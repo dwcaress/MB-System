@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.6 1996-08-05 15:21:58 caress Exp $
+ *	$Id: mbr_em12darw.c,v 4.7 1996-08-26 20:05:02 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.5  1996/07/26  21:09:33  caress
  * Version after first cut of handling em12s and em121 data.
  *
@@ -73,7 +76,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.6 1996-08-05 15:21:58 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.7 1996-08-26 20:05:02 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -606,9 +609,9 @@ int	*error;
 				ping->bath_acrosstrack[i] = data->distacr[i];
 				ping->bath_alongtrack[i] = data->distalo[i];
 				ping->tt[i] = data->range[i];
-				ping->amp[i] = (signed char) data->refl[i];
+				ping->amp[i] = (char) data->refl[i];
 				ping->quality[i] = (unsigned char) data->beamq[i];
-				ping->heave[i] = (signed char) 0;
+				ping->heave[i] = (char) 0;
 				ping->beam_frequency[i] = 0;
 				ping->beam_samples[i] = 0;
 				ping->beam_center_sample[i] = 0;
@@ -848,7 +851,7 @@ int	*error;
 			}
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			data->refl[i] = (signed char)((mb_io_ptr->new_amp[i] - 64)
+			data->refl[i] = (char)((mb_io_ptr->new_amp[i] - 64)
 				/ reflscale);
 			}
 
