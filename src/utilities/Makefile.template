@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.5 2002-02-22 09:07:08 caress Exp $
+#	$Id: Makefile.template,v 5.6 2002-05-02 04:01:37 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.5  2002/02/22 09:07:08  caress
+# Release 5.0.beta13
+#
 # Revision 5.4  2001/11/15 22:58:02  caress
 # Reordered program building.
 #
@@ -141,13 +144,15 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mblist $(MANDIR)/mblist.l \
 	$(BINDIR)/mbnavlist $(MANDIR)/mbnavlist.l \
 	$(BINDIR)/mbsvplist $(MANDIR)/mbsvplist.l \
+	$(BINDIR)/mbbackangle $(MANDIR)/mbbackangle.l \
+	$(BINDIR)/mbclean $(MANDIR)/mbclean.l \
+	$(BINDIR)/mbhistogram $(MANDIR)/mbhistogram.l \
 	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.l \
 	$(BINDIR)/mbmosaic $(MANDIR)/mbmosaic.l \
 	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.l \
 	$(BINDIR)/mbgetesf $(MANDIR)/mbgetesf.l \
 	$(BINDIR)/mbps $(MANDIR)/mbps.l \
 	$(BINDIR)/mbmerge $(MANDIR)/mbmerge.l \
-	$(BINDIR)/mbclean $(MANDIR)/mbclean.l \
 	$(BINDIR)/mbcleanold $(MANDIR)/mbcleanold.l \
 	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.l \
 	$(BINDIR)/mbbath $(MANDIR)/mbbath.l \
@@ -156,8 +161,7 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.l \
 	$(BINDIR)/mbmask $(MANDIR)/mbmask.l \
 	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.l \
-	$(BINDIR)/mbhistogram $(MANDIR)/mbhistogram.l \
-	$(BINDIR)/mbbackangle $(MANDIR)/mbbackangle.l \
+	$(BINDIR)/mbbackangleold $(MANDIR)/mbbackangleold.l \
 	$(BINDIR)/mbanglecorrect $(MANDIR)/mbanglecorrect.l \
 	$(BINDIR)/mbfilter $(MANDIR)/mbfilter.l \
 	$(BINDIR)/mbcut $(MANDIR)/mbcut.l \
@@ -241,6 +245,9 @@ $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbbackangle
+$(BINDIR)/mbbackangleold:	mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
+	$(CC) $(CFLAGS) mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
+		$(LFLAGS) -o $(BINDIR)/mbbackangleold
 $(BINDIR)/mbanglecorrect:	mbanglecorrect.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbanglecorrect.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbanglecorrect
@@ -317,6 +324,8 @@ mbhistogram.o:	mbhistogram.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCD
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbhistogram.c
 mbbackangle.o:	mbbackangle.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbbackangle.c
+mbbackangleold.o:	mbbackangleold.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbbackangleold.c
 mbanglecorrect.o:	mbanglecorrect.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbanglecorrect.c
 mbfilter.o:	mbfilter.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -409,6 +418,9 @@ $(MANDIR)/mbhistogram.l:	mbhistogram.manl
 $(MANDIR)/mbbackangle.l:	mbbackangle.manl
 	cp mbbackangle.manl $(MANDIR)/mbbackangle.l
 	chmod 664 $(MANDIR)/mbbackangle.l
+$(MANDIR)/mbbackangleold.l:	mbbackangleold.manl
+	cp mbbackangleold.manl $(MANDIR)/mbbackangleold.l
+	chmod 664 $(MANDIR)/mbbackangleold.l
 $(MANDIR)/mbanglecorrect.l:	mbanglecorrect.manl
 	cp mbanglecorrect.manl $(MANDIR)/mbanglecorrect.l
 	chmod 664 $(MANDIR)/mbanglecorrect.l

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 5.3 2001-07-20 00:31:11 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 5.4 2002-05-02 03:55:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -164,10 +167,11 @@ int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+static char res_id[]="$Id: mbr_hsatlraw.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsatlraw.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_register_hsatlraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -297,7 +301,6 @@ int mbr_info_hsatlraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsatlraw.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_info_hsatlraw";
 	int	status = MB_SUCCESS;
 
@@ -366,10 +369,8 @@ int mbr_info_hsatlraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
-	int	i;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
 	char	*data_ptr;
@@ -618,8 +619,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
 	struct mbsys_hsds_struct *store;
-	double	gain_beam, factor;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -778,7 +778,6 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbf_hsatlraw_struct *data;
 	char	*data_ptr;
 	struct mbsys_hsds_struct *store;
-	double	scalefactor;
 	int	i;
 
 	/* print input debug statements */
@@ -1310,6 +1309,13 @@ int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp,
 	/* read event record from file */
 	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
+	/* make sure line is long enough */
+	if (strlen(line) < 69 + shift)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
 	/* parse data from first line */
 	if (status == MB_SUCCESS)
 		{
@@ -1393,6 +1399,13 @@ int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp,
 
 	/* read event record from file */
 	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+
+	/* make sure line is long enough */
+	if (strlen(line) < 84 + shift)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
 
 	/* parse data from first line */
 	if (status == MB_SUCCESS)
@@ -1488,6 +1501,13 @@ int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp,
 	/* read event record from file */
 	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
+	/* make sure line is long enough */
+	if (strlen(line) < 67 + shift)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
 	/* parse data from first line */
 	if (status == MB_SUCCESS)
 		{
@@ -1571,6 +1591,13 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp,
 
 	/* read event record from file */
 	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+
+	/* make sure line is long enough */
+	if (strlen(line) < 90 + shift)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
 
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
@@ -1747,6 +1774,15 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp,
 	/* read event record from file */
 	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
+	/* make sure line is long enough */
+	if (status == MB_SUCCESS 
+		&& strlen(line) < 90 + shift
+		|| strlen(line) > 91 + shift)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
 		{
@@ -1778,8 +1814,9 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp,
 		}
 
 	/* read and parse data from first data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
-		shift+9,line,error)) == MB_SUCCESS)
+	if (status == MB_SUCCESS 
+		&& (status = mbr_hsatlraw_read_line(verbose,mbfp,
+				shift+9,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
 		if (numvals == 29)
@@ -1794,8 +1831,9 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp,
 		}
 
 	/* read and parse data from second data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
-		shift+9,line,error)) == MB_SUCCESS)
+	if (status == MB_SUCCESS 
+		&& (status = mbr_hsatlraw_read_line(verbose,mbfp,
+				shift+9,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
 		if (numvals == 29)
@@ -1812,8 +1850,9 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp,
 		}
 
 	/* read and parse data from third data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
-		shift+9,line,error)) == MB_SUCCESS)
+	if (status == MB_SUCCESS 
+		&& (status = mbr_hsatlraw_read_line(verbose,mbfp,
+				shift+9,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
 		if (numvals == 29)
@@ -1832,8 +1871,9 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp,
 		}
 
 	/* read and parse data from fourth data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
-		shift+9,line,error)) == MB_SUCCESS)
+	if (status == MB_SUCCESS 
+		&& (status = mbr_hsatlraw_read_line(verbose,mbfp,
+				shift+9,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
 		if (numvals == 29)
@@ -1930,6 +1970,13 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp,
 
 	/* read event record from file */
 	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+
+	/* make sure line is long enough */
+	if (strlen(line) < 84 + shift)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
 
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
@@ -2073,6 +2120,13 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp,
 	/* read event record from file */
 	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
+	/* make sure line is long enough */
+	if (strlen(line) < 40 + shift)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
 		{
@@ -2177,6 +2231,13 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp,
 
 	/* read event record from file */
 	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+
+	/* make sure line is long enough */
+	if (strlen(line) < 90 + shift)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
 
 	/* parse data from event record */
 	if (status == MB_SUCCESS)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.3 2002-02-22 09:03:43 caress Exp $
+ *	$Id: mb_close.c,v 5.4 2002-05-02 03:55:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/02/22 09:03:43  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.2  2001/07/20 00:31:11  caress
  * Release 5.0.beta03
  *
@@ -131,7 +134,7 @@
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 5.3 2002-02-22 09:03:43 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -203,6 +206,8 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 	/* else if netcdf then use nc_close */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
 	    {
+	    if (mb_io_ptr->filemode == MB_FILEMODE_WRITE)
+		nc_enddef((int) mb_io_ptr->mbfp);
 	    nc_close((int) mb_io_ptr->mbfp);
 	    }
 

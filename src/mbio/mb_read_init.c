@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.8 2002-02-22 09:03:43 caress Exp $
+ *    $Id: mb_read_init.c,v 5.9 2002-05-02 03:55:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/02/22 09:03:43  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.7  2002/01/24 02:30:58  caress
  * Added DARWIN.
  *
@@ -189,7 +192,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.8 2002-02-22 09:03:43 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.9 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -274,6 +277,7 @@ int mb_read_init(int verbose, char *file,
 		}
 
 	/* initialize file access for the mbio descriptor */
+	mb_io_ptr->filemode = MB_FILEMODE_READ;
 	mb_io_ptr->mbfp = NULL;
 	strcpy(mb_io_ptr->file,file);
 	mb_io_ptr->file_pos = 0;

@@ -1140,6 +1140,33 @@ write failures.
 
 ---------------------------------------------------------
 .br
+int \fBmb_get_store\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*mbio_ptr\fP,
+ 		char \fI**store_ptr\fP,
+		int \fI*error\fP);
+
+The function \fBmb_get_store()\fP returns a pointer \fI*store_ptr\fP
+to the data storage structure associated with a particular \fBMBIO\fP 
+descriptor \fImbio_ptr\fP. The \fBmb_read_init()\fP and 
+\fBmb_write_init()\fP functions
+both allocate one of these internal storage structures. The
+form of the data structure is determined by the
+sonar system associated with the format of the data being written.
+Storage structure pointers must be passed to level two \fBMBIO\fP
+functions such as \fBmb_write_ping()\fP and \fBmb_insert()\fP. 
+The \fIverbose\fP value controls the standard error 
+output verbosity of the function.
+
+The return values are:
+ 	\fIstore_ptr\fP:	pointer to complete data structure
+ 	\fIerror\fP:		error value
+
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about failures. 
+
+---------------------------------------------------------
+.br
 int \fBmb_get_all\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,

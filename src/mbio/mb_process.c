@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.18 2002-04-06 02:43:39 caress Exp $
+ *    $Id: mb_process.c,v 5.19 2002-05-02 03:55:34 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.17  2001/12/20 21:03:18  caress
  * Release 5.0.beta11
  *
@@ -104,7 +107,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.18 2002-04-06 02:43:39 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.19 2002-05-02 03:55:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -1288,7 +1291,6 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge004:           %d\n",process->mbp_kluge004);
 		fprintf(stderr,"dbg2       mbp_kluge005:           %d\n",process->mbp_kluge005);
 		}
-fprintf(stderr,"Tide file1:%s\n", process->mbp_tidefile);
 		
 	/* try to avoid absolute pathnames - get pwd */
 	lastslash = strrchr(file, '/');
@@ -1322,7 +1324,6 @@ fprintf(stderr,"Tide file1:%s\n", process->mbp_tidefile);
 	status = mb_get_relative_path(verbose, process->mbp_tidefile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_staticfile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_sscorrfile, pwd, error);
-fprintf(stderr,"Tide file2:%s\n", process->mbp_tidefile);
 
 	/* get expected process parameter file name */
 	strcpy(parfile, file);

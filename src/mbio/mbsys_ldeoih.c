@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.4 2002-04-06 02:43:39 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.5 2002-05-02 03:55:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.3  2001/08/25 00:54:13  caress
  * Adding beamwidth values to extract functions.
  *
@@ -117,7 +120,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char res_id[]="$Id: mbsys_ldeoih.c,v 5.4 2002-04-06 02:43:39 caress Exp $";
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.5 2002-05-02 03:55:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -335,8 +338,14 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*speed = 0.01 * store->speed;
 			
 		/* set beamwidths in mb_io structure */
-		mb_io_ptr->beamwidth_ltrack = 2.0;
-		mb_io_ptr->beamwidth_xtrack = 2.0;
+		if (store->beam_xwidth > 0)
+		    mb_io_ptr->beamwidth_ltrack = 0.01 * store->beam_xwidth;
+		else
+		    mb_io_ptr->beamwidth_ltrack = 2.0;
+		if (store->beam_lwidth > 0)
+		    mb_io_ptr->beamwidth_xtrack = 0.01 * store->beam_lwidth;
+		else
+		    mb_io_ptr->beamwidth_xtrack = 2.0;
 
 		/* read distance, depth, and backscatter 
 			values into storage arrays */
@@ -513,8 +522,8 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	int	time_j[5];
-	double	depthscale;
-	double	distscale;
+	double	depthscale, depthmax;
+	double	distscale, distmax;
 	int	i;
 
 	/* print input debug statements */
@@ -601,6 +610,157 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get heading (360 degrees = 65536) */
 		store->heading = 182.044444*heading;
+
+		/* if needed reset numbers of beams and allocate 
+		   memory for store arrays */
+		if (nbath > store->beams_bath_alloc)
+		    {
+		    store->beams_bath_alloc = nbath;
+		    if (store->beamflag != NULL)
+			status = mb_free(verbose, &store->beamflag, error);
+		    if (store->bath != NULL)
+			status = mb_free(verbose, &store->bath, error);
+		    if (store->bath_acrosstrack != NULL)
+			status = mb_free(verbose, &store->bath_acrosstrack, error);
+		    if (store->bath_alongtrack != NULL)
+			status = mb_free(verbose, &store->bath_alongtrack, error);
+		    status = mb_malloc(verbose, 
+				store->beams_bath_alloc * sizeof(char),
+				&store->beamflag,error);
+		    status = mb_malloc(verbose, 
+				store->beams_bath_alloc * sizeof(short),
+				&store->bath,error);
+		    status = mb_malloc(verbose, 
+				store->beams_bath_alloc * sizeof(short),
+				&store->bath_acrosstrack,error);
+		    status = mb_malloc(verbose, 
+				store->beams_bath_alloc * sizeof(short),
+				&store->bath_alongtrack,error);
+
+		    /* deal with a memory allocation failure */
+		    if (status == MB_FAILURE)
+			{
+			status = mb_free(verbose, &store->beamflag, error);
+			status = mb_free(verbose, &store->bath, error);
+			status = mb_free(verbose, &store->bath_acrosstrack, error);
+			status = mb_free(verbose, &store->bath_alongtrack, error);
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			if (verbose >= 2)
+				{
+				fprintf(stderr,"\ndbg2  MBcopy function <%s> terminated with error\n",
+					function_name);
+				fprintf(stderr,"dbg2  Return values:\n");
+				fprintf(stderr,"dbg2       error:      %d\n",*error);
+				fprintf(stderr,"dbg2  Return status:\n");
+				fprintf(stderr,"dbg2       status:  %d\n",status);
+				}
+			return(status);
+			}
+		    }
+		if (namp > store->beams_amp_alloc)
+		    {
+		    store->beams_amp_alloc = namp;
+		    if (store != NULL)
+			{
+			if (store->amp != NULL)
+			    status = mb_free(verbose, &store->amp, error);
+			status = mb_malloc(verbose, 
+				    store->beams_amp_alloc * sizeof(short),
+				    &store->amp,error);
+
+			/* deal with a memory allocation failure */
+			if (status == MB_FAILURE)
+			    {
+			    status = mb_free(verbose, &store->amp, error);
+			    status = MB_FAILURE;
+			    *error = MB_ERROR_MEMORY_FAIL;
+			    if (verbose >= 2)
+				    {
+				    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
+					    function_name);
+				    fprintf(stderr,"dbg2  Return values:\n");
+				    fprintf(stderr,"dbg2       error:      %d\n",*error);
+				    fprintf(stderr,"dbg2  Return status:\n");
+				    fprintf(stderr,"dbg2       status:  %d\n",status);
+				    }
+			    return(status);
+			    }
+			}
+		    }
+		if (nss > store->pixels_ss_alloc)
+		    {
+		    store->pixels_ss_alloc = nss;
+		    if (store != NULL)
+			{
+			if (store->ss != NULL)
+			    status = mb_free(verbose, &store->ss, error);
+			if (store->ss_acrosstrack != NULL)
+			    status = mb_free(verbose, &store->ss_acrosstrack, error);
+			if (store->ss_alongtrack != NULL)
+			    status = mb_free(verbose, &store->ss_alongtrack, error);
+			status = mb_malloc(verbose, 
+				    store->pixels_ss_alloc * sizeof(short),
+				    &store->ss,error);
+			status = mb_malloc(verbose, 
+				    store->pixels_ss_alloc * sizeof(short),
+				    &store->ss_acrosstrack,error);
+			status = mb_malloc(verbose, 
+				    store->pixels_ss_alloc * sizeof(short),
+				    &store->ss_alongtrack,error);
+
+			/* deal with a memory allocation failure */
+			if (status == MB_FAILURE)
+			    {
+			    status = mb_free(verbose, &store->ss, error);
+			    status = mb_free(verbose, &store->ss_acrosstrack, error);
+			    status = mb_free(verbose, &store->ss_alongtrack, error);
+			    status = MB_FAILURE;
+			    *error = MB_ERROR_MEMORY_FAIL;
+			    if (verbose >= 2)
+				    {
+				    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
+					    function_name);
+				    fprintf(stderr,"dbg2  Return values:\n");
+				    fprintf(stderr,"dbg2       error:      %d\n",*error);
+				    fprintf(stderr,"dbg2  Return status:\n");
+				    fprintf(stderr,"dbg2       status:  %d\n",status);
+				    }
+			    return(status);
+			    }
+			}
+		    }
+		    
+		/* get scaling */
+		store->depth_scale = 1000;
+		store->distance_scale = 1000;
+		depthmax = 0.0;
+		distmax = 0.0;
+		for (i=0;i<nbath;i++)
+		    {
+		    if (beamflag[i] != MB_FLAG_NULL)
+			{
+			depthmax = MAX(depthmax, bath[i]);
+			distmax = MAX(distmax, fabs(bathacrosstrack[i]));
+			}
+		    }
+		for (i=0;i<nss;i++)
+		    {
+		    if (ss[i] != 0.0)
+			{
+			distmax = MAX(distmax, fabs(ssacrosstrack[i]));
+			}
+		    }
+		if (depthmax > 0.0)
+		    store->depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
+		if (distmax > 0.0)
+		    store->distance_scale = MAX((int) (1 + distmax / 30.0), 1);
+
+		/* set beam widths */
+		if (store->beam_xwidth = 0)
+		    store->beam_xwidth = 100 * mb_io_ptr->beamwidth_xtrack;
+		if (store->beam_lwidth = 0)
+		    store->beam_lwidth = 100 * mb_io_ptr->beamwidth_ltrack;
 
 		/* put distance, depth, and backscatter values 
 			into data structure */

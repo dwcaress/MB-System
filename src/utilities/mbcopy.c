@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.8 2002-04-06 02:53:45 caress Exp $
+ *    $Id: mbcopy.c,v 5.9 2002-05-02 04:01:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/04/06 02:53:45  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.7  2001/08/25 00:58:08  caress
  * Fixed problem with simrad to simrad2 function.
  *
@@ -193,7 +196,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.8 2002-04-06 02:53:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.9 2002-05-02 04:01:37 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -2543,7 +2546,6 @@ int mbcopy_any_to_mbldeoih(int verbose,
 	char	*function_name = "mbcopy_any_to_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *ostore;
-	double	depthmax, distmax;
 	int	i;
 
 	/* get data structure pointer */
@@ -2609,152 +2611,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 
 	/* copy the data  */
 	if (ostore != NULL)
-		{
-		/* if needed reset numbers of beams and allocate 
-		   memory for store arrays */
-		if (nbath > ostore->beams_bath_alloc)
-		    {
-		    ostore->beams_bath_alloc = nbath;
-		    if (ostore->beamflag != NULL)
-			status = mb_free(verbose, &ostore->beamflag, error);
-		    if (ostore->bath != NULL)
-			status = mb_free(verbose, &ostore->bath, error);
-		    if (ostore->bath_acrosstrack != NULL)
-			status = mb_free(verbose, &ostore->bath_acrosstrack, error);
-		    if (ostore->bath_alongtrack != NULL)
-			status = mb_free(verbose, &ostore->bath_alongtrack, error);
-		    status = mb_malloc(verbose, 
-				ostore->beams_bath_alloc * sizeof(char),
-				&ostore->beamflag,error);
-		    status = mb_malloc(verbose, 
-				ostore->beams_bath_alloc * sizeof(short),
-				&ostore->bath,error);
-		    status = mb_malloc(verbose, 
-				ostore->beams_bath_alloc * sizeof(short),
-				&ostore->bath_acrosstrack,error);
-		    status = mb_malloc(verbose, 
-				ostore->beams_bath_alloc * sizeof(short),
-				&ostore->bath_alongtrack,error);
-
-		    /* deal with a memory allocation failure */
-		    if (status == MB_FAILURE)
-			{
-			status = mb_free(verbose, &ostore->beamflag, error);
-			status = mb_free(verbose, &ostore->bath, error);
-			status = mb_free(verbose, &ostore->bath_acrosstrack, error);
-			status = mb_free(verbose, &ostore->bath_alongtrack, error);
-			status = MB_FAILURE;
-			*error = MB_ERROR_MEMORY_FAIL;
-			if (verbose >= 2)
-				{
-				fprintf(stderr,"\ndbg2  MBcopy function <%s> terminated with error\n",
-					function_name);
-				fprintf(stderr,"dbg2  Return values:\n");
-				fprintf(stderr,"dbg2       error:      %d\n",*error);
-				fprintf(stderr,"dbg2  Return status:\n");
-				fprintf(stderr,"dbg2       status:  %d\n",status);
-				}
-			return(status);
-			}
-		    }
-		if (namp > ostore->beams_amp_alloc)
-		    {
-		    ostore->beams_amp_alloc = namp;
-		    if (ostore != NULL)
-			{
-			if (ostore->amp != NULL)
-			    status = mb_free(verbose, &ostore->amp, error);
-			status = mb_malloc(verbose, 
-				    ostore->beams_amp_alloc * sizeof(short),
-				    &ostore->amp,error);
-
-			/* deal with a memory allocation failure */
-			if (status == MB_FAILURE)
-			    {
-			    status = mb_free(verbose, &ostore->amp, error);
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_MEMORY_FAIL;
-			    if (verbose >= 2)
-				    {
-				    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
-					    function_name);
-				    fprintf(stderr,"dbg2  Return values:\n");
-				    fprintf(stderr,"dbg2       error:      %d\n",*error);
-				    fprintf(stderr,"dbg2  Return status:\n");
-				    fprintf(stderr,"dbg2       status:  %d\n",status);
-				    }
-			    return(status);
-			    }
-			}
-		    }
-		if (nss > ostore->pixels_ss_alloc)
-		    {
-		    ostore->pixels_ss_alloc = nss;
-		    if (ostore != NULL)
-			{
-			if (ostore->ss != NULL)
-			    status = mb_free(verbose, &ostore->ss, error);
-			if (ostore->ss_acrosstrack != NULL)
-			    status = mb_free(verbose, &ostore->ss_acrosstrack, error);
-			if (ostore->ss_alongtrack != NULL)
-			    status = mb_free(verbose, &ostore->ss_alongtrack, error);
-			status = mb_malloc(verbose, 
-				    ostore->pixels_ss_alloc * sizeof(short),
-				    &ostore->ss,error);
-			status = mb_malloc(verbose, 
-				    ostore->pixels_ss_alloc * sizeof(short),
-				    &ostore->ss_acrosstrack,error);
-			status = mb_malloc(verbose, 
-				    ostore->pixels_ss_alloc * sizeof(short),
-				    &ostore->ss_alongtrack,error);
-
-			/* deal with a memory allocation failure */
-			if (status == MB_FAILURE)
-			    {
-			    status = mb_free(verbose, &ostore->ss, error);
-			    status = mb_free(verbose, &ostore->ss_acrosstrack, error);
-			    status = mb_free(verbose, &ostore->ss_alongtrack, error);
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_MEMORY_FAIL;
-			    if (verbose >= 2)
-				    {
-				    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
-					    function_name);
-				    fprintf(stderr,"dbg2  Return values:\n");
-				    fprintf(stderr,"dbg2       error:      %d\n",*error);
-				    fprintf(stderr,"dbg2  Return status:\n");
-				    fprintf(stderr,"dbg2       status:  %d\n",status);
-				    }
-			    return(status);
-			    }
-			}
-		    }
-		    
-		/* get scaling */
-		ostore->depth_scale = 1000;
-		ostore->distance_scale = 1000;
-		depthmax = 0.0;
-		distmax = 0.0;
-		for (i=0;i<nbath;i++)
-		    {
-		    if (beamflag[i] != MB_FLAG_NULL)
-			{
-			depthmax = MAX(depthmax, bath[i]);
-			distmax = MAX(distmax, fabs(bathacrosstrack[i]));
-			}
-		    }
-		for (i=0;i<nss;i++)
-		    {
-		    if (ss[i] != 0.0)
-			{
-			distmax = MAX(distmax, fabs(ssacrosstrack[i]));
-			}
-		    }
-		if (depthmax > 0.0)
-		    ostore->depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
-		if (distmax > 0.0)
-		    ostore->distance_scale = MAX((int) (1 + distmax / 30.0), 1);
-		
+		{		
 		/* set beam widths */
 		ostore->beam_xwidth = 100 * beamwidth_xtrack;
 		ostore->beam_lwidth = 100 * beamwidth_ltrack;

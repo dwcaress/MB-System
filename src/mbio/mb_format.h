@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.7 2001-09-17 23:25:13 caress Exp $
+ *    $Id: mb_format.h,v 5.8 2002-05-02 04:00:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/09/17 23:25:13  caress
+ * Added format 84
+ *
  * Revision 5.6  2001/07/20 17:00:20  caress
  * Added RCS controlled update date and revision string.
  *
@@ -184,7 +187,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2001-09-17 23:25:13 $ $Revision: 5.7 $";
+static char mb_format_updatedate[] = "$Date: 2002-05-02 04:00:41 $ $Revision: 5.8 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -209,7 +212,8 @@ static char mb_format_updatedate[] = "$Date: 2001-09-17 23:25:13 $ $Revision: 5.
 #define MB_SYS_SINGLEBEAM	19
 #define MB_SYS_XSE		20
 #define MB_SYS_HS10		21
-#define	MB_SYS_SURF		22
+#define	MB_SYS_NETCDF		22
+#define	MB_SYS_SURF		23
 
 /* Number of supported MBIO data formats */
 #define	MB_FORMATS	51
@@ -303,6 +307,8 @@ static char mb_format_updatedate[] = "$Date: 2001-09-17 23:25:13 $ $Revision: 5.
 #define	MBF_MBLDEOIH	71	/* Generic in-house multibeam, variable beam, 
  					bathymetry, amplitude, and sidescan
  					binary, centered, L-DEO. */
+#define	MBF_MBNETCDF	75	/* IFREMER generic multibeam, variable beam, 
+ 					netCDF, IFREMER. */
 #define	MBF_CBAT9001	81	/* Reson SeaBat 9001 multibeam, 60 beams
  					bathymetry and amplitude,
  					binary, University of New Brunswick. */
