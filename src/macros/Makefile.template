@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.1 1994-10-21 11:36:58 caress Exp $
+#	$Id: Makefile.template,v 4.2 1994-10-31 19:43:01 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.1  1994/10/21  11:36:58  caress
+# Release V4.0
+#
 # Revision 4.0  1994/05/24  02:32:35  caress
 # First cut.
 #
@@ -27,17 +30,17 @@
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/man1
+MANDIR = ../../man/manl
 
 ### make all makes the MB-system macros and man pages
-all:	$(MANDIR)/xbt.1 \
-	$(BINDIR)/mbm_xbt $(MANDIR)/mbm_xbt.1 \
-	$(BINDIR)/mbm_fmtvel $(MANDIR)/mbm_fmtvel.1 \
-	$(BINDIR)/mbm_vrefcheck $(MANDIR)/mbm_vrefcheck.1 \
-	$(BINDIR)/mbm_rollerror $(MANDIR)/mbm_rollerror.1 \
-	$(BINDIR)/mbm_plot $(MANDIR)/mbm_plot.1 \
-	$(BINDIR)/mbm_grdplot $(MANDIR)/mbm_grdplot.1 \
-	$(BINDIR)/mbm_stat $(MANDIR)/mbm_stat.1
+all:	$(MANDIR)/xbt.l \
+	$(BINDIR)/mbm_xbt $(MANDIR)/mbm_xbt.l \
+	$(BINDIR)/mbm_fmtvel $(MANDIR)/mbm_fmtvel.l \
+	$(BINDIR)/mbm_vrefcheck $(MANDIR)/mbm_vrefcheck.l \
+	$(BINDIR)/mbm_rollerror $(MANDIR)/mbm_rollerror.l \
+	$(BINDIR)/mbm_plot $(MANDIR)/mbm_plot.l \
+	$(BINDIR)/mbm_grdplot $(MANDIR)/mbm_grdplot.l \
+	$(BINDIR)/mbm_stat $(MANDIR)/mbm_stat.l
 
 ### make clean removes the object files
 clean:
@@ -67,28 +70,28 @@ $(BINDIR)/mbm_stat:	mbm_stat.perl
 	chmod 775 $(BINDIR)/mbm_stat
 
 ### copy the man pages to the man page directory
-$(MANDIR)/xbt.1:	xbt.1
-	cp xbt.1 $(MANDIR)/xbt.1
-	chmod 664 $(MANDIR)/xbt.1
-$(MANDIR)/mbm_xbt.1:	mbm_xbt.1
-	cp mbm_xbt.1 $(MANDIR)/mbm_xbt.1
-	chmod 664 $(MANDIR)/mbm_xbt.1
-$(MANDIR)/mbm_fmtvel.1:	mbm_fmtvel.1
-	cp mbm_fmtvel.1 $(MANDIR)/mbm_fmtvel.1
-	chmod 664 $(MANDIR)/mbm_fmtvel.1
-$(MANDIR)/mbm_vrefcheck.1:	mbm_vrefcheck.1
-	cp mbm_vrefcheck.1 $(MANDIR)/mbm_vrefcheck.1
-	chmod 664 $(MANDIR)/mbm_vrefcheck.1
-$(MANDIR)/mbm_rollerror.1:	mbm_rollerror.1
-	cp mbm_rollerror.1 $(MANDIR)/mbm_rollerror.1
-	chmod 664 $(MANDIR)/mbm_rollerror.1
-$(MANDIR)/mbm_plot.1:	mbm_plot.1
-	cp mbm_plot.1 $(MANDIR)/mbm_plot.1
-	chmod 664 $(MANDIR)/mbm_plot.1
-$(MANDIR)/mbm_grdplot.1:	mbm_grdplot.1
-	cp mbm_grdplot.1 $(MANDIR)/mbm_grdplot.1
-	chmod 664 $(MANDIR)/mbm_grdplot.1
-$(MANDIR)/mbm_stat.1:	mbm_stat.1
-	cp mbm_stat.1 $(MANDIR)/mbm_stat.1
-	chmod 664 $(MANDIR)/mbm_stat.1
+$(MANDIR)/xbt.l:	xbt.manl
+	cp xbt.manl $(MANDIR)/xbt.l
+	chmod 664 $(MANDIR)/xbt.l
+$(MANDIR)/mbm_xbt.l:	mbm_xbt.manl
+	cp mbm_xbt.manl $(MANDIR)/mbm_xbt.l
+	chmod 664 $(MANDIR)/mbm_xbt.l
+$(MANDIR)/mbm_fmtvel.l:	mbm_fmtvel.manl
+	cp mbm_fmtvel.manl $(MANDIR)/mbm_fmtvel.l
+	chmod 664 $(MANDIR)/mbm_fmtvel.l
+$(MANDIR)/mbm_vrefcheck.l:	mbm_vrefcheck.manl
+	cp mbm_vrefcheck.manl $(MANDIR)/mbm_vrefcheck.l
+	chmod 664 $(MANDIR)/mbm_vrefcheck.l
+$(MANDIR)/mbm_rollerror.l:	mbm_rollerror.manl
+	cp mbm_rollerror.manl $(MANDIR)/mbm_rollerror.l
+	chmod 664 $(MANDIR)/mbm_rollerror.l
+$(MANDIR)/mbm_plot.l:	mbm_plot.manl
+	cp mbm_plot.manl $(MANDIR)/mbm_plot.l
+	chmod 664 $(MANDIR)/mbm_plot.l
+$(MANDIR)/mbm_grdplot.l:	mbm_grdplot.manl
+	cp mbm_grdplot.manl $(MANDIR)/mbm_grdplot.l
+	chmod 664 $(MANDIR)/mbm_grdplot.l
+$(MANDIR)/mbm_stat.l:	mbm_stat.manl
+	cp mbm_stat.manl $(MANDIR)/mbm_stat.l
+	chmod 664 $(MANDIR)/mbm_stat.l
 
