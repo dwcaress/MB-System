@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.10 2004-06-18 04:16:55 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.11 2004-09-16 19:11:48 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.10 2004-06-18 04:16:55 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.11 2004-09-16 19:11:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.10  2004/06/18 04:16:55  caress
+#   Adding support for segy i/o and working on support for Reson 7k format 88.
+#
 #   Revision 5.9  2003/04/17 20:42:48  caress
 #   Release 5.0.beta30
 #
@@ -2268,6 +2271,17 @@ elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
 	elsif ($landscape)
 		{
 		$view_pageflag = "-landscape -media BBox";
+		}
+	}
+elsif ($ps_viewer eq "ggv")
+	{
+	if ($portrait)
+		{
+		$view_pageflag = "--geometry=portrait";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "--geometry=landscape";
 		}
 	}
 if ($no_view_ps)
