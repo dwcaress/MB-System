@@ -1,4 +1,4 @@
-.TH mbio l "6 May 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbio l "26 March 2003" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
@@ -2869,7 +2869,7 @@ int \fBmb_format_system\fP(
 The function \fBmb_format_system\fP returns 
 the \fBMBIO\fP sonar system id. The format id
 \fI*format\fP is first checked for validity. In some cases,
-formerly valid but now obsolete format id values are mapped
+formerly valid but now oattintbsolete format id values are mapped
 to current values. The input values are:
  	\fI*format\fP:		\fBMBIO\fP format id
 .br
@@ -3230,6 +3230,7 @@ int \fBmb_attint_add\fP(
  		char \fI*mbio_ptr\fP,
  		double \fItime_d\fP,
  		double \fIheave\fP,
+ 		double \fIroll\fP,
  		double \fIpitch\fP,
  		int \fI*error\fP);
 
