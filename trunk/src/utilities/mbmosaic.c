@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.8 1999-10-05 22:04:18 caress Exp $
+ *    $Id: mbmosaic.c,v 4.9 2000-06-20 21:00:19 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1999/10/05  22:04:18  caress
+ * Improved the facility for outputting ArcView grids.
+ *
  * Revision 4.7  1999/09/24  23:11:07  caress
  * Altered grid interval parameter handling
  *
@@ -96,7 +99,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.8 1999-10-05 22:04:18 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.9 2000-06-20 21:00:19 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -2049,28 +2052,6 @@ char **argv;
 			zmin,zmax,dx,dy,
 			xlabel,ylabel,zlabel,title,projection_id, 
 			argc,argv,&error);
-
-		/* execute mbm_grdplot */
-		if (datatype == MBMOSAIC_DATA_AMPLITUDE)
-			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, zlabel);
-			}
-		else
-			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, zlabel);
-			}
-		if (verbose)
-			{
-			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
-				plot_cmd);
-			}
-		plot_status = system(plot_cmd);
-		if (plot_status == -1)
-			{
-			fprintf(stderr, "\nError executing mbm_grdplot on output file %s\n", ofile);
-			}
 		}
 	if (status != MB_SUCCESS)
 		{
@@ -2131,20 +2112,6 @@ char **argv;
 				zmin,zmax,dx,dy,
 				xlabel,ylabel,nlabel,title,projection_id, 
 				argc,argv,&error);
-
-			/* execute mbm_grdplot */
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, nlabel);
-			if (verbose)
-				{
-				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
-					plot_cmd);
-				}
-			plot_status = system(plot_cmd);
-			if (plot_status == -1)
-				{
-				fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
-				}
 			}
 		if (status != MB_SUCCESS)
 			{
@@ -2203,20 +2170,6 @@ char **argv;
 				zmin,zmax,dx,dy,
 				xlabel,ylabel,sdlabel,title,projection_id, 
 				argc,argv,&error);
-
-			/* execute mbm_grdplot */
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, sdlabel);
-			if (verbose)
-				{
-				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
-					plot_cmd);
-				}
-			plot_status = system(plot_cmd);
-			if (plot_status == -1)
-				{
-				fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
-				}
 			}
 		if (status != MB_SUCCESS)
 			{
@@ -2240,6 +2193,69 @@ char **argv;
 		{
 		mb_free(verbose,&priority_angle_angle,&error); 
 		mb_free(verbose,&priority_angle_priority,&error); 
+		}
+		
+	/* run mbm_grdplot */
+	if (gridkind == MBMOSAIC_CDFGRD)
+		{
+		/* execute mbm_grdplot */
+		strcpy(ofile,fileroot);
+		strcat(ofile,".grd");
+		if (datatype == MBMOSAIC_DATA_AMPLITUDE)
+			{
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
+			}
+		else
+			{
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
+			}
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on output file %s\n", ofile);
+			}
+		}
+	if (more == MB_YES
+		&& gridkind == MBMOSAIC_CDFGRD)
+		{
+		/* execute mbm_grdplot */
+		strcpy(ofile,fileroot);
+		strcat(ofile,"_num.grd");
+		sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
+			ofile, ofile, title, nlabel);
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+			}
+
+		/* execute mbm_grdplot */
+		strcpy(ofile,fileroot);
+		strcat(ofile,"_sd.grd");
+		sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
+			ofile, ofile, title, sdlabel);
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+			}
 		}
 
 	if (verbose > 0)
