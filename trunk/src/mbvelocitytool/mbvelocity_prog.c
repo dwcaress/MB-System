@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.0 1994-10-21 12:43:44 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.1 1994-11-10 01:16:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:43:44  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/04/12  01:13:24  caress
  * First cut at translation from hsvelocitytool. The new program
  * mbvelocitytool will deal with all supported multibeam data
@@ -77,7 +80,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.0 1994-10-21 12:43:44 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.1 1994-11-10 01:16:07 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -153,6 +156,7 @@ int	nload;
 /* survey ping raytracing arrays */
 double	*ttimes = NULL;
 double	*angles = NULL;
+double	*angles_forward = NULL;
 int	*flags = NULL;
 double	*p = NULL;
 double	**ttime_tab;
@@ -351,7 +355,7 @@ int mbvt_quit()
 		mb_close(verbose,mbio_ptr,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
-		mb_free(verbose,&angles,&error);
+		mb_free(verbose,&angles_forward,&error);
 		mb_free(verbose,&p,&error);
 		for (i=0;i<beams_bath;i++)
 			{
@@ -696,6 +700,8 @@ char	*file;
 /*                  action_new_profile in mbvelocity_stubs.c which    */
 /*		      is called by selecting the "NEW EDITABLE        */
 /*                    PROFILE" from the "FILE" pulldown menu.         */
+/*		    - also called from mbvt_process_multibeam()	      */
+/*		      if no editable profile already exists.
 /* Functions called:                                                  */
 /*                  mb_free                                           */
 /*		    mb_malloc                                         */
@@ -1789,7 +1795,7 @@ int	form;
 		fprintf(stderr,"dbg2       format:      %d\n",form);
 		}
 	if (edit != MB_YES)
-	    return(MB_FAILURE);
+	    mbvt_new_edit_profile();
 
 	/* check for format with travel time data */
 	status = mb_format(verbose,&format,&format_num,&error);
@@ -1810,7 +1816,7 @@ int	form;
 		mb_close(verbose,mbio_ptr,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
-		mb_free(verbose,&angles,&error);
+		mb_free(verbose,&angles_forward,&error);
 		mb_free(verbose,&p,&error);
 		for (i=0;i<beams_bath;i++)
 			{
@@ -1843,6 +1849,7 @@ int	form;
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&p,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double *),
@@ -1884,10 +1891,6 @@ int	form;
 		fprintf(stderr,"Records in buffer:          %d\n",nbuffer);
 		}
 
-	/* set up for raytracing */
-	if (status == MB_SUCCESS && edit == MB_YES)
-		status = mbvt_setup_raytracing();
-
 	/* process the data */
 	if (status == MB_SUCCESS && edit == MB_YES)
 		status = mbvt_process_multibeam();
@@ -1910,149 +1913,7 @@ int	form;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-/* This is the first function called when the "PROCESS MULTIBEAM"     */
-/*   is selected from the menu bar.                                   */
-/* Called by:                                                         */
-/*                  action_process_mb                                 */
-/* Functions called:                                                  */
-/*                  mb_free                                           */
-/*                  mb_malloc                                         */
-/*                  mb_ttimes                                         */
-/* Function returns:                                                  */
-/*                  status                                            */
-/*--------------------------------------------------------------------*/
-int mbvt_setup_raytracing()
-{
-	/* local variables */
-	char	*function_name = "mbvt_setup_raytracing";
-	struct mb_buffer_struct *buff;
-	int	status = MB_SUCCESS;
-	double	*ttime;
-	double	*dist;
-	double	*vel;
-	double	*dep;
-	int	nvel;
-	int	angles_found;
-	double	dr, dx;
-	int	icenter;
-	int	i, j;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		}
-
-	/* check for velocity profile */
-	if (profile_edit.n <= 0)
-		{
-		fprintf(stderr,"\nNo edit velocity profile available - Raytracing initialization aborted.\n");
-		status = MB_FAILURE;
-		return(status);
-		}
-
-	/* check for multibeam data */
-	if (nbuffer <= 0)
-		{
-		fprintf(stderr,"\nNo multibeam data available - Raytracing initialization aborted.\n");
-		status = MB_FAILURE;
-		return(status);
-		}
-
-	/* construct layered velocity model from discrete model */
-	nvel = profile_edit.n;
-	vel = profile_edit.velocity_layer;
-	dep = profile_edit.depth;
-	for (i=0;i<nvel-1;i++)
-		vel[i] = 0.5*(profile_edit.velocity[i] 
-				+ profile_edit.velocity[i+1]);
-	vel[nvel-1] = 0.0;
-
-	/* allocate memory for raytracing tables */
-	for (i=0;i<beams_bath;i++)
-		{
-		mb_free(verbose,&ttime_tab[i],&error);
-		mb_free(verbose,&dist_tab[i],&error);
-		status = mb_malloc(verbose,nvel*sizeof(double),
-				&(ttime_tab[i]),&error);
-		status = mb_malloc(verbose,nvel*sizeof(double),
-				&(dist_tab[i]),&error);
-		}
-
-	/* get buffer structure */
-	buff = (struct mb_buffer_struct *) buff_ptr;
-
-	/* search through the data to find angles of beams */
-	angles_found = MB_NO;
-	for (i=0;i<nbuffer,!angles_found;i++)
-		{
-		if (buff->buffer_kind[i] == MB_DATA_DATA)
-			{
-			status = mb_ttimes(verbose,mbio_ptr,
-					buff->buffer[i],&kind,&nbeams,
-					ttimes,angles,flags,&error);
-			if (status == MB_SUCCESS)
-				angles_found = MB_YES;
-			}
-		}
-
-	/* if angle separation specified, recalculate beam angles */
-	if (dangle > 0.0)
-		{
-		icenter = nbeams/2;
-		for (i=0;i<nbeams;i++)
-			angles[i] = (i - icenter)*dangle;
-		}
-
-	/* set the beam ray parameters */
-	for (i=0;i<nbeams;i++)
-		p[i] = sin(DTR*angles[i])/vel[0];
-
-	/* set up the raytracing tables for survey pings */
-	for (i=0;i<nbeams;i++)
-		{
-		ttime = ttime_tab[i];
-		dist = dist_tab[i];
-		ttime[0] = 0.0;
-		dist[0] = 0.0;
-		for (j=0;j<nvel-1;j++)
-			{
-			dr = (dep[j+1] - dep[j])/sqrt(1. 
-				- p[i]*p[i]*vel[j]*vel[j]);
-			dx = dr*p[i]*vel[j];
-			ttime[j+1] = ttime[j] + 2.*dr/vel[j];
-			dist[j+1] = dist[j] + dx;
-			}
-
-		/* output some debug values */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg5  Raytracing table created for survey beam %d in program <%s>:\n",i,program_name);
-			fprintf(stderr,"dbg5       angle: %f\n",angles[i]);
-			fprintf(stderr,"dbg5       p:     %f\n",p[i]);
-			fprintf(stderr,"dbg5      beam    depth      vel        time      dist\n",j,dep[j],vel[j],ttime[j],dist[j]);
-			for (j=0;j<nvel;j++)
-				fprintf(stderr,"dbg5       %2d   %8.2f   %7.2f   %8.2f  %9.2f\n",j,dep[j],vel[j],ttime[j],dist[j]);
-			}
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-/* This function is the second one called when the "PROCESS MULTIBEAM"*/
+/* This function is called when the "PROCESS MULTIBEAM"               */
 /*   selection is made from the menu bar.                             */
 /* Called by:                                                         */
 /*                  action_process_mb                                 */
@@ -2077,6 +1938,8 @@ int mbvt_process_multibeam()
 	double	delta, a, b;
 	int	ns;
 	double	depth_predict, res;
+	double	dr, dx;
+	int	icenter;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -2098,6 +1961,26 @@ int mbvt_process_multibeam()
 		fprintf(stderr,"\nNo Multibeam data available - Multibeam processing aborted.\n");
 		status = MB_FAILURE;
 		return(status);
+		}
+
+	/* construct layered velocity model from discrete model */
+	nvel = profile_edit.n;
+	vel = profile_edit.velocity_layer;
+	dep = profile_edit.depth;
+	for (i=0;i<nvel-1;i++)
+		vel[i] = 0.5*(profile_edit.velocity[i] 
+				+ profile_edit.velocity[i+1]);
+	vel[nvel-1] = 0.0;
+
+	/* allocate memory for raytracing tables */
+	for (i=0;i<beams_bath;i++)
+		{
+		mb_free(verbose,&ttime_tab[i],&error);
+		mb_free(verbose,&dist_tab[i],&error);
+		status = mb_malloc(verbose,nvel*sizeof(double),
+				&(ttime_tab[i]),&error);
+		status = mb_malloc(verbose,nvel*sizeof(double),
+				&(dist_tab[i]),&error);
 		}
 
 	/* initialize residuals */
@@ -2142,7 +2025,49 @@ int mbvt_process_multibeam()
 			{
 			status = mb_ttimes(verbose,mbio_ptr,
 				buff->buffer[k],&kind,&nbeams,
-				ttimes,angles,flags,&error);
+				ttimes,angles,
+				angles_forward,flags,&error);
+
+			/* if angle separation specified, 
+				recalculate beam angles */
+			if (dangle > 0.0)
+			    {
+			    icenter = nbeams/2;
+			    for (i=0;i<nbeams;i++)
+				angles[i] = (i - icenter)*dangle;
+			    }
+
+			/* set the beam ray parameters */
+			for (i=0;i<nbeams;i++)
+			    p[i] = sin(DTR*angles[i])/vel[0];
+
+			/* set up the raytracing tables */
+			for (i=0;i<nbeams;i++)
+			    {
+			    ttime = ttime_tab[i];
+			    dist = dist_tab[i];
+			    ttime[0] = 0.0;
+			    dist[0] = 0.0;
+			    for (j=0;j<nvel-1;j++)
+				{
+				dr = (dep[j+1] - dep[j])/sqrt(1. 
+					- p[i]*p[i]*vel[j]*vel[j]);
+				dx = dr*p[i]*vel[j];
+				ttime[j+1] = ttime[j] + 2.*dr/vel[j];
+				dist[j+1] = dist[j] + dx;
+				}
+
+			    /* output some debug values */
+			    if (verbose >= 5)
+				{
+				fprintf(stderr,"\ndbg5  Raytracing table created for survey beam %d in program <%s>:\n",i,program_name);
+				fprintf(stderr,"dbg5       angle: %f\n",angles[i]);
+				fprintf(stderr,"dbg5       p:     %f\n",p[i]);
+				fprintf(stderr,"dbg5      beam    depth      vel        time      dist\n",j,dep[j],vel[j],ttime[j],dist[j]);
+				for (j=0;j<nvel;j++)
+				    fprintf(stderr,"dbg5       %2d   %8.2f   %7.2f   %8.2f  %9.2f\n",j,dep[j],vel[j],ttime[j],dist[j]);
+				}
+			    }
 			}
 
 		/* loop over the beams */

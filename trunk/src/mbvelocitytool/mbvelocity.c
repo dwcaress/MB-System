@@ -12,7 +12,7 @@
 /*                                                          */
 /************************************************************/
 /*    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocity.c,v 4.0 1994-10-21 12:43:44 caress Exp $
+ *    $Id: mbvelocity.c,v 4.1 1994-11-10 01:16:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:43:44  caress
+ * Release V4.0
+ *
  * Revision 4.3  1994/04/12  14:32:21  caress
  * Changed a few "Hydrosweep" text strings to "Multibeam"
  *
@@ -1235,11 +1238,9 @@ static void action_process_mb(w, tag, list)
 	XmListCallbackStruct *list;
 
 {
-
+	fprintf(stderr, "\nAbout to process data\n");
 	/* process Multibeam data */
-	status = mbvt_setup_raytracing();
-	if (status == 1)
-		status = mbvt_process_multibeam();
+	status = mbvt_process_multibeam();
 	if (status != 1)
 		XBell(theDisplay,100);
 
