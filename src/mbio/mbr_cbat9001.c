@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat9001.c	8/8/94
- *	$Id: mbr_cbat9001.c,v 4.1 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_cbat9001.c,v 4.2 1995-07-13 19:13:36 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.0  1994/10/21  12:34:54  caress
  * Release V4.0
  *
@@ -59,7 +62,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_cbat9001.c,v 4.1 1995-03-06 19:38:54 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat9001.c,v 4.2 1995-07-13 19:13:36 caress Exp $";
 	char	*function_name = "mbr_alm_cbat9001";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -936,8 +939,8 @@ int	*error;
 		&& mb_io_ptr->new_kind == MB_DATA_DATA)
 		{
 		/*get navigation */
-		data->longitude = (int) mb_io_ptr->new_lon/0.00000009;
-		data->latitude = (int) mb_io_ptr->new_lat/0.00000009;
+		data->longitude = (int) (mb_io_ptr->new_lon/0.00000009);
+		data->latitude = (int) (mb_io_ptr->new_lat/0.00000009);
 
 		/* get heading */
 		data->heading = (int) (mb_io_ptr->new_heading * 100);
@@ -996,10 +999,10 @@ int	*error;
 	char	*data_ptr;
 	FILE	*mbfp;
 	int	done;
+	int	first;
 	short int *type;
-	static char label[2];
-
-	static int label_save_flag = MB_NO;
+	char label[2];
+	char label_save[2];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1021,41 +1024,79 @@ int	*error;
 
 	done = MB_NO;
 	type = (short int *) label;
+	first = MB_YES;
+	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO)
 		{
-		/* get next record label */
-		if (label_save_flag == MB_NO)
+#ifndef BYTESWAPPED
+		/* get first part of next record label */
+		if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
 			{
-			if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				}
-			if (label[0] == 0x02)
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+
+		/* if first part is good read second part */
+		if (status == MB_SUCCESS && label[0] == 0x02)
+			{
 			if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
 			}
-		else
-			label_save_flag = MB_NO;
 
-		/* swap bytes if necessary */
-#ifdef BYTESWAPPED
-		*type = (short int) mb_swap_short(*type);
+#else
+		/* byteswapped case */
+		/* get second part of next record label */
+		if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+
+		/* if not first and second part looks like first
+			get other piece from last label */
+		if (status == MB_SUCCESS && first == MB_NO
+			&& label[1] == 0x02)
+			{
+			label[0] = label[1];
+			label[1] = label_save[0];
+			}
+
+		/* else get first part of next record label */
+		else if (status == MB_SUCCESS)
+			{
+			if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				}
+			}
+
+		/* save label */
+		label_save[0] = label[0];
+		label_save[1] = label[1];
 #endif
+
+		/* reset first flag */
+		first = MB_NO;
 
 /*		fprintf(stderr,"\nstart of mbr_cbat9001_rd_data loop:\n");
 		fprintf(stderr,"done:%d\n",done);
 		fprintf(stderr,"type:%x\n",*type);
-		fprintf(stderr,"label_save_flag:%x\n",label_save_flag);*/
+		fprintf(stderr,"comment:   %x\n",RESON_COMMENT);
+		fprintf(stderr,"pos:       %x\n",RESON_POS);
+		fprintf(stderr,"parameter: %x\n",RESON_PARAMETER);
+		fprintf(stderr,"svp:       %x\n",RESON_SVP);
+		fprintf(stderr,"bath:      %x\n",RESON_BATH);
+		fprintf(stderr,"short svp: %x\n",RESON_SHORT_SVP);
+		fprintf(stderr,"status:%d\n",status);*/
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE)
 			{
-	/*fprintf(stderr,"call nothing, read failure\n");*/
 			done = MB_YES;
 			}
 		else if (*type == RESON_COMMENT)
@@ -1108,6 +1149,16 @@ int	*error;
 				data->kind = MB_DATA_DATA;
 				}
 			}
+		else if (*type == RESON_SHORT_SVP)
+			{
+			status = mbr_cbat9001_rd_short_svp(
+				verbose,mbfp,data,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				data->kind = MB_DATA_VELOCITY_PROFILE;
+				}
+			}
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
@@ -1115,8 +1166,7 @@ int	*error;
 
 /*		fprintf(stderr,"end of mbr_cbat9001_rd_data loop:\n");
 		fprintf(stderr,"done:%d\n",done);
-		fprintf(stderr,"type:%x\n",*type);
-		fprintf(stderr,"label_save_flag:%x\n",label_save_flag);*/
+		fprintf(stderr,"type:%x\n",*type);*/
 		}
 
 	/* print output debug statements */
@@ -1555,6 +1605,116 @@ int	*error;
 #endif
 		data->svp_num = 0;
 		for (i=0;i<500;i++)
+			{
+			short_ptr = (short int *) &line[16+4*i];
+			short_ptr2 = (short int *) &line[18+4*i];
+#ifndef BYTESWAPPED
+			data->svp_depth[i] = *short_ptr;
+			data->svp_vel[i] = *short_ptr2;
+#else
+			data->svp_depth[i] = (short int) mb_swap_short(*short_ptr);
+			data->svp_vel[i] = (short int) mb_swap_short(*short_ptr2);
+#endif
+			if (data->svp_vel[i] > 0) data->svp_num = i + 1;
+			}
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       year:             %d\n",data->svp_year);
+		fprintf(stderr,"dbg5       month:            %d\n",data->svp_month);
+		fprintf(stderr,"dbg5       day:              %d\n",data->svp_day);
+		fprintf(stderr,"dbg5       hour:             %d\n",data->svp_hour);
+		fprintf(stderr,"dbg5       minute:           %d\n",data->svp_minute);
+		fprintf(stderr,"dbg5       sec:              %d\n",data->svp_second);
+		fprintf(stderr,"dbg5       hundredth_sec:    %d\n",data->svp_hundredth_sec);
+		fprintf(stderr,"dbg5       thousandth_sec:   %d\n",data->svp_thousandth_sec);
+		fprintf(stderr,"dbg5       svp_latitude:     %d\n",data->svp_latitude);
+		fprintf(stderr,"dbg5       svp_longitude:    %d\n",data->svp_longitude);
+		fprintf(stderr,"dbg5       svp_num:          %d\n",data->svp_num);
+		for (i=0;i<data->svp_num;i++)
+			fprintf(stderr,"dbg5       depth: %f     vel: %f\n",
+				data->svp_depth[i],data->svp_vel[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_cbat9001_rd_short_svp(verbose,mbfp,data,error)
+int	verbose;
+FILE	*mbfp;
+struct mbf_cbat9001_struct *data;
+int	*error;
+{
+	char	*function_name = "mbr_cbat9001_rd_svp";
+	int	status = MB_SUCCESS;
+	char	line[RESON_SHORT_SVP_SIZE+3];
+	short int *short_ptr;
+	short int *short_ptr2;
+	int	*int_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
+		}
+
+	/* read record into char array */
+	status = fread(line,1,RESON_SHORT_SVP_SIZE+3,mbfp);
+	if (status == RESON_SHORT_SVP_SIZE+3)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get data */
+	if (status == MB_SUCCESS)
+		{
+		data->kind = MB_DATA_VELOCITY_PROFILE;
+		data->svp_day =            (int) line[0];
+		data->svp_month =          (int) line[1];
+		data->svp_year =           (int) line[2];
+		data->svp_hour =           (int) line[3];
+		data->svp_minute =         (int) line[4];
+		data->svp_second =         (int) line[5];
+		data->svp_hundredth_sec =  (int) line[6];
+		data->svp_thousandth_sec = (int) line[7];
+#ifndef BYTESWAPPED
+		int_ptr = (int *) &line[8];
+		data->svp_latitude = *int_ptr;
+		int_ptr = (int *) &line[12];
+		data->svp_longitude = *int_ptr;
+#else
+		int_ptr = (int *) &line[8];
+		data->svp_latitude = (int) mb_swap_long(*int_ptr);
+		int_ptr = (int *) &line[12];
+		data->svp_latitude = (int) mb_swap_long(*int_ptr);
+#endif
+		data->svp_num = 0;
+		for (i=0;i<200;i++)
 			{
 			short_ptr = (short int *) &line[16+4*i];
 			short_ptr2 = (short int *) &line[18+4*i];
@@ -2319,6 +2479,8 @@ int	*error;
 	struct mbf_cbat9001_struct *data;
 	char	line[RESON_SVP_SIZE+3];
 	short int label;
+	int	size;
+	int	svp_num_max;
 	short int *short_ptr;
 	short int *short_ptr2;
 	int	*int_ptr;
@@ -2359,8 +2521,21 @@ int	*error;
 				data->svp_depth[i],data->svp_vel[i]);
 		}
 
+	/* figure out which svp record to output */
+	if (data->svp_num > 200)
+		{
+		label = RESON_SVP;
+		size = RESON_SVP_SIZE;
+		svp_num_max = 500;
+		}
+	else
+		{
+		label = RESON_SHORT_SVP;
+		size = RESON_SHORT_SVP_SIZE;
+		svp_num_max = 200;
+		}
+
 	/* write the record label */
-	label = RESON_SVP;
 #ifdef BYTESWAPPED
 	label = (short) mb_swap_short(label);
 #endif
@@ -2410,20 +2585,20 @@ int	*error;
 				mb_swap_short((short int)data->svp_vel[i]);
 #endif
 			}
-		for (i=data->svp_num;i<500;i++)
+		for (i=data->svp_num;i<svp_num_max;i++)
 			{
 			short_ptr = (short int *) &line[16+4*i];
 			short_ptr2 = (short int *) &line[18+4*i];
 			*short_ptr = 0;
 			*short_ptr2 = 0;
 			}
-		line[RESON_SVP_SIZE] = 0x03;
-		line[RESON_SVP_SIZE+1] = '\0';
-		line[RESON_SVP_SIZE+2] = '\0';
+		line[size] = 0x03;
+		line[size+1] = '\0';
+		line[size+2] = '\0';
 
 		/* write out data */
-		status = fwrite(line,1,RESON_SVP_SIZE+3,mbfp);
-		if (status != RESON_SVP_SIZE+3)
+		status = fwrite(line,1,size+3,mbfp);
+		if (status != size+3)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;

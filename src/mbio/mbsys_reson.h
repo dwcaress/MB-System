@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.h	8/20/94
- *	$Id: mbsys_reson.h,v 4.0 1994-10-21 12:35:08 caress Exp $
+ *	$Id: mbsys_reson.h,v 4.1 1995-07-13 19:15:09 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:35:08  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/10/21  12:20:01  caress
  * Initial revision
  *
@@ -44,6 +47,7 @@
  *         0x0242: Parameter                               44 data bytes
  *         0x0243: Sound velocity profile                2016 data bytes
  *         0x0244: SeaBat 9001 bathymetry                 752 data bytes
+ *         0x0245: Short sound velocity profile           816 data bytes
  *   5. Reson systems record navigation fixes using the position 
  *      telegram; navigation is not always included in the per ping data.
  *      Since speed is not recorded, it is impossible to extrapolate
@@ -69,6 +73,7 @@
 #define	RESON_PARAMETER		0x0242
 #define	RESON_SVP		0x0243
 #define	RESON_BATH		0x0244
+#define	RESON_SHORT_SVP		0x0245
 
 /* telegram sizes */
 #define	RESON_COMMENT_SIZE	200
@@ -76,6 +81,7 @@
 #define	RESON_PARAMETER_SIZE	44
 #define	RESON_SVP_SIZE		2016
 #define	RESON_BATH_SIZE		752
+#define	RESON_SHORT_SVP_SIZE	816
 
 /* internal data structure */
 struct mbsys_reson_struct

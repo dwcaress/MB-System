@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 4.5 1995-03-22 19:44:26 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 4.6 1995-07-13 19:13:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,6 +25,14 @@
  *					structure
  *   mbsys_ldeoih_insert	- insert basic data into mbsys_ldeoih_struct 
  *					structure
+ *   mbsys_ldeoih_ttimes    - would extract travel time and beam angle data from
+ *                        mbsys_ldeoih_struct structure if there were any
+ *   mbsys_ldeoih_nav_get - extract navigation and attitude 
+ *			    sensor data from
+ *                          mbsys_ldeoih_struct structure
+ *   mbsys_ldeoih_nav_put - insert navigation and attitude 
+ *			    sensor data into
+ *                          mbsys_ldeoih_struct structure
  *   mbsys_ldeoih_copy		- copy data in one mbsys_ldeoih_struct 
  *					structure into another 
  *					mbsys_ldeoih_struct structure
@@ -32,6 +40,10 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/03/22  19:44:26  caress
+ * Added explicit casts to shorts divided by doubles for
+ * ansi C compliance.
+ *
  * Revision 4.4  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -83,7 +95,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_ldeoih.c,v 4.5 1995-03-22 19:44:26 caress Exp $";
+ static char res_id[]="$Id: mbsys_ldeoih.c,v 4.6 1995-07-13 19:13:36 caress Exp $";
 	char	*function_name = "mbsys_ldeoih_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -714,6 +726,301 @@ int	*error;
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_ldeoih_nav_get(verbose,mbio_ptr,store_ptr,kind,
+		time_i,time_d,navlon,navlat,speed,heading,
+		roll,pitch,heave,error)
+int	verbose;
+char	*mbio_ptr;
+char	*store_ptr;
+int	*kind;
+int	time_i[7];
+double	*time_d;
+double	*navlon;
+double	*navlat;
+double	*speed;
+double	*heading;
+double	*roll;
+double	*pitch;
+double	*heave;
+int	*error;
+{
+	char	*function_name = "mbsys_ldeoih_nav_get";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_ldeoih_struct *store;
+	int	time_j[5];
+	int	id;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_ldeoih_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get time */
+		time_j[0] = store->year;
+		time_j[1] = store->day;
+		time_j[2] = store->min;
+		time_j[3] = store->sec;
+		time_j[4] = 0;
+		mb_get_itime(verbose,time_j,time_i);
+		mb_get_time(verbose,time_i,time_d);
+
+		/* get navigation */
+		*navlon = ((double) store->lon2u)/60. 
+			+ ((double) store->lon2b)/600000.;
+		*navlat = ((double) store->lat2u)/60. 
+			+ ((double) store->lat2b)/600000. - 90.;
+		if (mb_io_ptr->lonflip < 0)
+			{
+			if (*navlon > 0.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -360.)
+				*navlon = *navlon + 360.;
+			}
+		else if (mb_io_ptr->lonflip == 0)
+			{
+			if (*navlon > 180.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -180.)
+				*navlon = *navlon + 360.;
+			}
+		else
+			{
+			if (*navlon > 360.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < 0.)
+				*navlon = *navlon + 360.;
+			}
+
+		/* get heading (360 degrees = 65536) */
+		*heading = store->heading*0.0054932;
+
+		/* set speed to zero */
+		*speed = 0.0;
+
+		/* get roll pitch and heave */
+		*roll = 0.0;
+		*pitch = 0.0;
+		*heave = 0.0;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
+			fprintf(stderr,"dbg4       roll:       %f\n",
+				*roll);
+			fprintf(stderr,"dbg4       pitch:      %f\n",
+				*pitch);
+			fprintf(stderr,"dbg4       heave:      %f\n",
+				*heave);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+		&& *kind == MB_DATA_DATA)
+		{
+		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
+		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);
+		fprintf(stderr,"dbg2       time_i[2]:     %d\n",time_i[2]);
+		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
+		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
+		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
+		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
+		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
+		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
+		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
+		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
+		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
+		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_ldeoih_nav_put(verbose,mbio_ptr,store_ptr,
+		time_i,time_d,navlon,navlat,speed,heading,
+		roll,pitch,heave,error)
+int	verbose;
+char	*mbio_ptr;
+char	*store_ptr;
+int	time_i[7];
+double	time_d;
+double	navlon;
+double	navlat;
+double	speed;
+double	heading;
+double	roll;
+double	pitch;
+double	heave;
+int	*error;
+{
+	char	*function_name = "mbsys_ldeoih_nav_put";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_ldeoih_struct *store;
+	int	kind;
+	int	time_j[5];
+	int	id;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
+		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
+		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
+		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
+		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
+		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
+		fprintf(stderr,"dbg2       time_d:     %d\n",time_d);
+		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
+		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
+		fprintf(stderr,"dbg2       speed:      %f\n",speed);
+		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       roll:       %f\n",roll);
+		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
+		fprintf(stderr,"dbg2       heave:      %f\n",heave);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_ldeoih_struct *) store_ptr;
+
+	/* insert data in structure */
+	if (store->kind == MB_DATA_DATA)
+		{
+		/* get time */
+		mb_get_jtime(verbose,time_i,time_j);
+		store->year = time_j[0];
+		store->day = time_j[1];
+		store->min = time_j[2];
+		store->sec = time_j[3];
+
+		/* get navigation */
+		if (navlon < 0.0) navlon = navlon + 360.0;
+		store->lon2u = (short int) 60.0*navlon;
+		store->lon2b = (short int) (600000.0*(navlon 
+			- ((double) store->lon2u)/60.0));
+		navlat = navlat + 90.0;
+		store->lat2u = (short int) 60.0*navlat;
+		store->lat2b = (short int) (600000.0*(navlat 
+			- ((double) store->lat2u)/60.0));
+
+		/* get heading (360 degrees = 65536) */
+		store->heading = 182.044444*heading;
+
+		/* get roll pitch and heave */
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
 
 	/* return status */

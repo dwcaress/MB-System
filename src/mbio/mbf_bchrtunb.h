@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_bchrtunb.h	8/21/94
- *	$Id: mbf_bchrtunb.h,v 4.0 1994-10-21 12:35:02 caress Exp $
+ *	$Id: mbf_bchrtunb.h,v 4.1 1995-07-13 19:15:09 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 21, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:35:02  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/10/21  12:20:01  caress
  * Initial revision
  *
@@ -74,7 +77,7 @@ struct mbf_bchrtunb_profile_struct
 	int	longitude;		/* 180 deg = 2*pi*e9 */
 	int	roll;			/* 0.005 degrees */
 	int	pitch;			/* 0.005 degrees */
-	int	heading;		/* 0.01 degrees */
+	int	heading;		/* PI/180 degrees */
 	int	heave;			/* 0.001 meters */
 	short bath[8];		/* depths:  0.01 meters */	
 	short int bath_acrosstrack[8];

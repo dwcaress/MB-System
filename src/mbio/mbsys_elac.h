@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.h	8/20/94
- *	$Id: mbsys_elac.h,v 4.0 1994-10-21 12:35:07 caress Exp $
+ *	$Id: mbsys_elac.h,v 4.1 1995-07-13 19:15:09 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:35:07  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/10/21  12:20:01  caress
  * Initial revision
  *
@@ -79,7 +82,7 @@
 /* telegram sizes */
 #define	ELAC_COMMENT_SIZE	200
 #define	ELAC_POS_SIZE		36
-#define	ELAC_PARAMETER_SIZE	44
+#define	ELAC_PARAMETER_SIZE	56
 #define	ELAC_SVP_SIZE		2016
 #define	ELAC_BATH56_SIZE	848
 #define	ELAC_BATH40_SIZE	608
@@ -101,7 +104,7 @@ struct mbsys_elac_profile_struct
 	int	longitude;		/* 180 deg = 2*pi*e9 */
 	int	roll;			/* 0.005 degrees */
 	int	pitch;			/* 0.005 degrees */
-	int	heading;		/* 0.01 degrees */
+	int	heading;		/* PI/180 degrees */
 	int	heave;			/* 0.001 meters */
 	short bath[8];		/* depths:  0.01 meters */	
 	short int bath_acrosstrack[8];

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 4.1 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 4.2 1995-07-13 19:13:36 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.0  1994/10/21  12:34:53  caress
  * Release V4.0
  *
@@ -49,6 +52,7 @@
 #define	M_PI	3.14159265358979323846
 #endif
 #define DTR	(M_PI/180.)
+#define RTD	(180./M_PI)
 
 /* include for byte swapping */
 #include "../../include/mb_swap.h"
@@ -59,7 +63,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.1 1995-03-06 19:38:54 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.2 1995-07-13 19:13:36 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -317,6 +321,7 @@ int	*error;
 	struct mbsys_elac_struct *store;
 	double	mtodeglon, mtodeglat;
 	double	dx, dy, dt, speed, dd, headingx, headingy;
+	double	factor;
 	double	depthscale, dacrscale, daloscale, reflscale;
 	int	ibeam;
 	int	i, j, k;
@@ -482,9 +487,37 @@ int	*error;
 
 		/* get speed  */
 		mb_io_ptr->new_speed = 0.0;
+		
+		/* interpolate nav from previous fixes if needed and possible */
+		if (data->profile[0].longitude == 0 
+			&& data->profile[0].latitude == 0
+			&& mb_io_ptr->nfix > 1
+			&& (mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1] 
+				>= mb_io_ptr->new_time_d)
+			&& (mb_io_ptr->fix_time_d[0] 
+				<= mb_io_ptr->new_time_d))
+			{
+			j = -1;
+			for (i=1;i<mb_io_ptr->nfix;i++)
+			    {
+			    if (j == -1 && 
+				mb_io_ptr->fix_time_d[i] >= mb_io_ptr->new_time_d)
+				j = i;
+			    }
+			factor = (mb_io_ptr->new_time_d - mb_io_ptr->fix_time_d[j-1])
+				/(mb_io_ptr->fix_time_d[j] - mb_io_ptr->fix_time_d[j-1]);
+			mb_io_ptr->new_lon = mb_io_ptr->fix_lon[j-1] 
+				+ factor*(mb_io_ptr->fix_lon[j] - mb_io_ptr->fix_lon[j]);
+			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[j-1] 
+				+ factor*(mb_io_ptr->fix_lat[j] - mb_io_ptr->fix_lat[j]);
+			data->profile[0].longitude = 
+				(int) (mb_io_ptr->new_lon*11111111.0);
+			data->profile[0].latitude = 
+				(int) (mb_io_ptr->new_lat*11111111.0);
+			}
 
 		/* extrapolate nav from previous fixes if needed and possible */
-		if (data->profile[0].longitude == 0 
+		else if (data->profile[0].longitude == 0 
 			&& data->profile[0].latitude == 0
 			&& mb_io_ptr->nfix > 1)
 			{
@@ -508,6 +541,23 @@ int	*error;
 			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
 				+ headingy*mtodeglat*dd;
 			mb_io_ptr->speed = 3.6*speed;
+			data->profile[0].longitude = 
+				(int) (mb_io_ptr->new_lon*11111111.0);
+			data->profile[0].latitude = 
+				(int) (mb_io_ptr->new_lat*11111111.0);
+			}
+
+		/* just take the only nav available */
+		else if (data->profile[0].longitude == 0 
+			&& data->profile[0].latitude == 0
+			&& mb_io_ptr->nfix == 1)
+			{
+			mb_io_ptr->new_lon = mb_io_ptr->fix_lon[0];
+			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[0];
+			data->profile[0].longitude = 
+				(int) (mb_io_ptr->new_lon*11111111.0);
+			data->profile[0].latitude = 
+				(int) (mb_io_ptr->new_lat*11111111.0);
 			}
 
 		if (mb_io_ptr->lonflip < 0)
@@ -759,6 +809,8 @@ int	*error;
 				= data->profile[i].hundredth_sec;
 			store->profile[i].thousandth_sec 
 				= data->profile[i].thousandth_sec;
+			store->profile[i].longitude = data->profile[i].longitude;
+			store->profile[i].latitude = data->profile[i].latitude;
 			store->profile[i].roll = data->profile[i].roll;
 			store->profile[i].pitch = data->profile[i].pitch;
 			store->profile[i].heading = data->profile[i].heading;
@@ -937,6 +989,8 @@ int	*error;
 				= store->profile[i].hundredth_sec;
 			data->profile[i].thousandth_sec 
 				= store->profile[i].thousandth_sec;
+			data->profile[i].longitude = store->profile[i].longitude;
+			data->profile[i].latitude = store->profile[i].latitude;
 			data->profile[i].roll = store->profile[i].roll;
 			data->profile[i].pitch = store->profile[i].pitch;
 			data->profile[i].heading = store->profile[i].heading;
@@ -1010,9 +1064,9 @@ int	*error;
 		{
 		/*get navigation */
 		data->profile[0].longitude 
-			= (int) mb_io_ptr->new_lon/0.00000009;
+			= (int) (mb_io_ptr->new_lon*11111111.0);
 		data->profile[0].latitude 
-			= (int) mb_io_ptr->new_lat/0.00000009;
+			= (int) (mb_io_ptr->new_lat*11111111.0);
 
 		/* get heading */
 		data->profile[0].heading 
@@ -1091,8 +1145,6 @@ int	*error;
 	short int *type;
 	static char label[2];
 
-	static int label_save_flag = MB_NO;
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1117,22 +1169,17 @@ int	*error;
 	while (done == MB_NO)
 		{
 		/* get next record label */
-		if (label_save_flag == MB_NO)
+		if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
 			{
-			if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				}
-			if (label[0] == 0x02)
-			if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				}
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
 			}
-		else
-			label_save_flag = MB_NO;
+		if (label[0] == 0x02)
+		if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
 
 		/* swap bytes if necessary */
 #ifdef BYTESWAPPED
@@ -1213,6 +1260,11 @@ int	*error;
 				done = MB_YES;
 				data->kind = MB_DATA_DATA;
 				}
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 
 		/* bail out if there is an error */
@@ -1837,7 +1889,7 @@ int	*error;
 			short_ptr = (short int *) &profile[18];
 			data->profile[i].pitch = (int) *short_ptr;
 			short_ptr = (short int *) &profile[20];
-			data->profile[i].heading = (int) *short_ptr;
+			data->profile[i].heading = (int)(unsigned short) *short_ptr;
 			short_ptr = (short int *) &profile[22];
 			data->profile[i].heave = (int) *short_ptr;
 			for (j=0;j<8;j++)
@@ -1873,7 +1925,7 @@ int	*error;
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[20];
 			data->profile[i].heading 
-				= (int) mb_swap_short(*short_ptr);
+				= (int)(unsigned short) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[22];
 			data->profile[i].heave 
 				= (int) mb_swap_short(*short_ptr);
@@ -2066,7 +2118,7 @@ int	*error;
 			short_ptr = (short int *) &profile[18];
 			data->profile[i].pitch = (int) *short_ptr;
 			short_ptr = (short int *) &profile[20];
-			data->profile[i].heading = (int) *short_ptr;
+			data->profile[i].heading = (int)(unsigned short) *short_ptr;
 			short_ptr = (short int *) &profile[22];
 			data->profile[i].heave = (int) *short_ptr;
 			for (j=0;j<8;j++)
@@ -2102,7 +2154,7 @@ int	*error;
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[20];
 			data->profile[i].heading 
-				= (int) mb_swap_short(*short_ptr);
+				= (int)(unsigned short) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[22];
 			data->profile[i].heave 
 				= (int) mb_swap_short(*short_ptr);
@@ -2295,7 +2347,7 @@ int	*error;
 			short_ptr = (short int *) &profile[18];
 			data->profile[i].pitch = (int) *short_ptr;
 			short_ptr = (short int *) &profile[20];
-			data->profile[i].heading = (int) *short_ptr;
+			data->profile[i].heading = (int)(unsigned short) *short_ptr;
 			short_ptr = (short int *) &profile[22];
 			data->profile[i].heave = (int) *short_ptr;
 			for (j=0;j<8;j++)
@@ -2331,7 +2383,7 @@ int	*error;
 				= (int) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[20];
 			data->profile[i].heading 
-				= (int) mb_swap_short(*short_ptr);
+				= (int)(unsigned short) mb_swap_short(*short_ptr);
 			short_ptr = (short int *) &profile[22];
 			data->profile[i].heave 
 				= (int) mb_swap_short(*short_ptr);
@@ -3322,7 +3374,7 @@ int	*error;
 			short_ptr = (short int *) &profile[18];
 			*short_ptr = (short int) data->profile[i].pitch;
 			short_ptr = (short int *) &profile[20];
-			*short_ptr = (short int) data->profile[i].heading;
+			*short_ptr = (short int)(unsigned short) data->profile[i].heading;
 			short_ptr = (short int *) &profile[22];
 			*short_ptr = (short int) data->profile[i].heave;
 			for (j=0;j<8;j++)
@@ -3358,7 +3410,7 @@ int	*error;
 				mb_swap_short((short int) data->profile[i].pitch);
 			short_ptr = (short int *) &profile[20];
 			*short_ptr = (short int) 
-				mb_swap_short((short int) data->profile[i].heading);
+				mb_swap_short((short int)(unsigned short) data->profile[i].heading);
 			short_ptr = (short int *) &profile[22];
 			*short_ptr = (short int) 
 				mb_swap_short((short int) data->profile[i].heave);
@@ -3576,7 +3628,7 @@ int	*error;
 			short_ptr = (short int *) &profile[18];
 			*short_ptr = (short int) data->profile[i].pitch;
 			short_ptr = (short int *) &profile[20];
-			*short_ptr = (short int) data->profile[i].heading;
+			*short_ptr = (short int)(unsigned short) data->profile[i].heading;
 			short_ptr = (short int *) &profile[22];
 			*short_ptr = (short int) data->profile[i].heave;
 			for (j=0;j<8;j++)
@@ -3612,7 +3664,7 @@ int	*error;
 				mb_swap_short((short int) data->profile[i].pitch);
 			short_ptr = (short int *) &profile[20];
 			*short_ptr = (short int) 
-				mb_swap_short((short int) data->profile[i].heading);
+				mb_swap_short((short int)(unsigned short) data->profile[i].heading);
 			short_ptr = (short int *) &profile[22];
 			*short_ptr = (short int) 
 				mb_swap_short((short int) data->profile[i].heave);
@@ -3830,7 +3882,7 @@ int	*error;
 			short_ptr = (short int *) &profile[18];
 			*short_ptr = (short int) data->profile[i].pitch;
 			short_ptr = (short int *) &profile[20];
-			*short_ptr = (short int) data->profile[i].heading;
+			*short_ptr = (short int)(unsigned short) data->profile[i].heading;
 			short_ptr = (short int *) &profile[22];
 			*short_ptr = (short int) data->profile[i].heave;
 			for (j=0;j<8;j++)
@@ -3866,7 +3918,7 @@ int	*error;
 				mb_swap_short((short int) data->profile[i].pitch);
 			short_ptr = (short int *) &profile[20];
 			*short_ptr = (short int) 
-				mb_swap_short((short int) data->profile[i].heading);
+				mb_swap_short((short int)(unsigned short) data->profile[i].heading);
 			short_ptr = (short int *) &profile[22];
 			*short_ptr = (short int) 
 				mb_swap_short((short int) data->profile[i].heave);

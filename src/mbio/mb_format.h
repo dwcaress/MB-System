@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.7 1995-02-17 22:22:20 caress Exp $
+ *    $Id: mb_format.h,v 4.8 1995-07-13 19:15:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/02/17  22:22:20  caress
+ * Changed flag tables.
+ *
  * Revision 4.6  1995/01/10  17:34:16  caress
  * Added fore-aft beamwidth table.
  *
@@ -619,7 +622,7 @@ static float mb_foreaft_beamwidth_table[] =
 	2.00,	/* MBF_MR1PRHIG */
 	2.00,	/* MBF_MBLDEOIH */
 	2.00,	/* MBF_CBAT9001 */
-	2.00,	/* MBF_BCHRTUNB */
+	6.00,	/* MBF_BCHRTUNB */
 	};
 
 /* names of formats for use in button or label names */
