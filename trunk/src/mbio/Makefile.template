@@ -1,11 +1,13 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.21 2000-09-30 06:35:13 caress Exp $
+#	$Id: Makefile.template,v 4.22 2000-09-30 07:21:21 caress Exp $
 #
-#     Copyright (c) 1993, 1994 by 
-#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
-#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#     Lamont-Doherty Earth Observatory
-#     Palisades, NY  10964
+#     Copyright (c) 1993, 1994, 2000 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, CA 95039
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
+#       Lamont-Doherty Earth Observatory
+#       Palisades, NY  10964
 #
 #     See README file for copying and redistribution conditions.
 #
@@ -14,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.21  2000/09/30  06:35:13  caress
+# Snapshot for Dale.
+#
 # Revision 4.20  1999/10/21  22:38:36  caress
 # Added MBPRONAV format.
 #

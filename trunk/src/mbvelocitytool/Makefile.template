@@ -1,11 +1,13 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.8 1999-12-11 04:43:26 caress Exp $
+#	$Id: Makefile.template,v 4.9 2000-09-30 07:22:08 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 1997 by 
-#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
-#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#     Lamont-Doherty Earth Observatory
-#     Palisades, NY  10964
+#     Copyright (c) 1993, 1994, 1997, 2000 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, CA 95039
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
+#       Lamont-Doherty Earth Observatory
+#       Palisades, NY  10964
 #
 #     See README file for copying and redistribution conditions.
 #
@@ -14,6 +16,9 @@
 # Date:		September 14, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.8  1999/12/11  04:43:26  caress
+# Moved xgraphics.c to src/xgraphics
+#
 # Revision 4.7  1998/10/05  19:18:58  caress
 # MB-System version 4.6beta
 #
@@ -75,19 +80,17 @@ $(BINDIR)/mbvelocitytool: mbvelocity.o \
 		mbvelocity_creation.o \
 		mbvelocity_bxutils.o \
 		mbvelocity_prog.o \
-		$(LIBDIR)/libxgraphics.a \
 		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbrt.a \
-		$(LIBDIR)/libgsf.a
+		$(LIBDIR)/libgsf.a \
+		$(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbvelocity.o \
 		mbvelocity_callbacks.o \
 		mbvelocity_creation.o \
 		mbvelocity_bxutils.o \
 		mbvelocity_prog.o \
-		$(LIBDIR)/libxgraphics.a \
 		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbrt.a \
 		$(LIBDIR)/libgsf.a \
+		$(LIBDIR)/libmbaux.a \
 		$(MOTIFLIBS) $(LFLAGS) \
 		-o $(BINDIR)/mbvelocitytool
 

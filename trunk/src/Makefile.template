@@ -1,11 +1,13 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 4.10 2000-09-30 05:08:04 caress Exp $
+#	$Id: Makefile.template,v 4.11 2000-09-30 07:18:57 caress Exp $
 #
-#     Copyright (c) 1993, 1994 by 
-#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
-#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#     Lamont-Doherty Earth Observatory
-#     Palisades, NY  10964
+#     Copyright (c) 1993, 1994, 2000 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, CA 95039
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
+#       Lamont-Doherty Earth Observatory
+#       Palisades, NY  10964
 #
 #     See README file for copying and redistribution conditions.
 #
@@ -14,6 +16,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.10  2000/09/30  05:08:04  caress
+# Snapshot for Dale.
+#
 # Revision 4.9  1999/12/11  04:36:44  caress
 # Moved xgraphics.c to src/xgraphics
 #

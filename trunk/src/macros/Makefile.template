@@ -1,11 +1,13 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.9 1999-12-29 00:17:55 caress Exp $
+#	$Id: Makefile.template,v 4.10 2000-09-30 07:20:07 caress Exp $
 #
-#     Copyright (c) 1993, 1994 by 
-#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
-#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#     Lamont-Doherty Earth Observatory
-#     Palisades, NY  10964
+#     Copyright (c) 1993, 1994, 2000 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, CA 95039
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
+#       Lamont-Doherty Earth Observatory
+#       Palisades, NY  10964
 #
 #     See README file for copying and redistribution conditions.
 #
@@ -14,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.9  1999/12/29  00:17:55  caress
+# Added mbm_grdtiff.
+#
 # Revision 4.8  1999/10/06  20:42:31  caress
 # Added mbm_grd2arc
 #
