@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsvelocitytool.c	6/6/93
- *    $Id: hsvelocitytool.c,v 4.0 1994-03-05 23:49:05 caress Exp $
+ *    $Id: hsvelocitytool.c,v 4.1 1994-03-12 01:50:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:49:05  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:53:26  caress
  * Fixed copyright message.
  *
@@ -78,7 +81,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: hsvelocitytool.c,v 4.0 1994-03-05 23:49:05 caress Exp $";
+static char rcs_id[] = "$Id: hsvelocitytool.c,v 4.1 1994-03-12 01:50:30 caress Exp $";
 static char program_name[] = "HSVELOCITYTOOL";
 static char help_message[] = "HSVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof hydrosweep multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "hsvelocitytool [-V -H]";
@@ -201,6 +204,9 @@ char	**argv;
 	int	c;
 	int	help = 0;
 	int	flag = 0;
+
+	char	*ctime();
+	char	*getenv();
 
 	/* set default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
