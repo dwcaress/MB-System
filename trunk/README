@@ -210,11 +210,11 @@ reflected in the source code archives available via
 anonymous ftp at lamont.ldeo.columbia.edu. When changes are
 made to the distributed source code, this is reflected in
 the names of the compressed tar files in the ftp archive.
-For example, the initial MB-System 4.6 distribution will be
-available in a file called MB-System4.6.tar.Z. After the
+For example, the initial MB-System 4.7 distribution will be
+available in a file called MB-System4.7.0.tar.Z. After the
 first incremental update, the filename will change to
-MB-System4.6a.tar.Z; subsequent incremental updates will
-be 4.6b, 4.6c, etc.  At all times, a link to the current
+MB-System4.7.1.tar.Z; subsequent incremental updates will
+be 4.7.2, 4.7.3, etc.  At all times, a link to the current
 MB-System distribution file called MB-System.tar.Z will be
 maintained in the ftp archive; this allows the Lamont World
 Wide Web page to always access the current distribution.
@@ -408,10 +408,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.19 1999-09-15 21:29:37 caress Exp $
+RCS ID: $Id: README,v 4.20 1999-09-16 23:09:54 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.19  1999/09/15  21:29:37  caress
+# Version 4.6.6 Release Notes
+#
 # Revision 4.18  1999/05/07  00:30:38  caress
 # Version 4.6a release
 #
