@@ -867,7 +867,7 @@ object slider_maxdepth_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("Maximum Depth (m):   250");
+        XmNlabelString = compound_string("Maximum Depth (m):     1");
 	XmNfontList = k_menu_font;
         XmNx = 10;
         XmNy = 15;
@@ -881,7 +881,7 @@ object slider_maxdepth : XmScale widget
     arguments 
     {
         XmNmaximum = 13000;
-        XmNminimum = 250;
+        XmNminimum = 1;
 	XmNscaleMultiple = 1;
         XmNorientation = XmHORIZONTAL;
 	XmNvalue = 3000;
