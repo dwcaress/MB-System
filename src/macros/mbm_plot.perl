@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.3 2001-10-11 01:32:11 caress Exp $
+#    $Id: mbm_plot.perl,v 5.4 2001-10-29 20:07:39 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.3 2001-10-11 01:32:11 caress Exp $
+#   $Id: mbm_plot.perl,v 5.4 2001-10-29 20:07:39 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.3  2001/10/11  01:32:11  caress
+# Replaced use of perl function MBparsedatalist
+# with call to new program mbdatalist.
+#
 # Revision 5.2  2001/10/10  23:56:01  dcaress
 # Regrettably, I don't remember what I changed...
 #
@@ -956,9 +960,15 @@ print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
 		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G`;		}
 
 	# now parse the mbinfo input 
+	$nrec_f = 0;
 	while (@mbinfo)
 		{
 		$line = shift @mbinfo;
+		if ($line =~ /Number of Records:\s+(\S+)/)
+			{
+			($nrec_f) = 
+				$line =~ /Number of Records:\s+(\S+)/;
+			}
 		if ($line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 			{
 			($xmin_f,$xmax_f) = 
@@ -986,7 +996,7 @@ print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
 			}
 		}
 
-	if (!$first_mb)
+	if (!$first_mb && $nrec_f > 0)
 		{
 		$first_mb = 1;
 		$xmin_data = $xmin_f;
@@ -1000,7 +1010,7 @@ print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
 		$smin_data = $smin_f;
 		$smax_data = $smax_f;
 		}
-	else
+	elsif ($nrec_f > 0)
 		{
 		$xmin_data = &min($xmin_data, $xmin_f);
 		$xmax_data = &max($xmax_data, $xmax_f);
