@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.7 2002-09-19 00:28:12 caress Exp $
+ *    $Id: mbmosaic.c,v 5.8 2002-09-20 22:30:45 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/09/19 00:28:12  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.6  2002/08/02 01:00:25  caress
  * Release 5.0.beta22
  *
@@ -135,7 +138,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.7 2002-09-19 00:28:12 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.8 2002-09-20 22:30:45 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -258,6 +261,7 @@ main (int argc, char **argv)
 	double	*norm = NULL;
 	double	*maxpriority = NULL;
 	int	*cnt = NULL;
+	int	*num = NULL;
 	double	*sigma = NULL;
 	float	*sdata = NULL;
 	float	*output = NULL;
@@ -308,7 +312,10 @@ main (int argc, char **argv)
 	/* other variables */
 	FILE	*fp;
 	char	buffer[128], *result;
-	int	i, j, ii, jj, n;
+	int	i, j, ii, jj, iii, jjj, kkk, n;
+	int	i1, i2, j1, j2;
+	double	r;
+	int	dmask[9];
 	int	kgrid, kout, kint, ib, ix, iy;
 	int	ix1, ix2, iy1, iy2;
 	int	nscan;
@@ -1115,6 +1122,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&norm,&error);
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&maxpriority,&error);
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&cnt,&error);
+	if (clip != 0)
+	    status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&num,&error);
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&sigma,&error);
 	status = mb_malloc(verbose,xdim*ydim*sizeof(float),&output,&error);
 
@@ -1968,17 +1977,55 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		/* translate the interpolation into the grid array */
 		zflag = 5.0e34;
 		for (i=0;i<gxdim;i++)
-			for (j=0;j<gydim;j++)
-				{
-				kgrid = i*gydim + j;
-				kint = i + j*gxdim;
-				if (grid[kgrid] == clipvalue 
-					&& sgrid[kint] < zflag)
+		    for (j=0;j<gydim;j++)
+			{
+			kgrid = i*gydim + j;
+			kint = i + j*gxdim;
+			num[kgrid] = MB_NO;
+			if (grid[kgrid] >= clipvalue 
+			    && sgrid[kint] < zflag)
+			    {
+			    /* initialize direction mask 
+				and bounds of search */
+			    for (ii=0;ii<9;ii++)
+				dmask[ii] = MB_NO;
+			    i1 = MAX(0, i - clip);
+			    i2 = MIN(gxdim - 1, i + clip);
+			    j1 = MAX(0, j - clip);
+			    j2 = MIN(gydim - 1, j + clip);
+				    
+			    /* loop over data within clip region */
+			    for (ii=i1;ii<=i2;ii++)
+				for (jj=j1;jj<=j2;jj++)
+				    {
+				    if (grid[ii*gydim+jj] < clipvalue)
 					{
-					grid[kgrid] = sgrid[kint];
-					nbinspline++;
+					r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
+					iii = rint((ii - i)/r) + 1;
+					jjj = rint((jj - j)/r) + 1;
+					kkk = iii * 3 + jjj;
+					dmask[kkk] = MB_YES;
 					}
+				    }
+				    
+			    if ((dmask[0] && dmask[8])
+				|| (dmask[3] && dmask[5])
+				|| (dmask[6] && dmask[2])
+				|| (dmask[1] && dmask[7]))
+				num[kgrid] = MB_YES;
+			    }
+			}
+		for (i=0;i<gxdim;i++)
+		    for (j=0;j<gydim;j++)
+			{
+			kgrid = i*gydim + j;
+			kint = i + j*gxdim;
+			if (num[kgrid] == MB_YES)
+				{
+				grid[kgrid] = sgrid[kint];
+				nbinspline++;
 				}
+			}
 		mb_free(verbose,&sdata,&error);
 		mb_free(verbose,&sgrid,&error);
 		mb_free(verbose,&work1,&error);
@@ -2258,6 +2305,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	mb_free(verbose,&norm,&error); 
 	mb_free(verbose,&maxpriority,&error); 
 	mb_free(verbose,&cnt,&error); 
+	if (clip != 0)
+	    mb_free(verbose,&num,&error); 
 	mb_free(verbose,&sigma,&error); 
 	mb_free(verbose,&output,&error); 
 	if (n_priority_angle > 0)
