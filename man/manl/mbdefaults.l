@@ -1,9 +1,9 @@
-.TH mbdefaults l "31 October 1994"
+.TH mbdefaults l "14 February 1995"
 .SH NAME
 \fBmbdefaults\fP - Set or list default mbio parameters for reading and writing multibeam bathymetry data
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbdefaults\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIpsdisplay \fB-E\fIyr/mo/da/hr/mn/sc 

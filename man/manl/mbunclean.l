@@ -1,9 +1,9 @@
-.TH mbunclean l "31 October 1994"
+.TH mbunclean l "14 February 1995"
 .SH NAME
 \fBmbunclean\fP - Unflags edited beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbunclean\fP [\fB-B\fIlow/high \fB-F\fIformat \fB-L\fIlonflip\fP 

@@ -1,9 +1,9 @@
-.TH mbclean l "31 October 1994"
+.TH mbclean l "14 February 1995"
 .SH NAME
 \fBmbclean\fP - Identifies and flags bad beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbclean\fP [\fB-B\fIlow/high \fB-C\fIslope\fP 

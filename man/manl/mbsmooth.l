@@ -1,9 +1,9 @@
-.TH mbsmooth l "31 October 1994"
+.TH mbsmooth l "14 February 1995"
 .SH NAME
 \fBmbsmooth\fP - Smooths multibeam bathymetry data.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbsmooth\fP [\fB-F\fIformat\fP \fB-G\fIwidth\fP \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP \fB-W\fIfilterfile\fP \fB-V -H\fP]

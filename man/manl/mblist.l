@@ -1,9 +1,9 @@
-.TH mblist l "31 October 1994"
+.TH mblist l "14 February 1995"
 .SH NAME
 \fBmblist\fP - List data in multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmblist\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIdumpmode 

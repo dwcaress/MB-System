@@ -1,10 +1,10 @@
-.TH mbgrid l "31 October 1994"
+.TH mbgrid l "14 February 1995"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from multibeam data files.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP \fB-E\fIdx/dy\fP \fB-F\fP \fB-G\fIgridkind\fP \fB-L\fIlonflip\fP \fB-M -N \fB-P\fIpings\fP \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
@@ -292,7 +292,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.2 1994-10-31 23:10:21 caress Exp $
+ Version $Id: mbgrid.l,v 4.3 1995-02-14 21:15:05 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -369,7 +369,7 @@ standard deviation values. The following will suffice:
 The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.2 1994-10-31 23:10:21 caress Exp $
+ Version $Id: mbgrid.l,v 4.3 1995-02-14 21:15:05 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
