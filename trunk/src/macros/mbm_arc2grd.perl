@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id: mbm_arc2grd.perl,v 5.4 2003-08-28 18:39:37 caress Exp $
+#    $Id: mbm_arc2grd.perl,v 5.5 2003-09-23 21:13:51 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward side of Oahu)
 #
 # Version:
-#   $Id: mbm_arc2grd.perl,v 5.4 2003-08-28 18:39:37 caress Exp $
+#   $Id: mbm_arc2grd.perl,v 5.5 2003-09-23 21:13:51 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.4  2003/08/28 18:39:37  caress
+#   Fixed problems parsing Arc grid files on MBARI CD's..
+#
 #   Revision 5.3  2003/08/24 23:57:14  caress
 #   *** empty log message ***
 #
@@ -106,6 +109,7 @@ if (!open(TMP,">$tmpfile"))
 
 # read header of ascii Arc grid file
 $cnt = 0;
+$nodata = "NaN";
 while (<INP>) {
 	$cnt++;
 	lc($_);
