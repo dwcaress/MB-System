@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.10 2001-12-18 04:27:45 caress Exp $
+ *    $Id: mb_process.h,v 5.11 2002-04-06 02:43:39 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -189,6 +189,15 @@
  *                                  #     using array geometry
  *   CORRECTED boolean              # sets raytraced bathymetry to "corrected" values [1]
  *
+ * STATIC BEAM BATHYMETRY OFFSETS:
+ *   STATICMODE mode                # sets offsetting of bathymetry by per-beam statics [0]
+ *                                  #  0: static correction off
+ *                                  #  1: static correction on
+ *   STATICFILE filename            # sets static per-beam file path [no default]
+ *                                  #   - static files are two-column ascii tables
+ *                                  #     with the beam # in the first column and
+ *                                  #     the depth offset in m in the second column
+ *
  * DRAFT CORRECTION:
  *   DRAFTMODE mode                 # sets draft correction [0]
  *                                  # - note: draft merged from navigation before 
@@ -288,6 +297,21 @@
  *                                  #   1: tide correction on
  *   TIDEFILE filename              # sets tide file path
  *   TIDEFORMAT constant            # sets tide file format [1]
+ *                                  # - tide files can be in one of four ASCII
+ *                                  #   table formats
+ *                                  #   1: format is <time_d tide>
+ *                                  #   2: format is <yr mon day hour min sec tide>
+ *                                  #   3: format is <yr jday hour min sec tide>
+ *                                  #   4: format is <yr jday daymin sec tide>
+ *                                  # - time_d = decimal seconds since 1/1/1970
+ *                                  # - daymin = decimal minutes start of day
+ *
+ * SIDESCAN CORRECTION:
+ *   SSCORRMODE  boolean            # sets correction of sidescan for amplitude vs grazing 
+ *                                  # angle function
+ *                                  #   0: sidescan correction off
+ *                                  #   1: sidescan correction on
+ *   SSCORRFILE filename            # sets sidescan correction file path [no default]
  *
  * SIDESCAN RECALCULATION:
  *   SSRECALCMODE  boolean          # sets recalculation of sidescan for Simrad multibeam data
@@ -355,6 +379,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2001/12/18 04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.9  2001/08/10  22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -432,6 +459,8 @@
 #define	MBP_ANGLES_OK		0
 #define	MBP_ANGLES_SNELL	1
 #define	MBP_ANGLES_SNELLNULL	2
+#define MBP_STATIC_OFF		0
+#define MBP_STATIC_ON		1
 #define MBP_DRAFT_OFF		0
 #define MBP_DRAFT_OFFSET	1
 #define MBP_DRAFT_MULTIPLY	2
@@ -454,12 +483,13 @@
 #define MBP_HEADING_CALCOFFSET  3
 #define MBP_TIDE_OFF		0
 #define MBP_TIDE_ON		1
+#define MBP_SSCORR_OFF		0
+#define MBP_SSCORR_ON		1
 #define MBP_SSRECALC_OFF	0
 #define MBP_SSRECALC_ON		1
 #define MBP_CORRECTION_UNKNOWN	-1
 #define MBP_CORRECTION_NO	0
 #define MBP_CORRECTION_YES	1
-
 
 struct mb_process_struct 
 	{
@@ -507,10 +537,12 @@ struct mb_process_struct
 	char	mbp_svpfile[MBP_FILENAMESIZE];
 	int	mbp_ssv_mode;
 	double	mbp_ssv;
-	int	mbp_corrected;
 	int	mbp_tt_mode;
 	double	mbp_tt_mult;
 	int	mbp_angle_mode;
+	int	mbp_corrected;
+	int	mbp_static_mode;
+	char	mbp_staticfile[MBP_FILENAMESIZE];
 	
 	/* draft correction */
 	int	mbp_draft_mode;
@@ -550,6 +582,10 @@ struct mb_process_struct
 	int	mbp_tide_mode;
 	char	mbp_tidefile[MBP_FILENAMESIZE];
 	int	mbp_tide_format;
+	
+	/* sidescan correction */
+	int	mbp_sscorr_mode;
+	char	mbp_sscorrfile[MBP_FILENAMESIZE];
 	
 	/* sidescan recalculation */
 	int	mbp_ssrecalc_mode;
@@ -650,6 +686,10 @@ int mb_pr_update_svp(int verbose, char *file,
 			int	mbp_angle_mode, 
 			int	mbp_corrected, 
 			int *error);
+int mb_pr_update_static(int verbose, char *file, 
+			int	mbp_static_mode, 
+			char	*mbp_staticfile, 
+			int *error);
 int mb_pr_update_navadj(int verbose, char *file, 
 			int	mbp_navadj_mode, 
 			char	*mbp_navadjfile, 
@@ -686,11 +726,15 @@ int mb_pr_update_edit(int verbose, char *file,
 			int	mbp_edit_mode, 
 			char	*mbp_editfile, 
 			int *error);
+int mb_pr_update_sscorr(int verbose, char *file, 
+			int	mbp_sscorr_mode,
+			char	*mbp_sscorrfile,
+			int *error);
 int mb_pr_update_ssrecalc(int verbose, char *file, 
-			int		mbp_ssrecalc_mode,
+			int	mbp_ssrecalc_mode,
 			double	mbp_ssrecalc_pixelsize,
 			double	mbp_ssrecalc_swathwidth,
-			int		mbp_ssrecalc_interpolate,
+			int	mbp_ssrecalc_interpolate,
 			int *error);
 int mb_pr_update_metadata(int verbose, char *file, 
 			char	*mbp_meta_vessel,
@@ -776,6 +820,10 @@ int mb_pr_get_svp(int verbose, char *file,
 			int	*mbp_angle_mode, 
 			int	*mbp_corrected, 
 			int *error);
+int mb_pr_get_static(int verbose, char *file, 
+			int	*mbp_static_mode, 
+			char	*mbp_staticfile, 
+			int *error);
 int mb_pr_get_navadj(int verbose, char *file, 
 			int	*mbp_navadj_mode, 
 			char	*mbp_navadjfile, 
@@ -811,6 +859,10 @@ int mb_pr_get_datacut(int verbose, char *file,
 int mb_pr_get_edit(int verbose, char *file, 
 			int	*mbp_edit_mode, 
 			char	*mbp_editfile, 
+			int *error);
+int mb_pr_get_sscorr(int verbose, char *file, 
+			int	*mbp_sscorr_mode,
+			char	*mbp_sscorrfile,
 			int *error);
 int mb_pr_get_ssrecalc(int verbose, char *file, 
 			int	*mbp_ssrecalc_mode,

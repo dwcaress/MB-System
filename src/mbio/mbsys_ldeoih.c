@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.3 2001-08-25 00:54:13 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.4 2002-04-06 02:43:39 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/08/25 00:54:13  caress
+ * Adding beamwidth values to extract functions.
+ *
  * Revision 5.2  2001/07/20  00:32:54  caress
  * Release 5.0.beta03
  *
@@ -114,11 +117,12 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.4 2002-04-06 02:43:39 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_ldeoih.c,v 5.3 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_ldeoih_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -160,6 +164,13 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->beams_bath = 0;
 	store->beams_amp = 0;
 	store->pixels_ss = 0;
+	store->depth_scale = 0;
+	store->distance_scale = 0;
+	store->transducer_depth = 0;
+	store->altitude = 0;
+	store->beam_xwidth = 0;
+	store->beam_lwidth = 0;
+	store->spare = 0;
 	store->beams_bath_alloc = 0;
 	store->beams_amp_alloc = 0;
 	store->pixels_ss_alloc = 0;
@@ -566,7 +577,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* set data kind */
 	store->kind = kind;
-
+	
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
@@ -876,7 +887,6 @@ int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	double	depthscale;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -949,7 +959,6 @@ int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_ldeoih_struct *store;
 	int	time_j[5];
 	double	depthscale;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1139,10 +1148,8 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	int	kind;
 	int	time_j[5];
 	double	depthscale;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)

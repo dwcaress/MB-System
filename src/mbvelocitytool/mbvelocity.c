@@ -116,8 +116,8 @@ int main( int argc, char **argv)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBvelocityTool"); ac++;
     XtSetArg(args[ac], XmNiconName, "MBvelocitytool"); ac++;
-    XtSetArg(args[ac], XmNx, -66); ac++;
-    XtSetArg(args[ac], XmNy, 213); ac++;
+    XtSetArg(args[ac], XmNx, 129); ac++;
+    XtSetArg(args[ac], XmNy, 309); ac++;
     XtSetArg(args[ac], XmNwidth, 1016); ac++;
     XtSetArg(args[ac], XmNheight, 668); ac++;
     topLevelShell = XtCreatePopupShell("topLevelShell",

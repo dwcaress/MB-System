@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.7 2001-08-25 00:58:08 caress Exp $
+ *    $Id: mbcopy.c,v 5.8 2002-04-06 02:53:45 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/08/25 00:58:08  caress
+ * Fixed problem with simrad to simrad2 function.
+ *
  * Revision 5.6  2001/07/20  00:34:38  caress
  * Release 5.0.beta03
  *
@@ -176,6 +179,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		int kind, int *time_i, double time_d, 
 		double navlon, double navlat, double speed, double heading, 
 		double draft, double roll, double pitch, double heave, 
+		double	beamwidth_xtrack, double beamwidth_ltrack, 
 		int nbath, int namp, int nss,
 		char *beamflag, double *bath, double *amp, 
 		double *bathacrosstrack, double *bathalongtrack,
@@ -189,10 +193,10 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.7 2001-08-25 00:58:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.8 2002-04-06 02:53:45 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
-	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
+	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -278,6 +282,7 @@ main (int argc, char **argv)
 	int	istart_ss, iend_ss, offset_ss;
 	char	comment[256];
 	int	insertcomments = MB_NO;
+	int	bathonly = MB_NO;
 	char	commentfile[256];
 	int	stripcomments = MB_NO;
 	int	copymode = MBCOPY_PARTIAL;
@@ -295,7 +300,7 @@ main (int argc, char **argv)
 	FILE	*fp;
 	char	*result;
 	int	format;
-	int	i, j, k, l, m;
+	int	i, j;
 
 	char	*ctime();
 	char	*getenv();
@@ -312,7 +317,7 @@ main (int argc, char **argv)
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:C:c:E:e:F:f:HhI:i:L:l:NnO:o:P:p:Q:q:R:r:S:s:T:t:Vv")) != -1)
+	while ((c = getopt(argc, argv, "B:b:C:c:DdE:e:F:f:HhI:i:L:l:NnO:o:P:p:Q:q:R:r:S:s:T:t:Vv")) != -1)
 	  switch (c) 
 		{
 		case 'B':
@@ -327,6 +332,11 @@ main (int argc, char **argv)
 		case 'c':
 			sscanf (optarg,"%s", commentfile);
 			insertcomments = MB_YES;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+			bathonly = MB_YES;
 			flag++;
 			break;
 		case 'E':
@@ -457,6 +467,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       insert comments:%d\n",insertcomments);
 		fprintf(stderr,"dbg2       comment file:   %s\n",commentfile);
 		fprintf(stderr,"dbg2       strip comments: %d\n",stripcomments);
+		fprintf(stderr,"dbg2       bath only:      %d\n",bathonly);
 		fprintf(stderr,"dbg2       use sleep:      %d\n",use_sleep);
 		fprintf(stderr,"dbg2       sleep factor:   %f\n",sleep_factor);
 		}
@@ -531,8 +542,19 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	omb_io_ptr = (struct mb_io_struct *) ombio_ptr; 
-
+	omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
+	
+	/* bathonly mode works only if output format is mbldeoih */
+	if (bathonly == MB_YES && oformat != MBF_MBLDEOIH)
+		{
+		bathonly = MB_NO;
+		if (verbose > 0)
+		    {
+		    fprintf(stderr,"\nThe -D option (strip amplitude and sidescan) is only valid for output format %d\n",MBF_MBLDEOIH);
+		    fprintf(stderr,"Program %s is ignoring the -D argument\n",program_name);
+		    }
+		}
+		
 	/* determine if full or partial copies will be made */
 	if (pings == 1 
 		&& imb_io_ptr->system != MB_SYS_NONE 
@@ -997,16 +1019,28 @@ main (int argc, char **argv)
 			ostore_ptr = omb_io_ptr->store_data;
 			if (kind == MB_DATA_DATA
 				|| kind == MB_DATA_COMMENT)
+				{
+				/* strip amplitude and sidescan if requested */
+				if (bathonly == MB_YES)
+				    {
+				    namp = 0;
+				    nss = 0;
+				    }
+				    
+				/* copy the data to mbldeoih */
 				status = mbcopy_any_to_mbldeoih(verbose, 
 				    kind, time_i, time_d, 
 				    navlon, navlat, speed, heading, 
 				    draft, roll, pitch, heave, 
+				    imb_io_ptr->beamwidth_xtrack, 
+				    imb_io_ptr->beamwidth_ltrack, 
 				    nbath,namp,nss,
 				    ibeamflag,ibath,iamp,ibathacrosstrack,
 				    ibathalongtrack,
 				    iss,issacrosstrack,issalongtrack,
 				    comment, 
 				    ombio_ptr, ostore_ptr, &error);
+				}
 			else 
 				error = MB_ERROR_OTHER;
 			}
@@ -1614,7 +1648,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 	double	bath_offset;
 	double	alpha, beta, theta, phi;
 	int	istep, interleave;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2443,7 +2477,6 @@ int mbcopy_simrad_time_convert(int verbose,
 	char	*function_name = "mbcopy_simrad_time_convert";
 	int	status = MB_SUCCESS;
 	int	time_i[7];
-	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2498,6 +2531,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		int kind, int *time_i, double time_d, 
 		double navlon, double navlat, double speed, double heading, 
 		double draft, double roll, double pitch, double heave, 
+		double	beamwidth_xtrack, double beamwidth_ltrack, 
 		int nbath, int namp, int nss,
 		char *beamflag, double *bath, double *amp, 
 		double *bathacrosstrack, double *bathalongtrack,
@@ -2509,7 +2543,8 @@ int mbcopy_any_to_mbldeoih(int verbose,
 	char	*function_name = "mbcopy_any_to_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *ostore;
-	int	i, j;
+	double	depthmax, distmax;
+	int	i;
 
 	/* get data structure pointer */
 	ostore = (struct mbsys_ldeoih_struct *) ostore_ptr;
@@ -2543,6 +2578,8 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
+		fprintf(stderr,"dbg2       beamwidth_xtrack: %f\n",beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack: %f\n",beamwidth_ltrack);
 		}
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
@@ -2696,6 +2733,31 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		/* get scaling */
 		ostore->depth_scale = 1000;
 		ostore->distance_scale = 1000;
+		depthmax = 0.0;
+		distmax = 0.0;
+		for (i=0;i<nbath;i++)
+		    {
+		    if (beamflag[i] != MB_FLAG_NULL)
+			{
+			depthmax = MAX(depthmax, bath[i]);
+			distmax = MAX(distmax, fabs(bathacrosstrack[i]));
+			}
+		    }
+		for (i=0;i<nss;i++)
+		    {
+		    if (ss[i] != 0.0)
+			{
+			distmax = MAX(distmax, fabs(ssacrosstrack[i]));
+			}
+		    }
+		if (depthmax > 0.0)
+		    ostore->depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
+		if (distmax > 0.0)
+		    ostore->distance_scale = MAX((int) (1 + distmax / 30.0), 1);
+		
+		/* set beam widths */
+		ostore->beam_xwidth = 100 * beamwidth_xtrack;
+		ostore->beam_lwidth = 100 * beamwidth_ltrack;
 
 		/* insert data */
 		if (kind == MB_DATA_DATA

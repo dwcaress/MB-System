@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.h	3/2/93
- *	$Id: mbsys_ldeoih.h,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_ldeoih.h,v 5.3 2002-04-06 02:43:39 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	March 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -84,18 +87,18 @@ struct mbsys_ldeoih_struct
 	/* type of data record */
 	int	kind;
 
-	/* position */
-	unsigned short	lon2u;	/* minutes east of prime meridian */
-	unsigned short	lon2b;	/* fraction of minute times 10000 */
-	unsigned short	lat2u;	/* number of minutes north of 90S */
-	unsigned short	lat2b;	/* fraction of minute times 10000 */
-
 	/* time stamp */
 	short	year;		/* year (4 digits) */
 	short	day;		/* julian day (1-366) */
 	short	min;		/* minutes from beginning of day (0-1439) */
 	short	sec;		/* seconds from beginning of minute (0-59) */
 	short	msec;		/* milliseconds from beginning of minute (0-59) */
+
+	/* position */
+	unsigned short	lon2u;	/* minutes east of prime meridian */
+	unsigned short	lon2b;	/* fraction of minute times 10000 */
+	unsigned short	lat2u;	/* number of minutes north of 90S */
+	unsigned short	lat2b;	/* fraction of minute times 10000 */
 
 	/* heading and speed */
 	unsigned short	heading;/* heading:
@@ -117,6 +120,9 @@ struct mbsys_ldeoih_struct
 	short	distance_scale;	/* 1000 X scale where distance = dist X scale */
 	short	transducer_depth; /* scaled by depth_scale */
 	short	altitude;	/* scaled by depth_scale */
+	short	beam_xwidth;	/* 0.01 degrees */
+	short	beam_lwidth;	/* 0.01 degrees */
+	short	spare;		/* spare */
 
 	/* pointers to arrays */
 	unsigned char *beamflag;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.3 2002-03-26 07:45:14 caress Exp $
+ *    $Id: mbdatalist.c,v 5.4 2002-04-06 02:53:45 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/03/26 07:45:14  caress
+ * Release 5.0.beta15
+ *
  * Revision 5.2  2002/02/22 09:07:08  caress
  * Release 5.0.beta13
  *
@@ -42,12 +45,14 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_format.h"
+#include "../../include/mb_status.h"
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.3 2002-03-26 07:45:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.4 2002-04-06 02:53:45 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbdatalist [-Fformat -Ifile -O -P -Rw/e/s/n -U -V -H]";
@@ -64,7 +69,6 @@ main (int argc, char **argv)
 	int	error = MB_ERROR_NO_ERROR;
 
 	/* MBIO read control parameters */
-	int	read_datalist = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
@@ -77,8 +81,6 @@ main (int argc, char **argv)
 	double	bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
-	double	btime_d;
-	double	etime_d;
 	double	speedmin;
 	double	timegap;
 	char	file[MB_PATH_MAXLINE];
@@ -89,7 +91,6 @@ main (int argc, char **argv)
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
 	FILE	*output;
-	int	i, j;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -223,9 +224,7 @@ main (int argc, char **argv)
 		{
 		if (make_inf == MB_YES)
 		    {
-		    sprintf(command, "mbinfo -G -F %d -I %s -O", format, read_file);
-		    fprintf(output, "Generating inf file for %s %d %f\n", read_file, format, file_weight);
-		    system(command);
+		    status = mb_make_info(verbose, file, format, &error);
 		    }
 		else
 		    {
@@ -269,9 +268,7 @@ main (int argc, char **argv)
 			mb_get_relative_path(verbose, file, pwd, &error);
 			if (make_inf == MB_YES)
 			    {
-			    sprintf(command, "mbinfo -G -F %d -I %s -O", format, file);
-			    fprintf(output, "Generating inf file for %s %d %f\n", file, format, file_weight);
-			    system(command);
+			    status = mb_make_info(verbose, file, format, &error);
 			    }
 			else
 			    {

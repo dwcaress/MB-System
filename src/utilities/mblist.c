@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.8 2002-03-26 23:21:15 caress Exp $
+ *    $Id: mblist.c,v 5.9 2002-04-06 02:53:45 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/03/26 23:21:15  caress
+ * Fixed default output string.
+ *
  * Revision 5.7  2001/10/29 20:12:40  caress
  * As per Bob Covill, fixed binary output of sidescan pixel number.
  *
@@ -260,7 +263,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 5.8 2002-03-26 23:21:15 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 5.9 2002-04-06 02:53:45 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W -Zsegment]";

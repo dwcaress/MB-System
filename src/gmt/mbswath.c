@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.5 2001-08-10 22:40:02 dcaress Exp $
+ *    $Id: mbswath.c,v 5.6 2002-04-06 02:45:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/08/10 22:40:02  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.4  2001-07-19 17:29:41-07  caress
  * Release 5.0.beta03
  *
@@ -293,7 +296,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.5 2001-08-10 22:40:02 dcaress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.6 2002-04-06 02:45:59 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -351,10 +354,6 @@ main (int argc, char **argv)
 	double	*ss = NULL;
 	double	*sslon = NULL;
 	double	*sslat = NULL;
-	int	*bathflag = NULL;
-	double	*bathfoot = NULL;
-	int	*ssflag = NULL;
-	double	*ssfoot = NULL;
 
 	/* gmt control variables */
 	double	borders[4];
@@ -395,7 +394,7 @@ main (int argc, char **argv)
 	int	rgb[3];
 	int	r1, g1, b1, r2, g2, b2;
 	int	count;
-	int	i, j, jmax;
+	int	i, j;
 	char	line[128];
 
 	/* get current mb default values */
@@ -1015,8 +1014,14 @@ main (int argc, char **argv)
 	    /* read if data may be in bounds */
 	    if (file_in_bounds == MB_YES)
 		{
-		
-		/* initialize reading the swath data file */
+		/* check for "fast bathymetry" or "fbt" file */
+		if (mode == MBSWATH_BATH
+		    || mode == MBSWATH_BATH_RELIEF)
+		    {
+		    mb_get_fbt(verbose, file, &format, &error);
+		    }
+	    
+		/* call mb_read_init() */
 		if ((status = mb_read_init(
 		    verbose,file,format,pings,lonflip,bounds,
 		    btime_i,etime_i,speedmin,timegap,
@@ -2489,7 +2494,7 @@ int plot_data_point(int verbose, int mode,
 	struct ping	*pingcur;
 	double	xx, yy;
 	int	red, green, blue, rgb[3];
-	int	i, j, k;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3088,7 +3093,7 @@ int plot_point(int verbose, double x, double y, int *rgb, int *error)
 	char	*function_name = "plot_point";
 	int	status = MB_SUCCESS;
 	int	ix, iy;
-	int	i, j, k;
+	int	k;
 
 	/* print input debug statements */
 	if (verbose >= 2)

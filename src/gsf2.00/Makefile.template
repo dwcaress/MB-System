@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  1/12/98
-#	$Id: Makefile.template,v 4.3 2001-06-30 17:36:01 caress Exp $
+#	$Id: Makefile.template,v 4.4 2002-04-06 02:50:59 caress Exp $
 #
 #     Copyright (c) 1998, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -11,11 +11,14 @@
 #
 #     See README file for copying and redistribution conditions.
 #
-# Makefile template for MB-system at the src/mbio directory level
+# Makefile template for MB-system at the src/gsf directory level
 # Author:	D. W. Caress
 # Date:		January 12, 1998
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.3  2001/06/30 17:36:01  caress
+# Fixed problem with cc.
+#
 # Revision 4.2  2000/09/30  07:19:33  caress
 # Snapshot for Dale.
 #

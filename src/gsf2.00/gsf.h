@@ -298,7 +298,11 @@ gsfDataID;
 #define GSF_NULL_NAV_POS_ERROR         0.0
 
 /* define Posix.4 proposed structure for internal storage of time */
-#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined))
+/* MB-System Modification
+    Added _SYS_TIME_H_ to allow building on DARWIN
+    David W. Caress
+    April 5, 2002 */
+#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined) && !defined (_SYS_TIME_H_))
 #define _STRUCT_TIMESPEC_
 #define _TIMESPEC_T
 #define _STRUCT_TIMESPEC

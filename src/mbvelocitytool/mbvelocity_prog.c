@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.7 2001-11-20 20:41:13 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.8 2002-04-06 02:53:15 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/11/20 20:41:13  caress
+ * Fixed use of -I option.
+ *
  * Revision 5.6  2001/07/20  16:09:36  caress
  * Fixed bug w/ *numload.
  *
@@ -208,7 +211,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.7 2001-11-20 20:41:13 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.8 2002-04-06 02:53:15 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -358,7 +361,7 @@ int mbvt_init(int argc, char **argv)
 	char	*function_name = "mbvt_init";
 	int	status = MB_SUCCESS;
 	char	ifile[MB_PATH_MAXLINE], sfile[MB_PATH_MAXLINE], wfile[MB_PATH_MAXLINE];
-	int	i, n;
+	int	i;
 
 	/* parsing variables */
 	extern char *optarg;
@@ -545,7 +548,6 @@ int mbvt_quit()
 	/* local variables */
 	char	*function_name = "mbvt_quit";
 	int	status;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1169,6 +1171,104 @@ int mbvt_save_swath_profile(char *file)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function saves the residuals at beam statics and sets up      */
+/*                  their use by mbprocess                            */
+/* Called by:                                                         */
+/*                  do_save_residuals() in mbvelocity_callbacks.c.    */
+/*                    called when the user selects "Save Residuals"   */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
+int mbvt_save_residuals(char *file)
+{
+	/* local variables */
+	char	*function_name = "mbvt_save_residuals";
+	int	status = MB_SUCCESS;
+	FILE	*fp;
+	int	oldmode;
+	char	oldfile[MB_PATH_MAXLINE];
+	int	i;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input values:\n");
+		fprintf(stderr,"dbg2       file:        %s\n",file);
+		}
+
+	/* do this if edit profile exists and swath data read */
+	if (profile_edit.n > 2 && nbuffer > 0)
+	    {
+
+	    /* open the file if possible */
+	    sprintf(file, "%s.sbo", swathfile);
+	    if ((fp = fopen(file, "w")) == NULL) 
+		{
+		status = MB_FAILURE;
+		fprintf(stderr,"\nUnable to Open Output Static Beam Offset File <%s> for writing\n",file);
+		do_error_dialog("Unable to open output file.", 
+				"You may not have write", 
+				"permission in this directory!");
+		return(status);
+		}
+
+	    /* write the sbo file */
+	    fprintf(fp, "## Static Beam Offset (SBO)\n");
+	    fprintf(fp, "## Output by Program %s\n", program_name); 
+	    fprintf(fp, "## Program Version %s\n", rcs_id);
+	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
+	    strncpy(date,"\0",25);
+	    right_now = time((time_t *)0);
+	    strncpy(date,ctime(&right_now),24);
+	    if ((user_ptr = getenv("USER")) == NULL)
+		    user_ptr = getenv("LOGNAME");
+	    if (user_ptr != NULL)
+		    strcpy(user, user_ptr);
+	    else
+		    strcpy(user, "unknown");
+	    gethostname(host,MB_PATH_MAXLINE);
+	    fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n",
+		    user, host, date);
+	    fprintf(fp, "## Swath File: %s\n", swathfile); 
+	    fprintf(fp, "## Number of Static Beam Offset Points: %d\n", nbeams); 
+	    for (i=0;i<nbeams;i++)
+		    fprintf(fp," %4d  %9.3f  %9.3f\n",
+				i, residual[i], res_sd[i]);
+    
+	    /* close the file */
+	    fclose(fp);
+	    
+	    /* set par file for use with mbprocess */
+	    status = mb_pr_get_static(verbose, swathfile, 
+			&oldmode, oldfile, &error);
+	    status = mb_pr_update_static(verbose, swathfile, 
+			MB_YES, file, &error);
+    
+	    /* check success */
+	    if (status == MB_SUCCESS)
+		edit = MB_YES;
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 /* This function reads the data in the requested display file.        */
 /* Called by:                                                         */
 /*                  open_file_ok in mbvelocity_callbacks.c                */
@@ -1440,7 +1540,6 @@ int mbvt_plot()
 {
 	/* local variables */
 	char	*function_name = "mbvt_plot";
-	struct profile *profile;
 	int	status = MB_SUCCESS;
 
 	/* plotting variables */
@@ -1466,8 +1565,6 @@ int mbvt_plot()
 	char	format_str[10];
 	int	color;
 	int	i, j;
-
-	struct xg_graphic *graphic;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2013,7 +2110,6 @@ int mbvt_action_drag_node(int x, int y)
 	char	*function_name = "mbvt_action_drag_node";
 	int	status = MB_SUCCESS;
 	int	ylim_min, ylim_max;
-	int     xh, yh, xp, yp, yh2, yp2, x_prev, y_prev;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2291,7 +2387,6 @@ int mbvt_get_format(char *file, int *form)
 	int	status = MB_SUCCESS;
 	char	tmp[MB_PATH_MAXLINE];
 	int	tform;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2368,7 +2463,8 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	int	done, count;
 	struct stat file_status;
 	int	fstat;
-	int	i, j, k;
+	double	rr, zz;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2400,6 +2496,17 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	if (traveltime == MB_NO)
 		{
 		fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
+		fprintf(stderr,"Format %d is does not include travel time data.\n",format);
+		fprintf(stderr,"Travel times and angles are being estimated\n");
+		fprintf(stderr,"assuming a 1500 m/s half-space\n");
+		status = MB_FAILURE;
+		do_error_dialog("Data doesn't include travel times!", 
+				"Travel times and angles estimated", 
+				"assuming 1500 m/s sound speed.");
+		}
+	/* if (traveltime == MB_NO)
+		{
+		fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
 		fprintf(stderr,"Format %d is unacceptable because it does not include travel time data.\n",format);
 		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for reading\n",file);
 		status = MB_FAILURE;
@@ -2407,7 +2514,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 				"The specified swath data format does", 
 				"not include travel time data!");
 		return(status);
-		}
+		}*/
 
 	/* deallocate previously loaded data, if any */
 	mbvt_deallocate_swath();
@@ -2565,7 +2672,9 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 			    ping[nbuffer].bathacrosstrack[i] = bathacrosstrack[i];
 			    ping[nbuffer].bathalongtrack[i] = bathalongtrack[i];
 			    }
-			status = mb_ttimes(verbose,mbio_ptr,
+			if (traveltime == MB_YES)
+			    {
+			    status = mb_ttimes(verbose,mbio_ptr,
 					    store_ptr,&kind,&nbeams,
 					    ping[nbuffer].ttimes,
 					    ping[nbuffer].angles,
@@ -2575,6 +2684,34 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 					    ping[nbuffer].alongtrack_offset,
 					    &ping[nbuffer].draft,
 					    &ping[nbuffer].ssv,&error);
+			    }
+			else
+			    {
+			    nbeams = ping[nbuffer].beams_bath;
+			    ping[nbuffer].draft = sonardepth;
+			    ping[nbuffer].ssv = 1500.0;
+			    for (i=0;i<ping[nbuffer].beams_bath;i++)
+				{
+				if (mb_beam_ok(ping[nbuffer].beamflag[i]))
+				    {
+				    zz = bath[i] - sonardepth;
+				    rr = sqrt(zz * zz 
+					+ bathacrosstrack[i] * bathacrosstrack[i]
+					+ bathalongtrack[i] * bathalongtrack[i]);
+				    ping[nbuffer].ttimes[i] = rr / 750.0;
+				    mb_xyz_to_takeoff(verbose, 
+						bathacrosstrack[i], 
+						bathalongtrack[i], 
+						(bath[i] - sonardepth), 
+						&ping[nbuffer].angles[i],
+						&ping[nbuffer].angles_forward[i],
+						&error);
+				    ping[nbuffer].angles_null[i] = 0.0;
+				    ping[nbuffer].heave[i] = 0.0;
+				    ping[nbuffer].alongtrack_offset[i] = 0.0;
+				    }
+				}
+			    }
 			    
 			/* get first nav */
 			if (navlon_levitus == 0.0 
@@ -2754,7 +2891,7 @@ int mbvt_deallocate_swath()
 	/* local variables */
 	char	*function_name = "mbvt_deallocate_swath";
 	int	status = MB_SUCCESS;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2850,14 +2987,11 @@ int mbvt_process_multibeam()
 	int	first;
 	double	ttime;
 	int	ray_stat;
-	double	ssv;
 	double	factor;
 	double	sx, sy, sxx, sxy;
 	double	delta, a, b;
 	int	ns;
 	double	depth_predict, res;
-	double	dr, dx;
-	int	icenter;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -2931,7 +3065,7 @@ int mbvt_process_multibeam()
 		    if (mb_beam_ok(ping[k].beamflag[i]))
 			{
 			/* get max beam id */
-			nbeams = MAX(nbeams, i);
+			nbeams = MAX(nbeams, i + 1);
 			
 			/* get factor relating lateral distance to
 			    acrosstrack distance */

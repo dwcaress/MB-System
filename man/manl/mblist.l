@@ -1,4 +1,4 @@
-.TH mblist l "9 August 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -205,16 +205,17 @@ of one or more of the following characters:
  	\fB/\fP  special character - this causes the value
                  indicated by the next character to be
                  inverted - this applies only to simple
-                 numeric values such as depth and heading
-                 and not to values like time strings or 
-                 positions with hemisphere characters.
- 	\fB-\fP  special character - this causes the value
-                 indicated by the next character to be
-                 multiplied by -1 - this applies only to 
-                 simple numeric values such as depth and 
+                 numeric values such as depth and 
                  heading and not to values like time  
-                 strings or positions with hemisphere 
+                 strings orpositions with hemisphere 
                  characters.
+ 	\fB-\fP  special character - this causes the value 
+                 indicated by the next character to be 
+                 multiplied by -1 - this applies only 
+                 to simple numeric values such as  
+                 depth and heading and not to values   
+                 like time strings or positions with 
+                 hemisphere characters.
  	\fBA\fP  for apparent seafloor crosstrack slope 
   		 (degrees from horizontal with positive
  		 slopes dipping toward port) - calculated 
@@ -246,6 +247,10 @@ of one or more of the following characters:
  	\fBM\fP  for unix time in decimal seconds since 1/1/70 00:00:00
  	\fBm\fP  for time in decimal seconds since first record
  	\fBN\fP  for ping count
+ 	\fBP\fP  for pitch in degrees
+ 	\fBp\fP  for draft in meters
+ 	\fBR\fP  for roll in degrees
+ 	\fBr\fP  for heave in meters
   	\fBS\fP  for speed (km/hr)
   	\fBs\fP  for speed made good (km/hr)
   	\fBT\fP  for a time string (yyyy/mm/dd/hh/mm/ss)

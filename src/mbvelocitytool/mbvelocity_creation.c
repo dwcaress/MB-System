@@ -81,6 +81,7 @@ extern void do_new_profile(Widget, XtPointer, XtPointer);
 extern void do_io_mode_save_svp(Widget, XtPointer, XtPointer);
 extern void do_io_mode_mb(Widget, XtPointer, XtPointer);
 extern void do_save_swath_svp(Widget, XtPointer, XtPointer);
+extern void do_save_residuals(Widget, XtPointer, XtPointer);
 
 /*
  * Create the window_mbvelocity hierarchy of widgets.
@@ -132,12 +133,10 @@ Createwindow_mbvelocity(Widget parent)
     Widget   pushButton_open_svp_display;
     Widget   pushButton_open_svp_edit;
     Widget   pushButton_new_svp_edit;
-    Widget   pushButton_save_svp;
     Widget   separator1;
-    Widget   pushButton_open_mb;
+    Widget   separator3;
     Widget   pushButton_about;
     Widget   pushButton_quit;
-    Widget   pushButton_process;
     
     /*
      * Register the converters for the widgets.
@@ -162,8 +161,8 @@ Createwindow_mbvelocity(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 8); ac++;
-    XtSetArg(args[ac], XmNy, 213); ac++;
+    XtSetArg(args[ac], XmNx, 129); ac++;
+    XtSetArg(args[ac], XmNy, 309); ac++;
     XtSetArg(args[ac], XmNwidth, 1016); ac++;
     XtSetArg(args[ac], XmNheight, 668); ac++;
     window_mbvelocity = XmCreateMainWindow(parent,
@@ -289,10 +288,10 @@ Createwindow_mbvelocity(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 172); ac++;
-    XtSetArg(args[ac], XmNheight, 150); ac++;
+    XtSetArg(args[ac], XmNx, 134); ac++;
+    XtSetArg(args[ac], XmNy, 338); ac++;
+    XtSetArg(args[ac], XmNwidth, 184); ac++;
+    XtSetArg(args[ac], XmNheight, 176); ac++;
     pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
         "pulldownMenu_file",
         args, 
@@ -442,6 +441,13 @@ Createwindow_mbvelocity(Widget parent)
     XtAddCallback(pushButton_open_mb, XmNactivateCallback, BxSetValuesCB, (XtPointer)"xmDialogShell_fileselect.title=Open Swath Sonar Data");
     
     ac = 0;
+    separator3 = XmCreateSeparator(pulldownMenu_file,
+        "separator3",
+        args, 
+        ac);
+    XtManageChild(separator3);
+    
+    ac = 0;
     {
         XmString    tmp0;
         
@@ -465,6 +471,30 @@ Createwindow_mbvelocity(Widget parent)
     }
     
     XtAddCallback(pushButton_save_svpfile, XmNactivateCallback, do_save_swath_svp, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, "Save residuals as offsets", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_file, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_save_residuals = XmCreatePushButton(pulldownMenu_file,
+            "pushButton_save_residuals",
+            args, 
+            ac);
+        XtManageChild(pushButton_save_residuals);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_save_residuals, XmNactivateCallback, do_save_residuals, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_file); ac++;
@@ -665,8 +695,8 @@ Createwindow_mbvelocity(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 201); ac++;
-    XtSetArg(args[ac], XmNy, 322); ac++;
+    XtSetArg(args[ac], XmNx, 396); ac++;
+    XtSetArg(args[ac], XmNy, 418); ac++;
     XtSetArg(args[ac], XmNwidth, 481); ac++;
     XtSetArg(args[ac], XmNheight, 449); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(xmDialogShell_about,
@@ -1010,8 +1040,8 @@ Createwindow_mbvelocity(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 252); ac++;
-    XtSetArg(args[ac], XmNy, 503); ac++;
+    XtSetArg(args[ac], XmNx, 447); ac++;
+    XtSetArg(args[ac], XmNy, 599); ac++;
     XtSetArg(args[ac], XmNwidth, 379); ac++;
     XtSetArg(args[ac], XmNheight, 88); ac++;
     bulletinBoard_message = XmCreateBulletinBoard(xmDialogShell_message,
@@ -1089,8 +1119,8 @@ Createwindow_mbvelocity(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 146); ac++;
-    XtSetArg(args[ac], XmNy, 278); ac++;
+    XtSetArg(args[ac], XmNx, 341); ac++;
+    XtSetArg(args[ac], XmNy, 374); ac++;
     XtSetArg(args[ac], XmNwidth, 591); ac++;
     XtSetArg(args[ac], XmNheight, 537); ac++;
     bulletinBoard_fileselect = XmCreateBulletinBoard(xmDialogShell_fileselect,
@@ -1178,8 +1208,8 @@ Createwindow_mbvelocity(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 286); ac++;
-    XtSetArg(args[ac], XmNy, 466); ac++;
+    XtSetArg(args[ac], XmNx, 481); ac++;
+    XtSetArg(args[ac], XmNy, 562); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 161); ac++;
     bulletinBoard_error = XmCreateBulletinBoard(xmDialogShell_error,
@@ -1310,8 +1340,8 @@ Createwindow_mbvelocity(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 176); ac++;
-    XtSetArg(args[ac], XmNy, 465); ac++;
+    XtSetArg(args[ac], XmNx, 371); ac++;
+    XtSetArg(args[ac], XmNy, 561); ac++;
     XtSetArg(args[ac], XmNwidth, 532); ac++;
     XtSetArg(args[ac], XmNheight, 164); ac++;
     bulletinBoard_scaling = XmCreateBulletinBoard(xmDialogShell_scaling,
@@ -1608,8 +1638,8 @@ Createwindow_mbvelocity(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 268); ac++;
-        XtSetArg(args[ac], XmNy, 461); ac++;
+        XtSetArg(args[ac], XmNx, 463); ac++;
+        XtSetArg(args[ac], XmNy, 557); ac++;
         XtSetArg(args[ac], XmNwidth, 348); ac++;
         XtSetArg(args[ac], XmNheight, 172); ac++;
         bulletinBoard_mode = XmCreateBulletinBoard(dialogShell_mode,

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.4 2001-12-18 04:26:12 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.5 2002-04-06 02:51:54 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.4 2001-12-18 04:26:12 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.5 2002-04-06 02:51:54 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.4  2001/12/18 04:26:12  caress
+#   Version 5.0.beta11.
+#
 # Revision 5.3  2001/11/02  21:07:40  caress
 # Adjusted handling of segmented xy files.
 #
@@ -1254,21 +1257,38 @@ print FCMD "/bin/mv $gmtfile .gmtdefaults\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
-if ($ps_viewer eq "xpsview" && $portrait)
+if ($ps_viewer eq "xpsview")
 	{
-	$view_pageflag = "-ps $pagesize -maxp $xpsview_mem{$pagesize}";
+	if ($portrait)
+		{
+		$view_pageflag = "-ps $pagesize -maxp $xpsview_mem{$pagesize}";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "-ps $pagesize -or landscape -maxp $xpsview_mem{$pagesize}";
+		}
 	}
-elsif ($ps_viewer eq "xpsview" && $landscape)
+elsif ($ps_viewer eq "pageview")
 	{
-	$view_pageflag = "-ps $pagesize -or landscape -maxp $xpsview_mem{$pagesize}";
+	if ($portrait)
+		{
+		$view_pageflag = "-w $page_width_in{$pagesize} -h $page_height_in{$pagesize}";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
+		}
 	}
-elsif ($ps_viewer eq "pageview" && $portrait)
+elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
 	{
-	$view_pageflag = "-w $page_width_in{$pagesize} -h $page_height_in{$pagesize}";
-	}
-elsif ($ps_viewer eq "pageview" && $landscape)
-	{
-	$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
+	if ($portrait)
+		{
+		$view_pageflag = "-portrait -media BBox";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "-landscape -media BBox";
+		}
 	}
 if ($no_view_ps)
 	{

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 5.4 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 5.5 2002-04-06 02:43:39 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.3  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -93,6 +96,53 @@
  * initial version
  *
  */
+/*
+ * Notes on the MBF_MBLDEOIH and MBF_MBLDEOBT data formats:
+ *   1. These data formats are used to store swath bathymetry
+ *      and/or backscatter data with arbitrary numbers of beams
+ *      and pixels. These formats were created by the 
+ *      Lamont-Doherty Earth Observatory and the Monterey Bay  
+ *      Aquarium Research Institute to serve as general  
+ *      purpose archive formats for processed swath data.
+ *   2. The original format (MBF_MBLDEOIH) stores bathymetry, 
+ *      amplitude, and sidescan data. The newer format 
+ *      (MBF_MBLDEOBT) is identical to MBF_MBLDEOIH when reading, 
+ *      but only bathymetry can be written. This provides an
+ *      easy means to strip bathymetry out of more voluminous
+ *      swath data and to store it in a relatively compressed
+ *      form that is fast to read.
+ *   3. Each data record has a header section and a data section.
+ *      The beginning of each header is a two byte identifier.
+ *      The size of the header depends on the identifier:
+ *           "##" =  8995 : Old comment - 30 byte header
+ *           "dd" = 25700 : Old data - 30 byte header
+ *           "cc" = 25443 : New comment - 36 byte header
+ *           "nn" = 28270 : New data - 2 byte header
+ *      In the case of data records, the header contains the time stamp,
+ *      navigation, and the numbers of depth, beam amplitude, and
+ *      sidescan values.  The data section contains the depth and
+ *      backscatter values.  The number of depth and beam amplitude
+ *      values is generally different from the number of sidescan
+ *      values, so the length of the data section must be calculated
+ *      from the numbers of beams and pixels. In the case of comment
+ *      records, the header contains no information other than the
+ *      identifier whether it is old (30 byte) or new (2 byte). The
+ *      data section of the comment record is always 128 bytes. 
+ *   4. The data headers have changed and now include beam angle
+ *      widths to allow beam footprint calculation. Older data 
+ *      is read without complaint, and the beam widths are passed
+ *      as zero.
+ *   5. The data consist of variable length binary records encoded
+ *	entirely in 2-byte integers.
+ *   6. All data arrays are centered.
+ *
+ * The kind value in the mbf_mbldeoih_struct indicates whether the
+ * mbf_sbsiocen_data_struct structure holds data (kind = 1) or an
+ * ascii comment record (kind = 0).
+ *
+ * These two structures are direct representations of the binary data 
+ * structures used in the MBF_MBLDEOIH format.
+ */
 
 /* standard include files */
 #include <stdio.h>
@@ -139,10 +189,19 @@ int mbr_dem_mbldeoih(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+/* define maximum number of beams */
+#define	MBF_MBLDEOIH_MAX_BEAMS	250
+#define	MBF_MBLDEOIH_MAX_PIXELS	10000
+
+/* define header sizes */
+#define	MBF_MBLDEOIH_OLDHEADERSIZE	38
+#define	MBF_MBLDEOIH_NEWHEADERSIZE	44
+
+static char res_id[]="$Id: mbr_mbldeoih.c,v 5.5 2002-04-06 02:43:39 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbldeoih.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_register_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -272,7 +331,6 @@ int mbr_info_mbldeoih(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbldeoih.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_info_mbldeoih";
 	int	status = MB_SUCCESS;
 
@@ -341,14 +399,9 @@ int mbr_info_mbldeoih(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbldeoih(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_mbldeoih_struct *dataplus;
-	struct mbf_mbldeoih_header_struct *header;
-	struct mbf_mbldeoih_data_struct *data;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -367,53 +420,8 @@ int mbr_alm_mbldeoih(int verbose, void *mbio_ptr, int *error)
 	status = MB_SUCCESS;
 
 	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_mbldeoih_struct);
-	mb_io_ptr->header_structure_size = 
-		sizeof(struct mbf_mbldeoih_header_struct);
-	status = mb_malloc(verbose,mb_io_ptr->structure_size,
-				&mb_io_ptr->raw_data,error);
 	status = mbsys_ldeoih_alloc(verbose,mbio_ptr,
 		&mb_io_ptr->store_data,error);
-
-	/* get pointer to raw data structure */
-	dataplus = (struct mbf_mbldeoih_struct *) mb_io_ptr->raw_data;
-	header = &(dataplus->header);
-	data = &(dataplus->data);
-
-	/* initialize values in structure */
-	dataplus->kind = MB_DATA_NONE;
-	header->lon2u = 0;
-	header->lon2b = 0;
-	header->lat2u = 0;
-	header->lat2b = 0;
-	header->year = 0;
-	header->day = 0;
-	header->min = 0;
-	header->sec = 0;
-	header->msec = 0;
-	header->heading = 0;
-	header->speed = 0;
-	header->beams_amp = 0;
-	header->pixels_ss = 0;
-	header->depth_scale = 0;
-	header->distance_scale = 0;
-	header->transducer_depth = 0;
-	header->altitude = 0;
-	for (i=0;i<MBF_MBLDEOIH_MAX_BEAMS;i++)
-	    {
-	    data->beamflag[i] = 0;
-	    data->bath[i] = 0;
-	    data->bath_acrosstrack[i] = 0;
-	    data->bath_alongtrack[i] = 0;
-	    data->amp[i] = 0;
-	    }
-	for (i=0;i<MBF_MBLDEOIH_MAX_PIXELS;i++)
-	    {
-	    data->ss[i] = 0;
-	    data->ss_acrosstrack[i] = 0;
-	    data->ss_alongtrack[i] = 0;
-	    }
-	memset(dataplus->comment, 0, 128);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -474,23 +482,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*function_name = "mbr_rt_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_mbldeoih_struct *dataplus;
-	struct mbf_mbldeoih_header_struct *header;
-	struct mbf_mbldeoih_data_struct *data;
 	struct mbsys_ldeoih_struct *store;
-	char	*comment;
-	unsigned char	*beamflag;
-	short int	*bath;
-	short int	*amp;
-	short int	*bath_acrosstrack;
-	short int	*bath_alongtrack;
-	short int	*ss;
-	short int	*ss_acrosstrack;
-	short int	*ss_alongtrack;
 	int	read_size;
-	int	time_j[5];
-	double	depthscale;
-	double	distscale;
+	short	*flag;
+	int	header_length;
+	char	buffer[MBF_MBLDEOIH_NEWHEADERSIZE];
+	int	index;
 	int	i;
 
 	/* print input debug statements */
@@ -507,27 +504,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* get pointer to mbio descriptor and data structure */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
-
-	/* get pointer to raw data structure */
-	dataplus = (struct mbf_mbldeoih_struct *) mb_io_ptr->raw_data;
-	header = &(dataplus->header);
-	data = &(dataplus->data);
-	comment = dataplus->comment;
-	beamflag = data->beamflag;
-	bath = data->bath;
-	amp = data->amp;
-	bath_acrosstrack = data->bath_acrosstrack;
-	bath_alongtrack = data->bath_alongtrack;
-	ss = data->ss;
-	ss_acrosstrack = data->ss_acrosstrack;
-	ss_alongtrack = data->ss_alongtrack;
 	
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	/* read next header from file */
-	if ((status = fread(header,1,mb_io_ptr->header_structure_size,
-			mb_io_ptr->mbfp)) == mb_io_ptr->header_structure_size) 
+	/* read next header id from file */
+	if ((status = fread(buffer,1,2,mb_io_ptr->mbfp)) == 2) 
 		{
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
@@ -540,51 +522,90 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		*error = MB_ERROR_EOF;
 		}
 
-	/* byte swap the data if necessary */
-#ifdef BYTESWAPPED
+	/* read rest of header from file */
 	if (status == MB_SUCCESS)
 		{
-		header->flag = mb_swap_short(header->flag);
-		header->year = mb_swap_short(header->year);
-		header->day = mb_swap_short(header->day);
-		header->min = mb_swap_short(header->min);
-		header->sec = mb_swap_short(header->sec);
-		header->msec = mb_swap_short(header->msec);
-		header->lon2u = mb_swap_short(header->lon2u);
-		header->lon2b = mb_swap_short(header->lon2b);
-		header->lat2u = mb_swap_short(header->lat2u);
-		header->lat2b = mb_swap_short(header->lat2b);
-		header->heading = mb_swap_short(header->heading);
-		header->speed = mb_swap_short(header->speed);
-		header->beams_bath = mb_swap_short(header->beams_bath);
-		header->beams_amp = mb_swap_short(header->beams_amp);
-		header->pixels_ss = mb_swap_short(header->pixels_ss);
-		header->depth_scale = mb_swap_short(header->depth_scale);
-		header->distance_scale = mb_swap_short(header->distance_scale);
-		}
-#endif
-
-	/* check for comment or unintelligible records */
-	if (status == MB_SUCCESS)
-		{
-		if (header->flag == 8995)
+		flag = (short *) buffer;
+		if (*flag == 8995)
 			{
-			dataplus->kind = MB_DATA_COMMENT;
+			store->kind = MB_DATA_COMMENT;
+			header_length = MBF_MBLDEOIH_OLDHEADERSIZE;
 			}
-		else if (header->flag == 25700)
+		else if (*flag == 25443)
 			{
-			dataplus->kind = MB_DATA_DATA;
+			store->kind = MB_DATA_COMMENT;
+			header_length = 2;
+			}
+		else if (*flag == 28270)
+			{
+			store->kind = MB_DATA_DATA;
+			header_length = MBF_MBLDEOIH_NEWHEADERSIZE;
+			}
+		else if (*flag == 25700)
+			{
+			store->kind = MB_DATA_DATA;
+			header_length = MBF_MBLDEOIH_OLDHEADERSIZE;
 			}
 		else
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			dataplus->kind = MB_DATA_NONE;
+			store->kind = MB_DATA_NONE;
+			}
+		}
+	if (status == MB_SUCCESS
+	    && header_length == 2)
+		{
+		/* only 2 byte header for new style comment */
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		}
+	else if (status == MB_SUCCESS
+	    && (status = fread(&buffer[2],1,header_length-2,
+			mb_io_ptr->mbfp)) == header_length-2)
+		{
+		mb_io_ptr->file_bytes += status;
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		}
+	else
+		{
+		mb_io_ptr->file_bytes += status;
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
+		{
+		index = 2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->year); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->day); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->min); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->sec); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->msec); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->lon2u); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->lon2b); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->lat2u); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->lat2b); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->heading); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->speed); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_bath); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_amp); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->pixels_ss); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->transducer_depth); index +=2;
+		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->altitude); index +=2;
+		if (header_length == MBF_MBLDEOIH_NEWHEADERSIZE)
+			{
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->spare); index +=2;
 			}
 		}
 
 	/* set kind and error in mb_io_ptr */
-	mb_io_ptr->new_kind = dataplus->kind;
+	mb_io_ptr->new_kind = store->kind;
 	mb_io_ptr->new_error = *error;
 
 	/* print debug statements */
@@ -592,36 +613,44 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		fprintf(stderr,"\ndbg5  New header read in function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       flag:       %d\n",header->flag);
-		fprintf(stderr,"dbg5       year:       %d\n",header->year);
-		fprintf(stderr,"dbg5       day:        %d\n",header->day);
-		fprintf(stderr,"dbg5       minute:     %d\n",header->min);
-		fprintf(stderr,"dbg5       second:     %d\n",header->sec);
-		fprintf(stderr,"dbg5       msec:       %d\n",header->msec);
-		fprintf(stderr,"dbg5       lonu:       %d\n",header->lon2u);
-		fprintf(stderr,"dbg5       lonb:       %d\n",header->lon2b);
-		fprintf(stderr,"dbg5       latu:       %d\n",header->lat2u);
-		fprintf(stderr,"dbg5       latb:       %d\n",header->lat2b);
-		fprintf(stderr,"dbg5       heading:    %d\n",header->heading);
-		fprintf(stderr,"dbg5       speed:      %d\n",header->speed);
+		fprintf(stderr,"dbg5       flag:       %d\n",*flag);
+		}
+	if (verbose >= 5 && store->kind == MB_DATA_DATA)
+		{
+		fprintf(stderr,"dbg5       year:       %d\n",store->year);
+		fprintf(stderr,"dbg5       day:        %d\n",store->day);
+		fprintf(stderr,"dbg5       minute:     %d\n",store->min);
+		fprintf(stderr,"dbg5       second:     %d\n",store->sec);
+		fprintf(stderr,"dbg5       msec:       %d\n",store->msec);
+		fprintf(stderr,"dbg5       lonu:       %d\n",store->lon2u);
+		fprintf(stderr,"dbg5       lonb:       %d\n",store->lon2b);
+		fprintf(stderr,"dbg5       latu:       %d\n",store->lat2u);
+		fprintf(stderr,"dbg5       latb:       %d\n",store->lat2b);
+		fprintf(stderr,"dbg5       heading:    %d\n",store->heading);
+		fprintf(stderr,"dbg5       speed:      %d\n",store->speed);
 		fprintf(stderr,"dbg5       beams bath: %d\n",
-			header->beams_bath);
+			store->beams_bath);
 		fprintf(stderr,"dbg5       beams amp:  %d\n",
-			header->beams_amp);
+			store->beams_amp);
 		fprintf(stderr,"dbg5       pixels ss:  %d\n",
-			header->pixels_ss);
-		fprintf(stderr,"dbg5       depth scale:%d\n",header->depth_scale);
-		fprintf(stderr,"dbg5       dist scale: %d\n",header->distance_scale);
+			store->pixels_ss);
+		fprintf(stderr,"dbg5       depth scale:%d\n",store->depth_scale);
+		fprintf(stderr,"dbg5       dist scale: %d\n",store->distance_scale);
+		fprintf(stderr,"dbg5       transducer_depth: %d\n",store->transducer_depth);
+		fprintf(stderr,"dbg5       altitude:         %d\n",store->altitude);
+		fprintf(stderr,"dbg5       beam_xwidth:      %d\n",store->beam_xwidth);
+		fprintf(stderr,"dbg5       beam_lwidth:      %d\n",store->beam_lwidth);
+		fprintf(stderr,"dbg5       spare:            %d\n",store->spare);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		}
 
 	/* read next chunk of the data */
 	if (status == MB_SUCCESS 
-		&& dataplus->kind == MB_DATA_COMMENT)
+		&& store->kind == MB_DATA_COMMENT)
 		{
 		read_size = 128;
-		if ((status = fread(comment,1,read_size,mb_io_ptr->mbfp))
+		if ((status = fread(store->comment,1,read_size,mb_io_ptr->mbfp))
 			== read_size) 
 			{
 			mb_io_ptr->file_bytes += status;
@@ -640,18 +669,17 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			fprintf(stderr,"\ndbg5  New comment read in function <%s>\n",
 				function_name);
-			fprintf(stderr,"dbg5       comment: %s\n",comment);
+			fprintf(stderr,"dbg5       comment: %s\n",store->comment);
 			}
 		}
 	else if (status == MB_SUCCESS 
-		&& store != NULL
-		&& dataplus->kind == MB_DATA_DATA)
+		&& store->kind == MB_DATA_DATA)
 		{
 		/* if needed reset numbers of beams and allocate 
 		   memory for store arrays */
-		if (header->beams_bath > store->beams_bath_alloc)
+		if (store->beams_bath > store->beams_bath_alloc)
 		    {
-		    store->beams_bath_alloc = header->beams_bath;
+		    store->beams_bath_alloc = store->beams_bath;
 		    if (store->beamflag != NULL)
 			status = mb_free(verbose, &store->beamflag, error);
 		    if (store->bath != NULL)
@@ -694,125 +722,119 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			return(status);
 			}
 		    }
-		if (header->beams_amp > store->beams_amp_alloc)
+		if (store->beams_amp > store->beams_amp_alloc)
 		    {
-		    store->beams_amp_alloc = header->beams_amp;
-		    if (store != NULL)
-			{
-			if (store->amp != NULL)
-			    status = mb_free(verbose, &store->amp, error);
-			status = mb_malloc(verbose, 
-				    store->beams_amp_alloc * sizeof(short),
-				    &store->amp,error);
+		    store->beams_amp_alloc = store->beams_amp;
+		    if (store->amp != NULL)
+			status = mb_free(verbose, &store->amp, error);
+		    status = mb_malloc(verbose, 
+				store->beams_amp_alloc * sizeof(short),
+				&store->amp,error);
 
-			/* deal with a memory allocation failure */
-			if (status == MB_FAILURE)
-			    {
-			    status = mb_free(verbose, &store->amp, error);
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_MEMORY_FAIL;
-			    if (verbose >= 2)
-				    {
-				    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
-					    function_name);
-				    fprintf(stderr,"dbg2  Return values:\n");
-				    fprintf(stderr,"dbg2       error:      %d\n",*error);
-				    fprintf(stderr,"dbg2  Return status:\n");
-				    fprintf(stderr,"dbg2       status:  %d\n",status);
-				    }
-			    return(status);
-			    }
+		    /* deal with a memory allocation failure */
+		    if (status == MB_FAILURE)
+			{
+			status = mb_free(verbose, &store->amp, error);
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			if (verbose >= 2)
+				{
+				fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
+					function_name);
+				fprintf(stderr,"dbg2  Return values:\n");
+				fprintf(stderr,"dbg2       error:      %d\n",*error);
+				fprintf(stderr,"dbg2  Return status:\n");
+				fprintf(stderr,"dbg2       status:  %d\n",status);
+				}
+			return(status);
 			}
 		    }
-		if (header->pixels_ss > store->pixels_ss_alloc)
+		if (store->pixels_ss > store->pixels_ss_alloc)
 		    {
-		    store->pixels_ss_alloc = header->pixels_ss;
-		    if (store != NULL)
-			{
-			if (store->ss != NULL)
-			    status = mb_free(verbose, &store->ss, error);
-			if (store->ss_acrosstrack != NULL)
-			    status = mb_free(verbose, &store->ss_acrosstrack, error);
-			if (store->ss_alongtrack != NULL)
-			    status = mb_free(verbose, &store->ss_alongtrack, error);
-			status = mb_malloc(verbose, 
-				    store->pixels_ss_alloc * sizeof(short),
-				    &store->ss,error);
-			status = mb_malloc(verbose, 
-				    store->pixels_ss_alloc * sizeof(short),
-				    &store->ss_acrosstrack,error);
-			status = mb_malloc(verbose, 
-				    store->pixels_ss_alloc * sizeof(short),
-				    &store->ss_alongtrack,error);
+		    store->pixels_ss_alloc = store->pixels_ss;
+		    if (store->ss != NULL)
+			status = mb_free(verbose, &store->ss, error);
+		    if (store->ss_acrosstrack != NULL)
+			status = mb_free(verbose, &store->ss_acrosstrack, error);
+		    if (store->ss_alongtrack != NULL)
+			status = mb_free(verbose, &store->ss_alongtrack, error);
+		    status = mb_malloc(verbose, 
+				store->pixels_ss_alloc * sizeof(short),
+				&store->ss,error);
+		    status = mb_malloc(verbose, 
+				store->pixels_ss_alloc * sizeof(short),
+				&store->ss_acrosstrack,error);
+		    status = mb_malloc(verbose, 
+				store->pixels_ss_alloc * sizeof(short),
+				&store->ss_alongtrack,error);
 
-			/* deal with a memory allocation failure */
-			if (status == MB_FAILURE)
-			    {
-			    status = mb_free(verbose, &store->ss, error);
-			    status = mb_free(verbose, &store->ss_acrosstrack, error);
-			    status = mb_free(verbose, &store->ss_alongtrack, error);
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_MEMORY_FAIL;
-			    if (verbose >= 2)
-				    {
-				    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
-					    function_name);
-				    fprintf(stderr,"dbg2  Return values:\n");
-				    fprintf(stderr,"dbg2       error:      %d\n",*error);
-				    fprintf(stderr,"dbg2  Return status:\n");
-				    fprintf(stderr,"dbg2       status:  %d\n",status);
-				    }
-			    return(status);
-			    }
+		    /* deal with a memory allocation failure */
+		    if (status == MB_FAILURE)
+			{
+			status = mb_free(verbose, &store->ss, error);
+			status = mb_free(verbose, &store->ss_acrosstrack, error);
+			status = mb_free(verbose, &store->ss_alongtrack, error);
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			if (verbose >= 2)
+				{
+				fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
+					function_name);
+				fprintf(stderr,"dbg2  Return values:\n");
+				fprintf(stderr,"dbg2       error:      %d\n",*error);
+				fprintf(stderr,"dbg2  Return status:\n");
+				fprintf(stderr,"dbg2       status:  %d\n",status);
+				}
+			return(status);
 			}
 		    }
 
 		/* read bathymetry */
-		read_size = sizeof(char)*header->beams_bath;
-		status = fread(beamflag,1,read_size,mb_io_ptr->mbfp);
-		read_size = sizeof(short int)*header->beams_bath;
-		status = fread(bath,1,read_size,mb_io_ptr->mbfp);
+		read_size = sizeof(char)*store->beams_bath;
+		status = fread(store->beamflag,1,read_size,mb_io_ptr->mbfp);
+		read_size = sizeof(short int)*store->beams_bath;
+		status = fread(store->bath,1,read_size,mb_io_ptr->mbfp);
 		mb_io_ptr->file_bytes += status;
-		status = fread(bath_acrosstrack,1,read_size,mb_io_ptr->mbfp);
+		status = fread(store->bath_acrosstrack,1,read_size,mb_io_ptr->mbfp);
 		mb_io_ptr->file_bytes += status;
-		status = fread(bath_alongtrack,1,read_size,mb_io_ptr->mbfp);
+		status = fread(store->bath_alongtrack,1,read_size,mb_io_ptr->mbfp);
 		mb_io_ptr->file_bytes += status;
 
 		/* read amplitudes */
-		read_size = sizeof(short int)*header->beams_amp;
-		status = fread(amp,1,read_size,mb_io_ptr->mbfp);
+		read_size = sizeof(short int)*store->beams_amp;
+		status = fread(store->amp,1,read_size,mb_io_ptr->mbfp);
 		mb_io_ptr->file_bytes += status;
 
 		/* read sidescan */
-		read_size = sizeof(short int)*header->pixels_ss;
-		status = fread(ss,1,read_size,mb_io_ptr->mbfp);
+		read_size = sizeof(short int)*store->pixels_ss;
+		status = fread(store->ss,1,read_size,mb_io_ptr->mbfp);
 		mb_io_ptr->file_bytes += status;
-		status = fread(ss_acrosstrack,1,read_size,mb_io_ptr->mbfp);
+		status = fread(store->ss_acrosstrack,1,read_size,mb_io_ptr->mbfp);
 		mb_io_ptr->file_bytes += status;
-		status = fread(ss_alongtrack,1,read_size,mb_io_ptr->mbfp);
+		status = fread(store->ss_alongtrack,1,read_size,mb_io_ptr->mbfp);
 		mb_io_ptr->file_bytes += status;
 
 		/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-		for (i=0;i<header->beams_bath;i++)
+		for (i=0;i<store->beams_bath;i++)
 			{
-			data->bath[i] = mb_swap_short(data->bath[i]);
-			data->bath_acrosstrack[i] 
-				= mb_swap_short(data->bath_acrosstrack[i]);
-			data->bath_alongtrack[i] 
-				= mb_swap_short(data->bath_alongtrack[i]);
+			store->bath[i] = mb_swap_short(store->bath[i]);
+			store->bath_acrosstrack[i] 
+				= mb_swap_short(store->bath_acrosstrack[i]);
+			store->bath_alongtrack[i] 
+				= mb_swap_short(store->bath_alongtrack[i]);
 			}
-		for (i=0;i<header->beams_amp;i++)
+		for (i=0;i<store->beams_amp;i++)
 			{
-			data->amp[i] = mb_swap_short(data->amp[i]);
+			store->amp[i] = mb_swap_short(store->amp[i]);
 			}
-		for (i=0;i<header->pixels_ss;i++)
+		for (i=0;i<store->pixels_ss;i++)
 			{
-			data->ss[i] = mb_swap_short(data->ss[i]);
-			data->ss_acrosstrack[i] 
-				= mb_swap_short(data->ss_acrosstrack[i]);
-			data->ss_alongtrack[i] 
-				= mb_swap_short(data->ss_alongtrack[i]);
+			store->ss[i] = mb_swap_short(store->ss[i]);
+			store->ss_acrosstrack[i] 
+				= mb_swap_short(store->ss_acrosstrack[i]);
+			store->ss_alongtrack[i] 
+				= mb_swap_short(store->ss_alongtrack[i]);
 			}
 #endif
 
@@ -834,87 +856,23 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"\ndbg5  New data read in function <%s>\n",
 				function_name);
 			fprintf(stderr,"dbg5       beams_bath: %d\n",
-				header->beams_bath);
+				store->beams_bath);
+			for (i=0;i<store->beams_bath;i++)
+			  fprintf(stderr,"dbg5       beam:%d  flag:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,store->beamflag[i],store->bath[i],
+				store->bath_acrosstrack[i],store->bath_alongtrack[i]);
 			fprintf(stderr,"dbg5       beams_amp:  %d\n",
-				header->beams_amp);
-			for (i=0;i<header->beams_bath;i++)
-			  fprintf(stderr,"dbg5       beam:%d  flag:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
-				i,beamflag[i],bath[i],amp[i],
-				bath_acrosstrack[i],bath_alongtrack[i]);
+				store->beams_amp);
+			for (i=0;i<store->beams_amp;i++)
+			  fprintf(stderr,"dbg5       beam:%d  flag:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,store->beamflag[i],store->amp[i],
+				store->bath_acrosstrack[i],store->bath_alongtrack[i]);
 			fprintf(stderr,"dbg5       pixels_ss:  %d\n",
-				header->pixels_ss);
+				store->pixels_ss);
 			  fprintf(stderr,"dbg5       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n",
-				i,ss[i],
-				ss_acrosstrack[i],ss_alongtrack[i]);
+				i,store->ss[i],
+				store->ss_acrosstrack[i],store->ss_alongtrack[i]);
 			}
-		}
-
-	/* translate data values to data storage structure */
-	if (status == MB_SUCCESS
-		&& store != NULL
-		&& dataplus->kind == MB_DATA_DATA)
-		{
-		/* type of data record */
-		store->kind = dataplus->kind;
-
-		/* position */
-		store->lon2u = header->lon2u;
-		store->lon2b = header->lon2b;
-		store->lat2u = header->lat2u;
-		store->lat2b = header->lat2b;
-
-		/* time stamp */
-		store->year = header->year;
-		store->day = header->day;
-		store->min = header->min;
-		store->sec = header->sec;
-		store->msec = header->msec;
-
-		/* heading and speed */
-		store->heading = header->heading;
-		store->speed = header->speed;
-
-		/* numbers of beams and scaling */
-		store->beams_bath = header->beams_bath;
-		store->beams_amp = header->beams_amp;
-		store->pixels_ss = header->pixels_ss;
-		store->depth_scale = header->depth_scale;
-		store->distance_scale = header->distance_scale;
-
-		/* get altitude and transducer depth */
-		store->altitude = header->altitude;
-		store->transducer_depth = header->transducer_depth;
-
-		/* depths and backscatter */
-		for (i=0;i<store->beams_bath;i++)
-			{
-			store->beamflag[i] = data->beamflag[i];
-			store->bath[i] = data->bath[i];
-			store->bath_acrosstrack[i] = data->bath_acrosstrack[i];
-			store->bath_alongtrack[i] = data->bath_alongtrack[i];
-			}
-		for (i=0;i<store->beams_amp;i++)
-			{
-			store->amp[i] = data->amp[i];
-			}
-		for (i=0;i<store->pixels_ss;i++)
-			{
-			store->ss[i] = data->ss[i];
-			store->ss_acrosstrack[i] = data->ss_acrosstrack[i];
-			store->ss_alongtrack[i] = data->ss_alongtrack[i];
-			}
-		}
-
-	/* translate comment to data storage structure */
-	else if (status == MB_SUCCESS
-		&& store != NULL
-		&& dataplus->kind == MB_DATA_COMMENT)
-		{
-		/* type of data record */
-		store->kind = dataplus->kind;
-
-		/* comment */
-		strcpy(store->comment,comment);
 		}
 
 	/* print output debug statements */
@@ -937,30 +895,12 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*function_name = "mbr_wt_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_mbldeoih_struct *dataplus;
-	struct mbf_mbldeoih_header_struct *header;
-	struct mbf_mbldeoih_data_struct *data;
 	struct mbsys_ldeoih_struct *store;
-	char	*comment;
-	unsigned char	*beamflag;
-	short int	*bath;
-	short int	*amp;
-	short int	*bath_acrosstrack;
-	short int	*bath_alongtrack;
-	short int	*ss;
-	short int	*ss_acrosstrack;
-	short int	*ss_alongtrack;
 	int	write_size;
-	int	time_j[5];
-	double	lon;
-	double	lat;
-	int	beams_bath;
-	int	beams_amp;
-	int	pixels_ss;
-	double	depthmax;
-	double	distmax;
-	double	depthscale;
-	double	distscale;
+	short	*flag;
+	int	header_length;
+	char	buffer[MBF_MBLDEOIH_NEWHEADERSIZE];
+	int	index;
 	int	i;
 
 	/* print input debug statements */
@@ -978,148 +918,86 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
 
-	/* get pointer to raw data structure */
-	dataplus = (struct mbf_mbldeoih_struct *) mb_io_ptr->raw_data;
-	header = &(dataplus->header);
-	data = &(dataplus->data);
-	comment = dataplus->comment;
-	beamflag = data->beamflag;
-	bath = data->bath;
-	amp = data->amp;
-	bath_acrosstrack = data->bath_acrosstrack;
-	bath_alongtrack = data->bath_alongtrack;
-	ss = data->ss;
-	ss_acrosstrack = data->ss_acrosstrack;
-	ss_alongtrack = data->ss_alongtrack;
-	header->depth_scale = 0;
-	header->distance_scale = 0;
-
-	/* first translate values from data storage structure */
-	if (store != NULL)
-		{
-		/* save beam and pixel numbers */
-		beams_bath = store->beams_bath;
-		beams_amp = store->beams_amp;
-		pixels_ss = store->pixels_ss;
-
-		/* type of data record */
-		dataplus->kind = store->kind;
-
-		/* position */
-		header->lon2u = store->lon2u;
-		header->lon2b = store->lon2b;
-		header->lat2u = store->lat2u;
-		header->lat2b = store->lat2b;
-
-		/* time stamp */
-		header->year = store->year;
-		header->day = store->day;
-		header->min = store->min;
-		header->sec = store->sec;
-		header->msec = store->msec;
-
-		/* heading and speed */
-		header->heading = store->heading;
-		header->speed = store->speed;
-
-		/* numbers of beams and scaling */
-		header->beams_bath = store->beams_bath;
-		header->beams_amp = store->beams_amp;
-		header->pixels_ss = store->pixels_ss;
-		header->depth_scale = store->depth_scale;
-		header->distance_scale = store->distance_scale;
-
-		/* get altitude and transducer depth */
-		header->altitude = store->altitude;
-		header->transducer_depth = store->transducer_depth;
-
-		/* depths amplitude and sidescan */
-		for (i=0;i<header->beams_bath;i++)
-			{
-			beamflag[i] = store->beamflag[i];
-			bath[i] = store->bath[i];
-			bath_acrosstrack[i] = store->bath_acrosstrack[i];
-			bath_alongtrack[i] = store->bath_alongtrack[i];
-			}
-		for (i=0;i<header->beams_amp;i++)
-			{
-			amp[i] = store->amp[i];
-			}
-		for (i=0;i<header->pixels_ss;i++)
-			{
-			ss[i] = store->ss[i];
-			ss_acrosstrack[i] = store->ss_acrosstrack[i];
-			ss_alongtrack[i] = store->ss_alongtrack[i];
-			}
-
-		/* comment */
-		strcpy(comment,store->comment);
-		}
-
 	/* set data flag 
-		(data: flag='dd'=25700 or comment:flag='##'=8995) */
-	if (dataplus->kind == MB_DATA_DATA)
-		header->flag = 25700;
+		(data: flag='nn'=28270 or comment:flag='cc'=25443) */
+	flag = (short *) buffer;
+	if (store->kind == MB_DATA_DATA)
+		{
+		*flag = 28270;
+		header_length = MBF_MBLDEOIH_NEWHEADERSIZE;
+		}
 	else
-		header->flag = 8995;
-
+		{
+		*flag = 25443;
+		header_length = 2;
+		}
 
 	/* print debug statements */
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  New header set in function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       flag:       %d\n",header->flag);
-		fprintf(stderr,"dbg5       year:       %d\n",header->year);
-		fprintf(stderr,"dbg5       day:        %d\n",header->day);
-		fprintf(stderr,"dbg5       minute:     %d\n",header->min);
-		fprintf(stderr,"dbg5       second:     %d\n",header->sec);
-		fprintf(stderr,"dbg5       msec:       %d\n",header->msec);
-		fprintf(stderr,"dbg5       lonu:       %d\n",header->lon2u);
-		fprintf(stderr,"dbg5       lonb:       %d\n",header->lon2b);
-		fprintf(stderr,"dbg5       latu:       %d\n",header->lat2u);
-		fprintf(stderr,"dbg5       latb:       %d\n",header->lat2b);
-		fprintf(stderr,"dbg5       heading:    %d\n",header->heading);
-		fprintf(stderr,"dbg5       speed:      %d\n",header->speed);
+		fprintf(stderr,"dbg5       flag:       %d\n",*flag);
+		}
+	if (verbose >= 5 && store->kind == MB_DATA_DATA)
+		{
+		fprintf(stderr,"dbg5       year:       %d\n",store->year);
+		fprintf(stderr,"dbg5       day:        %d\n",store->day);
+		fprintf(stderr,"dbg5       minute:     %d\n",store->min);
+		fprintf(stderr,"dbg5       second:     %d\n",store->sec);
+		fprintf(stderr,"dbg5       msec:       %d\n",store->msec);
+		fprintf(stderr,"dbg5       lonu:       %d\n",store->lon2u);
+		fprintf(stderr,"dbg5       lonb:       %d\n",store->lon2b);
+		fprintf(stderr,"dbg5       latu:       %d\n",store->lat2u);
+		fprintf(stderr,"dbg5       latb:       %d\n",store->lat2b);
+		fprintf(stderr,"dbg5       heading:    %d\n",store->heading);
+		fprintf(stderr,"dbg5       speed:      %d\n",store->speed);
 		fprintf(stderr,"dbg5       beams bath: %d\n",
-			header->beams_bath);
+			store->beams_bath);
 		fprintf(stderr,"dbg5       beams amp:  %d\n",
-			header->beams_amp);
+			store->beams_amp);
 		fprintf(stderr,"dbg5       pixels ss:  %d\n",
-			header->pixels_ss);
-		fprintf(stderr,"dbg5       depth scale: %d\n",header->depth_scale);
-		fprintf(stderr,"dbg5       dist scale:  %d\n",header->distance_scale);
+			store->pixels_ss);
+		fprintf(stderr,"dbg5       depth scale: %d\n",store->depth_scale);
+		fprintf(stderr,"dbg5       dist scale:  %d\n",store->distance_scale);
+		fprintf(stderr,"dbg5       transducer_depth: %d\n",store->transducer_depth);
+		fprintf(stderr,"dbg5       altitude:         %d\n",store->altitude);
+		fprintf(stderr,"dbg5       beam_xwidth:      %d\n",store->beam_xwidth);
+		fprintf(stderr,"dbg5       beam_lwidth:      %d\n",store->beam_lwidth);
+		fprintf(stderr,"dbg5       spare:            %d\n",store->spare);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		}
 
-	/* byte swap the data if necessary */
-#ifdef BYTESWAPPED
-	if (status == MB_SUCCESS)
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
 		{
-		header->flag = mb_swap_short(header->flag);
-		header->year = mb_swap_short(header->year);
-		header->day = mb_swap_short(header->day);
-		header->min = mb_swap_short(header->min);
-		header->sec = mb_swap_short(header->sec);
-		header->msec = mb_swap_short(header->msec);
-		header->lon2u = mb_swap_short(header->lon2u);
-		header->lon2b = mb_swap_short(header->lon2b);
-		header->lat2u = mb_swap_short(header->lat2u);
-		header->lat2b = mb_swap_short(header->lat2b);
-		header->heading = mb_swap_short(header->heading);
-		header->speed = mb_swap_short(header->speed);
-		header->beams_bath = mb_swap_short(header->beams_bath);
-		header->beams_amp = mb_swap_short(header->beams_amp);
-		header->pixels_ss = mb_swap_short(header->pixels_ss);
-		header->depth_scale = mb_swap_short(header->depth_scale);
-		header->distance_scale = mb_swap_short(header->distance_scale);
+		index = 2;
+		mb_put_binary_short(MB_NO, store->year, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->day, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->min, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->sec, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->msec, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->lon2u, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->lon2b, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->lat2u, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->lat2b, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->heading, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->speed, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->beams_bath, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->beams_amp, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->transducer_depth, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->altitude, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->spare, (void *)  &buffer[index]); index +=2;
 		}
-#endif
 
 	/* write next header to file */
-	if ((status = fwrite(header,1,mb_io_ptr->header_structure_size,
-			mb_io_ptr->mbfp)) == mb_io_ptr->header_structure_size) 
+	if ((status = fwrite(buffer,1,header_length,
+			mb_io_ptr->mbfp)) == header_length) 
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -1135,32 +1013,40 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		fprintf(stderr,"\ndbg5  Going to write data in function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       kind:       %d\n",dataplus->kind);
+		fprintf(stderr,"dbg5       kind:       %d\n",store->kind);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		}
-	if (verbose >=5 && dataplus->kind == MB_DATA_COMMENT)
+	if (verbose >=5 && store->kind == MB_DATA_COMMENT)
 		{
-		fprintf(stderr,"dbg5       comment:    %s\n",comment);
+		fprintf(stderr,"dbg5       comment:    %s\n",store->comment);
 		}
-	if (verbose >=5 && dataplus->kind == MB_DATA_DATA)
+	if (verbose >=5 && store->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg5       beams_bath: %d\n",beams_bath);
-		fprintf(stderr,"dbg5       beams_amp:  %d\n",beams_amp);
-		for (i=0;i<beams_bath;i++)
-			fprintf(stderr,"dbg5       beam:%d  flag:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
-				i,beamflag[i],bath[i],amp[i],bath_acrosstrack[i],bath_alongtrack[i]);
-		fprintf(stderr,"dbg5       pixels_ss:  %d\n",pixels_ss);
-		for (i=0;i<pixels_ss;i++)
-			fprintf(stderr,"dbg5       beam:%d  ss:%d  acrosstrack:%d  alongtrack:%d\n",
-				i,ss[i],ss_acrosstrack[i],ss_alongtrack[i]);
+			fprintf(stderr,"dbg5       beams_bath: %d\n",
+				store->beams_bath);
+			for (i=0;i<store->beams_bath;i++)
+			  fprintf(stderr,"dbg5       beam:%d  flag:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,store->beamflag[i],store->bath[i],
+				store->bath_acrosstrack[i],store->bath_alongtrack[i]);
+			fprintf(stderr,"dbg5       beams_amp:  %d\n",
+				store->beams_amp);
+			for (i=0;i<store->beams_amp;i++)
+			  fprintf(stderr,"dbg5       beam:%d  flag:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,store->beamflag[i],store->amp[i],
+				store->bath_acrosstrack[i],store->bath_alongtrack[i]);
+			fprintf(stderr,"dbg5       pixels_ss:  %d\n",
+				store->pixels_ss);
+			  fprintf(stderr,"dbg5       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n",
+				i,store->ss[i],
+				store->ss_acrosstrack[i],store->ss_alongtrack[i]);
 		}
 
 	/* write next chunk of the data */
-	if (dataplus->kind == MB_DATA_COMMENT)
+	if (store->kind == MB_DATA_COMMENT)
 		{
 		write_size = 128;
-		if ((status = fwrite(comment,1,write_size,mb_io_ptr->mbfp))
+		if ((status = fwrite(store->comment,1,write_size,mb_io_ptr->mbfp))
 			== write_size) 
 			{
 			status = MB_SUCCESS;
@@ -1172,50 +1058,50 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			*error = MB_ERROR_EOF;
 			}
 		}
-	else if (dataplus->kind == MB_DATA_DATA)
+	else if (store->kind == MB_DATA_DATA)
 		{
 
 		/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-		for (i=0;i<beams_bath;i++)
+		for (i=0;i<store->beams_bath;i++)
 			{
-			data->bath[i] = mb_swap_short(data->bath[i]);
-			data->bath_acrosstrack[i] 
-				= mb_swap_short(data->bath_acrosstrack[i]);
-			data->bath_alongtrack[i] 
-				= mb_swap_short(data->bath_alongtrack[i]);
+			store->bath[i] = mb_swap_short(store->bath[i]);
+			store->bath_acrosstrack[i] 
+				= mb_swap_short(store->bath_acrosstrack[i]);
+			store->bath_alongtrack[i] 
+				= mb_swap_short(store->bath_alongtrack[i]);
 			}
-		for (i=0;i<beams_amp;i++)
+		for (i=0;i<store->beams_amp;i++)
 			{
-			data->amp[i] = mb_swap_short(data->amp[i]);
+			store->amp[i] = mb_swap_short(store->amp[i]);
 			}
-		for (i=0;i<pixels_ss;i++)
+		for (i=0;i<store->pixels_ss;i++)
 			{
-			data->ss[i] = mb_swap_short(data->ss[i]);
-			data->ss_acrosstrack[i] 
-				= mb_swap_short(data->ss_acrosstrack[i]);
-			data->ss_alongtrack[i] 
-				= mb_swap_short(data->ss_alongtrack[i]);
+			store->ss[i] = mb_swap_short(store->ss[i]);
+			store->ss_acrosstrack[i] 
+				= mb_swap_short(store->ss_acrosstrack[i]);
+			store->ss_alongtrack[i] 
+				= mb_swap_short(store->ss_alongtrack[i]);
 			}
 #endif
 
 		/* write bathymetry */
-		write_size = sizeof(char)*beams_bath;
-		status = fwrite(beamflag,1,write_size,mb_io_ptr->mbfp);
-		write_size = sizeof(short int)*beams_bath;
-		status = fwrite(bath,1,write_size,mb_io_ptr->mbfp);
-		status = fwrite(bath_acrosstrack,1,write_size,mb_io_ptr->mbfp);
-		status = fwrite(bath_alongtrack,1,write_size,mb_io_ptr->mbfp);
+		write_size = sizeof(char) * store->beams_bath;
+		status = fwrite(store->beamflag,1,write_size,mb_io_ptr->mbfp);
+		write_size = sizeof(short int) * store->beams_bath;
+		status = fwrite(store->bath,1,write_size,mb_io_ptr->mbfp);
+		status = fwrite(store->bath_acrosstrack,1,write_size,mb_io_ptr->mbfp);
+		status = fwrite(store->bath_alongtrack,1,write_size,mb_io_ptr->mbfp);
 
 		/* write amplitude */
-		write_size = sizeof(short int)*beams_amp;
-		status = fwrite(amp,1,write_size,mb_io_ptr->mbfp);
+		write_size = sizeof(short int) * store->beams_amp;
+		status = fwrite(store->amp,1,write_size,mb_io_ptr->mbfp);
 
 		/* write sidescan */
-		write_size = sizeof(short int)*pixels_ss;
-		status = fwrite(ss,1,write_size,mb_io_ptr->mbfp);
-		status = fwrite(ss_acrosstrack,1,write_size,mb_io_ptr->mbfp);
-		status = fwrite(ss_alongtrack,1,write_size,mb_io_ptr->mbfp);
+		write_size = sizeof(short int) * store->pixels_ss;
+		status = fwrite(store->ss,1,write_size,mb_io_ptr->mbfp);
+		status = fwrite(store->ss_acrosstrack,1,write_size,mb_io_ptr->mbfp);
+		status = fwrite(store->ss_alongtrack,1,write_size,mb_io_ptr->mbfp);
 
 		/* check for error */
 		if (status == write_size) 
