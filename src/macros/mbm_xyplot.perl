@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.1 2001-06-30 17:36:53 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.1 2001-06-30 17:36:53 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.0  2000/12/01  22:58:01  caress
+# First cut at Version 5.0.
+#
 # Revision 4.10  2000/10/03  21:42:17  caress
 # Snapshot for Dale.
 #
@@ -368,61 +371,39 @@ if (!$xysegment)
 # parse list of data files
 @data_file_list = split(/:::::::/, $file_data);
 foreach $xyfile_raw (@data_file_list) {
-	# figure out how many parameters set for each file
-	if ($xyfile_raw =~ /\S+:\S+:\S+:\S+:\S+/)
-		{
-		($xysymbol_f, $xypen_f, $xyfill_f, 
-			$xysegment_f, $xyfile_f)
-			= $xyfile_raw
-			=~ /(\S+):(\S+):(\S+):(\S+):(\S+)/;
-		push(@xysymbols, $xysymbol_f);
-		push(@xyfills, $xyfill_f);
-		push(@xypens, $xypen_f);
-		push(@xysegments, $xysegment_f);
-		push(@xyfiles, $xyfile_f);
-		}
-	elsif ($xyfile_raw =~ /\S+:\S+:\S+:\S+/)
-		{
-		($xysymbol_f, $xypen_f, $xyfill_f, $xyfile_f)
-			= $xyfile_raw
-			=~ /(\S+):(\S+):(\S+):(\S+)/;
-		push(@xysymbols, $xysymbol_f);
-		push(@xyfills, $xyfill_f);
-		push(@xypens, $xypen_f);
-		push(@xysegments, $xysegment);
-		push(@xyfiles, $xyfile_f);
-		}
-	elsif ($xyfile_raw =~ /\S+:\S+:\S+/)
-		{
-		($xysymbol_f, $xypen_f, $xyfile_f)
-			= $xyfile_raw
-			=~ /(\S+):(\S+):(\S+)/;
-		push(@xysymbols, $xysymbol_f);
-		push(@xyfills, $xyfill);
-		push(@xypens, $xypen_f);
-		push(@xysegments, $xysegment);
-		push(@xyfiles, $xyfile_f);
-		}
-	elsif ($xyfile_raw =~ /\S+:\S+/)
-		{
-		($xysymbol_f, $xyfile_f)
-			= $xyfile_raw
-			=~ /(\S+):(\S+)/;
-		push(@xysymbols, $xysymbol_f);
-		push(@xyfills, $xyfill);
-		push(@xypens, $xypen);
-		push(@xysegments, $xysegment);
-		push(@xyfiles, $xyfile_f);
-		}
-	elsif ($xyfile_raw =~ /\S+/)
-		{
-		$xyfile_f = $xyfile_raw;
-		push(@xysymbols, $xysymbol);
-		push(@xyfills, $xyfill);
-		push(@xypens, $xypen);
-		push(@xysegments, $xysegment);
-		push(@xyfiles, $xyfile_f);
-		}
+	# set default parameters
+	$xysymbol_f = $xysymbol;
+	$xyfill_f = $xyfill;
+	$xypen_f = $xypen;
+	$xysegment_f = $xysegment;
+
+	# figure out how many parameters to set for each file
+	@filearg = split(/:/, $xyfile_raw);
+	for ($i = 0; $i < $#filearg; $i++) {
+		if ($filearg[$i] =~ /S(\S+)/)
+			{
+			($xysymbol_f) = $filearg[$i] =~ /S(\S+)/;
+			}
+		if ($filearg[$i] =~ /G(\S+)/)
+			{
+			($xyfill_f) = $filearg[$i] =~ /G(\S+)/;
+			}
+		if ($filearg[$i] =~ /W(\S+)/)
+			{
+			($xypen_f) = $filearg[$i] =~ /W(\S+)/;
+			}
+		if ($filearg[$i] =~ /N(\S+)/)
+			{
+			($xysegment_f) = $filearg[$i] =~ /N(\S+)/;
+			}
+	}
+
+	# set filename
+	push(@xysymbols, $xysymbol_f);
+	push(@xyfills, $xyfill_f);
+	push(@xypens, $xypen_f);
+	push(@xysegments, $xysegment_f);
+	push(@xyfiles, $filearg[$#filearg]);
 }
 
 # check that files are ok
@@ -998,7 +979,17 @@ if ($labels)
 	}
 if ($nlabels < 1)
 	{
-	$tlabel = "Data File $file_data";
+	if ($#xyfiles == 0)
+		{
+		$tlabel = "Data File $xyfiles[0]";
+		}
+	else
+		{
+		$tlabel = "Data Files";
+		foreach $xyfile (@xyfiles) {
+			$tlabel = $tlabel . " $xyfile";
+			}
+		}
 	}
 if ($nlabels < 2)
 	{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.4 2001-06-08 21:44:01 caress Exp $
+ *    $Id: mb_io.h,v 5.5 2001-06-30 17:40:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/08  21:44:01  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.3  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -175,6 +178,7 @@ struct mb_io_struct
 				    last record read */
 	long	file3_bytes;	/* number of bytes read from file */
 	char	*xdrs;		/* XDR stream handle */
+	char	*xdrs2;		/* XDR stream handle #2 */
 
 	/* read or write history */
 	int	fileheader;	/* indicates whether file header has

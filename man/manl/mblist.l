@@ -194,6 +194,13 @@ of one or more of the following characters:
                  numeric values such as depth and heading
                  and not to values like time strings or 
                  positions with hemisphere characters.
+ 	\fB-\fP  special character - this causes the value
+                 indicated by the next character to be
+                 multiplied by -1 - this applies only to 
+                 simple numeric values such as depth and 
+                 heading and not to values like time  
+                 strings or positions with hemisphere 
+                 characters.
  	\fBA\fP  for apparent seafloor crosstrack slope 
   		 (degrees from horizontal with positive
  		 slopes dipping toward port) - calculated 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.3 2001-04-06 22:05:59 caress Exp $
+ *    $Id: mb_format.h,v 5.4 2001-06-30 17:40:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/04/06  22:05:59  caress
+ * Consolidated xse formats into one format.
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -194,7 +197,7 @@
 #define MB_SYS_SINGLEBEAM	19
 #define MB_SYS_XSE		20
 #define MB_SYS_HS10		21
-#define	MB_SYS_SB2120		22
+#define	MB_SYS_SURF		22
 
 /* Number of supported MBIO data formats */
 #define	MB_FORMATS	50
@@ -349,6 +352,18 @@
 #define MBF_MBPRONAV    166     /* MB-System simple navigation format, ascii, MBARI */ 
 #define MBF_HS10JAMS    171     /* Furuno HS10 multibeam format, 45 beams, 
 					bathymetry and amplitude, ascii, JAMSTEC */ 
+#define MBF_ATLSSURF    181     /* STN Atlas processing multibeam format, \n
+					Hydrosweep DS2, Hydrosweep MD, 
+					Fansweep 10, Fansweep 20, 
+					bathymetry, amplitude, and sidescan,
+					up to 1440 beams and 4096 pixels, 
+					XDR binary, STN Atlas. */ 
+#define MBF_HSDS2RAW    182     /* STN Atlas raw multibeam format, \n
+					Hydrosweep DS2, Hydrosweep MD, 
+					Fansweep 10, Fansweep 20, 
+					bathymetry, amplitude, and sidescan,
+					up to 1440 beams and 4096 pixels, 
+					XDR binary, STN Atlas. */
 
 /* Alias table for old (pre-version 4.0) format id's */
 static int format_alias_table[] = 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.4 2001-06-29 22:50:23 caress Exp $
+ *    $Id: mbcopy.c,v 5.5 2001-06-30 17:42:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/29  22:50:23  caress
+ * Atlas Hydrosweep DS2 raw data and SURF data formats.
+ *
  * Revision 5.3  2001/06/08  21:45:46  caress
  * Version 5.0.beta01
  *
@@ -178,7 +181,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.4 2001-06-29 22:50:23 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.5 2001-06-30 17:42:04 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -984,7 +987,9 @@ main (int argc, char **argv)
 					&roll, &pitch, &heave, 
 					&error);
 			ostore_ptr = omb_io_ptr->store_data;
-			status = mbcopy_any_to_mbldeoih(verbose, 
+			if (kind == MB_DATA_DATA
+				|| kind == MB_DATA_COMMENT)
+				status = mbcopy_any_to_mbldeoih(verbose, 
 				    kind, time_i, time_d, 
 				    navlon, navlat, speed, heading, 
 				    draft, roll, pitch, heave, 
@@ -994,6 +999,8 @@ main (int argc, char **argv)
 				    iss,issacrosstrack,issalongtrack,
 				    comment, 
 				    ombio_ptr, ostore_ptr, &error);
+			else 
+				error = MB_ERROR_OTHER;
 			}
 		else if (copymode == MBCOPY_PARTIAL
 			&& error == MB_ERROR_NO_ERROR)
