@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_defaults.c,v 5.1 2001-04-30 05:13:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.8  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -87,16 +90,16 @@
 /*--------------------------------------------------------------------*/
 int mb_defaults(int verbose, int *format, int *pings,
 		int *lonflip, double bounds[4], 
-		int btime_i[7], int etime_i[7],
+		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.1 2001-04-30 05:13:06 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
-	char	file[128];
-	char	home[128];
-	char	dummy[128];
+	char	file[MB_PATH_MAXLINE];
+	char	home[MB_PATH_MAXLINE];
+	char	string[MB_PATH_MAXLINE];
 	char	*HOME = "HOME";
 	char	*getenv();
 
@@ -142,31 +145,31 @@ int mb_defaults(int verbose, int *format, int *pings,
 	if ((fp = fopen(file, "r")) != NULL)
 		{
 		status = MB_SUCCESS;
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12],"%d",format);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12],"%d",pings);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12],"%d",lonflip);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12],"%lf",speedmin);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12],"%lf",timegap);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12],"%lf %lf %lf %lf",
-			&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12],"%d %d %d %d %d %d",
-			&btime_i[0],&btime_i[1],&btime_i[2],
-			&btime_i[3],&btime_i[4],&btime_i[5]);
-		btime_i[6] = 0;
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12],"%d %d %d %d %d %d",
-			&etime_i[0],&etime_i[1],&etime_i[2],
-			&etime_i[3],&etime_i[4],&etime_i[5]);
-		etime_i[6] = 0;
-		fclose(fp);
+		while (fgets(string,sizeof(string),fp) != NULL)
+			{
+			if (strncmp(string,"format:",7) == 0)
+				sscanf(string,"format: %d",format);
+			if (strncmp(string,"pings:",6) == 0)
+				sscanf(string,"pings: %d",pings);
+			if (strncmp(string,"lonflip:",8) == 0)
+				sscanf(string,"lonflip: %d",lonflip);
+			if (strncmp(string,"speed:",6) == 0)
+				sscanf(string,"speed: %lf",speedmin);
+			if (strncmp(string,"timegap:",6) == 0)
+				sscanf(string,"timegap: %lf",timegap);
+			if (strncmp(string,"bounds:",7) == 0)
+				sscanf(string,"bounds: %lf lf lf lf",
+					&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			if (strncmp(string,"begin time:",11) == 0)
+				sscanf(string,"begin time:  %d %d %d %d %d %d %d",
+					&btime_i[0],&btime_i[1],&btime_i[2],
+					&btime_i[3],&btime_i[4],&btime_i[5],&btime_i[6]);
+			if (strncmp(string,"end time:",9) == 0)
+				sscanf(string,"end time:  %d %d %d %d %d %d %d",
+					&btime_i[0],&btime_i[1],&btime_i[2],
+					&btime_i[3],&btime_i[4],&btime_i[5],&btime_i[6]);
+			}
+ 		fclose(fp);
 		}
 	else
 		status = MB_FAILURE;
@@ -208,18 +211,15 @@ int mb_defaults(int verbose, int *format, int *pings,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_env(verbose,psdisplay,mbproject)
-int verbose;
-char *psdisplay;
-char *mbproject;
+int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.1 2001-04-30 05:13:06 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
-	char	file[128];
-	char	home[128];
-	char	dummy[128];
+	char	file[MB_PATH_MAXLINE]; 
+	char	home[MB_PATH_MAXLINE];
+	char	string[MB_PATH_MAXLINE];
 	char	*HOME = "HOME";
 	char	*getenv();
 
@@ -235,27 +235,35 @@ char *mbproject;
 	/* set system default Postscript displayer */
 #ifdef IRIX
 	strcpy(psdisplay, "xpsview");
+	strcpy(imgdisplay, "xv");
 #endif
 #ifdef IRIX64
 	strcpy(psdisplay, "xpsview");
+	strcpy(imgdisplay, "xv");
 #endif
 #ifdef SOLARIS
 	strcpy(psdisplay, "pageview");
+	strcpy(imgdisplay, "xv");
 #endif
 #ifdef LYNX
 	strcpy(psdisplay, "ghostview");
+	strcpy(imgdisplay, "xv");
 #endif
 #ifdef LINUX
 	strcpy(psdisplay, "ghostview");
+	strcpy(imgdisplay, "gimp");
 #endif
 #ifdef SUN
 	strcpy(psdisplay, "pageview");
+	strcpy(imgdisplay, "xv");
 #endif
 #ifdef HPUX
 	strcpy(psdisplay, "ghostview");
+	strcpy(imgdisplay, "xv");
 #endif
 #ifdef OTHER
 	strcpy(psdisplay, "ghostview");
+	strcpy(imgdisplay, "xv");
 #endif
 
 	/* set system default project name */
@@ -269,19 +277,15 @@ char *mbproject;
 	if ((fp = fopen(file, "r")) != NULL)
 		{
 		status = MB_SUCCESS;
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12], "%s", psdisplay);
-		fgets(dummy,sizeof(dummy),fp);
-		sscanf(&dummy[12], "%s", mbproject);
+		while (fgets(string,sizeof(string),fp) != NULL)
+			{
+			if (strncmp(string,"ps viewer:",10) == 0)
+				sscanf(string,"ps viewer: %s",psdisplay);
+			if (strncmp(string,"img viewer:",10) == 0)
+				sscanf(string,"img viewer: %s",imgdisplay);
+			if (strncmp(string,"project:",8) == 0)
+				sscanf(string,"project: %s",mbproject);
+			}
 		fclose(fp);
 		}
 	else
