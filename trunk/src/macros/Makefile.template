@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.0 1994-05-24 02:32:35 caress Exp $
+#	$Id: Makefile.template,v 4.1 1994-10-21 11:36:58 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/05/24  02:32:35  caress
+# First cut.
+#
 #
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
@@ -33,6 +36,7 @@ all:	$(MANDIR)/xbt.1 \
 	$(BINDIR)/mbm_vrefcheck $(MANDIR)/mbm_vrefcheck.1 \
 	$(BINDIR)/mbm_rollerror $(MANDIR)/mbm_rollerror.1 \
 	$(BINDIR)/mbm_plot $(MANDIR)/mbm_plot.1 \
+	$(BINDIR)/mbm_grdplot $(MANDIR)/mbm_grdplot.1 \
 	$(BINDIR)/mbm_stat $(MANDIR)/mbm_stat.1
 
 ### make clean removes the object files
@@ -55,6 +59,9 @@ $(BINDIR)/mbm_rollerror:	mbm_rollerror.perl
 $(BINDIR)/mbm_plot:	mbm_plot.perl
 	cp mbm_plot.perl $(BINDIR)/mbm_plot
 	chmod 775 $(BINDIR)/mbm_plot
+$(BINDIR)/mbm_grdplot:	mbm_grdplot.perl
+	cp mbm_grdplot.perl $(BINDIR)/mbm_grdplot
+	chmod 775 $(BINDIR)/mbm_grdplot
 $(BINDIR)/mbm_stat:	mbm_stat.perl
 	cp mbm_stat.perl $(BINDIR)/mbm_stat
 	chmod 775 $(BINDIR)/mbm_stat
@@ -78,6 +85,9 @@ $(MANDIR)/mbm_rollerror.1:	mbm_rollerror.1
 $(MANDIR)/mbm_plot.1:	mbm_plot.1
 	cp mbm_plot.1 $(MANDIR)/mbm_plot.1
 	chmod 664 $(MANDIR)/mbm_plot.1
+$(MANDIR)/mbm_grdplot.1:	mbm_grdplot.1
+	cp mbm_grdplot.1 $(MANDIR)/mbm_grdplot.1
+	chmod 664 $(MANDIR)/mbm_grdplot.1
 $(MANDIR)/mbm_stat.1:	mbm_stat.1
 	cp mbm_stat.1 $(MANDIR)/mbm_stat.1
 	chmod 664 $(MANDIR)/mbm_stat.1

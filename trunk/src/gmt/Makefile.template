@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.1 1994-06-13 20:18:05 caress Exp $
+#	$Id: Makefile.template,v 4.2 1994-10-21 11:34:20 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.1  1994/06/13  20:18:05  caress
+# Added make mbcontourfilter.o
+#
 # Revision 4.0  1994/05/24  02:31:58  caress
 # First cut.
 #
@@ -25,6 +28,10 @@
 GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
 GMTINCDIR = /ocean/mgg/gmt2/src
 NETCDFDIR = /ocean/mgg/netcdf/sun4/lib
+#
+# Compilers
+CC = cc
+FC = f77
 #
 # Compile and load flags:
 CFLAGS = -O2
@@ -39,8 +46,7 @@ INCDIR = ../../include
 MANDIR = ../../man/man1
 
 ### make all makes the MB-system macros and man pages
-all:	$(BINDIR)/grdmakecmd $(MANDIR)/grdmakecmd.1 \
-	$(BINDIR)/mbcontour $(MANDIR)/mbcontour.1 \
+all:	$(BINDIR)/mbcontour $(MANDIR)/mbcontour.1 \
 	$(BINDIR)/mbswath $(MANDIR)/mbswath.1
 
 ### make clean removes the object files
@@ -48,20 +54,18 @@ clean:
 	rm -f *.o
 
 ### link or copy the executables
-$(BINDIR)/grdmakecmd: grdmakecmd.o
-	$(CC) $(CFLAGS) grdmakecmd.o $(GMTLIBDIR)/libgmt.a -lnetcdf $(LFLAGS) -o $(BINDIR)/grdmakecmd
 $(BINDIR)/mbcontour: mbcontour.o mb_truecont.o mb_delaun.o mb_track.o mb_pslibface.o ../../lib/libmbio.a
 	$(CC) $(CFLAGS) mbcontour.o mb_truecont.o mb_delaun.o mb_track.o mb_pslibface.o ../../lib/libmbio.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmt.a $(LFLAGS) -o $(BINDIR)/mbcontour
 $(BINDIR)/mbswath: mbswath.o ../../lib/libmbio.a
 	$(CC) $(CFLAGS) mbswath.o ../../lib/libmbio.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmt.a $(LFLAGS) -o $(BINDIR)/mbswath
 
 ### compile the source files
-grdmakecmd.o:	grdmakecmd.c  $(INCDIR)/mb_status.h
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) grdmakecmd.c
 mbcontour.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbcontour.c
-mbcontourfilter.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -DMBCONTOURFILTER mbcontour.c -o mbcontourfilter.o
+mbcontourfilter.o:	mbcontourfilter.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -DMBCONTOURFILTER mbcontourfilter.c -o mbcontourfilter.o
+mbcontourfilter.c:	mbcontour.c
+	cp mbcontour.c mbcontourfilter.c
 mb_truecont.o:	mb_truecont.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
 	$(CC) -c $(CFLAGS) mb_truecont.c
 mb_delaun.o:	mb_delaun.c  $(INCDIR)/mb_status.h
@@ -76,9 +80,6 @@ mbswath.o:	mbswath.c  $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) ../../lib/libmbio.a  mbswath.c
 
 ### copy the man pages to the man page directory
-$(MANDIR)/grdmakecmd.1:	grdmakecmd.1
-	cp grdmakecmd.1 $(MANDIR)/grdmakecmd.1
-	chmod 664 $(MANDIR)/grdmakecmd.1
 $(MANDIR)/mbcontour.1:	mbcontour.1
 	cp mbcontour.1 $(MANDIR)/mbcontour.1
 	chmod 664 $(MANDIR)/mbcontour.1

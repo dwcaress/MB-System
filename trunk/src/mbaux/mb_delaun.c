@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 4.1 1994-05-24 03:11:40 caress Exp $
+ *    $Id: mb_delaun.c,v 4.2 1994-10-21 11:34:20 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -95,6 +95,9 @@
  * Date:	April, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/24  03:11:40  caress
+ * Fixed include.
+ *
  * Revision 4.0  1994/05/16  22:09:29  caress
  * First cut at new contouring scheme
  *
@@ -144,7 +147,7 @@ int	*kv1;
 int	*kv2;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 4.1 1994-05-24 03:11:40 caress Exp $";
+  	static char rcs_id[]="$Id: mb_delaun.c,v 4.2 1994-10-21 11:34:20 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];
@@ -253,6 +256,9 @@ int	*error;
 	for (nuc=npts-1;nuc>-1;nuc--)
 	  {
 	  km = 0;
+/*fprintf(stderr,"\nnuc:%d\n",nuc);
+for (jt=0;jt<isp;jt++)
+fprintf(stderr,"jt:%d  %d %d %d\n",jt,iv1[jt],iv2[jt],iv3[jt]);*/
 
 	  /* loop through the established 3-tuples */
 	  for (jt=0;jt<isp;jt++)
@@ -269,11 +275,21 @@ int	*error;
 		triangle for which the point lies within the circumcircle
 		Thus "interior" edges are eliminated prior to 
 		construction of the new triangles (3 tuples). */
-	    if (rsq < 0.0)
+/*if (rsq <= 0.0 && !(rsq < 0.0))
+{
+fprintf(stderr,"NOTICE: rsq:%g\n",rsq);
+fprintf(stderr,"nuc:%d p1:%f p2:%f  i1:%d p1:%f p2:%f  jt:%d v1:%f v2:%f\n",
+nuc,p1[nuc],p2[nuc],i1,p1[i1],p2[i1],jt,v1[jt],v2[jt]);
+fprintf(stderr,"jt:%d iv1:%d %f %f\n",jt,iv1[jt],p1[iv1[jt]],p2[iv1[jt]]);
+fprintf(stderr,"jt:%d iv2:%d %f %f\n",jt,iv2[jt],p1[iv2[jt]],p2[iv2[jt]]);
+fprintf(stderr,"jt:%d iv3:%d %f %f\n",jt,iv3[jt],p1[iv3[jt]],p2[iv3[jt]]);
+}*/
+	    if (rsq <= 0.0)
 	      {
 	      /* triangle needs replacing => push the index on the stack */
 	      id = id - 1;
 	      istack[id] = jt;
+/*fprintf(stderr,"delete triangle jt:%d\n",jt);*/
 
 	      /* add edges to kv but delete if already present */
 	      for (i=0;i<3;i++)
