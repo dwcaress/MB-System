@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 4.3 1999-04-21 05:45:32 caress Exp $
+ *	$Id: mbr_em300mba.c,v 4.4 2000-02-07 22:59:47 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1999/04/21  05:45:32  caress
+ * Fixed handling of bad sidescan data.
+ *
  * Revision 4.2  1999/04/07  20:38:24  caress
  * Fixes related to building under Linux.
  *
@@ -62,7 +65,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 4.3 1999-04-21 05:45:32 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 4.4 2000-02-07 22:59:47 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -898,7 +901,9 @@ int	*error;
 		   sidescan then zero sidescan,  if sidescan
 		   newer than bath then set error,  if ok then
 		   check that beam ids are the same */
-		if (bath_time_d > ss_time_d)
+		if (data->png_ss_date == 0
+			|| data->png_nbeams_ss == 0
+			|| bath_time_d > ss_time_d)
 		    {
 		    status = mbr_zero_ss_em300mba(verbose,mb_io_ptr->raw_data,error);
 		    }
@@ -2419,6 +2424,8 @@ int	*error;
 	fprintf(stderr,"call nothing, read failure, expect %x\n",expect);
 #endif
 			done = MB_YES;
+			*type = first_type;
+			data->kind = MB_DATA_DATA;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
@@ -2636,7 +2643,9 @@ int	*error;
 #endif
 			done = MB_YES;
 			expect = EM2_NONE;
+			*type = first_type;
 			*label_save_flag = MB_YES;
+			data->kind = MB_DATA_DATA;
 			}
 		else if (*type == EM2_BATH_MBA)
 			{
@@ -2670,7 +2679,9 @@ int	*error;
 #endif
 			done = MB_YES;
 			expect = EM2_NONE;
+			*type = first_type;
 			*label_save_flag = MB_YES;
+			data->kind = MB_DATA_DATA;
 			}
 		else if (*type == EM2_SS_MBA)
 			{
@@ -4396,7 +4407,12 @@ int	*error;
 			fprintf(stderr,"dbg5        %d   %d  %d\n",
 				i, data->svp_depth[i], data->svp_vel[i]);
 		}
-
+/*fprintf(stderr, "-------------------\n");
+fprintf(stderr, "%d %d %d\n", data->svp_origin_date, data->svp_origin_msec, data->svp_num);
+for (i=0;i<data->svp_num;i++)
+	fprintf(stderr,"%f  %f\n",
+		0.01 * data->svp_depth_res * data->svp_depth[i], 0.1 * data->svp_vel[i]);
+*/
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -4606,7 +4622,7 @@ int	*error;
 		if (read_len == 4)
 			{
 			status = MB_SUCCESS;
-			data->png_offset_multiplier = (mb_u_char) line[0];
+			data->png_offset_multiplier = (mb_s_char) line[0];
 			}
 		else
 			{
@@ -7718,7 +7734,7 @@ int	*error;
 	/* output end of record */
 	if (status == MB_SUCCESS)
 		{
-		line[0] = (mb_u_char) data->png_offset_multiplier;
+		line[0] = (mb_s_char) data->png_offset_multiplier;
 		line[1] = 0x03;
 		
 		/* compute checksum */
