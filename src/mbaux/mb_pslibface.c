@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 5.0 2000-12-01 22:53:59 caress Exp $
+ *    $Id: mb_pslibface.c,v 5.1 2004-05-21 23:19:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:53:59  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.14  2000/10/11  01:01:26  caress
  * Convert to ANSI C
  *
@@ -109,7 +112,7 @@ int plot_init(	int	verbose,
 		double	*inch2lon, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.1 2004-05-21 23:19:26 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -213,6 +216,9 @@ int plot_init(	int	verbose,
 		gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 #else
+#ifdef GMT4_0
+		gmtdefs.encoding.name, 
+#endif
 		GMT_epsinfo (argv[0]));
 	GMT_echo_command (argc, argv);
 #endif
@@ -285,7 +291,7 @@ int plot_init(	int	verbose,
 /* 	function plot_end ends the GMT plotting. */
 int plot_end(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.1 2004-05-21 23:19:26 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
