@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.9 2004-12-02 06:33:32 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.10 2005-03-25 04:26:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2004/12/02 06:33:32  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.8  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -132,7 +135,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char res_id[]="$Id: mbsys_ldeoih.c,v 5.9 2004-12-02 06:33:32 caress Exp $";
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.10 2005-03-25 04:26:49 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1071,6 +1074,10 @@ int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert data into structure */
 	if (store->kind == MB_DATA_DATA)
 		{
+		if (store->depth_scale <= 0)
+			{
+		 	store->depth_scale = MAX((int) (1 + transducer_depth / 30.0), 1);
+			}
 		depthscale = 0.001 * store->depth_scale;
 		store->transducer_depth = transducer_depth / depthscale;
 		store->altitude = altitude / depthscale;
@@ -1352,6 +1359,10 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->speed = 100 * speed;
 
 		/* get draft */
+		if (store->depth_scale <= 0)
+			{
+		 	store->depth_scale = MAX((int) (1 + draft / 30.0), 1);
+			}
 		depthscale = 0.001 * store->depth_scale;
 		store->transducer_depth = draft / depthscale;
 
