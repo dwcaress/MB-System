@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.25 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mblist.c,v 4.26 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.25  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.24  2000/09/11  20:10:02  caress
  * Linked to new datalist parsing functions. Now supports recursive datalists
  * and comments in datalists.
@@ -178,11 +181,9 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.25 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.26 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V -W]";
@@ -1270,27 +1271,23 @@ char **argv;
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int set_output(verbose,beams_bath,beams_amp,pixels_ss,
-		use_bath,use_amp,use_ss,dump_mode,beam_set,pixel_set,
-		beam_start,beam_end,pixel_start,pixel_end,
-		n_list,list,error)
-int	verbose;
-int	beams_bath;
-int	beams_amp;
-int	pixels_ss;
-int	use_bath;
-int	use_amp;
-int	use_ss;
-int	dump_mode;
-int	beam_set;
-int	pixel_set;
-int	*beam_start;
-int	*beam_end;
-int	*pixel_start;
-int	*pixel_end;
-int	*n_list;
-char	*list;
-int	*error;
+int set_output(	int	verbose, 
+		int	beams_bath, 
+		int	beams_amp, 
+		int	pixels_ss, 
+		int	use_bath, 
+		int	use_amp, 
+		int	use_ss, 
+		int	dump_mode, 
+		int	beam_set, 
+		int	pixel_set, 
+		int	*beam_start, 
+		int	*beam_end, 
+		int	*pixel_start, 
+		int	*pixel_end, 
+		int	*n_list, 
+		char	*list, 
+		int	*error)
 {
 	char	*function_name = "set_output";
 	int	status = MB_SUCCESS;

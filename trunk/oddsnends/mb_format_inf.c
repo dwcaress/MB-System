@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format_inf.c	1/21/93
- *    $Id: mb_format_inf.c,v 4.5 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_format_inf.c,v 4.6 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.4  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -71,12 +74,9 @@
 #include "../../include/mb_status.h"
 
 /*--------------------------------------------------------------------*/
-int mb_format_inf(verbose,format_num,message)
-int	verbose;
-int	format_num;
-char	**message;
+int mb_format_inf(int verbose, int format_num, char **message)
 {
-  static char rcs_id[]="$Id: mb_format_inf.c,v 4.5 2000-09-30 06:26:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_format_inf.c,v 4.6 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_format_inf";
 	int	status;
 

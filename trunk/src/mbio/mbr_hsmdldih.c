@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.10 2000-09-30 06:34:20 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.11 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.9  1999/09/14  20:39:11  caress
  * Fixed bugs handling HSMD
  *
@@ -82,12 +85,9 @@
 #include "../../include/mbf_hsmdldih.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_hsmdldih(verbose,mbio_ptr,error)
-int    verbose;
-char   *mbio_ptr;
-int    *error;
+int mbr_alm_hsmdldih(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.10 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.11 2000-10-11 01:03:21 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdldih";
 	int	 status = MB_SUCCESS;
 	int	 i;
@@ -168,10 +168,7 @@ int    *error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_hsmdldih(verbose,mbio_ptr,error)
-int    verbose;
-char   *mbio_ptr;
-int    *error;
+int mbr_dem_hsmdldih(int verbose, char *mbio_ptr, int *error)
 {
 	char    *function_name = "mbr_dem_hsmdldih";
 	int	  status = MB_SUCCESS;
@@ -209,10 +206,7 @@ int    *error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_hsmdldih(verbose,data_ptr,error)
-int    verbose;
-char   *data_ptr;
-int    *error;
+int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error)
 {
 	char	 *function_name = "mbr_zero_hsmdldih";
 	int	 status = MB_SUCCESS;
@@ -327,11 +321,7 @@ int    *error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hsmdldih(verbose,mbio_ptr,store_ptr,error)
-int    verbose;
-char   *mbio_ptr;
-char   *store_ptr;
-int    *error;
+int mbr_rt_hsmdldih(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	 *function_name = "mbr_rt_hsmdldih";
 	int	 status = MB_SUCCESS;
@@ -826,11 +816,7 @@ int    *error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_hsmdldih(verbose,mbio_ptr,store_ptr,error)
-int    verbose;
-char   *mbio_ptr;
-char   *store_ptr;
-int    *error;
+int mbr_wt_hsmdldih(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_hsmdldih";
 	int	status = MB_SUCCESS;
@@ -1086,10 +1072,7 @@ int    *error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsmdldih_rd_data(verbose,mbio_ptr,error)
-int    verbose;
-char   *mbio_ptr;
-int    *error;
+int mbr_hsmdldih_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char    *function_name = "mbr_hsmdldih_rd_data";
 	int     status = MB_SUCCESS;
@@ -2000,17 +1983,8 @@ int    *error;
 	/* return status */
 	return(status);
 }
-
 /*--------------------------------------------------------------------*/
-/*
- * This function actually does the writing of raw data 
- */
-
-int mbr_hsmdldih_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_hsmdldih_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	  *function_name = "mbr_hsmdldih_wr_data";
 	int	  status = MB_SUCCESS;

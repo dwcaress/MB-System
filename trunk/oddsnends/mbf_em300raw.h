@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em300raw.h	10/16/98
- *	$Id: mbf_em300raw.h,v 4.3 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbf_em300raw.h,v 4.4 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.2  2000/07/20  20:24:59  caress
  * First cut at supporting both EM120 and EM1002.
  *
@@ -211,7 +214,7 @@
 
 /* maximum number of beams and pixels */
 #define	MBF_EM300RAW_MAXBEAMS		254
-#define	MBF_EM300RAW_MAXRAWPIXELS	8192
+#define	MBF_EM300RAW_MAXRAWPIXELS	32000
 #define	MBF_EM300RAW_MAXSVP		1024
 #define	MBF_EM300RAW_MAXATTITUDE	100
 #define	MBF_EM300RAW_MAXHEADING		100

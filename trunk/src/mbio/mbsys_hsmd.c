@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.8 2000-09-30 06:32:52 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.9 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -41,6 +41,9 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/09/30  06:32:52  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.7  1999/09/14  20:39:11  caress
  * Fixed bugs handling HSMD
  *
@@ -104,13 +107,10 @@
 #include "../../include/mbsys_hsmd.h"
 
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_alloc(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	**store_ptr;
-int	*error;
+int mbsys_hsmd_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error)
 {
-	static char res_id[]="$Id: mbsys_hsmd.c,v 4.8 2000-09-30 06:32:52 caress Exp $";
+	static char res_id[]="$Id: mbsys_hsmd.c,v 4.9 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -148,11 +148,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_deall(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	**store_ptr;
-int	*error;
+int mbsys_hsmd_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error)
 {
 	char	*function_name = "mbsys_hsmd_deall";
 	int	status = MB_SUCCESS;
@@ -188,35 +185,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_extract(verbose,mbio_ptr,store_ptr,kind,
-		       time_i,time_d,navlon,navlat,speed,heading,
-		       nbath,namp,nss,
-		       beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-		       ss,ssacrosstrack,ssalongtrack,
-		       comment,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*kind;
-int	time_i[7];
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-int	*nbath;
-int	*namp;
-int	*nss;
-char	*beamflag;
-double	*bath;
-double	*amp;
-double	*bathacrosstrack;
-double	*bathalongtrack;
-double	*ss;
-double	*ssacrosstrack;
-double	*ssalongtrack;
-char	*comment;
-int	*error;
+int mbsys_hsmd_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+		int *kind, int time_i[7], double *time_d,
+		double *navlon, double *navlat,
+		double *speed, double *heading,
+		int *nbath, int *namp, int *nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, int *error)
 {
 	char	*function_name = "mbsys_hsmd_extract";
 	int	status = MB_SUCCESS;
@@ -517,34 +494,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_insert(verbose,mbio_ptr,store_ptr,
-		      time_i,time_d,navlon,navlat,speed,heading,
-		      nbath,namp,nss,
-		      beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-		      ss,ssacrosstrack,ssalongtrack,
-		      comment,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	time_i[7];
-double	time_d;
-double	navlon;
-double	navlat;
-double	speed;
-double	heading;
-int	nbath;
-int	namp;
-int	nss;
-char	*beamflag;
-double	*bath;
-double	*amp;
-double	*bathacrosstrack;
-double	*bathalongtrack;
-double	*ss;
-double	*ssacrosstrack;
-double	*ssalongtrack;
-char	*comment;
-int	*error;
+int mbsys_hsmd_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+		int time_i[7], double time_d,
+		double navlon, double navlat,
+		double speed, double heading,
+		int nbath, int namp, int nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, int *error)
 {
 	char	*function_name = "mbsys_hsmd_insert";
 	int	status = MB_SUCCESS;
@@ -714,24 +672,12 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,angles_null,
-	heave,alongtrack_offset,flags,draft,ssv,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*kind;
-int	*nbeams;
-double	*ttimes;
-double	*angles;
-double	*angles_forward;
-double	*angles_null;
-double	*heave;
-double	*alongtrack_offset;
-int	*flags;
-double	*draft;
-double	*ssv;
-int	*error;
+int mbsys_hsmd_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+	int *kind, int *nbeams,
+	double *ttimes, double *angles, 
+	double *angles_forward, double *angles_null,
+	double *heave, double *alongtrack_offset, 
+	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_hsmd_ttimes";
 	int	status = MB_SUCCESS;
@@ -755,7 +701,6 @@ int	*error;
 		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
 		fprintf(stderr,"dbg2       heave:      %d\n",heave);
 		fprintf(stderr,"dbg2       ltrk_off:   %d\n",alongtrack_offset);
-		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
 	/* get mbio descriptor */
@@ -773,7 +718,7 @@ int	*error;
 		/* get nbeams */
 		*nbeams = mb_io_ptr->beams_bath;
 
-		/* zero travel times, angles, and flags */
+		/* zero travel times, angles */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			ttimes[i] = 0.0;
@@ -782,10 +727,9 @@ int	*error;
 			angles_null[i] = 40.0;
 			heave[i] = 0.0;
 			alongtrack_offset[i] = 0.0;
-			flags[i] = MB_NO;
 			}
 
-		/* get travel times, angles, and flags */
+		/* get travel times, angles */
 		if (store->skals)
 			scale = 0.00015;
 		else
@@ -811,8 +755,6 @@ int	*error;
 					angles_forward[j] = 180.0;
 					}
 				heave[j] = store->heave;
-				if (store->spfb[i] < 0.0)
-					flags[j] = MB_YES;
      	 			}
     			}
 
@@ -825,8 +767,6 @@ int	*error;
 				ttimes[j] = fabs(scale * store->spfb[i]);
 				angles[j] = store->angle[i];
 				heave[j] = store->heave;
-				if (store->spfb[i] < 0.0)
-					flags[j] = MB_YES;
       				}
     			}
 
@@ -872,11 +812,10 @@ int	*error;
 		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f  flag:%d\n",
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n",
 				i,ttimes[i],angles[i],
 				angles_forward[i],angles_null[i],
-				heave[i],alongtrack_offset[i],
-				flags[i]);
+				heave[i],alongtrack_offset[i]);
 		}
 	if (verbose >= 2)
 		{
@@ -889,15 +828,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_altitude(verbose,mbio_ptr,store_ptr,
-	kind,transducer_depth,altitude,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*kind;
-double	*transducer_depth;
-double	*altitude;
-int	*error;
+int mbsys_hsmd_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+	int *kind, double *transducer_depth, double *altitude, 
+	int *error)
 {
 	char	*function_name = "mbsys_hsmd_altitude";
 	int	status = MB_SUCCESS;
@@ -1006,24 +939,12 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,draft, 
-		roll,pitch,heave,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*kind;
-int	time_i[7];
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-double	*draft;
-double	*roll;
-double	*pitch;
-double	*heave;
-int	*error;
+int mbsys_hsmd_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind, int time_i[7], double *time_d,
+		double *navlon, double *navlat,
+		double *speed, double *heading, double *draft, 
+		double *roll, double *pitch, double *heave, 
+		int *error)
 {
 	char	*function_name = "mbsys_hsmd_extract_nav";
 	int	status = MB_SUCCESS;
@@ -1208,23 +1129,12 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,draft, 
-		roll,pitch,heave,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	time_i[7];
-double	time_d;
-double	navlon;
-double	navlat;
-double	speed;
-double	heading;
-double	draft;
-double	roll;
-double	pitch;
-double	heave;
-int	*error;
+int mbsys_hsmd_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+		int time_i[7], double time_d,
+		double navlon, double navlat,
+		double speed, double heading, double draft, 
+		double roll, double pitch, double heave,
+		int *error)
 {
 	char	*function_name = "mbsys_hsmd_insert_nav";
 	int	status = MB_SUCCESS;
@@ -1312,12 +1222,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_copy(verbose,mbio_ptr,store_ptr,copy_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-char	*copy_ptr;
-int	*error;
+int mbsys_hsmd_copy(int verbose, char *mbio_ptr, 
+			char *store_ptr, char *copy_ptr,
+			int *error)
 {
 	char	*function_name = "mbsys_hsmd_copy";
 	int	status = MB_SUCCESS;

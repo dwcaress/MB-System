@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 4.2 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 4.3 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.1  1999/12/29  00:34:06  caress
  * Release 4.6.8
  *
@@ -48,12 +51,9 @@
 #include "../../include/mbf_mbpronav.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_mbpronav(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_mbpronav(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 4.2 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 4.3 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -111,10 +111,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_mbpronav(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_mbpronav(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_mbpronav";
 	int	status = MB_SUCCESS;
@@ -152,10 +149,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_mbpronav(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_mbpronav";
 	int	status = MB_SUCCESS;
@@ -213,11 +207,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_mbpronav(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_mbpronav(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_mbpronav";
 	int	status = MB_SUCCESS;
@@ -410,11 +400,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_mbpronav(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_mbpronav(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_mbpronav";
 	int	status = MB_SUCCESS;
@@ -515,10 +501,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mbpronav_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_mbpronav_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_mbpronav_rd_data";
 	int	status = MB_SUCCESS;
@@ -740,11 +723,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mbpronav_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_mbpronav_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_mbpronav_wr_data";
 	int	status = MB_SUCCESS;

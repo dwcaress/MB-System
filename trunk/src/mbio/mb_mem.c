@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 4.8 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_mem.c,v 4.9 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.7  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -89,13 +92,9 @@ static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static int	mb_alloc_size[MB_MEMORY_HEAP_MAX];
 
 /*--------------------------------------------------------------------*/
-int mb_malloc(verbose,size,ptr,error)
-int	verbose;
-int	size;
-char	**ptr;
-int	*error;
+int mb_malloc(int verbose, int size, char **ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 4.8 2000-09-30 06:26:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem.c,v 4.9 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
 	int	iptr;
@@ -178,10 +177,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_free(verbose,ptr,error)
-int	verbose;
-char	**ptr;
-int	*error;
+int mb_free(int verbose, char **ptr, int *error)
 {
 	char	*function_name = "mb_free";
 	int	status = MB_SUCCESS;
@@ -261,9 +257,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_memory_list(verbose,error)
-int	verbose;
-int	*error;
+int mb_memory_list(int verbose, int *error)
 {
 	char	*function_name = "mb_memory_list";
 	int	status = MB_SUCCESS;

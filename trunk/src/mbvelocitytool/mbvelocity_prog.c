@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 4.22 2000-09-30 07:05:18 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 4.23 2000-10-11 01:06:03 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  2000/09/30  07:05:18  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.21  1999/02/04  23:54:54  caress
  * MB-System version 4.6beta7
  *
@@ -152,7 +155,7 @@ struct profile
 #define	MB_SSV_INCORRECT    2
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.22 2000-09-30 07:05:18 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.23 2000-10-11 01:06:03 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -315,9 +318,7 @@ char	*getenv();
 /* Function returns:                                                  */
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
-int mbvt_init(argc,argv)
-int	argc;
-char	**argv;
+int mbvt_init(int argc, char **argv)
 {
 	/* local variables */
 	char	*function_name = "mbvt_init";
@@ -582,11 +583,7 @@ int mbvt_quit()
 /* Function returns:                                                  */
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
-int mbvt_set_graphics(xgid,brdr,ncol,pixels)
-int	xgid;
-int	*brdr;
-int	ncol;
-int	*pixels;
+int mbvt_set_graphics(int xgid, int *brdr, int ncol, int *pixels)
 {
 	/* local variables */
 	char	*function_name = "mbvt_set_graphics";
@@ -643,14 +640,8 @@ int	*pixels;
 /* Function returns:                                                  */
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
-int mbvt_get_values(s_edit,s_ndisplay,s_maxdepth,
-	s_velrange,s_resrange,s_format)
-int	*s_edit;
-int	*s_ndisplay;
-double	*s_maxdepth;
-double	*s_velrange;
-double	*s_resrange;
-int	*s_format;
+int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
+	double *s_velrange, double *s_resrange, int *s_format)
 {
 	/* local variables */
 	char	*function_name = "mbvt_get_values";
@@ -701,12 +692,8 @@ int	*s_format;
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_set_values(s_edit,s_ndisplay,s_maxdepth,s_velrange,s_resrange)
-int	s_edit;
-int	s_ndisplay;
-double	s_maxdepth;
-double	s_velrange;
-double	s_resrange;
+int mbvt_set_values(int s_edit, int s_ndisplay, 
+		double s_maxdepth, double s_velrange, double s_resrange)
 {
 	/* local variables */
 	char	*function_name = "mbvt_set_values";
@@ -755,8 +742,7 @@ double	s_resrange;
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_open_edit_profile(file)
-char	*file;
+int mbvt_open_edit_profile(char *file)
 {
 	/* local variables */
 	char	*function_name = "mbvt_open_edit_profile";
@@ -991,8 +977,7 @@ int mbvt_new_edit_profile()
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_save_edit_profile(file)
-char	*file;
+int mbvt_save_edit_profile(char *file)
 {
 	/* local variables */
 	char	*function_name = "mbvt_save_edit_profile";
@@ -1077,8 +1062,7 @@ char	*file;
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_open_display_profile(file)
-char	*file;
+int mbvt_open_display_profile(char *file)
 {
 	/* local variables */
 	char	*function_name = "mbvt_open_display_profile";
@@ -1206,9 +1190,7 @@ char	*file;
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_get_display_names(nlist,list)
-int	*nlist;
-char	*list[MAX_PROFILES];
+int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES])
 {
 	/* local variables */
 	char	*function_name = "mbvt_get_display_names";
@@ -1254,8 +1236,7 @@ char	*list[MAX_PROFILES];
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_delete_display_profile(select)
-int	select;
+int mbvt_delete_display_profile(int select)
 {
 	/* local variables */
 	char	*function_name = "mbvt_delete_display_profile";
@@ -1798,9 +1779,7 @@ int mbvt_plot()
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_action_mouse_down(x,y)
-int	x;
-int	y;
+int mbvt_action_mouse_down(int x, int y)
 {
 	/* local variables */
 	char	*function_name = "mbvt_action_mouse_down";
@@ -1858,9 +1837,7 @@ int	y;
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_action_mouse_up(x,y)
-int	x;
-int	y;
+int mbvt_action_mouse_up(int x, int y)
 {
 	/* local variables */
 	char	*function_name = "mbvt_action_mouse_up";
@@ -1905,9 +1882,7 @@ int	y;
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_action_mouse_drag(x,y)
-int	x;
-int	y;
+int mbvt_action_mouse_drag(int x, int y)
 {
 	/* local variables */
 	char	*function_name = "mbvt_action_mouse_drag";
@@ -2039,9 +2014,7 @@ int	y;
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_open_swath_file(file,form)
-char	*file;
-int	form;
+int mbvt_open_swath_file(char *file, int form)
 {
 	/* local variables */
 	char	*function_name = "mbvt_open_swath_file";

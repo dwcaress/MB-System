@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_comment.c	7/15/97
- *    $Id: mb_put_comment.c,v 4.2 2000-09-30 06:32:11 caress Exp $
+ *    $Id: mb_put_comment.c,v 4.3 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	July 15, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/09/30  06:32:11  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.1  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -48,11 +51,7 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_put_comment(verbose,mbio_ptr,comment,error)
-int	verbose;
-char	*mbio_ptr;
-char	*comment;
-int	*error;
+int mb_put_comment(int verbose, char *mbio_ptr, char *comment, int *error)
 {
   static char rcs_id[]="$Id $";
 	char	*function_name = "mb_put_comment";

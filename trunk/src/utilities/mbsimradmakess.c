@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsimradmakess.c	11/29/98
  *
- *    $Id: mbsimradmakess.c,v 4.4 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbsimradmakess.c,v 4.5 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -58,6 +58,9 @@
  * Date:	November 29, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.3  2000/03/08  00:05:05  caress
  * Release 4.6.10
  *
@@ -87,12 +90,10 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.4 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.5 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "MBSIMRADMAKESS";
 	static char help_message[] =  "MBSIMRADMAKESS is an utility for regenerating sidescan imagery from the raw amplitude samples contained in data from  Simrad \nEM300 and EM3000 multibeam sonars. This program ignores amplitude \ndata associated with flagged (bad) bathymetry data, thus removing \none important source of noise in the sidescan data. The default \ninput and output streams are stdin and stdout.";
 	static char usage_message[] = "mbsimradmakess [-Fformat -V -H  -Iinfile -Ooutfile -Ppixel_size -Sswath_width -Tpixel_int]";
@@ -830,10 +831,9 @@ char **argv;
 	exit(status);
 }
 /*--------------------------------------------------------------------*/
-int spline(x,y,n,yp1,ypn,y2)
 /* From Numerical Recipies */
-double x[],y[],yp1,ypn,y2[];
-int n;
+int spline(double *x, double *y,
+		int n, double yp1, double ypn, double *y2)
 {
 	int i,k;
 	double p,qn,sig,un,*u,*vector();
@@ -866,10 +866,9 @@ int n;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-int splint(xa,ya,y2a,n,x,y)
 /* From Numerical Recipies */
-double xa[],ya[],y2a[],x,*y;
-int n;
+int splint(double *xa, double *ya, double *y2a,
+		int n, double x, double *y)
 {
 	int klo,khi,k;
 	double h,b,a;
@@ -894,8 +893,7 @@ int n;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-double *vector(nl,nh)
-int nl,nh;
+double *vector(int nl, int nh)
 {
 	double *v;
 	v = (double *) malloc ((unsigned) (nh-nl+1)*sizeof(double));
@@ -903,9 +901,7 @@ int nl,nh;
 	return v-nl;
 }
 /*--------------------------------------------------------------------*/
-void free_vector(v,nl,nh)
-double *v;
-int nl,nh;
+void free_vector(double *v, int nl, int nh)
 {
 	free((char*) (v+nl));
 }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbifremr.c	3/29/96
- *	$Id: mbr_sbifremr.c,v 4.7 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_sbifremr.c,v 4.8 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Location:	152 39.061W; 34 09.150S on R/V Ewing
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.6  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -75,12 +78,9 @@
 #define	ANGLE_SPACING 3.75
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_sbifremr(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_sbifremr(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sbifremr.c,v 4.7 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_sbifremr.c,v 4.8 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_sbifremr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -124,10 +124,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_sbifremr(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_sbifremr(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_sbifremr";
 	int	status = MB_SUCCESS;
@@ -165,11 +162,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_sbifremr(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_sbifremr(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_sbifremr";
 	int	status = MB_SUCCESS;
@@ -395,11 +388,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_sbifremr(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_sbifremr(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_sbifremr";
 	int	status = MB_SUCCESS;
@@ -551,10 +540,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sbifremr_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_sbifremr_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_sbifremr_rd_data";
 	int	status = MB_SUCCESS;
@@ -855,10 +841,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sbifremr_wr_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_sbifremr_wr_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_sbifremr_wr_data";
 	int	status = MB_SUCCESS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.13 2000-09-30 06:32:11 caress Exp $
+ *    $Id: mb_time.c,v 4.14 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  2000/09/30  06:32:11  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.12  2000/03/06  21:53:54  caress
  * Implemented Suzanne Ohara's fixes to Y2K leapday problems.
  *
@@ -103,15 +106,12 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.13 2000-09-30 06:32:11 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.14 2000-10-11 01:02:30 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from
  * 	1/1/70 00:00:00 calculated from (yy/mm/dd/hr/mi/sc). */
-int mb_get_time(verbose,time_i,time_d)
-int verbose;
-int time_i[7];
-double *time_d;
+int mb_get_time(int verbose, int time_i[7], double *time_d)
 {
   char	*function_name = "mb_get_time";
 	int	status;
@@ -166,10 +166,7 @@ double *time_d;
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_date returns yy/mm/dd/hr/mi/sc calculated
  * 	from the number of seconds after 1/1/70 00:00:0 */
-int mb_get_date(verbose,time_d,time_i)
-int verbose;
-double time_d;
-int time_i[7];
+int mb_get_date(int verbose, double time_d, int time_i[7])
 {
 
 	char	*function_name = "mb_get_date";
@@ -244,10 +241,7 @@ int time_i[7];
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_jtime returns the day of year calculated 
  *	from (yy/mm/dd/hr/mi/sc). */
-int mb_get_jtime(verbose,time_i,time_j)
-int verbose;
-int time_i[7];
-int time_j[5];
+int mb_get_jtime(int verbose, int time_i[7], int time_j[5])
 {
 	char	*function_name = "mb_get_jtime";
 	int	status;
@@ -306,10 +300,7 @@ int time_j[5];
  *	calculated from the time in (yy/yd/hr/mi/sc) where yd is the
  *	day of the year.
  */
-int mb_get_itime(verbose,time_j,time_i)
-int verbose;
-int time_j[5];
-int time_i[7];
+int mb_get_itime(int verbose, int time_j[5], int time_i[7])
 {
 	char	*function_name = "mb_get_itime";
 	int	status;
@@ -384,10 +375,7 @@ int time_i[7];
  *      patented and first built in 1962. Thus, no digital swath
  *      data can have timestamps dating prior to 1962.
  */
-int mb_fix_y2k(verbose,year_short,year_long)
-int verbose;
-int year_short;
-int *year_long;
+int mb_fix_y2k(int verbose, int year_short, int *year_long)
 {
 	char	*function_name = "mb_fix_y2k";
 	int	status;
@@ -440,10 +428,7 @@ int *year_long;
  *      same thing was accomplished using
  *          year_short = year_long % 100;
  */
-int mb_unfix_y2k(verbose,year_long,year_short)
-int verbose;
-int year_long;
-int *year_short;
+int mb_unfix_y2k(int verbose, int year_long, int *year_short)
 {
 	char	*function_name = "mb_unfix_y2k";
 	int	status;

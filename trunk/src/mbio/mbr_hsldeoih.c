@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.16 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.17 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.15  2000/03/08  00:44:59  caress
  * Version 4.6.10
  *
@@ -118,12 +121,9 @@
 #define ZERO_SOME   1
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_hsldeoih(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_hsldeoih(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.16 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.17 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -178,10 +178,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_hsldeoih(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_hsldeoih(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_hsldeoih";
 	int	status = MB_SUCCESS;
@@ -219,11 +216,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_hsldeoih(verbose,data_ptr,mode,error)
-int	verbose;
-char	*data_ptr;
-int	mode;
-int	*error;
+int mbr_zero_hsldeoih(int verbose, char *data_ptr, int mode, int *error)
 {
 	char	*function_name = "mbr_zero_hsldeoih";
 	int	status = MB_SUCCESS;
@@ -379,11 +372,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hsldeoih(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_hsldeoih(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_hsldeoih";
 	int	status = MB_SUCCESS;
@@ -757,11 +746,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_hsldeoih(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_hsldeoih(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_hsldeoih";
 	int	status = MB_SUCCESS;
@@ -992,10 +977,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_hsldeoih_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_data";
 	int	status = MB_SUCCESS;
@@ -1160,11 +1142,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_nav_source(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_nav_source";
 	int	status = MB_SUCCESS;
@@ -1275,11 +1254,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_mean_velocity(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_mean_velocity";
 	int	status = MB_SUCCESS;
@@ -1394,11 +1370,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_velocity_profile(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_velocity_profile";
 	int	status = MB_SUCCESS;
@@ -1517,11 +1490,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_standby(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_standby";
 	int	status = MB_SUCCESS;
@@ -1647,11 +1617,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_survey(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_survey";
 	int	status = MB_SUCCESS;
@@ -2061,11 +2028,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_calibrate(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_calibrate";
 	int	status = MB_SUCCESS;
@@ -2475,11 +2439,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_comment(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_comment";
 	int	status = MB_SUCCESS;
@@ -2540,11 +2501,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_hsldeoih_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_wr_data";
 	int	status = MB_SUCCESS;
@@ -2657,11 +2614,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_nav_source(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_wr_nav_source";
 	int	status = MB_SUCCESS;
@@ -2788,11 +2742,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_mean_velocity(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_wr_mean_velocity";
 	int	status = MB_SUCCESS;
@@ -2923,11 +2874,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_velocity_profile(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_wr_velocity_profile";
 	int	status = MB_SUCCESS;
@@ -3054,11 +3002,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_standby(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_wr_standby";
 	int	status = MB_SUCCESS;
@@ -3201,11 +3146,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_survey(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_wr_survey";
 	int	status = MB_SUCCESS;
@@ -3573,11 +3515,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_calibrate(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_wr_calibrate";
 	int	status = MB_SUCCESS;
@@ -3945,11 +3884,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_comment(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsldeoih_struct *data;
-int	*error;
+int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, 
+		struct mbf_hsldeoih_struct *data, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_wr_comment";
 	int	status = MB_SUCCESS;

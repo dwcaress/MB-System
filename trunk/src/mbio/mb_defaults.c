@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 4.7 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_defaults.c,v 4.8 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.6  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -78,19 +81,12 @@
 #include "../../include/mb_status.h"
 
 /*--------------------------------------------------------------------*/
-int mb_defaults(verbose,format,pings,lonflip,bounds,btime_i,etime_i,
-		speedmin,timegap)
-int verbose;
-int *format;
-int *pings;
-int *lonflip;
-double *bounds;
-int *btime_i;
-int *etime_i;
-double *speedmin;
-double *timegap;
+int mb_defaults(int verbose, int *format, int *pings,
+		int *lonflip, double bounds[4], 
+		int btime_i[7], int etime_i[7],
+		double *speedmin, double *timegap)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.7 2000-09-30 06:26:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.8 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -213,7 +209,7 @@ int verbose;
 char *psdisplay;
 char *mbproject;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.7 2000-09-30 06:26:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.8 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;

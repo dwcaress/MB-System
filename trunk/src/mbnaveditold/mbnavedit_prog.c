@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.22 2000-09-30 07:04:44 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.23 2000-10-11 01:05:41 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  2000/09/30  07:04:44  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.21  2000/09/30  07:04:05  caress
  * Snapshot for Dale.
  *
@@ -184,7 +187,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.22 2000-09-30 07:04:44 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.23 2000-10-11 01:05:41 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -355,10 +358,7 @@ int mbnavedit_init_globals()
 
 
 /*--------------------------------------------------------------------*/
-int mbnavedit_init(argc,argv,startup_file)
-int	argc;
-char	**argv;
-int	*startup_file;
+int mbnavedit_init(int argc, char **argv, int *startup_file)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_init";
@@ -549,10 +549,7 @@ int	*startup_file;
 }
 
 /*--------------------------------------------------------------------*/
-int mbnavedit_set_graphics(xgid,ncol,pixels)
-int	xgid;
-int	ncol;
-int	*pixels;
+int mbnavedit_set_graphics(int xgid, int ncol, int *pixels)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_set_graphics";
@@ -883,10 +880,7 @@ int mbnavedit_open_file()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_get_output_file(file1,file2,form)
-char	*file1;
-char	*file2;
-int	*form;
+int mbedit_get_output_file(char *file1, char *file2, int *form)
 {
 	/* local variables */
 	char	*function_name = "mbedit_get_output_file";
@@ -1019,8 +1013,7 @@ int mbnavedit_close_file()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_dump_data(hold)
-int	hold;
+int mbnavedit_dump_data(int hold)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_dump_data";
@@ -1387,8 +1380,7 @@ int mbnavedit_clear_screen()
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_next_buffer(quit)
-int	*quit;
+int mbnavedit_action_next_buffer(int *quit)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_next_buffer";
@@ -1565,8 +1557,7 @@ int mbnavedit_action_close()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_done(quit)
-int	*quit;
+int mbnavedit_action_done(int *quit)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_done";
@@ -1658,8 +1649,7 @@ int mbnavedit_action_quit()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_step(step)
-int	step;
+int mbnavedit_action_step(int step)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_step";
@@ -1764,9 +1754,7 @@ int	step;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_mouse_pick(xx, yy)
-int	xx;
-int	yy;
+int mbnavedit_action_mouse_pick(int xx, int yy)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_mouse_pick";
@@ -1935,9 +1923,7 @@ int	yy;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_mouse_select(xx, yy)
-int	xx;
-int	yy;
+int mbnavedit_action_mouse_select(int xx, int yy)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_mouse_select";
@@ -2084,9 +2070,7 @@ int	yy;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_mouse_deselect(xx, yy)
-int	xx;
-int	yy;
+int mbnavedit_action_mouse_deselect(int xx, int yy)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_mouse_deselect";
@@ -2233,9 +2217,7 @@ int	yy;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_mouse_selectall(xx, yy)
-int	xx;
-int	yy;
+int mbnavedit_action_mouse_selectall(int xx, int yy)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_mouse_selectall";
@@ -2325,9 +2307,7 @@ int	yy;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_mouse_deselectall(xx, yy)
-int	xx;
-int	yy;
+int mbnavedit_action_mouse_deselectall(int xx, int yy)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_mouse_deselectall";
@@ -2388,8 +2368,7 @@ int	yy;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_deselect_all(type)
-int	type;
+int mbnavedit_action_deselect_all(int type)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_mouse_deselect_all";
@@ -2469,10 +2448,7 @@ int	type;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_set_interval(xx, yy, which)
-int	xx;
-int	yy;
-int	which;
+int mbnavedit_action_set_interval(int xx, int yy, int which)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_set_interval";
@@ -3400,8 +3376,7 @@ int mbnavedit_action_showall()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_get_smgcmg(i)
-int	i;
+int mbnavedit_get_smgcmg(int i)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_get_smgcmg";
@@ -4328,8 +4303,7 @@ int mbnavedit_plot_all()
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_tint(iplot)
-int	iplot;
+int mbnavedit_plot_tint(int iplot)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_tint";
@@ -4410,8 +4384,7 @@ int	iplot;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_lon(iplot)
-int	iplot;
+int mbnavedit_plot_lon(int iplot)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_lon";
@@ -4509,8 +4482,7 @@ int	iplot;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_lat(iplot)
-int	iplot;
+int mbnavedit_plot_lat(int iplot)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_lat";
@@ -4608,8 +4580,7 @@ int	iplot;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_speed(iplot)
-int	iplot;
+int mbnavedit_plot_speed(int iplot)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_speed";
@@ -4707,8 +4678,7 @@ int	iplot;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_heading(iplot)
-int	iplot;
+int mbnavedit_plot_heading(int iplot)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_heading";
@@ -4806,8 +4776,7 @@ int	iplot;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_roll(iplot)
-int	iplot;
+int mbnavedit_plot_roll(int iplot)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_roll";
@@ -4871,8 +4840,7 @@ int	iplot;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_pitch(iplot)
-int	iplot;
+int mbnavedit_plot_pitch(int iplot)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_pitch";
@@ -4936,8 +4904,7 @@ int	iplot;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_heave(iplot)
-int	iplot;
+int mbnavedit_plot_heave(int iplot)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_heave";
@@ -5001,9 +4968,7 @@ int	iplot;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_tint_value(iplot, iping)
-int	iplot;
-int	iping;
+int mbnavedit_plot_tint_value(int iplot, int iping)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_tint_value";
@@ -5056,9 +5021,7 @@ int	iping;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_lon_value(iplot, iping)
-int	iplot;
-int	iping;
+int mbnavedit_plot_lon_value(int iplot, int iping)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_lon_value";
@@ -5111,9 +5074,7 @@ int	iping;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_lat_value(iplot, iping)
-int	iplot;
-int	iping;
+int mbnavedit_plot_lat_value(int iplot, int iping)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_lat_value";
@@ -5166,9 +5127,7 @@ int	iping;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_speed_value(iplot, iping)
-int	iplot;
-int	iping;
+int mbnavedit_plot_speed_value(int iplot, int iping)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_speed_value";
@@ -5221,9 +5180,7 @@ int	iping;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_plot_heading_value(iplot, iping)
-int	iplot;
-int	iping;
+int mbnavedit_plot_heading_value(int iplot, int iping)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_plot_heading_value";

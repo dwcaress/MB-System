@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_init.c	2/3/93
- *    $Id: mb_mem_init.c,v 4.21 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_mem_init.c,v 4.22 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.20  1999/10/21  22:38:36  caress
  * Added MBPRONAV format.
  *
@@ -124,12 +127,9 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_mem_init(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mb_mem_init(int verbose, char *mbio_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_mem_init.c,v 4.21 2000-09-30 06:26:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem_init.c,v 4.22 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_mem_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

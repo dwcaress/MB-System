@@ -38,6 +38,7 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
+!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -110,7 +111,6 @@ identifier BXG_toggleButton_filters_wrongside;
 identifier BXG_window_mbedit;
 procedure BxManageCB(string);
 procedure BxUnmanageCB;
-procedure do_fileselection_init();
 procedure do_load_ok();
 procedure do_next_buffer();
 procedure do_buffer_size();
@@ -336,8 +336,8 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 292;
-        XmNy = 233;
+        XmNx = 314;
+        XmNy = 235;
         XmNwidth = 430;
         XmNheight = 251;
     };
@@ -553,8 +553,8 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 239;
-        XmNy = 291;
+        XmNx = 198;
+        XmNy = 241;
         XmNwidth = 536;
         XmNheight = 135;
     };
@@ -765,8 +765,8 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 239;
-        XmNy = 287;
+        XmNx = 225;
+        XmNy = 239;
         XmNwidth = 536;
         XmNheight = 142;
     };
@@ -883,8 +883,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 351;
-        XmNy = 278;
+        XmNx = 297;
+        XmNy = 269;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1003,8 +1003,8 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 291;
-        XmNy = 292;
+        XmNx = 236;
+        XmNy = 223;
         XmNwidth = 431;
         XmNheight = 133;
     };
@@ -1089,8 +1089,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 317;
-        XmNy = 315;
+        XmNx = 228;
+        XmNy = 207;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1344,8 +1344,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 270;
-        XmNy = 130;
+        XmNx = 169;
+        XmNy = 140;
         XmNwidth = 473;
         XmNheight = 457;
     };
@@ -1658,8 +1658,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 409;
-        XmNy = 207;
+        XmNx = 377;
+        XmNy = 189;
         XmNwidth = 196;
         XmNheight = 302;
     };
@@ -1979,8 +1979,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 128;
-        XmNy = 76;
+        XmNx = 236;
+        XmNy = 114;
         XmNwidth = 541;
         XmNheight = 489;
     };
@@ -2668,10 +2668,7 @@ object pushButton_file : XmPushButton widget {
     callbacks {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_file);
-       XmNactivateCallback = procedures {
-                 do_fileselection_init();
-                 BxManageCB("bulletinBoard_file");
-        };
+        XmNactivateCallback = procedure BxManageCB("bulletinBoard_file");
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.11 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbmosaic.c,v 4.12 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.10  2000/09/11  20:10:02  caress
  * Linked to new datalist parsing functions. Now supports recursive datalists
  * and comments in datalists.
@@ -108,7 +111,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.11 2000-09-30 07:06:28 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.12 2000-10-11 01:06:15 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -120,9 +123,7 @@ static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
 	extern char *optarg;
 	extern int optkind;
@@ -2300,15 +2301,10 @@ char **argv;
 /*
  * function write_ascii writes output grid to an ascii file 
  */
-int write_ascii(verbose,outfile,grid,
-			nx,ny,xmin,xmax,ymin,ymax,
-			dx,dy,error)
-int	verbose;
-char	*outfile;
-float	*grid;
-int	nx, ny;
-double	xmin, xmax, ymin, ymax, dx, dy;
-int	*error;
+int write_ascii(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, int *error)
 {
 	char	*function_name = "write_ascii";
 	int	status = MB_SUCCESS;
@@ -2388,16 +2384,10 @@ int	*error;
 /*
  * function write_arcascii writes output grid to an Arc/Info ascii file 
  */
-int write_arcascii(verbose,outfile,grid,
-			nx,ny,xmin,xmax,ymin,ymax,
-			dx,dy,nodata,error)
-int	verbose;
-char	*outfile;
-float	*grid;
-int	nx, ny;
-double	xmin, xmax, ymin, ymax, dx, dy;
-double	nodata;
-int	*error;
+int write_arcascii(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, double nodata, int *error)
 {
 	char	*function_name = "write_ascii";
 	int	status = MB_SUCCESS;
@@ -2478,15 +2468,10 @@ int	*error;
  * function write_oldgrd writes output grid to a 
  * GMT version 1 binary grd file 
  */
-int write_oldgrd(verbose,outfile,grid,
-			nx,ny,xmin,xmax,ymin,ymax,
-			dx,dy,error)
-int	verbose;
-char	*outfile;
-float	*grid;
-int	nx, ny;
-double	xmin, xmax, ymin, ymax, dx, dy;
-int	*error;
+int write_oldgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, int *error)
 {
 	char	*function_name = "write_oldgrd";
 	int	status = MB_SUCCESS;
@@ -2552,18 +2537,13 @@ int	*error;
  * function write_cdfgrd writes output grid to a 
  * GMT version 2 netCDF grd file 
  */
-int write_cdfgrd(verbose,outfile,grid,nx,ny,
-			xmin,xmax,ymin,ymax,zmin,zmax,dx,dy,
-			xlab,ylab,zlab,titl,projection,argc,argv,error)
-int	verbose;
-char	*outfile;
-float	*grid;
-int	nx, ny;
-double	xmin, xmax, ymin, ymax, zmin, zmax, dx, dy;
-char	*xlab, *ylab, *zlab, *titl, *projection;
-int	argc;
-char	**argv; 
-int	*error;
+int write_cdfgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double zmin, double zmax, double dx, double dy, 
+		char *xlab, char *ylab, char *zlab, char *titl, 
+		char *projection, int argc, char **argv, 
+		int *error)
 {
 	char	*function_name = "write_cdfgrd";
 	int	status = MB_SUCCESS;
@@ -2700,13 +2680,8 @@ int	*error;
  * function mbmosaic_project translates lon lat values into grid projected
  * values 
  */
-int mbmosaic_project(verbose, lon, lat, x, y, error)
-int	verbose;
-double	lon;
-double	lat;
-double	*x;
-double	*y;
-int	*error;
+int mbmosaic_project(int verbose, double lon, double lat, 
+		double *x, double *y, int *error)
 {
 	char	*function_name = "mbmosaic_project";
 	int	status = MB_SUCCESS;
@@ -2750,37 +2725,29 @@ int	*error;
  * function mbmosaic_get_priorities obtains data priorities based on
  * grazing angles and look azimuths
  */
-int mbmosaic_get_priorities(verbose, 
-	mode, file_weight, 
-	nangle, aangles, apriorities, 
-	azimuth, factor, 
-	nbath, beamflag, bath, bathacrosstrack,
-	depth, depthacrosstrack,  
-	bath_default, heading, 
-	ndata, data, acrosstrack, 
-	angles, priorities, error)
-int	verbose;
-int	mode;
-double	file_weight;
-int	nangle;
-double	*aangles;
-double	*apriorities;
-double	azimuth;
-double	factor;
-int	nbath;
-char	*beamflag;
-double	*bath;
-double	*bathacrosstrack;
-double	*depth;
-double	*depthacrosstrack;
-double	bath_default;
-double	heading;
-int	ndata;
-double	*data;
-double	*acrosstrack;
-double	*angles;
-double	*priorities;
-int	*error;
+int mbmosaic_get_priorities(
+		int	verbose, 
+		int	mode, 
+		double	file_weight, 
+		int	nangle, 
+		double	*aangles, 
+		double	*apriorities, 
+		double	azimuth, 
+		double	factor, 
+		int	nbath, 
+		char	*beamflag, 
+		double	*bath, 
+		double	*bathacrosstrack, 
+		double	*depth, 
+		double	*depthacrosstrack, 
+		double	bath_default, 
+		double	heading, 
+		int	ndata, 
+		double	*data, 
+		double	*acrosstrack, 
+		double	*angles, 
+		double	*priorities, 
+		int	*error)
 {
 	char	*function_name = "mbmosaic_get_priorities";
 	int	status = MB_SUCCESS;
@@ -3020,9 +2987,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int double_compare(a,b)
-double	*a;
-double	*b;
+int double_compare(double *a, double *b)
 {
 	if (*a > *b)
 		return(1);

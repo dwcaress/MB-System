@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.29 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbbath.c,v 4.30 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.29  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.28  2000/09/19  22:21:09  caress
  * Added -T option for travel time scaling.
  *
@@ -174,12 +177,10 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.29 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.30 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -1554,15 +1555,10 @@ and stdout.";
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int get_roll_correction(verbose,nroll,roll_time,roll_corr,time_d,
-		roll_correction,error)
-int	verbose;
-int	nroll;
-double	*roll_time;
-double	*roll_corr;
-double	time_d;
-double	*roll_correction;
-int	*error;
+int get_roll_correction(int verbose,
+		int nroll, double *roll_time, double *roll_corr,
+		double time_d, double *roll_correction,
+		int *error)
 {
 	char	*function_name = "get_roll_correction";
 	int	status = MB_SUCCESS;

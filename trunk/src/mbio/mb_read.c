@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 4.12 2000-09-30 06:32:11 caress Exp $
+ *    $Id: mb_read.c,v 4.13 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/09/30  06:32:11  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.11  1999/08/08  04:12:45  caress
  * Added ELMK2XSE format.
  *
@@ -117,39 +120,19 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_read(verbose,mbio_ptr,kind,pings,time_i,time_d,
-		navlon,navlat,speed,heading,distance,
-		nbath,namp,nss,
-		beamflag,bath,amp,bathlon,bathlat,
-		ss,sslon,sslat,
-		comment,error)
-int	verbose;
-char	*mbio_ptr;
-int	*kind;
-int	*pings;
-int	time_i[7];
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-double	*distance;
-int	*nbath;
-int	*namp;
-int	*nss;
-char	*beamflag;
-double	*bath;
-double	*amp;
-double	*bathlon;
-double	*bathlat;
-double	*ss;
-double	*sslon;
-double	*sslat;
-char	*comment;
-int	*error;
+int mb_read(int verbose, char *mbio_ptr,
+		int *kind, int *pings, 
+		int time_i[7], double *time_d,
+		double *navlon, double *navlat, 
+		double *speed, double *heading, double *distance,
+		int *nbath, int *namp, int *nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathlon, double *bathlat,
+		double *ss, double *sslon, double *sslat,
+		char *comment, int *error)
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 4.12 2000-09-30 06:32:11 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 4.13 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

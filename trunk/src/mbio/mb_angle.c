@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 4.1 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_angle.c,v 4.2 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -175,6 +175,9 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  1999/01/01  23:38:01  caress
  * MB-System version 4.6beta6
  *
@@ -190,13 +193,10 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_takeoff_to_rollpitch(verbose,theta,phi,alpha,beta,error)
-int	verbose;
-double	theta;
-double	phi;
-double	*alpha;
-double	*beta;
-int	*error;
+int mb_takeoff_to_rollpitch(int verbose,
+		double theta, double phi,
+		double *alpha, double *beta,
+		int *error)
 {
 	char	*function_name = "mb_takeoff_to_rollpitch";
 	int	status = MB_SUCCESS;
@@ -247,13 +247,10 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_rollpitch_to_takeoff(verbose,alpha,beta,theta,phi,error)
-int	verbose;
-double	alpha;
-double	beta;
-double	*theta;
-double	*phi;
-int	*error;
+int mb_rollpitch_to_takeoff(int verbose,
+		double alpha, double beta,
+		double *theta, double *phi,
+		int *error)
 {
 	char	*function_name = "mb_rollpitch_to_takeoff";
 	int	status = MB_SUCCESS;

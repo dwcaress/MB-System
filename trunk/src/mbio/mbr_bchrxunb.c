@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrxunb.c	8/29/97
- *	$Id: mbr_bchrxunb.c,v 4.3 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_bchrxunb.c,v 4.4 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 29, 1997
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.2  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -57,12 +60,9 @@
 #include "../../include/mb_swap.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_bchrxunb(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_bchrxunb(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_bchrxunb.c,v 4.3 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrxunb.c,v 4.4 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mbr_alm_bchrxunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -109,10 +109,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_bchrxunb(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_bchrxunb(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_bchrxunb";
 	int	status = MB_SUCCESS;
@@ -150,10 +147,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_bchrxunb(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_bchrxunb(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_bchrxunb";
 	int	status = MB_SUCCESS;
@@ -307,11 +301,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_bchrxunb(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_bchrxunb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_bchrxunb";
 	int	status = MB_SUCCESS;
@@ -899,11 +889,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_bchrxunb(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_bchrxunb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_bchrxunb";
 	int	status = MB_SUCCESS;
@@ -1205,10 +1191,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_bchrxunb_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_rd_data";
 	int	status = MB_SUCCESS;
@@ -1369,11 +1352,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_rd_comment(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_bchrxunb_struct *data;
-int	*error;
+int mbr_bchrxunb_rd_comment(int verbose, FILE *mbfp, 
+		struct mbf_bchrxunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_rd_comment";
 	int	status = MB_SUCCESS;
@@ -1431,11 +1411,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_rd_parameter(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_bchrxunb_struct *data;
-int	*error;
+int mbr_bchrxunb_rd_parameter(int verbose, FILE *mbfp, 
+		struct mbf_bchrxunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_rd_parameter";
 	int	status = MB_SUCCESS;
@@ -1648,11 +1625,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_rd_pos(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_bchrxunb_struct *data;
-int	*error;
+int mbr_bchrxunb_rd_pos(int verbose, FILE *mbfp, 
+		struct mbf_bchrxunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_rd_pos";
 	int	status = MB_SUCCESS;
@@ -1782,11 +1756,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_rd_svp(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_bchrxunb_struct *data;
-int	*error;
+int mbr_bchrxunb_rd_svp(int verbose, FILE *mbfp, 
+		struct mbf_bchrxunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_rd_svp";
 	int	status = MB_SUCCESS;
@@ -1892,11 +1863,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_rd_bath56(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_bchrxunb_struct *data;
-int	*error;
+int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, 
+		struct mbf_bchrxunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_rd_bath56";
 	int	status = MB_SUCCESS;
@@ -2120,11 +2088,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_rd_bath40(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_bchrxunb_struct *data;
-int	*error;
+int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, 
+		struct mbf_bchrxunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_rd_bath40";
 	int	status = MB_SUCCESS;
@@ -2348,11 +2313,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_rd_bath32(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_bchrxunb_struct *data;
-int	*error;
+int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, 
+		struct mbf_bchrxunb_struct *data, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_rd_bath32";
 	int	status = MB_SUCCESS;
@@ -2576,11 +2538,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_bchrxunb_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_wr_data";
 	int	status = MB_SUCCESS;
@@ -2663,11 +2621,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_wr_comment(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_wr_comment";
 	int	status = MB_SUCCESS;
@@ -2757,11 +2711,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_wr_parameter(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_bchrxunb_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_wr_parameter";
 	int	status = MB_SUCCESS;
@@ -2995,11 +2945,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_wr_pos(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_bchrxunb_wr_pos(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_wr_pos";
 	int	status = MB_SUCCESS;
@@ -3148,11 +3094,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_wr_svp(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_wr_svp";
 	int	status = MB_SUCCESS;
@@ -3290,11 +3232,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_wr_bath56(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_wr_bath56";
 	int	status = MB_SUCCESS;
@@ -3543,11 +3481,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_wr_bath40(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_wr_bath40";
 	int	status = MB_SUCCESS;
@@ -3796,11 +3730,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_bchrxunb_wr_bath32(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_bchrxunb_wr_bath32";
 	int	status = MB_SUCCESS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.30 2000-09-30 06:58:28 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.31 2000-10-11 01:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.30  2000/09/30  06:58:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.29  2000/09/08  00:29:20  caress
  * Revision of 7 September 2000.
  *
@@ -242,7 +245,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.30 2000-09-30 06:58:28 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.31 2000-10-11 01:02:07 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -391,10 +394,7 @@ char	*strstr();
 int mb_double_compare();
 
 /*--------------------------------------------------------------------*/
-int mbedit_init(argc,argv,startup_file)
-int	argc;
-char	**argv;
-int	*startup_file;
+int mbedit_init(int argc, char ** argv, int *startup_file)
 {
 	/* local variables */
 	char	*function_name = "mbedit_init";
@@ -618,11 +618,7 @@ int mbedit_startup_file()
 }
 
 /*--------------------------------------------------------------------*/
-int mbedit_set_graphics(xgid,brdr,ncol,pixels)
-int	xgid;
-int	*brdr;
-int	ncol;
-int	*pixels;
+int mbedit_set_graphics(int xgid, int *brdr, int ncol, int *pixels)
 {
 	/* local variables */
 	char	*function_name = "mbedit_set_graphics";
@@ -680,13 +676,7 @@ int	*pixels;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_set_filters(f_m,f_m_t,
-			f_w,f_w_t)
-int	f_m;
-int	f_m_t;
-int	f_w;
-int	f_w_t;
-
+int mbedit_set_filters(int f_m, int f_m_t, int f_w, int f_w_t)
 {
 	/* local variables */
 	char	*function_name = "mbedit_set_filters";
@@ -724,12 +714,7 @@ int	f_w_t;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_get_filters(f_m, f_m_t, f_w, f_w_t)
-int	*f_m;
-int	*f_m_t;
-int	*f_w;
-int	*f_w_t;
-
+int mbedit_get_filters(int *f_m, int *f_m_t, int *f_w, int *f_w_t)
 {
 	/* local variables */
 	char	*function_name = "mbedit_get_filters";
@@ -772,22 +757,20 @@ int	*f_w_t;
 }
 
 /*--------------------------------------------------------------------*/
-int mbedit_get_defaults(plt_size_max,plt_size,sh_flggd,
-	buffer_size_max,buffer_size,hold_size,form,
-	plwd,exgr,xntrvl,yntrvl,ttime_i,outmode)
-int	*plt_size_max;
-int	*plt_size;
-int	*sh_flggd;
-int	*buffer_size_max;
-int	*buffer_size;
-int	*hold_size;
-int	*form;
-int	*plwd;
-int	*exgr;
-int	*xntrvl;
-int	*yntrvl;
-int	*ttime_i;
-int	*outmode;
+int mbedit_get_defaults(
+		int	*plt_size_max, 
+		int	*plt_size, 
+		int	*sh_flggd, 
+		int	*buffer_size_max, 
+		int	*buffer_size, 
+		int	*hold_size, 
+		int	*form, 
+		int	*plwd, 
+		int	*exgr, 
+		int	*xntrvl, 
+		int	*yntrvl, 
+		int	*ttime_i, 
+		int	*outmode)
 {
 	/* local variables */
 	char	*function_name = "mbedit_get_defaults";
@@ -878,29 +861,26 @@ int	*outmode;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_open(file,form,savemode,outmode,
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	buffer_size,buffer_size_max,hold_size,
-	ndumped,nloaded,nbuffer,ngood,icurrent,nplt)
-char	*file;
-int	form;
-int	savemode;
-int	outmode;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*buffer_size;
-int	*buffer_size_max;
-int	*hold_size;
-int	*ndumped;
-int	*nloaded;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_open(
+		char	*file, 
+		int	form, 
+		int	savemode, 
+		int	outmode, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*buffer_size, 
+		int	*buffer_size_max, 
+		int	*hold_size, 
+		int	*ndumped, 
+		int	*nloaded, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_open";
@@ -1009,24 +989,22 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_next_buffer(hold_size,buffer_size,
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,ndumped,
-	nloaded,nbuffer,ngood,icurrent,nplt,quit)
-int	hold_size;
-int	buffer_size;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*ndumped;
-int	*nloaded;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
-int	*quit;
+int mbedit_action_next_buffer(
+		int	hold_size, 
+		int	buffer_size, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*ndumped, 
+		int	*nloaded, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt, 
+		int	*quit)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_next_buffer";
@@ -1145,13 +1123,13 @@ int	*quit;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_close(buffer_size,ndumped,nloaded,nbuffer,ngood,icurrent)
-int	buffer_size;
-int	*ndumped;
-int	*nloaded;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
+int mbedit_action_close(
+		int	buffer_size, 
+		int	*ndumped, 
+		int	*nloaded, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_close";
@@ -1251,15 +1229,14 @@ int	*icurrent;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_done(buffer_size,ndumped,nloaded,nbuffer,
-	ngood,icurrent, quit)
-int	buffer_size;
-int	*ndumped;
-int	*nloaded;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*quit;
+int mbedit_action_done(
+		int	buffer_size, 
+		int	*ndumped, 
+		int	*nloaded, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*quit)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_done";
@@ -1317,13 +1294,13 @@ int	*quit;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_quit(buffer_size,ndumped,nloaded,nbuffer,ngood,icurrent)
-int	buffer_size;
-int	*ndumped;
-int	*nloaded;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
+int mbedit_action_quit(
+		int	buffer_size, 
+		int	*ndumped, 
+		int	*nloaded, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_quit";
@@ -1373,19 +1350,18 @@ int	*icurrent;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_step(step,plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	step;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_step(
+		int	step, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_step";
@@ -1471,18 +1447,17 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_plot(plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_plot(
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_plot";
@@ -1555,21 +1530,19 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_toggle(x_loc,y_loc,
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	x_loc;
-int	y_loc;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_mouse_toggle(
+		int	x_loc, 
+		int	y_loc, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_toggle";
@@ -1771,21 +1744,19 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_pick(x_loc,y_loc,
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	x_loc;
-int	y_loc;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_mouse_pick(
+	int	x_loc, 
+	int	y_loc, 
+	int	plwd, 
+	int	exgr, 
+	int	xntrvl, 
+	int	yntrvl, 
+	int	plt_size, 
+	int	sh_flggd, 
+	int	*nbuffer, 
+	int	*ngood, 
+	int	*icurrent, 
+	int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_pick";
@@ -1977,21 +1948,19 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_erase(x_loc,y_loc,
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	x_loc;
-int	y_loc;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_mouse_erase(
+		int	x_loc, 
+		int	y_loc, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_erase";
@@ -2170,21 +2139,19 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_mouse_restore(x_loc,y_loc,
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	x_loc;
-int	y_loc;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_mouse_restore(
+		int	x_loc, 
+		int	y_loc, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_restore";
@@ -2365,20 +2332,18 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_zap_outbounds(iping,
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	iping;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_zap_outbounds(
+		int	iping, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_zap_outbounds";
@@ -2514,18 +2479,16 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_bad_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_bad_ping";
@@ -2635,18 +2598,16 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_good_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_good_ping";
@@ -2758,18 +2719,16 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_left_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_left_ping";
@@ -2879,18 +2838,16 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_right_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_right_ping";
@@ -3000,18 +2957,16 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_zero_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_zero_ping";
@@ -3121,18 +3076,16 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_unflag_view(
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_unflag_view";
@@ -3263,18 +3216,16 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_unflag_all(
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_unflag_all";
@@ -3413,18 +3364,16 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_filter_all(
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-	nbuffer,ngood,icurrent,nplt)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_filter_all";
@@ -3506,8 +3455,7 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_filter_ping(iping)
-int	iping;
+int mbedit_filter_ping(int iping)
 {
 	/* local variables */
 	char	*function_name = "mbedit_filter_ping";
@@ -3723,8 +3671,7 @@ int	iping;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_set_output_file(output_file)
-char	*output_file;
+int mbedit_set_output_file(char *output_file)
 {
 	/* local variables */
 	char	*function_name = "mbedit_set_output_file";
@@ -3766,10 +3713,7 @@ char	*output_file;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_get_output_file(file1,file2,form)
-char	*file1;
-char	*file2;
-int	*form;
+int mbedit_get_output_file(char *file1, char *file2, int *form)
 {
 	/* local variables */
 	char	*function_name = "mbedit_get_output_file";
@@ -3830,10 +3774,7 @@ int	*form;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_open_file(file,form, savemode)
-char	*file;
-int	form;
-int	savemode;
+int mbedit_open_file(char *file, int form, int savemode)
 {
 	/* local variables */
 	char	*function_name = "mbedit_open_file";
@@ -4299,10 +4240,7 @@ int mbedit_close_file()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_dump_data(hold_size,ndumped,nbuffer)
-int	hold_size;
-int	*ndumped;
-int	*nbuffer;
+int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 {
 	/* local variables */
 	char	*function_name = "mbedit_dump_data";
@@ -4389,12 +4327,8 @@ int	*nbuffer;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_load_data(buffer_size,nloaded,nbuffer,ngood,icurrent)
-int	buffer_size;
-int	*nloaded;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
+int mbedit_load_data(int buffer_size, 
+		int *nloaded, int *nbuffer, int *ngood, int *icurrent)
 {
 	/* local variables */
 	char	*function_name = "mbedit_load_data";
@@ -4658,16 +4592,15 @@ int mbedit_clear_screen()
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
-		    nplt,autoscale)
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*nplt;
-int	autoscale;
+int mbedit_plot_all(
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*nplt, 
+		int	autoscale)
 {
 	/* local variables */
 	char	*function_name = "mbedit_plot_all";
@@ -4978,9 +4911,7 @@ int	autoscale;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_plot_beam(iping,jbeam)
-int	iping;
-int	jbeam;
+int mbedit_plot_beam(int iping, int jbeam)
 {
 	/* local variables */
 	char	*function_name = "mbedit_plot_beam";
@@ -5032,8 +4963,7 @@ int	jbeam;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_plot_ping(iping)
-int	iping;
+int mbedit_plot_ping(int iping)
 {
 	/* local variables */
 	char	*function_name = "mbedit_plot_ping";
@@ -5125,9 +5055,7 @@ int	iping;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_plot_ping_label(iping, save)
-int	iping;
-int	save;
+int mbedit_plot_ping_label(int iping, int save)
 {
 	/* local variables */
 	char	*function_name = "mbedit_plot_ping_label";
@@ -5236,9 +5164,7 @@ int	save;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_unplot_beam(iping,jbeam)
-int	iping;
-int	jbeam;
+int mbedit_unplot_beam(int iping, int jbeam)
 {
 	/* local variables */
 	char	*function_name = "mbedit_unplot_beam";
@@ -5285,8 +5211,7 @@ int	jbeam;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_unplot_ping(iping)
-int	iping;
+int mbedit_unplot_ping(int iping)
 {
 	/* local variables */
 	char	*function_name = "mbedit_unplot_ping";
@@ -5339,24 +5264,22 @@ int	iping;
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_goto(ttime_i,hold_size,buffer_size,
-	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,ndumped,
-	nloaded,nbuffer,ngood,icurrent,nplt)
-int	ttime_i[7];
-int	hold_size;
-int	buffer_size;
-int	plwd;
-int	exgr;
-int	xntrvl;
-int	yntrvl;
-int	plt_size;
-int	sh_flggd;
-int	*ndumped;
-int	*nloaded;
-int	*nbuffer;
-int	*ngood;
-int	*icurrent;
-int	*nplt;
+int mbedit_action_goto(
+		int	ttime_i[7], 
+		int	hold_size, 
+		int	buffer_size, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	*ndumped, 
+		int	*nloaded, 
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_goto";
@@ -5550,10 +5473,7 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_check_buffer_size(form,buffer_size,buffer_size_max)
-int	form;
-int	*buffer_size;
-int	*buffer_size_max;
+int mbedit_check_buffer_size(int form, int *buffer_size, int *buffer_size_max)
 {
 	/* local variables */
 	char	*function_name = "mbedit_check_buffer_size";
@@ -5597,10 +5517,7 @@ int	*buffer_size_max;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_save_edit(time_d, beam, action)
-double	time_d;
-int	beam;
-int	action;
+int mbedit_save_edit(double time_d, int beam, int action)
 {
 	/* local variables */
 	char	*function_name = "mbedit_save_edit";

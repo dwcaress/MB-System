@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.17 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.18 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -47,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.16  2000/06/06  20:32:46  caress
  * Now handles amplitude flagging using beamflags.
  *
@@ -159,11 +162,9 @@ struct mbanglecorrect_ping_struct
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.17 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.18 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -1538,19 +1539,10 @@ j, i, slopeangle, rawangle, correction, ping[j].ss[i], ping[j].dataprocess[i]);*
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int check_ss_for_bath(verbose,
-	nbath,beamflag,bath,bathacrosstrack,
-	nss,ss,ssacrosstrack, 
-	error)
-int	verbose;
-int	nbath;
-char	*beamflag;
-double	*bath;
-double	*bathacrosstrack;
-int	nss;
-double	*ss;
-double	*ssacrosstrack;
-int	*error;
+int check_ss_for_bath(int verbose,
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int nss, double *ss, double *ssacrosstrack, 
+	int *error)
 {
 	char	*function_name = "check_ss_for_bath";
 	int	status = MB_SUCCESS;
@@ -1642,27 +1634,13 @@ ss[iss],ssacrosstrack[iss]);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int set_bathyslope(verbose,
-	nsmooth, 
-	nbath,beamflag,bath,bathacrosstrack,
-	ndepths,depths,depthacrosstrack, 
-	nslopes,slopes,slopeacrosstrack, 
-	depthsmooth, 
-	error)
-int	verbose;
-int	nsmooth;
-int	nbath;
-char	*beamflag;
-double	*bath;
-double	*bathacrosstrack;
-int	*ndepths;
-double	*depths;
-double	*depthacrosstrack;
-int	*nslopes;
-double	*slopes;
-double	*slopeacrosstrack;
-double	*depthsmooth;
-int	*error;
+int set_bathyslope(int verbose,
+	int nsmooth, 
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	double *depthsmooth, 
+	int *error)
 {
 	char	*function_name = "set_bathyslope";
 	int	status = MB_SUCCESS;
@@ -1841,21 +1819,11 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int get_bathyslope(verbose,
-	ndepths,depths,depthacrosstrack,
-	nslopes,slopes,slopeacrosstrack, 
-	acrosstrack,depth,slope,error)
-int	verbose;
-int	ndepths;
-double	*depths;
-double	*depthacrosstrack;
-int	nslopes;
-double	*slopes;
-double	*slopeacrosstrack;
-double	acrosstrack;
-double	*depth;
-double	*slope;
-int	*error;
+int get_bathyslope(int verbose,
+	int ndepths, double *depths, double *depthacrosstrack,
+	int nslopes, double *slopes, double *slopeacrosstrack, 
+	double acrosstrack, double *depth, double *slope,
+	int *error)
 {
 	char	*function_name = "get_bathyslope";
 	int	status = MB_SUCCESS;
@@ -1975,15 +1943,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int get_anglecorr(verbose,nangle,angles,corrs,angle,
-		corr,error)
-int	verbose;
-int	nangle;
-double	*angles;
-double	*corrs;
-double	angle;
-double	*corr;
-int	*error;
+int get_anglecorr(int verbose,
+	int nangle, double *angles, double *corrs,
+	double angle, double *corr, int *error)
 {
 	char	*function_name = "get_anglecorr";
 	int	status = MB_SUCCESS;

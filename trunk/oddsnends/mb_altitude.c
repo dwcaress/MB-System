@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_altitude.c	4/28/98
- *    $Id: mb_altitude.c,v 4.5 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_altitude.c,v 4.6 2000-10-11 01:02:30 caress Exp $
 
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 28, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.4  1999/08/08  04:12:45  caress
  * Added ELMK2XSE format.
  *
@@ -64,17 +67,12 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_altitude(verbose,mbio_ptr,store_ptr,kind,
-	transducer_depth,altitude,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*kind;
-double	*transducer_depth;
-double	*altitude;
-int	*error;
+int mb_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind,
+		double *transducer_depth, double *altitude,
+		int *error)
 {
-	static char rcs_id[]="$Id: mb_altitude.c,v 4.5 2000-09-30 06:26:58 caress Exp $";
+	static char rcs_id[]="$Id: mb_altitude.c,v 4.6 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_altitude";
 	int	status;
 	int	system;
@@ -222,16 +220,11 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_altitude(verbose,mbio_ptr,store_ptr,
-	transducer_depth,altitude,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-double	transducer_depth;
-double	altitude;
-int	*error;
+int mb_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+		double transducer_depth, double altitude,
+		int *error)
 {
-	static char rcs_id[]="$Id: mb_altitude.c,v 4.5 2000-09-30 06:26:58 caress Exp $";
+	static char rcs_id[]="$Id: mb_altitude.c,v 4.6 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_insert_altitude";
 	int	status;
 	int	system;

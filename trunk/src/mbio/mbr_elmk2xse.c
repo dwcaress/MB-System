@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2xse.c	3/27/99
- *	$Id: mbr_elmk2xse.c,v 4.1 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_elmk2xse.c,v 4.2 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 27, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  1999/08/08  04:14:35  caress
  * Initial revision.
  *
@@ -67,12 +70,9 @@
 #endif
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_elmk2xse(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_elmk2xse(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 4.1 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2xse.c,v 4.2 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2xse";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -121,10 +121,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_elmk2xse(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_elmk2xse(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_elmk2xse";
 	int	status = MB_SUCCESS;
@@ -163,10 +160,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_elmk2xse(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_elmk2xse(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_elmk2xse";
 	int	status = MB_SUCCESS;
@@ -334,11 +328,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_elmk2xse(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_elmk2xse(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_elmk2xse";
 	int	status = MB_SUCCESS;
@@ -903,11 +893,7 @@ data->mul_frame, data->sid_frame);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_elmk2xse(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_elmk2xse(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_elmk2xse";
 	int	status = MB_SUCCESS;
@@ -1216,10 +1202,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_elmk2xse_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_rd_data";
 	int	status = MB_SUCCESS;
@@ -1493,12 +1476,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_rd_nav(verbose,buffer_size,buffer,data,error)
-int	verbose;
-int	buffer_size;
-char	*buffer;
-struct mbf_elmk2xse_struct *data;
-int	*error;
+int mbr_elmk2xse_rd_nav(int verbose, int buffer_size, char *buffer, 
+		struct mbf_elmk2xse_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_rd_nav";
 	int	status = MB_SUCCESS;
@@ -1656,12 +1635,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_rd_svp(verbose,buffer_size,buffer,data,error)
-int	verbose;
-int	buffer_size;
-char	*buffer;
-struct mbf_elmk2xse_struct *data;
-int	*error;
+int mbr_elmk2xse_rd_svp(int verbose, int buffer_size, char *buffer, 
+		struct mbf_elmk2xse_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_rd_svp";
 	int	status = MB_SUCCESS;
@@ -1854,12 +1829,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_rd_ship(verbose,buffer_size,buffer,data,error)
-int	verbose;
-int	buffer_size;
-char	*buffer;
-struct mbf_elmk2xse_struct *data;
-int	*error;
+int mbr_elmk2xse_rd_ship(int verbose, int buffer_size, char *buffer, 
+		struct mbf_elmk2xse_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_rd_ship";
 	int	status = MB_SUCCESS;
@@ -1999,12 +1970,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_rd_sidescan(verbose,buffer_size,buffer,data,error)
-int	verbose;
-int	buffer_size;
-char	*buffer;
-struct mbf_elmk2xse_struct *data;
-int	*error;
+int mbr_elmk2xse_rd_sidescan(int verbose, int buffer_size, char *buffer, 
+		struct mbf_elmk2xse_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_rd_sidescan";
 	int	status = MB_SUCCESS;
@@ -2143,12 +2110,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_rd_multibeam(verbose,buffer_size,buffer,data,error)
-int	verbose;
-int	buffer_size;
-char	*buffer;
-struct mbf_elmk2xse_struct *data;
-int	*error;
+int mbr_elmk2xse_rd_multibeam(int verbose, int buffer_size, char *buffer, 
+		struct mbf_elmk2xse_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_rd_multibeam";
 	int	status = MB_SUCCESS;
@@ -2541,12 +2504,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_rd_comment(verbose,buffer_size,buffer,data,error)
-int	verbose;
-int	buffer_size;
-char	*buffer;
-struct mbf_elmk2xse_struct *data;
-int	*error;
+int mbr_elmk2xse_rd_comment(int verbose, int buffer_size, char *buffer, 
+		struct mbf_elmk2xse_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_rd_comment";
 	int	status = MB_SUCCESS;
@@ -2656,11 +2615,7 @@ int	*error;
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2xse_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_wr_data";
 	int	status = MB_SUCCESS;
@@ -2787,12 +2742,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_wr_nav(verbose,buffer_size,buffer,data_ptr,error)
-int	verbose;
-int	*buffer_size;
-char	*buffer;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2xse_wr_nav(int verbose, int *buffer_size, char *buffer, 
+		char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_wr_nav";
 	int	status = MB_SUCCESS;
@@ -2962,12 +2913,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_wr_svp(verbose,buffer_size,buffer,data_ptr,error)
-int	verbose;
-int	*buffer_size;
-char	*buffer;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2xse_wr_svp(int verbose, int *buffer_size, char *buffer, 
+		char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_wr_svp";
 	int	status = MB_SUCCESS;
@@ -3264,12 +3211,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_wr_ship(verbose,buffer_size,buffer,data_ptr,error)
-int	verbose;
-int	*buffer_size;
-char	*buffer;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2xse_wr_ship(int verbose, int *buffer_size, char *buffer, 
+		char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_wr_ship";
 	int	status = MB_SUCCESS;
@@ -3405,12 +3348,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_wr_multibeam(verbose,buffer_size,buffer,data_ptr,error)
-int	verbose;
-int	*buffer_size;
-char	*buffer;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2xse_wr_multibeam(int verbose, int *buffer_size, char *buffer, 
+		char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_wr_multibeam";
 	int	status = MB_SUCCESS;
@@ -3961,12 +3900,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_wr_sidescan(verbose,buffer_size,buffer,data_ptr,error)
-int	verbose;
-int	*buffer_size;
-char	*buffer;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2xse_wr_sidescan(int verbose, int *buffer_size, char *buffer, 
+		char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_wr_sidescan";
 	int	status = MB_SUCCESS;
@@ -4118,12 +4053,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2xse_wr_comment(verbose,buffer_size,buffer,data_ptr,error)
-int	verbose;
-int	*buffer_size;
-char	*buffer;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2xse_wr_comment(int verbose, int *buffer_size, char *buffer, 
+		char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2xse_wr_comment";
 	int	status = MB_SUCCESS;

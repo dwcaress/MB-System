@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_compare.c	11/19/98
- *    $Id: mb_compare.c,v 4.1 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_compare.c,v 4.2 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	November 19,  1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  1998/12/17  22:57:26  caress
  * MB-System version 4.6beta4
  *
@@ -27,13 +30,11 @@
  *
  */
 
-static char rcs_id[]="$Id: mb_compare.c,v 4.1 2000-09-30 06:26:58 caress Exp $";
+static char rcs_id[]="$Id: mb_compare.c,v 4.2 2000-10-11 01:02:30 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_int_compare compares int values. */
-int mb_int_compare(a,b)
-int	*a;
-int	*b;
+int mb_int_compare(int *a, int *b)
 {
 	if (*a > *b)
 		return(1);
@@ -42,9 +43,7 @@ int	*b;
 }
 /*--------------------------------------------------------------------*/
 /* 	function mb_double_compare compares double values. */
-int mb_double_compare(a,b)
-double	*a;
-double	*b;
+int mb_double_compare(double *a, double *b)
 {
 	if (*a > *b)
 		return(1);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_dsl120sf.c	8/6/96
- *	$Id: mbr_dsl120sf.c,v 4.4 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_dsl120sf.c,v 4.5 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 6, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.3  1999/12/29  00:34:06  caress
  * Release 4.6.8
  *
@@ -60,12 +63,9 @@
 #include "../../include/mbf_dsl120sf.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_dsl120sf(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_dsl120sf(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120sf.c,v 4.4 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120sf.c,v 4.5 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mbr_alm_dsl120sf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -119,10 +119,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_dsl120sf(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_dsl120sf(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_dsl120sf";
 	int	status = MB_SUCCESS;
@@ -162,10 +159,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_dsl120sf(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_dsl120sf";
 	int	status = MB_SUCCESS;
@@ -273,11 +267,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_dsl120sf(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_dsl120sf(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_dsl120sf";
 	int	status = MB_SUCCESS;
@@ -612,11 +602,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_dsl120sf(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_dsl120sf(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_dsl120sf";
 	int	status = MB_SUCCESS;
@@ -781,10 +767,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dsl120sf_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_rd_data";
 	int	status = MB_SUCCESS;
@@ -918,11 +901,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_rd_header(verbose,mbio_ptr,mbfp,error)
-int	verbose;
-char	*mbio_ptr;
-FILE	*mbfp;
-int	*error;
+int mbr_dsl120sf_rd_header(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_rd_header";
 	int	status = MB_SUCCESS;
@@ -1091,15 +1070,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_rd_dataheader(verbose,mbio_ptr,mbfp,
-	type,len,hdr_len,error)
-int	verbose;
-char	*mbio_ptr;
-FILE	*mbfp;
-char	*type;
-int	*len;
-int	*hdr_len;
-int	*error;
+int mbr_dsl120sf_rd_dataheader(int verbose, char *mbio_ptr, FILE *mbfp,
+	char *type, int *len, int *hdr_len, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_rd_dataheader";
 	int	status = MB_SUCCESS;
@@ -1161,11 +1133,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_rd_bath(verbose,mbio_ptr,mbfp,error)
-int	verbose;
-char	*mbio_ptr;
-FILE	*mbfp;
-int	*error;
+int mbr_dsl120sf_rd_bath(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_rd_bath";
 	int	status = MB_SUCCESS;
@@ -1274,11 +1242,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_rd_amp(verbose,mbio_ptr,mbfp,error)
-int	verbose;
-char	*mbio_ptr;
-FILE	*mbfp;
-int	*error;
+int mbr_dsl120sf_rd_amp(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_rd_amp";
 	int	status = MB_SUCCESS;
@@ -1390,11 +1354,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_rd_comment(verbose,mbio_ptr,mbfp,error)
-int	verbose;
-char	*mbio_ptr;
-FILE	*mbfp;
-int	*error;
+int mbr_dsl120sf_rd_comment(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_rd_comment";
 	int	status = MB_SUCCESS;
@@ -1465,11 +1425,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_dsl120sf_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_wr_data";
 	int	status = MB_SUCCESS;
@@ -1532,11 +1488,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_wr_bathamp(verbose,mbio_ptr,mbfp,error)
-int	verbose;
-char	*mbio_ptr;
-FILE	*mbfp;
-int	*error;
+int mbr_dsl120sf_wr_bathamp(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_wr_bathamp";
 	int	status = MB_SUCCESS;
@@ -1793,11 +1745,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_wr_comment(verbose,mbio_ptr,mbfp,error)
-int	verbose;
-char	*mbio_ptr;
-FILE	*mbfp;
-int	*error;
+int mbr_dsl120sf_wr_comment(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120sf_wr_comment";
 	int	status = MB_SUCCESS;

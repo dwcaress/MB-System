@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
- *	$Id: mbr_elmk2unb.c,v 4.7 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_elmk2unb.c,v 4.8 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.6  1999/04/07  20:38:24  caress
  * Fixes related to building under Linux.
  *
@@ -72,12 +75,9 @@
 #include "../../include/mb_swap.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_elmk2unb(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_elmk2unb(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.7 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.8 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -124,10 +124,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_elmk2unb(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_elmk2unb(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_elmk2unb";
 	int	status = MB_SUCCESS;
@@ -165,10 +162,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_elmk2unb(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_elmk2unb(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_elmk2unb";
 	int	status = MB_SUCCESS;
@@ -320,11 +314,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_elmk2unb(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_elmk2unb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_elmk2unb";
 	int	status = MB_SUCCESS;
@@ -866,11 +856,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_elmk2unb(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_elmk2unb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_elmk2unb";
 	int	status = MB_SUCCESS;
@@ -1146,10 +1132,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_elmk2unb_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_data";
 	int	status = MB_SUCCESS;
@@ -1290,11 +1273,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_comment(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_elmk2unb_struct *data;
-int	*error;
+int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp, 
+		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_comment";
 	int	status = MB_SUCCESS;
@@ -1352,11 +1332,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_parameter(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_elmk2unb_struct *data;
-int	*error;
+int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp, 
+		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_parameter";
 	int	status = MB_SUCCESS;
@@ -1569,11 +1546,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_pos(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_elmk2unb_struct *data;
-int	*error;
+int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp, 
+		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_pos";
 	int	status = MB_SUCCESS;
@@ -1703,11 +1677,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_svp(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_elmk2unb_struct *data;
-int	*error;
+int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, 
+		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_svp";
 	int	status = MB_SUCCESS;
@@ -1813,11 +1784,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_bathgen(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_elmk2unb_struct *data;
-int	*error;
+int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, 
+		struct mbf_elmk2unb_struct *data, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_rd_bathgen";
 	int	status = MB_SUCCESS;
@@ -2068,11 +2036,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2unb_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_wr_data";
 	int	status = MB_SUCCESS;
@@ -2147,11 +2111,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_wr_comment(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2unb_wr_comment(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_wr_comment";
 	int	status = MB_SUCCESS;
@@ -2241,11 +2201,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_wr_parameter(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2unb_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_wr_parameter";
 	int	status = MB_SUCCESS;
@@ -2479,11 +2435,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_wr_pos(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2unb_wr_pos(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_wr_pos";
 	int	status = MB_SUCCESS;
@@ -2632,11 +2584,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_wr_svp(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_wr_svp";
 	int	status = MB_SUCCESS;
@@ -2774,11 +2722,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_wr_bathgen(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_elmk2unb_wr_bathgen";
 	int	status = MB_SUCCESS;

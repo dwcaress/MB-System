@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.20 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_buffer.c,v 4.21 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -43,6 +43,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.20  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.19  1999/08/08  04:12:45  caress
  * Added ELMK2XSE format.
  *
@@ -157,12 +160,9 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_buffer_init(verbose,buff_ptr,error)
-int	verbose;
-char	**buff_ptr;
-int	*error;
+int mb_buffer_init(int verbose, char **buff_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.20 2000-09-30 06:26:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.21 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -203,11 +203,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_close(verbose,buff_ptr,mbio_ptr,error)
-int	verbose;
-char	**buff_ptr;
-char	*mbio_ptr;
-int	*error;
+int mb_buffer_close(int verbose, char **buff_ptr, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mb_buffer_close";
 	int	status = MB_SUCCESS;
@@ -260,14 +256,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_load(verbose,buff_ptr,mbio_ptr,nwant,nload,nbuff,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	nwant;
-int	*nload;
-int	*nbuff;
-int	*error;
+int mb_buffer_load(int verbose, char *buff_ptr,char *mbio_ptr,
+		    int nwant, int *nload, int *nbuff, int *error)
 {
 	char	*function_name = "mb_buffer_load";
 	int	status = MB_SUCCESS;
@@ -470,14 +460,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_dump(verbose,buff_ptr,mbio_ptr,nhold,ndump,nbuff,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	nhold;
-int	*ndump;
-int	*nbuff;
-int	*error;
+int mb_buffer_dump(int verbose, char *buff_ptr, char *mbio_ptr,
+		    int nhold, int *ndump, int *nbuff, int *error)
 {
 	char	*function_name = "mb_buffer_dump";
 	int	status = MB_SUCCESS;
@@ -700,14 +684,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_clear(verbose,buff_ptr,mbio_ptr,nhold,ndump,nbuff,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	nhold;
-int	*ndump;
-int	*nbuff;
-int	*error;
+int mb_buffer_clear(int verbose, char *buff_ptr, char *mbio_ptr,
+		    int nhold, int *ndump, int *nbuff, int *error)
 {
 	char	*function_name = "mb_buffer_clear";
 	int	status = MB_SUCCESS;
@@ -880,14 +858,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_info(verbose,buff_ptr,mbio_ptr,id,system,kind,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	id;
-int	*system;
-int	*kind;
-int	*error;
+int mb_buffer_info(int verbose, char *buff_ptr, char *mbio_ptr,
+		    int id, int *system, int *kind, int *error)
 {
 	char	*function_name = "mb_buffer_info";
 	int	status = MB_SUCCESS;
@@ -944,35 +916,16 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_get_next_data(verbose,buff_ptr,mbio_ptr,start,id,
-		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,namp,nss,
-		beamflag,bath,amp,
-		bathacrosstrack,bathalongtrack,
-		ss,ssacrosstrack,ssalongtrack,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	start;
-int	*id;
-int	time_i[7];
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-int	*nbath;
-int	*namp;
-int	*nss;
-char	*beamflag;
-double	*bath;
-double	*amp;
-double	*bathacrosstrack;
-double	*bathalongtrack;
-double	*ss;
-double	*ssacrosstrack;
-double	*ssalongtrack;
-int	*error;
+int mb_buffer_get_next_data(int verbose, char *buff_ptr, char *mbio_ptr,
+		int start, int *id,
+		int time_i[7], double *time_d,
+		double *navlon, double *navlat, 
+		double *speed, double *heading,
+		int *nbath, int *namp, int *nss,
+		char *beamflag, double *bath, double *amp,
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		int *error)
 {
 	char	*function_name = "mb_buffer_get_next_data";
 	int	status = MB_SUCCESS;
@@ -1089,25 +1042,13 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_get_next_nav(verbose,buff_ptr,mbio_ptr,start,id,
-		time_i,time_d,navlon,navlat,speed,heading,draft, 
-		roll,pitch,heave,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	start;
-int	*id;
-int	time_i[7];
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-double	*draft;
-double	*roll;
-double	*pitch;
-double	*heave;
-int	*error;
+int mb_buffer_get_next_nav(int verbose, char *buff_ptr, char *mbio_ptr,
+		int start, int *id,
+		int time_i[7], double *time_d,
+		double *navlon, double *navlat, 
+		double *speed, double *heading, double *draft, 
+		double *roll, double *pitch, double *heave,
+		int *error)
 {
 	char	*function_name = "mb_buffer_get_next_nav";
 	int	status = MB_SUCCESS;
@@ -1206,36 +1147,17 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_extract(verbose,buff_ptr,mbio_ptr,id,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,namp,nss,
-		beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-		ss,ssacrosstrack,ssalongtrack,
-		comment,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	id;
-int	*kind;
-int	time_i[7];
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-int	*nbath;
-int	*namp;
-int	*nss;
-char	*beamflag;
-double	*bath;
-double	*amp;
-double	*bathacrosstrack;
-double	*bathalongtrack;
-double	*ss;
-double	*ssacrosstrack;
-double	*ssalongtrack;
-char	*comment;
-int	*error;
+int mb_buffer_extract(int verbose, char *buff_ptr, char *mbio_ptr,
+		int id, int *kind, 
+		int time_i[7], double *time_d,
+		double *navlon, double *navlat, 
+		double *speed, double *heading,
+		int *nbath, int *namp, int *nss,
+		char *beamflag, double *bath, double *amp,
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, 
+		int *error)
 {
 	char	*function_name = "mb_buffer_extract";
 	int	status = MB_SUCCESS;
@@ -1581,26 +1503,13 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_extract_nav(verbose,buff_ptr,mbio_ptr,id,kind,
-		time_i,time_d,navlon,navlat,speed,heading,draft, 
-		roll,pitch,heave,
-		error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	id;
-int	*kind;
-int	time_i[7];
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-double	*draft;
-double	*roll;
-double	*pitch;
-double	*heave;
-int	*error;
+int mb_buffer_extract_nav(int verbose, char *buff_ptr, char *mbio_ptr,
+		int id, int *kind, 
+		int time_i[7], double *time_d,
+		double *navlon, double *navlat, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
+		int *error)
 {
 	char	*function_name = "mb_buffer_extract_nav";
 	int	status = MB_SUCCESS;
@@ -1875,36 +1784,16 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_insert(verbose,buff_ptr,mbio_ptr,id,
-		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,namp,nss,
-		beamflag,bath,amp,
-		bathacrosstrack,bathalongtrack,
-		ss,ssacrosstrack,ssalongtrack,
-		comment,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	id;
-int	time_i[7];
-double	time_d;
-double	navlon;
-double	navlat;
-double	speed;
-double	heading;
-int	nbath;
-int	namp;
-int	nss;
-char	*beamflag;
-double	*bath;
-double	*amp;
-double	*bathacrosstrack;
-double	*bathalongtrack;
-double	*ss;
-double	*ssacrosstrack;
-double	*ssalongtrack;
-char	*comment;
-int	*error;
+int mb_buffer_insert(int verbose, char *buff_ptr, char *mbio_ptr,
+		int id, int time_i[7], double time_d,
+		double navlon, double navlat, 
+		double speed, double heading,
+		int nbath, int namp, int nss,
+		char *beamflag, double *bath, double *amp,
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, 
+		int *error)
 {
 	char	*function_name = "mb_buffer_insert";
 	int	status = MB_SUCCESS;
@@ -2205,26 +2094,12 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_insert_nav(verbose,buff_ptr,mbio_ptr,id,
-		time_i,time_d,navlon,navlat,
-		speed,heading,draft,
-		roll,pitch,heave, 
-		error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	id;
-int	time_i[7];
-double	time_d;
-double	navlon;
-double	navlat;
-double	speed;
-double	heading;
-double	draft;
-double	roll;
-double	pitch;
-double	heave;
-int	*error;
+int mb_buffer_insert_nav(int verbose, char *buff_ptr, char *mbio_ptr,
+		int id, int time_i[7], double time_d,
+		double navlon, double navlat, 
+		double speed, double heading, double draft,
+		double roll, double pitch, double heave,
+		int *error)
 {
 	char	*function_name = "mb_buffer_insert_nav";
 	int	status = MB_SUCCESS;
@@ -2483,13 +2358,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_get_ptr(verbose,buff_ptr,mbio_ptr,id,store_ptr,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-int	id;
-char	**store_ptr;
-int	*error;
+int mb_buffer_get_ptr(int verbose, char *buff_ptr, char *mbio_ptr,
+			int id, char **store_ptr, 
+			int *error)
 {
 	char	*function_name = "mb_buffer_get_ptr";
 	int	status = MB_SUCCESS;
@@ -2541,12 +2412,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_alloc(verbose,buff_ptr,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-char	**store_ptr;
-int	*error;
+int mb_buffer_alloc(int verbose, char *buff_ptr, char *mbio_ptr,
+		    char **store_ptr, int *error)
 {
 	char	*function_name = "mb_buffer_alloc";
 	int	status = MB_SUCCESS;
@@ -2676,12 +2543,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_deall(verbose,buff_ptr,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-char	**store_ptr;
-int	*error;
+int mb_buffer_deall(int verbose, char *buff_ptr, char *mbio_ptr,
+			char **store_ptr, int *error)
 {
 	char	*function_name = "mb_buffer_deall";
 	int	status = MB_SUCCESS;
@@ -2811,13 +2674,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_copy_record(verbose,buff_ptr,mbio_ptr,store_ptr,copy_ptr,error)
-int	verbose;
-char	*buff_ptr;
-char	*mbio_ptr;
-char	*store_ptr;
-char	*copy_ptr;
-int	*error;
+int mb_copy_record(int verbose, char *buff_ptr, char *mbio_ptr,
+		    char *store_ptr, char *copy_ptr, int *error)
 {
 	char	*function_name = "mb_copy_record";
 	int	status = MB_SUCCESS;
