@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.3 2001-03-22 21:10:37 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.4 2001-04-06 22:16:01 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/03/22  21:10:37  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.2  2001/01/22  07:47:40  caress
  * Version 5.0.beta01
  *
@@ -680,7 +683,7 @@ void do_set_controls()
 	XtVaSetValues(scale_timespan, 
 			XmNminimum, 1, 
 			XmNmaximum, data_show_max, 
-			XmNvalue, data_show_size, 
+			XmNvalue, MAX(data_show_size, 1), 
 			NULL);
 	sprintf(string, "%d", data_show_max);
 	XtVaSetValues(label_timespan_2, 
@@ -1285,7 +1288,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			XtVaSetValues(scale_timespan, 
 				XmNminimum, 1, 
 				XmNmaximum, data_show_max, 
-				XmNvalue, data_show_size, 
+				XmNvalue, MAX(data_show_size, 1), 
 				NULL);
 			sprintf(string, "%d", data_show_max);
 			set_label_string(label_timespan_2, string);
@@ -1744,6 +1747,23 @@ do_flag( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_unflag( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	
+	/* interpolate time stamps */
+	mbnavedit_action_unflag();
+	
+	/* replot */
+	mbnavedit_plot_all();
+		
+	/* update controls */
+	do_set_controls();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_modeling_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
     double  dvalue;
@@ -2094,7 +2114,7 @@ do_open_file(int useprevious)
 	XtVaSetValues(scale_timespan, 
 			XmNminimum, 1, 
 			XmNmaximum, data_show_max, 
-			XmNvalue, data_show_size, 
+			XmNvalue, MAX(data_show_size, 1), 
 			NULL);
 	sprintf(string, "%d", data_show_max);
 	set_label_string(label_timespan_2, string);
@@ -2288,7 +2308,7 @@ do_showall( Widget w, XtPointer client_data, XtPointer call_data)
 	XtVaSetValues(scale_timespan, 
 			XmNminimum, 1, 
 			XmNmaximum, data_show_max, 
-			XmNvalue, data_show_size, 
+			XmNvalue, MAX(data_show_size, 1), 
 			NULL);
 	sprintf(string, "%d", data_show_max);
 	set_label_string(label_timespan_2, string);
@@ -2612,9 +2632,3 @@ void get_text_string(Widget w, String str)
     XtFree(str_tmp);
 }
 /*--------------------------------------------------------------------*/
-
-void
-do_unflag( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-}
