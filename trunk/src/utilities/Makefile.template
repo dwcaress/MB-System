@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.14 1997-09-12 18:54:47 caress Exp $
+#	$Id: Makefile.template,v 4.15 1997-09-17 19:21:33 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.14  1997/09/12  18:54:47  caress
+# Moved mb_rt.c to src/mbrt directory.
+#
 # Revision 4.13  1997/04/21  17:19:14  caress
 # MB-System 4.5 Beta Release.
 #
@@ -104,7 +107,6 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbmosaic $(MANDIR)/mbmosaic.l \
 	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.l \
 	$(BINDIR)/mbbath $(MANDIR)/mbbath.l \
-	$(BINDIR)/hsbath $(MANDIR)/hsbath.l \
 	$(BINDIR)/hsdump $(MANDIR)/hsdump.l \
 	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.l \
 	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.l \
@@ -162,8 +164,6 @@ $(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbrt.a
 	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libmbrt.a $(LFLAGS) \
 		-o $(BINDIR)/mbbath
-$(BINDIR)/hsbath:	$(BINDIR)/mbbath
-	cd $(BINDIR); pwd; rm -f hsbath; ln -s mbbath hsbath
 $(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LFLAGS) \
 		-o $(BINDIR)/hsdump
@@ -294,8 +294,6 @@ $(MANDIR)/mblevitus.l:	mblevitus.manl
 $(MANDIR)/mbbath.l:	mbbath.manl
 	cp mbbath.manl $(MANDIR)/mbbath.l
 	chmod 664 $(MANDIR)/mbbath.l
-$(MANDIR)/hsbath.l:	$(MANDIR)/mbbath.l
-	cd $(MANDIR); pwd; rm -f hsbath.l; ln -s mbbath.l hsbath.l
 $(MANDIR)/hsdump.l:	hsdump.manl
 	cp hsdump.manl $(MANDIR)/hsdump.l
 	chmod 664 $(MANDIR)/hsdump.l
