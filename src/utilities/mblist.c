@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.14 2004-06-18 04:11:57 caress Exp $
+ *    $Id: mblist.c,v 5.15 2004-12-02 06:38:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2004/06/18 04:11:57  caress
+ * Adding support for segy i/o and working on support for Reson 7k format 88.
+ *
  * Revision 5.13  2003/08/18 19:07:52  vschmidt
  * Fixed bug such that 'along track distance' now reports a cumulative distance for a list of files, rather than resetting with each file.
  *
@@ -274,7 +277,7 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.14 2004-06-18 04:11:57 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.15 2004-12-02 06:38:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -478,6 +481,14 @@ main (int argc, char **argv)
 		case 'D':
 		case 'd':
 			sscanf (optarg,"%d", &dump_mode);
+			if (dump_mode == DUMP_MODE_BATH)
+				beam_set = MBLIST_SET_ALL;
+			else if (dump_mode == DUMP_MODE_TOPO)
+				beam_set = MBLIST_SET_ALL;
+			else if (dump_mode == DUMP_MODE_AMP)
+				beam_set = MBLIST_SET_ALL;
+			else if (dump_mode == DUMP_MODE_SS)
+				pixel_set = MBLIST_SET_ALL;
 			flag++;
 			break;
 		case 'E':
@@ -2233,7 +2244,7 @@ int set_output(	int	verbose,
 		fprintf(stderr,"dbg2       use_amp:         %d\n",use_amp);
 		fprintf(stderr,"dbg2       use_ss:          %d\n",use_ss);
 		fprintf(stderr,"dbg2       dump_mode:       %d\n",dump_mode);
-		fprintf(stderr,"dbg2       beam_set:        %d\n",beam_set);
+		fprintf(stderr,"dbg2       :        %d\n",beam_set);
 		fprintf(stderr,"dbg2       pixel_set:       %d\n",pixel_set);
 		fprintf(stderr,"dbg2       beam_vertical:   %d\n",beam_vertical);
 		fprintf(stderr,"dbg2       pixel_vertical:  %d\n",pixel_vertical);

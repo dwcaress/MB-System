@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.20 2004-10-06 19:04:24 caress Exp $
+ *    $Id: mb_process.h,v 5.21 2004-12-02 06:33:31 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003 by
+ *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -60,6 +60,11 @@
  *                                  #   draft correction applied
  *                                  #   0: draft not changed
  *                                  #   1: draft merged from navigation file
+ *   NAVATTITUDE boolean            # sets roll, pitch and heave to be merged from navigation file
+ *                                  # - note: roll, pitch, and heave merged from navigation before 
+ *                                  #   roll bias and pitch bias corrections applied
+ *                                  #   0: roll, pitch, and heave not changed
+ *                                  #   1: roll, pitch, and heave merged from navigation file
  *   NAVINTERP boolean              # sets navigation interpolation algorithm [0]
  *                                  #   0: linear interpolation (recommended)
  *                                  #   1: spline interpolation
@@ -100,6 +105,28 @@
  *   NAVADJINTERP boolean           # sets adjusted navigation interpolation algorithm [0]
  *                                  #   0: linear interpolation (recommended)
  *                                  #   1: spline interpolation
+ *
+ * ATTITUDE MERGING:
+ *   ATTITUDEMODE mode              # sets atttitude (roll, pitch, and heave) merging [0]
+ *                                  # - note: roll, pitch, and heave merged before 
+ *                                  #   roll bias and pitch bias corrections applied
+ *                                  # - note: attitude merging from a separate file
+ *                                  #   supersedes attitude merging from a navigation file
+ *                                  #   0: attitude merging off
+ *                                  #   1: attitude merging on
+ *   ATTITUDEFILE filename              # sets attitude file path
+ *   ATTITUDEFORMAT constant            # sets attitude file format [1]
+ *                                  # - tide files can be in one of four ASCII
+ *                                  #   table formats
+ *                                  #   1: format is <time_d roll pitch heave>
+ *                                  #   2: format is <yr mon day hour min sec roll pitch heave>
+ *                                  #   3: format is <yr jday hour min sec roll pitch heave>
+ *                                  #   4: format is <yr jday daymin sec roll pitch heave>
+ *                                  # - time_d = decimal seconds since 1/1/1970
+ *                                  # - daymin = decimal minutes start of day
+ *                                  # - roll = positive starboard up, degrees
+ *                                  # - pitch = positive forward up, degrees
+ *                                  # - heave = positive up, meters
  *
  * DATA CUTTING:
  *   DATACUTCLEAR                   # clears all data cutting commands
@@ -410,6 +437,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2004/10/06 19:04:24  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.19  2004/05/21 23:46:22  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
@@ -488,6 +518,8 @@
 #define MBP_NAV_ON		1
 #define MBP_NAV_LINEAR		0
 #define MBP_NAV_SPLINE		1
+#define MBP_ATTITUDE_OFF	0
+#define MBP_ATTITUDE_ON		1
 #define	MBP_CUT_DATA_BATH	0
 #define	MBP_CUT_DATA_AMP	1
 #define	MBP_CUT_DATA_SS		2
@@ -583,6 +615,7 @@ struct mb_process_struct
 	int	mbp_nav_heading;
 	int	mbp_nav_speed;
 	int	mbp_nav_draft;
+	int	mbp_nav_attitude;
 	int	mbp_nav_algorithm;
 	double	mbp_nav_timeshift;
 	int	mbp_nav_shift;
@@ -594,6 +627,11 @@ struct mb_process_struct
 	int	mbp_navadj_mode;
 	char	mbp_navadjfile[MBP_FILENAMESIZE];
 	int	mbp_navadj_algorithm;
+	
+	/* attitude merging */
+	int	mbp_attitude_mode;
+	char	mbp_attitudefile[MBP_FILENAMESIZE];
+	int	mbp_attitude_format;
 
 	/* data cutting */
 	int	mbp_cut_num;
@@ -808,8 +846,14 @@ int mb_pr_update_nav(int verbose, char *file,
 			int	mbp_nav_heading, 
 			int	mbp_nav_speed, 
 			int	mbp_nav_draft, 
+			int	mbp_nav_attitude, 
 			int	mbp_nav_algorithm, 
 			double mbp_nav_timeshift,
+			int *error);
+int mb_pr_update_attitude(int verbose, char *file, 
+			int	mbp_attitude_mode, 
+			char	*mbp_attitudefile, 
+			int	mbp_attitude_format, 
 			int *error);
 int mb_pr_update_navshift(int verbose, char *file, 
 			int	mbp_nav_shift, 
@@ -954,8 +998,14 @@ int mb_pr_get_nav(int verbose, char *file,
 			int	*mbp_nav_heading, 
 			int	*mbp_nav_speed, 
 			int	*mbp_nav_draft, 
+			int	*mbp_nav_attitude, 
 			int	*mbp_nav_algorithm, 
 			double *mbp_nav_timeshift,
+			int *error);
+int mb_pr_get_attitude(int verbose, char *file, 
+			int	*mbp_attitude_mode, 
+			char	*mbp_attitudefile, 
+			int	*mbp_attitude_format, 
 			int *error);
 int mb_pr_get_navshift(int verbose, char *file, 
 			int	*mbp_nav_shift, 

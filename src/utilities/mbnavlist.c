@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.8 2003-07-30 16:41:06 caress Exp $
+ *    $Id: mbnavlist.c,v 5.9 2004-12-02 06:37:42 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/07/30 16:41:06  caress
+ * Fixed handling of time gap errors in data .
+ *
  * Revision 5.7  2003/07/02 18:14:19  caress
  * Release 5.0.0
  *
@@ -97,7 +100,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.8 2003-07-30 16:41:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.9 2004-12-02 06:37:42 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
@@ -168,6 +171,10 @@ main (int argc, char **argv)
 	double	distance;
 	double	altitude;
 	double	sonardepth;
+	double	draft;
+	double	roll;
+	double	pitch;
+	double	heave;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -178,6 +185,16 @@ main (int argc, char **argv)
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
+	int	atime_i[7 * MB_ASYNCH_SAVE_MAX];
+	double	atime_d[MB_ASYNCH_SAVE_MAX];
+	double	anavlon[MB_ASYNCH_SAVE_MAX];
+	double	anavlat[MB_ASYNCH_SAVE_MAX];
+	double	aspeed[MB_ASYNCH_SAVE_MAX];
+	double	aheading[MB_ASYNCH_SAVE_MAX];
+	double	adraft[MB_ASYNCH_SAVE_MAX];
+	double	aroll[MB_ASYNCH_SAVE_MAX];
+	double	apitch[MB_ASYNCH_SAVE_MAX];
+	double	aheave[MB_ASYNCH_SAVE_MAX];
 
 	/* additional time variables */
 	int	first_m = MB_YES;
@@ -201,6 +218,7 @@ main (int argc, char **argv)
 	double	b;
 
 	int	read_data;
+	int	inav, n;
 	int	i, j, k;
 
 	/* get current default values */
@@ -420,11 +438,7 @@ main (int argc, char **argv)
 		}
 		
 	/* set auxilliary nav source if requested */
-	if (aux_nav_channel == 0)
-		{
-		nav_source = MB_DATA_NAV;
-		}
-	else if (aux_nav_channel > 0)
+	if (aux_nav_channel > 0)
 		{
 		if (aux_nav_channel == 1)
 		    nav_source = MB_DATA_NAV1;
@@ -511,6 +525,14 @@ main (int argc, char **argv)
 			status = MB_FAILURE;
 			}
 
+		/* extract additional nav info */
+		if (error == MB_ERROR_NO_ERROR)
+		   	status = mb_extract_nnav(verbose,mbio_ptr,store_ptr,
+					MB_ASYNCH_SAVE_MAX, &kind, &n,
+				    	atime_i,atime_d,anavlon,anavlat,
+				    	aspeed,aheading,adraft,
+					aroll,apitch,aheave,&error);
+
 		/* increment counter */
 		if (error == MB_ERROR_NO_ERROR)
 			nread++;
@@ -518,329 +540,369 @@ main (int argc, char **argv)
 		/* print debug statements */
 		if (verbose >= 2)
 			{
-			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
+			fprintf(stderr,"\ndbg2  Nsv data read in program <%s>\n",
 				program_name);
 			fprintf(stderr,"dbg2       kind:           %d\n",kind);
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       status:         %d\n",status);
+			fprintf(stderr,"dbg2       n:              %d\n",n);
 			}
-/*fprintf(stdout, "kind:%d error:%d time:%4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n", 
-kind, error, time_i[0],  time_i[1],  time_i[2],  
+			
+		/* loop over the n navigation points, outputting each one */
+		/* calculate course made good and distance */
+		if (error == MB_ERROR_NO_ERROR && n > 0)
+			{
+			for (inav=0;inav<n;inav++)
+				{
+				/* get data */
+				for (j=0;j<7;j++)
+					time_i[j] = atime_i[inav * 7 + j];
+				time_d = atime_d[inav];
+				navlon = anavlon[inav];
+				navlat = anavlat[inav];
+				speed = aspeed[inav];
+				heading = aheading[inav];
+				draft = adraft[inav];
+				roll = aroll[inav];
+				pitch = apitch[inav];
+				heave = aheave[inav];
+				
+/*fprintf(stdout, "kind:%d error:%d %d of %d: time:%4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n", 
+kind, error, i, n, 
+time_i[0],  time_i[1],  time_i[2],  
 time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 		
-		/* calculate course made good and distance */
-		if (error == MB_ERROR_NO_ERROR)
-			{
-			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
-			headingx = sin(DTR*heading);
-			headingy = cos(DTR*heading);
-			if (first == MB_YES)
-				{
-				time_interval = 0.0;
-				course = heading;
-				speed_made_good = 0.0;
-				course_old = heading;
-				speed_made_good_old = speed;
-				distance = 0.0;
-				}
-			else
-				{
-				time_interval = time_d - time_d_old;
-				dx = (navlon - navlon_old)/mtodeglon;
-				dy = (navlat - navlat_old)/mtodeglat;
-				distance = sqrt(dx*dx + dy*dy);
-				if (distance > 0.0)
-					course = RTD*atan2(dx/distance,dy/distance);
+				/* calculate course made good and distance */
+				mb_coor_scale(verbose,navlat, &mtodeglon, &mtodeglat);
+				headingx = sin(DTR * heading);
+				headingy = cos(DTR * heading);
+				if (first == MB_YES)
+					{
+					time_interval = 0.0;
+					course = heading;
+					speed_made_good = 0.0;
+					course_old = heading;
+					speed_made_good_old = speed;
+					distance = 0.0;
+					}
 				else
-					course = course_old;
-				if (course < 0.0)
-					course = course + 360.0;
-				if (time_interval > 0.0)
-					speed_made_good = 3.6*distance/time_interval;
-				else
-					speed_made_good 
-						= speed_made_good_old;
-				}
-			distance_total += 0.001 * distance;
-			}
+					{
+					time_interval = time_d - time_d_old;
+					dx = (navlon - navlon_old)/mtodeglon;
+					dy = (navlat - navlat_old)/mtodeglat;
+					distance = sqrt(dx*dx + dy*dy);
+					if (distance > 0.0)
+						course = RTD*atan2(dx/distance,dy/distance);
+					else
+						course = course_old;
+					if (course < 0.0)
+						course = course + 360.0;
+					if (time_interval > 0.0)
+						speed_made_good = 3.6*distance/time_interval;
+					else
+						speed_made_good 
+							= speed_made_good_old;
+					}
+				distance_total += 0.001 * distance;
 
-		/* reset old values */
-		if (error == MB_ERROR_NO_ERROR)
-			{
-			navlon_old = navlon;
-			navlat_old = navlat;
-			course_old = course;
-			speed_made_good_old = speed_made_good;
-			time_d_old = time_d;
-			}
+				/* reset old values */
+				navlon_old = navlon;
+				navlat_old = navlat;
+				course_old = course;
+				speed_made_good_old = speed_made_good;
+				time_d_old = time_d;
 
-		/* now loop over list of output parameters */
-		if (error == MB_ERROR_NO_ERROR)
-		    {
-		    for (i=0; i<n_list; i++) 
-			{
-			switch (list[i]) 
-				{
-				case '/': /* Inverts next simple value */
-					invert_next_value = MB_YES;
-					break;
-				case '-': /* Flip sign on next simple value */
-					signflip_next_value = MB_YES;
-					break;
-				case 'H': /* heading */
-					printsimplevalue(verbose, heading, 6, 2, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'h': /* course */
-					printsimplevalue(verbose, course, 6, 2, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'J': /* time string */
-					mb_get_jtime(verbose,time_i,time_j);
-					if (ascii == MB_YES)
-					    {
-					    printf("%.4d %.3d %.2d %.2d %.2d.%6.6d",
-						time_j[0],time_j[1],
-						time_i[3],time_i[4],
-						time_i[5],time_i[6]);
-					    }
-					else
-					    {
-					    b = time_j[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_j[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[5];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    }
-					break;
-				case 'j': /* time string */
-					mb_get_jtime(verbose,time_i,time_j);
-					if (ascii == MB_YES)
-					    {
-					    printf("%.4d %.3d %.4d %.2d.%6.6d",
-						time_j[0],time_j[1],
-						time_j[2],time_j[3],time_j[4]);
-					    }
-					else
-					    {
-					    b = time_j[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_j[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_j[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_j[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_j[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    }
-					break;
-				case 'L': /* along-track distance (km) */
-					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'l': /* along-track distance (m) */
-					printsimplevalue(verbose, 1000.0 * distance_total, 7, 3, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'M': /* Decimal unix seconds since 
-						1/1/70 00:00:00 */
-					printsimplevalue(verbose, time_d, 0, 6, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'm': /* time in decimal seconds since 
-						first record */
-					if (first_m == MB_YES)
+				/* now loop over list of output parameters */
+				for (i=0; i<n_list; i++) 
+					{
+					switch (list[i]) 
 						{
-						time_d_ref = time_d;
-						first_m = MB_NO;
+						case '/': /* Inverts next simple value */
+							invert_next_value = MB_YES;
+							break;
+						case '-': /* Flip sign on next simple value */
+							signflip_next_value = MB_YES;
+							break;
+						case 'c': /* Sonar transducer depth (m) */
+							printsimplevalue(verbose, sonardepth, 0, 3, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'H': /* heading */
+							printsimplevalue(verbose, heading, 6, 2, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'h': /* course */
+							printsimplevalue(verbose, course, 6, 2, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'J': /* time string */
+							mb_get_jtime(verbose,time_i,time_j);
+							if (ascii == MB_YES)
+							    {
+							    printf("%.4d %.3d %.2d %.2d %.2d.%6.6d",
+								time_j[0],time_j[1],
+								time_i[3],time_i[4],
+								time_i[5],time_i[6]);
+							    }
+							else
+							    {
+							    b = time_j[0];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_j[1];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[3];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[4];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[5];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[6];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    }
+							break;
+						case 'j': /* time string */
+							mb_get_jtime(verbose,time_i,time_j);
+							if (ascii == MB_YES)
+							    {
+							    printf("%.4d %.3d %.4d %.2d.%6.6d",
+								time_j[0],time_j[1],
+								time_j[2],time_j[3],time_j[4]);
+							    }
+							else
+							    {
+							    b = time_j[0];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_j[1];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_j[2];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_j[3];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_j[4];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    }
+							break;
+						case 'L': /* along-track distance (km) */
+							printsimplevalue(verbose, distance_total, 7, 3, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'l': /* along-track distance (m) */
+							printsimplevalue(verbose, 1000.0 * distance_total, 7, 3, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'M': /* Decimal unix seconds since 
+								1/1/70 00:00:00 */
+							printsimplevalue(verbose, time_d, 0, 6, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'm': /* time in decimal seconds since 
+								first record */
+							if (first_m == MB_YES)
+								{
+								time_d_ref = time_d;
+								first_m = MB_NO;
+								}
+							b = time_d - time_d_ref;
+							printsimplevalue(verbose, b, 0, 6, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'P': /* pitch */
+							printsimplevalue(verbose, pitch, 5, 2, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'p': /* draft */
+							printsimplevalue(verbose, draft, 5, 2, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'R': /* roll */
+							printsimplevalue(verbose, roll, 5, 2, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'r': /* heave */
+							printsimplevalue(verbose, heave, 5, 2, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'S': /* speed */
+							printsimplevalue(verbose, speed, 5, 2, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 's': /* speed made good */
+							printsimplevalue(verbose, speed_made_good, 5, 2, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
+							if (ascii == MB_YES)
+							    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+								time_i[0],time_i[1],time_i[2],
+								time_i[3],time_i[4],time_i[5],
+								time_i[6]);
+							else
+							    {
+							    b = time_i[0];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[1];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[2];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[3];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[4];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[5] + 1e-6 * time_i[6];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    }
+							break;
+						case 't': /* yyyy mm dd hh mm ss time string */
+							if (ascii == MB_YES)
+							    printf("%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+								time_i[0],time_i[1],time_i[2],
+								time_i[3],time_i[4],time_i[5],
+								time_i[6]);
+							else
+							    {
+							    b = time_i[0];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[1];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[2];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[3];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[4];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = time_i[5] + 1e-6 * time_i[6];
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    }
+							break;
+						case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
+							time_u = (int) time_d;
+							if (ascii == MB_YES)
+							    printf("%d",time_u);
+							else
+							    {
+							    b = time_u;
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    }
+							break;
+						case 'u': /* time in seconds since first record */
+							time_u = (int) time_d;
+							if (first_u == MB_YES)
+								{
+								time_u_ref = time_u;
+								first_u = MB_NO;
+								}
+							if (ascii == MB_YES)
+							    printf("%d",time_u - time_u_ref);
+							else
+							    {
+							    b = time_u - time_u_ref;
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    }
+							break;
+						case 'V': /* time in seconds since last ping */
+						case 'v': 
+							if (ascii == MB_YES)
+							    {
+							    if ( fabs(time_interval) > 100. )
+								printf("%g",time_interval); 
+							    else
+								printf("%7.3f",time_interval);
+							    }
+							else
+							    {
+							    fwrite(&time_interval, sizeof(double), 1, stdout);
+							    }
+							break;
+						case 'X': /* longitude decimal degrees */
+							dlon = navlon;
+							printsimplevalue(verbose, dlon, 11, 6, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'x': /* longitude degress + decimal minutes */
+							dlon = navlon;
+							if (dlon < 0.0)
+								{
+								hemi = 'W';
+								dlon = -dlon;
+								}
+							else
+								hemi = 'E';
+							degrees = (int) dlon;
+							minutes = 60.0*(dlon - degrees);
+							if (ascii == MB_YES)
+							    {
+							    printf("%3d %8.5f%c",
+								degrees, minutes, hemi);
+							    }
+							else
+							    {
+							    b = degrees;
+							    if (hemi == 'W') b = -b;
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = minutes;
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    }
+							break;
+						case 'Y': /* latitude decimal degrees */
+							dlat = navlat;
+							printsimplevalue(verbose, dlat, 11, 6, ascii, 
+									    &invert_next_value, 
+									    &signflip_next_value, &error);
+							break;
+						case 'y': /* latitude degrees + decimal minutes */
+							dlat = navlat;
+							if (dlat < 0.0)
+								{
+								hemi = 'S';
+								dlat = -dlat;
+								}
+							else
+								hemi = 'N';
+							degrees = (int) dlat;
+							minutes = 60.0*(dlat - degrees);
+							if (ascii == MB_YES)
+							    {
+							    printf("%3d %8.5f%c",
+								degrees, minutes, hemi);
+							    }
+							else
+							    {
+							    b = degrees;
+							    if (hemi == 'S') b = -b;
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    b = minutes;
+							    fwrite(&b, sizeof(double), 1, stdout);
+							    }
+							break;
+						default:
+							if (ascii == MB_YES)
+							    printf("<Invalid Option: %c>",
+								list[i]);
+							break;
 						}
-					b = time_d - time_d_ref;
-					printsimplevalue(verbose, b, 0, 6, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'S': /* speed */
-					printsimplevalue(verbose, speed, 5, 2, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 's': /* speed made good */
-					printsimplevalue(verbose, speed_made_good, 5, 2, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					if (ascii == MB_YES)
-					    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
-						time_i[0],time_i[1],time_i[2],
-						time_i[3],time_i[4],time_i[5],
-						time_i[6]);
-					else
-					    {
-					    b = time_i[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[5] + 1e-6 * time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    }
-					break;
-				case 't': /* yyyy mm dd hh mm ss time string */
-					if (ascii == MB_YES)
-					    printf("%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
-						time_i[0],time_i[1],time_i[2],
-						time_i[3],time_i[4],time_i[5],
-						time_i[6]);
-					else
-					    {
-					    b = time_i[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = time_i[5] + 1e-6 * time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    }
-					break;
-				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
-					time_u = (int) time_d;
-					if (ascii == MB_YES)
-					    printf("%d",time_u);
-					else
-					    {
-					    b = time_u;
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    }
-					break;
-				case 'u': /* time in seconds since first record */
-					time_u = (int) time_d;
-					if (first_u == MB_YES)
 						{
-						time_u_ref = time_u;
-						first_u = MB_NO;
+						if (i<(n_list-1)) printf ("\t");
+						else printf ("\n");
 						}
-					if (ascii == MB_YES)
-					    printf("%d",time_u - time_u_ref);
-					else
-					    {
-					    b = time_u - time_u_ref;
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    }
-					break;
-				case 'V': /* time in seconds since last ping */
-				case 'v': 
-					if (ascii == MB_YES)
-					    {
-					    if ( fabs(time_interval) > 100. )
-						printf("%g",time_interval); 
-					    else
-						printf("%7.3f",time_interval);
-					    }
-					else
-					    {
-					    fwrite(&time_interval, sizeof(double), 1, stdout);
-					    }
-					break;
-				case 'X': /* longitude decimal degrees */
-					dlon = navlon;
-					printsimplevalue(verbose, dlon, 11, 6, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'x': /* longitude degress + decimal minutes */
-					dlon = navlon;
-					if (dlon < 0.0)
-						{
-						hemi = 'W';
-						dlon = -dlon;
-						}
-					else
-						hemi = 'E';
-					degrees = (int) dlon;
-					minutes = 60.0*(dlon - degrees);
-					if (ascii == MB_YES)
-					    {
-					    printf("%3d %8.5f%c",
-						degrees, minutes, hemi);
-					    }
-					else
-					    {
-					    b = degrees;
-					    if (hemi == 'W') b = -b;
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = minutes;
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    }
-					break;
-				case 'Y': /* latitude decimal degrees */
-					dlat = navlat;
-					printsimplevalue(verbose, dlat, 11, 6, ascii, 
-							    &invert_next_value, 
-							    &signflip_next_value, &error);
-					break;
-				case 'y': /* latitude degrees + decimal minutes */
-					dlat = navlat;
-					if (dlat < 0.0)
-						{
-						hemi = 'S';
-						dlat = -dlat;
-						}
-					else
-						hemi = 'N';
-					degrees = (int) dlat;
-					minutes = 60.0*(dlat - degrees);
-					if (ascii == MB_YES)
-					    {
-					    printf("%3d %8.5f%c",
-						degrees, minutes, hemi);
-					    }
-					else
-					    {
-					    b = degrees;
-					    if (hemi == 'S') b = -b;
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    b = minutes;
-					    fwrite(&b, sizeof(double), 1, stdout);
-					    }
-					break;
-				default:
-					if (ascii == MB_YES)
-					    printf("<Invalid Option: %c>",
-						list[i]);
-					break;
-				}
-			if (ascii == MB_YES)
-				{
-				if (i<(n_list-1)) printf ("\t");
-				else printf ("\n");
+					}
+				first = MB_NO;
 				}
 			}
-		    first = MB_NO;
-		    }
 		}
 
 	/* close the swath file */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.4 2004-05-21 23:31:28 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.5 2004-12-02 06:34:27 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/05/21 23:31:28  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.3  2002/03/26 07:43:57  caress
  * Release 5.0.beta15
  *
@@ -120,6 +123,7 @@ struct mbna_section {
 	double	snav_lat[MBNA_SNAV_NUM];
 	double	snav_lon_offset[MBNA_SNAV_NUM];
 	double	snav_lat_offset[MBNA_SNAV_NUM];
+	int	contoursuptodate;
 };
 struct mbna_file {
 	int	status;

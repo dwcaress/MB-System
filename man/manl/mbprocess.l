@@ -1,4 +1,4 @@
-.TH mbprocess l "6 October 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbprocess l "29 November 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbprocess\fP - this program performs a 
 variety of swath data processing 
@@ -112,6 +112,8 @@ The \fBmbprocess\fP commands found in parameter files are:
         sets navigation file path [no default]
    NAVFORMAT constant
         sets navigation file format [9]
+ 	see below for documentation of the 
+ 	supported navigation formats
    NAVHEADING boolean
         sets heading to be merged from navigation file
         - note: heading merged from navigation before 
@@ -128,6 +130,15 @@ The \fBmbprocess\fP commands found in parameter files are:
           draft correction applied
           0: draft not changed
           1: draft merged from navigation file
+   NAVATTITUDE boolean
+        sets roll, pitch and heave to be merged from 
+	navigation file
+        - note: roll, pitch, and heave merged from 
+	  navigation before roll bias and pitch bias 
+	  corrections applied
+          0: roll, pitch, and heave not changed
+          1: roll, pitch, and heave merged from 
+	     navigation file
    NAVINTERP boolean
         sets navigation interpolation algorithm [0]
           0: linear interpolation (recommended)
@@ -177,6 +188,31 @@ The \fBmbprocess\fP commands found in parameter files are:
         sets adjusted navigation interpolation algorithm [0]
           0: linear interpolation (recommended)
           1: spline interpolation
+ 
+  ATTITUDE MERGING:
+    ATTITUDEMODE mode
+        sets atttitude (roll, pitch, and heave) merging [0]
+        - roll, pitch, and heave merged before 
+          roll bias and pitch bias corrections applied
+        - attitude merging from a separate file supersedes
+          attitude merging from a navigation file
+          0: attitude merging off
+          1: attitude merging on
+    ATTITUDEFILE filename
+        sets attitude file path
+    ATTITUDEFORMAT constant
+        sets attitude file format [1]
+        - tide files can be in one of four ASCII
+          table formats
+          1: format is <time_d roll pitch heave>
+          2: format is <yr mon day hour min sec roll pitch heave>
+          3: format is <yr jday hour min sec roll pitch heave>
+          4: format is <yr jday daymin sec roll pitch heave>
+        - time_d = decimal seconds since 1/1/1970
+        - daymin = decimal minutes start of day
+        - roll = positive starboard up, degrees
+        - pitch = positive forward up, degrees
+        - heave = positive up, meters
 
  DATA CUTTING:
    DATACUTCLEAR
@@ -756,6 +792,145 @@ anything to the stderr stream.  If the
 outputs the program version being used, the processing parameters
 being use, and some statistics regarding the processing accomplished.
 
+.SH NAVIGATION FORMATS
+The navigation formats that are supported for merging by \fBmbprocess\fP
+include the following:
+ 	\fBMBprocess\fP ID          Name
+ 	------------------      ----
+ 	         1              Simple Decimal Time
+ 	         2              Simple Date 1
+ 	         3              Simple Date 2
+ 	         4              Simple Date 3
+ 	         5              L-DEO Processed Nav
+ 	         6              NMEA 0183 - GLL
+ 	         7              NMEA 0183 - GGA
+ 	         8              Simrad 90 Nav
+ 	         9              MBPRONAV (*.nve Files)
+
+Format 1 (Simple Decimal Time):
+ 	- text
+ 	- fields separated by white space
+ 	- each line contains the following fields:
+ 		time_d lon lat
+ 	- time_d : decimal seconds since 1970 Jan 1 00:00:00.00
+ 	- lon: decimal longitude (deg)
+ 	- lat: decimal latitude (deg)
+ 	
+Format 2 (Simple Date 1):
+ 	- text
+ 	- fields separated by white space
+ 	- each line contains the following fields:
+ 		yr mon day hour min sec lon lat
+ 	- yr: four-digit year
+ 	- mon: integer month of year
+ 	- day: integer day of month
+ 	- hour: integer hour of day
+ 	- min: integer minute of hour
+ 	- sec: decimal second of minute
+ 	- lon: decimal longitude (deg)
+ 	- lat: decimal latitude (deg)
+
+Format 3 (Simple Date 2):
+ 	- text
+ 	- fields separated by white space
+ 	- each line contains the following fields:
+ 		yr jday hour min sec lon lat
+ 	- yr: four-digit year
+ 	- jday: integer julian day of year
+ 	- hour: integer hour of day
+ 	- min: integer minute of hour
+ 	- sec: decimal second of minute
+ 	- lon: decimal longitude (deg)
+ 	- lat: decimal latitude (deg)
+
+Format 4 (Simple Date 3):
+ 	- text
+ 	- fields separated by white space
+ 	- each line contains the following fields:
+ 		yr jday daymin sec lon lat
+ 	- yr: four-digit year
+ 	- jday: integer julian day of year
+ 	- daymin: integer minute of day
+ 	- sec: decimal second of minute
+ 	- lon: decimal longitude (deg)
+ 	- lat: decimal latitude (deg)
+
+Format 5 (L-DEO Processed Nav):
+ 	- text
+ 	- fields separated by white space
+ 	- each line contains the following fields:
+ 		timetag NorS latd latm EorW lond lonm src dr1 dr2
+ 	- timetag: comes in two forms
+ 		form 1: yy+jjj:hh:mm:ss.sss
+ 		form 2: yyyy+jjj:hh:mm:ss.sss
+ 	- yy: either two-digit or four-digit year
+ 	- jjj: integer julian day of year
+ 	- hh: integer hour of day
+ 	- mm: integer minute of hour
+ 	- ss.sss: decimal second of minute
+ 	- NorS: 'S' for southern hemisphere
+ 	        'N' for northern hemisphere
+ 	- latd: integer latitude degrees
+ 	- latm: decimal latitude minutes
+ 	- EorW: 'E' for eastern hemisphere
+ 	        'W' for western hemisphere
+ 	- lond: integer longitude degrees
+ 	- lonm: decimal longitude minutes
+ 	- src: nav source (e.g. gp1, dr, satl)
+ 	        'gp1'  - GPS receiver 1
+ 	        'dr'   - dead reckoning
+ 	        'satl' - transit satellite
+ 	- dr1: nonzero when src is 'dr'
+ 	- dr2: nonzero when src is 'dr'
+
+Format 6 (NMEA 0183 - GLL):
+ 	- text
+ 	- fields separated by commas
+ 	- nav derived from GLL strings
+
+Format 7 (NMEA 0183 - GGA):
+ 	- text
+ 	- fields separated by commas
+ 	- nav derived from GGA strings
+
+Format 8 (Simrad 90 Nav):
+ 	- text
+ 	- fields not separated by white space
+ 	- each line contains the following fields:
+ 		ddmmyy_hhmmss.ss_LLlllllN_LLLllllllE   
+	- dd: day of month
+ 	- mm: integer month of year
+	- yy: two-digit year
+ 	- hh: integer hour of day
+ 	- mm: integer minute of hour
+ 	- ss.ss: decimal second of minute
+ 	- LL: integer latitude degrees
+ 	- lllll: integer latitude minutes X 1000
+ 	- N:    'S' for southern hemisphere
+ 	        'N' for northern hemisphere
+ 	- LLL: integer longitude degrees
+ 	- lllll: integer longitude minutes X 1000
+ 	- E:    'E' for eastern hemisphere
+ 	        'W' for western hemisphere
+
+Format 9 (MBPRONAV (*.nve Files)):
+ 	- text
+ 	- fields separated by white space
+ 	- each line contains the following fields:
+ 		yr mn dy hr mi se td lo la hg sp dr
+ 	- yr: four-digit year
+ 	- mn: integer month of year
+ 	- dy: integer day of month
+ 	- hr: integer hour of day
+ 	- mi: integer minute of hour
+ 	- se: decimal second of minute
+ 	- td : decimal seconds since 1970 Jan 1 00:00:00.00
+ 	- lo: decimal longitude (deg)
+ 	- la: decimal latitude (deg)
+ 	- hg: decimal heading (deg)
+ 	- sp: decimal speed (km/hr)
+ 	- dr: decimal draft (m)
+
 .SH EXAMPLES
 Suppose the user has a Simrad EM120 data file called
 "0051_20010829_223755.mb57" that requires processing.
@@ -766,7 +941,7 @@ an mbprocess parameter file "0051_20010829_223755.mb57.par".
 The contents of the parameter file are:
 
  ## MB-System processing parameter file
- ## Written by mb_pr_writepar version $Id: mbprocess.l,v 5.17 2004-10-06 18:51:39 caress Exp $
+ ## Written by mb_pr_writepar version $Id: mbprocess.l,v 5.18 2004-12-02 06:43:19 caress Exp $
  ## MB-system Version 5.0.beta22
  ## Generated by user <caress> on cpu <menard> at <Fri Sep  6 21:27:41 2002>
  ##
@@ -786,6 +961,7 @@ The contents of the parameter file are:
  NAVHEADING 0
  NAVSPEED 0
  NAVDRAFT 0
+ NAVATTITUDE 0
  NAVINTERP 0
  NAVTIMESHIFT 0.000000
  NAVSHIFT 0
@@ -797,6 +973,11 @@ The contents of the parameter file are:
  NAVADJMODE 0
  NAVADJFILE 
  NAVADJINTERP 0
+ ##
+ ## Attitude Merging:
+ ATTITUDEMODE 0
+ ATTITUDEFILE 
+ ATTITUDEFORMAT 1
  ##
  ## Data cutting:
  DATACUTCLEAR
@@ -910,6 +1091,7 @@ in "0051_20010829_223755.mb57.par" are:
  NAVHEADING 1
  NAVSPEED 1
  NAVDRAFT 1
+ NAVATTITUDE 1
 
 At this point, running \fBmbprocess\fP on 
 "0051_20010829_223755.mb57" will apply the bathymetry
@@ -959,11 +1141,11 @@ To process the data, run mbprocess:
 
  The output to the terminal is:
  Program mbprocess
- Version $Id: mbprocess.l,v 5.17 2004-10-06 18:51:39 caress Exp $
+ Version $Id: mbprocess.l,v 5.18 2004-12-02 06:43:19 caress Exp $
  MB-System Version 5.0.beta07
  
  Program <mbprocess>
- Version $Id: mbprocess.l,v 5.17 2004-10-06 18:51:39 caress Exp $
+ Version $Id: mbprocess.l,v 5.18 2004-12-02 06:43:19 caress Exp $
  MB-system Version 5.0.beta07
  
  Program Operation:

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.11 2004-09-16 19:02:33 caress Exp $
+ *    $Id: mb_access.c,v 5.12 2004-12-02 06:33:32 caress Exp $
 
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2004/09/16 19:02:33  caress
+ * Changes to better support segy data.
+ *
  * Revision 5.10  2004/06/18 03:07:15  caress
  * Adding support for segy i/o and working on support for Reson 7k format 88.
  *
@@ -68,7 +71,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.11 2004-09-16 19:02:33 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.12 2004-12-02 06:33:32 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -578,6 +581,139 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
+	int nmax, int *kind, int *n,
+	int *time_i, double *time_d, 
+	double *navlon, double *navlat,
+	double *speed, double *heading, double *draft, 
+	double *roll, double *pitch, double *heave, 
+	int *error)
+{
+	char	*function_name = "mb_extract_nnav";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	double	easting, northing;
+	int	i, inav;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_extract_nnav != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_extract_nnav)
+				(verbose,mbio_ptr,store_ptr,
+				nmax,kind,n,
+				time_i,time_d,
+				navlon,navlat,
+				speed,heading,draft,
+				roll,pitch,heave, 
+				error);
+		}
+	else if (mb_io_ptr->mb_io_extract_nav != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_extract_nav)
+				(verbose,mbio_ptr,store_ptr,
+				kind,time_i,time_d,
+				navlon,navlat,
+				speed,heading,draft,
+				roll,pitch,heave, 
+				error);
+		if (status == MB_SUCCESS)
+			*n = 1;
+		else
+			*n = 0;
+		}
+	else
+		{
+		*n = 0;
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+		
+	/* apply projection and lonflip if necessary */
+	if (status == MB_SUCCESS)
+		{
+		for (inav=0;inav<*n;inav++)
+			{
+			/* apply inverse projection if required */
+			if (mb_io_ptr->projection_initialized == MB_YES)
+				{
+				easting = navlon[inav];
+				northing = navlat[inav];
+				mb_proj_inverse(verbose, mb_io_ptr->pjptr, 
+								easting, northing,
+								&(navlon[inav]), &(navlat[inav]),
+								error);
+				}
+
+			/* apply lonflip */
+			if (mb_io_ptr->lonflip < 0)
+				{
+				if (navlon[inav] > 0.) 
+					navlon[inav] = navlon[inav] - 360.;
+				else if (navlon[inav] < -360.)
+					navlon[inav] = navlon[inav] + 360.;
+				}
+			else if (mb_io_ptr->lonflip == 0)
+				{
+				if (navlon[inav] > 180.) 
+					navlon[inav] = navlon[inav] - 360.;
+				else if (navlon[inav] < -180.)
+					navlon[inav] = navlon[inav] + 360.;
+				}
+			else
+				{
+				if (navlon[inav] > 360.) 
+					navlon[inav] = navlon[inav] - 360.;
+				else if (navlon[inav] < 0.)
+					navlon[inav] = navlon[inav] + 360.;
+				}
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       n:          %d\n",*n);
+		for (inav=0;inav<*n;inav++)
+			{
+			for (i=0;i<7;i++)
+				fprintf(stderr,"dbg2       %d time_i[%d]:     %d\n",inav,i,time_i[inav * 7 + i]);
+			fprintf(stderr,"dbg2       %d time_d:        %f\n",inav,time_d[inav]);
+			fprintf(stderr,"dbg2       %d longitude:     %f\n",inav,navlon[inav]);
+			fprintf(stderr,"dbg2       %d latitude:      %f\n",inav,navlat[inav]);
+			fprintf(stderr,"dbg2       %d speed:         %f\n",inav,speed[inav]);
+			fprintf(stderr,"dbg2       %d heading:       %f\n",inav,heading[inav]);
+			fprintf(stderr,"dbg2       %d draft:         %f\n",inav,draft[inav]);
+			fprintf(stderr,"dbg2       %d roll:          %f\n",inav,roll[inav]);
+			fprintf(stderr,"dbg2       %d pitch:         %f\n",inav,pitch[inav]);
+			fprintf(stderr,"dbg2       %d heave:         %f\n",inav,heave[inav]);
+			}
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */

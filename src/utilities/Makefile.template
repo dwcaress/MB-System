@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.15 2004-10-18 03:37:49 caress Exp $
+#	$Id: Makefile.template,v 5.16 2004-12-02 06:39:28 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.15  2004/10/18 03:37:49  caress
+# Added libpsl to GMT related programs.
+#
 # Revision 5.14  2004/10/06 19:10:51  caress
 # Release 5.0.5 update.
 #
@@ -180,7 +183,9 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbsegylist \
 	$(BINDIR)/mbsegyinfo \
 	$(BINDIR)/mbsegygrid \
+	$(BINDIR)/mbauvnavusbl \
 	$(BINDIR)/mbgetesf \
+	$(BINDIR)/mbneptune2esf \
 	$(BINDIR)/mbps \
 	$(BINDIR)/mbstripnan \
 	$(BINDIR)/mbmerge \
@@ -261,6 +266,9 @@ $(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIB
 $(BINDIR)/mbgetesf:	mbgetesf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbgetesf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbgetesf
+$(BINDIR)/mbneptune2esf:	mbneptune2esf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbneptune2esf.o $(LIBDIR)/libmbio.a $(LFLAGS) $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+		-o $(BINDIR)/mbneptune2esf
 $(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbgetmask
@@ -326,6 +334,9 @@ $(BINDIR)/mbsegygrid:	mbsegygrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIB
 	$(CC) $(CFLAGS) mbsegygrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbsegygrid
+$(BINDIR)/mbauvnavusbl:	mbauvnavusbl.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbauvnavusbl.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a \
+		$(LFLAGS) -o $(BINDIR)/mbauvnavusbl
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -365,6 +376,8 @@ mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR
 	$(CC) -c $(CFLAGS) mbrollbias.c
 mbgetesf.o:	mbgetesf.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbgetesf.c
+mbneptune2esf.o:	mbneptune2esf.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbneptune2esf.c
 mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbgetmask.c
 mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -407,3 +420,5 @@ mbsegyinfo.o:	mbsegyinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbsegyinfo.c
 mbsegygrid.o:	mbsegygrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbsegygrid.c
+mbauvnavusbl.o:	mbauvnavusbl.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbauvnavusbl.c

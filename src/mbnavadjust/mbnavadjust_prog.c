@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.13 2004-05-21 23:31:27 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.14 2004-12-02 06:34:27 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2004/05/21 23:31:27  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.12  2003/04/17 21:07:49  caress
  * Release 5.0.beta30
  *
@@ -119,7 +122,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.13 2004-05-21 23:31:27 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.14 2004-12-02 06:34:27 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -183,7 +186,7 @@ int	idata = 0;
 int	icomment = 0;
 int	odata = 0;
 int	ocomment = 0;
-char	comment[256];
+char	comment[MB_COMMENT_MAXLINE];
 
 /* color control values */
 #define	WHITE	0	
@@ -274,6 +277,7 @@ int mbnavadjust_init_globals()
 	project.tick_int = 100.;
 	project.label_int = 100000.;
 	mbna_contour_algorithm = MB_CONTOUR_OLD;
+	/*mbna_contour_algorithm = MB_CONTOUR_TRIANGLES;*/
 	mbna_ncolor = 4;
 	mbna_contour = NULL;
 	mbna_contour1.nvector = 0;
@@ -943,7 +947,7 @@ int mbnavadjust_write_project()
 			for (j=0;j<file->num_sections;j++)
 				{
 				section = &file->sections[j];
-				fprintf(hfp,"SECTION %4d %5d %5d %d %d %10.6f %16.6f %16.6f %12.7f %12.7f %12.7f %12.7f %9.3f %9.3f\n",
+				fprintf(hfp,"SECTION %4d %5d %5d %d %d %10.6f %16.6f %16.6f %12.7f %12.7f %12.7f %12.7f %9.3f %9.3f %d\n",
 					j,
 					section->num_pings,
 					section->num_beams,
@@ -957,7 +961,8 @@ int mbnavadjust_write_project()
 					section->latmin,
 					section->latmax,
 					section->depthmin,
-					section->depthmax);
+					section->depthmax,
+					section->contoursuptodate);
 				for (k=MBNA_MASK_DIM-1;k>=0;k--)
 				    {
 				    for (l=0;l<MBNA_MASK_DIM;l++)
@@ -1248,7 +1253,7 @@ int mbnavadjust_read_project()
 				if (status == MB_SUCCESS)
 					result = fgets(buffer,BUFFER_MAX,hfp);
 				if (status == MB_SUCCESS && result == buffer)
-					nscan = sscanf(buffer,"SECTION %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+					nscan = sscanf(buffer,"SECTION %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d",
 						&idummy,
 						&section->num_pings,
 						&section->num_beams,
@@ -1262,12 +1267,15 @@ int mbnavadjust_read_project()
 						&section->latmin,
 						&section->latmax,
 						&section->depthmin,
-						&section->depthmax);
-				if (result != buffer || nscan != 14)
+						&section->depthmax,
+						&section->contoursuptodate);
+				if (result != buffer || nscan < 14)
 					{
 					status = MB_FAILURE;
 fprintf(stderr, "read failed on section: %s\n", buffer);
 					}
+				if (nscan == 14)
+					section->contoursuptodate = MB_NO;
 				for (k=MBNA_MASK_DIM-1;k>=0;k--)
 				    {
 				    if (status == MB_SUCCESS)
@@ -1912,7 +1920,6 @@ section->distance, distance, project.section_length);*/
 					}
 					
 				/* initialize new section */
-/*fprintf(stderr,"New section: %d\n",file->num_sections);*/
 				file->num_sections++;
 				section = &file->sections[file->num_sections-1];
 				section->num_pings = 0;
@@ -1926,8 +1933,7 @@ section->distance, distance, project.section_length);*/
 				if (file->num_sections > 1)
 					{
 					csection = &file->sections[file->num_sections-2];
-					if (time_d - csection->etime_d >= 0.0
-						&& time_d - csection->etime_d < MBNA_TIME_GAP_MAX)
+					if (fabs(time_d - csection->etime_d) < MBNA_TIME_GAP_MAX)
 						{
 						section->continuity = MB_YES;
 						section->global_start_snav--;
@@ -1938,8 +1944,7 @@ section->distance, distance, project.section_length);*/
 					{
 					cfile = &project.files[project.num_files-2];
 					csection = &cfile->sections[cfile->num_sections-1];
-					if (time_d - csection->etime_d >= 0.0
-						&& time_d - csection->etime_d < MBNA_TIME_GAP_MAX)
+					if (fabs(time_d - csection->etime_d) < MBNA_TIME_GAP_MAX)
 						{
 						section->continuity = MB_YES;
 						section->global_start_snav--;
@@ -1955,6 +1960,7 @@ section->distance, distance, project.section_length);*/
 				section->latmax = navlat;
 				section->depthmin = good_depth;
 				section->depthmax = good_depth;
+				section->contoursuptodate = MB_NO;
 				new_segment = MB_NO;
 				
 				/* open output section file */
@@ -2065,6 +2071,10 @@ section->distance, distance, project.section_length);*/
 						if (lat != 0.0) section->latmax = MAX(section->latmax,lat);
 						section->depthmin = MIN(section->depthmin,bath[i]);
 						section->depthmax = MAX(section->depthmax,bath[i]);
+						}
+					else
+						{
+						beamflag[i] = MB_FLAG_NULL;
 						}
 					}
 					
@@ -4260,7 +4270,8 @@ int mbnavadjust_section_contour(int fileid, int sectionid,
 			project.datadir,fileid,sectionid);
 		
 		/* read contours from file if possible */
-		if ((cfp = fopen(path,"r")) != NULL)
+		if (project.files[fileid].sections[sectionid].contoursuptodate == MB_YES 
+		    && (cfp = fopen(path,"r")) != NULL)
 		    {
 		    /* read contour file header */
 		    index = 4 * sizeof(int) + 4 * sizeof(double);
@@ -4355,9 +4366,11 @@ int mbnavadjust_section_contour(int fileid, int sectionid,
 
 			    /* close the file */
 			    fclose(cfp);
+			    
+			    /* set the contours up to date flag */
+			    project.files[fileid].sections[sectionid].contoursuptodate = MB_YES;
 			    }
 			}
-		
 		}
 			
  	/* print output debug statements */
@@ -4399,7 +4412,6 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
     		/* get position in lon and lat */
 	    	x = ix / mbna_plotx_scale +  mbna_plot_lon_min;
 	    	y = (cont_borders[3] - iy) / mbna_ploty_scale +  mbna_plot_lat_min;
-fprintf(stderr,"x:%f y:%f\n",x,y);
 		crossing = &project.crossings[mbna_current_crossing];
 	    	
 	    	/* get closest snav point in swath 1 */
@@ -4441,7 +4453,7 @@ fprintf(stderr,"x:%f y:%f\n",x,y);
 		}
 			
  	/* print output debug statements */
-	if (mbna_verbose >= 0)
+	if (mbna_verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  snav point selected in MBnavadjust function <%s>\n",
 			function_name);

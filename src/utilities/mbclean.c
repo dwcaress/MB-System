@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.8 2003-07-26 18:01:22 caress Exp $
+ *    $Id: mbclean.c,v 5.9 2004-12-02 06:39:28 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/07/26 18:01:22  caress
+ * Changed beamflag handling code.
+ *
  * Revision 5.7  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -235,7 +238,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.8 2003-07-26 18:01:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.9 2004-12-02 06:39:28 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -632,8 +635,8 @@ main (int argc, char **argv)
 		for the specified data format */
 	if (beam_flagging == MB_NO && mode <= 2)
 		{
-		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data \nas negative numbers (specified by cleaning mode %d).\n",format,mode);
-		fprintf(stderr,"\nCopy the data to another format or set the cleaning mode to zero \nbad data values (-M3 or -M4).\n");
+		fprintf(stderr,"\nMBIO format %d does not support flagging of bad data (specified by cleaning mode %d).\n",format,mode);
+		fprintf(stderr,"\nCopy the data to another format or set the cleaning mode to null \nbad soundings (-M3 or -M4).\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);

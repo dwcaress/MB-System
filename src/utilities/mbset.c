@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.23 2004-05-21 23:51:19 caress Exp $
+ *    The MB-system:	mbset.c	1/4/2000
+ *    $Id: mbset.c,v 5.24 2004-12-02 06:37:42 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003 by
+ *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2004/05/21 23:51:19  caress
+ * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
+ *
  * Revision 5.22  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -126,7 +129,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.23 2004-05-21 23:51:19 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.24 2004-12-02 06:37:42 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -329,6 +332,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_nav_heading = MBP_NAV_ON;
 			process.mbp_nav_speed = MBP_NAV_ON;
 			process.mbp_nav_draft = MBP_NAV_ON;
+			process.mbp_nav_attitude = MBP_NAV_ON;
 			}
 		    }
 		else if (strncmp(pargv[i], "NAVFORMAT", 9) == 0)
@@ -346,6 +350,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "NAVDRAFT", 8) == 0)
 		    {
 		    sscanf(pargv[i], "NAVDRAFT:%d", &process.mbp_nav_draft);
+		    }
+		else if (strncmp(pargv[i], "NAVATTITUDE", 11) == 0)
+		    {
+		    sscanf(pargv[i], "NAVATTITUDE:%d", &process.mbp_nav_attitude);
 		    }
 		else if (strncmp(pargv[i], "NAVINTERP", 9) == 0)
 		    {
@@ -388,6 +396,24 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "NAVADJINTERP", 12) == 0)
 		    {
 		    sscanf(pargv[i], "NAVADJINTERP:%d", &process.mbp_navadj_algorithm);
+		    }
+
+		/* attitude merging */
+		else if (strncmp(pargv[i], "ATTITUDEMODE", 12) == 0)
+		    {
+		    sscanf(pargv[i], "ATTITUDEMODE:%d", &process.mbp_attitude_mode);
+		    }
+		else if (strncmp(pargv[i], "ATTITUDEFILE", 12) == 0)
+		    {
+		    sscanf(pargv[i], "ATTITUDEFILE:%s", process.mbp_attitudefile);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_attitude_mode = MBP_NAV_ON;
+			}
+		    }
+		else if (strncmp(pargv[i], "ATTITUDEFORMAT", 14) == 0)
+		    {
+		    sscanf(pargv[i], "ATTITUDEFORMAT:%d", &process.mbp_attitude_format);
 		    }
 
 		/* data cutting */
@@ -1025,6 +1051,8 @@ the manual pages for mbprocess and mbset. \n\n";
 	    if (process.mbp_nav_mode == MBP_NAV_ON)
 		{
 		fprintf(stderr,"  Navigation merged from navigation file.\n");
+		fprintf(stderr,"  Navigation file:               %s\n", process.mbp_navfile);
+	        fprintf(stderr,"  Navigation format:             %d\n", process.mbp_nav_format);
 		if (process.mbp_nav_heading == MBP_NAV_ON)
 		    fprintf(stderr,"  Heading merged from navigation file.\n");
 		else
@@ -1037,7 +1065,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		    fprintf(stderr,"  Draft merged from navigation file.\n");
 		else
 		    fprintf(stderr,"  Draft not merged from navigation file.\n");
-		fprintf(stderr,"  Navigation file:               %s\n", process.mbp_navfile);
+		if (process.mbp_nav_attitude == MBP_NAV_ON)
+		    fprintf(stderr,"  Roll, pitch, and heave merged from navigation file.\n");
+		else
+		    fprintf(stderr,"  Roll, pitch, and heave not merged from navigation file.\n");
 		if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
 		    fprintf(stderr,"  Navigation algorithm:          linear interpolation\n");
 		else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
@@ -1058,14 +1089,26 @@ the manual pages for mbprocess and mbset. \n\n";
 
 	    fprintf(stderr,"\nAdjusted Navigation Merging:\n");
 	    if (process.mbp_navadj_mode == MBP_NAV_ON)
+		{
 		fprintf(stderr,"  Navigation merged from adjusted navigation file.\n");
+		fprintf(stderr,"  Adjusted navigation file:      %s\n", process.mbp_navadjfile);
+		if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
+		    fprintf(stderr,"  Adjusted navigation algorithm: linear interpolation\n");
+		else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
+		    fprintf(stderr,"  Adjusted navigation algorithm: spline interpolation\n");
+		}
 	    else
 		fprintf(stderr,"  Navigation not merged from adjusted navigation file.\n");
-	    fprintf(stderr,"  Adjusted navigation file:      %s\n", process.mbp_navadjfile);
-	    if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
-		fprintf(stderr,"  Adjusted navigation algorithm: linear interpolation\n");
-	    else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
-		fprintf(stderr,"  Adjusted navigation algorithm: spline interpolation\n");
+
+	    fprintf(stderr,"\nAttitude Merging:\n");
+	    if (process.mbp_attitude_mode == MBP_NAV_ON)
+	        {
+		fprintf(stderr,"  Attitude merged from attitude file.\n");
+	        fprintf(stderr,"  Attitude file:                 %s\n", process.mbp_attitudefile);
+	        fprintf(stderr,"  Attitude format:               %d\n", process.mbp_attitude_format);
+		}
+	    else
+		fprintf(stderr,"  Attitude not merged from attitude file.\n");
 
 	    fprintf(stderr,"\nData Cutting:\n");
 	    if (process.mbp_cut_num > 0)

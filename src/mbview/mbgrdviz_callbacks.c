@@ -90,7 +90,7 @@ int	survey_color = MBV_COLOR_BLACK;
 char	survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.7 2004-09-16 21:44:39 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.8 2004-12-02 06:36:31 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -1984,7 +1984,7 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 		{
 		if (status = mb_datalist_open(verbose,&datalist,
 						input_file_ptr,
-						MB_DATALIST_LOOK_NO,&error) == MB_SUCCESS)
+						MB_DATALIST_LOOK_UNSET,&error) == MB_SUCCESS)
 			{
 			while (done == MB_NO)
 				{
@@ -1994,7 +1994,6 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 					&& format != MBF_ASCIIXYZ
 					&& format != MBF_ASCIIYXZ)
 					{
-
 					/* check for available nav file if that is
 					   all that is needed */
 					if (swathbounds == MB_NO)
@@ -2005,6 +2004,7 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 						mb_get_fbt(verbose, swathfile, &format, &error);
 
 					/* read the swath or nav data using mbio calls */
+fprintf(stderr,"Trying to read nav from %s\n",swathfile);
 					do_mbgrdviz_readnav(instance, swathfile, 
 								format, weight, &error);
 					}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.19 2004-09-16 19:02:34 caress Exp $
+ *    $Id: mb_io.h,v 5.20 2004-12-02 06:33:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2004/09/16 19:02:34  caress
+ * Changes to better support segy data.
+ *
  * Revision 5.18  2004/07/15 19:25:03  caress
  * Progress in supporting Reson 7k data.
  *
@@ -414,6 +417,13 @@ struct mb_io_struct
 		char *comment, int *error);
 	int (*mb_io_extract_nav)(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		int time_i[7], double *time_d, 
+		double *navlon, double *navlat,
+		double *speed, double *heading, double *draft, 
+		double *roll, double *pitch, double *heave, 
+		int *error);
+	int (*mb_io_extract_nnav)(int verbose, void *mbio_ptr, void *store_ptr, 
+		int nmax, int *kind, int *n,
+		int *time_i, double *time_d, 
 		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft, 
 		double *roll, double *pitch, double *heave, 

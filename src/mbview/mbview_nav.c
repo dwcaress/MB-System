@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.2 2004-09-16 21:44:40 caress Exp $
+ *    $Id: mbview_nav.c,v 5.3 2004-12-02 06:36:31 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/09/16 21:44:40  caress
+ * Many changes over the summer.
+ *
  * Revision 5.1  2004/02/24 22:52:28  caress
  * Added spherical projection to MBview.
  *
@@ -73,7 +76,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.2 2004-09-16 21:44:40 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.3 2004-12-02 06:36:31 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -584,9 +587,8 @@ int mbview_addnav(int verbose, int instance,
 					&data->navs[inav].navpts[i].point.xdisplay, 
 					&data->navs[inav].navpts[i].point.ydisplay, 
 					&data->navs[inav].navpts[i].point.zdisplay);
-if (navz[i] > 0.0
-|| navz[i] < -250.0)
-fprintf(stderr,"Negative depth: llz:%f %f %f   grid:%f %f   dpy:%f %f %f\n",
+
+/*fprintf(stderr,"Depth: llz:%f %f %f   grid:%f %f   dpy:%f %f %f\n",
 data->navs[inav].navpts[i].point.xlon, 
 data->navs[inav].navpts[i].point.ylat, 
 data->navs[inav].navpts[i].point.zdata, 
@@ -594,7 +596,7 @@ data->navs[inav].navpts[i].point.xgrid,
 data->navs[inav].navpts[i].point.ygrid,
 data->navs[inav].navpts[i].point.xdisplay, 
 data->navs[inav].navpts[i].point.ydisplay, 
-data->navs[inav].navpts[i].point.zdisplay);
+data->navs[inav].navpts[i].point.zdisplay);*/
 
 			/* ************************************************* */
 			/* get center on-bottom nav positions in grid coordinates */

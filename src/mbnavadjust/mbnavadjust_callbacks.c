@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.6 2004-05-21 23:31:28 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.7 2004-12-02 06:34:27 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2004/05/21 23:31:28  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.5  2003/04/17 21:07:49  caress
  * Release 5.0.beta30
  *
@@ -1888,6 +1891,7 @@ do_biases_apply( Widget w, XtPointer client_data, XtPointer call_data)
     	struct mbna_file *file1;
     	struct mbna_file *file2;
 	int	ivalue;
+	int	isection;
 	
 	/* get file structures */
 	file1 = &(project.files[mbna_file_id_1]);
@@ -1912,6 +1916,57 @@ do_biases_apply( Widget w, XtPointer client_data, XtPointer call_data)
 			XmNvalue, &ivalue, 
 			NULL);
 	file2->roll_bias = 0.1 * ivalue;
+
+	/* set contours out of date */
+	for (isection=0;isection<file1->num_sections;isection++)
+		{
+		file1->sections[isection].contoursuptodate = MB_NO;
+		}
+	for (isection=0;isection<file2->num_sections;isection++)
+		{
+		file2->sections[isection].contoursuptodate = MB_NO;
+		}
+
+	mbnavadjust_crossing_replot();
+	mbnavadjust_get_misfit();
+	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	double	heading_bias;
+	double	roll_bias;
+    	struct mbna_file *file;
+	int	ivalue;
+	int	ifile, isection;
+	
+	/* get bias values */
+	XtVaGetValues(scale_biases_heading1, 
+			XmNvalue, &ivalue, 
+			NULL);
+	heading_bias = 0.1 * ivalue;
+	XtVaGetValues(scale_biases_roll1, 
+			XmNvalue, &ivalue, 
+			NULL);
+	roll_bias = 0.1 * ivalue;
+
+	/* loop over files */
+	for (ifile=0;ifile<project.num_files;ifile++)
+		{
+		file = &(project.files[ifile]);
+		file->heading_bias = heading_bias;
+		file->roll_bias = roll_bias;
+				
+		/* set contours out of date */
+		for (isection=0;isection<file->num_sections;isection++)
+			{
+			file->sections[isection].contoursuptodate = MB_NO;
+			}
+		}
 
 	mbnavadjust_crossing_replot();
 	mbnavadjust_get_misfit();
@@ -1988,42 +2043,6 @@ do_biases_init( Widget w, XtPointer client_data, XtPointer call_data)
 			XmNsensitive, True,
 			NULL);
 		}
-}
-
-/*--------------------------------------------------------------------*/
-
-void
-do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	double	heading_bias;
-	double	roll_bias;
-    	struct mbna_file *file;
-	int	ivalue;
-	int	ifile;
-	
-
-	/* get bias values */
-	XtVaGetValues(scale_biases_heading1, 
-			XmNvalue, &ivalue, 
-			NULL);
-	heading_bias = 0.1 * ivalue;
-	XtVaGetValues(scale_biases_roll1, 
-			XmNvalue, &ivalue, 
-			NULL);
-	roll_bias = 0.1 * ivalue;
-
-	/* loop over files */
-	for (ifile=0;ifile<project.num_files;ifile++)
-		{
-		file = &(project.files[ifile]);
-		file->heading_bias = heading_bias;
-		file->roll_bias = roll_bias;
-		}
-
-	mbnavadjust_crossing_replot();
-	mbnavadjust_get_misfit();
-	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2159,8 +2178,14 @@ do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
 		XmNvalue, &ivalue, 
 		NULL);
     project.tick_int = ((double) ivalue) / 100.0;
+    
+    if (mbna_file_id_1 >= 0 && mbna_section_1 >= 0)
+   	 project.files[mbna_file_id_1].sections[mbna_section_1].contoursuptodate = MB_NO;
+    if (mbna_file_id_2 >= 0 && mbna_section_2 >= 0)
+   	 project.files[mbna_file_id_2].sections[mbna_section_2].contoursuptodate = MB_NO;
 
     mbnavadjust_crossing_replot();
+    mbnavadjust_write_project();
     mbnavadjust_get_misfit();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
@@ -2337,6 +2362,7 @@ void
 do_file_new( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"do_file_new\n");
 }
 
 /*--------------------------------------------------------------------*/
@@ -2344,6 +2370,15 @@ void
 do_file_open( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"do_file_open\n");
+}
+
+/*--------------------------------------------------------------------*/
+void
+do_file_importdata( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"do_file_importdata\n");
 }
 
 /*--------------------------------------------------------------------*/
@@ -2354,13 +2389,6 @@ do_file_close( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbnavadjust_close_project();
     do_update_status();
-}
-
-/*--------------------------------------------------------------------*/
-void
-do_file_importdata( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 }
 
 /*--------------------------------------------------------------------*/
@@ -2540,15 +2568,10 @@ do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_fileselection_list(Widget w, XtPointer client, XtPointer call)
 {
-	char	*mb_suffix;
-	char	*sb_suffix;
-	char	*datalist_suffix;
-	char	*file_root;
-	int	mb_len;
-	int	sb_len;
-	int	datalist_len;
+	int	error;
+	char	fileroot[MB_PATH_MAXLINE];
 	int	form;
-	char	value_text[10];
+	char	value_text[128];
 
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
@@ -2558,54 +2581,17 @@ do_fileselection_list(Widget w, XtPointer client, XtPointer call)
 	/* get output file */
 	if((int)strlen(string) > 0)
 		{
-		/* look for MB suffix convention */
-		if ((mb_suffix = strstr(string,".mb")) != NULL)
-			mb_len = strlen(mb_suffix);
-
-		/* look for SeaBeam suffix convention */
-		if ((sb_suffix = strstr(string,".rec")) != NULL)
-			sb_len = strlen(sb_suffix);
-
-		/* look for datalist suffix convention */
-		if ((datalist_suffix = strstr(string,".dls")) != NULL)
-			datalist_len = strlen(datalist_suffix);
-
-		/* if MB suffix convention used keep it */
-		if (mb_len >= 4 && mb_len <= 6)
+		status = mb_get_format(mbna_verbose, string, fileroot, 
+					    &form, &error);
+		if (status == MB_SUCCESS)
 			{
-			/* get the file format and set the widget */
-			if (sscanf(&mb_suffix[3], "%d", &form) == 1)
-				{
-				format = form;
-				sprintf(value_text,"%d",format);
-				XmTextFieldSetString(
-				    textField_format,
-				    value_text);
-				}
-			}
-			
-		/* else look for ".rec" format 41 file */
-		else if (sb_len == 4)
-			{
-			/* get the file format and set the widget */
-			format = 41;
+			format = form;
 			sprintf(value_text,"%d",format);
 			XmTextFieldSetString(
-				textField_format,
-				value_text);
+			    textField_format,
+			    value_text);
 			}
-			
-		/* else look for ".dls" datalist file */
-		else if (datalist_len == 4)
-			{
-			/* get the file format and set the widget */
-			format = -1;
-			sprintf(value_text,"%d",format);
-			XmTextFieldSetString(
-				textField_format,
-				value_text);
-			}
-	}
+		}
 }
 
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.17 2004-09-16 00:59:15 caress Exp $
+ *    $Id: mbinfo.c,v 5.18 2004-12-02 06:38:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2004/09/16 00:59:15  caress
+ * Fixed good-nav-only mode.
+ *
  * Revision 5.16  2004/07/15 19:33:57  caress
  * Improvements to support for Reson 7k data.
  *
@@ -206,7 +209,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.17 2004-09-16 00:59:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.18 2004-12-02 06:38:09 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -1450,6 +1453,13 @@ main (int argc, char **argv)
 			/* update coverage mask */
 			if (pass == 1 && coverage_mask == MB_YES)
 			    {
+			    ix = (int)((navlon - lonmin) / mask_dx);
+			    iy = (int)((navlat - latmin) / mask_dy);
+			    if (ix >= 0 && ix < mask_nx
+				&& iy >= 0 && iy < mask_ny)
+				{
+				mask[ix+iy*mask_nx] = MB_YES;
+				}
 			    for (i=0;i<beams_bath;i++)
 				{
 				if (mb_beam_ok(beamflag[i]))

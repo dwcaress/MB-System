@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.6 2004-11-08 05:47:20 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.7 2004-12-02 06:33:29 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2004/11/08 05:47:20  caress
+ * Now gets sidescan from snippet data, maybe even properly...
+ *
  * Revision 5.5  2004/11/06 03:55:15  caress
  * Working to support the Reson 7k format.
  *
@@ -1428,11 +1431,6 @@ typedef struct s7kr_remotecontrolsettings_struct
 	s7k_header	header;
 	mb_u_long	serial_number;		/* Sonar serial number */
 	unsigned int	ping_number;		/* Ping number */
-	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode.
-							0 = no multi-ping
-							>0 = sequence number of the ping
-								in the multi-ping
-								sequence. */
 	float		frequency;		/* Transmit frequency (Hertz) */
 	float		sample_rate;		/* Sample rate (Hertz) */
 	float		receiver_bandwidth;	/* Receiver bandwidth (Hertz) */
@@ -1488,7 +1486,6 @@ typedef struct s7kr_remotecontrolsettings_struct
 									in the multi-ping
 									sequence. 
 							24-31: Reserved */
-	float		receive_width;		/* Receive beam width (radians) */
 	float		range_minimum;		/* Bottom detection minimum range (meters) */
 	float		range_maximum;		/* Bottom detection maximum range (meters) */
 	float		depth_minimum;		/* Bottom detection minimum depth (meters) */
@@ -1739,6 +1736,13 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *error);
 int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
+			int *error);
+int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
+			int nmax, int *kind, int *n,
+			int *time_i, double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading, double *draft, 
 			double *roll, double *pitch, double *heave, 
