@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 5.8 2002-04-08 20:59:38 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 5.9 2002-04-08 21:29:49 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/04/08 20:59:38  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.7  2002/02/26 07:50:41  caress
  * Release 5.0.beta14
  *
@@ -152,7 +155,7 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sb2000ss.c,v 5.8 2002-04-08 20:59:38 caress Exp $";
+static char res_id[]="$Id: mbr_sb2000ss.c,v 5.9 2002-04-08 21:29:49 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
@@ -501,7 +504,6 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* if not a good header search through file to find one */
 	while (status == MB_SUCCESS && found == MB_NO)
 		{
-fprintf(stderr, "Searching skip:%d\n", skip);
 		/* shift bytes by one */
 		for (i=0;i<MBSYS_SB2000_HEADER_SIZE-1;i++)
 			buffer[i] = buffer[i+1];
