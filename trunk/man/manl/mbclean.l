@@ -1,4 +1,4 @@
-.TH mbclean l "12 March 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean l "8 August 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP - Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -32,13 +32,16 @@ A set number of outer beams can also be flagged.
 The order in which the flagging algorithms are applied is
 as follows:
 .br
- 	1. Flag specified number of outer beams (\fB-X\fP option).
+ 	1. Flag specified number of outer beams 
+ 		(\fB-X\fP option).
  	2. Flag soundings outside specified acceptable 
  		depth range (\fB-B\fP option).
- 	3. Flag soundings outside acceptable depth range using
- 		fractions of local median depth (\fB-G\fP option).
- 	4. Flag soundings outside acceptable depth range using
- 		deviation from local median depth (\fB-A\fP option).
+ 	3. Flag soundings outside acceptable depth range 
+ 		using fractions of local median depth 
+ 		(\fB-G\fP option).
+ 	4. Flag soundings outside acceptable depth range 
+ 		using deviation from local median depth 
+ 		(\fB-A\fP option).
  	5. Flag soundings associated with excessive slopes 
  		(\fB-C\fP option or default).
  	6. Zap "rails" (\fB-Q\fP option).
@@ -163,9 +166,22 @@ of its operation and then exit immediately.
 .B \-I
 \fIinfile\fP
 .br
-Data file from which the input data will be read. If
-no input file is specified, the input will be read
-from stdin. Default: \fIinfile\fP = stdin.
+Sets the input filename. If \fIformat\fP > 0 (set with the 
+\fB-F\fP option) then the swath sonar data contained in \fIinfile\fP 
+is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read 
+and process the data in each one of these files. Each input file will
+have an associated output file with either the ".sga" or ".aga" suffix.
+In the \fIinfile\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile1 11
+ 	datafile2 24
+.br
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
 .B \-L
 \fIlonflip\fP
@@ -228,48 +244,125 @@ and the number of beams flagged as bad.
 
 .SH EXAMPLES
 Suppose one wishes to do a first pass edit of 
-a raw SeaBeam 2112 file in
-the vendor format (format 41). Use the following to flag any
-beams which deviate by more than 1% from the local median
+six Simrad EM300 files in
+the processing format (format 57). A datalist referencing these
+six files exists as the file datalist.mb-1 and has the contents:
+ 	0001_20020424_212920.mb57 57
+ 	0002_20020425_011607.mb57 57
+ 	0003_20020425_022926.mb57 57
+ 	0004_20020425_024336.mb57 57
+ 	0005_20020425_034057.mb57 57
+ 	0006_20020425_045013.mb57 57
+.br
+Use the following to flag any
+beams which deviate by more than 20% from the local median
 depth or which produce a slope greater than 3.5 (74 degrees):
 
- 	mbclean -F41 -M1 -C3.5 -D0.01/0.20 \
- 		-G0.99/1.01 \
- 		-I sb199507130318.rec \
- 		-O sb199507130318_c.mb41
+ 	mbclean -Idatalist.mb-1 \\
+ 		-M1 -C3.5 -D0.01/0.20 \\
+ 		-G0.80/1.20
 
-The program will output some information because of the
-\fB-V\fP option:
+The program will output flagging statistics for each file and
+give totals at the end. If the \fB-V\fP option is specified, 
+\fBmbclean\fP will also output information for each beam that
+is flagged. Here is an example of the nonverbose output:
 .br
- 	Program MBCLEAN
- 	Version $Id: mbclean.l,v 5.2 2001-08-10 22:42:50 dcaress Exp $
- 	MB-system Version 4.3
 .br
- 	132 records loaded into buffer
-.br
- 	f: 1995  9  2 04:50:44.413000    75  1243.50  1263.80
- 	f: 1995  9  2 04:50:44.413000    76  1244.80  1263.80
- 	f: 1995  9  2 04:50:44.413000    99  1244.20  1265.20
- 	f: 1995  9  2 04:50:48.795000    14  1242.90  1257.30
- 	......... (lines deleted) .........
- 	s: 1995  9  2 04:59:25.189000    45  1784.00  1231.20   3.71 148.80
- 	s: 1995  9  2 04:59:31.779000    46  1777.20  1230.90   3.63 149.80
- 	s: 1995  9  2 04:59:31.779000    47  1530.50  1231.20   4.27  68.50
- 	......... (lines deleted) .........
-.br
- 	82 records dumped from buffer
- 	0 records loaded into buffer
- 	50 records dumped from buffer
- 	179 bathymetry data records processed
-.br
+ 	Processing 0001_20020424_212920.mb57
+ 	908 bathymetry data records processed
  	0 outer beams zapped
+ 	0 beams zapped for too few good beams in ping
  	0 beams out of acceptable depth range
- 	96 beams out of acceptable fractional depth range
+ 	64 beams out of acceptable fractional depth range
  	0 beams exceed acceptable deviation from median depth
  	0 bad rail beams identified
- 	14 excessive slopes identified
- 	110 beams flagged
+ 	1601 excessive slopes identified
+ 	1665 beams flagged
+ 	0 beams unflagged
  	0 beams zeroed
+
+ 	Processing 0002_20020425_011607.mb57
+ 	259 bathymetry data records processed
+ 	0 outer beams zapped
+ 	0 beams zapped for too few good beams in ping
+ 	0 beams out of acceptable depth range
+ 	0 beams out of acceptable fractional depth range
+ 	0 beams exceed acceptable deviation from median depth
+ 	0 bad rail beams identified
+ 	242 excessive slopes identified
+ 	242 beams flagged
+ 	0 beams unflagged
+ 	0 beams zeroed
+
+ 	Processing 0003_20020425_022926.mb57
+ 	65 bathymetry data records processed
+ 	0 outer beams zapped
+ 	0 beams zapped for too few good beams in ping
+ 	0 beams out of acceptable depth range
+ 	9 beams out of acceptable fractional depth range
+ 	0 beams exceed acceptable deviation from median depth
+ 	0 bad rail beams identified
+ 	497 excessive slopes identified
+ 	506 beams flagged
+ 	0 beams unflagged
+ 	0 beams zeroed
+
+ 	Processing 0004_20020425_024336.mb57
+ 	410 bathymetry data records processed
+ 	0 outer beams zapped
+ 	0 beams zapped for too few good beams in ping
+ 	0 beams out of acceptable depth range
+ 	0 beams out of acceptable fractional depth range
+ 	0 beams exceed acceptable deviation from median depth
+ 	0 bad rail beams identified
+ 	148 excessive slopes identified
+ 	148 beams flagged
+ 	0 beams unflagged
+ 	0 beams zeroed
+
+ 	Processing 0005_20020425_034057.mb57
+ 	252 bathymetry data records processed
+ 	0 outer beams zapped
+ 	0 beams zapped for too few good beams in ping
+ 	0 beams out of acceptable depth range
+ 	0 beams out of acceptable fractional depth range
+ 	0 beams exceed acceptable deviation from median depth
+ 	0 bad rail beams identified
+ 	100 excessive slopes identified
+ 	100 beams flagged
+ 	0 beams unflagged
+ 	0 beams zeroed
+
+ 	Processing 0006_20020425_045013.mb57
+ 	562 bathymetry data records processed
+ 	0 outer beams zapped
+ 	0 beams zapped for too few good beams in ping
+ 	0 beams out of acceptable depth range
+ 	0 beams out of acceptable fractional depth range
+ 	0 beams exceed acceptable deviation from median depth
+ 	0 bad rail beams identified
+ 	41 excessive slopes identified
+ 	41 beams flagged
+ 	0 beams unflagged
+ 	0 beams zeroed
+
+ 	MBclean Processing Totals:
+ 	-------------------------
+ 	6 total swath data files processed
+ 	2456 total bathymetry data records processed
+ 	0 total beams flagged in old esf files
+ 	0 total beams unflagged in old esf files
+ 	0 total beams zeroed in old esf files
+ 	0 total outer beams zapped
+ 	0 total beams zapped for too few good beams in ping
+ 	0 total beams out of acceptable depth range
+ 	73 total beams out of acceptable fractional depth range
+ 	0 total beams exceed acceptable deviation from median depth
+ 	0 total bad rail beams identified
+ 	2629 total excessive slopes identified
+ 	2702 total beams flagged
+ 	0 total beams unflagged
+ 	0 total beams zeroed
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBcleanold\fP(l), \fBmbedit\fP(l), 

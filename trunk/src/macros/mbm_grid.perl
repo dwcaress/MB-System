@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.4 2001-12-18 04:26:12 caress Exp $
+#    $Id: mbm_grid.perl,v 5.5 2002-08-21 00:54:20 caress Exp $
 #
-#    Copyright (c) 1999, 2000 by
+#    Copyright (c) 1999, 2002 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -41,7 +41,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 # Additional Options:
 #            [-Adatatype -Bborder -Cclip -Dxdim/ydim -Edx/dy/units
-#            -Fpriority_range -Ggridkind -H -Llonflip -M -N -Ppings
+#            -Fpriority_range -Ggridkind -H -Llonflip -Jprojection 
+#            -M -N -Ppings
 #            -Sspeed -Ttension -U{azimuth/factor | time}
 #            -V -Wscale -Xextend
 #            -Ypriority_file -Zbathdef]
@@ -53,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.4 2001-12-18 04:26:12 caress Exp $
+#   $Id: mbm_grid.perl,v 5.5 2002-08-21 00:54:20 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.4  2001/12/18 04:26:12  caress
+#   Version 5.0.beta11.
+#
 # Revision 5.3  2001/11/20  00:36:45  caress
 # Now reads inf files with -R option first and runs mbinfo
 # only if really needed (if file bounds not completely
@@ -88,7 +92,7 @@ $program_name = "mbm_grid";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:L:l:MmO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:');
+&MBGetopts('A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L:l:MmO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:');
 
 $datatype = 		($opt_A || $opt_a || 1);
 $border = 		($opt_B || $opt_b);
@@ -99,7 +103,8 @@ $format = 		($opt_F);
 $priority_range = 	($opt_f);
 $gridkind = 		($opt_G || $opt_g);
 $help =    		($opt_H || $opt_h);
-$file_data = 		($opt_I || $opt_i);
+$file_data = 		($opt_I || $opt_i || "datalist.mb-1");
+$projection = 		($opt_J || $opt_j);
 $lonflip =    		($opt_L || $opt_l);
 $more = 		($opt_M || $opt_m);
 $root =    		($opt_O || $opt_o);
@@ -432,16 +437,16 @@ if (!$xintyint && !$xdimydim)
 		$bathdef = 1000.0;
 		$zmax_data = $bathdef;
 		}
-	$xinterval = 0.07 * $zmax_data;
+	$xinterval = 0.025 * $zmax_data;
 	$xdim = ($xmax - $xmin) * 110000.0 / $xinterval;
 	$ydim = ($ymax - $ymin) * 110000.0 / $xinterval;
-	if ($xdim > 501 && $xdim > $ydim)
+	if ($xdim > 1001 && $xdim > $ydim)
 		{
-		$xinterval = ($xmax - $xmin) * 110000.0 / 501;
+		$xinterval = ($xmax - $xmin) * 110000.0 / 1001;
 		}
-	elsif ($ydim > 501)
+	elsif ($ydim > 1001)
 		{
-		$xinterval = ($ymax - $ymin) * 110000.0 / 501;
+		$xinterval = ($ymax - $ymin) * 110000.0 / 1001;
 		}
 	$xintyint = "$xinterval/$xinterval/meters";
 	}
@@ -532,10 +537,6 @@ if ($clip)
 	{
 	printf FCMD "\t-C$clip \\\n";
 	}
-if ($priority_range)
-	{
-	printf FCMD "\t-F$priority_range \\\n";
-	}
 if ($gridkind)
 	{
 	printf FCMD "\t-G$gridkind \\\n";
@@ -543,6 +544,10 @@ if ($gridkind)
 if ($lonflip)
 	{
 	printf FCMD "\t-L$lonflip \\\n";
+	}
+if ($projection)
+	{
+	printf FCMD "\t-J$projection \\\n";
 	}
 if ($more)
 	{
@@ -575,6 +580,10 @@ if ($datatype > 2)
  		{
  		printf FCMD "\t-Y$priority_file \\\n";
  		}
+	if ($priority_range)
+		{
+		printf FCMD "\t-F$priority_range \\\n";
+		}
  	if ($bathdef)
  		{
  		printf FCMD "\t-Z$bathdef \\\n";

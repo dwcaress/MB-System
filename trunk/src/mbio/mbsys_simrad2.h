@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.9 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.10 2002-08-21 00:55:46 caress Exp $
  *
- *    Copyright (c) 1998, 2001 by
+ *    Copyright (c) 1998, 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.8  2002/05/29 23:41:49  caress
  * Release 5.0.beta18
  *

@@ -75,9 +75,14 @@ The GNU GPL also prohibits the distribution of proprietary executables linked wi
 MB-System libraries unless the source code is also distributed. We waive this restriction on
 distributing proprietary compiled programs for specific software products if and only if those
 software products meet the following two conditions:
-     1) The software product was created, sold, and delivered to customers using source code 
+.RS
+.HP 
+1) The software product was created, sold, and delivered to customers using source code 
 derived from MB-System release 4.6 distributions. 
-     2) The software product was sold and delivered to customers prior to January 1, 2001. 
+.br
+.HP 
+2) The software product was sold and delivered to customers prior to January 1, 2001. 
+.RE
 
 .SH HISTORY
 The development of \fBMB-System\fP began in 1990 as part of ongoing research at L-DEO
@@ -124,9 +129,9 @@ underlying code as well as providing significant new capabilities.
 The version 5.0 release of \fBMB-System\fP includes a number of changes and improvements relative
 to the version 4 releases. The most significant changes include:
 
-\fBA new approach to managing data processing.\fP
-.br
-- Many tools - one output file. In previous versions of \fBMB-System\fP, each processing
+.SS A new approach to managing data processing.
+.IP \(bu 4
+Many tools - one output file. In previous versions of \fBMB-System\fP, each processing
 program read an input swath data file and produced an output swath data file. This
 "serial" processing scheme generally produced a large number of intermediate data
 files. \fBMB-System\fP version 5.0 features the integration of the editing and analysis
@@ -134,14 +139,14 @@ tools with a single program, mbprocess, that outputs processed data files. The n
 "parallel" processing scheme covers bathymetry data processing, but does not yet
 incorporate the sidescan processing capabilities. All of the old tools and capabilities
 are still part of the distribution. 
-.br
-- Recursive datalists. The lists of data files used by gridding and plotting programs can
+.IP \(bu 4
+Recursive datalists. The lists of data files used by gridding and plotting programs can
 now be recursive, making it simpler to manage data from many different surveys. 
-.br
-- Automatic format identification. \fBMB-System\fP programs will now attempt to
+.IP \(bu 4
+Automatic format identification. \fBMB-System\fP programs will now attempt to
 automatically identify the swath data format based on the filename suffix. 
-.br
-- Ancillary data files. Many common \fBMB-System\fP tasks (e.g. swath plotting
+.IP \(bu 4
+Ancillary data files. Many common \fBMB-System\fP tasks (e.g. swath plotting
 and gridding) can be accomplished more rapidly using ancillary data files containing
 file statistics (".inf" files), quickly read bathymetry (".fbt" files), and
 (".fnv") files. Each of these files is named by adding the indicated four character
@@ -152,57 +157,57 @@ are created using \fBmblist\fP to create a text navigation list.
 These ancillary files are automatically created together using the 
 program \fBmbdatalist\fP.
 
-\fBNew tools.\fP
-.br
-- \fBmbnavadjust\fP. This new tool allows users to adjust poorly navigated surveys by
+.SS New tools.
+.IP \(bu 4
+\fBmbnavadjust\fP. This new tool allows users to adjust poorly navigated surveys by
 matching features in overlapping swathes. It is particularly useful for processing
 surveys conducted from submerged platforms. 
-.br
-- \fBmbprocess\fP. This new tool performs a variety of processing tasks and produces a
+.IP \(bu 4
+\fBmbprocess\fP. This new tool performs a variety of processing tasks and produces a
 single output processed swath data file. The program mbprocess can apply
 bathymetry edits from mbedit and mbclean, navigation edits from mbnavedit, sound
 velocity profile changes from mbvelocitytool, and a variety of other corrections. 
-.br
-- \fBmbset\fP. This new tool allows users to create and modify the parameter files used to
+.IP \(bu 4
+\fBmbset\fP. This new tool allows users to create and modify the parameter files used to
 control the operation of mbprocess. 
-.br
-- \fBmbdatalist\fP. This new tool allows users to list the files referenced by
+.IP \(bu 4
+\fBmbdatalist\fP. This new tool allows users to list the files referenced by
 a recursive datalist structure. It can also be used to create the ancillary ".inf",
 ".fbt", and ".fnv" files for all of the data files referenced in a recursive datalist
 structure. 
 
-\fBRestructuring the code.\fP
-.br
-- All of the C code now conforms to the ANSI C standard. 
-.br
-- The underlying input/output library (\fBMBIO\fP) has been substantially rewritten. The
+.SS Restructuring the code.
+.IP \(bu 4
+All of the C code now conforms to the ANSI C standard. 
+.IP \(bu 4
+The underlying input/output library (\fBMBIO\fP) has been substantially rewritten. The
 structure has been streamlined, simplifying both future development and support of
 the existing code. The \fBMBIO\fP API has been greatly modified. 
 
-\fBHandling of old Simrad multibeam data. \fP
-.br
-- Vendor format data from the old Simrad multibeams (pre-1997 sonars) are now
+.SS Handling of old Simrad multibeam data. 
+.IP \(bu 4
+Vendor format data from the old Simrad multibeams (pre-1997 sonars) are now
 supported by a single format id (51) rather than a separate format id for each sonar
 model. The old format id's are automatically aliased to 51, so existing shellscripts
 will continue to work. 
-.br
-- MB-System no longer supports beam flagging in format 51 data. The use of mbedit and mbclean on format 51
+.IP \(bu 4
+MB-System no longer supports beam flagging in format 51 data. The use of mbedit and mbclean on format 51
 data will cause the flagged beams to be irrevocably nulled. Previous versions of MB-System used the highest bit
 in the depth values to represent beam flags because no Simrad data seemed to use that bit. We have not obtained
 data with depth values using the full bit-range, conflicting with the old beam flagging scheme. We recommend
 that old Simrad data be translated to the extended processing format (57) which contains proper beam flags and
 supports all processing functions. Format 57 is also used for processing data from the current Simrad multibeam
 sonars. 
-.br
-- Sidescan data from old Simrad multibeams (pre-1997 sonars) are now handled in the same manner as data from
+.IP \(bu 4
+Sidescan data from old Simrad multibeams (pre-1997 sonars) are now handled in the same manner as data from
 the newer sonars (e.g. EM3000, EM3000, EM120). The raw samples in the vendor data format are binned,
 averaged, and interpolated into a 1024 pixel sidescan swath. This binned sidescan is not saved in the vendor
 format, so (as above) it is recommended that the data be translated to an extended format (57) that stores both
 bathymetry beam flags and processed sidescan. 
 
-\fBStreamlining of MB-System Default Parameters.\fP
-.br
-- Prior to version 5.0, the \fBMB-System\fP defaults
+.SS Streamlining of MB-System Default Parameters.
+.IP \(bu 4
+Prior to version 5.0, the \fBMB-System\fP defaults
 set by \fBmbdefaults\fP included the format id, a control for
 ping averaging, longitude and latitude bounds for windowing
 by area, and begin and end times for windowing in time. These
@@ -215,20 +220,20 @@ The controls for ping averaging and windowing in time and space
 are rarely used, and must now be explicitly set in command
 line arguments.
 
-\fBNew Data Formats.\fP
-.br
-- Furuno HS10 multibeam bathymetry is supported as format 171. 
-.br
-- SeaBeam 2120 multibeam data in the L3 Communications XSE format are supported as format 94 (already used
+.SS New Data Formats.
+.IP \(bu 4
+Furuno HS10 multibeam bathymetry is supported as format 171. 
+.IP \(bu 4
+SeaBeam 2120 multibeam data in the L3 Communications XSE format are supported as format 94 (already used
 to support Elac Bottomchart MkII XSE data). 
-.br
-- Raw STN Atlas multibeam data generated by the upgraded Hydrosweep DS2 multibeam on the R/V Ewing are
+.IP \(bu 4
+Raw STN Atlas multibeam data generated by the upgraded Hydrosweep DS2 multibeam on the R/V Ewing are
 supported by read-only format 182. Processing is supported using the augmented read-write format 183. 
-.br
-- The IFREMER netCDF multibeam archiving data format is supported as format 75. Similarly, the IFREMER
+.IP \(bu 4
+The IFREMER netCDF multibeam archiving data format is supported as format 75. Similarly, the IFREMER
 netCDF navigation archiving data format is supported as format 167. 
-.br
-- The STN Atlas processing data format SURF is supported as format 181. At
+.IP \(bu 4
+The STN Atlas processing data format SURF is supported as format 181. At
 present, SURF is supported as a read-only format. This allows plotting and gridding
 of the SURF data, but not processing. Writing or translating the SURF data to
 allow processing will be supported in a later version.
@@ -317,22 +322,32 @@ a parallel processing scheme that simplifies the processing
 of most swath data. This scheme is centered around the program
 \fBmbprocess\fP, which can accomplish the following
 processing tasks in a single step:
-     - Merge edited navigation generated by \fBmbnavedit\fP.
-     - Apply bathymetry edit flags from \fBmbedit\fP 
-       and \fBmbclean\fP
-     - Recalculate bathymetry from raw travel time and
-       angle data by raytracing through water sound speed
-       models from \fBmbvelocitytool\fP or \fBmbsvplist\fP.
-     - Apply changes to roll bias, pitch bias, heading
-       bias, and draft values.
-     - Recalculate sidescan from raw backscatter samples
-       (Simrad multibeam data only).
-     - Recalculate sidescan from raw backscatter samples
-       (Simrad multibeam data only).
-     - Correct sidescan for amplitude vs grazing angle
-       patterns.
-     - Apply tides to bathymetry.
+.RS
+.IP \(bu 4
+Merge edited navigation generated by \fBmbnavedit\fP.
+.IP \(bu 4
+Apply bathymetry edit flags from \fBmbedit\fP 
+and \fBmbclean\fP
+.IP \(bu 4
+Recalculate bathymetry from raw travel time and
+angle data by raytracing through water sound speed
+models from \fBmbvelocitytool\fP or \fBmbsvplist\fP.
+.IP \(bu 4
+Apply changes to roll bias, pitch bias, heading
+bias, and draft values.
+.IP \(bu 4
+Recalculate sidescan from raw backscatter samples
+(Simrad multibeam data only).
+.IP \(bu 4
+Recalculate sidescan from raw backscatter samples
+(Simrad multibeam data only).
+.IP \(bu 4
+Correct sidescan for amplitude vs grazing angle
+patterns.
+.IP \(bu 4
+Apply tides to bathymetry.
 .br
+.RE
 The actions of \fBmbprocess\fP are controlled by text
 parameter files. Each \fBmbprocess\fP parameter file is
 named by adding a ".par" suffix to the associated input
@@ -757,7 +772,7 @@ Next, we run \fBmbdatalist\fP to generate the statistics (".inf"),
 quickly read bathymetry (".fbt"), and quickly read navigation
 (".fnv") files that make many tasks run faster:
 
- 	mbdatalist -I sb199411211212.mb41 \
+ 	mbdatalist -I sb199411211212.mb41 \\
  		-N -V
 
 Running this program generates three output files, which we
@@ -772,8 +787,8 @@ We are now set up to process the data. However, first
 we visually check the data by generating a swath plot
 of color filled bathymetry overlaid with contours and
 navigation. This is easily accomplished with \fBmbm_plot\fP:
- 	mbm_plot -I sb199411211212.mb41 \
- 		-G1 -C -N -V \
+ 	mbm_plot -I sb199411211212.mb41 \\
+ 		-G1 -C -N -V \\
  		-O ZSwathBathCont
 	ZSwathBathCont.cmd
 .br
@@ -796,22 +811,22 @@ The types of swath plots produced by \fBmbm_plot\fP include:
 
 We have already generated the first type of plot. We now
 generate the other four as well:
- 	mbm_plot -I sb199411211212.mb41 \
- 		-G2 -N -V \
+ 	mbm_plot -I sb199411211212.mb41 \\
+ 		-G2 -N -V \\
  		-O ZSwathBathShade
-	ZSwathBathShade.cmd
- 	mbm_plot -I sb199411211212.mb41 \
- 		-G3 -S0/1 -N -V \
+ 	ZSwathBathShade.cmd
+ 	mbm_plot -I sb199411211212.mb41 \\
+ 		-G3 -S0/1 -N -V \\
  		-O ZSwathBathAmp
-	ZSwathBathAmp.cmd
- 	mbm_plot -I sb199411211212.mb41 \
- 		-G4 -S -N -V \
+ 	ZSwathBathAmp.cmd
+ 	mbm_plot -I sb199411211212.mb41 \\
+ 		-G4 -S -N -V \\
  		-O ZSwathAmp
-	ZSwathAmp.cmd
- 	mbm_plot -I sb199411211212.mb41 \
- 		-G5 -S -N -V \
+ 	ZSwathAmp.cmd
+ 	mbm_plot -I sb199411211212.mb41 \\
+ 		-G5 -S -N -V \\
  		-O ZSwathSS
-	ZSwathSS.cmd
+ 	ZSwathSS.cmd
 .br
 We use the -S option to apply histogram equalization to
 sidescan and amplitude data; note that for the bathymetry

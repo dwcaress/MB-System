@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.12 2002-07-20 20:44:38 caress Exp $
+#	$Id: Makefile.template,v 4.13 2002-08-21 00:54:20 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.12  2002/07/20 20:44:38  caress
+# Release 5.0.beta20
+#
 # Revision 4.11  2001/06/03 07:01:28  caress
 # Release 5.0.beta01
 #
@@ -82,7 +85,8 @@ all:	$(MANDIR)/xbt.l \
 	$(BINDIR)/mbm_grdcut $(MANDIR)/mbm_grdcut.l \
 	$(BINDIR)/mbm_grdinfo $(MANDIR)/mbm_grdinfo.l \
 	$(BINDIR)/mbm_grdtiff $(MANDIR)/mbm_grdtiff.l \
-	$(BINDIR)/mbm_utm $(MANDIR)/mbm_utm.l
+	$(BINDIR)/mbm_utm $(MANDIR)/mbm_utm.l \
+	$(BINDIR)/mbm_grd2geovrml $(MANDIR)/mbm_grd2geovrml.l
 
 ### make clean does nothing
 clean:
@@ -139,6 +143,9 @@ $(BINDIR)/mbm_grdtiff:	mbm_grdtiff.perl
 $(BINDIR)/mbm_utm:	mbm_utm.perl
 	cp mbm_utm.perl $(BINDIR)/mbm_utm
 	chmod 775 $(BINDIR)/mbm_utm
+$(BINDIR)/mbm_grd2geovrml:	mbm_grd2geovrml.perl
+	cp mbm_grd2geovrml.perl $(BINDIR)/mbm_grd2geovrml
+	chmod 775 $(BINDIR)/mbm_grd2geovrml
 
 ### copy the man pages to the man page directory
 $(MANDIR)/xbt.l:	xbt.manl
@@ -195,4 +202,7 @@ $(MANDIR)/mbm_grdtiff.l:	mbm_grdtiff.manl
 $(MANDIR)/mbm_utm.l:	mbm_utm.manl
 	cp mbm_utm.manl $(MANDIR)/mbm_utm.l
 	chmod 664 $(MANDIR)/mbm_utm.l
+$(MANDIR)/mbm_grd2geovrml.l:	mbm_grd2geovrml.manl
+	cp mbm_grd2geovrml.manl $(MANDIR)/mbm_grd2geovrml.l
+	chmod 664 $(MANDIR)/mbm_grd2geovrml.l
 

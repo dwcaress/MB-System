@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbstripNaN.c        8/8/02
- *    $Id: mbstripnan.c,v 5.0 2002-08-10 07:00:21 caress Exp $
+ *    $Id: mbstripnan.c,v 5.1 2002-08-21 00:57:11 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    Mike McCann (mccann@mbari.org)
@@ -23,6 +23,9 @@
  * MBARI
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2002/08/10 07:00:21  caress
+ * First version from Mike McCann.
+ *
  */
 
 #include <stdio.h>
@@ -35,7 +38,7 @@ main () {
 	struct node { double lon, lat, height; };
 	struct node n;
 	while ( ( fread(&n, 24, 1, stdin) > 0 ) ) {
-		if ( ! isnand(n.height) ) {
+		if ( ! isnan(n.height) ) {
 			fwrite(&n, 24, 1, stdout);
 		}
 	}

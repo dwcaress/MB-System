@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.11 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.12 2002-08-21 00:55:46 caress Exp $
  *
- *    Copyright (c) 1998, 2000 by
+ *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.10  2002/05/29 23:38:53  caress
  * Release 5.0.beta18
  *
@@ -220,7 +223,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.11 2002-07-20 20:42:40 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.12 2002-08-21 00:55:46 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
