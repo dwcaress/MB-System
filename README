@@ -1,45 +1,5 @@
-Revision History:
-$Log: not supported by cvs2svn $
-# Revision 4.2  1994/10/20  21:30:31  caress
-# Release V4.0
-#
-# Revision 4.1  1994/08/03  21:00:43  dale
-# Update for Beta issues......
-#
-# Revision 4.0  1994/03/05  23:06:24  caress
-# Changes for release 4.0.
-#
-# Revision 3.7  1993/12/14  22:15:56  caress
-# Changed for release version 3.4
-#
-# Revision 3.6  1993/11/06  21:24:39  caress
-# Added discussion of src/realtime directory.
-#
-# Revision 3.5  1993/11/05  21:25:02  caress
-# Added discussion of how to run make to generate the executables.
-#
-# Revision 3.4  1993/11/05  14:59:04  caress
-# Some small changes by Dale.
-#
-# Revision 3.3  1993/11/04  17:46:36  caress
-# Updated for version 3.3.  Added where to get required
-# software packages and what Makefile to change to fit
-# local environments.
-#
-# Revision 3.2  1993/08/25  14:41:41  dale
-# Add porting, and requirements, and bugs and stuff for 3.2
-#
-# Revision 3.1  1993/04/22  16:09:21  dale
-# Update and clarify the text, add third reason
-#
-# Revision 3.0  1993/04/22  16:04:29  dale
-# *** empty log message ***
-#
-
-RCS ID: $Id: README,v 4.3 1994-10-21 13:29:54 caress Exp $
-
-MBSYSTEM 4.BETA RELEASE Notes:
-----------------------------
+MBSYSTEM VERSION 4.0 RELEASE Notes:
+-----------------------------------
 
 This directory structure contains the version 4.0 release  
 of the MBSYSTEM software package for processing and display of 
@@ -255,4 +215,49 @@ Good Luck!!
 
 Dave Caress caress@ldeo.columbia.edu 
 Dale Chayes dale@ldeo.columbia.edu
+
+------------------------------------------------------------------------
+
+RCS ID: $Id: README,v 4.4 1994-10-21 17:42:43 caress Exp $
+
+Revision History:
+$Log: not supported by cvs2svn $
+# Revision 4.3  1994/10/21  13:29:54  caress
+# Release V4.0
+#
+# Revision 4.2  1994/10/20  21:30:31  caress
+# Release V4.0
+#
+# Revision 4.1  1994/08/03  21:00:43  dale
+# Update for Beta issues......
+#
+# Revision 4.0  1994/03/05  23:06:24  caress
+# Changes for release 4.0.
+#
+# Revision 3.7  1993/12/14  22:15:56  caress
+# Changed for release version 3.4
+#
+# Revision 3.6  1993/11/06  21:24:39  caress
+# Added discussion of src/realtime directory.
+#
+# Revision 3.5  1993/11/05  21:25:02  caress
+# Added discussion of how to run make to generate the executables.
+#
+# Revision 3.4  1993/11/05  14:59:04  caress
+# Some small changes by Dale.
+#
+# Revision 3.3  1993/11/04  17:46:36  caress
+# Updated for version 3.3.  Added where to get required
+# software packages and what Makefile to change to fit
+# local environments.
+#
+# Revision 3.2  1993/08/25  14:41:41  dale
+# Add porting, and requirements, and bugs and stuff for 3.2
+#
+# Revision 3.1  1993/04/22  16:09:21  dale
+# Update and clarify the text, add third reason
+#
+# Revision 3.0  1993/04/22  16:04:29  dale
+# *** empty log message ***
+#
 
