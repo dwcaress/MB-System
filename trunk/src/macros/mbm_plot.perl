@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.25 1999-12-29 00:17:55 caress Exp $
+#    $Id: mbm_plot.perl,v 4.26 2000-01-13 22:48:11 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -70,10 +70,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.25 1999-12-29 00:17:55 caress Exp $
+#   $Id: mbm_plot.perl,v 4.26 2000-01-13 22:48:11 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.25  1999/12/29  00:17:55  caress
+# Release 4.6.8
+#
 # Revision 4.24  1999/08/08  04:17:04  caress
 # Added coastline plots.
 #
@@ -886,7 +889,7 @@ foreach $file_mb (@files_data)
 	# use .inf file if it exists and no time or space bounds applied
 	$use_inf = 0;
 	$file_inf = $file_mb . ".inf";
-	if (-r $file_inf && !$mb_btime && !$mb_etime && $bounds_info)
+	if (-r $file_inf && !$mb_btime && !$mb_etime && !$bounds_info)
 		{
 		if ($verbose) 
 			{
