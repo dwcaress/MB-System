@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.5 1994-06-21 22:53:08 caress Exp $
+ *    $Id: mblist.c,v 4.6 1994-07-29 19:02:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/06/21  22:53:08  caress
+ * Changes to support PCs running Lynx OS.
+ *
  * Revision 4.4  1994/06/05  22:31:22  caress
  * Major revision changing the manner in which complete
  * dumps occur.  Options added to control the range of beams
@@ -99,6 +102,9 @@
 #include "../../include/mb_format.h"
 
 /* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
 #define DTR	(M_PI/180.)
 
 /* local options */
@@ -115,7 +121,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.5 1994-06-21 22:53:08 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.6 1994-07-29 19:02:56 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";

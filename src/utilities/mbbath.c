@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.3 1994-04-12 18:58:00 caress Exp $
+ *    $Id: mbbath.c,v 4.4 1994-07-29 19:02:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/04/12  18:58:00  caress
+ * Fixed fprintf statements on lines 689 and 691.
+ *
  * Revision 4.2  1994/04/12  17:01:29  caress
  * First cut at mbbath.  Will need to deal with alongtrack angles
  * as well as acrosstrack angles.
@@ -78,8 +81,11 @@
 #include "../../include/mb_format.h"
 #include "../../include/mbsys_hsds.h"
 
-/* define */
-#define DTR (M_PI/180.)
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
 
 /*--------------------------------------------------------------------*/
 
@@ -88,7 +94,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.3 1994-04-12 18:58:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.4 1994-07-29 19:02:56 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mblevitus.c,v 4.2 1994-07-29 19:02:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	April 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -61,8 +65,13 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
+
 /* global defines */
-#define	DTR	M_PI/180.0
 #define	NO_DATA	-1000000000.0
 #define	NDEPTH_MAX	46
 
@@ -72,7 +81,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 4.2 1994-07-29 19:02:56 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
@@ -284,6 +293,16 @@ char **argv;
 	geoid_latitude = 978.0309 
 		+ 5.18552*sine_theta*sine_theta 
 		- 0.0057*sine_two_theta*sine_two_theta;
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	for (i=0;i<33;i++)
+		{
+		mb_swap_float(&temperature[i][ilat]);
+		mb_swap_float(&salinity[i][ilat]);
+		}
+#endif
+
 
 	/* calculate velocity from temperature and salinity */
 	nvelocity = 0;
