@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.11 1995-02-14 21:59:53 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.12 1995-02-15 14:37:51 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1995/02/14  21:59:53  caress
+ * Version 4.2
+ *
  * Revision 4.10  1995/01/17  23:19:57  caress
  * Fixed bug where fractional seconds were set to zero
  * when writing data.
@@ -92,7 +95,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.11 1995-02-14 21:59:53 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.12 1995-02-15 14:37:51 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1598,7 +1601,7 @@ int	*error;
 	int	shift;
 	char	ew, ns;
 	unsigned short	read_ss[2*MBF_SB2100RW_PIXELS+2];
-	signed short	*read_ss_ptr;
+	short	*read_ss_ptr;
 	int	degrees, minutes;
 	int	i;
 
@@ -1775,7 +1778,7 @@ int	*error;
 		}
 	if (status == MB_SUCCESS)
 		{
-		read_ss_ptr = (signed short *) read_ss;
+		read_ss_ptr = (short *) read_ss;
 		for (i=0;i<data->num_pixels;i++)
 			{
 			/* deal with byte swapping if necessary */
@@ -2492,7 +2495,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mbf_sb2100rw_struct *data;
 	unsigned short	write_ss[2*MBF_SB2100RW_PIXELS];
-	signed short	*write_ss_ptr;
+	short	*write_ss_ptr;
 	char	*char_ptr;
 	double	degrees;
 	int	idegrees, minutes;
@@ -2676,7 +2679,7 @@ int	*error;
 		status = fprintf(mbfp,"\r\n");
 
 		/* construct and write out sidescan data */
-		write_ss_ptr = (signed short *) write_ss;
+		write_ss_ptr = (short *) write_ss;
 		for (i=0;i<data->num_pixels;i++)
 			{
 			/* deal with byte swapping if necessary */
