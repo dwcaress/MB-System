@@ -1,10 +1,10 @@
-.TH MBSWATH 1 "25 October 1994"
+.TH mbswath l "31 October 1994"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor \fB-B\fItickinfo \fB-b\fIyr/mo/da/hr/mn/sc \fB-D\fImode/scale/min/max \fB-E\fIyr/mo/da/hr/mn/sc \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
@@ -321,5 +321,8 @@ you have a Sun workstation):
  # All done!
  echo All done!
 
+.SH SEE ALSO
+\fBmbm_plot\fP(l), \fBmb_contour\fP(l)
+
 .SH BUGS
-Of course.  What do you expect for free software?
+Yes.

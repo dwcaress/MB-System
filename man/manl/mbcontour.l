@@ -1,10 +1,10 @@
-.TH MBCONTOUR 1 "13 September 1994"
+.TH mbcontour l "31 October 1994"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbcontour\fP \fB-J\fIparameters\fP \fB-R\fIwest/east/south/north \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt\fP \fB-B\fItickinfo\fP \fB-b\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcontourfile\fP \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIred/green/blue\fP \fB-I\fIdatalist\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP \fB-N\fInplot\fP \fB-O\fP \fB-P\fP \fB-p\fIpings\fP \fB-Q\fP \fB-T\fItimegap\fP \fB-U\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fIalgorithm\fP \fB-#\fIcopies\fP \fB-V -H\fP]
@@ -272,4 +272,4 @@ annotated time marks every hour, and day annotations every four hours:
  		-p1 -P -X1 -Y1 -K -V > hs_ew9302_161_bmn.mb24.ps
 
 .SH BUGS
-Of course.  What do you expect for free software?
+Probably.
