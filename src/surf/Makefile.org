@@ -1,0 +1,117 @@
+##################################################################
+#
+# Makefile for Archive Library "libsapi.a"
+#
+##################################################################
+
+SAPI_LIB           =  libsapi.a
+
+ALL_INCLUDE        = -I.
+
+CC      = cc
+
+
+# HP-UX 10.20
+#CFLAGS  = -Ae $(ALL_INCLUDE)
+#LIBS  = $(SAPI_LIB) -lrpcsvc -lm
+
+# DEC-Unix, OSF1 # please use gmake
+#CFLAGS  = -std1 -D_ANSI_C_SOURCE -D_POSIX_SOURCE -D_XOPEN_SOURCE \
+#          -D_AES_SOURCE -D_OSF_SOURCE $(ALL_INCLUDE)
+#LIBS  = $(SAPI_LIB) -lrpcsvc -lm
+
+# IRIX
+CFLAGS  = -c -g2 -DCC -DCG_ANSI -DSYSV $(ALL_INCLUDE)
+LIBS  = $(SAPI_LIB) -lsun -lm
+
+# Solaris, SunOS
+#CFLAGS = $(ALL_INCLUDE)
+#LIBS  = $(SAPI_LIB) -lrpcsvc -lm -lnsl
+
+# Linux
+#CFLAGS = $(ALL_INCLUDE)
+#LIBS  =  $(SAPI_LIB) -lrpcsvc -lm
+
+
+$(SAPI_LIB):  $(SAPI_LIB)(xdr_surf.o)    \
+              $(SAPI_LIB)(mem_surf.o)    \
+              $(SAPI_LIB)(util_surf.o)   \
+              $(SAPI_LIB)(pb_math.o)     \
+              $(SAPI_LIB)(sapi_files.o)  \
+              $(SAPI_LIB)(sapi_build.o)  \
+              $(SAPI_LIB)(sapi_globals.o)\
+              $(SAPI_LIB)(sapi_data.o)   \
+              $(SAPI_LIB)(sapi_simple.o) \
+              $(SAPI_LIB)(myOpSys.o)
+
+
+$(SAPI_LIB)(xdr_surf.o): \
+                surf.h \
+                xdr_surf.h\
+                xdr_surf.c
+
+$(SAPI_LIB)(mem_surf.o): \
+                surf.h \
+                xdr_surf.h \
+                mem_surf.h \
+                mem_surf.c
+
+$(SAPI_LIB)(util_surf.o): \
+                surf.h \
+                xdr_surf.h \
+                mem_surf.h \
+                util_surf.h\
+                util_surf.c
+
+$(SAPI_LIB)(pb_math.o): \
+                pb_math.h\
+                pb_math.c
+
+$(SAPI_LIB)(sapi_files.o): \
+       		surf.h\
+                xdr_surf.h\
+                mem_surf.h\
+                sapi.h\
+	        sapi_files.c
+
+$(SAPI_LIB)(sapi_globals.o): \
+       		surf.h\
+                xdr_surf.h\
+	        mem_surf.h\
+       		sapi.h\
+                sapi_globals.c
+
+$(SAPI_LIB)(sapi_data.o): \
+       		surf.h\
+                xdr_surf.h\
+                mem_surf.h\
+       		sapi.h\
+                sapi_data.c
+
+$(SAPI_LIB)(sapi_simple.o): \
+                surf.h\
+                xdr_surf.h\
+                mem_surf.h\
+                sapi.h\
+                sapi_simple.c
+
+$(SAPI_LIB)(sapi_build.o): \
+                surf.h\
+                xdr_surf.h\
+                mem_surf.h\
+                sapi.h\
+                sapi_build.c
+
+$(SAPI_LIB)(myOpSys.o): myOpSys.c
+
+myOpSys.c: getopsys
+	getopsys
+
+##########################################
+clean:
+	- rm -f libsapi.a
+	- rm -f myOpSys.c
+	- rm -f *.o
+
+dist: clean
+	- cd libsapi/Debug; rm -f *
