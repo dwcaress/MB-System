@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 1.1 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbsys_reson.c,v 4.0 1994-10-21 12:35:00 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,6 +33,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1994/10/21  12:20:01  caress
+ * Initial revision
+ *
  *
  *
  */
@@ -60,7 +63,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_reson.c,v 1.1 1994-10-21 12:20:01 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 4.0 1994-10-21 12:35:00 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em1000rw.h	8/8/94
- *	$Id: mbf_em1000rw.h,v 1.1 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbf_em1000rw.h,v 4.0 1994-10-21 12:35:04 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1994/10/21  12:20:01  caress
+ * Initial revision
+ *
  * Revision 1.1  1994/10/21  12:13:33  caress
  * Initial revision
  *
