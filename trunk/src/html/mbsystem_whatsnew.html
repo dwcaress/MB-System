@@ -122,6 +122,25 @@ the current Simrad multibeam sonars.</LI>
 </UL>
 
 <UL>
+<LI>Streamlining of MB-System Default Parameters.</LI>
+
+<UL>
+<LI>Prior to version 5.0, the MB-System defaults
+set by mbdefaults included the format id, a control for
+ping averaging, longitude and latitude bounds for windowing
+by area, and begin and end times for windowing in time. These
+values are no longer set in the .mbio_defaults file or controlled
+by mbdefaults. As noted above, the format id is automatically
+identified from the filename when possible. When filenames do not
+match one of the recognized structures, users must specify the
+format using the relevant programs -Fformat option.
+The controls for ping averaging and windowing in time and space
+are rarely used, and must now be explicitly set in command
+line arguments.</LI>
+</UL>
+</UL>
+
+<UL>
 <LI>New Data Formats</LI>
 
 <UL>
@@ -138,7 +157,7 @@ Processing is supported using the augmented read-write format 183.</LI>
 </UL>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2001-07-20 00:43:45 $ $Revision: 5.3 $ </P></CENTER>
+Last Updated: $Date: 2001-11-20 21:59:03 $ $Revision: 5.4 $ </P></CENTER>
 
 <P>
 <HR WIDTH="67%"></P>
