@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.17 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.18 2003-04-22 20:51:22 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.16  2002/10/02 23:55:42  caress
  * Release 5.0.beta24
  *
@@ -115,7 +118,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.17 2003-04-17 21:05:23 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.18 2003-04-22 20:51:22 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -2792,7 +2795,7 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_speed = (int) rint(speed / 0.036);
 
 		/* get draft  */
-		ping->png_offset_multiplier = (int)(draft / 655.36);
+		ping->png_offset_multiplier = (int)floor(draft / 655.36);
 		ping->png_xducer_depth 
 			= 100 * (draft - 655.36 * ping->png_offset_multiplier);
 
