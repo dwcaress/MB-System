@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 5.1 2000-12-10 20:26:50 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 5.2 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:26:50  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -85,8 +88,10 @@ int mbr_info_mbpronav(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error);
@@ -124,13 +129,15 @@ int mbr_info_mbpronav(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_info_mbpronav";
 	int	status = MB_SUCCESS;
 
@@ -175,8 +182,10 @@ int mbr_info_mbpronav(int verbose,
 	*insert = &mbsys_singlebeam_insert; 
 	*extract_nav = &mbsys_singlebeam_extract_nav; 
 	*insert_nav = &mbsys_singlebeam_insert_nav; 
-	*altitude = &mbsys_singlebeam_altitude; 
+	*extract_altitude = &mbsys_singlebeam_extract_altitude; 
 	*insert_altitude = NULL;
+	*extract_svp = NULL; 
+	*insert_svp = NULL;
 	*ttimes = &mbsys_singlebeam_ttimes; 
 	*copyrecord = &mbsys_singlebeam_copy; 
 
@@ -214,8 +223,10 @@ int mbr_info_mbpronav(int verbose,
 		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
 		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
 		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -231,7 +242,7 @@ int mbr_info_mbpronav(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbpronav(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -530,7 +541,7 @@ int mbr_mbpronav_rd_data(int verbose, char *mbio_ptr, int *error)
 	double  sec;
 	double  d1, d2, d3, d4, d5;
 	double  d6, d7, d8, d9;
-	int	i;
+	int	i, i1, i2, i3, i4, i5;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -549,7 +560,7 @@ int mbr_mbpronav_rd_data(int verbose, char *mbio_ptr, int *error)
 	data = (struct mbf_mbpronav_struct *) mb_io_ptr->raw_data;
 
 	/* initialize everything to zeros */
-	mbr_zero_mbpronav(verbose,data,error);
+	mbr_zero_mbpronav(verbose,mb_io_ptr->raw_data,error);
 
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
@@ -583,7 +594,7 @@ int mbr_mbpronav_rd_data(int verbose, char *mbio_ptr, int *error)
 
 	    /* read data */
 	    nread = sscanf(line,
-			"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+			"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d",
 			&data->time_i[0],
 			&data->time_i[1],
 			&data->time_i[2],
@@ -598,7 +609,12 @@ int mbr_mbpronav_rd_data(int verbose, char *mbio_ptr, int *error)
 			&d6,
 			&d7,
 			&d8,
-			&d9);
+			&d9, 
+			&i1, 
+			&i2, 
+			&i3, 
+			&i4, 
+			&i5);
 	    data->time_i[5] = (int) sec;
 	    data->time_i[6] = 1000000.0 * (sec - data->time_i[5]);
 	    if (nread == 8)
@@ -671,7 +687,7 @@ int mbr_mbpronav_rd_data(int verbose, char *mbio_ptr, int *error)
 	    	status = MB_SUCCESS;
 	   	*error = MB_ERROR_NO_ERROR;
 		}
-	    else if (nread == 15)
+	    else if (nread >= 15)
 	        {
 	        data->time_d = d1;
 		data->longitude = d2;
@@ -804,7 +820,7 @@ int mbr_mbpronav_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 		    }
 
             sprintf(line,
-			"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+			"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\n",
 			data->time_i[0],
 			data->time_i[1],
 			data->time_i[2],

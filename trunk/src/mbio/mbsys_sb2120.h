@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2120.h	3/27/2000
- *	$Id: mbsys_sb2120.h,v 5.0 2000-12-10 20:24:25 caress Exp $
+ *	$Id: mbsys_sb2120.h,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	December 7,  2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/10  20:24:25  caress
+ * Initial revision.
+ *
  *
  */
 /*
@@ -102,7 +105,7 @@
 #define	MBSYS_SB2120_COMMENT_LENGTH	200
 #define	MBSYS_SB2120_BUFFER_SIZE	10000
 #define	MBSYS_SB2120_DESCRIPTION_LENGTH	64
-#define	MBSYS_SB2120_TIME_OFFSET	2177452800
+#define	MBSYS_SB2120_TIME_OFFSET	((unsigned int) 2177452800)
 #define	MBSYS_SB2120_BUFFER_SIZE	10000
 #define	MBSYS_SB2120_MAX_SIZE		200
 
@@ -291,7 +294,7 @@ int mbsys_sb2120_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_sb2120_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2120_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
 int mbsys_sb2120_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
@@ -305,6 +308,15 @@ int mbsys_sb2120_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 			double navlon, double navlat,
 			double speed, double heading, double draft, 
 			double roll, double pitch, double heave,
+			int *error);
+int mbsys_sb2120_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, 
+			int *nsvp, 
+			double *depth, double *velocity,
+			int *error);
+int mbsys_sb2120_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+			int nsvp, 
+			double *depth, double *velocity,
 			int *error);
 int mbsys_sb2120_copy(int verbose, char *mbio_ptr, 
 			char *store_ptr, char *copy_ptr,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -782,7 +785,7 @@ int mbsys_simrad2_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_simrad2_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_simrad2_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
 int mbsys_simrad2_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
@@ -797,7 +800,21 @@ int mbsys_simrad2_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 			double speed, double heading, double draft, 
 			double roll, double pitch, double heave,
 			int *error);
+int mbsys_simrad2_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, 
+			int *nsvp, 
+			double *depth, double *velocity,
+			int *error);
+int mbsys_simrad2_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+			int nsvp, 
+			double *depth, double *velocity,
+			int *error);
 int mbsys_simrad2_copy(int verbose, char *mbio_ptr, 
 			char *store_ptr, char *copy_ptr,
 			int *error);
+int mbsys_simrad2_makess(int verbose, char *mbio_ptr, char *store_ptr,
+		int pixel_size_set, double *pixel_size, 
+		int swath_width_set, double *swath_width, 
+		int pixel_int, 
+		int *error);
 

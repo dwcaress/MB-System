@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_define.h,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/09/30  06:29:44  caress
  * Snapshot for Dale.
  *
@@ -57,6 +60,9 @@
 
 /* maximum number of navigation points saved */
 #define MB_NAV_SAVE_MAX 20
+
+/* maximum size of SVP profiles */
+#define MB_SVP_MAX 1024
 
 /* types of  files used by swath sonar data formats */
 #define	MB_FILETYPE_NORMAL	1
@@ -102,8 +108,12 @@ typedef signed char	mb_s_char;
 #define RTD	57.2957795130823230000
 
 /* min max define */
+#ifndef MIN
 #define	MIN(A, B)	((A) < (B) ? (A) : (B))
+#endif
+#ifndef MAX
 #define	MAX(A, B)	((A) > (B) ? (A) : (B))
+#endif
 	
 /* MBIO core function prototypes */
 int mb_format_info(int verbose, int *format, int *system, 
@@ -118,7 +128,8 @@ int mb_format_info(int verbose, int *format, int *system,
 		int (**read_ping)(), int (**write_ping)(), 
 		int (**extract)(),  int (**insert)(), 
 		int (**extract_nav)(), int (**insert_nav)(), 
-		int (**altitude)(),  int (**insert_altitude)(), 
+		int (**extract_altitude)(),  int (**insert_altitude)(), 
+		int (**extract_svp)(),  int (**insert_svp)(), 
 		int (**ttimes)(), int (**copyrecord)(), 
 		int *error);
 int mb_format(int verbose, int *format, int *error);
@@ -235,12 +246,21 @@ int mb_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		double speed, double heading, double draft, 
 		double roll, double pitch, double heave, 
 		int *error);
-int mb_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		int *kind,
 		double *transducer_depth, double *altitude,
 		int *error);
 int mb_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		double transducer_depth, double altitude,
+		int *error);
+int mb_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind,
+		int *nsvp,
+		double *depth, double *velocity,
+		int *error);
+int mb_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+		int nsvp,
+		double *depth, double *velocity,
 		int *error);
 int mb_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 		int *kind, int *nbeams,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.10  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -109,15 +112,79 @@ int mbr_info_em300raw(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error);
 int mbr_alm_em300raw(int verbose, char *mbio_ptr, int *error);
 int mbr_dem_em300raw(int verbose, char *mbio_ptr, int *error);
+int mbr_zero_em300raw(int verbose, char *data_ptr, int *error);
 int mbr_rt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 int mbr_wt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_em300raw_rd_data(int verbose, char *mbio_ptr, int *error);
+int mbr_em300raw_chk_label(int verbose, char *mbio_ptr, short type, short sonar);
+int mbr_em300raw_rd_start(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short type, short sonar, int *version, int *error);
+int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_height(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error);
+int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		int *match, short sonar, int version, int *error);
+int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *match, int *error);
+int mbr_em300raw_wr_data(int verbose, char *mbio_ptr, int *error);
+int mbr_em300raw_wr_start(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_clock(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_tide(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_height(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_pos(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_svp(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
+int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_em300raw(int verbose, 
@@ -148,13 +215,15 @@ int mbr_info_em300raw(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_info_em300raw";
 	int	status = MB_SUCCESS;
 
@@ -199,8 +268,10 @@ int mbr_info_em300raw(int verbose,
 	*insert = &mbsys_simrad2_insert; 
 	*extract_nav = &mbsys_simrad2_extract_nav; 
 	*insert_nav = &mbsys_simrad2_insert_nav; 
-	*altitude = &mbsys_simrad2_altitude; 
+	*extract_altitude = &mbsys_simrad2_extract_altitude; 
 	*insert_altitude = NULL; 
+	*extract_svp = &mbsys_simrad2_extract_svp; 
+	*insert_svp = &mbsys_simrad2_insert_svp; 
 	*ttimes = &mbsys_simrad2_ttimes; 
 	*copyrecord = &mbsys_simrad2_copy; 
 
@@ -238,8 +309,10 @@ int mbr_info_em300raw(int verbose,
 		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
 		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
 		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -253,10 +326,12 @@ int mbr_info_em300raw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300raw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	double	*pixel_size;
+	double	*swath_width;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -285,6 +360,10 @@ int mbr_alm_em300raw(int verbose, char *mbio_ptr, int *error)
 
 	/* initialize everything to zeros */
 	mbr_zero_em300raw(verbose,mb_io_ptr->raw_data,error);
+	pixel_size = &mb_io_ptr->saved1;
+	swath_width = &mb_io_ptr->saved2;
+	*pixel_size = 0.0;
+	*swath_width = 0.0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -953,23 +1032,15 @@ int mbr_rt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	struct mbsys_simrad2_attitude_struct *attitude;
 	struct mbsys_simrad2_heading_struct *heading;
 	struct mbsys_simrad2_ping_struct *ping;
-	mb_s_char *beam_ss;
 	int	time_i[7];
 	double	bath_time_d, ss_time_d;
-	double	ss_spacing;
 	double	dd, dt, dx, dy, speed;
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
-	double	depthoffset, depthscale;
-	double	dacrscale, daloscale;
-	double	ttscale, reflscale;
-	double	bathsort[MBF_EM300RAW_MAXBEAMS];
-	int	nbathsort;
-	double	*pixel_size, pixel_size_calc, swathwidth, xtrack;
-	int	ss_cnt[MBSYS_SIMRAD2_MAXPIXELS];
+	double	*pixel_size, *swath_width;
 	int	ifix;
-	int	first, last, k1, k2;
-	int	i, j, k, jj, kk;
+	int	first, last;
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -987,36 +1058,7 @@ int mbr_rt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	data = (struct mbf_em300raw_struct *) mb_io_ptr->raw_data;
 	store = (struct mbsys_simrad2_struct *) store_ptr;
 	pixel_size = (double *) &mb_io_ptr->saved1;
-
-	/* reset values in mb_io_ptr */
-	mb_io_ptr->new_kind = MB_DATA_NONE;
-	mb_io_ptr->new_time_i[0] = 0;
-	mb_io_ptr->new_time_i[1] = 0;
-	mb_io_ptr->new_time_i[2] = 0;
-	mb_io_ptr->new_time_i[3] = 0;
-	mb_io_ptr->new_time_i[4] = 0;
-	mb_io_ptr->new_time_i[5] = 0;
-	mb_io_ptr->new_time_i[6] = 0;
-	mb_io_ptr->new_time_d = 0.0;
-	mb_io_ptr->new_lon = 0.0;
-	mb_io_ptr->new_lat = 0.0;
-	mb_io_ptr->new_heading = 0.0;
-	mb_io_ptr->new_speed = 0.0;
-	for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
-		{
-		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
-		mb_io_ptr->new_bath[i] = 0.0;
-		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
-		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
-		mb_io_ptr->new_amp[i] = 0.0;
-		}
-	for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
-		{
-		mb_io_ptr->new_ss[i] = 0.0;
-		mb_io_ptr->new_ss_acrosstrack[i] = 0.0;
-		mb_io_ptr->new_ss_alongtrack[i] = 0.0;
-		ss_cnt[i] = 0;
-		}
+	swath_width = (double *) &mb_io_ptr->saved2;
 
 	/* read next data from file */
 	status = mbr_em300raw_rd_data(verbose,mbio_ptr,error);
@@ -1409,214 +1451,6 @@ data->png_bso);*/
 
 		/* get speed  */
 		mb_io_ptr->new_speed = speed;
-
-		/* read beam and pixel values into storage arrays */
-		depthscale = 0.01 * data->png_depth_res;
-		depthoffset = 0.01 * data->png_xducer_depth
-				+ 655.36 * data->png_offset_multiplier;
-		dacrscale  = 0.01 * data->png_distance_res;
-		daloscale  = 0.01 * data->png_distance_res;
-		reflscale  = 0.5;
-		mb_io_ptr->new_beams_bath = 0;
-		nbathsort = 0;
-		for (i=0;i<data->png_nbeams;i++)
-			{
-			j = data->png_beam_num[i] - 1;
-			mb_io_ptr->new_bath[j] 
-				= depthscale * data->png_depth[i]
-				    + depthoffset;
-			mb_io_ptr->new_beamflag[j] 
-				= MB_FLAG_NONE;
-			mb_io_ptr->new_bath_acrosstrack[j] 
-				= dacrscale * data->png_acrosstrack[i];
-			mb_io_ptr->new_bath_alongtrack[j] 
-				= daloscale * data->png_alongtrack[i];
-			if (data->png_quality[i] != 0)
-				mb_io_ptr->new_amp[j] 
-					= reflscale * data->png_amp[i] + 64;
-			else
-				mb_io_ptr->new_amp[j] = 0;
-			mb_io_ptr->new_beams_bath = MAX(j + 1, mb_io_ptr->new_beams_bath);
-			bathsort[nbathsort] = mb_io_ptr->new_bath[j];
-			nbathsort++;
-			}
-		mb_io_ptr->new_beams_amp = mb_io_ptr->new_beams_bath;
-		
-		/* get median depth and sidescan pixel size */
-		if (nbathsort > 0)
-		    {
-		    qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
-		    swathwidth = 2.5 + MAX(90.0 - 0.01 * data->png_depression[0], 
-					90.0 - 0.01 * data->png_depression[data->png_nbeams-1]);
-		    swathwidth = MAX(swathwidth, 60.0);
-		    pixel_size_calc = 2 * tan(DTR * swathwidth) * bathsort[nbathsort/2] 
-					/ MBSYS_SIMRAD2_MAXPIXELS;
-		    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
-		    if (*pixel_size <= 0.0)
-			*pixel_size = pixel_size_calc;
-		    else if (0.95 * (*pixel_size) > pixel_size_calc)
-			*pixel_size = 0.95 * (*pixel_size);
-		    else if (1.05 * (*pixel_size) < pixel_size_calc)
-			*pixel_size = 1.05 * (*pixel_size);
-		    else
-			*pixel_size = pixel_size_calc;
-		    }
-
-		/* get raw pixel size */
-		if (data->sonar <= EM2_EM3000)
-		    ss_spacing = 750.0 / data->png_sample_rate;
-		else
-		    ss_spacing = 750.0 / 14000;
-
-		/* loop over raw sidescan, putting each raw pixel into
-			the binning arrays */
-		mb_io_ptr->new_pixels_ss = MBSYS_SIMRAD2_MAXPIXELS;
-		for (i=0;i<data->png_nbeams_ss;i++)
-			{
-			beam_ss = &data->png_ssraw[data->png_start_sample[i]];
-			j = data->png_beam_num[i] - 1;
-			if (mb_io_ptr->new_beamflag[j] != MB_FLAG_NULL)
-			    for (k=0;k<data->png_beam_samples[i];k++)
-				{
-				if (beam_ss[k] != EM2_INVALID_AMP)
-					{
-					/* interpolate based on range */
-					if (k == data->png_center_sample[i])
-					    {
-					    xtrack = mb_io_ptr->new_bath_acrosstrack[j];
-					    }
-					else if (i == data->png_nbeams_ss - 1 
-					    || (k <= data->png_center_sample[i]
-						&& i != 0))
-					    {
-					    if (data->png_range[i] != data->png_range[i-1])
-						{
-						jj = data->png_beam_num[i-1] - 1;
-						xtrack = mb_io_ptr->new_bath_acrosstrack[j]
-						    + (mb_io_ptr->new_bath_acrosstrack[j]
-							- mb_io_ptr->new_bath_acrosstrack[jj])
-						    * 2 *((double)(k - data->png_center_sample[i]))
-						    / fabs((double)(data->png_range[i] - data->png_range[i-1]));
-						}
-					    else
-						{
-						xtrack = mb_io_ptr->new_bath_acrosstrack[j]
-						    + ss_spacing * (k - data->png_center_sample[i]);
-						}
-					    }
-					else
-					    {
-					    if (data->png_range[i] != data->png_range[i+1])
-						{
-						jj = data->png_beam_num[i+1] - 1;
-						    
-						xtrack = mb_io_ptr->new_bath_acrosstrack[j]
-						    + (mb_io_ptr->new_bath_acrosstrack[jj]
-							- mb_io_ptr->new_bath_acrosstrack[j])
-						    * 2 *((double)(k - data->png_center_sample[i]))
-						    / fabs((double)(data->png_range[i+1] - data->png_range[i]));
-						}
-					    else
-						{
-						xtrack = mb_io_ptr->new_bath_acrosstrack[j]
-						    + ss_spacing * (k - data->png_center_sample[i]);
-						}
-					    }
-					kk = MBSYS_SIMRAD2_MAXPIXELS / 2 
-					    + (int)(xtrack / *pixel_size);
-/*if (verbose > 2)
-fprintf(stderr, "i:%d kk:%d xtrack:%f pixel_size:%f\n", 
-i, kk, xtrack, *pixel_size);*/
-					if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
-					    {
-					    mb_io_ptr->new_ss[kk] 
-						    += reflscale*((double)beam_ss[k]) + 64.0; 
-							/*+ 34.0
-							- 0.5 * (data->png_bsn + data->png_bso);*/
-					    mb_io_ptr->new_ss_alongtrack[kk] 
-						    += mb_io_ptr->new_bath_alongtrack[j];
-					    ss_cnt[kk]++;
-					    }
-					}
-				}
-			}
-			
-		/* average the sidescan */
-		first = MBSYS_SIMRAD2_MAXPIXELS;
-		last = -1;
-		for (k=0;k<MBSYS_SIMRAD2_MAXPIXELS;k++)
-			{
-			if (ss_cnt[k] > 0)
-				{
-				mb_io_ptr->new_ss[k] /= ss_cnt[k];
-				mb_io_ptr->new_ss_alongtrack[k] /= ss_cnt[k];
-				mb_io_ptr->new_ss_acrosstrack[k] 
-					= (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
-						* (*pixel_size);
-				first = MIN(first, k);
-				last = k;
-				}
-			}
-			
-		/* interpolate the sidescan */
-		k1 = first;
-		k2 = first;
-		for (k=first+1;k<last;k++)
-		    {
-		    if (ss_cnt[k] <= 0)
-			{
-			if (k2 <= k)
-			    {
-			    k2 = k+1;
-			    while (ss_cnt[k2] <= 0 && k2 < last)
-				k2++;
-			    }
-			mb_io_ptr->new_ss[k] = mb_io_ptr->new_ss[k1]
-			    + (mb_io_ptr->new_ss[k2] - mb_io_ptr->new_ss[k1])
-				* ((double)(k - k1)) / ((double)(k2 - k1));
-			mb_io_ptr->new_ss_acrosstrack[k] 
-				= (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
-					* (*pixel_size);
-			mb_io_ptr->new_ss_alongtrack[k] = mb_io_ptr->new_ss_alongtrack[k1]
-			    + (mb_io_ptr->new_ss_alongtrack[k2] - mb_io_ptr->new_ss_alongtrack[k1])
-				* ((double)(k - k1)) / ((double)(k2 - k1));
-			}
-		    else
-			{
-			k1 = k;
-			}
-		    }
-
-		/* print debug statements */
-		if (verbose >= 4)
-			{
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				mb_io_ptr->new_lon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				mb_io_ptr->new_lat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				mb_io_ptr->new_speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				mb_io_ptr->new_heading);
-			fprintf(stderr,"dbg4       beams_bath: %d\n",
-				mb_io_ptr->new_beams_bath);
-			fprintf(stderr,"dbg4       beams_amp:  %d\n",
-				mb_io_ptr->new_beams_amp);
-			for (i=0;i<mb_io_ptr->new_beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_beamflag[i],
-				mb_io_ptr->new_bath[i],
-				mb_io_ptr->new_amp[i],
-				mb_io_ptr->new_bath_acrosstrack[i],
-				mb_io_ptr->new_bath_alongtrack[i]);
-			fprintf(stderr,"dbg4       pixels_ss:  %d\n",
-				mb_io_ptr->new_pixels_ss);
-			for (i=0;i<mb_io_ptr->new_pixels_ss;i++)
-			  fprintf(stderr,"dbg4       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n",
-				i,ss_cnt[i],mb_io_ptr->new_ss[i],
-				mb_io_ptr->new_ss_acrosstrack[i],
-				mb_io_ptr->new_ss_alongtrack[i]);
-			}
 		}
 
 	if (status == MB_SUCCESS
@@ -2021,16 +1855,16 @@ i, kk, xtrack, *pixel_size);*/
 			    {
 			    ping->png_ssraw[i] = data->png_ssraw[i];
 			    }
-			ping->png_pixel_size = 100 * (*pixel_size);
-			ping->png_pixels_ss = 2 * MAX(MBSYS_SIMRAD2_MAXPIXELS/2 - first, 
-							last - MBSYS_SIMRAD2_MAXPIXELS/2);
-			ping->png_pixels_ss = MAX(ping->png_pixels_ss, 0);
-			for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
-			    {
-			    ping->png_ss[i] = (short)(100 * mb_io_ptr->new_ss[i]);
-			    ping->png_ssalongtrack[i] 
-				    = (short)(mb_io_ptr->new_ss_alongtrack[i] / daloscale);
-			    }
+			ping->png_pixel_size = 0;
+			ping->png_pixels_ss = 0;
+			
+			/* generate sidescan */
+			status = mbsys_simrad2_makess(verbose,
+					mbio_ptr, store_ptr,
+					MB_NO, pixel_size, 
+					MB_NO, swath_width, 
+					0, 
+					error);
 			}
 		}
 
@@ -2065,7 +1899,6 @@ int mbr_wt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
 	double	depthoffset;
 	int	iss;
-	mb_s_char *beam_ss;
 	int	i, j;
 
 	/* print input debug statements */
@@ -2386,7 +2219,7 @@ int mbr_wt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		}
 
 	/* write next data to file */
-	status = mbr_em300raw_wr_data(verbose,mbio_ptr,data_ptr,error);
+	status = mbr_em300raw_wr_data(verbose,mbio_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5334,12 +5167,13 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
+int mbr_em300raw_wr_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_data";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_em300raw_struct *data;
+	char	*data_ptr;
 	FILE	*mbfp;
 
 	/* print input debug statements */
@@ -5350,14 +5184,14 @@ int mbr_em300raw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
+	data = (struct mbf_em300raw_struct *) mb_io_ptr->raw_data;
+	data_ptr = (char *) data;
 	mbfp = mb_io_ptr->mbfp;
 
 	if (data->kind == MB_DATA_COMMENT
@@ -5447,11 +5281,11 @@ int mbr_em300raw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_start(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_start(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_start";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[MBF_EM300RAW_BUFFER_SIZE], *buff;
 	int	buff_len, write_len;
 	short	*label;
@@ -5471,11 +5305,8 @@ int mbr_em300raw_wr_start(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -5838,11 +5669,11 @@ int mbr_em300raw_wr_start(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_run_parameter";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_RUN_PARAMETER_SIZE];
 	short	label;
 	int	write_len;
@@ -5861,11 +5692,8 @@ int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp, char *data_ptr, int *
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -6082,11 +5910,11 @@ int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp, char *data_ptr, int *
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_clock(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_clock(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_clock";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_CLOCK_SIZE];
 	short	label;
 	int	write_len;
@@ -6105,11 +5933,8 @@ int mbr_em300raw_wr_clock(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -6265,11 +6090,11 @@ int mbr_em300raw_wr_clock(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_tide(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_tide(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_tide";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_TIDE_SIZE];
 	short	label;
 	int	write_len;
@@ -6288,11 +6113,8 @@ int mbr_em300raw_wr_tide(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -6451,11 +6273,11 @@ int mbr_em300raw_wr_tide(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_height(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_height(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_height";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_HEIGHT_SIZE];
 	short	label;
 	int	write_len;
@@ -6474,11 +6296,8 @@ int mbr_em300raw_wr_height(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -6629,11 +6448,11 @@ int mbr_em300raw_wr_height(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_heading";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_HEADING_HEADER_SIZE];
 	short	label;
 	int	write_len;
@@ -6652,11 +6471,8 @@ int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -6869,11 +6685,11 @@ int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_attitude";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_ATTITUDE_HEADER_SIZE];
 	short	label;
 	int	write_len;
@@ -6892,11 +6708,8 @@ int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -7127,11 +6940,11 @@ int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_pos(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_pos(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_pos";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_POS_HEADER_SIZE];
 	short	label;
 	int	write_len;
@@ -7150,11 +6963,8 @@ int mbr_em300raw_wr_pos(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -7379,11 +7189,11 @@ int mbr_em300raw_wr_pos(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_svp(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_svp";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_SVP2_HEADER_SIZE];
 	short	label;
 	int	write_len;
@@ -7402,11 +7212,8 @@ int mbr_em300raw_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -7633,11 +7440,11 @@ int mbr_em300raw_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_bath";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_BATH_HEADER_SIZE];
 	short	label;
 	int	write_len;
@@ -7656,11 +7463,8 @@ int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -7936,11 +7740,11 @@ int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_ss";
 	int	status = MB_SUCCESS;
-	struct mbf_em300raw_struct *data;
 	char	line[EM2_SS_HEADER_SIZE];
 	short	label;
 	int	write_len;
@@ -7959,11 +7763,8 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_em300raw_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.h	10/4/94
- *	$Id: mbsys_sb2000.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_sb2000.h,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.5  2000/09/30  06:31:19  caress
  * Snapshot for Dale.
  *
@@ -186,7 +189,7 @@ int mbsys_sb2000_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_sb2000_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2000_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
 int mbsys_sb2000_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,

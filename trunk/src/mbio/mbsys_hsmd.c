@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,26 +21,13 @@
  *
  *      MBF_HSMDRAW : MBIO ID 101
  *
- * These functions include:
- *   mbsys_hsmd_alloc	- allocate memory for mbsys_hsmd_struct structure
- *   mbsys_hsmd_deall	- deallocate memory for mbsys_hsmd_struct structure
- *   mbsys_hsmd_extract	- extract basic data from mbsys_hsmd_struct structure
- *   mbsys_hsmd_insert	- insert basic data into mbsys_hsmd_struct structure
- *   mbsys_hsmd_ttimes  - extract travel time and beam angle data from
- *                        mbsys_hsmd_struct structure
- *   mbsys_hsmd_extract_nav - extract navigation and attitude 
- *		          sensor data from
- *                        mbsys_hsmd_struct structure
- *   mbsys_hsmd_insert_nav - insert navigation and attitude 
- *			  sensor data into
- *                        mbsys_hsmd_struct structure
- *   mbsys_hsmd_copy	- copy data in one mbsys_hsmd_struct structure
- *   			  into another mbsys_hsmd_struct structure
- *
  * Author:	Dale Chayes
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.9  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -113,7 +100,7 @@
 int mbsys_hsmd_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
-	static char res_id[]="$Id: mbsys_hsmd.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbsys_hsmd.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -844,11 +831,11 @@ int mbsys_hsmd_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsmd_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hsmd_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_hsmd_altitude";
+	char	*function_name = "mbsys_hsmd_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsmd_struct *store;

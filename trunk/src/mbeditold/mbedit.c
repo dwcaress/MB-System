@@ -113,8 +113,8 @@ int main( int argc, char **argv)
     /* End user code block <create_topLevelShell> */
     
     ac = 0;
-    XtSetArg(args[ac], XmNtitle, "MBedit"); ac++;
-    XtSetArg(args[ac], XmNiconName, "MBedit"); ac++;
+    XtSetArg(args[ac], XmNtitle, "MBeditold"); ac++;
+    XtSetArg(args[ac], XmNiconName, "MBeditold"); ac++;
     XtSetArg(args[ac], XmNallowShellResize, False); ac++;
     XtSetArg(args[ac], XmNdeleteResponse, XmDESTROY); ac++;
     XtSetArg(args[ac], XmNx, 0); ac++;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_oic.c	3/1/99
- *	$Id: mbsys_oic.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_oic.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,29 +19,13 @@
  *      MBF_OICGEODA : MBIO ID 141
  *      MBF_OICMBARI : MBIO ID 142
  *
- * These functions include:
- *   mbsys_oic_alloc		- allocate memory for mbsys_oic_struct 
- *					structure
- *   mbsys_oic_deall		- deallocate memory for mbsys_oic_struct 
- *					structure
- *   mbsys_oic_extract		- extract basic data from mbsys_oic_struct 
- *					structure
- *   mbsys_oic_insert		- insert basic data into mbsys_oic_struct 
- *					structure
- *   mbsys_oic_ttimes		- would extract travel time and beam angle data from
- *					mbsys_oic_struct structure if there were any
- *   mbsys_oic_extract_nav	- extract navigation data from
- *					mbsys_oic_struct structure
- *   mbsys_oic_insert_nav	- insert navigation data into
- *					mbsys_oic_struct structure
- *   mbsys_oic_copy		- copy data in one mbsys_oic_struct 
- *					structure into another 
- *					mbsys_oic_struct structure
- *
  * Author:	D. W. Caress
  * Date:	March 1, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.2  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -73,7 +57,7 @@
 int mbsys_oic_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_oic.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_oic.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_oic_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -818,11 +802,11 @@ int mbsys_oic_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_oic_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_oic_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_oic_altitude";
+	char	*function_name = "mbsys_oic_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_oic_struct *store;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100b1.c	3/3/94
- *	$Id: mbr_sb2100b1.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_sb2100b1.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.5  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -102,15 +105,42 @@ int mbr_info_sb2100b1(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error);
 int mbr_alm_sb2100b1(int verbose, char *mbio_ptr, int *error);
 int mbr_dem_sb2100b1(int verbose, char *mbio_ptr, int *error);
+int mbr_zero_sb2100b1(int verbose, char *data_ptr, int *error);
 int mbr_rt_sb2100b1(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 int mbr_wt_sb2100b1(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_sb2100b1_rd_data(int verbose, char *mbio_ptr, int *error);
+int mbr_sb2100b1_rd_fh(int verbose, FILE *mbfp, int record_length, int *error);
+int mbr_sb2100b1_rd_pr(int verbose, FILE *mbfp, 
+		struct mbf_sb2100b1_struct *data, short record_length,
+		int *error);
+int mbr_sb2100b1_rd_tr(int verbose, FILE *mbfp, 
+		struct mbf_sb2100b1_struct *data, short record_length,
+		int *error);
+int mbr_sb2100b1_rd_dh(int verbose, FILE *mbfp, 
+		struct mbf_sb2100b1_struct *data, short record_length,
+		int *error);
+int mbr_sb2100b1_rd_br(int verbose, FILE *mbfp, 
+		struct mbf_sb2100b1_struct *data, short record_length,
+		int *error);
+int mbr_sb2100b1_rd_sr(int verbose, FILE *mbfp, 
+		struct mbf_sb2100b1_struct *data, short record_length,
+		int *error);
+int mbr_sb2100b1_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error);
+int mbr_sb2100b1_wr_fh(int verbose, FILE *mbfp, int *error);
+int mbr_sb2100b1_wr_pr(int verbose, FILE *mbfp, char *data_ptr, int *error);
+int mbr_sb2100b1_wr_tr(int verbose, FILE *mbfp, char *data_ptr, int *error);
+int mbr_sb2100b1_wr_dh(int verbose, FILE *mbfp, char *data_ptr, int *error);
+int mbr_sb2100b1_wr_br(int verbose, FILE *mbfp, char *data_ptr, int *error);
+int mbr_sb2100b1_wr_sr(int verbose, FILE *mbfp, char *data_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_sb2100b1(int verbose, 
@@ -141,13 +171,15 @@ int mbr_info_sb2100b1(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_info_sb2100b1";
 	int	status = MB_SUCCESS;
 
@@ -192,8 +224,10 @@ int mbr_info_sb2100b1(int verbose,
 	*insert = &mbsys_sb2100_insert; 
 	*extract_nav = &mbsys_sb2100_extract_nav; 
 	*insert_nav = &mbsys_sb2100_insert_nav; 
-	*altitude = &mbsys_sb2100_altitude; 
+	*extract_altitude = &mbsys_sb2100_extract_altitude; 
 	*insert_altitude = NULL; 
+	*extract_svp = &mbsys_sb2100_extract_svp; 
+	*insert_svp = &mbsys_sb2100_insert_svp; 
 	*ttimes = &mbsys_sb2100_ttimes; 
 	*copyrecord = &mbsys_sb2100_copy; 
 
@@ -231,8 +265,10 @@ int mbr_info_sb2100b1(int verbose,
 		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
 		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
 		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -247,7 +283,7 @@ int mbr_info_sb2100b1(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100b1(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100b1";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1775,17 +1811,17 @@ int mbr_sb2100b1_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 	/* write the data */
 	if (data->kind == MB_DATA_PARAMETER)
 		{
-		status = mbr_sb2100b1_wr_pr(verbose,mbfp,data,error);
+		status = mbr_sb2100b1_wr_pr(verbose,mbfp,data_ptr,error);
 		}
 	else if (data->kind == MB_DATA_COMMENT)
 		{
-		status = mbr_sb2100b1_wr_tr(verbose,mbfp,data,error);
+		status = mbr_sb2100b1_wr_tr(verbose,mbfp,data_ptr,error);
 		}
 	else if (data->kind == MB_DATA_DATA)
 		{
-		status = mbr_sb2100b1_wr_dh(verbose,mbfp,data,error);
-		status = mbr_sb2100b1_wr_br(verbose,mbfp,data,error);
-		status = mbr_sb2100b1_wr_sr(verbose,mbfp,data,error);
+		status = mbr_sb2100b1_wr_dh(verbose,mbfp,data_ptr,error);
+		status = mbr_sb2100b1_wr_br(verbose,mbfp,data_ptr,error);
+		status = mbr_sb2100b1_wr_sr(verbose,mbfp,data_ptr,error);
 		}
 	else
 		{

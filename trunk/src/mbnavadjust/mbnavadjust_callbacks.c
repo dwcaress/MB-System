@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.0 2000-12-01 22:55:48 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.1 2001-01-22 07:45:59 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:55:48  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.0  2000/09/30  07:00:06  caress
  * Snapshot for Dale.
  *
@@ -533,62 +536,26 @@ do_mbnavadjust_init(int argc, char **argv)
     /* Setup the entire screen. */
     display = XtDisplay(bulletinBoard_mbnavadjust);
     colormap = DefaultColormap(display,XDefaultScreen(display));
-				
-     /* Load the colors that will be used in this program. */
-    status = XLookupColor(display,colormap,
-	    "white",&db_color,&colors[0]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[0]);
-    if (status == 0)
-	    {
+    
+    /* Load the colors that will be used in this program. */
+    status = XLookupColor(display,colormap, "white",&db_color,&colors[0]);
+    if ((status = XAllocColor(display,colormap,&colors[0])) == 0)
 	    fprintf(stderr,"Failure to allocate color: white\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "black",&db_color,&colors[1]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[1]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "black",&db_color,&colors[1]);
+    if ((status = XAllocColor(display,colormap,&colors[1])) == 0)
 	    fprintf(stderr,"Failure to allocate color: black\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "red",&db_color,&colors[2]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[2]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "red",&db_color,&colors[2]);
+    if ((status = XAllocColor(display,colormap,&colors[2])) == 0)
 	    fprintf(stderr,"Failure to allocate color: red\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "green",&db_color,&colors[3]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[3]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "green",&db_color,&colors[3]);
+    if ((status = XAllocColor(display,colormap,&colors[3])) == 0)
 	    fprintf(stderr,"Failure to allocate color: green\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "blue",&db_color,&colors[4]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[4]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "blue",&db_color,&colors[4]);
+    if ((status = XAllocColor(display,colormap,&colors[4])) == 0)
 	    fprintf(stderr,"Failure to allocate color: blue\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "coral",&db_color,&colors[5]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[5]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "coral",&db_color,&colors[5]);
+    if ((status = XAllocColor(display,colormap,&colors[5])) == 0)
 	    fprintf(stderr,"Failure to allocate color: coral\n");
-	    exit(-1);
-	    }
     j = 6;
     for (i=0;i<16;i++)
     	    {
@@ -602,7 +569,6 @@ do_mbnavadjust_init(int argc, char **argv)
 	    		j+i,colors[j+i].red,
 	    		colors[j+i].green,
 	    		colors[j+i].blue);
-	    	exit(-1);
 	    	}
     	    }
     j += 16;
@@ -618,7 +584,6 @@ do_mbnavadjust_init(int argc, char **argv)
 	    		j+i,colors[j+i].red,
 	    		colors[j+i].green,
 	    		colors[j+i].blue);
-	    	exit(-1);
 	    	}
     	    }
     j += 16;
@@ -634,7 +599,6 @@ do_mbnavadjust_init(int argc, char **argv)
 	    		j+i,colors[j+i].red,
 	    		colors[j+i].green,
 	    		colors[j+i].blue);
-	    	exit(-1);
 	    	}
     	    }
     j += 16;
@@ -650,7 +614,6 @@ do_mbnavadjust_init(int argc, char **argv)
 	    		j+i,colors[j+i].red,
 	    		colors[j+i].green,
 	    		colors[j+i].blue);
-	    	exit(-1);
 	    	}
     	    }
     j += 16;
@@ -666,7 +629,6 @@ do_mbnavadjust_init(int argc, char **argv)
 	    		j+i,colors[j+i].red,
 	    		colors[j+i].green,
 	    		colors[j+i].blue);
-	    	exit(-1);
 	    	}
     	    }
     j += 16;
@@ -680,7 +642,6 @@ do_mbnavadjust_init(int argc, char **argv)
 	    		j,colors[j].red,
 	    		colors[j].green,
 	    		colors[j].blue);
-	exit(-1);
 	}
     for (i=0;i<NCOLORS;i++)
 	    {

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.c	2/26/93
- *	$Id: mbsys_sb.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_sb.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,23 +25,13 @@
  *      MBF_SBURIVAX : MBIO ID 15
  *      MBF_SBSIOSWB : MBIO ID 16
  *      MBF_SBIFREMR : MBIO ID 17
- * These functions include:
- *   mbsys_sb_alloc	- allocate memory for mbsys_sb_struct structure
- *   mbsys_sb_deall	- deallocate memory for mbsys_sb_struct structure
- *   mbsys_sb_extract	- extract basic data from mbsys_sb_struct structure
- *   mbsys_sb_insert	- insert basic data into mbsys_sb_struct structure
- *   mbsys_sb_ttimes    - would extract travel time and beam angle data from
- *                        mbsys_sb_struct structure if there were any
- *   mbsys_sb_extract_nav - extract navigation data from
- *                          mbsys_sb_struct structure
- *   mbsys_sb_insert_nav - insert navigation data into
- *                          mbsys_sb_struct structure
- *   mbsys_sb_copy	- copy data in one mbsys_sb_struct structure
- *   				into another mbsys_sb_struct structure
  *
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.14  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -128,7 +118,7 @@
 int mbsys_sb_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_sb_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -675,11 +665,11 @@ int mbsys_sb_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_sb_altitude";
+	char	*function_name = "mbsys_sb_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb_struct *store;

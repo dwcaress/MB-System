@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.h	8/20/94
- *	$Id: mbsys_reson.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_reson.h,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.6  2000/09/30  06:31:19  caress
  * Snapshot for Dale.
  *
@@ -453,6 +456,7 @@
 
 /* maximum number of beams and pixels */
 #define	MBSYS_RESON_MAXBEAMS	101
+#define	MBSYS_RESON_MAXSVP	500
 #define	MBSYS_RESON_COMMENT_LENGTH	200
 
 /* telegram types */
@@ -552,8 +556,8 @@ struct mbsys_reson_struct
 	int	svp_latitude;		/* 180 deg = 2e9 */
 	int	svp_longitude;		/* 180 deg = 2e9 */
 	int	svp_num;
-	int	svp_depth[500]; /* 0.1 meters */
-	int	svp_vel[500];	/* 0.1 meters/sec */
+	int	svp_depth[MBSYS_RESON_MAXSVP]; /* 0.1 meters */
+	int	svp_vel[MBSYS_RESON_MAXSVP];	/* 0.1 meters/sec */
 
 	/* bathymetry */
 	int	year;
@@ -623,7 +627,7 @@ int mbsys_reson_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_reson_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_reson_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
 int mbsys_reson_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
@@ -637,6 +641,15 @@ int mbsys_reson_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 			double navlon, double navlat,
 			double speed, double heading, double draft, 
 			double roll, double pitch, double heave,
+			int *error);
+int mbsys_reson_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, 
+			int *nsvp, 
+			double *depth, double *velocity,
+			int *error);
+int mbsys_reson_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+			int nsvp, 
+			double *depth, double *velocity,
 			int *error);
 int mbsys_reson_copy(int verbose, char *mbio_ptr, 
 			char *store_ptr, char *copy_ptr,
