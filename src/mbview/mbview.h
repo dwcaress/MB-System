@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 1.1 2003-09-23 21:29:00 caress Exp $
+ *    $Id: mbview.h,v 1.2 2003-11-07 00:39:13 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2003/09/23 21:29:00  caress
+ * Adding first cut on mbview to cvs.
+ *
  *
  */
 
@@ -132,6 +135,16 @@
 #define MBV_NAV_OFF			0
 #define MBV_NAV_VIEW			1
 
+/* stat masks */
+#define MBV_STATMASK0	0x01
+#define MBV_STATMASK1	0x02
+#define MBV_STATMASK2	0x04
+#define MBV_STATMASK3	0x08
+#define MBV_STATMASK4	0x10
+#define MBV_STATMASK5	0x20
+#define MBV_STATMASK6	0x40
+#define MBV_STATMASK7	0x80
+
 /* structure declarations */
 struct mbview_contoursegment_struct {
 	float	x[2];
@@ -150,6 +163,16 @@ struct mbview_point_struct {
 	double	ydisplay;
 	double	zdisplay;
 	};
+	
+struct mbview_navpoint_struct {
+	double	time_d;
+	struct mbview_point_struct point;
+	struct mbview_point_struct pointport;
+	struct mbview_point_struct pointcntr;
+	struct mbview_point_struct pointstbd;
+	int	shot;
+	int	cdp;
+	};
 
 struct mbview_linesegment_struct {
 	struct mbview_point_struct *endpoints[2];
@@ -160,11 +183,14 @@ struct mbview_linesegment_struct {
 
 struct mbview_pick_struct {
 	struct mbview_point_struct endpoints[2];
+	struct mbview_point_struct xpoints[8];
 	struct mbview_linesegment_struct segment;
+	struct mbview_linesegment_struct xsegments[4];
 	};
 
 struct mbview_area_struct {
 	struct mbview_point_struct endpoints[2];
+	struct mbview_linesegment_struct segment;
 	double	areawidth;
 	struct mbview_point_struct cornerpoints[4];
 	struct mbview_linesegment_struct segments[4];
@@ -184,6 +210,20 @@ struct mbview_route_struct {
 	int	npoints;
 	int	npoints_alloc;
 	struct mbview_point_struct *points;
+	struct mbview_linesegment_struct *segments;
+	};
+
+struct mbview_nav_struct {
+	int	color;
+	int	size;
+	mb_path	name;
+	int	swathbounds;
+	int	shot;
+	int	cdp;
+	int	npoints;
+	int	npoints_alloc;
+	int	nselected;
+	struct mbview_navpoint_struct *navpts;
 	struct mbview_linesegment_struct *segments;
 	};
 
@@ -226,7 +266,6 @@ struct mbview_struct {
 	int	secondary_colortable_mode;
 	double	secondary_colortable_min;
 	double	secondary_colortable_max;
-	double	secondary_overlay_center;
 	double	secondary_shade_mode;
 
 	/* view controls */
@@ -242,7 +281,9 @@ struct mbview_struct {
 	double	illuminate_elevation;
 	double	illuminate_azimuth;
 	double	slope_magnitude;
-	double	overlay_magnitude;
+	double	overlay_shade_magnitude;
+	double	overlay_shade_center;
+	int	overlay_shade_mode;
 	
 	/* contour controls */
 	double	contour_interval;
@@ -277,6 +318,8 @@ struct mbview_struct {
 	float	*primary_r;
 	float	*primary_g;
 	float	*primary_b;
+	char	*primary_stat_color;
+	char	*primary_stat_z;
 	int	secondary_sameas_primary;
 	float	secondary_nodatavalue;
 	int	secondary_nxy;
@@ -325,6 +368,8 @@ struct mbview_struct {
 	int	nav_view_mode;
 	int	nnav;
 	int	nnav_alloc;
+	int	nav_selected;
+	struct mbview_nav_struct *navs;
 	};
 
 /* mbview API function prototypes */
@@ -361,7 +406,9 @@ int mbview_setviewcontrols(int verbose, int instance,
 			double	illuminate_elevation,
 			double	illuminate_azimuth,
 			double	slope_magnitude,
-			double	overlay_magnitude,
+			double	overlay_shade_magnitude,
+			double	overlay_shade_center,
+			int	overlay_shade_mode,
 			double	contour_interval,
 			int	display_projection_mode,
 			char	*display_projection_id,
@@ -415,7 +462,9 @@ int mbview_setsecondarycolortable(int verbose, int instance,
 			int	secondary_colortable_mode,
 			double	secondary_colortable_min,
 			double	secondary_colortable_max,
-			double	secondary_overlay_center,
+			double	overlay_shade_magnitude,
+			double	overlay_shade_center,
+			int	overlay_shade_mode,
 			int *error);
 int mbview_getsitecount(int verbose, int instance,
 			int	*nsite,
@@ -504,6 +553,58 @@ int mbview_getroute(int verbose, int instance,
 			int	*routesize,
 			mb_path	routename,
 			int *error);
+int mbview_getnavpointcount(int verbose, int instance,
+			int	nav,
+			int	*npoint,
+			int	*nintpoint,
+			int *error);
+int mbview_getnavcount(int verbose, int instance,
+			int *nnav,
+			int *error);
+int mbview_allocnavarrays(int verbose, 
+			int	npointtotal,
+			double	**time_d,
+			double	**navlon,
+			double	**navlat,
+			double	**navz,
+			double	**navportlon,
+			double	**navportlat,
+			double	**navstbdlon,
+			double	**navstbdlat,
+			int	**cdp,
+			int	**shot,
+			int *error);
+int mbview_freenavarrays(int verbose,
+			double	**time_d,
+			double	**navlon,
+			double	**navlat,
+			double	**navz,
+			double	**navportlon,
+			double	**navportlat,
+			double	**navstbdlon,
+			double	**navstbdlat,
+			int	**cdp,
+			int	**shot,
+			int *error);
+int mbview_addnav(int verbose, int instance,
+			int	npoint,
+			double	*time_d,
+			double	*navlon,
+			double	*navlat,
+			double	*navz,
+			double	*navportlon,
+			double	*navportlat,
+			double	*navstbdlon,
+			double	*navstbdlat,
+			int	*cdp,
+			int	*shot,
+			int	navcolor,
+			int	navsize,
+			mb_path	navname,
+			int	navswathbounds,
+			int	navshot,
+			int	navcdp,
+			int *error);
 int mbview_enableviewsites(int verbose, int instance,
 			int *error);
 int mbview_enableeditsites(int verbose, int instance,
@@ -511,6 +612,8 @@ int mbview_enableeditsites(int verbose, int instance,
 int mbview_enableviewroutes(int verbose, int instance,
 			int *error);
 int mbview_enableeditroutes(int verbose, int instance,
+			int *error);
+int mbview_enableviewnavs(int verbose, int instance,
 			int *error);
 
 int mbview_open(int verbose, int instance, int *error);

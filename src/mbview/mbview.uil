@@ -38,6 +38,7 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
+!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -84,6 +85,18 @@ procedure do_mbview_aboutpopdown();
 procedure do_mbview_route();
 procedure do_mbview_site();
 procedure do_mbview_nav();
+procedure do_mbview_shadeparmspopup();
+procedure do_mbview_3dparmspopup();
+procedure do_mbview_2dparmspopup();
+procedure do_mbview_shadeparmsapply();
+procedure do_mbview_shadeparmspopdown();
+procedure do_mbview_3dparmsapply();
+procedure do_mbview_3dparmspopdown();
+procedure do_mbview_2dparmsapply();
+procedure do_mbview_2dparmspopdown();
+procedure do_mbview_sitelistpopup();
+procedure do_mbview_sitelistpopdown();
+procedure do_mbview_sitelistapply();
 
 list BaseStyle : arguments {
 };
@@ -114,7 +127,6 @@ object mbview_mbgrdviz : XmBulletinBoardDialog widget {
 !(BX) BxNclass = "MB3DView";
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
-        XmNborderWidth = 0;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 8;
         XmNy = 32;
@@ -134,6 +146,10 @@ object mbview_mbgrdviz : XmBulletinBoardDialog widget {
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_resolution;
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_message;
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_about;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_shadeparms;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_3dparms;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_2dparms;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_sitelist;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -226,6 +242,1425 @@ object mainWindow_mbgrdviz : XmMainWindow widget {
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmMainWindow mainWindow_mbgrdviz;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
+
+object mB3DView_mbview_pushButton_sitelist_apply : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Apply");
+        XmNx = 130;
+        XmNy = 250;
+        XmNwidth = 100;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_sitelistapply();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_pushButton_sitelist_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNx = 270;
+        XmNy = 250;
+        XmNwidth = 100;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_sitelistpopdown();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_list_sitelist : XmList widget {
+    arguments {
+        arguments Style_use;
+        XmNwidth = 480;
+        XmNheight = 210;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_scrolledWindow_sitelist : XmScrolledWindow widget {
+    arguments {
+        arguments Style_use;
+        XmNscrollingPolicy = XmAPPLICATION_DEFINED;
+        XmNx = 10;
+        XmNy = 30;
+        XmNwidth = 480;
+        XmNheight = 210;
+    };
+    controls {
+         managed XmList mB3DView_mbview_list_sitelist;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_sitelist : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Current Sites:");
+        XmNx = 10;
+        XmNy = 0;
+        XmNwidth = 130;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_bulletinBoard_sitelist : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("MBview Site List");
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 159;
+        XmNy = 298;
+        XmNwidth = 506;
+        XmNheight = 311;
+    };
+    controls {
+         managed XmLabel mB3DView_mbview_label_sitelist;
+         managed XmScrolledWindow mB3DView_mbview_scrolledWindow_sitelist;
+         managed XmPushButton mB3DView_mbview_pushButton_sitelist_dismiss;
+         managed XmPushButton mB3DView_mbview_pushButton_sitelist_apply;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object mB3DView_mbview_dialogShell_sitelist : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNx = 159;
+!(BX)        XmNy = 298;
+!(BX)        XmNwidth = 506;
+!(BX)        XmNheight = 311;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmBulletinBoardDialog mB3DView_mbview_bulletinBoard_sitelist;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
+
+object mB3DView_mbview_pushButton_view_2d_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNx = 100;
+        XmNy = 150;
+        XmNwidth = 70;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_2dparmspopdown();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_pushButton_view_2d_apply : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Apply");
+        XmNx = 20;
+        XmNy = 150;
+        XmNwidth = 70;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_2dparmsapply();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_2d_offset : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("View Offset:");
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 90;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_view_2doffsetx : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("X:");
+        XmNx = 20;
+        XmNy = 40;
+        XmNwidth = 50;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_view_2doffsetx : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 70;
+        XmNy = 40;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_separator14 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 130;
+        XmNwidth = 170;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_label_view_2doffsety : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Y:");
+        XmNx = 20;
+        XmNy = 70;
+        XmNwidth = 50;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_view_2doffsety : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 70;
+        XmNy = 70;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_view_2dzoom : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Zoom:");
+        XmNx = 10;
+        XmNy = 100;
+        XmNwidth = 60;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_view_2dzoom : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 70;
+        XmNy = 100;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_bulletinBoard_2dparms : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("MBview 2D Parameters");
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 175;
+        XmNy = 528;
+        XmNwidth = 187;
+        XmNheight = 215;
+    };
+    controls {
+         managed XmTextField mB3DView_mbview_textField_view_2dzoom;
+         managed XmLabel mB3DView_mbview_label_view_2dzoom;
+         managed XmTextField mB3DView_mbview_textField_view_2doffsety;
+         managed XmLabel mB3DView_mbview_label_view_2doffsety;
+         managed XmSeparator mB3DView_mbview_separator14;
+         managed XmTextField mB3DView_mbview_textField_view_2doffsetx;
+         managed XmLabel mB3DView_mbview_label_view_2doffsetx;
+         managed XmLabel mB3DView_mbview_label_2d_offset;
+         managed XmPushButton mB3DView_mbview_pushButton_view_2d_apply;
+         managed XmPushButton mB3DView_mbview_pushButton_view_2d_dismiss;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object mB3DView_mbview_dialogShell_2dparms : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNx = 175;
+!(BX)        XmNy = 528;
+!(BX)        XmNwidth = 187;
+!(BX)        XmNheight = 215;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmBulletinBoardDialog mB3DView_mbview_bulletinBoard_2dparms;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
+
+object mB3DView_mbview_pushButton_view_3d_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNx = 160;
+        XmNy = 420;
+        XmNwidth = 100;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_3dparmspopdown();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_exageration : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 290;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_exager : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Vertical Exageration:");
+        XmNx = 10;
+        XmNy = 290;
+        XmNwidth = 150;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_pushButton_view_3d_apply : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Apply");
+        XmNx = 20;
+        XmNy = 420;
+        XmNwidth = 100;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_3dparmsapply();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_separator9 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 130;
+        XmNwidth = 260;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_label_model : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Model Orientation & Zoom:");
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 200;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_model_azimuth : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Azimuth (degrees):");
+        XmNx = 20;
+        XmNy = 40;
+        XmNwidth = 140;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_model_elevation : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Elevation (degrees):");
+        XmNx = 10;
+        XmNy = 70;
+        XmNwidth = 150;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_model_azimuth : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 40;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_model_elevation : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 70;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_view : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("View Orientation & Zoom:");
+        XmNx = 10;
+        XmNy = 150;
+        XmNwidth = 200;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_view_azimuth : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Azimuth (degrees):");
+        XmNx = 10;
+        XmNy = 180;
+        XmNwidth = 150;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_view_azimuth : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 180;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_separator4 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 270;
+        XmNwidth = 260;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_label_view_elevation : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Elevation (degrees):");
+        XmNx = 10;
+        XmNy = 210;
+        XmNwidth = 150;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_view_elevation : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 210;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_view_offset : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Pan:");
+        XmNx = 10;
+        XmNy = 340;
+        XmNwidth = 90;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_view_3doffsetx : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("X:");
+        XmNx = 100;
+        XmNy = 340;
+        XmNwidth = 60;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_view_3doffsetx : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 340;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_separator20 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 400;
+        XmNwidth = 260;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_label_view_3doffsety : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Y:");
+        XmNx = 60;
+        XmNy = 370;
+        XmNwidth = 100;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_view_3doffsety : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 370;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_view_3dzoom : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Zoom:");
+        XmNx = 60;
+        XmNy = 240;
+        XmNwidth = 100;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_view_3dzoom : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 240;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_separator11 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 320;
+        XmNwidth = 260;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_label_model_3dzoom : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Zoom:");
+        XmNx = 60;
+        XmNy = 100;
+        XmNwidth = 100;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_model_3dzoom : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 100;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_bulletinBoard_3dparms : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("MBview 3D Parameters");
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 43;
+        XmNy = 454;
+        XmNwidth = 281;
+        XmNheight = 478;
+    };
+    controls {
+         managed XmTextField mB3DView_mbview_textField_model_3dzoom;
+         managed XmLabel mB3DView_mbview_label_model_3dzoom;
+         managed XmSeparator mB3DView_mbview_separator11;
+         managed XmTextField mB3DView_mbview_textField_view_3dzoom;
+         managed XmLabel mB3DView_mbview_label_view_3dzoom;
+         managed XmTextField mB3DView_mbview_textField_view_3doffsety;
+         managed XmLabel mB3DView_mbview_label_view_3doffsety;
+         managed XmSeparator mB3DView_mbview_separator20;
+         managed XmTextField mB3DView_mbview_textField_view_3doffsetx;
+         managed XmLabel mB3DView_mbview_label_view_3doffsetx;
+         managed XmLabel mB3DView_mbview_label_view_offset;
+         managed XmTextField mB3DView_mbview_textField_view_elevation;
+         managed XmLabel mB3DView_mbview_label_view_elevation;
+         managed XmSeparator mB3DView_mbview_separator4;
+         managed XmTextField mB3DView_mbview_textField_view_azimuth;
+         managed XmLabel mB3DView_mbview_label_view_azimuth;
+         managed XmLabel mB3DView_mbview_label_view;
+         managed XmTextField mB3DView_mbview_textField_model_elevation;
+         managed XmTextField mB3DView_mbview_textField_model_azimuth;
+         managed XmLabel mB3DView_mbview_label_model_elevation;
+         managed XmLabel mB3DView_mbview_label_model_azimuth;
+         managed XmLabel mB3DView_mbview_label_model;
+         managed XmSeparator mB3DView_mbview_separator9;
+         managed XmPushButton mB3DView_mbview_pushButton_view_3d_apply;
+         managed XmLabel mB3DView_mbview_label_exager;
+         managed XmTextField mB3DView_mbview_textField_exageration;
+         managed XmPushButton mB3DView_mbview_pushButton_view_3d_dismiss;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object mB3DView_mbview_dialogShell_3dparms : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNx = 43;
+!(BX)        XmNy = 454;
+!(BX)        XmNwidth = 281;
+!(BX)        XmNheight = 478;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmBulletinBoardDialog mB3DView_mbview_bulletinBoard_3dparms;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
+
+object mB3DView_mbview_pushButton_shadeparms_dismiss2 : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNx = 160;
+        XmNy = 380;
+        XmNwidth = 100;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_shadeparmspopdown();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_illum_elev : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 100;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_illum_elev : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Elevation (degrees):");
+        XmNx = 10;
+        XmNy = 100;
+        XmNwidth = 150;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_pushButton_shadeparms_apply : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Apply");
+        XmNx = 20;
+        XmNy = 380;
+        XmNwidth = 100;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_shadeparmsapply();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_separator16 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 140;
+        XmNwidth = 260;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_label_illumination : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Shading by Illumination:");
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 180;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_illum_amp : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Amplitude:");
+        XmNx = 10;
+        XmNy = 40;
+        XmNwidth = 150;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_illum_azi : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Azimuth (degrees):");
+        XmNx = 20;
+        XmNy = 70;
+        XmNwidth = 140;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_illum_amp : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 40;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_illum_azi : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 70;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_slopeshade : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Shading by Slope:");
+        XmNx = 10;
+        XmNy = 160;
+        XmNwidth = 200;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_slope_amp : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Amplitude:");
+        XmNx = 50;
+        XmNy = 190;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_slope_amp : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 190;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_separator15 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 220;
+        XmNwidth = 260;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_label_overlay_amp : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Amplitude:");
+        XmNx = 60;
+        XmNy = 270;
+        XmNwidth = 100;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_overlay_amp : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 270;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_toggleButton_overlay_shade_ctoh : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Cold-to-Hot");
+        XmNwidth = 117;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_toggleButton_overlay_shade_htoc : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Hot-to-Cold");
+        XmNwidth = 117;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_radioBox_overlay_shade : XmRadioBox widget {
+    arguments {
+        arguments Style_use;
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 30;
+        XmNy = 330;
+        XmNwidth = 243;
+        XmNheight = 34;
+    };
+    controls {
+         managed XmToggleButton mB3DView_mbview_toggleButton_overlay_shade_ctoh;
+         managed XmToggleButton mB3DView_mbview_toggleButton_overlay_shade_htoc;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_overlayshade : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Shading by Overlay:");
+        XmNx = 10;
+        XmNy = 240;
+        XmNwidth = 200;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_label_overlay_center : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Center:");
+        XmNx = 60;
+        XmNy = 300;
+        XmNwidth = 100;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_textField_overlay_center : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 160;
+        XmNy = 300;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_separator13 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 360;
+        XmNwidth = 260;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_bulletinBoard_shadeparms : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("MBview Shading Parameters");
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 71;
+        XmNy = 525;
+        XmNwidth = 278;
+        XmNheight = 439;
+    };
+    controls {
+         managed XmSeparator mB3DView_mbview_separator13;
+         managed XmTextField mB3DView_mbview_textField_overlay_center;
+         managed XmLabel mB3DView_mbview_label_overlay_center;
+         managed XmLabel mB3DView_mbview_label_overlayshade;
+         managed XmRadioBox mB3DView_mbview_radioBox_overlay_shade;
+         managed XmTextField mB3DView_mbview_textField_overlay_amp;
+         managed XmLabel mB3DView_mbview_label_overlay_amp;
+         managed XmSeparator mB3DView_mbview_separator15;
+         managed XmTextField mB3DView_mbview_textField_slope_amp;
+         managed XmLabel mB3DView_mbview_label_slope_amp;
+         managed XmLabel mB3DView_mbview_label_slopeshade;
+         managed XmTextField mB3DView_mbview_textField_illum_azi;
+         managed XmTextField mB3DView_mbview_textField_illum_amp;
+         managed XmLabel mB3DView_mbview_label_illum_azi;
+         managed XmLabel mB3DView_mbview_label_illum_amp;
+         managed XmLabel mB3DView_mbview_label_illumination;
+         managed XmSeparator mB3DView_mbview_separator16;
+         managed XmPushButton mB3DView_mbview_pushButton_shadeparms_apply;
+         managed XmLabel mB3DView_mbview_label_illum_elev;
+         managed XmTextField mB3DView_mbview_textField_illum_elev;
+         managed XmPushButton mB3DView_mbview_pushButton_shadeparms_dismiss2;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object mB3DView_mbview_dialogShell_shadeparms : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNx = 71;
+!(BX)        XmNy = 525;
+!(BX)        XmNwidth = 278;
+!(BX)        XmNheight = 439;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmBulletinBoardDialog mB3DView_mbview_bulletinBoard_shadeparms;
 !(BX)    };
 !(BX)    callbacks {
 !(BX)        callbacks Style_useReasons;
@@ -455,9 +1890,10 @@ object mB3DView_mbview_label_about_version : XmLabel widget {
 object mB3DView_mbview_bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
+        XmNdialogTitle = compound_string("About MBview...");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 170;
-        XmNy = 242;
+        XmNx = -60;
+        XmNy = 605;
         XmNwidth = 463;
         XmNheight = 531;
     };
@@ -483,8 +1919,8 @@ object mB3DView_mbview_bulletinBoard_about : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_about : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 170;
-!(BX)        XmNy = 242;
+!(BX)        XmNx = -60;
+!(BX)        XmNy = 605;
 !(BX)        XmNwidth = 463;
 !(BX)        XmNheight = 531;
 !(BX)    };
@@ -543,10 +1979,10 @@ object mB3DView_mbview_bulletinBoard_message : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
-        XmNdialogTitle = compound_string("MB3Dview: Please wait...");
+        XmNdialogTitle = compound_string("MBview: Please wait...");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 191;
-        XmNy = 460;
+        XmNx = -55;
+        XmNy = 651;
         XmNwidth = 421;
         XmNheight = 95;
     };
@@ -565,8 +2001,8 @@ object mB3DView_mbview_bulletinBoard_message : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_message : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 191;
-!(BX)        XmNy = 460;
+!(BX)        XmNx = -55;
+!(BX)        XmNy = 651;
 !(BX)        XmNwidth = 421;
 !(BX)        XmNheight = 95;
 !(BX)    };
@@ -675,10 +2111,11 @@ object mB3DView_mbview_label_lowresolution : XmLabel widget {
 object mB3DView_mbview_bulletinBoard_resolution : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
+        XmNdialogTitle = compound_string("MBview Rendering Resolution");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 246;
-        XmNy = 386;
+        XmNx = 88;
+        XmNy = 574;
         XmNwidth = 311;
         XmNheight = 242;
     };
@@ -700,8 +2137,8 @@ object mB3DView_mbview_bulletinBoard_resolution : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MB3DView Rendering Resolution";
-!(BX)        XmNx = 246;
-!(BX)        XmNy = 386;
+!(BX)        XmNx = 88;
+!(BX)        XmNy = 574;
 !(BX)        XmNwidth = 311;
 !(BX)        XmNheight = 242;
 !(BX)    };
@@ -721,7 +2158,7 @@ object mB3DView_mbview_pushButton_colorbounds_dismiss : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Dismiss");
         XmNx = 240;
-        XmNy = 470;
+        XmNy = 380;
         XmNwidth = 110;
         XmNheight = 50;
     };
@@ -779,7 +2216,7 @@ object mB3DView_mbview_pushButton_colorbounds_apply : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Apply");
         XmNx = 110;
-        XmNy = 470;
+        XmNy = 380;
         XmNwidth = 100;
         XmNheight = 50;
     };
@@ -1273,7 +2710,7 @@ object mB3DView_mbview_radioBox_overlaymode : XmRadioBox widget {
 !(BX)    };
 };
 
-object mB3DView_mbview_separator4 : XmSeparator widget {
+object mB3DView_mbview_separator5 : XmSeparator widget {
     arguments {
         XmNx = 10;
         XmNy = 360;
@@ -1286,93 +2723,19 @@ object mB3DView_mbview_separator4 : XmSeparator widget {
     };
 };
 
-object mB3DView_mbview_label_overlayshadebounds : XmLabel widget {
-    arguments {
-        arguments Style_use;
-        XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Overlay Color Bounds:");
-        XmNx = 10;
-        XmNy = 380;
-        XmNwidth = 200;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object mB3DView_mbview_label_overlaycenter : XmLabel widget {
-    arguments {
-        arguments Style_use;
-        XmNalignment = XmALIGNMENT_END;
-        XmNlabelString = compound_string("Center:");
-        XmNx = 30;
-        XmNy = 410;
-        XmNwidth = 60;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object mB3DView_mbview_textField_overlaycenter : XmTextField widget {
-    arguments {
-        arguments Style_use;
-        XmNx = 110;
-        XmNy = 410;
-        XmNwidth = 110;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object mB3DView_mbview_separator5 : XmSeparator widget {
-    arguments {
-        XmNx = 10;
-        XmNy = 440;
-        XmNwidth = 410;
-        XmNheight = 20;
-    };
-    controls {
-    };
-    callbacks {
-    };
-};
-
 object mB3DView_mbview_bulletinBoard_colorbounds : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
+        XmNdialogTitle = compound_string("MBview Colors and Contours");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 181;
-        XmNy = 241;
+        XmNx = -104;
+        XmNy = 602;
         XmNwidth = 440;
-        XmNheight = 533;
+        XmNheight = 445;
     };
     controls {
          managed XmSeparator mB3DView_mbview_separator5;
-         managed XmTextField mB3DView_mbview_textField_overlaycenter;
-         managed XmLabel mB3DView_mbview_label_overlaycenter;
-         managed XmLabel mB3DView_mbview_label_overlayshadebounds;
-         managed XmSeparator mB3DView_mbview_separator4;
          managed XmRadioBox mB3DView_mbview_radioBox_overlaymode;
          managed XmTextField mB3DView_mbview_textField_overlaymax;
          managed XmLabel mB3DView_mbview_label_overlaymax;
@@ -1410,10 +2773,10 @@ object mB3DView_mbview_bulletinBoard_colorbounds : XmBulletinBoardDialog widget 
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MB3DView Colors & Contours";
-!(BX)        XmNx = 181;
-!(BX)        XmNy = 241;
+!(BX)        XmNx = -104;
+!(BX)        XmNy = 602;
 !(BX)        XmNwidth = 440;
-!(BX)        XmNheight = 533;
+!(BX)        XmNheight = 445;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog mB3DView_mbview_bulletinBoard_colorbounds;
@@ -1920,6 +3283,54 @@ object mB3DView_mbview_pushButton_colorbounds : XmPushButton widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_pushButton_2dview : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("2D Controls");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_2dparmspopup();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_pushButton_3dview : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("3D Controls");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_3dparmspopup();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_pushButton_shadeparms : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Shading");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_shadeparmspopup();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mB3DView_mbview_pushButton_resolution : XmPushButton widget {
     arguments {
         arguments Style_use;
@@ -1936,17 +3347,37 @@ object mB3DView_mbview_pushButton_resolution : XmPushButton widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_pushButton_sitelist : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Site List");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_sitelistpopup();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mbview_pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 27;
+        XmNy = 110;
         XmNwidth = 144;
-        XmNheight = 52;
+        XmNheight = 148;
     };
     controls {
          managed XmPushButton mB3DView_mbview_pushButton_colorbounds;
+         managed XmPushButton mB3DView_mbview_pushButton_2dview;
+         managed XmPushButton mB3DView_mbview_pushButton_3dview;
+         managed XmPushButton mB3DView_mbview_pushButton_shadeparms;
          managed XmPushButton mB3DView_mbview_pushButton_resolution;
+         managed XmPushButton mB3DView_mbview_pushButton_sitelist;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -2174,8 +3605,8 @@ object mbview_pushButton_help_about : XmPushButton widget {
 object mB3DView_mbview_pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 24;
-        XmNy = 144;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 123;
         XmNheight = 28;
     };
@@ -2572,7 +4003,7 @@ object mbview_bulletinBoard_mbview : XmBulletinBoard widget {
 !(BX) BxNderived = "MB3DViewDerived";
 !(BX) BxNfilebase = "MB3DViewDerived";
 !(BX) BxNclassFilebase = "MB3DView";
-!(BX) BxNclassGeometry = "785x949+9+33";
+!(BX) BxNclassGeometry = "801x814+12+47";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
@@ -2580,10 +4011,10 @@ object mbview_bulletinBoard_mbview : XmBulletinBoard widget {
 !(BX) BxNpaletteGeom = "+0+0";
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 9;
-        XmNy = 33;
-        XmNwidth = 785;
-        XmNheight = 949;
+        XmNx = 12;
+        XmNy = 47;
+        XmNwidth = 801;
+        XmNheight = 814;
     };
     controls {
          managed XmPushButton mB3DView_mbview_pushButton_reset;
@@ -2598,6 +4029,10 @@ object mbview_bulletinBoard_mbview : XmBulletinBoard widget {
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_resolution;
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_message;
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_about;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_shadeparms;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_3dparms;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_2dparms;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_sitelist;
     };
     callbacks {
         callbacks Style_useReasons;
