@@ -1,4 +1,4 @@
-.TH mbio l "26 March 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbio l "11 April 2003" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
@@ -404,6 +404,13 @@ The following swath mapping sonar data formats are supported in this version of
     Attributes:           L-DEO MR1, bathymetry and sidescan, 
                           variable beams and pixels,  
                           xdr binary, L-DEO.
+
+    MBIO Data Format ID:  64
+    Format name:          MBF_MR1PRVR2
+    Informal Description: SOEST MR1 post processed format
+    Attributes:           SOEST MR1, bathymetry and sidescan,
+                          variable beams and pixels, xdr binary, 
+                          SOEST, University of Hawaii.
     
     MBIO Data Format ID:  71
     Format name:          MBF_MBLDEOIH

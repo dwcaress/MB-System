@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.13 2003-03-10 20:02:29 caress Exp $
+#	$Id: Makefile.template,v 5.14 2003-04-16 16:47:41 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.13  2003/03/10 20:02:29  caress
+# Added mr1pr library.
+#
 # Revision 5.12  2002/09/19 22:19:00  caress
 # Release 5.0.beta23
 #
@@ -202,7 +205,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_coor_scale.o mb_check_info.o \
 		mb_time.o mb_angle.o mb_proj.o \
 		mb_get_value.o mb_defaults.o \
-		mb_process.o \
+		mb_process.o mb_esf.o \
 		mb_get.o mb_get_all.o mb_read.o \
 		mb_put_all.o mb_put_comment.o \
 		mb_buffer.o \
@@ -261,7 +264,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_coor_scale.o mb_check_info.o\
 		mb_time.o mb_angle.o mb_proj.o \
 		mb_get_value.o mb_defaults.o \
-		mb_process.o \
+		mb_process.o mb_esf.o \
 		mb_get.o mb_get_all.o mb_read.o \
 		mb_put_all.o mb_put_comment.o \
 		mb_buffer.o \
@@ -350,6 +353,8 @@ mb_defaults.o:	mb_defaults.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_defaults.c
 mb_process.o:	mb_process.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_io.h $(INCDIR)/mb_process.h
 	$(CC) -c $(CFLAGS) mb_process.c
+mb_esf.o:	mb_esf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_io.h $(INCDIR)/mb_process.h
+	$(CC) -c $(CFLAGS) mb_esf.c
 mb_get.o:	mb_get.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_get.c
 mb_get_all.o:	mb_get_all.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.4 2002-11-12 07:25:23 caress Exp $
+ *    $Id: mb_mem.c,v 5.5 2003-04-16 16:47:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/11/12 07:25:23  caress
+ * Added mb_memory_clear() call.
+ *
  * Revision 5.3  2002/10/15 18:34:58  caress
  * Release 5.0.beta25
  *
@@ -105,12 +108,12 @@
 #define	MB_MEMORY_HEAP_MAX	10000
 static int	n_mb_alloc = 0;
 static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
-static int	mb_alloc_size[MB_MEMORY_HEAP_MAX];
+static size_t	mb_alloc_size[MB_MEMORY_HEAP_MAX];
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.4 2002-11-12 07:25:23 caress Exp $";
+static char rcs_id[]="$Id: mb_mem.c,v 5.5 2003-04-16 16:47:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
-int mb_malloc(int verbose, int size, void **ptr, int *error)
+int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 {
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
@@ -193,7 +196,7 @@ int mb_malloc(int verbose, int size, void **ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_realloc(int verbose, int size, void **ptr, int *error)
+int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 {
 	char	*function_name = "mb_realloc";
 	int	status = MB_SUCCESS;

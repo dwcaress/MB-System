@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.15 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_process.h,v 5.16 2003-04-16 16:47:41 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -406,6 +406,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.14  2002/09/07 04:48:34  caress
  * Added slope mode option to mb_process.
  *
@@ -684,6 +687,19 @@ struct mb_process_struct
 	int	mbp_kluge003;
 	int	mbp_kluge004;
 	int	mbp_kluge005;
+	};
+	
+/* edit save file definitions */
+#define MB_ESF_MAXTIMEDIFF 0.0011
+struct mb_esf_struct 
+	{
+	char	esffile[MB_PATH_MAXLINE];
+	int	nedit;
+	double	*edit_time_d;
+	int	*edit_beam;
+	int	*edit_action;
+	int	*edit_use;
+	FILE	*esffp;
 	};
 
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -986,3 +1002,23 @@ int mb_pr_get_kluges(int verbose, char *file,
 			int	*mbp_kluge004,
 			int	*mbp_kluge005,
 			int *error);
+int mb_esf_check(int verbose, char *swathfile, char *esffile, 
+		int *found, int *error);
+int mb_esf_load(int verbose, char *swathfile,
+		int load, int output,
+		char *esffile, 
+		struct mb_esf_struct *esf,
+		int *error);
+int mb_esf_open(int verbose, char *esffile, 
+		int load, int output,
+		struct mb_esf_struct *esf,
+		int *error);
+int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
+		double time_d, int nbath, char *beamflag, 
+		int *error);
+int mb_esf_save(int verbose, struct mb_esf_struct *esf, 
+		double time_d, int beam, int action, int *error);
+int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
+
+
+
