@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.12 2002-02-22 09:03:43 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.13 2002-04-02 00:33:50 caress Exp $
  *
  *    Copyright (c) 2000, 2001 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/02/22 09:03:43  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.11  2001/12/30 20:32:12  caress
  * Fixed array overflows in handling XSE data.
  *
@@ -93,7 +96,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.12 2002-02-22 09:03:43 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.13 2002-04-02 00:33:50 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -477,6 +480,7 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			dsign = -1.0;
 		    else
 			dsign = 1.0;
+
 /*
 fprintf(stderr, "itrack: %d %d   freq:%f\n", 
 ixtrackmin, ixtrackmax, store->mul_frequency);
@@ -974,7 +978,7 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			j = store->mul_num_beams - store->beams[i].beam;
 			*nbeams = MAX(store->beams[i].beam, *nbeams);
 			ttimes[j] = store->beams[i].tt;
-			beta = 90.0 + RTD * store->beams[i].angle;
+			beta = 90.0 - dsign * RTD * store->beams[i].angle;
 			alpha = RTD * store->beams[i].pitch;
 			mb_rollpitch_to_takeoff(verbose, 
 			    alpha, beta, &angles[j], 
