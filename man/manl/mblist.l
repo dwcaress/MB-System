@@ -1,9 +1,9 @@
-.TH mblist l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mblist l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmblist\fP - List data in multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmblist\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIdumpmode 

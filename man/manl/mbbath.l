@@ -1,9 +1,9 @@
-.TH mbbath l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbbath l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbbath\fP - Generates bathymetry from travel times in multibeam data.
+\fBmbbath\fP - Generates bathymetry from travel times in swath sonar data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbbath\fP [\fB-A\fIangle\fP \fB-B\fIroll_bias\fP \fB-D\fIdraught\fP 
@@ -13,7 +13,7 @@ Version 4.4
 
 .SH DESCRIPTION
 \fBmbbath\fP is an utility for calculating bathymetry from travel times
-in multibeam data.  The depths and crosstrack distances are calculated 
+in swath sonar data.  The depths and crosstrack distances are calculated 
 from the travel times by raytracing through a water sound velocity profile 
 (SVP) specified by the user.  This program only works with data formats
 that store travel time data for each beam.
@@ -54,7 +54,7 @@ Palisades, NY 10964
 .TP
 .B \fB-A\fIangle\fP
 Sets the angle interval of adjacent beams.  The default value
-for the appropriate multibeam system is internal to MB-System,
+for the appropriate swath sonar system is internal to MB-System,
 but could be different on different installations of the
 same sonar.
 .TP
@@ -67,7 +67,7 @@ port positive.
 Default: \fIroll_bias\fP = 0.0
 .TP
 .B \fB-D\fIdraught\fP
-Sets the \fIdraught\fP in meters of the ship used to collect the multibeam data.
+Sets the \fIdraught\fP in meters of the ship used to collect the swath sonar data.
 This value will be added to the depth values determined by raytracing.
 Note that if the data stream includes a \fIdraught\fP value, it will
 automatically be included in the bathymetry calculations. 
@@ -76,7 +76,7 @@ not included in the data stream or is in error.
 Default: \fIdraught\fP = 0.0.
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This program only works with data formats which store travel time
 data for each beam.

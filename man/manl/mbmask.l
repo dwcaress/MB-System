@@ -1,10 +1,10 @@
-.TH mbmask l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbmask l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbmask\fP, \fBmbgetmask\fP - Extract multibeam data flags from one
 file and apply to another.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbgetmask\fP [\fB-F\fPformat \fB-B\fPyr/mo/da/hr/mn/sc \fB-E\fPyr/mo/da/hr/mn/sc \fB-S\fPspeed \fB-I\fPinfile \fB-V -H\fP]

@@ -1,10 +1,10 @@
-.TH mbgrid l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbgrid l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
-from multibeam data files.
+from swath sonar data files.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
@@ -17,8 +17,8 @@ Version 4.4
 
 .SH DESCRIPTION
 \fBmbgrid\fP is an utility used to grid bathymetry, amplitude, or sidescan 
-data contained in a set of multibeam data files. This program uses 
-one of four algorithms to grid regions covered by multibeam 
+data contained in a set of swath sonar data files. This program uses 
+one of four algorithms to grid regions covered by swath sonar 
 swaths and then can fill in gaps between the swaths (to the degree 
 specified by the user) using a thin plate spline interpolation.
 The gridding algorithms include gaussian weighted average,
@@ -63,7 +63,7 @@ when adjacent grids are created which should match along the edges.
 The data input bounds are set to a region three times as large as
 the working grid in both longitude and latitude.  The program reads all
 pings which lie within the data input bounds, and accepts all beam
-values with locations within the working grid. In addition to multibeam
+values with locations within the working grid. In addition to swath sonar
 data in formats supported by \fBMB-System\fP (see the \fBMB-System\fP manual
 page), \fBmbgrid\fP can also read data from ASCII text files in
 longitude, latitude, value triples. This allows one to incorporate
@@ -238,14 +238,14 @@ This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
 .B \fB-I\fIdatalist\fP
-Sets the filename of the file containing a list of the input multibeam
+Sets the filename of the file containing a list of the input swath sonar
 data files and their formats.  In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
  	datafile1 1
  	datafile2 8
 .br
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.  A format identifier of 0 indicates
 that the file contains lines of (lon, lat, depth) triples which can be read
@@ -380,8 +380,8 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 4.13 1996-09-05 13:07:47 caress Exp $
- MB-system Version 4.4
+ Version $Id: mbgrid.l,v 4.14 1997-04-21 17:19:14 caress Exp $
+ MB-system Version 4.5
  
  MBGRID Parameters:
  List of input files: datalist

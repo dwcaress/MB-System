@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.12 1996-04-22 13:23:05 caress Exp $
+#	$Id: Makefile.template,v 4.13 1997-04-21 17:19:14 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,12 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.13  1997/04/17  15:14:38  caress
+# MB-System 4.5 Beta Release
+#
+# Revision 4.12  1996/04/22  13:23:05  caress
+# Now have DTR and MIN/MAX defines in mb_define.h
+#
 # Revision 4.11  1995/08/07  17:39:23  caress
 # Moved to GMT 3
 #
@@ -92,6 +98,7 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbclean $(MANDIR)/mbclean.l \
 	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.l \
 	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.l \
+	$(BINDIR)/mbmosaic $(MANDIR)/mbmosaic.l \
 	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.l \
 	$(BINDIR)/mbbath $(MANDIR)/mbbath.l \
 	$(BINDIR)/hsbath $(MANDIR)/hsbath.l \
@@ -141,6 +148,10 @@ $(BINDIR)/mbgrid:	mbgrid.o zgrid.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbgrid.o zgrid.o $(LIBDIR)/libmbio.a \
 		$(GMTLIBDIR)/libgmt.a $(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbgrid
+$(BINDIR)/mbmosaic:	mbmosaic.o zgrid.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbmosaic.o zgrid.o $(LIBDIR)/libmbio.a \
+		$(GMTLIBDIR)/libgmt.a $(NETCDFLIBDIR)/libnetcdf.a \
+		$(LFLAGS) -o $(BINDIR)/mbmosaic
 $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LFLAGS) \
 		-o $(BINDIR)/mblevitus
@@ -205,6 +216,8 @@ mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/
 	$(CC) -c $(CFLAGS) mbunclean.c
 mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) $(BIGFLAG) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbgrid.c
+mbmosaic.o:	mbmosaic.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) $(BIGFLAG) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbmosaic.c
 mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h Makefile
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
@@ -270,6 +283,9 @@ $(MANDIR)/mbunclean.l:	mbunclean.manl
 $(MANDIR)/mbgrid.l:	mbgrid.manl
 	cp mbgrid.manl $(MANDIR)/mbgrid.l
 	chmod 664 $(MANDIR)/mbgrid.l
+$(MANDIR)/mbmosaic.l:	mbmosaic.manl
+	cp mbmosaic.manl $(MANDIR)/mbmosaic.l
+	chmod 664 $(MANDIR)/mbmosaic.l
 $(MANDIR)/mblevitus.l:	mblevitus.manl
 	cp mblevitus.manl $(MANDIR)/mblevitus.l
 	chmod 664 $(MANDIR)/mblevitus.l

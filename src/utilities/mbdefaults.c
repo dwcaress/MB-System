@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c,v 4.3 1995-05-12 17:12:32 caress Exp $
+ *	$Id: mbdefaults.c,v 4.4 1997-04-21 17:19:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,14 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
+ * Revision 4.3  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.2  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -58,7 +66,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 4.3 1995-05-12 17:12:32 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 4.4 1997-04-21 17:19:14 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
 	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";

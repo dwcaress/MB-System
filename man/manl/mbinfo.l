@@ -1,9 +1,9 @@
-.TH mbinfo l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbinfo l "16 April 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbinfo\fP - Output some basic statistics of multibeam bathymetry data files.
+\fBmbinfo\fP - Output some basic statistics of swath sonar data files.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 
@@ -11,15 +11,31 @@ Version 4.4
 \fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-W -V -H\fP]
 
 .SH DESCRIPTION
-\fBmbinfo\fP is an utility for reading a multibeam data file 
-and outputting some basic statistics.  The data input may be averaged 
-or windowed in time and space.  If pings are averaged (pings > 2) 
-\fBmbinfo\fP estimates the variance for each of the multibeam beams 
+\fBMBinfo\fP is an utility for reading a swath sonar data file 
+or files and outputting some basic statistics.  The table generated
+shows the filename, the data format id, a brief description of
+the format, data counts, navigation totals, time and navigation
+of the first and last data records, and minimum and maximum
+data values. The data counts include the total number of bathymetry,
+amplitude, and sidescan values read. These totals may be less
+than the maximum possible (number of data records times the
+maximum number of data supported for the particular data format)
+for formats supporting variable numbers of beams or pixels.
+Also reported are the numbers and percentages of good, zero,
+and flagged data values (good values are those which are neither
+zero nor flagged as bad).
+
+The data input may be averaged over several pings
+and/or windowed in time and space.  Comments in the data 
+stream may also be printed out.
+The results are dumped to stdout.
+
+If pings are averaged (\fIpings\fP > 2) 
+\fBmbinfo\fP estimates the variance for each of the bathymetry beams 
 and sidescan pixels
-by reading a set number of pings (>2) and then finding the 
+by reading a set number of pings and then finding the 
 variance of the values for each beam.  The bathymetry values are
-detrended before variances are calculated. The results are 
-dumped to stdout.
+detrended before variances are calculated. 
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -50,10 +66,10 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .B \fB-F\fIformat\fP
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input multibeam
+with the \fB-I\fP option will actually contain a list of input swath sonar
 data files. This program uses the \fBMBIO\fP library 
-and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
@@ -72,9 +88,9 @@ of its operation and then exit immediately.
 .TP
 .B \fB-I\fIfilename\fP
 Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-f\fP option) then the multibeam data contained in \fIinfile\fP 
+\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
-is assumed to be an ascii file containing a list of the input multibeam
+is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read 
 the data in each one of these files.
 In the \fIinfile\fP file, each
@@ -82,8 +98,8 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
@@ -110,7 +126,7 @@ and/or signal as a function of beam and pixel number.
 Default: \fIpings\fP = 1 (no variance calculations).
 .TP
 .B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds within which multibeam 
+Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.6 1996-04-22 13:23:05 caress Exp $
+ *    $Id: mbfilter.c,v 4.7 1997-04-21 17:19:14 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,12 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/17  15:14:38  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.6  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.5  1995/11/17  22:33:12  caress
  * Fixed bug using bath data when no amp present.
  * Bug fix provided by Dan Scheirer.
@@ -94,6 +100,9 @@ struct mbfilter_ping_struct
 	double	navlat;
 	double	speed;
 	double	heading;
+	int	beams_bath;
+	int	beams_amp;
+	int	pixels_ss;
 	double	*bath;
 	double	*bathacrosstrack;
 	double	*bathalongtrack;
@@ -110,7 +119,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.6 1996-04-22 13:23:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.7 1997-04-21 17:19:14 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -197,7 +206,7 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* time, user, host variables */
 	long int	right_now;
-	char	date[25], user[128], host[128];
+	char	date[25], user[128], *user_ptr, host[128];
 
 	/* processing control variables */
 	int	datakind = MBFILTER_SS;
@@ -669,7 +678,12 @@ The default input and output streams are stdin and stdout.\n";
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
 	strncpy(date,ctime(&right_now),24);
-	strcpy(user,getenv("USER"));
+	if ((user_ptr = getenv("USER")) == NULL)
+		user_ptr = getenv("LOGNAME");
+	if (user_ptr != NULL)
+		strcpy(user,user_ptr);
+	else
+		strcpy(user, "unknown");
 	gethostname(host,128);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
@@ -863,12 +877,26 @@ The default input and output streams are stdin and stdout.\n";
 		status = MB_SUCCESS;
 		while (status == MB_SUCCESS)
 			{
+			/* clear the processed data */
+			if (datakind == MBFILTER_BATH)
+			    for (i=0;i<beams_bath;i++)
+				ping[ndata].dataprocess[i] = 0.0;
+			else if (datakind == MBFILTER_AMP)
+			    for (i=0;i<beams_amp;i++)
+				ping[ndata].dataprocess[i] = 0.0;
+			else if (datakind == MBFILTER_SS)
+			    for (i=0;i<pixels_ss;i++)
+				ping[ndata].dataprocess[i] = 0.0;
+			
+			/* get the data */
 			status = mb_buffer_get_next_data(verbose,
 				buff_ptr,imbio_ptr,start,&ping[ndata].id,
 				ping[ndata].time_i,&ping[ndata].time_d,
 				&ping[ndata].navlon,&ping[ndata].navlat,
 				&ping[ndata].speed,&ping[ndata].heading,
-				&beams_bath,&beams_amp,&pixels_ss,
+				&ping[ndata].beams_bath,
+				&ping[ndata].beams_amp,
+				&ping[ndata].pixels_ss,
 				ping[ndata].bath,ping[ndata].amp,
 				ping[ndata].bathacrosstrack,
 				ping[ndata].bathalongtrack,
@@ -931,17 +959,17 @@ The default input and output streams are stdin and stdout.\n";
 		  if (datakind == MBFILTER_BATH)
 		    {
 		    dataptr0 = ping[j].bath;
-		    ndatapts = beams_bath;
+		    ndatapts = ping[j].beams_bath;
 		    }
 		  else if (datakind == MBFILTER_AMP)
 		    {
 		    dataptr0 = ping[j].amp;
-		    ndatapts = beams_amp;
+		    ndatapts = ping[j].beams_amp;
 		    }
 		  else if (datakind == MBFILTER_SS)
 		    {
 		    dataptr0 = ping[j].ss;
-		    ndatapts = pixels_ss;
+		    ndatapts = ping[j].pixels_ss;
 		    }
 
 		  /* loop over each value */
@@ -1009,13 +1037,13 @@ The default input and output streams are stdin and stdout.\n";
 		  for (j=jbeg;j<=jend;j++)
 		    {
 		    if (datakind == MBFILTER_SS)
-		      for (i=0;i<pixels_ss;i++)
+		      for (i=0;i<ping[j].pixels_ss;i++)
 			ping[j].ss[i] = ping[j].dataprocess[i];
 		    else if (datakind == MBFILTER_AMP)
-		      for (i=0;i<beams_amp;i++)
+		      for (i=0;i<ping[j].beams_amp;i++)
 			ping[j].amp[i] = ping[j].dataprocess[i];
 		    else if (datakind == MBFILTER_BATH)
-		      for (i=0;i<beams_bath;i++)
+		      for (i=0;i<ping[j].beams_bath;i++)
 			ping[j].bath[i] = ping[j].dataprocess[i];
 		    }
 		}
@@ -1043,17 +1071,17 @@ The default input and output streams are stdin and stdout.\n";
 		  if (datakind == MBFILTER_BATH)
 		    {
 		    dataptr0 = ping[j].bath;
-		    ndatapts = beams_bath;
+		    ndatapts = ping[j].beams_bath;
 		    }
 		  else if (datakind == MBFILTER_AMP)
 		    {
 		    dataptr0 = ping[j].amp;
-		    ndatapts = beams_amp;
+		    ndatapts = ping[j].beams_amp;
 		    }
 		  else if (datakind == MBFILTER_SS)
 		    {
 		    dataptr0 = ping[j].ss;
-		    ndatapts = pixels_ss;
+		    ndatapts = ping[j].pixels_ss;
 		    }
 
 		  /* loop over each value */
@@ -1124,13 +1152,13 @@ The default input and output streams are stdin and stdout.\n";
 		  for (j=jbeg;j<=jend;j++)
 		    {
 		    if (datakind == MBFILTER_SS)
-		      for (i=0;i<pixels_ss;i++)
+		      for (i=0;i<ping[j].pixels_ss;i++)
 			ping[j].ss[i] = ping[j].dataprocess[i];
 		    else if (datakind == MBFILTER_AMP)
-		      for (i=0;i<beams_amp;i++)
+		      for (i=0;i<ping[j].beams_amp;i++)
 			ping[j].amp[i] = ping[j].dataprocess[i];
 		    else if (datakind == MBFILTER_BATH)
-		      for (i=0;i<beams_bath;i++)
+		      for (i=0;i<ping[j].beams_bath;i++)
 			ping[j].bath[i] = ping[j].dataprocess[i];
 		    }
 		}
@@ -1158,17 +1186,17 @@ The default input and output streams are stdin and stdout.\n";
 		  if (datakind == MBFILTER_BATH)
 		    {
 		    dataptr0 = ping[j].bath;
-		    ndatapts = beams_bath;
+		    ndatapts = ping[j].beams_bath;
 		    }
 		  else if (datakind == MBFILTER_AMP)
 		    {
 		    dataptr0 = ping[j].amp;
-		    ndatapts = beams_amp;
+		    ndatapts = ping[j].beams_amp;
 		    }
 		  else if (datakind == MBFILTER_SS)
 		    {
 		    dataptr0 = ping[j].ss;
-		    ndatapts = pixels_ss;
+		    ndatapts = ping[j].pixels_ss;
 		    }
 
 		  /* loop over each value */
@@ -1230,13 +1258,13 @@ The default input and output streams are stdin and stdout.\n";
 		  for (j=jbeg;j<=jend;j++)
 		    {
 		    if (datakind == MBFILTER_SS)
-		      for (i=0;i<pixels_ss;i++)
+		      for (i=0;i<ping[j].pixels_ss;i++)
 			ping[j].ss[i] = ping[j].dataprocess[i];
 		    else if (datakind == MBFILTER_AMP)
-		      for (i=0;i<beams_amp;i++)
+		      for (i=0;i<ping[j].beams_amp;i++)
 			ping[j].amp[i] = ping[j].dataprocess[i];
 		    else if (datakind == MBFILTER_BATH)
-		      for (i=0;i<beams_bath;i++)
+		      for (i=0;i<ping[j].beams_bath;i++)
 			ping[j].bath[i] = ping[j].dataprocess[i];
 		    }
 		}
@@ -1249,7 +1277,9 @@ The default input and output streams are stdin and stdout.\n";
 				ping[j].time_i,ping[j].time_d,
 				ping[j].navlon,ping[j].navlat,
 				ping[j].speed,ping[j].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[j].beams_bath,
+				ping[j].beams_amp,
+				ping[j].pixels_ss,
 				ping[j].bath,ping[j].amp,
 				ping[j].bathacrosstrack,
 				ping[j].bathalongtrack,
@@ -1269,6 +1299,8 @@ The default input and output streams are stdin and stdout.\n";
 		else if (ndata > 0)
 			{
 			nhold = nbuff - ping[0].id + 1;
+			if (nhold > nbuff / 2)
+				nhold = nbuff / 2;
 			}
 		else
 			nhold = 0;

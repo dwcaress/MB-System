@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.15 1996-09-19 20:22:08 caress Exp $
+ *    $Id: mbmerge.c,v 4.16 1997-04-21 17:19:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,13 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1997/04/17  15:14:38  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.15  1996/09/19  20:22:08  caress
+ * Added capability to merge Simrad data and support for the
+ * Simrad 90 position datagram format.
+ *
  * Revision 4.14  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -103,7 +110,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.15 1996-09-19 20:22:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.16 1997-04-21 17:19:14 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -172,7 +179,7 @@ char **argv;
 
 	/* time, user, host variables */
 	long int	right_now;
-	char	date[25], user[128], host[128];
+	char	date[25], user[128], *user_ptr, host[128];
 
 	/* navigation handling variables */
 	int	nnav;
@@ -769,7 +776,12 @@ char **argv;
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
 	strncpy(date,ctime(&right_now),24);
-	strcpy(user,getenv("USER"));
+	if ((user_ptr = getenv("USER")) == NULL)
+		user_ptr = getenv("LOGNAME");
+	if (user_ptr != NULL)
+		strcpy(user,user_ptr);
+	else
+		strcpy(user, "unknown");
 	gethostname(host,128);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",

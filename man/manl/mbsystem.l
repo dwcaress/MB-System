@@ -1,20 +1,20 @@
-.TH mbsystem l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbsystem l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbsystem\fP - A set of utilities for manipulating and processing multibeam
-bathymetry data.
+\fBmbsystem\fP - A set of utilities for manipulating and 
+processing swath sonar bathymetry, amplitude, and sidescan data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH INTRODUCTION
 The \fBMB-System\fP is a software package consisting of programs which 
-manipulate, process, list, or display multibeam bathymetry, amplitude, 
+manipulate, process, list, or display swath sonar bathymetry, amplitude, 
 and sidescan data which has been developed at the Lamont-Doherty 
 Earth Observatory (L-DEO). The heart of the system is an input/output library 
 called \fBMBIO\fP which allows programs to transparently
-work with any of a number of supported multibeam data formats.  This
+work with any of a number of supported swath sonar data formats.  This
 approach has allowed the creation of "generic" utilities which can
-be applied in a uniform manner to multibeam data from a variety
+be applied in a uniform manner to sonar data from a variety
 of sources.
 
 The development of \fBMBIO\fP and its associated programs began in 1990
@@ -22,16 +22,17 @@ as part of ongoing research at L-DEO involving multibeam bathymetry data.
 Development was accelerated in 1991 as part of the effort to support
 the Atlas Hydrosweep DS multibeam sonar on L-DEO's ship, the R/V
 Maurice Ewing.  The National Science Foundation provided support in
-1993 and 1994 to improve and extend \fBMB-System\fP so as to provide
+1993 to improve and extend \fBMB-System\fP so as to provide
 a standard "generic" set of tools for processing and display of 
-multibeam data that could be used by the U.S. academic community.
+swath sonar data that could be used by the U.S. academic community.
 SeaBeam Instruments and Antarctic Support Associates provided
 additional support in 1994 for the
 development of \fBMB-System\fP, with particular emphasis on capabilities 
 related to the new SeaBeam 2100 series of sonars.
 
-The National Science Foundation has now funded a five year effort
-to maintain and further develop \fBMB-System\fP; this funding
+The National Science Foundation funded a five year effort
+begun in 1995 to maintain and further 
+develop \fBMB-System\fP; this funding
 is being augmented by additional efforts at SeaBeam Instruments
 which relate to SeaBeam products but are nonetheless released
 to public domain distribution.
@@ -42,8 +43,9 @@ on the Motif widget set.  To date, \fBMB-System\fP has been successfully
 installed on Sun workstations running under SunOS4.1 and Solaris, 
 Silicon Graphics (SGI)
 workstations running under IRIX, Hewlett Packard workstations,
-and 486 PC's running under the Lynx 
-operating system.
+486 and Pentium PC's running under the Lynx 
+operating system, PC's running under the public domain
+LINUX operatings system.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -58,7 +60,7 @@ Palisades, NY 10964
 See the individual manual pages for detailed information about 
 specific programs.
 See the manual page for \fBMBIO\fP for information about the 
-i/o library and the multibeam data formats supported by \fBMBIO\fP.
+i/o library and the swath sonar data formats supported by \fBMBIO\fP.
 
 These are the current MB-system programs:
  \fBhsdump\fP:  Lists contents of the various sorts of 
@@ -70,60 +72,61 @@ These are the current MB-system programs:
  		function of the grazing angle with 
  		the seafloor.
  \fBmbbath\fP:  Generates bathymetry from travel times 
- 		in multibeam data. 
+ 		in swath sonar data. 
  \fBmbclean\fP:  Identifies and flags bad beams in 
- 		multibeam bathymetry data. 
+ 		swath sonar bathymetry data. 
  \fBmbcontour\fP:  Generate GMT compatible Postscript 
  		color swath contour plots.
- \fBmbcopy\fP:  Copy multibeam data files. 
+ \fBmbcopy\fP:  Copy swath sonar data files. 
  \fBmbcut\fP:  Removes data from portions of swath
  		as specified by the user. 
  \fBmbdefaults\fP:  Set or list default mbio parameters 
- 		for reading and writing multibeam data 
+ 		for reading and writing swath sonar data 
  \fBmbedit\fP:  Interactive editor used to flag bad 
- 		beams in multibeam bathymetry data. 
+ 		beams in swath sonar bathymetry data. 
  \fBmbfilter\fP:   Apply some simple filter functions 
  		to sidescan, beam amplitude, or 
  		bathymetry data. 
- \fBmbformat\fP:   List information about multibeam 
+ \fBmbformat\fP:   List information about swath sonar 
  		data formats supported by the MBIO library. 
  \fBmbgetmask\fP:  Extract list of flagged or edited 
- 		beams from a multibeam data file.
+ 		beams from a swath sonar data file.
  \fBmbgrid\fP:  Grid bathymetry, amplitude, and sidescan 
- 		data from multibeam data files. 
+ 		data from swath sonar data files. 
  \fBmbhistogram\fP:  Obtain histogram of bathymetry, 
  		amplitude, or sidescan data from
-  		multibeam data files.
+  		swath sonar data files.
  \fBmbinfo\fP:  Output some basic statistics of 
- 		multibeam data files. 
+ 		swath sonar data files. 
  \fBmblevitus\fP:  Create a water velocity profile 
  		which is representative of the mean 
  		annual water column for a specified 
  		1 degree by 1 degree region. 
- \fBmblist\fP:  List data in multibeam data files. 
+ \fBmblist\fP:  List data in swath sonar data files. 
  \fBmbmask\fP:  Apply editing information obtained 
  		from one file with \fBmbgetmask\fP 
  		to another file.
- \fBmbmerge\fP:  Merges multibeam data with new 
+ \fBmbmerge\fP:  Merge swath sonar data with new 
  		navigation. 
+ \fBmbmosaic\fP:  Mosaic sidescan and amplitude data. 
  \fBmbnavedit\fP:  Interactive editor used to fix
  		problems with navigation in
- 		multibeam data files. 
+ 		swath sonar data files. 
  \fBmbps\fP:    Simple perspective views of swath
  		bathymetry in Postscript. 
  \fBmbrollbias\fP:  Evaluate the roll bias of a 
- 		multibeam system using two pieces 
+ 		swath sonar system using two pieces 
  		of coincident bathymetry data 
  		collected with opposing ship headings.
  \fBmbswath\fP:  Generate GMT compatible Postscript 
  		color and color shaded relief swath plots.
- \fBmbtide\fP:  Corrects multibeam bathymetry
+ \fBmbtide\fP:  Corrects swath sonar bathymetry
  		for tide data. 
- \fBmbunclean\fP:  Unflags edited beams in multibeam 
+ \fBmbunclean\fP:  Unflags edited beams in swath sonar 
  		bathymetry data. 
  \fBmbvelocitytool\fP:  Interactive program for 
  		modeling the affect of the water 
- 		velocity profile on multibeam 
+ 		velocity profile on swath sonar 
  		bathymetry calculations.
 
 Macros are programs or shellscripts which make use of programs 
@@ -146,16 +149,16 @@ tasks easily.  These are the current MB-system macros:
  		writes a shellscript which will 
  		generate a GMT 3D perspective view
  		of the data.
- \fBmbm_plot\fP:  Reads a multibeam data file and 
+ \fBmbm_plot\fP:  Reads a swath sonar data file and 
  		writes a shellscript which will 
  		generate a swath and/or contour 
  		plot of the data.
- \fBmbm_rollerror\fP:  Reads a multibeam data file,
+ \fBmbm_rollerror\fP:  Reads a swath sonar data file,
  		calculates the noise in the vertical reference 
  		used by the sonar, and generates a file 
  		containing roll corrections which
  		can be applied to the data.
- \fBmbm_stat\fP:  Runs \fBmbinfo\fP on a multibeam data  
+ \fBmbm_stat\fP:  Runs \fBmbinfo\fP on a swath sonar data  
  		file and extracts beam statistics from 
  		the output of mbinfo.
  \fBmbm_vrefcheck\fP:  Generates a plot of high pass
@@ -163,14 +166,16 @@ tasks easily.  These are the current MB-system macros:
  \fBmbm_xbt\fP:  Processes a Sparton XBT data file 
  		and outputs a sound velocity profile 
  		file which can be used to process 
- 		multibeam data.
+ 		swath sonar data.
 
 .SH PROCESSING SEABEAM 2100 DATA
 
 The following data processing stream is recommended for
 data obtained with SeaBeam 2100 series multibeam sonars. 
 SeaBeam 2112 sonars are currently in use on the R/V Knorr 
-(operated by the Woods Hole Oceanographic Institution 
+(operated by the Woods Hole Oceanographic Institution),
+the R/V Revelle (operated by the Scripps Institution
+of Oceanography), 
 and the R/V Nathaniel B. Palmer (operated by Antarctic
 Support Associates for the NSF), among other vessels.
 
@@ -378,7 +383,7 @@ filtered sidescan:
 
  	ssfilter.cmd
 
-\fBStep 8\fP: Grid the bathymetry and corrected sidescan data.
+\fBStep 8\fP: Grid the bathymetry.
 
 Now use \fBmbgrid\fP to grid the bathymetry. The greatest
 depth in the file is 4502 meters (from the mbinfo output).
@@ -424,11 +429,48 @@ the data density and standard deviation grids:
  	grd_sb2112_example_bath_num.cmd
  	grd_sb2112_example_bath_sd.cmd
 
-Now run \fBmbgrid\fP to grid the bathymetry corrected sidescan
+\fBStep 9\fP: Mosaic the corrected sidescan data.
+
+The program \fBmbmosaic\fP operates in a fashion similar to
+\fBmbgrid\fP, but has special capabilities allowing users
+to prioritize which parts of the swath are used in the
+mosaic that are useful for sidescan data. In particular,
+it is possible to create mosaics which do not use the
+nadir region of the swath except where no other data is
+available, or to create mosaics of sidescan data with
+particular look azimuths. The sidescan data has a higher
+resolution than the bathymetry so a smaller grid size
+can be appropriate. However, we wish to overlay the 
+sidescan on the bathymetry, so we use the same grid
+cell spacing of 150 m.
+
+In order to give the nadir region a lower priority than
+the outer parts of the sidescan swath, create a file
+of data priorities (priorities range from 0 to 1) as
+a function of apparent grazing angle (negative angles
+are on the port side of the swath, zero is at nadir,
+and positive angles are on the starboard side of the
+swath):
+
+ 	-60.0 0.2
+ 	-45.0 1.0
+ 	-15.0 0.8
+ 	-14.9 0.1
+ 	14.9 0.1
+ 	15.0 0.8
+ 	45.0 1.0
+ 	60.0 0.2
+
+Here the nadir region has been set to a low priority and
+the highest priority has been given to data from an
+apparent grazing angle of 45 degrees.
+
+Now run \fBmbmosaic\fP to mosaic the bathymetry corrected sidescan
 data (-A4):
 
- 	mbgrid -Idatalist_grid -E150/150/m \\
+ 	mbmosaic -Idatalist_grid -E150/150/m \\
  		-R114.2208/114.4209/-31.9001/-31.6377 \\
+ 		-Wangle_priority.dat -F0.10 \\
  		-Osb2112_example_ss -A4 -N -C2 -M -V
 
 Now run the plot shellscripts to view the gridded sidescan
@@ -439,7 +481,7 @@ standard deviation plots:
  	grd_sb2112_example_ss_num.cmd
  	grd_sb2112_example_ss_sd.cmd
 
-\fBStep 9\fP: Generate additional maps of the gridded data.
+\fBStep 10\fP: Generate additional maps of the gridded data.
 
 First, we use \fBmbm_grdplot\fP to generate a color shaded
 relief view of the bathymetry. We choose to illuminate
@@ -461,9 +503,9 @@ plot will look better. We also use the -L option to specify
 the title and color scale label for the plot. Here is the 
 command:
 
- 	mbm_grdplot -Igrd_sb2112_example_bath \
- 		-G2 -A0.4/45 -D -MGQ72 -V \
- 		-L"Shaded Relief Bathymetry":"Depth (meters)" \
+ 	mbm_grdplot -Igrd_sb2112_example_bath \\
+ 		-G2 -A0.4/45 -D -MGQ72 -V \\
+ 		-L"Shaded Relief Bathymetry":"Depth (meters)" \\
  		-Osb2112_example_bathshade
 
  	sb2112_example_bathshade.cmd
@@ -486,15 +528,15 @@ by specifing a negative shading magnitude (-A-0.4).
 In this case, we forgo specifying the image resolution,
 resulting in a grainy plot:
 
- 	mbm_grdplot -Igrd_sb2112_example_bath \
- 		-G3 -Kgrd_sb2112_example_ss \
- 		-S0/1 -D1/1 -A0.4 -V \
- 		-L"Bathymetry Overlaid With Sidescan":"Depth (meters)" \
+ 	mbm_grdplot -Igrd_sb2112_example_bath \\
+ 		-G3 -Kgrd_sb2112_example_ss \\
+ 		-S0/1 -D1/1 -A0.4 -V \\
+ 		-L"Bathymetry Overlaid With Sidescan":"Depth (meters)" \\
  		-Osb2112_example_bathss
 
  	sb2112_example_bathss.cmd
 
-\fBStep 10\fP: Generate 3D perspective views of the gridded data.
+\fBStep 11\fP: Generate 3D perspective views of the gridded data.
 
 Now, generate a 3D perspective view of the gridded
 bathymetry with shading through synthetic illumination (-G2)
@@ -506,8 +548,8 @@ and an illumination azimuth of 45 degrees (-A0.4/45). We
 also choose a perspective azimuth of 250 degrees and an 
 elevation of 30 degrees (-E240/30):
 
- 	mbm_grd3dplot -Igrd_sb2112_example_bath \
- 		-G2 -A0.4/45 -E250/30 -MGS-1 -V \
+ 	mbm_grd3dplot -Igrd_sb2112_example_bath \\
+ 		-G2 -A0.4/45 -E250/30 -MGS-1 -V \\
  		-Osb2112_example_bath3d
 
  	sb2112_example_bath3d.cmd
@@ -519,9 +561,9 @@ be histogram equalized, so we use -S0/1. We also want
 the shading to be more prominent than the default
 shading magnitude of 0.2 would produce, so we use -A0.5:
 
- 	mbm_grd3dplot -Igrd_sb2112_example_bath \
- 		-Kgrd_sb2112_example_ss \
- 		-G3 -A0.5 -E250/30 -D0/1 -S0/1 -MGS-1 -V \
+ 	mbm_grd3dplot -Igrd_sb2112_example_bath \\
+ 		-Kgrd_sb2112_example_ss \\
+ 		-G3 -A0.5 -E250/30 -D0/1 -S0/1 -MGS-1 -V \\
  		-Osb2112_example_bathss3d
 
  	sb2112_example_bathss3d.cmd
@@ -726,7 +768,9 @@ used - here we assume the zone is +27.
  		-Ocruise.mrg2 -J27 -V
 
 \fBStep 3\fP: Copy the bathymetry and sidescan data in each
-file from format 111 to format 112.
+file from format 111 to format 112. Note that it does not
+matter which of the two parallel files you specify for
+format 111, as long as they end in ".bat.dat" and ".amp.dat".
 
  	mbcopy -F111/112 \\
  		-IDSL120.940630_1100.bat.dat \\

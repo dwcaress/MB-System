@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	zgrid.c	    4/25/95
- *    $Id: zgrid.c,v 4.1 1996-04-22 13:23:05 caress Exp $
+ *    $Id: zgrid.c,v 4.2 1997-04-21 17:19:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -51,6 +51,12 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
+ * Revision 4.1  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.0  1995/04/25  19:07:29  caress
  * First cut at C version of zgrid.
  *

@@ -1,10 +1,11 @@
-.TH mbbackangle l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbbackangle l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbbackangle\fP - Generates a table of the average amplitude or 
-sidescan values as a function of the grazing angle with the seafloor.
+sidescan values in swath sonar data as a function of 
+the grazing angle with the seafloor.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbbackangle\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc 
@@ -14,7 +15,7 @@ Version 4.4
 \fB-Z\fIdepth\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-The program \fBmbbackangle\fP reads a multibeam data file 
+The program \fBmbbackangle\fP reads a swath sonar data file 
 containing beam amplitude and/or sidescan data and generates a table
 of the average amplitude or sidescan values as a function of
 the grazing angle with the seafloor. This table can be used
@@ -65,10 +66,10 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .B \fB-F\fIformat\fP
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input multibeam
+with the \fB-I\fP option will actually contain a list of input swath sonar
 data files. This program uses the \fBMBIO\fP library 
-and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
@@ -78,9 +79,9 @@ of its operation and then exit immediately.
 .TP
 .B \fB-I\fIfilename\fP
 Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-F\fP option) then the multibeam data contained in \fIinfile\fP 
+\fB-F\fP option) then the swath sonar data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
-is assumed to be an ascii file containing a list of the input multibeam
+is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read 
 the data in each one of these files.
 In the \fIinfile\fP file, each
@@ -88,8 +89,8 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
@@ -105,7 +106,7 @@ so that the middle bin is centered on the angle 0.0.
 Default: \fInangle\fP = 161, \fIangle\fP = 80.0.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds within which multibeam 
+Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be copied. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.

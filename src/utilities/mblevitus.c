@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 4.6 1996-04-22 13:23:05 caress Exp $
+ *    $Id: mblevitus.c,v 4.7 1997-04-21 17:19:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,11 +14,30 @@
  * MBLEVITUS generates an average water velocity profile for a 
  * specified location from the Levitus temperature and salinity 
  * database.
+ * 
+ * The calculation of water sound velocity from salinity and
+ * temperature observations proceeds in two steps. The first
+ * step is to calculate the pressure as a function of depth
+ * and latitude. We use equations from a 1989 book by Coates:
+ * * 
+ * The second step is to calculate the water sound velocity.
+ * We use the DelGrosso equation because of the results presented in 
+ *    Dusha, Brian D. Worcester, Peter F., Cornuelle, Bruce D., 
+ *      Howe, Bruce. M. "On equations for the speed of sound 
+ *      in seawater", J. Acoust. Soc. Am., Vol 93, No 1, 
+ *      January 1993, pp 255-275.
  *
  * Author:	D. W. Caress
  * Date:	April 15, 1993
+ * Rewrite:	March 26, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/17  15:14:38  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.6  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.5  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -83,6 +102,7 @@
 /* global defines */
 #define	NO_DATA	-1000000000.0
 #define	NDEPTH_MAX	46
+#define	NLEVITUS_MAX	33
 
 /*--------------------------------------------------------------------*/
 
@@ -90,7 +110,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 4.6 1996-04-22 13:23:05 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 4.7 1997-04-21 17:19:14 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
@@ -120,8 +140,8 @@ char **argv;
 	int	ilat;
 	int	nvelocity;
 	int	nvelocity_tot;
-	float	temperature[33][180];
-	float	salinity[33][180];
+	float	temperature[NLEVITUS_MAX][180];
+	float	salinity[NLEVITUS_MAX][180];
 	float	velocity[NDEPTH_MAX];
 	static float	depth[NDEPTH_MAX] = {
 		    0.,   10.,   20.,   30.,   50., 
@@ -134,18 +154,15 @@ char **argv;
 		 7000., 7500., 8000., 8500., 9000.,
 		 9500.,10000.,10500.,11000.,11500.,
 		12000. }; /* 46 depth values */
-	double	theta, sine_theta, sine_two_theta;
-	double	geoid_latitude;
-	double	d1, d2, depth_pressure, pressure;
-	double	sm, pkc, c01, c10, c11, c20, b0, c00;
-	double	b1, b2, b3;
-	double	gradient;
+	double	pressure;
+	double	c0, dltact, dltacs, dltacp, dcstp;
 	double	zero = 0.0;
 
 	/* time, user, host variables */
 	long int	right_now;
-	char	date[25], user[128], host[128];
+	char	date[25], user[128], *user_ptr, host[128];
 
+	int	last_good;
 	int	i, j, k;
 
 	char	*ctime();
@@ -263,7 +280,7 @@ char **argv;
 		lon_actual,lat_actual);
 
 	/* read the temperature */
-	record_size = sizeof(float)*33*180;
+	record_size = sizeof(float) * NLEVITUS_MAX * 180;
 	location = ilon*record_size;
 	status = fseek(ifp,location,0);
 	if ((status = fread(&temperature[0][0],1,record_size,ifp)) 
@@ -296,72 +313,90 @@ char **argv;
 	/* close input file */
 	fclose(ifp);
 
-	/* get geoid latitude */
-	theta = DTR*latitude;
-	sine_theta = sin(theta);
-	sine_two_theta = sin(2.0*theta);
-	geoid_latitude = 978.0309 
-		+ 5.18552*sine_theta*sine_theta 
-		- 0.0057*sine_two_theta*sine_two_theta;
-
 	/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	for (i=0;i<33;i++)
+	for (i=0;i<NLEVITUS_MAX;i++)
 		{
 		mb_swap_float(&temperature[i][ilat]);
 		mb_swap_float(&salinity[i][ilat]);
 		}
 #endif
 
-
 	/* calculate velocity from temperature and salinity */
 	nvelocity = 0;
-	for (i=0;i<33;i++)
+	nvelocity_tot = 0;
+	last_good = -1;
+	for (i=0;i<NDEPTH_MAX;i++)
 	  {
-	  if (salinity[i][ilat] > NO_DATA)
+	  if (i < NLEVITUS_MAX)
+	    if (salinity[i][ilat] > NO_DATA)
+		{
+		last_good = i;
+		nvelocity++;
+		}
+	  if (last_good >= 0)
 		{
 		/* set counter */
-		nvelocity++;
+		nvelocity_tot++;
 
-		/* get depth for a given pressure 
+		/* get pressure for a given depth 
 			as a function of latitude */
-		d1 = (-3.434e-12*depth[i] + 1.113e-07)*depth[i] + 0.712953;
-		d2 = d1*depth[i] + 14190.7*log(1 + 1.83e-05*depth[i]);
-		depth_pressure = 1000.*(d2/(geoid_latitude 
-					+ 0.0001113*depth[i]));
-		if (fabs(depth_pressure - depth[i]) >= 0.5)
-			pressure = depth[i]*depth[i]/depth_pressure;
-		else
-			pressure = depth[i];
+		pressure = 1.0052405 * depth[i]
+			* (1.0 + 0.00528 * sin (DTR * latitude)
+			    * sin(DTR * latitude))
+			+ 0.00000236 * depth[i] * depth[i];
 
-		/* calculate sound velocity using 
-			Wilson's October 1960 formula */
-		sm = salinity[i][ilat] - 35.0;
-		pkc = pressure * 0.1019716 + 1.03323;
-		c00 = (((7.9851e-06*temperature[i][ilat] - 2.6054e-04)
-			*temperature[i][ilat] - 0.044532)
-			*temperature[i][ilat] + 4.5721)
-			*temperature[i][ilat] + 1449.14;
-		c01 = (7.7711e-07*temperature[i][ilat] - 0.011244)
-			*temperature[i][ilat] + 1.39799;
-		c10 = ((4.5283e-08*temperature[i][ilat] + 7.4812e-06)
-			*temperature[i][ilat] - 1.8607e-04)
-			*temperature[i][ilat] + 0.16027;
-		c11 = (1.579e-09*temperature[i][ilat] + 3.158e-08)
-			*temperature[i][ilat] + 7.7016e-05;
-		c20 = (1.8563e-09*temperature[i][ilat] - 2.5294e-07)
-			*temperature[i][ilat] + 1.0268e-05;
-		b0 =  (1.69202E-03*sm + c01)*sm + c00;
-		b1 =  c11*sm + c10;
-		b2 =  -1.2943E-07*sm + c20;
-		b3 =  -1.9646E-10*temperature[i][ilat] + 3.5216E-09;
-		velocity[i] =  (((-3.3603E-12*pkc + b3)*pkc + b2)
-			*pkc + b1)*pkc + b0;
+		/* calculate water sound speed using 
+			DelGrosso equations */
+		/* convert decibar to kg/cm**2 */
+		pressure = pressure * 0.1019716; 
+		c0 = 1402.392;
+		dltact  = temperature[last_good][ilat] 
+			    * ( 5.01109398873 
+			    + temperature[last_good][ilat] 
+			    * (-0.0550946843172 
+			    + temperature[last_good][ilat] 
+			    * 0.000221535969240));
+		dltacs = salinity[last_good][ilat]
+			    * (1.32952290781 
+			    + salinity[last_good][ilat] 
+			    * 0.000128955756844);
+      
+		dltacp = pressure 
+			    * (0.156059257041E0 
+				+ pressure 
+				* (0.000024499868841
+				    + pressure 
+				    * -0.00000000883392332513));
+		dcstp =  temperature[last_good][ilat] 
+			    * (-0.0127562783426
+				    * salinity[last_good][ilat]      
+				+ pressure 
+				* ( 0.00635191613389
+				    + pressure 
+				    * (0.265484716608E-7
+					* temperature[last_good][ilat]
+					- 0.00000159349479045       
+					+ 0.522116437235E-9 * pressure)
+				    -0.000000438031096213
+				    * temperature[last_good][ilat] 
+				    * temperature[last_good][ilat] )) 
+			    + salinity[last_good][ilat] 
+			    * (-0.161674495909E-8 
+				* salinity[last_good][ilat]
+				* pressure * pressure 
+				+ temperature[last_good][ilat] 
+				* (0.0000968403156410
+				    * temperature[last_good][ilat]
+				    + pressure 
+				    * ( 0.00000485639620015
+					* salinity[last_good][ilat]      
+					-0.000340597039004)));
+		velocity[i] = c0 + dltact + dltacs + dltacp + dcstp;
 		}
 	  else
 		velocity[i] = salinity[i][ilat];
 	  }
-	nvelocity_tot = nvelocity;
 
 	/* check for existence of water velocity profile */
 	if (nvelocity < 1)
@@ -373,19 +408,6 @@ char **argv;
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}
-
-	/* extrapolate to depth of 12000 meters */
-	if (nvelocity > 1)
-		{
-		gradient = (velocity[nvelocity-1] - velocity[nvelocity-2])
-			/(depth[nvelocity-1] - depth[nvelocity-2]);
-		for (i=nvelocity;i<NDEPTH_MAX;i++)
-			{
-			velocity[i] = velocity[i-1] 
-				+ gradient*(depth[i] - depth[i-1]);
-			}
-		nvelocity_tot = NDEPTH_MAX;
 		}
 
 	/* open the output file */
@@ -406,7 +428,12 @@ char **argv;
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
 	strncpy(date,ctime(&right_now),24);
-	strcpy(user,getenv("USER"));
+	if ((user_ptr = getenv("USER")) == NULL)
+		user_ptr = getenv("LOGNAME");
+	if (user_ptr != NULL)
+		strcpy(user,user_ptr);
+	else
+		strcpy(user, "unknown");
 	gethostname(host,128);
 	fprintf(ofp,"# Run by user <%s> on cpu <%s> at <%s>\n",
 		user,host,date);
@@ -422,18 +449,19 @@ char **argv;
 	fprintf(ofp,"# meters/second.\n");
 	fprintf(ofp,"# The first %d velocity values are defined using the\n",
 		nvelocity);
-	fprintf(ofp,"# Levitus database; the remaining %d points are\n",
+	fprintf(ofp,"# salinity and temperature values available in the\n");
+	fprintf(ofp,"# Levitus database; the remaining %d velocity values are\n",
 		nvelocity_tot-nvelocity);
-	fprintf(ofp,"# extrapolated using a constant velocity gradient\n");
-	fprintf(ofp,"# obtained from the two deepest known points.\n");
+	fprintf(ofp,"# calculated using the deepest temperature\n");
+	fprintf(ofp,"# and salinity value available.\n");
 
 	for (i=0;i<nvelocity_tot;i++)
 		fprintf(ofp,"%f %f\n",depth[i],velocity[i]);
-	fprintf(outfp,"Velocity points defined by Levitus database: %d\n",
+	fprintf(outfp,"Values defined directly by Levitus database:      %2d\n",
 		nvelocity);
-	fprintf(outfp,"Velocity points extrapolated to depth:       %d\n",
-		nvelocity_tot-nvelocity);
-	fprintf(outfp,"Velocity points written:                     %d\n",
+	fprintf(outfp,"Values assuming deepest salinity and temperature: %2d\n",
+		nvelocity_tot - nvelocity);
+	fprintf(outfp,"Velocity points written:                          %2d\n",
 		nvelocity_tot);
 	fprintf(outfp,"Output file: %s\n",ofile);
 	if (verbose >= 1)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.13 1996-04-22 13:23:05 caress Exp $
+ *    $Id: mbclean.c,v 4.14 1997-04-21 17:19:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,12 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1997/04/17  15:14:38  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.13  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.12  1996/03/01  22:37:24  caress
  * Added -U option to flag half-pings containing less than
  * a specified number of good bathymetry values.
@@ -141,7 +147,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.13 1996-04-22 13:23:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.14 1997-04-21 17:19:14 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -254,7 +260,7 @@ char **argv;
 
 	/* time, user, host variables */
 	long int	right_now;
-	char	date[25], user[128], host[128];
+	char	date[25], user[128], *user_ptr, host[128];
 
 	/* processing variables */
 	int	start;
@@ -595,7 +601,12 @@ char **argv;
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
 	strncpy(date,ctime(&right_now),24);
-	strcpy(user,getenv("USER"));
+	if ((user_ptr = getenv("USER")) == NULL)
+		user_ptr = getenv("LOGNAME");
+	if (user_ptr != NULL)
+		strcpy(user,user_ptr);
+	else
+		strcpy(user, "unknown");
 	gethostname(host,128);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",

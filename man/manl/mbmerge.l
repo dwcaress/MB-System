@@ -1,16 +1,16 @@
-.TH mbmerge l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbmerge l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbmerge\fP - Merges multibeam data with new navigation.
+\fBmbmerge\fP - Merges swath sonar data with new navigation.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbmerge\fP [\fB-F\fIformat \fB-L\fIlonflip\fP 
 \fB-I\fIinfile \fB-O\fIoutfile \fB-M\fInavformat\fP \fB-N\fInavfile\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbmerge\fP is an utility for merging navigation with multibeam
+\fBmbmerge\fP is an utility for merging navigation with swath sonar
 echosounder data.  The input navigation can be in one of several
 formats, including the L-DEO shipboard processing format. 
 The default input and output streams are stdin and stdout.
@@ -27,10 +27,10 @@ Palisades, NY 10964
 .SH OPTIONS
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
@@ -65,7 +65,7 @@ This format consists of ascii lines of the form:
 .br
 where time_d is decimal unix time in seconds since
 1/1/1970 00:00:00.000 and lon and lat are in decimal degrees.
-This form can be obtained from multibeam data files using \fBmblist\fP
+This form can be obtained from swath sonar data files using \fBmblist\fP
 with the \fB-O\fP\fIMXY\fP option. Some representative lines are:
  5440574.017	-129.505875	 46.445255
  5440574.100	-129.506045	 46.445083
@@ -78,7 +78,7 @@ This format consists of ascii lines of the form:
  	year mon day hour min sec lon lat
 .br
 where lon and lat are in decimal degrees.
-This form can be obtained from multibeam data files using \fBmblist\fP
+This form can be obtained from swath sonar data files using \fBmblist\fP
 with the \fB-O\fP\fItXY\fP option. Some representative lines are:
  1981 05 06 04 14 01	-129.505875	 46.445255
  1981 05 06 04 14 06	-129.506045	 46.445083
@@ -92,7 +92,7 @@ This format consists of ascii lines of the form:
 .br
 where jday is the julian day of the year and 
 lon and lat are in decimal degrees.
-This form can be obtained from multibeam data files using \fBmblist\fP
+This form can be obtained from swath sonar data files using \fBmblist\fP
 with the \fB-O\fP\fIJXY\fP option. Some representative lines are:
  1981 126 04 14 01	-129.505875	 46.445255
  1981 126 04 14 06	-129.506045	 46.445083
@@ -106,7 +106,7 @@ This format consists of ascii lines of the form:
 .br
 where jday is the julian day of the year, daymin is the minute
 of the day, and lon and lat are in decimal degrees.
-This form can be obtained from multibeam data files using \fBmblist\fP
+This form can be obtained from swath sonar data files using \fBmblist\fP
 with the \fB-O\fP\fIjXY\fP option. Some representative lines are:
  1981 126 0254 01	-129.505875	 46.445255
  1981 126 0254 06	-129.506045	 46.445083
