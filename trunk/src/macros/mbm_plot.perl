@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.5 1995-03-20 16:42:45 caress Exp $
+#    $Id: mbm_plot.perl,v 4.6 1995-05-03 17:30:42 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,10 +39,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.5 1995-03-20 16:42:45 caress Exp $
+#   $Id: mbm_plot.perl,v 4.6 1995-05-03 17:30:42 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.5  1995/03/20  16:42:45  caress
+# Fixed synopsis.
+#
 # Revision 4.4  1995/02/14  19:50:31  caress
 # Version 4.2
 #
@@ -228,19 +231,19 @@ while (@mbinfo)
 # check that there is data
 if ($xmin >= $xmax || $ymin >= $ymax)
 	{
-	die "Does not appear to be any data in the input!\n$program_name aborted.\n"
+	die "Does not appear to be any data in the input!\n$program_name aborted.\n";
 	}
 if (($color == 1 || $color == 2 || $color == 3) && ($zmin >= $zmax))
 	{
-	die "Does not appear to be any bathymetry data in the input!\n$program_name aborted.\n"
+	die "Does not appear to be any bathymetry data in the input!\n$program_name aborted.\n";
 	}
 if (($color == 3 || $color == 4) && ($amin >= $amax))
 	{
-	die "Does not appear to be any amplitude data in the input!\n$program_name aborted.\n"
+	die "Does not appear to be any amplitude data in the input!\n$program_name aborted.\n";
 	}
 if (($color == 5) && ($smin >= $smax))
 	{
-	die "Does not appear to be any sidescan data in the input!\n$program_name aborted.\n"
+	die "Does not appear to be any sidescan data in the input!\n$program_name aborted.\n";
 	}
 
 # either use specified bounds
@@ -501,7 +504,7 @@ if ($color == 1 || $color == 2 || $color == 3)
 			print FCMD " >>";
 			}
 		print FCMD " $cptfile\n";
-		$d1 = $d2
+		$d1 = $d2:
 		}
 	}
 
@@ -583,7 +586,7 @@ if ($color == 4 || $color == 5)
 			print FCMD " >>";
 			}
 		print FCMD " $cptfile\n";
-		$d1 = $d2
+		$d1 = $d2;
 		}
 	}
 
