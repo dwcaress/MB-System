@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.3 1994-10-21 13:02:31 caress Exp $
+ *    $Id: mbcopy.c,v 4.4 1995-03-02 13:49:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/07/29  19:02:56  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * using unix second time base.
@@ -71,7 +74,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.3 1994-10-21 13:02:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 4.4 1995-03-02 13:49:21 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input multibeam data file to an output \nmultibeam data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Fiformat/oformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Ccommentfile \n\t-N -V -H  -Iinfile -Ooutfile]";
@@ -437,7 +440,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);

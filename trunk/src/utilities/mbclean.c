@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.6 1994-12-02 16:02:51 caress Exp $
+ *    $Id: mbclean.c,v 4.7 1995-03-02 13:49:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1994/12/02  16:02:51  caress
+ * Fixed (?) bug where mbclean went into infinite loop
+ * with MR1 (61) data.
+ *
  * Revision 4.5  1994/10/21  13:02:31  caress
  * Release V4.0
  *
@@ -122,7 +126,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.6 1994-12-02 16:02:51 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.7 1995-03-02 13:49:21 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -488,7 +492,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);

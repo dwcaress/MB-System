@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 4.2 1995-02-27 14:43:18 caress Exp $
+ *    $Id: mbhistogram.c,v 4.3 1995-03-02 13:49:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/02/27  14:43:18  caress
+ * Fixed bug regarding closing a text input file.
+ *
  * Revision 4.1  1995/01/06  00:06:41  caress
  * Can now read from either single data files or from multiple
  * data files specified in a datalist.
@@ -51,7 +54,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 4.2 1995-02-27 14:43:18 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 4.3 1995-03-02 13:49:21 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a multibeam data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -315,7 +318,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(output,"\nMBIO Error allocating histogram arrays:\n%s\n",message);
 		fprintf(output,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -410,7 +413,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(output,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(output,"\nProgram <%s> Terminated\n",
 			program_name);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	1/12/95
- *    $Id: mbanglecorrect.c,v 4.1 1995-02-22 21:53:14 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.2 1995-03-02 13:49:21 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/02/22  21:53:14  caress
+ * Fixed bug in handling of buffered io.
+ *
  * Revision 4.0  1995/02/14  21:17:15  caress
  * Version 4.2
  *
@@ -94,7 +97,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.1 1995-02-22 21:53:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.2 1995-03-02 13:49:21 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -509,7 +512,7 @@ The default input and output streams are stdin and stdout.\n";
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
@@ -553,7 +556,7 @@ The default input and output streams are stdin and stdout.\n";
 				&sigma,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
-			mb_error(verbose,error,message);
+			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
@@ -618,7 +621,7 @@ The default input and output streams are stdin and stdout.\n";
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 			{
-			mb_error(verbose,error,message);
+			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);

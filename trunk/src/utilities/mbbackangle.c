@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 4.1 1995-02-27 14:43:18 caress Exp $
+ *    $Id: mbbackangle.c,v 4.2 1995-03-02 13:49:21 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/02/27  14:43:18  caress
+ * Fixed bug regarding closing a text input file.
+ *
  * Revision 4.0  1995/02/14  21:17:15  caress
  * Version 4.2
  *
@@ -52,7 +55,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 4.1 1995-02-27 14:43:18 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangle.c,v 4.2 1995-03-02 13:49:21 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a multibeam data file and generates a table\n\t\
@@ -316,7 +319,7 @@ The results are dumped to stdout.";
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating angle arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -439,7 +442,7 @@ The results are dumped to stdout.";
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);

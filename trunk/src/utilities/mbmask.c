@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 4.2 1994-10-21 13:02:31 caress Exp $
+ *    $Id: mbmask.c,v 4.3 1995-03-02 13:49:21 caress Exp $
  *
  *    Copyright (c) 1993,1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,6 +25,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -64,7 +67,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 4.2 1994-10-21 13:02:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 4.3 1995-03-02 13:49:21 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -324,7 +327,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -339,7 +342,7 @@ char **argv;
 	/* if error reading first mask then quit */
 	if (status != MB_SUCCESS)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error reading first flagging mask record:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -392,7 +395,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
