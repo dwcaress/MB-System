@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em1000rw.c	8/8/94
- *	$Id: mbr_em1000rw.c,v 4.11 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_em1000rw.c,v 4.12 1999-02-04 23:52:54 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.10  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *
@@ -89,7 +92,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em1000rw.c,v 4.11 1998-10-05 17:46:15 caress Exp $";
+	static char res_id[]="$Id: mbr_em1000rw.c,v 4.12 1999-02-04 23:52:54 caress Exp $";
 	char	*function_name = "mbr_alm_em1000rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -355,7 +358,7 @@ int	*error;
 	int	ntime_i[7];
 	double	ntime_d;
 	double	ss_spacing;
-	double	dd;
+	double	dd, dt, dx, dy, speed;
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
 	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
@@ -533,6 +536,27 @@ int	*error;
 		/* interpolate from saved nav if possible */
 		if (mb_io_ptr->nfix > 1)
 			{
+			/* get speed if necessary */
+			if (data->speed <= 0.0)
+			    {
+                            mb_coor_scale(verbose,
+                                mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
+                                &mtodeglon,&mtodeglat);
+                            dx = (mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
+                                - mb_io_ptr->fix_lon[0])/mtodeglon;
+                            dy = (mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
+                                - mb_io_ptr->fix_lat[0])/mtodeglat;
+                            dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
+                                - mb_io_ptr->fix_time_d[0];
+                            speed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
+			    }
+			else
+			    {
+			    speed = 3.6 * data->speed;
+			    }
+			if (speed > 100.0)
+			    speed = 0.0;
+
 			/* interpolation possible */
 			if (mb_io_ptr->new_time_d 
 				>= mb_io_ptr->fix_time_d[0]
@@ -561,15 +585,16 @@ int	*error;
 			
 			/* extrapolate from first fix */
 			else if (mb_io_ptr->new_time_d 
-				< mb_io_ptr->fix_time_d[0])
+				< mb_io_ptr->fix_time_d[0]
+				&& speed > 0.0)
 			    {
 			    dd = (mb_io_ptr->new_time_d 
 				- mb_io_ptr->fix_time_d[0])
-				* data->speed;
+				* speed / 3.6;
 			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[0],
 				&mtodeglon,&mtodeglat);
-			    headingx = sin(DTR*data->line_heading);
-			    headingy = cos(DTR*data->line_heading);
+			    headingx = sin(DTR*(data->line_heading));
+			    headingy = cos(DTR*(data->line_heading));
 			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[0] 
 				+ headingx*mtodeglon*dd;
 			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[0] 
@@ -578,48 +603,59 @@ int	*error;
 			
 			/* extrapolate from last fix */
 			else if (mb_io_ptr->new_time_d 
-				> mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+				> mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
+				&& speed > 0.0)
 			    {
 			    dd = (mb_io_ptr->new_time_d 
 				- mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-				* data->speed;
+				* speed / 3.6;
 			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
 				&mtodeglon,&mtodeglat);
-			    headingx = sin(DTR*data->line_heading);
-			    headingy = cos(DTR*data->line_heading);
+			    headingx = sin(DTR*(data->line_heading));
+			    headingy = cos(DTR*(data->line_heading));
 			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
 				+ headingx*mtodeglon*dd;
 			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
 				+ headingy*mtodeglat*dd;
 			    }
+			
+			/* use last fix */
+			else
+			    {
+			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1];
+			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1];
+			    }
 			}
 			
-		/* else extrapolate from most recent fix */
-		else if (data->pos_year != 0)
+		/* else extrapolate from only fix */
+		else if (mb_io_ptr->nfix == 1
+			&& data->speed > 0.0)
 			{
-			ntime_i[0] = data->pos_year + 1900;
-			ntime_i[1] = data->pos_month;
-			ntime_i[2] = data->pos_day;
-			ntime_i[3] = data->pos_hour;
-			ntime_i[4] = data->pos_minute;
-			ntime_i[5] = data->pos_second;
-			ntime_i[6] = 10000*data->pos_centisecond;
-			mb_get_time(verbose,ntime_i,&ntime_d);
-			dd = (mb_io_ptr->new_time_d - ntime_d)
-				*data->speed;
-			mb_coor_scale(verbose,data->latitude,
+			dd = (mb_io_ptr->new_time_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+				* speed / 3.6;
+			mb_coor_scale(verbose,mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
 				&mtodeglon,&mtodeglat);
-			headingx = sin(DTR*data->line_heading);
-			headingy = cos(DTR*data->line_heading);
-			mb_io_ptr->new_lon = data->longitude 
+			headingx = sin(DTR*(data->line_heading));
+			headingy = cos(DTR*(data->line_heading));
+			mb_io_ptr->new_lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
 				+ headingx*mtodeglon*dd;
-			mb_io_ptr->new_lat = data->latitude 
+			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
 				+ headingy*mtodeglat*dd;
+			mb_io_ptr->new_speed = 3.6 * data->speed;
+			}
+
+		/* else just take last position */
+		else if (mb_io_ptr->nfix == 1)
+			{
+			mb_io_ptr->new_lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1];
+			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1];
+			mb_io_ptr->new_speed = 0.0;
 			}
 		else
 			{
 			mb_io_ptr->new_lon = 0.0;
 			mb_io_ptr->new_lat = 0.0;
+			mb_io_ptr->new_speed = 0.0;
 			}
 		if (mb_io_ptr->lonflip < 0)
 			{
@@ -1254,7 +1290,7 @@ int	*error;
 		data->latitude = mb_io_ptr->new_lat;
 
 		/* get heading */
-		data->line_heading = (int) (mb_io_ptr->new_heading * 10);
+		data->line_heading = mb_io_ptr->new_heading;
 
 		/* get speed  */
 		data->speed = mb_io_ptr->new_speed/3.6;

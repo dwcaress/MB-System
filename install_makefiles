@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.16 1998-10-05 22:12:48 caress Exp $
+#    $Id: install_makefiles,v 4.17 1999-02-04 23:55:57 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.16 1998-10-05 22:12:48 caress Exp $
+#   $Id: install_makefiles,v 4.17 1999-02-04 23:55:57 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.16  1998/10/05  22:12:48  caress
+# MB-System version 4.6beta
+#
 # Revision 4.15  1997/09/18  13:29:15  caress
 # Removed references to realtime stuff.
 #
@@ -262,9 +265,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 $MBSYSTEM_HOME = "/usr/people/caress/dev/mbsystem";
 $OS = "IRIX64";
 $BYTESWAPPED = "NO";
-$CFLAGS = "-g";
+$CFLAGS = "-g -w";
 $LFLAGS = "-lm";
 $GRAPHICAL = "YES";
+$GMTOLD = "NO";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11";
 $GMTLIBDIR = "/usr/local/gmt/src";
@@ -285,6 +289,12 @@ $CFLAGS = "$CFLAGS -D$OS";
 if ($BYTESWAPPED eq "YES")
 	{
 	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
+	}
+
+# use GMT 3.0 instead of GMT 3.1 if desired
+if ($GMTOLD eq "YES")
+	{
+	$CFLAGS = "$CFLAGS -DGMT_OLD";
 	}
 
 # set archiver 
@@ -335,7 +345,6 @@ if ($CC)
 	print "C Compiler:                $CC\n";
 	}
 print "C Compile Flags:           $CFLAGS\n";
-print "F77 Compile Flags:         $FFLAGS\n";
 print "Load Flags:                $LFLAGS\n";
 print "Library Archiver:          $ARCHIVE\n";
 if ($GRAPHICAL eq "YES")
@@ -405,14 +414,6 @@ while (@files)
 		elsif (index($_,"CFLAGS",0) == 0)
 			{
 			print MAK "CFLAGS = $CFLAGS\n";
-			}
-		elsif (index($_,"FFLAGS",0) == 0)
-			{
-			print MAK "FFLAGS = $FFLAGS\n";
-			}
-		elsif (index($_,"FWITHCFLAGS",0) == 0)
-			{
-			print MAK "FWITHCFLAGS = $FWITHCFLAGS\n";
 			}
 		elsif (index($_,"LFLAGS",0) == 0)
 			{

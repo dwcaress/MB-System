@@ -1,4 +1,4 @@
-.TH mbfilter l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbfilter l "22 January 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbfilter\fP - Apply some simple filter functions to sidescan, beam
 amplitude, or bathymetry data from swath sonar data files.
@@ -7,7 +7,9 @@ amplitude, or bathymetry data from swath sonar data files.
 Version 4.6
 
 .SH SYNOPSIS
-\fBmbfilter\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc 
+\fBmbfilter\fP [\fB-A\fIkind\fP 
+\fB-B\fIyr/mo/da/hr/mn/sc 
+\fB-C\fImode/xdim/ldim/iteration\fP 
 \fB-D\fImode/xdim/ldim/iteration/offset\fP 
 \fB-E\fIyr/mo/da/hr/mn/sc 
 \fB-F\fIformat\fP \fB-I\fIinfile\fP \fB-N\fIbuffersize\fP
@@ -18,7 +20,7 @@ Version 4.6
 
 .SH DESCRIPTION
 \fBmbfilter\fP applies one or more simple filters to the specified
-data (sidescan, beam amplitude, and/or bathymetry). The filters
+swath data (sidescan, beam amplitude, and/or bathymetry). The filters
 include:
   - boxcar mean for lo-pass filtering
   - gaussian mean for lo-pass filtering
@@ -27,13 +29,45 @@ include:
   - boxcar mean subtraction for hi-pass filtering
   - gaussian mean subtraction for hi-pass filtering
   - boxcar median subtraction for hi-pass filtering
-.br
+  - edge detection for contrast enhancement
+  - gradient magnitude subtraction for contrast enhancement
+
 These filters are mostly intended for use with sidescan
 data. In particular, the lo-pass or smoothing filters
 can be used for first-order speckle reduction in sidescan
 data, and the hi-pass filters can be used to emphasize
-fine scale structure in the data.
-.br
+fine scale structure in the data. A combination of
+lo-pass and hi-pass filtering can effectively perform
+band-pass filtering. The contrast enhancing
+filters can, under certain circumstances, sharpen sidescan
+images of the seafloor. The lo-pass and contrast
+enhancement filters are described
+in the paper by Sauter and Parson (1994) listed below.
+
+The filtering used here is designed and applied in the
+same manner as spatial filters are applied to images.
+The swath data is treated as an image, with the x and
+y coordinates corresponding to pixel (or beam) number and
+ping number, respectively. The filters consist of M x N
+matrices which are convolved with the swath data image
+(M is the filter dimension in the acrosstrack direction
+and N is the filter dimension in the alongtrack direction).
+Missing or flagged data are ignored in the filtering
+process.
+
+Users can apply up to three filters at a time (one each of
+the lo-pass, hi-pass, and contrast enhancement filters).
+If multiple filters are applied, the hi-pass will be
+applied first, followed by the lo-pass, followed
+finally by the contrast enhancement filter.
+Users can apply as many iterations of each filter as
+desired.
+
+The user specifies the window size
+used by the filters (3x3 or 5x5 are typical for using smoothing
+filters iteratively to reduce speckle; larger windows like 3x20
+are typical for hi-pass filtering). 
+
 The boxcar mean, gaussian mean, and median filter all
 achieve similar results in uniformly smoothing the data; 
 the boxcar mean is faster to apply, the gaussian mean preserves
@@ -43,9 +77,8 @@ gradient filter applies averaging weights which depend on the
 inverse gradient of the data. This approach causes the filter
 to smooth regions without distinct edges much more than regions
 with edges, thus tending to preserve the sharpness of features
-more than the simpler smoothing filters. Descriptions of these 
-speckle reduction filters can be found in the reference given below. 
-.br
+more than the simpler smoothing filters. 
+
 The median smoothing filter can be set by the \fB-T\fP
 option to operate with low and high
 ratio thresholds (the value is changed only if the original
@@ -55,7 +88,7 @@ filter to preferentially despike the data. In particular, this
 approach is useful for suppressing "stripes" or "bad" 
 pings which have amplitude or sidescan values differing significantly
 from surrounding pings.
-.br
+
 The hi-pass filters are constructed by calculating a low-pass
 filtered version of the data and then subtracting that from
 the original data. An offset value is added to the hi-passed
@@ -64,16 +97,16 @@ flagged as bad in some formats and not allowed in others).
 The hi-pass filters can be used to remove
 long-wavelength variations in seafloor reflectivity in order
 to emphasize fine-scale structure.
-.br
-The user can specify both a hi-pass filter and a low-pass filter
-to be applied to the data; the hi-pass will be applied first.
-Each of the specified filters can be iteratively applied
-as many times as the user desires.
-The user specifies the window size
-used by the filters (3x3 or 5x5 are typical for using smoothing
-filters iteratively to reduce speckle; larger windows like 3x20
-are typical for hi-pass filtering). 
-.br
+
+The contrast enhancement filters are generally only successful
+when applied after smoothing because of their tendency to
+amplify noise. The edge detection filter enhances contrast by
+tending to shift values on either side of a boundary away
+from the average value across the boundary. A 5 X 5 filter or
+larger is generally required for success with the edge detection
+algorithm. The gradient filter increases contrast by subtracting
+twice the local gradient magnitude from each value.
+
 The default input and output streams are stdin and stdout.
 
 .SH AUTHORSHIP
@@ -102,6 +135,26 @@ Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
+.B \-C
+\fImode/xdim/ldim/iteration\fP
+.br
+.br
+Turns on contrast enhancement filtering and sets the 
+filter parameters to be 
+used. Here \fImode\fP specifies the filter type:
+ 	\fImode\fP = 1 : Edge Detection Filter
+ 	\fImode\fP = 2 : Gradient Magnitude Subtraction Filter
+.br
+The dimensions of the data window used are set using \fIxdim\fP
+(acrosstrack dimension) and \fIldim\fP (alongtrack dimension).
+Values of \fIxdim\fP = 5 and \fIldim\fP = 5 are typical, but
+larger or smaller dimensions can be used. 
+The \fIiteration\fP value specifies
+the number of times the filter is applied; there is no limit to
+this value. 
+Default: contrast enhancement off, \fIxdim\fP = 5, \fIldim\fP = 5, 
+\fIiteration\fP = 1.
+.TP
 .B \-D
 \fImode/xdim/ldim/iteration/offset\fP
 .br
@@ -123,7 +176,7 @@ chosen according to the range of values allowed in the
 data type and data formats being used (e.g. for SeaBeam 2100
 sidescan as represented in format 41, the sidescan values
 can range from 1 to 65535, so an \fIoffset\fP = 1000 is appropriate).
-Default: \fImode\fP = 1, \fIxdim\fP = 3, \fIldim\fP = 10, 
+Default: hi-pass filtering off, \fIxdim\fP = 3, \fIldim\fP = 10, 
 \fIiteration\fP = 1, \fIoffset\fP = 1000.
 .TP
 .B \-E
@@ -261,6 +314,12 @@ To first apply a hi-pass filter to emphasize fine-scale structure
 and then apply a lo-pass filter to reduce speckle:
  	mbfilter -F41 -Itest.mb41 -Otest_hipass.mb41 \
  		-D1/3/10/1/10000 -S4/3/3/5
+.br
+To first reduce speckle by smoothing the data with Gaussian
+mean filter and apply an edge detection contrast enhancement
+filter:
+ 	mbfilter -F41 -Itest.mb41 -Otest_hipass.mb41 \
+ 		-S3/7/7/1 -C1/5/5/1
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbbackangle\fP(l), \fBmbanglecorrect\fP(l)
