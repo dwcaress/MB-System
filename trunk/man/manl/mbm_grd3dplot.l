@@ -1,10 +1,10 @@
-.TH mbm_grd3dplot l "3 November 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_grd3dplot l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grd3dplot\fP - Create an executable shellscript which will generate
 a GMT 3D perspective plot of gridded data in a GMT grd file.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbm_grd3dplot\fP \fB-I\fP\fIfile\fP 

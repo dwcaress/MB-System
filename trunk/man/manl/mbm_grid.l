@@ -1,11 +1,11 @@
-.TH mbm_grid l "23 June 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_grid l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grid\fP - Create an executable shellscript which will generate
 a grid (bathymetry or topography) or mosaic (amplitude or sidescan)
 of swath sonar swath data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 mbm_grid \fB-I\fP\fIfile\fP
