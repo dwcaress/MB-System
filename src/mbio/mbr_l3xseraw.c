@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.9 2001-12-20 20:48:51 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.10 2001-12-30 20:32:12 caress Exp $
  *
- *    Copyright (c) 2000 by 
+ *    Copyright (c) 2000, 2001 by 
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001/12/20 20:48:51  caress
+ * Release 5.0.beta11
+ *
  * Revision 5.8  2001/10/23  02:34:12  caress
  * Added error checking for corrupted depth and heave values.
  *
@@ -114,7 +117,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.9 2001-12-20 20:48:51 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.10 2001-12-30 20:32:12 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -244,7 +247,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.9 2001-12-20 20:48:51 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.10 2001-12-30 20:32:12 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -313,7 +316,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.9 2001-12-20 20:48:51 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.10 2001-12-30 20:32:12 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -538,6 +541,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	unsigned long	frame_transaction;
 	unsigned long	frame_address;
 	unsigned long	buffer_size;
+	unsigned long	*buffer_size_max;
 	unsigned long	*frame_save;
 	unsigned long	*frame_expect;
 	unsigned long	*frame_id_save;
@@ -548,6 +552,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	char	*buffer;
 	int	index;
 	int	read_len;
+	int	skip;
 	int	i, j;
 
 	/* print input debug statements */
@@ -579,6 +584,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	frame_sec_save = (unsigned long *) &mb_io_ptr->save5;
 	frame_usec_save = (unsigned long *) &mb_io_ptr->save6;
 	buffer_size_save = (unsigned long *) &mb_io_ptr->save7;
+	buffer_size_max = (unsigned long *) &mb_io_ptr->save8;
 	buffer = mb_io_ptr->hdr_comment;
 	store->sbm_properties = MB_NO;
 	store->sbm_hrp = MB_NO;
@@ -608,6 +614,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		{
 		
 		/* look for the next frame start */
+		skip = 0;
 		if ((read_len = fread(&label[0],1,4,mb_io_ptr->mbfp)) != 4)
 		    {
 		    status = MB_FAILURE;
@@ -628,6 +635,10 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
+				}
+		    else
+				{
+				skip++;
 				}
 		    }
 
@@ -675,9 +686,24 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 				buffer_size++;
 				index++;
 				}
+
+		    /* don't let buffer overflow - error if record exceeds max size */
+		    if (buffer_size >= MBSYS_XSE_BUFFER_SIZE)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		    }
+		*buffer_size_max = MAX(buffer_size,*buffer_size_max);
+
 #ifdef MB_DEBUG
-fprintf(stderr, "\nBUFFER SIZE: %u\n", buffer_size);
+if (*error != MB_ERROR_EOF)
+{
+if (skip > 0)
+fprintf(stderr, "\nBYTES SKIPPED BETWEEN FRAMES: %d\n", skip);
+fprintf(stderr, "\nBUFFER SIZE: %u  MAX FOUND: %u  MAX: %u\n", 
+buffer_size,*buffer_size_max,MBSYS_XSE_BUFFER_SIZE);
+}
 #endif
 
 		/* parse header values */
@@ -2791,6 +2817,7 @@ fprintf(stderr, "READ SBM_GROUP_CENTER\n");
 				store->sbm_center = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_beam); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_count); index += 4;
+				store->sbm_center_count = MIN(MBSYS_XSE_MAXSAMPLES, store->sbm_center_count);
 				for (i=0;i<store->sbm_center_count;i++)
 				    {
 				    mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_center_amp[i]); 
@@ -3312,11 +3339,11 @@ fprintf(stderr, "WRITE SHIP\n");
 	else if (store->kind == MB_DATA_DATA)
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE SIDESCAN\n");
+fprintf(stderr, "WRITE MULTIBEAM\n");
 #endif
-		if (store->sid_frame == MB_YES)
+		if (store->mul_frame == MB_YES)
 		    {
-		    status = mbr_l3xseraw_wr_sidescan(verbose,&buffer_size,buffer,store_ptr,error);
+		    status = mbr_l3xseraw_wr_multibeam(verbose,&buffer_size,buffer,store_ptr,error);
 		    if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -3324,11 +3351,11 @@ fprintf(stderr, "WRITE SIDESCAN\n");
 			}
 		    }
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE MULTIBEAM\n");
+fprintf(stderr, "WRITE SIDESCAN\n");
 #endif
-		if (store->mul_frame == MB_YES)
+		if (store->sid_frame == MB_YES)
 		    {
-		    status = mbr_l3xseraw_wr_multibeam(verbose,&buffer_size,buffer,store_ptr,error);
+		    status = mbr_l3xseraw_wr_sidescan(verbose,&buffer_size,buffer,store_ptr,error);
 		    if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -3671,6 +3698,10 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	int group_cnt_index;
 	int frame_id;
 	int group_id;
+	int write_conductivity = MB_NO;
+	int write_salinity = MB_NO;
+	int write_temperature = MB_NO;
+	int write_pressure = MB_NO;
 	int	i;
 
 	/* print input debug statements */
@@ -3810,8 +3841,25 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    frame_count += group_count + 12;
 	    }
 
-	/* get ctd groups */
+	/* figure out which ctd groups are nonzero */
 	if (store->svp_nctd > 0)
+	    {
+	    for (i=0;i<store->svp_nctd;i++)
+		{
+		if (store->svp_conductivity[i] != 0.0)
+			write_conductivity = MB_YES;
+		if (store->svp_salinity[i] != 0.0)
+			write_salinity = MB_YES;
+		if (store->svp_temperature[i] != 0.0)
+			write_temperature = MB_YES;
+		if (store->svp_pressure[i] != 0.0)
+			write_pressure = MB_YES;
+		}
+	    }
+
+	/* get conductivity group */
+	if (store->svp_nctd > 0
+		&& write_conductivity == MB_YES)
 	    {
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -3850,7 +3898,12 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 
 	    /* add group count to the frame count */
 	    frame_count += group_count + 12;
+	    }
 
+	/* get salinity group */
+	if (store->svp_nctd > 0
+		&& write_salinity == MB_YES)
+	    {
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
 	    strncpy(&buffer[index], "GSH$", 4);
@@ -3888,7 +3941,12 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 
 	    /* add group count to the frame count */
 	    frame_count += group_count + 12;
+	    }
 
+	/* get temperature group */
+	if (store->svp_nctd > 0
+		&& write_temperature == MB_YES)
+	    {
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
 	    strncpy(&buffer[index], "GSH$", 4);
@@ -3926,7 +3984,12 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 
 	    /* add group count to the frame count */
 	    frame_count += group_count + 12;
+	    }
 
+	/* get pressure group */
+	if (store->svp_nctd > 0
+		&& write_pressure == MB_YES)
+	    {
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
 	    strncpy(&buffer[index], "GSH$", 4);
@@ -5429,7 +5492,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    for (i=0;i<store->sbm_center_count;i++)
 		{
 		mb_put_binary_float(SWAPFLAG, store->sbm_center_amp[i], &buffer[index]); 
-		index += 8;
+		index += 4;
 		}
 	    group_count += 12 + 4 * store->sbm_center_count;
     
