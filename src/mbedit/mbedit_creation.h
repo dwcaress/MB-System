@@ -59,6 +59,7 @@ EXTERNAL Widget   textfield_format;
 EXTERNAL Widget   setting_output_label;
 EXTERNAL Widget   setting_output;
 EXTERNAL Widget   setting_output_toggle_output;
+EXTERNAL Widget   setting_output_toggle_edit;
 EXTERNAL Widget   setting_output_toggle_browse;
 EXTERNAL Widget   output_file_label;
 EXTERNAL Widget   output_file_text;

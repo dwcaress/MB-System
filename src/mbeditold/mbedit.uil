@@ -38,6 +38,7 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
+!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -75,6 +76,7 @@ identifier BXG_textfield_format_label;
 identifier BXG_textfield_format;
 identifier BXG_setting_output_label;
 identifier BXG_setting_output_toggle_browse;
+identifier BXG_setting_output_toggle_edit;
 identifier BXG_setting_output_toggle_output;
 identifier BXG_setting_output;
 identifier BXG_output_file_label;
@@ -138,6 +140,7 @@ procedure do_show_flagged_off();
 procedure do_mode_toggle();
 procedure do_unflag_view();
 procedure do_unflag_all();
+procedure do_output_edit();
 
 list BaseStyle : arguments {
 };
@@ -344,8 +347,8 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 419;
-        XmNy = 389;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 536;
         XmNheight = 135;
     };
@@ -556,8 +559,8 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 419;
-        XmNy = 385;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 536;
         XmNheight = 142;
     };
@@ -674,8 +677,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 531;
-        XmNy = 376;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -794,8 +797,8 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 471;
-        XmNy = 390;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 431;
         XmNheight = 133;
     };
@@ -880,8 +883,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 497;
-        XmNy = 413;
+        XmNx = 201;
+        XmNy = 339;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1135,8 +1138,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 452;
-        XmNy = 434;
+        XmNx = 1208;
+        XmNy = 688;
         XmNwidth = 473;
         XmNheight = 457;
     };
@@ -1449,8 +1452,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 589;
-        XmNy = 305;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 196;
         XmNheight = 302;
     };
@@ -1504,7 +1507,7 @@ object output_file_text : XmTextField widget {
         XmNcolumns = 40;
         XmNmaxLength = 130;
         XmNx = 10;
-        XmNy = 520;
+        XmNy = 510;
     };
     controls {
     };
@@ -1522,7 +1525,8 @@ object output_file_label : XmLabel widget {
         arguments Style_use;
         XmNlabelString = compound_string("Output file name:");
         XmNx = 10;
-        XmNy = 500;
+        XmNy = 480;
+        XmNheight = 30;
     };
     controls {
     };
@@ -1546,6 +1550,25 @@ object setting_output_toggle_output : XmToggleButton widget {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_setting_output_toggle_output);
         XmNvalueChangedCallback = procedure do_output_output();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object setting_output_toggle_edit : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Output Edits Only");
+        XmNwidth = 174;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_setting_output_toggle_edit);
+        XmNvalueChangedCallback = procedure do_output_edit();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -1577,13 +1600,14 @@ object setting_output : XmRowColumn widget {
         XmNradioBehavior = true;
         XmNspacing = 0;
         XmNorientation = XmVERTICAL;
-        XmNx = 220;
-        XmNy = 440;
-        XmNwidth = 167;
-        XmNheight = 62;
+        XmNx = 310;
+        XmNy = 420;
+        XmNwidth = 180;
+        XmNheight = 90;
     };
     controls {
          managed XmToggleButton setting_output_toggle_output;
+         managed XmToggleButton setting_output_toggle_edit;
          managed XmToggleButton setting_output_toggle_browse;
     };
     callbacks {
@@ -1600,8 +1624,8 @@ object setting_output_label : XmLabel widget {
         arguments Style_use;
         XmNlabelString = compound_string("Output Mode:");
         XmNmarginWidth = 0;
-        XmNx = 220;
-        XmNy = 420;
+        XmNx = 210;
+        XmNy = 430;
     };
     controls {
     };
@@ -1806,10 +1830,10 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 442;
-        XmNy = 440;
-        XmNwidth = 521;
-        XmNheight = 573;
+        XmNx = 74;
+        XmNy = 389;
+        XmNwidth = 541;
+        XmNheight = 562;
     };
     controls {
          managed XmFileSelectionBox fileSelectionBox;
@@ -1833,8 +1857,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "Open Swath Sonar Data File";
 !(BX)        XmNdeleteResponse = XmUNMAP;
-!(BX)        XmNwidth = 521;
-!(BX)        XmNheight = 573;
+!(BX)        XmNwidth = 541;
+!(BX)        XmNheight = 562;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_file;
@@ -2737,8 +2761,8 @@ object mbedit_bboard : XmBulletinBoard widget {
 object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 180;
-        XmNy = 124;
+        XmNx = 1064;
+        XmNy = 435;
         XmNwidth = 1014;
         XmNheight = 665;
     };
@@ -2802,8 +2826,8 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        XmNiconName = "MBedit";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
-!(BX)        XmNx = 180;
-!(BX)        XmNy = 124;
+!(BX)        XmNx = 1064;
+!(BX)        XmNy = 435;
 !(BX)        XmNwidth = 1014;
 !(BX)        XmNheight = 665;
 !(BX)    };
