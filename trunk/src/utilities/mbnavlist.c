@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 4.0 1999-12-29 00:58:18 caress Exp $
+ *    $Id: mbnavlist.c,v 4.1 2000-03-08 00:03:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/12/29  00:58:18  caress
+ * Release 4.6.8
+ *
  * Revision 1.1  1999/12/29  00:35:11  caress
  * Initial revision
  *
@@ -48,7 +51,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 4.0 1999-12-29 00:58:18 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 4.1 2000-03-08 00:03:45 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -411,6 +414,9 @@ char **argv;
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       status:         %d\n",status);
 			}
+/*fprintf(stdout, "kind:%d error:%d time:%4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n", 
+kind, error, time_i[0],  time_i[1],  time_i[2],  
+time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 		
 		/* calculate course made good and distance */
 		if (error == MB_ERROR_NO_ERROR)
@@ -543,19 +549,11 @@ char **argv;
 						printf("%7.3f",time_interval);
 					break;
 				case 'X': /* longitude decimal degrees */
-					dlon = navlon 
-					+ headingy*mtodeglon
-						*bathacrosstrack[j]
-					+ headingx*mtodeglon
-						*bathalongtrack[j];
+					dlon = navlon;
 					printf("%11.6f",dlon);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
-					dlon = navlon 
-					+ headingy*mtodeglon
-						*bathacrosstrack[j]
-					+ headingx*mtodeglon
-						*bathalongtrack[j];
+					dlon = navlon;
 					if (dlon < 0.0)
 						{
 						hemi = 'W';
@@ -569,19 +567,11 @@ char **argv;
 						degrees, minutes, hemi);
 					break;
 				case 'Y': /* latitude decimal degrees */
-					dlat = navlat 
-					- headingx*mtodeglat
-						*bathacrosstrack[j]
-					+ headingy*mtodeglat
-						*bathalongtrack[j];
+					dlat = navlat;
 					printf("%11.6f",dlat);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
-					dlat = navlat 
-					- headingx*mtodeglat
-						*bathacrosstrack[j]
-					+ headingy*mtodeglat
-						*bathalongtrack[j];
+					dlat = navlat;
 					if (dlat < 0.0)
 						{
 						hemi = 'S';

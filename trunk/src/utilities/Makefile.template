@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.18 1999-12-29 00:35:11 caress Exp $
+#	$Id: Makefile.template,v 4.19 2000-03-08 00:06:36 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.18  1999/12/29  00:35:11  caress
+# Release 4.6.8
+#
 # Revision 4.17  1998/12/17  22:52:10  caress
 # MB-System version 4.6beta4
 #
@@ -129,7 +132,8 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbcut $(MANDIR)/mbcut.l \
 	$(BINDIR)/mbtide $(MANDIR)/mbtide.l \
 	$(BINDIR)/mbsimradmakess $(MANDIR)/mbsimradmakess.l \
-	$(BINDIR)/mbnavlist $(MANDIR)/mbnavlist.l
+	$(BINDIR)/mbnavlist $(MANDIR)/mbnavlist.l \
+	$(BINDIR)/mbprocess $(MANDIR)/mbprocess.l
 
 ### make clean removes the object files
 clean:
@@ -217,6 +221,9 @@ $(BINDIR)/mbsimradmakess:	mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.
 $(BINDIR)/mbnavlist:	mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbnavlist
+$(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbrt.a
+	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbrt.a \
+		$(LFLAGS) -o $(BINDIR)/mbprocess
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -274,6 +281,8 @@ mbsimradmakess.o:	mbsimradmakess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h 
 	$(CC) -c $(CFLAGS) mbsimradmakess.c
 mbnavlist.o:	mbnavlist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbnavlist.c
+mbprocess.o:	mbprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbprocess.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbsystem.l:	mbsystem.manl
@@ -357,3 +366,6 @@ $(MANDIR)/mbsimradmakess.l:	mbsimradmakess.manl
 $(MANDIR)/mbnavlist.l:	mbnavlist.manl
 	cp mbnavlist.manl $(MANDIR)/mbnavlist.l
 	chmod 664 $(MANDIR)/mbnavlist.l
+$(MANDIR)/mbprocess.l:	mbprocess.manl
+	cp mbprocess.manl $(MANDIR)/mbprocess.l
+	chmod 664 $(MANDIR)/mbprocess.l

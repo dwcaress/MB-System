@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsimradmakess.c	11/29/98
  *
- *    $Id: mbsimradmakess.c,v 4.2 1999-04-21 05:44:42 caress Exp $
+ *    $Id: mbsimradmakess.c,v 4.3 2000-03-08 00:05:05 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -56,6 +56,9 @@
  * Date:	November 29, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1999/04/21  05:44:42  caress
+ * Fixed handling of swath width and bad sidescan data.
+ *
  * Revision 4.1  1999/02/04  23:55:08  caress
  * MB-System version 4.6beta7
  *
@@ -84,7 +87,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.2 1999-04-21 05:44:42 caress Exp $";
+	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.3 2000-03-08 00:05:05 caress Exp $";
 	static char program_name[] = "MBSIMRADMAKESS";
 	static char help_message[] =  "MBSIMRADMAKESS is an utility for regenerating sidescan imagery from the raw amplitude samples contained in data from  Simrad \nEM300 and EM3000 multibeam sonars. This program ignores amplitude \ndata associated with flagged (bad) bathymetry data, thus removing \none important source of noise in the sidescan data. The default \ninput and output streams are stdin and stdout.";
 	static char usage_message[] = "mbsimradmakess [-Fformat -V -H  -Iinfile -Ooutfile -Ppixel_size -Sswath_width -Tpixel_int]";
@@ -163,6 +166,7 @@ char **argv;
 	double	depthscale, depthoffset;
 	double	dacrscale, daloscale;
 	double	reflscale;
+	double	ssoffset;
 	int	swath_width_set = MB_NO;
 	int	pixel_size_set = MB_NO;
 	double	swath_width;
@@ -532,6 +536,16 @@ char **argv;
 			dacrscale  = 0.01 * ping->png_distance_res;
 			daloscale  = 0.01 * ping->png_distance_res;
 			reflscale  = 0.5;
+			ssoffset = 64.0;
+			if (store->run_mode == 4)
+			    {
+			    if (depthscale * ping->png_depth[ping->png_nbeams/2] > 3500.0
+				&& ping->png_max_range > 19000
+				&& ping->png_bsn + ping->png_bso < -60)
+				{
+				ssoffset = 64.0 - 0.6 * (ping->png_bsn + ping->png_bso + 60);
+				}
+			    }
 
 			/* get median depth */
 			nbathsort = 0;
@@ -638,8 +652,7 @@ char **argv;
 						    + (int)(xtrack / pixel_size);
 						if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
 						    {
-						    ss[kk] 
-							    += reflscale*((double)beam_ss[k]) + 64.0;
+						    ss[kk]  += reflscale*((double)beam_ss[k]) + ssoffset;
 						    ssalongtrack[kk] 
 							    += bathalongtrack[j];
 						    ss_cnt[kk]++;
