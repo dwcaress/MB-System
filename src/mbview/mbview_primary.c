@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_primary.c	9/25/2003
- *    $Id: mbview_primary.c,v 1.1 2003-11-07 00:39:15 caress Exp $
+ *    $Id: mbview_primary.c,v 1.2 2003-11-25 01:43:18 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -67,7 +67,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_primary.c,v 1.1 2003-11-07 00:39:15 caress Exp $";
+static char rcs_id[]="$Id: mbview_primary.c,v 1.2 2003-11-25 01:43:18 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, int instance,

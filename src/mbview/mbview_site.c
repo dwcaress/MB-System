@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 1.1 2003-11-07 00:39:15 caress Exp $
+ *    $Id: mbview_site.c,v 1.2 2003-11-25 01:43:19 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -75,7 +75,7 @@ extern char	*mbsystem_library_name;
 Cardinal 	ac = 0;
 Arg      	args[256];
 
-static char rcs_id[]="$Id: mbview_site.c,v 1.1 2003-11-07 00:39:15 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 1.2 2003-11-25 01:43:19 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,

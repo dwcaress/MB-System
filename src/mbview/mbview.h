@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 1.2 2003-11-07 00:39:13 caress Exp $
+ *    $Id: mbview.h,v 1.3 2003-11-25 01:43:18 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -112,9 +112,10 @@
 #define MBV_PICK_NONE			0
 #define MBV_PICK_ONEPOINT		1
 #define MBV_PICK_TWOPOINT		2
-#define MBV_PICK_SITE			3
-#define MBV_PICK_ROUTE			4
-#define MBV_PICK_NAV			5
+#define MBV_PICK_AREA			3
+#define MBV_PICK_SITE			4
+#define MBV_PICK_ROUTE			5
+#define MBV_PICK_NAV			6
 
 /* area defines */
 #define MBV_AREA_NONE			0
@@ -165,7 +166,11 @@ struct mbview_point_struct {
 	};
 	
 struct mbview_navpoint_struct {
+	int	draped;
+	int	selected;
 	double	time_d;
+	double	heading;
+	double	speed;
 	struct mbview_point_struct point;
 	struct mbview_point_struct pointport;
 	struct mbview_point_struct pointcntr;
@@ -189,9 +194,11 @@ struct mbview_pick_struct {
 	};
 
 struct mbview_area_struct {
+	double	width;
+	double	length;
+	double	bearing;
 	struct mbview_point_struct endpoints[2];
 	struct mbview_linesegment_struct segment;
-	double	areawidth;
 	struct mbview_point_struct cornerpoints[4];
 	struct mbview_linesegment_struct segments[4];
 	};
@@ -346,6 +353,10 @@ struct mbview_struct {
 	int	area_type;
 	struct mbview_area_struct area;
 	
+	/* nav pick */
+	int	navpick_type;
+	struct mbview_pick_struct navpick;
+	
 	/* site data */
 	int	site_mode;
 	int	site_view_mode;
@@ -366,9 +377,11 @@ struct mbview_struct {
 	/* nav data */
 	int	nav_mode;
 	int	nav_view_mode;
+	int	navdrape_view_mode;
 	int	nnav;
 	int	nnav_alloc;
-	int	nav_selected;
+	int	nav_selected[2];
+	int	nav_point_selected[2];
 	struct mbview_nav_struct *navs;
 	};
 
@@ -397,6 +410,7 @@ int mbview_setviewcontrols(int verbose, int instance,
 			int	site_view_mode,
 			int	route_view_mode,
 			int	nav_view_mode,
+			int	navdrape_view_mode,
 			double	exageration,
 			double	modelelevation3d,
 			double	modelazimuth3d,
@@ -567,6 +581,8 @@ int mbview_allocnavarrays(int verbose,
 			double	**navlon,
 			double	**navlat,
 			double	**navz,
+			double	**navheading,
+			double	**navspeed,
 			double	**navportlon,
 			double	**navportlat,
 			double	**navstbdlon,
@@ -579,6 +595,8 @@ int mbview_freenavarrays(int verbose,
 			double	**navlon,
 			double	**navlat,
 			double	**navz,
+			double	**navheading,
+			double	**navspeed,
 			double	**navportlon,
 			double	**navportlat,
 			double	**navstbdlon,
@@ -592,6 +610,8 @@ int mbview_addnav(int verbose, int instance,
 			double	*navlon,
 			double	*navlat,
 			double	*navz,
+			double	*navheading,
+			double	*navspeed,
 			double	*navportlon,
 			double	*navportlat,
 			double	*navstbdlon,

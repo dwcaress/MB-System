@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 1.1 2003-11-07 00:39:16 caress Exp $
+ *    $Id: mbview_plot.c,v 1.2 2003-11-25 01:43:18 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -67,7 +67,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 1.1 2003-11-07 00:39:16 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 1.2 2003-11-25 01:43:18 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -435,7 +435,10 @@ int mbview_drawdata(int instance, int rez)
 		
 	/* draw current area */
 	mbview_drawarea(instance);
-		
+
+	/* draw current navpick */
+	mbview_drawnavpick(instance);		
+
 	/* draw sites */
 	mbview_drawsite(instance, rez);
 		
@@ -915,18 +918,45 @@ int mbview_findpoint(int instance, int xpixel, int ypixel,
 	ijbounds[1] = data->primary_nx;
 	ijbounds[2] = 0;
 	ijbounds[3] = data->primary_ny;
-	mbview_findpointrez(instance, MBV_REZ_LOW, xpixel, ypixel, 
+	rez = MBV_REZ_LOW;
+	mbview_findpointrez(instance, rez, xpixel, ypixel, 
 			ijbounds, found, 
 			xgrid, ygrid,
 			xlon, ylat, zdata,
 			xdisplay, ydisplay, zdisplay);
+	if (*found == MB_YES)
+		{
+		/* save last good results */
+		foundsave = *found;
+		xgridsave = *xgrid;
+		ygridsave = *ygrid;
+		xlonsave = *xlon;
+		ylatsave = *ylat;
+		zdatasave = *zdata;
+		xdisplaysave = *xdisplay;
+		ydisplaysave = *ydisplay;
+		zdisplaysave = *zdisplay;
+		}
 
 	/* now check high rez */
-	mbview_findpointrez(instance, MBV_REZ_HIGH, xpixel, ypixel, 
+	rez = MBV_REZ_HIGH;
+	mbview_findpointrez(instance, rez, xpixel, ypixel, 
 			ijbounds, found, 
 			xgrid, ygrid, 
 			xlon, ylat, zdata,
 			xdisplay, ydisplay, zdisplay);
+	if (*found == MB_NO && foundsave == MB_YES)
+		{
+		rez = MBV_REZ_LOW;
+		*found = foundsave;
+		*xgrid = xgridsave;
+		*ygrid = ygridsave;
+		*xlon = xlonsave;
+		*ylat = ylatsave;
+		*xdisplay = xdisplaysave;
+		*ydisplay = ydisplaysave;
+		*zdisplay = zdisplaysave;
+		}
 
 	/* repeat until found at highest resolution possible */
 	while (*found == MB_YES
@@ -1157,6 +1187,12 @@ stride, npickx, npicky, ipickstride, jpickstride);*/
 			&& data->primary_data[l] != data->primary_nodatavalue
 			&& data->primary_data[m] != data->primary_nodatavalue)
 			{
+			if (!(data->primary_stat_z[k/8] & statmask[k%8]))
+				mbview_zscalepoint(view,data,k);
+			if (!(data->primary_stat_z[l/8] & statmask[l%8]))
+				mbview_zscalepoint(view,data,l);
+			if (!(data->primary_stat_z[m/8] & statmask[m%8]))
+				mbview_zscalepoint(view,data,m);
 			rgb[2] = 0.25;
 /*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
 i,j, rgb[0], rgb[1], rgb[2]);*/
@@ -1177,6 +1213,12 @@ i,j, rgb[0], rgb[1], rgb[2]);*/
 			&& data->primary_data[m] != data->primary_nodatavalue
 			&& data->primary_data[n] != data->primary_nodatavalue)
 			{
+			if (!(data->primary_stat_z[l/8] & statmask[l%8]))
+				mbview_zscalepoint(view,data,l);
+			if (!(data->primary_stat_z[m/8] & statmask[m%8]))
+				mbview_zscalepoint(view,data,m);
+			if (!(data->primary_stat_z[n/8] & statmask[n%8]))
+				mbview_zscalepoint(view,data,n);
 			rgb[2] = 0.75;
 /*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
 i,j, rgb[0], rgb[1], rgb[2]);*/

@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 1.1 2003-11-07 00:39:14 caress Exp $
+ *    $Id: mbview_pick.c,v 1.2 2003-11-25 01:43:18 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -67,7 +67,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 1.1 2003-11-07 00:39:14 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 1.2 2003-11-25 01:43:18 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -323,7 +323,10 @@ int mbview_pick_text(int instance)
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	dx, dy, range, bearing;
-	char	EorW[2], NorS[2];
+	int	time_i[7];
+	char	lonstr0[24], lonstr1[24];
+	char	latstr0[24], latstr1[24];
+	char	date0[24], date1[24];
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -339,64 +342,21 @@ int mbview_pick_text(int instance)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
-	/* set lon lat annotation */
-	if (data->pickinfo_mode == MBV_PICK_ONEPOINT
-		|| data->pickinfo_mode == MBV_PICK_TWOPOINT)
-		{
-		if (data->pick.endpoints[0].xlon > 0.0)
-			EorW[0] = 'E';
-		else
-			EorW[0] = 'W';
-		if (data->pick.endpoints[0].ylat > 0.0)
-			NorS[0] = 'N';
-		else
-			NorS[0] = 'S';
-		if (data->pick_type == MBV_PICK_TWOPOINT)
-			{
-			if (data->pick.endpoints[1].xlon > 0.0)
-				EorW[1] = 'E';
-			else
-				EorW[1] = 'W';
-			if (data->pick.endpoints[1].ylat > 0.0)
-				NorS[1] = 'N';
-			else
-				NorS[1] = 'S';
-			}
-		}
-	else if (data->pickinfo_mode == MBV_PICK_SITE)
-		{
-		if (data->sites[data->site_selected].point.xlon > 0.0)
-			EorW[0] = 'E';
-		else
-			EorW[0] = 'W';
-		if (data->sites[data->site_selected].point.ylat > 0.0)
-			NorS[0] = 'N';
-		else
-			NorS[0] = 'S';
-		}
-	else if (data->pickinfo_mode == MBV_PICK_ROUTE)
-		{
-		if (data->routes[data->route_selected].points[data->route_point_selected].xlon > 0.0)
-			EorW[0] = 'E';
-		else
-			EorW[0] = 'W';
-		if (data->routes[data->route_selected].points[data->route_point_selected].ylat > 0.0)
-			NorS[0] = 'N';
-		else
-			NorS[0] = 'S';
-		}
 
 	/* update pick info */
 	if (data->pickinfo_mode == MBV_PICK_ONEPOINT)
 		{
-		sprintf(value_text,":::t\"Pick Info:\":t\" Lon: %.6f %c\":t\" Lat: %.6f %c\":t\" Depth: %.3f m\"", 
-			data->pick.endpoints[0].xlon, EorW[0],
-			data->pick.endpoints[0].ylat, NorS[0],
-			data->pick.endpoints[0].zdata);
+		mbview_setlonlatstrings(data->pick.endpoints[0].xlon, data->pick.endpoints[0].ylat, 
+					lonstr0, latstr0);
+		sprintf(value_text,":::t\"Pick Info:\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\"", 
+			lonstr0, latstr0, data->pick.endpoints[0].zdata);
 		}
 	else if (data->pickinfo_mode == MBV_PICK_TWOPOINT)
 		{
+		mbview_setlonlatstrings(data->pick.endpoints[0].xlon, data->pick.endpoints[0].ylat, 
+					lonstr0, latstr0);
+		mbview_setlonlatstrings(data->pick.endpoints[1].xlon, data->pick.endpoints[1].ylat, 
+					lonstr1, latstr1);
 		dx = data->pick.endpoints[1].xdisplay
 				- data->pick.endpoints[0].xdisplay;
 		dy = data->pick.endpoints[1].ydisplay
@@ -404,21 +364,28 @@ int mbview_pick_text(int instance)
 		range = sqrt(dx * dx + dy * dy) / view->scale ;
 		bearing = RTD * atan2(dx, dy);
 		sprintf(value_text,
-		":::t\"Pick Info:\":t\" Lon 1: %.6f %c\":t\" Lat 1: %.6f %c\":t\" Depth 1: %.3f m\":t\" Lon 2: %.6f %c\":t\" Lat 2: %.6f %c\":t\" Depth 2: %.3f m\":t\" Bearing: %.1f deg\":t\" Distance: %.3f m\"", 
-			data->pick.endpoints[0].xlon, EorW[0],
-			data->pick.endpoints[0].ylat, NorS[0],
+		":::t\"Pick Info:\":t\" Lon 1: %s\":t\" Lat 1: %s\":t\" Depth 1: %.3f m\":t\" Lon 2: %s\":t\" Lat 2: %s\":t\" Depth 2: %.3f m\":t\" Bearing: %.1f deg\":t\" Distance: %.3f m\"", 
+			lonstr0, latstr0,
 			data->pick.endpoints[0].zdata,
-			data->pick.endpoints[1].xlon, EorW[1],
-			data->pick.endpoints[1].ylat, NorS[1],
+			lonstr1, latstr1,
 			data->pick.endpoints[1].zdata,
 			bearing, range);
 		}
+	else if (data->pickinfo_mode == MBV_PICK_AREA)
+		{
+		sprintf(value_text,
+		":::t\"Area Info:\":t\" Length: %.3f m\":t\" Width: %.3f m\":t\" Bearing: %.1f deg\"", 
+			data->area.length,
+			data->area.width,
+			data->area.bearing);
+		}
 	else if (data->pickinfo_mode == MBV_PICK_SITE)
 		{
-		sprintf(value_text,":::t\"Site %d Pick Info:\":t\" Lon: %.6f %c\":t\" Lat: %.6f %c\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
-			data->site_selected,
-			data->sites[data->site_selected].point.xlon, EorW[0],
-			data->sites[data->site_selected].point.ylat, NorS[0],
+		mbview_setlonlatstrings(data->sites[data->site_selected].point.xlon, 
+					data->sites[data->site_selected].point.ylat, 
+					lonstr0, latstr0);
+		sprintf(value_text,":::t\"Site %d Pick Info:\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
+			data->site_selected, lonstr0, latstr0,
 			data->sites[data->site_selected].point.zdata,
 			data->sites[data->site_selected].color,
 			data->sites[data->site_selected].size,
@@ -426,14 +393,63 @@ int mbview_pick_text(int instance)
 		}
 	else if (data->pickinfo_mode == MBV_PICK_ROUTE)
 		{
-		sprintf(value_text,":::t\"Route %d Pick Info:\":t\" Point: %d\":t\" Lon: %.6f %c\":t\" Lat: %.6f %c\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
-			data->route_selected,data->route_point_selected,
-			data->routes[data->route_selected].points[data->route_point_selected].xlon, EorW[0],
-			data->routes[data->route_selected].points[data->route_point_selected].ylat, NorS[0],
+		mbview_setlonlatstrings(data->routes[data->route_selected].points[data->route_point_selected].xlon, 
+					data->routes[data->route_selected].points[data->route_point_selected].ylat, 
+					lonstr0, latstr0);
+		sprintf(value_text,":::t\"Route %d Pick Info:\":t\" Point: %d\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
+			data->route_selected,data->route_point_selected, 
+			lonstr0, latstr0,
 			data->routes[data->route_selected].points[data->route_point_selected].zdata,
 			data->routes[data->route_selected].color,
 			data->routes[data->route_selected].size,
 			data->routes[data->route_selected].name);
+		}
+	else if (data->pickinfo_mode == MBV_PICK_NAV
+		&& data->navpick_type == MBV_PICK_ONEPOINT)
+		{
+		mb_get_date(mbv_verbose,
+				data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].time_d,
+				time_i);
+		sprintf(date0, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%3.3d",
+			time_i[0], time_i[1], time_i[2], 
+			time_i[3], time_i[4], time_i[5], 
+			(time_i[6] / 1000));
+		mbview_setlonlatstrings(data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.xlon, 
+					data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.ylat, 
+					lonstr0, latstr0);
+		sprintf(value_text,":::t\"Navigation Pick Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" Vehicle Depth: %.3f m\":t\" Heading: %.1f deg\":t\" Speed: %.1f km/hr\"", 
+			data->navs[data->nav_selected[0]].name, 
+			date0, lonstr0, latstr0,
+			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.zdata,
+			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].heading,
+			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].speed);
+		}
+	else if (data->pickinfo_mode == MBV_PICK_NAV
+		&& data->navpick_type == MBV_PICK_TWOPOINT)
+		{
+		mb_get_date(mbv_verbose,
+				data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].time_d,
+				time_i);
+		sprintf(date0, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%3.3d",
+			time_i[0], time_i[1], time_i[2], 
+			time_i[3], time_i[4], time_i[5], 
+			(time_i[6] / 1000));
+		mbview_setlonlatstrings(data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.xlon, 
+					data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.ylat, 
+					lonstr0, latstr0);
+		mb_get_date(mbv_verbose,
+				data->navs[data->nav_selected[1]].navpts[data->nav_point_selected[1]].time_d,
+				time_i);
+		sprintf(date1, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%3.3d",
+			time_i[0], time_i[1], time_i[2], 
+			time_i[3], time_i[4], time_i[5], 
+			(time_i[6] / 1000));
+		mbview_setlonlatstrings(data->navs[data->nav_selected[1]].navpts[data->nav_point_selected[1]].point.xlon, 
+					data->navs[data->nav_selected[1]].navpts[data->nav_point_selected[1]].point.ylat, 
+					lonstr1, latstr1);
+		sprintf(value_text,":::t\"Navigation Picks Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\"", 
+			data->navs[data->nav_selected[0]].name, date0, lonstr0, latstr0,
+			data->navs[data->nav_selected[1]].name, date1, lonstr1, latstr1);
 		}
 	else
 		{
@@ -447,6 +463,50 @@ int mbview_pick_text(int instance)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setlonlatstrings(double lon, double lat, char *lonstring, char *latstring)
+{
+	/* local variables */
+	char	*function_name = "mbview_setlonlatstrings";
+	int	status = MB_SUCCESS;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       lon:              %f\n",lon);
+		fprintf(stderr,"dbg2       lat:              %f\n",lat);
+		}
+		
+	/* set the strings */
+	if (lon < 0.0)
+		sprintf(lonstring, "%9.5f W", fabs(lon));
+	else
+		sprintf(lonstring, "%9.5f E", fabs(lon));
+	if (lat < 0.0)
+		sprintf(latstring, "%8.5f S", fabs(lat));
+	else
+		sprintf(latstring, "%8.5f N", fabs(lat));
+	
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       lonstring:       %s\n",lonstring);
+		fprintf(stderr,"dbg2       latstring:       %s\n",latstring);
 		fprintf(stderr,"dbg2       status:          %d\n",status);
 		}
 
@@ -598,6 +658,14 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 		data->area.cornerpoints[3].ydisplay 
 			= data->area.endpoints[1].ydisplay
 				+ dyuse;
+				
+		/* calculate width and length */
+		data->area.length = sqrt(dx * dx + dy * dy) / view->scale;
+		data->area.width = view->areaaspect * data->area.length;
+		data->area.bearing = RTD * atan2(dx, dy);
+		
+		/* set pick info */
+		data->pickinfo_mode = MBV_PICK_AREA;
 
 		/* now project the segment endpoints */
 		for (i=0;i<4;i++)
@@ -631,6 +699,9 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 							- view->zorigin);
 				}
 			}
+		
+		/* set pick annotation */
+		mbview_pick_text(instance);
 		}
 
 	/* now set and drape the segments 
