@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson8k.c	3.00	8/20/94
- *	$Id: mbsys_reson8k.c,v 5.0 2001-09-17 23:24:10 caress Exp $
+ *	$Id: mbsys_reson8k.c,v 5.1 2001-11-16 01:32:31 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	September 3, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/09/17  23:24:10  caress
+ * Added XTF format.
+ *
  *
  */
 
@@ -44,7 +47,7 @@
 int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_reson8k.c,v 5.0 2001-09-17 23:24:10 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson8k.c,v 5.1 2001-11-16 01:32:31 caress Exp $";
 	char	*function_name = "mbsys_reson8k_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -101,7 +104,7 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->nav_heading = 0.0;
 
 	/* attitude data */
-	store->att_time_d = 0.0;
+	store->att_timetag = 0.0;
 	store->att_heading = 0.0;
 	store->att_heave = 0.0;
 	store->att_roll = 0.0;
@@ -1144,9 +1147,9 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*draft = store->MBOffsetZ;
 
 		/* get roll pitch and heave */
-		*roll = store->att_roll;
-		*pitch = store->att_pitch;
-		*heave = store->att_heave;
+		*roll = store->png_roll;
+		*pitch = store->png_pitch;
+		*heave = store->png_heave;
 
 		/* print debug statements */
 		if (verbose >= 5)

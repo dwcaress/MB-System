@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_xtfr8101.c,v 5.1 2001-10-12 21:08:37 caress Exp $
+ *	$Id: mbr_xtfr8101.c,v 5.2 2001-11-16 01:32:31 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 26, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/10/12  21:08:37  caress
+ * Added interpolation of attitude data.
+ *
  * Revision 5.0  2001/09/17  23:24:10  caress
  * Added XTF format.
  *
@@ -75,7 +78,7 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.1 2001-10-12 21:08:37 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.2 2001-11-16 01:32:31 caress Exp $";
 	char	*function_name = "mbr_register_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -205,7 +208,7 @@ int mbr_info_xtfr8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.1 2001-10-12 21:08:37 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.2 2001-11-16 01:32:31 caress Exp $";
 	char	*function_name = "mbr_info_xtfr8101";
 	int	status = MB_SUCCESS;
 
@@ -274,7 +277,7 @@ int mbr_info_xtfr8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.1 2001-10-12 21:08:37 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.2 2001-11-16 01:32:31 caress Exp $";
 	char	*function_name = "mbr_alm_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -523,7 +526,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->MRUOffsetRoll = data->fileheader.MRUOffsetRoll;		/* Multibeam MRU roll offset (degrees) */
 	
 		/* attitude data */
-		store->att_time_d = 0.0;
+		store->att_timetag = data->attitudeheader.TimeTag;
 		store->att_heading = data->attitudeheader.Heading;
 		store->att_heave = data->attitudeheader.Heave;
 		store->att_roll = data->attitudeheader.Roll;
