@@ -1,9 +1,14 @@
-MBSYSTEM VERSION 4.0 RELEASE NOTES:
+MB-SYSTEM VERSION 4.1 RELEASE NOTES:
 -----------------------------------
 
-This directory structure contains the version 4.0 release  
-of the MBSYSTEM software package for processing and display of 
-multibeam data.
+This directory structure contains the version 4.1 release  
+of the MB-System software package for processing and display of 
+multibeam data. Version 4.1 includes significant bug fixes
+relative to version 4.0.
+
+RELEASE DATE:
+------------
+November 1, 1994
 
 Authors:
 --------
@@ -38,7 +43,7 @@ language. Some L-DEO extensions to GMT for handling underway data
 are also used. The source code for these required software packages
 is available as follows:
 
-	MB-System v 4.0
+	MB-System v 4.1
 	- available from L-DEO via anonymous ftp to
 	  lamont.ldgo.columbia.edu
 	- compressed tar file MB-System4.0.tar.Z
@@ -65,8 +70,8 @@ Installing MB-System:
 --------------------
 	The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
-		% uncompress MB-System4.0.tar.Z
-		% tar xvf MB-System4.0.tar.Z
+		% uncompress MB-System4.1.tar.Z
+		% tar xvf MB-System4.1.tar
 	This will create a directory structure called mbsystem. 
 In order to configure your installation, you must edit the
 shellscript mbsystem/install_makefiles.  This is perl script
@@ -234,10 +239,14 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.5 1994-10-21 21:54:24 caress Exp $
+RCS ID: $Id: README,v 4.6 1994-11-18 16:37:15 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.5  1994/10/21  21:54:24  caress
+# Release V4.0
+# quit
+#
 # Revision 4.4  1994/10/21  17:42:43  caress
 # Release V4.0
 #
