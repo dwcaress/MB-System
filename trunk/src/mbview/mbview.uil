@@ -38,7 +38,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -97,6 +96,7 @@ procedure do_mbview_2dparmspopdown();
 procedure do_mbview_sitelistpopup();
 procedure do_mbview_sitelistpopdown();
 procedure do_mbview_sitelistapply();
+procedure do_mbview_navdrape();
 
 list BaseStyle : arguments {
 };
@@ -332,7 +332,7 @@ object mB3DView_mbview_label_sitelist : XmLabel widget {
         arguments Style_use;
         XmNlabelString = compound_string("Current Sites:");
         XmNx = 10;
-        XmNy = 0;
+        XmNy = 10;
         XmNwidth = 130;
         XmNheight = 30;
     };
@@ -582,8 +582,8 @@ object mB3DView_mbview_bulletinBoard_2dparms : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("MBview 2D Parameters");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 175;
-        XmNy = 528;
+        XmNx = 319;
+        XmNy = 346;
         XmNwidth = 187;
         XmNheight = 215;
     };
@@ -610,8 +610,8 @@ object mB3DView_mbview_bulletinBoard_2dparms : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_2dparms : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 175;
-!(BX)        XmNy = 528;
+!(BX)        XmNx = 319;
+!(BX)        XmNy = 346;
 !(BX)        XmNwidth = 187;
 !(BX)        XmNheight = 215;
 !(BX)    };
@@ -1126,8 +1126,8 @@ object mB3DView_mbview_bulletinBoard_3dparms : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("MBview 3D Parameters");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 43;
-        XmNy = 454;
+        XmNx = 272;
+        XmNy = 215;
         XmNwidth = 281;
         XmNheight = 478;
     };
@@ -1171,8 +1171,8 @@ object mB3DView_mbview_bulletinBoard_3dparms : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_3dparms : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 43;
-!(BX)        XmNy = 454;
+!(BX)        XmNx = 272;
+!(BX)        XmNy = 215;
 !(BX)        XmNwidth = 281;
 !(BX)        XmNheight = 478;
 !(BX)    };
@@ -1615,8 +1615,8 @@ object mB3DView_mbview_bulletinBoard_shadeparms : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("MBview Shading Parameters");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 71;
-        XmNy = 525;
+        XmNx = 273;
+        XmNy = 234;
         XmNwidth = 278;
         XmNheight = 439;
     };
@@ -1654,8 +1654,8 @@ object mB3DView_mbview_bulletinBoard_shadeparms : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_shadeparms : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 71;
-!(BX)        XmNy = 525;
+!(BX)        XmNx = 273;
+!(BX)        XmNy = 234;
 !(BX)        XmNwidth = 278;
 !(BX)        XmNheight = 439;
 !(BX)    };
@@ -1892,8 +1892,8 @@ object mB3DView_mbview_bulletinBoard_about : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogTitle = compound_string("About MBview...");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = -60;
-        XmNy = 605;
+        XmNx = 181;
+        XmNy = 188;
         XmNwidth = 463;
         XmNheight = 531;
     };
@@ -1919,8 +1919,8 @@ object mB3DView_mbview_bulletinBoard_about : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_about : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = -60;
-!(BX)        XmNy = 605;
+!(BX)        XmNx = 181;
+!(BX)        XmNy = 188;
 !(BX)        XmNwidth = 463;
 !(BX)        XmNheight = 531;
 !(BX)    };
@@ -1981,8 +1981,8 @@ object mB3DView_mbview_bulletinBoard_message : XmBulletinBoardDialog widget {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNdialogTitle = compound_string("MBview: Please wait...");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = -55;
-        XmNy = 651;
+        XmNx = 202;
+        XmNy = 406;
         XmNwidth = 421;
         XmNheight = 95;
     };
@@ -2001,8 +2001,8 @@ object mB3DView_mbview_bulletinBoard_message : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_message : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = -55;
-!(BX)        XmNy = 651;
+!(BX)        XmNx = 202;
+!(BX)        XmNy = 406;
 !(BX)        XmNwidth = 421;
 !(BX)        XmNheight = 95;
 !(BX)    };
@@ -2114,8 +2114,8 @@ object mB3DView_mbview_bulletinBoard_resolution : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("MBview Rendering Resolution");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 88;
-        XmNy = 574;
+        XmNx = 257;
+        XmNy = 333;
         XmNwidth = 311;
         XmNheight = 242;
     };
@@ -2137,8 +2137,8 @@ object mB3DView_mbview_bulletinBoard_resolution : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MB3DView Rendering Resolution";
-!(BX)        XmNx = 88;
-!(BX)        XmNy = 574;
+!(BX)        XmNx = 257;
+!(BX)        XmNy = 333;
 !(BX)        XmNwidth = 311;
 !(BX)        XmNheight = 242;
 !(BX)    };
@@ -2729,8 +2729,8 @@ object mB3DView_mbview_bulletinBoard_colorbounds : XmBulletinBoardDialog widget 
         XmNdialogTitle = compound_string("MBview Colors and Contours");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = -104;
-        XmNy = 602;
+        XmNx = 192;
+        XmNy = 231;
         XmNwidth = 440;
         XmNheight = 445;
     };
@@ -2773,8 +2773,8 @@ object mB3DView_mbview_bulletinBoard_colorbounds : XmBulletinBoardDialog widget 
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MB3DView Colors & Contours";
-!(BX)        XmNx = -104;
-!(BX)        XmNy = 602;
+!(BX)        XmNx = 192;
+!(BX)        XmNy = 231;
 !(BX)        XmNwidth = 440;
 !(BX)        XmNheight = 445;
 !(BX)    };
@@ -3096,6 +3096,22 @@ object mB3DView_mbview_toggleButton_nav : XmToggleButton widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_toggleButton_navdrape : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Draped Navigation");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_navdrape();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mB3DView_mbview_separator8 : XmSeparator widget {
     arguments {
         arguments Style_use;
@@ -3209,10 +3225,10 @@ object mB3DView_mbview_toggleButton_colortable_sealevel : XmToggleButton widget 
 object mbview_pulldownMenu_view : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 27;
+        XmNy = 86;
         XmNwidth = 211;
-        XmNheight = 468;
+        XmNheight = 492;
     };
     controls {
          managed XmToggleButton mB3DView_mbview_toggleButton_display_2D;
@@ -3231,6 +3247,7 @@ object mbview_pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton mB3DView_mbview_toggleButton_site;
          managed XmToggleButton mB3DView_mbview_toggleButton_route;
          managed XmToggleButton mB3DView_mbview_toggleButton_nav;
+         managed XmToggleButton mB3DView_mbview_toggleButton_navdrape;
          managed XmSeparator mB3DView_mbview_separator8;
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_haxby;
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_bright;
@@ -3366,8 +3383,8 @@ object mB3DView_mbview_pushButton_sitelist : XmPushButton widget {
 object mbview_pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 27;
-        XmNy = 110;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 144;
         XmNheight = 148;
     };
@@ -3543,8 +3560,8 @@ object mB3DView_mbview_toggleButton_mode_nav : XmToggleButton widget {
 object mB3DView_mbview_pulldownMenu_mouse : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 27;
+        XmNy = 134;
         XmNwidth = 119;
         XmNheight = 196;
     };

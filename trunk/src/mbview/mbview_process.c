@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 1.1 2003-11-07 00:39:16 caress Exp $
+ *    $Id: mbview_process.c,v 1.2 2003-11-25 01:43:19 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -67,7 +67,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 1.1 2003-11-07 00:39:16 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 1.2 2003-11-25 01:43:19 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -768,6 +768,68 @@ fprintf(stderr,"mbview_zscale: %d\n", instance);
 						* (data->area.segments[i].lspoints[j].zdata 
 							- view->zorigin)
 							+ MBV_OPENGL_3D_LINE_OFFSET);
+				}
+			}
+		}
+	
+	/* handle navpicks */
+	if (data->navpick_type != MBV_PICK_NONE)
+		{
+		data->navpick.endpoints[0].zdisplay 
+				= (float)(view->zscale 
+					* (data->navpick.endpoints[0].zdata 
+						- view->zorigin)
+						+ MBV_OPENGL_3D_LINE_OFFSET);
+		for (i=0;i<4;i++)
+			{
+			data->navpick.xpoints[i].zdisplay 
+					= (float)(view->zscale 
+						* (data->navpick.xpoints[i].zdata 
+							- view->zorigin)
+							+ MBV_OPENGL_3D_LINE_OFFSET);
+			}
+		for(i=0;i<2;i++)
+			{
+			if (data->navpick.xsegments[i].nls > 0)
+				{
+				for (j=0;j<data->navpick.xsegments[i].nls;j++)
+					{
+					data->navpick.xsegments[i].lspoints[j].zdisplay 
+							= (float)(view->zscale 
+								* (data->navpick.xsegments[i].lspoints[j].zdata 
+									- view->zorigin)
+									+ MBV_OPENGL_3D_LINE_OFFSET);
+					}
+				}
+			}
+		}
+	if (data->navpick_type == MBV_PICK_TWOPOINT)
+		{
+		data->navpick.endpoints[1].zdisplay 
+				= (float)(view->zscale 
+					* (data->navpick.endpoints[1].zdata 
+						- view->zorigin)
+						+ MBV_OPENGL_3D_LINE_OFFSET);
+		for (i=4;i<8;i++)
+			{
+			data->navpick.xpoints[i].zdisplay 
+					= (float)(view->zscale 
+						* (data->navpick.xpoints[i].zdata 
+							- view->zorigin)
+							+ MBV_OPENGL_3D_LINE_OFFSET);
+			}
+		for(i=2;i<4;i++)
+			{
+			if (data->navpick.xsegments[i].nls > 0)
+				{
+				for (j=0;j<data->navpick.xsegments[i].nls;j++)
+					{
+					data->navpick.xsegments[i].lspoints[j].zdisplay 
+							= (float)(view->zscale 
+								* (data->navpick.xsegments[i].lspoints[j].zdata 
+									- view->zorigin)
+									+ MBV_OPENGL_3D_LINE_OFFSET);
+					}
 				}
 			}
 		}
