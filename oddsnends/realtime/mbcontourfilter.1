@@ -69,11 +69,13 @@ of its operation and then exit immediately.
 .TP
 .B \fB-I\fIdatalist\fP
 Sets the filename of the file containing a list of the input multibeam
-data files and their formats.  In the \fIdatalist\fP file, each
+data files and their formats. By default, \fBmbcontourfilter\fP 
+reads data from stdin. In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
+
 This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
