@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.8 2001-08-23 20:50:24 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.9 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/08/23  20:50:24  caress
+ * Fixed problems with SB2120 data.
+ *
  * Revision 5.7  2001/07/27  19:07:16  caress
  * Fixed handling 1180 data.
  *
@@ -81,7 +84,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.8 2001-08-23 20:50:24 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -400,6 +403,23 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed  = 3.6 * store->nav_speed_ground;
+			
+		/* set beamwidths in mb_io structure */
+		if (store->mul_frequency >= 50.0
+		    || store->mul_frequency <= 0.0)
+		    {
+		    mb_io_ptr->beamwidth_ltrack 
+			= 2.8;
+		    mb_io_ptr->beamwidth_xtrack 
+			= 1.5;
+		    }
+		else
+		    {
+		    mb_io_ptr->beamwidth_ltrack 
+			= 1.0;
+		    mb_io_ptr->beamwidth_xtrack 
+			= 1.0;
+		    }
 
 		/* get distance and depth values */
 		*nbath = 0;

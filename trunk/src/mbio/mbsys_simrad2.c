@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/08/04  01:00:02  caress
+ * Applied mods from Gordon Keith.
+ *
  * Revision 5.7  2001/07/20  00:32:54  caress
  * Release 5.0.beta03
  *
@@ -91,7 +94,7 @@
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -410,7 +413,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -671,7 +674,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -759,7 +762,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -839,7 +842,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1173,6 +1176,71 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			*speed = 0.036 * ping->png_speed;
 		else
 			*speed = 0.0;
+			
+		/* set beamwidths in mb_io structure */
+		if (store->run_tran_beam > 0)
+		    mb_io_ptr->beamwidth_ltrack 
+			= 0.1 * store->run_tran_beam;
+		else if (ping->png_tx > 0)
+		    {
+		    mb_io_ptr->beamwidth_ltrack 
+			= 0.1 * ping->png_tx;
+		    }
+		else if (store->sonar == MBSYS_SIMRAD2_EM120)
+		    mb_io_ptr->beamwidth_ltrack = 2.0;
+		else if (store->sonar == MBSYS_SIMRAD2_EM300)
+		    mb_io_ptr->beamwidth_ltrack = 2.0;
+		else if (store->sonar == MBSYS_SIMRAD2_EM1002)
+		    mb_io_ptr->beamwidth_ltrack = 2.0;
+		else if (store->sonar == MBSYS_SIMRAD2_EM2000)
+		    mb_io_ptr->beamwidth_ltrack = 1.5;
+		else if (store->sonar == MBSYS_SIMRAD2_EM3000
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_1 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_2 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_3 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7)
+		    mb_io_ptr->beamwidth_ltrack = 1.5;
+		else if (store->sonar == MBSYS_SIMRAD2_EM1000)
+		    mb_io_ptr->beamwidth_ltrack = 3.3;
+		else if (store->sonar == MBSYS_SIMRAD2_EM12S
+			|| store->sonar == MBSYS_SIMRAD2_EM12D)
+		    mb_io_ptr->beamwidth_ltrack = 1.7;
+		else if (store->sonar == MBSYS_SIMRAD2_EM121)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 1.0;
+		    }
+		if (store->run_rec_beam > 0)
+		    {
+		    mb_io_ptr->beamwidth_xtrack 
+			= 0.1 * store->run_rec_beam;
+		    }
+		else if (store->sonar == MBSYS_SIMRAD2_EM120)
+		    mb_io_ptr->beamwidth_xtrack = 2.0;
+		else if (store->sonar == MBSYS_SIMRAD2_EM300)
+		    mb_io_ptr->beamwidth_xtrack = 2.0;
+		else if (store->sonar == MBSYS_SIMRAD2_EM1002)
+		    mb_io_ptr->beamwidth_xtrack = 2.0;
+		else if (store->sonar == MBSYS_SIMRAD2_EM2000)
+		    mb_io_ptr->beamwidth_xtrack = 1.5;
+		else if (store->sonar == MBSYS_SIMRAD2_EM3000
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_1 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_2 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_3 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7)
+		    mb_io_ptr->beamwidth_xtrack = 1.5;
+		else if (store->sonar == MBSYS_SIMRAD2_EM1000)
+		    mb_io_ptr->beamwidth_xtrack = 3.3;
+		else if (store->sonar == MBSYS_SIMRAD2_EM12S
+			|| store->sonar == MBSYS_SIMRAD2_EM12D)
+		    mb_io_ptr->beamwidth_xtrack = 3.5;
+		else if (store->sonar == MBSYS_SIMRAD2_EM121)
+		    mb_io_ptr->beamwidth_xtrack = mb_io_ptr->beamwidth_ltrack;
 
 		/* read distance and depth values into storage arrays */
 		depthscale = 0.01 * ping->png_depth_res;

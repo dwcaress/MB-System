@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.4 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -69,7 +72,7 @@
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_singlebeam.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_singlebeam.c,v 5.4 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_singlebeam_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -269,6 +272,10 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = store->speed;
+			
+		/* set beamwidths in mb_io structure */
+		mb_io_ptr->beamwidth_ltrack = 5.0;
+		mb_io_ptr->beamwidth_xtrack = 5.0;
 
 		/* read distance and depth values into storage arrays */
 		*nbath = 1;

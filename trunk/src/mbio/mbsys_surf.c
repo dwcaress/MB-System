@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.5 2001-08-10 22:41:19 dcaress Exp $
+ *	$Id: mbsys_surf.c,v 5.6 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	June 25, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/08/10  22:41:19  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.4  2001-07-30 17:40:52-07  caress
  * Fixed typos.
  *
@@ -65,7 +68,7 @@
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_surf.c,v 5.5 2001-08-10 22:41:19 dcaress Exp $";
+ static char res_id[]="$Id: mbsys_surf.c,v 5.6 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_surf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -434,6 +437,10 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed = 3.6 * store->pr_speed;
+			
+		/* set beamwidths in mb_io structure */
+		mb_io_ptr->beamwidth_ltrack = 2.3;
+		mb_io_ptr->beamwidth_xtrack = 2.3;
 
 		/* read distance and depth values into storage arrays */
 		*nbath = store->tt_beam_cnt;

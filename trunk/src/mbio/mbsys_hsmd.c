@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 5.3 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -103,7 +106,7 @@
 int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
-	static char res_id[]="$Id: mbsys_hsmd.c,v 5.2 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbsys_hsmd.c,v 5.3 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -258,6 +261,10 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
       
 		/* set speed to zero */
 		*speed = store->speed;
+			
+		/* set beamwidths in mb_io structure */
+		mb_io_ptr->beamwidth_ltrack = 1.7;
+		mb_io_ptr->beamwidth_xtrack = 1.7;
 
 		/* zero bathymetry and sidescan */
 		for (i=0;i<MBSYS_HSMD_BEAMS;i++)
