@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.24 2004-12-02 06:31:02 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.25 2005-03-25 04:12:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2004/12/02 06:31:02  caress
+ * First cut at adding stacked views from along and across track.
+ *
  * Revision 5.23  2004/05/21 23:26:04  caress
  * Moved to new version of BX GUI builder
  *
@@ -346,7 +349,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.24 2004-12-02 06:31:02 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.25 2005-03-25 04:12:24 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -5034,7 +5037,7 @@ int mbedit_plot_all(
 	int	swidth, sascent, sdescent;
 	int	sxstart;
 	int	xcen, ycen;
-	int	x0, y0, x, y, dy;
+	int	x0, y0, x, y, dx, dy;
 	char	string[MB_PATH_MAXLINE];
 	char	*string_ptr;
 	int	fpx, fpdx, fpy, fpdy;
@@ -5172,6 +5175,7 @@ int mbedit_plot_all(
 	/* set scaling */
 	xcen = xmin + (xmax - xmin)/2;
 	ycen = ymin + (ymax - ymin)/2;
+	dx = (xmax - xmin)/plot_size;
 	dy = (ymax - ymin)/plot_size;
 	xscale = 100*plot_width/(xmax - xmin);
 	yscale = (xscale*100)/exager;
@@ -5417,6 +5421,7 @@ int mbedit_plot_all(
 	for (i=current_id;i<current_id+nplot;i++)
 		{
 		/* set beam plotting locations */
+		x = xmax - dx / 2 - (i - current_id) * dx;
 		y = ymax - dy / 2 - (i - current_id) * dy;
 		ping[i].label_x = xmin - 5;
 		ping[i].label_y = y;
@@ -5442,9 +5447,8 @@ int mbedit_plot_all(
 					}
 				else
 					{
-					ping[i].bath_x[j] = xcen 
-						+ dxscale*ping[i].bathacrosstrack[j];
-					ping[i].bath_y[j] = y + dyscale*
+					ping[i].bath_x[j] = x;
+					ping[i].bath_y[j] = ycen + dyscale*
 						(fabs((double)ping[i].bath[j]) 
 						- bathmedian);
 					}

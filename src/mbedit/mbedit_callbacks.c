@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.13 2004-12-02 06:31:02 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.14 2005-03-25 04:12:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2004/12/02 06:31:02  caress
+ * First cut at adding stacked views from along and across track.
+ *
  * Revision 5.12  2004/05/21 23:26:04  caress
  * Moved to new version of BX GUI builder
  *
@@ -230,6 +233,7 @@ int	mode_view = VIEW_WATERFALL;
 int	mode_pick = MODE_TOGGLE;
 int	mshow_detects = MB_NO;
 int	mshow_flagged = MB_NO;
+int	mview_mode = VIEW_WATERFALL;
 int	mshow_time = 1;
 int	mode_output = OUTPUT_MODE_EDIT;
 int	mode_reverse_keys = MB_NO;
@@ -709,6 +713,22 @@ int do_setup_data()
 	    
 	/* set the show flagged toggle */
 	XmToggleButtonSetState(toggleButton_show_flagged_on, mshow_flagged, FALSE);
+    
+	/* turn off all view mode togglebuttons */
+	XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
+    
+	/* now turn on the current view mode togglebutton */
+	if (mview_mode == 0)
+		XmToggleButtonSetState(toggleButton_view_waterfall, MB_YES, FALSE);
+	else if (mview_mode == 1)
+		XmToggleButtonSetState(toggleButton_view_alongtrack, MB_YES, FALSE);
+	else if (mview_mode == 2)
+		XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_YES, FALSE);
+
+	/* reset scaling */
+	status = mbedit_set_viewmode(mview_mode);
 	    
 	/* turn off all plot mode togglebuttons */
 	XmToggleButtonSetState(toggleButton_show_wideplot, MB_NO, FALSE);
@@ -2073,6 +2093,41 @@ do_show_flagged( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
     
     mshow_flagged = XmToggleButtonGetState(toggleButton_show_flagged_on);
+
+    /* replot the data */
+    status = mbedit_action_plot(mplot_width, mexager,
+	    mx_interval, my_interval, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    &nbuffer, &ngood, &icurrent, &mnplot);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_view_mode( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    /* turn off all togglebuttons */
+    XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
+
+    /* turn on the one that was clicked */
+    XmToggleButtonSetState(w, MB_YES, FALSE);
+    
+    /* now set the data type id */
+    if (w == toggleButton_view_waterfall)
+	mview_mode = 0;
+    else if (w == toggleButton_view_alongtrack)
+	mview_mode = 1;
+    else if (w == toggleButton_view_acrosstrack)
+	mview_mode = 2;
+    else
+    	mview_mode = 0;
+
+    /* reset scaling */
+    status = mbedit_set_viewmode(mview_mode);
 
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
