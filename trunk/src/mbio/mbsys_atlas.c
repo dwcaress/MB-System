@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_atlas.c,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_atlas.c,v 5.3 2001-07-26 03:40:56 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	June 25, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/06/30  17:40:14  caress
  * Release 5.0.beta02
  *
@@ -56,7 +59,7 @@
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_atlas.c,v 5.2 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_atlas.c,v 5.3 2001-07-26 03:40:56 caress Exp $";
 	char	*function_name = "mbsys_surf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -365,7 +368,8 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
 	double	pixel_size;
-	int	i;
+	double	range, tt, ttmin, ssdepth;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -435,6 +439,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 			}
+		ttmin = 999999.9;
 		for (i=0;i<store->tt_beam_cnt;i++)
 			{
 			bath[i] = store->pr_bath[i];
@@ -442,16 +447,56 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			bathacrosstrack[i] = store->pr_bathacrosstrack[i];
 			bathalongtrack[i] = store->pr_bathalongtrack[i];
 			amp[i] = store->tt_lamplitude[i];
+			if (beamflag[i] != MB_FLAG_NULL
+				&& store->tt_lruntime[i] < ttmin)
+				ttmin = store->tt_lruntime[i];
 			}
 		*namp = *nbath;
 		*nss = store->ss_max_side_bb_cnt 
 			+ store->ss_max_side_sb_cnt;
 		pixel_size = store->start_cmean * store->ss_timespacing;
-		for (i=0;i<*nss;i++)
+/*		for (i=0;i<store->ss_max_side_bb_cnt;i++)
+			{
+			j = store->ss_max_side_bb_cnt - i;
+			ss[j] = store->ss_sidescan[i];
+			ssacrosstrack[j] = -pixel_size * i;
+			ssalongtrack[j] = 0.0;
+			}
+		for (i=store->ss_max_side_bb_cnt;i<*nss;i++)
 			{
 			ss[i] = store->ss_sidescan[i];
-			ssacrosstrack[i] = pixel_size * (i - *nss / 2);
+			ssacrosstrack[i] = pixel_size * (i - store->ss_max_side_bb_cnt);
 			ssalongtrack[i] = 0.0;
+			}*/
+		ssdepth = store->start_cmean * ttmin / 2.0;
+		for (i=0;i<*nss;i++)
+			{
+			ss[i]= 0.0;
+			ssacrosstrack[i];
+			ssalongtrack[i];
+			}
+		for (i=0;i<store->ss_max_side_bb_cnt;i++)
+			{
+			j = store->ss_max_side_bb_cnt - i;
+			tt = store->ss_timedelay + store->ss_timespacing * (i - 1);
+			if (tt > ttmin)
+				{ 
+				ss[j] = store->ss_sidescan[i];
+				range = store->start_cmean * tt / 2.0;
+				ssacrosstrack[j] = -sqrt(range * range - ssdepth * ssdepth);
+				ssalongtrack[j] = 0.0;
+				}
+			}
+		for (i=store->ss_max_side_bb_cnt;i<*nss;i++)
+			{
+			tt = store->ss_timedelay + store->ss_timespacing * (i - store->ss_max_side_bb_cnt);
+			if (tt > ttmin)
+				{ 
+				ss[i] = store->ss_sidescan[i];
+				range = store->start_cmean * tt / 2.0;
+				ssacrosstrack[i] = sqrt(range * range - ssdepth * ssdepth);
+				ssalongtrack[i] = 0.0;
+				}
 			}
 
 		/* print debug statements */
@@ -605,6 +650,8 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
+	double	xtrackmin;
+	int	centerpixel;
 	int	i, j;
 
 	/* print input debug statements */
@@ -690,9 +737,34 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			store->pr_bathalongtrack[i] = bathalongtrack[i];
 			store->tt_lamplitude[i] = amp[i];
 			}
-		store->ss_max_side_bb_cnt = nss / 2;
-		store->ss_max_side_sb_cnt = nss / 2;
-		for (i=0;i<nss;i++)
+		if (store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt != nss)
+			{
+			xtrackmin = 99999.9;
+			centerpixel = 0;
+			for (i=0;i<nss;i++)
+				{
+				if (ss[i] > 0.0 && fabs(ssacrosstrack[i]) < xtrackmin)
+					{
+					xtrackmin = fabs(ssacrosstrack[i]);
+					centerpixel = i;
+					}
+				}
+			if (centerpixel > 0)
+				{
+				store->ss_max_side_bb_cnt = centerpixel;
+				store->ss_max_side_sb_cnt = nss - centerpixel;
+				}
+			else
+				{
+				store->ss_max_side_bb_cnt = nss / 2;
+				store->ss_max_side_sb_cnt = nss / 2;
+				}
+			}
+		for (i=0;i<store->ss_max_side_bb_cnt;i++)
+			{
+			store->ss_sidescan[i] = ss[store->ss_max_side_bb_cnt - i];
+			}
+		for (i=store->ss_max_side_bb_cnt;i<nss;i++)
 			{
 			store->ss_sidescan[i] = ss[i];
 			}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2raw.c,v 5.1 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_hsds2raw.c,v 5.2 2001-07-26 03:40:56 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.0  2001/06/29  22:49:07  caress
  * Added support for HSDS2RAW
  *
@@ -79,7 +82,7 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.1 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.2 2001-07-26 03:40:56 caress Exp $";
 	char	*function_name = "mbr_register_hsds2raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -209,7 +212,7 @@ int mbr_info_hsds2raw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.1 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.2 2001-07-26 03:40:56 caress Exp $";
 	char	*function_name = "mbr_info_hsds2raw";
 	int	status = MB_SUCCESS;
 
@@ -278,7 +281,7 @@ int mbr_info_hsds2raw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.1 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.2 2001-07-26 03:40:56 caress Exp $";
 	char	*function_name = "mbr_alm_hsds2raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1295,48 +1298,45 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	    }	
 
-	/* calculate bathymetry */
+	/* calculate first cut bathymetry */
 	if (status == MB_SUCCESS)
 		{
+		/* get angle_table for 90 degree coverage */
+		if (store->start_opmode[3] == 0)
+			{
+			if (store->tt_beam_cnt == 140)
+		    		angle_table = (double *) ds2_ang_90d_140b;
+			else if (store->tt_beam_cnt == 59)
+		    		angle_table = (double *) ds2_ang_90d_59b;
+			}
+
+		/* get angle_table for 120 degree coverage */
+		else if (store->start_opmode[3] == 1)
+			{
+			if (store->tt_beam_cnt == 140)
+		    		angle_table = (double *) ds2_ang_120d_140b;
+			else if (store->tt_beam_cnt == 59)
+		    		angle_table = (double *) ds2_ang_120d_59b;
+			}
+
+		/* calculate bathymetry */
 		for (i=0;i<store->tt_beam_cnt;i++)
 			{
-			/* get angle_table for 90 degree coverage */
-			if (store->start_opmode[3] == 0)
-			    {
-			    if (store->tt_beam_cnt == 140)
-		    		angle_table = (double *) ds2_ang_90d_140b;
-			    else if (store->tt_beam_cnt == 59)
-		    		angle_table = (double *) ds2_ang_90d_59b;
-			    }
-
-			/* get angle_table for 120 degree coverage */
-			else if (store->start_opmode[3] == 1)
-			    {
-			    if (store->tt_beam_cnt == 140)
-		    		angle_table = (double *) ds2_ang_120d_140b;
-			    else if (store->tt_beam_cnt == 59)
-		    		angle_table = (double *) ds2_ang_120d_59b;
-			    }
-
-			/* get travel times */
-			for (i=0;i<store->tt_beam_cnt;i++)
+			if (store->tt_lruntime[i] > 0.0)
 				{
-				if (store->tt_lruntime[i] > 0.0)
-					{
-					rr = store->start_cmean * store->tt_lruntime[i] / 2.0;
-					store->pr_bath[i] = rr * cos(angle_table[i]) 
+				rr = store->start_cmean * store->tt_lruntime[i] / 2.0;
+				store->pr_bath[i] = rr * cos(angle_table[i]) 
 									+ store->start_heave + store->tt_draught;
-					store->pr_bathacrosstrack[i] = rr * sin(angle_table[i]);
- 					store->pr_bathalongtrack[i] = 0.0;
-					store->pr_beamflag[i] = MB_FLAG_NONE;
-					}
-				else
-					{
-					store->pr_bath[i] = 0.0;
-					store->pr_bathacrosstrack[i] = 0.0;
-					store->pr_bathalongtrack[i] = 0.0;
-					store->pr_beamflag[i] = MB_FLAG_NULL;
-					}
+				store->pr_bathacrosstrack[i] = rr * sin(angle_table[i]);
+ 				store->pr_bathalongtrack[i] = 0.0;
+				store->pr_beamflag[i] = MB_FLAG_NONE;
+				}
+			else
+				{
+				store->pr_bath[i] = 0.0;
+				store->pr_bathacrosstrack[i] = 0.0;
+				store->pr_bathalongtrack[i] = 0.0;
+				store->pr_beamflag[i] = MB_FLAG_NULL;
 				}
 			}
 		}
