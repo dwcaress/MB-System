@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2120.c	3/27/2000
- *	$Id: mbsys_sb2120.c,v 5.0 2000-12-10 20:24:25 caress Exp $
+ *	$Id: mbsys_sb2120.c,v 5.1 2000-12-13 17:47:32 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -43,6 +43,9 @@
  * Date:	December 7,  2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/10  20:24:25  caress
+ * Initial revision.
+ *
  *
  *
  */
@@ -66,7 +69,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2120.c,v 5.0 2000-12-10 20:24:25 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2120.c,v 5.1 2000-12-13 17:47:32 caress Exp $";
 	char	*function_name = "mbsys_sb2120_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -570,7 +573,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_sb2120_insert(int verbose, char *mbio_ptr, char *store_ptr, 
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
@@ -1039,7 +1042,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2120_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft, 
@@ -1326,7 +1329,7 @@ int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2120_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading, double draft, 
