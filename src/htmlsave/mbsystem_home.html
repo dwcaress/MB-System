@@ -1,236 +1,1 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
-<HTML>
-<HEAD>
-   <TITLE>MB-System Home Page</TITLE>
-   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
-   <META NAME="GENERATOR" CONTENT="Mozilla/3.01SGoldC-SGI (X11; I; IRIX64 6.4 IP30) [Netscape]">
-</HEAD>
-<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
-<BODY>
-
-<CENTER><P><!-- WEBMAGIC VERSION NUMBER="2.0.2" --><!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" --><!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" --></P></CENTER>
-
-<H2 ALIGN=CENTER><IMG SRC="mbsystem_logo.gif" SGI_SETWIDTH SGI_SETHEIGHT SGI_FULLPATH="/SB3/caress/dev/mbhtml/mbsystem_logo.gif" HEIGHT=207 WIDTH=616></H2>
-
-<CENTER><DT><B><FONT SIZE=+2>Mapping the Seafloor:</FONT></B></DT></CENTER>
-
-<CENTER><DT><B><FONT SIZE=+2>Software for the Processing and Display</FONT></B></DT></CENTER>
-
-<CENTER><DT><B><FONT SIZE=+2>of Swath Sonar Data</FONT></B></DT></CENTER>
-
-<CENTER><DT><B>&nbsp;</B></DT></CENTER>
-
-<CENTER><DT><B><FONT SIZE=+1><A HREF="http://www.mbari.org/~caress">David
-W. Caress</A> (1,2) and <A HREF="http://www.ldeo.columbia.edu/~dale">Dale
-N. Chayes</A> (2)</FONT></B></DT></CENTER>
-
-<CENTER><DT><B>1. <A HREF="http://www.mbari.org/">Monterey Bay Aquarium
-Research Institute</A></B></DT></CENTER>
-
-<CENTER><DT><B>2. <A HREF="http://www.ldeo.columbia.edu/">Lamont-Doherty
-Earth Observatory</A></B></DT></CENTER>
-
-<CENTER><DT><B>of <A HREF="http://www.columbia.edu/">Columbia University</A></B></DT></CENTER>
-
-<CENTER><P>
-<HR WIDTH="67%"></P></CENTER>
-
-<CENTER><DT><B><FONT SIZE=+1>Introduction</FONT></B></DT></CENTER>
-
-<P>MB-System is an open source software package for the processing and
-display of bathymetry and backscatter imagery data derived from multibeam,
-interferometry, and sidescan sonars. This software is distributed freely
-(and for free) in the form of source code for Unix platforms. The heart
-of the system is an input/output library called MBIO which allows programs
-to work transparently with any of a number of supported swath sonar data
-formats. This approach has allowed the creation of &quot;generic&quot;
-utilities which can be applied in a uniform manner to sonar data from a
-variety of sources. Most of the programs are command-line tools, but the
-package does include graphical tools for editing swath bathymetry, editing
-navigation, modeling bathymetry calculation, and adjusting survey navigation.</P>
-
-<P>The acronym MB stands for MultiBeam; this reflects the fact that the
-early development of MB-System focused on processing deep sea data from
-multibeam sonars. However, MB-System now supports several data formats
-from sidescan and interferometric sonars and works with data from all depth
-ranges. </P>
-
-<P>The <A HREF="http://www.nsf.gov">National Science Foundation</A> (NSF)
-has been the primary supporter of MB-System development. NSF initially
-provided grants to the authors at the <A HREF="http://www.ldeo.columbia.edu">Lamont-Doherty
-Earth Observatory</A> in 1993 (two years), and 1995 (five years). <A HREF="http://www.seabeam.com/">SeaBeam
-Instruments</A> also contributed significant effort from 1994 to 1999.
-This support has been renewed through a new five year grant (2001-2005)
-to Caress at the <A HREF="http://www.mbari.org">Monterey Bay Aquarium Research
-Institute</A> (MBARI) and to Chayes at Lamont. MBARI is matching the NSF
-support as part of its seafloor mapping program.</P>
-
-<P>The original NSF mandate was to create a set of generic tools which
-would work with all of the sonar data used in NSF-supported projects. Not
-surprisingly, the core of the MB-System user community consists of NSF-supported
-researchers at U.S. institutions such as the Lamont-Doherty Earth Observatory,
-the Scripps Institution of Oceanography, and the Woods Hole Oceanographic
-Institution. However, MB-System has also come to be used widely in the
-international marine geological community. </P>
-
-<P>The MB-System source code is distributed under the <A HREF="gpl.html">GNU
-General Public License</A> as formulated by the <A HREF="http://www.gnu.org/">GNU&nbsp;Project.</A>
-MB-System installation depends on some other software packages (e.g. <A HREF="http://imina.soest.hawaii.edu/gmt/">GMT</A>
-and <A HREF="http://unidata.ucar.edu/packages/netcdf/">netCDF</A>), all
-of which are freely available as source code.</P>
-
-<P>This documention is distributed with and refers to MB-System release
-5.0.beta29.</P>
-
-<P>
-<HR WIDTH="67%"></P>
-
-<CENTER><DT><B><FONT SIZE=+1>Information About MB-System:</FONT></B></DT></CENTER>
-
-<UL>
-<LI><A HREF="mbsystem_whatsnew.html">What's new in MB-System version 5</A></LI>
-
-<LI><A HREF="mbsystem_capabilities.html">Short list of capabilities</A></LI>
-
-<LI><A HREF="mbsystem_man_list.html">List of MB-System programs and links
-to manual pages</A></LI>
-
-<LI><A HREF="mbsystem_formats.html">List of supported swath data formats</A></LI>
-
-<LI><A HREF="mbsystem_how_to_get.html">How to get and install MB-System</A></LI>
-
-<LI><A HREF="mbsystem_faq.html">Frequently Asked Questions (and answers)</A></LI>
-
-<LI><A HREF="mbsystem_future.html">Future MB-System development plans</A></LI>
-
-<LI><A HREF="mbsystem_copyright.html">Copyright and Caveat</A></LI>
-</UL>
-
-<CENTER><P>
-<HR WIDTH="67%"></P></CENTER>
-
-<CENTER><DT><A NAME="MB-authors"></A><B><FONT SIZE=+1>Authors:</FONT></B></DT></CENTER>
-
-<CENTER><DT><B><FONT SIZE=+1>&nbsp;</FONT></B></DT></CENTER>
-
-<CENTER><DT><B><FONT SIZE=+1>&nbsp;</FONT></B></DT></CENTER>
-
-<CENTER><DD><IMG SRC="caress2001.gif" HEIGHT=146 WIDTH=108 ALIGN=LEFT></DD></CENTER>
-
-<DD><B><A HREF="http://www.mbari.org/~caress">David W. Caress</A></B></DD>
-
-<DD><A HREF="mailto:caress@mbari.org">caress@mbari.org</A></DD>
-
-<TABLE CELLSPACING=0 CELLPADDING=0 >
-<TR>
-<TD>
-<DD>Senior Research Specialist</DD>
-</TD>
-
-<TD>
-<DD>Adjunct Associate Research Scientist</DD>
-</TD>
-</TR>
-
-<TR>
-<TD>
-<DD><A HREF="http://www.mbari.org">Monterey Bay Aquarium&nbsp;</A></DD>
-
-<DD><A HREF="http://www.mbari.org">Research Institute</A></DD>
-</TD>
-
-<TD>
-<DD><A HREF="http://www.ldeo.columbia.edu">Lamont-Doherty Earth Observatory</A>&nbsp;</DD>
-
-<DD>of <A HREF="http://www.columbia.edu">Columbia University</A></DD>
-</TD>
-</TR>
-
-<TR>
-<TD>
-<DD>7700 Sandholdt Road</DD>
-</TD>
-
-<TD>
-<DD>Palisades, NY 19064</DD>
-</TD>
-</TR>
-
-<TR>
-<TD>
-<DD>Moss Landing, CA 95039</DD>
-</TD>
-
-<TD></TD>
-</TR>
-
-<TR>
-<TD>
-<DD>Voice: (831) 775-1775</DD>
-</TD>
-
-<TD></TD>
-</TR>
-
-<TR>
-<TD>
-<DD>Fax: (831) 775-1620</DD>
-</TD>
-
-<TD></TD>
-</TR>
-</TABLE>
-
-<CENTER><DT><B><FONT SIZE=+1>&nbsp;</FONT></B></DT></CENTER>
-
-<P><IMG SRC="chayes.gif" HEIGHT=126 WIDTH=109 ALIGN=LEFT> </P>
-
-<DD><B><A HREF="http://www.ldeo.columbia.edu/~dale">Dale N. Chayes</A></B></DD>
-
-<DD><A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A></DD>
-
-<DD>Senior Staff Associate</DD>
-
-<DD><A HREF="http://www.ldeo.columbia.edu">Lamont-Doherty Earth Observatory</A>
-of <A HREF="http://www.columbia.edu">Columbia University</A></DD>
-
-<DD>Palisades, NY 10964</DD>
-
-<DD>Voice: (914) 365-8434</DD>
-
-<DD>Fax: (914) 359-6940</DD>
-
-
-<CENTER><P>
-<HR WIDTH="67%"></P></CENTER>
-
-<CENTER><DT><A NAME="MB-documentors"></A><B><FONT SIZE=+1>Documentation:</FONT></B></DT></CENTER>
-
-<CENTER><DT><B><FONT SIZE=+1>&nbsp;</FONT></B></DT></CENTER>
-
-<CENTER><DT><B><FONT SIZE=+1>&nbsp;</FONT></B></DT></CENTER>
-
-<P><IMG SRC="schmidt.gif" HEIGHT=126 WIDTH=109 ALIGN=LEFT> </P>
-
-<DD><B><A HREF="http://www.ldeo.columbia.edu/~vschmidt">Val Schmidt</A></B></DD>
-
-<DD><A HREF="mailto:dale@ldeo.columbia.edu">vschmidt@ldeo.columbia.edu</A></DD>
-
-<DD>Research Engineer</DD>
-
-<DD><A HREF="http://www.ldeo.columbia.edu">Lamont-Doherty Earth Observatory</A>
-of <A HREF="http://www.columbia.edu">Columbia University</A></DD>
-
-<DD>Palisades, NY 10964</DD>
-
-<CENTER><P>&nbsp; </P></CENTER>
-
-<CENTER><P>Last Updated: $Date: 2003-03-10 22:33:20 $ $Revision: 5.23 $
-</P></CENTER>
-
-<P>
-<HR WIDTH="67%"><BR>
-&nbsp; </P>
-
-</BODY>
-</HTML>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN"><html><head><title>MB-System Home Page</title><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"><meta name="GENERATOR" content="Mozilla/3.01SGoldC-SGI (X11; I; IRIX64 6.4 IP30) [Netscape]"></head><body text="#000000" bgcolor="#ffffff" link="#336699" vlink="#997040" alink="#cc9900"><center><p><!-- WEBMAGIC VERSION NUMBER="2.0.2" --><!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" --><!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" --></p></center><h2 align="Center"><img src="mbsystem_logo.gif" sgi_setwidth="" sgi_setheight="" sgi_fullpath="/SB3/caress/dev/mbhtml/mbsystem_logo.gif" height="207" width="616"></h2><center><dt><b><font size="+2">Mapping the Seafloor:</font></b></dt></center><center><dt><b><font size="+2">Software for the Processing and Display</font></b></dt></center><center><dt><b><font size="+2">of Swath Sonar Data</font></b></dt></center><center><dt><b>&nbsp;</b></dt></center><center><dt><b><font size="+1"><a href="http://www.mbari.org/%7Ecaress">David W. Caress</a>(1,2) and <a href="http://www.ldeo.columbia.edu/%7Edale">Dale N. Chayes</a>(2)</font></b></dt></center><center><dt><b>1. <a href="http://www.mbari.org/">Monterey BayAquarium Research Institute</a></b></dt></center><center><dt><b>2. <a href="http://www.ldeo.columbia.edu/">Lamont-Doherty Earth Observatory</a></b></dt></center><center><dt><b>of <a href="http://www.columbia.edu/">ColumbiaUniversity</a></b></dt></center><center><p> </p><hr width="67%"><p></p></center><center><dt><b><font size="+1">Introduction</font></b></dt></center><p>MB-System is an open source software package for theprocessing and display of bathymetry and backscatter imagery data derivedfrom multibeam, interferometry, and sidescan sonars. This software is distributedfreely (and for free) in the form of source code for Unix platforms. Theheart of the system is an input/output library called MBIO which allows programs to work transparently with any of a number of supported swath sonar data formats.This approach has allowed the creation of "generic" utilities which can beapplied in a uniform manner to sonar data from a variety of sources. Mostof the programs are command-line tools, but the package does include graphicaltools for editing swath bathymetry, editing navigation, modeling bathymetrycalculation, and adjusting survey navigation.</p><p>The acronym MB stands for MultiBeam; this reflects thefact that the early development of MB-System focused on processing deep seadata from multibeam sonars. However, MB-System now supports several dataformats from sidescan and interferometric sonars and works with data fromall depth ranges. </p><p>The <a href="http://www.nsf.gov">National Science Foundation</a>(NSF) has been the primary supporter of MB-System development. NSF initially provided grants to the authors at the <a href="http://www.ldeo.columbia.edu">Lamont-Doherty Earth Observatory</a>in 1993 (two years), and 1995 (five years). <a href="http://www.seabeam.com/">SeaBeam Instruments</a>also contributed significant effort from 1994 to 1999. This support hasbeen renewed through a new five year grant (2001-2005) to Caress at the <a href="http://www.mbari.org">Monterey Bay Aquarium Research Institute</a>(MBARI) and to Chayes at Lamont. MBARI is matching the NSF support as partof its seafloor mapping program.</p><p>The original NSF mandate was to create a set of generictools which would work with all of the sonar data used in NSF-supported projects.Not surprisingly, the core of the MB-System user community consists of NSF-supported researchers at U.S. institutions such as the Lamont-Doherty Earth Observatory, the Scripps Institution of Oceanography, and the Woods Hole Oceanographic Institution. However, MB-System has also come to be used widely in the internationalmarine geological community. </p><p>The MB-System source code is distributed under the <a href="gpl.html">GNU General Public License</a>as formulated by the <a href="http://www.gnu.org/">GNU&nbsp;Project.</a>MB-System installation depends on some other software packages (e.g. <a href="http://imina.soest.hawaii.edu/gmt/">GMT</a>and <a href="http://unidata.ucar.edu/packages/netcdf/">netCDF</a>), all of which are freely available as source code.</p><p>This documention is distributed with and refers to MB-Systemrelease 5.0.beta30.</p><center><p> </p><hr width="67%"><p></p></center><center><dt><b><font size="+1">Information About MB-System:</font></b></dt></center><ul><li><a href="mbsystem_whatsnew.html">What's new in MB-System version 5</a></li><li><a href="mbsystem_capabilities.html">Short list of capabilities</a></li><li><a href="mbsystem_man_list.html">List of MB-System programs and links to manual pages</a></li><li><a href="mbsystem_formats.html">List of supported swath data formats</a></li><li><a href="mbsystem_how_to_get.html">How to get and install MB-System</a></li><li><a href="mbsystem_faq.html">Frequently Asked Questions (and answers)</a></li><li><a href="mbsystem_future.html">Future MB-System development plans</a></li><li><a href="mbsystem_copyright.html">Copyright and Caveat</a></li></ul><center><p> </p><hr width="67%"><p></p></center><center><dt><a name="MB-authors"></a><b><font size="+1">Authors:</font></b></dt></center><center><dt><br></dt><table cellspacing="0" cellpadding="0" width="100%"><tbody><tr><td valign="Top" align="Center"><div align="Center"><p><img src="caress2001.gif" height="146" width="108" align="Center"><p></div><dd><b><a href="http://www.mbari.org/%7Ecaress">David W. Caress</a></b></dd><dd><a href="mailto:caress@mbari.org">caress@mbari.org</a></dd><table cellspacing="0" cellpadding="0"><tbody><tr><td><dd>Senior Research Specialist</dd></td><td><dd>Adjunct Associate ResearchScientist</dd></td></tr><tr><td><dd><a href="http://www.mbari.org">Monterey Bay Aquarium&nbsp;</a></dd><dd><a href="http://www.mbari.org">Research Institute</a></dd></td><td><dd><a href="http://www.ldeo.columbia.edu">Lamont-Doherty Earth Observatory</a>&nbsp;</dd><dd>of <a href="http://www.columbia.edu">Columbia University</a></dd></td></tr><tr><td><dd>7700 SandholdtRoad</dd></td><td><dd>Palisades,NY 19064</dd></td></tr><tr><td><dd>Moss Landing,CA 95039</dd></td><td><br></td></tr><tr><td><dd>Voice:(831) 775-1775</dd></td><td><br></td></tr><tr><td><dd>Fax:(831) 775-1620</dd></td><td><br></td></tr></tbody></table></td></tr><tr><td valign="Top"><div align="Center"><p><img src="chayes.gif" height="126" width="109" align="Center"></p></div><dd><div align="Center"><b><a href="http://www.ldeo.columbia.edu/%7Edale">Dale N. Chayes</a></b></div></dd><dd><div align="Center"><a href="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</a></div></dd><dd><div align="Center">Senior Staff Associate</div></dd><dd><div align="Center"><a href="http://www.ldeo.columbia.edu">Lamont-Doherty Earth Observatory</a>of <a href="http://www.columbia.edu">Columbia University</a></div></dd><dd><div align="Center">Palisades, NY 10964</div></dd><dd><div align="Center">Voice: (914) 365-8434</div></dd><dd><div align="Center">Fax: (914) 359-6940</div></dd></td></tr></tbody></table></center><center><dt><b><font size="+1"></font></b></dt></center><center></center><dd><br></dd><center><p></p><hr width="67%"><p></p></center><center><dt><a name="MB-documentors"></a><b><font size="+1">Documentation:</font></b></dt></center><center><dt><b><font size="+1">&nbsp;</font></b></dt></center><center><dt><br></dt><table cellspacing="0" cellpadding="0" width="100%"><tbody><tr><td valign="Top"><div align="Center"><p><img src="schmidt.gif" height="126" width="109" align="Center"></p></div><dd><div align="Center"><b><a href="http://www.ldeo.columbia.edu/%7Evschmidt">Val Schmidt</a></b></div></dd><dd><div align="Center"><a href="mailto:vschmidt@ldeo.columbia.edu">vschmidt@ldeo.columbia.edu</a></div></dd><dd><div align="Center">Research Engineer</div></dd><dd><div align="Center"><a href="http://www.ldeo.columbia.edu">Lamont-Doherty Earth Observatory</a>of <a href="http://www.columbia.edu">Columbia University</a></div></dd><dd><div align="Center">Palisades, NY 10964</div></dd><div align="Center"><center></center><br></div></td></tr></tbody></table></center><center><dt><br></dt></center><center><p>Last Updated: $Date: 2003-04-17 21:43:48 $ $Revision: 5.24 $ </p></center><p></p><div align="Center"><hr width="67%"></div><br>&nbsp; <p></p></body></html>
