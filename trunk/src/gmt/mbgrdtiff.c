@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.1 2001-01-22 05:03:25 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.2 2001-06-03 06:58:45 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -155,6 +155,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22 05:03:25  caress
+ * Release 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:52:16  caress
  * First cut at Version 5.0.
  *
@@ -269,7 +272,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.1 2001-01-22 05:03:25 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.2 2001-06-03 06:58:45 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -311,10 +314,12 @@ main (int argc, char **argv)
 	int     rgb[3];
 	int	i, j, k, kk;
         int     index;
+	int	off;
         short   value_short;
         int     value_int;
         float   value_float;
 	double  value_double;
+	char	*projection = "-Jx1.0";
 
 	/* initialize some values */
 	strcpy (grdfile,"\0");
@@ -326,29 +331,65 @@ main (int argc, char **argv)
 	bounds[2] = 0.0;
 	bounds[3] = 0.0;
 	intensity = MB_NO;
-	
+
+	/* deal with gmt options */
+fprintf(stderr,"argc:%d\n",argc);
 #ifdef GMT3_0
-	argc = gmt_begin (argc, argv);
-	grd_init (&header, argc, argv, FALSE);
-	grd_init (&iheader, argc, argv, FALSE);
+	gmt_begin (1, argv);
 #else
-	argc = GMT_begin (argc, argv);
-	GMT_grd_init (&header, argc, argv, FALSE);
-	GMT_grd_init (&iheader, argc, argv, FALSE);
+	GMT_begin (1, argv);
 #endif
+#ifdef GMT3_0
+	errflg += get_common_args (projection, 
+				&bounds[0], &bounds[1], 
+				&bounds[2], &bounds[3]);
+#else
+	errflg += GMT_get_common_args (projection, 
+				&bounds[0], &bounds[1], 
+				&bounds[2], &bounds[3]);
+#endif
+fprintf(stderr,"argc:%d\n",argc);
+	for (i = 1; i < argc; i++) 
+		{
+		if (argv[i][0] == '-') 
+			{
+			switch (argv[i][1]) 
+				{
+				/* Common parameters */
+
+				case 'r':
+					argv[i][1] = 'R';
+				case 'R':
+#ifdef GMT3_0
+					errflg += get_common_args (argv[i], 
+						&bounds[0], &bounds[1], 
+						&bounds[2], &bounds[3]);
+#else
+					errflg += GMT_get_common_args (argv[i], 
+						&bounds[0], &bounds[1], 
+						&bounds[2], &bounds[3]);
+#endif
+					break;
+				
+				/* Supplemental parameters */
+			
+ 			}
+			}
+		}
 
 	/* process argument list */
+fprintf(stderr,"about to call getopt: %d\n",argc);
 	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:O:o:R:r:")) != -1)
 	  switch (c) 
 		{
+		case 'H':
+		case 'h':
+			help++;
+			break;
 		case 'C':
 		case 'c':
 			sscanf (optarg,"%s", cptfile);
 			flag++;
-			break;
-		case 'H':
-		case 'h':
-			help++;
 			break;
 		case 'I':
 		case 'i':
@@ -366,12 +407,6 @@ main (int argc, char **argv)
 			sscanf (optarg,"%s", tiff_file);
 			flag++;
 			break;
-		case 'R':
-		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
-			flag++;
-			break;
 		case 'V':
 		case 'v':
 			verbose++;
@@ -381,6 +416,7 @@ main (int argc, char **argv)
 		}
 
 	/* if error flagged then print it and exit */
+
 	if (errflg)
 		{
 		fprintf(stderr,"usage: %s\n", usage_message);
@@ -389,6 +425,16 @@ main (int argc, char **argv)
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
 		}
+	
+#ifdef GMT3_0
+	grd_init (&header, argc, argv, FALSE);
+	grd_init (&iheader, argc, argv, FALSE);
+#else
+fprintf(stderr,"calling GMT_grd_init...\n");
+	GMT_grd_init (&header, argc, argv, FALSE);
+	GMT_grd_init (&iheader, argc, argv, FALSE);
+fprintf(stderr,"done calling GMT_grd_init...\n");
+#endif
 
 	/* print starting message */
 	if (verbose == 1 || help)
@@ -426,7 +472,9 @@ main (int argc, char **argv)
 	read_cpt(cptfile);
 	if (gmt_n_colors <= 0)
 #else
+fprintf(stderr,"calling GMT_read_cpt:%s\n",cptfile);
 	GMT_read_cpt(cptfile);
+fprintf(stderr,"done calling GMT_read_cpt:%s\n",cptfile);
 	if (GMT_n_colors <= 0)
 #endif
 	  {
@@ -483,10 +531,23 @@ main (int argc, char **argv)
 		exit(error);		    
 		}
 	    }
+	/* Determine the wesn to be used to read the grdfile */
+fprintf(stderr,"bounds 1: %f %f %f %f\n",bounds[0], bounds[1], bounds[2], bounds[3]);
+	off = (header.node_offset) ? 0 : 1;
+#ifdef GMT3_0
+	map_setup (bounds[0], bounds[1], bounds[2], bounds[3]);
+	grd_setregion (&header, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
+#else
+fprintf(stderr,"bounds 2: %f %f %f %f\n",bounds[0], bounds[1], bounds[2], bounds[3]);
+	GMT_map_setup (bounds[0], bounds[1], bounds[2], bounds[3]);
+fprintf(stderr,"bounds 3: %f %f %f %f\n",bounds[0], bounds[1], bounds[2], bounds[3]);
+	GMT_grd_setregion (&header, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
+fprintf(stderr,"bounds 4: %f %f %f %f\n",bounds[0], bounds[1], bounds[2], bounds[3]);
+#endif	
 
 	/* allocate memory */
-	nx = header.nx;
-	ny = header.ny;
+	nx = irint ( (bounds[1] - bounds[0]) / header.x_inc) + off;
+	ny = irint ( (bounds[3] - bounds[2]) / header.y_inc) + off;
 	nxy = nx * ny;
 #ifdef GMT3_0
 	if (gmt_gray)
@@ -796,9 +857,9 @@ main (int argc, char **argv)
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 1 * 8]);
 		value_double = 0;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 2 * 8]);
-		value_double = header.x_min;
+		value_double = header.x_min + 0.5 * header.x_inc;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 3 * 8]);
-		value_double = header.y_max;
+		value_double = header.y_max - 0.5 * header.y_inc;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 4 * 8]);
 		value_double = 0.0;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 5 * 8]);
