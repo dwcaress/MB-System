@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.13 2002-09-16 04:50:47 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.14 2002-09-16 05:51:53 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2002/09/16 04:50:47  caress
+ * Fixed mis-dimensioned array in rd_rawbeam functions.
+ *
  * Revision 5.12  2002/08/21 00:55:46  caress
  * Release 5.0.beta22
  *
@@ -226,7 +229,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.13 2002-09-16 04:50:47 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.14 2002-09-16 05:51:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -3940,7 +3943,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_rawbeam2";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_ping_struct *ping;
-	char	line[EM2_RAWBEAM_HEADER_SIZE];
+	char	line[EM2_RAWBEAM2_HEADER_SIZE];
 	short	short_val;
 	int	read_len;
 	int	spare;
@@ -7397,7 +7400,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_wr_rawbeam2";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_ping_struct *ping;
-	char	line[EM2_RAWBEAM_HEADER_SIZE];
+	char	line[EM2_RAWBEAM2_HEADER_SIZE];
 	short	label;
 	int	write_len;
 	int	write_size;
