@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.10 1995-09-28 18:10:48 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.11 1996-01-26 21:23:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1995/09/28  18:10:48  caress
+ * Various bug fixes working toward release 4.3.
+ *
  * Revision 4.9  1995/08/17  14:41:09  caress
  * Revision for release 4.3.
  *
@@ -95,7 +98,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.10 1995-09-28 18:10:48 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.11 1996-01-26 21:23:30 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -208,6 +211,8 @@ int	*error;
 	struct mbsys_sb2100_struct *store;
 	int	time_j[5];
 	double	scale,  pixel_size, pixel_scale;
+	double	gain_db;
+	double	gain_factor;
 	int	i;
 
 	/* print input debug statements */
@@ -293,9 +298,20 @@ int	*error;
 		else
 			pixel_scale = 1.0;
 		if (store->frequency[0] == 'L')
+			{
 			pixel_size = store->pixel_size_12khz;
+			gain_db = store->ping_gain_12khz 
+				+ store->transmitter_attenuation_12khz
+				- 30.0;
+			}
 		else
+			{
 			pixel_size = store->pixel_size_36khz;
+			gain_db = store->ping_gain_36khz 
+				+ store->transmitter_attenuation_36khz
+				- 30.0;
+			}
+		gain_factor = pow(10.0, (-gain_db / 20.0));
 		for (i=0;i<*nbath;i++)
 			{
 			bath[i] = scale*store->depth[i];
@@ -304,11 +320,11 @@ int	*error;
 			}
 		for (i=0;i<*namp;i++)
 			{
-			amp[i] = store->amplitude_beam[i];
+			amp[i] = 0.25 * store->amplitude_beam[i] - gain_db;
 			}
 		for (i=0;i<*nss;i++)
 			{
-			ss[i] = store->amplitude_ss[i];
+			ss[i] = gain_factor * store->amplitude_ss[i];
 			ssacrosstrack[i] = pixel_scale*pixel_size
 				*(i - MBSYS_SB2100_CENTER_PIXEL);
 			ssalongtrack[i] = scale*store->alongtrack_ss[i];
@@ -484,6 +500,8 @@ int	*error;
 	int	time_j[5];
 	double	scale, pixel_size;
 	int	set_pixel_size;
+	double	gain_db;
+	double	gain_factor;
 	int	i;
 
 	/* print input debug statements */
@@ -568,6 +586,15 @@ int	*error;
 			scale = 1.0;
 			store->range_scale = 'D';
 			}
+		if (store->frequency[0] == 'L')
+			gain_db = store->ping_gain_12khz 
+				+ store->transmitter_attenuation_12khz
+				- 30.0;
+		else
+			gain_db = store->ping_gain_36khz 
+				+ store->transmitter_attenuation_36khz
+				- 30.0;
+		gain_factor = pow(10.0, (gain_db / 20.0));
 		for (i=0;i<nbath;i++)
 			{
 			store->depth[i] = scale*bath[i];
@@ -575,7 +602,7 @@ int	*error;
 			store->alongtrack_beam[i] = scale*bathalongtrack[i];
 			}
 		for (i=0;i<namp;i++)
-			store->amplitude_beam[i] = amp[i];
+			store->amplitude_beam[i] = 4.0 * (amp[i] + gain_db);
 		if ((store->frequency[0] == 'H' 
 			    && store->pixel_size_36khz <= 0.0)
 			|| (store->frequency[0] != 'H' 
@@ -585,7 +612,7 @@ int	*error;
 			set_pixel_size = MB_NO;
 		for (i=0;i<nss;i++)
 			{
-			store->amplitude_ss[i] = ss[i];
+			store->amplitude_ss[i] = gain_factor * ss[i];
 			store->alongtrack_ss[i] = scale*ssalongtrack[i];
 			if (set_pixel_size == MB_YES
 				&& ssacrosstrack[i] > 0)
@@ -629,7 +656,8 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,flags,depthadd,error)
+	ttimes,angles,angles_forward,angles_null,flags,
+	depthadd,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -638,8 +666,10 @@ int	*nbeams;
 double	*ttimes;
 double	*angles;
 double	*angles_forward;
+double	*angles_null;
 int	*flags;
 double	*depthadd;
+double	*ssv;
 int	*error;
 {
 	char	*function_name = "mbsys_sb2100_ttimes";
@@ -660,6 +690,7 @@ int	*error;
 		fprintf(stderr,"dbg2       ttimes:     %d\n",ttimes);
 		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
 		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
@@ -684,6 +715,7 @@ int	*error;
 			ttimes[i] = 0.001*store->travel_time[i];
 			angles[i] = 0.001*store->angle_across[i];
 			angles_forward[i] = 0.01*store->angle_forward[i];
+			angles_null[i] = 0.0;
 			if (store->quality[i] != ' ')
 				flags[i] = MB_YES;
 			else
@@ -692,6 +724,7 @@ int	*error;
 
 		/* get depth offset (heave + heave offset) */
 		*depthadd = 0.001*store->heave + 100.0*store->ship_draft;
+		*ssv = 0.01*store->surface_sound_velocity;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -728,11 +761,12 @@ int	*error;
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
 		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
+		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  flag:%d\n",
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  flag:%d\n",
 				i,ttimes[i],angles[i],
-				angles_forward[i],flags[i]);
+				angles_forward[i],angles_null[i],flags[i]);
 		}
 	if (verbose >= 2)
 		{

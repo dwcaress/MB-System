@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.18 1995-10-23 19:32:03 caress Exp $
+ *    $Id: mbbath.c,v 4.19 1996-01-26 21:25:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1995/10/23  19:32:03  caress
+ * Now user specified draught is added to depth offset rather
+ * than replacing it.
+ *
  * Revision 4.17  1995/10/23  19:26:45  caress
  * Now uses depth offset as correction after bathymetry is
  * calculated rather than before raytracing.
@@ -143,7 +147,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.18 1995-10-23 19:32:03 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.19 1996-01-26 21:25:58 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -151,7 +155,7 @@ model. The depths may be saved as \ncalculated by raytracing (corrected \
 meters) or adjusted as if the \nvertical water velocity is 1500 m/s \
 (uncorrected meters). The default \ninput and output streams are stdin \
 and stdout.";
-	static char usage_message[] = "mbbath [-Aangle -Brollbias \
+	static char usage_message[] = "mbbath [-Brollbias \
 -Ddraught -Fformat  \n\t-Iinfile -Ooutfile -Ppitch_bias -Rrollfile \
 \n\t-Sstaticfile -U -Wvelfile -V -H]";
 
@@ -223,8 +227,8 @@ and stdout.";
 	char	vfile[128];
 	double	roll_bias;
 	double	pitch_bias;
-	double	angle_correction;
-	double	dangle;
+	double	roll_angle_correction;
+	double	pitch_angle_correction;
 	double	draught;
 	int	uncorrected;
 	FILE	*vfp;
@@ -233,6 +237,7 @@ and stdout.";
 	double	*velocity = NULL;
 	double	*velocity_sum = NULL;
 	char	*rt_svp;
+	int	fix_2100_tt = MB_NO;
 
 	/* roll error correction handling variables */
 	char	rfile[128];
@@ -250,8 +255,10 @@ and stdout.";
 	double	*ttimes = NULL;
 	double	*angles = NULL;
 	double	*angles_forward = NULL;
+	double	*angles_null = NULL;
 	int	*flags = NULL;
 	double	depth_offset;
+	double	ssv;
 	double	ttime;
 	int	ray_stat;
 
@@ -313,12 +320,11 @@ and stdout.";
 	roll_bias = 0.0;
 	pitch_bias = 0.0;
 	roll_correction = 0.0;
-	dangle = 0.0;
 	draught = 0.0;
 	uncorrected = MB_NO;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:D:d:F:f:I:i:O:o:P:p:R:r:S:s:UuW:w:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:D:d:F:f:I:i:O:o:P:p:R:r:S:s:UuW:w:Zz")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -328,11 +334,6 @@ and stdout.";
 		case 'V':
 		case 'v':
 			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			sscanf (optarg,"%lf", &dangle);
-			flag++;
 			break;
 		case 'F':
 		case 'f':
@@ -382,6 +383,11 @@ and stdout.";
 		case 'O':
 		case 'o':
 			sscanf (optarg,"%s", ofile);
+			flag++;
+			break;
+		case 'Z':
+		case 'z':
+			fix_2100_tt = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -443,7 +449,6 @@ and stdout.";
 		fprintf(stderr,"dbg2       velocity file:   %s\n",vfile);
 		fprintf(stderr,"dbg2       roll bias:       %f\n",roll_bias);
 		fprintf(stderr,"dbg2       pitch bias:      %f\n",pitch_bias);
-		fprintf(stderr,"dbg2       beam angle:      %f\n",dangle);
 		fprintf(stderr,"dbg2       draught:         %f\n",draught);
 		fprintf(stderr,"dbg2       roll file:       %s\n",rfile);
 		fprintf(stderr,"dbg2       statics file:    %s\n",sfile);
@@ -673,6 +678,7 @@ and stdout.";
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 
 	/* if error initializing memory then quit */
@@ -1090,12 +1096,48 @@ and stdout.";
 			status = mb_ttimes(verbose,imbio_ptr,
 				store_ptr,&kind,&nbeams,
 				ttimes,angles,
-				angles_forward,flags,
-				&depth_offset,&error);
+				angles_forward,angles_null,flags,
+				&depth_offset,&ssv,&error);
+
+			/* fix possible problem with SB2100 data */
+			if (error == MB_ERROR_NO_ERROR
+				&& kind == MB_DATA_DATA
+				&& format == 41
+				&& fix_2100_tt == MB_YES)
+				{
+				/* check ping pulsewidth and double ttime if < 3 */
+
+				/* get data structure pointer */
+				store = (struct mbsys_sb2100_struct *) store_ptr;
+				if (store->frequency[0] == 'H' 
+					&& store->ping_pulse_width_36khz < 3)
+					{
+					for (i=0;i<beams_bath;i++)
+						ttimes[i] = 2.0 * ttimes[i];
+					}
+				}
 
 			/* add user specified draught */
 			if (draught > 0.0)
 				depth_offset = depth_offset + draught;
+
+			/* check depth_offset */
+			if (depth_offset < 0.0)
+				{
+				fprintf(stderr, "\nDepth offset negative - raytracing starts above water!\n");
+				fprintf(stderr, "Depth offset is sum of heave + transducer depth.\n");
+				fprintf(stderr, "Depth offset from data: %f\n", depth_offset - draught);
+				fprintf(stderr, "User specified offset:  %f\n", draught);
+				fprintf(stderr, "Data Record: %d\n",odata);
+				fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
+					time_i[0], time_i[1], time_i[2], 
+					time_i[3], time_i[4], time_i[5], time_i[6]);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				error = MB_ERROR_BAD_PARAMETER;
+				status = MB_FAILURE;
+				exit(error);
+				}
 
 			/* if needed get roll correction */
 			if (nroll > 0 && kind == MB_DATA_DATA)
@@ -1108,12 +1150,16 @@ and stdout.";
 			/* get angle correction */
 			if (kind == MB_DATA_DATA)
 				{
-				angle_correction = 
+				roll_angle_correction = 
 					roll_bias + roll_correction;
+				pitch_angle_correction = 
+					pitch_bias;
 				}
 			else if (kind == MB_DATA_CALIBRATE)
 				{
-				angle_correction = pitch_bias;
+				roll_angle_correction = pitch_bias;
+				pitch_angle_correction = 
+					roll_bias + roll_correction;
 				}
 
 			/* loop over the beams */
@@ -1122,11 +1168,12 @@ and stdout.";
 			  if (ttimes[i] > 0.0)
 			    {
 			    /* get takeoff angle */
-			    angles[i] = angles[i] + angle_correction;
+			    angles[i] = angles[i] + roll_angle_correction;
 			    
 			    /* raytrace */
-			    status = mb_rt(verbose, rt_svp, 0.0, 
+			    status = mb_rt(verbose, rt_svp, depth_offset, 
 				    angles[i], 0.5*ttimes[i],
+				    ssv, angles_null[i], 
 				    0, NULL, NULL, NULL, 
 				    &xx, &zz, 
 				    &ttime, &ray_stat, &error);
@@ -1151,9 +1198,11 @@ and stdout.";
 				    and depth */
 			    if (angles[i] < 0.0)
 				xx = -xx;
+			    angles_forward[i] = angles_forward[i] 
+				+ pitch_angle_correction;
 			    bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
 			    bathalongtrack[i] = xx*sin(DTR*angles_forward[i]);
-			    bath[i] = zz + depth_offset;
+			    bath[i] = zz;
 			    
 			    /* apply static correction */
 			    if (nbath_corr == beams_bath)
@@ -1162,6 +1211,12 @@ and stdout.";
 			    /* flag depths as needed */
 			    if (flags[i] == MB_YES)
 				bath[i] = -bath[i];
+
+			    /* output some debug values */
+			    if (verbose >= 5)
+				fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %8.2f %8.2f\n",
+				    idata, i, 0.5*ttimes[i], angles[i], 
+				    bathacrosstrack[i],bath[i]);
 
 			    /* output some debug messages */
 			    if (verbose >= 5)
@@ -1220,7 +1275,7 @@ and stdout.";
 			    fprintf(stderr,"dbg5       kind:  %d\n",kind);
 			    fprintf(stderr,"dbg5      beam    time      depth        dist\n");	
 			    for (i=0;i<nbath;i++)
-				fprintf(stderr,"dbg5       %2d   %6.0f   %f   %f   %f\n",
+				fprintf(stderr,"dbg5       %2d   %f   %f   %f   %f\n",
 				    i,ttimes[i],
 				    bath[i],bathacrosstrack[i],
 				    bathalongtrack[i]);
@@ -1252,7 +1307,7 @@ and stdout.";
 				fprintf(stderr,"\nMBIO Error returned from function <mb_put>:\n%s\n",message);
 				fprintf(stderr,"\nMultibeam Data Not Written To File <%s>\n",ofile);
 				fprintf(stderr,"Output Record: %d\n",odata+1);
-				fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
+				fprintf(stderr,"Time: %4d %2d %2d %2d:%2d:%2d.%6d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],
 					time_i[6]);
@@ -1301,127 +1356,6 @@ and stdout.";
 
 	/* end it all */
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int setup_raytracing(verbose,mbio_ptr,store_ptr,nbeams,ttimes,
-	angles,angles_forward,flags,
-	angle_bias,dangle,nvel,vel,dep,
-	angle,p,ttime_tab,dist_tab,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	nbeams;
-double	*ttimes;
-double	*angles;
-double	*angles_forward;
-int	*flags;
-double	angle_bias;
-double	dangle;
-int	nvel;
-double	*dep;
-double	*vel;
-double	*angle;
-double	*p;
-double	**ttime_tab;
-double	**dist_tab;
-int	*error;
-{
-	char	*function_name = "setup_raytracing";
-	int	status = MB_SUCCESS;
-	double	*ttime;
-	double	*dist;
-	int	kind;
-	int	center_beam;
-	double	dr, dx;
-	int	i, j;
-	
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %d\n",ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
-		fprintf(stderr,"dbg2       flags:      %d\n",flags);
-		fprintf(stderr,"dbg2       angle_bias: %f\n",angle_bias);
-		fprintf(stderr,"dbg2       dangle:     %f\n",dangle);
-		fprintf(stderr,"dbg2       nvel:       %d\n",nvel);
-		for (i=0;i<nvel;i++)
-			fprintf(stderr,"dbg2       dep[%d]:%f  vel[%d]:%f\n",
-				i,dep[i],i,vel[i]);
-		fprintf(stderr,"dbg2       angle:      %d\n",angle);
-		fprintf(stderr,"dbg2       p:          %d\n",p);
-		fprintf(stderr,"dbg2       ttime_tab:  %d\n",ttime_tab);
-		fprintf(stderr,"dbg2       dist_tab:   %d\n",dist_tab);
-		}
-
-	/* set the angle increment between survey ping beams */
-	if (dangle > 0.0)
-		{
-		center_beam = nbeams/2;
-		for (i=0;i<nbeams;i++)
-			{
-			angle[i] = (i-center_beam)*dangle + angle_bias;
-			p[i] = sin(DTR*angle[i])/vel[0];
-			}
-		}
-	for (i=0;i<nbeams;i++)
-		{
-		angle[i] = angles[i];
-		p[i] = sin(DTR*angle[i])/vel[0];
-		}
-
-	/* set up the raytracing tables for survey pings */
-	for (i=0;i<nbeams;i++)
-		{
-		ttime = ttime_tab[i];
-		dist = dist_tab[i];
-		ttime[0] = 0.0;
-		dist[0] = 0.0;
-		for (j=0;j<nvel-1;j++)
-			{
-			dr = (dep[j+1] - dep[j])
-				/sqrt(1. - p[i]*p[i]*vel[j]*vel[j]);
-			dx = dr*p[i]*vel[j];
-			ttime[j+1] = ttime[j] + 2.*dr/vel[j];
-			dist[j+1] = dist[j] + dx;
-			}
-
-		/* output some debug values */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg5  Raytracing table created for survey beam %d in function <%s>:\n",i,function_name);
-			fprintf(stderr,"dbg5       angle: %f\n",angle[i]);
-			fprintf(stderr,"dbg5       p:     %f\n",p[i]);
-			fprintf(stderr,"dbg5      beam    depth      vel        time      dist     vsum\n",j,dep[j],vel[j],ttime[j],dist[j]);
-			for (j=0;j<nvel;j++)
-				fprintf(stderr,"dbg5       %2d   %8.2f   %7.2f   %8.2f  %9.2f\n",j,dep[j],vel[j],ttime[j],dist[j]);
-			}
-		}
-
-	/* assume success */
-	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
-
-	/* return status */
-	return(status);
 }
 /*--------------------------------------------------------------------*/
 int get_roll_correction(verbose,nroll,roll_time,roll_corr,time_d,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.20 1995-09-28 18:10:48 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.21 1996-01-26 21:23:30 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.20  1995/09/28  18:10:48  caress
+ * Various bug fixes working toward release 4.3.
+ *
  * Revision 4.19  1995/08/17  14:42:45  caress
  * Revision for release 4.3.
  *
@@ -120,7 +123,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.20 1995-09-28 18:10:48 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.21 1996-01-26 21:23:30 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -363,6 +366,8 @@ int	*error;
 	struct mbsys_sb2100_struct *store;
 	int	time_j[5];
 	double	scale,  pixel_size, pixel_scale;
+	double	gain_db;
+	double	gain_factor;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -516,9 +521,20 @@ int	*error;
 		else
 			pixel_scale = 1.0;
 		if (data->frequency[0] == 'L')
+			{
 			pixel_size = data->pixel_size_12khz;
+			gain_db = data->ping_gain_12khz 
+				+ data->transmitter_attenuation_12khz
+				- 30.0;
+			}
 		else
+			{
 			pixel_size = data->pixel_size_36khz;
+			gain_db = data->ping_gain_36khz 
+				+ data->transmitter_attenuation_36khz
+				- 30.0;
+			}
+		gain_factor = pow(10.0, (-gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			mb_io_ptr->new_bath[i] 
@@ -531,12 +547,12 @@ int	*error;
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
 			mb_io_ptr->new_amp[i] 
-				= data->amplitude_beam[i];
+				= 0.25 * data->amplitude_beam[i] - gain_db;
 			}
 		for (i=0;i<mb_io_ptr->pixels_ss;i++)
 			{
 			mb_io_ptr->new_ss[i] 
-				= data->amplitude_ss[i];
+				= gain_factor * data->amplitude_ss[i];
 			mb_io_ptr->new_ss_acrosstrack[i] 
 				= pixel_scale*pixel_size*
 					(i - MBF_SB2100RW_CENTER_PIXEL);
@@ -730,6 +746,8 @@ int	*error;
 	int	time_j[5];
 	double	scale, pixel_size;
 	int	set_pixel_size;
+	double	gain_db;
+	double	gain_factor;
 	int	i;
 
 	/* print input debug statements */
@@ -913,6 +931,15 @@ int	*error;
 			scale = 1.0;
 			data->range_scale = 'D';
 			}
+		if (data->frequency[0] == 'L')
+			gain_db = data->ping_gain_12khz 
+				+ data->transmitter_attenuation_12khz
+				- 30.0;
+		else
+			gain_db = data->ping_gain_36khz 
+				+ data->transmitter_attenuation_36khz
+				- 30.0;
+		gain_factor = pow(10.0, (gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			 data->depth[i]
@@ -925,7 +952,7 @@ int	*error;
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
 			 data->amplitude_beam[i]
-				= mb_io_ptr->new_amp[i];
+				= 4.0 * (mb_io_ptr->new_amp[i] + gain_db);
 			}
 		if ((data->frequency[0] == 'H' 
 			    && data->pixel_size_36khz <= 0.0)
@@ -937,7 +964,8 @@ int	*error;
 		for (i=0;i<mb_io_ptr->pixels_ss;i++)
 			{
 			data->amplitude_ss[i]
-				= (int) mb_io_ptr->new_ss[i];
+				= (int) (gain_factor 
+					* mb_io_ptr->new_ss[i]);
 			data->alongtrack_ss[i]
 				= scale*mb_io_ptr->new_ss_alongtrack[i];
 			if (set_pixel_size == MB_YES
@@ -2223,7 +2251,6 @@ int	*error;
 		status = fprintf(mbfp,"%2.2d",data->minute);
 		status = fprintf(mbfp,"%5.5d",data->msec);
 		status = fprintf(mbfp,"%+06d",data->roll_bias_port);
-		status = fprintf(mbfp,"%+06d",data->roll_bias_starboard);
 		status = fprintf(mbfp,"%+06d",data->pitch_bias);
 		status = fprintf(mbfp,"%2.2d",data->num_svp);
 		status = fprintf(mbfp,"%7.7d",data->ship_draft);
@@ -2490,7 +2517,10 @@ int	*error;
 		minutes = (int) (600000.0*(degrees - idegrees) + 0.5);
 		status = fprintf(mbfp,"%3.3d",idegrees);
 		status = fprintf(mbfp,"%6.6d",minutes);
+		if (data->speed > 999999 || data->speed < -999999)
+			data->speed = 0;
 		status = fprintf(mbfp,"%+07d",data->speed);
+		
 		status = fprintf(mbfp,"%4.4d",data->num_beams);
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",

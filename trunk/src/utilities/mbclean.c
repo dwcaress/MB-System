@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.10 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbclean.c,v 4.11 1996-01-26 21:25:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.9  1995/03/13  19:22:12  caress
  * Added fractional depth range checking (-G option).
  *
@@ -126,7 +130,7 @@ struct bad_struct
 	int	flag;
 	int	ping;
 	int	beam;
-	int	bath;
+	double	bath;
 	};
 
 /*--------------------------------------------------------------------*/
@@ -135,10 +139,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.10 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.11 1996-01-26 21:25:58 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
-	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Gfraction_low/fraction_high -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
+	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -193,14 +197,17 @@ char **argv;
 	int	ndata = 0;
 	int	nrange = 0;
 	int	nfraction = 0;
+	int	ndeviation = 0;
 	int	nouter = 0;
 	int	nrail = 0;
 	int	nbad = 0;
 	int	nflag = 0;
 	int	nzero = 0;
 	char	comment[256];
+	int	check_slope = MB_NO;
 	double	slopemax = 1.0;
-	double	distancemin = 10.;
+	double	distancemin = 0.01;
+	double	distancemax = 0.25;
 	int	mode = MBCLEAN_FLAG_ONE;
 	int	zap_beams = 0;
 	int	zap_rails = MB_NO;
@@ -210,6 +217,8 @@ char **argv;
 	int	check_fraction = MB_NO;
 	double	fraction_low;
 	double	fraction_high;
+	int	check_deviation = MB_NO;
+	double	deviation_max;
 
 	/* rail processing variables */
 	int	center;
@@ -233,7 +242,7 @@ char **argv;
 	double	*bathy3 = NULL;
 	int	nlist;
 	double	*list = NULL;
-	double	median;
+	double	median = 0.0;
 	double	dd;
 	double	slope;
 
@@ -281,7 +290,7 @@ char **argv;
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:O:o:QqX:x:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:O:o:QqX:x:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -292,6 +301,12 @@ char **argv;
 		case 'v':
 			verbose++;
 			break;
+		case 'A':
+		case 'a':
+			sscanf (optarg,"%lf", &deviation_max);
+			check_deviation = MB_YES;
+			flag++;
+			break;
 		case 'B':
 		case 'b':
 			sscanf (optarg,"%lf/%lf", &depth_low,&depth_high);
@@ -301,11 +316,12 @@ char **argv;
 		case 'C':
 		case 'c':
 			sscanf (optarg,"%lf", &slopemax);
+			check_slope = MB_YES;
 			flag++;
 			break;
 		case 'D':
 		case 'd':
-			sscanf (optarg,"%lf", &distancemin);
+			sscanf (optarg,"%lf/%lf", &distancemin, &distancemax);
 			flag++;
 			break;
 		case 'F':
@@ -363,6 +379,15 @@ char **argv;
 		exit(error);
 		}
 
+	/* turn on slope checking if nothing else is to be used */
+	if (check_slope == MB_NO
+		&& zap_beams == 0
+		&& zap_rails == MB_NO
+		&& check_range == MB_NO
+		&& check_fraction == MB_NO
+		&& check_deviation == MB_NO)
+		check_slope = MB_YES;
+
 	/* print starting message */
 	if (verbose == 1)
 		{
@@ -406,16 +431,19 @@ char **argv;
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:    %s\n",ofile);
 		fprintf(stderr,"dbg2       mode:           %d\n",mode);
-		fprintf(stderr,"dbg2       maximum slope:  %f\n",slopemax);
-		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemin);
 		fprintf(stderr,"dbg2       zap_beams:      %d\n",zap_beams);
 		fprintf(stderr,"dbg2       zap_rails:      %d\n",zap_rails);
+		fprintf(stderr,"dbg2       check_slope:    %d\n",check_slope);
+		fprintf(stderr,"dbg2       maximum slope:  %f\n",slopemax);
+		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemin);
+		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemax);
 		fprintf(stderr,"dbg2       check_range:    %d\n",check_range);
 		fprintf(stderr,"dbg2       depth_low:      %f\n",depth_low);
 		fprintf(stderr,"dbg2       depth_high:     %f\n",depth_high);
 		fprintf(stderr,"dbg2       check_fraction: %d\n",check_fraction);
 		fprintf(stderr,"dbg2       fraction_low:   %f\n",fraction_low);
 		fprintf(stderr,"dbg2       fraction_high:  %f\n",fraction_high);
+		fprintf(stderr,"dbg2       check_deviation:%d\n",check_deviation);
 		}
 
 	/* if help desired then print it and exit */
@@ -673,6 +701,18 @@ char **argv;
 			ping[0].ssacrosstrack,ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
+	sprintf(comment,"  Maximum distance:   %f",distancemax);
+	status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+	strncpy(comment,"\0",256);
 	sprintf(comment,"  Outer beams zapped: %d",zap_beams);
 	status = mb_put(verbose,ombio_ptr,kind,
 			ping[0].time_i,ping[0].time_d,
@@ -781,6 +821,48 @@ char **argv;
 		{
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth fractional range checking off");
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		}
+	if (check_deviation == MB_YES)
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Depth deviation from median checking on:");
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		strncpy(comment,"\0",256);
+		sprintf(comment,"    Maximum acceptable depth deviation: %f",deviation_max);
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		}
+	else
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Depth deviation from median checking off");
 		status = mb_put(verbose,ombio_ptr,kind,
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
@@ -1095,19 +1177,39 @@ char **argv;
 				}
 				}
 
-			/* find the median depth in current ping */
+			/* loop over each of the beams in the current ping */
+			if (ping[1].id >= 0)
+			{
+			for (i=0;i<beams_bath;i++)
+			if (ping[1].bath[i] > 0.0)
+			{
+			
+			/* get local median value */
+			if (median <= 0.0)
+			    median = ping[1].bath[i];
 			nlist = 0;
 			for (j=0;j<3;j++)
 			{
 			if (ping[j].id >= 0)
-				for (i=0;i<beams_bath;i++)
+			    for (k=0;k<beams_bath;k++)
+				{
+				if (ping[j].bath[k] > 0.0)
+				    {
+				    dd = sqrt((ping[j].bathx[k] 
+					- ping[1].bathx[i])
+					*(ping[j].bathx[k] 
+					- ping[1].bathx[i])
+					+ (ping[j].bathy[k] 
+					- ping[1].bathy[i])
+					*(ping[j].bathy[k] 
+					- ping[1].bathy[i]));
+				    if (dd <= distancemax * median)
 					{
-					if (ping[j].bath[i] > 0.0)
-						{
-						list[nlist] = ping[j].bath[i];
-						nlist++;
-						}
+					list[nlist] = ping[j].bath[k];
+					nlist++;
 					}
+				    }
+				}
 			}
 			sort(nlist,list);
 			median = list[nlist/2];
@@ -1121,49 +1223,73 @@ char **argv;
 					list[nlist-1]);
 				}
 
-			/* check fractional depth range if desired */
+			/* check fractional deviation from median if desired */
 			if (check_fraction == MB_YES 
-				&& ping[1].id >= 0 && median > 0.0)
+			    && median > 0.0)
+			    {
+			    if (ping[1].bath[i]/median < fraction_low
+				|| ping[1].bath[i]/median > fraction_high)
 				{
-				for (i=0;i<beams_bath;i++)
-					{
-					if (ping[1].bath[i] > 0.0
-					&& (ping[1].bath[i]/median < fraction_low
-					|| ping[1].bath[i]/median > fraction_high))
-					{
-					if (verbose >= 1)
-					fprintf(stderr,"f: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f\n",
-						ping[1].time_i[0],
-						ping[1].time_i[1],
-						ping[1].time_i[2],
-						ping[1].time_i[3],
-						ping[1].time_i[4],
-						ping[1].time_i[5],
-						ping[1].time_i[6],
-						i,ping[1].bath[i],median);
-					find_bad = MB_YES;
-					if (mode <= 2)
-						{
-						ping[1].bath[i] = -ping[1].bath[i];
-						nfraction++;
-						nflag++;
-						}
-					else
-						{
-						ping[1].bath[i] = 0.0;
-						nfraction++;
-						nzero++;
-						}
-					}
-					}
+				if (verbose >= 1)
+				    fprintf(stderr,"f: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f\n",
+					ping[1].time_i[0],
+					ping[1].time_i[1],
+					ping[1].time_i[2],
+					ping[1].time_i[3],
+					ping[1].time_i[4],
+					ping[1].time_i[5],
+					ping[1].time_i[6],
+					i,ping[1].bath[i],median);
+				find_bad = MB_YES;
+				if (mode <= 2)
+				    {
+				    ping[1].bath[i] = -ping[1].bath[i];
+				    nfraction++;
+				    nflag++;
+				    }
+				else
+				    {
+				    ping[1].bath[i] = 0.0;
+				    nfraction++;
+				    nzero++;
+				    }
 				}
+			    }
 
-			/* loop over each of the points in the current ping */
-			if (ping[1].id >= 0)
-			{
-			for (i=0;i<beams_bath;i++)
-			if (ping[1].bath[i] > 0.0)
-			{
+			/* check absolute deviation from median if desired */
+			if (check_deviation == MB_YES 
+			    && median > 0.0)
+			    {
+			    if (fabs(ping[1].bath[i] - median) > deviation_max)
+				{
+				if (verbose >= 1)
+				fprintf(stderr,"a: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f\n",
+				    ping[1].time_i[0],
+				    ping[1].time_i[1],
+				    ping[1].time_i[2],
+				    ping[1].time_i[3],
+				    ping[1].time_i[4],
+				    ping[1].time_i[5],
+				    ping[1].time_i[6],
+				    i,ping[1].bath[i],median);
+				find_bad = MB_YES;
+				if (mode <= 2)
+				    {
+				    ping[1].bath[i] = -ping[1].bath[i];
+				    ndeviation++;
+				    nflag++;
+				    }
+				else
+				    {
+				    ping[1].bath[i] = 0.0;
+				    ndeviation++;
+				    nzero++;
+				    }
+				}
+			    }
+
+			/* check slopes - loop over each of the beams in the current ping */
+			if (check_slope == MB_YES)
 			for (j=0;j<3;j++)
 				{
 				if (ping[j].id >= 0)
@@ -1180,14 +1306,14 @@ char **argv;
 						- ping[1].bathy[i])
 						*(ping[j].bathy[k] 
 						- ping[1].bathy[i]));
-					if (dd > 0.0)
+					if (dd > 0.0 && dd <= distancemax * median)
 						slope = fabs(
 						(ping[j].bath[k] 
 						- ping[1].bath[i])/dd);
 					else
 						slope = 0.0;
 					if (slope > slopemax 
-						&& dd > distancemin)
+						&& dd > distancemin * median)
 						{
 						find_bad = MB_YES;
 						if (mode == MBCLEAN_FLAG_BOTH)
@@ -1275,14 +1401,14 @@ char **argv;
 							}
 						}
 					if (verbose >= 1 && slope > slopemax 
-						&& dd > distancemin
+						&& dd > distancemin * median
 						&& bad[0].flag == MB_YES)
 						{
 						p = bad[0].ping;
 						b = bad[0].beam;
 						if (verbose >= 2)
 							fprintf(stderr,"\n");
-						fprintf(stderr,"s: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2g %8.2f %6.2f %6.2f\n",
+						fprintf(stderr,"s: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f %6.2f %6.2f\n",
 						ping[p].time_i[0],
 						ping[p].time_i[1],
 						ping[p].time_i[2],
@@ -1293,14 +1419,14 @@ char **argv;
 						b,bad[0].bath,median,slope,dd);
 						}
 					if (verbose >= 1 && slope > slopemax
-						&& dd > distancemin
+						&& dd > distancemin * median
 						&& bad[1].flag == MB_YES)
 						{
 						p = bad[1].ping;
 						b = bad[1].beam;
 						if (verbose >= 2)
 							fprintf(stderr,"\n");
-						fprintf(stderr,"%s: 4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2g %8.2f %6.2f %6.2f\n",
+						fprintf(stderr,"%s: 4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f %6.2f %6.2f\n",
 						ping[p].time_i[0],
 						ping[p].time_i[1],
 						ping[p].time_i[2],
@@ -1428,6 +1554,7 @@ char **argv;
 		fprintf(stderr,"%d outer beams zapped\n",nouter);
 		fprintf(stderr,"%d beams out of acceptable depth range\n",nrange);
 		fprintf(stderr,"%d beams out of acceptable fractional depth range\n",nfraction);
+		fprintf(stderr,"%d beams exceed acceptable deviation from median depth\n",ndeviation);
 		fprintf(stderr,"%d bad rail beams identified\n",nrail);
 		fprintf(stderr,"%d excessive slopes identified\n",nbad);
 		fprintf(stderr,"%d beams flagged\n",nflag);
