@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.16 2003-12-24 06:57:37 caress Exp $
+#	$Id: Makefile.template,v 5.17 2003-12-24 08:23:32 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.16  2003/12/24 06:57:37  caress
+# Fixed problem with formats 42 and 43. Combined former files mbr_sb2100b1.c and mbr_sb2100b2.c into new file mbr_sb2100bi.c. Files mbf_sb2100b1.h and mbf_sb2100b2.h are no longer part of the archive.
+#
 # Revision 5.15  2003/07/27 20:49:30  caress
 # Release 5.0.0
 #
@@ -453,7 +456,7 @@ mbr_hsldeoih.o: mbr_hsldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_hsldeoih.c
 mbr_sb2100rw.o: mbr_sb2100rw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100rw.h $(INCDIR)/mbsys_sb2100.h
 	$(CC) -c $(CFLAGS) mbr_sb2100rw.c
-mbr_sb2100bi.o: mbr_sb2100bi.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100b1.h $(INCDIR)/mbsys_sb2100.h
+mbr_sb2100bi.o: mbr_sb2100bi.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb2100.h
 	$(CC) -c $(CFLAGS) mbr_sb2100bi.c
 mbr_emoldraw.o: mbr_emoldraw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_simrad.h
 	$(CC) -c $(CFLAGS) mbr_emoldraw.c
@@ -668,12 +671,6 @@ $(INCDIR)/mbf_hsldeoih.h:	mbf_hsldeoih.h
 $(INCDIR)/mbf_sb2100rw.h:	mbf_sb2100rw.h
 	cp mbf_sb2100rw.h $(INCDIR)/mbf_sb2100rw.h
 	chmod 664 $(INCDIR)/mbf_sb2100rw.h
-$(INCDIR)/mbf_sb2100b1.h:	mbf_sb2100b1.h
-	cp mbf_sb2100b1.h $(INCDIR)/mbf_sb2100b1.h
-	chmod 664 $(INCDIR)/mbf_sb2100b1.h
-$(INCDIR)/mbf_sb2100b2.h:	mbf_sb2100b2.h
-	cp mbf_sb2100b2.h $(INCDIR)/mbf_sb2100b2.h
-	chmod 664 $(INCDIR)/mbf_sb2100b2.h
 $(INCDIR)/mbf_em12darw.h:	mbf_em12darw.h
 	cp mbf_em12darw.h $(INCDIR)/mbf_em12darw.h
 	chmod 664 $(INCDIR)/mbf_em12darw.h
