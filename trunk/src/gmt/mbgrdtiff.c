@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.7 2002-11-12 06:47:19 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.8 2003-04-17 20:43:37 caress Exp $
  *
- *    Copyright (c) 1999, 2000 by
+ *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -215,6 +215,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/11/12 06:47:19  caress
+ * Proper GeoTIFF now created with projected coordinate systems.
+ *
  * Revision 5.6  2001/11/08 02:22:17  caress
  * Fixed program so bounds can be taken from grd file if not
  * specified on the command line.
@@ -373,7 +376,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.7 2002-11-12 06:47:19 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.8 2003-04-17 20:43:37 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";

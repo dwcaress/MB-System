@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.7 2003-03-16 18:05:01 caress Exp $
+#    $Id: mbm_grid.perl,v 5.8 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 1999, 2002 by
+#    Copyright (c) 1999, 2002, 2003 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -54,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.7 2003-03-16 18:05:01 caress Exp $
+#   $Id: mbm_grid.perl,v 5.8 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.7  2003/03/16 18:05:01  caress
+#   Added -K option for underlaying background data on grids.
+#
 #   Revision 5.6  2002/10/02 23:53:13  caress
 #   Release 5.0.beta24
 #

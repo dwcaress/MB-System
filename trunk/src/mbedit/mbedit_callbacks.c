@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.8 2002-08-30 19:28:21 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.9 2003-04-17 20:45:42 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/08/30 19:28:21  caress
+ * Added time series style plots.
+ *
  * Revision 5.7  2002/07/20 20:45:04  caress
  * Release 5.0.beta20
  *
@@ -266,6 +269,8 @@ static int mb_borders[4] =
 void do_load(int save_mode);
 void do_filebutton_on();
 void do_filebutton_off();
+void do_nextbutton_on();
+void do_nextbutton_off();
 void set_label_string(Widget, String);
 void set_label_multiline_string(Widget, String);
 void get_text_string(Widget, String);
@@ -515,7 +520,9 @@ do_mbedit_init(int argc, char **argv)
     
     /* set up the widgets */
     do_setup_data();
-    
+    do_filebutton_on();
+    do_nextbutton_off();
+        
     /* if startup indicated try to open it */
     if (startup_file == MB_YES)
 	{
@@ -1360,6 +1367,15 @@ do_filebutton_on()
 		XtVaSetValues(pushButton_file, 
 			XmNsensitive, True, 
 			NULL);
+		XtVaSetValues(pushButton_done, 
+			XmNsensitive, False, 
+			NULL);
+		XtVaSetValues(pushButton_forward, 
+			XmNsensitive, False, 
+			NULL);
+		XtVaSetValues(pushButton_reverse, 
+			XmNsensitive, False, 
+			NULL);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1368,6 +1384,34 @@ void
 do_filebutton_off()
 {
 		XtVaSetValues(pushButton_file, 
+			XmNsensitive, False, 
+			NULL);
+		XtVaSetValues(pushButton_done, 
+			XmNsensitive, True, 
+			NULL);
+		XtVaSetValues(pushButton_forward, 
+			XmNsensitive, True, 
+			NULL);
+		XtVaSetValues(pushButton_reverse, 
+			XmNsensitive, True, 
+			NULL);
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_nextbutton_on()
+{
+		XtVaSetValues(pushButton_next, 
+			XmNsensitive, True, 
+			NULL);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_nextbutton_off()
+{
+		XtVaSetValues(pushButton_next, 
 			XmNsensitive, False, 
 			NULL);
 }

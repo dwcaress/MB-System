@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdinfo.perl	4/26/01
-#    $Id: mbm_grdinfo.perl,v 1.1 2001-06-03 06:59:24 caress Exp $
+#    $Id: mbm_grdinfo.perl,v 1.2 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 2001 by 
+#    Copyright (c) 2001, 2003 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -40,10 +40,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward coast of Oahu)
 ##
 # Version:
-#   $Id: mbm_grdinfo.perl,v 1.1 2001-06-03 06:59:24 caress Exp $
+#   $Id: mbm_grdinfo.perl,v 1.2 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 1.1  2001/06/03 06:59:24  caress
+#   Initial revision
+#
 #   Revision 5.1  2001/03/22 21:05:45  caress
 #   Trying to make release 5.0.beta0
 #
