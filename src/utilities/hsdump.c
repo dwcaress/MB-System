@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 4.2 1994-06-03 23:54:03 caress Exp $
+ *    $Id: hsdump.c,v 4.3 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/06/03  23:54:03  caress
+ * Added format_num and fixed call to mb_format_inf.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -57,7 +60,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 4.2 1994-06-03 23:54:03 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 4.3 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -74,7 +77,7 @@ char **argv;
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message;
+	char	*message = NULL;
 
 	/* MBIO read and write control parameters */
 	int	format = 0;
@@ -82,8 +85,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -92,13 +95,13 @@ char **argv;
 	int	beams_amp;
 	int	pixels_ss;
 	char	file[128];
-	char	*mbio_ptr;
+	char	*mbio_ptr = NULL;
 
 	/* mbio read and write values */
 	char	*store_ptr;
 	struct mbsys_hsds_struct *store;
 	int	kind;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -108,13 +111,13 @@ char **argv;
 	int	nbath;
 	int	namp;
 	int	nss;
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath = NULL;
+	double	*bathacrosstrack = NULL;
+	double	*bathalongtrack = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*ssacrosstrack = NULL;
+	double	*ssalongtrack = NULL;
 	char	comment[256];
 
 	/* dump control parameters */
@@ -163,12 +166,14 @@ char **argv;
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
+	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
+	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
@@ -265,12 +270,14 @@ char **argv;
 		fprintf(output,"dbg2       btime_i[3]:      %d\n",btime_i[3]);
 		fprintf(output,"dbg2       btime_i[4]:      %d\n",btime_i[4]);
 		fprintf(output,"dbg2       btime_i[5]:      %d\n",btime_i[5]);
+		fprintf(output,"dbg2       btime_i[6]:      %d\n",btime_i[6]);
 		fprintf(output,"dbg2       etime_i[0]:      %d\n",etime_i[0]);
 		fprintf(output,"dbg2       etime_i[1]:      %d\n",etime_i[1]);
 		fprintf(output,"dbg2       etime_i[2]:      %d\n",etime_i[2]);
 		fprintf(output,"dbg2       etime_i[3]:      %d\n",etime_i[3]);
 		fprintf(output,"dbg2       etime_i[4]:      %d\n",etime_i[4]);
 		fprintf(output,"dbg2       etime_i[5]:      %d\n",etime_i[5]);
+		fprintf(output,"dbg2       etime_i[6]:      %d\n",etime_i[6]);
 		fprintf(output,"dbg2       speedmin:        %f\n",speedmin);
 		fprintf(output,"dbg2       timegap:         %f\n",timegap);
 		fprintf(output,"dbg2       input file:      %s\n",file);
@@ -325,15 +332,17 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathacrosstrack,
-				&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathalongtrack,
-				&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssalongtrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
+				&bathacrosstrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
+				&bathalongtrack,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&ssacrosstrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -702,16 +711,16 @@ char **argv;
 		}
 
 	/* close the file */
-	status = mb_close(verbose,mbio_ptr,&error);
+	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathacrosstrack,&error); 
-	mb_free(verbose,bathalongtrack,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,ssacrosstrack,&error); 
-	mb_free(verbose,ssalongtrack,&error); 
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&bathacrosstrack,&error); 
+	mb_free(verbose,&bathalongtrack,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&ssacrosstrack,&error); 
+	mb_free(verbose,&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

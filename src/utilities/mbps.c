@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.3 1994-07-29 19:02:56 caress Exp $
+ *    $Id: mbps.c,v 4.4 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/07/29  19:02:56  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * using unix second time base.
+ *
  * Revision 4.2  1994/03/08  12:51:05  caress
  * Really fixed mb_format_inf call.
  * l
@@ -83,13 +87,13 @@
 
 struct ping
 	{
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath;
+	double	*bathacrosstrack;
+	double	*bathalongtrack;
+	double	*amp;
+	double	*ss;
+	double	*ssacrosstrack;
+	double	*ssalongtrack;
 	};
 
 main (argc, argv)
@@ -97,7 +101,7 @@ int argc;
 char **argv; 
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 4.3 1994-07-29 19:02:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.4 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
@@ -141,8 +145,8 @@ char **argv;
 	int	format_num;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -155,24 +159,24 @@ char **argv;
 	int	pixels_ss;
 
 	/* MBIO read values */
-	char	*mbio_ptr;
+	char	*mbio_ptr = NULL;
 	int	kind;
 	struct ping *data[MBPS_MAXPINGS];
 	struct ping *datacur;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
 	double	distance;
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath = NULL;
+	double	*bathacrosstrack = NULL;
+	double	*bathalongtrack = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*ssacrosstrack = NULL;
+	double	*ssalongtrack = NULL;
 	char	comment[256];
 	int	icomment = 0;
 	int	comments = MB_NO;
@@ -198,10 +202,10 @@ char **argv;
 	double	hdgend = 0.0;
 	double	timbeg = 0.0;
 	double	timend = 0.0;
-	int	timbeg_i[6];
-	int	timend_i[6];
-	int	timbeg_j[4];
-	int	timend_j[4];
+	int	timbeg_i[7];
+	int	timend_i[7];
+	int	timbeg_j[5];
+	int	timend_j[5];
 	double	distot = 0.0;
 	double	timtot = 0.0;
 	double	spdavg = 0.0;
@@ -221,7 +225,7 @@ char **argv;
 	int i, j, k, l, m;
 
 	/* initialize some time variables */
-	for (i=0;i<6;i++)
+	for (i=0;i<7;i++)
 		{
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
@@ -255,6 +259,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
 			flag++;
 			break;
 		case 'E':
@@ -262,6 +267,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'S':
@@ -379,12 +385,14 @@ char **argv;
 		fprintf(output,"dbg2       btime_i[3]: %d\n",btime_i[3]);
 		fprintf(output,"dbg2       btime_i[4]: %d\n",btime_i[4]);
 		fprintf(output,"dbg2       btime_i[5]: %d\n",btime_i[5]);
+		fprintf(output,"dbg2       btime_i[6]: %d\n",btime_i[6]);
 		fprintf(output,"dbg2       etime_i[0]: %d\n",etime_i[0]);
 		fprintf(output,"dbg2       etime_i[1]: %d\n",etime_i[1]);
 		fprintf(output,"dbg2       etime_i[2]: %d\n",etime_i[2]);
 		fprintf(output,"dbg2       etime_i[3]: %d\n",etime_i[3]);
 		fprintf(output,"dbg2       etime_i[4]: %d\n",etime_i[4]);
 		fprintf(output,"dbg2       etime_i[5]: %d\n",etime_i[5]);
+		fprintf(output,"dbg2       etime_i[6]: %d\n",etime_i[6]);
 		fprintf(output,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(output,"dbg2       file:       %s\n",file);
 	}
@@ -413,23 +421,31 @@ char **argv;
 
 	/* allocate memory for data arrays */
 	for (i=0;i<pings;i++) {
+		data[i] = NULL;
 		status = mb_malloc(verbose,pings*sizeof(struct ping),
 					&data[i],&error);
 		if (error == MB_ERROR_NO_ERROR) {
 			datacur = data[i];
-			status = mb_malloc(verbose,beams_bath*sizeof(int),
+			datacur->bath = NULL;
+			datacur->amp = NULL;
+			datacur->bathacrosstrack = NULL;
+			datacur->bathalongtrack = NULL;
+			datacur->ss = NULL;
+			datacur->ssacrosstrack = NULL;
+			datacur->ssalongtrack = NULL;
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&datacur->bath,&error);
-			status = mb_malloc(verbose,beams_amp*sizeof(int),
+			status = mb_malloc(verbose,beams_amp*sizeof(double),
 					&datacur->amp,&error);
-			status = mb_malloc(verbose,beams_bath*sizeof(int),
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&datacur->bathacrosstrack,&error);
-			status = mb_malloc(verbose,beams_bath*sizeof(int),
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&datacur->bathalongtrack,&error);
-			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			status = mb_malloc(verbose,pixels_ss*sizeof(double),
 					&datacur->ss,&error);
-			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			status = mb_malloc(verbose,pixels_ss*sizeof(double),
 					&datacur->ssacrosstrack,&error);
-			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			status = mb_malloc(verbose,pixels_ss*sizeof(double),
 					&datacur->ssalongtrack,&error);
 		} /* if data[i] */
 	} 	 /* for i */	  
@@ -497,9 +513,10 @@ char **argv;
 				mb_error(verbose,error,&message);
 				fprintf(output,"\nNonfatal MBIO Error:\n%s\n",
 					message);
-				fprintf(output,"Time: %d %d %d %d %d %d\n",
+				fprintf(output,"Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 				}
 			else if (verbose >= 1 && error < MB_ERROR_NO_ERROR)
 				{
@@ -514,9 +531,10 @@ char **argv;
 				mb_error(verbose,error,&message);
 				fprintf(output,"\nFatal MBIO Error:\n%s\n",
 					message);
-				fprintf(output,"Last Good Time: %d %d %d %d %d %d\n",
+				fprintf(output,"Last Good Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 				}
 
 		} /* end reading of data, 2'nd while under read/process data */
@@ -543,7 +561,7 @@ char **argv;
 			if (status==MB_SUCCESS) {
 				distot+=distance*1000.0;	/* dist in meters */
 				for (j=0; j<beams_bath; j++) {
-					if (bath[j]>0) {
+					if (bath[j]>0.0) {
 					/* bath[] > 0 for unflagged data */
 					    if (viewdir=='S' || viewdir=='s') {
 						xp[irec-1][j]=distot+bathacrosstrack[j]*
@@ -581,10 +599,10 @@ char **argv;
 
 
 				if ((irec-1)==0)
-					for (k=0; k<6; k++)
+					for (k=0; k<7; k++)
 						timbeg_i[k]=time_i[k];
 				else
-					for (k=0; k<6; k++)
+					for (k=0; k<7; k++)
 						timend_i[k]=time_i[k];
 				i++;
 				if (i>=(PINGS_MAX-3)) {
@@ -862,7 +880,7 @@ char **argv;
 
 
 	/* close the multibeam file */
-	status = mb_close(verbose,mbio_ptr,&error);
+	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory */
 	for (i=0;i<pings;i++) {

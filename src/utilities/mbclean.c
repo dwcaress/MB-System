@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.4 1994-07-29 19:02:56 caress Exp $
+ *    $Id: mbclean.c,v 4.5 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/07/29  19:02:56  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * using unix second time base.
+ *
  * Revision 4.3  1994/04/12  00:42:00  caress
  * Changed call to mb_buffer_close in accordance with change
  * in mb_buffer source code.  The parameter list now includes
@@ -83,19 +87,19 @@
 struct mbclean_ping_struct 
 	{
 	int	id;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath;
+	double	*bathacrosstrack;
+	double	*bathalongtrack;
+	double	*amp;
+	double	*ss;
+	double	*ssacrosstrack;
+	double	*ssalongtrack;
 	double	*bathx;
 	double	*bathy;
 	};
@@ -115,7 +119,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.4 1994-07-29 19:02:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.5 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -130,7 +134,7 @@ char **argv;
 	int	status;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message;
+	char	*message = NULL;
 
 	/* MBIO read control parameters */
 	int	format;
@@ -138,8 +142,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -148,14 +152,14 @@ char **argv;
 	int	beams_amp;
 	int	pixels_ss;
 	char	ifile[128];
-	char	*imbio_ptr;
+	char	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	char	ofile[128];
-	char	*ombio_ptr;
+	char	*ombio_ptr = NULL;
 
 	/* MBIO buffer structure pointer */
-	char	*buff_ptr;
+	char	*buff_ptr = NULL;
 	int	nbuff;
 	int	nwant = 500;
 	int	nload;
@@ -165,7 +169,7 @@ char **argv;
 	int	finished;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	char	*store_ptr = NULL;
 	int	kind;
 	struct mbclean_ping_struct ping[3];
 	struct bad_struct bad[2];
@@ -184,8 +188,8 @@ char **argv;
 	int	zap_beams = 0;
 	int	zap_rails = MB_NO;
 	int	check_range = MB_NO;
-	int	depth_low;
-	int	depth_high;
+	double	depth_low;
+	double	depth_high;
 
 	/* rail processing variables */
 	int	center;
@@ -201,15 +205,15 @@ char **argv;
 	double	mtodeglat;
 	double	headingx;
 	double	headingy;
-	double	*bathx1;
-	double	*bathy1;
-	double	*bathx2;
-	double	*bathy2;
-	double	*bathx3;
-	double	*bathy3;
+	double	*bathx1 = NULL;
+	double	*bathy1 = NULL;
+	double	*bathx2 = NULL;
+	double	*bathy2 = NULL;
+	double	*bathx3 = NULL;
+	double	*bathy3 = NULL;
 	int	nlist;
-	int	*list;
-	int	median;
+	double	*list = NULL;
+	double	median;
 	double	dd;
 	double	slope;
 
@@ -241,12 +245,14 @@ char **argv;
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
+	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
+	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
@@ -268,7 +274,7 @@ char **argv;
 			break;
 		case 'B':
 		case 'b':
-			sscanf (optarg,"%d/%d", &depth_low,&depth_high);
+			sscanf (optarg,"%lf/%lf", &depth_low,&depth_high);
 			check_range = MB_YES;
 			flag++;
 			break;
@@ -359,12 +365,14 @@ char **argv;
 		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       data format:    %d\n",format);
@@ -376,8 +384,8 @@ char **argv;
 		fprintf(stderr,"dbg2       zap_beams:      %d\n",zap_beams);
 		fprintf(stderr,"dbg2       zap_rails:      %d\n",zap_rails);
 		fprintf(stderr,"dbg2       check_range:    %d\n",check_range);
-		fprintf(stderr,"dbg2       depth_low:      %d\n",depth_low);
-		fprintf(stderr,"dbg2       depth_high:     %d\n",depth_high);
+		fprintf(stderr,"dbg2       depth_low:      %f\n",depth_low);
+		fprintf(stderr,"dbg2       depth_high:     %f\n",depth_high);
 		}
 
 	/* if help desired then print it and exit */
@@ -441,34 +449,38 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[0].bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[0].bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[0].bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(int),&ping[0].amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[0].ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[0].ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[0].ssalongtrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ping[0].bathx,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ping[0].bathy,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[1].bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[1].bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[1].bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(int),&ping[1].amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[1].ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[1].ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[1].ssalongtrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ping[1].bathx,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ping[1].bathy,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[2].bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[2].bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&ping[2].bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(int),&ping[2].amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[2].ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[2].ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ping[2].ssalongtrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ping[2].bathx,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ping[2].bathy,&error);
-	status = mb_malloc(verbose,3*beams_bath*sizeof(int),&list,&error);
+	for (i=0;i<3;i++)
+		{
+		ping[i].bath = NULL;
+		ping[i].bathacrosstrack = NULL;
+		ping[i].bathalongtrack = NULL;
+		ping[i].amp = NULL;
+		ping[i].ss = NULL;
+		ping[i].ssacrosstrack = NULL;
+		ping[i].ssalongtrack = NULL;
+		ping[i].bathx = NULL;
+		ping[i].bathy = NULL;
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+			&ping[i].bath,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+			&ping[i].bathacrosstrack,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+			&ping[i].bathalongtrack,&error);
+		status = mb_malloc(verbose,beams_amp*sizeof(double),
+			&ping[i].amp,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&ping[i].ss,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&ping[i].ssacrosstrack,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&ping[i].ssalongtrack,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+			&ping[i].bathx,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+			&ping[i].bathy,&error);
+		}
+	status = mb_malloc(verbose,3*beams_bath*sizeof(double),
+			&list,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -657,7 +669,7 @@ char **argv;
 			ping[0].ssacrosstrack,ping[0].ssalongtrack,
 			comment,&error);
 		strncpy(comment,"\0",256);
-		sprintf(comment,"    Minimum acceptable depth: %d",depth_low);
+		sprintf(comment,"    Minimum acceptable depth: %f",depth_low);
 		status = mb_put(verbose,ombio_ptr,kind,
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
@@ -669,7 +681,7 @@ char **argv;
 			ping[0].ssacrosstrack,ping[0].ssalongtrack,
 			comment,&error);
 		strncpy(comment,"\0",256);
-		sprintf(comment,"    Maximum acceptable depth: %d",depth_high);
+		sprintf(comment,"    Maximum acceptable depth: %f",depth_high);
 		status = mb_put(verbose,ombio_ptr,kind,
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
@@ -790,7 +802,7 @@ char **argv;
 				{
 				for (i=0;i<zap_beams;i++)
 					{
-					if (ping[1].bath[i] > 0)
+					if (ping[1].bath[i] > 0.0)
 					{
 					find_bad = MB_YES;
 					if (mode <= 2)
@@ -801,13 +813,13 @@ char **argv;
 						}
 					else
 						{
-						ping[1].bath[i] = 0;
+						ping[1].bath[i] = 0.0;
 						nouter++;
 						nzero++;
 						}
 					}
 					j = beams_bath - i - 1;
-					if (ping[1].bath[j] > 0)
+					if (ping[1].bath[j] > 0.0)
 					{
 					find_bad = MB_YES;
 					if (mode <= 2)
@@ -818,7 +830,7 @@ char **argv;
 						}
 					else
 						{
-						ping[1].bath[j] = 0;
+						ping[1].bath[j] = 0.0;
 						nouter++;
 						nzero++;
 						}
@@ -831,7 +843,7 @@ char **argv;
 				{
 				for (i=0;i<beams_bath;i++)
 					{
-					if (ping[1].bath[i] > 0
+					if (ping[1].bath[i] > 0.0
 					&& (ping[1].bath[i] < depth_low
 					|| ping[1].bath[i] > depth_high))
 					{
@@ -844,7 +856,7 @@ char **argv;
 						}
 					else
 						{
-						ping[1].bath[i] = 0;
+						ping[1].bath[i] = 0.0;
 						nrange++;
 						nzero++;
 						}
@@ -866,7 +878,7 @@ char **argv;
 			  for (j=center+1;j<beams_bath;j++)
 			    {
 			    k = center - (j - center);
-			    if (highok == MB_YES && ping[1].bath[j] > 0)
+			    if (highok == MB_YES && ping[1].bath[j] > 0.0)
 				{
 				if (ping[1].bathacrosstrack[j] <= highdist)
 					{
@@ -876,7 +888,7 @@ char **argv;
 				else
 					highdist = ping[1].bathacrosstrack[j];
 				}
-			    if (lowok == MB_YES && ping[1].bath[k] > 0)
+			    if (lowok == MB_YES && ping[1].bath[k] > 0.0)
 				{
 				if (ping[1].bathacrosstrack[k] >= lowdist)
 					{
@@ -903,7 +915,7 @@ char **argv;
 					}
 				else
 					{
-					ping[1].bath[j] = 0;
+					ping[1].bath[j] = 0.0;
 					nrail++;
 					nzero++;
 					}
@@ -922,7 +934,7 @@ char **argv;
 					}
 				else
 					{
-					ping[1].bath[k] = 0;
+					ping[1].bath[k] = 0.0;
 					nrail++;
 					nzero++;
 					}
@@ -973,7 +985,7 @@ char **argv;
 			if (ping[j].id >= 0)
 				for (i=0;i<beams_bath;i++)
 					{
-					if (ping[j].bath[i] > 0)
+					if (ping[j].bath[i] > 0.0)
 						{
 						list[nlist] = ping[j].bath[i];
 						nlist++;
@@ -986,9 +998,9 @@ char **argv;
 				{
 				fprintf(stderr,"\ndbg2  depth statistics:\n");
 				fprintf(stderr,"dbg2    number:        %d\n",nlist);
-				fprintf(stderr,"dbg2    minimum depth: %d\n",list[0]);
-				fprintf(stderr,"dbg2    median depth:  %d\n",median);
-				fprintf(stderr,"dbg2    maximum depth: %d\n",
+				fprintf(stderr,"dbg2    minimum depth: %f\n",list[0]);
+				fprintf(stderr,"dbg2    median depth:  %f\n",median);
+				fprintf(stderr,"dbg2    maximum depth: %f\n",
 					list[nlist-1]);
 				}
 
@@ -996,15 +1008,15 @@ char **argv;
 			if (ping[1].id >= 0)
 			{
 			for (i=0;i<beams_bath;i++)
-			if (ping[1].bath[i] > 0)
+			if (ping[1].bath[i] > 0.0)
 			{
 			for (j=0;j<3;j++)
 				{
 				if (ping[j].id >= 0)
 				{
 				for (k=0;k<beams_bath;k++)
-				if (ping[j].bath[k] > 0 
-					&& ping[1].bath[i] > 0)
+				if (ping[j].bath[k] > 0.0 
+					&& ping[1].bath[i] > 0.0)
 					{
 					dd = sqrt((ping[j].bathx[k] 
 						- ping[1].bathx[i])
@@ -1043,13 +1055,14 @@ char **argv;
 							nbad++;
 							nflag = nflag + 2;
 							if (verbose >= 1)
-							fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d  %4d %6.2f %5d %5d\n",
+							fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %6.2f %f %f\n",
 							ping[j].time_i[0],
 							ping[j].time_i[1],
 							ping[j].time_i[2],
 							ping[j].time_i[3],
 							ping[j].time_i[4],
 							ping[j].time_i[5],
+							ping[j].time_i[6],
 							k,slope,
 							ping[j].bath[k],median);
 							}
@@ -1126,13 +1139,14 @@ char **argv;
 						b = bad[0].beam;
 						if (verbose >= 2)
 							fprintf(stderr,"\n");
-						fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d  %4d %6.2f %8.2f %5d %5d\n",
+						fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %6.2f %8.2f %f %f\n",
 						ping[p].time_i[0],
 						ping[p].time_i[1],
 						ping[p].time_i[2],
 						ping[p].time_i[3],
 						ping[p].time_i[4],
 						ping[p].time_i[5],
+						ping[p].time_i[6],
 						b,slope,dd,bad[0].bath,median);
 						}
 					if (verbose >= 1 && slope > slopemax
@@ -1143,13 +1157,14 @@ char **argv;
 						b = bad[1].beam;
 						if (verbose >= 2)
 							fprintf(stderr,"\n");
-						fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d  %4d %6.2f %8.2f %5d %5d\n",
+						fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %6.2f %8.2f %f %f\n",
 						ping[p].time_i[0],
 						ping[p].time_i[1],
 						ping[p].time_i[2],
 						ping[p].time_i[3],
 						ping[p].time_i[4],
 						ping[p].time_i[5],
+						ping[p].time_i[6],
 						b,slope,dd,bad[1].bath,median);
 						}
 					}
@@ -1184,7 +1199,7 @@ char **argv;
 				for (j=0;j<2;j++)
 					{
 					ping[j].id = ping[j+1].id;
-					for (i=0;i<6;i++)
+					for (i=0;i<7;i++)
 						ping[j].time_i[i] = 
 							ping[j+1].time_i[i];
 					ping[j].time_d = ping[j+1].time_d;
@@ -1240,24 +1255,24 @@ char **argv;
 		}
 
 	/* close the files */
-	status = mb_buffer_close(verbose,buff_ptr,imbio_ptr,&error);
-	status = mb_close(verbose,imbio_ptr,&error);
-	status = mb_close(verbose,ombio_ptr,&error);
+	status = mb_buffer_close(verbose,&buff_ptr,imbio_ptr,&error);
+	status = mb_close(verbose,&imbio_ptr,&error);
+	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* free the memory */
 	for (j=0;j<3;j++)
 		{
-		mb_free(verbose,ping[j].bath,&error); 
-		mb_free(verbose,ping[j].bathacrosstrack,&error); 
-		mb_free(verbose,ping[j].bathalongtrack,&error); 
-		mb_free(verbose,ping[j].amp,&error); 
-		mb_free(verbose,ping[j].ss,&error); 
-		mb_free(verbose,ping[j].ssacrosstrack,&error); 
-		mb_free(verbose,ping[j].ssalongtrack,&error); 
-		mb_free(verbose,ping[j].bathx,&error); 
-		mb_free(verbose,ping[j].bathy,&error); 
+		mb_free(verbose,&ping[j].bath,&error); 
+		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
+		mb_free(verbose,&ping[j].bathalongtrack,&error); 
+		mb_free(verbose,&ping[j].amp,&error); 
+		mb_free(verbose,&ping[j].ss,&error); 
+		mb_free(verbose,&ping[j].ssacrosstrack,&error); 
+		mb_free(verbose,&ping[j].ssalongtrack,&error); 
+		mb_free(verbose,&ping[j].bathx,&error); 
+		mb_free(verbose,&ping[j].bathy,&error); 
 		}
-	mb_free(verbose,list,&error); 
+	mb_free(verbose,&list,&error); 
 
 	/* check memory */
 	if (verbose >= 4)
@@ -1286,11 +1301,11 @@ char **argv;
 #define TINY 1.0e-5
 int sort(n,r)
 int	n;
-int *r;
+double *r;
 {
 	int	status = MB_SUCCESS;
 	int	nn, m, j, i, lognb2;
-	int	tr;
+	double	tr;
 
 	if (n <= 0) 
 		{

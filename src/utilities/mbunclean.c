@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 4.2 1994-03-25 14:01:31 caress Exp $
+ *    $Id: mbunclean.c,v 4.3 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/25  14:01:31  caress
+ * Added ability to check that depth values are within a specified
+ * acceptable range.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -33,6 +37,10 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/25  14:01:31  caress
+ * Added ability to check that depth values are within a specified
+ * acceptable range.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -65,7 +73,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 4.2 1994-03-25 14:01:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 4.3 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags multibeam bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
@@ -89,8 +97,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -99,29 +107,29 @@ char **argv;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*imbio_ptr;
+	char	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	char	ofile[128];
-	char	*ombio_ptr;
+	char	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
 	char	*store_ptr;
 	int	kind;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
 	double	distance;
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath = NULL;
+	double	*bathacrosstrack = NULL;
+	double	*bathalongtrack = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*ssacrosstrack = NULL;
+	double	*ssalongtrack = NULL;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
@@ -130,8 +138,8 @@ char **argv;
 	int	data_use;
 	char	comment[256];
 	int	check_range = MB_NO;
-	int	depth_low;
-	int	depth_high;
+	double	depth_low;
+	double	depth_high;
 
 	/* time, user, host variables */
 	long int	right_now;
@@ -158,12 +166,14 @@ char **argv;
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
+	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
+	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
@@ -185,7 +195,7 @@ char **argv;
 			break;
 		case 'B':
 		case 'b':
-			sscanf (optarg,"%d/%d", &depth_low,&depth_high);
+			sscanf (optarg,"%lf/%lf", &depth_low,&depth_high);
 			check_range = MB_YES;
 			flag++;
 			break;
@@ -252,19 +262,21 @@ char **argv;
 		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:    %s\n",ofile);
 		fprintf(stderr,"dbg2       check_range:    %d\n",check_range);
-		fprintf(stderr,"dbg2       depth_low:      %d\n",depth_low);
-		fprintf(stderr,"dbg2       depth_high:     %d\n",depth_high);
+		fprintf(stderr,"dbg2       depth_low:      %f\n",depth_low);
+		fprintf(stderr,"dbg2       depth_high:     %f\n",depth_high);
 		}
 
 	/* if help desired then print it and exit */
@@ -304,16 +316,16 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
@@ -428,7 +440,7 @@ char **argv;
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 		strncpy(comment,"\0",256);
-		sprintf(comment,"    Minimum acceptable depth: %d",depth_low);
+		sprintf(comment,"    Minimum acceptable depth: %f",depth_low);
 		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
@@ -437,7 +449,7 @@ char **argv;
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 		strncpy(comment,"\0",256);
-		sprintf(comment,"    Maximum acceptable depth: %d",depth_high);
+		sprintf(comment,"    Maximum acceptable depth: %f",depth_high);
 		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
@@ -511,9 +523,10 @@ char **argv;
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",message);
 			fprintf(stderr,"Input Record: %d\n",idata);
-			fprintf(stderr,"Time: %d %d %d %d %d %d\n",
+			fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
 				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5]);
+				time_i[3],time_i[4],time_i[5],
+				time_i[6]);
 			}
 		else if (verbose >= 1 && error < MB_ERROR_NO_ERROR)
 			{
@@ -526,9 +539,10 @@ char **argv;
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nFatal MBIO Error:\n%s\n",message);
-			fprintf(stderr,"Last Good Time: %d %d %d %d %d %d\n",
+			fprintf(stderr,"Last Good Time: %d %d %d %d %d %d %d\n",
 				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5]);
+				time_i[3],time_i[4],time_i[5],
+				time_i[6]);
 			}
 
 		/* process some data */
@@ -538,13 +552,13 @@ char **argv;
 			{
 			for (i=0;i<beams_bath;i++)
 				{
-				if (check_range == MB_NO && bath[i] < 0)
+				if (check_range == MB_NO && bath[i] < 0.0)
 					{
 					bath[i] = -bath[i];
 					data_use = MB_YES;
 					unflag++;
 					}
-				else if (check_range == MB_YES && bath[i] < 0
+				else if (check_range == MB_YES && bath[i] < 0.0
 					&& (-bath[i] >= depth_low
 						&& -bath[i] <= depth_high))
 					{
@@ -554,7 +568,7 @@ char **argv;
 					}
 				}
 			for (i=0;i<beams_amp;i++)
-				if (amp[i] < 0 && bath[i] > 0)
+				if (amp[i] < 0 && bath[i] > 0.0)
 					{
 					amp[i] = -amp[i];
 					data_use = MB_YES;
@@ -587,9 +601,10 @@ char **argv;
 				fprintf(stderr,"\nMBIO Error returned from function <mb_put>:\n%s\n",message);
 				fprintf(stderr,"\nMultibeam Data Not Written To File <%s>\n",ofile);
 				fprintf(stderr,"Output Record: %d\n",odata+1);
-				fprintf(stderr,"Time: %d %d %d %d %d %d\n",
+				fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 				fprintf(stderr,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
@@ -598,17 +613,17 @@ char **argv;
 		}
 
 	/* close the files */
-	status = mb_close(verbose,imbio_ptr,&error);
-	status = mb_close(verbose,ombio_ptr,&error);
+	status = mb_close(verbose,&imbio_ptr,&error);
+	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,bathacrosstrack,&error); 
-	mb_free(verbose,bathalongtrack,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,ssacrosstrack,&error); 
-	mb_free(verbose,ssalongtrack,&error); 
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&bathacrosstrack,&error); 
+	mb_free(verbose,&bathalongtrack,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&ssacrosstrack,&error); 
+	mb_free(verbose,&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mbformat.c,v 4.2 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -49,7 +53,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 4.2 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the multibeam data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -V -H]";
@@ -138,12 +142,30 @@ char **argv;
 		printf("%s",message);
 		}
 	else
+		{
+		printf("\nSupported MBIO Formats:\n");
 		for (i=1;i<=MB_FORMATS;i++)
 			{
-			status = mb_format_inf(verbose,i,&message);
-			printf("\nMBIO Data Format ID:  %d\n",format_table[i]);
-			printf("%s",message);
+			if (supported_format_table[i] == MB_YES)
+				{
+				status = mb_format_inf(verbose,i,&message);
+				printf("\nMBIO Data Format ID:  %d\n",
+					format_table[i]);
+				printf("%s",message);
+				}
 			}
+		printf("\n\nUnsupported MBIO Formats which will be supported someday:\n");
+		for (i=1;i<=MB_FORMATS;i++)
+			{
+			if (supported_format_table[i] == MB_NO)
+				{
+				status = mb_format_inf(verbose,i,&message);
+				printf("\nMBIO Data Format ID:  %d\n",
+					format_table[i]);
+				printf("%s",message);
+				}
+			}
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.2 1994-04-28 01:32:57 caress Exp $
+ *    $Id: mbinfo.c,v 4.3 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,10 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/28  01:32:57  caress
+ * Changed mb_get to mb_read so that min/max of longitude can
+ * be calculated using both navigation and beam data.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -88,7 +92,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.2 1994-04-28 01:32:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.3 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -111,8 +115,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -125,24 +129,24 @@ char **argv;
 	int	pixels_ss;
 
 	/* MBIO read values */
-	char	*mbio_ptr;
+	char	*mbio_ptr = NULL;
 	int	kind;
 	struct ping *data[MBINFO_MAXPINGS];
 	struct ping *datacur;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
 	double	distance;
-	double	*bath;
-	double	*bathlon;
-	double	*bathlat;
-	double	*amp;
-	double	*ss;
-	double	*sslon;
-	double	*sslat;
+	double	*bath = NULL;
+	double	*bathlon = NULL;
+	double	*bathlat = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*sslon = NULL;
+	double	*sslat = NULL;
 	char	comment[256];
 	int	icomment = 0;
 	int	comments = MB_NO;
@@ -170,10 +174,10 @@ char **argv;
 	double	hdgend = 0.0;
 	double	timbeg = 0.0;
 	double	timend = 0.0;
-	int	timbeg_i[6];
-	int	timend_i[6];
-	int	timbeg_j[4];
-	int	timend_j[4];
+	int	timbeg_i[7];
+	int	timend_i[7];
+	int	timbeg_j[5];
+	int	timend_j[5];
 	double	distot = 0.0;
 	double	timtot = 0.0;
 	double	spdavg = 0.0;
@@ -198,15 +202,15 @@ char **argv;
 	int	nss;
 	double	sumx, sumxx, sumy, sumxy, delta;
 	double	a, b, dev, mean, variance;
-	double	*bathmean;
-	double	*bathvar;
-	int	*nbathvar;
-	double	*ampmean;
-	double	*ampvar;
-	int	*nampvar;
-	double	*ssmean;
-	double	*ssvar;
-	int	*nssvar;
+	double	*bathmean = NULL;
+	double	*bathvar = NULL;
+	int	*nbathvar = NULL;
+	double	*ampmean = NULL;
+	double	*ampvar = NULL;
+	int	*nampvar = NULL;
+	double	*ssmean = NULL;
+	double	*ssvar = NULL;
+	int	*nssvar = NULL;
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
@@ -217,7 +221,7 @@ char **argv;
 	char	*getenv();
 
 	/* initialize some time variables */
-	for (i=0;i<6;i++)
+	for (i=0;i<7;i++)
 		{
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
@@ -271,6 +275,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
 			flag++;
 			break;
 		case 'E':
@@ -278,6 +283,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'S':
@@ -349,12 +355,14 @@ char **argv;
 		fprintf(output,"dbg2       btime_i[3]: %d\n",btime_i[3]);
 		fprintf(output,"dbg2       btime_i[4]: %d\n",btime_i[4]);
 		fprintf(output,"dbg2       btime_i[5]: %d\n",btime_i[5]);
+		fprintf(output,"dbg2       btime_i[6]: %d\n",btime_i[6]);
 		fprintf(output,"dbg2       etime_i[0]: %d\n",etime_i[0]);
 		fprintf(output,"dbg2       etime_i[1]: %d\n",etime_i[1]);
 		fprintf(output,"dbg2       etime_i[2]: %d\n",etime_i[2]);
 		fprintf(output,"dbg2       etime_i[3]: %d\n",etime_i[3]);
 		fprintf(output,"dbg2       etime_i[4]: %d\n",etime_i[4]);
 		fprintf(output,"dbg2       etime_i[5]: %d\n",etime_i[5]);
+		fprintf(output,"dbg2       etime_i[6]: %d\n",etime_i[6]);
 		fprintf(output,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(output,"dbg2       timegap:    %f\n",timegap);
 		fprintf(output,"dbg2       comments:   %d\n",comments);
@@ -391,10 +399,20 @@ char **argv;
 	/* allocate memory for data arrays */
 	for (i=0;i<pings_read;i++)
 		{
+		data[i] = NULL;
 		status = mb_malloc(verbose,pings_read*sizeof(struct ping),
 				&data[i],&error);
 		if (error == MB_ERROR_NO_ERROR)
+			{
 			datacur = data[i];
+			datacur->bath = NULL;
+			datacur->amp = NULL;
+			datacur->bathlon = NULL;
+			datacur->bathlat = NULL;
+			datacur->ss = NULL;
+			datacur->sslon = NULL;
+			datacur->sslat = NULL;
+			}
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&datacur->bath,&error);
@@ -536,9 +554,10 @@ char **argv;
 				mb_error(verbose,error,&message);
 				fprintf(output,"\nNonfatal MBIO Error:\n%s\n",
 					message);
-				fprintf(output,"Time: %d %d %d %d %d %d\n",
+				fprintf(output,"Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 				}
 			else if (verbose >= 1 && error < MB_ERROR_NO_ERROR)
 				{
@@ -553,9 +572,10 @@ char **argv;
 				mb_error(verbose,error,&message);
 				fprintf(output,"\nFatal MBIO Error:\n%s\n",
 					message);
-				fprintf(output,"Last Good Time: %d %d %d %d %d %d\n",
+				fprintf(output,"Last Good Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 				}
 
 			/* take note of min and maxes */
@@ -568,11 +588,12 @@ char **argv;
 					lonmax = navlon;
 					latmin = navlat;
 					latmax = navlat;
-					bathbeg = bath[beams_bath/2];
+					if (beams_bath > 0)
+						bathbeg = bath[beams_bath/2];
 					lonbeg = navlon;
 					latbeg = navlat;
 					timbeg = time_d;
-					for (i=0;i<6;i++)
+					for (i=0;i<7;i++)
 						timbeg_i[i] = time_i[i];
 					spdbeg = speed;
 					hdgbeg = heading;
@@ -655,13 +676,14 @@ char **argv;
 						nfsbeams++;
 					}
 				distot = distot + distance;
-				bathend = bath[beams_bath/2];
+				if (beams_bath > 0)
+					bathend = bath[beams_bath/2];
 				lonend = navlon;
 				latend = navlat;
 				spdend = speed;
 				hdgend = heading;
 				timend = time_d;
-				for (i=0;i<6;i++)
+				for (i=0;i<7;i++)
 					timend_i[i] = time_i[i];
 				}
 			}
@@ -818,7 +840,7 @@ char **argv;
 		}
 
 	/* close the multibeam file */
-	status = mb_close(verbose,mbio_ptr,&error);
+	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* calculate final variances */
 	if (pings_read > 2)
@@ -844,8 +866,7 @@ char **argv;
 		}
 
 	/* now print out the results */
-	timtot = (timend - timbeg)/60.0;
-	distot = distot;
+	timtot = (timend - timbeg)/3600.0;
 	if (distot > 0.0)
 		spdavg = distot/timtot;
 	mb_get_jtime(verbose,timbeg_i,timbeg_j);
@@ -872,16 +893,16 @@ char **argv;
 	fprintf(output,"Total Track Length: %10.4f km\n",distot);
 	fprintf(output,"Average Speed:      %10.4f km/hr\n",spdavg);
 	fprintf(output,"\nStart of Data:\n");
-	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d  JD%d\n",
+	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
 		timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
-		timbeg_i[4],timbeg_i[5],timbeg_j[1]);
+		timbeg_i[4],timbeg_i[5],timbeg_i[6],timbeg_j[1]);
 	fprintf(output,"Lon: %9.4f     Lat: %9.4f   Depth:%8.2f\n",
 		lonbeg,latbeg,bathbeg);
 	fprintf(output,"Speed:%8.4f  Heading:%9.4f\n",spdbeg,hdgbeg);
 	fprintf(output,"\nEnd of Data:\n");
-	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d  JD%d\n",
+	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
 		timend_i[1],timend_i[2],timend_i[0],timend_i[3],
-		timend_i[4],timend_i[5],timend_j[1]);
+		timend_i[4],timend_i[5],timend_i[6],timend_j[1]);
 	fprintf(output,"Lon: %9.4f     Lat: %9.4f   Depth:%8.2f\n",
 		lonend,latend,bathend);
 	fprintf(output,"Speed:%8.4f  Heading:%9.4f\n",spdend,hdgend);
@@ -940,24 +961,24 @@ char **argv;
 	/* deallocate memory used for data arrays */
 	for (i=0;i<pings_read;i++)
 		{
-		mb_free(verbose,data[i]->bath,&error);
-		mb_free(verbose,data[i]->amp,&error);
-		mb_free(verbose,data[i]->bathlon,&error);
-		mb_free(verbose,data[i]->bathlat,&error);
-		mb_free(verbose,data[i]->ss,&error);
-		mb_free(verbose,data[i]->sslon,&error);
-		mb_free(verbose,data[i]->sslat,&error);
-		mb_free(verbose,data[i],&error);
+		mb_free(verbose,&data[i]->bath,&error);
+		mb_free(verbose,&data[i]->amp,&error);
+		mb_free(verbose,&data[i]->bathlon,&error);
+		mb_free(verbose,&data[i]->bathlat,&error);
+		mb_free(verbose,&data[i]->ss,&error);
+		mb_free(verbose,&data[i]->sslon,&error);
+		mb_free(verbose,&data[i]->sslat,&error);
+		mb_free(verbose,&data[i],&error);
 		}
-	mb_free(verbose,bathmean,&error);
-	mb_free(verbose,bathvar,&error);
-	mb_free(verbose,nbathvar,&error);
-	mb_free(verbose,ampmean,&error);
-	mb_free(verbose,ampvar,&error);
-	mb_free(verbose,nampvar,&error);
-	mb_free(verbose,ssmean,&error);
-	mb_free(verbose,ssvar,&error);
-	mb_free(verbose,nssvar,&error);
+	mb_free(verbose,&bathmean,&error);
+	mb_free(verbose,&bathvar,&error);
+	mb_free(verbose,&nbathvar,&error);
+	mb_free(verbose,&ampmean,&error);
+	mb_free(verbose,&ampvar,&error);
+	mb_free(verbose,&nampvar,&error);
+	mb_free(verbose,&ssmean,&error);
+	mb_free(verbose,&ssvar,&error);
+	mb_free(verbose,&nssvar,&error);
 
 	/* set program status */
 	status = MB_SUCCESS;

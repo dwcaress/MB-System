@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $
+ *	$Id: mbdefaults.c,v 4.1 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:13:22  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/01  18:59:27  caress
  * First cut at new version. Any changes are associated with
  * support of three data types (beam bathymetry, beam amplitude,
@@ -49,10 +52,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 4.1 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
-	static char help_message[] = "MBDEFAULTS sets and retrieves the default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
-	static char usage_message[] = "mbdefaults [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H]";
+	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
+	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -64,6 +67,8 @@ static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	FILE	*fp;
 	char	file[128];
 	char	home[128];
+	char	psdisplay[128];
+	char	mbproject[128];
 	char	*HOME = "HOME";
 	char	*getenv();
 
@@ -72,53 +77,33 @@ static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	int pings;
 	int lonflip;
 	double bounds[4];
-	int btime_i[6];
-	int etime_i[6];
+	int btime_i[7];
+	int etime_i[7];
 	double speedmin;
 	double timegap;
 
-	/* get current default values */
+	/* get current default mbio values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 
+	/* now get current mb environment values */
+	status = mb_env(verbose,psdisplay,mbproject);
+
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:HhL:l:P:p:R:r:S:s:T:t:VvW:w:")) != -1)
 	  switch (c) 
 		{
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf (optarg,"%d", &format);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%d", &pings);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf (optarg,"%d", &lonflip);
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
-			flag++;
-			break;
 		case 'B':
 		case 'b':
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg,"%s",psdisplay);
 			flag++;
 			break;
 		case 'E':
@@ -126,6 +111,32 @@ static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
+			flag++;
+			break;
+		case 'F':
+		case 'f':
+			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'H':
+		case 'h':
+			help++;
+			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'P':
+		case 'p':
+			sscanf (optarg,"%d", &pings);
+			flag++;
+			break;
+		case 'R':
+		case 'r':
+			sscanf (optarg,"%lf/%lf/%lf/%lf", 
+				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
 			flag++;
 			break;
 		case 'S':
@@ -136,6 +147,15 @@ static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 		case 'T':
 		case 't':
 			sscanf (optarg,"%lf", &timegap);
+			flag++;
+			break;
+		case 'V':
+		case 'v':
+			verbose++;
+			break;
+		case 'W':
+		case 'w':
+			sscanf (optarg,"%s", mbproject);
 			flag++;
 			break;
 		case '?':
@@ -179,14 +199,18 @@ static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 		fprintf(stderr,"dbg2       btime_i[3]: %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]: %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]: %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]: %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]: %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]: %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]: %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]: %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]: %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]: %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]: %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:    %f\n",timegap);
+		fprintf(stderr,"dbg2       psdisplay:  %s\n",psdisplay);
+		fprintf(stderr,"dbg2       mbproject:  %s\n",mbproject);
 		}
 
 	/* if help desired then print it and exit */
@@ -215,12 +239,14 @@ static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 		fprintf(fp,"timegap:    %f\n",timegap);
 		fprintf(fp,"bounds:     %f %f %f %f\n",
 			bounds[0],bounds[1],bounds[2],bounds[3]);
-		fprintf(fp,"begin time: %d %d %d %d %d %d\n",
+		fprintf(fp,"begin time: %d %d %d %d %d %d %d\n",
 			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5]);
-		fprintf(fp,"end time:   %d %d %d %d %d %d\n",
+			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
+		fprintf(fp,"end time:   %d %d %d %d %d %d %d\n",
 			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5]);
+			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
+		fprintf(fp,"ps viewer:  %s\n",psdisplay);
+		fprintf(fp,"project:    %s\n",mbproject);
 		fclose(fp);
 
 		printf("\nNew MBIO Default Control Parameters:\n");
@@ -231,12 +257,14 @@ static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 		printf("timegap:  %f\n",timegap);
 		printf("bounds: %f %f %f %f\n",
 			bounds[0],bounds[1],bounds[2],bounds[3]);
-		printf("begin time: %d %d %d %d %d %d\n",
+		printf("begin time: %d %d %d %d %d %d %d\n",
 			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5]);
-		printf("end time:   %d %d %d %d %d %d\n\n",
+			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
+		printf("end time:   %d %d %d %d %d %d %d\n",
 			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5]);
+			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
+		printf("ps viewer:  %s\n",psdisplay);
+		printf("project:    %s\n",mbproject);
 		}
 
 	/* else just list the current defaults */
@@ -250,12 +278,14 @@ static char rcs_id[]="$Id: mbdefaults.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 		printf("timegap:  %f\n",timegap);
 		printf("bounds: %f %f %f %f\n",
 			bounds[0],bounds[1],bounds[2],bounds[3]);
-		printf("begin time: %d %d %d %d %d %d\n",
+		printf("begin time: %d %d %d %d %d %d %d\n",
 			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5]);
-		printf("end time:   %d %d %d %d %d %d\n\n",
+			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
+		printf("end time:   %d %d %d %d %d %d %d\n",
 			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5]);
+			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
+		printf("ps viewer:  %s\n",psdisplay);
+		printf("project:    %s\n",mbproject);
 		}
 
 	/* print output debug statements */

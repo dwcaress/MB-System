@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.2 1994-07-29 19:02:56 caress Exp $
+ *    $Id: mbcopy.c,v 4.3 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  19:02:56  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * using unix second time base.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -67,7 +71,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.2 1994-07-29 19:02:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 4.3 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input multibeam data file to an output \nmultibeam data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Fiformat/oformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Ccommentfile \n\t-N -V -H  -Iinfile -Ooutfile]";
@@ -92,8 +96,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -102,7 +106,7 @@ char **argv;
 	int	ibeams_bath;
 	int	ibeams_amp;
 	int	ipixels_ss;
-	char	*imbio_ptr;
+	char	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	int	oformat = 0;
@@ -111,32 +115,32 @@ char **argv;
 	int	obeams_bath;
 	int	obeams_amp;
 	int	opixels_ss;
-	char	*ombio_ptr;
+	char	*ombio_ptr = NULL;
 
 	/* MBIO read and write values */
 	char	*store_ptr;
 	int	kind;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
 	double	distance;
-	int	*ibath;
-	int	*ibathacrosstrack;
-	int	*ibathalongtrack;
-	int	*iamp;
-	int	*iss;
-	int	*issacrosstrack;
-	int	*issalongtrack;
-	int	*obath;
-	int	*obathacrosstrack;
-	int	*obathalongtrack;
-	int	*oamp;
-	int	*oss;
-	int	*ossacrosstrack;
-	int	*ossalongtrack;
+	double	*ibath = NULL;
+	double	*ibathacrosstrack = NULL;
+	double	*ibathalongtrack = NULL;
+	double	*iamp = NULL;
+	double	*iss = NULL;
+	double	*issacrosstrack = NULL;
+	double	*issalongtrack = NULL;
+	double	*obath = NULL;
+	double	*obathacrosstrack = NULL;
+	double	*obathalongtrack = NULL;
+	double	*oamp = NULL;
+	double	*oss = NULL;
+	double	*ossacrosstrack = NULL;
+	double	*ossalongtrack = NULL;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
@@ -192,7 +196,9 @@ char **argv;
 			break;
 		case 'F':
 		case 'f':
-			sscanf (optarg,"%d/%d", &iformat,&oformat);
+			i = sscanf (optarg,"%d/%d", &iformat,&oformat);
+			if (i == 1)
+				oformat = iformat;
 			flag++;
 			break;
 		case 'P':
@@ -216,6 +222,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
 			flag++;
 			break;
 		case 'E':
@@ -223,6 +230,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'S':
@@ -293,12 +301,14 @@ char **argv;
 		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       input format:   %d\n",iformat);
@@ -401,27 +411,27 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,ibeams_bath*sizeof(int),&ibath,&error);
-	status = mb_malloc(verbose,ibeams_bath*sizeof(int),&ibathacrosstrack,
+	status = mb_malloc(verbose,ibeams_bath*sizeof(double),&ibath,&error);
+	status = mb_malloc(verbose,ibeams_bath*sizeof(double),&ibathacrosstrack,
 				&error);
-	status = mb_malloc(verbose,ibeams_bath*sizeof(int),&ibathalongtrack,
+	status = mb_malloc(verbose,ibeams_bath*sizeof(double),&ibathalongtrack,
 				&error);
-	status = mb_malloc(verbose,ibeams_amp*sizeof(int),&iamp,&error);
-	status = mb_malloc(verbose,ipixels_ss*sizeof(int),&iss,&error);
-	status = mb_malloc(verbose,ipixels_ss*sizeof(int),&issacrosstrack,
+	status = mb_malloc(verbose,ibeams_amp*sizeof(double),&iamp,&error);
+	status = mb_malloc(verbose,ipixels_ss*sizeof(double),&iss,&error);
+	status = mb_malloc(verbose,ipixels_ss*sizeof(double),&issacrosstrack,
 				&error);
-	status = mb_malloc(verbose,ipixels_ss*sizeof(int),&issalongtrack,
+	status = mb_malloc(verbose,ipixels_ss*sizeof(double),&issalongtrack,
 				&error);
-	status = mb_malloc(verbose,obeams_bath*sizeof(int),&obath,&error);
-	status = mb_malloc(verbose,obeams_bath*sizeof(int),&obathacrosstrack,
+	status = mb_malloc(verbose,obeams_bath*sizeof(double),&obath,&error);
+	status = mb_malloc(verbose,obeams_bath*sizeof(double),&obathacrosstrack,
 				&error);
-	status = mb_malloc(verbose,obeams_bath*sizeof(int),&obathalongtrack,
+	status = mb_malloc(verbose,obeams_bath*sizeof(double),&obathalongtrack,
 				&error);
-	status = mb_malloc(verbose,obeams_amp*sizeof(int),&oamp,&error);
-	status = mb_malloc(verbose,opixels_ss*sizeof(int),&oss,&error);
-	status = mb_malloc(verbose,opixels_ss*sizeof(int),&ossacrosstrack,
+	status = mb_malloc(verbose,obeams_amp*sizeof(double),&oamp,&error);
+	status = mb_malloc(verbose,opixels_ss*sizeof(double),&oss,&error);
+	status = mb_malloc(verbose,opixels_ss*sizeof(double),&ossacrosstrack,
 				&error);
-	status = mb_malloc(verbose,opixels_ss*sizeof(int),&ossalongtrack,
+	status = mb_malloc(verbose,opixels_ss*sizeof(double),&ossalongtrack,
 				&error);
 
 	/* if error initializing memory then quit */
@@ -619,9 +629,9 @@ char **argv;
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
-		sprintf(comment,"  Begin time:         %d %d %d %d %d %d",
+		sprintf(comment,"  Begin time:         %d %d %d %d %d %d %d",
 			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5]);
+			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
 		status = mb_put(verbose,ombio_ptr,kind,
 				time_i,time_d,
 				navlon,navlat,speed,heading,
@@ -631,9 +641,9 @@ char **argv;
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
-		sprintf(comment,"  End time:           %d %d %d %d %d %d",
+		sprintf(comment,"  End time:           %d %d %d %d %d %d %d",
 			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5]);
+			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 		status = mb_put(verbose,ombio_ptr,kind,
 				time_i,time_d,
 				navlon,navlat,speed,heading,
@@ -760,9 +770,9 @@ char **argv;
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",message);
 			fprintf(stderr,"Input Record: %d\n",idata);
-			fprintf(stderr,"Time: %d %d %d %d %d %d\n",
+			fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
 				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5]);
+				time_i[3],time_i[4],time_i[5],time_i[6]);
 			}
 		else if (verbose >= 1 && error < MB_ERROR_NO_ERROR)
 			{
@@ -775,9 +785,9 @@ char **argv;
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nFatal MBIO Error:\n%s\n",message);
-			fprintf(stderr,"Last Good Time: %d %d %d %d %d %d\n",
+			fprintf(stderr,"Last Good Time: %d %d %d %d %d %d %d\n",
 				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5]);
+				time_i[3],time_i[4],time_i[5],time_i[6]);
 			}
 
 		/* process some data */
@@ -788,9 +798,9 @@ char **argv;
 			/* do bathymetry */
 			for (j=0;j<offset_bath;j++)
 				{
-				obath[j] = 0;
-				obathacrosstrack[j] = 0;
-				obathalongtrack[j] = 0;
+				obath[j] = 0.0;
+				obathacrosstrack[j] = 0.0;
+				obathalongtrack[j] = 0.0;
 				}
 			for (i=istart_bath;i<iend_bath;i++)
 				{
@@ -801,15 +811,15 @@ char **argv;
 				}
 			for (j=iend_bath+offset_bath;j<obeams_bath;j++)
 				{
-				obath[j] = 0;
-				obathacrosstrack[j] = 0;
-				obathalongtrack[j] = 0;
+				obath[j] = 0.0;
+				obathacrosstrack[j] = 0.0;
+				obathalongtrack[j] = 0.0;
 				}
 
 			/* do amplitudes */
 			for (j=0;j<offset_amp;j++)
 				{
-				oamp[j] = 0;
+				oamp[j] = 0.0;
 				}
 			for (i=istart_amp;i<iend_amp;i++)
 				{
@@ -818,15 +828,15 @@ char **argv;
 				}
 			for (j=iend_amp+offset_amp;j<obeams_amp;j++)
 				{
-				oamp[j] = 0;
+				oamp[j] = 0.0;
 				}
 
 			/* do sidescan */
 			for (j=0;j<offset_ss;j++)
 				{
-				oss[j] = 0;
-				ossacrosstrack[j] = 0;
-				ossalongtrack[j] = 0;
+				oss[j] = 0.0;
+				ossacrosstrack[j] = 0.0;
+				ossalongtrack[j] = 0.0;
 				}
 			for (i=istart_ss;i<iend_ss;i++)
 				{
@@ -837,9 +847,9 @@ char **argv;
 				}
 			for (j=iend_ss+offset_ss;j<opixels_ss;j++)
 				{
-				oss[j] = 0;
-				ossacrosstrack[j] = 0;
-				ossalongtrack[j] = 0;
+				oss[j] = 0.0;
+				ossacrosstrack[j] = 0.0;
+				ossalongtrack[j] = 0.0;
 				}
 			}
 
@@ -879,9 +889,10 @@ char **argv;
 				fprintf(stderr,"\nMBIO Error returned from function <mb_put>:\n%s\n",message);
 				fprintf(stderr,"\nMultibeam Data Not Written To File <%s>\n",ofile);
 				fprintf(stderr,"Output Record: %d\n",odata+1);
-				fprintf(stderr,"Time: %d %d %d %d %d %d\n",
+				fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 				fprintf(stderr,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
@@ -890,24 +901,24 @@ char **argv;
 		}
 
 	/* close the files */
-	status = mb_close(verbose,imbio_ptr,&error);
-	status = mb_close(verbose,ombio_ptr,&error);
+	status = mb_close(verbose,&imbio_ptr,&error);
+	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,ibath,&error); 
-	mb_free(verbose,ibathacrosstrack,&error); 
-	mb_free(verbose,ibathalongtrack,&error); 
-	mb_free(verbose,iamp,&error); 
-	mb_free(verbose,iss,&error); 
-	mb_free(verbose,issacrosstrack,&error); 
-	mb_free(verbose,issalongtrack,&error); 
-	mb_free(verbose,obath,&error); 
-	mb_free(verbose,obathacrosstrack,&error); 
-	mb_free(verbose,obathalongtrack,&error); 
-	mb_free(verbose,oamp,&error); 
-	mb_free(verbose,oss,&error); 
-	mb_free(verbose,ossacrosstrack,&error); 
-	mb_free(verbose,ossalongtrack,&error); 
+	mb_free(verbose,&ibath,&error); 
+	mb_free(verbose,&ibathacrosstrack,&error); 
+	mb_free(verbose,&ibathalongtrack,&error); 
+	mb_free(verbose,&iamp,&error); 
+	mb_free(verbose,&iss,&error); 
+	mb_free(verbose,&issacrosstrack,&error); 
+	mb_free(verbose,&issalongtrack,&error); 
+	mb_free(verbose,&obath,&error); 
+	mb_free(verbose,&obathacrosstrack,&error); 
+	mb_free(verbose,&obathalongtrack,&error); 
+	mb_free(verbose,&oamp,&error); 
+	mb_free(verbose,&oss,&error); 
+	mb_free(verbose,&ossacrosstrack,&error); 
+	mb_free(verbose,&ossalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: surfunc.c,v 4.1 1994-06-04 02:02:01 caress Exp $
+ *    $Id: surfunc.c,v 4.2 1994-10-21 13:02:31 caress Exp $
  *
  *    Inclusion in MB-System:
  *    Copyright (c) 1994 by 
@@ -55,6 +55,11 @@
  * Date:	May 2, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/06/04  02:02:01  caress
+ * Fixed several bugs and made some stylistic changes to
+ * the output.  Changed the data input bounds to be much
+ * larger than the working grid bounds.
+ *
  * Revision 4.0  1994/05/05  20:30:06  caress
  * First cut. This code derived from GMT program surface by
  * Walter Smith and Paul Wessel.

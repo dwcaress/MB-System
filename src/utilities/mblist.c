@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.6 1994-07-29 19:02:56 caress Exp $
+ *    $Id: mblist.c,v 4.7 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1994/07/29  19:02:56  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * using unix second time base.
+ *
  * Revision 4.5  1994/06/21  22:53:08  caress
  * Changes to support PCs running Lynx OS.
  *
@@ -121,7 +125,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.6 1994-07-29 19:02:56 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.7 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -143,8 +147,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -168,7 +172,7 @@ char **argv;
 	int	nread;
 	int	beam_status = MB_SUCCESS;
 	int	pixel_status = MB_SUCCESS;
-	int	time_j[4];
+	int	time_j[5];
 	int	use_bath = MB_NO;
 	int	use_amp = MB_NO;
 	int	use_ss = MB_NO;
@@ -179,22 +183,22 @@ char **argv;
 	int	first = MB_YES;
 
 	/* MBIO read values */
-	char	*mbio_ptr;
+	char	*mbio_ptr = NULL;
 	int	kind;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
 	double	distance;
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath = NULL;
+	double	*bathacrosstrack = NULL;
+	double	*bathalongtrack = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*ssacrosstrack = NULL;
+	double	*ssalongtrack = NULL;
 	char	comment[256];
 	int	icomment = 0;
 
@@ -251,6 +255,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
 			flag++;
 			break;
 		case 'D':
@@ -263,6 +268,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'F':
@@ -368,12 +374,14 @@ char **argv;
 		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
@@ -440,16 +448,16 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssacrosstrack,
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssacrosstrack,
 			&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssalongtrack,
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssalongtrack,
 			&error);
 
 	/* if error initializing memory then quit */
@@ -611,7 +619,7 @@ char **argv;
 					sxx = 0.0;
 					sxy = 0.0;
 					for (k=0;k<beams_bath;k++)
-					  if (bath[k] > 0)
+					  if (bath[k] > 0.0)
 					    {
 					    sx += bathacrosstrack[k];
 					    sy += bath[k];
@@ -632,19 +640,19 @@ char **argv;
 					printf("%.4f",slope);
 					break;
 				case 'B': /* amplitude */
-					printf("%6d",amp[j]);
+					printf("%.3f",amp[j]);
 					break;
 				case 'b': /* sidescan */
-					printf("%6d",ss[pixels_ss/2]);
+					printf("%.3f",ss[pixels_ss/2]);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
-					printf("%5d",
+					printf("%.3f",
 					bathacrosstrack[j]);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
-					printf("%5d",
+					printf("%.3f",
 					bathalongtrack[j]);
 					break;
 				case 'H': /* heading */
@@ -653,30 +661,33 @@ char **argv;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
 					printf(
-					"%.4d %.3d %.2d %.2d %.2d",
+					"%.4d %.3d %.2d %.2d %.2d.%6.6d",
 					time_j[0],time_j[1],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],
+					time_i[5],time_i[6]);
 					break;
 				case 'j': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
 					printf(
-					"%.4d %.3d %.4d %.2d",
+					"%.4d %.3d %.4d %.2d.%6.6d",
 					time_j[0],time_j[1],
-					time_j[2],time_j[3]);
+					time_j[2],time_j[3],time_j[4]);
 					break;
 				case 'L': /* along-track dist. */
 					printf("%7.3f",distance_total);
 					break;
-				case 'M': /* MBIO time in minutes since 1/1/81 00:00:00 */
-					printf("%.3f",time_d);
+				case 'M': /* Decimal unix seconds since 
+						1/1/70 00:00:00 */
+					printf("%.6f",time_d);
 					break;
-				case 'm': /* time in minutes since first record */
+				case 'm': /* time in decimal seconds since 
+						first record */
 					if (first_m == MB_YES)
 						{
 						time_d_ref = time_d;
 						first_m = MB_NO;
 						}
-					printf("%.3f",time_d - time_d_ref);
+					printf("%.6f",time_d - time_d_ref);
 					break;
 				case 'N': /* ping counter */
 					printf("%6d",nread);
@@ -686,42 +697,24 @@ char **argv;
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					printf(
-					"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d",
+					"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 					break;
 				case 't': /* yyyy mm dd hh mm ss time string */
 					printf(
-					"%.4d %.2d %.2d %.2d %.2d %.2d",
+					"%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 					break;
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
-					time_tm.tm_year = time_i[0] - 1900;
-					time_tm.tm_mon = time_i[1] - 1;
-					time_tm.tm_mday = time_i[2];
-					time_tm.tm_hour = time_i[3];
-					time_tm.tm_min = time_i[4];
-					time_tm.tm_sec = time_i[5];
-#if defined (IRIX) || defined (LYNX)
-					time_u = mktime(&time_tm);
-#else
-					time_u = timegm(time_tm);
-#endif
+					time_u = (int) time_d;
 					printf("%d",time_u);
 					break;
 				case 'u': /* time in seconds since first record */
-					time_tm.tm_year = time_i[0] - 1900;
-					time_tm.tm_mon = time_i[1] - 1;
-					time_tm.tm_mday = time_i[2];
-					time_tm.tm_hour = time_i[3];
-					time_tm.tm_min = time_i[4];
-					time_tm.tm_sec = time_i[5];
-#if defined (IRIX) || defined (LYNX)
-					time_u = mktime(&time_tm);
-#else
-					time_u = timegm(time_tm);
-#endif
+					time_u = (int) time_d;
 					if (first_u == MB_YES)
 						{
 						time_u_ref = time_u;
@@ -758,10 +751,10 @@ char **argv;
 						}
 					break;
 				case 'Z': /* topography */
-					printf("%6d",-bath[j]);
+					printf("%.3f",-bath[j]);
 					break;
 				case 'z': /* depth */
-					printf("%6d",bath[j]);
+					printf("%6.3f",bath[j]);
 					break;
 				case '#': /* beam number */
 					printf("%6d",j);
@@ -811,7 +804,7 @@ char **argv;
 					sxx = 0.0;
 					sxy = 0.0;
 					for (k=0;k<beams_bath;k++)
-					  if (bath[k] > 0)
+					  if (bath[k] > 0.0)
 					    {
 					    sx += bathacrosstrack[k];
 					    sy += bath[k];
@@ -832,7 +825,7 @@ char **argv;
 					printf("%.4f",slope);
 					break;
 				case 'B': /* amplitude */
-					printf("%6d",amp[beams_bath/2]);
+					printf("%.3f",amp[beams_bath/2]);
 					break;
 				case 'b': /* sidescan */
 					printf("%6d",ss[j]);
@@ -867,16 +860,16 @@ char **argv;
 				case 'L': /* along-track dist. */
 					printf("%7.3f",distance_total);
 					break;
-				case 'M': /* MBIO time in minutes since 1/1/81 00:00:00 */
-					printf("%.3f",time_d);
+				case 'M': /* Unix time in decimal seconds since 1/1/70 00:00:00 */
+					printf("%.6f",time_d);
 					break;
-				case 'm': /* time in minutes since first record */
+				case 'm': /* time in decimal seconds since first record */
 					if (first_m == MB_YES)
 						{
 						time_d_ref = time_d;
 						first_m = MB_NO;
 						}
-					printf("%.3f",time_d - time_d_ref);
+					printf("%.6f",time_d - time_d_ref);
 					break;
 				case 'N': /* ping counter */
 					printf("%6d",nread);
@@ -897,31 +890,11 @@ char **argv;
 					time_i[3],time_i[4],time_i[5]);
 					break;
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
-					time_tm.tm_year = time_i[0] - 1900;
-					time_tm.tm_mon = time_i[1] - 1;
-					time_tm.tm_mday = time_i[2];
-					time_tm.tm_hour = time_i[3];
-					time_tm.tm_min = time_i[4];
-					time_tm.tm_sec = time_i[5];
-#if defined (IRIX) || defined (LYNX)
-					time_u = mktime(&time_tm);
-#else
-					time_u = timegm(time_tm);
-#endif
+					time_u = (int) time_d;
 					printf("%d",time_u);
 					break;
 				case 'u': /* time in seconds since first record */
-					time_tm.tm_year = time_i[0] - 1900;
-					time_tm.tm_mon = time_i[1] - 1;
-					time_tm.tm_mday = time_i[2];
-					time_tm.tm_hour = time_i[3];
-					time_tm.tm_min = time_i[4];
-					time_tm.tm_sec = time_i[5];
-#if defined (IRIX) || defined (LYNX)
-					time_u = mktime(&time_tm);
-#else
-					time_u = timegm(time_tm);
-#endif
+					time_u = (int) time_d;
 					if (first_u == MB_YES)
 						{
 						time_u_ref = time_u;
@@ -980,16 +953,16 @@ char **argv;
 		}
 
 	/* close the multibeam file */
-	status = mb_close(verbose,mbio_ptr,&error);
+	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory used for data arrays */
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathacrosstrack,&error); 
-	mb_free(verbose,bathalongtrack,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,ssacrosstrack,&error); 
-	mb_free(verbose,ssalongtrack,&error); 
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&bathacrosstrack,&error); 
+	mb_free(verbose,&bathalongtrack,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&ssacrosstrack,&error); 
+	mb_free(verbose,&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)
