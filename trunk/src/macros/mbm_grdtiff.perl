@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdtiff.perl	11/3/1999
-#    $Id: mbm_grdtiff.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#    $Id: mbm_grdtiff.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
 #
 #    Copyright (c) 1999, 2000 by
 #    D. W. Caress (caress@mbari.org)
@@ -49,10 +49,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdtiff.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#   $Id: mbm_grdtiff.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.0  2000/12/01 22:58:01  caress
+#   First cut at Version 5.0.
+#
 # Revision 4.1  2000/10/03  21:42:17  caress
 # Snapshot for Dale.
 #
@@ -391,10 +394,11 @@ else
 
 # get postscript viewer
 # check environment variable
-if ($ENV{"MB_TIFF_VIEWER"})
+if ($ENV{"MB_IMG_VIEWER"})
 	{
-	$tiff_viewer = $ENV{"MB_TIFF_VIEWER"};
+	$tiff_viewer = $ENV{"MB_IMG_VIEWER"};
 	}
+
 # check for .mbio_defaults file
 if (!$tiff_viewer)
 	{
@@ -404,18 +408,18 @@ if (!$tiff_viewer)
 		{
 		while (<MBDEF>)
 			{
-			if (/tiff viewer:\s+(\S+)/)
+			if (/img viewer:\s+(\S+)/)
 				{
-				($tiff_viewer) = /tiff viewer:\s+(\S+)/;
+				($img_viewer) = /img viewer:\s+(\S+)/;
 				}
 			}
 		close MBDEF;
 		}
 	}
 # else just set it to xv
-if (!$ps_viewer)
+if (!$img_viewer)
 	{
-	$tiff_viewer = "xv";
+	$img_viewer = "xv";
 	}
 
 # see if data file is a grd file or a list of grdfiles
@@ -480,7 +484,14 @@ if (!$bounds || !$zbounds)
 	{
 	foreach $file_grd (@files_data) {
 
-	@grdinfo = `grdinfo $file_grd`;
+	if ($bounds)
+		{
+		@grdinfo = `mbm_grdinfo -I$file_grd -R$bounds`;
+		}
+	else
+		{
+		@grdinfo = `grdinfo $file_grd`;
+		}
 	while (@grdinfo)
 		{
 		$line = shift @grdinfo;
@@ -563,6 +574,10 @@ if ($bounds)
 	elsif ($bounds =~ /^r$/)
 		{
 		$use_corner_points = 1;
+		$xmin = $xmin;
+		$xmax = $xmax;
+		$ymin = $ymin;
+		$ymax = $ymax;
 		$bounds_plot = sprintf ("%1.8g/%1.8g/%1.8g/%1.8gr",
 			$xmin, $ymin, $xmax, $ymax);
 		}
@@ -1066,6 +1081,7 @@ if ($color_mode)
 		printf FCMD "mbgrdtiff -I $file_use \\\n\t";
 		}
 	printf FCMD "-O \$TIFF_FILE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "-C \$CPT_FILE \\\n\t";
 	if ($color_mode == 2 || $color_mode == 3)
 		{
@@ -1097,16 +1113,16 @@ print FCMD "echo Resetting GMT fonts...\n";
 print FCMD "/bin/mv $gmtfile .gmtdefaults\n";
 
 # display image on screen if desired
-print FCMD "#\n# Run $tiff_viewer\n";
+print FCMD "#\n# Run $img_viewer\n";
 if ($no_view_tiff)
 	{
-	print FCMD "#echo Running $tiff_viewer in background...\n";
-	print FCMD "#$tiff_viewer $tiffile &\n";
+	print FCMD "#echo Running $img_viewer in background...\n";
+	print FCMD "#$img_viewer $tiffile &\n";
 	}
 else
 	{
-	print FCMD "echo Running $tiff_viewer in background...\n";
-	print FCMD "$tiff_viewer $tiffile &\n";
+	print FCMD "echo Running $img_viewer in background...\n";
+	print FCMD "$img_viewer $tiffile &\n";
 	}
 
 # claim it's all over

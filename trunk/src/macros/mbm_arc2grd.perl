@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id: mbm_arc2grd.perl,v 5.0 2001-04-23 21:22:45 caress Exp $
+#    $Id: mbm_arc2grd.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
 #
 #    Copyright (c) 2001 by
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward side of Oahu)
 #
 # Version:
-#   $Id: mbm_arc2grd.perl,v 5.0 2001-04-23 21:22:45 caress Exp $
+#   $Id: mbm_arc2grd.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.0  2001/04/23 21:22:45  caress
+#   Initial revision
+#
 #
 #
 #
@@ -113,10 +116,10 @@ while (<INP>) {
 	}
 	elsif ($cnt == 6) {
 		($nodata) = $_ =~ /nodata_value\s+(\S+)/;
-		$xmin_f = $xllcorner;
-		$xmax_f = $xllcorner + $cellsize * ($ncols - 1);
-		$ymin_f = $yllcorner;
-		$ymax_f = $yllcorner + $cellsize * ($nrows - 1);
+		$xmin_f = $xllcorner + 0.5 * $cellsize;
+		$xmax_f = $xllcorner + $cellsize * ($ncols - 0.5);
+		$ymin_f = $yllcorner + 0.5 * $cellsize;
+		$ymax_f = $yllcorner + $cellsize * ($nrows - 0.5);
 	}
 	elsif ($cnt > 6) {
 		chop($_);

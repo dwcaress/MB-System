@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/23/01
-#    $Id: mbm_grdcut.perl,v 5.0 2001-04-24 23:29:35 caress Exp $
+#    $Id: mbm_grdcut.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
 #
 #    Copyright (c) 2001 by
 #    D. W. Caress (caress@mbari.org)
@@ -40,10 +40,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the Kohala coast of Hawaii)
 #
 # Version:
-#   $Id: mbm_grdcut.perl,v 5.0 2001-04-24 23:29:35 caress Exp $
+#   $Id: mbm_grdcut.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.0  2001/04/24 23:29:35  caress
+#   Initital revision.
+#
 #
 #
 
@@ -151,9 +154,9 @@ $diffx = ($xminr - $xmin) / $xinc;
 $diffxn = int(($xminr - $xmin) / $xinc);
 print "diffx: $diffx $diffxn\n";
 $xminout = $xmin + $xinc * int(($xminr - $xmin) / $xinc);
-$xmaxout = $xmin + $xinc * int(($xmaxr - $xmin) / $xinc);
+$xmaxout = $xmin + $xinc * int(($xmaxr - $xmin) / $xinc + 0.5);
 $yminout = $ymin + $yinc * int(($yminr - $ymin) / $yinc);
-$ymaxout = $ymin + $yinc * int(($ymaxr - $ymin) / $yinc);
+$ymaxout = $ymin + $yinc * int(($ymaxr - $ymin) / $yinc + 0.5);
 $nxout = int((($xmaxout - $xminout) / $xinc) + 0.5) + 1;
 $nyout = int((($ymaxout - $yminout) / $yinc) + 0.5) + 1;
 

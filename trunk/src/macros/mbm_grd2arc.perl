@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd2arc.perl	6/11/99
-#    $Id: mbm_grd2arc.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#    $Id: mbm_grd2arc.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
 #
 #    Copyright (c) 1999, 2000 by
 #    D. W. Caress (caress@mbari.org)
@@ -38,10 +38,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 5, 1999
 #
 # Version:
-#   $Id: mbm_grd2arc.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#   $Id: mbm_grd2arc.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.0  2000/12/01 22:58:01  caress
+#   First cut at Version 5.0.
+#
 # Revision 4.1  2000/10/03  21:42:17  caress
 # Snapshot for Dale.
 #
@@ -122,10 +125,30 @@ while (@grdinfo)
 		($ymin_f,$ymax_f,$yinc_f,$nrows) = $line =~ 
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+).+ny:\s+(\S+)/;
 		}
+	if ($line =~ /\S+\s+Normal node registration used/)
+		{
+		$node_normal = 1;
+		}
 	}
 
 # reset the GMT default double format
 `gmtset D_FORMAT $dformatsave`;
+
+# deal with translating grid bounds
+if ($node_normal)
+	{
+	$xmin_a = $xmin_f - 0.5 * $xinc_f;
+	$xmax_a = $xmax_f + 0.5 * $xinc_f;
+	$ymin_a = $ymin_f - 0.5 * $yinc_f;
+	$ymax_a = $ymax_f + 0.5 * $yinc_f;
+	}
+else
+	{
+	$xmin_a = $xmin_f;
+	$xmax_a = $xmax_f;
+	$ymin_a = $ymin_f;
+	$ymax_a = $ymax_f;
+	}
 
 # tell the world we got started
 if ($verbose) 
@@ -133,9 +156,10 @@ if ($verbose)
 	print "\nProgram $program_name status:\n";
 	print "\tInput GRD file:            $ifile\n";
 	print "\tOutput ArcView ASCII file: $ofile\n";
-	print "\tGrid dimensions:  $ncols  $nrows\n";
-	print "\tGrid cell sizes:  $xinc_f  $yinc_f\n";
-	print "\tGrid bounds:      $xmin_f  $xmax_f    $ymin_f  $ymax_f\n";
+	print "\tGrid dimensions:    $ncols  $nrows\n";
+	print "\tGrid cell sizes:    $xinc_f  $yinc_f\n";
+	print "\tGrid bounds (GMT):  $xmin_f  $xmax_f    $ymin_f  $ymax_f\n";
+	print "\tGrid bounds (Arc):  $xmin_a  $xmax_a    $ymin_a  $ymax_a\n";
 	}
 
 # Check for equal dx and dy
@@ -148,8 +172,8 @@ if ($xinc_f != $yinc_f)
 # output header of Arcview ascii file
 printf OUT "ncols $ncols\n";
 printf OUT "nrows $nrows\n";
-printf OUT "xllcorner $xmin_f\n";
-printf OUT "yllcorner $ymin_f\n";
+printf OUT "xllcorner $xmin_a\n";
+printf OUT "yllcorner $ymin_a\n";
 printf OUT "cellsize $xinc_f\n";
 printf OUT "nodata_value $nodata\n";
 
