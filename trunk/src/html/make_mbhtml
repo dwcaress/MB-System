@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 5.7 2002-07-22 01:11:43 caress Exp $
+#    $Id: make_mbhtml,v 5.8 2002-08-28 01:36:56 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 5.7 2002-07-22 01:11:43 caress Exp $
+#   $Id: make_mbhtml,v 5.8 2002-08-28 01:36:56 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.7  2002/07/22 01:11:43  caress
+#   Added generation of postscript files.
+#
 #   Revision 5.6  2002/01/02 20:20:08  caress
 #   Fixed handling of operating system differences.
 #
@@ -108,6 +111,7 @@ else
 print "Operating System: $os\nFormatter: $groff\n";
 
 # Loop over files
+`cc man2html.c -o man2html`;
 foreach $man_page (@manual_pages) {
     chop($man_page);
     chop($man_page);
@@ -115,15 +119,19 @@ foreach $man_page (@manual_pages) {
     print "\nProcessing manual page for $man_page...\n";
 
     # first generate a postscript version for mbsystem/ps
+    print "Generating ../../ps/$man_page.ps\n";
     `$groff -man -Tps ../../man/manl/$man_page.l > ../../ps/$man_page.ps`;
     
     # Generate an initial html file
+    print "Generating ../../html/$man_page.html\n";
     $raw_html_file = "./$man_page.html";
     $date = `head -1 ../../man/manl/$man_page.l | awk '{print \$4,\$5,\$6}'`;
     chop($date);
     chop($date);
     $date = substr($date, 1);
-    `$groff -man ../../man/manl/$man_page.l | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`;
+#    `cat ../../man/manl/$man_page.l | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`; 
+#    `$groff -man -Thtml ../../man/manl/$man_page.l  > $raw_html_file`;
+    `cat ../../man/manl/$man_page.l | man2html -f > $raw_html_file`;
 
     # Open the input file
     if (!open(IHTML,"$raw_html_file"))
