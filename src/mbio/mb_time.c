@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.3 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_time.c,v 4.4 1995-01-03 22:49:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -62,7 +65,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.3 1994-10-21 12:11:53 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.4 1995-01-03 22:49:33 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from
@@ -123,6 +126,7 @@ double *time_d;
 /* 	function mb_get_date returns yy/mm/dd/hr/mi/sc calculated
  * 	from the number of seconds after 1/1/70 00:00:0 */
 int mb_get_date(verbose,time_d,time_i)
+int verbose;
 double time_d;
 int time_i[7];
 {
@@ -157,7 +161,7 @@ int time_i[7];
 	time_i[0] = (int) (time_d/SECINYEAR) + 1970;
 	leapday = (time_i[0] - 1969)/4;
 	yearday = daytotal - 365*(time_i[0] - 1970) - leapday + 1;
-	if (yearday < 0)
+	if (yearday <= 0)
 		{
 		time_i[0]--;
 		leapday = (time_i[0] - 1969)/4;
