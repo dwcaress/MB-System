@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 4.1 1994-04-11 23:34:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -32,6 +32,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -62,7 +65,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_ldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+ static char res_id[]="$Id: mbsys_ldeoih.c,v 4.1 1994-04-11 23:34:41 caress Exp $";
 	char	*function_name = "mbsys_ldeoih_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -577,6 +580,111 @@ int	*error;
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_ldeoih_ttimes(verbose,mbio_ptr,store_ptr,kind,
+		nbeams,ttimes,angles,flags,error)
+int	verbose;
+char	*mbio_ptr;
+char	*store_ptr;
+int	*kind;
+int	*nbeams;
+double	*ttimes;
+double	*angles;
+int	*flags;
+int	*error;
+{
+	char	*function_name = "mbsys_ldeoih_ttimes";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_ldeoih_struct *store;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %d\n",ttimes);
+		fprintf(stderr,"dbg2       angles:     %d\n",angles);
+		fprintf(stderr,"dbg2       flags:      %d\n",flags);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_ldeoih_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get nbeams */
+		*nbeams = mb_io_ptr->beams_bath;
+
+		/* get travel times, angles, and flags */
+		for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			ttimes[i] = 0.0;
+			angles[i] = 0.0;
+			flags[i] = MB_NO;
+			}
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
+		for (i=0;i<*nbeams;i++)
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle:%f  flag:%d\n",
+				i,ttimes[i],angles[i],flags[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */
