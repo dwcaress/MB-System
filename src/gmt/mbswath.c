@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.14 1995-08-17 14:49:26 caress Exp $
+ *    $Id: mbswath.c,v 4.15 1995-11-15 22:32:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1995/08/17  14:49:26  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.13  1995/08/07  17:31:39  caress
  * Moved to GMT V3.
  *
@@ -133,6 +136,7 @@
 #define	MBSWATH_BATH_AMP_CPT	6
 #define MBSWATH_FOOTPRINT_REAL	1
 #define MBSWATH_FOOTPRINT_FAKE	2
+#define MBSWATH_FOOTPRINT_POINT	3
 
 /* DTR define */
 #ifndef M_PI
@@ -206,7 +210,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.14 1995-08-17 14:49:26 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.15 1995-11-15 22:32:55 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -263,6 +267,7 @@ char **argv;
 
 	/* gmt control variables */
 	double	borders[4];
+	double	borders_use[4];
 	char	cptfile[128];
 	char	cptshadefile[128];
 	int	ampshademode = 0;
@@ -555,7 +560,7 @@ char **argv;
 		fprintf(stderr,"dbg2       amplitude scale:  %f\n",ampscale);
 		fprintf(stderr,"dbg2       amplitude minimum:%f\n",ampmin);
 		fprintf(stderr,"dbg2       amplitude maximum:%f\n",ampmax);
-		fprintf(stderr,"dbg2       footprint mode:   %f\n",footprint_mode);
+		fprintf(stderr,"dbg2       footprint mode:   %d\n",footprint_mode);
 		fprintf(stderr,"dbg2       footprint factor: %f\n",factor);
 		fprintf(stderr,"dbg2       default depth:    %f\n",default_depth);
 		fprintf(stderr,"dbg2       mode:             %d\n",mode);
@@ -569,9 +574,27 @@ char **argv;
 		exit(error);
 		}
 
+	/* copy borders in correct order for use by this program */
+	if (project_info.region == MB_YES)
+		{
+		borders_use[0] = borders[0];
+		borders_use[1] = borders[1];
+		borders_use[2] = borders[2];
+		borders_use[3] = borders[3];
+		}
+	else
+		{
+		borders_use[0] = borders[0];
+		borders_use[1] = borders[2];
+		borders_use[2] = borders[1];
+		borders_use[3] = borders[3];
+		}
+
 	/* if borders not specified then quit */
-	if (borders[0] >= borders[1] || borders[2] >= borders[3]
-		|| borders[2] <= -90.0 || borders[3] >= 90.0)
+	if (borders_use[0] >= borders_use[1] 
+		|| borders_use[2] >= borders_use[3]
+		|| borders_use[2] <= -90.0 
+		|| borders_use[3] >= 90.0)
 		{
 		fprintf(stderr,"\nRegion borders not properly specified:\n\t%f %f %f %f\n",borders[0],borders[1],borders[2],borders[3]);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
@@ -582,16 +605,20 @@ char **argv;
 
 	/* set bounds for multibeam reading larger than
 		map borders */
-	bounds[0] = borders[0] - 0.25*(borders[1] - borders[0]);
-	bounds[1] = borders[1] + 0.25*(borders[1] - borders[0]);
-	bounds[2] = borders[2] - 0.25*(borders[3] - borders[2]);
-	bounds[3] = borders[3] + 0.25*(borders[3] - borders[2]);
-
+	bounds[0] = borders_use[0] 
+		- 0.25*(borders_use[1] - borders_use[0]);
+	bounds[1] = borders_use[1] 
+		+ 0.25*(borders_use[1] - borders_use[0]);
+	bounds[2] = borders_use[2] 
+		- 0.25*(borders_use[3] - borders_use[2]);
+	bounds[3] = borders_use[3] 
+		+ 0.25*(borders_use[3] - borders_use[2]);
+	
 	/* set up map */
 	map_setup(borders[0],borders[1],borders[2],borders[3]);
 
 	/* get scaling from degrees to km */
-	mb_coor_scale(verbose,0.5*(borders[2] + borders[3]),
+	mb_coor_scale(verbose,0.5*(borders_use[2] + borders_use[3]),
 			&mtodeglon,&mtodeglat);
 
 	/* get color palette file */
@@ -691,10 +718,10 @@ char **argv;
 		timestamp (argc, argv);
 
 	/* set clip path */
-	geo_to_xy(borders[0],borders[2],&clipx[0],&clipy[0]);
-	geo_to_xy(borders[1],borders[2],&clipx[1],&clipy[1]);
-	geo_to_xy(borders[1],borders[3],&clipx[2],&clipy[2]);
-	geo_to_xy(borders[0],borders[3],&clipx[3],&clipy[3]);
+	geo_to_xy(borders_use[0],borders_use[2],&clipx[0],&clipy[0]);
+	geo_to_xy(borders_use[1],borders_use[2],&clipx[1],&clipy[1]);
+	geo_to_xy(borders_use[1],borders_use[3],&clipx[2],&clipy[2]);
+	geo_to_xy(borders_use[0],borders_use[3],&clipx[3],&clipy[3]);
 	ps_clipon(clipx,clipy,4,-1,-1,-1,3);
 
 	/* if plot is made using an image operator
@@ -1010,6 +1037,7 @@ char **argv;
 		if (plot == MB_YES)
 			{
 			/* get footprint locations */
+			if (footprint_mode != MBSWATH_FOOTPRINT_POINT)
 			status = get_footprints(verbose,mode,
 				footprint_mode,factor,default_depth, 
 				swath_plot,mtodeglon,mtodeglat,&error);
@@ -1037,8 +1065,14 @@ char **argv;
 				nplot = *npings - first;
 			else
 				nplot = *npings - first - 1;
-			status = plot_data(verbose,mode,swath_plot,
-				first,nplot,&error);
+			if (footprint_mode == MBSWATH_FOOTPRINT_POINT)
+				status = plot_data_point(verbose,
+					mode,swath_plot,
+					first,nplot,&error);
+			else 
+				status = plot_data_footprint(verbose,
+					mode,swath_plot,
+					first,nplot,&error);
 
 			/* let the world know */
 			/*if (verbose >= 1)
@@ -2009,7 +2043,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int plot_data(verbose,mode,swath,first,nplot,error)
+int plot_data_footprint(verbose,mode,swath,first,nplot,error)
 int	verbose;
 int	mode;
 struct swath *swath;
@@ -2017,7 +2051,7 @@ int	first;
 int	nplot;
 int	*error;
 {
-	char	*function_name = "plot_data";
+	char	*function_name = "plot_data_footprint";
 	int	status = MB_SUCCESS;
 	struct ping	*pingcur;
 	struct footprint	*print;
@@ -2104,6 +2138,117 @@ int	*error;
 					geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				get_rgb24(pingcur->ss[j],&red,&green,&blue);
 				status = plot_box(verbose,xx,yy,
+						red,green,blue,error);
+				}
+			}
+		}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBSWATH function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int plot_data_point(verbose,mode,swath,first,nplot,error)
+int	verbose;
+int	mode;
+struct swath *swath;
+int	first;
+int	nplot;
+int	*error;
+{
+	char	*function_name = "plot_data_point";
+	int	status = MB_SUCCESS;
+	struct ping	*pingcur;
+	double	xx, yy;
+	int	red, green, blue;
+	int	i, j, k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBSWATH function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mode:       %d\n",mode);
+		fprintf(stderr,"dbg2       swath:      %d\n",swath);
+		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
+		fprintf(stderr,"dbg2       first:      %d\n",first);
+		fprintf(stderr,"dbg2       nplot:      %d\n",nplot);
+		}
+
+	if (mode == MBSWATH_BATH 
+		|| mode == MBSWATH_BATH_RELIEF
+		|| mode == MBSWATH_BATH_AMP 
+		|| mode == MBSWATH_BATH_AMP_CPT)
+		{
+		/* loop over all pings and beams and plot the good ones */
+		for (i=first;i<first+nplot;i++)
+			{
+			pingcur = &swath->data[i];
+			for (j=0;j<swath->beams_bath;j++)
+			  if (pingcur->bath[j] > 0.0)
+				{
+				geo_to_xy(pingcur->bathlon[j], 
+					pingcur->bathlat[j], 
+					&xx, &yy);
+				get_rgb24(pingcur->bath[j],&red,&green,&blue);
+				if (mode == MBSWATH_BATH_RELIEF 
+					|| mode == MBSWATH_BATH_AMP
+					|| mode == MBSWATH_BATH_AMP_CPT)
+					illuminate(pingcur->bathshade[j],
+						&red,&green,&blue);
+				status = plot_point(verbose,xx,yy,
+						red,green,blue,error);
+				}
+			}
+		}
+	else if (mode == MBSWATH_AMP)
+		{
+		/* loop over all pings and beams and plot the good ones */
+		for (i=first;i<first+nplot;i++)
+			{
+			pingcur = &swath->data[i];
+			for (j=0;j<swath->beams_amp;j++)
+			  if (pingcur->amp[j] > 0.0)
+				{
+				geo_to_xy(pingcur->bathlon[j], 
+					pingcur->bathlat[j], 
+					&xx, &yy);
+				get_rgb24(pingcur->amp[j],&red,&green,&blue);
+				status = plot_point(verbose,xx,yy,
+						red,green,blue,error);
+				}
+			}
+		}
+	else if (mode == MBSWATH_SS)
+		{
+		/* loop over all pings and beams and plot the good ones */
+		for (i=first;i<first+nplot;i++)
+			{
+			pingcur = &swath->data[i];
+			for (j=0;j<swath->pixels_ss;j++)
+			  if (pingcur->ss[j] > 0.0)
+				{
+				geo_to_xy(pingcur->sslon[j], 
+					pingcur->sslat[j], 
+					&xx, &yy);
+				get_rgb24(pingcur->ss[j],&red,&green,&blue);
+				status = plot_point(verbose,xx,yy,
 						red,green,blue,error);
 				}
 			}
@@ -2303,6 +2448,89 @@ int	*error;
 			}
 		    }*/
 		}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBSWATH function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int plot_point(verbose,x,y,red,green,blue,error)
+int	verbose;
+double	x;
+double	y;
+int	red;
+int	green;
+int	blue;
+int	*error;
+{
+	char	*function_name = "plot_box";
+	int	status = MB_SUCCESS;
+	int	ix, iy;
+	int	i, j, k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBSWATH function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       x:          %f\n",x);
+		fprintf(stderr,"dbg2       y:          %f\n",y);
+		fprintf(stderr,"dbg2       red:        %d\n",red);
+		fprintf(stderr,"dbg2       green:      %d\n",green);
+		fprintf(stderr,"dbg2       blue:       %d\n",blue);
+		}
+
+	/* if simple case just plot point */
+	if (image == MBSWATH_IMAGE_VECTOR)
+		{
+		ps_setpaint (red,green,blue);
+		ps_cross (x, y, 0.005);
+		}
+
+	/* if image plot then plot pixel */
+	else if (image == MBSWATH_IMAGE_8 || image == MBSWATH_IMAGE_24)
+		{
+		/* get pixel */
+		ix = nx*x/x_inch;
+		iy = ny*y/y_inch;
+
+		/* plot pixel */
+		if (image == MBSWATH_IMAGE_8)
+			{
+			k = nx*(ny - iy) + ix;
+			bitimage[k] = (unsigned char) YIQ (red, green, blue);
+			}
+		else if (gmtdefs.color_image == 2)
+			{
+			k = nx*(ny - iy) + ix;
+			bitimage[k] = red;
+			bitimage[k+nm] = green;
+			bitimage[k+nm2] = blue;
+			}
+		else
+			{
+			k = 3*(nx*(ny - iy) + ix);
+			bitimage[k] = red;
+			bitimage[k+1] = green;
+			bitimage[k+2] = blue;
+			}
+		  }
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
