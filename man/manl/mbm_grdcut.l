@@ -1,4 +1,4 @@
-.TH mbm_grdcut l "23 April 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grdcut l "28 November 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdcut\fP - Macro to extract a specified subarea of a
 GMT GRD grid file as another GRD file. 
@@ -94,8 +94,8 @@ The resulting output is:
  	Running grdcut...
  	grdcut kohalaa.grd -Gz.grd -R-155.51688391551/-155.433596039659/20.2166526184856/20.2999404943366 -V
  	grdcut: File spec:	W E S N dx dy nx ny:
- 	grdcut: Old:	-155.729	-155.319	20.0949	20.4763	0.0002872	0.0002872	1426	1329
- 	grdcut: New:	-155.517	-155.434	20.2167	20.2999	0.0002872	0.0002872	291	291
+ 	grdcut: Old: -155.729 -155.319 20.0949 20.4763 0.0002872 0.0002872 1426 1329
+ 	grdcut: New: -155.517 -155.434 20.2167 20.2999 0.0002872 0.0002872  291  291
 
  
 .SH SEE ALSO
