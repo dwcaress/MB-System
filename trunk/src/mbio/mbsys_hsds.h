@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.h	2/16/93
- *	$Id: mbsys_hsds.h,v 4.1 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbsys_hsds.h,v 4.2 1995-02-22 21:56:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	February 16, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -100,6 +103,14 @@
 	- this is supposed to be 1.525 degrees but seems
 	to really be 1.510 degrees */
 #define MBSYS_HSDS_BEAM_SPACING 1.510
+
+/* array matching gain values to appropriate beam */
+static int which_gain[MBSYS_HSDS_BEAMS] = 
+			{ 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+			  4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 
+			  7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
+			 10,10,10,10,11,11,11,11,12,12,12,12,
+			 13,13,13,13,14,14,14,14,15 };
 
 struct mbsys_hsds_struct
 	{
