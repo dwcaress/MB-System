@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em121raw.c	7/8/96
- *	$Id: mbr_em121raw.c,v 4.2 1996-08-26 18:33:50 caress Exp $
+ *	$Id: mbr_em121raw.c,v 4.3 1996-08-26 19:03:38 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1996/08/26  18:33:50  caress
+ * Changed "signed char" to "char" for SunOs 4.1 compiler compatibility.
+ *
  * Revision 4.1  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -53,7 +56,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em121raw.c,v 4.2 1996-08-26 18:33:50 caress Exp $";
+	static char res_id[]="$Id: mbr_em121raw.c,v 4.3 1996-08-26 19:03:38 caress Exp $";
 	char	*function_name = "mbr_alm_em121raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1145,7 +1148,7 @@ int	*error;
 				}
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
 				{
-				data->amp[i] = (signed char) 
+				data->amp[i] = (char) 
 					((mb_io_ptr->new_amp[i] - 64) 
 					/ reflscale);
 				}
@@ -1154,7 +1157,7 @@ int	*error;
 			{
 			for (i=0;i<data->pixels_ss;i++)
 				{
-				data->ss[i] = (signed char) 
+				data->ss[i] = (char) 
 					((mb_io_ptr->new_ss[i] - 64) 
 					/ reflscale);
 				}

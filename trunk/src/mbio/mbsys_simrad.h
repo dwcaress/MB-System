@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.3 1996-08-26 18:33:50 caress Exp $
+ *	$Id: mbsys_simrad.h,v 4.4 1996-08-26 19:03:38 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1996/08/26  18:33:50  caress
+ * Changed "signed char" to "char" for SunOs 4.1 compiler compatibility.
+ *
  * Revision 4.2  1996/08/05  15:25:43  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -238,9 +241,9 @@ struct mbsys_simrad_survey_struct
 					EM-12 high res:  0.20 msec 
 					EM-12 low res:   0.80 msec
 					EM-121:          range_res meters */
-	signed char	amp[MBSYS_SIMRAD_MAXBEAMS];	/* 0.5 dB */
+	char	amp[MBSYS_SIMRAD_MAXBEAMS];	/* 0.5 dB */
 	unsigned char	quality[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
-	signed char	heave[MBSYS_SIMRAD_MAXBEAMS];	/* 0.1 meters */
+	char	heave[MBSYS_SIMRAD_MAXBEAMS];	/* 0.1 meters */
 	
 	/* sidescan */
 	int	pixels_ss;	/* total number of samples for this ping */
