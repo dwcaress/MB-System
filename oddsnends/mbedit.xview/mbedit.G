@@ -8,14 +8,14 @@
 	:menu-type              :command
 	:menu-handler           nil
 	:menu-title             "File"
-	:menu-item-labels       ("Load" )
-	:menu-item-label-types  (:string )
-	:menu-item-states       (:active )
-	:menu-item-defaults     (nil )
-	:initial-selections     (nil )
-	:menu-item-handlers     (nil )
-	:menu-item-menus        (nil )
-	:menu-item-colors       ("" )
+	:menu-item-labels       ("Load" "Show Colors" )
+	:menu-item-label-types  (:string :string )
+	:menu-item-states       (:active :active )
+	:menu-item-defaults     (nil nil )
+	:initial-selections     (nil nil )
+	:menu-item-handlers     (nil action_show_colors )
+	:menu-item-menus        (nil nil )
+	:menu-item-colors       ("" "" )
 	:pinnable               t
 	:user-data              ()
 	:actions                (
@@ -27,6 +27,14 @@
 		:arg_type               ()
 		:action                 (Show)
 		)
+		(
+		:from                   (menu_file "Show Colors")
+		:when                   (Notify )
+		:to                     (menu_file "Show Colors")
+		:function_type          CallFunction
+		:arg_type               ()
+		:action                 (action_show_colors)
+		)
 	)
 )
 (
@@ -37,7 +45,7 @@
 	:height                 764
 	:background-color       ""
 	:foreground-color       ""
-	:label                  "MBEDIT Version $Id: mbedit.G,v 3.0 1993-04-22 18:50:54 dale Exp $"
+	:label                  "MBEDIT Version $Id: mbedit.G,v 3.1 1993-08-17 04:32:17 caress Exp $"
 	:label-type             :string
 	:initial-state          :open
 	:show-footer            t
@@ -125,7 +133,7 @@
 	:help                   ""
 	:x                      160
 	:y                      8
-	:width                  344
+	:width                  364
 	:height                 20
 	:value-x                331
 	:value-y                8
@@ -392,7 +400,7 @@
 	:help                   ""
 	:x                      560
 	:y                      56
-	:width                  318
+	:width                  330
 	:height                 20
 	:value-x                689
 	:value-y                56
@@ -495,7 +503,7 @@
 	:help                   ""
 	:x                      160
 	:y                      80
-	:width                  237
+	:width                  249
 	:height                 15
 	:value-x                338
 	:value-y                80
@@ -534,7 +542,7 @@
 	:help                   ""
 	:x                      560
 	:y                      80
-	:width                  319
+	:width                  331
 	:height                 20
 	:value-x                690
 	:value-y                80
@@ -609,8 +617,8 @@
 	:type                   :popup-window
 	:name                   popup_load
 	:owner                  window_mbedit
-	:width                  273
-	:height                 322
+	:width                  267
+	:height                 375
 	:background-color       ""
 	:foreground-color       ""
 	:label                  "Load Input Multibeam File"
@@ -631,8 +639,8 @@
 	:help                   ""
 	:x                      0
 	:y                      0
-	:width                  273
-	:height                 322
+	:width                  267
+	:height                 375
 	:background-color       ""
 	:foreground-color       ""
 	:initial-state          :visible
@@ -666,25 +674,34 @@
 	:droppable              nil
 	:default-drop-site      nil
 	:menu                   nil
-	:notify-handler         nil
+	:notify-handler         set_output_name
 	:event-handler          nil
 	:initial-list-values    ()
 	:initial-list-glyphs    ()
 	:initial-selections     ()
 	:user-data              ()
-	:actions                ()
+	:actions                (
+		(
+		:from                   (popup_load list_files)
+		:when                   (Notify )
+		:to                     (popup_load list_files)
+		:function_type          CallFunction
+		:arg_type               ()
+		:action                 (set_output_name)
+		)
+	)
 )
 (
 	:type                   :text-field
 	:name                   textfield_format
 	:owner                  controls_load
 	:help                   ""
-	:x                      24
-	:y                      264
-	:width                  169
+	:x                      16
+	:y                      256
+	:width                  189
 	:height                 15
-	:value-x                142
-	:value-y                264
+	:value-x                134
+	:value-y                256
 	:value-length           2
 	:stored-length          80
 	:rows                   3
@@ -705,12 +722,40 @@
 	:actions                ()
 )
 (
+	:type                   :text-field
+	:name                   textfield_output
+	:owner                  controls_load
+	:help                   ""
+	:x                      16
+	:y                      280
+	:width                  232
+	:height                 32
+	:value-x                16
+	:value-y                297
+	:value-length           29
+	:stored-length          80
+	:rows                   3
+	:foreground-color       ""
+	:text-type              :alphanumeric
+	:label                  "Output File:"
+	:label-type             :string
+	:layout-type            :vertical
+	:value-underlined       t
+	:initial-value          ""
+	:initial-state          :active
+	:read-only              nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
 	:type                   :button
 	:name                   button_load_cancel
 	:owner                  controls_load
 	:help                   ""
 	:x                      32
-	:y                      288
+	:y                      336
 	:width                  59
 	:height                 19
 	:constant-width         nil
@@ -747,8 +792,8 @@
 	:name                   button_load_ok
 	:owner                  controls_load
 	:help                   ""
-	:x                      200
-	:y                      288
+	:x                      192
+	:y                      336
 	:width                  36
 	:height                 19
 	:constant-width         nil
