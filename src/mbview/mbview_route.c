@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.7 2005-02-08 22:37:43 caress Exp $
+ *    $Id: mbview_route.c,v 5.8 2005-03-25 04:46:15 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/02/08 22:37:43  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.5  2004/09/16 21:44:38  caress
  * Many changes over the summer.
  *
@@ -92,7 +95,7 @@ Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.7 2005-02-08 22:37:43 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.8 2005-03-25 04:46:15 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -1641,6 +1644,7 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 					shared.shareddata.routes[i].name[0] = '\0';
 					shared.shareddata.routes[i].npoints = 0;
 					shared.shareddata.routes[i].npoints_alloc = MBV_ALLOC_NUM;
+					shared.shareddata.routes[i].waypoint = NULL;
 					shared.shareddata.routes[i].points = NULL;
 					shared.shareddata.routes[i].segments = NULL;
 					status = mb_realloc(mbv_verbose, 
