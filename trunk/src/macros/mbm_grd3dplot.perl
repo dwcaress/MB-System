@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 5.11 2004-10-06 18:56:11 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 5.12 2005-03-25 04:05:40 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -63,10 +63,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 5.11 2004-10-06 18:56:11 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 5.12 2005-03-25 04:05:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.11  2004/10/06 18:56:11  caress
+#   Release 5.0.5 update.
+#
 #   Revision 5.10  2004/09/16 19:11:48  caress
 #   Supports postscript viewer ggv.
 #
@@ -1938,7 +1941,7 @@ if ($nlabels < 2)
 if ($tick_info)
 	{
 	$axes = $tick_info;
-	if (!($tick_info =~ /.*\..*/))
+	if (!($tick_info =~ /.*:\..*/))
 		{
 		$axes = "$axes:.\"$tlabel\":";
 		}

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.13 2004-12-18 01:31:26 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.14 2005-03-25 04:05:39 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.13 2004-12-18 01:31:26 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.14 2005-03-25 04:05:39 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.13  2004/12/18 01:31:26  caress
+#   Working towards release 5.0.6.
+#
 #   Revision 5.12  2004/10/06 18:56:11  caress
 #   Release 5.0.5 update.
 #
@@ -2089,7 +2092,7 @@ if ($nlabels < 2)
 if ($tick_info)
 	{
 	$axes = $tick_info;
-	if (!($tick_info =~ /.*\..*/))
+	if (!($tick_info =~ /.*:\..*/))
 		{
 		$axes = "$axes:.\"$tlabel\":";
 		}

@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.16 2004-12-18 01:31:26 caress Exp $
+#    $Id: mbm_plot.perl,v 5.17 2005-03-25 04:05:40 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
+#    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.16 2004-12-18 01:31:26 caress Exp $
+#   $Id: mbm_plot.perl,v 5.17 2005-03-25 04:05:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.16  2004/12/18 01:31:26  caress
+#   Working towards release 5.0.6.
+#
 #   Revision 5.15  2004/09/16 22:43:32  caress
 #   Fixed bug using -MME option.
 #
@@ -466,7 +469,7 @@ if ($help)
 	print "\t$program_name -Fformat -Ifile [-Amagnitude[/azimuth | zero_level]\n";
 	print "\t\t-C[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\n";
 	print "\t\t-Gcolor_mode -H\n";
-	print "\t\t-N[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F]\n";
+	print "\t\t-N[time_tick/time_annot/date_annot/time_tick_len[/name_hgt[/name_perp]] | F[P]]\n";
 	print "\t\t-Oroot -Ppagesize -S[color/shade] -T -Uorientation -V \n";
 	print "\t\t-Wcolor_style[/pallette] ]\n";
 	print "Additional Options:\n";
@@ -848,24 +851,46 @@ else
 		$color_pallette = 1;
 		}
 	}
+printf "navigation_control:$navigation_control\n";
 if ($navigation_control && $navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
 	{
 	$navigation_mode = 1;
 	}
+elsif ($navigation_control && ($navigation_control =~ /FP/ 
+				|| $navigation_control =~ /fp/))
+	{
+printf "navigation_control:PERP\n";
+	$navigation_mode = 1;
+	$name_mode = 1;
+	$name_perp = 1;
+	$navigation_control = "0.25/1/4/0.15";
+	$nav_name_hgt = "0.15";
+	}
 elsif ($navigation_control && ($navigation_control =~ /F/ 
 				|| $navigation_control =~ /f/))
 	{
+printf "navigation_control:NOT PERP\n";
 	$navigation_mode = 1;
 	$name_mode = 1;
+	$name_perp = 0;
 	$navigation_control = "0.25/1/4/0.15";
 	$nav_name_hgt = "0.15";
 	}
 elsif ($navigation_control)
 	{
-	if ($navigation_control =~ /\S+\/\S+\/\S+\/\S+\/\S+/)
+	if ($navigation_control =~ /\S+\/\S+\/\S+\/\S+\/\S+\/\S+/)
 		{
 		$navigation_mode = 1;
 		$name_mode = 1;
+		($nav_time_tick, $nav_time_annot, 
+				$nav_date_annot, $nav_tick_size, $nav_name_hgt, $name_perp) 
+				= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($navigation_control =~ /\S+\/\S+\/\S+\/\S+\/\S+/)
+		{
+		$navigation_mode = 1;
+		$name_mode = 1;
+		$name_perp = 0;
 		($nav_time_tick, $nav_time_annot, 
 				$nav_date_annot, $nav_tick_size, $nav_name_hgt) 
 				= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
@@ -1994,7 +2019,7 @@ if ($nlabels < 2)
 if ($tick_info)
 	{
 	$axes = $tick_info;
-	if (!($tick_info =~ /.*\..*/))
+	if (!($tick_info =~ /.*:\..*/))
 		{
 		$axes = "$axes:.\"$tlabel\":";
 		}
@@ -2362,7 +2387,11 @@ if ($contour_mode || $navigation_mode)
 		{
 		printf FCMD "-D$navigation_control \\\n\t";
 		}
-	if ($name_mode)
+	if ($name_mode && $name_perp != 0)
+		{
+		printf FCMD "-G$nav_name_hgt/1 \\\n\t";
+		}
+	elsif ($name_mode)
 		{
 		printf FCMD "-G$nav_name_hgt \\\n\t";
 		}
