@@ -25,7 +25,7 @@ the calculation of the histrogram equalization This feature
 is similar to the Gaussian option of \fBgrdhisteq\fP. The linear
 histogram equalization is most appropriate for use with 
 grayscale images, such as those produced from amplitude
-or sidescan data, and is used by the macro \fBmbm_plot 
+or sidescan data, and is used by the macro \fBmbm_plot\fP
 for that purpose. The Gaussian histogram equalization is
 well suited for shading of images, and is used by
 \fBmbm_plot\fP for shading of color bathymetry with
