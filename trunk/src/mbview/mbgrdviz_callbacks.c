@@ -66,7 +66,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 1.4 2003-12-01 20:42:40 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 1.5 2003-12-02 20:12:55 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -786,6 +786,8 @@ fprintf(stderr, "using internal test grid...\n");
 			{
 			mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
 			reference_lon = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
+			if (reference_lon > 180.0)
+				reference_lon -= 360.0;
 			utmzone = (int)(((reference_lon + 183.0)
 					/ 6.0) + 0.5);
 			if (0.5 * (mbv_primary_ymin + mbv_primary_ymax) >= 0.0)
