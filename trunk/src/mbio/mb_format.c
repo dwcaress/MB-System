@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.30 2003-09-23 21:02:45 caress Exp $
+ *    $Id: mb_format.c,v 5.31 2004-04-27 01:46:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.30  2003/09/23 21:02:45  caress
+ * Added formats 168 and 169 for reading xyt and yxt triples (topography instead of depth).
+ *
  * Revision 5.29  2003/08/11 19:13:53  caress
  * Added *.gsf to recognized file suffixes.
  *
@@ -192,7 +195,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.30 2003-09-23 21:02:45 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.31 2004-04-27 01:46:11 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -383,6 +386,10 @@ int mb_format_register(int verbose,
 	else if (*format == MBF_XTFR8101)
 		{
 		status = mbr_register_xtfr8101(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_RESON7KR)
+		{
+		status = mbr_register_reson7kr(verbose, mbio_ptr, error); 
 		}
 	else if (*format == MBF_BCHRTUNB)
 		{
@@ -971,6 +978,17 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack, 
 			error);
 		}
+	else if (*format == MBF_RESON7KR)
+		{
+		status = mbr_info_reson7kr(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, svp_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
 	else if (*format == MBF_BCHRTUNB)
 		{
 		status = mbr_info_bchrtunb(verbose, system, 
@@ -1406,7 +1424,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.30 2003-09-23 21:02:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.31 2004-04-27 01:46:11 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1476,7 +1494,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.30 2003-09-23 21:02:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.31 2004-04-27 01:46:11 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1545,7 +1563,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.30 2003-09-23 21:02:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.31 2004-04-27 01:46:11 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1611,7 +1629,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.30 2003-09-23 21:02:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.31 2004-04-27 01:46:11 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1684,7 +1702,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.30 2003-09-23 21:02:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.31 2004-04-27 01:46:11 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1755,7 +1773,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.30 2003-09-23 21:02:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.31 2004-04-27 01:46:11 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -2534,6 +2552,31 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_GSFGENMB;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a Reson 7K multibeam *.s7k format convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".s7k")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".S7K")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_RESON7KR;
 		found = MB_YES;
 		}
 	    }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.15 2003-09-23 21:02:45 caress Exp $
+ *    $Id: mb_format.h,v 5.16 2004-04-27 01:46:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2003/09/23 21:02:45  caress
+ * Added formats 168 and 169 for reading xyt and yxt triples (topography instead of depth).
+ *
  * Revision 5.14  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -208,7 +211,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2003-09-23 21:02:45 $ $Revision: 5.15 $";
+static char mb_format_updatedate[] = "$Date: 2004-04-27 01:46:13 $ $Revision: 5.16 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -238,9 +241,10 @@ static char mb_format_updatedate[] = "$Date: 2003-09-23 21:02:45 $ $Revision: 5.
 #define	MB_SYS_ATLAS		24
 #define	MB_SYS_NAVNETCDF	25
 #define	MB_SYS_SURF		26
+#define	MB_SYS_RESON7K		27
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	56
+#define	MB_FORMATS	57
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -434,6 +438,15 @@ static char mb_format_updatedate[] = "$Date: 2003-09-23 21:02:45 $ $Revision: 5.
 					bathymetry, amplitude, and sidescan,
 					up to 1440 beams and 4096 pixels,
 					XDR binary, L-DEO. */
+#define MBF_RESON7KR	88	/* Reson 7K multibeam vendor format
+					Reson 7K series multibeam sonars, 
+					bathymetry, amplitude, three channels sidescan, and subbottom
+					up to 254 beams, variable pixels, binary, Reson. */
+#define MBF_RESON7KP	89	/* MBARI processing format for Reson 7K multibeam data
+					Reson 7K series multibeam sonars, 
+					bathymetry, amplitude, three channels sidescan, and subbottom
+					up to 254 beams, variable pixels, binary, Reson. */
+
 
 /* Alias table for old (pre-version 4.0) format id's */
 static int format_alias_table[] = 

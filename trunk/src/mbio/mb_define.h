@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.22 2003-09-23 20:56:00 caress Exp $
+ *    $Id: mb_define.h,v 5.23 2004-04-27 01:46:12 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2003/09/23 20:56:00  caress
+ * Added declaration of type mb_path.
+ *
  * Revision 5.21  2003/07/26 17:59:32  caress
  * Changed beamflag handling code.
  *
@@ -378,6 +381,20 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		double *rawss, 
 		double *rawssacrosstrack, 
 		double *rawssalongtrack, 
+		int *error);
+int mb_extract_segyheader(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind,
+		void *segyheader_ptr, 
+		int *error);
+int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind,
+		void *segyheader_ptr, 
+		float *segydata, 
+		int *error);
+int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
+		int kind,
+		void *segyheader_ptr, 
+		float *segydata, 
 		int *error);
 int mb_copyrecord(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);

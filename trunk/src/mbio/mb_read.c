@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 5.6 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_read.c,v 5.7 2004-04-27 01:46:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.5  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -140,7 +143,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_read.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
+static char rcs_id[]="$Id: mb_read.c,v 5.7 2004-04-27 01:46:13 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_read(int verbose, void *mbio_ptr,
@@ -297,6 +300,15 @@ int mb_read(int verbose, void *mbio_ptr,
 					mb_io_ptr->new_error = *error;
 					mb_notice_log_error(verbose, mbio_ptr, *error);
 					}
+				else if (mb_io_ptr->new_kind == MB_DATA_SUBBOTTOM_MCS
+					|| mb_io_ptr->new_kind == MB_DATA_SUBBOTTOM_CNTRBEAM
+					|| mb_io_ptr->new_kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_SUBBOTTOM;
+					mb_io_ptr->new_error = *error;
+					mb_notice_log_error(verbose, mbio_ptr, *error);
+					}
 				else
 					{
 					status = MB_FAILURE;
@@ -386,6 +398,7 @@ int mb_read(int verbose, void *mbio_ptr,
 
 		/* check for time gap */
 		if (status == MB_SUCCESS 
+			&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN 
 			&& mb_io_ptr->new_kind == MB_DATA_DATA
 			&& mb_io_ptr->ping_count > 1)
 			{
@@ -823,6 +836,7 @@ int mb_read(int verbose, void *mbio_ptr,
 			|| *error == MB_ERROR_TIME_GAP) 
 		{
 		if (mb_io_ptr->ping_count > 1 
+			&& *time_d > MB_TIME_D_UNKNOWN 
 			&& *speed < mb_io_ptr->speedmin)
 			{
 			status = MB_FAILURE;

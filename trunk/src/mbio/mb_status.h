@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.47 2004-02-26 22:43:25 caress Exp $
+ *    $Id: mb_status.h,v 5.48 2004-04-27 01:46:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.47  2004/02/26 22:43:25  caress
+ * Release 5.0.3
+ *
  * Revision 5.46  2003/07/27 13:16:01  caress
  * Release 5.0.0
  *
@@ -260,7 +263,7 @@
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			31
+#define	MB_DATA_KINDS			38
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -273,13 +276,13 @@
 #define	MB_DATA_PARAMETER		9	/* general */
 #define	MB_DATA_START			10	/* Simrad */
 #define	MB_DATA_STOP			11	/* Simrad */
-#define	MB_DATA_NAV			12	/* Simrad */
+#define	MB_DATA_NAV			12	/* Simrad, Reson 7k */
 #define	MB_DATA_RUN_PARAMETER		13	/* Simrad */
 #define	MB_DATA_CLOCK			14	/* Simrad */
-#define	MB_DATA_TIDE			15	/* Simrad */
+#define	MB_DATA_TIDE			15	/* Simrad, Reson 7k */
 #define	MB_DATA_HEIGHT			16	/* Simrad */
 #define	MB_DATA_HEADING			17	/* Simrad, Hypack */
-#define	MB_DATA_ATTITUDE		18	/* Simrad, Hypack */
+#define	MB_DATA_ATTITUDE		18	/* Simrad, Hypack, Reson 7k */
 #define	MB_DATA_SSV			19	/* Simrad */
 #define	MB_DATA_ANGLE			20	/* HSMD */
 #define	MB_DATA_EVENT			21	/* HSMD */
@@ -288,19 +291,25 @@
 #define	MB_DATA_PROCESSING_PARAMETERS	24	/* GSF */
 #define	MB_DATA_SENSOR_PARAMETERS	25	/* GSF */
 #define	MB_DATA_NAVIGATION_ERROR	26	/* GSF */
-#define	MB_DATA_RAW_LINE		27	/* uninterpretable line
-							for ascii formats */
+#define	MB_DATA_RAW_LINE		27	/* uninterpretable line for ascii formats */
 #define	MB_DATA_NAV1			28	/* ancillary nav system 1 */
 #define	MB_DATA_NAV2			29	/* ancillary nav system 2 */
 #define	MB_DATA_NAV3			30	/* ancillary nav system 3 */
 #define	MB_DATA_TILT			31	/* Simrad */
+#define	MB_DATA_MOTION			32	/* Reson 7k */
+#define	MB_DATA_CTD			33	/* Reson 7k */
+#define	MB_DATA_SUBBOTTOM_MCS		34	/* Reson 7k */
+#define	MB_DATA_SUBBOTTOM_CNTRBEAM	35	/* Simrad */
+#define	MB_DATA_SUBBOTTOM_SUBBOTTOM	36	/* Reson 7k, XTF */
+#define	MB_DATA_SIDESCAN2		37	/* Reson 7k, XTF */
+#define	MB_DATA_SIDESCAN3		38	/* Reson 7k, XTF */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-16
+#define	MB_ERROR_MIN			-17
 #define	MB_ERROR_MAX			15
 
 /* MBIO function fatal error values */
@@ -327,17 +336,18 @@
 #define	MB_ERROR_OUT_TIME		-3
 #define	MB_ERROR_SPEED_TOO_SMALL	-4
 #define	MB_ERROR_COMMENT		-5
-#define	MB_ERROR_OTHER			-6
-#define	MB_ERROR_UNINTELLIGIBLE		-7
-#define	MB_ERROR_IGNORE			-8
-#define	MB_ERROR_NO_DATA_REQUESTED	-9
-#define	MB_ERROR_BUFFER_FULL		-10
-#define	MB_ERROR_NO_DATA_LOADED		-11
-#define	MB_ERROR_BUFFER_EMPTY		-12
-#define	MB_ERROR_NO_DATA_DUMPED		-13
-#define	MB_ERROR_NO_MORE_DATA		-14
-#define	MB_ERROR_DATA_NOT_INSERTED	-15
-#define	MB_ERROR_BAD_PROJECTION		-16
+#define	MB_ERROR_SUBBOTTOM		-6
+#define	MB_ERROR_OTHER			-7
+#define	MB_ERROR_UNINTELLIGIBLE		-8
+#define	MB_ERROR_IGNORE			-9
+#define	MB_ERROR_NO_DATA_REQUESTED	-10
+#define	MB_ERROR_BUFFER_FULL		-11
+#define	MB_ERROR_NO_DATA_LOADED		-12
+#define	MB_ERROR_BUFFER_EMPTY		-13
+#define	MB_ERROR_NO_DATA_DUMPED		-14
+#define	MB_ERROR_NO_MORE_DATA		-15
+#define	MB_ERROR_DATA_NOT_INSERTED	-16
+#define	MB_ERROR_BAD_PROJECTION		-17
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
@@ -376,6 +386,7 @@ static char *nonfatal_error_msg[] =
 	"Data outside specified time interval",
 	"Ship speed too small",
 	"Comment record",
+	"Subbottom record",
 	"Neither a data record nor a comment record",
 	"Unintelligible data record",
 	"Ignore this data",
@@ -433,6 +444,13 @@ static char *notice_msg[] =
 	"MB_DATA_NAV2 (ID=29): Auxilliary nav system 2", 
 	"MB_DATA_NAV3 (ID=30): Auxilliary nav system 3", 
 	"MB_DATA_TILT (ID=31): Mechanical tilt record", 
+	"MB_DATA_MOTION (ID=32): Motion (DVL) sensor record", 
+	"MB_DATA_CTD (ID=33): CTD record", 
+	"MB_DATA_SUBBOTTOM_MCS (ID=34): MCS subbottom record", 
+	"MB_DATA_SUBBOTTOM_CNTRBEAM (ID=35): Centerbeam subbottom record", 
+	"MB_DATA_SUBBOTTOM_SUBBOTTOM (ID=36): Subbottom record", 
+	"MB_DATA_SIDESCAN2 (ID=37): Secondary sidescan record", 
+	"MB_DATA_SIDESCAN3 (ID=38): Tertiary sidescan record", 
 	
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",
@@ -440,16 +458,17 @@ static char *notice_msg[] =
 	"MB_ERROR_OUT_TIME (ID=-3): Data outside specified time interval",
 	"MB_ERROR_SPEED_TOO_SMALL (ID=-4): Ship speed too small",
 	"MB_ERROR_COMMENT (ID=-5): Comment record",
-	"MB_ERROR_OTHER (ID=-6): Neither a data record nor a comment record",
-	"MB_ERROR_UNINTELLIGIBLE (ID=-7): Unintelligible data record",
-	"MB_ERROR_IGNORE (ID=-8): Ignore this data",
-	"MB_ERROR_NO_DATA_REQUESTED (ID=-9): No data requested for buffer load",
-	"MB_ERROR_BUFFER_FULL (ID=-10): Data buffer is full",
-	"MB_ERROR_NO_DATA_LOADED (ID=-11): No data was loaded into the buffer",
-	"MB_ERROR_BUFFER_EMPTY (ID=-12): Data buffer is empty",
-	"MB_ERROR_NO_DATA_DUMPED (ID=-13): No data was dumped from the buffer",
-	"MB_ERROR_NO_MORE_DATA (ID=-14): No more survey data records in buffer", 
-	"MB_ERROR_DATA_NOT_INSERTED (ID=-15): Data inconsistencies prevented inserting data into storage structure", 
+	"MB_ERROR_SUBBOTTOM (ID=-6): Subbottom record",
+	"MB_ERROR_OTHER (ID=-7): Neither a data record nor a comment record",
+	"MB_ERROR_UNINTELLIGIBLE (ID=-8): Unintelligible data record",
+	"MB_ERROR_IGNORE (ID=-9): Ignore this data",
+	"MB_ERROR_NO_DATA_REQUESTED (ID=-10): No data requested for buffer load",
+	"MB_ERROR_BUFFER_FULL (ID=-11): Data buffer is full",
+	"MB_ERROR_NO_DATA_LOADED (ID=-12): No data was loaded into the buffer",
+	"MB_ERROR_BUFFER_EMPTY (ID=-13): Data buffer is empty",
+	"MB_ERROR_NO_DATA_DUMPED (ID=-14): No data was dumped from the buffer",
+	"MB_ERROR_NO_MORE_DATA (ID=-15): No more survey data records in buffer", 
+	"MB_ERROR_DATA_NOT_INSERTED (ID=-16): Data inconsistencies prevented inserting data into storage structure", 
 	
 	/* problem notices */
 	"APPARENT DATA PROBLEM (ID=1): No survey data found",

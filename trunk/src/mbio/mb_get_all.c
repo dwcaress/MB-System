@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.7 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_get_all.c,v 5.8 2004-04-27 01:46:12 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2003/04/16 16:47:41  caress
  * Release 5.0.beta30
  *
@@ -120,7 +123,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_get_all.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
+static char rcs_id[]="$Id: mb_get_all.c,v 5.8 2004-04-27 01:46:12 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
@@ -461,6 +464,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 
 	/* check for time gap */
 	if (status == MB_SUCCESS 
+		&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN 
 		&& (*kind == MB_DATA_DATA
 		    || *kind == MB_DATA_NAV
 		    || *kind == MB_DATA_CALIBRATE) 
@@ -483,7 +487,8 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		    || (*kind == MB_DATA_NAV
 			&& mb_io_ptr->nav_count > 1)))
 		{
-		if (*speed < mb_io_ptr->speedmin)
+		if (*time_d > MB_TIME_D_UNKNOWN 
+			&& *speed < mb_io_ptr->speedmin)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_SPEED_TOO_SMALL;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.14 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_read_init.c,v 5.15 2004-04-27 01:46:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.13  2003/02/27 04:33:33  caress
  * Fixed handling of SURF format data.
  *
@@ -208,7 +211,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.14 2003-04-17 21:05:23 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.15 2004-04-27 01:46:13 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -496,7 +499,7 @@ int mb_read_init(int verbose, char *file,
 	    if (strncmp(file,stdin_string,5) == 0)
 		mb_io_ptr->mbfp = stdin;
 	    else
-		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "r")) == NULL) 
+		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "rw")) == NULL) 
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -506,7 +509,7 @@ int mb_read_init(int verbose, char *file,
 	    if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile >= 2)
 		{
-		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r")) == NULL) 
+		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "rw")) == NULL) 
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -517,14 +520,14 @@ int mb_read_init(int verbose, char *file,
 	    else if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile <= -2)
 		{
-		mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r");
+		mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "rw");
 		}
  
 	    /* open the third file if required */
 	    if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile >= 3)
 		{
-		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r")) == NULL) 
+		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "rw")) == NULL) 
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -534,7 +537,7 @@ int mb_read_init(int verbose, char *file,
 	    /* or open the third file if desired and possible */
 	    else if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile <= -3)
-		mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r");
+		mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "rw");
 
 	    /* if needed, initialize XDR stream */
 	    if (status == MB_SUCCESS 
@@ -783,7 +786,7 @@ int mb_read_init(int verbose, char *file,
 		
 	/* check for projection specification file */
 	sprintf(prjfile, "%s.prj", file);
-	if ((pfp = fopen(prjfile, "r")) != NULL)
+	if ((pfp = fopen(prjfile, "rw")) != NULL)
 		{
 		fscanf(pfp,"%s", projection_id);
 		proj_status = mb_proj_init(verbose,projection_id, 
