@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.22 1999-03-31 18:11:35 caress Exp $
+ *    $Id: mb_format.h,v 4.23 1999-04-02 00:54:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.21  1999/02/04  23:52:54  caress
  * MB-System version 4.6beta7
  *
@@ -479,7 +482,7 @@ static char *format_description[] =
 	"Format name:          MBF_CBAT8101\nInformal Description: Reson SeaBat 8101 shallow water multibeam\nAttributes:           101 beam bathymetry and amplitude,\n                      binary, SeaBeam Instruments.\n",
 	"Format name:          MBF_HYPC8101\nInformal Description: Reson SeaBat 8101 shallow water multibeam\nAttributes:           101 beam bathymetry,\n                      ASCII, read-only, Coastal Oceanographics.\n",
 	"Format name:          MBF_BCHRTUNB\nInformal Description: Elac BottomChart shallow water multibeam\nAttributes:           56 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
-	"Format name:          MBF_ELMK2UNB\nInformal Description: Elac BottomChart shallow water multibeam\nAttributes:           56 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
+	"Format name:          MBF_ELMK2UNB\nInformal Description: Elac BottomChart MkII shallow water multibeam\nAttributes:           126 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
 	"Format name:          MBF_BCHRXUNB\nInformal Description: Elac BottomChart shallow water multibeam\nAttributes:           56 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
 	"Format name:          MBF_HSMDARAW\nInformal Description: Atlas HSMD medium depth multibeam raw format\nAttributes:           40 beam bathymetry, 160 pixel sidescan,\n                      XDR (binary), STN Atlas Elektronik.\n",
 	"Format name:          MBF_HSMDLDIH\nInformal Description: Atlas HSMD medium depth multibeam processed format\nAttributes:           40 beam bathymetry, 160 pixel sidescan,\n                      XDR (binary), L-DEO.\n",
@@ -994,9 +997,9 @@ static float mb_nav_source[] =
 	MB_DATA_DATA,	/* MBF_CBAT9001 */
 	MB_DATA_DATA,	/* MBF_CBAT8101 */
 	MB_DATA_DATA,	/* MBF_HYPC8101 */
-	MB_DATA_DATA,	/* MBF_BCHRTUNB */
-	MB_DATA_DATA,	/* MBF_ELMK2UNB */
-	MB_DATA_DATA,	/* MBF_BCHRXUNB */
+	MB_DATA_NAV,	/* MBF_BCHRTUNB */
+	MB_DATA_NAV,	/* MBF_ELMK2UNB */
+	MB_DATA_NAV,	/* MBF_BCHRXUNB */
 	MB_DATA_DATA,   /* MBF_HSMDARAW */
 	MB_DATA_DATA,   /* MBF_HSMDLDIH */
 	MB_DATA_DATA,   /* MBF_DSL120PF */
