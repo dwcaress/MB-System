@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsvelocitytool.c	3.00	6/6/93
- *    $Id: hsvelocitytool.c,v 1.1 1993-08-16 23:28:30 caress Exp $
+ *    $Id: hsvelocitytool.c,v 1.2 1993-11-05 16:21:57 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1993/08/16  23:28:30  caress
+ * Initial revision
+ *
  *
  */
 
@@ -65,7 +68,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: hsvelocitytool.c,v 1.1 1993-08-16 23:28:30 caress Exp $";
+static char rcs_id[] = "$Id: hsvelocitytool.c,v 1.2 1993-11-05 16:21:57 caress Exp $";
 static char program_name[] = "HSVELOCITYTOOL";
 static char help_message[] = "HSVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof hydrosweep multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "hsvelocitytool [-V -H]";
@@ -82,6 +85,7 @@ struct profile	profile_display[MAX_PROFILES];
 struct profile	profile_edit;
 int	*edit_x;
 int	*edit_y;
+int	*edit_xl;
 char	editfile[128];
 int	edit = 0;
 int	ndisplay = 0;
@@ -464,6 +468,7 @@ char	*file;
 		strcpy(profile->name,"\0");
 		mb_free(verbose,edit_x,&error);
 		mb_free(verbose,edit_y,&error);
+		mb_free(verbose,edit_xl,&error);
 		mb_free(verbose,profile->depth,&error);
 		mb_free(verbose,profile->velocity,&error);
 		mb_free(verbose,profile->velocity_layer,&error);
@@ -491,6 +496,7 @@ char	*file;
 	size = profile->n*sizeof(int);
 	status = mb_malloc(verbose,size,&edit_x,&error);
 	status = mb_malloc(verbose,size,&edit_y,&error);
+	status = mb_malloc(verbose,size,&edit_xl,&error);
 	size = profile->n*sizeof(double);
 	status = mb_malloc(verbose,size,&(profile->depth),&error);
 	status = mb_malloc(verbose,size,&(profile->velocity),&error);
@@ -588,6 +594,7 @@ int hsvt_new_edit_profile()
 		strcpy(profile->name,"\0");
 		mb_free(verbose,edit_x,&error);
 		mb_free(verbose,edit_y,&error);
+		mb_free(verbose,edit_xl,&error);
 		mb_free(verbose,profile->depth,&error);
 		mb_free(verbose,profile->velocity,&error);
 		mb_free(verbose,profile->velocity_layer,&error);
@@ -603,6 +610,7 @@ int hsvt_new_edit_profile()
 	size = profile->n*sizeof(int);
 	status = mb_malloc(verbose,size,&edit_x,&error);
 	status = mb_malloc(verbose,size,&edit_y,&error);
+	status = mb_malloc(verbose,size,&edit_xl,&error);
 	size = profile->n*sizeof(double);
 	status = mb_malloc(verbose,size,&(profile->depth),&error);
 	status = mb_malloc(verbose,size,&(profile->velocity),&error);
@@ -945,7 +953,7 @@ int hsvt_plot()
 	int	nxr_int, nyr_int;
 	int	xr_int, yr_int;
 	int	xx, vx, yy, vy;
-	int	xxo, yyo;
+	int	xxo, yyo, xxl;
 	int	swidth, sascent, sdescent;
 	char	string[128];
 	int	color;
@@ -1054,17 +1062,34 @@ int hsvt_plot()
 
 	/* plot edit profile */
 	if (edit == MB_YES)
+
+	  /* construct layered velocity model from discrete model */
+	  for (i=0;i<profile_edit.n-1;i++)
+		profile_edit.velocity_layer[i] = 0.5*(profile_edit.velocity[i] 
+				+ profile_edit.velocity[i+1]);
+	  profile_edit.velocity_layer[profile_edit.n-1] = 0.0;
+
 	  for (j=0;j<profile_edit.n;j++)
 		{
 		xx = xmin + (profile_edit.velocity[j] - xminimum)*xscale;
 		yy = ymin + (profile_edit.depth[j] - yminimum)*yscale;
 		xg_fillrectangle(hsvt_xgid, xx-2, yy-2, 4, 4, OVERLAY2_DRAW);
 		if (j > 0)
-			xg_drawline(hsvt_xgid,xxo,yyo,xx,yy,OVERLAY2_DRAW);
+			{
+			xxl = xmin + (profile_edit.velocity_layer[j-1] - xminimum)*xscale;
+/*			xg_drawline(hsvt_xgid,xxo,yyo,xx,yy,OVERLAY2_DRAW);*/
+			xg_drawline(hsvt_xgid,xxl,yyo,xxl,yy,OVERLAY2_DRAW);
+			}
+		if (j > 1)
+			{
+			xg_drawline(hsvt_xgid,edit_xl[j-2],yyo,xxl,yyo,OVERLAY2_DRAW);
+			}
 		xxo = xx;
 		yyo = yy;
 		edit_x[j] = xx;
 		edit_y[j] = yy;
+		if (j > 0)
+			edit_xl[j-1] = xxl;
 		}
 
 	/* now plot grid for Hydrosweep Residuals */
@@ -1122,7 +1147,7 @@ int hsvt_plot()
 		}
 	if (nbuffer > 0)
 		{
-		sprintf(string,"Depth Range:  minimum: %f m   maximum: %f m",
+		sprintf(string,"Depth Range:  minimum: %5.0f m   maximum: %5.0f m",
 			bath_min, bath_max);
 		xg_justify(hsvt_xgid,string,&swidth,
 			&sascent,&sdescent);
@@ -1319,33 +1344,111 @@ int	y;
 		xg_fillrectangle(hsvt_xgid, edit_x[active]-2, 
 			edit_y[active]-2, 4, 4, OVERLAY2_CLEAR);
 		if (active > 0)
-			xg_drawline(hsvt_xgid,
+			{
+/*			xg_drawline(hsvt_xgid,
 				edit_x[active-1],edit_y[active-1],
 				edit_x[active],edit_y[active],
-				OVERLAY2_CLEAR);
-		if (active < profile_edit.n - 1)
+				OVERLAY2_CLEAR);*/
 			xg_drawline(hsvt_xgid,
+				edit_xl[active-1],edit_y[active-1],
+				edit_xl[active-1],edit_y[active],
+				OVERLAY2_CLEAR);
+			xg_drawline(hsvt_xgid,
+				edit_xl[active-1],edit_y[active],
+				edit_xl[active-0],edit_y[active],
+				OVERLAY2_CLEAR);
+			}
+		if (active > 1)
+			{
+			xg_drawline(hsvt_xgid,
+				edit_xl[active-2],edit_y[active-1],
+				edit_xl[active-1],edit_y[active-1],
+				OVERLAY2_CLEAR);
+			}
+		if (active < profile_edit.n - 1)
+			{
+/*			xg_drawline(hsvt_xgid,
 				edit_x[active],edit_y[active],
 				edit_x[active+1],edit_y[active+1],
+				OVERLAY2_CLEAR);*/
+			xg_drawline(hsvt_xgid,
+				edit_xl[active],edit_y[active],
+				edit_xl[active],edit_y[active+1],
 				OVERLAY2_CLEAR);
+			}
+		if (active < profile_edit.n - 1 && active > 1)
+			{
+			xg_drawline(hsvt_xgid,
+				edit_xl[active],edit_y[active+1],
+				edit_xl[active+1],edit_y[active+1],
+				OVERLAY2_CLEAR);
+			}
 
-		/* get new location values */
+		/* get new location and velocity values */
 		edit_x[active] = x;
 		edit_y[active] = y;
 		profile_edit.velocity[active] = (x - xmin)/xscale + xminimum;
 		profile_edit.depth[active] = (y - ymin)/yscale + yminimum;
+		if (active > 0)
+			{
+			profile_edit.velocity_layer[active-1] = 0.5*
+				(profile_edit.velocity[active-1] 
+				+ profile_edit.velocity[active]);
+			edit_xl[active-1] = xmin 
+				+ (profile_edit.velocity_layer[active-1] 
+				- xminimum)*xscale;
+			}
+		if (active < profile_edit.n - 1)
+			{
+			profile_edit.velocity_layer[active] = 0.5*
+				(profile_edit.velocity[active] 
+				+ profile_edit.velocity[active+1]);
+			edit_xl[active] = xmin 
+				+ (profile_edit.velocity_layer[active] 
+				- xminimum)*xscale;
+			}
 
 		/* replot the current ping */
 		if (active > 0)
-			xg_drawline(hsvt_xgid,
+			{
+/*			xg_drawline(hsvt_xgid,
 				edit_x[active-1],edit_y[active-1],
 				edit_x[active],edit_y[active],
-				OVERLAY2_DRAW);
-		if (active < profile_edit.n - 1)
+				OVERLAY2_DRAW);*/
 			xg_drawline(hsvt_xgid,
+				edit_xl[active-1],edit_y[active-1],
+				edit_xl[active-1],edit_y[active],
+				OVERLAY2_DRAW);
+			xg_drawline(hsvt_xgid,
+				edit_xl[active-1],edit_y[active],
+				edit_xl[active-0],edit_y[active],
+				OVERLAY2_DRAW);
+			}
+		if (active > 1)
+			{
+			xg_drawline(hsvt_xgid,
+				edit_xl[active-2],edit_y[active-1],
+				edit_xl[active-1],edit_y[active-1],
+				OVERLAY2_DRAW);
+			}
+		if (active < profile_edit.n - 1)
+			{
+/*			xg_drawline(hsvt_xgid,
 				edit_x[active],edit_y[active],
 				edit_x[active+1],edit_y[active+1],
+				OVERLAY2_DRAW);*/
+			xg_drawline(hsvt_xgid,
+				edit_xl[active],edit_y[active],
+				edit_xl[active],edit_y[active+1],
 				OVERLAY2_DRAW);
+			}
+		if (active < profile_edit.n - 1 && active > 1)
+			{
+			xg_drawline(hsvt_xgid,
+				edit_xl[active],edit_y[active+1],
+				edit_xl[active+1],edit_y[active+1],
+				OVERLAY2_DRAW);
+			}
 		if (active > 0)
 			xg_fillrectangle(hsvt_xgid, edit_x[active-1]-2, 
 				edit_y[active-1]-2, 4, 4, OVERLAY2_DRAW);
