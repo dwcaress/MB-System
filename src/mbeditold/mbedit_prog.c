@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.15 1997-04-22 19:26:36 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.16 1997-04-29 15:50:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1997/04/22  19:26:36  caress
+ * Fixed startup mode.
+ *
  * Revision 4.14  1997/04/21  16:56:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -186,7 +189,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.15 1997-04-22 19:26:36 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.16 1997-04-29 15:50:50 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -3575,7 +3578,7 @@ int	autoscale;
 		nplot = plot_size;
 	*nplt = nplot;
 
-	/* get data into ping arrays and find mean depth value */
+	/* get data into ping arrays and find median depth value */
 	bathsum = 0.0;
 	nbathsum = 0;
 	nbathlist = 0;
@@ -3612,6 +3615,27 @@ int	autoscale;
 			}
 		ii = ping[i].id + 1;
 		}
+		
+	/* if not enough information in unflagged bathymetry look
+	    into the flagged bathymetry */
+	if (nbathlist <= 0 || xtrack_max <= 0.0)
+		{
+		for (i=0;i<nplot;i++)
+			{
+			for (j=0;j<beams_bath;j++)
+				{
+				if (ping[i].bath[j] < 0.0)
+					{
+					bathsum += fabs(ping[i].bath[j]);
+					nbathsum++;
+					bathlist[nbathlist] = fabs(ping[i].bath[j]);
+					nbathlist++;
+					xtrack_max = MAX(xtrack_max, 
+						fabs(ping[i].bathacrosstrack[j]));
+					}
+				}
+			}
+		}
 	if (nbathsum > 0)
 		bathmean = bathsum/nbathsum;
 	if (nbathlist > 0)
@@ -3621,7 +3645,7 @@ int	autoscale;
 		}
 		
 	/* if autoscale on reset plot width */
-	if (autoscale == MB_YES)
+	if (autoscale == MB_YES && xtrack_max > 0.0)
 		{
 		plot_width = 2.4 * xtrack_max;
 		ndec = MAX(1, (int) log10((double) plot_width));
