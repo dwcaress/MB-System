@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.26 2003-01-15 20:52:13 caress Exp $
+ *    $Id: mbprocess.c,v 5.27 2003-02-27 04:45:15 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2003/01/15 20:52:13  caress
+ * Release 5.0.beta28
+ *
  * Revision 5.25  2002/10/02 23:56:06  caress
  * Release 5.0.beta24
  *
@@ -186,7 +189,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.26 2003-01-15 20:52:13 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.27 2003-02-27 04:45:15 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -422,7 +425,7 @@ and mbedit edit save files.\n";
 	int	nbeams;
 	int	istart, iend, icut;
 	int	intstat;
-	int	i, j, k, mm;
+	int	i, j, k, ii, mm;
 	
 	char	*ctime();
 	char	*getenv();
@@ -2156,9 +2159,12 @@ and mbedit edit save files.\n";
 		/* insert into sorted array */
 		if (i > 0)
 		    {
+/*for (ii=0;ii<=i;ii++)
+fprintf(stderr,"          %d edit: %f %d %d\n",
+ii,edit_time_d[ii],edit_beam[ii],edit_action[ii]);*/
 		    if (insert > 0 && stime_d < edit_time_d[insert])
 			{
-			for (j = insert; j >= 0 && stime_d < edit_time_d[j]; j--)
+			for (j = insert; j > 0 && stime_d < edit_time_d[j-1]; j--)
 			    insert--;
 			}
 		    else if (stime_d >= edit_time_d[insert])
@@ -2182,13 +2188,14 @@ and mbedit edit save files.\n";
 		edit_time_d[insert] = stime_d;
 		edit_beam[insert] = sbeam;
 		edit_action[insert] = saction;
+/*fprintf(stderr,"INSERT:%d i:%d edit: %f %d %d\n",
+insert, i,edit_time_d[insert],edit_beam[insert],edit_action[insert]);*/
 		}
 	    fclose(tfp);
-/*
-for (i=0;i<nedit;i++)
+
+/*for (i=0;i<nedit;i++)
 fprintf(stderr,"i:%d edit: %f %d %d\n",
-i,edit_time_d[i],edit_beam[i],edit_action[i]);
-*/
+i,edit_time_d[i],edit_beam[i],edit_action[i]);*/
 		
 	    /* set some beam editing starting values */
 	    firstedit = 0;
@@ -4695,7 +4702,7 @@ j, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
 		}
 for (i=0;i<nedit;i++)
 {
-if (edit_use[i] == 0) 
+if (edit_use[i] != 1)
 fprintf(stderr,"i:%d edit: %f %d %d   %d\n",
 i,edit_time_d[i],edit_beam[i],edit_action[i],edit_use[i]);
 }
