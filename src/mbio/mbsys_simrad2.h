@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.4 2001-05-30 17:57:26 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.5 2001-06-01 00:14:06 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,11 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/05/30  17:57:26  caress
+ * Fixed New Simrad data handling, plus removed use of
+ * intermediate data structure. Still need to reduce use
+ * of #ifdefs related to byteswapping.
+ *
  * Revision 5.3  2001/05/24  23:18:07  caress
  * Fixed handling of Revelle EM120 data (first cut).
  *
@@ -851,8 +856,21 @@ struct mbsys_simrad2_struct
 /* system specific function prototypes */
 int mbsys_simrad2_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error);
+int mbsys_simrad2_survey_alloc(int verbose, 
+			char *mbio_ptr, char *store_ptr, 
+			int *error);
+int mbsys_simrad2_attitude_alloc(int verbose, 
+			char *mbio_ptr, char *store_ptr, 
+			int *error);
+int mbsys_simrad2_heading_alloc(int verbose, 
+			char *mbio_ptr, char *store_ptr, 
+			int *error);
+int mbsys_simrad2_ssv_alloc(int verbose, 
+			char *mbio_ptr, char *store_ptr, 
+			int *error);
 int mbsys_simrad2_deall(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error);
+int mbsys_simrad2_zero_ss(int verbose, char *store_ptr, int *error);
 int mbsys_simrad2_extract(int verbose, char *mbio_ptr, char *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

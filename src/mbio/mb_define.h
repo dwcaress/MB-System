@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.3 2001-04-30 05:14:10 caress Exp $
+ *    $Id: mb_define.h,v 5.4 2001-06-01 00:14:06 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/04/30  05:14:10  caress
+ * Changes to MB-System defaults.
+ *
  * Revision 5.2  2001/03/22 20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -65,7 +68,7 @@
 #define MB_DESCRIPTION_LENGTH	2048
 
 /* maximum number of navigation points saved */
-#define MB_NAV_SAVE_MAX 20
+#define MB_NAV_SAVE_MAX 30
 
 /* maximum size of SVP profiles */
 #define MB_SVP_MAX 1024

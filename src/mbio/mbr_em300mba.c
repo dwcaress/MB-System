@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.4 2001-05-30 17:57:26 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.5 2001-06-01 00:14:06 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,11 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/05/30  17:57:26  caress
+ * Fixed New Simrad data handling, plus removed use of
+ * intermediate data structure. Still need to reduce use
+ * of #ifdefs related to byteswapping.
+ *
  * Revision 5.3  2001/05/24  23:18:07  caress
  * Fixed handling of Revelle EM120 data (first cut).
  *
@@ -192,7 +197,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
 	char	*function_name = "mbr_register_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -322,7 +327,7 @@ int mbr_info_em300mba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
 	char	*function_name = "mbr_info_em300mba";
 	int	status = MB_SUCCESS;
 
@@ -391,7 +396,7 @@ int mbr_info_em300mba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300mba(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -484,112 +489,6 @@ int mbr_dem_em300mba(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_ss_em300mba(int verbose, char *store_ptr, int *error)
-{
-	char	*function_name = "mbr_zero_ss_em300mba";
-	int	status = MB_SUCCESS;
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_ping_struct *ping;
-	int	i;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
-		}
-
-	/* get pointer to data descriptor */
-	store = (struct mbsys_simrad2_struct *) store_ptr;
-	if (store != NULL)
-	    ping = (struct mbsys_simrad2_ping_struct *) store->ping;
-
-	/* initialize all sidescan stuff to zeros */
-	if (store->ping != NULL)
-		{
-		ping->png_ss_date = 0;	
-				/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-		ping->png_ss_msec = 0;	
-				/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-		ping->png_max_range = 0;  
-				/* max range of ping in number of samples */
-		ping->png_r_zero = 0;	
-				/* range to normal incidence used in TVG
-				    (R0 predicted) in samples */
-		ping->png_r_zero_corr = 0;
-				/* range to normal incidence used to correct
-				    sample amplitudes in number of samples */
-		ping->png_tvg_start = 0;	
-				/* start sample of TVG ramp if not enough 
-				    dynamic range (0 otherwise) */
-		ping->png_tvg_stop = 0;	\
-				/* stop sample of TVG ramp if not enough 
-				    dynamic range (0 otherwise) */
-		ping->png_bsn = 0;	
-				/* normal incidence backscatter (BSN) in dB */
-		ping->png_bso = 0;	
-				/* oblique incidence backscatter (BSO) in dB */
-		ping->png_tx = 0;	
-				/* Tx beamwidth in 0.1 degree */
-		ping->png_tvg_crossover = 0;	
-				/* TVG law crossover angle in degrees */
-		ping->png_nbeams_ss = 0;	
-				/* number of beams with sidescan */
-		ping->png_npixels = 0;	
-				/* number of pixels of sidescan */
-		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
-		    {
-		    ping->png_beam_index[i] = 0;	
-				/* beam index number */
-		    ping->png_sort_direction[i] = 0;	
-				/* sorting direction - first sample in beam has lowest
-				    range if 1, highest if -1. */
-		    ping->png_beam_samples[i] = 0;	
-				/* number of sidescan samples derived from
-					each beam */
-		    ping->png_start_sample[i] = 0;	
-				/* start sample number */
-		    ping->png_center_sample[i] = 0;	
-				/* center sample number */
-		    }
-		for (i=0;i<MBSYS_SIMRAD2_MAXRAWPIXELS;i++)
-		    {
-		    ping->png_ssraw[i] = EM2_INVALID_AMP;
-				/* the sidescan ordered port to starboard */
-		    }
-		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
-		    {
-		    ping->png_ss[i] = 0;
-				/* the sidescan ordered port to starboard */
-		    ping->png_ssalongtrack[i] = 0;
-				/* the sidescan ordered port to starboard */
-		    }
-		}
-
-	/* assume success */
-	status = MB_SUCCESS;
-	*error = MB_ERROR_NO_ERROR;
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
 int mbr_rt_em300mba(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_em300mba";
@@ -642,7 +541,7 @@ int mbr_rt_em300mba(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		&& store->kind == MB_DATA_DATA
 		&& ping->png_ss_read == MB_NO)
 		{
-		status = mbr_zero_ss_em300mba(verbose,store_ptr,error);
+		status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
 		}
 	
 	/* else check that bath and sidescan data record time stamps
@@ -677,7 +576,7 @@ int mbr_rt_em300mba(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			|| ping->png_nbeams_ss == 0
 			|| bath_time_d > ss_time_d)
 		    {
-		    status = mbr_zero_ss_em300mba(verbose,store_ptr,error);
+		    status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
 		    }
 		else if (bath_time_d < ss_time_d)
 		    {
@@ -812,6 +711,7 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -908,13 +808,15 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 			if (skip > 0 && !(skip == 4 || *wrapper < 0))
 			    {
 			    fprintf(stderr, 
-"\nThe MBSYS_SIMRAD2 module skipped %d bytes between\n\
+"\nThe MBF_EM300MBA module skipped %d bytes between\n\
 identified data records %d:%x and %d:%x \n\
 Something is broken...\n\
+The data may include a data record type that we\n\
+haven't seen yet, or there could be an error in the code.\n\
 We recommend you send a data sample and problem \n\
 description to the MB-System team \n\
 (caress@mbari.org and dale@ldeo.columbia.edu)\n\
-Have a nice day....\n", 
+Have a nice day...\n", 
 skip, *typelast, *typelast, *type, *type);
 			    }
 			*typelast = *type;
@@ -927,17 +829,17 @@ skip, *typelast, *typelast, *type, *type);
 			    else if (skip == 4)
 					*wrapper = MB_YES;
 			    }
+
+			/* swap bytes if necessary */
+#ifdef BYTESWAPPED
+			*type = (short) mb_swap_short(*type);
+			*sonar = (short) mb_swap_short(*sonar);
+#endif
 			}
 		
 		/* else use saved label */
 		else
 			*label_save_flag = MB_NO;
-
-		/* swap bytes if necessary */
-#ifdef BYTESWAPPED
-		*type = (short) mb_swap_short(*type);
-		*sonar = (short) mb_swap_short(*sonar);
-#endif
 
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"\nstart of mbr_em300mba_rd_data loop:\n");
@@ -1301,6 +1203,12 @@ skip, *typelast, *typelast, *type, *type);
 				verbose,mbfp,store,*sonar,error);
 			if (status == MB_SUCCESS)
 				ping->png_raw_read = MB_YES;
+			if (expect == EM2_SS_MBA
+				&& ping->png_nbeams == 0)
+				{
+				done = MB_YES;
+				expect = EM2_NONE;
+				}
 			}
 		else if (*type == EM2_SS_MBA 
 			&& expect != EM2_NONE 
@@ -1495,8 +1403,8 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_start";
 	int	status = MB_SUCCESS;
 	char	line[MBSYS_SIMRAD2_BUFFER_SIZE];
-	short	*short_ptr;
-	int	*int_ptr;
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	char	*comma_ptr;
@@ -1535,33 +1443,18 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		store->par_date = (int) mb_swap_int(*int_ptr);
-		store->date = store->par_date;
-		int_ptr = (int *) &line[4];
-		store->par_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = store->par_msec;
-		short_ptr = (short *) &line[8];
-		store->par_line_num = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		store->par_serial_1 = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[12];
-		store->par_serial_2 = (unsigned short) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		store->par_date = (int) *int_ptr;
-		store->date = store->par_date;
-		int_ptr = (int *) &line[4];
-		store->par_msec = (int) *int_ptr;
-		store->msec = store->par_msec;
-		short_ptr = (short *) &line[8];
-		store->par_line_num = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		store->par_serial_1 = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[12];
-		store->par_serial_2 = (unsigned short) *short_ptr;
-#endif
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    store->par_date = (int) int_val;
+		    store->date = store->par_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    store->par_msec = (int) int_val;
+		    store->msec = store->par_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    store->par_line_num = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    store->par_serial_1 = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[12], &short_val); 
+		    store->par_serial_2 = (int) ((unsigned short) short_val);
 		}
 		
 	/* now loop over reading individual characters to 
@@ -1908,8 +1801,8 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_run_parameter";
 	int	status = MB_SUCCESS;
 	char	line[EM2_RUN_PARAMETER_SIZE];
-	short	*short_ptr;
-	int	*int_ptr;
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -1944,83 +1837,43 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		store->run_date = (int) mb_swap_int(*int_ptr);
-		if (store->run_date != 0) store->date = store->run_date;
-		int_ptr = (int *) &line[4];
-		store->run_msec = (int) mb_swap_int(*int_ptr);
-		if (store->run_date != 0) store->msec = store->run_msec;
-		short_ptr = (short *) &line[8];
-		store->run_ping_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		store->run_serial = (unsigned short) mb_swap_short(*short_ptr);
-		int_ptr = (int *) &line[12];
-		store->run_status = (int) mb_swap_int(*int_ptr);
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    store->run_date = (int) int_val;
+		    if (store->run_date != 0) store->date = store->run_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    store->run_msec = (int) int_val;
+		    if (store->run_date != 0) store->msec = store->run_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    store->run_ping_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    store->run_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[12], &int_val); 
+		    store->run_status = (int) int_val;
 		store->run_mode = (mb_u_char) line[16];
 		store->run_filter_id = (mb_u_char) line[17];
-		short_ptr = (short *) &line[18];
-		store->run_min_depth = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[20];
-		store->run_max_depth = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[22];
-		store->run_absorption = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[24];
-		store->run_tran_pulse = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[26];
-		store->run_tran_beam = (unsigned short) mb_swap_short(*short_ptr);
+		mb_get_binary_short(MB_NO, &line[18], &short_val); 
+		    store->run_min_depth = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[20], &short_val); 
+		    store->run_max_depth = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[22], &short_val); 
+		    store->run_absorption = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[24], &short_val); 
+		    store->run_tran_pulse = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[26], &short_val); 
+		    store->run_tran_beam = (int) ((unsigned short) short_val);
 		store->run_tran_pow = (mb_u_char) line[28];
 		store->run_rec_beam = (mb_u_char) line[29];
 		store->run_rec_band = (mb_u_char) line[30];
 		store->run_rec_gain = (mb_u_char) line[31];
 		store->run_tvg_cross = (mb_u_char) line[32];
 		store->run_ssv_source = (mb_u_char) line[33];
-		short_ptr = (short *) &line[34];
-		store->run_max_swath = (unsigned short) mb_swap_short(*short_ptr);
+		mb_get_binary_short(MB_NO, &line[34], &short_val); 
+		    store->run_max_swath = (int) ((unsigned short) short_val);
 		store->run_beam_space = (mb_u_char) line[36];
 		store->run_swath_angle = (mb_u_char) line[37];
 		store->run_stab_mode = (mb_u_char) line[38];
 		for (i=0;i<6;i++)
 		    store->run_spare[i] = line[39+i];
-#else
-		int_ptr = (int *) &line[0];
-		store->run_date = (int) *int_ptr;
-		if (store->run_date != 0) store->date = store->run_date;
-		int_ptr = (int *) &line[4];
-		store->run_msec = (int) *int_ptr;
-		if (store->run_date != 0) store->msec = store->run_msec;
-		short_ptr = (short *) &line[8];
-		store->run_ping_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		store->run_serial = (unsigned short) *short_ptr;
-		int_ptr = (int *) &line[12];
-		store->run_status = (int) *int_ptr;
-		store->run_mode = (mb_u_char) line[16];
-		store->run_filter_id = (mb_u_char) line[17];
-		short_ptr = (short *) &line[18];
-		store->run_min_depth = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[20];
-		store->run_max_depth = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[22];
-		store->run_absorption = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[24];
-		store->run_tran_pulse = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[26];
-		store->run_tran_beam = (unsigned short) *short_ptr;
-		store->run_tran_pow = (mb_u_char) line[28];
-		store->run_rec_beam = (mb_u_char) line[29];
-		store->run_rec_band = (mb_u_char) line[30];
-		store->run_rec_gain = (mb_u_char) line[31];
-		store->run_tvg_cross = (mb_u_char) line[32];
-		store->run_ssv_source = (mb_u_char) line[33];
-		short_ptr = (short *) &line[34];
-		store->run_max_swath = (unsigned short) *short_ptr;
-		store->run_beam_space = (mb_u_char) line[36];
-		store->run_swath_angle = (mb_u_char) line[37];
-		store->run_stab_mode = (mb_u_char) line[38];
-		for (i=0;i<6;i++)
-		    store->run_spare[i] = line[39+i];
-#endif
 		}
 
 	/* print debug statements */
@@ -2080,8 +1933,8 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_clock";
 	int	status = MB_SUCCESS;
 	char	line[EM2_CLOCK_SIZE];
-	short	*short_ptr;
-	int	*int_ptr;
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -2116,39 +1969,21 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		store->clk_date = (int) mb_swap_int(*int_ptr);
-		store->date = store->clk_date;
-		int_ptr = (int *) &line[4];
-		store->clk_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = store->clk_msec;
-		short_ptr = (short *) &line[8];
-		store->clk_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		store->clk_serial = (unsigned short) mb_swap_short(*short_ptr);
-		int_ptr = (int *) &line[12];
-		store->clk_origin_date = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[16];
-		store->clk_origin_msec = (int) mb_swap_int(*int_ptr);
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    store->clk_date = (int) int_val;
+		    store->date = store->clk_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    store->clk_msec = (int) int_val;
+		    store->msec = store->clk_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    store->clk_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    store->clk_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[12], &int_val); 
+		    store->clk_origin_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[16], &int_val); 
+		    store->clk_origin_msec = (int) int_val;
 		store->clk_1_pps_use = (mb_u_char) line[20];
-#else
-		int_ptr = (int *) &line[0];
-		store->clk_date = (int) *int_ptr;
-		store->date = store->clk_date;
-		int_ptr = (int *) &line[4];
-		store->clk_msec = (int) *int_ptr;
-		store->msec = store->clk_msec;
-		short_ptr = (short *) &line[8];
-		store->clk_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		store->clk_serial = (unsigned short) *short_ptr;
-		int_ptr = (int *) &line[12];
-		store->clk_origin_date = (int) *int_ptr;
-		int_ptr = (int *) &line[16];
-		store->clk_origin_msec = (int) *int_ptr;
-		store->clk_1_pps_use = (mb_u_char) line[20];
-#endif
 		}
 
 	/* print debug statements */
@@ -2191,8 +2026,8 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_tide";
 	int	status = MB_SUCCESS;
 	char	line[EM2_TIDE_SIZE];
-	short	*short_ptr;
-	int	*int_ptr;
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -2227,41 +2062,22 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		store->tid_date = (int) mb_swap_int(*int_ptr);
-		store->date = store->tid_date;
-		int_ptr = (int *) &line[4];
-		store->tid_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = store->tid_msec;
-		short_ptr = (short *) &line[8];
-		store->tid_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		store->tid_serial = (unsigned short) mb_swap_short(*short_ptr);
-		int_ptr = (int *) &line[12];
-		store->tid_origin_date = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[16];
-		store->tid_origin_msec = (int) mb_swap_int(*int_ptr);
-		short_ptr = (short *) &line[20];
-		store->tid_tide = mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		store->tid_date = (int) *int_ptr;
-		store->date = store->tid_date;
-		int_ptr = (int *) &line[4];
-		store->tid_msec = (int) *int_ptr;
-		store->msec = store->tid_msec;
-		short_ptr = (short *) &line[8];
-		store->tid_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		store->tid_serial = (unsigned short) *short_ptr;
-		int_ptr = (int *) &line[12];
-		store->tid_origin_date = (int) *int_ptr;
-		int_ptr = (int *) &line[16];
-		store->tid_origin_msec = (int) *int_ptr;
-		short_ptr = (short *) &line[20];
-		store->tid_tide = *short_ptr;
-#endif
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    store->tid_date = (int) int_val;
+		    store->date = store->tid_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    store->tid_msec = (int) int_val;
+		    store->msec = store->tid_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    store->tid_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    store->tid_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[12], &int_val); 
+		    store->tid_origin_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[16], &int_val); 
+		    store->tid_origin_msec = (int) int_val;
+		mb_get_binary_short(MB_NO, &line[20], &short_val); 
+		    store->tid_tide = (int) short_val;
 		}
 
 	/* print debug statements */
@@ -2304,8 +2120,8 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_height";
 	int	status = MB_SUCCESS;
 	char	line[EM2_HEIGHT_SIZE];
-	short	*short_ptr;
-	int	*int_ptr;
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -2340,35 +2156,19 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		store->hgt_date = (int) mb_swap_int(*int_ptr);
-		store->date = store->hgt_date;
-		int_ptr = (int *) &line[4];
-		store->hgt_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = store->hgt_msec;
-		short_ptr = (short *) &line[8];
-		store->hgt_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		store->hgt_serial = (unsigned short) mb_swap_short(*short_ptr);
-		int_ptr = (int *) &line[12];
-		store->hgt_height = (int) mb_swap_int(*int_ptr);
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    store->hgt_date = (int) int_val;
+		    store->date = store->hgt_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    store->hgt_msec = (int) int_val;
+		    store->msec = store->hgt_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    store->hgt_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    store->hgt_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[12], &int_val); 
+		    store->hgt_height = (int) int_val;
 		store->hgt_type = (mb_u_char) line[16];
-#else
-		int_ptr = (int *) &line[0];
-		store->hgt_date = (int) *int_ptr;
-		store->date = store->hgt_date;
-		int_ptr = (int *) &line[4];
-		store->hgt_msec = (int) *int_ptr;
-		store->msec = store->hgt_msec;
-		short_ptr = (short *) &line[8];
-		store->hgt_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		store->hgt_serial = (unsigned short) *short_ptr;
-		int_ptr = (int *) &line[12];
-		store->hgt_height = (int) *int_ptr;
-		store->hgt_type = (mb_u_char) line[16];
-#endif
 		}
 
 	/* print debug statements */
@@ -2410,9 +2210,9 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_heading";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_heading_struct *heading;
-	char	line[16];
-	short	*short_ptr;
-	int	*int_ptr;
+	char	line[EM2_HEADING_HEADER_SIZE];
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -2450,33 +2250,18 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		heading->hed_date = (int) mb_swap_int(*int_ptr);
-		store->date = heading->hed_date;
-		int_ptr = (int *) &line[4];
-		heading->hed_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = heading->hed_msec;
-		short_ptr = (short *) &line[8];
-		heading->hed_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		heading->hed_serial = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[12];
-		heading->hed_ndata = (int) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		heading->hed_date = (int) *int_ptr;
-		store->date = heading->hed_date;
-		int_ptr = (int *) &line[4];
-		heading->hed_msec = (int) *int_ptr;
-		store->msec = heading->hed_msec;
-		short_ptr = (short *) &line[8];
-		heading->hed_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		heading->hed_serial = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[12];
-		heading->hed_ndata = (int) *short_ptr;
-#endif
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    heading->hed_date = (int) int_val;
+		    store->date = heading->hed_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    heading->hed_msec = (int) int_val;
+		    store->msec = heading->hed_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    heading->hed_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    heading->hed_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[12], &short_val); 
+		    heading->hed_ndata = (int) ((unsigned short) short_val);
 		}
 
 	/* read binary heading values */
@@ -2489,17 +2274,10 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp,
 			&& i < MBSYS_SIMRAD2_MAXHEADING)
 			{
 			status = MB_SUCCESS;
-#ifdef BYTESWAPPED
-			short_ptr = (short *) &line[0];
-			heading->hed_time[i] = (unsigned short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[2];
-			heading->hed_heading[i] = (unsigned short) mb_swap_short(*short_ptr);
-#else
-			short_ptr = (short *) &line[0];
-			heading->hed_time[i] = (unsigned short) *short_ptr;
-			short_ptr = (short *) &line[2];
-			heading->hed_heading[i] = (unsigned short) *short_ptr;
-#endif
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    heading->hed_time[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    heading->hed_heading[i] = (int) ((unsigned short) short_val);
 			}
 		else
 			{
@@ -2573,9 +2351,9 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_ssv";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_ssv_struct *ssv;
-	char	line[16];
-	short	*short_ptr;
-	int	*int_ptr;
+	char	line[EM2_SSV_HEADER_SIZE];
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -2613,33 +2391,18 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		ssv->ssv_date = (int) mb_swap_int(*int_ptr);
-		store->date = ssv->ssv_date;
-		int_ptr = (int *) &line[4];
-		ssv->ssv_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = ssv->ssv_msec;
-		short_ptr = (short *) &line[8];
-		ssv->ssv_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		ssv->ssv_serial = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[12];
-		ssv->ssv_ndata = (int) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		ssv->ssv_date = (int) *int_ptr;
-		store->date = ssv->ssv_date;
-		int_ptr = (int *) &line[4];
-		ssv->ssv_msec = (int) *int_ptr;
-		store->msec = ssv->ssv_msec;
-		short_ptr = (short *) &line[8];
-		ssv->ssv_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		ssv->ssv_serial = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[12];
-		ssv->ssv_ndata = (int) *short_ptr;
-#endif
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    ssv->ssv_date = (int) int_val;
+		    store->date = ssv->ssv_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    ssv->ssv_msec = (int) int_val;
+		    store->msec = ssv->ssv_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    ssv->ssv_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    ssv->ssv_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[12], &short_val); 
+		    ssv->ssv_ndata = (int) ((unsigned short) short_val);
 		}
 
 	/* read binary heading values */
@@ -2652,17 +2415,10 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp,
 			&& i < MBSYS_SIMRAD2_MAXSSV)
 			{
 			status = MB_SUCCESS;
-#ifdef BYTESWAPPED
-			short_ptr = (short *) &line[0];
-			ssv->ssv_time[i] = (unsigned short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[2];
-			ssv->ssv_ssv[i] = (unsigned short) mb_swap_short(*short_ptr);
-#else
-			short_ptr = (short *) &line[0];
-			ssv->ssv_time[i] = (unsigned short) *short_ptr;
-			short_ptr = (short *) &line[2];
-			ssv->ssv_ssv[i] = (unsigned short) *short_ptr;
-#endif
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    ssv->ssv_time[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    ssv->ssv_ssv[i] = (int) ((unsigned short) short_val);
 			}
 		else
 			{
@@ -2734,9 +2490,9 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp,
 	char	*function_name = "mbr_em300mba_rd_attitude";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_attitude_struct *attitude;
-	char	line[16];
-	short	*short_ptr;
-	int	*int_ptr;
+	char	line[EM2_ATTITUDE_HEADER_SIZE];
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -2774,33 +2530,18 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		attitude->att_date = (int) mb_swap_int(*int_ptr);
-		store->date = attitude->att_date;
-		int_ptr = (int *) &line[4];
-		attitude->att_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = attitude->att_msec;
-		short_ptr = (short *) &line[8];
-		attitude->att_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		attitude->att_serial = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[12];
-		attitude->att_ndata = (int) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		attitude->att_date = (int) *int_ptr;
-		store->date = attitude->att_date;
-		int_ptr = (int *) &line[4];
-		attitude->att_msec = (int) *int_ptr;
-		store->msec = attitude->att_msec;
-		short_ptr = (short *) &line[8];
-		attitude->att_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		attitude->att_serial = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[12];
-		attitude->att_ndata = (int) *short_ptr;
-#endif
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    attitude->att_date = (int) int_val;
+		    store->date = attitude->att_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    attitude->att_msec = (int) int_val;
+		    store->msec = attitude->att_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    attitude->att_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    attitude->att_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[12], &short_val); 
+		    attitude->att_ndata = (int) ((unsigned short) short_val);
 		}
 
 	/* read binary attitude values */
@@ -2813,33 +2554,18 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp,
 			&& i < MBSYS_SIMRAD2_MAXATTITUDE)
 			{
 			status = MB_SUCCESS;
-#ifdef BYTESWAPPED
-			short_ptr = (short *) &line[0];
-			attitude->att_time[i] = (unsigned short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[2];
-			attitude->att_sensor_status[i] = (unsigned short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[4];
-			attitude->att_roll[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[6];
-			attitude->att_pitch[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[8];
-			attitude->att_heave[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[10];
-			attitude->att_heading[i] = (unsigned short) mb_swap_short(*short_ptr);
-#else
-			short_ptr = (short *) &line[0];
-			attitude->att_time[i] = (unsigned short) *short_ptr;
-			short_ptr = (short *) &line[2];
-			attitude->att_sensor_status[i] = (unsigned short) *short_ptr;
-			short_ptr = (short *) &line[4];
-			attitude->att_roll[i] = (short) *short_ptr;
-			short_ptr = (short *) &line[6];
-			attitude->att_pitch[i] = (short) *short_ptr;
-			short_ptr = (short *) &line[8];
-			attitude->att_heave[i] = (short) *short_ptr;
-			short_ptr = (short *) &line[10];
-			attitude->att_heading[i] = (unsigned short) *short_ptr;
-#endif
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    attitude->att_time[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    attitude->att_sensor_status[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[4], &short_val); 
+			    attitude->att_roll[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[6], &short_val); 
+			    attitude->att_pitch[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[8], &short_val); 
+			    attitude->att_heave[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[10], &short_val); 
+			    attitude->att_heading[i] = (int) ((unsigned short) short_val);
 			}
 		else
 			{
@@ -2914,9 +2640,9 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp,
 {
 	char	*function_name = "mbr_em300mba_rd_pos";
 	int	status = MB_SUCCESS;
-	char	line[256];
-	short	*short_ptr;
-	int	*int_ptr;
+	char	line[MBSYS_SIMRAD2_COMMENT_LENGTH];
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -2951,57 +2677,30 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		store->pos_date = (int) mb_swap_int(*int_ptr);
-		store->date = store->pos_date;
-		int_ptr = (int *) &line[4];
-		store->pos_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = store->pos_msec;
-		short_ptr = (short *) &line[8];
-		store->pos_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		store->pos_serial = (unsigned short) mb_swap_short(*short_ptr);
-		int_ptr = (int *) &line[12];
-		store->pos_latitude = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[16];
-		store->pos_longitude = (int) mb_swap_int(*int_ptr);
-		short_ptr = (short *) &line[20];
-		store->pos_quality = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[22];
-		store->pos_speed = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[24];
-		store->pos_course = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[26];
-		store->pos_heading = (unsigned short) mb_swap_short(*short_ptr);
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    store->pos_date = (int) int_val;
+		    store->date = store->pos_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    store->pos_msec = (int) int_val;
+		    store->msec = store->pos_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    store->pos_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    store->pos_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[12], &int_val); 
+		    store->pos_latitude = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[16], &int_val); 
+		    store->pos_longitude = (int) int_val;
+		mb_get_binary_short(MB_NO, &line[20], &short_val); 
+		    store->pos_quality = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[22], &short_val); 
+		    store->pos_speed = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[24], &short_val); 
+		    store->pos_course = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[26], &short_val); 
+		    store->pos_heading = (int) ((unsigned short) short_val);
 		store->pos_system = (mb_u_char) line[28];
 		store->pos_input_size = (mb_u_char) line[29];
-#else
-		int_ptr = (int *) &line[0];
-		store->pos_date = (int) *int_ptr;
-		store->date = store->pos_date;
-		int_ptr = (int *) &line[4];
-		store->pos_msec = (int) *int_ptr;
-		store->msec = store->pos_msec;
-		short_ptr = (short *) &line[8];
-		store->pos_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		store->pos_serial = (unsigned short) *short_ptr;
-		int_ptr = (int *) &line[12];
-		store->pos_latitude = (int) *int_ptr;
-		int_ptr = (int *) &line[16];
-		store->pos_longitude = (int) *int_ptr;
-		short_ptr = (short *) &line[20];
-		store->pos_quality = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[22];
-		store->pos_speed = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[24];
-		store->pos_course = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[26];
-		store->pos_heading = (unsigned short) *short_ptr;
-		store->pos_system = (mb_u_char) line[28];
-		store->pos_input_size = (mb_u_char) line[29];
-#endif
 		}
 
 	/* read input position string */
@@ -3096,9 +2795,9 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp,
 {
 	char	*function_name = "mbr_em300mba_rd_svp";
 	int	status = MB_SUCCESS;
-	char	line[256];
-	short	*short_ptr;
-	int	*int_ptr;
+	char	line[EM2_SVP_HEADER_SIZE];
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -3133,45 +2832,24 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		store->svp_use_date = (int) mb_swap_int(*int_ptr);
-		store->date = store->svp_use_date;
-		int_ptr = (int *) &line[4];
-		store->svp_use_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = store->svp_use_msec;
-		short_ptr = (short *) &line[8];
-		store->svp_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		store->svp_serial = (unsigned short) mb_swap_short(*short_ptr);
-		int_ptr = (int *) &line[12];
-		store->svp_origin_date = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[16];
-		store->svp_origin_msec = (int) mb_swap_int(*int_ptr);
-		short_ptr = (short *) &line[20];
-		store->svp_num = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[22];
-		store->svp_depth_res = (unsigned short) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		store->svp_use_date = (int) *int_ptr;
-		store->date = store->svp_use_date;
-		int_ptr = (int *) &line[4];
-		store->svp_use_msec = (int) *int_ptr;
-		store->msec = store->svp_use_msec;
-		short_ptr = (short *) &line[8];
-		store->svp_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		store->svp_serial = (unsigned short) *short_ptr;
-		int_ptr = (int *) &line[12];
-		store->svp_origin_date = (int) *int_ptr;
-		int_ptr = (int *) &line[16];
-		store->svp_origin_msec = (int) *int_ptr;
-		short_ptr = (short *) &line[20];
-		store->svp_num = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[22];
-		store->svp_depth_res = (unsigned short) *short_ptr;
-#endif
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    store->svp_use_date = (int) int_val;
+		    store->date = store->svp_use_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    store->svp_use_msec = (int) int_val;
+		    store->msec = store->svp_use_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    store->svp_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    store->svp_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[12], &int_val); 
+		    store->svp_origin_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[16], &int_val); 
+		    store->svp_origin_msec = (int) int_val;
+		mb_get_binary_short(MB_NO, &line[20], &short_val); 
+		    store->svp_num = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[22], &short_val); 
+		    store->svp_depth_res = (int) ((unsigned short) short_val);
 		}
 
 	/* read binary svp values */
@@ -3188,17 +2866,10 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp,
 		else if (i < MBSYS_SIMRAD2_MAXSVP)
 			{
 			status = MB_SUCCESS;
-#ifdef BYTESWAPPED
-			short_ptr = (short *) &line[0];
-			store->svp_depth[i] = (unsigned short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[2];
-			store->svp_vel[i] = (unsigned short) mb_swap_short(*short_ptr);
-#else
-			short_ptr = (short *) &line[0];
-			store->svp_depth[i] = (unsigned short) *short_ptr;
-			short_ptr = (short *) &line[2];
-			store->svp_vel[i] = (unsigned short) *short_ptr;
-#endif
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    store->svp_depth[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    store->svp_vel[i] = (int) ((unsigned short) short_val);
 			}
 		}
 	    store->svp_num = MIN(store->svp_num, MBSYS_SIMRAD2_MAXSVP);
@@ -3267,9 +2938,9 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 {
 	char	*function_name = "mbr_em300mba_rd_svp2";
 	int	status = MB_SUCCESS;
-	char	line[256];
-	short	*short_ptr;
-	int	*int_ptr;
+	char	line[EM2_SVP2_HEADER_SIZE];
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -3304,45 +2975,24 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		store->svp_use_date = (int) mb_swap_int(*int_ptr);
-		store->date = store->svp_use_date;
-		int_ptr = (int *) &line[4];
-		store->svp_use_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = store->svp_use_msec;
-		short_ptr = (short *) &line[8];
-		store->svp_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		store->svp_serial = (unsigned short) mb_swap_short(*short_ptr);
-		int_ptr = (int *) &line[12];
-		store->svp_origin_date = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[16];
-		store->svp_origin_msec = (int) mb_swap_int(*int_ptr);
-		short_ptr = (short *) &line[20];
-		store->svp_num = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[22];
-		store->svp_depth_res = (unsigned short) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		store->svp_use_date = (int) *int_ptr;
-		store->date = store->svp_use_date;
-		int_ptr = (int *) &line[4];
-		store->svp_use_msec = (int) *int_ptr;
-		store->msec = store->svp_use_msec;
-		short_ptr = (short *) &line[8];
-		store->svp_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		store->svp_serial = (unsigned short) *short_ptr;
-		int_ptr = (int *) &line[12];
-		store->svp_origin_date = (int) *int_ptr;
-		int_ptr = (int *) &line[16];
-		store->svp_origin_msec = (int) *int_ptr;
-		short_ptr = (short *) &line[20];
-		store->svp_num = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[22];
-		store->svp_depth_res = (unsigned short) *short_ptr;
-#endif
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    store->svp_use_date = (int) int_val;
+		    store->date = store->svp_use_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    store->svp_use_msec = (int) int_val;
+		    store->msec = store->svp_use_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    store->svp_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    store->svp_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[12], &int_val); 
+		    store->svp_origin_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[16], &int_val); 
+		    store->svp_origin_msec = (int) int_val;
+		mb_get_binary_short(MB_NO, &line[20], &short_val); 
+		    store->svp_num = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[22], &short_val); 
+		    store->svp_depth_res = (int) ((unsigned short) short_val);
 		}
 
 	/* read binary svp values */
@@ -3359,17 +3009,8 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 		else if (i < MBSYS_SIMRAD2_MAXSVP)
 			{
 			status = MB_SUCCESS;
-#ifdef BYTESWAPPED
-			int_ptr = (int *) &line[0];
-			store->svp_depth[i] = (int) mb_swap_int(*int_ptr);
-			int_ptr = (int *) &line[4];
-			store->svp_vel[i] = (int) mb_swap_int(*int_ptr);
-#else
-			int_ptr = (int *) &line[0];
-			store->svp_depth[i] = (int) *int_ptr;
-			int_ptr = (int *) &line[4];
-			store->svp_vel[i] = (int) *int_ptr;
-#endif
+			mb_get_binary_int(MB_NO, &line[0], &store->svp_depth[i]); 
+			mb_get_binary_int(MB_NO, &line[4], &store->svp_vel[i]); 
 			}
 		}
 	    store->svp_num = MIN(store->svp_num, MBSYS_SIMRAD2_MAXSVP);
@@ -3440,8 +3081,8 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_ping_struct *ping;
 	char	line[EM2_BATH_MBA_HEADER_SIZE];
-	short	*short_ptr;
-	int	*int_ptr;
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -3480,65 +3121,34 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		ping->png_date = (int) mb_swap_int(*int_ptr);
-		store->date = ping->png_date;
-		int_ptr = (int *) &line[4];
-		ping->png_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = ping->png_msec;
-		short_ptr = (short *) &line[8];
-		ping->png_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		ping->png_serial = (unsigned short) mb_swap_short(*short_ptr);
-		int_ptr = (int *) &line[12];
-		ping->png_latitude = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[16];
-		ping->png_longitude = (int) mb_swap_int(*int_ptr);
-		short_ptr = (short *) &line[20];
-		ping->png_speed = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[22];
-		ping->png_heading = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[24];
-		ping->png_ssv = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[26];
-		ping->png_xducer_depth = (unsigned short) mb_swap_short(*short_ptr);
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    ping->png_date = (int) int_val;
+		    store->date = ping->png_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    ping->png_msec = (int) int_val;
+		    store->msec = ping->png_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    ping->png_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    ping->png_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[12], &int_val); 
+		    ping->png_latitude = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[16], &int_val); 
+		    ping->png_longitude = (int) int_val;
+		mb_get_binary_short(MB_NO, &line[20], &short_val); 
+		    ping->png_speed = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[22], &short_val); 
+		    ping->png_heading = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[24], &short_val); 
+		    ping->png_ssv = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[26], &short_val); 
+		    ping->png_xducer_depth = (int) ((unsigned short) short_val);
 		ping->png_nbeams_max = (mb_u_char) line[28];
 		ping->png_nbeams = (mb_u_char) line[29];
 		ping->png_depth_res = (mb_u_char) line[30];
 		ping->png_distance_res = (mb_u_char) line[31];
-		short_ptr = (short *) &line[32];
-		ping->png_sample_rate = (unsigned short) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		ping->png_date = (int) *int_ptr;
-		store->date = ping->png_date;
-		int_ptr = (int *) &line[4];
-		ping->png_msec = (int) *int_ptr;
-		store->msec = ping->png_msec;
-		short_ptr = (short *) &line[8];
-		ping->png_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		ping->png_serial = (unsigned short) *short_ptr;
-		int_ptr = (int *) &line[12];
-		ping->png_latitude = (int) *int_ptr;
-		int_ptr = (int *) &line[16];
-		ping->png_longitude = (int) *int_ptr;
-		short_ptr = (short *) &line[20];
-		ping->png_speed = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[22];
-		ping->png_heading = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[24];
-		ping->png_ssv = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[26];
-		ping->png_xducer_depth = (unsigned short) *short_ptr;
-		ping->png_nbeams_max = (mb_u_char) line[28];
-		ping->png_nbeams = (mb_u_char) line[29];
-		ping->png_depth_res = (mb_u_char) line[30];
-		ping->png_distance_res = (mb_u_char) line[31];
-		short_ptr = (short *) &line[32];
-		ping->png_sample_rate = (unsigned short) *short_ptr;
-#endif
+		mb_get_binary_short(MB_NO, &line[32], &short_val); 
+		    ping->png_sample_rate = (int) ((unsigned short) short_val);
 		}
 		
 	/* check for some indicators of a broken record 
@@ -3566,53 +3176,28 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 			&& i < MBSYS_SIMRAD2_MAXBEAMS)
 			{
 			status = MB_SUCCESS;
-#ifdef BYTESWAPPED
-			short_ptr = (short *) &line[0];
-			if (store->sonar == EM2_EM120
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    if (store->sonar == EM2_EM120
 				|| store->sonar == EM2_EM300)
-			    ping->png_depth[i] = (unsigned short) mb_swap_short(*short_ptr);
-			else
-			    ping->png_depth[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[2];
-			ping->png_acrosstrack[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[4];
-			ping->png_alongtrack[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[6];
-			ping->png_depression[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[8];
-			ping->png_azimuth[i] = (unsigned short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[10];
-			ping->png_range[i] = (unsigned short) mb_swap_short(*short_ptr);
+				ping->png_depth[i] = (int) ((unsigned short) short_val);
+			    else
+				ping->png_depth[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    ping->png_acrosstrack[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[4], &short_val); 
+			    ping->png_alongtrack[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[6], &short_val); 
+			    ping->png_depression[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[8], &short_val); 
+			    ping->png_azimuth[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[10], &short_val); 
+			    ping->png_range[i] = (int) ((unsigned short) short_val);
 			ping->png_quality[i] = (mb_u_char) line[12];
 			ping->png_window[i] = (mb_u_char) line[13];
-			short_ptr = (short *) &line[14];
-			ping->png_amp[i] = (short) mb_swap_short(*short_ptr);
+			mb_get_binary_short(MB_NO, &line[14], &short_val); 
+			    ping->png_amp[i] = (int) ((short) short_val);
 			ping->png_beam_num[i] = (mb_u_char) line[16];
 			ping->png_beamflag[i] = (char) line[17];
-#else
-			short_ptr = (short *) &line[0];
-			if (store->sonar == EM2_EM120
-				|| store->sonar == EM2_EM300)
-			    ping->png_depth[i] = (unsigned short) *short_ptr;
-			else
-			    ping->png_depth[i] = (short) *short_ptr;
-			short_ptr = (short *) &line[2];
-			ping->png_acrosstrack[i] = (short) *short_ptr;
-			short_ptr = (short *) &line[4];
-			ping->png_alongtrack[i] = (short) *short_ptr;
-			short_ptr = (short *) &line[6];
-			ping->png_depression[i] = (short) *short_ptr;
-			short_ptr = (short *) &line[8];
-			ping->png_azimuth[i] = (unsigned short) *short_ptr;
-			short_ptr = (short *) &line[10];
-			ping->png_range[i] = (unsigned short) *short_ptr;
-			ping->png_quality[i] = (mb_u_char) line[12];
-			ping->png_window[i] = (mb_u_char) line[13];
-			short_ptr = (short *) &line[14];
-			ping->png_amp[i] = (short) *short_ptr;
-			ping->png_beam_num[i] = (mb_u_char) line[16];
-			ping->png_beamflag[i] = (char) line[17];
-#endif
 			}
 		else
 			{
@@ -3674,8 +3259,6 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 	/* print debug statements */
 	if (verbose >= 5)
 		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-			function_name);
 		fprintf(stderr,"dbg5       type:            %d\n",store->type);
 		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:            %d\n",store->date);
@@ -3732,8 +3315,8 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_ping_struct *ping;
 	char	line[EM2_BATH_MBA_HEADER_SIZE];
-	short	*short_ptr;
-	int	*int_ptr;
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -3766,37 +3349,20 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		ping->png_date = (int) mb_swap_int(*int_ptr);
-		store->date = ping->png_date;
-		int_ptr = (int *) &line[4];
-		ping->png_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = ping->png_msec;
-		short_ptr = (short *) &line[8];
-		ping->png_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		ping->png_serial = (unsigned short) mb_swap_short(*short_ptr);
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    ping->png_date = (int) int_val;
+		    store->date = ping->png_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    ping->png_msec = (int) int_val;
+		    store->msec = ping->png_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    ping->png_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    ping->png_serial = (int) ((unsigned short) short_val);
 		ping->png_nbeams_max = (mb_u_char) line[12];
 		ping->png_nrawbeams = (mb_u_char) line[13];
-		short_ptr = (short *) &line[14];
-		ping->png_ssv = (unsigned short) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		ping->png_date = (int) *int_ptr;
-		store->date = ping->png_date;
-		int_ptr = (int *) &line[4];
-		ping->png_msec = (int) *int_ptr;
-		store->msec = ping->png_msec;
-		short_ptr = (short *) &line[8];
-		ping->png_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		ping->png_serial = (unsigned short) *short_ptr;
-		ping->png_nbeams_max = (mb_u_char) line[12];
-		ping->png_nrawbeams = (mb_u_char) line[13];
-		short_ptr = (short *) &line[14];
-		ping->png_ssv = (unsigned short) *short_ptr;
-#endif
+		mb_get_binary_short(MB_NO, &line[14], &short_val); 
+		    ping->png_ssv = (int) ((unsigned short) short_val);
 		}
 		
 	/* check for some indicators of a broken record 
@@ -3824,25 +3390,14 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 			&& i < MBSYS_SIMRAD2_MAXBEAMS)
 			{
 			status = MB_SUCCESS;
-#ifdef BYTESWAPPED
-			short_ptr = (short *) &line[0];
-			ping->png_rawpointangle[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[2];
-			ping->png_rawtiltangle[i] = (unsigned short) mb_swap_short(*short_ptr);
-			short_ptr = (short *) &line[4];
-			ping->png_rawrange[i] = (unsigned short) mb_swap_short(*short_ptr);
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    ping->png_rawpointangle[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    ping->png_rawtiltangle[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[4], &short_val); 
+			    ping->png_rawrange[i] = (int) ((unsigned short) short_val);
 			ping->png_rawamp[i] = (mb_s_char) line[6];
 			ping->png_rawbeam_num[i] = (mb_u_char) line[7];
-#else
-			short_ptr = (short *) &line[0];
-			ping->png_rawpointangle[i] = (short) *short_ptr;
-			short_ptr = (short *) &line[2];
-			ping->png_rawtiltangle[i] = (unsigned short) *short_ptr;
-			short_ptr = (short *) &line[4];
-			ping->png_rawrange[i] = (unsigned short) *short_ptr;
-			ping->png_rawamp[i] = (mb_s_char) line[6];
-			ping->png_rawbeam_num[i] = (mb_u_char) line[7];
-#endif
 			}
 		else
 			{
@@ -3936,14 +3491,14 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_ping_struct *ping;
 	char	line[2 * MBSYS_SIMRAD2_BUFFER_SIZE];
-	short	*short_ptr;
-	int	*int_ptr;
+	short	short_val;
+	int	int_val;
 	int	read_len, len;
 	int	done;
 	int	junk_bytes;
-	int	offset;
 	int	read_size;
-	int	i, j;
+	int	offset;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3978,69 +3533,36 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		ping->png_ss_date = (int) mb_swap_int(*int_ptr);
-		store->date = ping->png_ss_date;
-		int_ptr = (int *) &line[4];
-		ping->png_ss_msec = (int) mb_swap_int(*int_ptr);
-		store->msec = ping->png_ss_msec;
-		short_ptr = (short *) &line[8];
-		ping->png_count = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		ping->png_serial = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[12];
-		ping->png_max_range = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[14];
-		ping->png_r_zero = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[16];
-		ping->png_r_zero_corr = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[18];
-		ping->png_tvg_start = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[20];
-		ping->png_tvg_stop = (unsigned short) mb_swap_short(*short_ptr);
+		mb_get_binary_int(MB_NO, &line[0], &int_val); 
+		    ping->png_ss_date = (int) int_val;
+		    store->date = ping->png_ss_date;
+		mb_get_binary_int(MB_NO, &line[4], &int_val); 
+		    ping->png_ss_msec = (int) int_val;
+		    store->msec = ping->png_ss_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    ping->png_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    ping->png_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[12], &short_val); 
+		    ping->png_max_range = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[14], &short_val); 
+		    ping->png_r_zero = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[16], &short_val); 
+		    ping->png_r_zero_corr = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[18], &short_val); 
+		    ping->png_tvg_start = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[20], &short_val); 
+		    ping->png_tvg_stop = (int) ((unsigned short) short_val);
 		ping->png_bsn = (mb_s_char) line[22];
 		ping->png_bso = (mb_s_char) line[23];
-		short_ptr = (short *) &line[24];
-		ping->png_tx = (unsigned short) mb_swap_short(*short_ptr);
+		mb_get_binary_short(MB_NO, &line[24], &short_val); 
+		    ping->png_tx = (int) ((unsigned short) short_val);
 		ping->png_tvg_crossover = (mb_u_char) line[26];
 		ping->png_nbeams_ss = (mb_u_char) line[27];
-		short_ptr = (short *) &line[28];
-		ping->png_pixel_size = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[30];
-		ping->png_pixels_ss = (short) mb_swap_short(*short_ptr);
-#else
-		int_ptr = (int *) &line[0];
-		ping->png_ss_date = (int) *int_ptr;
-		store->date = ping->png_ss_date;
-		int_ptr = (int *) &line[4];
-		ping->png_ss_msec = (int) *int_ptr;
-		store->msec = ping->png_ss_msec;
-		short_ptr = (short *) &line[8];
-		ping->png_count = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[10];
-		ping->png_serial = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[12];
-		ping->png_max_range = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[14];
-		ping->png_r_zero = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[16];
-		ping->png_r_zero_corr = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[18];
-		ping->png_tvg_start = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[20];
-		ping->png_tvg_stop = (unsigned short) *short_ptr;
-		ping->png_bsn = (mb_s_char) line[22];
-		ping->png_bso = (mb_s_char) line[23];
-		short_ptr = (short *) &line[24];
-		ping->png_tx = (unsigned short) *short_ptr;
-		ping->png_tvg_crossover = (mb_u_char) line[26];
-		ping->png_nbeams_ss = (mb_u_char) line[27];
-		short_ptr = (short *) &line[28];
-		ping->png_pixel_size = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[30];
-		ping->png_pixels_ss = (unsigned short) *short_ptr;
-#endif
+		mb_get_binary_short(MB_NO, &line[28], &short_val); 
+		    ping->png_pixel_size = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[30], &short_val); 
+		    ping->png_pixels_ss = (int) ((unsigned short) short_val);
 		}
 		
 	/* check for some indicators of a broken record 
@@ -4066,23 +3588,13 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 			&& i < MBSYS_SIMRAD2_MAXBEAMS)
 			{
 			status = MB_SUCCESS;
-#ifdef BYTESWAPPED
 			ping->png_beam_index[i] = (mb_u_char) line[0];
 			ping->png_sort_direction[i] = (mb_s_char) line[1];
-			short_ptr = (short *) &line[2];
-			ping->png_beam_samples[i] = (unsigned short) mb_swap_short(*short_ptr);
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    ping->png_beam_samples[i] = (int) ((unsigned short) short_val);
 			ping->png_start_sample[i] = ping->png_npixels;
-			short_ptr = (short *) &line[4];
-			ping->png_center_sample[i] = (unsigned short) mb_swap_short(*short_ptr);
-#else
-			ping->png_beam_index[i] = (mb_u_char) line[0];
-			ping->png_sort_direction[i] = (mb_s_char) line[1];
-			short_ptr = (short *) &line[2];
-			ping->png_beam_samples[i] = (unsigned short) *short_ptr;
-			ping->png_start_sample[i] = ping->png_npixels;
-			short_ptr = (short *) &line[4];
-			ping->png_center_sample[i] = (unsigned short) *short_ptr;
-#endif
+			mb_get_binary_short(MB_NO, &line[4], &short_val); 
+			    ping->png_center_sample[i] = (int) ((unsigned short) short_val);
 			}
 		else
 			{
@@ -4181,13 +3693,8 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 		offset = (MBSYS_SIMRAD2_MAXPIXELS - ping->png_pixels_ss) / 2;
 		for (i=0;i<ping->png_pixels_ss;i++)
 		    {
-#ifdef BYTESWAPPED
-		    short_ptr = (short *) &line[2*i];
-		    ping->png_ss[offset+i] = (short) mb_swap_short(*short_ptr);
-#else
-		    short_ptr = (short *) &line[2*i];
-		    ping->png_ss[offset+i] = (short) *short_ptr;
-#endif
+		    mb_get_binary_short(MB_NO, &line[2*i], &short_val); 
+			ping->png_ss[offset+i] = (int) ((short) short_val);
 		    }
 		}
 		
@@ -4215,16 +3722,11 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 		offset = (MBSYS_SIMRAD2_MAXPIXELS - ping->png_pixels_ss) / 2;
 		for (i=0;i<ping->png_pixels_ss;i++)
 		    {
-#ifdef BYTESWAPPED
-		    short_ptr = (short *) &line[2*i];
-		    ping->png_ssalongtrack[offset+i] = (short) mb_swap_short(*short_ptr);
-#else
-		    short_ptr = (short *) &line[2*i];
-		    ping->png_ssalongtrack[offset+i] = (short) *short_ptr;
-#endif
+		    mb_get_binary_short(MB_NO, &line[2*i], &short_val); 
+			ping->png_ssalongtrack[offset+i] = (int) ((short) short_val);
 		    }
 		}
-
+		
 	/* now loop over reading individual characters to 
 	    get last bytes of record */
 	if (status == MB_SUCCESS)
@@ -4255,7 +3757,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 			}
 		}
 	    }
-	
+		
 	/* check if bath and sidescan time tags agree 
 	   - we cannot pair bath 
 	   and sidescan records from different pings */
@@ -4283,6 +3785,25 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       png_ss_msec:     %d\n",ping->png_ss_msec);
 		fprintf(stderr,"dbg5       png_count:       %d\n",ping->png_count);
 		fprintf(stderr,"dbg5       png_serial:      %d\n",ping->png_serial);
+		fprintf(stderr,"dbg5       png_heading:     %d\n",ping->png_heading);
+		fprintf(stderr,"dbg5       png_ssv:         %d\n",ping->png_ssv);
+		fprintf(stderr,"dbg5       png_xducer_depth:      %d\n",ping->png_xducer_depth);
+		fprintf(stderr,"dbg5       png_offset_multiplier: %d\n",ping->png_offset_multiplier);
+		fprintf(stderr,"dbg5       png_nbeams_max:        %d\n",ping->png_nbeams_max);
+		fprintf(stderr,"dbg5       png_nbeams:            %d\n",ping->png_nbeams);
+		fprintf(stderr,"dbg5       png_depth_res:         %d\n",ping->png_depth_res);
+		fprintf(stderr,"dbg5       png_distance_res:      %d\n",ping->png_distance_res);
+		fprintf(stderr,"dbg5       png_sample_rate:       %d\n",ping->png_sample_rate);
+		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack dprsn   azi   rng  qual wnd  amp num flag\n");
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		for (i=0;i<ping->png_nbeams;i++)
+			fprintf(stderr,"dbg5       %3d %6d %6d %6d %5d %5d %5d %4d %3d %4d %3d %4d\n",
+				i, ping->png_depth[i], ping->png_acrosstrack[i], 
+				ping->png_alongtrack[i], ping->png_depression[i], 
+				ping->png_azimuth[i], ping->png_range[i], 
+				ping->png_quality[i], ping->png_window[i], 
+				ping->png_amp[i], ping->png_beam_num[i], 
+				ping->png_beamflag[i]);
 		fprintf(stderr,"dbg5       png_max_range:   %d\n",ping->png_max_range);
 		fprintf(stderr,"dbg5       png_r_zero:      %d\n",ping->png_r_zero);
 		fprintf(stderr,"dbg5       png_r_zero_corr: %d\n",ping->png_r_zero_corr);
@@ -4301,7 +3822,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 				i, ping->png_beam_index[i], ping->png_sort_direction[i], 
 				ping->png_beam_samples[i], ping->png_start_sample[i], 
 				ping->png_center_sample[i]);
-		fprintf(stderr,"dbg5       cnt  ssraw\n");
+		fprintf(stderr,"dbg5       cnt  ss\n");
 		fprintf(stderr,"dbg5       --------------------------------------------------\n");
 		for (i=0;i<ping->png_npixels;i++)
 			fprintf(stderr,"dbg5        %d %d\n",
@@ -4510,8 +4031,6 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp,
 	short	*label;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	char	*comma_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
@@ -4622,42 +4141,17 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp,
 	/* set up start of output buffer - we handle this
 	   record differently because of the ascii data */
 	memset(line, 0, MBSYS_SIMRAD2_BUFFER_SIZE);
-	label = (short *) &line[4];
-	*label = store->type;
-#ifdef BYTESWAPPED
-	*label = (short) mb_swap_short(*label);
-#endif
 
 	/* put binary header data into buffer */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		short_ptr = (short *) &line[6];
-		*short_ptr = (unsigned short) mb_swap_short(store->sonar);
-		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_int(store->par_date);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(store->par_msec);
-		short_ptr = (short *) &line[16];
-		*short_ptr = (unsigned short) mb_swap_short(store->par_line_num);
-		short_ptr = (short *) &line[18];
-		*short_ptr = (unsigned short) mb_swap_short(store->par_serial_1);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) mb_swap_short(store->par_serial_2);
-#else
-		short_ptr = (short *) &line[6];
-		*short_ptr = (unsigned short) store->sonar;
-		int_ptr = (int *) &line[8];
-		*int_ptr = (int) store->par_date;
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) store->par_msec;
-		short_ptr = (short *) &line[16];
-		*short_ptr = (unsigned short) store->par_line_num;
-		short_ptr = (short *) &line[18];
-		*short_ptr = (unsigned short) store->par_serial_1;
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) store->par_serial_2;
-#endif
+		mb_put_binary_short(MB_NO, (short) store->type, (void *) &line[4]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->sonar, (void *) &line[6]);
+		mb_put_binary_int(MB_NO, (int) store->par_date, (void *) &line[8]); 
+		mb_put_binary_int(MB_NO, (int) store->par_msec, (void *) &line[12]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->par_line_num, (void *) &line[16]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->par_serial_1, (void *) &line[18]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->par_serial_2, (void *) &line[20]);
 		}
 		
 	/* construct ASCII parameter buffer */
@@ -4844,11 +4338,7 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp,
 		
 	/* get size of record */
 	write_size = 25 + buff_len;
-	int_ptr = (int *) &line[0];
-	*int_ptr = write_size - 4;
-#ifdef BYTESWAPPED
-	*int_ptr = (int) mb_swap_int(*int_ptr);
-#endif
+	mb_put_binary_int(MB_NO, (int) (write_size - 4), (void *) &line[0]); 
 		
 	/* compute checksum */
 	uchar_ptr = (mb_u_char *) line;
@@ -4856,12 +4346,7 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp,
 	    checksum += uchar_ptr[j];
     
 	/* set checksum */
-	short_ptr = (short *) &line[buff_len + 23];
-#ifdef BYTESWAPPED
-	*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-	*short_ptr = (unsigned short) checksum;
-#endif
+	mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[buff_len + 23]);
 
 	/* finally write out the data */
 	write_len = fwrite(&line,1,write_size,mbfp);
@@ -4898,8 +4383,6 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -4953,10 +4436,7 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_RUN_PARAMETER_SIZE;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_RUN_PARAMETER_SIZE), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -4969,10 +4449,7 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_RUN_PARAMETER;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_RUN_PARAMETER), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -4990,10 +4467,7 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5012,79 +4486,30 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(store->run_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(store->run_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(store->run_ping_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(store->run_serial);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(store->run_status);
+		mb_put_binary_int(MB_NO, (int) store->run_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) store->run_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->run_ping_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->run_serial, (void *) &line[10]);
+		mb_put_binary_int(MB_NO, (int) store->run_status, (void *) &line[12]); 
 		line[16] = store->run_mode;
 		line[17] = store->run_filter_id;
-		short_ptr = (short *) &line[18];
-		*short_ptr = (unsigned short) mb_swap_short(store->run_min_depth);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) mb_swap_short(store->run_max_depth);
-		short_ptr = (short *) &line[22];
-		*short_ptr = (unsigned short) mb_swap_short(store->run_absorption);
-		short_ptr = (short *) &line[24];
-		*short_ptr = (unsigned short) mb_swap_short(store->run_tran_pulse);
-		short_ptr = (short *) &line[26];
-		*short_ptr = (unsigned short) mb_swap_short(store->run_tran_beam);
+		mb_put_binary_short(MB_NO, (unsigned short) store->run_min_depth, (void *) &line[18]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->run_max_depth, (void *) &line[20]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->run_absorption, (void *) &line[22]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->run_tran_pulse, (void *) &line[24]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->run_tran_beam, (void *) &line[26]);
 		line[28] = store->run_tran_pow;
 		line[29] = store->run_rec_beam;
 		line[30] = store->run_rec_band;
 		line[31] = store->run_rec_gain;
 		line[32] = store->run_tvg_cross;
 		line[33] = store->run_ssv_source;
-		short_ptr = (short *) &line[34];
-		*short_ptr = (unsigned short) mb_swap_short(store->run_max_swath);
+		mb_put_binary_short(MB_NO, (unsigned short) store->run_max_swath, (void *) &line[34]);
 		line[36] = store->run_beam_space;
 		line[37] = store->run_swath_angle;
 		line[38] = store->run_stab_mode;
 		for (i=0;i<6;i++)
 		    line[39+i] = store->run_spare[i];
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) store->run_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) store->run_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) store->run_ping_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) store->run_serial;
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) store->run_status;
-		line[16] = store->run_mode;
-		line[17] = store->run_filter_id;
-		short_ptr = (short *) &line[18];
-		*short_ptr = (unsigned short) store->run_min_depth;
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) store->run_max_depth;
-		short_ptr = (short *) &line[22];
-		*short_ptr = (unsigned short) store->run_absorption;
-		short_ptr = (short *) &line[24];
-		*short_ptr = (unsigned short) store->run_tran_pulse;
-		short_ptr = (short *) &line[26];
-		*short_ptr = (unsigned short) store->run_tran_beam;
-		line[28] = store->run_tran_pow;
-		line[29] = store->run_rec_beam;
-		line[30] = store->run_rec_band;
-		line[31] = store->run_rec_gain;
-		line[32] = store->run_tvg_cross;
-		line[33] = store->run_ssv_source;
-		short_ptr = (short *) &line[34];
-		*short_ptr = (unsigned short) store->run_max_swath;
-		line[36] = store->run_beam_space;
-		line[37] = store->run_swath_angle;
-		line[38] = store->run_stab_mode;
-		for (i=0;i<6;i++)
-		    line[39+i] = store->run_spare[i];
-#endif
 		line[EM2_RUN_PARAMETER_SIZE-7] = 0x03;
 		
 		/* compute checksum */
@@ -5093,12 +4518,7 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp,
 		    checksum += uchar_ptr[j];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[EM2_RUN_PARAMETER_SIZE-6];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[EM2_RUN_PARAMETER_SIZE-6]);
 
 		/* write out data */
 		write_len = fwrite(line,1,EM2_RUN_PARAMETER_SIZE-4,mbfp);
@@ -5139,8 +4559,6 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -5177,10 +4595,7 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_CLOCK_SIZE;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_CLOCK_SIZE), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -5193,10 +4608,7 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_CLOCK;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_CLOCK), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5214,10 +4626,7 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5236,35 +4645,13 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(store->clk_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(store->clk_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(store->clk_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(store->clk_serial);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(store->clk_origin_date);
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) mb_swap_int(store->clk_origin_msec);
+		mb_put_binary_int(MB_NO, (int) store->clk_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) store->clk_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->clk_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->clk_serial, (void *) &line[10]);
+		mb_put_binary_int(MB_NO, (int) store->clk_origin_date, (void *) &line[12]); 
+		mb_put_binary_int(MB_NO, (int) store->clk_origin_msec, (void *) &line[16]); 
 		line[20] = store->clk_1_pps_use;
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) store->clk_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) store->clk_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) store->clk_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) store->clk_serial;
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) store->clk_origin_date;
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) store->clk_origin_msec;
-		line[20] = store->clk_1_pps_use;
-#endif
 		line[EM2_CLOCK_SIZE-7] = 0x03;
 		
 		/* compute checksum */
@@ -5273,12 +4660,7 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp,
 		    checksum += uchar_ptr[j];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[EM2_CLOCK_SIZE-6];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[EM2_CLOCK_SIZE-6]);
 
 		/* write out data */
 		write_len = fwrite(line,1,EM2_CLOCK_SIZE-4,mbfp);
@@ -5319,8 +4701,6 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -5357,10 +4737,7 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_TIDE_SIZE;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_TIDE_SIZE), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -5373,10 +4750,7 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_TIDE;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_TIDE), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5394,10 +4768,7 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5416,37 +4787,13 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(store->tid_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(store->tid_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(store->tid_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(store->tid_serial);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(store->tid_origin_date);
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) mb_swap_int(store->tid_origin_msec);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (short) mb_swap_short(store->tid_tide);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) store->tid_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) store->tid_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) store->tid_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) store->tid_serial;
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) store->tid_origin_date;
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) store->tid_origin_msec;
-		short_ptr = (short *) &line[20];
-		*short_ptr = (short) store->tid_tide;
-#endif
+		mb_put_binary_int(MB_NO, (int) store->tid_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) store->tid_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->tid_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->tid_serial, (void *) &line[10]);
+		mb_put_binary_int(MB_NO, (int) store->tid_origin_date, (void *) &line[12]); 
+		mb_put_binary_int(MB_NO, (int) store->tid_origin_msec, (void *) &line[16]); 
+		mb_put_binary_short(MB_NO, (short) store->tid_tide, (void *) &line[20]);
 		line[EM2_TIDE_SIZE-8] = '\0';
 		line[EM2_TIDE_SIZE-7] = 0x03;
 		
@@ -5456,12 +4803,7 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp,
 		    checksum += uchar_ptr[j];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[EM2_TIDE_SIZE-6];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[EM2_TIDE_SIZE-6]);
 
 		/* write out data */
 		write_len = fwrite(line,1,EM2_TIDE_SIZE-4,mbfp);
@@ -5502,8 +4844,6 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -5539,10 +4879,7 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_HEIGHT_SIZE;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_HEIGHT_SIZE), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -5555,10 +4892,7 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_HEIGHT;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_HEIGHT), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5576,10 +4910,7 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5598,31 +4929,12 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(store->hgt_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(store->hgt_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(store->hgt_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(store->hgt_serial);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(store->hgt_height);
+		mb_put_binary_int(MB_NO, (int) store->hgt_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) store->hgt_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->hgt_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->hgt_serial, (void *) &line[10]);
+		mb_put_binary_int(MB_NO, (int) store->hgt_height, (void *) &line[12]); 
 		line[16] = (mb_u_char) store->hgt_type;
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) store->hgt_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) store->hgt_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) store->hgt_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) store->hgt_serial;
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) store->hgt_height;
-		line[16] = (mb_u_char) store->hgt_type;
-#endif
 		line[EM2_HEIGHT_SIZE-7] = 0x03;
 		
 		/* compute checksum */
@@ -5631,12 +4943,7 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp,
 		    checksum += uchar_ptr[j];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[EM2_HEIGHT_SIZE-6];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[EM2_HEIGHT_SIZE-6]);
 
 		/* write out data */
 		write_len = fwrite(line,1,EM2_HEIGHT_SIZE-4,mbfp);
@@ -5678,8 +4985,6 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -5694,7 +4999,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		}
 		
-	/* get  storage structure */
+	/* get storage structure */
 	heading = (struct mbsys_simrad2_heading_struct *) store->heading;
 
 	/* print debug statements */
@@ -5723,11 +5028,8 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_HEADING_HEADER_SIZE 
-			+ EM2_HEADING_SLICE_SIZE * heading->hed_ndata + 8;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_HEADING_HEADER_SIZE 
+			+ EM2_HEADING_SLICE_SIZE * heading->hed_ndata + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -5740,10 +5042,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_HEADING;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_HEADING), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5761,10 +5060,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5783,29 +5079,11 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(heading->hed_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(heading->hed_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(heading->hed_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(heading->hed_serial);
-		short_ptr = (short *) &line[12];
-		*short_ptr = (unsigned short) mb_swap_short(heading->hed_ndata);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) heading->hed_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) heading->hed_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) heading->hed_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) heading->hed_serial;
-		short_ptr = (short *) &line[12];
-		*short_ptr = (unsigned short) heading->hed_ndata;
-#endif
+		mb_put_binary_int(MB_NO, (int) heading->hed_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) heading->hed_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) heading->hed_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) heading->hed_serial, (void *) &line[10]);
+		mb_put_binary_short(MB_NO, (unsigned short) heading->hed_ndata, (void *) &line[12]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -5830,17 +5108,8 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<heading->hed_ndata;i++)
 		{
-#ifdef BYTESWAPPED
-		short_ptr = (short *) &line[0];
-		*short_ptr = (unsigned short) mb_swap_short(heading->hed_time[i]);
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) mb_swap_short(heading->hed_heading[i]);
-#else
-		short_ptr = (short *) &line[0];
-		*short_ptr = (unsigned short) heading->hed_time[i];
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) heading->hed_heading[i];
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) heading->hed_time[i], (void *) &line[0]);
+		mb_put_binary_short(MB_NO, (unsigned short) heading->hed_heading[i], (void *) &line[2]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -5872,12 +5141,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 		checksum += uchar_ptr[0];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[2];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
 		write_len = fwrite(line,1,4,mbfp);
@@ -5919,8 +5183,6 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -5963,11 +5225,8 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_SSV_HEADER_SIZE 
-			+ EM2_SSV_SLICE_SIZE * ssv->ssv_ndata + 8;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_SSV_HEADER_SIZE 
+			+ EM2_SSV_SLICE_SIZE * ssv->ssv_ndata + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -5980,10 +5239,7 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_SSV;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_SSV), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6001,10 +5257,7 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6023,29 +5276,11 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(ssv->ssv_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(ssv->ssv_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(ssv->ssv_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(ssv->ssv_serial);
-		short_ptr = (short *) &line[12];
-		*short_ptr = (unsigned short) mb_swap_short(ssv->ssv_ndata);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) ssv->ssv_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) ssv->ssv_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) ssv->ssv_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) ssv->ssv_serial;
-		short_ptr = (short *) &line[12];
-		*short_ptr = (unsigned short) ssv->ssv_ndata;
-#endif
+		mb_put_binary_int(MB_NO, (int) ssv->ssv_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) ssv->ssv_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) ssv->ssv_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) ssv->ssv_serial, (void *) &line[10]);
+		mb_put_binary_short(MB_NO, (unsigned short) ssv->ssv_ndata, (void *) &line[12]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -6070,17 +5305,8 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<ssv->ssv_ndata;i++)
 		{
-#ifdef BYTESWAPPED
-		short_ptr = (short *) &line[0];
-		*short_ptr = (unsigned short) mb_swap_short(ssv->ssv_time[i]);
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) mb_swap_short(ssv->ssv_ssv[i]);
-#else
-		short_ptr = (short *) &line[0];
-		*short_ptr = (unsigned short) ssv->ssv_time[i];
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) ssv->ssv_ssv[i];
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) ssv->ssv_time[i], (void *) &line[0]);
+		mb_put_binary_short(MB_NO, (unsigned short) ssv->ssv_ssv[i], (void *) &line[2]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -6112,12 +5338,7 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp,
 		checksum += uchar_ptr[0];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[2];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
 		write_len = fwrite(line,1,4,mbfp);
@@ -6159,8 +5380,6 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -6206,11 +5425,8 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_ATTITUDE_HEADER_SIZE 
-			+ EM2_ATTITUDE_SLICE_SIZE * attitude->att_ndata + 8;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_ATTITUDE_HEADER_SIZE 
+			+ EM2_ATTITUDE_SLICE_SIZE * attitude->att_ndata + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6223,10 +5439,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_ATTITUDE;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_ATTITUDE), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6244,10 +5457,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6266,29 +5476,11 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(attitude->att_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(attitude->att_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(attitude->att_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(attitude->att_serial);
-		short_ptr = (short *) &line[12];
-		*short_ptr = (unsigned short) mb_swap_short(attitude->att_ndata);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) attitude->att_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) attitude->att_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) attitude->att_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) attitude->att_serial;
-		short_ptr = (short *) &line[12];
-		*short_ptr = (unsigned short) attitude->att_ndata;
-#endif
+		mb_put_binary_int(MB_NO, (int) attitude->att_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) attitude->att_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) attitude->att_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) attitude->att_serial, (void *) &line[10]);
+		mb_put_binary_short(MB_NO, (unsigned short) attitude->att_ndata, (void *) &line[12]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -6313,33 +5505,12 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<attitude->att_ndata;i++)
 		{
-#ifdef BYTESWAPPED
-		short_ptr = (short *) &line[0];
-		*short_ptr = (unsigned short) mb_swap_short(attitude->att_time[i]);
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) mb_swap_short(attitude->att_sensor_status[i]);
-		short_ptr = (short *) &line[4];
-		*short_ptr = (short) mb_swap_short(attitude->att_roll[i]);
-		short_ptr = (short *) &line[6];
-		*short_ptr = (short) mb_swap_short(attitude->att_pitch[i]);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (short) mb_swap_short(attitude->att_heave[i]);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(attitude->att_heading[i]);
-#else
-		short_ptr = (short *) &line[0];
-		*short_ptr = (unsigned short) attitude->att_time[i];
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) attitude->att_sensor_status[i];
-		short_ptr = (short *) &line[4];
-		*short_ptr = (short) attitude->att_roll[i];
-		short_ptr = (short *) &line[6];
-		*short_ptr = (short) attitude->att_pitch[i];
-		short_ptr = (short *) &line[8];
-		*short_ptr = (short) attitude->att_heave[i];
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) attitude->att_heading[i];
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) attitude->att_time[i], (void *) &line[0]);
+		mb_put_binary_short(MB_NO, (unsigned short) attitude->att_sensor_status[i], (void *) &line[2]);
+		mb_put_binary_short(MB_NO, (short) attitude->att_roll[i], (void *) &line[4]);
+		mb_put_binary_short(MB_NO, (short) attitude->att_pitch[i], (void *) &line[6]);
+		mb_put_binary_short(MB_NO, (short) attitude->att_heave[i], (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) attitude->att_heading[i], (void *) &line[10]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -6371,12 +5542,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp,
 		checksum += uchar_ptr[0];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[2];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
 		write_len = fwrite(line,1,4,mbfp);
@@ -6417,8 +5583,6 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -6461,12 +5625,9 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_POS_HEADER_SIZE 
+	mb_put_binary_int(MB_NO, (int) (EM2_POS_HEADER_SIZE 
 			+ store->pos_input_size 
-			- (store->pos_input_size % 2) + 8;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+			- (store->pos_input_size % 2) + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6479,10 +5640,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_POS;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_POS), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6500,10 +5658,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6522,53 +5677,18 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(store->pos_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(store->pos_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(store->pos_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(store->pos_serial);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(store->pos_latitude);
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) mb_swap_int(store->pos_longitude);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) mb_swap_short(store->pos_quality);
-		short_ptr = (short *) &line[22];
-		*short_ptr = (unsigned short) mb_swap_short(store->pos_speed);
-		short_ptr = (short *) &line[24];
-		*short_ptr = (unsigned short) mb_swap_short(store->pos_course);
-		short_ptr = (short *) &line[26];
-		*short_ptr = (unsigned short) mb_swap_short(store->pos_heading);
+		mb_put_binary_int(MB_NO, (int) store->pos_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) store->pos_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->pos_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->pos_serial, (void *) &line[10]);
+		mb_put_binary_int(MB_NO, (int) store->pos_latitude, (void *) &line[12]); 
+		mb_put_binary_int(MB_NO, (int) store->pos_longitude, (void *) &line[16]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->pos_quality, (void *) &line[20]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->pos_speed, (void *) &line[22]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->pos_course, (void *) &line[24]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->pos_heading, (void *) &line[26]);
 		line[28] = (mb_u_char) store->pos_system;
 		line[29] = (mb_u_char) store->pos_input_size;
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) store->pos_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) store->pos_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) store->pos_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) store->pos_serial;
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) store->pos_latitude;
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) store->pos_longitude;
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) store->pos_quality;
-		short_ptr = (short *) &line[22];
-		*short_ptr = (unsigned short) store->pos_speed;
-		short_ptr = (short *) &line[24];
-		*short_ptr = (unsigned short) store->pos_course;
-		short_ptr = (short *) &line[26];
-		*short_ptr = (unsigned short) store->pos_heading;
-		line[28] = (mb_u_char) store->pos_system;
-		line[29] = (mb_u_char) store->pos_input_size;
-#endif
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -6620,12 +5740,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp,
 		line[1] = 0x03;
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[2];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
 		write_len = fwrite(&line[1],1,3,mbfp);
@@ -6666,8 +5781,6 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -6710,11 +5823,8 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_SVP2_HEADER_SIZE 
-			+ EM2_SVP2_SLICE_SIZE * store->svp_num + 8;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_SVP2_HEADER_SIZE 
+			+ EM2_SVP2_SLICE_SIZE * store->svp_num + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6727,10 +5837,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_SVP2;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_SVP2), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6748,10 +5855,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6770,41 +5874,14 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(store->svp_use_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(store->svp_use_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(store->svp_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(store->svp_serial);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(store->svp_origin_date);
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) mb_swap_int(store->svp_origin_msec);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) mb_swap_short(store->svp_num);
-		short_ptr = (short *) &line[22];
-		*short_ptr = (unsigned short) mb_swap_short(store->svp_depth_res);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) store->svp_use_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) store->svp_use_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) store->svp_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) store->svp_serial;
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) store->svp_origin_date;
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) store->svp_origin_msec;
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) store->svp_num;
-		short_ptr = (short *) &line[22];
-		*short_ptr = (unsigned short) store->svp_depth_res;
-#endif
+		mb_put_binary_int(MB_NO, (int) store->svp_use_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) store->svp_use_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_serial, (void *) &line[10]);
+		mb_put_binary_int(MB_NO, (int) store->svp_origin_date, (void *) &line[12]); 
+		mb_put_binary_int(MB_NO, (int) store->svp_origin_msec, (void *) &line[16]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_num, (void *) &line[20]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_depth_res, (void *) &line[22]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -6829,17 +5906,8 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<store->svp_num;i++)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(store->svp_depth[i]);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(store->svp_vel[i]);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) store->svp_depth[i];
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) store->svp_vel[i];
-#endif
+		mb_put_binary_int(MB_NO, (int) store->svp_depth[i], (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) store->svp_vel[i], (void *) &line[4]); 
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -6871,12 +5939,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 		checksum += uchar_ptr[0];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[2];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
 		write_len = fwrite(line,1,4,mbfp);
@@ -6917,9 +5980,8 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	short	label;
 	int	write_len;
 	int	write_size;
+	int	offset;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -6978,11 +6040,8 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_BATH_MBA_HEADER_SIZE 
-			+ EM2_BATH_MBA_BEAM_SIZE * ping->png_nbeams + 8;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_BATH_MBA_HEADER_SIZE 
+			+ EM2_BATH_MBA_BEAM_SIZE * ping->png_nbeams + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6995,10 +6054,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_BATH_MBA;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_BATH_MBA), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7016,10 +6072,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7038,61 +6091,21 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(ping->png_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(ping->png_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_serial);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(ping->png_latitude);
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) mb_swap_int(ping->png_longitude);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_speed);
-		short_ptr = (short *) &line[22];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_heading);
-		short_ptr = (short *) &line[24];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_ssv);
-		short_ptr = (short *) &line[26];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_xducer_depth);
+		mb_put_binary_int(MB_NO, (int) ping->png_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) ping->png_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_serial, (void *) &line[10]);
+		mb_put_binary_int(MB_NO, (int) ping->png_latitude, (void *) &line[12]); 
+		mb_put_binary_int(MB_NO, (int) ping->png_longitude, (void *) &line[16]); 
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_speed, (void *) &line[20]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_heading, (void *) &line[22]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_ssv, (void *) &line[24]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_xducer_depth, (void *) &line[26]);
 		line[28] = (mb_u_char) ping->png_nbeams_max;
 		line[29] = (mb_u_char) ping->png_nbeams;
 		line[30] = (mb_u_char) ping->png_depth_res;
 		line[31] = (mb_u_char) ping->png_distance_res;
-		short_ptr = (short *) &line[32];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_sample_rate);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) ping->png_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) ping->png_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) ping->png_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) ping->png_serial;
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) ping->png_latitude;
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) ping->png_longitude;
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) ping->png_speed;
-		short_ptr = (short *) &line[22];
-		*short_ptr = (unsigned short) ping->png_heading;
-		short_ptr = (short *) &line[24];
-		*short_ptr = (unsigned short) ping->png_ssv;
-		short_ptr = (short *) &line[26];
-		*short_ptr = (unsigned short) ping->png_xducer_depth;
-		line[28] = (mb_u_char) ping->png_nbeams_max;
-		line[29] = (mb_u_char) ping->png_nbeams;
-		line[30] = (mb_u_char) ping->png_depth_res;
-		line[31] = (mb_u_char) ping->png_distance_res;
-		short_ptr = (short *) &line[32];
-		*short_ptr = (unsigned short) ping->png_sample_rate;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_sample_rate, (void *) &line[32]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -7117,53 +6130,21 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<ping->png_nbeams;i++)
 		{
-#ifdef BYTESWAPPED
-		short_ptr = (short *) &line[0];
 		if (store->sonar == EM2_EM120
 			|| store->sonar == EM2_EM300)
-		    *short_ptr = (unsigned short) mb_swap_short(ping->png_depth[i]);
+		    mb_put_binary_short(MB_NO, (unsigned short) ping->png_depth[i], (void *) &line[0]);
 		else
-		    *short_ptr = (short) mb_swap_short(ping->png_depth[i]);
-		short_ptr = (short *) &line[2];
-		*short_ptr = (short) mb_swap_short(ping->png_acrosstrack[i]);
-		short_ptr = (short *) &line[4];
-		*short_ptr = (short) mb_swap_short(ping->png_alongtrack[i]);
-		short_ptr = (short *) &line[6];
-		*short_ptr = (short) mb_swap_short(ping->png_depression[i]);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_azimuth[i]);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_range[i]);
+		    mb_put_binary_short(MB_NO, (short) ping->png_depth[i], (void *) &line[0]);
+		mb_put_binary_short(MB_NO, (short) ping->png_acrosstrack[i], (void *) &line[2]);
+		mb_put_binary_short(MB_NO, (short) ping->png_alongtrack[i], (void *) &line[4]);
+		mb_put_binary_short(MB_NO, (short) ping->png_depression[i], (void *) &line[6]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_azimuth[i], (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_range[i], (void *) &line[10]);
 		line[12] = (mb_u_char) ping->png_quality[i];
 		line[13] = (mb_u_char) ping->png_window[i];
-		short_ptr = (short *) &line[14];
-		*short_ptr = (short) mb_swap_short(ping->png_amp[i]);
+		mb_put_binary_short(MB_NO, (short) ping->png_amp[i], (void *) &line[14]);
 		line[16] = (mb_u_char) ping->png_beam_num[i];
 		line[17] = (char) ping->png_beamflag[i];
-#else
-		short_ptr = (short *) &line[0];
-		if (store->sonar == EM2_EM120
-			|| store->sonar == EM2_EM300)
-		    *short_ptr = (unsigned short) ping->png_depth[i];
-		else
-		    *short_ptr = (short) ping->png_depth[i];
-		short_ptr = (short *) &line[2];
-		*short_ptr = (short) ping->png_acrosstrack[i];
-		short_ptr = (short *) &line[4];
-		*short_ptr = (short) ping->png_alongtrack[i];
-		short_ptr = (short *) &line[6];
-		*short_ptr = (short) ping->png_depression[i];
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) ping->png_azimuth[i];
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) ping->png_range[i];
-		line[12] = (mb_u_char) ping->png_quality[i];
-		line[13] = (mb_u_char) ping->png_window[i];
-		short_ptr = (short *) &line[14];
-		*short_ptr = (short) ping->png_amp[i];
-		line[16] = (mb_u_char) ping->png_beam_num[i];
-		line[17] = (char) ping->png_beamflag[i];
-#endif
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -7195,12 +6176,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 		checksum += uchar_ptr[0];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[2];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
 		write_len = fwrite(line,1,4,mbfp);
@@ -7242,8 +6218,6 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	i, j;
 
@@ -7290,11 +6264,8 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_RAWBEAM_HEADER_SIZE 
-			+ EM2_RAWBEAM_BEAM_SIZE * ping->png_nrawbeams + 8;
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+	mb_put_binary_int(MB_NO, (int) (EM2_RAWBEAM_HEADER_SIZE 
+			+ EM2_RAWBEAM_BEAM_SIZE * ping->png_nrawbeams + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -7307,10 +6278,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_RAWBEAM;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_RAWBEAM), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7328,10 +6296,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7350,33 +6315,13 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(ping->png_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(ping->png_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_serial);
+		mb_put_binary_int(MB_NO, (int) ping->png_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) ping->png_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_serial, (void *) &line[10]);
 		line[12] = (mb_u_char) ping->png_nbeams_max;
 		line[13] = (mb_u_char) ping->png_nrawbeams;
-		short_ptr = (short *) &line[14];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_ssv);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) ping->png_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) ping->png_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) ping->png_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) ping->png_serial;
-		line[12] = (mb_u_char) ping->png_nbeams_max;
-		line[13] = (mb_u_char) ping->png_nrawbeams;
-		short_ptr = (short *) &line[14];
-		*short_ptr = (unsigned short) ping->png_ssv;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_ssv, (void *) &line[14]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -7401,25 +6346,11 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<ping->png_nrawbeams;i++)
 		{
-#ifdef BYTESWAPPED
-		short_ptr = (short *) &line[0];
-		*short_ptr = (short) mb_swap_short(ping->png_rawpointangle[i]);
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_rawtiltangle[i]);
-		short_ptr = (short *) &line[4];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_rawrange[i]);
+		mb_put_binary_short(MB_NO, (short) ping->png_rawpointangle[i], (void *) &line[0]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_rawtiltangle[i], (void *) &line[2]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_rawrange[i], (void *) &line[4]);
 		line[6] = (mb_s_char) ping->png_rawamp[i];
 		line[7] = (mb_u_char) ping->png_rawbeam_num[i];
-#else
-		short_ptr = (short *) &line[0];
-		*short_ptr = (short) ping->png_rawpointangle[i];
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) ping->png_rawtiltangle[i];
-		short_ptr = (short *) &line[4];
-		*short_ptr = (unsigned short) ping->png_rawrange[i];
-		line[6] = (mb_s_char) ping->png_rawamp[i];
-		line[7] = (mb_u_char) ping->png_rawbeam_num[i];
-#endif
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -7451,12 +6382,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp,
 		checksum += uchar_ptr[0];
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[2];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
 		write_len = fwrite(line,1,4,mbfp);
@@ -7498,8 +6424,6 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 	int	write_len;
 	int	write_size;
 	unsigned short checksum;
-	short	*short_ptr;
-	int	*int_ptr;
 	mb_u_char   *uchar_ptr;
 	int	offset;
 	int	i, j;
@@ -7527,8 +6451,6 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:            %d\n",store->date);
 		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
-		fprintf(stderr,"dbg5       png_date:        %d\n",ping->png_date);
-		fprintf(stderr,"dbg5       png_msec:        %d\n",ping->png_msec);
 		fprintf(stderr,"dbg5       png_ss_date:     %d\n",ping->png_ss_date);
 		fprintf(stderr,"dbg5       png_ss_msec:     %d\n",ping->png_ss_msec);
 		fprintf(stderr,"dbg5       png_count:       %d\n",ping->png_count);
@@ -7551,7 +6473,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 				i, ping->png_beam_index[i], ping->png_sort_direction[i], 
 				ping->png_beam_samples[i], ping->png_start_sample[i], 
 				ping->png_center_sample[i]);
-		fprintf(stderr,"dbg5       cnt  ssraw\n");
+		fprintf(stderr,"dbg5       cnt  ss\n");
 		fprintf(stderr,"dbg5       --------------------------------------------------\n");
 		for (i=0;i<ping->png_npixels;i++)
 			fprintf(stderr,"dbg5        %d %d\n",
@@ -7569,13 +6491,9 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_SS_MBA_HEADER_SIZE 
+	mb_put_binary_int(MB_NO, (int) (EM2_SS_MBA_HEADER_SIZE 
 			+ EM2_SS_MBA_BEAM_SIZE * ping->png_nbeams_ss 
-			+ ping->png_npixels - (ping->png_npixels % 2) + 8
-			+ 2 * ping->png_pixels_ss * sizeof(short);
-#ifdef BYTESWAPPED
-	write_size = (int) mb_swap_int(write_size);
-#endif
+			+ ping->png_npixels - (ping->png_npixels % 2) + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -7588,10 +6506,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_SS_MBA;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (EM2_SS_MBA), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7608,10 +6523,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 
 	if (status == MB_SUCCESS)
 		{
-		label = store->sonar;
-#ifdef BYTESWAPPED
-		label = (short) mb_swap_short(label);
-#endif
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7630,65 +6542,22 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-#ifdef BYTESWAPPED
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) mb_swap_int(ping->png_ss_date);
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) mb_swap_int(ping->png_ss_msec);
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_count);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_serial);
-		short_ptr = (short *) &line[12];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_max_range);
-		short_ptr = (short *) &line[14];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_r_zero);
-		short_ptr = (short *) &line[16];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_r_zero_corr);
-		short_ptr = (short *) &line[18];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_tvg_start);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_tvg_stop);
+		mb_put_binary_int(MB_NO, (int) ping->png_ss_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) ping->png_ss_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_serial, (void *) &line[10]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_max_range, (void *) &line[12]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_r_zero, (void *) &line[14]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_r_zero_corr, (void *) &line[16]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_tvg_start, (void *) &line[18]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_tvg_stop, (void *) &line[20]);
 		line[22] = (mb_s_char) ping->png_bsn;
 		line[23] = (mb_s_char) ping->png_bso;
-		short_ptr = (short *) &line[24];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_tx);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_tx, (void *) &line[24]);
 		line[26] = (mb_u_char) ping->png_tvg_crossover;
 		line[27] = (mb_u_char) ping->png_nbeams_ss;
-		short_ptr = (short *) &line[28];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_pixel_size);
-		short_ptr = (short *) &line[30];
-		*short_ptr = (unsigned short) mb_swap_short(ping->png_pixels_ss);
-#else
-		int_ptr = (int *) &line[0];
-		*int_ptr = (int) ping->png_ss_date;
-		int_ptr = (int *) &line[4];
-		*int_ptr = (int) ping->png_ss_msec;
-		short_ptr = (short *) &line[8];
-		*short_ptr = (unsigned short) ping->png_count;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (unsigned short) ping->png_serial;
-		short_ptr = (short *) &line[12];
-		*short_ptr = (unsigned short) ping->png_max_range;
-		short_ptr = (short *) &line[14];
-		*short_ptr = (unsigned short) ping->png_r_zero;
-		short_ptr = (short *) &line[16];
-		*short_ptr = (unsigned short) ping->png_r_zero_corr;
-		short_ptr = (short *) &line[18];
-		*short_ptr = (unsigned short) ping->png_tvg_start;
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) ping->png_tvg_stop;
-		line[22] = (mb_s_char) ping->png_bsn;
-		line[23] = (mb_s_char) ping->png_bso;
-		short_ptr = (short *) &line[24];
-		*short_ptr = (unsigned short) ping->png_tx;
-		line[26] = (mb_u_char) ping->png_tvg_crossover;
-		line[27] = (mb_u_char) ping->png_nbeams_ss;
-		short_ptr = (short *) &line[28];
-		*short_ptr = (short) ping->png_pixel_size;
-		short_ptr = (short *) &line[30];
-		*short_ptr = (short) ping->png_pixels_ss;
-#endif
+		mb_put_binary_short(MB_NO, (short) ping->png_pixel_size, (void *) &line[28]);
+		mb_put_binary_short(MB_NO, (short) ping->png_pixels_ss, (void *) &line[30]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -7713,21 +6582,10 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<ping->png_nbeams_ss;i++)
 		{
-#ifdef BYTESWAPPED
 		line[0] = (mb_u_char) ping->png_beam_index[i];
 		line[1] = (mb_s_char) ping->png_sort_direction[i];
-		short_ptr = (short *) &line[2];
-		*short_ptr = (short) mb_swap_short(ping->png_beam_samples[i]);
-		short_ptr = (short *) &line[4];
-		*short_ptr = (short) mb_swap_short(ping->png_center_sample[i]);
-#else
-		line[0] = (mb_u_char) ping->png_beam_index[i];
-		line[1] = (mb_s_char) ping->png_sort_direction[i];
-		short_ptr = (short *) &line[2];
-		*short_ptr = (short) ping->png_beam_samples[i];
-		short_ptr = (short *) &line[4];
-		*short_ptr = (short) ping->png_center_sample[i];
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_beam_samples[i], (void *) &line[2]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_center_sample[i], (void *) &line[4]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -7748,7 +6606,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 			}
 		}
 
-	/* output raw sidescan data */
+	/* output sidescan data */
 	if (status == MB_SUCCESS)
 		{
 		write_size = ping->png_npixels + 1 - (ping->png_npixels % 2);
@@ -7779,13 +6637,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 	    offset = (MBSYS_SIMRAD2_MAXPIXELS - ping->png_pixels_ss) / 2;
 	    for (i=0;i<ping->png_pixels_ss;i++)
 		{
-#ifdef BYTESWAPPED
-		short_ptr = (short *) &line[2*i];
-		*short_ptr = (short) mb_swap_short(ping->png_ss[offset+i]);
-#else
-		short_ptr = (short *) &line[2*i];
-		*short_ptr = (short) ping->png_ss[offset+i];
-#endif
+		mb_put_binary_short(MB_NO, (short) ping->png_ss[offset+i], (void *) &line[2*i]);
 		}
 		
 	    /* compute checksum */
@@ -7814,13 +6666,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 	    offset = (MBSYS_SIMRAD2_MAXPIXELS - ping->png_pixels_ss) / 2;
 	    for (i=0;i<ping->png_pixels_ss;i++)
 		{
-#ifdef BYTESWAPPED
-		short_ptr = (short *) &line[sizeof(short)*i];
-		*short_ptr = (short) mb_swap_short(ping->png_ssalongtrack[offset+i]);
-#else
-		short_ptr = (short *) &line[sizeof(short)*i];
-		*short_ptr = (short) ping->png_ssalongtrack[offset+i];
-#endif
+		mb_put_binary_short(MB_NO, (short) ping->png_ssalongtrack[offset+i], (void *) &line[2*i]);
 		}
 		
 	    /* compute checksum */
@@ -7849,12 +6695,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 		line[1] = 0x03;
 	    
 		/* set checksum */
-		short_ptr = (short *) &line[2];
-#ifdef BYTESWAPPED
-		*short_ptr = (unsigned short) mb_swap_short(checksum);
-#else
-		*short_ptr = (unsigned short) checksum;
-#endif
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
 
 		/* write out data */
 		write_len = fwrite(&line[1],1,3,mbfp);
