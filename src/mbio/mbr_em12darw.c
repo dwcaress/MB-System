@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    The MB-system:	mbr_em12darw.c	2/2/93
+ *	$Id: mbr_em12darw.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
+ *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -11,24 +11,19 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbr_hsuricen.c contains the functions for reading and writing
- * multibeam data in the HSURICEN format.  
+ * mbr_em12darw.c contains the functions for reading and writing
+ * multibeam data in the EM12DARW format.  
  * These functions include:
- *   mbr_alm_hsuricen	- allocate read/write memory
- *   mbr_dem_hsuricen	- deallocate read/write memory
- *   mbr_rt_hsuricen	- read and translate data
- *   mbr_wt_hsuricen	- translate and write data
+ *   mbr_alm_em12darw	- allocate read/write memory
+ *   mbr_dem_em12darw	- deallocate read/write memory
+ *   mbr_rt_em12darw	- read and translate data
+ *   mbr_wt_em12darw	- translate and write data
  *
- * Author:	D. W. Caress
- * Date:	February 2, 1993
+ * Author:	R. B. Owens
+ * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
- * Revision 4.1  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/02/21  03:59:50  caress
- * First cut at new version. Altered to be consistent
- * with passing of three types of data: bathymetry,
- * amplitude, and sidescan.
+ * Revision 4.0  1994/03/05  22:54:09  caress
+ * First cut.
  *
  * Revision 3.0  1993/05/14  22:56:29  sohara
  * initial version
@@ -44,19 +39,21 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
-#include "../../include/mbsys_hsds.h"
-#include "../../include/mbf_hsuricen.h"
+#include "mbf_em12darw.h"
+#include "mbsys_em12.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_hsuricen(verbose,mbio_ptr,error)
+int mbr_alm_em12darw(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
-	char	*function_name = "mbr_alm_hsuricen";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	struct mbf_em12darw_struct *data;
+	char	*data_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -75,13 +72,19 @@ int	*error;
 	status = MB_SUCCESS;
 
 	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_hsuricen_struct);
-	mb_io_ptr->data_structure_size = 
-		sizeof(struct mbf_hsuricen_data_struct);
+	mb_io_ptr->structure_size = sizeof(struct mbf_em12darw_struct);
 	status = mb_malloc(verbose,mb_io_ptr->structure_size,
 				&mb_io_ptr->raw_data,error);
-	status = mb_malloc(verbose,sizeof(struct mbsys_hsds_struct),
+	status = mb_malloc(verbose,sizeof(struct mbsys_em12_struct),
 				&mb_io_ptr->store_data,error);
+
+	/* get pointer to mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	data = (struct mbf_em12darw_struct *) mb_io_ptr->raw_data;
+	data_ptr = (char *) data;
+
+	/* initialize everything to zeros */
+	mbr_zero_em12darw(verbose,data_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -98,12 +101,12 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_hsuricen(verbose,mbio_ptr,error)
+int mbr_dem_em12darw(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_dem_hsuricen";
+	char	*function_name = "mbr_dem_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
@@ -124,6 +127,7 @@ int	*error;
 	status = mb_free(verbose,mb_io_ptr->raw_data,error);
 	status = mb_free(verbose,mb_io_ptr->store_data,error);
 
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -139,23 +143,107 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hsuricen(verbose,mbio_ptr,store_ptr,error)
+int mbr_zero_em12darw(verbose,data_ptr,error)
 int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
+char	*data_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_rt_hsuricen";
+	char	*function_name = "mbr_zero_em12darw";
+	int	status = MB_SUCCESS;
+	struct mbf_em12darw_struct *data;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		}
+
+	/* get pointer to data descriptor */
+	data = (struct mbf_em12darw_struct *) data_ptr;
+
+	/* initialize everything to zeros */
+	if (data != NULL)
+		{
+		/* record type */
+		data->func = 150;
+
+		/* time */
+		data->year = 0;
+		data->jday = 0;
+		data->minute = 0;
+		data->secs = 0;
+
+		/* navigation */
+		data->latitude = 0.0;
+		data->longitude = 0.0;
+		data->speed = 0.0;
+		data->gyro = 0.0;
+		data->roll = 0.0;
+		data->pitch = 0.0;
+		data->heave = 0.0;
+
+		/* other parameters */
+		data->corflag = 0;
+		data->utm_merd = 0.0;
+		data->utm_zone = 0;
+		data->posq = 0;
+		data->pingno = 0;
+		data->mode = 0;
+		data->depthl = 0.0;
+		data->sndval = 0.0;
+
+		/* beam values */
+		for (i=0;i<MBSYS_EM12_BEAMS;i++)
+			{
+			data->depth[i] = 0;
+			data->distacr[i] = 0;
+			data->distalo[i] = 0;
+			data->range[i] = 0;
+			data->refl[i] = 0;
+			data->beamq[i] = 0;
+			}
+		}
+
+	/* assume success */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_em12darw(verbose,mbio_ptr,store_ptr,error)
+int	verbose;
+char	*mbio_ptr;
+char	*store_ptr;  
+int	*error;
+{
+	char	*function_name = "mbr_rt_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_hsuricen_struct *dataplus;
-	struct mbf_hsuricen_data_struct *data;
-	struct mbsys_hsds_struct *store;
+	struct mbf_em12darw_struct *data;
+	struct mbsys_em12_struct *store;
 	char	*datacomment;
 	int	time_j[4];
-	int	i, j, k;
-	int	id;
-	double	scale;
+	int	i, j, k, n, data_kind;
+	int	iamp;
+	double	depthscale,dacrscale,daloscale,rangescale,reflscale;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -165,22 +253,21 @@ int	*error;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);  
 		}
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_hsuricen_struct *) mb_io_ptr->raw_data;
-	data = &(dataplus->data);
-	datacomment = (char *) data;
-	dataplus->kind = MB_DATA_DATA;
-	store = (struct mbsys_hsds_struct *) store_ptr;
+	data = (struct mbf_em12darw_struct *) mb_io_ptr->raw_data;
+	datacomment = (char *) data->depth;
+	store = (struct mbsys_em12_struct *) store_ptr;	
+
 
 	/* read next record from file */
-	if ((status = fread(data,1,mb_io_ptr->data_structure_size,
-			mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) 
+	if ((status = fread(data,1,mb_io_ptr->structure_size,
+			mb_io_ptr->mbfp)) == mb_io_ptr->structure_size) 
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -191,46 +278,47 @@ int	*error;
 		*error = MB_ERROR_EOF;
 		}
 
+
 	/* check for comment or unintelligible records */
 	if (status == MB_SUCCESS)
 		{
-		if (data->sec == 25443)
+		if (data->func == 100)
 			{
-			dataplus->kind = MB_DATA_COMMENT;
+			data_kind = MB_DATA_COMMENT;
 			}
 		else if (data->year == 0)
 			{
-			dataplus->kind = MB_DATA_NONE;
+			data_kind = MB_DATA_NONE;
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 		else
 			{
-			dataplus->kind = MB_DATA_DATA;
+			data_kind = MB_DATA_DATA;
 			}
 		}
 
 	/* set kind and error in mb_io_ptr */
-	mb_io_ptr->new_kind = dataplus->kind;
+	mb_io_ptr->new_kind = data_kind;
 	mb_io_ptr->new_error = *error;
 
 	/* translate values to current ping variables 
 		in mbio descriptor structure */
 	if (status == MB_SUCCESS 
-		&& dataplus->kind == MB_DATA_DATA)
+		&& data_kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_j[0] = data->year;
-		time_j[1] = data->day;
-		time_j[2] = data->min;
-		time_j[3] = data->sec/100;
+		time_j[0] = data->year + 1900;
+		time_j[1] = data->jday;
+		time_j[2] = data->minute;
+		time_j[3] = data->secs/100;
 		mb_get_itime(verbose,time_j,mb_io_ptr->new_time_i);
 		mb_get_time(verbose,mb_io_ptr->new_time_i,
 			&(mb_io_ptr->new_time_d));
 
-		/* get navigation */
-		mb_io_ptr->new_lon = 0.0000001*data->lon;
-		mb_io_ptr->new_lat = 0.0000001*data->lat;
+		/* get navigation */ 
+		mb_io_ptr->new_lon = data->longitude;
+		mb_io_ptr->new_lat = data->latitude;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (mb_io_ptr->new_lon > 0.) 
@@ -254,32 +342,43 @@ int	*error;
 			}
 
 		/* get heading */
-		mb_io_ptr->new_heading = 0.1*data->hdg;
+		mb_io_ptr->new_heading = data->gyro;
 
-		/* get speed (convert 100Xnm/hr to km/hr) */
-		mb_io_ptr->new_speed = 0.018333333*data->speed;
+		/* get speed (convert nm/hr to km/hr) */
+		mb_io_ptr->new_speed = 1.8333333*data->speed;
 
-		/* read distance and depth values into storage arrays */
-		/* switch order of data as it is read into the global arrays */
-		id = mb_io_ptr->beams_bath - 1;
-		if (data->scale != 100 && data->scale < 0)
+		/* read beam values into storage arrays */
+		/* DO NOT switch order of data as it is read 
+			into the global arrays */
+		if (data->mode == 1)
 			{
-			scale = 0.01*data->scale;
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
-				{
-				mb_io_ptr->new_bath_acrosstrack[id-i] 
-					= scale*data->dist[i];
-				mb_io_ptr->new_bath[id-i] 
-					= scale*data->deph[i];
-				}
+			depthscale = 0.1;
+			dacrscale  = 0.2;
+			daloscale  = 0.2;
+			rangescale = 0.2;
+			reflscale  = 0.5;
 			}
-		else
+		else if (data->mode == 2)
 			{
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
-				{
-				mb_io_ptr->new_bath_acrosstrack[id-i] = data->dist[i];
-				mb_io_ptr->new_bath[id-i] = data->deph[i];
-				}
+			depthscale = 0.2;
+			dacrscale  = 0.5;
+			daloscale  = 0.5;
+			rangescale = 0.8;
+			reflscale  = 0.5;
+			}
+		for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			mb_io_ptr->new_bath[i] 
+				= (int)(depthscale*data->depth[i]);
+			mb_io_ptr->new_bath_acrosstrack[i] 
+				= (int)(dacrscale*data->distacr[i]);
+			mb_io_ptr->new_bath_alongtrack[i] 
+				= (int)(daloscale*data->distalo[i]);
+			}
+		for (i=0;i<mb_io_ptr->beams_amp;i++)
+			{
+			iamp = (int)(reflscale*data->refl[i]);
+			mb_io_ptr->new_amp[i] = iamp+200;
 			}
 
 		/* print debug statements */
@@ -314,23 +413,24 @@ int	*error;
 				mb_io_ptr->new_heading);
 			fprintf(stderr,"dbg4       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
-			fprintf(stderr,"dbg4       beams_amp: %d\n",
+			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  amp[%d]: %d  bathdist[%d]: %d\n",
+			  fprintf(stderr,"dbg4       beam:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
 				i,mb_io_ptr->new_bath[i],
-				i,mb_io_ptr->new_amp[i],
-				i,mb_io_ptr->new_bath_acrosstrack[i]);
+				mb_io_ptr->new_amp[i],
+				mb_io_ptr->new_bath_acrosstrack[i],
+				mb_io_ptr->new_bath_alongtrack[i]);
 			}
 
 		/* done translating values */
 
 		}
 	else if (status == MB_SUCCESS 
-		&& dataplus->kind == MB_DATA_COMMENT)
+		&& data_kind == MB_DATA_COMMENT)
 		{
 		/* copy comment */
-		strncpy(mb_io_ptr->new_comment,&datacomment[2],253);
+		strncpy(mb_io_ptr->new_comment,datacomment,256);
 
 		/* print debug statements */
 		if (verbose >= 4)
@@ -345,115 +445,52 @@ int	*error;
 			}
 		}
 
-	/* translate values to hydrosweep data storage structure */
+	/* translate values to em12 data storage structure */
 	if (status == MB_SUCCESS
 		&& store != NULL)
 		{
 		/* type of data record */
-		store->kind = dataplus->kind;
+		store->kind = data_kind;
 
-		/* position (all records ) */
-		store->lon = mb_io_ptr->new_lon;
-		store->lat = mb_io_ptr->new_lat;
-		if (store->lon > 180.) 
-			store->lon = store->lon - 360.;
-		else if (store->lon < -180.)
-			store->lon = store->lon + 360.;
+		/* time */
+		store->year = data->year;
+		store->jday = data->jday;
+		store->minute = data->minute;
+		store->secs = data->secs;
 
-		/* time stamp (all records ) */
-		store->year = mb_io_ptr->new_time_i[0];
-		store->month = mb_io_ptr->new_time_i[1];
-		store->day = mb_io_ptr->new_time_i[2];
-		store->hour = mb_io_ptr->new_time_i[3];
-		store->minute = mb_io_ptr->new_time_i[4];
-		store->second = mb_io_ptr->new_time_i[5];
-		store->alt_minute = 0;
-		store->alt_second = 0;
+		/* navigation */
+		store->latitude = data->latitude;
+		store->longitude = data->longitude;
+		store->speed = data->speed;
+		store->gyro = data->gyro;
+		store->roll = data->roll;
+		store->pitch = data->pitch;
+		store->heave = data->heave;
 
-		/* additional navigation and depths (ERGNMESS and ERGNEICH) */
-		store->course_true = mb_io_ptr->new_heading;
-		store->speed_transverse = 0.0;
-		store->speed = 0.005092593*data->speed;
-		store->speed_reference[0] = data->speed_ref;
-		store->pitch = 0.1*data->pitch;
-		store->track = 0;
-		store->depth_center 
-			= mb_io_ptr->new_bath[mb_io_ptr->beams_bath/2];
-		store->depth_scale = 0.01*data->scale;
-		store->spare = 1;
-		id = MBSYS_HSDS_BEAMS - 1;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+		/* other parameters */
+		store->corflag = data->corflag;
+		store->utm_merd = data->utm_merd;
+		store->utm_zone = data->utm_zone;
+		store->posq = data->posq;
+		store->pingno = data->pingno;
+		store->mode = data->mode;
+		store->depthl = data->depthl;
+		store->sndval = data->sndval;
+
+		/* beam values */
+		for (i=0;i<MBSYS_EM12_BEAMS;i++)
 			{
-			store->distance[id-i] = data->dist[i];
-			store->depth[id-i] = data->deph[i];
+			store->depth[i] = data->depth[i];
+			store->distacr[i] = data->distacr[i];
+			store->distalo[i] = data->distalo[i];
+			store->range[i] = data->range[i];
+			store->refl[i] = data->refl[i];
+			store->beamq[i] = data->beamq[i];
 			}
 
-		/* travel time data (ERGNSLZT) */
-		store->course_ground = 0.1*data->course;
-		store->speed_ground = 0.0;
-		store->heave = 0.0;
-		store->roll = 0.0;
-		store->time_center = 0.0;
-		store->time_scale = 0.0;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			store->time[i] = 0;
-		for (i=0;i<11;i++)
-			store->gyro[i] = 0.0;
-
-		/* amplitude data (ERGNAMPL) */
-		store->mode[0] = '\0';
-		store->trans_strbd = 0;
-		store->trans_vert = 0;
-		store->trans_port = 0;
-		store->pulse_len_strbd = 0;
-		store->pulse_len_vert = 0;
-		store->pulse_len_port = 0;
-		store->gain_start = 0;
-		store->r_compensation_factor = 0;
-		store->compensation_start = 0;
-		store->increase_start = 0;
-		store->tvc_near = 0;
-		store->tvc_far = 0;
-		store->increase_int_near = 0;
-		store->increase_int_far = 0;
-		store->gain_center = 0;
-		store->filter_gain = 0.0;
-		store->amplitude_center = 0;
-		store->echo_duration_center = 0;
-		store->echo_scale_center = 0;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			{
-			store->amplitude[i] = 0;
-			store->echo_duration[i] = 0;
-			}
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			{
-			store->gain[i] = 0;
-			store->echo_scale[i] = 0;
-			}
-
-		/* mean velocity (ERGNHYDI) */
-		store->draught = 0.0;
-		store->vel_mean = 0.0;
-		store->vel_keel = 0.0;
-		store->tide = 0.0;
-
-		/* water velocity profile (HS_ERGNCTDS) */
-		store->num_vel = 0.0;
-
-		/* navigation source (ERGNPOSI) */
-		store->pos_corr_x = 0.0;
-		store->pos_corr_y = 0.0;
-		strncpy(store->sensors,"\0",8);
-
-		/* comment (LDEOCMNT) */
+		/* comment */
 		strncpy(store->comment,mb_io_ptr->new_comment,
-			MBSYS_HSDS_MAXLINE);
-
-		/* processed backscatter */
-		store->back_scale = 0.0;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			store->back[i] = 0;
+			MBSYS_EM12_MAXLINE);
 		}
 
 	/* print output debug statements */
@@ -471,24 +508,23 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_hsuricen(verbose,mbio_ptr,store_ptr,error)
+int mbr_wt_em12darw(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_wt_hsuricen";
+	char	*function_name = "mbr_wt_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_hsuricen_struct *dataplus;
-	struct mbf_hsuricen_data_struct *data;
-	struct mbsys_hsds_struct *store;
+	struct mbf_em12darw_struct *data;
+	struct mbsys_em12_struct *store;
 	char	*datacomment;
 	int	time_i[6];
 	int	time_j[4];
 	double	lon, lat;
+	double	depthscale, dacrscale,daloscale,rangescale,reflscale;
 	int	i, j;
-	int	id;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -505,18 +541,15 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_hsuricen_struct *) mb_io_ptr->raw_data;
-	data = &(dataplus->data);
-	datacomment = (char *) data;
-	store = (struct mbsys_hsds_struct *) store_ptr;
+	data = (struct mbf_em12darw_struct *) mb_io_ptr->raw_data;
+	datacomment = (char *) data->depth;
+	store = (struct mbsys_em12_struct *) store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Status at beginning of MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       store->kind:    %d\n",
-			store->kind);
 		fprintf(stderr,"dbg5       new_kind:       %d\n",
 			mb_io_ptr->new_kind);
 		fprintf(stderr,"dbg5       new_error:      %d\n",
@@ -525,132 +558,158 @@ int	*error;
 		fprintf(stderr,"dbg5       status:         %d\n",status);
 		}
 
-	/* first set some plausible amounts for some of the 
-		variables in the HSURICEN record */
-	data->course = 0;
-	data->pitch = 0;
-	data->scale = 100;	/* this is a unit scale factor */
-	data->speed_ref = 'B';	/* assume speed is over the ground */
-	data->quality = 0;
 
-	/* second translate values from hydrosweep data storage structure */
+	/*  translate values from em12 data storage structure */
 	if (store != NULL)
 		{
-		dataplus->kind = store->kind;
 		if (store->kind == MB_DATA_DATA)
 			{
-			/* position */
-			if (store->lon < -180.0)
-				store->lon = store->lon + 360.0;
-			if (store->lon > 180.0)
-				store->lon = store->lon - 360.0;
-			data->lon = (int)(0.5 + 10000000.0*store->lon);
-			data->lat = (int)(0.5 + 10000000.0*store->lat);
+			/* record type */
+			data->func = 150;
 
-			/* time stamp */
-			time_i[0] = store->year;
-			time_i[1] = store->month;
-			time_i[2] = store->day;
-			time_i[3] = store->hour;
-			time_i[4] = store->minute;
-			time_i[5] = store->second;
-			mb_get_jtime(verbose,time_i,time_j);
-			data->year = time_j[0];
-			data->day = time_j[1];
-			data->min = time_j[2];
-			data->sec = 100*time_j[3];
+			/* time */
+			data->year = store->year;
+			data->jday = store->jday;
+			data->minute = store->minute;
+			data->secs = store->secs;
 
-			/* additional navigation and depths */
-			data->hdg = 10.0*store->course_true;
-			data->course = 10.0*store->course_ground;
-			data->speed = 196.36363636363*store->speed;
-			data->speed_ref = store->speed_reference[0];
-			data->pitch = 10.0*store->pitch;
-			data->scale = 100*store->depth_scale;
-			id = MBSYS_HSDS_BEAMS - 1;
-			for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+			/* navigation */
+			data->latitude = store->latitude;
+			data->longitude = store->longitude;
+			data->speed = store->speed;
+			data->gyro = store->gyro;
+			data->roll = store->roll;
+			data->pitch = store->pitch;
+			data->heave = store->heave;
+
+			/* other parameters */
+			data->corflag = store->corflag;
+			data->utm_merd = store->utm_merd;
+			data->utm_zone = store->utm_zone;
+			data->posq = store->posq;
+			data->pingno = store->pingno;
+			data->mode = store->mode;
+			data->depthl = store->depthl;
+			data->sndval = store->sndval;
+
+			/* beam values */
+			for (i=0;i<MBSYS_EM12_BEAMS;i++)
 				{
-				data->dist[i] = store->distance[id-i];
-				data->deph[i] = store->depth[id-i];
+				data->depth[i] = store->depth[i];
+				data->distacr[i] = store->distacr[i];
+				data->distalo[i] = store->distalo[i];
+				data->range[i] = store->range[i];
+				data->refl[i] = store->refl[i];
+				data->beamq[i] = store->beamq[i];
 				}
 			}
 
 		/* comment */
 		else if (store->kind == MB_DATA_COMMENT)
 			{
-			strcpy(datacomment,"cc");
-			strncat(datacomment,store->comment,MBSYS_HSDS_MAXLINE);
+			data->func=100;
+			strncpy(datacomment,store->comment,MBSYS_EM12_MAXLINE);
 			}
 		}
-
-	/* set kind from current ping */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR)
-		dataplus->kind = mb_io_ptr->new_kind;
 
 	/* check for comment */
 	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
 		&& mb_io_ptr->new_kind == MB_DATA_COMMENT)
 		{
-		strcpy(datacomment,"cc");
-		strncat(datacomment,mb_io_ptr->new_comment,
-			mb_io_ptr->data_structure_size-3);
+		data->func=100;
+		strncpy(datacomment,mb_io_ptr->new_comment,MBSYS_EM12_MAXLINE);
 		}
 
-	/* else translate current ping data to hsuricen data structure */
+	/* else translate current ping data to em12darw data structure */
 	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
 		&& mb_io_ptr->new_kind == MB_DATA_DATA)
 		{
+		/* record type */
+		data->func=150;
+		if (store == NULL)
+			data->mode = 2;	/* DEEP mode (see scaling
+						 factors below) */
+
 		/* get time */
 		mb_get_jtime(verbose,mb_io_ptr->new_time_i,time_j);
-		data->year = time_j[0];
-		data->day = time_j[1];
-		data->min = time_j[2];
-		data->sec = 100*time_j[3];
+		data->year = time_j[0]-1900;
+		data->jday = time_j[1];
+		data->minute = time_j[2];
+		data->secs = 100*time_j[3];
 
 		/* get navigation */
 		if (mb_io_ptr->new_lon < -180.0)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.0;
 		if (mb_io_ptr->new_lon > 180.0)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.0;
-		data->lon = (int)(0.5 + 10000000.0*mb_io_ptr->new_lon);
-		data->lat = (int)(0.5 + 10000000.0*mb_io_ptr->new_lat);
+		data->longitude = mb_io_ptr->new_lon;
+		data->latitude = mb_io_ptr->new_lat;
+		data->corflag = 0;		/* lat/lon co-ords */
+		data->utm_merd = 0.0;
+		data->utm_zone = 0;
 
 		/* get heading */
-		data->hdg = (int)(0.5 + 10.*mb_io_ptr->new_heading);
+		data->gyro = mb_io_ptr->new_heading;
 
-		/* get speed (convert km/hr to 100Xnm/hr) */
-		data->speed = 54.54545454*mb_io_ptr->new_speed;
+		/* get speed (convert km/hr to nm/hr) */
+		data->speed = 0.545454*mb_io_ptr->new_speed;
+		data->depthl = mb_io_ptr->new_bath[mb_io_ptr->beams_bath/2];
 
-		/* put distance and depth values 
-			into hsuricen data structure */
-		/* switch order of data as it is read 
-			into the output arrays */
-		id = mb_io_ptr->beams_bath - 1;
+		/* put beam values 
+			into em12darw data structure */
+		if (data->mode == 1)
+			{
+			depthscale = 0.1;
+			dacrscale  = 0.2;
+			daloscale  = 0.2;
+			rangescale = 0.2;
+			reflscale  = 0.5;
+			}
+		else
+			{
+			data->mode = 2;
+			depthscale = 0.2;
+			dacrscale  = 0.5;
+			daloscale  = 0.5;
+			rangescale = 0.8;
+			reflscale  = 0.5;
+			}
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data->deph[i] = mb_io_ptr->new_bath[id-i];
-			data->dist[i] = mb_io_ptr->new_bath_acrosstrack[id-i];
+			data->depth[i] = (int)(mb_io_ptr->new_bath[i]
+					/depthscale);
+			data->distacr[i] = 
+				(int) (mb_io_ptr->new_bath_acrosstrack[i]
+				/dacrscale);
+			data->distalo[i] = 
+				(int) (mb_io_ptr->new_bath_alongtrack[i]
+				/daloscale);
 			}
-		}
+		for (i=0;i<mb_io_ptr->beams_amp;i++)
+			{
+			data->refl[i] = (int)((mb_io_ptr->new_amp[i]-200)
+				/reflscale);
+			}
+
+		} /* end if on mb_io_ptr->new_kind */
 
 	/* print debug statements */
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Ready to write data in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       kind:       %d\n",
-			dataplus->kind);
+		fprintf(stderr,"dbg5       kind:       %d\n", 
+				mb_io_ptr->new_kind);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		}
 
 	/* write next record to file */
-	if (dataplus->kind == MB_DATA_DATA
-		|| dataplus->kind == MB_DATA_COMMENT)
+	if (data->func == 150 || data->func == 100)
 		{
-		if ((status = fwrite(data,1,mb_io_ptr->data_structure_size,
+		if ((status = fwrite(data,1,mb_io_ptr->structure_size,
 				mb_io_ptr->mbfp)) 
-				== mb_io_ptr->data_structure_size) 
+				== mb_io_ptr->structure_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -683,5 +742,6 @@ int	*error;
 
 	/* return status */
 	return(status);
+
 }
 /*--------------------------------------------------------------------*/

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbf_sbsiomrg.h	3.00	1/20/93
- *	$Id: mbf_sbsiomrg.h,v 3.0 1993-05-14 22:53:48 sohara Exp $
+ *    The MB-system:	mbf_sbsiomrg.h	1/20/93
+ *	$Id: mbf_sbsiomrg.h,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -12,11 +12,23 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_sbsiomrg.h defines the data structure used by MBIO functions
- * to store multibeam data read from the  MBF_SBSIOMRG format (MBIO id 1).  
+ * to store multibeam data read from the  MBF_SBSIOMRG format (MBIO id 11).  
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.1  1994/02/17  21:19:08  caress
+ * Updated associated MBIO format id in comments.
+ *
+ * Revision 4.0  1994/02/17  20:59:54  caress
+ * First cut at new version. No changes.
+ *
+ * Revision 3.0  1993/05/14  22:53:48  sohara
+ * initial version
+ *
  */
 /*
  * Notes on the MBF_SBSIOMRG data format:

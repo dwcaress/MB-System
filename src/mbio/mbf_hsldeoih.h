@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbf_hsldeoih.h	3.00	3/11/93
- *	$Id: mbf_hsldeoih.h,v 3.0 1993-05-14 22:51:50 sohara Exp $
+ *    The MB-system:	mbf_hsldeoih.h	3/11/93
+ *	$Id: mbf_hsldeoih.h,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -12,11 +12,23 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_hsldeoih.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_HSLDEOIH format (MBIO id 8).  
+ * to store multibeam data read from the MBF_HSLDEOIH format (MBIO id 24).  
  *
  * Author:	D. W. Caress
  * Date:	March 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.1  1994/02/17  21:19:08  caress
+ * Updated associated MBIO format id in comments.
+ *
+ * Revision 4.0  1994/02/17  20:59:54  caress
+ * First cut at new version. No changes.
+ *
+ * Revision 3.0  1993/05/14  22:51:50  sohara
+ * initial version
+ *
  */
 /*
  * Notes on the MBF_HSLDEOIH data format:

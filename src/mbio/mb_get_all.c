@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_get_all.c	3.00	1/26/93
- *    $Id: mb_get_all.c,v 3.1 1993-05-14 22:35:26 sohara Exp $
+ *    The MB-system:	mb_get_all.c	1/26/93
+ *    $Id: mb_get_all.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -22,6 +22,22 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.2  1994/02/23  00:32:27  caress
+ * Fixed several debug messages plus a couple real bugs.
+ *
+ * Revision 4.1  1994/02/20  03:37:05  caress
+ * Fixed a number of bad variable names.
+ *
+ * Revision 4.0  1994/02/20  01:50:47  caress
+ * First cut of new version.  Includes new handling of
+ * sidescan and amplitude data.
+ *
+ * Revision 3.1  1993/05/14  22:35:26  sohara
+ * fixed rcs_id message
+ *
  * Revision 3.0  1993/04/23  15:57:18  dale
  * Initial version
  *
@@ -40,7 +56,9 @@
 /*--------------------------------------------------------------------*/
 int mb_get_all(verbose,mbio_ptr,store_ptr,kind,time_i,time_d,
 		navlon,navlat,speed,heading,distance,
-		nbath,bath,bathdist,nback,back,backdist,
+		nbath,namp,nss,
+		bath,amp,bathacrosstrack,bathalongtrack,
+		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
 char	*mbio_ptr;
@@ -54,15 +72,19 @@ double	*speed;
 double	*heading;
 double	*distance;
 int	*nbath;
+int	*namp;
+int	*nss;
 int	*bath;
-int	*bathdist;
-int	*nback;
-int	*back;
-int	*backdist;
+int	*amp;
+int	*bathacrosstrack;
+int	*bathalongtrack;
+int	*ss;
+int	*ssacrosstrack;
+int	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 3.1 1993-05-14 22:35:26 sohara Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -96,16 +118,26 @@ int	*error;
 	*speed = 0.0;
 	*heading = 0.0;
 	*nbath = 0;
+	*namp = 0;
+	*nss = 0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
-		bath[i] = 0;
-		bathdist[i] = 0;
+		mb_io_ptr->bath[i] = 0;
+		mb_io_ptr->bath_acrosstrack[i] = 0;
+		mb_io_ptr->bath_alongtrack[i] = 0;
+		mb_io_ptr->bath_num[i] = 0;
 		}
-	*nback = 0;
-	for (i=0;i<mb_io_ptr->beams_back;i++)
+	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
-		back[i] = 0;
-		backdist[i] = 0;
+		mb_io_ptr->amp[i] = 0;
+		mb_io_ptr->amp_num[i] = 0;
+		}
+	for (i=0;i<mb_io_ptr->pixels_ss;i++)
+		{
+		mb_io_ptr->ss[i] = 0;
+		mb_io_ptr->ss_acrosstrack[i] = 0;
+		mb_io_ptr->ss_alongtrack[i] = 0;
+		mb_io_ptr->ss_num[i] = 0;
 		}
 	strcpy(comment,"\0");
 
@@ -179,13 +211,20 @@ int	*error;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			bath[i] = mb_io_ptr->new_bath[i];
-			bathdist[i] = mb_io_ptr->new_bathdist[i];
+			bathacrosstrack[i] = mb_io_ptr->new_bath_acrosstrack[i];
+			bathalongtrack[i] = mb_io_ptr->new_bath_alongtrack[i];
 			}
-		*nback = mb_io_ptr->beams_back;
-		for (i=0;i<mb_io_ptr->beams_back;i++)
+		*namp = mb_io_ptr->beams_amp;
+		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			back[i] = mb_io_ptr->new_back[i];
-			backdist[i] = mb_io_ptr->new_backdist[i];
+			amp[i] = mb_io_ptr->new_amp[i];
+			}
+		*nss = mb_io_ptr->pixels_ss;
+		for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			{
+			ss[i] = mb_io_ptr->new_ss[i];
+			ssacrosstrack[i] = mb_io_ptr->new_ss_acrosstrack[i];
+			ssalongtrack[i] = mb_io_ptr->new_ss_alongtrack[i];
 			}
 		}
 
@@ -355,14 +394,33 @@ int	*error;
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
 		&& *kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg2       nbath:         %d\n",*nbath);
-		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       bath[%d]: %d  bathdist[%d]: %d\n",
-			i,bath[i],i,bathdist[i]);
-		fprintf(stderr,"dbg2       nback:         %d\n",*nback);
-		for (i=0;i<*nback;i++)
-		  fprintf(stderr,"dbg2       back[%d]: %d  backdist[%d]: %d\n",
-			i,back[i],i,backdist[i]);
+		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
+		if (verbose >= 3 && mb_io_ptr->beams_bath > 0)
+		  {
+		  fprintf(stderr,"dbg3       beam   bath  crosstrack alongtrack\n");
+		  for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    fprintf(stderr,"dbg3       %4d   %5d    %5d     %5d\n",
+			i,bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg2       namp:      %d\n",*namp);
+		if (verbose >= 3 && mb_io_ptr->beams_amp > 0)
+		  {
+		  fprintf(stderr,"dbg3       beam   amp  crosstrack alongtrack\n");
+		  for (i=0;i<mb_io_ptr->beams_amp;i++)
+		    fprintf(stderr,"dbg3       %4d   %5d    %5d     %5d\n",
+			i,amp[i],
+			bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg2       nss:      %d\n",*nss);
+		if (verbose >= 3 && mb_io_ptr->pixels_ss > 0)
+		  {
+		  fprintf(stderr,"dbg3       pixel sidescan crosstrack alongtrack\n");
+		  for (i=0;i<mb_io_ptr->pixels_ss;i++)
+		    fprintf(stderr,"dbg3       %4d   %5d    %5d     %5d\n",
+			i,ss[i],
+			ssacrosstrack[i],ssalongtrack[i]);
+		  }
 		}
 	if (verbose >= 2)
 		{

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbr_hsldeoih.c	3.00	2/11/93
- *	$Id: mbr_hsldeoih.c,v 3.0 1993-05-14 22:56:08 sohara Exp $
+ *    The MB-system:	mbr_hsldeoih.c	2/11/93
+ *	$Id: mbr_hsldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -22,6 +22,20 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.1  1994/03/03  03:15:16  caress
+ * Fixed bug relating to processed amplitude data.
+ *
+ * Revision 4.0  1994/02/21  03:59:50  caress
+ * First cut at new version. Altered to be consistent
+ * with passing of three types of data: bathymetry,
+ * amplitude, and sidescan.
+ *
+ * Revision 3.0  1993/05/14  22:56:08  sohara
+ * initial version
+ *
  */
 
 /* standard include files */
@@ -42,7 +56,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 3.0 1993-05-14 22:56:08 sohara Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -333,12 +347,11 @@ int	*error;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
 		mb_io_ptr->new_bath[i] = 0;
-		mb_io_ptr->new_bathdist[i] = 0;
+		mb_io_ptr->new_bath_acrosstrack[i] = 0;
 		}
-	for (i=0;i<mb_io_ptr->beams_back;i++)
+	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
-		mb_io_ptr->new_back[i] = 0;
-		mb_io_ptr->new_backdist[i] = 0;
+		mb_io_ptr->new_amp[i] = 0;
 		}
 
 	/* read next data from file */
@@ -452,8 +465,15 @@ int	*error;
 			{
 			mb_io_ptr->new_bath[i] 
 				= data->depth_scale*data->depth[i];
-			mb_io_ptr->new_bathdist[i] 
+			mb_io_ptr->new_bath_acrosstrack[i] 
 				= data->depth_scale*data->distance[i];
+			}
+
+		/* read processded amplitude values into storage arrays */
+		for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			mb_io_ptr->new_amp[i] 
+				= data->back_scale*data->back[i];
 			}
 
 		/* print more debug statements */
@@ -461,16 +481,13 @@ int	*error;
 			{
 			fprintf(stderr,"dbg4       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
+			fprintf(stderr,"dbg4       beams_amp: %d\n",
+				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  bathdist[%d]: %d\n",
+			  fprintf(stderr,"dbg4       bath[%d]: %d  amp[%d]: %d  bathdist[%d]: %d\n",
 				i,mb_io_ptr->new_bath[i],
-				i,mb_io_ptr->new_bathdist[i]);
-			fprintf(stderr,"dbg4       beams_back: %d\n",
-				mb_io_ptr->beams_back);
-			for (i=0;i<mb_io_ptr->beams_back;i++)
-			  fprintf(stderr,"dbg4       back[%d]: %d  backdist[%d]: %d\n",
-				i,mb_io_ptr->new_back[i],
-				i,mb_io_ptr->new_backdist[i]);
+				i,mb_io_ptr->new_amp[i],
+				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
 		}
@@ -810,7 +827,18 @@ int	*error;
 			{
 			data->depth[i] = scalefactor*mb_io_ptr->new_bath[i];
 			data->distance[i] 
-				= scalefactor*mb_io_ptr->new_bathdist[i];
+				= scalefactor*mb_io_ptr->new_bath_acrosstrack[i];
+			}
+
+		/* put processed amplitude values 
+			into hsldeoih data structure */
+		if (data->back_scale > 0.0)
+			scalefactor = 1.0/data->back_scale;
+		else
+			scalefactor = 1.0;
+		for (i=0;i<mb_io_ptr->beams_amp;i++)
+			{
+			data->back[i] = scalefactor*mb_io_ptr->new_amp[i];
 			}
 
 		/* add some plausible amounts for some of the 

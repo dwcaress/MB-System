@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbr_mbldeoih.c	3.00	2/2/93
- *	$Id: mbr_mbldeoih.c,v 3.0 1993-05-14 22:56:57 sohara Exp $
+ *    The MB-system:	mbr_mbldeoih.c	2/2/93
+ *	$Id: mbr_mbldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -22,6 +22,17 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/21  03:59:50  caress
+ * First cut at new version. Altered to be consistent
+ * with passing of three types of data: bathymetry,
+ * amplitude, and sidescan.
+ *
+ * Revision 3.0  1993/05/14  22:56:57  sohara
+ * initial version
+ *
  */
 
 /* standard include files */
@@ -42,7 +53,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 3.0 1993-05-14 22:56:57 sohara Exp $";
+ static char res_id[]="$Id: mbr_mbldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -144,13 +155,17 @@ int	*error;
 	struct mbsys_ldeoih_struct *store;
 	char	*comment;
 	short int	*bath;
-	short int	*bathdist;
-	short int	*back;
-	short int	*backdist;
+	short int	*amp;
+	short int	*bath_acrosstrack;
+	short int	*bath_alongtrack;
+	short int	*ss;
+	short int	*ss_acrosstrack;
+	short int	*ss_alongtrack;
 	int	read_size;
 	int	time_j[4];
 	double	bathscale;
-	double	backscale;
+	double	ampscale;
+	double	ssscale;
 	int	i;
 
 	/* print input debug statements */
@@ -174,9 +189,12 @@ int	*error;
 	data = &(dataplus->data);
 	comment = dataplus->comment;
 	bath = data->bath;
-	bathdist = data->bathdist;
-	back = data->back;
-	backdist = data->backdist;
+	amp = data->amp;
+	bath_acrosstrack = data->bath_acrosstrack;
+	bath_alongtrack = data->bath_alongtrack;
+	ss = data->ss;
+	ss_acrosstrack = data->ss_acrosstrack;
+	ss_alongtrack = data->ss_alongtrack;
 
 	/* read next header from file */
 	if ((status = fread(header,1,mb_io_ptr->header_structure_size,
@@ -232,10 +250,13 @@ int	*error;
 		fprintf(stderr,"dbg5       speed:      %d\n",header->speed);
 		fprintf(stderr,"dbg5       beams bath: %d\n",
 			header->beams_bath);
-		fprintf(stderr,"dbg5       beams back: %d\n",
-			header->beams_back);
-		fprintf(stderr,"dbg5       bath scale: %d\n",header->bathscale);
-		fprintf(stderr,"dbg5       back scale: %d\n",header->backscale);
+		fprintf(stderr,"dbg5       beams amp:  %d\n",
+			header->beams_amp);
+		fprintf(stderr,"dbg5       pixels ss:  %d\n",
+			header->pixels_ss);
+		fprintf(stderr,"dbg5       bath scale: %d\n",header->bath_scale);
+		fprintf(stderr,"dbg5       amp scale:  %d\n",header->amp_scale);
+		fprintf(stderr,"dbg5       ss scale:   %d\n",header->ss_scale);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		}
@@ -271,18 +292,26 @@ int	*error;
 		/* if needed reset numbers of beams */
 		if (header->beams_bath != mb_io_ptr->beams_bath)
 			mb_io_ptr->beams_bath = header->beams_bath;
-		if (header->beams_back != mb_io_ptr->beams_back)
-			mb_io_ptr->beams_back = header->beams_back;
+		if (header->beams_amp != mb_io_ptr->beams_amp)
+			mb_io_ptr->beams_amp = header->beams_amp;
+		if (header->pixels_ss != mb_io_ptr->pixels_ss)
+			mb_io_ptr->pixels_ss = header->pixels_ss;
 
 		/* read bathymetry */
 		read_size = sizeof(short int)*header->beams_bath;
 		status = fread(bath,1,read_size,mb_io_ptr->mbfp);
-		status = fread(bathdist,1,read_size,mb_io_ptr->mbfp);
+		status = fread(bath_acrosstrack,1,read_size,mb_io_ptr->mbfp);
+		status = fread(bath_alongtrack,1,read_size,mb_io_ptr->mbfp);
 
-		/* read backscatter */
-		read_size = sizeof(short int)*header->beams_back;
-		status = fread(back,1,read_size,mb_io_ptr->mbfp);
-		status = fread(backdist,1,read_size,mb_io_ptr->mbfp);
+		/* read amplitudes */
+		read_size = sizeof(short int)*header->beams_amp;
+		status = fread(amp,1,read_size,mb_io_ptr->mbfp);
+
+		/* read sidescan */
+		read_size = sizeof(short int)*header->pixels_ss;
+		status = fread(ss,1,read_size,mb_io_ptr->mbfp);
+		status = fread(ss_acrosstrack,1,read_size,mb_io_ptr->mbfp);
+		status = fread(ss_alongtrack,1,read_size,mb_io_ptr->mbfp);
 
 		/* check for end of file */
 		if (status == read_size) 
@@ -303,14 +332,17 @@ int	*error;
 				function_name);
 			fprintf(stderr,"dbg5       beams_bath: %d\n",
 				header->beams_bath);
+			fprintf(stderr,"dbg5       beams_amp:  %d\n",
+				header->beams_amp);
 			for (i=0;i<header->beams_bath;i++)
-			  fprintf(stderr,"dbg5       bath[%d]: %d  bathdist[%d]: %d\n",
-				i,bath[i],i,bathdist[i]);
-			fprintf(stderr,"dbg5       beams_back: %d\n",
-				header->beams_back);
-			for (i=0;i<header->beams_back;i++)
-			  fprintf(stderr,"dbg5       back[%d]: %d  backdist[%d]: %d\n",
-				i,back[i],i,backdist[i]);
+			  fprintf(stderr,"dbg5       beam:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,bath[i],amp[i],
+				bath_acrosstrack[i],bath_alongtrack[i]);
+			fprintf(stderr,"dbg5       pixels_ss:  %d\n",
+				header->pixels_ss);
+			  fprintf(stderr,"dbg5       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n",
+				i,ss[i],
+				ss_acrosstrack[i],ss_alongtrack[i]);
 			}
 		}
 
@@ -362,25 +394,37 @@ int	*error;
 		mb_io_ptr->new_speed = 0.01*header->speed;
 
 		/* get scales */
-		bathscale = 0.001*header->bathscale;
-		backscale = 0.001*header->backscale;
+		bathscale = 0.001*header->bath_scale;
+		ampscale = 0.001*header->amp_scale;
+		ssscale = 0.001*header->ss_scale;
 
-		/* read distance and depth values into storage arrays */
+		/* read depth and beam location values into storage arrays */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			mb_io_ptr->new_bath[i] = 
 				(short int) bathscale*bath[i];
-			mb_io_ptr->new_bathdist[i] = 
-				(short int) bathscale*bathdist[i];
+			mb_io_ptr->new_bath_acrosstrack[i] = 
+				(short int) bathscale*bath_acrosstrack[i];
+			mb_io_ptr->new_bath_alongtrack[i] = 
+				(short int) bathscale*bath_alongtrack[i];
 			}
 
-		/* read distance and backscatter values into storage arrays */
-		for (i=0;i<mb_io_ptr->beams_back;i++)
+		/* read amplitude values into storage arrays */
+		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			mb_io_ptr->new_back[i] = 
-				(short int) backscale*back[i];
-			mb_io_ptr->new_backdist[i] = 
-				(short int) backscale*backdist[i];
+			mb_io_ptr->new_amp[i] = 
+				(short int) ampscale*amp[i];
+			}
+
+		/* read sidescan and pixel location values into storage arrays */
+		for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			{
+			mb_io_ptr->new_ss[i] = 
+				(short int) ssscale*ss[i];
+			mb_io_ptr->new_ss_acrosstrack[i] = 
+				(short int) ssscale*ss_acrosstrack[i];
+			mb_io_ptr->new_ss_alongtrack[i] = 
+				(short int) ssscale*ss_alongtrack[i];
 			}
 
 		/* print debug statements */
@@ -415,16 +459,17 @@ int	*error;
 				mb_io_ptr->new_heading);
 			fprintf(stderr,"dbg4       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
+			fprintf(stderr,"dbg4       beams_amp:  %d\n",
+				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  bathdist[%d]: %d\n",
-				i,mb_io_ptr->new_bath[i],
-				i,mb_io_ptr->new_bathdist[i]);
-			fprintf(stderr,"dbg4       beams_back: %d\n",
-				mb_io_ptr->beams_back);
-			for (i=0;i<mb_io_ptr->beams_back;i++)
-			  fprintf(stderr,"dbg4       back[%d]: %d  backdist[%d]: %d\n",
-				i,mb_io_ptr->new_back[i],
-				i,mb_io_ptr->new_backdist[i]);
+			  fprintf(stderr,"dbg4       beam:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,bath[i],amp[i],
+				bath_acrosstrack[i],bath_alongtrack[i]);
+			fprintf(stderr,"dbg4       pixels_ss:  %d\n",
+				mb_io_ptr->pixels_ss);
+			  fprintf(stderr,"dbg4       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n",
+				i,ss[i],
+				ss_acrosstrack[i],ss_alongtrack[i]);
 			}
 
 		/* done translating values */
@@ -474,20 +519,28 @@ int	*error;
 
 		/* numbers of beams and scaling */
 		store->beams_bath = header->beams_bath;
-		store->beams_back = header->beams_back;
-		store->bathscale = header->bathscale;
-		store->backscale = header->backscale;
+		store->beams_amp = header->beams_amp;
+		store->pixels_ss = header->pixels_ss;
+		store->bath_scale = header->bath_scale;
+		store->amp_scale = header->amp_scale;
+		store->ss_scale = header->ss_scale;
 
 		/* depths and backscatter */
 		for (i=0;i<store->beams_bath;i++)
 			{
 			store->bath[i] = data->bath[i];
-			store->bathdist[i] = data->bathdist[i];
+			store->bath_acrosstrack[i] = data->bath_acrosstrack[i];
+			store->bath_alongtrack[i] = data->bath_alongtrack[i];
 			}
-		for (i=0;i<store->beams_back;i++)
+		for (i=0;i<store->beams_amp;i++)
 			{
-			store->back[i] = data->back[i];
-			store->backdist[i] = data->backdist[i];
+			store->amp[i] = data->amp[i];
+			}
+		for (i=0;i<store->pixels_ss;i++)
+			{
+			store->ss[i] = data->bath[i];
+			store->ss_acrosstrack[i] = data->ss_acrosstrack[i];
+			store->ss_alongtrack[i] = data->ss_alongtrack[i];
 			}
 
 		/* comment */
@@ -524,9 +577,12 @@ int	*error;
 	struct mbsys_ldeoih_struct *store;
 	char	*comment;
 	short int	*bath;
-	short int	*bathdist;
-	short int	*back;
-	short int	*backdist;
+	short int	*amp;
+	short int	*bath_acrosstrack;
+	short int	*bath_alongtrack;
+	short int	*ss;
+	short int	*ss_acrosstrack;
+	short int	*ss_alongtrack;
 	int	write_size;
 	int	time_j[4];
 	double	lon;
@@ -554,9 +610,12 @@ int	*error;
 	data = &(dataplus->data);
 	comment = dataplus->comment;
 	bath = data->bath;
-	bathdist = data->bathdist;
-	back = data->back;
-	backdist = data->backdist;
+	amp = data->amp;
+	bath_acrosstrack = data->bath_acrosstrack;
+	bath_alongtrack = data->bath_alongtrack;
+	ss = data->ss;
+	ss_acrosstrack = data->ss_acrosstrack;
+	ss_alongtrack = data->ss_alongtrack;
 
 	/* first translate values from data storage structure */
 	if (store != NULL)
@@ -582,20 +641,28 @@ int	*error;
 
 		/* numbers of beams and scaling */
 		header->beams_bath = store->beams_bath;
-		header->beams_back = store->beams_back;
-		header->bathscale = store->bathscale;
-		header->backscale = store->backscale;
+		header->beams_amp = store->beams_amp;
+		header->pixels_ss = store->pixels_ss;
+		header->bath_scale = store->bath_scale;
+		header->amp_scale = store->amp_scale;
+		header->ss_scale = store->ss_scale;
 
-		/* depths and backscatter */
+		/* depths amplitude and sidescan */
 		for (i=0;i<header->beams_bath;i++)
 			{
 			bath[i] = store->bath[i];
-			bathdist[i] = store->bathdist[i];
+			bath_acrosstrack[i] = store->bath_acrosstrack[i];
+			bath_alongtrack[i] = store->bath_alongtrack[i];
 			}
-		for (i=0;i<header->beams_back;i++)
+		for (i=0;i<header->beams_amp;i++)
 			{
-			back[i] = store->back[i];
-			backdist[i] = store->backdist[i];
+			amp[i] = store->amp[i];
+			}
+		for (i=0;i<header->pixels_ss;i++)
+			{
+			ss[i] = store->ss[i];
+			ss_acrosstrack[i] = store->ss_acrosstrack[i];
+			ss_alongtrack[i] = store->ss_alongtrack[i];
 			}
 
 		/* comment */
@@ -646,28 +713,43 @@ int	*error;
 		/* get speed */
 		header->speed = 100.*mb_io_ptr->new_speed;
 
-		/* set numbers of bathymetry and backscatter beams */
+		/* set numbers of beams and sidescan */
 		header->beams_bath = mb_io_ptr->beams_bath;
-		header->beams_back = mb_io_ptr->beams_back;
+		header->beams_amp = mb_io_ptr->beams_amp;
+		header->pixels_ss = mb_io_ptr->pixels_ss;
 
 		/* set bathymetry and backscatter scalings */
-		header->bathscale = 1000;
-		header->backscale = 1000;
+		header->bath_scale = 1000;
+		header->amp_scale = 1000;
+		header->ss_scale = 1000;
 
-		/* put distance and depth values 
+		/* put depth and beam location values 
 			into mbldeoih data structure */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			bath[i] = mb_io_ptr->new_bath[i];
-			bathdist[i] = mb_io_ptr->new_bathdist[i];
+			bath_acrosstrack[i] 
+				= mb_io_ptr->new_bath_acrosstrack[i];
+			bath_alongtrack[i] 
+				= mb_io_ptr->new_bath_alongtrack[i];
 			}
 
-		/* put distance and backscatter values 
+		/* put amplitude values 
 			into mbldeoih data structure */
-		for (i=0;i<mb_io_ptr->beams_back;i++)
+		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			back[i] = mb_io_ptr->new_back[i];
-			backdist[i] = mb_io_ptr->new_backdist[i];
+			amp[i] = mb_io_ptr->new_amp[i];
+			}
+
+		/* put sidescan and pixel location values 
+			into mbldeoih data structure */
+		for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			{
+			ss[i] = mb_io_ptr->new_ss[i];
+			ss_acrosstrack[i] 
+				= mb_io_ptr->new_ss_acrosstrack[i];
+			ss_alongtrack[i] 
+				= mb_io_ptr->new_ss_alongtrack[i];
 			}
 		}
 
@@ -697,10 +779,13 @@ int	*error;
 		fprintf(stderr,"dbg5       speed:      %d\n",header->speed);
 		fprintf(stderr,"dbg5       beams bath: %d\n",
 			header->beams_bath);
-		fprintf(stderr,"dbg5       beams back: %d\n",
-			header->beams_back);
-		fprintf(stderr,"dbg5       bath scale: %d\n",header->bathscale);
-		fprintf(stderr,"dbg5       back scale: %d\n",header->backscale);
+		fprintf(stderr,"dbg5       beams amp:  %d\n",
+			header->beams_amp);
+		fprintf(stderr,"dbg5       pixels ss:  %d\n",
+			header->pixels_ss);
+		fprintf(stderr,"dbg5       bath scale: %d\n",header->bath_scale);
+		fprintf(stderr,"dbg5       amp scale:  %d\n",header->amp_scale);
+		fprintf(stderr,"dbg5       ss scale:   %d\n",header->ss_scale);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		}
@@ -734,13 +819,14 @@ int	*error;
 	if (verbose >=5 && dataplus->kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg5       beams_bath: %d\n",header->beams_bath);
+		fprintf(stderr,"dbg5       beams_amp:  %d\n",header->beams_amp);
 		for (i=0;i<header->beams_bath;i++)
-			fprintf(stderr,"dbg5       bath[%d]: %d  bathdist[%d]: %d\n",
-				i,bath[i],i,bathdist[i]);
-		fprintf(stderr,"dbg5       beams_back: %d\n",header->beams_back);
-		for (i=0;i<header->beams_back;i++)
-			fprintf(stderr,"dbg5       back[%d]: %d  backdist[%d]: %d\n",
-				i,back[i],i,backdist[i]);
+			fprintf(stderr,"dbg5       beam:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,bath[i],amp[i],bath_acrosstrack[i],bath_alongtrack[i]);
+		fprintf(stderr,"dbg5       pixels_ss:  %d\n",header->pixels_ss);
+		for (i=0;i<header->pixels_ss;i++)
+			fprintf(stderr,"dbg5       beam:%d  ss:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,ss[i],ss_acrosstrack[i],ss_alongtrack[i]);
 		}
 
 	/* write next chunk of the data */
@@ -765,12 +851,18 @@ int	*error;
 		/* write bathymetry */
 		write_size = sizeof(short int)*header->beams_bath;
 		status = fwrite(bath,1,write_size,mb_io_ptr->mbfp);
-		status = fwrite(bathdist,1,write_size,mb_io_ptr->mbfp);
+		status = fwrite(bath_acrosstrack,1,write_size,mb_io_ptr->mbfp);
+		status = fwrite(bath_alongtrack,1,write_size,mb_io_ptr->mbfp);
 
-		/* write backscatter */
-		write_size = sizeof(short int)*header->beams_back;
-		status = fwrite(back,1,write_size,mb_io_ptr->mbfp);
-		status = fwrite(backdist,1,write_size,mb_io_ptr->mbfp);
+		/* write amplitude */
+		write_size = sizeof(short int)*header->beams_amp;
+		status = fwrite(amp,1,write_size,mb_io_ptr->mbfp);
+
+		/* write sidescan */
+		write_size = sizeof(short int)*header->pixels_ss;
+		status = fwrite(ss,1,write_size,mb_io_ptr->mbfp);
+		status = fwrite(ss_acrosstrack,1,write_size,mb_io_ptr->mbfp);
+		status = fwrite(ss_alongtrack,1,write_size,mb_io_ptr->mbfp);
 
 		/* check for error */
 		if (status == write_size) 

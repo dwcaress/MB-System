@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_hsds.h	3.00	2/16/93
- *	$Id: mbsys_hsds.h,v 3.1 1993-06-09 08:21:11 caress Exp $
+ *    The MB-system:	mbsys_hsds.h	2/16/93
+ *	$Id: mbsys_hsds.h,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -15,14 +15,26 @@
  * to store data from Hydrosweep DS multibeam sonar systems.
  * The data formats which are commonly used to store Hydrosweep DS
  * data in files include
- *      MBF_HSATLRAW : MBIO ID 5
- *      MBF_HSLDEDMB : MBIO ID 6
- *      MBF_HSURICEN : MBIO ID 7
- *      MBF_HSLDEOIH : MBIO ID 8
+ *      MBF_HSATLRAW : MBIO ID 21
+ *      MBF_HSLDEDMB : MBIO ID 22
+ *      MBF_HSURICEN : MBIO ID 23
+ *      MBF_HSLDEOIH : MBIO ID 24
  *
  * Author:	D. W. Caress
  * Date:	February 16, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/17  20:36:40  caress
+ * First cut at new version.  Comment changes only.
+ *
+ * Revision 3.1  1993/06/09  08:21:11  caress
+ * Added definition of beam angle spacing.  The actual spacing
+ * seems to be 1.510 degrees instead of the 1.525 degrees listed
+ * in the Atlas manuals (based on Hydrosweep DS data collected
+ * on the R/V Ewing on June 9, 1993.
+ *
  * Revision 3.0  1993/05/14  22:59:28  sohara
  * initial version
  *
@@ -33,7 +45,7 @@
  *      ascii format.  The data consists of a number of different
  *      multi-line ascii records.
  *   2. The DS systems output 59 beams of bathymetry and 59 beams
- *      of backscatter measurements, along with a plethora of other
+ *      of amplitude measurements, along with a plethora of other
  *      information.
  *   3. The records all include navigation and time stamp information.
  *      The record types are:
@@ -173,7 +185,7 @@ struct mbsys_hsds_struct
 	/* comment (LDEOCMNT) */
 	char	comment[MBSYS_HSDS_MAXLINE];
 
-	/* processed backscatter data */
+	/* processed amplitude data */
 	double	back_scale;
 	int	back[MBSYS_HSDS_BEAMS];
 	};	

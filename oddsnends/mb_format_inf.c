@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_format_inf.c	3.00	1/21/93
- *    $Id: mb_format_inf.c,v 3.1 1993-05-14 22:34:46 sohara Exp $
+ *    The MB-system:	mb_format_inf.c	1/21/93
+ *    $Id: mb_format_inf.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -18,6 +18,18 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.1  1994/03/03  03:15:16  caress
+ * Not sure what was changed.
+ *
+ * Revision 4.0  1994/02/21  04:03:53  caress
+ * First cut at new version.  No changes.
+ *
+ * Revision 3.1  1993/05/14  22:34:46  sohara
+ * fixed rcs_id message
+ *
  * Revision 3.0  1993/04/23  15:52:35  dale
  * Initial version
  *
@@ -33,12 +45,12 @@
 #include "../../include/mb_status.h"
 
 /*--------------------------------------------------------------------*/
-int mb_format_inf(verbose,format,message)
+int mb_format_inf(verbose,format_num,message)
 int	verbose;
-int	format;
+int	format_num;
 char	**message;
 {
-  static char rcs_id[]="$Id: mb_format_inf.c,v 3.1 1993-05-14 22:34:46 sohara Exp $";
+  static char rcs_id[]="$Id: mb_format_inf.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
 	char	*function_name = "mb_format_inf";
 	int	status;
 
@@ -48,14 +60,14 @@ char	**message;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
-		fprintf(stderr,"dbg2       format: %d\n",format);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       format_num: %d\n",format_num);
 		}
 
 	/* set the message and status */
-	if (format >0 && format <= MB_FORMATS)
+	if (format_num >0 && format_num <= MB_FORMATS)
 		{
-		*message = format_description[format];
+		*message = format_description[format_num];
 		status = MB_SUCCESS;
 		}
 	else

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbio_status.h	3.00	2/1/93
- *    $Id: mb_status.h,v 3.0 1993-04-23 18:56:22 dale Exp $
+ *    The MB-system:	mbio_status.h	2/1/93
+ *    $Id: mb_status.h,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -18,27 +18,45 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/03/05  02:14:41  caress
+ * Altered to accomodate MBF_SB2100RW format.
+ *
+ * Revision 4.2  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.1  1994/02/17  21:01:39  caress
+ * Changed MB_VERSION to 4.00
+ *
+ * Revision 4.0  1994/02/17  20:27:46  caress
+ * First cut at new version.  Added data kind MB_DATA_PARAMETER
+ * for SeaBeam 2100 data.
+ *
+ * Revision 3.0  1993/04/23  18:56:22  dale
+ * Initial version
+ *
  *
  */
 
 /* MB-system version id */
-#define	MB_VERSION	"3.00"
+#define	MB_VERSION	"4.00"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			9
+#define	MB_DATA_KINDS			10
 #define	MB_DATA_NONE			0
-#define	MB_DATA_DATA			1
-#define	MB_DATA_COMMENT			2
-#define	MB_DATA_CALIBRATE		3
-#define	MB_DATA_MEAN_VELOCITY		4
-#define	MB_DATA_VELOCITY_PROFILE	5
-#define	MB_DATA_STANDBY			6
-#define	MB_DATA_NAV_SOURCE		7
-#define	MB_DATA_RAW_LINE		8
+#define	MB_DATA_DATA			1	/* general survey data */
+#define	MB_DATA_COMMENT			2	/* general comment */
+#define	MB_DATA_CALIBRATE		3	/* Hydrosweep DS */
+#define	MB_DATA_MEAN_VELOCITY		4	/* Hydrosweep DS */
+#define	MB_DATA_VELOCITY_PROFILE	5	/* Hydrosweep DS */
+#define	MB_DATA_STANDBY			6	/* Hydrosweep DS */
+#define	MB_DATA_NAV_SOURCE		7	/* Hydrosweep DS */
+#define	MB_DATA_PARAMETER		8	/* SeaBeam 2100 */
+#define	MB_DATA_RAW_LINE		9	/* uninterpretable line
+							for ascii formats */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
