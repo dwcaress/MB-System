@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.5 1995-03-08 13:31:09 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.6 1995-03-17 15:12:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/03/08  13:31:09  caress
+ * Fixed bug related to handling of shallow water data and the depth scale.
+ *
  * Revision 4.4  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -80,7 +83,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.5 1995-03-08 13:31:09 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.6 1995-03-17 15:12:59 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -1739,7 +1742,11 @@ int	*error;
 		mb_get_double( &(data->depth_center),line+77+shift, 7);
 		mb_get_double( &(data->depth_scale),line+84+shift,  4);
 		mb_get_int( &(data->spare),line+88+shift,  2);
-		data->depth[29] = (int) data->depth_center;
+		if (data->depth_scale > 0.0)
+			data->depth[29] = 
+				(int) (data->depth_center/data->depth_scale);
+		else
+			data->depth[29] = (int) data->depth_center;
 		data->distance[29] = 0;
 		}
 
