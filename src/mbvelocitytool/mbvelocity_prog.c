@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.12 2003-04-17 21:11:18 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.13 2004-10-06 19:06:56 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2003/04/17 21:11:18  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.11  2002/08/21 00:51:54  caress
  * Fixed label displays for command line loading.
  *
@@ -181,6 +184,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_process.h"
 
 /* velocity profile structure definition */
 struct profile
@@ -191,11 +195,6 @@ struct profile
 	double	*depth;
 	double	*velocity;
 	};
-	
-/* angle correction mode defines */
-#define	MB_ANGLEMODE_ANGLES_OK		0
-#define	MB_ANGLEMODE_ANGLES_SNELL	1
-#define	MB_ANGLEMODE_ANGLES_SNELLNULL	2
 
 /* ping structure definition */
 struct mbvt_ping_struct 
@@ -223,7 +222,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.12 2003-04-17 21:11:18 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.13 2004-10-06 19:06:56 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -249,7 +248,7 @@ double	maxdepth = 3000.0;
 double	velrange = 500.0;
 double	resrange = 200.0;
 double	ssv_start = 0.0;
-int	anglemode = MB_ANGLEMODE_ANGLES_OK;
+int	anglemode = MBP_ANGLES_SNELL;
 
 /* plotting variables */
 int	xmin, xmax, ymin, ymax;

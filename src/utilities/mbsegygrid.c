@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.2 2004-09-16 01:01:12 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.3 2004-10-06 19:10:52 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/09/16 01:01:12  caress
+ * Fixed many things.
+ *
  * Revision 5.1  2004/07/15 19:33:56  caress
  * Improvements to support for Reson 7k data.
  *
@@ -37,6 +40,8 @@
 #include <math.h>
 #include <string.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* Includes for System 5 type operating system */
 #if defined (IRIX) || defined (LYNX)
@@ -76,11 +81,16 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 char	*ctime();
 char	*getenv();
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.2 2004-09-16 01:01:12 caress Exp $";
+/* output stream for basic stuff (stdout if verbose <= 1,
+	outfp if verbose > 1) */
+FILE	*outfp;
 
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.3 2004-10-06 19:10:52 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
-static char usage_message[] = "MBsegygrid -Ifile -Ogridfile [-Ddecimatex/decimatey -R -Smode[/start/end[/schan/echan]] -Tsweep[/delay] -H -V]";
+static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ddecimatex/decimatey\n\
+          -R -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
+          -Wmode/start/end -H -V]";
 
 /*--------------------------------------------------------------------*/
 
@@ -110,6 +120,7 @@ main (int argc, char **argv)
 	float	*wtrace = NULL;
 
 	/* grid controls */
+	char	fileroot[MB_PATH_MAXLINE];
 	char	gridfile[MB_PATH_MAXLINE];
 	int	decimatex = 1;
 	int	decimatey = 1;
@@ -142,10 +153,20 @@ main (int argc, char **argv)
 	char	ylabel[MB_PATH_MAXLINE];
 	char	zlabel[MB_PATH_MAXLINE];
 	char	title[MB_PATH_MAXLINE];
+	char	plot_cmd[MB_PATH_MAXLINE];
+
+	int	sinftracemode = MBSEGYGRID_USESHOT;
+	int	sinftracestart = 0;
+	int	sinftraceend = 0;
+	int	sinfchanstart = 0;
+	int	sinfchanend = -1;
+	double	sinftimesweep = 0.0;
+	double	sinftimedelay = 0.0;
 
 	int	nread;
 	int	tracecount, tracenum, channum, traceok;
 	double	tracemin, tracemax;
+	double	xwidth, ywidth;
 	int	ix, iy, iys, igainstart;
 	int	iystart, iyend;
 	double	factor, gtime, btime, stime, dtime;
@@ -155,6 +176,7 @@ main (int argc, char **argv)
 	int	rmsmode = MB_NO;
 	double	rms;
 	int	nrms;
+	int	plot_status;
 	int	i, j, k, n;
 
 	/* set file to null */
@@ -199,7 +221,7 @@ main (int argc, char **argv)
 			break;
 		case 'O':
 		case 'o':
-			sscanf (optarg,"%s", gridfile);
+			sscanf (optarg,"%s", fileroot);
 			flag++;
 			break;
 		case 'R':
@@ -242,11 +264,17 @@ main (int argc, char **argv)
 			errflg++;
 		}
 
+	/* set output stream to stdout or outfp */
+	if (verbose >= 2)
+	    outfp = outfp;
+	else
+	    outfp = stdout;
+
 	/* if error flagged then print it and exit */
 	if (errflg)
 		{
-		fprintf(stderr,"usage: %s\n", usage_message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
+		fprintf(outfp,"usage: %s\n", usage_message);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
@@ -255,61 +283,89 @@ main (int argc, char **argv)
 	/* print starting message */
 	if (verbose == 1 || help)
 		{
-		fprintf(stderr,"\nProgram %s\n",program_name);
-		fprintf(stderr,"Version %s\n",rcs_id);
-		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
+		fprintf(outfp,"\nProgram %s\n",program_name);
+		fprintf(outfp,"Version %s\n",rcs_id);
+		fprintf(outfp,"MB-system Version %s\n",MB_VERSION);
 		}
 
 	/* print starting debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Program <%s>\n",program_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       help:           %d\n",help);
-		fprintf(stderr,"dbg2       segyfile:       %s\n",segyfile);
-		fprintf(stderr,"dbg2       gridfile:       %s\n",gridfile);
-		fprintf(stderr,"dbg2       decimatex:      %d\n",decimatex);
-		fprintf(stderr,"dbg2       decimatey:      %d\n",decimatey);
-		fprintf(stderr,"dbg2       tracemode:      %d\n",tracemode);
-		fprintf(stderr,"dbg2       tracestart:     %d\n",tracestart);
-		fprintf(stderr,"dbg2       traceend:       %d\n",traceend);
-		fprintf(stderr,"dbg2       chanstart:      %d\n",chanstart);
-		fprintf(stderr,"dbg2       chanend:        %d\n",chanend);
-		fprintf(stderr,"dbg2       timesweep:      %f\n",timesweep);
-		fprintf(stderr,"dbg2       timedelay:      %f\n",timedelay);
-		fprintf(stderr,"dbg2       ngridx:         %d\n",ngridx);
-		fprintf(stderr,"dbg2       ngridy:         %d\n",ngridy);
-		fprintf(stderr,"dbg2       ngridxy:        %d\n",ngridxy);
-		fprintf(stderr,"dbg2       windowmode:     %d\n",windowmode);
-		fprintf(stderr,"dbg2       windowstart:    %f\n",windowstart);
-		fprintf(stderr,"dbg2       windowend:      %f\n",windowend);
-		fprintf(stderr,"dbg2       gainmode:       %d\n",gainmode);
-		fprintf(stderr,"dbg2       gain:           %f\n",gain);
-		fprintf(stderr,"dbg2       rmsmode:        %d\n",rmsmode);
+		fprintf(outfp,"\ndbg2  Program <%s>\n",program_name);
+		fprintf(outfp,"dbg2  Version %s\n",rcs_id);
+		fprintf(outfp,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(outfp,"dbg2  Control Parameters:\n");
+		fprintf(outfp,"dbg2       verbose:        %d\n",verbose);
+		fprintf(outfp,"dbg2       help:           %d\n",help);
+		fprintf(outfp,"dbg2       segyfile:       %s\n",segyfile);
+		fprintf(outfp,"dbg2       fileroot:       %s\n",fileroot);
+		fprintf(outfp,"dbg2       decimatex:      %d\n",decimatex);
+		fprintf(outfp,"dbg2       decimatey:      %d\n",decimatey);
+		fprintf(outfp,"dbg2       tracemode:      %d\n",tracemode);
+		fprintf(outfp,"dbg2       tracestart:     %d\n",tracestart);
+		fprintf(outfp,"dbg2       traceend:       %d\n",traceend);
+		fprintf(outfp,"dbg2       chanstart:      %d\n",chanstart);
+		fprintf(outfp,"dbg2       chanend:        %d\n",chanend);
+		fprintf(outfp,"dbg2       timesweep:      %f\n",timesweep);
+		fprintf(outfp,"dbg2       timedelay:      %f\n",timedelay);
+		fprintf(outfp,"dbg2       ngridx:         %d\n",ngridx);
+		fprintf(outfp,"dbg2       ngridy:         %d\n",ngridy);
+		fprintf(outfp,"dbg2       ngridxy:        %d\n",ngridxy);
+		fprintf(outfp,"dbg2       windowmode:     %d\n",windowmode);
+		fprintf(outfp,"dbg2       windowstart:    %f\n",windowstart);
+		fprintf(outfp,"dbg2       windowend:      %f\n",windowend);
+		fprintf(outfp,"dbg2       gainmode:       %d\n",gainmode);
+		fprintf(outfp,"dbg2       gain:           %f\n",gain);
+		fprintf(outfp,"dbg2       rmsmode:        %d\n",rmsmode);
 		}
 
 	/* if help desired then print it and exit */
 	if (help)
 		{
-		fprintf(stderr,"\n%s\n",help_message);
-		fprintf(stderr,"\nusage: %s\n", usage_message);
+		fprintf(outfp,"\n%s\n",help_message);
+		fprintf(outfp,"\nusage: %s\n", usage_message);
 		exit(error);
+		}
+		
+	/* get segy limits if required */
+	if (traceend < 1 || traceend < tracestart || timesweep <= 0.0)
+		{
+		get_segy_limits(verbose, 
+				segyfile,  
+				&sinftracemode,
+				&sinftracestart,
+				&sinftraceend,
+				&sinfchanstart,
+				&sinfchanend,
+				&sinftimesweep,
+				&sinftimedelay,
+				&error);
+		if (traceend < 1 || traceend < tracestart)
+			{
+			tracemode = sinftracemode;
+			tracestart = sinftracestart;
+			traceend = sinftraceend;
+			chanstart = sinfchanstart;
+			chanend = sinfchanend;
+			}
+		if (timesweep <= 0.0)
+			{
+			timesweep = sinftimesweep;
+			timedelay = sinftimedelay;
+			}
 		}
 		
 	/* check specified parameters */
 	if (traceend < 1 || traceend < tracestart)
 		{
-		fprintf(stderr,"\nBad trace numbers: %d %d specified...\n", tracestart, traceend);
-		fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+		fprintf(outfp,"\nBad trace numbers: %d %d specified...\n", tracestart, traceend);
+		fprintf(outfp,"\nProgram <%s> Terminated\n", program_name);
 		exit(error);
 		}
 	if (timesweep <= 0.0)
 		{
-		fprintf(stderr,"\nBad time sweep: %f specified...\n", timesweep);
-		fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+		fprintf(outfp,"\nBad time sweep: %f specified...\n", timesweep);
+		fprintf(outfp,"\nProgram <%s> Terminated\n", program_name);
 		exit(error);
 		}
 
@@ -318,14 +374,16 @@ main (int argc, char **argv)
 		&mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nSEGY File <%s> not initialized for reading\n",segyfile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
+		fprintf(outfp,"\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n",message);
+		fprintf(outfp,"\nSEGY File <%s> not initialized for reading\n",segyfile);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
 		}
 		
 	/* calculate implied grid parameters */
+	strcpy(gridfile,fileroot);
+	strcat(gridfile,".grd");
 	if (chanend > chanstart)
 		ntraces = (traceend - tracestart + 1) * (chanend - chanstart + 1);
 	else
@@ -356,6 +414,42 @@ main (int argc, char **argv)
 	status = mb_malloc(verbose, 2 * ngridxy * sizeof(float), &grid, &error);
 	status = mb_malloc(verbose, ngridy * sizeof(float), &ptrace, &error);
 	status = mb_malloc(verbose, ngridy * sizeof(float), &wtrace, &error);
+
+	/* output info */
+	if (verbose >= 0)
+		{
+		fprintf(outfp,"\nMBsegygrid Parameters:\n");
+		fprintf(outfp,"Input segy file:         %s\n",segyfile);
+		fprintf(outfp,"Output fileroot:         %s\n",fileroot);
+		fprintf(outfp,"Input Parameters:\n");
+		fprintf(outfp,"     trace mode:         %d\n",tracemode);
+		fprintf(outfp,"     trace start:        %d\n",tracestart);
+		fprintf(outfp,"     trace end:          %d\n",traceend);
+		fprintf(outfp,"     channel start:      %d\n",chanstart);
+		fprintf(outfp,"     channel end:        %d\n",chanend);
+		fprintf(outfp,"     trace decimation:   %d\n",decimatex);
+		fprintf(outfp,"     time sweep:         %f seconds\n",timesweep);
+		fprintf(outfp,"     time delay:         %f seconds\n",timedelay);
+		fprintf(outfp,"     sample interval:    %f seconds\n",sampleinterval);
+		fprintf(outfp,"     sample decimation:  %d\n",decimatey);
+		fprintf(outfp,"     window mode:        %d\n",windowmode);
+		fprintf(outfp,"     window start:       %f seconds\n",windowstart);
+		fprintf(outfp,"     window end:         %f seconds\n",windowend);
+		fprintf(outfp,"     gain mode:          %d\n",gainmode);
+		fprintf(outfp,"     gain:               %f\n",gain);
+		fprintf(outfp,"     rmsmode:            %d\n",rmsmode);
+		fprintf(outfp,"Output Parameters:\n");
+		fprintf(outfp,"     grid filename:      %s\n",gridfile);
+		fprintf(outfp,"     x grid dimension:   %d\n",ngridx);
+		fprintf(outfp,"     y grid dimension:   %d\n",ngridy);
+		fprintf(outfp,"     grid xmin:          %f\n",xmin);
+		fprintf(outfp,"     grid xmax:          %f\n",xmax);
+		fprintf(outfp,"     grid ymin:          %f\n",ymin);
+		fprintf(outfp,"     grid ymax:          %f\n",ymax);
+		fprintf(outfp,"     NaN values used to flag regions with no data\n");
+		}
+	if (verbose > 0)
+		fprintf(outfp,"\n");
 	
 	/* proceed if all ok */
 	if (status == MB_SUCCESS)
@@ -458,16 +552,16 @@ main (int argc, char **argv)
 				if (verbose > 0 || nread % 25 == 0)
 					{
 					if (traceok == MB_YES) 
-						fprintf(stderr,"PROCESS ");
+						fprintf(outfp,"PROCESS ");
 					else 
-						fprintf(stderr,"IGNORE  ");
+						fprintf(outfp,"IGNORE  ");
 					if (tracemode == MBSEGYGRID_USESHOT) 
-						fprintf(stderr,"read:%d position:%d shot:%d channel:%d ",
+						fprintf(outfp,"read:%d position:%d shot:%d channel:%d ",
 							nread,tracecount,tracenum,channum);
 					else 
-						fprintf(stderr,"read:%d position:%d rp:%d channel:%d ",
+						fprintf(outfp,"read:%d position:%d rp:%d channel:%d ",
 							nread,tracecount,tracenum,channum);
-					fprintf(stderr,"%4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d usec minmax: %f %f\n",
+					fprintf(outfp,"%4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d usec minmax: %f %f\n",
 					traceheader.year,traceheader.day_of_yr,
 					traceheader.hour,traceheader.min,traceheader.sec,traceheader.mils,
 					traceheader.nsamps,traceheader.si_micros,
@@ -507,10 +601,10 @@ main (int argc, char **argv)
 								gtime = (i - igainstart) * sampleinterval;
 								factor = 1.0 + gain * gtime;
 								factor = pow(10.0, gtime * gain);
-/*fprintf(stderr,"i:%d iy:%d factor:%f trace[%d]: %f",
+/*fprintf(outfp,"i:%d iy:%d factor:%f trace[%d]: %f",
 i,iy,factor,i,trace[i]);*/
 								trace[i] = trace[i] * factor;
-/*fprintf(stderr," %f\n",trace[i]);*/
+/*fprintf(outfp," %f\n",trace[i]);*/
 								}
 							}
 						}
@@ -544,7 +638,7 @@ i,iy,factor,i,trace[i]);*/
 							}
 						if (nrms > 0)
 							rms = sqrt(rms) / nrms;
-/*fprintf(stderr,"grid ix:%d nrms:%d rms:%f\n",ix,nrms,rms);*/
+/*fprintf(outfp,"grid ix:%d nrms:%d rms:%f\n",ix,nrms,rms);*/
 
 						/* insert data into the grid */
 						for (iy=0;iy<ngridy;iy++)
@@ -576,7 +670,7 @@ i,iy,factor,i,trace[i]);*/
 	strcpy(xlabel, "Trace Number");
 	strcpy(ylabel, "Time (seconds)");
 	strcpy(zlabel, "Trace Signal");
-	sprintf(title, "SEGY File: %s", segyfile);
+	sprintf(title, "Seismic Grid from %s", segyfile);
 	status = write_cdfgrd(verbose, gridfile, grid,
 		ngridx, ngridy, 
 		xmin, xmax, ymin, ymax,
@@ -592,6 +686,22 @@ i,iy,factor,i,trace[i]);*/
 	status = mb_free(verbose, &grid, &error);
 	status = mb_free(verbose, &ptrace, &error);
 	status = mb_free(verbose, &wtrace, &error);
+	
+	/* run mbm_grdplot */
+	xwidth = 0.01 * (double) ngridx;
+	ywidth = 6.0;
+	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", 
+			gridfile, xwidth, ywidth, gridfile, title, zlabel);
+	if (verbose)
+		{
+		fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", 
+			plot_cmd);
+		}
+	plot_status = system(plot_cmd);
+	if (plot_status == -1)
+		{
+		fprintf(outfp, "\nError executing mbm_grdplot on grid file %s\n", gridfile);
+		}
 
 	/* check memory */
 	if (verbose >= 4)
@@ -600,14 +710,165 @@ i,iy,factor,i,trace[i]);*/
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Program <%s> completed\n",
+		fprintf(outfp,"\ndbg2  Program <%s> completed\n",
 			program_name);
-		fprintf(stderr,"dbg2  Ending status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
+		fprintf(outfp,"dbg2  Ending status:\n");
+		fprintf(outfp,"dbg2       status:  %d\n",status);
 		}
 
 	/* end it all */
 	exit(error);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function get_segy_limits gets info for default segy gridding 
+ */
+int get_segy_limits(int verbose, 
+		char	*segyfile,  
+		int	*tracemode,
+		int	*tracestart,
+		int	*traceend,
+		int	*chanstart,
+		int	*chanend,
+		double	*timesweep,
+		double	*timedelay,
+		int *error)
+{
+	char	*function_name = "get_segy_limits";
+	int	status = MB_SUCCESS;
+	char	sinffile[MB_PATH_MAXLINE];
+	char	command[MB_PATH_MAXLINE];
+	char	line[MB_PATH_MAXLINE];
+	FILE	*sfp;
+	int	datmodtime = 0;
+	int	sinfmodtime = 0;
+	struct stat file_status;
+	int	fstat;
+	double	delay0, delay1, delaydel;
+	int	shot0, shot1, shotdel;
+	int	shottrace0, shottrace1, shottracedel;
+	int	rp0, rp1, rpdel;
+	int	rptrace0, rptrace1, rptracedel;
+	int	nscan;
+	int	i,j,k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(outfp,"\ndbg2  Function <%s> called\n",
+			function_name);
+		fprintf(outfp,"dbg2  Input arguments:\n");
+		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
+		fprintf(outfp,"dbg2       segyfile:   %s\n",segyfile);
+		}
+		
+	/* set sinf filename */
+	sprintf(sinffile, "%s.sinf", segyfile);
+		
+	/* check status of segy and sinf file */
+	datmodtime = 0;
+	sinfmodtime = 0;
+	if ((fstat = stat(segyfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		datmodtime = file_status.st_mtime;
+		}
+	if ((fstat = stat(sinffile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		sinfmodtime = file_status.st_mtime;
+		}
+		
+	/* if sinf file is missing or out of date, make it */
+	if (datmodtime > 0 && datmodtime > sinfmodtime)
+		{
+		if (verbose >= 1)
+			fprintf(stderr,"\nGenerating sinf file for %s\n",segyfile);
+		sprintf(command, "mbsegyinfo -I %s -O", segyfile);
+		system(command);
+		}
+
+		
+	/* read sinf file if possible */
+	sprintf(sinffile, "%s.sinf", segyfile);
+	if ((sfp = fopen(sinffile, "r")) != NULL)
+		{
+		/* read the sinf file */
+		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL)
+		    {
+		    if (strncmp(line, "  Trace length (sec):", 21) == 0)
+			{
+			nscan = sscanf(line, "  Trace length (sec):%lf", timesweep);
+			}
+		    else if (strncmp(line, "    Delay (sec):", 16) == 0)
+			{
+			nscan = sscanf(line, "    Delay (sec): %lf %lf %lf", &delay0, &delay1, &delaydel);
+			}
+		    else if (strncmp(line, "    Shot number:", 16) == 0)
+			{
+			nscan = sscanf(line, "    Shot number: %d %d %d", &shot0, &shot1, &shotdel);
+			}
+		    else if (strncmp(line, "    Shot trace:", 15) == 0)
+			{
+			nscan = sscanf(line, "    Shot trace: %d %d %d", &shottrace0, &shottrace1, &shottracedel);
+			}
+		    else if (strncmp(line, "    RP number:", 14) == 0)
+			{
+			nscan = sscanf(line, "    RP number: %d %d %d", &rp0, &rp1, &rpdel);
+			}
+		    else if (strncmp(line, "    RP trace:", 13) == 0)
+			{
+			nscan = sscanf(line, "    RP trace: %d %d %d", &rptrace0, &rptrace1, &rptracedel);
+			}
+		    }
+		fclose(sfp);
+		}
+		
+	/* set the trace mode */
+	if (rpdel > 1)
+		{
+		*tracemode = MBSEGYGRID_USECMP;
+		*tracestart = rp0;
+		*traceend = rp1;
+		*chanstart = rptrace0;
+		*chanend = rptrace1;
+		}
+	else
+		{
+		*tracemode = MBSEGYGRID_USESHOT;
+		*tracestart = shot0;
+		*traceend = shot1;
+		*chanstart = shottrace0;
+		*chanend = shottrace1;
+		}
+	
+	/* set the sweep and delay */
+	if (delaydel > 0.0)
+		{
+		*timesweep += delaydel;
+		}
+	*timedelay = delay0;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(outfp,"dbg2  Return values:\n");
+		fprintf(outfp,"dbg2       tracemode:  %d\n",*tracemode);
+		fprintf(outfp,"dbg2       tracestart: %d\n",*tracestart);
+		fprintf(outfp,"dbg2       traceend:   %d\n",*traceend);
+		fprintf(outfp,"dbg2       chanstart:  %d\n",*chanstart);
+		fprintf(outfp,"dbg2       chanend:    %d\n",*chanend);
+		fprintf(outfp,"dbg2       timesweep:  %f\n",*timesweep);
+		fprintf(outfp,"dbg2       timedelay:  %f\n",*timedelay);
+		fprintf(outfp,"dbg2       error:      %d\n",*error);
+		fprintf(outfp,"dbg2  Return status:\n");
+		fprintf(outfp,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
 }
 /*--------------------------------------------------------------------*/
 /*
@@ -636,30 +897,30 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	i,j,k;
 
 	/* print input debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+		fprintf(outfp,"\ndbg2  Function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
-		fprintf(stderr,"dbg2       nx:         %d\n",nx);
-		fprintf(stderr,"dbg2       ny:         %d\n",ny);
-		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
-		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
-		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
-		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
-		fprintf(stderr,"dbg2       zmin:       %f\n",zmin);
-		fprintf(stderr,"dbg2       zmax:       %f\n",zmax);
-		fprintf(stderr,"dbg2       dx:         %f\n",dx);
-		fprintf(stderr,"dbg2       dy:         %f\n",dy);
-		fprintf(stderr,"dbg2       xlab:       %s\n",xlab);
-		fprintf(stderr,"dbg2       ylab:       %s\n",ylab);
-		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
-		fprintf(stderr,"dbg2       titl:       %s\n",titl);
-		fprintf(stderr,"dbg2       argc:       %d\n",argc);
-		fprintf(stderr,"dbg2       *argv:      %d\n",*argv);
+		fprintf(outfp,"dbg2  Input arguments:\n");
+		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
+		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
+		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       nx:         %d\n",nx);
+		fprintf(outfp,"dbg2       ny:         %d\n",ny);
+		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
+		fprintf(outfp,"dbg2       xmax:       %f\n",xmax);
+		fprintf(outfp,"dbg2       ymin:       %f\n",ymin);
+		fprintf(outfp,"dbg2       ymax:       %f\n",ymax);
+		fprintf(outfp,"dbg2       zmin:       %f\n",zmin);
+		fprintf(outfp,"dbg2       zmax:       %f\n",zmax);
+		fprintf(outfp,"dbg2       dx:         %f\n",dx);
+		fprintf(outfp,"dbg2       dy:         %f\n",dy);
+		fprintf(outfp,"dbg2       xlab:       %s\n",xlab);
+		fprintf(outfp,"dbg2       ylab:       %s\n",ylab);
+		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
+		fprintf(outfp,"dbg2       titl:       %s\n",titl);
+		fprintf(outfp,"dbg2       argc:       %d\n",argc);
+		fprintf(outfp,"dbg2       *argv:      %d\n",*argv);
 		}
 
 	/* inititialize grd header */
@@ -720,7 +981,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 for (j=0;j<ny;j++)
 {
 k = j * nx + i;
-fprintf(stderr,"%d %d %d %f\n",i,j,k,grid[k]);
+fprintf(outfp,"%d %d %d %f\n",i,j,k,grid[k]);
 }*/
 	GMT_write_grd(outfile, &grd, grid, w, e, s, n, pad, complex);
 #endif
@@ -728,12 +989,12 @@ fprintf(stderr,"%d %d %d %f\n",i,j,k,grid[k]);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(outfp,"dbg2  Return values:\n");
+		fprintf(outfp,"dbg2       error:      %d\n",*error);
+		fprintf(outfp,"dbg2  Return status:\n");
+		fprintf(outfp,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.13 2004-06-18 04:08:41 caress Exp $
+#	$Id: Makefile.template,v 5.14 2004-10-06 19:10:51 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.13  2004/06/18 04:08:41  caress
+# Adding support for segy i/o and working on support for Reson 7k format 88.
+#
 # Revision 5.12  2004/05/21 23:51:19  caress
 # Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
 #
@@ -274,6 +277,7 @@ $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(L
 		$(LFLAGS) -o $(BINDIR)/mbhistogram
 $(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(GMTLIBDIR)/libgmt.a \
 		$(LFLAGS) -o $(BINDIR)/mbbackangle
 $(BINDIR)/mbbackangleold:	mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
@@ -370,7 +374,7 @@ mbstripnan.o:	mbstripnan.c
 mbhistogram.o:	mbhistogram.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbhistogram.c
 mbbackangle.o:	mbbackangle.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
-	$(CC) -c $(CFLAGS) mbbackangle.c
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbbackangle.c
 mbbackangleold.o:	mbbackangleold.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbbackangleold.c
 mbanglecorrect.o:	mbanglecorrect.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h

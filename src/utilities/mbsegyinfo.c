@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsegylist.c	6/2/2004
- *    $Id: mbsegyinfo.c,v 5.1 2004-07-27 19:48:35 caress Exp $
+ *    The MB-system:	mbsegyinfo.c	6/2/2004
+ *    $Id: mbsegyinfo.c,v 5.2 2004-10-06 19:10:53 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	June 2, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/07/27 19:48:35  caress
+ * Working on handling subbottom data.
+ *
  * Revision 5.0  2004/06/18 04:06:05  caress
  * Adding support for segy i/o and working on support for Reson 7k format 88.
  *
@@ -56,15 +59,15 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.1 2004-07-27 19:48:35 caress Exp $";
+static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.2 2004-10-06 19:10:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char program_name[] = "MBsegylist";
-	static char help_message[] =  "MBsegylist lists table data from a segy data file.";
-	static char usage_message[] = "MBsegylist -Ifile [-H -Olist -V]";
+	static char program_name[] = "MBsegyinfo";
+	static char help_message[] =  "MBsegyinfo lists table data from a segy data file.";
+	static char usage_message[] = "MBsegyinfo -Ifile [-Llonflip -O -H -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -134,6 +137,8 @@ main (int argc, char **argv)
 	double	sourcewaterdepthmax = 0.0;
 	double	receiverwaterdepthmin = 0.0;
 	double	receiverwaterdepthmax = 0.0;
+	double	delaymin = 0.0;
+	double	delaymax = 0.0;
 	double	lonmin = 0.0;
 	double	lonmax = 0.0;
 	double	latmin = 0.0;
@@ -153,7 +158,7 @@ main (int argc, char **argv)
 	double	time_d, time_d_old;
 	double	navlon, navlat;
 	double	factor, sonardepth, waterdepth;
-	double	delay, interval;
+	double	tracelength, delay, interval;
 	double	range;
 	double	receiverelevation;
 	double	sourceelevation;
@@ -291,7 +296,7 @@ main (int argc, char **argv)
 	if (output_usefile == MB_YES)
 	    {
 	    strcpy(output_file, read_file);
-	    strcat(output_file, ".inf");
+	    strcat(output_file, ".sinf");
 	    if ((output = fopen(output_file, "w")) == NULL)
 		output = stream;
 	    }
@@ -391,6 +396,7 @@ main (int argc, char **argv)
 			sourcedepth = factor * ((double)traceheader.src_depth);
 			sourcewaterdepth = factor * ((double)traceheader.src_wbd);
 			receiverwaterdepth = factor * ((double)traceheader.grp_wbd);
+			delay = 0.001 * ((double)traceheader.delay_mils);
 
 			/* get initial values */
 			if (first == MB_YES)
@@ -403,6 +409,8 @@ main (int argc, char **argv)
 				rpmax = traceheader.rp_num;
 				rptracemin = traceheader.rp_tr;
 				rptracemax = traceheader.rp_tr;
+				delaymin = delay;
+				delaymax = delay;
 				lonmin = navlon;
 				lonmax = navlon;
 				latmin = navlat;
@@ -450,6 +458,8 @@ main (int argc, char **argv)
 				rpmax = MAX(rpmax, traceheader.rp_num);
 				rptracemin = MIN(rptracemin, traceheader.rp_tr);
 				rptracemax = MAX(rptracemax, traceheader.rp_tr);
+				delaymin = MIN(delaymin, delay);
+				delaymax = MAX(delaymax, delay);
 				lonmin = MIN(lonmin, navlon);
 				lonmax = MAX(lonmax, navlon);
 				latmin = MIN(latmin, navlat);
@@ -493,12 +503,14 @@ main (int argc, char **argv)
 	status = mb_segy_close(verbose,&mbsegyioptr,&error);
 	
 	/* output the information */
+	tracelength = 0.000001 * (double)(fileheader.sample_interval * fileheader.number_samples);
 	fprintf(output,"\nSEGY Data File:      %s\n",read_file);
 	fprintf(output,"\nFile Header Info:\n");
 	fprintf(output,"  Channels:                   %8d\n",fileheader.channels);
 	fprintf(output,"  Auxilliary Channels:        %8d\n",fileheader.aux_channels);
 	fprintf(output,"  Sample Interval (usec):     %8d\n",fileheader.sample_interval);
 	fprintf(output,"  Number of Samples in Trace: %8d\n",fileheader.number_samples);
+	fprintf(output,"  Trace length (sec):         %8f\n",tracelength);
 	if (fileheader.format == 1)
 		fprintf(output,"  Data Format:                IBM 32 bit floating point\n");
 	else if (fileheader.format == 2)
@@ -527,6 +539,8 @@ main (int argc, char **argv)
 		rpmin, rpmax, rpmax - rpmin + 1);
 	fprintf(output,"    RP trace:                 %8d %8d %8d\n", 
 		rptracemin, rptracemax, rptracemax - rptracemin + 1);
+	fprintf(output,"    Delay (sec):              %8f %8f %8f\n", 
+		delaymin, delaymax, delaymin - delaymax);
 	fprintf(output,"    Range (m):                %8f %8f %8f\n", 
 		rangemin, rangemax, rangemin - rangemax);
 	fprintf(output,"    Receiver Elevation (m):   %8f %8f %8f\n", 

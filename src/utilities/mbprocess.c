@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.33 2004-04-27 02:56:37 caress Exp $
+ *    $Id: mbprocess.c,v 5.34 2004-10-06 19:10:52 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003 by
+ *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.33  2004/04/27 02:56:37  caress
+ * Implemented Kluge004
+ *
  * Revision 5.32  2003/11/25 01:16:58  caress
  * The LDEO processed nav format has changed slightly. The code now reads old or new LDEO nav as NAVFORMAT:5.
  *
@@ -184,18 +187,6 @@ int check_ss_for_bath(int verbose,
 	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
 	int nss, double *ss, double *ssacrosstrack, 
 	int *error);
-int set_bathyslope(int verbose,
-	int nsmooth, 
-	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
-	double *depthsmooth, 
-	int *error);
-int get_bathyslope(int verbose,
-	int ndepths, double *depths, double *depthacrosstrack,
-	int nslopes, double *slopes, double *slopeacrosstrack, 
-	double acrosstrack, double *depth, double *slope,
-	int *error);
 int get_corrtable(int verbose,
 	double time_d, int ncorrtable, int ncorrangle, 
 	struct mbprocess_sscorr_struct	*corrtable, 
@@ -210,7 +201,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.33 2004-04-27 02:56:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.34 2004-10-06 19:10:52 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -434,13 +425,13 @@ and mbedit edit save files.\n";
 	double	*slopes;
 	double	*slopeacrosstrack;
 	double	bathy;
+	double	altitude_use;
 	double	slope;
 	double	angle;
-	double	slopeangle;
-	double	rawangle;
 	double	correction;
 
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
+	double	factor;
 	int	nbeams;
 	int	istart, iend, icut;
 	int	intstat;
@@ -2377,6 +2368,33 @@ and mbedit edit save files.\n";
 			}
 		}
 	    fclose(tfp);
+	    
+	    /* force amplitude correction tables to be symmetric if desired */
+	    if (process.mbp_ampcorr_symmetry == MBP_AMPCORR_SYMMETRIC)
+		    {
+		    for (itable=0;itable<nampcorrtable;itable++)
+			    {
+			    for (i=0;i<ampcorrtable[itable].nangle/2;i++)
+				    {
+				    j = ampcorrtable[itable].nangle - 1 - i;
+				    if (ampcorrtable[itable].amplitude[i] > 0.0
+				    	&& ampcorrtable[itable].amplitude[j] > 0.0)
+					factor = 0.5;
+				    else
+				    	factor = 1.0;
+				    ampcorrtable[itable].amplitude[i] 
+					    = factor * (ampcorrtable[itable].amplitude[i]
+						    + ampcorrtable[itable].amplitude[j]);
+				    ampcorrtable[itable].sigma[i] 
+					    = MAX(ampcorrtable[itable].sigma[i],
+						    ampcorrtable[itable].sigma[j]);
+				    ampcorrtable[itable].amplitude[j] 
+					    = ampcorrtable[itable].amplitude[i];
+				    ampcorrtable[itable].sigma[j] 
+					    = ampcorrtable[itable].sigma[i];
+				    }
+			    }
+		    }
 		
 	    /* check for good amplitude correction data */
 	    if (nampcorrtable < 1)
@@ -2502,6 +2520,33 @@ and mbedit edit save files.\n";
 			}
 		}
 	    fclose(tfp);
+	    
+	    /* force sidescan correction tables to be symmetric if desired */
+	    if (process.mbp_sscorr_symmetry == MBP_SSCORR_SYMMETRIC)
+		    {
+		    for (itable=0;itable<nsscorrtable;itable++)
+			    {
+			    for (i=0;i<sscorrtable[itable].nangle/2;i++)
+				    {
+				    j = sscorrtable[itable].nangle - 1 - i;
+				    if (sscorrtable[itable].amplitude[i] > 0.0
+				    	&& sscorrtable[itable].amplitude[j] > 0.0)
+					factor = 0.5;
+				    else
+				    	factor = 1.0;
+				    sscorrtable[itable].amplitude[i] 
+					    = factor * (sscorrtable[itable].amplitude[i]
+						    + sscorrtable[itable].amplitude[j]);
+				    sscorrtable[itable].amplitude[j] 
+					    = sscorrtable[itable].amplitude[i];
+				    sscorrtable[itable].sigma[i] 
+					    = MAX(sscorrtable[itable].sigma[i],
+						    sscorrtable[itable].sigma[j]);
+				    sscorrtable[itable].sigma[j] 
+					    = sscorrtable[itable].sigma[i];
+				    }
+			    }
+		    }
 		
 	    /* check for good sidescan correction data */
 	    if (nsscorrtable < 1)
@@ -4357,6 +4402,34 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			}
 		    }
 
+		/* get seafloor slopes if needed for amplitude or sidescan correction */
+		if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+				&& nampcorrtable > 0
+				&& nampcorrangle > 0)
+				|| 
+				(process.mbp_sscorr_mode == MBP_SSCORR_ON
+				&& nsscorrtable > 0
+				&& nsscorrangle > 0)
+				))
+			{
+			mb_pr_set_bathyslope(verbose, 
+					nsmooth, 
+					beams_bath,
+					beamflag,
+					bath,
+					bathacrosstrack,
+					&ndepths,
+					depths,
+					depthacrosstrack,
+					&nslopes,
+					slopes,
+					slopeacrosstrack,
+					depthsmooth,
+					&error);
+			}
+
 		/* correct the amplitude if desired */
 		if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON
 		    && error == MB_ERROR_NO_ERROR
@@ -4366,7 +4439,8 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			{
 			/* calculate the correction table */
 			status = get_corrtable(verbose,
-				    time_d, nampcorrtable, nampcorrangle, 
+				    time_d, 
+				    nampcorrtable, nampcorrangle, 
 				    ampcorrtable, &ampcorrtableuse, 
 				    &error);
 				
@@ -4396,27 +4470,13 @@ fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
 i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
 
 			/* get seafloor slopes */
-			set_bathyslope(verbose, 
-					nsmooth, 
-					beams_bath,
-					beamflag,
-					bath,
-					bathacrosstrack,
-					&ndepths,
-					depths,
-					depthacrosstrack,
-					&nslopes,
-					slopes,
-					slopeacrosstrack,
-					depthsmooth,
-					&error);
 		    	for (i=0;i<beams_amp;i++)
 				{
 				if (mb_beam_ok(beamflag[i]))
 			    		{
 			    		if (ndepths > 1)
 						{
-						status = get_bathyslope(verbose,
+						status = mb_pr_get_bathyslope(verbose,
 				    				ndepths,
 				    				depths,
 				    				depthacrosstrack,
@@ -4441,22 +4501,17 @@ i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]
 				
 			    		if (bathy > 0.0)
 						{
-						rawangle = RTD*
-				    			atan(bathacrosstrack[i]/bathy);
-						if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE)
-						    angle = rawangle;
-						else
-						    {
-						    slopeangle = RTD*atan(slope);
-						    angle = rawangle + slopeangle;
-						    }
+						altitude_use = bathy - sonardepth;
+						angle = RTD * atan(bathacrosstrack[i] / altitude_use);
+						if (process.mbp_ampcorr_slope != MBP_AMPCORR_IGNORESLOPE)
+						   angle += RTD * atan(slope);
 						status = get_anglecorr(verbose, 
 								ampcorrtableuse.nangle, 
 								ampcorrtableuse.angle, 
 								ampcorrtableuse.amplitude, 
 								angle, &correction, &error);
 /*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f", 
-j, i, slopeangle, rawangle, correction, reference_amp, amp[i]);*/
+j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 						if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
 				    			amp[i] = amp[i] - correction + reference_amp;
 						else
@@ -4478,7 +4533,8 @@ j, i, slopeangle, rawangle, correction, reference_amp, amp[i]);*/
 			{
 			/* calculate the correction table */
 			status = get_corrtable(verbose,
-				    time_d, nsscorrtable, nsscorrangle, 
+				    time_d, 
+				    nsscorrtable, nsscorrangle, 
 				    sscorrtable, &sscorrtableuse, 
 				    &error);
 				
@@ -4508,27 +4564,13 @@ fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
 i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*/
 
 			/* get seafloor slopes */
-			set_bathyslope(verbose, 
-					nsmooth, 
-					beams_bath,
-					beamflag,
-					bath,
-					bathacrosstrack,
-					&ndepths,
-					depths,
-					depthacrosstrack,
-					&nslopes,
-					slopes,
-					slopeacrosstrack,
-					depthsmooth,
-					&error);
 		    	for (i=0;i<pixels_ss;i++)
 				{
 				if (ss[i] > 0.0)
 			    		{
 			    		if (ndepths > 1)
 						{
-						status = get_bathyslope(verbose,
+						status = mb_pr_get_bathyslope(verbose,
 				    				ndepths,
 				    				depths,
 				    				depthacrosstrack,
@@ -4553,14 +4595,15 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 				
 			    		if (bathy > 0.0)
 						{
-						rawangle = RTD*
-				    			atan(ssacrosstrack[i]/bathy);
-						if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE)
-						    angle = rawangle;
-						else
+						altitude_use = bathy - sonardepth;
+						angle = RTD * atan(ssacrosstrack[i] / altitude_use);
+/*fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f angle:%f\n",
+time_d, i, ssacrosstrack[i], altitude_use, angle);*/
+						if (process.mbp_sscorr_slope != MBP_SSCORR_IGNORESLOPE)
 						    {
-						    slopeangle = RTD*atan(slope);
-						    angle = rawangle + slopeangle;
+/*fprintf(stderr,"SLOPECALC: time_d:%f i:%d angle:%f ",time_d,i,angle);*/
+						    angle += RTD * atan(slope);
+/*fprintf(stderr,"slope:%f slopeangle:%f angle:%f\n",slope,RTD * atan(slope),angle);*/
 						    }
 						status = get_anglecorr(verbose, 
 								sscorrtableuse.nangle, 
@@ -4568,7 +4611,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 								sscorrtableuse.amplitude, 
 								angle, &correction, &error);
 /*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f reference:%f ss: %f", 
-idata, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
+idata, i, slope, angle, correction, reference_amp, ss[i]);*/
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 				    			ss[i] = ss[i] - correction + reference_amp;
 						else
@@ -4877,330 +4920,17 @@ ss[iss],ssacrosstrack[iss]);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int set_bathyslope(int verbose,
-	int nsmooth, 
-	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
-	double *depthsmooth, 
-	int *error)
-{
-	char	*function_name = "set_bathyslope";
-	int	status = MB_SUCCESS;
-	int	first, next, last;
-	int	nbathgood;
-	double	depthsum;
-	double	dacrosstrack;
-	int	j1, j2;
-	int	i, j;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBPROCESS function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %d\n",bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
-			bathacrosstrack);
-		fprintf(stderr,"dbg2       bath:\n");
-		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
-				i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr,"dbg2       depths:           %d\n",depths);
-		fprintf(stderr,"dbg2       depthacrosstrack: %d\n",depthacrosstrack);
-		fprintf(stderr,"dbg2       slopes:           %d\n",slopes);
-		fprintf(stderr,"dbg2       slopeacrosstrack: %d\n",slopeacrosstrack);
-		}
-
-	/* initialize depths */
-	*ndepths = 0;
-	for (i=0;i<nbath;i++)
-		{
-		depths[i] = 0.0;
-		depthacrosstrack[i] = 0.0;
-		}
-
-	/* first fill in the existing depths */
-	first = -1;
-	last = -1;
-	nbathgood = 0;
-	for (i=0;i<nbath;i++)
-		{
-		if (mb_beam_ok(beamflag[i]))
-			{
-			if (first == -1)
-				{
-				first = i;
-				}
-			last = i;
-			depths[i] = bath[i];
-			depthacrosstrack[i] = bathacrosstrack[i];
-			nbathgood++;
-			}
-		}
-
-	/* now interpolate the depths */
-	if (nbathgood > 0)
-	for (i=first;i<last;i++)
-		{
-		if (mb_beam_ok(beamflag[i]))
-			{
-			next = i;
-			j = i + 1;
-			while (next == i && j < nbath)
-				{
-				if (mb_beam_ok(beamflag[j]))
-					next = j;
-				else
-					j++;
-				}
-			if (next > i)
-				{
-				for (j=i+1;j<next;j++)
-					{
-					depths[j] = bath[i] + 
-						(bath[next] - bath[i])
-						*(j-i)/(next-1);
-					depthacrosstrack[j] = bathacrosstrack[i] + 
-						(bathacrosstrack[next] - bathacrosstrack[i])
-						*(j-i)/(next-1);
-					}
-				}
-			}
-		}
-
-	/* now smooth the depths */
-	if (nbathgood > 0 && nsmooth > 0)
-		{
-		for (i=first;i<=last;i++)
-			{
-			j1 = i - nsmooth;
-			j2 = i + nsmooth;
-			if (j1 < first)
-				j1 = first;
-			if (j2 > last)
-				j2 = last;
-			depthsum = 0.0;
-			for (j=j1;j<=j2;j++)
-				{
-				depthsum += depths[j];
-				}
-			if (depthsum > 0.0)
-				depthsmooth[i] = depthsum/(j2-j1+1);
-			else
-				depthsmooth[i] = depths[i];
-			}
-		for (i=first;i<=last;i++)
-			depths[i] = depthsmooth[i];
-		}
-
-	/* now extrapolate the depths at the ends of the swath */
-	if (nbathgood > 0)
-		{
-		*ndepths = nbath;
-		if (last - first > 0)
-			dacrosstrack = 
-				(depthacrosstrack[last] 
-				- depthacrosstrack[first]) 
-				/ (last - first);
-		else 
-			dacrosstrack = 1.0;
-		for (i=0;i<first;i++)
-			{
-			depths[i] = depths[first];
-			depthacrosstrack[i] = depthacrosstrack[first] 
-				+ dacrosstrack * (i - first);
-			}
-		for (i=last+1;i<nbath;i++)
-			{
-			depths[i] = depths[last];
-			depthacrosstrack[i] = depthacrosstrack[last] 
-				+ dacrosstrack * (i - last);
-			}
-		}
-
-	/* now calculate slopes */
-	if (nbathgood > 0)
-		{
-		*nslopes = nbath + 1;
-		for (i=0;i<nbath-1;i++)
-			{
-			slopes[i+1] = (depths[i+1] - depths[i])
-				/(depthacrosstrack[i+1] - depthacrosstrack[i]);
-			slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
-				+ depthacrosstrack[i]);
-			}
-		slopes[0] = 0.0;
-		slopeacrosstrack[0] = depthacrosstrack[0];
-		slopes[nbath] = 0.0;
-		slopeacrosstrack[nbath] = depthacrosstrack[nbath-1];
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBPROCESS function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       ndepths:         %d\n",
-			*ndepths);
-		fprintf(stderr,"dbg2       depths:\n");
-		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, depths[i], depthacrosstrack[i]);
-		fprintf(stderr,"dbg2       nslopes:         %d\n",
-			*nslopes);
-		fprintf(stderr,"dbg2       slopes:\n");
-		for (i=0;i<*nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, slopes[i], slopeacrosstrack[i]);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int get_bathyslope(int verbose,
-	int ndepths, double *depths, double *depthacrosstrack,
-	int nslopes, double *slopes, double *slopeacrosstrack, 
-	double acrosstrack, double *depth, double *slope,
-	int *error)
-{
-	char	*function_name = "get_bathyslope";
-	int	status = MB_SUCCESS;
-	int	found_depth, found_slope;
-	int	idepth, islope;
-	int	i;
-	
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBPROCESS function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       ndepths:         %d\n",
-			ndepths);
-		fprintf(stderr,"dbg2       depths:\n");
-		for (i=0;i<ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, depths[i], depthacrosstrack[i]);
-		fprintf(stderr,"dbg2       nslopes:         %d\n",
-			nslopes);
-		fprintf(stderr,"dbg2       slopes:\n");
-		for (i=0;i<nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, slopes[i], slopeacrosstrack[i]);
-		fprintf(stderr,"dbg2       acrosstrack:     %f\n",acrosstrack);
-		}
-
-	/* check if acrosstrack is in defined interval */
-	found_depth = MB_NO;
-	found_slope = MB_NO;
-	if (ndepths > 1)
-	    {
-	    
-	    if (acrosstrack < depthacrosstrack[0])
-		{
-		*depth = depths[0];
-		*slope = 0.0;
-		found_depth = MB_YES;
-		found_slope = MB_YES;
-		}
-
-	    else if (acrosstrack > depthacrosstrack[ndepths-1])
-		{
-		*depth = depths[ndepths-1];
-		*slope = 0.0;
-		found_depth = MB_YES;
-		found_slope = MB_YES;
-		}
-    
-	    else if (acrosstrack >= depthacrosstrack[0]
-		    && acrosstrack <= depthacrosstrack[ndepths-1])
-		{
-    
-		/* look for depth */
-		idepth = -1;
-		while (found_depth == MB_NO && idepth < ndepths - 2)
-		    {
-		    idepth++;
-		    if (acrosstrack >= depthacrosstrack[idepth]
-			&& acrosstrack <= depthacrosstrack[idepth+1])
-			{
-			*depth = depths[idepth] 
-				+ (acrosstrack - depthacrosstrack[idepth])
-				/(depthacrosstrack[idepth+1] 
-				- depthacrosstrack[idepth])
-				*(depths[idepth+1] - depths[idepth]);
-			found_depth = MB_YES;
-			*error = MB_ERROR_NO_ERROR;
-			}
-		    }
-    
-		/* look for slope */
-		islope = -1;
-		while (found_slope == MB_NO && islope < nslopes - 2)
-		    {
-		    islope++;
-		    if (acrosstrack >= slopeacrosstrack[islope]
-			&& acrosstrack <= slopeacrosstrack[islope+1])
-			{
-			*slope = slopes[islope] 
-				+ (acrosstrack - slopeacrosstrack[islope])
-				/(slopeacrosstrack[islope+1] 
-				- slopeacrosstrack[islope])
-				*(slopes[islope+1] - slopes[islope]);
-			found_slope = MB_YES;
-			*error = MB_ERROR_NO_ERROR;
-			}
-		    }
-		}
-	    }
-
-	/* check for failure */
-	if (found_depth != MB_YES || found_slope != MB_YES)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_OTHER;
-		*depth = 0.0;
-		*slope = 0.0;
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBPROCESS function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       depth:           %f\n",*depth);
-		fprintf(stderr,"dbg2       slope:           %f\n",*slope);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
 int get_corrtable(int verbose,
 	double time_d, int ncorrtable, int ncorrangle, 
 	struct mbprocess_sscorr_struct	*corrtable, 
 	struct mbprocess_sscorr_struct	*corrtableuse, 
 	int *error)
 {
-	char	*function_name = "get_anglecorr";
+	char	*function_name = "get_corrtable";
 	int	status = MB_SUCCESS;
 	double	factor;
-	int	ifirst, ilast, irecent, inext;
-	int	i, ii, itable;
+	int	ifirst, ilast, irecent, inext, nfactor;
+	int	i, ii, j, itable;
 
 	/* print input debug statements */
 	if (verbose >= 2)

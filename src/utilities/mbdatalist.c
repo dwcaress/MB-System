@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.7 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbdatalist.c,v 5.8 2004-10-06 19:10:52 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2002/05/29 23:43:09  caress
  * Release 5.0.beta18
  *
@@ -61,10 +64,10 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.7 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.8 2004-10-06 19:10:52 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
-	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -V -H]";
+	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -Z -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -100,10 +103,12 @@ main (int argc, char **argv)
 	int	problem_report = MB_NO;
 	int	problem = MB_NO;
 	int	nproblem = 0;
+	int	make_datalistp = MB_NO;
 	
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
 	FILE	*output;
+	FILE	*fp;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -113,7 +118,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnOoPpQqR:r:Uu")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnOoPpQqR:r:UuZz")) != -1)
 	  switch (c) 
 		{
 		case 'F':
@@ -166,6 +171,10 @@ main (int argc, char **argv)
 		case 'v':
 			verbose++;
 			break;
+		case 'Z':
+		case 'z':
+			make_datalistp = MB_YES;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -209,6 +218,7 @@ main (int argc, char **argv)
 		fprintf(output,"dbg2       make_inf:       %d\n",make_inf);
 		fprintf(output,"dbg2       force_update:   %d\n",force_update);
 		fprintf(output,"dbg2       problem_report: %d\n",problem_report);
+		fprintf(output,"dbg2       make_datalistp: %d\n",make_datalistp);
 		fprintf(output,"dbg2       pings:          %d\n",pings);
 		fprintf(output,"dbg2       lonflip:        %d\n",lonflip);
 		fprintf(output,"dbg2       bounds[0]:      %f\n",bounds[0]);
@@ -238,6 +248,23 @@ main (int argc, char **argv)
 		{
 		fprintf(output,"\n%s\n",help_message);
 		fprintf(output,"\nusage: %s\n", usage_message);
+		exit(error);
+		}
+
+	/* if make_datalistp desired then make it and exit */
+	if (make_datalistp)
+		{
+	    	if ((fp = fopen("datalistp.mb-1","w")) == NULL)
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    fprintf(stderr, "\nUnable to open output file datalistp.mb-1\n");
+		    fprintf(stderr, "Program %s aborted!\n", program_name);
+		    exit(error);
+		    }
+		fprintf(fp, "$PROCESSED\ndatalist.mb-1 -1\n");
+		fclose(fp);
+		if (verbose > 0)
+		    fprintf(output, "Convenience datalist file datalistp.mb-1 created...\n");
 		exit(error);
 		}
 
