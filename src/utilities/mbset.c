@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.10 2001-10-19 00:56:17 caress Exp $
+ *    $Id: mbset.c,v 5.11 2001-10-19 19:40:32 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2001/10/19  00:56:17  caress
+ * Now tries to use relative paths.
+ *
  * Revision 5.9  2001/09/17  23:21:14  caress
  * Fixed metadata support.
  *
@@ -87,7 +90,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.10 2001-10-19 00:56:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.11 2001-10-19 19:40:32 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -124,7 +127,7 @@ the manual pages for mbprocess and mbset. \n\n";
 	
 	/* processing variables */
 	int	explicit = MB_NO;
-	int	lookforfiles = MB_NO;
+	int	lookforfiles = 0;
 	int	mbp_ifile_specified;
 	char	mbp_ifile[MBP_FILENAMESIZE];
 	int	nscan, toggle;
@@ -162,7 +165,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			break;
 		case 'L':
 		case 'l':
-			lookforfiles = MB_YES;
+			lookforfiles++;
 			flag++;
 			break;
 		case 'P':
@@ -783,25 +786,16 @@ the manual pages for mbprocess and mbset. \n\n";
 			    program_name, pargv[i]);
 		    }
 		}
-		
-	/* get bathymetry recalculation mode */
-	if (process.mbp_svp_mode == MBP_SVP_ON)
+	    
+	/* figure out data format or output filename if required */
+	if (process.mbp_format_specified == MB_NO
+	    || process.mbp_ofile_specified == MB_NO)
 	    {
-	    process.mbp_bathrecalc_mode = MBP_BATHRECALC_RAYTRACE;
+	    mb_pr_default_output(verbose, &process, &error);
 	    }
-	else if (process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF
-	    || process.mbp_pitchbias_mode != MBP_PITCHBIAS_OFF)
-	    {
-	    process.mbp_bathrecalc_mode = MBP_BATHRECALC_ROTATE;
-	    }
-	else if (process.mbp_draft_mode != MBP_DRAFT_OFF)
-	    {
-	    process.mbp_bathrecalc_mode = MBP_BATHRECALC_OFFSET;
-	    }
-	else
-	    {
-	    process.mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
-	    }
+	    
+	/* update bathymetry recalculation mode */
+	mb_pr_bathmode(verbose, &process, &error);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -827,7 +821,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		fprintf(stderr,"  Format:                        %d\n",process.mbp_format);
 	    if (process.mbp_ifile_specified == MB_YES)
 		fprintf(stderr,"  Input file:                    %s\n",process.mbp_ifile);
-	    if (process.mbp_ifile_specified == MB_YES)
+	    if (process.mbp_ofile_specified == MB_YES)
 		fprintf(stderr,"  Output file:                   %s\n",process.mbp_ofile);
 
 	    fprintf(stderr,"\nNavigation Merging:\n");
