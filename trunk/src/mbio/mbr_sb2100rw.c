@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 5.4 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 5.5 2001-07-27 19:07:16 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.3  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -196,7 +199,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.5 2001-07-27 19:07:16 caress Exp $";
 	char	*function_name = "mbr_register_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -326,7 +329,7 @@ int mbr_info_sb2100rw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.5 2001-07-27 19:07:16 caress Exp $";
 	char	*function_name = "mbr_info_sb2100rw";
 	int	status = MB_SUCCESS;
 
@@ -395,7 +398,7 @@ int mbr_info_sb2100rw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.5 2001-07-27 19:07:16 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -667,7 +670,7 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->kind = data->kind;
 
 		/* sonar parameters (PR) */
-		if (data->kind == MB_DATA_PARAMETER)
+		if (data->kind == MB_DATA_VELOCITY_PROFILE)
 		    {
 		    store->year = data->year;
 		    store->jday = data->jday;
@@ -846,7 +849,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->kind = store->kind;
 
 		/* sonar parameters (PR) */
-		if (data->kind == MB_DATA_PARAMETER)
+		if (data->kind == MB_DATA_VELOCITY_PROFILE)
 		    {
 		    data->year = store->year;
 		    data->jday = store->jday;
@@ -1146,7 +1149,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error)
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
-				data->kind = MB_DATA_PARAMETER;
+				data->kind = MB_DATA_VELOCITY_PROFILE;
 				}
 			}
 		else if (type == MBF_SB2100RW_TR)
@@ -2005,7 +2008,7 @@ int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		{
 		status = mbr_sb2100rw_wr_rawline(verbose,mbfp,data,error);
 		}
-	else if (data->kind == MB_DATA_PARAMETER)
+	else if (data->kind == MB_DATA_VELOCITY_PROFILE)
 		{
 		status = mbr_sb2100rw_wr_pr(verbose,mbfp,data,error);
 		}

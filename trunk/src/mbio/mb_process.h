@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.4 2001-06-03 06:54:56 caress Exp $
+ *    $Id: mb_process.h,v 5.5 2001-07-27 19:07:16 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -275,6 +275,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/03 06:54:56  caress
+ * Improved handling of lever calculation.
+ *
  * Revision 5.3  2001/06/01  00:14:06  caress
  * Added support for metadata insertion.
  *
@@ -304,6 +307,13 @@
 #define MBP_NAV_ON		1
 #define MBP_NAV_LINEAR		0
 #define MBP_NAV_SPLINE		1
+#define	MBP_CUT_DATA_BATH	0
+#define	MBP_CUT_DATA_AMP	1
+#define	MBP_CUT_DATA_SS		2
+#define	MBP_CUT_MODE_NONE	0
+#define	MBP_CUT_MODE_NUMBER   	1
+#define	MBP_CUT_MODE_DISTANCE 	2
+#define	MBP_CUT_NUM_MAX	20
 #define MBP_EDIT_OFF		0
 #define MBP_EDIT_ON		1
 #define MBP_EDIT_FLAG		1
@@ -379,6 +389,13 @@ struct mb_process_struct
 	int	mbp_navadj_mode;
 	char	mbp_navadjfile[MBP_FILENAMESIZE];
 	int	mbp_navadj_algorithm;
+
+	/* data cutting */
+	int	mbp_cut_num;
+	int	mbp_cut_kind[MBP_CUT_NUM_MAX];
+	int	mbp_cut_mode[MBP_CUT_NUM_MAX];
+	double	mbp_cut_min[MBP_CUT_NUM_MAX];
+	double	mbp_cut_max[MBP_CUT_NUM_MAX];
 	
 	/* bathymetry editing */
 	int	mbp_edit_mode;
