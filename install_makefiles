@@ -1,7 +1,9 @@
-#! /usr/local/bin/perl 
+eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
+                    & eval 'exec perl -S $0 $argv:q'
+                         if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.3 1994-10-20 21:23:53 caress Exp $
+#    $Id: install_makefiles,v 4.4 1994-10-21 13:38:18 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,10 +41,13 @@
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.3 1994-10-20 21:23:53 caress Exp $
+#   $Id: install_makefiles,v 4.4 1994-10-21 13:38:18 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1994/10/20  21:23:53  caress
+# Release V4.0
+#
 # Revision 4.2  1994/06/22  19:30:38  caress
 # Added support for different archivers used under
 # different operating systems (e.g. ar used for Suns and
