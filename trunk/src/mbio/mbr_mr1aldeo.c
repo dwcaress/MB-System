@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1aldeo.c	10/24/95
- *	$Id: mbr_mr1aldeo.c,v 1.6 1998-10-05 18:32:27 caress Exp $
+ *	$Id: mbr_mr1aldeo.c,v 1.7 1999-05-05 20:32:19 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	October 24, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 1.1  1998/10/05  17:46:15  caress
  * Initial revision
  *
@@ -66,7 +69,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.6 1998-10-05 18:32:27 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.7 1999-05-05 20:32:19 caress Exp $";
 	char	*function_name = "mbr_alm_mr1aldeo";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -825,7 +828,7 @@ int	*error;
 		/* get port bathymetry */
 		beam_center = mb_io_ptr->beams_bath/2;
 		data->port_btycount = 0;
-		for (i=beam_center-1;i>-1;i--)
+		for (i=beam_center-2;i>-1;i--)
 			{
 			if (mb_io_ptr->new_beamflag[i] != MB_FLAG_NULL)
 				{
@@ -859,7 +862,7 @@ int	*error;
 
 		/* get starboard bathymetry */
 		data->stbd_btycount = 0;
-		for (i=beam_center+1;i<mb_io_ptr->beams_bath;i++)
+		for (i=beam_center+2;i<mb_io_ptr->beams_bath;i++)
 			{
 			if (mb_io_ptr->new_beamflag[i] != MB_FLAG_NULL)
 				{
@@ -870,7 +873,7 @@ int	*error;
 				    data->bath_stbd[data->stbd_btycount] 
 					= mb_io_ptr->new_bath[i];
 				data->bath_acrosstrack_stbd[data->stbd_btycount]
-					= -mb_io_ptr->new_bath_acrosstrack[i];
+					= mb_io_ptr->new_bath_acrosstrack[i];
 				data->stbd_btycount++;
 				}
 			}
