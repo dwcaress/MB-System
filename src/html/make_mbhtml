@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 5.3 2001-07-20 18:00:05 caress Exp $
+#    $Id: make_mbhtml,v 5.4 2001-11-19 23:52:41 dcaress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 5.3 2001-07-20 18:00:05 caress Exp $
+#   $Id: make_mbhtml,v 5.4 2001-11-19 23:52:41 dcaress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.3  2001-07-20 11:00:05-07  caress
+#   Don't know what I did...
+#
 # Revision 5.2  2001/06/08  21:54:03  caress
 # Version 5.0.beta01
 #
@@ -95,7 +98,16 @@ foreach $man_page (@manual_pages) {
     chop($date);
     chop($date);
     $date = substr($date, 1);
-    `awf -man ../../man/manl/$man_page.l | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`;
+    $os = `uname -s`;
+    if ($os == "IRIX64") 
+	{
+	$groff = "awf";
+	}
+    else
+	{
+	$groff = "groff";
+	}
+    `$groff -man ../../man/manl/$man_page.l | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`;
 
     # Open the input file
     if (!open(IHTML,"$raw_html_file"))
