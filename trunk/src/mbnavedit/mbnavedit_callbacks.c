@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.7 1998-10-05 19:17:39 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.8 1999-04-09 22:34:08 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1998/10/05  19:17:39  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.6  1997/09/15  19:10:20  caress
  * Real Version 4.5
  *
@@ -702,6 +705,10 @@ void do_set_controls()
 			TRUE, TRUE);
 			
 	/* set the lon, lat, speed and heading plot toggles */
+	XmToggleButtonSetState(toggleButton_time, 
+			plot_tint, TRUE);
+	XmToggleButtonSetState(toggleButton_org_time, 
+			plot_tint_org, TRUE);
 	XmToggleButtonSetState(toggleButton_lon, 
 			plot_lon, TRUE);
 	XmToggleButtonSetState(toggleButton_org_lon, 
@@ -724,6 +731,10 @@ void do_set_controls()
 			plot_cmg, TRUE);
 
 	/* hide or display items according to toggle states */
+	if (plot_tint == MB_YES)
+		XtManageChild(toggleButton_org_time);
+	else
+		XtUnmanageChild(toggleButton_org_time);
 	if (plot_lon == MB_YES)
 		XtManageChild(toggleButton_org_lon);
 	else
@@ -1227,6 +1238,51 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
+do_toggle_time(w, client, call)
+Widget w;
+XtPointer client;
+XtPointer call;
+{
+	int	screen_height;
+
+	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+
+	plot_tint = XmToggleButtonGetState(toggleButton_time);
+	if (plot_tint == MB_YES)
+		XtManageChild(toggleButton_org_time);
+	else
+		{
+		XtUnmanageChild(toggleButton_org_time);
+		mbnavedit_action_deselect_all(PLOT_TINT);
+		}
+
+	/* get and set size of canvas */
+	number_plots = 0;
+	if (plot_tint == MB_YES)
+		number_plots++;
+	if (plot_lon == MB_YES)
+		number_plots++;
+	if (plot_lat == MB_YES)
+		number_plots++;
+	if (plot_speed == MB_YES)
+		number_plots++;
+	if (plot_heading == MB_YES)
+		number_plots++;
+	screen_height = number_plots*plot_height;
+	if (screen_height <= 0)
+		screen_height = plot_height;
+	XtVaSetValues(drawingArea, 
+			XmNwidth, plot_width, 
+			XmNheight, screen_height, 
+			NULL);	
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+
+/*--------------------------------------------------------------------*/
+/* ARGSUSED */
+void
 do_toggle_lon(w, client, call)
 Widget w;
 XtPointer client;
@@ -1403,6 +1459,22 @@ XtPointer call;
 			XmNwidth, plot_width, 
 			XmNheight, screen_height, 
 			NULL);	
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+
+/*--------------------------------------------------------------------*/
+/* ARGSUSED */
+void
+do_toggle_org_time(w, client, call)
+Widget w;
+XtPointer client;
+XtPointer call;
+{
+	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+
+	plot_tint_org = XmToggleButtonGetState(toggleButton_org_time);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -2264,4 +2336,3 @@ void get_text_string(Widget w, String str)
     XtFree(str_tmp);
 }
 /*--------------------------------------------------------------------*/
-

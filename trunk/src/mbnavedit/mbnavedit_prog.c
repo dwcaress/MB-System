@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.13 1999-02-04 23:54:13 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.14 1999-04-09 22:34:08 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1999/02/04  23:54:13  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.12  1998/12/18  01:40:25  caress
  * MB-System version 4.6beta5
  *
@@ -94,6 +97,7 @@ struct mbnavedit_ping_struct
 	int	time_i[7];
 	double	time_d;
 	double	file_time_d;
+	double	tint;
 	double	lon;
 	double	lat;
 	double	speed;
@@ -101,12 +105,16 @@ struct mbnavedit_ping_struct
 	double	roll;
 	double	pitch;
 	double	heave;
+	double	time_d_org;
+	double	tint_org;
 	double	lon_org;
 	double	lat_org;
 	double	speed_org;
 	double	heading_org;
 	double	speed_made_good;
 	double	course_made_good;
+	int	tint_x;
+	int	tint_y;
 	int	lon_x;
 	int	lon_y;
 	int	lat_x;
@@ -115,6 +123,7 @@ struct mbnavedit_ping_struct
 	int	speed_y;
 	int	heading_x;
 	int	heading_y;
+	int	tint_select;
 	int	lon_select;
 	int	lat_select;
 	int	speed_select;
@@ -143,7 +152,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.13 1999-02-04 23:54:13 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.14 1999-04-09 22:34:08 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -261,6 +270,8 @@ int mbnavedit_init_globals()
 	data_step_size = 750;
 	mode_pick = PICK_MODE_PICK;
 	mode_set_interval = MB_NO;
+	plot_tint = MB_YES;
+	plot_tint_org = MB_YES;
 	plot_lon = MB_YES;
 	plot_lon_org = MB_YES;
 	plot_lat = MB_YES;
@@ -277,11 +288,13 @@ int mbnavedit_init_globals()
 	plot_width = DEFAULT_PLOT_WIDTH;
 	plot_height = DEFAULT_PLOT_HEIGHT;
 	number_plots = 0;
+	if (plot_tint == MB_YES)    number_plots++;
 	if (plot_lon == MB_YES)	    number_plots++;
 	if (plot_lat == MB_YES)	    number_plots++;
 	if (plot_speed == MB_YES)   number_plots++;
 	if (plot_heading == MB_YES) number_plots++;
 	time_fix = MB_NO;
+	use_ping_data = MB_NO;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -348,7 +361,7 @@ int	*startup_file;
 	strcpy(ofile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:O:o:Tt")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:O:o:PpTt")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -400,6 +413,11 @@ int	*startup_file;
 		case 'o':
 			sscanf (optarg,"%s", ofile);
 			ofile_defined = MB_YES;
+			flag++;
+			break;
+		case 'P':
+		case 'p':
+			use_ping_data = MB_YES;
 			flag++;
 			break;
 		case 'T':
@@ -921,7 +939,8 @@ int	hold;
 	/* insert changed data into buffer */
 	for (iping=0;iping<nlist;iping++)
 		{
-		if (ping[iping].lon != ping[iping].lon_org
+		if (ping[iping].time_d != ping[iping].time_d_org
+			|| ping[iping].lon != ping[iping].lon_org
 			|| ping[iping].lat != ping[iping].lat_org
 			|| ping[iping].speed != ping[iping].speed_org
 			|| ping[iping].heading != ping[iping].heading_org
@@ -1036,7 +1055,8 @@ int mbnavedit_load_data()
 	if (status == MB_SUCCESS) 
 	do
 		{
-		status = mb_buffer_get_next_nav(verbose,
+		if (use_ping_data == MB_NO)
+		    status = mb_buffer_get_next_nav(verbose,
 			buff_ptr,imbio_ptr,start,&ping[nlist].id,
 			ping[nlist].time_i,&ping[nlist].time_d,
 			&ping[nlist].lon,&ping[nlist].lat,
@@ -1044,6 +1064,23 @@ int mbnavedit_load_data()
 			&ping[nlist].roll,&ping[nlist].pitch,
 			&ping[nlist].heave,
 			&error);
+		else
+		    {
+		    status = mb_buffer_get_next_data(verbose,
+			buff_ptr,imbio_ptr,start,&ping[nlist].id,
+			ping[nlist].time_i,&ping[nlist].time_d,
+			&ping[nlist].lon,&ping[nlist].lat,
+			&ping[nlist].speed,&ping[nlist].heading,
+			&nbath,&namp,&nss,
+			beamflag,bath,amp,  
+			bathacrosstrack,bathalongtrack, 
+			ss,ssacrosstrack,ssalongtrack,
+			&error);
+		    ping[nlist].heading = 0.0;
+		    ping[nlist].roll = 0.0;
+		    ping[nlist].pitch = 0.0;
+		    ping[nlist].heave = 0.0;
+		    }
 		if (status == MB_SUCCESS)
 			{
 			/* get first time value if first record */
@@ -1063,6 +1100,7 @@ int mbnavedit_load_data()
 				ping[nlist].time_d - file_start_time_d;
 
 			/* set everything deselected */
+			ping[nlist].tint_select = MB_NO;
 			ping[nlist].lon_select = MB_NO;
 			ping[nlist].lat_select = MB_NO;
 			ping[nlist].speed_select = MB_NO;
@@ -1103,6 +1141,26 @@ int mbnavedit_load_data()
 	/* if requested fix time stamp repeats */
 	if (time_fix == MB_YES)
 		mbnavedit_action_fixtime();
+		
+	/* calculate expected time */
+	if (nlist > 1)
+	    {
+	    for (i=1;i<nlist;i++)
+		{
+		ping[i].tint = ping[i].time_d - ping[i-1].time_d;
+		ping[i].tint_org = ping[i].tint;
+		ping[i].time_d_org = ping[i].time_d;
+		}
+	    ping[0].tint = ping[1].tint;
+	    ping[0].tint_org = ping[1].tint_org;
+	    ping[0].time_d_org = ping[0].time_d;
+	    }
+	else if (nlist == 0)
+	    {
+	    ping[0].tint = 0.0;
+	    ping[0].tint_org = 0.0;
+	    ping[0].time_d_org = ping[0].time_d;
+	    }
 
 	/* calculate speed-made-good and course-made-good */
 	for (i=0;i<nlist;i++)
@@ -1645,7 +1703,12 @@ int	yy;
 	range_min = 100000;
 	for (i=current_id+1;i<current_id+nplot;i++)
 		{
-		if (plot[active_plot].type == PLOT_LONGITUDE)
+		if (plot[active_plot].type == PLOT_TINT)
+			{
+			ix = xx - ping[i].tint_x;
+			iy = yy - ping[i].tint_y;
+			}
+		else if (plot[active_plot].type == PLOT_LONGITUDE)
 			{
 			ix = xx - ping[i].lon_x;
 			iy = yy - ping[i].lon_y;
@@ -1677,7 +1740,15 @@ int	yy;
 		and replot it */
 	if (range_min <= MBNAVEDIT_PICK_DISTANCE)
 		{
-		if (plot[active_plot].type == PLOT_LONGITUDE)
+		if (plot[active_plot].type == PLOT_TINT)
+			{
+			if (ping[iping].tint_select == MB_YES)
+				ping[iping].tint_select = MB_NO;
+			else
+				ping[iping].tint_select = MB_YES;
+			mbnavedit_plot_tint_value(active_plot,iping); 
+			}
+		else if (plot[active_plot].type == PLOT_LONGITUDE)
 			{
 			if (ping[iping].lon_select == MB_YES)
 				ping[iping].lon_select = MB_NO;
@@ -1801,7 +1872,12 @@ int	yy;
 	/* find all data points that are close enough */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
-		if (plot[active_plot].type == PLOT_LONGITUDE)
+		if (plot[active_plot].type == PLOT_TINT)
+			{
+			ix = xx - ping[i].tint_x;
+			iy = yy - ping[i].tint_y;
+			}
+		else if (plot[active_plot].type == PLOT_LONGITUDE)
 			{
 			ix = xx - ping[i].lon_x;
 			iy = yy - ping[i].lon_y;
@@ -1827,7 +1903,12 @@ int	yy;
 			and replot it */
 		if (range <= MBNAVEDIT_ERASE_DISTANCE)
 			{
-			if (plot[active_plot].type == PLOT_LONGITUDE)
+			if (plot[active_plot].type == PLOT_TINT)
+				{
+				ping[i].tint_select = MB_YES;
+				mbnavedit_plot_tint_value(active_plot,i); 
+				}
+			else if (plot[active_plot].type == PLOT_LONGITUDE)
 				{
 				ping[i].lon_select = MB_YES;
 				mbnavedit_plot_lon_value(active_plot,i); 
@@ -1940,7 +2021,12 @@ int	yy;
 	/* find all data points that are close enough */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
-		if (plot[active_plot].type == PLOT_LONGITUDE)
+		if (plot[active_plot].type == PLOT_TINT)
+			{
+			ix = xx - ping[i].tint_x;
+			iy = yy - ping[i].tint_y;
+			}
+		else if (plot[active_plot].type == PLOT_LONGITUDE)
 			{
 			ix = xx - ping[i].lon_x;
 			iy = yy - ping[i].lon_y;
@@ -1966,7 +2052,12 @@ int	yy;
 			and replot it */
 		if (range <= MBNAVEDIT_ERASE_DISTANCE)
 			{
-			if (plot[active_plot].type == PLOT_LONGITUDE)
+			if (plot[active_plot].type == PLOT_TINT)
+				{
+				ping[i].tint_select = MB_NO;
+				mbnavedit_plot_tint_value(active_plot,i); 
+				}
+			else if (plot[active_plot].type == PLOT_LONGITUDE)
 				{
 				ping[i].lon_select = MB_NO;
 				mbnavedit_plot_lon_value(active_plot,i); 
@@ -2064,7 +2155,9 @@ int	yy;
 	/* select all data points in active plot */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
-		if (plot[active_plot].type == PLOT_LONGITUDE)
+		if (plot[active_plot].type == PLOT_TINT)
+			ping[i].tint_select = MB_YES;
+		else if (plot[active_plot].type == PLOT_LONGITUDE)
 			ping[i].lon_select = MB_YES;
 		else if (plot[active_plot].type == PLOT_LATITUDE)
 			ping[i].lat_select = MB_YES;
@@ -2132,6 +2225,7 @@ int	yy;
 		active plots plus all non-active plots */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
+		ping[i].tint_select = MB_NO;
 		ping[i].lon_select = MB_NO;
 		ping[i].lat_select = MB_NO;
 		ping[i]. speed_select = MB_NO;
@@ -2168,7 +2262,7 @@ int mbnavedit_action_deselect_all(type)
 int	type;
 {
 	/* local variables */
-	char	*function_name = "mbnavedit_action_mouse_deselectall";
+	char	*function_name = "mbnavedit_action_mouse_deselect_all";
 	int	status = MB_SUCCESS;
 	int	ndeselect;
 	int	i;
@@ -2190,7 +2284,13 @@ int	type;
 	ndeselect = 0;
 	for (i=0;i<nlist;i++)
 		{
-		if (type == PLOT_LONGITUDE 
+		if (type == PLOT_TINT 
+			&& ping[i].tint_select == MB_YES)
+			{
+			ping[i].tint_select = MB_NO;
+			ndeselect++;
+			}
+		else if (type == PLOT_LONGITUDE 
 			&& ping[i].lon_select == MB_YES)
 			{
 			ping[i].lon_select = MB_NO;
@@ -2571,7 +2671,7 @@ int mbnavedit_action_interpolate()
 	int	iplot;
 	int	iping;
 	int	ibefore, iafter;
-	int	lonlat_change;
+	int	timelonlat_change;
 	int	i;
 
 	/* print input debug statements */
@@ -2584,8 +2684,74 @@ int mbnavedit_action_interpolate()
 	/* don't try to do anything if no data */
 	if (nplot > 0)
 	{
-	/* look for position changes */
-	lonlat_change = MB_NO;
+	/* look for position or time changes */
+	timelonlat_change = MB_NO;
+
+	/* do expected time */
+	for (iping=0;iping<nlist;iping++)
+	    {
+	    if (ping[iping].tint_select == MB_YES)
+		{
+		ibefore = iping;
+		for (i=iping-1;i>=0;i--)
+		    if (ping[i].tint_select == MB_NO
+			&& ibefore == iping)
+			ibefore = i;
+		iafter = iping;
+		for (i=iping+1;i<nlist;i++)
+		    if (ping[i].tint_select == MB_NO
+			&& iafter == iping)
+			iafter = i;
+		if (ibefore < iping && iafter > iping)
+		    {
+		    ping[iping].time_d = ping[ibefore].time_d 
+			+ (ping[iafter].time_d - ping[ibefore].time_d)
+			*((double)(iping - ibefore))
+			    /	((double)(iafter - ibefore));
+		    ping[iping].tint = ping[iping].time_d 
+					- ping[iping-1].time_d;
+		    timelonlat_change = MB_YES;
+		    }
+		else if (ibefore < iping && ibefore > 0)
+		    {
+		    ping[iping].time_d = ping[ibefore].time_d 
+			+ (ping[ibefore].time_d - ping[ibefore-1].time_d)
+			* (iping - ibefore);
+		    ping[iping].tint = ping[iping].time_d 
+					- ping[iping-1].time_d;
+		    timelonlat_change = MB_YES;
+		    }
+		else if (ibefore < iping)
+		    {
+		    ping[iping].time_d = ping[ibefore].time_d;
+		    ping[iping].tint = ping[iping].time_d 
+					- ping[iping-1].time_d;
+		    timelonlat_change = MB_YES;
+		    }
+		else if (iafter > iping && iafter < nlist - 1)
+		    {
+		    ping[iping].time_d = ping[iafter].time_d 
+			+ (ping[iafter+1].time_d - ping[iafter].time_d)
+			*(iping - iafter);
+		    ping[iping].tint = 0.0;
+		    timelonlat_change = MB_YES;
+		    }
+		else if (iafter > iping)
+		    {
+		    ping[iping].time_d = ping[iafter].time_d;
+		    ping[iping].tint = ping[iping].time_d 
+					- ping[iping-1].time_d;
+		    timelonlat_change = MB_YES;
+		    }
+		ping[iping].file_time_d = 
+			ping[iping].time_d - file_start_time_d;
+		status = mb_get_date(verbose, ping[iping].time_d, ping[iping].time_i);
+		if (iping < nlist - 1)
+		    if (ping[iping+1].tint_select == MB_NO)
+			ping[iping+1].tint = ping[iping+1].time_d 
+						- ping[iping].time_d;
+		}
+	    }
 
 	/* do longitude */
 	for (iping=0;iping<nlist;iping++)
@@ -2608,7 +2774,7 @@ int mbnavedit_action_interpolate()
 			+ (ping[iafter].lon - ping[ibefore].lon)
 			*(ping[iping].time_d - ping[ibefore].time_d)
 			/(ping[iafter].time_d - ping[ibefore].time_d);
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		else if (ibefore < iping && ibefore > 0)
 		    {
@@ -2616,12 +2782,12 @@ int mbnavedit_action_interpolate()
 			+ (ping[ibefore].lon - ping[ibefore-1].lon)
 			*(ping[iping].time_d - ping[ibefore].time_d)
 			/(ping[ibefore].time_d - ping[ibefore-1].time_d);
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		else if (ibefore < iping)
 		    {
 		    ping[iping].lon = ping[ibefore].lon;
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		else if (iafter > iping && iafter < nlist - 1)
 		    {
@@ -2629,12 +2795,12 @@ int mbnavedit_action_interpolate()
 			+ (ping[iafter+1].lon - ping[iafter].lon)
 			*(ping[iping].time_d - ping[iafter].time_d)
 			/(ping[iafter+1].time_d - ping[iafter].time_d);
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		else if (iafter > iping)
 		    {
 		    ping[iping].lon = ping[iafter].lon;
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		}
 	    }
@@ -2660,7 +2826,7 @@ int mbnavedit_action_interpolate()
 			+ (ping[iafter].lat - ping[ibefore].lat)
 			*(ping[iping].time_d - ping[ibefore].time_d)
 			/(ping[iafter].time_d - ping[ibefore].time_d);
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		else if (ibefore < iping && ibefore > 0)
 		    {
@@ -2668,12 +2834,12 @@ int mbnavedit_action_interpolate()
 			+ (ping[ibefore].lat - ping[ibefore-1].lat)
 			*(ping[iping].time_d - ping[ibefore].time_d)
 			/(ping[ibefore].time_d - ping[ibefore-1].time_d);
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		else if (ibefore < iping)
 		    {
 		    ping[iping].lat = ping[ibefore].lat;
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		else if (iafter > iping && iafter < nlist - 1)
 		    {
@@ -2681,12 +2847,12 @@ int mbnavedit_action_interpolate()
 			+ (ping[iafter+1].lat - ping[iafter].lat)
 			*(ping[iping].time_d - ping[iafter].time_d)
 			/(ping[iafter+1].time_d - ping[iafter].time_d);
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		else if (iafter > iping)
 		    {
 		    ping[iping].lat = ping[iafter].lat;
-		    lonlat_change = MB_YES;
+		    timelonlat_change = MB_YES;
 		    }
 		}
 	    }
@@ -2758,7 +2924,7 @@ int mbnavedit_action_interpolate()
 	    }
 
 	/* recalculate speed-made-good and course-made-good */
-	if (lonlat_change == MB_YES)
+	if (timelonlat_change == MB_YES)
 		for (i=0;i<nlist;i++)
 			mbnavedit_get_smgcmg(i);
 	}
@@ -2790,7 +2956,7 @@ int mbnavedit_action_revert()
 	int	active_plot;
 	int	range;
 	int	ix, iy;
-	int	lonlat_change;
+	int	timelonlat_change;
 	int	i;
 
 	/* print input debug statements */
@@ -2805,19 +2971,35 @@ int mbnavedit_action_revert()
 	{
 
 	/* look for position changes */
-	lonlat_change = MB_NO;
+	timelonlat_change = MB_NO;
 
 	/* loop over each of the plots */
 	for (iplot=0;iplot<number_plots;iplot++)
 		{
 		for (i=current_id;i<current_id+nplot;i++)
 			{
-			if (plot[iplot].type == PLOT_LONGITUDE)
+			if (plot[iplot].type == PLOT_TINT)
+				{
+				if (ping[i].tint_select == MB_YES)
+					{
+					ping[i].time_d = ping[i].time_d_org;
+					ping[i].file_time_d = 
+						ping[i].time_d - file_start_time_d;
+					ping[i].tint = ping[i].time_d 
+							- ping[i-1].time_d;
+					timelonlat_change = MB_YES;
+					if (i < nlist - 1)
+					    ping[i+1].tint = ping[i+1].time_d 
+							    - ping[i].time_d;
+					status = mb_get_date(verbose, ping[i].time_d, ping[i].time_i);
+					}
+				}
+			else if (plot[iplot].type == PLOT_LONGITUDE)
 				{
 				if (ping[i].lon_select == MB_YES)
 					{
 					ping[i].lon = ping[i].lon_org;
-					lonlat_change = MB_YES;
+					timelonlat_change = MB_YES;
 					}
 				}
 			else if (plot[iplot].type == PLOT_LATITUDE)
@@ -2825,7 +3007,7 @@ int mbnavedit_action_revert()
 				if (ping[i].lat_select == MB_YES)
 					{
 					ping[i].lat = ping[i].lat_org;
-					lonlat_change = MB_YES;
+					timelonlat_change = MB_YES;
 					}
 				}
 			else if (plot[iplot].type == PLOT_SPEED)
@@ -2842,7 +3024,7 @@ int mbnavedit_action_revert()
 		}
 
 	/* recalculate speed-made-good and course-made-good */
-	if (lonlat_change == MB_YES)
+	if (timelonlat_change == MB_YES)
 		for (i=0;i<nlist;i++)
 			mbnavedit_get_smgcmg(i);
 		
@@ -3069,6 +3251,8 @@ int mbnavedit_plot_all()
 	int	status = MB_SUCCESS;
 	double	time_min;
 	double	time_max;
+	double	tint_min;
+	double	tint_max;
 	double	lon_min;
 	double	lon_max;
 	double	lat_min;
@@ -3126,6 +3310,7 @@ int mbnavedit_plot_all()
 	/* deselect data outside plots */
 	for (i=0;i<current_id;i++)
 		{
+		ping[i].tint_select = MB_NO;
 		ping[i].lon_select = MB_NO;
 		ping[i].lat_select = MB_NO;
 		ping[i].speed_select = MB_NO;
@@ -3133,6 +3318,7 @@ int mbnavedit_plot_all()
 		}
 	for (i=current_id+nplot;i<nlist;i++)
 		{
+		ping[i].tint_select = MB_NO;
 		ping[i].lon_select = MB_NO;
 		ping[i].lat_select = MB_NO;
 		ping[i].speed_select = MB_NO;
@@ -3146,6 +3332,8 @@ int mbnavedit_plot_all()
 	/* find min max values */
 	time_min = plot_start_time;
 	time_max = plot_end_time;
+	tint_min = ping[current_id].tint;
+	tint_max = ping[current_id].tint;
 	lon_min = ping[current_id].lon;
 	lon_max = ping[current_id].lon;
 	lat_min = ping[current_id].lat;
@@ -3162,6 +3350,13 @@ int mbnavedit_plot_all()
 	heave_max = ping[current_id].heave;
 	for (i=current_id+1;i<current_id+nplot;i++)
 		{
+		tint_min = MIN(ping[i].tint, tint_min);
+		tint_max = MAX(ping[i].tint, tint_max);
+		if (plot_tint_org == MB_YES)
+			{
+			tint_min = MIN(ping[i].tint_org, tint_min);
+			tint_max = MAX(ping[i].tint_org, tint_max);
+			}
 		lon_min = MIN(ping[i].lon, lon_min);
 		lon_max = MAX(ping[i].lon, lon_max);
 		if (plot_lon_org == MB_YES)
@@ -3217,6 +3412,10 @@ int mbnavedit_plot_all()
 	range = 0.51*(time_max - time_min);
 	time_min = center - range;
 	time_max = center + range;
+	center = 0.5*(tint_min + tint_max);
+	range = 0.55*(tint_max - tint_min);
+	tint_min = center - range;
+	tint_max = center + range;
 	center = 0.5*(lon_min + lon_max);
 	range = 0.55*(lon_max - lon_min);
 	lon_min = center - range;
@@ -3263,6 +3462,12 @@ int mbnavedit_plot_all()
 		}
 
 	/* make sure min max values aren't too small */
+	if ((tint_max - tint_min) < 0.01)
+		{
+		center = 0.5*(tint_min + tint_max);
+		tint_min = center - 0.005;
+		tint_max = center + 0.005;
+		}
 	if ((lon_max - lon_min) < 0.01)
 		{
 		center = 0.5*(lon_min + lon_max);
@@ -3308,12 +3513,13 @@ int mbnavedit_plot_all()
 		fprintf(stderr,"\n%d data records set for plotting (%d desired)\n",
 			nplot,data_show_size);
 		for (i=current_id;i<current_id+nplot;i++)
-			fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f %11.6f %5.2f %5.1f %5.1f %5.1f %5.1f\n",
+			fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f  %11.6f  %11.6f  %11.6f %11.6f %5.2f %5.1f %5.1f %5.1f %5.1f\n",
 				i,ping[i].id,ping[i].record,
 				ping[i].time_i[1],ping[i].time_i[2],
 				ping[i].time_i[0],ping[i].time_i[3],
 				ping[i].time_i[4],ping[i].time_i[5],
-				ping[i].time_i[6],
+				ping[i].time_i[6],ping[i].time_d,
+				ping[i].file_time_d,ping[i].tint,
 				ping[i].lon, ping[i].lat, 
 				ping[i].speed, ping[i].heading, 
 				ping[i].roll, ping[i].pitch, 
@@ -3329,6 +3535,40 @@ int mbnavedit_plot_all()
 
 	/* figure out how many plots to make */
 	number_plots = 0;
+	if (plot_tint == MB_YES)
+		{
+		plot[number_plots].type = PLOT_TINT;
+		plot[number_plots].ixmin = 1.75*margin_x;
+		plot[number_plots].ixmax = plot_width - margin_x/2;
+		plot[number_plots].iymin = plot_height - margin_y
+			+ number_plots*plot_height;
+		plot[number_plots].iymax = number_plots*plot_height 
+			+ margin_y;
+		plot[number_plots].xmin = time_min;
+		plot[number_plots].xmax = time_max;
+		plot[number_plots].ymin = tint_min;
+		plot[number_plots].ymax = tint_max;
+		plot[number_plots].xscale = 
+			(plot[number_plots].ixmax 
+			- plot[number_plots].ixmin)
+			/(plot[number_plots].xmax 
+			- plot[number_plots].xmin);
+		plot[number_plots].yscale = 
+			(plot[number_plots].iymax 
+			- plot[number_plots].iymin)
+			/(plot[number_plots].ymax 
+			- plot[number_plots].ymin);
+		plot[number_plots].xinterval = 100.0;
+		plot[number_plots].yinterval = 5.0;
+		sprintf(plot[number_plots].xlabel, 
+			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
+			xtime_i[1], xtime_i[2], xtime_i[0]);
+		sprintf(plot[number_plots].ylabel1, 
+			"dT");
+		sprintf(plot[number_plots].ylabel2, 
+			"(seconds)");
+		number_plots++;
+		}
 	if (plot_lon == MB_YES)
 		{
 		plot[number_plots].type = PLOT_LONGITUDE;
@@ -3730,7 +3970,9 @@ int mbnavedit_plot_all()
 			pixel_values[BLACK],XG_SOLIDLINE);
 
 		/* now plot the data */
-		if (plot[iplot].type == PLOT_LONGITUDE)
+		if (plot[iplot].type == PLOT_TINT)
+			mbnavedit_plot_tint(iplot);
+		else if (plot[iplot].type == PLOT_LONGITUDE)
 			mbnavedit_plot_lon(iplot);
 		else if (plot[iplot].type == PLOT_LATITUDE)
 			mbnavedit_plot_lat(iplot);
@@ -3753,6 +3995,89 @@ int mbnavedit_plot_all()
 		status = MB_SUCCESS;
 	else
 		status = MB_FAILURE;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_plot_tint(iplot)
+int	iplot;
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_plot_tint";
+	int	status = MB_SUCCESS;
+	int	ixmin, ixmax, iymin, iymax;
+	double	xmin, xmax, ymin, ymax;
+	double	xscale, yscale;
+	int	ix, iy;
+	int	tint_x1, tint_y1, tint_x2, tint_y2;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iplot:       %d\n",iplot);
+		}
+
+	/* get scaling values */
+	ixmin = plot[iplot].ixmin;
+	ixmax = plot[iplot].ixmax;
+	iymin = plot[iplot].iymin;
+	iymax = plot[iplot].iymax;
+	xmin = plot[iplot].xmin;
+	xmax = plot[iplot].xmax;
+	ymin = plot[iplot].ymin;
+	ymax = plot[iplot].ymax;
+	xscale = plot[iplot].xscale;
+	yscale = plot[iplot].yscale;
+
+	/* plot original expected time data */
+	if (plot_tint_org == MB_YES)
+	{
+	tint_x1 = ixmin + xscale*(ping[current_id].file_time_d - xmin);
+	tint_y1 = iymin + yscale*(ping[current_id].tint_org - ymin);
+	for (i=current_id+1;i<current_id+nplot;i++)
+		{
+		tint_x2 = ixmin + xscale*(ping[i].file_time_d - xmin);
+		tint_y2 = iymin + yscale*(ping[i].tint_org - ymin);
+		xg_drawline(mbnavedit_xgid,
+			tint_x1, tint_y1, tint_x2, tint_y2, 
+			pixel_values[GREEN],XG_SOLIDLINE);
+		tint_x1 = tint_x2;
+		tint_y1 = tint_y2;
+		}
+	}
+
+	/* plot basic expected time data */
+	for (i=current_id;i<current_id+nplot;i++)
+		{
+		ping[i].tint_x = ixmin + xscale*(ping[i].file_time_d - xmin);
+		ping[i].tint_y = iymin + yscale*(ping[i].tint - ymin);
+		if (ping[i].tint_select == MB_YES)
+			xg_drawrectangle(mbnavedit_xgid, 
+				ping[i].tint_x-2, 
+				ping[i].tint_y-2, 4, 4, 
+				pixel_values[RED],XG_SOLIDLINE);
+		else
+			xg_fillrectangle(mbnavedit_xgid, 
+				ping[i].tint_x-2, 
+				ping[i].tint_y-2, 4, 4, 
+				pixel_values[BLACK],XG_SOLIDLINE);
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4317,6 +4642,61 @@ int	iplot;
 		heave_y1 = heave_y2;
 		}
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_plot_tint_value(iplot, iping)
+int	iplot;
+int	iping;
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_plot_tint_value";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iplot:       %d\n",iplot);
+		fprintf(stderr,"dbg2       iping:       %d\n",iping);
+		}
+
+	/* unplot basic expected time data value */
+	xg_drawrectangle(mbnavedit_xgid, 
+			ping[iping].tint_x-2, 
+			ping[iping].tint_y-2, 4, 4, 
+			pixel_values[WHITE],XG_SOLIDLINE);
+	xg_fillrectangle(mbnavedit_xgid, 
+			ping[iping].tint_x-2, 
+			ping[iping].tint_y-2, 4, 4, 
+			pixel_values[WHITE],XG_SOLIDLINE);
+
+	/* replot basic expected time data value */
+	if (ping[iping].tint_select == MB_YES)
+		xg_drawrectangle(mbnavedit_xgid, 
+			ping[iping].tint_x-2, 
+			ping[iping].tint_y-2, 4, 4, 
+			pixel_values[RED],XG_SOLIDLINE);
+	else
+		xg_fillrectangle(mbnavedit_xgid, 
+			ping[iping].tint_x-2, 
+			ping[iping].tint_y-2, 4, 4, 
+			pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* print output debug statements */
 	if (verbose >= 2)
