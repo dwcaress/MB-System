@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.11 1996-01-26 21:25:58 caress Exp $
+ *    $Id: mbclean.c,v 4.12 1996-03-01 22:37:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1996/01/26  21:25:58  caress
+ * Version 4.3 distribution
+ *
  * Revision 4.10  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -139,7 +142,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.11 1996-01-26 21:25:58 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.12 1996-03-01 22:37:24 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -200,6 +203,7 @@ char **argv;
 	int	ndeviation = 0;
 	int	nouter = 0;
 	int	nrail = 0;
+	int	nmin = 0;
 	int	nbad = 0;
 	int	nflag = 0;
 	int	nzero = 0;
@@ -219,6 +223,9 @@ char **argv;
 	double	fraction_high;
 	int	check_deviation = MB_NO;
 	double	deviation_max;
+	int	check_num_good_min = MB_NO;
+	int	num_good_min;
+	int	num_good;
 
 	/* rail processing variables */
 	int	center;
@@ -252,7 +259,6 @@ char **argv;
 
 	/* processing variables */
 	int	start;
-
 	int	i, j, k, l, m, p, b;
 
 	char	*ctime();
@@ -290,7 +296,7 @@ char **argv;
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:O:o:QqX:x:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:O:o:QqU:u:X:x:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -360,6 +366,12 @@ char **argv;
 			zap_rails = MB_YES;
 			flag++;
 			break;
+		case 'U':
+		case 'u':
+			sscanf (optarg,"%d", &num_good_min);
+			check_num_good_min = MB_YES;
+			flag++;
+			break;
 		case 'X':
 		case 'x':
 			sscanf (optarg,"%d", &zap_beams);
@@ -385,7 +397,8 @@ char **argv;
 		&& zap_rails == MB_NO
 		&& check_range == MB_NO
 		&& check_fraction == MB_NO
-		&& check_deviation == MB_NO)
+		&& check_deviation == MB_NO
+		&& check_num_good_min == MB_NO)
 		check_slope = MB_YES;
 
 	/* print starting message */
@@ -444,6 +457,8 @@ char **argv;
 		fprintf(stderr,"dbg2       fraction_low:   %f\n",fraction_low);
 		fprintf(stderr,"dbg2       fraction_high:  %f\n",fraction_high);
 		fprintf(stderr,"dbg2       check_deviation:%d\n",check_deviation);
+		fprintf(stderr,"dbg2       check_num_good_min:%d\n",check_num_good_min);
+		fprintf(stderr,"dbg2       num_good_min:   %d\n",num_good_min);
 		}
 
 	/* if help desired then print it and exit */
@@ -966,6 +981,109 @@ char **argv;
 				fprintf(stderr,"dbg2    next:     %d\n",ping[2].id);
 				}
 
+			/* check for minimum number of good depths
+				on each side of swath */
+			if (check_num_good_min == MB_YES 
+				&& num_good_min > 0
+				&& ping[1].id >= 0)
+				{
+				/* do port */
+				num_good = 0;
+				for (i=0;i<center;i++)
+					{
+					if (ping[1].bath[i] > 0.0)
+						num_good++;
+					}
+				if (num_good < num_good_min)
+					{
+					for (i=0;i<center;i++)
+						{
+						if (ping[1].bath[i] > 0.0 && mode <= 2)
+							{
+							if (verbose >= 1)
+							fprintf(stderr,"n: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %3d %3d\n",
+							    ping[1].time_i[0],
+							    ping[1].time_i[1],
+							    ping[1].time_i[2],
+							    ping[1].time_i[3],
+							    ping[1].time_i[4],
+							    ping[1].time_i[5],
+							    ping[1].time_i[6],
+							    i,ping[1].bath[i],
+							    num_good, num_good_min);
+							ping[1].bath[i] = -ping[1].bath[i];
+							nmin++;
+							nflag++;
+							}
+						else if (ping[1].bath[i] > 0.0)
+							{
+							if (verbose >= 1)
+							fprintf(stderr,"n: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %3d %3d\n",
+							    ping[1].time_i[0],
+							    ping[1].time_i[1],
+							    ping[1].time_i[2],
+							    ping[1].time_i[3],
+							    ping[1].time_i[4],
+							    ping[1].time_i[5],
+							    ping[1].time_i[6],
+							    i,ping[1].bath[i],
+							    num_good, num_good_min);
+							ping[1].bath[i] = 0.0;
+							nmin++;
+							nzero++;
+							}
+						}
+					}
+					
+				/* do starboard */
+				num_good = 0;
+				for (i=center+1;i<beams_bath;i++)
+					{
+					if (ping[1].bath[i] > 0.0)
+						num_good++;
+					}
+				if (num_good < num_good_min)
+					{
+					for (i=center+1;i<beams_bath;i++)
+						{
+						if (ping[1].bath[i] > 0.0 && mode <= 2)
+							{
+							if (verbose >= 1)
+							fprintf(stderr,"n: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %3d %3d\n",
+							    ping[1].time_i[0],
+							    ping[1].time_i[1],
+							    ping[1].time_i[2],
+							    ping[1].time_i[3],
+							    ping[1].time_i[4],
+							    ping[1].time_i[5],
+							    ping[1].time_i[6],
+							    i,ping[1].bath[i],
+							    num_good, num_good_min);
+							ping[1].bath[i] = -ping[1].bath[i];
+							nmin++;
+							nflag++;
+							}
+						else if (ping[1].bath[i] > 0.0)
+							{
+							if (verbose >= 1)
+							fprintf(stderr,"n: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %3d %3d\n",
+							    ping[1].time_i[0],
+							    ping[1].time_i[1],
+							    ping[1].time_i[2],
+							    ping[1].time_i[3],
+							    ping[1].time_i[4],
+							    ping[1].time_i[5],
+							    ping[1].time_i[6],
+							    i,ping[1].bath[i],
+							    num_good, num_good_min);
+							ping[1].bath[i] = 0.0;
+							nmin++;
+							nzero++;
+							}
+						}
+					}
+				}
+
 			/* zap outer beams if requested */
 			if (zap_beams > 0 && ping[1].id >= 0)
 				{
@@ -1426,7 +1544,7 @@ char **argv;
 						b = bad[1].beam;
 						if (verbose >= 2)
 							fprintf(stderr,"\n");
-						fprintf(stderr,"%s: 4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f %6.2f %6.2f\n",
+						fprintf(stderr,"s: 4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f %6.2f %6.2f\n",
 						ping[p].time_i[0],
 						ping[p].time_i[1],
 						ping[p].time_i[2],
@@ -1552,6 +1670,7 @@ char **argv;
 		{
 		fprintf(stderr,"\n%d bathymetry data records processed\n",ndata);
 		fprintf(stderr,"%d outer beams zapped\n",nouter);
+		fprintf(stderr,"%d beams zapped for too few good beams in ping\n",nmin);
 		fprintf(stderr,"%d beams out of acceptable depth range\n",nrange);
 		fprintf(stderr,"%d beams out of acceptable fractional depth range\n",nfraction);
 		fprintf(stderr,"%d beams exceed acceptable deviation from median depth\n",ndeviation);
