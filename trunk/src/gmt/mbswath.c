@@ -25,6 +25,10 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.2  1993/11/03  21:09:10  caress
+ * Changed ps_plotinit call to agree with current version
+ * of GMT (v2.1.4).
+ *
  * Revision 3.1  1993/06/20  23:08:30  caress
  * Fixed help message.
  *
@@ -120,7 +124,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 3.2 1993-11-03 21:09:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 3.3 1993-11-27 03:03:37 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Idatalist -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -Fred/green/blue -Gmagnitude/azimuth -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -1226,6 +1230,7 @@ int	*error;
 	double	dx, dy, dd;
 	double	dst2;
 	double	drvx, drvy;
+	double	sinx,cosy;
 	int	i, j;
 
 	/* print input debug statements */
@@ -1247,6 +1252,9 @@ int	*error;
 	/* get shading from directional bathymetric gradient */
 	if (mode == MBSWATH_BATH_RELIEF)
 	  {
+	  /* get directional factors */
+	  sinx = sin(DTR*azimuth);
+	  cosy = cos(DTR*azimuth);
 
 	  /* loop over the pings and beams */
 	  for (i=0;i<swath->npings;i++)
@@ -1301,24 +1309,11 @@ int	*error;
 			drvy = dd*dy/dst2;
 			drvcount++;
 			}
-/*	fprintf(stderr,"\ni:%d j:%d  dx:%f dy:%f dd:%f drvx:%f drvy:%f  count:%d\n",
-		i,j,dx,dy,dd,drvx,drvy,drvcount);*/
 
 		/* do along track components */
 		dx = 0.0;
 		dy = 0.0;
 		dd = 0.0;
-		drvx = 0.0;
-		drvy = 0.0;
-/*	if (i > 0 && i < swath->npings - 1)
-		fprintf(stderr,"ping0->bath[j]:%f  ping2->bath[j]:%f\n",
-			ping0->bath[j],ping2->bath[j]);
-	else if (i < swath->npings - 1)
-		fprintf(stderr,"ping1->bath[j]:%f  ping2->bath[j]:%f\n",
-			ping1->bath[j],ping2->bath[j]);
-	else if (i > 0)
-		fprintf(stderr,"ping0->bath[j]:%f  ping1->bath[j]:%f\n",
-			ping0->bath[j],ping1->bath[j]);*/
 		if (i > 0 && i < swath->npings - 1
 			&& ping0->bath[j] > 0.0
 			&& ping2->bath[j] > 0.0)
@@ -1356,15 +1351,13 @@ int	*error;
 			drvy = drvy + dd*dy/dst2;
 			drvcount++;
 			}
-/*	fprintf(stderr,"i:%d j:%d  dx:%f dy:%f dd:%f drvx:%f drvy:%f  count:%d\n",
-		i,j,dx,dy,dd,drvx,drvy,drvcount);*/
 
 		/* calculate directional derivative */
 		if (drvcount == 2)
-			ping1->shade[j] = magnitude*(drvx*sin(DTR*azimuth) 
-				+ drvy*cos(DTR*azimuth));
+			ping1->shade[j] = magnitude*(drvx*sinx + drvy*cosy);
 		else
 			ping1->shade[j] = 0.0;
+
 		}
 	    }
 	  }
