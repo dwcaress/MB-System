@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	3.00	4/8/93
- *    $Id: mbedit.c,v 3.3 1993-08-30 19:03:20 caress Exp $
+ *    $Id: mbedit.c,v 3.4 1993-11-03 19:40:34 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.3  1993/08/30  19:03:20  caress
+ * Added Go To option.  Also added Erase and Restore edit modes.
+ *
  * Revision 3.2  1993/08/17  00:28:52  caress
  * Version current as of 16 August 1993.
  *
@@ -77,7 +80,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit.c,v 3.3 1993-08-30 19:03:20 caress Exp $";
+static char rcs_id[] = "$Id: mbedit.c,v 3.4 1993-11-03 19:40:34 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -156,7 +159,7 @@ int	plot_size = MBEDIT_MAX_PINGS/2;
 int	nplot = 0;
 int	mbedit_xgid;
 int	borders[4];
-int	scale_max = 2000;
+int	scale_max = 5000;
 int	xscale = 1000;
 int	yscale = 1000;
 int	x_interval = 1000;
