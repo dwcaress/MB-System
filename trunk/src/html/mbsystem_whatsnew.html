@@ -61,17 +61,23 @@ of other corrections.</LI>
 <LI>MBset. This new tool allows users to create and modify the parameter
 files used to control the operation of mbprocess.</LI>
 
+<LI>MBdatalist. This new tool allows users to list the files referenced by
+a recursive datalist structure. It can also be used to create the ancillary ".inf",
+".fbt", and ".fnv" files for all of the data files referenced in a recursive datalist
+structure. </LI>
+
+<LI>MBsvplist. This new tool lists water sound velocity profiles embedded
+in swath data files, creating secondary files that 
+can be read into MBvelocitytool.</LI>
+
 <LI>MBareaclean. This new tool identifies and flags artifacts in swath sonar
 bathymetry data within a specified area of interest. The
 area is divided into a grid with square cells or bins, and the
 data are grouped according to these bins. Once all
 of  data  are read, statistical tests are applied 
 to the soundings within each bin.</LI>
-
-<LI>MBsvplist. This new tool lists water sound velocity profiles embedded
-in swath data files, creating secondary files that can be read into MBvelocitytool.<BR>
 <BR>
-</LI>
+<BR>
 </UL>
 
 <LI>Improved bathymetry and navigation editors.</LI>
@@ -218,7 +224,10 @@ as format 75. Similarly, the IFREMER netCDF navigation
 archiving data format is supported
 as format 167.</LI>
 
-<LI>The Atlas SURF format is supported read-only as format 181. 
+<LI>The STN Atlas processing data format SURF is supported as format 181. At
+present, SURF is supported as a read-only format. This allows plotting and gridding
+of the SURF data, but not processing. Writing or translating the SURF data to
+allow processing will be supported in a later version.
 </LI>
 
 <LI>The Hawaii Mapping Research Group's new MR1 format is supported as
@@ -231,7 +240,7 @@ to Roger Davis and HMRG for making the code available under the GPL.</LI>
 </UL>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2003-04-17 21:43:48 $ $Revision: 5.8 $ </P></CENTER>
+Last Updated: $Date: 2003-04-17 22:28:19 $ $Revision: 5.9 $ </P></CENTER>
 
 <P>
 <HR WIDTH="67%"></P>
