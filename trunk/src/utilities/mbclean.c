@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	3.00	2/26/93
- *    $Id: mbclean.c,v 3.0 1993-05-04 22:21:32 dale Exp $
+ *    $Id: mbclean.c,v 3.1 1993-05-18 00:01:15 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/05/04  22:21:32  dale
+ * Initial version.
+ *
  */
 
 /* standard include files */
@@ -77,7 +80,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 3.0 1993-05-04 22:21:32 dale Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 3.1 1993-05-18 00:01:15 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Fformat -Llonflip -Mmode -Cslope -Ddistance -Xzap_beams \n\t-N -V -H -Iinfile -Ooutfile]";
@@ -117,9 +120,9 @@ char **argv;
 	/* MBIO buffer structure pointer */
 	char	*buff_ptr;
 	int	nbuff;
-	int	nwant = 20;
+	int	nwant = 500;
 	int	nload;
-	int	nhold = 10;
+	int	nhold = 50;
 	int	ndump;
 	int	done;
 	int	finished;
