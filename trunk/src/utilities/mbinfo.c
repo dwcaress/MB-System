@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.5 2001-09-17 23:21:14 caress Exp $
+ *    $Id: mbinfo.c,v 5.6 2001-10-25 16:02:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/09/17  23:21:14  caress
+ * Fixed metadata support.
+ *
  * Revision 5.4  2001/08/10  22:42:50  dcaress
  * Release 5.0.beta07
  *
@@ -169,7 +172,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.5 2001-09-17 23:21:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.6 2001-10-25 16:02:55 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -892,7 +895,7 @@ main (int argc, char **argv)
 					}
 				else if (strncmp(comment, "METADRAFT:", 10) == 0)
 					{
-					sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
+					sscanf(comment, "METADRAFT:%lf", &val_double);
 					fprintf(output,"Draft:                  %f m\n", val_double);
 					}
 
