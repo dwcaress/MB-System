@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.5 1995-08-17 15:04:52 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.6 1995-10-03 13:28:50 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/08/17  15:04:52  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.4  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -123,7 +126,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.5 1995-08-17 15:04:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.6 1995-10-03 13:28:50 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -1237,8 +1240,8 @@ The default input and output streams are stdin and stdout.\n";
 				    ping[jj].depthacrosstrack,
 				    ping[jj].nslopes,
 				    ping[jj].slopes,
-				    ping[jj].ssacrosstrack,
-				    ping[jj].bathacrosstrack[i],
+				    ping[jj].slopeacrosstrack,
+				    ping[jj].ssacrosstrack[i],
 				    &bathy,&slope,&error);
 				if (status != MB_SUCCESS)
 				    {
@@ -1612,10 +1615,10 @@ int	*error;
 	int	first, next, last;
 	int	nbathgood;
 	double	depthsum;
+	double	dacrosstrack;
 	int	j1, j2;
 	int	i, j;
 	
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1719,13 +1722,24 @@ int	*error;
 	if (nbathgood > 0)
 		{
 		*ndepths = nbath;
+		if (last - first > 0)
+			dacrosstrack = 
+				(depthacrosstrack[last] 
+				- depthacrosstrack[first]) 
+				/ (last - first);
+		else 
+			dacrosstrack = 1.0;
 		for (i=0;i<first;i++)
 			{
 			depths[i] = depths[first];
+			depthacrosstrack[i] = depthacrosstrack[first] 
+				+ dacrosstrack * (i - first);
 			}
 		for (i=last+1;i<nbath;i++)
 			{
 			depths[i] = depths[last];
+			depthacrosstrack[i] = depthacrosstrack[last] 
+				+ dacrosstrack * (i - last);
 			}
 		}
 
@@ -1795,7 +1809,6 @@ int	*error;
 	int	idepth, islope;
 	int	i;
 	
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
