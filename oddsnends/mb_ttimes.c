@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.16 1999-03-31 18:11:35 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.17 1999-07-16 19:24:15 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -181,6 +181,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.15  1999/01/01  23:41:06  caress
  * MB-System version 4.6beta6
  *
@@ -272,7 +275,7 @@ double	*draft;
 double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.16 1999-03-31 18:11:35 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.17 1999-07-16 19:24:15 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -435,6 +438,14 @@ int	*error;
 	else if (system == MB_SYS_HDCS)
 		{
 		status = mbsys_hdcs_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,
+				angles,angles_forward,angles_null,
+				heave,alongtrack_offset,
+				draft,ssv,error);
+		}
+	else if (system == MB_SYS_SINGLEBEAM)
+		{
+		status = mbsys_singlebeam_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
 				heave,alongtrack_offset,

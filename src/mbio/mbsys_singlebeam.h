@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_singlebeam.h	2/17/93
- *	$Id: mbsys_singlebeam.h,v 4.0 1999-04-16 01:27:33 caress Exp $
+ *    The MB-system:	mbsys_singlebeam.h	4/13/93
+ *	$Id: mbsys_singlebeam.h,v 4.1 1999-07-16 19:24:15 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,7 @@
  *
  * $Log: not supported by cvs2svn $
  *
+ *
  */
 /*
  * Notes on the MBSYS_SINGLEBEAM data structure:
@@ -46,10 +47,10 @@ struct mbsys_singlebeam_struct
 	int	kind;
 	
 	/* survey id */
-	char	survey_id[24];
+	char	survey_id[8];
 			    /* Identifier supplied by the contributing       
 				 organization, else given by NGDC in
-				 a manner which represents the data. */+
+				 a manner which represents the data. */
 
 	/* time stamp */
 	double	time_d;
@@ -61,6 +62,8 @@ struct mbsys_singlebeam_struct
 	/* navigation */
 	double	longitude;
 	double	latitude;
+	double	easting;
+	double	northing;
 	double	heading;    /* degrees */
 	double	speed;	    /* km/hr */
 	int	nav_type;   /* Indicates how lat/lon was obtained:
@@ -79,12 +82,16 @@ struct mbsys_singlebeam_struct
 	/* motion sensor data */
 	double	roll;
 	double	pitch;
-	double	heave;
+	double	heave;		/* heave or rov depth in m */
+	
+	/* submersible/ROV data */
+	double	rov_pressure;	/* platform pressure in decibar */
+	double	rov_altitude;	/* altitude above seafloor in m */
 
 	/* bathymetry */
+	int	flag;	    /* MB-System style beamflag */
 	double	tt;	    /* two way travel time in sec */
 	double	bath;	    /* corrected depth in m */
-	double	altitude;   /* altitude of transducer above seafloor in m */
 	double	tide;	    /* tidal correction in m */
 	int	bath_corr;  /* BATHYMETRIC CORRECTION CODE
 			       This code details the procedure
