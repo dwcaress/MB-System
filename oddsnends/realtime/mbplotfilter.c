@@ -151,7 +151,8 @@ char **argv;
 			}
 		else if (strncmp(line,"flus",4) == 0)
 			{
-			/*move2(homex,homey);*/ 
+			for (i=0;i<210;i++)
+				move2(x,y);
 			makcur();
 			fflush(stdout);
 			fflush(stderr);

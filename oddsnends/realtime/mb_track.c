@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	3.00	8/15/93
- *    $Id: mb_track.c,v 3.0 1993-08-26 00:59:59 caress Exp $
+ *    $Id: mb_track.c,v 3.1 1993-11-05 18:58:09 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/08/26  00:59:59  caress
+ * Initial version.
+ *
  *
  */
 
@@ -91,7 +94,7 @@ struct swath *swath;
 double	time_tick_int,time_annot_int,date_annot_int,time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 3.0 1993-08-26 00:59:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 3.1 1993-11-05 18:58:09 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;
@@ -125,10 +128,10 @@ int	*error;
 	newpen(0);
 	for (i=1;i<swath->npings;i++)
 		{
-/*		boldline(swath->data[i-1].navlon,swath->data[i-1].navlat,
-			swath->data[i].navlon,swath->data[i].navlat);*/
-		plot(swath->data[i-1].navlon,swath->data[i-1].navlat,IUP);
-		plot(swath->data[i].navlon,swath->data[i].navlat,IDN);
+		boldline(swath->data[i-1].navlon,swath->data[i-1].navlat,
+			swath->data[i].navlon,swath->data[i].navlat);
+/*		plot(swath->data[i-1].navlon,swath->data[i-1].navlat,IUP);
+		plot(swath->data[i].navlon,swath->data[i].navlat,IDN);*/
 		}
 
 	/* draw the time ticks */
