@@ -1,6 +1,6 @@
-.TH mbm_xbt l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_xbt l "17 September 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbm_xbt\fP - Calculate sound velocity from XBT data.
+\fBmbm_xbt\fP - Calculate sound speed from XBT data.
 
 .SH VERSION
 Version 5.0
@@ -11,11 +11,11 @@ Version 5.0
 
 .SH DESCRIPTION
 \fBmbm_xbt\fP is a perl shellscript to translate various XBT data sets
-from depth and temperature into depth and sound velocity.  Header 
+from depth and temperature into depth and sound speed.  Header 
 lines are  turned into comments beginning with '#' characters. The 
 output filename consists of the input filename with the suffix ".sv".
 The conversion is done using the DelGrosso equation as referenced 
-in Dusha et al. [1993] (reference below). 
+in Dusha et al. [1993] (reference below).
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -36,7 +36,8 @@ Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
 \fIformat\fP
 .br
 Allows the user to select the type of XBT data. Currently supported
-formats are: 1 = Sparton XBT, 2 = MK12 XBT. Default: \fIformat\fP = 1.
+formats are: 1 = Sparton XBT, 2 = Sippican MK12 XBT, 3 = Sippican MK21. 
+Default: \fIformat\fP = 2.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -55,13 +56,18 @@ Latitude of the XBT cast.
 .B \-S
 \fIsalinity\fP
 .br
-Sets the salinity used to calculate velocity from temperature
+Sets the salinity used to calculate sound speed from temperature
 and depth. The default value of 35 ppt may be significantly
 in error in some areas.  Default: \fIsalinity\fP = 35.
 .TP
 .B \-V
 Causes \fBmbm_xbt\fP to operate in "verbose" mode so that it outputs
 more information than usual.
+
+.SH NOTES
+There is a hard limit in the code that prevents temperatures less than 
+-2.0 degrees C from being used. Input lines containing temperatures less
+than -2.0 will be ignored.
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBxbt\fP(l), 
