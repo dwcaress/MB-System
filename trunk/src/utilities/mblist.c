@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.1 1994-04-12 18:50:33 caress Exp $
+ *    $Id: mblist.c,v 4.2 1994-04-29 18:01:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,11 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/04/12  18:50:33  caress
+ * Added #ifdef IRIX statements for compatibility with
+ * SGI machines.  The system routine timegm does not exist
+ * on SGI's; mktime must be used instead.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -97,7 +102,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.1 1994-04-12 18:50:33 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.2 1994-04-29 18:01:20 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Lbath_beam -Mamp_beam -Nss_pixel -Ooptions -Ddumpmode]";
@@ -691,6 +696,13 @@ char **argv;
 					"%.4d %.3d %.2d %.2d %.2d",
 					time_j[0],time_j[1],
 					time_i[3],time_i[4],time_i[5]);
+					break;
+				case 'j': /* time string */
+					mb_get_jtime(verbose,time_i,time_j);
+					printf(
+					"%.4d %.3d %.4d %.2d",
+					time_j[0],time_j[1],
+					time_j[2],time_j[3]);
 					break;
 				case 'L': /* along-track dist. */
 					printf("%7.3f",distance_total);
