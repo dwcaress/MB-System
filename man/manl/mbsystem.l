@@ -175,6 +175,17 @@ control the operation of mbprocess.
 a recursive datalist structure. It can also be used to create the ancillary ".inf",
 ".fbt", and ".fnv" files for all of the data files referenced in a recursive datalist
 structure. 
+.IP \(bu 4
+\fBmbsvplist\fP. This new tool lists water sound velocity profiles embedded
+in swath data files, creating secondary files that 
+can be read into MBvelocitytool.
+.IP \(bu 4
+\fBmbareaclean\fP. This new tool identifies and flags artifacts in swath sonar
+bathymetry data within a specified area of interest. The
+area is divided into a grid with square cells or bins, and the
+data are grouped according to these bins. Once all
+of  data  are read, statistical tests are applied 
+to the soundings within each bin.
 
 .SS Support for Projected Coordinate Systems.
 .IP \(bu 4
@@ -264,6 +275,14 @@ The STN Atlas processing data format SURF is supported as format 181. At
 present, SURF is supported as a read-only format. This allows plotting and gridding
 of the SURF data, but not processing. Writing or translating the SURF data to
 allow processing will be supported in a later version.
+.IP \(bu 4
+The Hawaii Mapping Research Group's new MR1 format is supported as format 64. 
+This format is used to disseminate data from both the HMRG 
+interferometric sonars (e.g. MR1) and the WHOI DSL 120 
+deep-towed inteferometric sonar. This format has been 
+supported by including the code for the HMRG library libmr1pr 
+in the \fBMB-System MBIO\fP library. Thanks to Roger Davis and HMRG for 
+making the code available under the GPL.
 
 .SH THE NEW VERSION 5 DATA PROCESSING STRUCTURE
 Previous versions of \fBMB-System\fP have emphasized
