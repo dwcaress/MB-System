@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 4.11 1998-12-17 22:50:20 caress Exp $
+ *    $Id: mbmask.c,v 4.12 1999-03-31 18:33:06 caress Exp $
  *
  *    Copyright (c) 1993,1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,6 +25,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1998/12/17  22:50:20  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.10  1998/10/05 19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -97,7 +100,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 4.11 1998-12-17 22:50:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 4.12 1999-03-31 18:33:06 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -168,12 +171,13 @@ char **argv;
 	char	mfile[128];
 	int	nmask;
 	int	beams_bath_mask;
+	int	nbath;
 	int	mask_time_i[7];
 	double	mask_time_d;
 	char	*bath_mask = NULL;
 	int	mask_done;
 	int	mask_version;
-	double	eps = 0.02;
+	double	eps;
 	int	dummy;
 
 	/* time, user, host variables */
@@ -215,6 +219,7 @@ char **argv;
 	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
+	eps = 0.02;
 
 	/* set default input and output */
 	strcpy (ifile, "stdin");
@@ -222,7 +227,7 @@ char **argv;
 	strcpy (mfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:M:m:I:i:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:M:m:O:o:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -238,19 +243,24 @@ char **argv;
 			sscanf (optarg,"%d", &format);
 			flag++;
 			break;
-		case 'M':
-		case 'm':
-			sscanf (optarg,"%s", mfile);
-			flag++;
-			break;
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", ifile);
 			flag++;
 			break;
+		case 'M':
+		case 'm':
+			sscanf (optarg,"%s", mfile);
+			flag++;
+			break;
 		case 'O':
 		case 'o':
 			sscanf (optarg,"%s", ofile);
+			flag++;
+			break;
+		case 'T':
+		case 't':
+			sscanf (optarg,"%lf", &eps);
 			flag++;
 			break;
 		case '?':
@@ -310,6 +320,7 @@ char **argv;
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:    %s\n",ofile);
 		fprintf(stderr,"dbg2       mask file:      %s\n",mfile);
+		fprintf(stderr,"dbg2       eps:            %f\n",eps);
 		}
 
 	/* if help desired then print it and exit */
@@ -370,7 +381,7 @@ char **argv;
 
 	/* read the first mask record */
 	status = read_mask(verbose,mask_version,beams_bath_mask,fp,
-			&nmask,mask_time_i,&mask_time_d,bath_mask,
+			&nmask,mask_time_i,&mask_time_d,&nbath,bath_mask,
 			&error);
 
 	/* if error reading first mask then quit */
@@ -558,6 +569,7 @@ char **argv;
 						fp,
 						&nmask,mask_time_i,
 						&mask_time_d,
+						&nbath, 
 						bath_mask,
 						&error);
 				if (status == MB_FAILURE)
@@ -575,13 +587,12 @@ char **argv;
 				&& time_d >= mask_time_d - eps 
 				&& time_d <= mask_time_d + eps)
 				{
-				for (j=0;j<beams_bath;j++)
+				for (j=0;j<MIN(beams_bath, nbath);j++)
 					{
-					if (mask_version == 1
-					    && beamflag[j] == MB_FLAG_NULL)
+					if (beamflag[j] == MB_FLAG_NULL
+					    && bath_mask[j] != MB_FLAG_NULL)
 					    {
 					    bath_mask[j] = MB_FLAG_NULL;
-					    data_use = MB_YES;
 					    }
 					else if (mb_beam_ok(beamflag[j])
 					    && !mb_beam_ok(bath_mask[j]))
@@ -672,7 +683,7 @@ char **argv;
 }
 /*--------------------------------------------------------------------*/
 int read_mask(verbose,mask_version,beams_bath,fp,
-	nmask,time_i,time_d,mask_bath,error)
+	nmask,time_i,time_d,nbath,mask_bath,error)
 int	verbose;
 int	mask_version;
 int	beams_bath;
@@ -680,6 +691,7 @@ FILE	*fp;
 int	*nmask;
 int	time_i[7];
 double	*time_d;
+int	*nbath;
 char	*mask_bath;
 int	*error;
 {
@@ -742,9 +754,9 @@ int	*error;
 		}
 	    }
 	    
-	/* else read newer binary version which supports
+	/* else read newer binary version 2 which supports
 	    full flagging and selecting of beams */
-	else
+	else if (mask_version == 2)
 	    {
 	    if ((status = fread(time_i,1,7*sizeof(int),fp)) 
 		    == 7 * sizeof(int))
@@ -756,6 +768,32 @@ int	*error;
 		    status = MB_FAILURE;
 	    if ((status = fread(mask_bath,1,beams_bath,fp)) 
 		    == beams_bath)
+		    status = MB_SUCCESS;
+	    else
+		    status = MB_FAILURE;
+	    }
+	    
+	/* else read newer binary version 3 which supports
+	    full flagging and selecting of beams */
+	else
+	    {
+	    if ((status = fread(time_i,1,7*sizeof(int),fp)) 
+		    == 7 * sizeof(int))
+		    {
+		    mb_get_time(verbose,time_i,time_d,error);
+		    status = MB_SUCCESS;
+		    }
+	    else
+		    status = MB_FAILURE;
+	    if ((status = fread(nbath,1,sizeof(int),fp)) 
+		    == sizeof(int))
+		    {
+		    status = MB_SUCCESS;
+		    }
+	    else
+		    status = MB_FAILURE;
+	    if ((status = fread(mask_bath,1,*nbath,fp)) 
+		    == *nbath)
 		    status = MB_SUCCESS;
 	    else
 		    status = MB_FAILURE;
@@ -782,8 +820,9 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
 		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       time_d:     %f\n",*time_d);
+		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
 		fprintf(stderr,"dbg2       mask_bath:\ndbg2       ");
-		for (i=0;i<beams_bath;i++)
+		for (i=0;i<*nbath;i++)
 			fprintf(stderr,"%d",mask_bath[i]);
 		fprintf(stderr,"\n");
 		fprintf(stderr,"dbg2  Return status:\n");
