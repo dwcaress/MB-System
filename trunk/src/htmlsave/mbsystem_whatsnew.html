@@ -61,6 +61,13 @@ of other corrections.</LI>
 <LI>MBset. This new tool allows users to create and modify the parameter
 files used to control the operation of mbprocess.</LI>
 
+<LI>MBareaclean. This new tool identifies and flags artifacts in swath sonar
+bathymetry data within a specified area of interest. The
+area is divided into a grid with square cells or bins, and the
+data are grouped according to these bins. Once all
+of  data  are read, statistical tests are applied 
+to the soundings within each bin.</LI>
+
 <LI>MBsvplist. This new tool lists water sound velocity profiles embedded
 in swath data files, creating secondary files that can be read into MBvelocitytool.<BR>
 <BR>
@@ -127,7 +134,9 @@ systems specified in the projections.dat  file.
 This  means,  for instance, that GeoTIFF images generated 
 with mbgrdtiff  will  be  properly  georeferenced
 when  they  are imported into ESRI ArcGIS or other GIS
-packages.</LI>
+packages.<BR>
+<BR>
+</LI>
 </UL>
 
 <LI>Restructuring the code.</LI>
@@ -209,6 +218,9 @@ as format 75. Similarly, the IFREMER netCDF navigation
 archiving data format is supported
 as format 167.</LI>
 
+<LI>The Atlas SURF format is supported read-only as format 181. 
+</LI>
+
 <LI>The Hawaii Mapping Research Group's new MR1 format is supported as
 format 64. This format is used to disseminate data from both the
 HMRG interferometric sonars (e.g. MR1) and the WHOI DSL 120 deep-towed
@@ -219,7 +231,7 @@ to Roger Davis and HMRG for making the code available under the GPL.</LI>
 </UL>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2003-03-10 22:33:20 $ $Revision: 5.7 $ </P></CENTER>
+Last Updated: $Date: 2003-04-17 21:43:48 $ $Revision: 5.8 $ </P></CENTER>
 
 <P>
 <HR WIDTH="67%"></P>
