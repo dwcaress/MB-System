@@ -1,0 +1,123 @@
+.TH mbm_grd2arc l "5 October 1999" "MB-System 4.6" "MB-System 4.6"
+.SH NAME
+\fBmbm_grd2arc\fP - Macro to convert a GMT 
+grid file in the GMT NetCDF grid format 
+to an ArcView ASCII grid. 
+
+.SH VERSION
+Version 4.6
+
+.SH SYNOPSIS
+mbm_grd2arc \fB-I\fP\fIgrdfile\fP \fB-O\fP\fIarcfile\fP [\fB-H\fP \fB-N\fP\fInodata\fP \fB-V\fP]
+
+.SH DESCRIPTION
+\fBmbm_grd2arc\fP is a macro to convert a GMT 
+grid file in the GMT NetCDF grid format 
+to an ArcView ASCII grid. This allows users to import the grid
+into Arc/Info and ArcView. The grids must have the same grid 
+interval in both longitude and latitude. If the grid was created
+using \fBmbgrid\fP or \fBmbmosaic\fP, the \fB-E\fP option 
+must have been used in that program
+to set the grid cell sizes equal (see the mbgrid and mbmosaic
+manual pages).
+.br
+The macro first obtains the bounds, dimensions, and grid
+cell size of the grid using the GMT program \fBgrdinfo\fP.
+The grid dimensions, the lower left position, and the
+grid cell size are written to the header of the output
+ArcView ASCII grid file.
+The macro then uses the GMT program \fBgrd2xyz\fP to 
+dump each of the grid values to a temporary ASCII file. 
+This temporary file is read and parsed one value at
+a time.  Any NaN values are
+replaced by the \fInodata\fP value specified with the \fB-N\fP
+option. Each final value is printed to the output file.
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I
+\fIgrdname\fP
+.br
+Sets the filename of the input GMT grid file. This file must be
+in the GMT NetCDF GRD format. 
+.TP
+.B \-N
+\fInodata\fP
+.br
+Sets the "no data" value used in the output ASCII file.
+Default: \fInodata\fP = -99999.
+.TP
+.B \-O
+\fIarcfile\fP
+.br
+Sets the filename of the output ArcView ASCII grid.
+.TP
+.B \-V
+The \fB-V\fP option causes \fBmbm_grd2arc\fP to print out status messages.
+
+.SH EXAMPLES
+Suppose that we have used \fBmbgrid\fP to obtain a
+topography grid file called KohalaA_bath.grd in the GMT NetCDF
+GRD format:
+ 	mbgrid -Idatalist \\
+ 		-OKohalaA_bath \\
+ 		-R-155.72855/-155.31928/20.09488/20.47645 \\
+ 		-E30.0/0m! -A2 -N -G3 -C1 -V
+.br
+In this case, the \fB-E\fP option was used 
+to force \fBmbgrid\fP to use equal longitude and latitude
+grid cell sizes. See the \fBmbgrid\fP or \fBmbmosaic\fP manual pages for
+details on the usage of the \fB-E\fP option in those
+programs.
+
+In order to convert KohalaA_bath.grd to an ArcView ASCII grid
+so that the data can be imported into the Arc/Info or ArcView
+GIS packages, we use the \fBmbm_grd2arc\fP macro:
+ 	mbm_grd2arc -IKohalaA_bath.grd \\
+ 		-OKohalaA_bath.asc -V
+.br
+Running the example above produced the following output:
+
+ 	Program mbm_grd2arc status:
+ 	        Input GRD file:            KohalaA_bath.grd
+ 	        Output ArcView ASCII file: KohalaA_bath.asc
+ 	        Grid dimensions:  1426  1329
+ 	        Grid cell sizes:  0.0002871995719  0.0002871995719
+ 	        Grid bounds:      -155.72855  -155.3192906    20.09488  20.47628103
+
+ 	Generating temporary file...
+ 	Parsing temporary file...
+ 	10% complete
+ 	20% complete
+ 	30% complete
+ 	40% complete
+ 	50% complete
+ 	60% complete
+ 	70% complete
+ 	80% complete
+ 	90% complete
+ 	100% complete
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbgrid\fP(l),
+\fBmbmosaic\fP(l), \fBmbm_grid\fP(l)
+
+.SH BUGS
+This macro is new and hasn't been tested in serious
+usage yet - let us know what to fix, add, or
+change!.
+
+
