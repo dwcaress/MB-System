@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 4.0 1994-10-21 12:34:58 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 4.1 1994-10-21 15:42:42 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:34:58  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/10/21  12:20:01  caress
  * Initial revision
  *
@@ -54,7 +57,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 4.0 1994-10-21 12:34:58 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 4.1 1994-10-21 15:42:42 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -634,6 +637,11 @@ int	*error;
 		store->day = data->day;
 		store->min = data->min;
 		store->sec = 0.01*data->sec;
+		
+		/* heading */
+		store->sbhdg = data->heading < 0 
+		    ? (unsigned short int) round(((int)data->heading + 3600)*18.204444444)
+		    : (unsigned short int) round(data->heading*18.204444444);
 
 		/* depths and distances */
 		id = data->beams_bath - 1;
@@ -646,7 +654,6 @@ int	*error;
 
 		/* additional values */
 		store->sbtim = data->eclipse_time;
-		store->sbhdg = data->eclipse_heading;
 		store->axis = 0;
 		store->major = 0;
 		store->minor = 0;
@@ -792,6 +799,11 @@ int	*error;
 		data->day = store->day;
 		data->min = store->min;
 		data->sec = 100*store->sec;
+
+		/* heading */
+		data->heading = store->sbhdg > 327680
+		    ? (short int) round(((int)store->sbhdg - 655360)*0.054931641625)
+		    : (short int) round(((int)store->sbhdg)*0.054931641625);
 
 		/* additional values */
 		data->eclipse_time = store->sbtim;
