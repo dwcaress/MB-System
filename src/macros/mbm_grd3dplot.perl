@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 5.2 2001-06-03 06:59:24 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -63,10 +63,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 5.2 2001-06-03 06:59:24 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2001/03/22 21:05:45  caress
+#   Trying to make release 5.0.beta0
+#
 # Revision 5.0  2000/12/01  22:58:01  caress
 # First cut at Version 5.0.
 #
@@ -680,7 +683,14 @@ if (!$ps_viewer)
 # get limits of data file using grdinfo
 if (!$bounds || !$zbounds)
 	{
-	@grdinfo = `grdinfo $file_data`;
+	if ($bounds)
+		{
+		@grdinfo = `mbm_grdinfo -I$file_data -R$bounds`;
+		}
+	else
+		{
+		@grdinfo = `grdinfo $file_data`;
+		}
 	while (@grdinfo)
 		{
 		$line = shift @grdinfo;

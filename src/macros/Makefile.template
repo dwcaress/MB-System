@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.10 2000-09-30 07:20:07 caress Exp $
+#	$Id: Makefile.template,v 4.11 2001-06-03 07:01:28 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.10  2000/09/30 07:20:07  caress
+# Snapshot for Dale.
+#
 # Revision 4.9  1999/12/29  00:17:55  caress
 # Added mbm_grdtiff.
 #
@@ -72,6 +75,9 @@ all:	$(MANDIR)/xbt.l \
 	$(BINDIR)/mbm_dslnavfix $(MANDIR)/mbm_dslnavfix.l \
 	$(BINDIR)/mbm_grid $(MANDIR)/mbm_grid.l \
 	$(BINDIR)/mbm_grd2arc $(MANDIR)/mbm_grd2arc.l \
+	$(BINDIR)/mbm_arc2grd $(MANDIR)/mbm_arc2grd.l \
+	$(BINDIR)/mbm_grdcut $(MANDIR)/mbm_grdcut.l \
+	$(BINDIR)/mbm_grdinfo $(MANDIR)/mbm_grdinfo.l \
 	$(BINDIR)/mbm_grdtiff $(MANDIR)/mbm_grdtiff.l
 
 ### make clean does nothing
@@ -114,6 +120,15 @@ $(BINDIR)/mbm_grid:	mbm_grid.perl
 $(BINDIR)/mbm_grd2arc:	mbm_grd2arc.perl
 	cp mbm_grd2arc.perl $(BINDIR)/mbm_grd2arc
 	chmod 775 $(BINDIR)/mbm_grd2arc
+$(BINDIR)/mbm_arc2grd:	mbm_arc2grd.perl
+	cp mbm_arc2grd.perl $(BINDIR)/mbm_arc2grd
+	chmod 775 $(BINDIR)/mbm_arc2grd
+$(BINDIR)/mbm_grdcut:	mbm_grdcut.perl
+	cp mbm_grdcut.perl $(BINDIR)/mbm_grdcut
+	chmod 775 $(BINDIR)/mbm_grdcut
+$(BINDIR)/mbm_grdinfo:	mbm_grdinfo.perl
+	cp mbm_grdinfo.perl $(BINDIR)/mbm_grdinfo
+	chmod 775 $(BINDIR)/mbm_grdinfo
 $(BINDIR)/mbm_grdtiff:	mbm_grdtiff.perl
 	cp mbm_grdtiff.perl $(BINDIR)/mbm_grdtiff
 	chmod 775 $(BINDIR)/mbm_grdtiff
@@ -158,6 +173,15 @@ $(MANDIR)/mbm_grid.l:	mbm_grid.manl
 $(MANDIR)/mbm_grd2arc.l:	mbm_grd2arc.manl
 	cp mbm_grd2arc.manl $(MANDIR)/mbm_grd2arc.l
 	chmod 664 $(MANDIR)/mbm_grd2arc.l
+$(MANDIR)/mbm_arc2grd.l:	mbm_arc2grd.manl
+	cp mbm_arc2grd.manl $(MANDIR)/mbm_arc2grd.l
+	chmod 664 $(MANDIR)/mbm_arc2grd.l
+$(MANDIR)/mbm_grdcut.l:	mbm_grdcut.manl
+	cp mbm_grdcut.manl $(MANDIR)/mbm_grdcut.l
+	chmod 664 $(MANDIR)/mbm_grdcut.l
+$(MANDIR)/mbm_grdinfo.l:	mbm_grdinfo.manl
+	cp mbm_grdinfo.manl $(MANDIR)/mbm_grdinfo.l
+	chmod 664 $(MANDIR)/mbm_grdinfo.l
 $(MANDIR)/mbm_grdtiff.l:	mbm_grdtiff.manl
 	cp mbm_grdtiff.manl $(MANDIR)/mbm_grdtiff.l
 	chmod 664 $(MANDIR)/mbm_grdtiff.l

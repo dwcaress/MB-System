@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.2 2001-06-03 06:59:24 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.2 2001-06-03 06:59:24 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2001/03/22 21:05:45  caress
+#   Trying to make release 5.0.beta0
+#
 # Revision 5.0  2000/12/01  22:58:01  caress
 # First cut at Version 5.0.
 #
@@ -827,7 +830,14 @@ if (!$bounds || !$zbounds)
 	{
 	foreach $file_grd (@files_data) {
 
-	@grdinfo = `grdinfo $file_grd`;
+	if ($bounds)
+		{
+		@grdinfo = `mbm_grdinfo -I$file_grd -R$bounds`;
+		}
+	else
+		{
+		@grdinfo = `grdinfo $file_grd`;
+		}
 	while (@grdinfo)
 		{
 		$line = shift @grdinfo;
@@ -1834,7 +1844,11 @@ if ($contour_mode)
 	printf FCMD "grdcontour $file_use -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "-C$contour_control \\\n\t";
-	printf FCMD "-L$zmin/$zmax -Wc1p \\\n\t";
+	if (!$contour_pen)
+		{
+		$contour_pen = "-Wc1p";
+		}
+	printf FCMD "-L$zmin/$zmax -W$contour_pen\\\n\t";
 	if ($contour_anot_int)
 		{
 		printf FCMD "-A$contour_anot_int \\\n\t";
@@ -1854,10 +1868,6 @@ if ($contour_mode)
 	elsif ($contour_tick_on)
 		{
 		printf FCMD "-T \\\n\t";
-		}
-	if ($contour_pen)
-		{
-		printf FCMD "-W$contour_pen \\\n\t";
 		}
 	if ($portrait)
 		{

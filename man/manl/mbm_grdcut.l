@@ -41,10 +41,15 @@ Sets the filename of the input GMT grid file. This file must be
 in the GMT NetCDF GRD format. 
 .TP
 .B \-O
-\fIarcfile\fP
+\fIoutfile\fP
 .br
 Sets the filename of the output GMT grid file. This file will be
 in the GMT NetCDF GRD format. 
+.TP
+.B \-R
+\fIw/e/s/n\fP
+.br
+Sets the bounds of the area to be extracted from the input grid file. 
 .TP
 .B \-V
 The \fB-V\fP option causes \fBmbm_grdcut\fP to print out status messages.

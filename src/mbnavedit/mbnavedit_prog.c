@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.4 2001-04-06 22:16:01 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.5 2001-06-03 07:06:25 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/04/06 22:16:01  caress
+ * Fixed unflagging.
+ *
  * Revision 5.3  2001/03/22  21:10:37  caress
  * Trying to make release 5.0.beta0.
  *
@@ -205,7 +208,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.4 2001-04-06 22:16:01 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.5 2001-06-03 07:06:25 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -1160,6 +1163,8 @@ int mbnavedit_load_data()
 			ping[nbuff].draft_org = ping[nbuff].draft;
 			ping[nbuff].file_time_d = 
 				ping[nbuff].time_d - file_start_time_d;
+			ping[nbuff].lon_dr = ping[nbuff].lon;
+			ping[nbuff].lat_dr = ping[nbuff].lat;
 
 			/* set everything deselected */
 			ping[nbuff].tint_select = MB_NO;
@@ -1241,13 +1246,6 @@ int mbnavedit_load_data()
 	    ping[0].time_d_org = ping[0].time_d;
 	    }
 
-	/* calculate speed-made-good and course-made-good */
-	for (i=0;i<nbuff;i++)
-		mbnavedit_get_smgcmg(i);
-		
-	/* calculate model */
-	mbnavedit_get_model();
-
 	/* find index of current ping */
 	current_id = 0;
 
@@ -1257,7 +1255,15 @@ int mbnavedit_load_data()
 		data_show_size = 0;
 		plot_start_time = ping[0].file_time_d;
 		plot_end_time = ping[nbuff-1].file_time_d;
+		nplot = nbuff;
 		}
+
+	/* calculate speed-made-good and course-made-good */
+	for (i=0;i<nbuff;i++)
+		mbnavedit_get_smgcmg(i);
+		
+	/* calculate model */
+	mbnavedit_get_model();
 		
 	/* turn message off */
 	do_message_off();
@@ -3771,12 +3777,12 @@ int mbnavedit_get_inversion()
 	int	ncycle;
 	double	bandwidth;
 	int	nr, nc;
-	double	lon_start;
-	double	lat_start;
+	int	nlon_avg, nlat_avg;
+	double	lon_avg, lat_avg;
 	double	mtodeglon, mtodeglat;
 	double	dtime_d, dtime_d_sq;
 	char	string[50];
-	int	i, j, k;
+	int	i, ii, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3787,14 +3793,34 @@ int mbnavedit_get_inversion()
 		}
 
 	/* set maximum dimensions of the inverse problem */
-	nrows = nbuff + (nbuff - 1) + (nbuff - 2);
-	ncols = nbuff;
+	nrows = nplot + (nplot - 1) + (nplot - 2);
+	ncols = nplot;
 	nnz = 3;
 	ncycle = 512;
 	bandwidth = 10000.0;
-	lon_start = ping[0].lon;
-	lat_start = ping[0].lat;
-	mb_coor_scale(verbose, lat_start,
+	    
+	/* get average lon value */
+	lon_avg = 0.0;
+	nlon_avg = 0;
+	lat_avg = 0.0;
+	nlat_avg = 0;
+	for (i=current_id;i<current_id+nplot;i++)
+		{
+		/* constrain lon unless flagged by user */
+		if (ping[i].lonlat_flag == MB_NO)
+			{
+			lon_avg += ping[i].lon;
+			nlon_avg++;
+			lat_avg += ping[i].lat;
+			nlat_avg++;
+			}
+		}
+	if (nlon_avg > 0)
+		lon_avg /= nlon_avg;
+	if (nlat_avg > 0)
+		lat_avg /= nlat_avg;
+
+	mb_coor_scale(verbose, lat_avg,
 			&mtodeglon, &mtodeglat);
 
 	/* allocate space for the inverse problem */
@@ -3813,7 +3839,7 @@ int mbnavedit_get_inversion()
 	    {
 	    /* set message */
 	    sprintf(string,"Setting up inversion of %d longitude points",
-		    nbuff);
+		    nplot);
 	    do_message_on(string);
 		    
 	    /* initialize arrays */
@@ -3843,64 +3869,66 @@ int mbnavedit_get_inversion()
 	    /* loop over all nav points - add constraints for 
 	       original lon values, speed, acceleration */
 	    nr = 0;
-	    nc = nbuff;
-	    for (i=0;i<nbuff;i++)
+	    nc = nplot;
+	    for (i=current_id;i<current_id+nplot;i++)
 		    {
+			ii = i - current_id;
+
 		    /* constrain lon unless flagged by user */
 		    if (ping[i].lonlat_flag == MB_NO)
-			{
-			k = nnz * nr;
-			d[nr] = (ping[i].lon_org - lon_start) / mtodeglon;
-			nia[nr] = 1;
-			ia[k] = i;
-			a[k] = 1.0;
-			nr++;
-			}
+				{
+				k = nnz * nr;
+				d[nr] = (ping[i].lon_org - lon_avg) / mtodeglon;
+				nia[nr] = 1;
+				ia[k] = ii;
+				a[k] = 1.0;
+				nr++;
+				}
     
 		    /* constrain speed */
 		    if (weight_speed > 0.0
-			&& i > 0 && ping[i].time_d > ping[i-1].time_d)
-			{
-			/* get time difference */
-			dtime_d = ping[i].time_d - ping[i-1].time_d;
+			&& ii > 0 && ping[i].time_d > ping[i-1].time_d)
+				{
+				/* get time difference */
+				dtime_d = ping[i].time_d - ping[i-1].time_d;
     
-			/* constrain lon speed */
-			k = nnz * nr;
-			d[nr] = 0.0;
-			nia[nr] = 2;
-			ia[k] = i - 1;
-			a[k] = -weight_speed / dtime_d;
-			ia[k+1] = i;
-			a[k+1] = weight_speed / dtime_d;
-			nr++;
-			}
+				/* constrain lon speed */
+				k = nnz * nr;
+				d[nr] = 0.0;
+				nia[nr] = 2;
+				ia[k] = ii - 1;
+				a[k] = -weight_speed / dtime_d;
+				ia[k+1] = ii;
+				a[k+1] = weight_speed / dtime_d;
+				nr++;
+				}
     
 		    /* constrain acceleration */
 		    if (weight_acceleration > 0.0
-			&& i > 0 && i < nbuff - 1 
-			&& ping[i+1].time_d > ping[i-1].time_d)
-			{
-			/* get time difference */
-			dtime_d = ping[i+1].time_d - ping[i-1].time_d;
-			dtime_d_sq = dtime_d * dtime_d;
+				&& ii > 0 && ii < nplot - 1 
+				&& ping[i+1].time_d > ping[i-1].time_d)
+				{
+				/* get time difference */
+				dtime_d = ping[i+1].time_d - ping[i-1].time_d;
+				dtime_d_sq = dtime_d * dtime_d;
     
-			/* constrain lon acceleration */
-			k = nnz * nr;
-			d[nr] = 0.0;
-			nia[nr] = 3;
-			ia[k] = i - 1;
-			a[k] = weight_acceleration / dtime_d_sq;
-			ia[k+1] = i;
-			a[k+1] = -2.0 * weight_acceleration / dtime_d_sq;
-			ia[k+2] = i + 1;
-			a[k+2] = weight_acceleration / dtime_d_sq;
-			nr++;
-			}
+				/* constrain lon acceleration */
+				k = nnz * nr;
+				d[nr] = 0.0;
+				nia[nr] = 3;
+				ia[k] = ii - 1;
+				a[k] = weight_acceleration / dtime_d_sq;
+				ia[k+1] = ii;
+				a[k+1] = -2.0 * weight_acceleration / dtime_d_sq;
+				ia[k+2] = ii + 1;
+				a[k+2] = weight_acceleration / dtime_d_sq;
+				nr++;
+				}
 		    }
     
 	    /* set message */
 	    sprintf(string,"Inverting %dX%d for smooth longitude...",
-		    ncols, nr);
+		    nc, nr);
 	    do_message_on(string);
 		    
 	    /* compute upper bound on maximum eigenvalue */
@@ -3943,14 +3971,15 @@ int mbnavedit_get_inversion()
 	    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
     
 	    /* generate solution */
-	    for (i=0;i<nbuff;i++)
+	    for (i=current_id;i<current_id+nplot;i++)
 		{
-		ping[i].lon_dr = lon_start + mtodeglon * x[i];
+		ii = i - current_id;
+		ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
 		}
 
 	    /* set message */
 	    sprintf(string,"Setting up inversion of %d latitude points",
-		    nbuff);
+		    nplot);
 	    do_message_on(string);
 		    
 	    /* initialize arrays */
@@ -3980,64 +4009,66 @@ int mbnavedit_get_inversion()
 	    /* loop over all nav points - add constraints for 
 	       original lat values, speed, acceleration */
 	    nr = 0;
-	    nc = nbuff;
-	    for (i=0;i<nbuff;i++)
+	    nc = nplot;
+	    for (i=current_id;i<current_id+nplot;i++)
 		    {
+			ii = i - current_id;
+
 		    /* constrain lat unless flagged by user */
 		    if (ping[i].lonlat_flag == MB_NO)
-			{
-			k = nnz * nr;
-			d[nr] = (ping[i].lat_org - lat_start) / mtodeglat;
-			nia[nr] = 1;
-			ia[k] = i;
-			a[k] = 1.0;
-			nr++;
-			}
+				{
+				k = nnz * nr;
+				d[nr] = (ping[i].lat_org - lat_avg) / mtodeglat;
+				nia[nr] = 1;
+				ia[k] = ii;
+				a[k] = 1.0;
+				nr++;
+				}
     
 		    /* constrain speed */
 		    if (weight_speed > 0.0
-			&& i > 0 && ping[i].time_d > ping[i-1].time_d)
-			{
-			/* get time difference */
-			dtime_d = ping[i].time_d - ping[i-1].time_d;
+			&& ii > 0 && ping[i].time_d > ping[i-1].time_d)
+				{
+				/* get time difference */
+				dtime_d = ping[i].time_d - ping[i-1].time_d;
     
-			/* constrain lat speed */
-			k = nnz * nr;
-			d[nr] = 0.0;
-			nia[nr] = 2;
-			ia[k] = i - 1;
-			a[k] = -weight_speed / dtime_d;
-			ia[k+1] = i;
-			a[k+1] = weight_speed / dtime_d;
-			nr++;
-			}
+				/* constrain lat speed */
+				k = nnz * nr;
+				d[nr] = 0.0;
+				nia[nr] = 2;
+				ia[k] = ii - 1;
+				a[k] = -weight_speed / dtime_d;
+				ia[k+1] = ii;
+				a[k+1] = weight_speed / dtime_d;
+				nr++;
+				}
     
 		    /* constrain acceleration */
 		    if (weight_acceleration > 0.0
-			&& i > 0 && i < nbuff - 1 
+			&& ii > 0 && ii < nplot - 1 
 			&& ping[i+1].time_d > ping[i-1].time_d)
-			{
-			/* get time difference */
-			dtime_d = ping[i+1].time_d - ping[i-1].time_d;
-			dtime_d_sq = dtime_d * dtime_d;
+				{
+				/* get time difference */
+				dtime_d = ping[i+1].time_d - ping[i-1].time_d;
+				dtime_d_sq = dtime_d * dtime_d;
     
-			/* constrain lat acceleration */
-			k = nnz * nr;
-			d[nr] = 0.0;
-			nia[nr] = 3;
-			ia[k] = i - 1;
-			a[k] = weight_acceleration / dtime_d_sq;
-			ia[k+1] = i;
-			a[k+1] = -2.0 * weight_acceleration / dtime_d_sq;
-			ia[k+2] = i + 1;
-			a[k+2] = weight_acceleration / dtime_d_sq;
-			nr++;
-			}
+				/* constrain lat acceleration */
+				k = nnz * nr;
+				d[nr] = 0.0;
+				nia[nr] = 3;
+				ia[k] = ii - 1;
+				a[k] = weight_acceleration / dtime_d_sq;
+				ia[k+1] = ii;
+				a[k+1] = -2.0 * weight_acceleration / dtime_d_sq;
+				ia[k+2] = ii + 1;
+				a[k+2] = weight_acceleration / dtime_d_sq;
+				nr++;
+				}
 		    }
     
 	    /* set message */
 	    sprintf(string,"Inverting %dX%d for smooth latitude...",
-		    ncols, nr);
+		    nc, nr);
 	    do_message_on(string);
 		    
 	    /* compute upper bound on maximum eigenvalue */
@@ -4080,11 +4111,12 @@ int mbnavedit_get_inversion()
 	    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
     
 	    /* generate solution */
-	    for (i=0;i<nbuff;i++)
+	    for (i=current_id;i<current_id+nplot;i++)
 		{
-		ping[i].lat_dr = lat_start + mtodeglat * x[i];
+		ii = i - current_id;
+		ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
 		}
-    
+
 	    /* deallocate arrays */
 	    status = mb_free(verbose, &a,&error);
 	    status = mb_free(verbose, &ia,&error);
