@@ -10,7 +10,7 @@ Version 4.3
 \fB-D\fImin/max\fP \fB-F\fIformat\fP 
 \fB-G\fIfraction_low/fraction_high\fP 
 \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
-\fB-M\fImode\fP \fB-Q\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
+\fB-M\fImode\fP \fB-Q\fP \fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbclean\fP identifies and flags artifacts in multibeam bathymetry data.
@@ -155,6 +155,12 @@ have.  These are identified when one or more outer beams lies
 inboard of a more inner beam; all beams outboard of the first
 offending beam are flagged.
 .TP
+.B \fB-U\fInmin\fP
+This flag causes \fBmbclean\fP to search for port or starboard
+halves of pings which contain fewer than \fInmin\fP good bathymetry
+values. All bathymetry values in the affected half-pings are
+flagged.
+.TP
 .B \fB-X\fIzap_beams\fP
 If this option is used, the outermost \fIzap_beams\fP at both ends
 of the swath are flagged as bad; this is useful if the outer beams 
@@ -183,7 +189,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.6 1996-01-26 21:14:21 caress Exp $
+ 	Version $Id: mbclean.l,v 4.7 1996-03-01 22:37:24 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer
