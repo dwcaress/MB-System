@@ -6,26 +6,27 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id: mbm_xbt.perl,v 5.4 2004-09-17 22:01:08 caress Exp $
+#    $Id: mbm_xbt.perl,v 5.5 2004-09-18 00:36:10 dale Exp $
 #
-#    Copyright (c) 1993, 1994, 2000, 2003 by 
+#    Copyright (c) 1993, 1994, 2000, 2003, 2004 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#      Lamont-Doherty Earth Observatory
+#      Lamont-Doherty Earth Observatory of Columbia University
 #      Palisades, NY  10964
 #
-#    See README file for copying and redistribution conditions.
+#    See README file in the top level of the MB-System distribution 
+#    directory for copying and redistribution conditions.
 #--------------------------------------------------------------------
 #
 # Command:
 #   mbm_xbt
 #
-# Purpose:      
+# Purpose: 
 #   Perl code to translate Sparton XBT data or Sippican (MK12 or MK21)
 #   XBT data from depth and temperature into depth and sound speed.
-#   Sound Velocity is computed according to DelGrosso's equations.
+#   Sound speed is computed according to DelGrosso's equations.
 #
 #   We use the DelGrosso equation because of the results presented in 
 #   Dusha, Brian D. Worcester, Peter F., Cornuelle, Bruce D., Howe, Bruce. M.
@@ -83,7 +84,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      
 #
 # Version:
-# $Id: mbm_xbt.perl,v 5.4 2004-09-17 22:01:08 caress Exp $
+# $Id: mbm_xbt.perl,v 5.5 2004-09-18 00:36:10 dale Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
