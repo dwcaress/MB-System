@@ -95,6 +95,7 @@ EXTERNAL Widget   setting_mode_toggle_toggle;
 EXTERNAL Widget   setting_mode_toggle_pick;
 EXTERNAL Widget   setting_mode_toggle_erase;
 EXTERNAL Widget   setting_mode_toggle_restore;
+EXTERNAL Widget   setting_mode_toggle_info;
 EXTERNAL Widget   canvas_mbedit;
 /*
  * End Global Widget Declarations.
