@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.3 2001-10-12 21:08:10 caress Exp $
+#	$Id: Makefile.template,v 5.4 2001-11-15 22:58:02 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2001/10/12  21:08:10  caress
+# Added mbdatalist
+#
 # Revision 5.2  2001/06/29  22:50:23  caress
 # Atlas Hydrosweep DS2 raw data and SURF data formats.
 #
@@ -130,34 +133,34 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbdefaults $(MANDIR)/mbdefaults.l \
 	$(BINDIR)/mbdatalist $(MANDIR)/mbdatalist.l \
 	$(BINDIR)/mbinfo $(MANDIR)/mbinfo.l \
+	$(BINDIR)/mbset $(MANDIR)/mbset.l \
+	$(BINDIR)/mbprocess $(MANDIR)/mbprocess.l \
 	$(BINDIR)/mbcopy $(MANDIR)/mbcopy.l \
 	$(BINDIR)/mblist $(MANDIR)/mblist.l \
+	$(BINDIR)/mbnavlist $(MANDIR)/mbnavlist.l \
+	$(BINDIR)/mbsvplist $(MANDIR)/mbsvplist.l \
+	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.l \
+	$(BINDIR)/mbmosaic $(MANDIR)/mbmosaic.l \
+	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.l \
+	$(BINDIR)/mbgetesf $(MANDIR)/mbgetesf.l \
+	$(BINDIR)/mbps $(MANDIR)/mbps.l \
 	$(BINDIR)/mbmerge $(MANDIR)/mbmerge.l \
 	$(BINDIR)/mbclean $(MANDIR)/mbclean.l \
 	$(BINDIR)/mbcleanold $(MANDIR)/mbcleanold.l \
 	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.l \
-	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.l \
-	$(BINDIR)/mbmosaic $(MANDIR)/mbmosaic.l \
-	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.l \
 	$(BINDIR)/mbbath $(MANDIR)/mbbath.l \
 	$(BINDIR)/hsdump $(MANDIR)/hsdump.l \
 	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.l \
-	$(BINDIR)/mbgetesf $(MANDIR)/mbgetesf.l \
 	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.l \
 	$(BINDIR)/mbmask $(MANDIR)/mbmask.l \
 	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.l \
-	$(BINDIR)/mbps $(MANDIR)/mbps.l \
 	$(BINDIR)/mbhistogram $(MANDIR)/mbhistogram.l \
 	$(BINDIR)/mbbackangle $(MANDIR)/mbbackangle.l \
 	$(BINDIR)/mbanglecorrect $(MANDIR)/mbanglecorrect.l \
 	$(BINDIR)/mbfilter $(MANDIR)/mbfilter.l \
 	$(BINDIR)/mbcut $(MANDIR)/mbcut.l \
 	$(BINDIR)/mbtide $(MANDIR)/mbtide.l \
-	$(BINDIR)/mbsimradmakess $(MANDIR)/mbsimradmakess.l \
-	$(BINDIR)/mbnavlist $(MANDIR)/mbnavlist.l \
-	$(BINDIR)/mbsvplist $(MANDIR)/mbsvplist.l \
-	$(BINDIR)/mbset $(MANDIR)/mbset.l \
-	$(BINDIR)/mbprocess $(MANDIR)/mbprocess.l
+	$(BINDIR)/mbsimradmakess $(MANDIR)/mbsimradmakess.l
 
 ### make clean removes the object files
 clean:
