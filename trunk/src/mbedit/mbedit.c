@@ -610,12 +610,30 @@ static void setup_data()
 			XmNvalue, buffer_size, 
 			NULL);
 
+	/* set values of buffer size label */
+	sprintf(value_text,"%d",buffer_size_max);
+	XtVaSetValues(widget_array[k_buff_size_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			XmRString, 
+			value_text, 
+			(strlen(value_text) + 1), 
+			NULL);	
+
 	/* set values of buffer hold size slider */
 	XtVaSetValues(widget_array[k_buff_retain_size], 
 			XmNminimum, 1, 
 			XmNmaximum, buffer_size_max, 
 			XmNvalue, hold_size, 
 			NULL);
+
+	/* set values of buffer hold size label */
+	sprintf(value_text,"%d",buffer_size_max);
+	XtVaSetValues(widget_array[k_buff_retain_size_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			XmRString, 
+			value_text, 
+			(strlen(value_text) + 1), 
+			NULL);	
 
 	/* set values of plot width slider */
 	XtVaSetValues(widget_array[k_x_scale], 
@@ -1129,13 +1147,15 @@ static void do_load_ok(fs, client_data, cbs)
 
 		/* process input file name */
 		status = mbedit_action_open(input_file,mformat,
-				mode_output,hold_size,buffer_size,
+				mode_output,
 				mplot_width,mexager,mx_interval,
 				my_interval,mplot_size,
+				&buffer_size,&buffer_size_max, 
+				&hold_size,
 				&ndumped,&nloaded,&nbuffer,
 				&ngood,&icurrent,&mnplot);
 		if (status == 0) XBell(theDisplay,100);
-
+		
 		/* display data from chosen file */
 		status = mbedit_action_plot(mplot_width,mexager,
 		         mx_interval,my_interval,mplot_size,&nbuffer,

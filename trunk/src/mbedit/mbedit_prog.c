@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.12 1996-04-22 13:20:55 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.13 1996-07-31 18:40:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1996/04/22  13:20:55  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.11  1996/04/17  23:11:09  caress
  * Fixed bug that caused display to reset to beginning of buffer
  * at inconvenient times.
@@ -153,7 +156,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.12 1996-04-22 13:20:55 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.13 1996-07-31 18:40:14 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -216,8 +219,9 @@ char	comment[256];
 #define	MBEDIT_BUFFER_SIZE	MB_BUFFER_MAX
 int	file_open = MB_NO;
 char	*buff_ptr = NULL;
-int	buffer_size_default = MBEDIT_BUFFER_SIZE;
-int	hold_size_default = 100;
+int	buff_size = MBEDIT_BUFFER_SIZE;
+int	buff_size_max = MBEDIT_BUFFER_SIZE;
+int	holdd_size = 100;
 int	nload = 0;
 int	ndump = 0;
 int	nbuff = 0;
@@ -430,10 +434,10 @@ int	*startup_file;
 	if (fileflag > 0)
 		{
 		status = mbedit_action_open(ifile,format,output_mode, 
-				hold_size_default,
-				buffer_size_default,
 				plot_width,exager,
 				x_interval,y_interval,plot_size,
+				&buff_size,&buff_size_max,
+				&holdd_size, 
 				&ndump,&nload,&nbuff,
 				&nlist,&current_id,&nplot);
 		if (status = MB_SUCCESS)
@@ -553,11 +557,11 @@ int	*outmode;
 	*plt_size = plot_size;
 
 	/* get maximum and starting buffer sizes */
-	*buffer_size_max = MBEDIT_BUFFER_SIZE;
-	*buffer_size = buffer_size_default;
+	*buffer_size_max = buff_size_max;
+	*buffer_size = buff_size;
 
 	/* get starting hold size */
-	*hold_size = hold_size_default;
+	*hold_size = holdd_size;
 
 	/* get format */
 	*form = format;
@@ -620,19 +624,21 @@ int	*outmode;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_open(file,form,outmode,hold_size,buffer_size,
+int mbedit_action_open(file,form,outmode,
 	plwd,exgr,xntrvl,yntrvl,plt_size,
+	buffer_size,buffer_size_max,hold_size,
 	ndumped,nloaded,nbuffer,ngood,icurrent,nplt)
 char	*file;
 int	form;
 int	outmode;
-int	hold_size;
-int	buffer_size;
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	*buffer_size;
+int	*buffer_size_max;
+int	*hold_size;
 int	*ndumped;
 int	*nloaded;
 int	*nbuffer;
@@ -650,16 +656,17 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:        %s\n",file);
-		fprintf(stderr,"dbg2       format:      %d\n",form);
-		fprintf(stderr,"dbg2       outmode:     %d\n",outmode);
-		fprintf(stderr,"dbg2       hold_size:   %d\n",hold_size);
-		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
-		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
-		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
-		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
-		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
-		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       file:            %s\n",file);
+		fprintf(stderr,"dbg2       format:          %d\n",form);
+		fprintf(stderr,"dbg2       outmode:         %d\n",outmode);
+		fprintf(stderr,"dbg2       plot_width:      %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:          %d\n",exgr);
+		fprintf(stderr,"dbg2       x_interval:      %d\n",xntrvl);
+		fprintf(stderr,"dbg2       y_interval:      %d\n",yntrvl);
+		fprintf(stderr,"dbg2       plot_size:       %d\n",plt_size);
+		fprintf(stderr,"dbg2       buffer_size:     %d\n",*buffer_size);
+		fprintf(stderr,"dbg2       buffer_size_max: %d\n",*buffer_size_max);
+		fprintf(stderr,"dbg2       hold_size:       %d\n",*hold_size);
 		}
 
 	/* set the output mode */
@@ -670,20 +677,32 @@ int	*nplt;
 
 	/* open the file */
 	status = mbedit_open_file(file,form);
+	
+	/* check buffer size */
+	if (status == MB_SUCCESS)
+		{
+		mbedit_check_buffer_size(form,
+			buffer_size,buffer_size_max);
+		if (*hold_size > *buffer_size)
+			*hold_size = *buffer_size / 2;
+		buff_size = *buffer_size;
+		buff_size_max = *buffer_size_max;
+		holdd_size = *hold_size;
+		}
 
 	/* load the buffer */
 	if (status == MB_SUCCESS)
-		status = mbedit_load_data(buffer_size,nloaded,nbuffer,
+		status = mbedit_load_data(*buffer_size,nloaded,nbuffer,
 			ngood,icurrent);
 
 	/* keep going until good data or end of file found */
 	while (*nloaded > 0 && *ngood == 0)
 		{
 		/* dump the buffer */
-		status = mbedit_dump_data(hold_size,ndumped,nbuffer);
+		status = mbedit_dump_data(*hold_size,ndumped,nbuffer);
 
 		/* load the buffer */
-		status = mbedit_load_data(buffer_size,nloaded,nbuffer,
+		status = mbedit_load_data(*buffer_size,nloaded,nbuffer,
 			ngood,icurrent);
 		}
 
@@ -703,13 +722,16 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       nloaded:     %d\n",*ndumped);
-		fprintf(stderr,"dbg2       nloaded:     %d\n",*nloaded);
-		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
-		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
-		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
-		fprintf(stderr,"dbg2       nplot:        %d\n",*nplt);
-		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2       buffer_size:     %d\n",*buffer_size);
+		fprintf(stderr,"dbg2       buffer_size_max: %d\n",*buffer_size_max);
+		fprintf(stderr,"dbg2       hold_size:       %d\n",*hold_size);
+		fprintf(stderr,"dbg2       ndumped:         %d\n",*ndumped);
+		fprintf(stderr,"dbg2       nloaded:         %d\n",*nloaded);
+		fprintf(stderr,"dbg2       nbuffer:         %d\n",*nbuffer);
+		fprintf(stderr,"dbg2       ngood:           %d\n",*ngood);
+		fprintf(stderr,"dbg2       icurrent:        %d\n",*icurrent);
+		fprintf(stderr,"dbg2       nplot:           %d\n",*nplt);
+		fprintf(stderr,"dbg2       error:           %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
 		}
@@ -3506,6 +3528,55 @@ int	*nplt;
 		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
 		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
 		fprintf(stderr,"dbg2       nplot:        %d\n",*nplt);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_check_buffer_size(form,buffer_size,buffer_size_max)
+int	form;
+int	*buffer_size;
+int	*buffer_size_max;
+{
+	/* local variables */
+	char	*function_name = "mbedit_check_buffer_size";
+	int	status = MB_SUCCESS;
+	int	format_num;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       form:            %d\n",form);
+		fprintf(stderr,"dbg2       buffer_size:     %d\n",*buffer_size);
+		fprintf(stderr,"dbg2       buffer_size_max: %d\n",*buffer_size_max);
+		}
+		
+	/* get format_num */
+	status = mb_format(verbose,&form,&format_num,&error);
+	
+	/* set buffer size lower if format supports sidescan */
+	if (pixels_ss_table[format_num] > 0)
+		*buffer_size_max = MBEDIT_BUFFER_SIZE / 5;
+	else
+		*buffer_size_max = MBEDIT_BUFFER_SIZE;
+	if (*buffer_size > *buffer_size_max)
+		*buffer_size = *buffer_size_max;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       buffer_size:     %d\n",*buffer_size);
+		fprintf(stderr,"dbg2       buffer_size_max: %d\n",*buffer_size_max);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
