@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 4.7 2000-09-30 06:54:58 caress Exp $
+ *    $Id: mb_delaun.c,v 4.8 2000-10-11 01:00:12 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -96,6 +96,9 @@
  * Date:	April, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  2000/09/30  06:54:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.6  1997/09/15  19:03:27  caress
  * Real Version 4.5
  *
@@ -139,33 +142,31 @@
 /* 	function mb_delaun creates a network of triangles connecting an
 	input set of points, where the triangles are as close to equiangular
 	as possible. */
-int mb_delaun(verbose,npts,p1,p2,ed,ntri,iv1,iv2,iv3,
-		ct1,ct2,ct3,cs1,cs2,cs3,
-		v1,v2,v3,istack,kv1,kv2,error)
-int	verbose;
-int	npts;
-double	*p1;
-double	*p2;
-int	*ed;
-int	*ntri;
-int	*iv1;
-int	*iv2;
-int	*iv3;
-int	*ct1;
-int	*ct2;
-int	*ct3;
-int	*cs1;
-int	*cs2;
-int	*cs3;
-double	*v1;
-double	*v2;
-double	*v3;
-int	*istack;
-int	*kv1;
-int	*kv2;
-int	*error;
+int mb_delaun(
+	int	verbose, 
+	int	npts, 
+	double	*p1, 
+	double	*p2, 
+	int	*ed, 
+	int	*ntri, 
+	int	*iv1, 
+	int	*iv2, 
+	int	*iv3, 
+	int	*ct1, 
+	int	*ct2, 
+	int	*ct3, 
+	int	*cs1, 
+	int	*cs2, 
+	int	*cs3, 
+	double	*v1, 
+	double	*v2, 
+	double	*v3, 
+	int	*istack, 
+	int	*kv1, 
+	int	*kv2, 
+	int	*error)
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 4.7 2000-09-30 06:54:58 caress Exp $";
+  	static char rcs_id[]="$Id: mb_delaun.c,v 4.8 2000-10-11 01:00:12 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];
