@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile  1/21/93
-#	$Id: Makefile,v 4.0 1994-03-06 00:13:22 caress Exp $
+#	$Id: Makefile,v 4.1 1994-04-12 17:03:51 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/06  00:13:22  caress
+# First cut at version 4.0
+#
 # Revision 4.0  1994/03/01  18:53:57  caress
 # First cut at new version.
 #
@@ -87,6 +90,7 @@ all:	$(MANDIR)/mbsystem.1 \
 	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.1 \
 	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.1 \
 	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.1 \
+	$(BINDIR)/mbbath $(MANDIR)/mbbath.1 \
 	$(BINDIR)/hsbath $(MANDIR)/hsbath.1 \
 	$(BINDIR)/hsdump $(MANDIR)/hsdump.1 \
 	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.1 \
@@ -120,8 +124,10 @@ $(BINDIR)/mbgrid:	mbgrid.o zgrid.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbgrid.o zgrid.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a -lnetcdf $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbgrid
 $(BINDIR)/mblevitus:	mblevitus.o
 	$(CC) $(CFLAGS) mblevitus.o $(LFLAGS) -o $(BINDIR)/mblevitus
-$(BINDIR)/hsbath:	hsbath.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) hsbath.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/hsbath
+$(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbbath
+$(BINDIR)/hsbath:	$(BINDIR)/mbbath
+	cd $(BINDIR); pwd; rm -f hsbath; ln -s mbbath hsbath
 $(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/hsdump
 $(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a
@@ -159,8 +165,8 @@ mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mblevitus.c
 zgrid.o:	zgrid.f
 	$(FC) -c $(FFLAGS) zgrid.f
-hsbath.o:	hsbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
-	$(CC) -c $(CFLAGS) hsbath.c
+mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
+	$(CC) -c $(CFLAGS) mbbath.c
 hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
 	$(CC) -c $(CFLAGS) hsdump.c
 mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
@@ -208,9 +214,11 @@ $(MANDIR)/mbgrid.1:	mbgrid.1
 $(MANDIR)/mblevitus.1:	mblevitus.1
 	cp mblevitus.1 $(MANDIR)/mblevitus.1
 	chmod 664 $(MANDIR)/mblevitus.1
-$(MANDIR)/hsbath.1:	hsbath.1
-	cp hsbath.1 $(MANDIR)/hsbath.1
-	chmod 664 $(MANDIR)/hsbath.1
+$(MANDIR)/mbbath.1:	mbbath.1
+	cp mbbath.1 $(MANDIR)/mbbath.1
+	chmod 664 $(MANDIR)/mbbath.1
+$(MANDIR)/hsbath.1:	$(MANDIR)/mbbath.1
+	cd $(MANDIR); pwd; rm -f hsbath.1; ln -s mbbath.1 hsbath.1
 $(MANDIR)/hsdump.1:	hsdump.1
 	cp hsdump.1 $(MANDIR)/hsdump.1
 	chmod 664 $(MANDIR)/hsdump.1
