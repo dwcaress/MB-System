@@ -1,7 +1,9 @@
-#! /usr/local/bin/perl
+eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
+                    & eval 'exec perl -S $0 $argv:q'
+                         if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_fmtvel.perl	6/18/93
-#    $Id: mbm_fmtvel.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
+#    $Id: mbm_fmtvel.perl,v 4.1 1994-10-21 11:36:58 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,10 +36,13 @@
 #   May 19, 1993
 #
 # Version:
-#   $Id: mbm_fmtvel.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
+#   $Id: mbm_fmtvel.perl,v 4.1 1994-10-21 11:36:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/05  23:52:40  caress
+# First cut at version 4.0
+#
 # Revision 4.1  1994/03/03  04:11:13  caress
 # Fixed copyright message.
 #
@@ -196,7 +201,7 @@ sub Getopts {
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP
 ;# Modified March 1990, Feb 1991 to properly handle timezones
-;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 4.0 $$Date: 1994-03-05 23:52:40 $
+;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 4.1 $$Date: 1994-10-21 11:36:58 $
 ;#   Marion Hakanson (hakanson@cse.ogi.edu)
 ;#   Oregon Graduate Institute of Science and Technology
 ;#

@@ -1,7 +1,9 @@
-#! /usr/local/bin/perl 
+eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
+                    & eval 'exec perl -S $0 $argv:q'
+                         if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.1 1994-05-02 00:19:44 caress Exp $
+#    $Id: mbm_plot.perl,v 4.2 1994-10-21 11:36:58 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,10 +39,13 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.1 1994-05-02 00:19:44 caress Exp $
+#   $Id: mbm_plot.perl,v 4.2 1994-10-21 11:36:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1994/05/02  00:19:44  caress
+# Added 2 significant digits to basemap tick intervals.
+#
 # Revision 4.0  1994/03/05  23:52:40  caress
 # First cut at version 4.0
 #
@@ -95,12 +100,11 @@ $root =    ($opt_O || $opt_o);
 $format =  ($opt_F || $opt_f);
 $bounds =  ($opt_R || $opt_r);
 $color = ($opt_G || $opt_g);
-$shade =   ($opt_S || $opt_s);
 $contour = ($opt_C || $opt_c);
 $navigation = ($opt_N || $opt_n);
 $shadecontrol = ($opt_A || $opt_a);
 $execute = ($opt_X || $opt_x);
-$pageview = ($opt_P || $opt_p);
+$view_ps = ($opt_P || $opt_p);
 $help =    ($opt_H || $opt_h);
 $verbose = ($opt_V || $opt_v);
 
@@ -109,7 +113,7 @@ if ($help)
 	{
 	print "\n$program_name:\n";
 	print "\nPerl shellscript to generate a gmt plot of the multibeam data contained \nin the specified file.  The plot will be scaled to fit on an 8.5 X 11 \ninch page.  The plot may include bathymetry color fill (-G1),\nbathymetry color shaded relief (-G2), bathymetry shaded with amplitudes\n(-G3), greyshade fill amplitude (-G4), or greyshade fill sidescan (-G5).\nThe plot may also include four color contoured bathymetry (-C).  A gmt shellscript will be created which \ngenerates a postscript image and then displays it using pageview. \nThe -X option will cause the shellscript to be executed immediately.\n";
-	print "\nUsage: $program_name -Fformat -Ifile [-Oroot -Rw/e/s/n -Gmode -AfImagnitude/azimuth -C -N -X -P -V -H]\n";
+	print "\nUsage: $program_name -Fformat -Ifile [-Oroot -Rw/e/s/n -Gmode -Amagnitude/azimuth -C -N -X -P -V -H]\n";
 	die "\n";
 	}
 
@@ -130,9 +134,33 @@ if (!$color && !$contour && !$navigation)
 	{
 	$navigation = 1;
 	}
-if (!$shadecontrol)
+
+# get postscript viewer
+# check environment variable
+if ($ENV{"MB_PS_VIEWER"})
 	{
-	$shadecontrol = "5/0";
+	$ps_viewer = $ENV{"MB_PS_VIEWER"};
+	}
+# check for .mbio_defaults file
+if (!$ps_viewer)
+	{
+	$home = $ENV{"HOME"};
+	$mbdef = "$home/.mbio_defaults";
+	if (open(MBDEF,"<$mbdef"))
+		{
+		while (<MBDEF>)
+			{
+			if (/ps viewer:\s+(\S+)/)
+				{
+				($ps_viewer) = /ps viewer:\s+(\S+)/;
+				}
+			}
+		}
+	}
+# just set it to ghostview
+if (!$ps_viewer)
+	{
+	$ps_viewer = "ghostview";
 	}
 
 # deal with specified bounds
@@ -362,6 +390,11 @@ $contour_int = 50;
 $color_int = 250;
 $tick_int = 250;
 
+# figure out some reasonable time tick intervals for navigation
+$time_tick = 0.25;
+$time_annot = 1;
+$date_annot = 4;
+
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
@@ -417,17 +450,27 @@ if ($color == 4 || $color == 5)
 	print FCMD "#\n# Make greyshade pallette table file\n";
 	print FCMD "echo Making greyshade pallette table file...\n";
 	$ncpt = 15;
-	@cptbr = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
-	@cptbg = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
-	@cptbb = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
+#	@cptbr = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
+#	@cptbg = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
+#	@cptbb = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
+	@cptbr = (255, 233, 215, 197, 179, 161, 143, 125, 107,  89,  71,   53,  35,  17,  0);
+	@cptbg = (255, 233, 215, 197, 179, 161, 143, 125, 107,  89,  71,   53,  35,  17,  0);
+	@cptbb = (255, 233, 215, 197, 179, 161, 143, 125, 107,  89,  71,   53,  35,  17,  0);
 	if ($color == 4)
 		{
 		$dd = 1.1 * ($amax - $amin)/($ncpt - 1);
 		$d1 = $amin - 0.05*($amax - $amin);
 		}
-	if ($color == 5)
+	if ($color == 5 && $format == 41)
 		{
-		$dd = 1.1 * ($smax - $smin)/($ncpt - 1);
+		$smin = 20 * log($smin) / log(10);
+		$smax = 20 * log($smax) / log(10);
+		$dd = 1.01 * ($smax - $smin)/($ncpt - 1);
+		$d1 = $smin - 0.01*($smax - $smin);
+		}
+	elsif ($color == 5)
+		{
+		$dd = 1.05 * ($smax - $smin)/($ncpt - 1);
 		$d1 = $smin - 0.05*($smax - $smin);
 		}
 	foreach $i (0 .. $ncpt - 2)
@@ -449,6 +492,18 @@ if ($color == 4 || $color == 5)
 		}
 	}
 
+# set shade control if not set by user
+if (!$shadecontrol && $color == 3)
+	{
+	$shademagnitude = 1.0/($amax - $amin);
+	$shadenull = 0.5 * ($amax + $amin);
+	$shadecontrol = "$shademagnitude/$shadenull";
+	}
+elsif (!$shadecontrol)
+	{
+	$shadecontrol = "5/0";
+	}
+
 # do swath plot if needed
 if ($color)
 	{
@@ -463,6 +518,10 @@ if ($color)
 		{
 		print FCMD " -G$shadecontrol";
 		}
+	if ($color == 5 && $format == 41)
+		{
+		print FCMD " -D3/1/0/1";
+		}
 	if ($portrait)
 		{
 		print FCMD " -P";
@@ -472,7 +531,7 @@ if ($color)
 	}
 
 # do contour plot if needed
-if ($contour)
+if ($contour || $navigation)
 	{
 	print FCMD "#\n# Run mbcontour\n";
 	print FCMD "echo Running mbcontour...\n";
@@ -480,31 +539,32 @@ if ($contour)
 	printf FCMD " -R%.4f/%.4f/%.4f/%.4f", $xmin,$xmax,$ymin,$ymax;
 	printf FCMD " -Ba%.4fg%.4f\":.Data File %s:\"", 
 		$base_tick,$base_tick,$file;
-	if ($color)
+	if ($color && $contour)
 		{
 		print FCMD " -C$cptfile";
 		}
-	else
+	elsif ($contour)
 		{
 		printf FCMD " -A%.4f/%.4f/%.4f/%.4f/0.01/0.1",
 			$contour_int,$color_int,$tick_int,$color_int;
+		}
+	if ($contour && $format == 41)
+		{
+		print FCMD " -Z1";
+		}
+	if ($navigation)
+		{
+		printf FCMD " -D%.4f/%.4f/%.4f/0.15",
+			$time_tick,$time_annot,$date_annot;
 		}
 	print FCMD " -p1";
 	if ($portrait)
 		{
 		print FCMD " -P";
 		}
-	if (!$color)
-		{
-		print FCMD " -X1 -Y1 -K -V > $psfile\n";
-		}
-	elsif ($color)
+	if ($color)
 		{
 		print FCMD " -O -K -V >> $psfile\n";
-		}
-	elsif ($navigation)
-		{
-		print FCMD " -K -V >> $psfile\n";
 		}
 	else
 		{
@@ -512,39 +572,8 @@ if ($contour)
 		}
 	}
 
-# do navigation plot if needed
-if ($navigation)
-	{
-	print FCMD "#\n# Run mblist\n";
-	print FCMD "echo Running mblist...\n";
-	printf FCMD "mblist -F%d -I%s -OXYU > %s\n", $format,$file,$navfile;
-	print FCMD "#\n# Run pstrack\n";
-	print FCMD "echo Running pstrack...\n";
-	printf FCMD "pstrack %s -Jm%g", $navfile,$plotscale;
-	printf FCMD " -R%.4f/%.4f/%.4f/%.4f", $xmin,$xmax,$ymin,$ymax;
-	printf FCMD " -Ba%.4fg%.4f\":.Data File %s:\" -W2", 
-		$base_tick,$base_tick,$file;
-	printf FCMD " -Mt15ma1h";
-	if ($portrait)
-		{
-		print FCMD " -P";
-		}
-	if ($color || $shade)
-		{
-		print FCMD " -O -K >> $psfile\n";
-		}
-	elsif ($contour)
-		{
-		print FCMD " -O >> $psfile\n";
-		}
-	else
-		{
-		print FCMD " -X1 -Y1 > $psfile\n";
-		}
-	}
-
 # do scale plot if needed
-if ($color || $shade)
+if ($color)
 	{
 	print FCMD "#\n# Run psscale\n";
 	print FCMD "echo Running psscale...\n";
@@ -552,7 +581,18 @@ if ($color || $shade)
 	printf FCMD " -D%.4f/%.4f/%.4f/%.4fh", 
 		$colorscale_offx,$colorscale_offy,
 		$colorscale_width,$colorscale_height;
-	print FCMD " -B\":.Depth (meters):\"";
+	if ($color == 5)
+		{
+		print FCMD " -B\":.Sidescan Pixel Values:\"";
+		}
+	elsif ($color == 4)
+		{
+		print FCMD " -B\":.Beam Amplitude Values:\"";
+		}
+	else
+		{
+		print FCMD " -B\":.Depth (meters):\"";
+		}
 	if ($portrait)
 		{
 		print FCMD " -P";
@@ -563,19 +603,19 @@ if ($color || $shade)
 # delete surplus files
 print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
-print FCMD "rm -f $cptfile $listfile $navfile\n";
+print FCMD "rm -f $cptfile $listfile\n";
 
 # display image on screen if desired
-print FCMD "#\n# Run pageview\n";
-if ($pageview)
+print FCMD "#\n# Run $ps_viewer\n";
+if ($view_ps)
 	{
-	print FCMD "echo Running pageview in background...\n";
-	print FCMD "pageview $psfile &\n";
+	print FCMD "echo Running $ps_viewer in background...\n";
+	print FCMD "$ps_viewer $psfile &\n";
 	}
 else
 	{
-	print FCMD "#echo Running pageview in background...\n";
-	print FCMD "#pageview $psfile &\n";
+	print FCMD "#echo Running $ps_viewer in background...\n";
+	print FCMD "#$ps_viewer $psfile &\n";
 	}
 
 # claim it's all over
@@ -606,8 +646,8 @@ if ($execute)
 die "\nAll done!\n";
 
 #-----------------------------------------------------------------------
-# This should be loaded from the library but the shipboard installation
-# of Perl is screwed up so....
+# This should be loaded from the library but Perl installations
+# are often screwed up so....
 #
 ;# getopts.pl - a better getopt.pl
 

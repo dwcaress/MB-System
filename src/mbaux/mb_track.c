@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 4.1 1994-07-29 19:04:31 caress Exp $
+ *    $Id: mb_track.c,v 4.2 1994-10-21 11:34:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,10 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  19:04:31  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * >> using unix second time base.
+ *
  * Revision 4.0  1994/05/16  22:09:29  caress
  * First cut at new contouring scheme
  *
@@ -56,12 +60,12 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 4.1 1994-07-29 19:04:31 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 4.2 1994-10-21 11:34:20 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;
 	double	hour0, hour1;
-	int	time_j[4];
+	int	time_j[5];
 	double	x, y, x1, y1, x2, y2, x3, y3, x4, y4;
 	double	dx, dy;
 	double	angle;
@@ -147,14 +151,14 @@ int	*error;
 		/* do date annotation if needed */
 		if (date_annot == MB_YES)
 			{
-			x1 = x + 0.75*data->time_tick_len*(dx - dy);
-			y1 = y + 0.75*data->time_tick_len*(dy + dx);
-			x3 = x + 0.75*data->time_tick_len*(dx + dy);
-			y3 = y + 0.75*data->time_tick_len*(dy - dx);
-			x2 = x + 0.75*data->time_tick_len*(-dx + dy);
-			y2 = y + 0.75*data->time_tick_len*(-dy - dx);
-			x4 = x + 0.75*data->time_tick_len*(-dx - dy);
-			y4 = y + 0.75*data->time_tick_len*(-dy + dx);
+			x1 = x + 0.375*data->time_tick_len*(dx - dy);
+			y1 = y + 0.375*data->time_tick_len*(dy + dx);
+			x3 = x + 0.375*data->time_tick_len*(dx + dy);
+			y3 = y + 0.375*data->time_tick_len*(dy - dx);
+			x2 = x + 0.375*data->time_tick_len*(-dx + dy);
+			y2 = y + 0.375*data->time_tick_len*(-dy - dx);
+			x4 = x + 0.375*data->time_tick_len*(-dx - dy);
+			y4 = y + 0.375*data->time_tick_len*(-dy + dx);
 /*			boldline(x1,y1,x2,y2);
 			boldline(x3,y3,x4,y4);*/
 			plot(x1,y1,IUP);
@@ -171,14 +175,14 @@ int	*error;
 		/* do time annotation if needed */
 		else if (time_annot == MB_YES)
 			{
-			x1 = x + 0.75*data->time_tick_len*(dx - dy);
-			y1 = y + 0.75*data->time_tick_len*(dy + dx);
-			x3 = x + 0.75*data->time_tick_len*(dx + dy);
-			y3 = y + 0.75*data->time_tick_len*(dy - dx);
-			x2 = x + 0.75*data->time_tick_len*(-dx + dy);
-			y2 = y + 0.75*data->time_tick_len*(-dy - dx);
-			x4 = x + 0.75*data->time_tick_len*(-dx - dy);
-			y4 = y + 0.75*data->time_tick_len*(-dy + dx);
+			x1 = x + 0.375*data->time_tick_len*(dx - dy);
+			y1 = y + 0.375*data->time_tick_len*(dy + dx);
+			x3 = x + 0.375*data->time_tick_len*(dx + dy);
+			y3 = y + 0.375*data->time_tick_len*(dy - dx);
+			x2 = x + 0.375*data->time_tick_len*(-dx + dy);
+			y2 = y + 0.375*data->time_tick_len*(-dy - dx);
+			x4 = x + 0.375*data->time_tick_len*(-dx - dy);
+			y4 = y + 0.375*data->time_tick_len*(-dy + dx);
 /*			boldline(x1,y1,x2,y2);
 			boldline(x3,y3,x4,y4);*/
 			plot(x1,y1,IUP);
@@ -194,14 +198,14 @@ int	*error;
 		/* do time tick if needed */
 		else if (time_tick == MB_YES)
 			{
-			x1 = x + 0.5*data->time_tick_len*(dx - dy);
-			y1 = y + 0.5*data->time_tick_len*(dy + dx);
-			x3 = x + 0.5*data->time_tick_len*(dx + dy);
-			y3 = y + 0.5*data->time_tick_len*(dy - dx);
-			x2 = x + 0.5*data->time_tick_len*(-dx + dy);
-			y2 = y + 0.5*data->time_tick_len*(-dy - dx);
-			x4 = x + 0.5*data->time_tick_len*(-dx - dy);
-			y4 = y + 0.5*data->time_tick_len*(-dy + dx);
+			x1 = x + 0.25*data->time_tick_len*(dx - dy);
+			y1 = y + 0.25*data->time_tick_len*(dy + dx);
+			x3 = x + 0.25*data->time_tick_len*(dx + dy);
+			y3 = y + 0.25*data->time_tick_len*(dy - dx);
+			x2 = x + 0.25*data->time_tick_len*(-dx + dy);
+			y2 = y + 0.25*data->time_tick_len*(-dy - dx);
+			x4 = x + 0.25*data->time_tick_len*(-dx - dy);
+			y4 = y + 0.25*data->time_tick_len*(-dy + dx);
 /*			boldline(x1,y1,x2,y2);
 			boldline(x3,y3,x4,y4);*/
 			plot(x1,y1,IUP);

@@ -7,7 +7,7 @@ a GMT plot of multibeam swath data.
 Version 4.00
 
 .SH SYNOPSIS
-\fBmbm_plot\fP \fB-F\fIformat \fB-I\fIfile \fP[\fB-O\fIroot \fB-R\fIw/e/s/n \fB-Gmode -S -C -N -A\fImagnitude/azimuth\fB -X -V -H\fP]
+\fBmbm_plot\fP \fB-F\fIformat \fB-I\fIfile \fP[\fB-O\fIroot \fB-R\fIw/e/s/n \fB-Gmode -C -N -A\fImagnitude/azimuth\fB -X -V -H\fP]
 
 .SH DESCRIPTION
 \fBmbm_plot\fP is an utility which generates a shellscript for making
@@ -92,16 +92,15 @@ name of the input GRD file is used as the \fIroot\fP.
 .TP
 .B \fB-P\fP
 This option will cause the shellscript to include lines which execute
-\fBpageview\fP to display the postscript image on the screen.  This
-will work only on Sun Workstations.
+a program to display the Postscript image on the screen.  The program
+to be used to display the Postscript is set using \fBmbdefaults\fP;
+the default value can be overridden by setting the environment
+variable $MB_PS_VIEWER.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
 Sets the longitude and latitude bounds within which multibeam 
 data will be read. Normally the bounds are automatically chosen
 to include all of the data in the input file. 
-.TP
-.B \fB-S\fP
-Sets flag indicating that a shaded relief map of the data is desired.
 .TP
 .B \fB-V\fP
 Causes \fBmbm_plot\fP to operate in "verbose" mode so that it outputs

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.2 1994-07-29 19:04:31 caress Exp $
+ *    $Id: mbswath.c,v 4.3 1994-10-21 11:34:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  19:04:31  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * >> using unix second time base.
+ *
  * Revision 4.1  1994/06/13  18:39:15  caress
  * Made it possible to read data from stdin.
  *
@@ -75,6 +79,10 @@
 /* GMT include files */
 #include "gmt.h"
 
+/* min max defines */
+#define      min(A, B)       ((A) < (B) ? (A) : (B))
+#define      max(A, B)       ((A) > (B) ? (A) : (B))
+
 /* MBSWATH MODE DEFINES */
 #define	MBSWATH_BATH		1
 #define	MBSWATH_BATH_RELIEF	2
@@ -99,7 +107,7 @@ struct	ping
 	{
 	int	pings;
 	int	kind;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -154,10 +162,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.2 1994-07-29 19:04:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.3 1994-10-21 11:34:20 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
-	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
+	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
 
 	extern char *optarg;
 	extern int optkind;
@@ -170,7 +178,7 @@ char **argv;
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message;
+	char	*message = NULL;
 
 	/* MBIO read control parameters */
 	char	filelist[128];
@@ -181,8 +189,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -191,28 +199,32 @@ char **argv;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*mbio_ptr;
+	char	*mbio_ptr = NULL;
 
 	/* mbio read values */
-	struct swath *swath_plot;
-	struct ping *pingcur;
-	double	*bath;
-	double	*bathlon;
-	double	*bathlat;
-	double	*amp;
-	double	*ss;
-	double	*sslon;
-	double	*sslat;
-	int	*bathflag;
-	double	*bathfoot;
-	int	*ssflag;
-	double	*ssfoot;
+	struct swath *swath_plot = NULL;
+	struct ping *pingcur = NULL;
+	double	*bath = NULL;
+	double	*bathlon = NULL;
+	double	*bathlat = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*sslon = NULL;
+	double	*sslat = NULL;
+	int	*bathflag = NULL;
+	double	*bathfoot = NULL;
+	int	*ssflag = NULL;
+	double	*ssfoot = NULL;
 
 	/* gmt control variables */
 	double	borders[4];
 	char	cptfile[128];
 	double	magnitude = 1.0;
 	double	azimuth = 90.0;
+	int	ampscale_mode = 0;
+	double	ampscale = 1.0;
+	double	ampmin = 0.0;
+	double	ampmax = 1.0;
 	int	monochrome = MB_NO;
 	double	factor = 1.0;
 	int	mode = MBSWATH_BATH;
@@ -225,6 +237,7 @@ char **argv;
 	int	*npings;
 	int	nping_read;
 	int	nplot;
+	double	amplog;
 	double	mtodeglon, mtodeglat;
 	double	clipx[4], clipy[4];
 
@@ -318,7 +331,7 @@ char **argv;
 		}
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhp:L:l:b:E:e:f:S:s:T:t:G:g:A:a:I:i:Z:z:B:C:F:MJ:KOPR:Q:UX:x:Y:y:#:0123")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:D:d:E:e:F:f:G:g:HhI:i:J:KL:l:MOPp:Q:R:S:s:T:t:UVvX:x:Y:y:Z:z:#:0123")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -330,12 +343,19 @@ char **argv;
 			sscanf (optarg, "%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
+			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg, "%d/%lf/%lf/%lf",
+				&ampscale_mode,&ampscale,&ampmin,&ampmax);
 			break;
 		case 'E':
 		case 'e':
 			sscanf (optarg, "%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			break;
                 case 'f':
                         sscanf (optarg, "%d",&format);
@@ -441,12 +461,14 @@ char **argv;
 		fprintf(stderr,"dbg2       btime_i[3]:       %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:       %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:       %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:       %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:       %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:       %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:       %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:       %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:       %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:       %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:       %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:         %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:          %f\n",timegap);
 		fprintf(stderr,"dbg2       file list:        %s\n",filelist);
@@ -457,6 +479,10 @@ char **argv;
 		fprintf(stderr,"dbg2       borders[3]:       %f\n",borders[3]);
 		fprintf(stderr,"dbg2       shade magnitude:  %f\n",magnitude);
 		fprintf(stderr,"dbg2       shade azimuth:    %f\n",azimuth);
+		fprintf(stderr,"dbg2       amp scale mode:   %d\n",ampscale_mode);
+		fprintf(stderr,"dbg2       amplitude scale:  %f\n",ampscale);
+		fprintf(stderr,"dbg2       amplitude minimum:%f\n",ampmin);
+		fprintf(stderr,"dbg2       amplitude maximum:%f\n",ampmax);
 		fprintf(stderr,"dbg2       footprint factor: %f\n",factor);
 		fprintf(stderr,"dbg2       mode:             %d\n",mode);
 		}
@@ -619,6 +645,18 @@ char **argv;
 	for (i=0;i<MAXPINGS;i++)
 		{
 		pingcur = &(swath_plot->data[i]);
+		pingcur->bath = NULL;
+		pingcur->amp = NULL;
+		pingcur->bathlon = NULL;
+		pingcur->bathlat = NULL;
+		pingcur->ss = NULL;
+		pingcur->sslon = NULL;
+		pingcur->sslat = NULL;
+		pingcur->bathflag = NULL;
+		pingcur->bathfoot = NULL;
+		pingcur->ssflag = NULL;
+		pingcur->ssfoot = NULL;
+		pingcur->bathshade = NULL;
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&(pingcur->bath),&error);
 		status = mb_malloc(verbose,beams_amp*sizeof(double),
@@ -665,9 +703,6 @@ char **argv;
 
 	/* loop over reading */
 	*npings = 0;
-	swath_plot->beams_bath = beams_bath;
-	swath_plot->beams_amp = beams_amp;
-	swath_plot->pixels_ss = pixels_ss;
 	start = MB_YES;
 	done = MB_NO;
 	while (done == MB_NO)
@@ -688,6 +723,9 @@ char **argv;
 			bath,amp,bathlon,bathlat,
 			ss,sslon,sslat,
 			pingcur->comment,&error);
+		swath_plot->beams_bath = beams_bath;
+		swath_plot->beams_amp = beams_amp;
+		swath_plot->pixels_ss = pixels_ss;
 
 		/* print debug statements */
 		if (verbose >= 2)
@@ -713,6 +751,79 @@ char **argv;
 			{
 			nping_read += pingcur->pings;
 			(*npings)++;
+			}
+
+		/* scale amplitudes if necessary */
+		if (error == MB_ERROR_NO_ERROR
+			&& (mode == MBSWATH_BATH_AMP
+			|| mode == MBSWATH_AMP)
+			&& ampscale_mode > 0)
+			{
+			for (i=0;i<beams_amp;i++)
+				{
+				if (amp[i] > 0 && ampscale_mode == 1)
+				    {
+				    amp[i] = ampscale*(amp[i] - ampmin)
+					/(ampmax - ampmin);
+				    }
+				else if (amp[i] > 0 && ampscale_mode == 2)
+				    {
+				    amp[i] = min(amp[i],ampmax);
+				    amp[i] = max(amp[i],ampmin);
+				    amp[i] = ampscale*(amp[i] - ampmin)
+					/(ampmax - ampmin);
+				    }
+				else if (amp[i] > 0 && ampscale_mode == 3)
+				    {
+				    amplog = 20.0*log10(amp[i]);
+				    amp[i] = ampscale*(amplog - ampmin)
+					/(ampmax - ampmin);
+				    }
+				else if (amp[i] > 0 && ampscale_mode == 4)
+				    {
+				    amplog = 20.0*log10(amp[i]);
+				    amplog = min(amplog,ampmax);
+				    amplog = max(amplog,ampmin);
+				    amp[i] = ampscale*(amplog - ampmin)
+					   /(ampmax - ampmin);
+				    }
+				}
+			}
+
+		/* scale sidescan if necessary */
+		if (error == MB_ERROR_NO_ERROR
+			&& mode == MBSWATH_SS
+			&& ampscale_mode > 0)
+			{
+			for (i=0;i<pixels_ss;i++)
+				{
+				if (ss[i] > 0 && ampscale_mode == 1)
+				    {
+				    ss[i] = ampscale*(ss[i] - ampmin)
+					/(ampmax - ampmin);
+				    }
+				else if (ss[i] > 0 && ampscale_mode == 2)
+				    {
+				    ss[i] = min(ss[i],ampmax);
+				    ss[i] = max(ss[i],ampmin);
+				    ss[i] = ampscale*(ss[i] - ampmin)
+					/(ampmax - ampmin);
+				    }
+				else if (ss[i] > 0 && ampscale_mode == 3)
+				    {
+				    amplog = 20.0*log10(ss[i]);
+				    ss[i] = ampscale*(amplog - ampmin)
+					/(ampmax - ampmin);
+				    }
+				else if (ss[i] > 0 && ampscale_mode == 4)
+				    {
+				    amplog = 20.0*log10(ss[i]);
+				    amplog = min(amplog,ampmax);
+				    amplog = max(amplog,ampmin);
+				    ss[i] = ampscale*(amplog - ampmin)
+					   /(ampmax - ampmin);
+				    }
+				}
 			}
 
 		/* decide whether to plot, whether to 
@@ -766,6 +877,10 @@ char **argv;
 			status = plot_data(verbose,mode,swath_plot,
 				first,nplot,&error);
 
+			/* let the world know */
+			if (verbose >= 1)
+			    fprintf(stderr,"plotted %d pings...\n",nplot);
+
 			/* reorganize data */
 			if (flush == MB_YES && save_new == MB_YES)
 				{
@@ -790,26 +905,26 @@ char **argv;
 
 			}
 		}
-	status = mb_close(verbose,mbio_ptr,&error);
+	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory for data arrays */
 	for (i=0;i<MAXPINGS;i++)
 		{
 		pingcur = &swath_plot->data[i];
-		mb_free(verbose,pingcur->bath,&error);
-		mb_free(verbose,pingcur->amp,&error);
-		mb_free(verbose,pingcur->bathlon,&error);
-		mb_free(verbose,pingcur->bathlat,&error);
-		mb_free(verbose,pingcur->ss,&error);
-		mb_free(verbose,pingcur->sslon,&error);
-		mb_free(verbose,pingcur->sslat,&error);
-		mb_free(verbose,pingcur->bathflag,&error);
-		mb_free(verbose,pingcur->bathfoot,&error);
-		mb_free(verbose,pingcur->ssflag,&error);
-		mb_free(verbose,pingcur->ssfoot,&error);
-		mb_free(verbose,pingcur->bathshade,&error);
+		mb_free(verbose,&pingcur->bath,&error);
+		mb_free(verbose,&pingcur->amp,&error);
+		mb_free(verbose,&pingcur->bathlon,&error);
+		mb_free(verbose,&pingcur->bathlat,&error);
+		mb_free(verbose,&pingcur->ss,&error);
+		mb_free(verbose,&pingcur->sslon,&error);
+		mb_free(verbose,&pingcur->sslat,&error);
+		mb_free(verbose,&pingcur->bathflag,&error);
+		mb_free(verbose,&pingcur->bathfoot,&error);
+		mb_free(verbose,&pingcur->ssflag,&error);
+		mb_free(verbose,&pingcur->ssfoot,&error);
+		mb_free(verbose,&pingcur->bathshade,&error);
 		}
-	mb_free(verbose,swath_plot,&error);
+	mb_free(verbose,&swath_plot,&error);
 
 	/* figure out whether and what to read next */
         if (use_stdin == MB_NO)
@@ -857,7 +972,7 @@ char **argv;
 
 	/* deallocate image */
 	if (image == MBSWATH_IMAGE_8 || image == MBSWATH_IMAGE_24)
-		mb_free(verbose,bitimage,&error);
+		mb_free(verbose,&bitimage,&error);
 
 	/* check memory */
 	if (verbose >= 2)
@@ -1858,7 +1973,7 @@ int	*error;
 	ping2 = &swath->data[two];
 	ping1->pings = ping2->pings;
 	ping1->kind = ping2->kind;
-	for (i=0;i<6;i++)
+	for (i=0;i<7;i++)
 		ping1->time_i[i] = ping2->time_i[i];
 	ping1->time_d = ping2->time_d;
 	ping1->navlon = ping2->navlon;

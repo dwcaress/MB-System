@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 4.0 1994-05-16 22:12:46 caress Exp $
+ *    $Id: mb_contour.h,v 4.1 1994-10-21 11:34:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,14 +19,20 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/05/16  22:12:46  caress
+ * First cut at new contouring scheme.
+ *
  *
  */
 
+/* contour algorithm defines */
+#define	MB_CONTOUR_OLD	0
+#define	MB_CONTOUR_TRIANGLES	1
 
 /* swath bathymetry data structure */
 struct	ping
 	{
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -34,6 +40,7 @@ struct	ping
 	double	*bath;
 	double	*bathlon;
 	double	*bathlat;
+	int	*bflag[2];
 	};
 
 /* structure including swath bathymetry data and control parameters
@@ -47,6 +54,7 @@ struct swath
 	struct ping *pings;
 
 	/* what is plotted */
+	int	contour_algorithm;
 	int	plot_contours;
 	int	plot_triangles;
 	int	plot_track;
@@ -100,6 +108,8 @@ struct swath
 	int	nsave;
 	double	*xsave;
 	double	*ysave;
+	int	*isave;
+	int	*jsave;
 
 	/* contour label arrays */
 	int	nlabel;

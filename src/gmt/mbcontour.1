@@ -1,4 +1,4 @@
-.TH MBCONTOUR 1 "17 May 1994"
+.TH MBCONTOUR 1 "13 September 1994"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -7,12 +7,21 @@ swath plots of multibeam data using Postscript.
 Version 4.00
 
 .SH SYNOPSIS
-\fBmbcontour\fP \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt \fB-B\fItickinfo \fB-C\fIcontourfile \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP \fB-F\fIred/green/blue \fB-I\fIdatalist \fB-K\fI \fB-L\fIlonflip \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-#\fIcopies \fB-V -H\fP]
+\fBmbcontour\fP \fB-J\fIparameters\fP \fB-R\fIwest/east/south/north \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt\fP \fB-B\fItickinfo\fP \fB-b\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcontourfile\fP \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIred/green/blue\fP \fB-I\fIdatalist\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP \fB-N\fInplot\fP \fB-O\fP \fB-P\fP \fB-p\fIpings\fP \fB-Q\fP \fB-T\fItimegap\fP \fB-U\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fIalgorithm\fP \fB-#\fIcopies\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbcontour\fP is an utility for swath contouring of multibeam bathymetry 
 data using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
-is fully compatible with the GMT package version 2.1.  The contour levels 
+is fully compatible with the GMT package version 2.1. Two contouring
+algorithms are available. The first draws contours between successive
+pings; this algorithm is simple and therefore fast but produces poor
+looking contours when beams from one ping lie "behind" beams from a
+previous ping (this happens for sonars that ping at nonnull pitch
+angles or for the "inside" beams when ships make sharp turns). The
+second algorithm constructs a triangular network from the available
+soundings and contours the network; this approach is complicated
+and therefore slow but produces good looking contours under most
+conditions. The contour levels 
 and colors can be controlled directly or set implicitly using contour 
 and color change intervals. Contours can also be set to have ticks 
 pointing downhill.
@@ -60,6 +69,11 @@ contour levels to be plotted with unannotated, unticked, black contours.
 If contours are specified using the \fB-C\fP option, then any use
 of the \fB-A\fP option will be ignored.
 .TP
+.B \fB-b\fIyr/mo/da/hr/mn/sc\fP
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
+.TP
 .B \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP
 Sets the parameters governing the annotation of the shiptrack.  
 Time marks are made with "X" marks along the shiptrack; annotated
@@ -73,6 +87,11 @@ annotated date ticks are given in hours by
 \fItime_tick\fP, \fItime_annot\fP, and \fIdate_annot\fP, respectively.
 Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; 
 \fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1.
+.TP
+.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \fB-f\fIformat\fP
 Sets the data format used if the input is read from stdin
@@ -163,6 +182,13 @@ Default: \fIlonflip\fP = 0.
 .B \-M
 Force conversion to monochrome image using the [television] YIQ transformation.
 .TP
+.B \fB-N\fInplot\fP
+Sets the number of pings to be read in before each contouring
+episode. See the description of the \fB-Z\fIalgorithm\fP option
+for advice on reasonable values
+Default: \fInplot\fP = 50 unless \fB-Z\fI1\fP is specified,
+in which case the default is \fInplot\fP = 5.
+.TP
 .B \-O
 Selects Overlay plot mode [Default initializes a new plot system].
 .TP
@@ -177,6 +203,11 @@ ping.  If \fIpings\fP = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
+.TP
+.B \fB-Q\fP
+Causes the program to plot the triangles constructed as part of the
+contouring if the "triangle algorithm" is specified using the
+\fB-Z\fI0\fP option. This allows the data distribution to be directly viewed.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
 Sets the longitude and latitude bounds within which multibeam 
@@ -198,6 +229,25 @@ Selects verbose mode, which will send progress reports to stderr [Default runs "
 .B \-X \-Y
 Shift origin of plot by (\fIx-shift,y-shift\fP) inches  [Default is (1,1) for new plots, (0,0) for overlays].
 .TP
+.B \fB-Z\fIalgorithm\fP
+Sets the contouring algorithm to be used. If \fIalgorithm\fP=0,
+a simple ping to ping contouring approach is used; this algorithm
+is fast but produces poor looking contours when used with data
+where beams from one ping may lie "behind" beams from previous
+pings (this happens for sonars that ping at nonnull pitch
+angles or for the "inside" beams when ships make sharp turns).
+If \fIalgorithm\fP=1 then a triangular network is constructed from
+the available soundings and this network is in turn contoured;
+this algorithm is slow but produces good looking contours in
+most cases. It is important to note that the time required for
+"triangle" algorithm increases with the square of the number
+of beams to be contoured; thus it is sensible to keep the number
+of pings contoured at a time small (e.g. use \fB-N\fP\fI5\fP).
+The time required for the "ping to ping" algorithm varies linearly
+with the number of pings contoured; thus larger numbers of pings
+may be reasonably contoured at a time (e.g. use \fB-N\fP\fI50\fP). 
+Default: \fIalgorithm\fP = 0.
+.TP
 .B \-#
 Specifies the number of plot copies. [Default is 1]
 .SH EXAMPLES
@@ -214,8 +264,8 @@ where the file datalist contains:
 .br
 A plot including a navigation track can also be created using 
 \fBmbcontour\fP.  Here the \fB-D\fP flag is used to add a plot
-of the ship track annotated with time marks every 0.25 minutes,
-annotated time marks every hour, and day annotations every four days:
+of the ship track annotated with time marks every 0.25 hours,
+annotated time marks every hour, and day annotations every four hours:
  	mbcontour -Idatalist -Jm2.44652 -R-25.7252/-23.0683/59.7415/61.0699 
  		-Ba0.5314g0.5314":.Data File hs_ew9302_161_bmn.mb24:" 
  		-D0.25/1/4/0.1 -A50.0000/250.0000/250.0000/250.0000/0.01/0.1 

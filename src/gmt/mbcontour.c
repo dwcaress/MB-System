@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.4 1994-07-29 19:04:31 caress Exp $
+ *    $Id: mbcontour.c,v 4.5 1994-10-21 11:34:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/07/29  19:04:31  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * >> using unix second time base.
+ *
  * Revision 4.3  1994/06/13  19:01:13  caress
  * Fixed typos in info messages.
  *
@@ -92,15 +96,15 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.4 1994-07-29 19:04:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.5 1994-10-21 11:34:20 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O \n\t-P -ppings -Q -Ttimegap -U -Xx-shift -Yy-shift -#copies -V -H]";
+	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len -Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O -Nnplot \n\t-P -ppings -Q -Ttimegap -U -Xx-shift -Yy-shift -Zalgorithm -#copies -V -H]";
 #else
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O \n\t-P -ppings -U -Xx-shift -Yy-shift -#copies -V -H]";
+	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -Nnplot -O \n\t-P -ppings -U -Xx-shift -Yy-shift -Zalgorithm -#copies -V -H]";
 #endif
 
 	extern char *optarg;
@@ -114,7 +118,7 @@ char **argv;
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message;
+	char	*message = NULL;
 
 	/* MBIO read control parameters */
 	char	filelist[128];
@@ -123,8 +127,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -133,37 +137,38 @@ char **argv;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*mbio_ptr;
+	char	*mbio_ptr = NULL;
 
 	/* mbio read values */
-	struct swath *swath_plot;
-	struct ping *pingcur;
+	struct swath *swath_plot = NULL;
+	struct ping *pingcur = NULL;
 	int	kind;
 	int	pings_read;
-	int	*time_i;
-	double	*time_d;
-	double	*navlon;
-	double	*navlat;
+	int	*time_i = NULL;
+	double	*time_d = NULL;
+	double	*navlon = NULL;
+	double	*navlat = NULL;
 	double	speed;
-	double	*heading;
-	double	distance;
-	double	*bath;
-	double	*bathlon;
-	double	*bathlat;
-	double	*amp;
-	double	*ss;
-	double	*sslon;
-	double	*sslat;
+	double	*heading = NULL;
+	double	distance = NULL;
+	double	*bath = NULL;
+	double	*bathlon = NULL;
+	double	*bathlat = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*sslon = NULL;
+	double	*sslat = NULL;
 	char	comment[256];
 
 	/* plot control variables */
+	int	contour_algorithm;
 	char	contourfile[128];
 	int	plot;
 	int	done;
 	int	flush;
 	int	save_new;
 	int	first;
-	int	*npings;
+	int	*npings = NULL;
 	int	nping_read;
 	int	nplot;
 	int	plot_contours;
@@ -188,12 +193,12 @@ char **argv;
 	/* pen variables */
 	int	ncolor;
 	int	nlevel;
-	double	*level;
-	int	*red;
-	int	*green;
-	int	*blue;
-	int	*label;
-	int	*tick;
+	double	*level = NULL;
+	int	*red = NULL;
+	int	*green = NULL;
+	int	*blue = NULL;
+	int	*label = NULL;
+	int	*tick = NULL;
 
 	/* inch to map scale */
 	double	inchtolon;
@@ -214,6 +219,7 @@ char **argv;
 		btime_i,etime_i,&speedmin,&timegap);
 
 	/* initialize some values */
+	contour_algorithm = MB_CONTOUR_OLD;
 	strcpy (file, "stdin");
 	strcpy (contourfile,"\0");
 	set_contours = MB_NO;
@@ -222,7 +228,7 @@ char **argv;
 	bounds[2] = 0.0;
 	bounds[3] = 0.0;
 	scale = 0.0;
-	nplot = 5;
+	nplot = 0;
 	cont_int = 25.;
 	col_int = 100.;
 	tick_int = 100.;
@@ -241,7 +247,7 @@ char **argv;
         use_stdin = MB_YES;
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhA:a:b:C:c:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:F:MJ:KOPR:UX:x:Y:y:#:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:b:C:c:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:F:MJ:KOPR:UX:x:Y:y:Z:z:#:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -256,6 +262,7 @@ char **argv;
 			sscanf (optarg, "%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
 			break;
 		case 'C':
 		case 'c':
@@ -275,6 +282,7 @@ char **argv;
 			sscanf (optarg, "%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			break;
                 case 'f':
                         sscanf (optarg, "%d",&format);
@@ -331,6 +339,11 @@ char **argv;
 		case 'v':
 			verbose++;
 			break;
+		case 'Z':
+		case 'z':
+			sscanf (optarg,"%d", &contour_algorithm);
+			flag++;
+			break;
 		case 'B':
 		case 'F':
 		case 'K':
@@ -355,6 +368,12 @@ char **argv;
 			program_name);
 		exit(MB_FAILURE);
 		}
+
+	/* set number of pings to be plotted if not set */
+	if (nplot == 0 && contour_algorithm == MB_CONTOUR_TRIANGLES)
+		nplot = 5;
+	else if (nplot == 0)
+		nplot = 50;
 
 	/* if nothing set to be plotted, plot contours and track */
 	if (plot_contours == MB_NO && plot_triangles == MB_NO 
@@ -411,12 +430,14 @@ char **argv;
 		fprintf(stderr,"dbg2       btime_i[3]:       %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:       %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:       %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:       %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:       %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:       %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:       %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:       %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:       %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:       %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:       %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:         %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:          %f\n",timegap);
 		fprintf(stderr,"dbg2       file list:        %s\n",filelist);
@@ -425,6 +446,8 @@ char **argv;
 		fprintf(stderr,"dbg2       bounds[1]:        %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:        %f\n",bounds[2]);
 		fprintf(stderr,"dbg2       bounds[3]:        %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       contour algorithm:%d\n",
+			contour_algorithm);
 		fprintf(stderr,"dbg2       plot contours:    %d\n",
 			plot_contours);
 		fprintf(stderr,"dbg2       plot triangles:   %d\n",
@@ -631,6 +654,7 @@ char **argv;
 
 	/* initialize contour controls */
 	status = mb_contour_init(verbose,&swath_plot,nplot,beams_bath,
+				contour_algorithm,
 				plot_contours,plot_triangles,plot_track,
 				cont_int,col_int,tick_int,label_int,
 				tick_len_map,label_hgt_map,
@@ -747,13 +771,14 @@ char **argv;
 				for (i=0;i<*npings;i++)
 					{
 					pingcur = &swath_plot->pings[i];
-					fprintf(stderr,"dbg2       %4d  %4d %2d %2d %2d %2d %2d\n",
+					fprintf(stderr,"dbg2       %4d  %4d %2d %2d %2d %2d %2d %6.6d\n",
 						i,pingcur->time_i[0],
 						pingcur->time_i[1],
 						pingcur->time_i[2],
 						pingcur->time_i[3],
 						pingcur->time_i[4],
-						pingcur->time_i[5]);
+						pingcur->time_i[5],
+						pingcur->time_i[6]);
 					}
 				}
 
@@ -786,13 +811,13 @@ char **argv;
 
 			}
 		}
-	status = mb_close(verbose,mbio_ptr,&error);
+	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,amp,&error);
-	mb_free(verbose,ss,&error);
-	mb_free(verbose,sslon,&error);
-	mb_free(verbose,sslat,&error);
+	mb_free(verbose,&amp,&error);
+	mb_free(verbose,&ss,&error);
+	mb_free(verbose,&sslon,&error);
+	mb_free(verbose,&sslat,&error);
 	status = mb_contour_deall(verbose,swath_plot,&error);
 
 	/* figure out whether and what to read next */
@@ -818,12 +843,12 @@ char **argv;
 	plot_end(verbose,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,level,&error);
-	mb_free(verbose,label,&error);
-	mb_free(verbose,tick,&error);
-	mb_free(verbose,red,&error);
-	mb_free(verbose,green,&error);
-	mb_free(verbose,blue,&error);
+	mb_free(verbose,&level,&error);
+	mb_free(verbose,&label,&error);
+	mb_free(verbose,&tick,&error);
+	mb_free(verbose,&red,&error);
+	mb_free(verbose,&green,&error);
+	mb_free(verbose,&blue,&error);
 
 	/* print ending info */
 	if (verbose >= 1)
@@ -877,7 +902,7 @@ int	*error;
 	/* copy things */
 	ping1 = &swath->pings[one];
 	ping2 = &swath->pings[two];
-	for (i=0;i<6;i++)
+	for (i=0;i<7;i++)
 		ping1->time_i[i] = ping2->time_i[i];
 	ping1->time_d = ping2->time_d;
 	ping1->navlon = ping2->navlon;

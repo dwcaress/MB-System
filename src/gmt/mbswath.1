@@ -1,4 +1,4 @@
-.TH MBSWATH 1 "26 February 1994"
+.TH MBSWATH 1 "14 October 1994"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -7,7 +7,7 @@ swath plots of multibeam data using Postscript.
 Version 4.00
 
 .SH SYNOPSIS
-\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor \fB-B\fItickinfo \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
+\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor \fB-B\fItickinfo \fB-D\fImode/scale/min/max \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbswath\fP is an utility for plotting multibeam swath data in color fill
@@ -49,6 +49,22 @@ Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
 Sets the color palette file which controls the color of the plot.
 See documentation of the GMT package for a complete description
 of cpt files.
+.TP
+.B \fB-D\fImode/scale/min/max\fP
+Sets scaling of beam amplitude or sidescan pixel values which
+can be applied before plotting. If \fImode\fP = 1 or 2, then
+a linear scaling of the form:
+ 	scaled_value = scale * (value - min) / (max - min)
+.br
+is applied.  If \fImode\fP = 3 or 4, then a log10 scaling of
+the form:
+ 	scaled_value = scale * (20 * log10(value) - min) / (max - min)
+.br
+is applied.  If \fImode\fP = 2 or 4, then the value (or 20*log10(value))
+will be clipped to \fImin\fP if it is smaller than \fImin\fP or \fImax\fP
+if it is greater than \fImax\fP; this clipping happens prior to the
+multiplication by \fIscale\fP. Default: \fImode\fP = 1, \fIscale\fP = 1.0,
+\fImin\fP = 0.0, \fImax\fP = 1.0.
 .TP
 .B \fB-f\fIformat\fP
 Sets the data format used if the input is read from stdin
