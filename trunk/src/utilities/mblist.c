@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	3.00	2/1/93
- *    $Id: mblist.c,v 3.3 1993-06-09 11:47:44 caress Exp $
+ *    $Id: mblist.c,v 3.4 1993-06-13 03:02:18 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.3  1993/06/09  11:47:44  caress
+ * Fixed problem with unix time value output. In unix time
+ * months are counted 0-11 instead of 1-12.
+ *
  * Revision 3.2  1993/05/17  16:37:18  caress
  * Fixed problem where program crashed if -F was used.
  *
@@ -45,6 +49,9 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 
+/* DTR define */
+#define DTR	(M_PI/180.)
+
 /* local options */
 #define	MAX_OPTIONS			25
 #define	MBLIST_MODE_LIST		1
@@ -57,7 +64,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 3.3 1993-06-09 11:47:44 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 3.4 1993-06-13 03:02:18 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Mbath_beam -Nback_beam -Ooptions -Ddumpmode]";
@@ -128,6 +135,12 @@ char **argv;
 	/* unix time variables */
 	struct tm	time_tm;
 	time_t	time_u;
+
+	/* crosstrack slope values */
+	double	slope;
+	double	sx, sy, sxx, sxy;
+	int	ns;
+	double	delta, a, b, theta;
 
 	int	i, j;
 
@@ -586,6 +599,32 @@ char **argv;
 					break;
 				case 'N': /* ping counter */
 					printf("%6d",nread);
+					break;
+				case 'A': /* Seafloor crosstrack slope */
+					ns = 0;
+					sx = 0.0;
+					sy = 0.0;
+					sxx = 0.0;
+					sxy = 0.0;
+					for (j=0;j<beams_bath;j++)
+					  if (bath[j] > 0)
+					    {
+					    sx += bathdist[j];
+					    sy += bath[j];
+					    sxx += bathdist[j]*bathdist[j];
+					    sxy += bathdist[j]*bath[j];
+					    ns++;
+					    }
+					if (ns > 0)
+					  {
+					  delta = ns*sxx - sx*sx;
+					  a = (sxx*sy - sx*sxy)/delta;
+					  b = (ns*sxy - sx*sy)/delta;
+					  slope = atan(b)/DTR;
+					  }
+					else
+					  slope = 0.0;
+					printf("%.4f",slope);
 					break;
 				default:
 					printf("<Invalid Option: %c>",
