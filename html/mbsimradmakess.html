@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbsimradmakess</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbsimradmakess</H1>
+Section: MB-System 5.0 (l)<BR>Updated: 13 July 2001<BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbsimradmakess</B> - Regenerates sidescan
+imagery from the raw amplitude samples contained in data from 
+Simrad EM300 and EM3000 multibeam sonars.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbsimradmakess</B> [<B>-F</B><I>format </I><B>-I</B><I>infile </I><B>-O</B><I>outfile 
+</I><B>-P</B><I>pixel_size</I> <B>-S</B><I>swath_width</I> <B>-T</B><I>pixel_int</I> 
+<B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The program <B>mbsimradmakess</B> is a utility for regenerating sidescan
+imagery from the raw amplitude samples contained in data from 
+Simrad EM300 and EM3000 multibeam sonars. This program ignores
+amplitude data associated with flagged (bad) bathymetry data, 
+thus removing one important source of noise in the
+sidescan data.
+<P>
+The number of raw samples provided by the sonar for 
+each ping ranges from a few hundred to
+as much as ten thousand, depending on the water depth, swath width,
+and the raw digitization sampling interval. Each bathymetry
+sounding (or beam) is associated with some number of raw
+amplitude samples. The acrosstrack locations of the samples are
+found using the raw sample size (determined by the digitization
+rate within the sonar) and the beam locations. This program 
+regenerates sidescan by binning, averaging, and interpolating 
+the amplitudes into a 1024 pixel array.
+<P>
+The most important control is the output pixel size. The user
+can set this value to a constant using the <B>-P</B> command. By
+default, the program adjusts the pixel size for each ping to maintain
+reasonable swath coverage with 1024 pixels. The desired swath
+width (in angular terms) can be set by the user using 
+the <B>-S</B> command; by default
+the swath width actually achieved by the sonar is used. Regardless
+of the swath width setting, the pixel size is not allowed to change
+by more than 5% for any ping.
+<P>
+Once the pizel size for a particular ping is set, all of the
+amplitude samples associated with unflagged (presumably good)
+bathymetry are binned into the 1024 pixel array, and then averaged.
+The removal of amplitudes from bad beams may leave gaps in
+the sidescan; these gaps can be filled by a simple linear
+interpolation. The <B>-T</B> command sets the maximum size of the
+gaps (in number of pixels) which can be interpolated. The default
+is for no interpolation. 
+<P>
+The default input and output streams are stdin and stdout.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the format for the input and output swath sonar data using 
+<B>MBIO</B> integer format identifiers. 
+This program uses the <B>MBIO</B> library, but works only with
+Simrad EM300/EM3000 data in the MBF_EM300MBA processing 
+format (MBIO id = 57). 
+Default: <I>format</I> = 57.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Data file from which the input data will be read. If
+no input file is specified, the input will be read
+from stdin. Default: <I>infile</I> = stdin.
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+Data file to which the output data will be written. If
+no output file is specified, the output will be written to
+stdout. Default: <I>outfile</I> = stdout.
+<DT><B>-P</B>
+
+<DD>
+<I>pixel_size</I>
+<BR>
+
+Sets the pixel size (in meters) of the sidescan data to a constant.
+The default is for the pixel size to be calculated for every ping
+so as to fit the swath width into the 1024 sidescan pixel array.
+If the pixel size is recalculated for each ping, the value is not
+allowed to change more than 5% in a single ping.
+<DT><B>-S</B>
+
+<DD>
+<I>swath_width</I>
+<BR>
+
+Sets the swath width (in degrees) of the sidescan data to a
+constant. This swath width is used to set the pixel size (unless
+the <B>-P</B> command is used to set that value constant).
+The default is for the swath width to conform to whatever
+the sonar actually achieves.
+<DT><B>-T</B>
+
+<DD>
+<I>pixel_int</I>
+<BR>
+
+Sets the maximum size (in numbers of pixels) of sidescan data gaps
+that are filled by linear interpolation. The default is for no
+interpolation, or <I>pixel_int</I> = 0.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbsimradmakess</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbsimradmakess</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and all error status messages.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to work with the sidescan imagery in EM300
+data. The data generally starts in the Simrad vendor format
+(<B>MBIO</B> format ID 56) which does not support flagging of bathymetry
+data and does not contain processed sidescan imagery. An initial
+version of the 1024 pixel sidescan is created on the 
+fly whenever <B>MB-System</B>
+programs are used to read the format 56 data, but all of the raw
+amplitude samples are included. Use the program <B>mbcopy</B> to
+translate the data into a processing format (<B>MBIO</B> 
+format ID 57) which supports 
+bathymetry flagging and processed sidescan:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcopy&nbsp;-F56/57&nbsp;-I&nbsp;605.0.em300&nbsp;&nbsp;<TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;605.mb57&nbsp;-V<BR>
+<BR>
+
+If some of the bathymetry soundings are erroneous, then the
+raw amplitudes associated with those bad beams will also be
+erroneous and corrupt the sidescan imagery.
+Suppose that editing the bathymetry with <B>mbedit</B> results
+in a data file called 605_e.mb57 in which all bad soundings have
+been identified and flagged. Then the sidescan imagery can be
+regenerated without the inclusion of the &quot;bad&quot; amplitudes by
+doing the following:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbsimradmakess&nbsp;-I&nbsp;605_e.mb57&nbsp;&nbsp;<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;605_es.mb57&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-T10&nbsp;-V<BR>
+<BR>
+
+Here we allow the program to determine the appropriate pixel
+size on a ping by ping basis, and we allow interpolation of
+sidescan gaps up to 10 pixels in size.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+This program could also work with data from the older
+Simrad sonars (e.g. EM950, EM1000, EM12), 
+provided we devise and support appropriate 
+new processing formats.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 13 July 2001</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
