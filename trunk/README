@@ -1,15 +1,14 @@
-MBSYSTEM VERSION 4.0 RELEASE Notes:
+MBSYSTEM VERSION 4.0 RELEASE NOTES:
 -----------------------------------
 
 This directory structure contains the version 4.0 release  
 of the MBSYSTEM software package for processing and display of 
-multibeam data.  There are undoubtably numerous bugs in this 
-software - the user should beware (and let us know about it!).
+multibeam data.
 
 Authors:
 --------
-David W. Caress (caress@lamont.ldeo.columbia.edu)
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+David W. Caress (caress@ldeo.columbia.edu)
+Dale N. Chayes (dale@ldeo.columbia.edu)
 Lamont-Doherty Earth Observatory of Columbia University
 Palisades, NY 10964
 
@@ -210,6 +209,23 @@ MB-System in 1994. Our primary efforts will be in the direction of
 enhanced usability through easier user interfaces, more documentation,
 cookbook examples, etc. We are interested in your suggestions.
 
+Bugs:
+------------
+	There are undoubtably bugs in this software. Although we
+make no promises about how rapidly problems will be fixed, we
+strongly encourage users to notify us of bugs (and fixes!!).
+We will support this software as long as we have sufficient
+support (funding) to do the job.
+
+Acknowledgments:
+------------
+	A number of people have made contributions to the code
+included in MB-System.  These include:
+	Suzanne O'Hara (L-DEO)
+	David Brock (Antarctic Support Associates)
+	Rod McCabe (Antarctic Support Associates)
+	Alberto Malinverno (Schlumberger-Doll)
+	Russ Alexander (UCSB)
 
 Good Luck!!
 
@@ -218,10 +234,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.4 1994-10-21 17:42:43 caress Exp $
+RCS ID: $Id: README,v 4.5 1994-10-21 21:54:24 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.4  1994/10/21  17:42:43  caress
+# Release V4.0
+#
 # Revision 4.3  1994/10/21  13:29:54  caress
 # Release V4.0
 #
