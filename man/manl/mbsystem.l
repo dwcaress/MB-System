@@ -1,4 +1,4 @@
-.TH mbsystem l "25 July 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbsystem l "12 November 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
@@ -175,6 +175,33 @@ control the operation of mbprocess.
 a recursive datalist structure. It can also be used to create the ancillary ".inf",
 ".fbt", and ".fnv" files for all of the data files referenced in a recursive datalist
 structure. 
+
+.SS Support for Projected Coordinate Systems.
+.IP \(bu 4
+\fBMB-System\fP now incorporates the source code for the PROJ.4 Cartographic Projections library,
+providing support for (apparently) all commonly used geodetic coordinate systems.
+\fBPROJ.4\fP was developed by Gerald Evenden (then of the USGS), and was obtained from 
+the www.remotesensing.org website.
+.IP \(bu 4
+A large number of commonly used projected coordinate systems (e.g. UTM) are defined
+in a file (mbsystem/share/projections.dat) distributed with \fBMB-System\fP. These include
+all of the standard UTM zones, all of the standard state plate coordinate systems, and 
+most of the European Petroleum Survey Group (EPSG) coordinate systems (also including UTM).
+.IP \(bu 4
+\fBMB-System\fP can now handle swath data that is navigated in a supported projected
+coordinate system. In particular, data files that are navigated with UTM eastings and
+northings instead of longitude and latitude can now be plotted and processed with 
+\fBMB-System\fP.
+.IP \(bu 4
+The programs \fBmbgrid\fP and \fBmbmosaic\fP can now output grids and mosaics in any of 
+the projected coordinate systems specified in mbsystem/share/projections.dat.
+.IP \(bu 4
+The TIFF images generated with \fBmbm_grdtiff\fP and \fBmbgrdtiff\fP now fully conform
+to the GeoTIFF standard, providing that the source grids or mosaics were generated
+using \fBmbgrid\fP or \fBmbmosaic\fP in either Geographic coordinates, UTM coordinates,
+or any of the EPSG coordinate systems specified in the projections.dat file. This means,
+for instance, that GeoTIFF images generated with \fBmbgrdtiff\fP will be properly 
+georeferenced when they are imported into ESRI \fBArcGIS\fP or other GIS packages.
 
 .SS Restructuring the code.
 .IP \(bu 4

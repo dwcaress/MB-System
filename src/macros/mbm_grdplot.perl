@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.7 2002-08-02 01:00:05 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.8 2002-11-14 03:50:19 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.7 2002-08-02 01:00:05 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.8 2002-11-14 03:50:19 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.7  2002/08/02 01:00:05  caress
+#   Release 5.0.beta22
+#
 #   Revision 5.6  2002/04/06 02:51:54  caress
 #   Release 5.0.beta16
 #
@@ -373,15 +376,37 @@ if (!$file_data)
 	print "\a";
 	die "\nNo input file specified!\n$program_name aborted\n";
 	}
-elsif (! -r $file_data)
+else
 	{
-	print "\a";
-	die "\nSpecified input file $file_data cannot be opened!\n$program_name aborted\n";
+	if ($file_data =~ /\S+=.+/)
+		{
+		($file_check) = $file_data =~ /(\S+)=.+/;
+		}
+	else
+		{
+		$file_check = $file_data;
+		}
+	if (! -r $file_check)
+		{
+		print "\a";
+		die "\nSpecified input file $file_check cannot be opened!\n$program_name aborted\n";
+		}
 	}
-if ($file_intensity && ! -r $file_intensity)
+if ($file_intensity)
 	{
-	print "\a";
-	die "\nSpecified intensity input file $file_intensity cannot be opened!\n$program_name aborted\n";
+	if ($file_intensity =~ /\S+=.+/)
+		{
+		($file_check) = $file_intensity =~ /(\S+)=.+/;
+		}
+	else
+		{
+		$file_check = $file_intensity;
+		}
+	if (! -r $file_check)
+		{
+		print "\a";
+		die "\nSpecified intensity input file $file_check cannot be opened!\n$program_name aborted\n";
+		}
 	}
 if ($color_mode == 3 && !$file_intensity)
 	{

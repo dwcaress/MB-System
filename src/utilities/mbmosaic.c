@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.13 2002-11-12 07:23:58 caress Exp $
+ *    $Id: mbmosaic.c,v 5.14 2002-11-14 03:52:25 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2002/11/12 07:23:58  caress
+ * Added mb_memory_clear() calls.
+ *
  * Revision 5.12  2002/11/04 21:26:55  caress
  * Fixed memory leak using proj.
  *
@@ -138,6 +141,7 @@
 #define	MBMOSAIC_OLDGRD		2
 #define	MBMOSAIC_CDFGRD		3
 #define	MBMOSAIC_ARCASCII	4
+#define	MBMOSAIC_GMTGRD		100
 
 /* gridded data type */
 #define	MBMOSAIC_DATA_AMPLITUDE		3
@@ -153,7 +157,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.13 2002-11-12 07:23:58 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.14 2002-11-14 03:52:25 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -194,13 +198,13 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	file[128];
+	char	file[MB_PATH_MAXLINE];
 	int	file_in_bounds;
 	void	*mbio_ptr = NULL;
 
 	/* mbmosaic control variables */
-	char	filelist[128];
-	char	fileroot[128];
+	char	filelist[MB_PATH_MAXLINE];
+	char	fileroot[MB_PATH_MAXLINE];
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
@@ -212,11 +216,12 @@ main (int argc, char **argv)
 	double	dy_set = 0.0;
 	double	dx = 0.0;
 	double	dy = 0.0;
-	char	units[128];
+	char	units[MB_PATH_MAXLINE];
 	int	clip = 0;
 	int	grid_mode = MBMOSAIC_SINGLE_BEST;
 	int	datatype = MBMOSAIC_DATA_SIDESCAN;
-	int	gridkind = MBMOSAIC_CDFGRD;
+	char	gridkindstring[MB_PATH_MAXLINE];
+	int	gridkind = MBMOSAIC_GMTGRD;
 	int	more = MB_NO;
 	int	use_NaN = MB_NO;
 	double	clipvalue = NO_DATA_FLAG;
@@ -229,14 +234,14 @@ main (int argc, char **argv)
 	double	priority_range = 0.0;
 	double	priority_azimuth = 0.0;
 	double	priority_azimuth_factor = 1.0;
-	char	pfile[128];
+	char	pfile[MB_PATH_MAXLINE];
 	int	n_priority_angle = 0;
 	double	*priority_angle_angle = NULL;
 	double	*priority_angle_priority = NULL;
 	double	bath_default = 1000.0;
-	char	ifile[128];
-	char	ofile[128];
-	char	plot_cmd[256];
+	char	ifile[MB_PATH_MAXLINE];
+	char	ofile[MB_PATH_MAXLINE];
+	char	plot_cmd[MB_COMMENT_MAXLINE];
 	int	plot_status;
 
 	/* mbio read values */
@@ -263,7 +268,7 @@ main (int argc, char **argv)
 	double	*ssalongtrack = NULL;
 	double	*sslon = NULL;
 	double	*sslat = NULL;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	double	*angles = NULL;
 	double	*priorities = NULL;
 
@@ -298,8 +303,8 @@ main (int argc, char **argv)
 	double	reference_lon, reference_lat;
 	int	utm_zone = 1;
 	char	projection_type;
-	char	projection_pars[128];
-	char	projection_id[128];
+	char	projection_pars[MB_PATH_MAXLINE];
+	char	projection_id[MB_PATH_MAXLINE];
 	int	proj_status;
 	void	*pjptr;
 	double	p_lon_1, p_lon_2;
@@ -309,12 +314,12 @@ main (int argc, char **argv)
 	double	headingx, headingy;
 
 	/* output char strings */
-	char	xlabel[128];
-	char	ylabel[128];
-	char	zlabel[128];
-	char	title[128];
-	char	nlabel[128];
-	char	sdlabel[128];
+	char	xlabel[MB_PATH_MAXLINE];
+	char	ylabel[MB_PATH_MAXLINE];
+	char	zlabel[MB_PATH_MAXLINE];
+	char	title[MB_PATH_MAXLINE];
+	char	nlabel[MB_PATH_MAXLINE];
+	char	sdlabel[MB_PATH_MAXLINE];
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		stderr if verbose > 1) */
@@ -326,7 +331,7 @@ main (int argc, char **argv)
 
 	/* other variables */
 	FILE	*fp;
-	char	buffer[128], *result;
+	char	buffer[MB_PATH_MAXLINE], *result;
 	int	i, j, ii, jj, iii, jjj, kkk, n;
 	int	i1, i2, j1, j2;
 	double	r;
@@ -344,6 +349,7 @@ main (int argc, char **argv)
 	strcpy (filelist, "datalist.mb-1");
 
 	/* initialize some values */
+	gridkindstring[0] = '\0';
 	strcpy(fileroot,"grid");
 	strcpy(projection_id,"Geographic");
 	gbnd[0] = 0.0;
@@ -407,7 +413,25 @@ main (int argc, char **argv)
 			break;
 		case 'G':
 		case 'g':
-			sscanf (optarg,"%d", &gridkind);
+			if (optarg[0] == '=')
+				{
+				gridkind = MBMOSAIC_GMTGRD;
+				strcpy(gridkindstring, optarg);
+				}
+			else
+				{
+				sscanf (optarg,"%d", &gridkind);
+				if (gridkind = MBMOSAIC_CDFGRD)
+					{
+					gridkind = MBMOSAIC_GMTGRD;
+					gridkindstring[0] = '\0';
+					}
+				else if (gridkind > MBMOSAIC_GMTGRD)
+					{
+					sprintf(gridkindstring, "=%d", (gridkind - 100));
+					gridkind = MBMOSAIC_GMTGRD;
+					}
+				}
 			flag++;
 			break;
 		case 'H':
@@ -569,6 +593,8 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       use_NaN:              %d\n",use_NaN);
 		fprintf(outfp,"dbg2       data type:            %d\n",datatype);
 		fprintf(outfp,"dbg2       grid format:          %d\n",gridkind);
+		if (gridkind == MBMOSAIC_GMTGRD)
+		fprintf(outfp,"dbg2       gmt grid format id:   %s\n",gridkindstring);
 		fprintf(outfp,"dbg2       scale:                %f\n",scale);
 		fprintf(outfp,"dbg2       border:               %f\n",border);
 		fprintf(outfp,"dbg2       extend:               %f\n",extend);
@@ -580,10 +606,10 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       priority_azimuth:     %f\n",priority_azimuth);
 		fprintf(outfp,"dbg2       priority_azimuth_fac: %f\n",priority_azimuth_factor);
 		fprintf(outfp,"dbg2       bath_default:         %f\n",bath_default);
-		fprintf(outfp,"dbg2       projection_pars:  %s\n",projection_pars);
-		fprintf(outfp,"dbg2       proj flag 1:      %d\n",projection_pars_f);
-		fprintf(outfp,"dbg2       projection_id:    %s\n",projection_id);
-		fprintf(outfp,"dbg2       utm_zone:         %d\n",utm_zone);
+		fprintf(outfp,"dbg2       projection_pars:      %s\n",projection_pars);
+		fprintf(outfp,"dbg2       proj flag 1:          %d\n",projection_pars_f);
+		fprintf(outfp,"dbg2       projection_id:        %s\n",projection_id);
+		fprintf(outfp,"dbg2       utm_zone:             %d\n",utm_zone);
 		}
 
 	/* if help desired then print it and exit */
@@ -972,7 +998,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			exit(error);
 			}
 		n_priority_angle = 0;
-		while ((result = fgets(buffer,128,fp)) == buffer)
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer)
 			{
 			if (buffer[0] != '#')
 				{
@@ -1009,7 +1035,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			exit(error);
 			}
 		n_priority_angle = 0;
-		while ((result = fgets(buffer,128,fp)) == buffer)
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer)
 			{
 			if (buffer[0] != '#')
 				{
@@ -1136,6 +1162,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			fprintf(outfp,"Grid format %d:  GMT version 1 grd (binary)\n",gridkind);
 		else if (gridkind == MBMOSAIC_ARCASCII)
 			fprintf(outfp,"Grid format %d:  Arc/Info ascii table\n",gridkind);
+		else if (gridkind == MBMOSAIC_GMTGRD)
+			{
+			fprintf(outfp,"Grid format %d:  GMT grid\n",gridkind);
+			if (strlen(gridkindstring) > 0)
+				fprintf(outfp,"GMT Grid ID:     %s\n",gridkindstring);
+			}
 		if (use_NaN == MB_YES) 
 			fprintf(outfp,"NaN values used to flag regions with no data\n");
 		else
@@ -2213,6 +2245,15 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			xlabel,ylabel,zlabel,title,projection_id, 
 			argc,argv,&error);
 		}
+	else if (gridkind == MBMOSAIC_GMTGRD)
+		{
+		sprintf(ofile,"%s.grd%s", fileroot, gridkindstring);
+		status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
+			gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+			zmin,zmax,dx,dy,
+			xlabel,ylabel,zlabel,title,projection_id, 
+			argc,argv,&error);
+		}
 	if (status != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
@@ -2274,6 +2315,15 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				xlabel,ylabel,nlabel,title,projection_id, 
 				argc,argv,&error);
 			}
+		else if (gridkind == MBMOSAIC_GMTGRD)
+			{
+			sprintf(ofile,"%s_num.grd%s", fileroot, gridkindstring);
+			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
+				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+				zmin,zmax,dx,dy,
+				xlabel,ylabel,zlabel,title,projection_id, 
+				argc,argv,&error);
+			}
 		if (status != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
@@ -2333,6 +2383,15 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				xlabel,ylabel,sdlabel,title,projection_id, 
 				argc,argv,&error);
 			}
+		else if (gridkind == MBMOSAIC_GMTGRD)
+			{
+			sprintf(ofile,"%s_sd.grd%s", fileroot, gridkindstring);
+			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
+				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+				zmin,zmax,dx,dy,
+				xlabel,ylabel,zlabel,title,projection_id, 
+				argc,argv,&error);
+			}
 		if (status != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
@@ -2365,20 +2424,20 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		proj_status = mb_proj_free(verbose, &(pjptr), &error);
 		
 	/* run mbm_grdplot */
-	if (gridkind == MBMOSAIC_CDFGRD)
+	if (gridkind == MBMOSAIC_GMTGRD)
 		{
 		/* execute mbm_grdplot */
 		strcpy(ofile,fileroot);
 		strcat(ofile,".grd");
 		if (datatype == MBMOSAIC_DATA_AMPLITUDE)
 			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, zlabel);
+			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
+				ofile, gridkindstring, ofile, title, zlabel);
 			}
 		else
 			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, zlabel);
+			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
+				ofile, gridkindstring, ofile, title, zlabel);
 			}
 		if (verbose)
 			{
@@ -2392,13 +2451,13 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			}
 		}
 	if (more == MB_YES
-		&& gridkind == MBMOSAIC_CDFGRD)
+		&& gridkind == MBMOSAIC_GMTGRD)
 		{
 		/* execute mbm_grdplot */
 		strcpy(ofile,fileroot);
 		strcat(ofile,"_num.grd");
-		sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
-			ofile, ofile, title, nlabel);
+		sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
+			ofile, gridkindstring, ofile, title, nlabel);
 		if (verbose)
 			{
 			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
@@ -2413,8 +2472,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		/* execute mbm_grdplot */
 		strcpy(ofile,fileroot);
 		strcat(ofile,"_sd.grd");
-		sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
-			ofile, ofile, title, sdlabel);
+		sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
+			ofile, gridkindstring, ofile, title, sdlabel);
 		if (verbose)
 			{
 			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
@@ -2460,7 +2519,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 	FILE	*fp;
 	int	i;
 	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
+	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*ctime();
 	char	*getenv();
 
@@ -2503,7 +2562,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 			strcpy(user,user_ptr);
 		else
 			strcpy(user, "unknown");
-		i = gethostname(host,128);
+		i = gethostname(host,MB_PATH_MAXLINE);
 		fprintf(fp,"program run by %s on %s at %s\n",user,host,date);
 		fprintf(fp,"%d %d\n%f %f %f %f\n",nx,ny,xmin,xmax,ymin,ymax);
 		for (i=0;i<nx*ny;i++)
@@ -2698,7 +2757,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	complex;
 	float	*a;
 	time_t	right_now;
-	char	date[128], user[128], *user_ptr, host[128];
+	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int	i, j, kg, ka;
 	char	*ctime();
 	char	*getenv();
@@ -2756,7 +2815,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	strcpy(grd.z_units,zlab);
 	strcpy(grd.title,titl);
 	strcpy(grd.command,"\0");
-	strncpy(date,"\0",128);
+	strncpy(date,"\0",MB_PATH_MAXLINE);
 	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
@@ -2765,7 +2824,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		strcpy(user,user_ptr);
 	else
 		strcpy(user, "unknown");
-	gethostname(host,128);
+	gethostname(host,MB_PATH_MAXLINE);
 	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
 
