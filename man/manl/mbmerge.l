@@ -157,7 +157,7 @@ ZDA (Time and Date):
                               second
  
 UNX (Nonstandard Time and Date derived from Unix host):
-    $--ZDA,hhmmss.ss,dd,mm,yyyy<CR><LF>
+    $--UNX,hhmmss.ss,dd,mm,yyyy<CR><LF>
            |     |   |  |  |
            |     |   |  |  +- Year
            |     |   |  +---- Month
