@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbcut</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbcut</H1>
+Section: MB-System 5.0 (l)<BR>Updated: 9 August 2001<BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbcut</B> - Removes data in specified regions of a swath
+in swath sonar data.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbcut</B> [<B>-A</B><I>kind/mode/min/max</I> <B>-B</B><I>yr/mo/da/hr/mn/sc 
+</I><B>-E</B><I>yr/mo/da/hr/mn/sc 
+</I><B>-F</B><I>format</I> <B>-I</B><I>infile</I>
+<B>-L</B><I>lonflip</I> <B>-O</B><I>outfile</I> <B>-R</B><I>west/east/south/north</I> 
+<B>-S</B><I>speed</I> 
+<B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbcut</B> removes swath data values that lie in
+user-specified ranges of beam numbers, pixel numbers, 
+or acrosstrack distances.
+Multiple cut ranges can be specified. The &quot;cut&quot; data is 
+flagged rather than zeroed whenever possible (some formats
+do not support flagging of some data types).
+The default input and output streams are stdin and stdout.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>kind/mode/min/max</I>
+<BR>
+
+Sets a range of data to be cut; multiple calls of this option
+may be made. The <I>kind</I> value indicates whether the
+affected data is bathymetry (<I>kind</I> = 0), amplitude 
+(<I>kind</I> = 1), or sidescan (<I>kind</I> = 2).
+The <I>mode</I> indicates whether the cut range is specified
+in terms of beam/pixel number (<I>mode</I> = 1) or
+acrosstrack distance (<I>mode</I> = 2). The <I>min</I>
+and <I>max</I> values specify the actual cut range.
+<DT><B>-B</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the starting time for data allowed in the input data.
+The <B>-E</B> option sets the ending time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
+<DT><B>-E</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the ending time for data allowed in the input data.
+The <B>-B</B> option sets the starting time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used in reading the input from stdin
+or from a file. This program uses the <B>MBIO</B> library 
+and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input swath sonar data filename. 
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;stdin&quot;.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+Data file to which the output data will be written. The <B>MBIO</B>
+format id used is the same as for the input data. If
+no output file is specified, the output will be written to
+stdout. Default: <I>outfile</I> = stdout.
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+Sets the longitude and latitude bounds within which swath sonar 
+data will be read. Only the data which lies within these bounds will
+be copied. 
+Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
+<DT><B>-S</B>
+
+<DD>
+<I>speed</I>
+<BR>
+
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+the input data; pings associated with a smaller ship speed will not be
+processed. Default: <I>speed</I> = 0.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbcut</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbcut</B> works in a &quot;verbose&quot; 
+mode and outputs the program version being used, the values
+of some important control parameters, and 
+all error status messages.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one has a SeaBeam 2100 data file called test.mb41
+which contains bathymetry (121 beams in a 120 degree swath), 
+beam amplitude (121 beams coincident with bathymetry),
+and sidescan data (2000 pixels, roughly a 150 degree swath).
+The specular region of the sidescan swath (the center of the
+swath) often causes problems when applying simple filters
+to the sidescan. To remove the specular region prior to
+the use of <B>mbfilter</B>, use <B>mbcut</B> as follows:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbcut&nbsp;-F41&nbsp;-Itest.mb41&nbsp;-Otestcut.mb41&nbsp;-A2/2/-500/500&nbsp;-V<BR>
+<BR>
+
+This will remove one kilometer of data from the center of
+the swath.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbfilter.html">mbfilter</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+No one really likes to throw away data.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 9 August 2001</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
