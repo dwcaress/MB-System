@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_samesurf.c	6/13/2002
- *	$Id: mbr_samesurf.c,v 5.1 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbr_samesurf.c,v 5.2 2002-08-02 01:01:10 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	June 13, 2002
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.0  2002/06/13 22:56:59  caress
  * Initial Revision
  *
@@ -74,7 +77,7 @@ int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.1 2002-07-20 20:42:40 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.2 2002-08-02 01:01:10 caress Exp $";
 	char	*function_name = "mbr_register_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -205,7 +208,7 @@ int mbr_info_samesurf(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.1 2002-07-20 20:42:40 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.2 2002-08-02 01:01:10 caress Exp $";
 	char	*function_name = "mbr_info_samesurf";
 	int	status = MB_SUCCESS;
 
@@ -274,7 +277,7 @@ int mbr_info_samesurf(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_samesurf.c,v 5.1 2002-07-20 20:42:40 caress Exp $";
+ static char res_id[]="$Id: mbr_samesurf.c,v 5.2 2002-08-02 01:01:10 caress Exp $";
 	char	*function_name = "mbr_alm_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -440,8 +443,8 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 							easting, northing,
 							&lon, &lat,
 							error);
-			store->GlobalData.referenceOfPositionX = lon;
-			store->GlobalData.referenceOfPositionY = lat;
+			store->GlobalData.referenceOfPositionX = DTR * lon;
+			store->GlobalData.referenceOfPositionY = DTR * lat;
 			*refeasting = easting;
 			*refnorthing = northing;
 			}
@@ -501,9 +504,9 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 							&lon, &lat,
 							error);
 				store->CenterPosition.centerPositionX = (float)
-					(lon - store->GlobalData.referenceOfPositionX);
+					(DTR * lon - store->GlobalData.referenceOfPositionX);
 				store->CenterPosition.centerPositionY = (float)
-					(lat - store->GlobalData.referenceOfPositionY);
+					(DTR * lat - store->GlobalData.referenceOfPositionY);
 				}
 			}
 			

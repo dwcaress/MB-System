@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c,v 5.0 2002-07-20 20:41:59 caress Exp $
+ *    $Id: mb_proj.c,v 5.1 2002-08-02 01:01:10 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,10 @@
  * Date:	July 16, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2002/07/20 20:41:59  caress
+ * Initial Revision
+ * l
+ *
  *
  *
  */
@@ -178,8 +182,8 @@ int mb_proj_forward(int verbose,
 	if (pjptr != NULL)
 		{
 		pj = (projPJ) pjptr;
-		pjll.u = lon;
-		pjll.v = lat;
+		pjll.u = DTR * lon;
+		pjll.v = DTR * lat;
 		pjxy = pj_fwd(pjll, pj);
 		*easting = pjxy.u;
 		*northing = pjxy.v;
@@ -238,8 +242,8 @@ int mb_proj_inverse(int verbose,
 		pjxy.u = easting;
 		pjxy.v = northing;
 		pjll = pj_inv(pjxy, pj);
-		*lon = pjll.u;
-		*lat = pjll.v;
+		*lon = RTD * pjll.u;
+		*lat = RTD * pjll.v;
 		}
 
 	/* assume success */
