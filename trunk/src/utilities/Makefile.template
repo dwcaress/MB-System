@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.13 1997-04-21 17:19:14 caress Exp $
+#	$Id: Makefile.template,v 4.14 1997-09-12 18:54:47 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.13  1997/04/21  17:19:14  caress
+# MB-System 4.5 Beta Release.
+#
 # Revision 4.13  1997/04/17  15:14:38  caress
 # MB-System 4.5 Beta Release
 #
@@ -155,8 +158,9 @@ $(BINDIR)/mbmosaic:	mbmosaic.o zgrid.o $(LIBDIR)/libmbio.a
 $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LFLAGS) \
 		-o $(BINDIR)/mblevitus
-$(BINDIR)/mbbath:	mbbath.o mb_rt.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbbath.o mb_rt.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+$(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbrt.a
+	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbrt.a $(LFLAGS) \
 		-o $(BINDIR)/mbbath
 $(BINDIR)/hsbath:	$(BINDIR)/mbbath
 	cd $(BINDIR); pwd; rm -f hsbath; ln -s mbbath hsbath
@@ -225,8 +229,6 @@ zgrid.o:	zgrid.c
 	$(CC) -c $(CFLAGS) zgrid.c
 mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbbath.c
-mb_rt.o:	mb_rt.c
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mb_rt.c
 hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hsds.h
 	$(CC) -c $(CFLAGS) hsdump.c
 mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
