@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.6 2001-11-08 02:22:17 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.7 2002-11-12 06:47:19 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -41,7 +41,7 @@
  *
  *           ------- IFD -----------
  *
- *      8    2      14       Number of entries in IFD
+ *      8    2      18       Number of entries in IFD
  *     
  *     10    2      254      Tag:   NewSubfileType
  *     12    2      4        Type:  long (4 byte unsigned int)
@@ -80,7 +80,7 @@
  *     82    2      273      Tag:   StripOffsets
  *     84    2      4        Type:  long (4 byte unsigned int)
  *     86    4      1        Count: entire image is one strip
- *     90    4               Value: offset to image data
+ *     90    4      512      Value: offset to image data
  *     
  *     94    2      277      Tag:   SamplesPerPixel
  *     96    2      3        Type:  short (2 byte unsigned int)
@@ -103,12 +103,12 @@
  *    130    2      282      Tag:   XResolution
  *    132    2      5        Type:  rational (2 ints: numerator, denominator)
  *    134    4      1        Count: one value
- *    138    4               Value: offset to fraction representing dpi
+ *    138    4      264      Value: offset to fraction representing dpi
  *     
  *    142    2      283      Tag:   YResolution
  *    144    2      4        Type:  rational (2 ints: numerator, denominator)
  *    146    4      1        Count: one value
- *    150    4               Value: offset to fraction representing dpi
+ *    150    4      272      Value: offset to fraction representing dpi
  *     
  *    154    2      296      Tag:   ResolutionUnit
  *    156    2      3        Type:  short (2 byte unsigned int)
@@ -118,12 +118,27 @@
  *    166    2      33550    Tag:   ModelPixelScaleTag
  *    168    2      12       Type:  double (IEEE double precision)
  *    170    4      3        Count: 3 for scalex,scaley,scalez where scalez=0
- *    174    4               Value: offset to values
+ *    174    4      280      Value: offset to values
  *     
  *    178    2      33922    Tag:   ModelTiepointTag
  *    180    2      12       Type:  double (IEEE double precision)
  *    182    4      6        Count: 6 for i,j,k,x,y,z where k=z=0
- *    186    4               Value: offset to values
+ *    186    4      304      Value: offset to values
+ *     
+ *    190    2      34735    Tag:   GeoKeyDirectoryTag
+ *    192    2      3        Type:  short (2 byte unsigned int)
+ *    194    4      20       Count: 20
+ *    198    4      352      Value: offset to values
+ *     
+ *    190    2      34736    Tag:   GeoDoubleParamsTag
+ *    192    2      3        Type:  double (IEEE double precision)
+ *    194    4      ndouble  Count: ndouble
+ *    198    4      400      Value: offset to values
+ *     
+ *    190    2      34737    Tag:   GeoAsciiParamsTag
+ *    192    2      2        Type:  ASCII
+ *    194    4      nascii   Count: nascii
+ *    198    4      448      Value: offset to values
  *
  *           ------- Values --------
  *
@@ -141,12 +156,57 @@
  *    288    8      scaley   ModelPixelScaleTag scaley
  *    296    8      scalez   ModelPixelScaleTag scalez
  *
- *    304    8      0        ModelTiePointTag i
- *    312    8      0        ModelTiePointTag j
- *    320    8      0        ModelTiePointTag k
- *    328    8      minlon   ModelTiePointTag minimum longitude
- *    336    8      maxlat   ModelTiePointTag minimum latitude
- *    344    8      0        ModelTiePointTag minimum z
+ *    ------- If GTModelTypeGeoKey = ModelTypeGeographic then:
+ *        304    8      0        ModelTiePointTag i
+ *        312    8      0        ModelTiePointTag j
+ *        320    8      0        ModelTiePointTag k
+ *        328    8      minlon   ModelTiePointTag minimum longitude
+ *        336    8      maxlat   ModelTiePointTag minimum latitude
+ *        344    8      0        ModelTiePointTag minimum z
+ * 
+ *    ------- Else if GTModelTypeGeoKey = ModelTypeProjected then:
+ *        304    8      0        ModelTiePointTag i
+ *        312    8      0        ModelTiePointTag j
+ *        320    8      0        ModelTiePointTag k
+ *        328    8      minX     ModelTiePointTag minimum easting
+ *        336    8      maxY     ModelTiePointTag minimum northing
+ *        344    8      0        ModelTiePointTag minimum z
+ *
+ *    352    2      1        GeoKeyDirectoryTag KeyDirectoryVersion
+ *    354    2      0        GeoKeyDirectoryTag KeyRevision
+ *    356    2      2        GeoKeyDirectoryTag MinorRevision
+ *    358    2      4        GeoKeyDirectoryTag NumberOfKeys
+ * 
+ *    360    2      1024     GeoKeyDirectoryTag KeyId: GTModelTypeGeoKey
+ *    362    2      0        GeoKeyDirectoryTag TiffTagLocation
+ *    364    2      1        GeoKeyDirectoryTag Count
+ *    366    2      1        GeoKeyDirectoryTag ModelType Value (ModelTypeProjected=1, ModelTypeGeographic=2)
+ * 
+ *    368    2      1025     GeoKeyDirectoryTag KeyId: GTRasterTypeGeoKey
+ *    370    2      0        GeoKeyDirectoryTag TiffTagLocation
+ *    372    2      1        GeoKeyDirectoryTag Count
+ *    374    2      2        GeoKeyDirectoryTag RasterType Value (RasterPixelIsArea=1, RasterPixelIsPoint=2)
+ * 
+ *    368    2      1026     GeoKeyDirectoryTag KeyId: GTCitationGeoKey
+ *    370    2      34737    GeoKeyDirectoryTag TiffTagLocation
+ *    372    2      nascii   GeoKeyDirectoryTag Count
+ *    374    2      0        GeoKeyDirectoryTag Value_Offset
+ * 
+ *    ------- If GTModelTypeGeoKey = ModelTypeGeographic then:
+ *        376    2      2048     GeoKeyDirectoryTag KeyId: GeographicTypeGeoKey
+ *        378    2      0        GeoKeyDirectoryTag TiffTagLocation
+ *        380    2      1        GeoKeyDirectoryTag Count
+ *        382    2      4030     GeoKeyDirectoryTag GeographicType Value (GCSE_WGS84=4030)
+ * 
+ *    ------- Else if GTModelTypeGeoKey = ModelTypeProjected then:
+ *        376    2      3072     GeoKeyDirectoryTag KeyId: ProjectedCSTypeGeoKey
+ *        378    2      0        GeoKeyDirectoryTag TiffTagLocation
+ *        380    2      1        GeoKeyDirectoryTag Count
+ *        382    2      32660    GeoKeyDirectoryTag ProjectedCSType Value (PCS_WGS84_UTM_zone_60N=32660)
+ *
+ *    400    8      ndouble  GeoDoubleParamsTag
+ *
+ *    448    8      nascii   GeoAsciiParamsTag
  *
  *           ------- Image ---------
  *
@@ -155,6 +215,10 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/11/08 02:22:17  caress
+ * Fixed program so bounds can be taken from grd file if not
+ * specified on the command line.
+ *
  * Revision 5.5  2001/09/19  21:57:10  caress
  * Really really removed inadvertant debug messages.
  *
@@ -202,8 +266,9 @@
 
 /* TIFF 6.0 and geoTIFF tag array */
 #define HEADER_SIZE 1024
-#define NUMBER_TAGS 15
 #define IMAGE_OFFSET HEADER_SIZE
+#define TIFF_COMMENT_MAXLINE 64
+#define NUMBER_TAGS 18
 #define NewSubfileType             254
 #define ImageWidth                 256
 #define ImageLength                257
@@ -219,6 +284,21 @@
 #define ResolutionUnit             296
 #define ModelPixelScaleTag       33550
 #define ModelTiepointTag         33922
+#define GeoKeyDirectoryTag       34735
+#define GeoDoubleParamsTag       34736
+#define GeoAsciiParamsTag        34737
+#define GTModelTypeGeoKey         1024
+#define GTRasterTypeGeoKey        1025
+#define GTCitationGeoKey          1026
+#define GeographicTypeGeoKey      2048
+#define ProjectedCSTypeGeoKey     3072
+
+#define RasterPixelIsArea	     1
+#define RasterPixelIsPoint	     2
+#define ModelTypeProjected	     1
+#define ModelTypeGeographic	     2
+#define GCS_WGS_84		  4326
+
 unsigned short   tiff_tag[] = 
                       { NewSubfileType,
 			ImageWidth,
@@ -234,7 +314,10 @@ unsigned short   tiff_tag[] =
 			YResolution,
 			ResolutionUnit,
 		        ModelPixelScaleTag,
-		        ModelTiepointTag
+		        ModelTiepointTag,
+			GeoKeyDirectoryTag,
+			GeoDoubleParamsTag,
+			GeoAsciiParamsTag
 		      };
 unsigned short   tiff_type[] = 
                       {   4,      /* NewSubfileType */
@@ -251,7 +334,10 @@ unsigned short   tiff_type[] =
 			  5,      /* YResolution */
 			  3,      /* ResolutionUnit */
 			 12,      /* ModelPixelScaleTag */
-			 12       /* ModelTiepointTag */
+			 12,      /* ModelTiepointTag */
+			  3,      /* GeoKeyDirectoryTag */
+			 12,      /* GeoDoubleParamsTag */
+			  2       /* GeoAsciiParamsTag */
 		      };
 int              tiff_offset[] = 
                       {   0,      /* NewSubfileType */
@@ -268,7 +354,10 @@ int              tiff_offset[] =
 			272,      /* YResolution */
 			  0,      /* ResolutionUnit */
 			280,      /* ModelPixelScaleTag */
-			304       /* ModelTiepointTag */
+			304,      /* ModelTiepointTag */
+			352,      /* GeoKeyDirectoryTag */
+			400,      /* GeoDoubleParamsTag */
+			448       /* GeoAsciiParamsTag */
 		      };
 
 /* global image variables and defines */
@@ -284,7 +373,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.6 2001-11-08 02:22:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.7 2002-11-12 06:47:19 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -302,10 +391,10 @@ main (int argc, char **argv)
 	char	*message = NULL;
 
 	/* control parameters */
-	char    grdfile[128];
-	char    cptfile[128];
-        char    intensfile[128];
-        char    tiff_file[128];
+	char    grdfile[MB_PATH_MAXLINE];
+	char    cptfile[MB_PATH_MAXLINE];
+        char    intensfile[MB_PATH_MAXLINE];
+        char    tiff_file[MB_PATH_MAXLINE];
 	int	intensity;
         double  bounds[4];
 	int	pad[4];
@@ -317,15 +406,21 @@ main (int argc, char **argv)
 
 	/* TIFF arrays */
 	int     image_size = 0;
+	int	modeltype;
+	int	projectionid;
+        char    projectionname[MB_PATH_MAXLINE];
 	char    tiff_header[HEADER_SIZE];
 	char    *tiff_image = NULL;
+	char	tiff_comment[TIFF_COMMENT_MAXLINE];
 	
 	/* other variables */
 	FILE    *tfp;
 	mb_u_char r, g, b;
 	int     rgb[3];
 	int	i, j, k, kk;
-        int     index;
+        int     index, keyindex;
+	int	nscan;
+	int	utmzone;
 	int	off;
         short   value_short;
         int     value_int;
@@ -533,7 +628,7 @@ main (int argc, char **argv)
 			grdfile, intensfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(error);		    
+		exit(error);
 		}
 	    }
 	    
@@ -625,16 +720,64 @@ main (int argc, char **argv)
 		exit(error);
 		}
 	    }
+	    
+	/* try to get projection from the grd file remark */
+	if (strncmp(&(header.remark[2]), "Projection: ", 12) == 0)
+		{
+		if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%dN", &utmzone)) == 1)
+			{
+			sprintf(projectionname, "UTM%dN", utmzone);
+			modeltype = ModelTypeProjected;
+			projectionid = 32600 + utmzone;
+			}
+		else if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%dS", &utmzone)) == 1)
+			{
+			sprintf(projectionname, "UTM%dS", utmzone);
+			modeltype = ModelTypeProjected;
+			projectionid = 32700 + utmzone;
+			}
+		else if ((nscan = sscanf(&(header.remark[2]), "Projection: epsg%d", &projectionid)) == 1)
+			{
+			sprintf(projectionname, "epsg%d", projectionid);
+			modeltype = ModelTypeProjected;
+			}
+		else
+			{
+			strcpy(projectionname, "Geographic WGS84");
+			modeltype = ModelTypeGeographic;
+			projectionid = GCS_WGS_84;
+			}
+		}
+	else
+		{
+		strcpy(projectionname, "Geographic WGS84");
+		modeltype = ModelTypeGeographic;
+		projectionid = GCS_WGS_84;
+		}
 
 	/* print debug info */
 	if (verbose >= 0)
 	    {
 	    fprintf(stderr,"Grid read:\n");
 	    fprintf(stderr,"  Dimensions: %d %d\n", header.nx, header.ny);
-	    fprintf(stderr,"  Longitude:  %f %f  %f\n",
-		  header.x_min, header.x_max, header.x_inc);
-	    fprintf(stderr,"  Latitude:   %f %f  %f\n",
-		  header.y_min, header.y_max, header.y_inc);
+	    if (modeltype == ModelTypeProjected)
+	    	{
+		fprintf(stderr,"  Projected Coordinate System Name: %s\n", projectionname);
+		fprintf(stderr,"  Projected Coordinate System ID:   %d\n", projectionid);
+	    	fprintf(stderr,"  Easting:    %f %f  %f\n",
+		  	header.x_min, header.x_max, header.x_inc);
+	    	fprintf(stderr,"  Northing:   %f %f  %f\n",
+		  	header.y_min, header.y_max, header.y_inc);
+		}
+	    else
+		{
+		fprintf(stderr,"  Geographic Coordinate System Name: %s\n", projectionname);
+		fprintf(stderr,"  Geographic Coordinate System ID:   %d\n", projectionid);
+	    	fprintf(stderr,"  Longitude:  %f %f  %f\n",
+		  	header.x_min, header.x_max, header.x_inc);
+	    	fprintf(stderr,"  Latitude:   %f %f  %f\n",
+		  	header.y_min, header.y_max, header.y_inc);
+		}
 #ifdef GMT3_0
 	    if (gmt_gray)
 #else
@@ -655,6 +798,9 @@ main (int argc, char **argv)
 		  program_name);
 	    exit(error);
 	    }
+	    
+	/* set the TIFF comment */
+	sprintf(tiff_comment, "Image generated by %s|", program_name);
 
 	/* set the TIFF header */
 	memset(tiff_header,0,HEADER_SIZE);
@@ -874,6 +1020,127 @@ main (int argc, char **argv)
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 4 * 8]);
 		value_double = 0.0;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 5 * 8]);
+		break;
+	      case GeoKeyDirectoryTag:
+		value_int = 20;
+		mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+		index += 4;
+		value_int = tiff_offset[i];
+	        mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+		index += 4;
+		
+		/* index to geotiff geokey directory */
+		keyindex = tiff_offset[i];
+
+		/* geokey directory header 
+			(KeyDirectoryVersion, KeyRevision, MinorRevision, NumberOfKeys) */
+		value_short = 1;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 0;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 2;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 4;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		
+		/* GTModelTypeGeoKey */
+		value_short = GTModelTypeGeoKey;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 0;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 1;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = modeltype;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		
+		/* GTRasterTypeGeoKey */
+		value_short = GTRasterTypeGeoKey;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 0;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 1;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = RasterPixelIsPoint;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		
+		/* GTCitationGeoKey */
+		value_short = GTCitationGeoKey;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = GeoAsciiParamsTag;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 64;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		value_short = 0;
+		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+		keyindex += 2;
+		
+		if (modeltype == ModelTypeGeographic)
+			{
+			/* GeographicTypeGeoKey */
+			value_short = GeographicTypeGeoKey;
+			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			keyindex += 2;
+			value_short = 0;
+			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			keyindex += 2;
+			value_short = 1;
+			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			keyindex += 2;
+			value_short = projectionid;
+			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			keyindex += 2;
+			}
+		
+		else if (modeltype == ModelTypeProjected)
+			{
+			/* ProjectedCSTypeGeoKey */
+			value_short = ProjectedCSTypeGeoKey;
+			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			keyindex += 2;
+			value_short = 0;
+			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			keyindex += 2;
+			value_short = 1;
+			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			keyindex += 2;
+			value_short = projectionid;
+			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
+			keyindex += 2;
+			}
+		break;
+	      case GeoDoubleParamsTag:
+		value_int = 0;
+		mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+		index += 4;
+		value_int = tiff_offset[i];
+	        mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+		index += 4;
+		break;
+	      case GeoAsciiParamsTag:
+		value_int = 64;
+		mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+		index += 4;
+		value_int = tiff_offset[i];
+	        mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
+		index += 4;
+		
+		/* put in the string */
+		strncpy(&tiff_header[tiff_offset[i]], tiff_comment, 64);
 		break;
 	      }
 	  }
