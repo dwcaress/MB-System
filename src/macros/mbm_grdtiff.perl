@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdtiff.perl	11/3/1999
-#    $Id: mbm_grdtiff.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
+#    $Id: mbm_grdtiff.perl,v 5.2 2002-08-02 01:00:05 caress Exp $
 #
 #    Copyright (c) 1999, 2000 by
 #    D. W. Caress (caress@mbari.org)
@@ -49,10 +49,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdtiff.perl,v 5.1 2001-06-03 06:59:24 caress Exp $
+#   $Id: mbm_grdtiff.perl,v 5.2 2002-08-02 01:00:05 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2001/06/03 06:59:24  caress
+#   Release 5.0.beta01
+#
 #   Revision 5.0  2000/12/01 22:58:01  caress
 #   First cut at Version 5.0.
 #
@@ -496,6 +499,18 @@ if (!$bounds || !$zbounds)
 		{
 		$line = shift @grdinfo;
 		if ($line =~ 
+			/\s+Projection: UTM Zone \S+/)
+			{
+			($utm_zone) = $line =~ 
+				/\s+Projection: UTM Zone (\S+)/;
+			$gridprojected = 1;
+			}
+		if ($line =~ 
+			/\s+Projection: Geographic/)
+			{
+			$gridprojected = 0;
+			}
+		if ($line =~ 
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 			{
 			($xmin_f,$xmax_f) = $line =~ 
@@ -581,6 +596,13 @@ if ($bounds)
 		$bounds_plot = sprintf ("%1.8g/%1.8g/%1.8g/%1.8gr",
 			$xmin, $ymin, $xmax, $ymax);
 		}
+	}
+
+# set grid to projected if outside geographic bounds
+if ($xmin < -360.0 || $xmax > 360.0
+	|| $ymin < -90.0 || $ymax > 90.0)
+	{
+	$gridprojected = 1;
 	}
 
 # set bounds string for plotting if not already set
@@ -972,7 +994,12 @@ if ($data_scale)
 #	printf FCMD "#\n# Get shading array\n";
 #	printf FCMD "echo Getting shading array...\n";
 #	printf FCMD "echo Running grdgradient...\n";
-#	printf FCMD "grdgradient $file_use -A$azimuth -G\$DATA_FILE.grad -N -M\n";
+#	printf FCMD "grdgradient $file_use -A$azimuth -G\$DATA_FILE.grad -N";
+#	if (!$gridprojected)
+#		{
+#		printf FCMD " -M";
+#		}
+#	printf FCMD "\n";
 #	printf FCMD "echo Running grdhisteq...\n";
 #	printf FCMD "grdhisteq \$DATA_FILE.grad -G\$DATA_FILE.eq -N\n";
 #	printf FCMD "echo Running grdmath...\n";
@@ -992,9 +1019,19 @@ if ($color_mode == 2)
 	printf FCMD "#\n# Get shading array\n";
 	printf FCMD "echo Getting shading array...\n";
 	printf FCMD "echo Running grdgradient to get x component of the gradient...\n";
-	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx -M\n";
+	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx";
+	if (!$gridprojected)
+		{
+		printf FCMD " -M";
+		}
+	printf FCMD "\n";
 	printf FCMD "echo Running grdgradient to get y component of the gradient...\n";
-	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy -M\n";
+	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy";
+	if (!$gridprojected)
+		{
+		printf FCMD " -M";
+		}
+	printf FCMD "\n";
 
 	printf FCMD "echo Running grdmath to get adjusted x gradient...\n";
 	printf FCMD "grdmath \$DATA_FILE.drvx $magnitude MUL 10 MUL = \$DATA_FILE.magx\n";
@@ -1050,9 +1087,19 @@ elsif ($color_mode >= 4)
 	printf FCMD "#\n# Get slope array\n";
 	printf FCMD "echo Getting slope array...\n";
 	printf FCMD "echo Running grdgradient to get x component of the gradient...\n";
-	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx -M\n";
+	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx";
+	if (!$gridprojected)
+		{
+		printf FCMD " -M";
+		}
+	printf FCMD "\n";
 	printf FCMD "echo Running grdgradient to get y component of the gradient...\n";
-	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy -M\n";
+	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy";
+	if (!$gridprojected)
+		{
+		printf FCMD " -M";
+		}
+	printf FCMD "\n";
 
 	printf FCMD "echo Running grdmath to get slope magnitude...\n";
 	printf FCMD "grdmath \$DATA_FILE.drvx 2.0 POW \\\n";
@@ -1731,7 +1778,7 @@ sub GetProjection {
 		{
 		if ($map_scale =~ /^xd$/)
 			{
-			$geographic = 1;
+			$linear = 1;
 			chop($map_scale);
 			}
 		else
@@ -1745,7 +1792,7 @@ sub GetProjection {
 		{
 		if ($map_scale =~ /^Xd$/)
 			{
-			$geographic = 1;
+			$linear = 1;
 			chop($map_scale);
 			}
 		else

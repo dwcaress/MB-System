@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.6 2002-07-25 19:07:17 caress Exp $
+ *    $Id: mbgrid.c,v 5.7 2002-08-02 01:00:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,10 +27,8 @@
  * faster than the Wessel and Smith minimum curvature algorithm
  * from the GMT program surface used in recent versions of mbgrid.
  *
- * The January 1996 version allows the creation of grids using
- * projected coordinates rather than geographic coordinates.
- * For example,  one can create a grid that is uniformly spaced
- * in UTM eastings and northings rather than uniformly spaced
+ * The July 2002 version allows the creation of grids using
+ * UTM eastings and northings rather than uniformly spaced
  * in longitude and latitude.
  *
  * Author:	D. W. Caress
@@ -40,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/07/25 19:07:17  caress
+ * Release 5.0.beta21
+ *
  * Revision 5.5  2002/04/06 02:53:45  caress
  * Release 5.0.beta16
  *
@@ -314,13 +315,13 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.6 2002-07-25 19:07:17 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.7 2002-08-02 01:00:25 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
 -Rwest/east/south/north [-Adatatype\n\
           -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units[!] -F\n\
-          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n\
+          -Ggridkind -H -Jprojection[/zone] -Llonflip -M -N -Ppings -Sspeed\n\
           -Ttension -Utime -V -Wscale -Xextend]";
 /*--------------------------------------------------------------------*/
 
@@ -421,7 +422,7 @@ main (int argc, char **argv)
 	double	tvalue;
 
 	/* grid variables */
-	double	gbnd[4], wbnd[4];
+	double	gbnd[4], wbnd[4], obnd[4];
 	double	xlon, ylat, xx, yy;
 	double	factor, weight, topofactor;
 	int	gxdim, gydim, offx, offy, xtradim;
@@ -452,16 +453,14 @@ main (int argc, char **argv)
 	/* projected grid parameters */
 	int	use_projection = MB_NO;
 	int	projection_pars_f = MB_NO;
-	int	projection_origin_f = MB_NO;
+	double	reference_lon;
+	int	utm_zone = 1;
+	char	projection_type;
 	char	projection_pars[128];
-	double	p_lon_o;
-	double	p_lat_o;
-	double	p_x_o;
-	double	p_y_o;
 	char	projection_id[128];
 	char	ellipsoid[128];
-	char	gmt_arg[128];
-	int	gmterror;
+	int	proj_status;
+	void	*pjptr;
 	double	p_lon_1, p_lon_2;
 	double	p_lat_1, p_lat_2;
 	double	deglontokm, deglattokm;
@@ -488,6 +487,7 @@ main (int argc, char **argv)
 	int	i, j, k, ii, jj, n;
 	int	kgrid, kout, kint, ib, ix, iy;
 	int	ix1, ix2, iy1, iy2;
+	int	nscan;
 	
 	double	foot_dx, foot_dy, foot_dxn, foot_dyn;
 	double	foot_lateral, foot_range, foot_theta;
@@ -511,7 +511,7 @@ main (int argc, char **argv)
 	/* initialize some values */
 	strcpy(fileroot,"grid");
 	strcpy(projection_id,"Geographic");
-	strcpy(ellipsoid,"WGS-84");
+	strcpy(ellipsoid,"WGS84");
 	gbnd[0] = 0.0;
 	gbnd[1] = 0.0;
 	gbnd[2] = 0.0;
@@ -527,7 +527,7 @@ main (int argc, char **argv)
 #endif
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -587,14 +587,6 @@ main (int argc, char **argv)
 		case 'j':
 			sscanf (optarg,"%s", projection_pars);
 			projection_pars_f = MB_YES;
-			flag++;
-			break;
-		case 'K':
-		case 'k':
-			sscanf (optarg,"%lf/%lf/%lf/%lf/%s/%s", 
-				&p_lon_o, &p_lat_o, 
-				&p_x_o, &p_y_o, projection_id, ellipsoid);
-			projection_origin_f = MB_YES;
 			flag++;
 			break;
 		case 'L':
@@ -742,13 +734,10 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       extend:           %f\n",extend);
 		fprintf(outfp,"dbg2       tension:          %f\n",tension);
 		fprintf(outfp,"dbg2       bathy_in_feet:    %d\n",bathy_in_feet);
+		fprintf(outfp,"dbg2       projection_pars:  %s\n",projection_pars);
 		fprintf(outfp,"dbg2       proj flag 1:      %d\n",projection_pars_f);
-		fprintf(outfp,"dbg2       proj flag 2:      %d\n",projection_origin_f);
-		fprintf(outfp,"dbg2       p_lon_o:          %f\n",p_lon_o);
-		fprintf(outfp,"dbg2       p_lat_o:          %f\n",p_lat_o);
-		fprintf(outfp,"dbg2       p_x_o:            %f\n",p_x_o);
-		fprintf(outfp,"dbg2       p_y_o:            %f\n",p_y_o);
 		fprintf(outfp,"dbg2       projection_id:    %s\n",projection_id);
+		fprintf(outfp,"dbg2       utm_zone:         %d\n",utm_zone);
 		fprintf(outfp,"dbg2       ellipsoid:        %s\n",ellipsoid);
 		}
 
@@ -802,48 +791,138 @@ main (int argc, char **argv)
 		outclipvalue = NaN;
 		}
 
-	/* deal with projected gridding */
-	if (projection_pars_f == MB_YES
-		&& projection_origin_f == MB_YES)
+	/* deal with projected gridding - UTM only for now */
+	if (projection_pars_f == MB_YES)
 		{
-		/* set projection flag */
-		use_projection = MB_YES;
+		/* extract UTM parameters */
+		nscan = sscanf(projection_pars, "%c/%d/%s",
+			&projection_type, &utm_zone, ellipsoid);
+		if (nscan > 0 
+			&& (projection_type == 'u'
+				|| projection_type == 'U'))
+			{
+			/* set utm zone */
+			if (nscan == 1 && projection_type == 'u')
+				{
+				reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
+				if (reference_lon < 180.0)
+					reference_lon += 360.0;
+				if (reference_lon >= 180.0)
+					reference_lon -= 360.0;
+				utm_zone = (int)(((reference_lon + 183.0)
+					/ 6.0) + 0.5);
+				}
+			
+			/* set projection_id */
+			sprintf(projection_id, "UTM Zone %d", utm_zone);
+			
+			/* make sure ellipsoid is ok */
+			if (strcmp(ellipsoid, "WGS84") != 0
+				&& strcmp(ellipsoid, "wgs84") != 0)
+				{
+				strcpy(ellipsoid, "WGS84");
+				}
+				
+			/* set projection flag */
+			use_projection = MB_YES;
+			proj_status = mb_proj_init(verbose,utm_zone, ellipsoid, 
+				&(pjptr), &error);
 
-		/* get ellipsoid */
-#ifdef GMT3_0
-		gmtdefs.ellipsoid = get_ellipse (ellipsoid);
-#else
-		gmtdefs.ellipsoid = GMT_get_ellipse (ellipsoid);
-#endif
+			/* tranlate lon lat bounds to UTM if required */
+			if (projection_type == 'u')
+				{
+				/* copy gbnd to obnd */
+				obnd[0] = gbnd[0];
+				obnd[1] = gbnd[1];
+				obnd[2] = gbnd[2];
+				obnd[3] = gbnd[3];
 
-		/* set up projection using GMT calls */
-		gmterror = 0;
-		sprintf(gmt_arg, "-R/%f/%f/%f/%f", 
-			p_lon_o, p_lon_o + 1.0, 
-			p_lat_o, p_lat_o + 1.0);
-		strcat(gmt_arg, projection_pars);
-#ifdef GMT3_0
-		gmterror += get_common_args (gmt_arg, 
-			&p_lon_1, &p_lon_2, 
-			&p_lat_1, &p_lat_2);
-#else
-		gmterror += GMT_get_common_args (gmt_arg, 
-			&p_lon_1, &p_lon_2, 
-			&p_lat_1, &p_lat_2);
-#endif
-		sprintf(gmt_arg, "-J%s", projection_pars);
-#ifdef GMT3_0
-		gmterror += get_common_args (gmt_arg, 
-			&p_lon_1, &p_lon_2, 
-			&p_lat_1, &p_lat_2);
-#else
-		gmterror += GMT_get_common_args (gmt_arg, 
-			&p_lon_1, &p_lon_2, 
-			&p_lat_1, &p_lat_2);
-#endif
+				/* first point */
+				xlon = obnd[0];
+				ylat = obnd[2];
+				mb_proj_forward(verbose, pjptr, xlon, ylat,
+						&xx, &yy, &error);
+				gbnd[0] = xx;
+				gbnd[1] = xx;
+				gbnd[2] = yy;
+				gbnd[3] = yy;
+				
+				/* second point */
+				xlon = obnd[1];
+				ylat = obnd[2];
+				mb_proj_forward(verbose, pjptr, xlon, ylat,
+						&xx, &yy, &error);
+				gbnd[0] = MIN(gbnd[0], xx);
+				gbnd[1] = MAX(gbnd[1], xx);
+				gbnd[2] = MIN(gbnd[2], yy);
+				gbnd[3] = MAX(gbnd[3], yy);
+				
+				/* third point */
+				xlon = obnd[0];
+				ylat = obnd[3];
+				mb_proj_forward(verbose, pjptr, xlon, ylat,
+						&xx, &yy, &error);
+				gbnd[0] = MIN(gbnd[0], xx);
+				gbnd[1] = MAX(gbnd[1], xx);
+				gbnd[2] = MIN(gbnd[2], yy);
+				gbnd[3] = MAX(gbnd[3], yy);
+				
+				/* fourth point */
+				xlon = obnd[1];
+				ylat = obnd[3];
+				mb_proj_forward(verbose, pjptr, xlon, ylat,
+						&xx, &yy, &error);
+				gbnd[0] = MIN(gbnd[0], xx);
+				gbnd[1] = MAX(gbnd[1], xx);
+				gbnd[2] = MIN(gbnd[2], yy);
+				gbnd[3] = MAX(gbnd[3], yy);
+				}
+			if (projection_type == 'U')
+				{
+				/* first point */
+				xx = gbnd[0];
+				yy = gbnd[2];
+				mb_proj_inverse(verbose, pjptr, xx, yy,
+						&xlon, &ylat, &error);
+				obnd[0] = xlon;
+				obnd[1] = xlon;
+				obnd[2] = ylat;
+				obnd[3] = ylat;
 
+				/* second point */
+				xx = gbnd[1];
+				yy = gbnd[2];
+				mb_proj_inverse(verbose, pjptr, xx, yy,
+						&xlon, &ylat, &error);
+				obnd[0] = MIN(obnd[0], xlon);
+				obnd[1] = MAX(obnd[1], xlon);
+				obnd[2] = MIN(obnd[2], ylat);
+				obnd[3] = MAX(obnd[3], ylat);
+
+				/* third point */
+				xx = gbnd[0];
+				yy = gbnd[3];
+				mb_proj_inverse(verbose, pjptr, xx, yy,
+						&xlon, &ylat, &error);
+				obnd[0] = MIN(obnd[0], xlon);
+				obnd[1] = MAX(obnd[1], xlon);
+				obnd[2] = MIN(obnd[2], ylat);
+				obnd[3] = MAX(obnd[3], ylat);
+
+				/* fourth point */
+				xx = gbnd[1];
+				yy = gbnd[3];
+				mb_proj_inverse(verbose, pjptr, xx, yy,
+						&xlon, &ylat, &error);
+				obnd[0] = MIN(obnd[0], xlon);
+				obnd[1] = MAX(obnd[1], xlon);
+				obnd[2] = MIN(obnd[2], ylat);
+				obnd[3] = MAX(obnd[3], ylat);
+				}
+			}
+			
 		/* check for error */
-		if (gmterror > 0)
+		if (proj_status != MB_SUCCESS)
 			{
 			fprintf(outfp,"\nError setting up special projection:\n\t-J%s\n",
 				projection_pars);
@@ -874,6 +953,13 @@ main (int argc, char **argv)
 			else
 				strcpy(units, "unknown");
 			}
+
+fprintf(stderr," UTM on: proj_status:%d  type:%c zone:%d ellipsoid:%s\n",
+proj_status, projection_type, utm_zone, ellipsoid);
+fprintf(stderr," Lon Lat Bounds: %f %f %f %f\n",
+obnd[0], obnd[1], obnd[2], obnd[3]);
+fprintf(stderr," UTM Bounds: %f %f %f %f\n",
+gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		}
 
 	/* deal with no projection */
@@ -982,11 +1068,10 @@ main (int argc, char **argv)
 		/* do first point */
 		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
-#ifdef GMT3_0
-		xy_to_geo(xx, yy, &xlon, &ylat);
-#else
-		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
-#endif
+		mb_proj_inverse(verbose, pjptr, 
+					xx, yy,
+					&xlon, &ylat,
+					&error);
 		bounds[0] = xlon;
 		bounds[1] = xlon;
 		bounds[2] = ylat;
@@ -995,11 +1080,10 @@ main (int argc, char **argv)
 		/* do second point */
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
-#ifdef GMT3_0
-		xy_to_geo(xx, yy, &xlon, &ylat);
-#else
-		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
-#endif
+		mb_proj_inverse(verbose, pjptr, 
+					xx, yy,
+					&xlon, &ylat,
+					&error);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -1008,11 +1092,10 @@ main (int argc, char **argv)
 		/* do third point */
 		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
-#ifdef GMT3_0
-		xy_to_geo(xx, yy, &xlon, &ylat);
-#else
-		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
-#endif
+		mb_proj_inverse(verbose, pjptr, 
+					xx, yy,
+					&xlon, &ylat,
+					&error);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -1021,11 +1104,10 @@ main (int argc, char **argv)
 		/* do fourth point */
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
-#ifdef GMT3_0
-		xy_to_geo(xx, yy, &xlon, &ylat);
-#else
-		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
-#endif
+		mb_proj_inverse(verbose, pjptr, 
+					xx, yy,
+					&xlon, &ylat,
+					&error);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -1072,11 +1154,6 @@ main (int argc, char **argv)
 		if (use_projection == MB_YES)
 			{
 			fprintf(outfp,"Projection parameters: %s\n", projection_pars);
-			fprintf(outfp,"Projection origin:\n");
-			fprintf(outfp,"  Longitude: %9.4f\n",p_lon_o);
-			fprintf(outfp,"  Latitude:  %9.4f\n",p_lat_o);
-			fprintf(outfp,"  Eastings:  %9.4f\n",p_x_o);
-			fprintf(outfp,"  Northings: %9.4f\n",p_y_o);
 			fprintf(outfp,"Ellipsoid:   %s\n",ellipsoid);
 			}
 		fprintf(outfp,"Grid dimensions: %d %d\n",xdim,ydim);
@@ -1085,6 +1162,8 @@ main (int argc, char **argv)
 			{
 			fprintf(outfp,"  Eastings:  %9.4f %9.4f\n",gbnd[0],gbnd[1]);
 			fprintf(outfp,"  Northings: %9.4f %9.4f\n",gbnd[2],gbnd[3]);
+			fprintf(outfp,"  Longitude: %9.4f %9.4f\n",obnd[0],obnd[1]);
+			fprintf(outfp,"  Latitude:  %9.4f %9.4f\n",obnd[2],obnd[3]);
 			}
 		else
 			{
@@ -1244,7 +1323,7 @@ main (int argc, char **argv)
 		if (format > 0 && file[0] != '#')
 		{
 		/* check for mbinfo file - get file bounds if possible */
-		status = mb_check_info(verbose, file, lonflip, wbnd, 
+		status = mb_check_info(verbose, file, lonflip, bounds, 
 				&file_in_bounds, &error);
 		if (status == MB_FAILURE)
 			{
@@ -1352,8 +1431,10 @@ main (int argc, char **argv)
 			    {
 			    for (ib=0;ib<beams_bath;ib++)
 			      if (mb_beam_ok(beamflag[ib]))
-				mbgrid_project(verbose, bathlon[ib], bathlat[ib], 
-					&bathlon[ib], &bathlat[ib], &error);
+				mb_proj_forward(verbose, pjptr, 
+						bathlon[ib], bathlat[ib],
+						&bathlon[ib], &bathlat[ib],
+						&error);
 			    }
 
 			  /* deal with data */
@@ -1640,7 +1721,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		if (format > 0 && file[0] != '#')
 		{
 		/* check for mbinfo file - get file bounds if possible */
-		status = mb_check_info(verbose, file, lonflip, wbnd, 
+		status = mb_check_info(verbose, file, lonflip, bounds, 
 				&file_in_bounds, &error);
 		if (status == MB_FAILURE)
 			{
@@ -1745,8 +1826,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    {
 			    for (ib=0;ib<beams_bath;ib++)
 			      if (mb_beam_ok(beamflag[ib]))
-				mbgrid_project(verbose, bathlon[ib], bathlat[ib], 
-					&bathlon[ib], &bathlat[ib], &error);
+				mb_proj_forward(verbose, pjptr, 
+						bathlon[ib], bathlat[ib],
+						&bathlon[ib], &bathlat[ib],
+						&error);
 			    }
 
 			  /* deal with data */
@@ -1866,8 +1949,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    {
 			    for (ib=0;ib<beams_amp;ib++)
 			      if (mb_beam_ok(beamflag[ib]))
-				mbgrid_project(verbose, bathlon[ib], bathlat[ib], 
-					&bathlon[ib], &bathlat[ib], &error);
+				mb_proj_forward(verbose, pjptr, 
+						bathlon[ib], bathlat[ib],
+						&bathlon[ib], &bathlat[ib],
+						&error);
 			    }
 
 			  /* deal with data */
@@ -1984,8 +2069,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    {
 			    for (ib=0;ib<pixels_ss;ib++)
 			      if (ss[ib] > 0.0)
-				mbgrid_project(verbose, sslon[ib], sslat[ib], 
-					&sslon[ib], &sslat[ib], &error);
+				mb_proj_forward(verbose, pjptr, 
+						sslon[ib], sslat[ib],
+						&sslon[ib], &sslat[ib],
+						&error);
 			    }
 
 			  /* deal with data */
@@ -2132,8 +2219,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			{
 			  /* reproject data positions if necessary */
 			  if (use_projection == MB_YES)
-			    mbgrid_project(verbose, tlon, tlat, 
-				    &tlon, &tlat, &error);
+				mb_proj_forward(verbose, pjptr, 
+						tlon, tlat,
+						&tlon, &tlat,
+						&error);
 
 			  /* get position in grid */
 			  ix = (tlon - wbnd[0] - 0.5*dx)/dx;
@@ -2318,7 +2407,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		if (format > 0 && file[0] != '#')
 		{
 		/* check for mbinfo file - get file bounds if possible */
-		status = mb_check_info(verbose, file, lonflip, wbnd, 
+		status = mb_check_info(verbose, file, lonflip, bounds, 
 				&file_in_bounds, &error);
 		if (status == MB_FAILURE)
 			{
@@ -2423,8 +2512,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    {
 			    for (ib=0;ib<beams_bath;ib++)
 			      if (mb_beam_ok(beamflag[ib]))
-				mbgrid_project(verbose, bathlon[ib], bathlat[ib], 
-					&bathlon[ib], &bathlat[ib], &error);
+				mb_proj_forward(verbose, pjptr, 
+						bathlon[ib], bathlat[ib],
+						&bathlon[ib], &bathlat[ib],
+						&error);
 			    }
 
 			  /* deal with data */
@@ -2509,8 +2600,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    {
 			    for (ib=0;ib<beams_amp;ib++)
 			      if (mb_beam_ok(beamflag[ib]))
-				mbgrid_project(verbose, bathlon[ib], bathlat[ib], 
-					&bathlon[ib], &bathlat[ib], &error);
+				mb_proj_forward(verbose, pjptr, 
+						bathlon[ib], bathlat[ib],
+						&bathlon[ib], &bathlat[ib],
+						&error);
 			    }
 
 			  /* deal with data */
@@ -2595,8 +2688,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    {
 			    for (ib=0;ib<pixels_ss;ib++)
 			      if (ss[ib] > 0.0)
-				mbgrid_project(verbose, sslon[ib], sslat[ib], 
-					&sslon[ib], &sslat[ib], &error);
+				mb_proj_forward(verbose, pjptr, 
+						sslon[ib], sslat[ib],
+						&sslon[ib], &sslat[ib],
+						&error);
 			    }
 
 			  /* deal with data */
@@ -2711,8 +2806,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			{
 			  /* reproject data positions if necessary */
 			  if (use_projection == MB_YES)
-			    mbgrid_project(verbose, tlon, tlat, 
-				    &tlon, &tlat, &error);
+				mb_proj_forward(verbose, pjptr, 
+						tlon, tlat,
+						&tlon, &tlat,
+						&error);
 
 			  /* get position in grid */
 			  ix = (tlon - wbnd[0] - 0.5*dx)/dx;
@@ -3725,51 +3822,6 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function mbgrid_project translates lon lat values into grid projected
- * values 
- */
-int mbgrid_project(int verbose, double lon, double lat, 
-		double *x, double *y, int *error)
-{
-	char	*function_name = "mbgrid_project";
-	int	status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       lon:        %f\n",lon);
-		fprintf(stderr,"dbg2       lat:        %f\n",lat);
-		}
-
-	/* deal with projection to eastings and northings */
-#ifdef GMT3_0
-	geo_to_xy(lon, lat, x, y);
-#else
-	GMT_geo_to_xy(lon, lat, x, y);
-#endif
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2       x:          %f\n",*x);
-		fprintf(stderr,"dbg2       y:          %f\n",*y);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}

@@ -1,4 +1,4 @@
-.TH mbgrid l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "1 August 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -10,7 +10,8 @@ Version 5.0
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
-\fB-E\fIdx/dy/units[!]\fP \fB-F\fImode\fP \fB-G\fIgridkind\fP 
+\fB-E\fIdx/dy/units[!]\fP \fB-F\fImode\fP 
+\fB-G\fIgridkind\fP \fB-J\fIprojection/fP[\fI/zone/ellipsoid\fP]
 \fB-L\fIlonflip\fP \fB-M -N -P\fIpings\fP \fB-Q\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fItime\fP 
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
@@ -36,6 +37,9 @@ weighted average gridding (\fB-W\fP), the maximum distance from
 data points that the spline 
 interpolation is used (\fB-C\fP), the format of the output files, and
 other parameters.
+The \fB-J\fP option can be used to specify grids in UTM eastings
+and northings (meters) rather than in geographic coordinates
+(longitude and latitude degrees).
 
 Before opening an input swath data file, \fBmbgrid\fP checks for
 an ascii file in the same directory having the same name except
@@ -307,6 +311,28 @@ event that a bathymetry or topography grid is being generated, \fBmbgrid\fP
 will attempt to read an "fbt" file in lieu of the original data.
 Default: \fIdatalist\fP = datalist.mb-1
 .TP
+.B \-J
+\fIprojection/fP[\fI/zone/ellipsoid\fP]
+This option causes \fBmbgrid\fP to generate a grid in UTM projected
+coordinates (eastings and northings in meters) rather than in
+the default geographic coordinates (longitude and latitude in degrees).
+If \fB-J\fP\fIu\fP is given, then the longitude and latitude bounds
+given with the \fB-fR\fP option are translated to UTM eastings and northings.
+In this case, the UTM zone parameter \fIzone\fP is optional, and by default
+the zone will be inferred from the midpoint of the specified longitude
+bounds.
+If \fB-J\fP\fIU\fP is given, then the bounds provided with \fB-R\fP must
+already be in eastings and northings. In this case the UTM zone parameter
+\fIzone\fP must be provided so that the specified bounds can be related
+to the data's geographic coordinates. The default ellipsoid is WGS84.
+UTM grids and mosaics
+produced by \fBMB-System\fP programs contain identifiers that are recognized
+by the plotting macros \fBmbm_grdplot\fP, \fBmbm_grd3dplot\fP, and \fBmbm_grdtiff\fP.
+These plotting macros automatically use a linear map projection whenever they
+encounter grids and mosaics that are already in a projected coordinate system.
+The underlying projection functions derive from the PROJ4 library, originally
+written by Gerald Evenden of the U.S. Geological Survey. 
+.TP
 .B \-L
 \fIlonflip\fP
 .br
@@ -452,7 +478,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.3 2002-04-06 02:53:45 caress Exp $
+ Version $Id: mbgrid.l,v 5.4 2002-08-02 01:00:25 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:
