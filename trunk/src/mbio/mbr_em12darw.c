@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.4 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_em12darw.c,v 4.5 1996-07-26 21:09:33 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.3  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -67,7 +70,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.4 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.5 1996-07-26 21:09:33 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -442,8 +445,7 @@ int	*error;
 			}
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			iamp = (int)(reflscale*data->refl[i]);
-			mb_io_ptr->new_amp[i] = iamp+200;
+			mb_io_ptr->new_amp[i] = reflscale * data->refl[i] + 64;
 			}
 
 		/* print debug statements */
@@ -585,9 +587,9 @@ int	*error;
 			store->bath_acrosstrack[i] = data->distacr[i];
 			store->bath_alongtrack[i] = data->distalo[i];
 			store->tt[i] = data->range[i];
-			store->amp[i] = data->refl[i];
-			store->quality[i] = data->beamq[i];
-			store->heave[i] = 0;
+			store->amp[i] = (signed char) data->refl[i];
+			store->quality[i] = (unsigned char) data->beamq[i];
+			store->heave[i] = (signed char) 0;
 			store->beam_frequency[i] = 0;
 			store->beam_samples[i] = 0;
 			store->beam_center_sample[i] = 0;
@@ -721,8 +723,8 @@ int	*error;
 				data->distacr[i] = store->bath_acrosstrack[i];
 				data->distalo[i] = store->bath_alongtrack[i];
 				data->range[i] = store->tt[i];
-				data->refl[i] = store->amp[i];
-				data->beamq[i] = store->quality[i];
+				data->refl[i] = (short int) store->amp[i];
+				data->beamq[i] = (short int) store->quality[i];
 				}
 			}
 
@@ -811,8 +813,8 @@ int	*error;
 			}
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			data->refl[i] = (int)((mb_io_ptr->new_amp[i]-200)
-				/reflscale);
+			data->refl[i] = (signed char)((mb_io_ptr->new_amp[i] - 64)
+				/ reflscale);
 			}
 
 		} /* end if on mb_io_ptr->new_kind */
