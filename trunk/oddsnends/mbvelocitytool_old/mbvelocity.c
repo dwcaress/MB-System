@@ -12,7 +12,7 @@
 /*                                                          */
 /************************************************************/
 /*    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocity.c,v 4.5 1995-06-05 19:59:16 caress Exp $
+ *    $Id: mbvelocity.c,v 4.6 1995-06-06 13:34:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/06/05  19:59:16  caress
+ * Removed all references to scandir
+ *
  * Revision 4.4  1995/04/04  22:19:27  caress
  * Resized widgets and window to fit 1024 X 768 screen.
  * This now works on an Indy presenter screen.
@@ -1327,7 +1330,7 @@ static void get_file_selection(w, tag, list)
 	selection_text = XmTextGetString(widget_array[k_selection_text]);
 
 	/* get output file */
-	if(strlen(selection_text) > 0)
+	if((int)strlen(selection_text) > 0)
 		{
 		/* look for MB suffix convention */
 		if ((suffix = strstr(selection_text,".mb")) != NULL)
