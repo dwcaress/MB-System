@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.5 1994-10-21 13:02:31 caress Exp $
+ *    $Id: mbclean.c,v 4.6 1994-12-02 16:02:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/10/21  13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.4  1994/07/29  19:02:56  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * using unix second time base.
@@ -119,7 +122,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.5 1994-10-21 13:02:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.6 1994-12-02 16:02:51 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -788,10 +791,13 @@ char **argv;
 				&error);
 			if (status == MB_SUCCESS)
 				ndata++;
+			else
+				finished = MB_YES;
 
 			if (verbose >= 2)
 				{
 				fprintf(stderr,"\ndbg2  current data status:\n");
+				fprintf(stderr,"dbg2    status:   %d\n",status);
 				fprintf(stderr,"dbg2    last:     %d\n",ping[0].id);
 				fprintf(stderr,"dbg2    current:  %d\n",ping[1].id);
 				fprintf(stderr,"dbg2    next:     %d\n",ping[2].id);
