@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $
  *
- *    Copyright (c) 1998, 2000 by
+ *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/05/24  23:18:07  caress
+ * Fixed handling of Revelle EM120 data (first cut).
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -74,7 +77,7 @@
 int mbsys_simrad2_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -392,7 +395,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -653,7 +656,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -741,7 +744,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -821,7 +824,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1080,8 +1083,8 @@ int mbsys_simrad2_extract(int verbose, char *mbio_ptr, char *store_ptr,
 				amp[j] = reflscale * ping->png_amp[i] + 64;
 			else
 				amp[j] = 0;
-			*nbath = MAX(j + 1, *nbath);
 			}
+		*nbath = ping->png_nbeams_max;
 		*namp = *nbath;
 		*nss = MBSYS_SIMRAD2_MAXPIXELS;
 		pixel_size = 0.01 * ping->png_pixel_size;
@@ -1526,7 +1529,7 @@ int mbsys_simrad2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 					ping->png_amp[j] = 0;
 				ping->png_nbeams++;
 				}
-			ping->png_nbeams_max = ping->png_nbeams;
+			ping->png_nbeams_max = nbath;
 			}
 		else if (status == MB_SUCCESS)
 			{
@@ -1684,7 +1687,7 @@ int mbsys_simrad2_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 		    {
 		    ttscale = 1.0 / ping->png_sample_rate;
 		    }
-		*nbeams = 0;
+		*nbeams = ping->png_nbeams_max;
 		for (j=0;j<ping->png_nbeams_max;j++)
 			{
 			ttimes[j] = 0.0;
@@ -1722,7 +1725,6 @@ int mbsys_simrad2_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			    angles_null[i] = 0.0;
 			heave[j] = heave_use;
 			alongtrack_offset[j] = 0.0;
-			*nbeams = MAX(j + 1, *nbeams);
 			}
 		
 		/* reset null angles for EM1000 outer beams */
@@ -3018,7 +3020,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				ssalongtrack[i]);
 			fprintf(stderr,"dbg2       pixels_ss:  %d\n",
 				ping->png_pixels_ss);
-			for (i=0;i<ping->png_pixels_ss;i++)
+			for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 			  fprintf(stderr,"dbg2       pixel:%4d  ss:%8d  ltrack:%8d\n",
 				i,ping->png_ss[i],ping->png_ssalongtrack[i]);
 			}
