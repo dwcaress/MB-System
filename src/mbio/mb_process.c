@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.25 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_process.c,v 5.26 2003-04-18 00:35:42 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.24  2003/04/16 16:47:41  caress
  * Release 5.0.beta30
  *
@@ -125,7 +128,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.25 2003-04-17 21:05:23 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.26 2003-04-18 00:35:42 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -955,11 +958,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		}
 	    }
 	    
-	/* update bathymetry recalculation mode */
-	mb_pr_bathmode(verbose, process, error);
-	    
 	/* look for nav and other bath edit files if not specified */
-	if (lookforfiles == 1)
+	if (lookforfiles == 1 || lookforfiles == 2)
 	    {
 	    /* look for navadj file */
 	    if (process->mbp_navadj_mode == MBP_NAV_OFF)
@@ -972,6 +972,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			    process->mbp_navadj_mode = MBP_NAV_ON;
 			    }
 		    }
+		if (process->mbp_navadj_mode == MBP_NAV_OFF)
+		    {
+		    process->mbp_navadjfile[0] = '\0';
+		    }
 		}
 
 	    /* look for nav file */
@@ -983,6 +987,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    {
 		    process->mbp_nav_mode = MBP_NAV_ON;
 		    process->mbp_nav_format = 9;
+		    }
+		else
+		    {
+		    process->mbp_navfile[0] = '\0';
 		    }
 		}
 
@@ -1003,12 +1011,44 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			process->mbp_edit_mode = MBP_EDIT_ON;
 			}
+		    else
+			{
+			process->mbp_editfile[0] = '\0';
+			}
+		    }
+		}
+	     }
+	    
+	/* look for svp files if not specified */
+	if (lookforfiles == 2)
+	    {
+	    /* look for svp file */
+	    if (process->mbp_svp_mode == MBP_SVP_OFF)
+ 		{
+		strcpy(process->mbp_svpfile, process->mbp_ifile);
+		strcat(process->mbp_svpfile, ".svp");
+		if (stat(process->mbp_svpfile, &statbuf) == 0)
+		    {
+		    process->mbp_svp_mode = MBP_SVP_ON;
+		    }
+		else
+		    {
+		    strcpy(process->mbp_svpfile, process->mbp_ifile);
+		    strcat(process->mbp_svpfile, "_001.svp");
+		    if (stat(process->mbp_svpfile, &statbuf) == 0)
+			{
+			process->mbp_svp_mode = MBP_SVP_ON;
+			}
+		    else
+			{
+			process->mbp_svpfile[0] = '\0';
+			}
 		    }
 		}
 	    }
 	    
 	/* reset all output files to local path if possible */
-	else if (lookforfiles > 1)
+	if (lookforfiles > 2)
 	    {
 	    /* reset output file */
 	    process->mbp_ofile_specified = MB_NO;
@@ -1140,6 +1180,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	mb_get_shortest_path(verbose, process->mbp_tidefile, error);
 	mb_get_shortest_path(verbose, process->mbp_ampcorrfile, error);
 	mb_get_shortest_path(verbose, process->mbp_sscorrfile, error);
+	    
+	/* update bathymetry recalculation mode */
+	mb_pr_bathmode(verbose, process, error);
 	    
 	/* check for error */
 	if (process->mbp_ifile_specified == MB_NO
