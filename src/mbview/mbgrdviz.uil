@@ -38,7 +38,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -53,10 +52,11 @@ names = case_sensitive
 procedure BxGlobalWidgetId;
 identifier BXG_pulldownMenu_savesite;
 identifier BXG_pulldownMenu_saveroute;
+identifier BXG_pulldownMenu_openswath;
+identifier BXG_pulldownMenu_opennav;
+identifier BXG_pulldownMenu_opensite;
 identifier BXG_pulldownMenu_openroute;
 identifier BXG_pulldownMenu_openoverlay;
-identifier BXG_pulldownMenu_opensite;
-identifier BXG_pulldownMenu_opennav;
 identifier BXG_pushButton_file_openprimary;
 identifier BXG_label_about_version;
 identifier BXG_fileSelectionBox;
@@ -97,8 +97,8 @@ object fileSelectionBox : XmFileSelectionDialog widget {
         arguments Style_use;
         XmNautoUnmanage = true;
         XmNpattern = compound_string("*grd");
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 83;
+        XmNy = 440;
         XmNwidth = 334;
         XmNheight = 505;
     };
@@ -356,8 +356,8 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 124;
-        XmNy = 32;
+        XmNx = 66;
+        XmNy = 410;
         XmNwidth = 463;
         XmNheight = 528;
     };
@@ -512,7 +512,6 @@ object pulldownMenu_opensite : XmPulldownMenu widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_opensite);
     };
 };
@@ -536,7 +535,7 @@ object cascadeButton_opensite : XmCascadeButton widget {
 object pulldownMenu_opennav : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 456;
+        XmNx = 416;
         XmNy = 328;
         XmNwidth = 1;
         XmNheight = 1;
@@ -544,6 +543,7 @@ object pulldownMenu_opennav : XmPulldownMenu widget {
     controls {
     };
     callbacks {
+        callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_opennav);
     };
 !(BX)    handlers {
@@ -554,10 +554,45 @@ object pulldownMenu_opennav : XmPulldownMenu widget {
 object cascadeButton_opennav : XmCascadeButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Open Swath or Nav Data");
+        XmNlabelString = compound_string("Open Nav Data");
     };
     controls {
          unmanaged XmPulldownMenu pulldownMenu_opennav;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pulldownMenu_openswath : XmPulldownMenu widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 416;
+        XmNy = 352;
+        XmNwidth = 1;
+        XmNheight = 1;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_openswath);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object cascadeButton_openswath : XmCascadeButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Open Swath Data");
+    };
+    controls {
+         unmanaged XmPulldownMenu pulldownMenu_openswath;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -689,8 +724,8 @@ object pulldownMenu_file : XmPulldownMenu widget {
         arguments Style_use;
         XmNx = 262;
         XmNy = 225;
-        XmNwidth = 200;
-        XmNheight = 200;
+        XmNwidth = 160;
+        XmNheight = 224;
     };
     controls {
          managed XmPushButton pushButton_file_openprimary;
@@ -698,6 +733,7 @@ object pulldownMenu_file : XmPulldownMenu widget {
          managed XmCascadeButton cascadeButton_openroute;
          managed XmCascadeButton cascadeButton_opensite;
          managed XmCascadeButton cascadeButton_opennav;
+         managed XmCascadeButton cascadeButton_openswath;
          managed XmSeparator separator;
          managed XmCascadeButton cascadeButton_saveroute;
          managed XmCascadeButton cascadeButton_savesite;
