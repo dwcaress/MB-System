@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 1.1 2003-09-23 21:29:01 caress Exp $
+ *    $Id: mbview_callbacks.c,v 1.2 2003-11-07 00:39:14 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,10 +18,13 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2003/09/23 21:29:01  caress
+ * Adding first cut on mbview to cvs.
+ *
  *
  */
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 /*
  * README: This file is appended to at file generation time.
  * Edits can be made throughout the file
@@ -67,299 +70,28 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
+/* Set flag to define mbview global variables in this code block */
+#define MBVIEWGLOBAL 
+
 /* mbview include */
 #include "mbview.h"
-
-#ifndef XmSET
-#define XmSET True
-#define XmUNSET False
-#endif
-
-#define LEFT_WIDTH 200
-#define LEFT_HEIGHT 30
-#define MBV_OPENGL_WIDTH 3.0
-#define MBV_OPENGL_ZMIN2D -5.0
-#define MBV_OPENGL_ZMAX2D 1000.0
-#define MBV_OPENGL_ZMIN3D 100000.0
-#define MBV_OPENGL_ZMAX3D 100000000.0
-#define MBV_OPENGL_2D_CONTOUR_OFFSET 0.0001
-#define MBV_OPENGL_3D_CONTOUR_OFFSET 0.001
-
-#define MBV_REZ_NONE 	0
-#define MBV_REZ_LOW 	1
-#define MBV_REZ_HIGH 	2
-#define MBV_REZ_FULL 	3
-#define MBV_EVENTCHECKCOARSENESS	5
-
-#define MBVIEW_PICK_IDIVISION 15
-#define MBVIEW_PICK_DIVISION ((double)MBVIEW_PICK_IDIVISION)
-#define MBV_PICK_DOWN	1
-#define MBV_PICK_MOVE	2
-#define MBV_AREALENGTH_DOWN	1
-#define MBV_AREALENGTH_MOVE	2
-#define MBV_AREAASPECT_CHANGE	3
-
-#define MBV_WINDOW_NULL 	0
-#define MBV_WINDOW_HIDDEN 	1
-#define MBV_WINDOW_VISIBLE 	2
-
-/* colortables */
-#define	MBV_NUM_COLORS   11
-float	colortable_haxby_red[MBV_NUM_COLORS] =
-                { 0.950, 1.000, 1.000, 1.000, 0.941, 0.804, 
-                  0.541, 0.416, 0.196, 0.157, 0.145 };
-float	colortable_haxby_green[MBV_NUM_COLORS] =
-                { 0.950, 0.729, 0.631, 0.741, 0.925, 1.000, 
-                  0.925, 0.922, 0.745, 0.498, 0.224 };
-float	colortable_haxby_blue[MBV_NUM_COLORS] =
-                { 0.950, 0.522, 0.267, 0.341, 0.475, 0.635, 
-                  0.682, 1.000, 1.000, 0.984, 0.686 };
-float	colortable_bright_red[MBV_NUM_COLORS] =
-                { 1.000, 1.000, 1.000, 1.000, 0.500, 0.000, 
-                  0.000, 0.000, 0.000, 0.500, 1.000 };
-float	colortable_bright_green[MBV_NUM_COLORS] =
-                { 0.000, 0.250, 0.500, 1.000, 1.000, 1.000, 
-                  1.000, 0.500, 0.000, 0.000, 0.000 };
-float	colortable_bright_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
-                  1.000, 1.000, 1.000, 1.000, 1.000 };
-float	colortable_muted_red[MBV_NUM_COLORS] =
-                { 0.784, 0.761, 0.702, 0.553, 0.353, 0.000, 
-                  0.000, 0.000, 0.000, 0.353, 0.553 };
-float	colortable_muted_green[MBV_NUM_COLORS] =
-                { 0.000, 0.192, 0.353, 0.553, 0.702, 0.784, 
-                  0.553, 0.353, 0.000, 0.000, 0.000 };
-float	colortable_muted_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
-                  0.553, 0.702, 0.784, 0.702, 0.553 };
-float	colortable_gray_red[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
-                  0.600, 0.700, 0.800, 0.900, 1.000 };
-float	colortable_gray_green[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
-                  0.600, 0.700, 0.800, 0.900, 1.000 };
-float	colortable_gray_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
-                  0.600, 0.700, 0.800, 0.900, 1.000 };
-float	colortable_flat_red[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
-                  0.500, 0.500, 0.500, 0.500, 0.500 };
-float	colortable_flat_green[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
-                  0.500, 0.500, 0.500, 0.500, 0.500 };
-float	colortable_flat_blue[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
-                  0.500, 0.500, 0.500, 0.500, 0.500 };
-float	colortable_abovesealevel_red[MBV_NUM_COLORS+1] =
-                { 0.980, 0.960, 0.941, 0.921, 0.902, 0.882, 
-		  0.862, 0.843, 0.823, 0.804, 0.784};
-float	colortable_abovesealevel_green[MBV_NUM_COLORS+1] =
-                { 0.980, 0.940, 0.901, 0.862, 0.823, 0.784, 
-		  0.744, 0.705, 0.666, 0.627, 0.588};
-float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1] =
-                { 0.471, 0.440, 0.408, 0.376, 0.345, 0.314, 
-		  0.282, 0.250, 0.219, 0.188, 0.157};
-
-/* structure to hold instances of mbview windows */
-struct mbview_world_struct
-    {
-    /* flag if this instance is initialized */
-    int			init;
-    
-    /* pointer to structure holding data to be rendered */
-    struct mbview_struct data;
-    
-    /* widgets and other Xwindows stuff of interest */
-    Widget		topLevelShell;
-    Widget		mainWindow;
-    Widget		glwmda;
-    MB3DViewData	mb3dview;
-    Display		*dpy;
-    Window		xid;
-    XVisualInfo 	*vi;
-    int			glx_init;
-    GLXContext		glx_context;
-    int			message_on;
-    int			plot_recursion;
-    int			plot_done;
-    int			plot_interrupt_allowed;
-       
-    /* cursors */
-    Cursor TargetBlackCursor;
-    Cursor TargetGreenCursor;
-    Cursor TargetRedCursor;
-    Cursor FleurBlackCursor;
-    Cursor FleurRedCursor;
-    Cursor SizingBlackCursor;
-    Cursor SizingRedCursor;
-    Cursor BoatBlackCursor;
-    Cursor BoatRedCursor;
-    Cursor WatchBlackCursor;
-    Cursor WatchRedCursor;    
-    
-    /* projections */
-    int primary_pj_init;
-    void *primary_pjptr;
-    int secondary_pj_init;
-    void *secondary_pjptr;
-    int display_pj_init;
-    void *display_pjptr;
-    double mtodeglon;
-    double mtodeglat;
-    
-    /* drawing variables */
-    Dimension gl_width;
-    Dimension gl_height;
-    float gl_xmin;
-    float right;
-    float left;
-    float top;
-    float bottom;
-    float aspect_ratio;
-    int projected;
-    int lastdrawrez;
-    int lastzscalerez;
-    int lastcolorrez;
-    int contourlorez;
-    int contourhirez;
-    int contourfullrez;
-    
-    /* grid display bounds */
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-    double xorigin;
-    double yorigin;
-    double zorigin;
-    double scale;
-    double zscale;
-    
-    float offset2d_x;
-    float offset2d_y;
-    float offset2d_x_save;
-    float offset2d_y_save;
-    float size2d;
-    float size2d_save;
-    float offset3d_x;
-    float offset3d_y;
-    float offset3d_z;
-    float viewoffset3d_z;
-    float offset3d_x_save;
-    float offset3d_y_save;
-    float offset3d_z_save;
-    float viewoffset3d_z_save;
-    float size3d;
-    float size3d_save;
-    float areaaspect;
-    float areaaspect_save;
-    double exageration_save;
-    double modelelevation3d_save;
-    double modelazimuth3d_save;
-    double viewelevation3d_save;
-    double viewazimuth3d_save;
-    double illuminate_magnitude_save;
-    double illuminate_elevation_save;
-    double illuminate_azimuth_save;
-    double slope_magnitude_save;
-    double overlay_magnitude_save;
-
-    /* button parameters */
-    int button1down;
-    int button2down;
-    int button3down;
-    int button_down_x;
-    int button_down_y;
-    int button_move_x;
-    int button_move_y;
-    int button_up_x;
-    int button_up_y;
-	
-    };
+#include "mbviewprivate.h"
 
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-Cardinal 	ac = 0;
+Cardinal 	ac;
 Arg      	args[256];
-int		mbv_verbose = 0;
-static int	mbv_ninstance = 0;
-Widget		parent_widget;
-XtAppContext	app_context;
 char		value_text[MB_PATH_MAXLINE];
 
-struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
-
-/* library name */
-char	*mbsystem_library_name = "MBview";
-
-static char rcs_id[]="$Id: mbview_callbacks.c,v 1.1 2003-09-23 21:29:01 caress Exp $";
-
-void do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data);
-void mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
-void do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_data_primary( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_data_primaryslope( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_data_secondary( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_overlay_none( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_overlay_slope( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_overlay_illumination( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_overlay_secondary( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_overlay_contour( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_display_2D( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_display_3D( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_mouse_mode( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbview_reset_view( Widget w, XtPointer client_data, XtPointer call_data);
-void set_mbview_mouse_mode(int instance, int mode);
-void set_mbview_grid_mode(int instance, int mode);
-void set_mbview_shade_mode(int instance, int mode);
-void set_mbview_contour_mode(int instance, int mode);
-void set_mbview_site_view_mode(int instance, int mode);
-void set_mbview_route_view_mode(int instance, int mode);
-void set_mbview_nav_view_mode(int instance, int mode);
-void set_mbview_display_mode(int instance, int mode);
-void set_mbview_colortable_mode(int instance, int mode);
-void set_mbview_colortable(int instance, int mode);
-void set_mbview_label_string(Widget w, String str);
-void set_mbview_label_multiline_string(Widget w, String str);
-void get_mbview_text_string(Widget w, String str);
-void do_mbview_xevents();
-int mbview_projectforward(int instance, int needlonlat,
-				double xgrid, double ygrid,
-				double *xlon, double *ylat,
-				double *xdisplay, double *ydisplay);
-int mbview_projectinverse(int instance, int needlonlat,
-				double xdisplay, double ydisplay,
-				double *xlon, double *ylat,
-				double *xgrid, double *ygrid);
-int mbview_getzdata(int instance, 
-			double xgrid, double ygrid,
-			int *found, double *zdata);
-int mbview_pick(int instance, int which, int xpixel, int ypixel);
-int mbview_findpoint(int instance, int xpixel, int ypixel,
-			int *found, 
-			double *xgrid, double *ygrid,
-			double *xlon, double *ylat, double *zdata,
-			double *xdisplay, double *ydisplay, double *zdisplay);
-int mbview_findpointrez(int instance, int rez, int xpixel, int ypixel,
-			int ijbounds[4], int *found, 
-			double *xgrid, double *ygrid,
-			double *xlon, double *ylat, double *zdata,
-			double *xdisplay, double *ydisplay, double *zdisplay);
-int mbview_viewbounds(int instance, int rez);
-int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg);
+static char rcs_id[]="$Id: mbview_callbacks.c,v 1.2 2003-11-07 00:39:14 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
-
-#ifdef MBVIEW_LIBRARY
-
-EXTERNAL MB3DViewData mbview_mbgrdviz;
 
 /*------------------------------------------------------------------------------*/
 /* code used in original BX application, not used for library */
-#else
+
+#ifndef MBVIEW_LIBRARY
 
 #include "creation-c.h"
 
@@ -506,7 +238,7 @@ GRAU( XtPointer, call)
 /* code below used for mbview library                                           */
 /*------------------------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 {
 	/* local variables */
@@ -535,12 +267,20 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 	/* set parent widget and app context */
 	parent_widget = parent;
 	app_context = app;
+	work_function_set = MB_NO;
+	timer_count = 0;
+	
+	/* set starting number of windows */
+	mbv_ninstance = 0;
 	
 	/* initialize windows */
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 		{
 		mbview_reset(i);
 		}
+
+	/* set timer function */
+	/*do_mbview_settimer();*/
 		
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -557,7 +297,7 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 	return(status);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_reset(int instance)
 {
 	/* local variables */
@@ -619,7 +359,6 @@ int mbview_reset(int instance)
 		data->secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
 		data->secondary_colortable_min = 0.0;
 		data->secondary_colortable_max = 0.0;
-		data->secondary_overlay_center = 0.0;
 		data->secondary_shade_mode = MBV_SHADE_VIEW_NONE;
 
 		data->exageration = 1.0;
@@ -637,7 +376,9 @@ int mbview_reset(int instance)
 		data->illuminate_elevation = 30.0;
 		data->illuminate_azimuth = 90.0;
 		data->slope_magnitude = 1.0;
-		data->overlay_magnitude = 1.0;
+		data->overlay_shade_magnitude = 1.0;
+		data->overlay_shade_center = 0.0;
+		data->overlay_shade_mode = MBV_COLORTABLE_NORMAL;
 
 		/* projection controls */
 		data->primary_grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
@@ -667,6 +408,8 @@ int mbview_reset(int instance)
 		data->primary_r = NULL;
 		data->primary_g = NULL;
 		data->primary_b = NULL;
+		data->primary_stat_color = NULL;
+		data->primary_stat_z = NULL;
 		data->secondary_sameas_primary = MB_NO;
 		data->secondary_nodatavalue = MBV_DEFAULT_NODATA;
 		data->secondary_nxy = 0;
@@ -701,6 +444,28 @@ int mbview_reset(int instance)
 		data->pick.segment.nls = 0;
 		data->pick.segment.nls_alloc = 0;
 		data->pick.segment.lspoints = NULL;
+		for (i=0;i<8;i++)
+		    {
+		    data->pick.xpoints[i].xgrid = 0.0;
+		    data->pick.xpoints[i].ygrid = 0.0;
+		    data->pick.xpoints[i].xlon = 0.0;
+		    data->pick.xpoints[i].ylat = 0.0;
+		    data->pick.xpoints[i].zdata = 0.0;
+		    data->pick.xpoints[i].xdisplay = 0.0;
+		    data->pick.xpoints[i].ydisplay = 0.0;
+		    data->pick.xpoints[i].zdisplay = 0.0;
+		    }
+		for (j=0;j<4;j++)
+		    {
+		    data->pick.xsegments[j].nls = 0;
+		    data->pick.xsegments[j].nls_alloc = 0;
+		    data->pick.xsegments[j].lspoints = NULL;
+		    for (i=0;i<2;i++)
+			{
+			data->pick.xsegments[j].endpoints[i] 
+		    		    = &(data->pick.xpoints[2*j+i]);
+			}
+		    }
 
 		/* area pick data */
 		data->area_type = MBV_AREA_NONE;
@@ -714,7 +479,11 @@ int mbview_reset(int instance)
 		    data->area.endpoints[i].xdisplay = 0.0;
 		    data->area.endpoints[i].ydisplay = 0.0;
 		    data->area.endpoints[i].zdisplay = 0.0;
+	    	    data->area.segment.endpoints[i] = &(data->area.endpoints[i]);
 		    }
+	    	data->area.segment.nls = 0;
+	    	data->area.segment.nls_alloc = 0;
+	    	data->area.segment.lspoints = NULL;
 		for (i=0;i<4;i++)
 		    {
 		    data->area.cornerpoints[i].xgrid = 0.0;
@@ -759,6 +528,7 @@ int mbview_reset(int instance)
 		data->nav_mode = MBV_NAV_OFF;
 		data->nnav = 0;
 		data->nnav_alloc = 0;
+		data->navs = NULL;
 		
 		/* windows */
 		view->topLevelShell = NULL;
@@ -774,8 +544,9 @@ int mbview_reset(int instance)
 		view->gl_height = 0;
 		view->projected = MB_NO;
 		view->lastdrawrez = MBV_REZ_NONE;
-		view->lastzscalerez = MBV_REZ_NONE;
-		view->lastcolorrez = MBV_REZ_NONE;
+		mbview_zscaleclear(instance);
+		mbview_setcolorparms(instance);
+		mbview_colorclear(instance);
 		view->contourlorez = MB_NO;
 		view->contourhirez = MB_NO;
 		view->contourfullrez = MB_NO;
@@ -804,8 +575,6 @@ int mbview_reset(int instance)
 		view->offset3d_y_save = 0.0;
 		view->offset3d_z_save = 0.0;
 		view->viewoffset3d_z_save = 0.0;
-		view->size3d = 0.0;
-		view->size3d_save = 0.0;
 		view->areaaspect = 0.5;
 		view->areaaspect_save = 0.5;
 		view->exageration_save = 0.0;
@@ -817,6 +586,7 @@ int mbview_reset(int instance)
 		view->illuminate_elevation_save = 0.0;
 		view->illuminate_azimuth_save = 0.0;
 		view->slope_magnitude_save = 0.0;
+		view->overlay_shade_magnitude_save = 0.0;
 		}
 		
 	/* print output debug statements */
@@ -832,7 +602,7 @@ int mbview_reset(int instance)
 	return(status);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_init(int verbose, int *instance, int *error)
 {
 	/* local variables */
@@ -843,7 +613,7 @@ int mbview_init(int verbose, int *instance, int *error)
 	int	i, j;
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -892,7 +662,7 @@ fprintf(stderr,"Initializing mbview instance:%d\n",*instance);
 	return(status);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahandle, int *error)
 {
 	/* local variables */
@@ -905,7 +675,7 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1006,6 +776,8 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		fprintf(stderr,"dbg2       primary_r:                 %d\n", (*datahandle)->primary_r);
 		fprintf(stderr,"dbg2       primary_g:                 %d\n", (*datahandle)->primary_g);
 		fprintf(stderr,"dbg2       primary_b:                 %d\n", (*datahandle)->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %d\n", (*datahandle)->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %d\n", (*datahandle)->primary_stat_z);
 		
 		/* secondary grid data */
 		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", (*datahandle)->secondary_sameas_primary);
@@ -1082,7 +854,7 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 	return(status);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_setwindowparms(int verbose, int instance,
 			int	(*mbview_dismiss_notify)(int),
 			char	*title,
@@ -1104,7 +876,7 @@ int mbview_setwindowparms(int verbose, int instance,
 fprintf(stderr,"Called mbview_setwindowparms:%d\n",instance);
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1152,7 +924,7 @@ fprintf(stderr,"Called mbview_setwindowparms:%d\n",instance);
 	return(status);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_setviewcontrols(int verbose, int instance,
 			int	display_mode,
 			int	mouse_mode,
@@ -1171,7 +943,9 @@ int mbview_setviewcontrols(int verbose, int instance,
 			double	illuminate_elevation,
 			double	illuminate_azimuth,
 			double	slope_magnitude,
-			double	overlay_magnitude,
+			double	overlay_shade_magnitude,
+			double	overlay_shade_center,
+			int	overlay_shade_mode,
 			double	contour_interval,
 			int	display_projection_mode,
 			char	*display_projection_id,
@@ -1187,7 +961,7 @@ int mbview_setviewcontrols(int verbose, int instance,
 fprintf(stderr,"Called mbview_setviewcontrols:%d\n",instance);
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1213,7 +987,9 @@ fprintf(stderr,"Called mbview_setviewcontrols:%d\n",instance);
 		fprintf(stderr,"dbg2       illuminate_elevation:      %f\n", illuminate_elevation);
 		fprintf(stderr,"dbg2       illuminate_azimuth:        %f\n", illuminate_azimuth);
 		fprintf(stderr,"dbg2       slope_magnitude:           %f\n", slope_magnitude);
-		fprintf(stderr,"dbg2       overlay_magnitude:         %f\n", overlay_magnitude);
+		fprintf(stderr,"dbg2       overlay_shade_magnitude:   %f\n", overlay_shade_magnitude);
+		fprintf(stderr,"dbg2       overlay_shade_center:      %f\n", overlay_shade_center);
+		fprintf(stderr,"dbg2       overlay_shade_mode:        %d\n", overlay_shade_mode);
 		fprintf(stderr,"dbg2       contour_interval:          %f\n", slope_magnitude);
 		fprintf(stderr,"dbg2       display_projection_mode:   %d\n", display_projection_mode);
 		fprintf(stderr,"dbg2       display_projection_id:     %s\n", display_projection_id);
@@ -1243,1291 +1019,20 @@ fprintf(stderr,"Called mbview_setviewcontrols:%d\n",instance);
         data->illuminate_elevation = illuminate_elevation;
         data->illuminate_azimuth = illuminate_azimuth;
         data->slope_magnitude = slope_magnitude;
-        data->overlay_magnitude = overlay_magnitude;
+        data->overlay_shade_magnitude = overlay_shade_magnitude;
+        data->overlay_shade_center = overlay_shade_center;
+        data->overlay_shade_mode = overlay_shade_mode;
         data->contour_interval = contour_interval;
         data->display_projection_mode = display_projection_mode;
         strcpy(data->display_projection_id, display_projection_id);
+
+	/* set widgets */
+	if (data->active == MB_YES)
+		mbview_set_widgets(verbose, instance, error);
 		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_setprimarygrid(int verbose, int instance,
-			int	primary_grid_projection_mode,
-			char	*primary_grid_projection_id,
-			float	primary_nodatavalue,
-			int	primary_nx,
-			int	primary_ny,
-			double	primary_min,
-			double	primary_max,
-			double	primary_xmin,
-			double	primary_xmax,
-			double	primary_ymin,
-			double	primary_ymax,
-			double	primary_dx,
-			double	primary_dy,
-			float	*primary_data,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_setprimarygrid";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_setprimarygrid:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                      %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
-		fprintf(stderr,"dbg2       primary_grid_projection_mode: %d\n", primary_grid_projection_mode);
-		fprintf(stderr,"dbg2       primary_grid_projection_id:   %s\n", primary_grid_projection_id);
-		fprintf(stderr,"dbg2       primary_nodatavalue:          %f\n", primary_nodatavalue);
-		fprintf(stderr,"dbg2       primary_nx:                   %d\n", primary_nx);
-		fprintf(stderr,"dbg2       primary_ny:                   %d\n", primary_ny);
-		fprintf(stderr,"dbg2       primary_min:                  %f\n", primary_min);
-		fprintf(stderr,"dbg2       primary_max:                  %f\n", primary_max);
-		fprintf(stderr,"dbg2       primary_xmin:                 %f\n", primary_xmin);
-		fprintf(stderr,"dbg2       primary_xmax:                 %f\n", primary_xmax);
-		fprintf(stderr,"dbg2       primary_ymin:                 %f\n", primary_ymin);
-		fprintf(stderr,"dbg2       primary_ymax:                 %f\n", primary_ymax);
-		fprintf(stderr,"dbg2       primary_dx:                   %f\n", primary_dx);
-		fprintf(stderr,"dbg2       primary_dy:                   %f\n", primary_dy);
-		fprintf(stderr,"dbg2       primary_data:                 %d\n", primary_data);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->primary_grid_projection_mode = primary_grid_projection_mode;
-        strcpy(data->primary_grid_projection_id, primary_grid_projection_id);
-        data->primary_nodatavalue = primary_nodatavalue;
-        data->primary_nxy = primary_nx * primary_ny;
-        data->primary_nx = primary_nx;
-        data->primary_ny = primary_ny;
-        data->primary_min = primary_min;
-        data->primary_max = primary_max;
-        data->primary_xmin = primary_xmin;
-        data->primary_xmax = primary_xmax;
-        data->primary_ymin = primary_ymin;
-        data->primary_ymax = primary_ymax;
-        data->primary_dx = primary_dx;
-        data->primary_dy = primary_dy;
-	data->viewbounds[0] = 0;
-	data->viewbounds[1] = data->primary_nx;
-	data->viewbounds[2] = 0;
-	data->viewbounds[3] = data->primary_ny;
-	
-	/* allocate required arrays */
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_data, error);
-    	if (status == MB_SUCCESS)
-	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_x, error);
-    	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_y, error);
-    	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_z, error);
-    	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_dzdx, error);
-    	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_dzdy, error);
-    	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_r, error);
-    	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_g, error);
-     	if (status == MB_SUCCESS)
-   	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_b, error);
-	if (status != MB_SUCCESS)
-	    {
-	    fprintf(stderr,"\nUnable to allocate memory to store primary grid data\n");
-	    fprintf(stderr,"\nProgram terminated in function <%s>.\n",
-		    function_name);
-	    exit(*error);
-	    }
-	
-	/* copy grid */
-	memcpy(data->primary_data, primary_data, data->primary_nxy * sizeof(float));
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_setsecondarygrid(int verbose, int instance,
-			int	secondary_grid_projection_mode,
-			char	*secondary_grid_projection_id,
-			float	secondary_nodatavalue,
-			int	secondary_nx,
-			int	secondary_ny,
-			double	secondary_min,
-			double	secondary_max,
-			double	secondary_xmin,
-			double	secondary_xmax,
-			double	secondary_ymin,
-			double	secondary_ymax,
-			double	secondary_dx,
-			double	secondary_dy,
-			float	*secondary_data,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_setsecondarygrid";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	proj_status;
-
-fprintf(stderr,"Called mbview_setsecondarygrid:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       secondary_grid_projection_mode:   %d\n", secondary_grid_projection_mode);
-		fprintf(stderr,"dbg2       secondary_grid_projection_id:     %s\n", secondary_grid_projection_id);
-		fprintf(stderr,"dbg2       secondary_nodatavalue:       %d\n", secondary_nodatavalue);
-		fprintf(stderr,"dbg2       secondary_nx:                %d\n", secondary_nx);
-		fprintf(stderr,"dbg2       secondary_ny:                %d\n", secondary_ny);
-		fprintf(stderr,"dbg2       secondary_min:               %f\n", secondary_min);
-		fprintf(stderr,"dbg2       secondary_max:               %f\n", secondary_max);
-		fprintf(stderr,"dbg2       secondary_xmin:              %f\n", secondary_xmin);
-		fprintf(stderr,"dbg2       secondary_xmax:              %f\n", secondary_xmax);
-		fprintf(stderr,"dbg2       secondary_ymin:              %f\n", secondary_ymin);
-		fprintf(stderr,"dbg2       secondary_ymax:              %f\n", secondary_ymax);
-		fprintf(stderr,"dbg2       secondary_dx:                %f\n", secondary_dx);
-		fprintf(stderr,"dbg2       secondary_dy:                %f\n", secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:              %d\n", secondary_data);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->secondary_grid_projection_mode = secondary_grid_projection_mode;
-        strcpy(secondary_grid_projection_id, secondary_grid_projection_id);
-        data->secondary_nodatavalue = secondary_nodatavalue;
-        data->secondary_nxy = secondary_nx * secondary_ny;
-        data->secondary_nx = secondary_nx;
-        data->secondary_ny = secondary_ny;
-        data->secondary_min = secondary_min;
-        data->secondary_max = secondary_max;
-        data->secondary_xmin = secondary_xmin;
-        data->secondary_xmax = secondary_xmax;
-        data->secondary_ymin = secondary_ymin;
-        data->secondary_ymax = secondary_ymax;
-        data->secondary_dx = secondary_dx;
-        data->secondary_dy = secondary_dy;
-	
-	/* allocate required arrays */
-    	status = mb_malloc(verbose, sizeof(float) * data->secondary_nxy, 
-    				&data->secondary_data, error);
-	if (status != MB_SUCCESS)
-	    {
-	    fprintf(stderr,"\nUnable to allocate memory to store secondary grid data\n");
-	    fprintf(stderr,"\nProgram terminated in function <%s>.\n",
-		    function_name);
-	    exit(*error);
-	    }
-	
-	/* copy grid */
-	memcpy(data->secondary_data, secondary_data, data->secondary_nxy * sizeof(float));
-	
-	/* check if secondary grid has same bounds and dimensions as primary grid so
-		that overlay calculations are trivial */
-	if (data->secondary_nx == data->primary_nx
-		&& data->secondary_ny == data->primary_ny
-		&& (fabs(data->secondary_xmin - data->primary_xmin) < 0.1 * data->primary_dx)
-		&& (fabs(data->secondary_xmax - data->primary_xmax) < 0.1 * data->primary_dx)
-		&& (fabs(data->secondary_ymin - data->primary_ymin) < 0.1 * data->primary_dy)
-		&& (fabs(data->secondary_ymax - data->primary_ymax) < 0.1 * data->primary_dy))
-		data->secondary_sameas_primary = MB_YES;
-	else
-		data->secondary_sameas_primary = MB_NO;
-
-	/* set projection for secondary grid if needed */
-	if (data->secondary_nxy > 0
-		&& data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
-		{
-		/* set projection for getting lon lat */
-		proj_status = mb_proj_init(mbv_verbose, 
-					data->secondary_grid_projection_id,
-					&(view->secondary_pjptr),
-					&error);
-		if (proj_status == MB_SUCCESS)
-			view->secondary_pj_init = MB_YES;
-fprintf(stderr,"SECONDARY GRID PROJECTION:%d %d %s\n",
-view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);
-		}
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_setprimarycolortable(int verbose, int instance,
-			int	primary_colortable,
-			int	primary_colortable_mode,
-			double	primary_colortable_min,
-			double	primary_colortable_max,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_setprimarycolortable";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_setprimarycolortable:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       primary_colortable:        %d\n", primary_colortable);
-		fprintf(stderr,"dbg2       primary_colortable_mode:   %d\n", primary_colortable_mode);
-		fprintf(stderr,"dbg2       primary_colortable_min:    %f\n", primary_colortable_min);
-		fprintf(stderr,"dbg2       primary_colortable_max:    %f\n", primary_colortable_max);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->primary_colortable = primary_colortable;
-        data->primary_colortable_mode = primary_colortable_mode;
-        data->primary_colortable_min = primary_colortable_min;
-        data->primary_colortable_max = primary_colortable_max;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_setslopecolortable(int verbose, int instance,
-			int	slope_colortable,
-			int	slope_colortable_mode,
-			double	slope_colortable_min,
-			double	slope_colortable_max,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_setslopecolortable";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_setslopecolortable:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       slope_colortable:          %d\n", slope_colortable);
-		fprintf(stderr,"dbg2       slope_colortable_mode:     %d\n", slope_colortable_mode);
-		fprintf(stderr,"dbg2       slope_colortable_min:      %f\n", slope_colortable_min);
-		fprintf(stderr,"dbg2       slope_colortable_max:      %f\n", slope_colortable_max);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->slope_colortable = slope_colortable;
-        data->slope_colortable_mode = slope_colortable_mode;
-        data->slope_colortable_min = slope_colortable_min;
-        data->slope_colortable_max = slope_colortable_max;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_setsecondarycolortable(int verbose, int instance,
-			int	secondary_colortable,
-			int	secondary_colortable_mode,
-			double	secondary_colortable_min,
-			double	secondary_colortable_max,
-			double	secondary_overlay_center,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_setsecondarycolortable";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_setsecondarycolortable:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       secondary_colortable:      %d\n", secondary_colortable);
-		fprintf(stderr,"dbg2       secondary_colortable_mode: %d\n", secondary_colortable_mode);
-		fprintf(stderr,"dbg2       secondary_colortable_min:  %f\n", secondary_colortable_min);
-		fprintf(stderr,"dbg2       secondary_colortable_max:  %f\n", secondary_colortable_max);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->secondary_colortable = secondary_colortable;
-        data->secondary_colortable_mode = secondary_colortable_mode;
-        data->secondary_colortable_min = secondary_colortable_min;
-        data->secondary_colortable_max = secondary_colortable_max;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_getsitecount(int verbose, int instance,
-			int *nsite,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_getsitecount";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_getsitecount:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* get number of sites */
-	*nsite = data->nsite;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       nsite:                     %d\n", *nsite);
-		fprintf(stderr,"dbg2       error:                     %d\n", *error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n", status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_allocsitearrays(int verbose, 
-			int	nsite,
-			double	**sitelon,
-			double	**sitelat,
-			double	**sitetopo,
-			int	**sitecolor,
-			int	**sitesize,
-			mb_path	**sitename,
-			int 	*error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_allocsitearrays";
-	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_allocsitearrays: nsite:%d\n", nsite);
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       nsite:                     %d\n", nsite);
-		fprintf(stderr,"dbg2       sitelon:                   %d\n", *sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %d\n", *sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %d\n", *sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %d\n", *sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %d\n", *sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %d\n", *sitename);
-		}
-
-	/* allocate the arrays using mb_realloc */
-	status = mb_realloc(verbose,nsite*sizeof(double),sitelon,error);
-	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(double),sitelat,error);
-	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(double),sitetopo,error);
-	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(int),sitecolor,error);
-	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(int),sitesize,error);
-	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(mb_path),sitename,error);
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sitelon:                   %d\n", *sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %d\n", *sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %d\n", *sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %d\n", *sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %d\n", *sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %d\n", *sitename);
-		fprintf(stderr,"dbg2       error:                     %d\n", *error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n", status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_freesitearrays(int verbose, 
-			double	**sitelon,
-			double	**sitelat,
-			double	**sitetopo,
-			int	**sitecolor,
-			int	**sitesize,
-			mb_path	**sitename,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_freesitearrays";
-	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_freesitearrays:\n");
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       sitelon:                   %d\n", *sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %d\n", *sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %d\n", *sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %d\n", *sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %d\n", *sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %d\n", *sitename);
-		}
-
-	/* free the arrays using mb_free */
-	status = mb_free(verbose,sitelon,error);
-	status = mb_free(verbose,sitelat,error);
-	status = mb_free(verbose,sitetopo,error);
-	status = mb_free(verbose,sitecolor,error);
-	status = mb_free(verbose,sitesize,error);
-	status = mb_free(verbose,sitename,error);
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sitelon:                   %d\n", *sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %d\n", *sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %d\n", *sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %d\n", *sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %d\n", *sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %d\n", *sitename);
-		fprintf(stderr,"dbg2       error:                     %d\n", *error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n", status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_addsites(int verbose, int instance,
-			int	nsite,
-			double	*sitelon,
-			double	*sitelat,
-			double	*sitetopo,
-			int	*sitecolor,
-			int	*sitesize,
-			mb_path	*sitename,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_addsites";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	double	xgrid, ygrid, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	int	nfound;
-	int	nadded;
-	int	i, ii, jj, iii, jjj, kkk;
-
-fprintf(stderr,"Called mbview_addsites:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       nsite:                     %d\n", nsite);
-		fprintf(stderr,"dbg2       sitelon:                   %d\n", sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %d\n", sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %d\n", sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %d\n", sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %d\n", sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %d\n", sitename);
-		for (i=0;i<nsite;i++)
-			{
-			fprintf(stderr,"dbg2       site:%d lon:%f lat:%f topo:%f color:%d size:%d name:%s\n", 
-					i, sitelon[i], sitelat[i], sitetopo[i], 
-					sitecolor[i], sitesize[i], sitename[i]);
-			}
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* make sure no site is selected */
-	data->site_selected = MBV_SELECT_NONE;
-
-	/* allocate memory if required */
-	if (data->nsite_alloc < data->nsite + nsite)
-		{
-fprintf(stderr,"Have %d sites allocated but need %d + %d = %d\n",
-data->nsite_alloc, data->nsite, nsite, data->nsite + nsite);
-		data->nsite_alloc = data->nsite + nsite;
-		status = mb_realloc(mbv_verbose, 
-			    	data->nsite_alloc * sizeof(struct mbview_site_struct),
-			    	&(data->sites), &error);
-		if (status == MB_FAILURE)
-			{
-			data->nsite_alloc = 0;
-			}
-		else
-			{
-			for (i=data->nsite;i<data->nsite_alloc;i++)
-				{
-				data->sites[i].color = MBV_COLOR_RED;
-				data->sites[i].size = 1;
-				data->sites[i].name[0] = '\0';
-				}
-			}
-		}
-	
-	/* loop over the sites */
-	nadded = 0;
-	for (i=0;i<nsite;i++)
-		{
-		/* get site positions in grid and display coordinates */
-		status = mbview_projectfromlonlat(instance,
-				sitelon[i], sitelat[i], 
-				&xgrid, &ygrid,
-				&xdisplay, &ydisplay);
-				
-		/* get topo from primary grid if needed */
-		if (sitetopo[i] == MBV_DEFAULT_NODATA)
-		    {
-		    nfound = 0;
-		    zdata = 0.0;
-		    ii = (int)((xgrid - data->primary_xmin) / data->primary_dx);
-		    jj = (int)((ygrid - data->primary_ymin) / data->primary_dy);
-		    if (ii >= 0 && ii < data->primary_nx - 1
-			    && jj >= 0 && jj < data->primary_ny - 1)
-			{
-			for (iii=ii;iii<=ii+1;iii++)
-			for (jjj=jj;jjj<=jj+1;jjj++)
-			    {
-			    kkk = iii * data->primary_ny + jjj;
-			    if (data->primary_data[kkk] != data->primary_nodatavalue)
-				{
-				nfound++;
-				zdata += data->primary_data[kkk];
-				}
-			    }
-			}
-		    if (nfound > 0)
-		        zdata /= (double)nfound;
-		    else
-		    	zdata = 0.0;
-		    }
-				
-		/* use provided topo */
-		else
-		    {
-		    zdata = sitetopo[i];
-		    }
-		    
-		/* add site */
-		zdisplay = view->zscale * (zdata - view->zorigin);
-
-		/* add the new site */
-		data->sites[data->nsite].point.xgrid = xgrid;
-		data->sites[data->nsite].point.ygrid = ygrid;
-		data->sites[data->nsite].point.xlon = sitelon[i];
-		data->sites[data->nsite].point.ylat = sitelat[i];
-		data->sites[data->nsite].point.zdata = zdata;
-		data->sites[data->nsite].point.xdisplay = xdisplay;
-		data->sites[data->nsite].point.ydisplay = ydisplay;
-		data->sites[data->nsite].point.zdisplay = zdisplay;
-		data->sites[data->nsite].color = sitecolor[i];
-		data->sites[data->nsite].size = sitesize[i];
-		strcpy(data->sites[data->nsite].name, sitename[i]);
-
-		/* set nsite */
-		data->nsite++;
-		nadded++;
-fprintf(stderr,"Added site %d added so far:%d total;%d\n",
-data->nsite-1, nadded, data->nsite);
-		}
-
-	/* make sites viewable */
-	if (nadded > 0)
-		{
-		data->site_view_mode = MBV_VIEW_ON;
-		}
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_getsites(int verbose, int instance,
-			int	*nsite,
-			double	*sitelon,
-			double	*sitelat,
-			double	*sitetopo,
-			int	*sitecolor,
-			int	*sitesize,
-			mb_path	*sitename,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_getsites";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	i;
-
-fprintf(stderr,"Called mbview_getsites:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       nsite:                     %d\n", nsite);
-		fprintf(stderr,"dbg2       sitelon:                   %d\n", sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %d\n", sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %d\n", sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %d\n", sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %d\n", sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %d\n", sitename);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* check that the array pointers are not NULL */
-	if (sitelon == NULL || sitelat == NULL || sitetopo == NULL 
-		|| sitecolor == NULL || sitesize == NULL || sitename == NULL)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_DATA_NOT_INSERTED;
-		}
-	
-	/* otherwise go get the site data */
-	else
-		{	
-		/* loop over the sites */
-		*nsite = data->nsite;
-		for (i=0;i<*nsite;i++)
-			{
-			sitelon[i] = data->sites[i].point.xlon;
-			sitelat[i] = data->sites[i].point.ylat ;
-			sitetopo[i] = data->sites[i].point.zdata;
-			sitecolor[i] = data->sites[i].color;
-			sitesize[i] = data->sites[i].size;
-			strcpy(sitename[i], data->sites[i].name);
-			}
-		}
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       nsite:                     %d\n", *nsite);
-		for (i=0;i<*nsite;i++)
-			{
-			fprintf(stderr,"dbg2       site:%d lon:%f lat:%f topo:%f color:%d size:%d name:%s\n", 
-					i, sitelon[i], sitelat[i], sitetopo[i], 
-					sitecolor[i], sitesize[i],
-					sitename[i]);
-			}
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_getroutecount(int verbose, int instance,
-			int *nroute,
-			int *error)
-{
-	/* local variables */
-	char	*function_name = "mbview_getroutecount";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_getroutecount:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* get number of routes */
-	*nroute = data->nroute;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       nroute:                    %d\n", *nroute);
-		fprintf(stderr,"dbg2       error:                     %d\n", *error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n", status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_getroutepointcount(int verbose, int instance,
-			int	route,
-			int	*npoint,
-			int	*nintpoint,
-			int *error)
-{
-	/* local variables */
-	char	*function_name = "mbview_getroutepointcount";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	i;
-
-fprintf(stderr,"Called mbview_getroutepointcount:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       route:                     %d\n", route);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* get number of points in specified route */
-	*npoint = 0;
-	*nintpoint = 0;
-	if (route >= 0 && route < data->nroute)
-		{
-		*npoint = data->routes[route].npoints;
-		for (i=0;i<*npoint-1;i++)
-			{
-			if (data->routes[route].segments[i].nls > 2)
-				*nintpoint += data->routes[route].segments[i].nls - 2;
-			}
-		}
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       npoint:                    %d\n", *npoint);
-		fprintf(stderr,"dbg2       nintpoint:                 %d\n", *nintpoint);
-		fprintf(stderr,"dbg2       error:                     %d\n", *error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n", status);
-		}
-
-	/* return */
-	return(status);
-
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_allocroutearrays(int verbose, 
-			int	npointtotal,
-			double	**routelon,
-			double	**routelat,
-			int	**interpolated,
-			double	**routetopo,
-			double	**distlateral,
-			double	**distovertopo,
-			double	**slope,
-			int *error)
-{
-	/* local variables */
-	char	*function_name = "mbview_allocroutearrays";
-	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_allocroutearrays: npointtotal:%d\n", npointtotal);
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       npointtotal:               %d\n", npointtotal);
-		fprintf(stderr,"dbg2       routelon:                  %d\n", *routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", *routelat);
-		if (interpolated != NULL)
-		fprintf(stderr,"dbg2       interpolated:              %d\n", *interpolated);
-		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
-		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
-		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", *distovertopo);
-		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %d\n", *slope);
-		}
-
-	/* allocate the arrays using mb_realloc */
-	status = mb_realloc(verbose,npointtotal*sizeof(double),routelon,error);
-	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),routelat,error);
-	if (status == MB_SUCCESS && interpolated != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(int),interpolated,error);
-	if (status == MB_SUCCESS && routetopo != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),routetopo,error);
-	if (status == MB_SUCCESS && distlateral != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),distlateral,error);
-	if (status == MB_SUCCESS && distovertopo != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),distovertopo,error);
-	if (status == MB_SUCCESS && slope != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),slope,error);
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       routelon:                  %d\n", *routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", *routelat);
-		if (interpolated != NULL)
-		fprintf(stderr,"dbg2       interpolated:              %d\n", *interpolated);
-		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
-		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
-		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", *distovertopo);
-		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %d\n", *slope);
-		fprintf(stderr,"dbg2       error:                     %d\n", *error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n", status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_freeroutearrays(int verbose,
-			double	**routelon,
-			double	**routelat,
-			int	**interpolated,
-			double	**routetopo,
-			double	**distlateral,
-			double	**distovertopo,
-			double	**slope,
-			int *error)
-{
-	/* local variables */
-	char	*function_name = "mbview_freeroutearrays";
-	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_freeroutearrays:\n");
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       routelon:                  %d\n", *routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", *routelat);
-		if (interpolated != NULL)
-		fprintf(stderr,"dbg2       interpolated:              %d\n", *interpolated);
-		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
-		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
-		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", *distovertopo);
-		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %d\n", *slope);
-		}
-
-	/* free the arrays using mb_free */
-	status = mb_free(verbose,routelon,error);
-	status = mb_free(verbose,routelat,error);
-	if (interpolated != NULL)
-		status = mb_free(verbose,interpolated,error);
-	if (routetopo != NULL)
-		status = mb_free(verbose,routetopo,error);
-	if (distlateral != NULL)
-		status = mb_free(verbose,distlateral,error);
-	if (distovertopo != NULL)
-		status = mb_free(verbose,distovertopo,error);
-	if (slope != NULL)
-		status = mb_free(verbose,slope,error);
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       routelon:                  %d\n", *routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", *routelat);
-		if (interpolated != NULL)
-		fprintf(stderr,"dbg2       interpolated:              %d\n", *interpolated);
-		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
-		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
-		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", *distovertopo);
-		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %d\n", *slope);
-		fprintf(stderr,"dbg2       error:                     %d\n", *error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n", status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_addroute(int verbose, int instance,
-			int	npoint,
-			double	*routelon,
-			double	*routelat,
-			int	routecolor,
-			int	routesize,
-			mb_path	routename,
-			int *error)
-{
-	/* local variables */
-	char	*function_name = "mbview_addroute";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	double	xgrid, ygrid, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	int	nfound;
-	int	nadded;
-	int	iroute;
-	int	i, ii, jj, iii, jjj, kkk;
-
-fprintf(stderr,"Called mbview_addroute:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       npoint:                    %d\n", npoint);
-		fprintf(stderr,"dbg2       routelon:                  %d\n", routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", routelat);
-		for (i=0;i<npoint;i++)
-			{
-			fprintf(stderr,"dbg2       point:%d lon:%f lat:%f\n", 
-					i, routelon[i], routelat[i]);
-			}
-		fprintf(stderr,"dbg2       routecolor:                %d\n", routecolor);
-		fprintf(stderr,"dbg2       routesize:                 %d\n", routesize);
-		fprintf(stderr,"dbg2       routename:                 %s\n", routename);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* make sure no route is selected */
-	data->route_selected = MBV_SELECT_NONE;
-	data->route_point_selected = MBV_SELECT_NONE;
-	
-	/* set route id so that new route is created */
-	iroute = data->nroute;
-	
-	/* loop over the points in the new route */
-	for (i=0;i<npoint;i++)
-		{
-		/* get route positions in grid and display coordinates */
-		status = mbview_projectfromlonlat(instance,
-				routelon[i], routelat[i], 
-				&xgrid, &ygrid,
-				&xdisplay, &ydisplay);
-				
-		/* get topo from primary grid */
-		nfound = 0;
-		zdata = 0.0;
-		ii = (int)((xgrid - data->primary_xmin) / data->primary_dx);
-		jj = (int)((ygrid - data->primary_ymin) / data->primary_dy);
-		if (ii >= 0 && ii < data->primary_nx - 1
-		    && jj >= 0 && jj < data->primary_ny - 1)
-			{
-			for (iii=ii;iii<=ii+1;iii++)
-			for (jjj=jj;jjj<=jj+1;jjj++)
-			    {
-			    kkk = iii * data->primary_ny + jjj;
-			    if (data->primary_data[kkk] != data->primary_nodatavalue)
-				{
-				nfound++;
-				zdata += data->primary_data[kkk];
-				}
-			    }
-			}
-		if (nfound > 0)
-			zdata /= (double)nfound;
-		else
-			zdata = 0.0;
-		    
-		/* get zdisplay */
-		zdisplay = view->zscale * (zdata - view->zorigin);
-			
-		/* add the route point */
-		mbview_route_add(instance, iroute, i,
-			xgrid, ygrid,
-			routelon[i], routelat[i], zdata,
-			xdisplay, ydisplay, zdisplay);
-		}
-
-	/* set color size and name for new route */
-	data->routes[iroute].color = routecolor;
-	data->routes[iroute].size = routesize;
-	strcpy(data->routes[iroute].name,routename);
-	
-	/* make routes viewable */
-	data->route_view_mode = MBV_VIEW_ON;
+	/* set widget sensitivity */
+	if (data->active == MB_YES)
+		mbview_update_sensitivity(verbose, instance, error);
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2545,388 +1050,7 @@ fprintf(stderr,"Called mbview_addroute:%d\n",instance);
 }
 
 
-/*--------------------------------------------------------------------*/
-int mbview_getroute(int verbose, int instance,
-			int	route,
-			int	*npointtotal,
-			double	*routelon,
-			double	*routelat,
-			int	*interpolated,
-			double	*routetopo,
-			double	*distlateral,
-			double	*distovertopo,
-			double	*slope,
-			int	*routecolor,
-			int	*routesize,
-			mb_path	routename,
-			int *error)
-{
-	/* local variables */
-	char	*function_name = "mbview_getroute";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	double	xx0, yy0, zz0, xx1, yy1, zz1, xx2, yy2, zz2;
-	double	dxx, dyy, dzz;
-	double	dll, doo;
-	int	i, j;
-
-fprintf(stderr,"Called mbview_getroute:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       route:                     %d\n", route);
-		fprintf(stderr,"dbg2       npointtotal:               %d\n", npointtotal);
-		fprintf(stderr,"dbg2       routelon:                  %d\n", routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", routelat);
-		fprintf(stderr,"dbg2       interpolated:              %d\n", interpolated);
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", routetopo);
-		fprintf(stderr,"dbg2       distlateral:               %d\n", distlateral);
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", distovertopo);
-		fprintf(stderr,"dbg2       slope:                     %d\n", slope);
-		fprintf(stderr,"dbg2       routecolor:                %d\n", routecolor);
-		fprintf(stderr,"dbg2       routesize:                 %d\n", routesize);
-		fprintf(stderr,"dbg2       routename:                 %d\n", routename);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* zero the points returned */
-	*npointtotal = 0;
-	
-	/* check that the array pointers are not NULL */
-	if (routelon == NULL || routelat == NULL || interpolated == NULL || routetopo == NULL 
-		|| distlateral == NULL || distovertopo == NULL || slope == NULL)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_DATA_NOT_INSERTED;
-		}
-	
-	/* otherwise go get the route data */
-	else
-		{	
-		/* loop over the route segments */
-		for (i=0;i<data->routes[route].npoints-1;i++)
-			{
-			/* add first point */
-			routelon[*npointtotal] = data->routes[route].points[i].xlon;
-			routelat[*npointtotal] = data->routes[route].points[i].ylat ;
-			interpolated[*npointtotal] = MB_NO;
-			routetopo[*npointtotal] = data->routes[route].points[i].zdata;
-			(*npointtotal)++;
-			
-			/* loop over interior of segment */
-			for (j=1;j<data->routes[route].segments[i].nls-1;j++)
-				{
-				routelon[*npointtotal] = data->routes[route].segments[i].lspoints[j].xlon;
-				routelat[*npointtotal] = data->routes[route].segments[i].lspoints[j].ylat;
-				interpolated[*npointtotal] = MB_YES;
-				routetopo[*npointtotal] = data->routes[route].segments[i].lspoints[j].zdata;
-				(*npointtotal)++;
-				}
-			}
-			
-		/* add last point */
-		j = data->routes[route].npoints - 1;
-		routelon[*npointtotal] = data->routes[route].points[j].xlon;
-		routelat[*npointtotal] = data->routes[route].points[j].ylat ;
-		interpolated[*npointtotal] = MB_NO;
-		routetopo[*npointtotal] = data->routes[route].points[j].zdata;
-		(*npointtotal)++;
-		
-		/* get color size and name */
-		*routecolor = data->routes[route].color;
-		*routesize = data->routes[route].size;
-		strcpy(routename, data->routes[route].name);
-		
-		/* calculate distance and slope */
-		mbview_projectll2meters(instance,
-			routelon[0], routelat[0],
-			&xx1, &yy1);
-		zz1 = routetopo[0];
-		distlateral[0] = 0.0;
-		distovertopo[0] = 0.0;
-		for (j=0;j<*npointtotal;j++)
-			{
-			if (j < *npointtotal - 1)
-				{
-				mbview_projectll2meters(instance,
-					routelon[j+1], routelat[j+1],
-					&xx2, &yy2);
-				zz2 = routetopo[j+1];
-				}
-			if (j == 0 && *npointtotal == 1)
-				{
-				dxx = 0.0;
-				dyy = 0.0;
-				dzz = 0.0;
-				}
-			else if (j == 0)
-				{
-				dxx = xx2 - xx1;
-				dyy = yy2 - yy1;
-				dzz = zz2 - zz1;
-				}
-			else if (j == *npointtotal - 1)
-				{
-				dxx = xx1 - xx0;
-				dyy = yy1 - yy0;
-				dzz = zz1 - zz0;
-				}
-			else
-				{
-				dxx = xx2 - xx0;
-				dyy = yy2 - yy0;
-				dzz = zz2 - zz0;
-				}
-			dll = sqrt(dxx * dxx + dyy * dyy);
-			doo = sqrt(dxx * dxx + dyy * dyy + dzz * dzz);
-			if (j > 0)
-				{
-				distlateral[j] += dll;
-				distovertopo[j] += doo;
-				}
-			if (dll > 0.0)
-				slope[j] = dzz / dll;
-			else
-				slope[j] = 0.0;
-			xx0 = xx1;
-			yy0 = yy1;
-			zz0 = zz1;
-			xx1 = xx2;
-			yy1 = yy2;
-			zz1 = zz2;
-			if (j < *npointtotal - 1)
-				{
-				distlateral[j+1] = distlateral[j];
-				distovertopo[j+1] = distovertopo[j];
-				}
-			}
-		}
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       npointtotal:               %d\n", *npointtotal);
-		for (i=0;i<*npointtotal;i++)
-			{
-			fprintf(stderr,"dbg2       route:%d lon:%f lat:%f interp:%d topo:%f color:%d size:%d name:%s\n", 
-					i, routelon[i], routelat[i], interpolated[i], routetopo[i], 
-					*routecolor, *routesize, routename);
-			}
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_enableviewsites(int verbose, int instance,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_enableviewsites";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_enableviewsites:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->site_mode = MBV_SITE_VIEW;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_enableeditsites(int verbose, int instance,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_enableeditsites";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_enableeditsites:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->site_mode = MBV_SITE_EDIT;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_enableviewroutes(int verbose, int instance,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_enableviewroutes";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_enableviewroutes:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->route_mode = MBV_ROUTE_VIEW;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_enableeditroutes(int verbose, int instance,
-			int *error)
-
-{
-	/* local variables */
-	char	*function_name = "mbview_enableeditroutes";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_enableeditroutes:%d\n",instance);
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set values */
-        data->route_mode = MBV_ROUTE_EDIT;
-		
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:                     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                    %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_open(int verbose, int instance, int *error)
 {
 	/* local variables */
@@ -2951,7 +1075,7 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 	data = &(view->data);
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -3040,6 +1164,8 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		fprintf(stderr,"dbg2       primary_r:                 %d\n", data->primary_r);
 		fprintf(stderr,"dbg2       primary_g:                 %d\n", data->primary_g);
 		fprintf(stderr,"dbg2       primary_b:                 %d\n", data->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %d\n", data->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %d\n", data->primary_stat_z);
 		
 		/* secondary grid data */
 		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
@@ -3088,7 +1214,9 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 			fprintf(stderr,"dbg2       route %d color:       %d\n",i,data->routes[i].color);
 			fprintf(stderr,"dbg2       route %d size:        %d\n",i,data->routes[i].size);
 			fprintf(stderr,"dbg2       route %d name:        %s\n",i,data->routes[i].name);
-			for (i=0;i<data->nroute;i++)
+			fprintf(stderr,"dbg2       route %d npoints:     %d\n",i,data->routes[i].npoints);
+			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,data->routes[i].npoints_alloc);
+			for (j=0;j<data->routes[i].npoints;j++)
 				{
 				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,data->routes[i].points[j].xgrid);
 				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,data->routes[i].points[j].ygrid);
@@ -3106,6 +1234,54 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		fprintf(stderr,"dbg2       nav_mode:              %d\n",data->nav_mode);
 		fprintf(stderr,"dbg2       nnav:                  %d\n",data->nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",data->nnav_alloc);
+		fprintf(stderr,"dbg2       nav_selected:          %d\n",data->nav_selected);
+		for (i=0;i<data->nnav;i++)
+			{
+			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,data->navs[i].color);
+			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,data->navs[i].size);
+			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,data->navs[i].name);
+			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,data->navs[i].swathbounds);
+			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,data->navs[i].shot);
+			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,data->navs[i].cdp);
+			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,data->navs[i].npoints);
+			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,data->navs[i].npoints_alloc);
+			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,data->navs[i].nselected);
+			for (j=0;j<data->navs[i].npoints;j++)
+				{
+				fprintf(stderr,"dbg2       nav %d %d xgrid:    %f\n",i,j,data->navs[i].navpts[j].point.xgrid);
+				fprintf(stderr,"dbg2       nav %d %d ygrid:    %f\n",i,j,data->navs[i].navpts[j].point.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d xlon:     %f\n",i,j,data->navs[i].navpts[j].point.xlon);
+				fprintf(stderr,"dbg2       nav %d %d ylat:     %f\n",i,j,data->navs[i].navpts[j].point.ylat);
+				fprintf(stderr,"dbg2       nav %d %d zdata:    %f\n",i,j,data->navs[i].navpts[j].point.zdata);
+				fprintf(stderr,"dbg2       nav %d %d xdisplay: %f\n",i,j,data->navs[i].navpts[j].point.xdisplay);
+				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,data->navs[i].navpts[j].point.ydisplay);
+				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,data->navs[i].navpts[j].point.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,data->navs[i].navpts[j].pointport.xgrid);
+				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,data->navs[i].navpts[j].pointport.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,data->navs[i].navpts[j].pointport.xlon);
+				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,data->navs[i].navpts[j].pointport.ylat);
+				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,data->navs[i].navpts[j].pointport.zdata);
+				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,data->navs[i].navpts[j].pointport.xdisplay);
+				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,data->navs[i].navpts[j].pointport.ydisplay);
+				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,data->navs[i].navpts[j].pointport.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,data->navs[i].navpts[j].pointcntr.xgrid);
+				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,data->navs[i].navpts[j].pointcntr.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,data->navs[i].navpts[j].pointcntr.xlon);
+				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,data->navs[i].navpts[j].pointcntr.ylat);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,data->navs[i].navpts[j].pointcntr.zdata);
+				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,data->navs[i].navpts[j].pointcntr.xdisplay);
+				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,data->navs[i].navpts[j].pointcntr.ydisplay);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,data->navs[i].navpts[j].pointcntr.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,data->navs[i].navpts[j].pointstbd.xgrid);
+				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,data->navs[i].navpts[j].pointstbd.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,data->navs[i].navpts[j].pointstbd.xlon);
+				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,data->navs[i].navpts[j].pointstbd.ylat);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,data->navs[i].navpts[j].pointstbd.zdata);
+				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,data->navs[i].navpts[j].pointstbd.xdisplay);
+				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,data->navs[i].navpts[j].pointstbd.ydisplay);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,data->navs[i].navpts[j].pointstbd.zdisplay);
+				}
+			}
 
 		}
 		
@@ -3253,7 +1429,6 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_illumination, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_slope, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_secondary, args, ac);
-		XtSetValues(view->mb3dview.mbview_separator1, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_contour, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_site, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_route, args, ac);
@@ -3290,10 +1465,6 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		XtSetValues(view->mb3dview.mbview_dialogShell_colorbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_bulletinBoard_colorbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_separator5, args, ac);
-		XtSetValues(view->mb3dview.mbview_textField_overlaycenter, args, ac);
-		XtSetValues(view->mb3dview.mbview_label_overlaycenter, args, ac);
-		XtSetValues(view->mb3dview.mbview_label_overlayshadebounds, args, ac);
-		XtSetValues(view->mb3dview.mbview_separator4, args, ac);
 		XtSetValues(view->mb3dview.mbview_radioBox_overlaymode, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_ctoh, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_htoc, args, ac);
@@ -3345,6 +1516,72 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		XtSetValues(view->mb3dview.mbview_separator7, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_about_title, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_about_dismiss, args, ac);
+		XtSetValues(view->mb3dview.mbview_dialogShell_shadeparms, args, ac);
+		XtSetValues(view->mb3dview.mbview_bulletinBoard_shadeparms, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator13, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_overlay_center, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_overlay_center, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_overlayshade, args, ac);
+		XtSetValues(view->mb3dview.mbview_radioBox_overlay_shade, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_shade_htoc, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_overlay_amp, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_overlay_amp, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator15, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_slope_amp, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_slope_amp, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_slopeshade, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_illum_azi, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_illum_amp, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_illum_azi, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_illum_amp, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_illumination, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator16, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_shadeparms_apply, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_illum_elev, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_illum_azi, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_shadeparms_dismiss2, args, ac);
+		XtSetValues(view->mb3dview.mbview_dialogShell_3dparms, args, ac);
+		XtSetValues(view->mb3dview.mbview_bulletinBoard_3dparms, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_model_3dzoom, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_model_3dzoom, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator11, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_view_3dzoom, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_3dzoom, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_view_3doffsety, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_3doffsety, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator1, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_view_3doffsetx, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_3doffsetx, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_offset, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_view_elevation, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_elevation, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator4, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_view_azimuth, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_azimuth, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_model_elevation, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_model_azimuth, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_model_elevation, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_model_azimuth, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_model, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator9, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_view_3d_apply, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_exager, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_exageration, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_view_3d_dismiss, args, ac);
+		XtSetValues(view->mb3dview.mbview_dialogShell_2dparms, args, ac);
+		XtSetValues(view->mb3dview.mbview_bulletinBoard_2dparms, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_view_2dzoom, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_2dzoom, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_view_2doffsety, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_2doffsety, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator14, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_view_2doffsetx, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_view_2doffsetx, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_2d_offset, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_view_2d_apply, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_view_2d_dismiss, args, ac);
 		XtSetValues(view->glwmda, args, ac);
 
 		/* set the initialization flag */
@@ -3354,8 +1591,9 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 	/* make sure some key parameters are set */
 	view->projected = MB_NO;
 	view->lastdrawrez = MBV_REZ_NONE;
-	view->lastzscalerez = MBV_REZ_NONE;
-	view->lastcolorrez = MBV_REZ_NONE;
+	mbview_zscaleclear(instance);
+	mbview_setcolorparms(instance);
+	mbview_colorclear(instance);
 	view->contourlorez = MB_NO;
 	view->contourhirez = MB_NO;
 	view->contourfullrez = MB_NO;
@@ -3374,52 +1612,7 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 			= pow(10.0, floor(log10(data->primary_max 
 						- data->primary_min)) - 1.0);
 		}
-		
-	/* set widget sensitivity */
-	ac = 0;
-	if (data->primary_nxy <= 0 || data->primary_data == NULL)
-		{
-		XtSetArg(args[ac], XmNsensitive, False); ac++;
-		}
-	else
-		{
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
-		}
-	XtSetValues(view->mb3dview.mbview_toggleButton_data_primary, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_data_primaryslope, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_none, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_illumination, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_slope, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_contour, args, ac);
-	XtSetValues(view->mb3dview.mbview_radioBox_slopemode, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_slope_ctoh, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_slope_htoc, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_slopemax, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_slopemin, args, ac);
-	XtSetValues(view->mb3dview.mbview_radioBox_colormode, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_data_ctoh, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_data_htoc, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_datamax, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_datamin, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_contours, args, ac);
-	ac = 0;
-	if (data->secondary_nxy <= 0 || data->secondary_data == NULL)
-		{
-		XtSetArg(args[ac], XmNsensitive, False); ac++;
-		}
-	else
-		{
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
-		}
-	XtSetValues(view->mb3dview.mbview_toggleButton_data_secondary, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_secondary, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_overlaycenter, args, ac);
-	XtSetValues(view->mb3dview.mbview_radioBox_overlaymode, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_ctoh, args, ac);
-	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_htoc, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_overlaymax, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_overlaymin, args, ac);
-			
+
 	/* set about version label */
 	sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", 
 		MB_VERSION, MB_BUILD_DATE);
@@ -3427,6 +1620,9 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 
 	/* set widgets */
 	mbview_set_widgets(verbose, instance, error);
+		
+	/* set widget sensitivity */
+	mbview_update_sensitivity(verbose, instance, error);
 	
 	/* create glx context */
 	mbview_reset_glx(instance);
@@ -3447,7 +1643,7 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 }
 
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_update(int verbose, int instance, int *error)
 {
 	/* local variables */
@@ -3460,7 +1656,7 @@ int mbview_update(int verbose, int instance, int *error)
 fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -3476,15 +1672,17 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 	data = &(view->data);
 	
 	/* make sure some key parameters are set */
-	view->projected = MB_NO;
+	/*view->projected = MB_NO;*/
 	view->lastdrawrez = MBV_REZ_NONE;
-	view->lastzscalerez = MBV_REZ_NONE;
-	view->lastcolorrez = MBV_REZ_NONE;
+	mbview_zscaleclear(instance);
+	mbview_setcolorparms(instance);
+	mbview_colorclear(instance);
 	view->contourlorez = MB_NO;
 	view->contourhirez = MB_NO;
 	view->contourfullrez = MB_NO;
-	if (data->primary_colortable_max
-		<= data->primary_colortable_min)
+	if (data->primary_nxy > 0
+		&& data->primary_colortable_max
+			<= data->primary_colortable_min)
 		{
     		data->primary_colortable_min 
 			= data->primary_min
@@ -3498,8 +1696,9 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 			= pow(10.0, floor(log10(data->primary_max 
 						- data->primary_min)) - 1.0);
 		}
-	if (data->secondary_colortable_max
-		<= data->secondary_colortable_min)
+	if (data->secondary_nxy > 0
+		&& data->secondary_colortable_max
+			<= data->secondary_colortable_min)
 		{
     		data->secondary_colortable_min 
 			= data->secondary_min
@@ -3509,11 +1708,67 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 			= data->secondary_max
 				+ 0.01 * (data->secondary_max 
 						- data->secondary_min);
-    		data->secondary_overlay_center 
+    		data->overlay_shade_center 
 			= 0.5 * (data->secondary_max 
 						+ data->secondary_min);
 		}
+
+	/* set widgets */
+	if (data->active == MB_YES)
+		mbview_set_widgets(verbose, instance, error);
 		
+	/* set widget sensitivity */
+	if (data->active == MB_YES)
+		mbview_update_sensitivity(verbose, instance, error);
+
+	/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from mbview_update\n");
+	mbview_plotlowhigh(instance);
+		
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_update_sensitivity(int verbose, int instance, int *error)
+{
+	/* local variables */
+	char	*function_name = "mbview_update_sensitivity";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	i;
+
+fprintf(stderr,"Updating mbview window instance:%d\n",instance);
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		}
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
 	/* set widget sensitivity */
 	ac = 0;
 	if (data->primary_nxy <= 0 || data->primary_data == NULL)
@@ -3541,6 +1796,26 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 	XtSetValues(view->mb3dview.mbview_textField_datamax, args, ac);
 	XtSetValues(view->mb3dview.mbview_textField_datamin, args, ac);
 	XtSetValues(view->mb3dview.mbview_textField_contours, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_slope_amp, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_illum_azi, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_illum_amp, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_illum_elev, args, ac);
+	XtSetValues(view->mb3dview.mbview_pushButton_shadeparms_apply, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_model_azimuth, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_model_elevation, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_model_3dzoom, args, ac);
+	XtSetValues(view->mb3dview.mbview_label_model_3dzoom, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_exageration, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_view_azimuth, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_view_elevation, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_view_3doffsetx, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_view_3doffsety, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_view_3dzoom, args, ac);
+	XtSetValues(view->mb3dview.mbview_pushButton_view_3d_apply, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_view_2doffsetx, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_view_2doffsety, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_view_2dzoom, args, ac);
+	XtSetValues(view->mb3dview.mbview_pushButton_view_2d_apply, args, ac);
 
 	ac = 0;
 	if (data->secondary_nxy <= 0 || data->secondary_data == NULL)
@@ -3553,15 +1828,19 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 		}
 	XtSetValues(view->mb3dview.mbview_toggleButton_data_secondary, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_secondary, args, ac);
-	XtSetValues(view->mb3dview.mbview_textField_overlaycenter, args, ac);
 	XtSetValues(view->mb3dview.mbview_radioBox_overlaymode, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_ctoh, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_htoc, args, ac);
 	XtSetValues(view->mb3dview.mbview_textField_overlaymax, args, ac);
 	XtSetValues(view->mb3dview.mbview_textField_overlaymin, args, ac);
+	XtSetValues(view->mb3dview.mbview_radioBox_overlay_shade, args, ac);
+	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh, args, ac);
+	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_shade_htoc, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_overlay_amp, args, ac);
+	XtSetValues(view->mb3dview.mbview_textField_overlay_center, args, ac);
 
 	ac = 0;
-	if (data->site_mode != MBV_SITE_EDIT)
+	if (data->site_mode == MBV_SITE_OFF)
 		{
 		XtSetArg(args[ac], XmNsensitive, False); ac++;
 		}
@@ -3569,11 +1848,22 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 		{
 		XtSetArg(args[ac], XmNsensitive, True); ac++;
 		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_site, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_site, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rsite, args, ac);
+	if (data->site_mode != MBV_SITE_EDIT)
+		{
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_site, "Pick Sites");
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rsite, "Pick Sites");
+		}
+	else
+		{
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_site, "Edit Sites");
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rsite, "Edit Sites");
+		}
 
 	ac = 0;
-	if (data->route_mode != MBV_ROUTE_EDIT)
+	if (data->route_mode == MBV_ROUTE_OFF)
 		{
 		XtSetArg(args[ac], XmNsensitive, False); ac++;
 		}
@@ -3581,19 +1871,35 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 		{
 		XtSetArg(args[ac], XmNsensitive, True); ac++;
 		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_route, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_route, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rroute, args, ac);
+	if (data->route_mode != MBV_ROUTE_EDIT)
+		{
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_route, "Pick Routes");
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rroute, "Pick Routes");
+		}
+	else
+		{
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_route, "Edit Routes");
+		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rroute, "Edit Routes");
+		}
 
-	/* set widgets */
-	mbview_set_widgets(verbose, instance, error);
-
-	/* draw */
-fprintf(stderr,"Calling mbview_plot from mbview_update\n");
-	mbview_plot(instance, MBV_REZ_LOW);
-
-	/* draw */
-fprintf(stderr,"Calling mbview_plot from mbview_update\n");
-	mbview_plot(instance, MBV_REZ_HIGH);
+	ac = 0;
+fprintf(stderr,"nav_mode:%d\n",data->nav_mode);
+	if (data->nav_mode == MBV_NAV_OFF)
+		{
+		XtSetArg(args[ac], XmNsensitive, False); ac++;
+		}
+	else
+		{
+		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
+	XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
+	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
+	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_nav, "Pick Nav");
+	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -3610,7 +1916,7 @@ fprintf(stderr,"Calling mbview_plot from mbview_update\n");
 	return(status);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 int mbview_set_widgets(int verbose, int instance, int *error)
 {
 	/* local variables */
@@ -3691,7 +1997,7 @@ int mbview_set_widgets(int verbose, int instance, int *error)
 	return(status);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 void 
 mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 {
@@ -3755,16 +2061,14 @@ instance, data->width, data->height);*/
 		    }
 
 		/* draw */
-fprintf(stderr,"Calling mbview_plot from mbview_resize\n");
-		mbview_plot(instance, MBV_REZ_LOW);
-
-		/* draw */
-fprintf(stderr,"Calling mbview_plot from mbview_resize\n");
-		mbview_plot(instance, MBV_REZ_HIGH);}
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from mbview_resize\n");
+		mbview_plotlowhigh(instance);
 
 	    	}
+	    }
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 	
 void
 do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data)
@@ -3779,14 +2083,11 @@ do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data)
     XtGetValues(w, args, ac);
 
 	    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_glwda_expose\n");
-	    mbview_plot(instance, MBV_REZ_LOW);
-
-	    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_glwda_expose\n");
-	    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_glwda_expose\n");
+		mbview_plotlowhigh(instance);
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 	
 void
 do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data)
@@ -3800,7 +2101,7 @@ do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data)
     XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
     XtGetValues(w, args, ac);
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 	
 void
 do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
@@ -3820,6 +2121,7 @@ do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
     ac = 0;
     XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
     XtGetValues(w, args, ac);
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_glwda_input: %d %d  instance:%d\n",
 acs->width, acs->height, instance);
 
@@ -3865,7 +2167,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_down_y);
 			    
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing sites */
@@ -3880,7 +2182,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_down_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing routes */
@@ -3895,7 +2197,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_down_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle selecting navigation */
@@ -3905,7 +2207,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 		
 		} /* end of left button events */
@@ -4003,7 +2305,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_down_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing sites */
@@ -4018,7 +2320,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_down_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing routes */
@@ -4033,7 +2335,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_down_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle selecting navigation */
@@ -4043,7 +2345,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 		
 		} /* end of middle button events */
@@ -4068,7 +2370,6 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    else 
 			    {
 			    view->offset3d_z_save = view->offset3d_z;
-			    /*view->size3d_save = view->size3d;*/
 			    }
 		    }
 	    
@@ -4116,7 +2417,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			/* set cursor for shading */
 			XDefineCursor(view->dpy,view->xid,view->FleurBlackCursor);
 
-			view->overlay_magnitude_save = data->overlay_magnitude;
+			view->overlay_shade_magnitude_save = data->overlay_shade_magnitude;
 			}
 		    }
 					    
@@ -4134,7 +2435,6 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    else 
 			    {
 			    view->viewoffset3d_z_save = view->viewoffset3d_z;
-			    /*view->size3d_save = view->size3d;*/
 			    }
 		    }
 					    
@@ -4160,7 +2460,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_down_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing routes */
@@ -4175,7 +2475,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_down_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle selecting navigation */
@@ -4185,7 +2485,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 		    
 		} /* end of right button events */
@@ -4225,7 +2525,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				data->height - view->button_move_y);
 			
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing sites */
@@ -4240,7 +2540,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_move_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing routes */
@@ -4255,7 +2555,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_move_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle selecting navigation */
@@ -4265,7 +2565,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 		
 		} /* end of left button events */
@@ -4288,6 +2588,15 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			view->offset2d_y = view->offset2d_y_save
 			    - (view->button_move_y - view->button_down_y) 
 			    * (view->top - view->bottom) / data->height;
+			if (XtIsManaged(view->mb3dview.mbview_textField_view_2doffsetx))
+				{
+				sprintf(value_text,"%g", view->offset2d_x);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, 
+						value_text);
+				sprintf(value_text,"%g", view->offset2d_y);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsety, 
+						value_text);
+				}
 			}
 		    else
 			{
@@ -4300,10 +2609,19 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			    	* view->aspect_ratio * view->aspect_ratio
 			    	* MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
 				/ data->height;
+			if (XtIsManaged(view->mb3dview.mbview_textField_view_3doffsetx))
+				{
+				sprintf(value_text,"%g", view->offset3d_x);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsetx, 
+						value_text);
+				sprintf(value_text,"%g", view->offset3d_y);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsety, 
+						value_text);
+				}
 			}
 			
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 	    
 		/* handle 3D rotate */
@@ -4321,9 +2639,18 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			    + 180.0 * ((double)(view->button_move_y 
 					    - view->button_down_y)) 
 				    / ((double)data->height);
+		    if (XtIsManaged(view->mb3dview.mbview_textField_model_azimuth))
+			    {
+			    sprintf(value_text,"%g", data->modelazimuth3d);
+			    XmTextFieldSetString(view->mb3dview.mbview_textField_model_azimuth, 
+					    value_text);
+			    sprintf(value_text,"%g", data->modelelevation3d);
+			    XmTextFieldSetString(view->mb3dview.mbview_textField_model_elevation, 
+					    value_text);
+			    }
 			
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 	    
 		/* handle shading */
@@ -4352,12 +2679,22 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				+ 180.0 * ((double)(view->button_move_y 
 						- view->button_down_y)) 
 					/ ((double)data->height);
+			if (XtIsManaged(view->mb3dview.mbview_textField_illum_azi))
+				{
+				sprintf(value_text,"%g", data->illuminate_azimuth);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_illum_azi, 
+						value_text);
+				sprintf(value_text,"%g", data->illuminate_elevation);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_illum_elev, 
+						value_text);
+				}
 
-			/* reset lastcolorrez flag */
-			view->lastcolorrez = MBV_REZ_NONE;
+			/* clear color status array */
+			mbview_setcolorparms(instance);
+			mbview_colorclear(instance);
 
 			/* replot */
-			mbview_plot(instance, MBV_REZ_LOW);
+			mbview_plotlow(instance);
 			}
 		    }
 					    
@@ -4376,9 +2713,18 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			    + 180.0 * ((double)(view->button_move_y 
 					    - view->button_down_y)) 
 				    / ((double)data->height);
+		    if (XtIsManaged(view->mb3dview.mbview_textField_view_azimuth))
+			    {
+			    sprintf(value_text,"%g", data->viewazimuth3d);
+			    XmTextFieldSetString(view->mb3dview.mbview_textField_view_azimuth, 
+					    value_text);
+			    sprintf(value_text,"%g", data->viewelevation3d);
+			    XmTextFieldSetString(view->mb3dview.mbview_textField_view_elevation, 
+					    value_text);
+			    }
 			
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle area picking */
@@ -4393,7 +2739,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_move_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing sites */
@@ -4408,7 +2754,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_move_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing routes */
@@ -4423,7 +2769,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_move_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle selecting navigation */
@@ -4433,7 +2779,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 	    
 		} /* end of middle button events */
@@ -4454,18 +2800,30 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			view->size2d = view->size2d_save 
 			    * exp(((double)(view->button_down_y - view->button_move_y)) 
 				    / ((double)data->height));
+			if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom))
+				{
+				sprintf(value_text,"%g", view->size2d);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, 
+						value_text);
+				}				
 			}
 
 		    /* rescale 3D map */
 		    else
 			{
 			view->offset3d_z = view->offset3d_z_save 
-			    + 2.0 * view->size3d * (((double)(view->button_down_y - view->button_move_y)) 
+			    + 2.0 * (((double)(view->button_down_y - view->button_move_y)) 
 				    / ((double)data->height));
+			if (XtIsManaged(view->mb3dview.mbview_textField_model_3dzoom))
+				{
+				sprintf(value_text,"%g", view->offset3d_z);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_model_3dzoom, 
+						value_text);
+				}
 			}
 			
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 	    
 		/* handle vertical exagerate */
@@ -4478,15 +2836,25 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    data->exageration = view->exageration_save 
 			    * exp(((double)(view->button_down_y - view->button_move_y)) 
 				    / ((double)data->height));
+		    view->zscale = data->exageration * view->scale;
+		    if (XtIsManaged(view->mb3dview.mbview_textField_exageration))
+			    {
+			    sprintf(value_text,"%g", data->exageration);
+			    XmTextFieldSetString(view->mb3dview.mbview_textField_exageration, 
+					    value_text);
+			    }
 			
 		    /* reset flags */
-		    view->lastzscalerez = MBV_REZ_NONE;
-		    view->contourlorez = MB_NO;
+		    mbview_zscaleclear(instance);
+    		    view->contourlorez = MB_NO;
 		    view->contourhirez = MB_NO;
 		    view->contourfullrez = MB_NO;
+		    
+		    /* rescale data other than the grid */
+		    mbview_zscale(instance);
  			
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 	    
 		/* handle shading */
@@ -4510,12 +2878,19 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			data->illuminate_magnitude = view->illuminate_magnitude_save 
 				* exp(((double)(view->button_down_y - view->button_move_y)) 
 					/ ((double)data->height));
+			if (XtIsManaged(view->mb3dview.mbview_textField_illum_amp))
+				{
+				sprintf(value_text,"%g", data->illuminate_magnitude);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_illum_amp, 
+						value_text);
+				}
 
-			/* reset lastcolorrez flag */
-			view->lastcolorrez = MBV_REZ_NONE;
+			/* clear color status array */
+			mbview_setcolorparms(instance);
+			mbview_colorclear(instance);
 
 			/* replot */
-			mbview_plot(instance, MBV_REZ_LOW);
+			mbview_plotlow(instance);
 			}
 
 		    /* handle shading by slope */
@@ -4528,12 +2903,19 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			data->slope_magnitude = view->slope_magnitude_save 
 				* exp(((double)(view->button_down_y - view->button_move_y)) 
 					/ ((double)data->height));
+			if (XtIsManaged(view->mb3dview.mbview_textField_slope_amp))
+				{
+				sprintf(value_text,"%g", data->slope_magnitude);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_slope_amp, 
+						value_text);
+				}
 
-			/* reset lastcolorrez flag */
-			view->lastcolorrez = MBV_REZ_NONE;
+			/* clear color status array */
+			mbview_setcolorparms(instance);
+			mbview_colorclear(instance);
 
 			/* replot */
-			mbview_plot(instance, MBV_REZ_LOW);
+			mbview_plotlow(instance);
 			}
 
 		    /* handle shading by overlay */
@@ -4543,15 +2925,22 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			XDefineCursor(view->dpy,view->xid,view->FleurBlackCursor);
 
 			/* change magnitude of overlay shading */
-			data->overlay_magnitude = view->overlay_magnitude_save 
+			data->overlay_shade_magnitude = view->overlay_shade_magnitude_save 
 				* exp(((double)(view->button_down_y - view->button_move_y)) 
 					/ ((double)data->height));
+			if (XtIsManaged(view->mb3dview.mbview_textField_overlay_amp))
+				{
+				sprintf(value_text,"%g", data->overlay_shade_magnitude);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, 
+						value_text);
+				}
 
-			/* reset lastcolorrez flag */
-			view->lastcolorrez = MBV_REZ_NONE;
+			/* clear color status array */
+			mbview_setcolorparms(instance);
+			mbview_colorclear(instance);
 
 			/* replot */
-			mbview_plot(instance, MBV_REZ_LOW);
+			mbview_plotlow(instance);
 			}
 		    }
 					    
@@ -4567,18 +2956,30 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			view->size2d = view->size2d_save 
 			    * exp(((double)(view->button_down_y - view->button_move_y)) 
 				    / ((double)data->height));
+			if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom))
+				{
+				sprintf(value_text,"%g", view->size2d);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, 
+						value_text);
+				}
 			}
 
 		    /* rescale 3D map */
 		    else
 			{
 			view->viewoffset3d_z = view->viewoffset3d_z_save 
-			    + 2.0 * view->size3d * (((double)(view->button_down_y - view->button_move_y)) 
+			    + 2.0 * (((double)(view->button_down_y - view->button_move_y)) 
 				    / ((double)data->height));
+			if (XtIsManaged(view->mb3dview.mbview_textField_view_3dzoom))
+				{
+				sprintf(value_text,"%g", view->viewoffset3d_z);
+				XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, 
+						value_text);
+				}
 			}
 			
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle area picking */
@@ -4598,7 +2999,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    data->height - view->button_move_y);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing sites */
@@ -4608,7 +3009,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle editing routes */
@@ -4618,7 +3019,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 					    
 		/* handle selecting navigation */
@@ -4628,7 +3029,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
-		    mbview_plot(instance, MBV_REZ_LOW);
+		    mbview_plotlow(instance);
 		    }
 		} /* end of right button events */
 			
@@ -4648,11 +3049,48 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	   /* If left mouse button is released */
 	  if (view->button1down == MB_YES)
 		{
+		    
+		/* handle move */
+		if (data->mouse_mode == MBV_MOUSE_MOVE
+		    || data->mouse_mode == MBV_MOUSE_ROTATE
+		    || data->mouse_mode == MBV_MOUSE_SHADE
+		    || data->mouse_mode == MBV_MOUSE_VIEWPOINT
+		    || data->mouse_mode == MBV_MOUSE_AREA
+		    && (view->button_down_x != view->button_up_x
+		    	|| view->button_down_y != view->button_up_y))
+		    {		
+		    /* set cursor for pick */
+		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
+		    
+		    /* process pick */
+		    mbview_pick(instance, MBV_PICK_UP,
+				    view->button_up_x, 
+				    data->height - view->button_up_y);
+			    
+		    /* replot */
+		    mbview_plotlow(instance);
+		    }
 		}
 
 	   /* If middle mouse button is released */
 	  else if (view->button2down == MB_YES)
 		{		    		    		
+		/* handle area picking */
+		if (data->mouse_mode == MBV_MOUSE_AREA
+		    && (view->button_down_x != view->button_up_x
+		    	|| view->button_down_y != view->button_up_y))
+		    {				    
+		    /* set cursor for area */
+		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
+
+		    /* process area */
+		    mbview_area(instance, MBV_AREALENGTH_UP,
+				    view->button_up_x, 
+				    data->height - view->button_up_y);
+
+		    /* replot */
+		    mbview_plotlow(instance);
+		    }
 		} /* end of middle button events */
 
 	   /* If right mouse button is released */
@@ -4669,7 +3107,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	  /* replot in high rez if last draw was low rez */
 	  if (view->lastdrawrez == MBV_REZ_LOW)
 	  	{
-		mbview_plot(instance, MBV_REZ_HIGH);
+		mbview_plothigh(instance);
 		}
     
 	  /* reset cursor */
@@ -4704,7 +3142,7 @@ fprintf(stderr,"KeyPress event\n");
 
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 void
 do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
@@ -4720,6 +3158,7 @@ do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
     	ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_dismiss instance:%d\n", instance);
 	
 	/* get view */
@@ -4729,7 +3168,7 @@ fprintf(stderr,"do_mbview_dismiss instance:%d\n", instance);
 	/* hide the widgets for this instance for possible later use */
 	mbview_destroy(mbv_verbose, instance, &error);
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 int mbview_destroy(int verbose, int instance, int *error)
 {
@@ -4801,6 +3240,12 @@ fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
      	if (status == MB_SUCCESS 
 		&& data->primary_b != NULL)
    	status = mb_free(mbv_verbose, &data->primary_b, error);
+     	if (status == MB_SUCCESS 
+		&& data->primary_stat_color != NULL)
+   	status = mb_free(mbv_verbose, &data->primary_stat_color, error);
+     	if (status == MB_SUCCESS 
+		&& data->primary_stat_z != NULL)
+   	status = mb_free(mbv_verbose, &data->primary_stat_z, error);
     	if (status == MB_SUCCESS 
 		&& data->secondary_data != NULL)
     	status = mb_free(mbv_verbose, &data->secondary_data, error);
@@ -4811,11 +3256,21 @@ fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
 	for (i=0;i<4;i++)
 		{
      		if (status == MB_SUCCESS
+		&& data->pick.xsegments[i].lspoints != 0
+		&& data->pick.xsegments[i].lspoints != NULL)
+   		status = mb_free(mbv_verbose, &data->pick.xsegments[i].lspoints, error);
+		}
+     	if (status == MB_SUCCESS
+		&& data->area.segment.lspoints != 0
+		&& data->area.segment.lspoints != NULL)
+   		status = mb_free(mbv_verbose, &data->area.segment.lspoints, error);
+	for (i=0;i<4;i++)
+		{
+     		if (status == MB_SUCCESS
 		&& data->area.segments[i].lspoints != 0
 		&& data->area.segments[i].lspoints != NULL)
    		status = mb_free(mbv_verbose, &data->area.segments[i].lspoints, error);
 		}
-fprintf(stderr, "Done freeing arrays for mbview instance:%d\n", instance);
 
 	if (status != MB_SUCCESS)
 		{
@@ -4848,7 +3303,7 @@ fprintf(stderr, "Calling mbview_reset() for mbview instance:%d\n", instance);
 	/* return */
 	return(status);
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 int mbview_quit(int verbose, int *error)
 {
@@ -4889,5693 +3344,8 @@ int mbview_quit(int verbose, int *error)
 	/* return */
 	return(status);
 }
-/*--------------------------------------------------------------------*/
-int mbview_reset_glx(int instance)
-{
-	/* local variables */
-	char	*function_name = "mbview_reset_glx";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-		
-	/* delete old glx_context if it exists */
-	if (view->glx_init == MB_YES)
-		{
-		glXDestroyContext(view->dpy, view->glx_context);
-		view->glx_init = MB_NO;
-		}
-	
-	/* set up a new opengl context */
-	ac = 0;
-	XtSetArg(args[ac], GLwNvisualInfo, &(view->vi));
-	ac++;
-	XtGetValues(view->glwmda, args, ac);
-	view->glx_context = glXCreateContext(view->dpy, view->vi,
-                	     NULL, GL_FALSE);
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
-	view->glx_init = MB_YES;
-        glViewport(0, 0, data->width, data->height);
-	view->aspect_ratio = ((float)data->width) / ((float)data->height);
-	view->lastdrawrez = MBV_REZ_NONE;
-	view->contourlorez = MB_NO;
-	view->contourhirez = MB_NO;
-	view->contourfullrez = MB_NO;
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		fprintf(stderr,"dbg2       view->dpy:             %d\n", view->dpy);
-		fprintf(stderr,"dbg2       view->vi:              %d\n", view->vi);
-		fprintf(stderr,"dbg2       view->glwmda:          %d\n", view->glwmda);
-		fprintf(stderr,"dbg2       view->glx_context:     %d\n", view->glx_context);
-		fprintf(stderr,"dbg2       view->glx_init:        %d\n", view->glx_init);
-		fprintf(stderr,"dbg2       view->lastdrawrez:     %d\n", view->lastdrawrez);
-		fprintf(stderr,"dbg2       view->contourlorez:    %d\n", view->contourlorez);
-		fprintf(stderr,"dbg2       view->contourhirez:    %d\n", view->contourhirez);
-		fprintf(stderr,"dbg2       view->contourfullrez:  %d\n", view->contourfullrez);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_projectdata(int instance)
-{
-	/* local variables */
-	char	*function_name = "mbview_projectdata";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
-	double	mtodeglon, mtodeglat;
-	double	xgrid, ygrid, xlon, ylat, xdisplay, ydisplay;
-	double	xlonmin, xlonmax, ylatmin, ylatmax;
-	int	derivative_ok;
-	double	dx, dy;
-	int	i, j, k, k1, k2;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		}
-fprintf(stderr,"mbview_projectdata: %d\n", instance);
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* delete old projections if necessary */
-	if (view->primary_pj_init == MB_YES
-		&& view->primary_pjptr != NULL)
-		{
-		mb_proj_free(mbv_verbose, &(view->primary_pjptr), &error);
-		view->primary_pj_init = MB_NO;
-		}
-	if (view->secondary_pj_init == MB_YES
-		&& view->secondary_pjptr != NULL)
-		{
-		mb_proj_free(mbv_verbose, &(view->secondary_pjptr), &error);
-		view->secondary_pj_init = MB_NO;
-		}
-	if (view->display_pj_init == MB_YES
-		&& view->display_pjptr != NULL)
-		{
-		mb_proj_free(mbv_verbose, &(view->display_pjptr), &error);
-		view->display_pj_init = MB_NO;
-		}
-	if (data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		data->primary_grid_projection_mode = MBV_PROJECTION_PROJECTED;
-	if (data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		data->secondary_grid_projection_mode = MBV_PROJECTION_PROJECTED;
-	if (data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		data->display_projection_mode = MBV_PROJECTION_PROJECTED;
-
-	/* check for case where primary grid is already projected but displayed
-	   in that same projection 
-	   - use same bounds info */
-	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
-		&& data->display_projection_mode == MBV_PROJECTION_PROJECTED
-		&& strcmp(data->primary_grid_projection_id,
-				data->display_projection_id) == 0)
-		{
-		/* reset modes */
-		data->primary_grid_projection_mode = MBV_PROJECTION_ALREADYPROJECTED;
-		data->display_projection_mode = MBV_PROJECTION_ALREADYPROJECTED;
-		
-		/* get bounds */
-		view->xmin = data->primary_xmin;
-		view->xmax = data->primary_xmax;
-		view->ymin = data->primary_ymin;
-		view->ymax = data->primary_ymax;
-
-		/* set projection for getting lon lat */
-		proj_status = mb_proj_init(mbv_verbose, 
-					data->primary_grid_projection_id,
-					&(view->primary_pjptr),
-					&error);
-		if (proj_status == MB_SUCCESS)
-			view->primary_pj_init = MB_YES;
-fprintf(stderr,"GRID PROJECTION:%d %d %s\n",
-view->primary_pj_init,view->primary_pjptr,data->primary_grid_projection_id);
-		}
-	   
-	/* else set up projections as needed */
-	else 
-		{
-		/* first go from grid coordinates to lon lat */
-		if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
-			{
-			/* set projection */
-			proj_status = mb_proj_init(mbv_verbose, 
-						data->primary_grid_projection_id,
-						&(view->primary_pjptr),
-						&error);
-			if (proj_status == MB_SUCCESS)
-				view->primary_pj_init = MB_YES;
-fprintf(stderr,"GRID PROJECTION:%d %d %s\n",
-view->primary_pj_init,view->primary_pjptr,data->primary_grid_projection_id);
-				
-			/* get initial bounds */
-			proj_status = mb_proj_inverse(mbv_verbose,
-						view->primary_pjptr,
-						data->primary_xmin,
-						data->primary_ymin,
-						&xlonmin, &ylatmin,
-						&error);						
-			proj_status = mb_proj_inverse(mbv_verbose,
-						view->primary_pjptr,
-						data->primary_xmax,
-						data->primary_ymax,
-						&xlonmax, &ylatmax,
-						&error);						
-			}
-		else
-			{
-			/* already lon lat - just copy initial bounds */
-			xlonmin = data->primary_xmin;
-			xlonmax = data->primary_xmax;
-			ylatmin = data->primary_ymin;
-			ylatmax = data->primary_ymax;
-			}
-			
-		/* now go from lon lat to display coordinates */
-		if (data->display_projection_mode == MBV_PROJECTION_PROJECTED)
-			{
-			/* set projection */
-			proj_status = mb_proj_init(mbv_verbose, 
-						data->display_projection_id,
-						&(view->display_pjptr),
-						&error);
-			if (proj_status == MB_SUCCESS)
-				view->display_pj_init = MB_YES;
-fprintf(stderr,"DISPLAY PROJECTION:%d %d %s\n",
-view->display_pj_init,view->display_pjptr,data->display_projection_id);
-				
-			/* get bounds */
-			proj_status = mb_proj_forward(mbv_verbose,
-						view->display_pjptr,
-						xlonmin, ylatmin,
-						&view->xmin, 
-						&view->ymin,
-						&error);						
-			proj_status = mb_proj_forward(mbv_verbose,
-						view->display_pjptr,
-						xlonmax, ylatmax,
-						&view->xmax, 
-						&view->ymax,
-						&error);						
-			}
-		else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-			{
-			/* set up geographic pseduo-projection */
-			mb_coor_scale(mbv_verbose, 
-	 			0.5*(ylatmin + ylatmax),
-	 			&(view->mtodeglon), &(view->mtodeglat));
-
-			/* get bounds */
-			view->xmin = xlonmin / view->mtodeglon;
-			view->xmax = xlonmax / view->mtodeglon;
-			view->ymin = ylatmin / view->mtodeglat;
-			view->ymax = ylatmax / view->mtodeglat;
-			}
-		}
-fprintf(stderr,"Projections:\n");
-fprintf(stderr,"  Grid: mode:%d id:%s\n", 
-data->primary_grid_projection_mode, data->primary_grid_projection_id);
-fprintf(stderr,"  Display: mode:%d id:%s\n", 
-data->display_projection_mode, data->display_projection_id);
-fprintf(stderr,"  Display min max: %f %f %f %f\n",
-view->xmin, view->xmax, view->ymin, view->ymax);
-
-	/* set projection for secondary grid if needed */
-	if (data->secondary_nxy > 0
-		&& data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
-		{
-		/* set projection for getting lon lat */
-		proj_status = mb_proj_init(mbv_verbose, 
-					data->secondary_grid_projection_id,
-					&(view->secondary_pjptr),
-					&error);
-		if (proj_status == MB_SUCCESS)
-			view->secondary_pj_init = MB_YES;
-fprintf(stderr,"SECONDARY GRID PROJECTION:%d %d %s\n",
-view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);
-		}
-		
-	/* get origin and scaling */
-	view->xorigin = 0.5 * (view->xmin + view->xmax);
-	view->yorigin = 0.5 * (view->ymin + view->ymax);
-	view->zorigin = 0.5 * (data->primary_min + data->primary_max);
-	view->scale  = MIN((1.75 * MBV_OPENGL_WIDTH 
-					/ (view->xmax - view->xmin)),
-				(1.75 * MBV_OPENGL_WIDTH  
-					/ view->aspect_ratio
-					/ (view->ymax - view->ymin)));
-	view->zscale = data->exageration * view->scale;
-	view->size2d = 1.0;
-	view->size3d = 1.0;
-
-	/* set x and y arrays */
-	for (i=0;i<data->primary_nx;i++)
-	{
-	for (j=0;j<data->primary_ny;j++)
-		{
-		/* get raw values in grid */
-		k = i * data->primary_ny + j;
-		xgrid = data->primary_xmin + i * data->primary_dx;
-		ygrid = data->primary_ymin + j * data->primary_dy;
-		
-		/* reproject positions into display coordinates */
-		mbview_projectforward(instance, MB_NO,
-					xgrid, ygrid,
-					&xlon, &ylat,
-					&xdisplay, &ydisplay);
-					
-		/* insert into plotting arrays */
-		data->primary_x[k] = (float)xdisplay;
-		data->primary_y[k] = (float)ydisplay;
-		}
-		
-	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
-		&& i % MBV_EVENTCHECKCOARSENESS == 0)
-		do_mbview_xevents();
-		
-	/* dump out of loop if plotting already done at a higher recursion */
-	if (view->plot_done == MB_YES)
-		i = data->primary_nx;
-	}
-
-	/* calculate derivatives of primary data */
-	for (i=0;i<data->primary_nx;i++)
-	{
-	for (j=0;j<data->primary_ny;j++)
-		{
-		/* figure if x derivative can be calculated */
-		derivative_ok = MB_NO;
-		if (i == 0)
-		    {
-		    k1 = i * data->primary_ny + j;
-		    k2 = (i + 1) * data->primary_ny + j;
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    }
-		else if (i == data->primary_nx - 1)
-		    {
-		    k1 = (i - 1) * data->primary_ny + j;
-		    k2 = i * data->primary_ny + j;
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    }
-		else
-		    {
-		    k1 = (i - 1) * data->primary_ny + j;
-		    k = i * data->primary_ny + j;
-		    k2 = (i + 1) * data->primary_ny + j;
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    else if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k] != data->primary_nodatavalue)
-			{
-			derivative_ok = MB_YES;
-			k2 = k;
-			}
-		    else if (data->primary_data[k] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			{
-			derivative_ok = MB_YES;
-			k1 = k;
-			}
-		    }
-		
-		/* calculate x derivative */
-		if (derivative_ok == MB_YES)
-			{
-			dx = (data->primary_x[k2] 
-				- data->primary_x[k1]);
-			if (dx != 0.0)
-			data->primary_dzdx[k] 
-				= view->scale * 
-					(data->primary_data[k2] 
-						- data->primary_data[k1])
-					/ dx;
-			else
-			data->primary_dzdx[k] = 0.0;
-			}
-		else
-			data->primary_dzdx[k] = 0.0;
-		
-		/* figure if y derivative can be calculated */
-		derivative_ok = MB_NO;
-		if (j == 0)
-		    {
-		    k1 = i * data->primary_ny + j;
-		    k2 = i * data->primary_ny + (j + 1);
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    }
-		else if (i == data->primary_ny - 1)
-		    {
-		    k1 = i * data->primary_ny + (j - 1);
-		    k2 = i * data->primary_ny + j;
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    }
-		else
-		    {
-		    k1 = i * data->primary_ny + (j - 1);
-		    k = i * data->primary_ny + j;
-		    k2 = i * data->primary_ny + (j + 1);
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    else if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k] != data->primary_nodatavalue)
-			{
-			derivative_ok = MB_YES;
-			k2 = k;
-			}
-		    else if (data->primary_data[k] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			{
-			derivative_ok = MB_YES;
-			k1 = k;
-			}
-		    }
-		
-		/* calculate y derivative */
-		if (derivative_ok == MB_YES)
-			{
-			dy = (data->primary_y[k2] 
-				- data->primary_y[k1]);
-			if (dy != 0.0)
-			data->primary_dzdy[k] 
-				= view->scale * 
-					(data->primary_data[k2] 
-						- data->primary_data[k1])
-					/ (data->primary_y[k2] 
-						- data->primary_y[k1]);
-			else
-			data->primary_dzdy[k] = 0.0;
-			}
-		else
-			data->primary_dzdy[k] = 0.0;
-		}
-		
-	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
-		&& i % MBV_EVENTCHECKCOARSENESS == 0)
-		do_mbview_xevents();
-		
-	/* dump out of loop if plotting already done at a higher recursion */
-	if (view->plot_done == MB_YES)
-		i = data->primary_nx;
-	}
-	
-	/* handle picks */
-	if (data->pick_type != MBV_PICK_NONE)
-		{
-		mbview_projectforward(instance, MB_YES,
-				data->pick.endpoints[0].xgrid,
-				data->pick.endpoints[0].ygrid,
-				&(data->pick.endpoints[0].xlon),
-				&(data->pick.endpoints[0].ylat),
-				&(data->pick.endpoints[0].xdisplay),
-				&(data->pick.endpoints[0].ydisplay));
-		}
-	if (data->pick_type == MBV_PICK_TWOPOINT)
-		{
-		mbview_projectforward(instance, MB_YES,
-				data->pick.endpoints[1].xgrid,
-				data->pick.endpoints[1].ygrid,
-				&(data->pick.endpoints[1].xlon),
-				&(data->pick.endpoints[1].ylat),
-				&(data->pick.endpoints[1].xdisplay),
-				&(data->pick.endpoints[1].ydisplay));
-		if (data->pick.segment.nls > 0)
-			{
-			for (i=0;i<data->pick.segment.nls;i++)
-				{
-				mbview_projectforward(instance, MB_YES,
-						data->pick.segment.lspoints[i].xgrid,
-						data->pick.segment.lspoints[i].ygrid,
-						&(data->pick.segment.lspoints[i].xlon),
-						&(data->pick.segment.lspoints[i].ylat),
-						&(data->pick.segment.lspoints[i].xdisplay),
-						&(data->pick.segment.lspoints[i].ydisplay));
-				}
-			}
-		}
-		
-	/* handle area */
-	if (data->area_type == MBV_AREA_QUAD)
-		{
-		for (i=0;i<2;i++)
-			{
-			mbview_projectforward(instance, MB_YES,
-					data->area.endpoints[i].xgrid,
-					data->area.endpoints[i].ygrid,
-					&(data->area.endpoints[i].xlon),
-					&(data->area.endpoints[i].ylat),
-					&(data->area.endpoints[i].xdisplay),
-					&(data->area.endpoints[i].ydisplay));
-			}
-		for (i=0;i<4;i++)
-			{
-			for (j=0;j<2;j++)
-				{
-				mbview_projectforward(instance, MB_YES,
-						data->area.segments[i].endpoints[j]->xgrid,
-						data->area.segments[i].endpoints[j]->ygrid,
-						&(data->area.segments[i].endpoints[j]->xlon),
-						&(data->area.segments[i].endpoints[j]->ylat),
-						&(data->area.segments[i].endpoints[j]->xdisplay),
-						&(data->area.segments[i].endpoints[j]->ydisplay));
-				}
-			for (j=0;j<data->area.segments[i].nls;j++)
-				{
-				mbview_projectforward(instance, MB_YES,
-						data->area.segments[i].lspoints[j].xgrid,
-						data->area.segments[i].lspoints[j].ygrid,
-						&(data->area.segments[i].lspoints[j].xlon),
-						&(data->area.segments[i].lspoints[j].ylat),
-						&(data->area.segments[i].lspoints[j].xdisplay),
-						&(data->area.segments[i].lspoints[j].ydisplay));
-				}
-			}
-		}
-		
-	/* scale z array */
-	mbview_zscale(instance, MBV_REZ_FULL);
-	
-	/* set projected flag only if plotting not done */
-	if (view->plot_done == MB_NO)
-		{
-		view->projected = MB_YES;
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mbview_zscale(int instance, int rez)
-{
-	/* local variables */
-	char	*function_name = "mbview_zscale";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	stride;
-	int	i, j, k, l;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		}
-fprintf(stderr,"mbview_zscale: %d %d\n", instance, rez);
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* set z scale */		
-	view->zscale = data->exageration * view->scale;
-	
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-
-	/* scale z array */
-	for (i=0;i<data->primary_nx;i+=stride)
-	{
-	for (j=0;j<data->primary_ny;j+=stride)
-		{
-		k = i * data->primary_ny + j;
-		if (data->primary_data[k] != data->primary_nodatavalue)
-			data->primary_z[k] 
-				= (float)(view->zscale 
-					* (data->primary_data[k] - view->zorigin));
-		}
-		
-	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
-		&& i % MBV_EVENTCHECKCOARSENESS == 0)
-		do_mbview_xevents();
-		
-	/* dump out of loop if plotting already done at a higher recursion */
-	if (view->plot_done == MB_YES)
-		i = data->primary_nx;
-	}
-	
-	/* handle picks */
-	if (data->pick_type != MBV_PICK_NONE)
-		{
-		data->pick.endpoints[0].zdisplay 
-				= (float)(view->zscale 
-					* (data->pick.endpoints[0].zdata 
-						- view->zorigin)
-						+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-		}
-	if (data->pick_type == MBV_PICK_TWOPOINT)
-		{
-		data->pick.endpoints[1].zdisplay 
-				= (float)(view->zscale 
-					* (data->pick.endpoints[1].zdata 
-						- view->zorigin)
-						+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-		if (data->pick.segment.nls > 0)
-			{
-			for (i=0;i<data->pick.segment.nls;i++)
-				{
-				data->pick.segment.lspoints[i].zdisplay 
-						= (float)(view->zscale 
-							* (data->pick.segment.lspoints[i].zdata 
-								- view->zorigin)
-								+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-				}
-			}
-		}
-		
-	/* handle area */
-	if (data->area_type == MBV_AREA_QUAD)
-		{
-		for (i=0;i<2;i++)
-			{
-			data->area.endpoints[i].zdisplay 
-				= (float)(view->zscale 
-					* (data->area.endpoints[i].zdata 
-						- view->zorigin)
-						+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-			}
-		for (i=0;i<4;i++)
-			{
-			data->area.endpoints[i].zdisplay 
-				= (float)(view->zscale 
-					* (data->area.endpoints[i].zdata 
-						- view->zorigin)
-						+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-			for (j=0;j<data->area.segments[i].nls;j++)
-				{
-				data->area.segments[i].lspoints[j].zdisplay 
-					= (float)(view->zscale 
-						* (data->area.segments[i].lspoints[j].zdata 
-							- view->zorigin)
-							+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-				}
-			}
-		}
-		
-	/* handle sites */
-	if (data->nsite > 0)
-		{
-		for (i=0;i<data->nsite;i++)
-			{
-			data->sites[i].point.zdisplay 
-				= (float)(view->zscale 
-					* (data->sites[i].point.zdata 
-						- view->zorigin)
-						+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-			}
-		}
-		
-	/* handle routes */
-	if (data->nroute > 0)
-		{
-		for (i=0;i<data->nroute;i++)
-		    {
-		    for (j=0;j<data->routes[i].npoints;j++)
-			{
-			data->routes[i].points[j].zdisplay 
-				= (float)(view->zscale 
-					* (data->routes[i].points[j].zdata 
-						- view->zorigin)
-						+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-			}
-		    for (j=0;j<data->routes[i].npoints-1;j++)
-			{
-			for (k=0;k<data->routes[i].segments[j].nls;k++)
-				{
-				data->routes[i].segments[j].lspoints[k].zdisplay 
-					= (float)(view->zscale 
-						* (data->routes[i].segments[j].lspoints[k].zdata 
-							- view->zorigin)
-							+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-				}
-			}
-		    }
-		}
-	
-	/* set rez flags only if plotting not done */
-	if (view->plot_done == MB_NO)
-		{
-		if (stride > 1)
-			view->lastzscalerez = rez;
-		else
-			view->lastzscalerez = MBV_REZ_FULL;
-        	view->contourlorez = MB_NO;
-        	view->contourhirez = MB_NO;
-        	view->contourfullrez = MB_NO;
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_projectforward(int instance, int needlonlat,
-				double xgrid, double ygrid,
-				double *xlon, double *ylat,
-				double *xdisplay, double *ydisplay)
-{
-	/* local variables */
-	char	*function_name = "mbview_projectforward";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
-	double	xx, yy;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       needlonlat:       %d\n",needlonlat);
-		fprintf(stderr,"dbg2       xgrid:            %f\n",xgrid);
-		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-		
-	/* get positions into geographic coordinates if necessary */
-	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
-		{
-		mb_proj_inverse(mbv_verbose, view->primary_pjptr,
-					xgrid, ygrid, xlon, ylat, &error);
-		}
-	else if (data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		if (needlonlat == MB_YES)
-			{
-			mb_proj_inverse(mbv_verbose, view->primary_pjptr,
-					xgrid, ygrid, xlon, ylat, &error);
-			}
-		}
-	else if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-		{
-		*xlon = xgrid;
-		*ylat = ygrid;
-		}
-
-	/* get positions in the display projection */
-	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED)
-		{
-		mb_proj_forward(mbv_verbose, view->display_pjptr,
-				*xlon, 
-				*ylat, 
-				&xx,
-				&yy,
-				&error);
-		}
-	else if (data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		xx = xgrid;
-		yy = ygrid;
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-		{
-		xx = *xlon / view->mtodeglon;
-		yy = *ylat / view->mtodeglat;
-		}
-
-	/* get final positions in display coordinates */
-	*xdisplay = view->scale * (xx - view->xorigin);
-	*ydisplay = view->scale * (yy - view->yorigin);
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       xlon:        %f\n",*xlon);
-		fprintf(stderr,"dbg2       ylat:        %f\n",*ylat);
-		fprintf(stderr,"dbg2       xdisplay:    %f\n",*xdisplay);
-		fprintf(stderr,"dbg2       ydisplay:    %f\n",*ydisplay);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_projectinverse(int instance, int needlonlat,
-				double xdisplay, double ydisplay,
-				double *xlon, double *ylat,
-				double *xgrid, double *ygrid)
-{
-	/* local variables */
-	char	*function_name = "mbview_projectinverse";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
-	double	xx, yy;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       needlonlat:       %d\n",needlonlat);
-		fprintf(stderr,"dbg2       xdisplay:         %f\n",xdisplay);
-		fprintf(stderr,"dbg2       ydisplay:         %f\n",ydisplay);
-		}
-
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* get positions in display projection */
-	xx = xdisplay / view->scale + view->xorigin;
-	yy = ydisplay / view->scale + view->yorigin;
-
-	/* get positions in geographic coordinates */
-	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED)
-		{
-		mb_proj_inverse(mbv_verbose, view->display_pjptr,
-				xx, yy, xlon, ylat, &error);
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		if (needlonlat == MB_YES)
-			mb_proj_inverse(mbv_verbose, view->display_pjptr,
-					xx, yy, xlon, ylat, &error);
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-		{
-		*xlon = xx * view->mtodeglon;
-		*ylat = yy * view->mtodeglat;
-		}
-
-	/* get positions into grid coordinates */
-	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
-		{
-		mb_proj_forward(mbv_verbose, view->primary_pjptr,
-				*xlon, *ylat, xgrid, ygrid, &error);
-		}
-	else if (data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		*xgrid = xx;
-		*ygrid = yy;
-		}
-	else
-		{
-		*xgrid = *xlon;
-		*ygrid = *ylat;
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       xlon:         %f\n",*xlon);
-		fprintf(stderr,"dbg2       ylat:         %f\n",*ylat);
-		fprintf(stderr,"dbg2       xgrid:        %f\n",*xgrid);
-		fprintf(stderr,"dbg2       ygrid:        %f\n",*xgrid);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:       %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_projectfromlonlat(int instance,
-				double xlon, double ylat,
-				double *xgrid, double *ygrid,
-				double *xdisplay, double *ydisplay)
-{
-	/* local variables */
-	char	*function_name = "mbview_projectfromlonlat";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	double	xx, yy;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
-		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* get positions into grid coordinates */
-	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
-		|| data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		mb_proj_forward(mbv_verbose, view->primary_pjptr,
-				xlon, ylat, xgrid, ygrid, &error);
-		}
-	else
-		{
-		*xgrid = xlon;
-		*ygrid = ylat;
-		}
-
-	/* get positions in the display projection */
-	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED)
-		{
-		mb_proj_forward(mbv_verbose, view->display_pjptr,
-				xlon, 
-				ylat, 
-				&xx,
-				&yy,
-				&error);
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-		{
-		xx = xlon / view->mtodeglon;
-		yy = ylat / view->mtodeglat;
-		}
-
-	/* get final positions in display coordinates */
-	*xdisplay = view->scale * (xx - view->xorigin);
-	*ydisplay = view->scale * (yy - view->yorigin);
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       xgrid:       %f\n",*xgrid);
-		fprintf(stderr,"dbg2       ygrid:       %f\n",*ygrid);
-		fprintf(stderr,"dbg2       xdisplay:    %f\n",*xdisplay);
-		fprintf(stderr,"dbg2       ydisplay:    %f\n",*ydisplay);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_projectll2meters(int instance,
-				double xlon, double ylat,
-				double *xx, double *yy)
-{
-	/* local variables */
-	char	*function_name = "mbview_projectfromlonlat";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
-		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* get positions in unscaled display projection */
-	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED)
-		{
-		mb_proj_forward(mbv_verbose, view->display_pjptr,
-				xlon, 
-				ylat, 
-				xx,
-				yy,
-				&error);
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-		{
-		*xx = xlon / view->mtodeglon;
-		*yy = ylat / view->mtodeglat;
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       xx:          %f\n",*xx);
-		fprintf(stderr,"dbg2       yy:          %f\n",*yy);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_colordata(int instance, int rez)
-{
-	/* local variables */
-	char	*function_name = "mbview_colordata";
-	int	status = MB_SUCCESS;
-	int	stride;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	i, j, k, ii;
-	double	value, svalue, factor, dd;
-	double	xlon, ylat;
-	double	min, max, minuse, maxuse;
-	double	ff, mag2;
-	double	illum_x, illum_y, illum_z;
-	double	intensity;
-	int	colortable, colortable_mode;
-	float	*colortable_red;
-	float	*colortable_blue;
-	float	*colortable_green;
-	int	shade_mode;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		}
-		
-fprintf(stderr,"mbview_colordata: %d %d\n", instance, rez);
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-	if (stride == 1)
-		view->lastcolorrez = MBV_REZ_FULL;
-
-	/* get min max values for coloring */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-		{
-		colortable = data->primary_colortable;
-		colortable_mode = data->primary_colortable_mode;
-		min = data->primary_colortable_min;
-		max = data->primary_colortable_max;
-		}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-		{
-		colortable = data->slope_colortable;
-		colortable_mode = data->slope_colortable_mode;
-		min = data->slope_colortable_min;
-		max = data->slope_colortable_max;
-		}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-		{
-		colortable = data->secondary_colortable;
-		colortable_mode = data->secondary_colortable_mode;
-		min = data->secondary_colortable_min;
-		max = data->secondary_colortable_max;
-		}
-		
-	/* get illumination vector if necessary */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-	    shade_mode = data->primary_shade_mode;
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-	    shade_mode = data->slope_shade_mode;
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-	    shade_mode = data->secondary_shade_mode;
-	if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
-		{
-        	illum_x = sin(DTR * data->illuminate_azimuth) 
-				* cos(DTR * data->illuminate_elevation);
-       	 	illum_y = cos(DTR * data->illuminate_azimuth) 
-				* cos(DTR * data->illuminate_elevation);
-        	illum_z = sin(DTR * data->illuminate_elevation);
-		mag2 = data->illuminate_magnitude
-			* data->illuminate_magnitude;
-/*fprintf(stderr,"ILLUMRAW: %f %f %f\n",
-data->illuminate_azimuth, data->illuminate_elevation, data->illuminate_magnitude);
-fprintf(stderr,"ILLUMLGT: %f %f %f %f\n",illum_x, illum_y, illum_z, mag2);*/
-		}
-	
-	/* get colortable */
-	if (colortable == MBV_COLORTABLE_HAXBY)
-		{
-		colortable_red = colortable_haxby_red;
-		colortable_blue = colortable_haxby_blue;
-		colortable_green = colortable_haxby_green;
-		}
-	else if (colortable == MBV_COLORTABLE_BRIGHT)
-		{
-		colortable_red = colortable_bright_red;
-		colortable_blue = colortable_bright_blue;
-		colortable_green = colortable_bright_green;
-		}
-	else if (colortable == MBV_COLORTABLE_MUTED)
-		{
-		colortable_red = colortable_muted_red;
-		colortable_blue = colortable_muted_blue;
-		colortable_green = colortable_muted_green;
-		}
-	else if (colortable == MBV_COLORTABLE_GRAY)
-		{
-		colortable_red = colortable_gray_red;
-		colortable_blue = colortable_gray_blue;
-		colortable_green = colortable_gray_green;
-		}
-	else if (colortable == MBV_COLORTABLE_FLAT)
-		{
-		colortable_red = colortable_flat_red;
-		colortable_blue = colortable_flat_blue;
-		colortable_green = colortable_flat_green;
-		}
-	else if (colortable == MBV_COLORTABLE_SEALEVEL)
-		{
-		colortable_red = colortable_haxby_red;
-		colortable_blue = colortable_haxby_blue;
-		colortable_green = colortable_haxby_green;
-		}
-		
-	/* color the data */
-	for (i=0;i<data->primary_nx;i+=stride)
-	{
-	for (j=0;j<data->primary_ny;j+=stride)
-		{
-		k = i * data->primary_ny + j;
-		
-		/* only color good data */
-		if (data->primary_data[k] != data->primary_nodatavalue)
-			{
-		
-			/* get values for coloring */
-			if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-				{
-				value = data->primary_data[k];
-				}
-			else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-				{
-				value = sqrt(data->primary_dzdx[k] 
-							* data->primary_dzdx[k]
-						+ data->primary_dzdy[k] 
-							* data->primary_dzdy[k]);
-				}
-			else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-				{
-				if (data->secondary_sameas_primary == MB_YES)
-					value = data->secondary_data[k];
-				else
-					mbview_getsecondaryvalue(instance, i, j, &value);
-				}
-
-			/* get color */
-			if (colortable != MBV_COLORTABLE_SEALEVEL)
-			    mbview_getcolor(value, min, max, colortable_mode, 
-					colortable_red,
-					colortable_green,
-					colortable_blue,
-					&data->primary_r[k],
-					&data->primary_g[k],
-					&data->primary_b[k]);
-			
-			else
-			    {
-			    if (value > 0.0)
-				{
-				if (colortable_mode == MBV_COLORTABLE_NORMAL)
-				    {
-				    minuse = 0.0;
-				    maxuse = max;
-				    colortable_red = colortable_abovesealevel_red;
-				    colortable_green = colortable_abovesealevel_green;
-				    colortable_blue = colortable_abovesealevel_blue;
-				    }
-				else
-				    {
-				    minuse = -max / 11.0;
-				    maxuse = max;
-				    colortable_red = colortable_haxby_red;
-				    colortable_green = colortable_haxby_green;
-				    colortable_blue = colortable_haxby_blue;
-				    }
-				}
-			    else
-				{
-				if (colortable_mode == MBV_COLORTABLE_REVERSED)
-				    {
-				    minuse = min;
-				    maxuse = 0.0;
-				    colortable_red = colortable_abovesealevel_red;
-				    colortable_green = colortable_abovesealevel_green;
-				    colortable_blue = colortable_abovesealevel_blue;
-				    }
-				else
-				    {
-				    minuse = min;
-				    maxuse = -min / 11.0;
-				    colortable_red = colortable_haxby_red;
-				    colortable_green = colortable_haxby_green;
-				    colortable_blue = colortable_haxby_blue;
-				    }
-				}
-			    mbview_getcolor(value, minuse, maxuse, colortable_mode, 
-					colortable_red,
-					colortable_green,
-					colortable_blue,
-					&data->primary_r[k],
-					&data->primary_g[k],
-					&data->primary_b[k]);
-			    }
-
-			/* get shade mode */
-			if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-			    shade_mode = data->primary_shade_mode;
-			else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-			    shade_mode = data->slope_shade_mode;
-			else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-			    shade_mode = data->secondary_shade_mode;
-
-			/* get values for shading */
-			if (shade_mode != MBV_SHADE_VIEW_NONE)
-			    {
-			    if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
-				{
-				dd = sqrt(mag2 * data->primary_dzdx[k] 
-						* data->primary_dzdx[k]
-					+ mag2 * data->primary_dzdy[k] 
-						* data->primary_dzdy[k]
-						+ 1.0);
-				intensity = data->illuminate_magnitude 
-					    * illum_x * data->primary_dzdx[k] / dd
-					+ data->illuminate_magnitude 
-					    * illum_y * data->primary_dzdy[k] / dd
-					+ illum_z / dd
-					- 0.5;
-/*if (j==25)
-fprintf(stderr,"intensity:%f  dzdx:%f  dzdy:%f\n",
-intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
-*/
-
-				mbview_applyshade(intensity,
-					&data->primary_r[k],
-					&data->primary_g[k],
-					&data->primary_b[k]);
-				}
-			    else if (shade_mode == MBV_SHADE_VIEW_SLOPE)
-				{
-				intensity = -data->slope_magnitude
-					* sqrt(data->primary_dzdx[k] 
-							* data->primary_dzdx[k]
-						+ data->primary_dzdy[k] 
-							* data->primary_dzdy[k]);
-				intensity = MAX(intensity, -1.0);
-				mbview_applyshade(intensity,
-					&data->primary_r[k],
-					&data->primary_g[k],
-					&data->primary_b[k]);
-				}
-			    else if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
-				{
-				if (data->secondary_sameas_primary == MB_YES)
-					svalue = data->secondary_data[k];
-				else
-					mbview_getsecondaryvalue(instance, i, j, &svalue);
-				if (svalue != data->secondary_nodatavalue)
-					{
-					intensity = data->overlay_magnitude 
-						* (svalue - data->secondary_overlay_center)
-						/ (data->secondary_max - data->secondary_min);
-					mbview_applyshade(intensity,
-						&data->primary_r[k],
-						&data->primary_g[k],
-						&data->primary_b[k]);
-					}
-				}
-			    }
-
-			}
-		}
-		
-	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
-		&& i % MBV_EVENTCHECKCOARSENESS == 0)
-		do_mbview_xevents();
-		
-	/* dump out of loop if plotting already done at a higher recursion */
-	if (view->plot_done == MB_YES)
-		i = data->primary_nx;
-	}
-	
-	/* set rez flag only if plotting not done */
-	if (view->plot_done == MB_NO)
-		view->lastcolorrez = rez;
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_getsecondaryvalue(int instance, int i, int j, 
-				double *secondary_value)
-{
-	/* local variables */
-	char	*function_name = "mbview_getsecondaryvalue";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	double	xlon, ylat;
-	double	xgrid, ygrid;
-	double	xsgrid, ysgrid;
-	int	ii, jj, kk;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       i:                %d\n",i);
-		fprintf(stderr,"dbg2       j:                %d\n",j);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* get position in primary grid */
-	xgrid = data->primary_xmin + i * data->primary_dx;
-	ygrid = data->primary_ymin + j * data->primary_dy;
-		
-	/* get lon and lat of desired position */
-	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
-		|| data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		mb_proj_inverse(mbv_verbose, view->primary_pjptr,
-				xgrid, ygrid, &xlon, &ylat, &error);
-		}
-	else
-		{
-		xlon = xgrid;
-		ylat = ygrid;
-		}
-
-	/* get position in secondary grid coordinates */
-	if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED
-		|| data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		mb_proj_forward(mbv_verbose, view->secondary_pjptr,
-				xlon, ylat, &xsgrid, &ysgrid, &error);
-		}
-	else
-		{
-		xsgrid = xlon;
-		ysgrid = ylat;
-		}
-
-	/* get rounded location in secondary grid */
-	ii = (xsgrid - data->secondary_xmin) / data->secondary_dx;
-	jj = (ysgrid - data->secondary_ymin) / data->secondary_dy;
-	
-	/* answer only defined within grid bounds */
-	if (ii < 0 || ii >= data->secondary_nx
-		|| jj < 0 || jj > data->secondary_ny)
-		{
-		*secondary_value = data->secondary_nodatavalue;
-		}
-	else
-		{
-		kk = ii * data->secondary_ny + jj;
-		*secondary_value = data->secondary_data[kk];
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       secondary_value:  %f\n",*secondary_value);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_getcolor(double value, double min, double max,
-			int colortablemode, 
-			float *colortable_red,
-			float *colortable_green,
-			float *colortable_blue,
-			float *red, float *green, float *blue)
-{
-	/* local variables */
-	char	*function_name = "mbview_getcolor";
-	int	status = MB_SUCCESS;
-	int	ii;
-	double	ff, factor;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       value:            %f\n",value);
-		fprintf(stderr,"dbg2       min:              %f\n",min);
-		fprintf(stderr,"dbg2       max:              %f\n",max);
-		fprintf(stderr,"dbg2       colortablemode:   %d\n",colortablemode);
-		fprintf(stderr,"dbg2       colortable_red:   %d\n",colortable_red);
-		fprintf(stderr,"dbg2       colortable_green: %d\n",colortable_green);
-		fprintf(stderr,"dbg2       colortable_blue:  %d\n",colortable_blue);
-		}
-		
-	/* get color */
-	if (colortablemode == MBV_COLORTABLE_NORMAL)
-		factor = (max - value) / (max - min);
-	else
-		factor = (value -  min) / (max - min);
-	factor = MAX(factor, 0.000001);
-	factor = MIN(factor, 0.999999);
-	ii = (int) (factor * (MBV_NUM_COLORS - 1));
-	ff = factor * (MBV_NUM_COLORS - 1) - ii;
-	*red = colortable_red[ii]
-		+ ff * (colortable_red[ii+1] - colortable_red[ii]);
-	*green = colortable_green[ii]
-		+ ff * (colortable_green[ii+1] - colortable_green[ii]);
-	*blue = colortable_blue[ii]
-		+ ff * (colortable_blue[ii+1] - colortable_blue[ii]);
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       red:     %f\n",*red);
-		fprintf(stderr,"dbg2       green:   %f\n",*green);
-		fprintf(stderr,"dbg2       blue:    %f\n",*blue);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_applyshade(double intensity, float *r, float *g, float *b)
-{
-	/* note - this correction algorithm is taken from the GMT Technical
-	   Reference and Cookbook by Wessel and Smith - you can find it in
-	   Appendix I: Color Space - The final frontier */
-	   
-	/* local variables */
-	char	*function_name = "mbview_applyshade";
-	int	status = MB_SUCCESS;
-	double	h, s, v;
-	double	vmax, vmin, dv, idv;
-	double	rmod, gmod, bmod;
-	double	f, p, q, t;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       intensity:           %f\n",intensity);
-		}
-	
-	/* change the initial rgb into hsv space */
-	vmax = MAX (MAX (*r, *g), *b);
-	vmin = MIN (MIN (*r, *g), *b);
-	dv = vmax - vmin;
-	v = vmax;
-	if (vmax == 0.0)
-		s = 0.0;
-	else
-		s = dv / vmax;
-	h = 0.0;
-	if (s > 0.0)
-		{
-		idv = 1.0 / dv;
-		rmod = (vmax - *r) * idv;
-		gmod = (vmax - *g) * idv;
-		bmod = (vmax - *b) * idv;
-		if (*r == vmax)
-			h = bmod - gmod;
-		else if (*g == vmax)
-			h = 2.0 + rmod - bmod;
-		else
-			h = 4.0 + gmod - rmod;
-		h *= 60.0;
-		if (h < 0.0) 
-			h += 360.0;
-		}
-
-	/* apply the shade to the color */
-	if (intensity > 0) 
-		{
-		if (s != 0.0) 
-			s = (1.0 - intensity) * s 
-				+ intensity * 0.1;
-		v = (1.0 - intensity) * v 
-			+ intensity;
-		}
-	else 
-		{
-		if (s != 0.0) 
-			s = (1.0 + intensity) * s 
-				- intensity;
-		v = (1.0 + intensity) * v 
-			- intensity * 0.3;
-		}
-	if (v < 0.0) 
-		v = 0.0;
-	if (s < 0.0) 
-		s = 0.0;
-	if (v > 1.0) 
-		v = 1.0;
-	if (s > 1.0) 
-		s = 1.0;
-	
-	/* change the corrected hsv values back into rgb */
-	if (s == 0.0)
-		{
-		*r = v;
-		*g = v;
-		*b = v;
-		}
-	else
-		{
-		while (h >= 360.0) 
-			h -= 360.0;
-		h /= 60.0;
-		f = h - ((int)h);
-		p = v * (1.0 - s);
-		q = v * (1.0 - (s * f));
-		t = v * (1.0 - (s * (1.0 - f)));
-		switch (((int)h)) 
-			{
-			case 0:
-				*r = v;	
-				*g = t;	
-				*b = p;
-				break;
-			case 1:
-				*r = q;	
-				*g = v;	
-				*b = p;
-				break;
-			case 2:
-				*r = p;	
-				*g = v;	
-				*b = t;
-				break;
-			case 3:
-				*r = p;	
-				*g = q;	
-				*b = v;
-				break;
-			case 4:
-				*r = t;	
-				*g = p;	
-				*b = v;
-				break;
-			case 5:
-				*r = v;	
-				*g = p;	
-				*b = q;
-				break;
-			}
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       red:     %d\n",*r);
-		fprintf(stderr,"dbg2       green:   %d\n",*g);
-		fprintf(stderr,"dbg2       blue:    %d\n",*b);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mbview_contour(int instance, int rez)
-{
-	/* local variables */
-	char	*function_name = "mbview_contour";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	i, j, k, l, kk;
-	int	stride;
-	int	vertex[4];
-	int	triangleA, triangleB;
-	int	nlevel, level_min, level_max;
-	int	nvertex, nside;
-	float	level_value, datamin, datamax;
-	float	factor;
-	float	xx[2], yy[2], zz;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    	stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    	stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    	stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-
-	/* start openGL list */
-	if (rez == MBV_REZ_FULL)
-		{
-	    	glNewList((GLuint)(3*instance+3), GL_COMPILE);
-		}
-	else if (rez == MBV_REZ_HIGH)
-		{
-	    	glNewList((GLuint)(3*instance+2), GL_COMPILE);
-		}
-	else
-		{
-	    	glNewList((GLuint)(3*instance+1), GL_COMPILE);
-		}
-	glColor3f(0.0, 0.0, 0.0);
-	glLineWidth(1.0);
-	glBegin(GL_LINES);
-	
-fprintf(stderr,"mbview_contour: instance:%d rez:%d contour interval:%f\n",
-instance, rez, data->contour_interval);
-
-	/* construct the contour segments in each triangle */
-	for (i=0;i<data->primary_nx-stride;i+=stride)
-	{
-	for (j=0;j<data->primary_ny-stride;j+=stride)
-		{
-		/* get vertex id's */
-		vertex[0] = i * data->primary_ny + j;
-		vertex[1] = (i + stride) * data->primary_ny + j;
-	        vertex[2] = i * data->primary_ny + j + stride;
-		vertex[3] = (i + stride) * data->primary_ny + j + stride;
-		
-		/* check if either triangle can be contoured */
-		triangleA = MB_NO;
-		triangleB = MB_NO;
-		if (data->primary_data[vertex[0]] != data->primary_nodatavalue
-			&& data->primary_data[vertex[1]] != data->primary_nodatavalue
-			&& data->primary_data[vertex[2]] != data->primary_nodatavalue)
-			triangleA = MB_YES;
-		if (data->primary_data[vertex[1]] != data->primary_nodatavalue
-			&& data->primary_data[vertex[3]] != data->primary_nodatavalue
-			&& data->primary_data[vertex[2]] != data->primary_nodatavalue)
-			triangleB = MB_YES;
-			
-		/* if at least one triangle is valid, contour it */
-		if (triangleA == MB_YES || triangleB == MB_YES)
-			{
-			/* get min max values and number of contours */
-			nvertex = 0;
-			datamin = 0.0;
-			datamax = 0.0;
-			for (kk=0;kk<4;kk++)
-				{
-				k = vertex[kk];
-				if (data->primary_data[k] != data->primary_nodatavalue) 
-					{
-					if (nvertex == 0)
-						{
-						datamin = data->primary_data[k];
-						datamax = data->primary_data[k];
-						}
-					else
-						{
-						datamin = MIN(datamin, data->primary_data[k]);
-						datamax = MAX(datamax, data->primary_data[k]);
-						}
-					nvertex++;
-					}
-				}
-
-			/* get start, end, and number of contour levels in contour_interval units */
-			level_min = (int)ceil(datamin / data->contour_interval);
-			level_max = (int)floor(datamax / data->contour_interval);
-			nlevel = level_max - level_min + 1;
-				
-			/* now if contours are needed loop over the contour levels */
-			if (nlevel > 0)
-				{
-				for (l=level_min;l<=level_max;l++)
-					{
-					level_value = l * data->contour_interval;
-					
-					/* deal with triangle A - vertexes 0, 1, and 2 */
-					if (triangleA == MB_YES)
-					{
-					nside = 0;
-					if ((data->primary_data[vertex[0]] > level_value
-							&& data->primary_data[vertex[1]] < level_value)
-						|| (data->primary_data[vertex[0]] < level_value
-							&& data->primary_data[vertex[1]] > level_value))
-						{
-						factor = (level_value - data->primary_data[vertex[0]])
-										/ (data->primary_data[vertex[1]]
-											- data->primary_data[vertex[0]]);
-						xx[nside] = data->primary_x[vertex[0]]
-									+ factor * (data->primary_x[vertex[1]]
-											- data->primary_x[vertex[0]]);
-						yy[nside] = data->primary_y[vertex[0]]
-									+ factor * (data->primary_y[vertex[1]]
-											- data->primary_y[vertex[0]]);
-						nside++;
-						}
-					if ((data->primary_data[vertex[1]] > level_value
-							&& data->primary_data[vertex[2]] < level_value)
-						|| (data->primary_data[vertex[1]] < level_value
-							&& data->primary_data[vertex[2]] > level_value))
-						{
-						factor = (level_value - data->primary_data[vertex[1]])
-										/ (data->primary_data[vertex[2]]
-											- data->primary_data[vertex[1]]);
-						xx[nside] = data->primary_x[vertex[1]]
-									+ factor * (data->primary_x[vertex[2]]
-											- data->primary_x[vertex[1]]);
-						yy[nside] = data->primary_y[vertex[1]]
-									+ factor * (data->primary_y[vertex[2]]
-											- data->primary_y[vertex[1]]);
-						nside++;
-						}
-					if (nside < 2 &&
-						((data->primary_data[vertex[2]] > level_value
-							&& data->primary_data[vertex[0]] < level_value)
-						|| (data->primary_data[vertex[2]] < level_value
-							&& data->primary_data[vertex[0]] > level_value)))
-						{
-						factor = (level_value - data->primary_data[vertex[2]])
-										/ (data->primary_data[vertex[0]]
-											- data->primary_data[vertex[2]]);
-						xx[nside] = data->primary_x[vertex[2]]
-									+ factor * (data->primary_x[vertex[0]]
-											- data->primary_x[vertex[2]]);
-						yy[nside] = data->primary_y[vertex[2]]
-									+ factor * (data->primary_y[vertex[0]]
-											- data->primary_y[vertex[2]]);
-						nside++;
-						}
-					if (nside == 2)
-						{
-						if (data->display_mode == MBV_DISPLAY_2D)
-							zz = 1.0 + MBV_OPENGL_2D_CONTOUR_OFFSET * (MBV_REZ_FULL + 1);
-						else
-							zz = (float)(view->zscale * (level_value - view->zorigin) 
-									+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-						glVertex3f(xx[0], yy[0], zz);
-						glVertex3f(xx[1], yy[1], zz);
-						}
-					}
-					
-					/* deal with triangle B - vertexes 1, 3, and 2 */
-					if (triangleB == MB_YES)
-					{
-					nside = 0;
-					if ((data->primary_data[vertex[1]] > level_value
-							&& data->primary_data[vertex[3]] < level_value)
-						|| (data->primary_data[vertex[1]] < level_value
-							&& data->primary_data[vertex[3]] > level_value))
-						{
-						factor = (level_value - data->primary_data[vertex[1]])
-										/ (data->primary_data[vertex[3]]
-											- data->primary_data[vertex[1]]);
-						xx[nside] = data->primary_x[vertex[1]]
-									+ factor * (data->primary_x[vertex[3]]
-											- data->primary_x[vertex[1]]);
-						yy[nside] = data->primary_y[vertex[1]]
-									+ factor * (data->primary_y[vertex[3]]
-											- data->primary_y[vertex[1]]);
-						nside++;
-						}
-					if ((data->primary_data[vertex[3]] > level_value
-							&& data->primary_data[vertex[2]] < level_value)
-						|| (data->primary_data[vertex[3]] < level_value
-							&& data->primary_data[vertex[2]] > level_value))
-						{
-						factor = (level_value - data->primary_data[vertex[3]])
-										/ (data->primary_data[vertex[2]]
-											- data->primary_data[vertex[3]]);
-						xx[nside] = data->primary_x[vertex[3]]
-									+ factor * (data->primary_x[vertex[2]]
-											- data->primary_x[vertex[3]]);
-						yy[nside] = data->primary_y[vertex[3]]
-									+ factor * (data->primary_y[vertex[2]]
-											- data->primary_y[vertex[3]]);
-						nside++;
-						}
-					if (nside < 2 &&
-						((data->primary_data[vertex[2]] > level_value
-							&& data->primary_data[vertex[1]] < level_value)
-						|| (data->primary_data[vertex[2]] < level_value
-							&& data->primary_data[vertex[1]] > level_value)))
-						{
-						factor = (level_value - data->primary_data[vertex[2]])
-										/ (data->primary_data[vertex[1]]
-											- data->primary_data[vertex[2]]);
-						xx[nside] = data->primary_x[vertex[2]]
-									+ factor * (data->primary_x[vertex[1]]
-											- data->primary_x[vertex[2]]);
-						yy[nside] = data->primary_y[vertex[2]]
-									+ factor * (data->primary_y[vertex[1]]
-											- data->primary_y[vertex[2]]);
-						nside++;
-						}
-					if (nside == 2)
-						{
-						zz = (float)(view->zscale * (level_value - view->zorigin) 
-									+ MBV_OPENGL_3D_CONTOUR_OFFSET);
-						glVertex3f(xx[0], yy[0], zz);
-						glVertex3f(xx[1], yy[1], zz);
-						}
-					}
-					
-					}
-				}
-			}
-		
-		}
-		
-	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
-		&& i % MBV_EVENTCHECKCOARSENESS == 0)
-		do_mbview_xevents();
-		
-	/* dump out of loop if plotting already done at a higher recursion */
-	if (view->plot_done == MB_YES)
-		i = data->primary_nx;
-	}
-	
-	/* end openGL list */
-	glEnd();
-	glEndList();
-
-	/* set rez flag only if plotting not done */
-	if (view->plot_done == MB_NO)
-		{
-		if (rez == MBV_REZ_FULL)
-			{
-			view->contourfullrez = MB_YES;
-			}
-		else if (rez == MBV_REZ_HIGH)
-			{
-			view->contourhirez = MB_YES;
-			}
-		else
-			{
-			view->contourlorez = MB_YES;
-			}
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-		
-/*--------------------------------------------------------------------*/
-int mbview_drawdata(int instance, int rez)
-{
-	/* local variables */
-	char	*function_name = "mbview_drawdata";
-	int	status = MB_SUCCESS;
-	int	on, flip;
-	int	stride;
-	int	i, j, k, l, m, n, kk, ll;
-	float	xlength, xxlength;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-		
-	/* set lastdrawrez flag */
-	view->lastdrawrez = rez;
-	
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-	if (stride == 1)
-		view->lastdrawrez = MBV_REZ_FULL;
-	
-	/* enable depth test for 3D plots */
-	if (data->display_mode == MBV_DISPLAY_3D)
-		glEnable(GL_DEPTH_TEST);
-	
-/*fprintf(stderr,"mbview_drawdata: %d %d stride:%d\n", instance,rez,stride);*/
-
-	/* draw the triangle outlines */
-	/*
-	glColor3f(1.0, 0.0, 0.0);
-	for (i=0;i<data->primary_nx-1;i++)
-	{
-	for (j=0;j<data->primary_ny-1;j++)
-		{
-		k = i * data->primary_ny + j;
-		l = (i + 1) * data->primary_ny + j;
-		m = i * data->primary_ny + j + 1;
-		n = (i + 1) * data->primary_ny + j + 1;
-		if (data->primary_data[k] != data->primary_nodatavalue
-			&& data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue)
-			{
-			glBegin(GL_LINE_LOOP);
-			glVertex3f(data->primary_x[k],
-				data->primary_y[k],
-				data->primary_z[k]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			glEnd();
-			}
-		if (data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue
-			&& data->primary_data[n] != data->primary_nodatavalue)
-			{
-			glBegin(GL_LINE_LOOP);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glVertex3f(data->primary_x[n],
-				data->primary_y[n],
-				data->primary_z[n]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			glEnd();
-			}
-		}
-	}
-	*/
-	
-	/* draw the triangles */
-	/*glBegin(GL_TRIANGLES);
-	for (i=0;i<data->primary_nx-stride;i+=stride)
-	{
-	for (j=0;j<data->primary_ny-stride;j+=stride)
-		{
-		k = i * data->primary_ny + j;
-		l = (i + stride) * data->primary_ny + j;
-		m = i * data->primary_ny + j + stride;
-		n = (i + stride) * data->primary_ny + j + stride;
-		if (data->primary_data[k] != data->primary_nodatavalue
-			&& data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue)
-			{
-			glColor3f(data->primary_r[k],
-				data->primary_g[k],
-				data->primary_b[k]);
-			glVertex3f(data->primary_x[k],
-				data->primary_y[k],
-				data->primary_z[k]);
-			glColor3f(data->primary_r[l],
-				data->primary_g[l],
-				data->primary_b[l]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glColor3f(data->primary_r[m],
-				data->primary_g[m],
-				data->primary_b[m]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			}
-		if (data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue
-			&& data->primary_data[n] != data->primary_nodatavalue)
-			{
-			glColor3f(data->primary_r[l],
-				data->primary_g[l],
-				data->primary_b[l]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glColor3f(data->primary_r[n],
-				data->primary_g[n],
-				data->primary_b[n]);
-			glVertex3f(data->primary_x[n],
-				data->primary_y[n],
-				data->primary_z[n]);
-			glColor3f(data->primary_r[m],
-				data->primary_g[m],
-				data->primary_b[m]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			}
-		}
-		
-	/* check for pending event */
-	/*if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
-		&& i % MBV_EVENTCHECKCOARSENESS == 0)
-		do_mbview_xevents();*/
-		
-	/* dump out of loop if plotting already done at a higher recursion */
-	/*if (view->plot_done == MB_YES)
-		i = data->primary_nx;
-	}
-	glEnd();*/
-		
-	/* draw the data as triangle strips */
-	for (i=0;i<data->primary_nx-stride;i+=stride)
-	{
-	on = MB_NO;
-	flip = MB_NO;
-	for (j=0;j<data->primary_ny;j+=stride)
-		{
-		k = i * data->primary_ny + j;
-		l = (i + stride) * data->primary_ny + j;
-		if (flip == MB_NO)
-			{
-			kk = k;
-			ll = l;
-			}
-		else
-			{
-			kk = l;
-			ll = k;
-			}
-		if (data->primary_data[kk] != data->primary_nodatavalue)
-			{
-			if (on == MB_NO)
-				{
-				glBegin(GL_TRIANGLE_STRIP);
-				on = MB_YES;
-				if (kk == k)
-					flip = MB_NO;
-				else
-					flip = MB_YES;
-				}
-			glColor3f(data->primary_r[kk],
-				data->primary_g[kk],
-				data->primary_b[kk]);
-			glVertex3f(data->primary_x[kk],
-				data->primary_y[kk],
-				data->primary_z[kk]);
-			}
-		else
-			{
-			glEnd();
-			on = MB_NO;
-			flip = MB_NO;
-			}
-		if (data->primary_data[ll] != data->primary_nodatavalue)
-			{
-			if (on == MB_NO)
-				{
-				glBegin(GL_TRIANGLE_STRIP);
-				on = MB_YES;
-				if (ll == l)
-					flip = MB_NO;
-				else
-					flip = MB_YES;
-				}
-			glColor3f(data->primary_r[ll],
-				data->primary_g[ll],
-				data->primary_b[ll]);
-			glVertex3f(data->primary_x[ll],
-				data->primary_y[ll],
-				data->primary_z[ll]);
-			}
-		else
-			{
-			glEnd();
-			on = MB_NO;
-			flip = MB_NO;
-			}
-		}
-	if (on == MB_YES)
-		{
-		glEnd();
-		on = MB_NO;
-		flip = MB_NO;
-		}
-		
-	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
-		&& i % MBV_EVENTCHECKCOARSENESS == 0)
-		do_mbview_xevents();
-		
-	/* dump out of loop if plotting already done at a higher recursion */
-	if (view->plot_done == MB_YES)
-		i = data->primary_nx;
-	}
-
-	/* draw contours */
-	if (data->grid_contour_mode == MBV_VIEW_ON)
-		{
-		if (rez == MBV_REZ_FULL && view->contourfullrez == MB_YES)
-	    		glCallList((GLuint)(3*instance+3));
-		else if (rez == MBV_REZ_HIGH && view->contourhirez == MB_YES)
-	    		glCallList((GLuint)(3*instance+2));
-		else if (rez == MBV_REZ_LOW && view->contourlorez == MB_YES)
-	    		glCallList((GLuint)(3*instance+1));
-		}
-		
-	/* draw current pick */
-	if (data->pick_type != MBV_PICK_NONE)
-		{
-		/* set color and linewidth */
-		glColor3f(1.0, 0.0, 0.0);
-		glLineWidth(3.0);
-		glBegin(GL_LINES);
-		
-		/* set size of 'X' in gl units */
-		if (data->display_mode == MBV_DISPLAY_2D)
-			xlength = 0.1 / view->size2d;
-		else
-			xlength = 0.05;
-		
-		/* plot first pick point */
-		glVertex3f((float)(data->pick.endpoints[0].xdisplay - xlength), 
-				(float)(data->pick.endpoints[0].ydisplay - xlength), 
-				(float)(data->pick.endpoints[0].zdisplay));
-		glVertex3f((float)(data->pick.endpoints[0].xdisplay + xlength), 
-				(float)(data->pick.endpoints[0].ydisplay + xlength), 
-				(float)(data->pick.endpoints[0].zdisplay));
-		glVertex3f((float)(data->pick.endpoints[0].xdisplay - xlength), 
-				(float)(data->pick.endpoints[0].ydisplay + xlength), 
-				(float)(data->pick.endpoints[0].zdisplay));
-		glVertex3f((float)(data->pick.endpoints[0].xdisplay + xlength), 
-				(float)(data->pick.endpoints[0].ydisplay - xlength), 
-				(float)(data->pick.endpoints[0].zdisplay));
-		
-		if (data->pick_type == MBV_PICK_TWOPOINT)
-			{
-			glVertex3f((float)(data->pick.endpoints[1].xdisplay - xlength), 
-					(float)(data->pick.endpoints[1].ydisplay - xlength), 
-					(float)(data->pick.endpoints[1].zdisplay));
-			glVertex3f((float)(data->pick.endpoints[1].xdisplay + xlength), 
-					(float)(data->pick.endpoints[1].ydisplay + xlength), 
-					(float)(data->pick.endpoints[1].zdisplay));
-			glVertex3f((float)(data->pick.endpoints[1].xdisplay - xlength), 
-					(float)(data->pick.endpoints[1].ydisplay + xlength), 
-					(float)(data->pick.endpoints[1].zdisplay));
-			glVertex3f((float)(data->pick.endpoints[1].xdisplay + xlength), 
-					(float)(data->pick.endpoints[1].ydisplay - xlength), 
-					(float)(data->pick.endpoints[1].zdisplay));
-			if (data->pick.segment.nls > 0)
-				{
-				for (i=0;i<data->pick.segment.nls-1;i++)
-					{
-					glVertex3f((float)(data->pick.segment.lspoints[i].xdisplay), 
-							(float)(data->pick.segment.lspoints[i].ydisplay), 
-							(float)(data->pick.segment.lspoints[i].zdisplay));
-					glVertex3f((float)(data->pick.segment.lspoints[i+1].xdisplay), 
-							(float)(data->pick.segment.lspoints[i+1].ydisplay), 
-							(float)(data->pick.segment.lspoints[i+1].zdisplay));
-					}
-				}
-			else
-				{
-				glVertex3f((float)(data->pick.endpoints[0].xdisplay), 
-						(float)(data->pick.endpoints[0].ydisplay), 
-						(float)(data->pick.endpoints[0].zdisplay));
-				glVertex3f((float)(data->pick.endpoints[1].xdisplay), 
-						(float)(data->pick.endpoints[1].ydisplay), 
-						(float)(data->pick.endpoints[1].zdisplay));
-				}
-			}
-		glEnd();
-		}
-		
-	/* draw current area */
-	if (data->area_type == MBV_AREA_QUAD)
-		{
-		/* set color and linewidth */
-		glColor3f(1.0, 1.0, 0.0);
-		glLineWidth(3.0);
-		glBegin(GL_LINE_LOOP);
-				
-		/* plot quad segments */
-		for (i=0;i<4;i++)
-			{
-			if (data->area.segments[i].nls > 2)
-				{
-				for (j=0;j<data->area.segments[i].nls-1;j++)
-					{
-					glVertex3f((float)(data->area.segments[i].lspoints[j].xdisplay), 
-							(float)(data->area.segments[i].lspoints[j].ydisplay), 
-							(float)(data->area.segments[i].lspoints[j].zdisplay));
-					/*glVertex3f((float)(data->area.segments[i].lspoints[j+1].xdisplay), 
-							(float)(data->area.segments[i].lspoints[j+1].ydisplay), 
-							(float)(data->area.segments[i].lspoints[j+1].zdisplay));*/
-					}
-				}
-			else
-				{
-				glVertex3f((float)(data->area.segments[i].endpoints[0]->xdisplay), 
-						(float)(data->area.segments[i].endpoints[0]->ydisplay), 
-						(float)(data->area.segments[i].endpoints[0]->zdisplay));
-				/*glVertex3f((float)(data->area.segments[i].endpoints[1]->xdisplay), 
-						(float)(data->area.segments[i].endpoints[1]->ydisplay), 
-						(float)(data->area.segments[i].endpoints[1]->zdisplay));*/
-				}
-			}
-		glEnd();
-		}
-		
-	/* draw sites */
-	if (data->site_mode != MBV_SITE_OFF
-		&& data->site_view_mode == MBV_VIEW_ON
-		&& data->nsite > 0)
-		{
-		
-		/* set size of star in gl units */
-		if (data->display_mode == MBV_DISPLAY_2D)
-			xlength = 0.05 / view->size2d;
-		else
-			xlength = 0.07;
-
-		/* loop over the sites */
-		for (i=0;i<data->nsite;i++)
-			{
-			/* set size */
-			if (i == data->site_selected)
-				xxlength = 1.3 * xlength;
-			else
-				xxlength = xlength;
-			
-			/* draw red interior */
-			glColor3f(1.0, 0.0, 0.0);
-			glBegin(GL_TRIANGLES);
-			glVertex3f((float)(data->sites[i].point.xdisplay), 
-					(float)(data->sites[i].point.ydisplay + xxlength), 
-					(float)(data->sites[i].point.zdisplay));
-			glVertex3f((float)(data->sites[i].point.xdisplay - 0.7071 * xxlength), 
-					(float)(data->sites[i].point.ydisplay - 0.7071 * xxlength), 
-					(float)(data->sites[i].point.zdisplay));
-			glVertex3f((float)(data->sites[i].point.xdisplay + 0.7071 * xxlength), 
-					(float)(data->sites[i].point.ydisplay - 0.7071 * xxlength), 
-					(float)(data->sites[i].point.zdisplay));
-			glEnd();
-			
-			/* draw black outline */
-			glColor3f(0.0, 0.0, 0.0);
-			glLineWidth((float)(1.0));
-			glBegin(GL_LINE_LOOP);
-			glVertex3f((float)(data->sites[i].point.xdisplay), 
-					(float)(data->sites[i].point.ydisplay + xxlength), 
-					(float)(data->sites[i].point.zdisplay));
-			glVertex3f((float)(data->sites[i].point.xdisplay - 0.7071 * xxlength), 
-					(float)(data->sites[i].point.ydisplay - 0.7071 * xxlength), 
-					(float)(data->sites[i].point.zdisplay));
-			glVertex3f((float)(data->sites[i].point.xdisplay + 0.7071 * xxlength), 
-					(float)(data->sites[i].point.ydisplay - 0.7071 * xxlength), 
-					(float)(data->sites[i].point.zdisplay));
-			glEnd();
-			}
-		}
-		
-	/* draw routes */
-	if (data->route_mode != MBV_SITE_OFF
-		&& data->route_view_mode == MBV_VIEW_ON
-		&& data->nroute > 0)
-		{
-		
-		/* set size of boxes in gl units */
-		if (data->display_mode == MBV_DISPLAY_2D)
-			xlength = 0.025 / view->size2d;
-		else
-			xlength = 0.035;
-		
-		/* loop over the route points */
-		for (i=0;i<data->nroute;i++)
-			{
-			glLineWidth((float)(2.0));
-			glBegin(GL_LINE);
-			for (j=0;j<data->routes[i].npoints;j++)
-				{
-				/* set size and color */
-				if (i == data->route_selected
-					&& j == data->route_point_selected)
-					{
-					glColor3f(1.0, 0.0, 0.0);
-					xxlength = 1.3 * xlength;
-					}
-				else
-					{
-					glColor3f(0.0, 0.0, 0.0);
-					xxlength = xlength;
-					}
-			
-				/* draw points */
-				glBegin(GL_QUADS);
-				glVertex3f((float)(data->routes[i].points[j].xdisplay - xxlength), 
-						(float)(data->routes[i].points[j].ydisplay - xxlength), 
-						(float)(data->routes[i].points[j].zdisplay));
-				glVertex3f((float)(data->routes[i].points[j].xdisplay + xxlength), 
-						(float)(data->routes[i].points[j].ydisplay - xxlength), 
-						(float)(data->routes[i].points[j].zdisplay));
-				glVertex3f((float)(data->routes[i].points[j].xdisplay + xxlength), 
-						(float)(data->routes[i].points[j].ydisplay + xxlength), 
-						(float)(data->routes[i].points[j].zdisplay));
-				glVertex3f((float)(data->routes[i].points[j].xdisplay - xxlength), 
-						(float)(data->routes[i].points[j].ydisplay + xxlength), 
-						(float)(data->routes[i].points[j].zdisplay));
-				glEnd();
-				}
-			}
-		
-		/* loop over the routes */
-		for (i=0;i<data->nroute;i++)
-			{
-			glColor3f(0.0, 0.0, 0.0);
-			glLineWidth((float)(2.0));
-			glBegin(GL_LINE_STRIP);
-			for (j=0;j<data->routes[i].npoints-1;j++)
-				{
-				/* set size and color */
-				if (i == data->route_selected
-					&& (j == data->route_point_selected
-						|| j == data->route_point_selected - 1))
-					{
-					glColor3f(1.0, 0.0, 0.0);
-					xxlength = 1.3 * xlength;
-					}
-				else
-					{
-					glColor3f(0.0, 0.0, 0.0);
-					xxlength = xlength;
-					}
-					
-				/* draw draped segment */
-				for (k=0;k<data->routes[i].segments[j].nls;k++)
-					{
-					/* draw points */
-					glVertex3f((float)(data->routes[i].segments[j].lspoints[k].xdisplay), 
-							(float)(data->routes[i].segments[j].lspoints[k].ydisplay), 
-							(float)(data->routes[i].segments[j].lspoints[k].zdisplay));
-					}
-				}
-			glEnd();
-			}
-		}
-
-	/* make sure depth test is off */
-	glDisable(GL_DEPTH_TEST);
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_plot(int instance, int rez)
-{
-	/* local variables */
-	char	*function_name = "mbview_plot";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	float	viewdistance;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* set plot_done to MB_NO and increment the plot recursion level */
-	view->plot_done = MB_NO;
-	view->plot_recursion++;
-	
-	/* make correct window current for OpenGL */
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
-/*fprintf(stderr,"\nmbview_plot: instance:%d rez:%d recursion:%d\n",instance,rez,view->plot_recursion);
-fprintf(stderr,"     view->plot_done:        %d\n",view->plot_done);
-fprintf(stderr,"     view->plot_recursion:   %d\n",view->plot_recursion);
-fprintf(stderr,"     view->projected:        %d\n",view->projected);
-fprintf(stderr,"     view->lastcolorrez:     %d\n",view->lastcolorrez);
-fprintf(stderr,"     view->lastzscalerez:    %d\n",view->lastzscalerez);
-fprintf(stderr,"     view->contourlorez:     %d\n",view->contourlorez);
-fprintf(stderr,"     view->contourhirez:     %d\n",view->contourhirez);
-fprintf(stderr,"     view->contourfullrez:   %d\n",view->contourfullrez);
-fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
-	
-	/* apply projection if needed */
-	if (view->plot_done == MB_NO
-		&& view->projected == MB_NO)
-		{
-		do_mbview_status("Projecting data...", instance);
-		mbview_projectdata(instance);
-		}
-	  
-	/* recolor if needed for current rez */
-	if (view->plot_done == MB_NO
-		&& view->lastcolorrez < rez)
-		{
-		if (rez == MBV_REZ_FULL)
-			do_mbview_status("Coloring data...", instance);
-	    	mbview_colordata(instance, rez);
-		}
-
-	/* re-zscale if needed for current rez */
-	if (view->plot_done == MB_NO
-		&& view->lastzscalerez < rez)
-		{
-		if (rez == MBV_REZ_FULL)
-			do_mbview_status("Rescaling data...", instance);
-	    	mbview_zscale(instance, rez);
-		}
-
-	/* contour if needed */
-	if (view->plot_done == MB_NO
-		&& (data->grid_contour_mode == MBV_VIEW_ON)
-		&& ((rez == MBV_REZ_FULL && view->contourfullrez == MB_NO)
-			|| (rez == MBV_REZ_HIGH && view->contourhirez == MB_NO)
-			|| (rez == MBV_REZ_LOW && view->contourlorez == MB_NO)))
-		{
-		if (rez == MBV_REZ_FULL)
-			do_mbview_status("Contouring data...", instance);
-	    	mbview_contour(instance, rez);
-		}
-	
-
-	/* get bounds of grid seen in current view */
-	/*if (view->plot_done == MB_NO)
-		{
-		mbview_viewbounds(instance, rez);
-		}*/
-	
-	/* do the actual openGL plotting */
-	if (view->plot_done == MB_NO)
-		{
-		/* set projection to 2D or 3D */
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		view->right = MBV_OPENGL_WIDTH / view->size2d;
-		view->left = -MBV_OPENGL_WIDTH / view->size2d;
-		view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-		view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-		if (data->display_mode == MBV_DISPLAY_2D)
-			{
-			glOrtho(view->left, 
-				view->right, 
-				view->bottom, 
-				view->top, 
-				MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
-			}
-		else
-			{
-			gluPerspective(40.0, 
-				view->aspect_ratio, 
-				0.01 * MBV_OPENGL_WIDTH,
-				1000 * MBV_OPENGL_WIDTH);
-			}
-
-		/* set up translations */
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		if (data->display_mode == MBV_DISPLAY_2D)
-			{
-			glTranslated (view->offset2d_x, 
-					view->offset2d_y, 
-					MBV_OPENGL_ZMIN2D);
-			}
-		else if (data->display_mode == MBV_DISPLAY_3D)
-			{
-			viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
-					/ view->size3d / view->aspect_ratio;
-			glTranslated (0.0, 0.0, 
-					-viewdistance + view->viewoffset3d_z);
-			glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-			glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-			glTranslated (view->offset3d_x, 
-					view->offset3d_y, 
-					-viewdistance + view->offset3d_z);
-			glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-			glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
-			}
-
-		/* set background color */
-		glClearColor(1.0, 1.0, 1.0, 0.0);
-		glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
-		glDepthFunc(GL_LESS);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		/* draw data */
-		if (view->plot_done == MB_NO)
-			{
-			if (rez == MBV_REZ_FULL)
-				do_mbview_status("Drawing full rez...", instance);
-			mbview_drawdata(instance, rez);
-			}
-		}
-
-	/* the plot_done flag will still be MB_NO if this
-	   is the highest recursion level to be reached - finish the plot
-	   only in this case */
-	if (view->plot_done == MB_NO)
-		{
-		/* flush opengl buffers */
-		glFlush();
-
-		/* swap opengl buffers */
-		glXSwapBuffers (XtDisplay(view->glwmda), 
-				XtWindow(view->glwmda));
-
-		/* set plot_done to MB_YES */
-		view->plot_done = MB_YES;
-fprintf(stderr, "Plot finished! instance:%d rez:%d recursion:%d\n", instance, rez, view->plot_recursion);
-		}
-		
-	/* decrement the plot recursion level */
-	view->plot_recursion--;
-			
-	if (view->message_on == MB_YES && view->plot_recursion == 0)
-		do_mbview_status("Done.", instance);
-fprintf(stderr,"done with mbview_plot %d %d  recursion:%d\n\n",instance,rez,view->plot_recursion);
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_pick(int instance, int which, int xpixel, int ypixel)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_pick";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	found;
-	double	xgrid, ygrid;
-	double	xlon, ylat, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	double	dx, dy, range, bearing;
-	char	EorW[2], NorS[2];
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       which:            %d\n",which);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* look for point */
-	mbview_findpoint(instance, xpixel, ypixel, 
-			&found, 
-			&xgrid, &ygrid,
-			&xlon, &ylat, &zdata,
-			&xdisplay, &ydisplay, &zdisplay);
-		
-	/* use any good pick */
-	if (found == MB_YES)
-		{
-		if ((which == MBV_PICK_DOWN)
-			|| (which == MBV_PICK_MOVE 
-				&& data->pick_type == MBV_PICK_NONE))
-			{
-			data->pickinfo_mode = MBV_PICK_ONEPOINT;
-			data->pick_type = MBV_PICK_ONEPOINT;
-			data->pick.endpoints[0].xgrid = xgrid;
-			data->pick.endpoints[0].ygrid = ygrid;
-			data->pick.endpoints[0].xlon = xlon;
-			data->pick.endpoints[0].ylat = ylat;
-			data->pick.endpoints[0].zdata = zdata;
-			data->pick.endpoints[0].xdisplay = xdisplay;
-			data->pick.endpoints[0].ydisplay = ydisplay;
-			data->pick.endpoints[0].zdisplay = zdisplay;
-			}
-		else if (which == MBV_PICK_MOVE)
-			{
-			data->pickinfo_mode = MBV_PICK_TWOPOINT;
-			data->pick_type = MBV_PICK_TWOPOINT;
-			data->pick.endpoints[1].xgrid = xgrid;
-			data->pick.endpoints[1].ygrid = ygrid;
-			data->pick.endpoints[1].xlon = xlon;
-			data->pick.endpoints[1].ylat = ylat;
-			data->pick.endpoints[1].zdata = zdata;
-			data->pick.endpoints[1].xdisplay = xdisplay;
-			data->pick.endpoints[1].ydisplay = ydisplay;
-			data->pick.endpoints[1].zdisplay = zdisplay;
-			}
-			
-		/* if a two point pick has been made drape it */
-		if (data->pick_type == MBV_PICK_TWOPOINT)
-			{
-			mbview_drapesegment(instance, &(data->pick.segment));
-			}
-		}
-	else
-		{
-		if (which == MBV_PICK_DOWN)
-			{
-			data->pickinfo_mode = MBV_PICK_NONE;
-			data->pick_type = MBV_PICK_NONE;
-			XBell(view->dpy,100);
-			}
-		else if (which == MBV_PICK_MOVE)
-			{
-			XBell(view->dpy,100);
-			}
-		}
-		
-	/* set pick annotation */
-	mbview_pick_text(instance);
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mbview_pick_text(int instance)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_pick_text";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	double	dx, dy, range, bearing;
-	char	EorW[2], NorS[2];
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-		
-	/* set lon lat annotation */
-	if (data->pickinfo_mode == MBV_PICK_ONEPOINT
-		|| data->pickinfo_mode == MBV_PICK_TWOPOINT)
-		{
-		if (data->pick.endpoints[0].xlon > 0.0)
-			EorW[0] = 'E';
-		else
-			EorW[0] = 'W';
-		if (data->pick.endpoints[0].ylat > 0.0)
-			NorS[0] = 'N';
-		else
-			NorS[0] = 'S';
-		if (data->pick_type == MBV_PICK_TWOPOINT)
-			{
-			if (data->pick.endpoints[1].xlon > 0.0)
-				EorW[1] = 'E';
-			else
-				EorW[1] = 'W';
-			if (data->pick.endpoints[1].ylat > 0.0)
-				NorS[1] = 'N';
-			else
-				NorS[1] = 'S';
-			}
-		}
-	else if (data->pickinfo_mode == MBV_PICK_SITE)
-		{
-		if (data->sites[data->site_selected].point.xlon > 0.0)
-			EorW[0] = 'E';
-		else
-			EorW[0] = 'W';
-		if (data->sites[data->site_selected].point.ylat > 0.0)
-			NorS[0] = 'N';
-		else
-			NorS[0] = 'S';
-		}
-	else if (data->pickinfo_mode == MBV_PICK_ROUTE)
-		{
-		if (data->routes[data->route_selected].points[data->route_point_selected].xlon > 0.0)
-			EorW[0] = 'E';
-		else
-			EorW[0] = 'W';
-		if (data->routes[data->route_selected].points[data->route_point_selected].ylat > 0.0)
-			NorS[0] = 'N';
-		else
-			NorS[0] = 'S';
-		}
-
-	/* update pick info */
-	if (data->pickinfo_mode == MBV_PICK_ONEPOINT)
-		{
-		sprintf(value_text,":::t\"Pick Info:\":t\" Lon: %.6f %c\":t\" Lat: %.6f %c\":t\" Depth: %.3f m\"", 
-			data->pick.endpoints[0].xlon, EorW[0],
-			data->pick.endpoints[0].ylat, NorS[0],
-			data->pick.endpoints[0].zdata);
-		}
-	else if (data->pickinfo_mode == MBV_PICK_TWOPOINT)
-		{
-		dx = data->pick.endpoints[1].xdisplay
-				- data->pick.endpoints[0].xdisplay;
-		dy = data->pick.endpoints[1].ydisplay
-				- data->pick.endpoints[0].ydisplay;
-		range = sqrt(dx * dx + dy * dy) / view->scale ;
-		bearing = RTD * atan2(dx, dy);
-		sprintf(value_text,
-		":::t\"Pick Info:\":t\" Lon 1: %.6f %c\":t\" Lat 1: %.6f %c\":t\" Depth 1: %.3f m\":t\" Lon 2: %.6f %c\":t\" Lat 2: %.6f %c\":t\" Depth 2: %.3f m\":t\" Bearing: %.1f deg\":t\" Distance: %.3f m\"", 
-			data->pick.endpoints[0].xlon, EorW[0],
-			data->pick.endpoints[0].ylat, NorS[0],
-			data->pick.endpoints[0].zdata,
-			data->pick.endpoints[1].xlon, EorW[1],
-			data->pick.endpoints[1].ylat, NorS[1],
-			data->pick.endpoints[1].zdata,
-			bearing, range);
-		}
-	else if (data->pickinfo_mode == MBV_PICK_SITE)
-		{
-		sprintf(value_text,":::t\"Site %d Pick Info:\":t\" Lon: %.6f %c\":t\" Lat: %.6f %c\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
-			data->site_selected,
-			data->sites[data->site_selected].point.xlon, EorW[0],
-			data->sites[data->site_selected].point.ylat, NorS[0],
-			data->sites[data->site_selected].point.zdata,
-			data->sites[data->site_selected].color,
-			data->sites[data->site_selected].size,
-			data->sites[data->site_selected].name);
-		}
-	else if (data->pickinfo_mode == MBV_PICK_ROUTE)
-		{
-		sprintf(value_text,":::t\"Route %d Pick Info:\":t\" Point: %d\":t\" Lon: %.6f %c\":t\" Lat: %.6f %c\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
-			data->route_selected,data->route_point_selected,
-			data->routes[data->route_selected].points[data->route_point_selected].xlon, EorW[0],
-			data->routes[data->route_selected].points[data->route_point_selected].ylat, NorS[0],
-			data->routes[data->route_selected].points[data->route_point_selected].zdata,
-			data->routes[data->route_selected].color,
-			data->routes[data->route_selected].size,
-			data->routes[data->route_selected].name);
-		}
-	else
-		{
-		sprintf(value_text, ":::t\"Pick Info:\":t\"No Pick\"");
-		}
-	set_mbview_label_multiline_string(view->mb3dview.mbview_label_pickinfo, value_text);
-	fprintf(stderr, "Pick Info: %d\n%s\n",data->pickinfo_mode, value_text);
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_area(int instance, int which, int xpixel, int ypixel)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_area";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	found;
-	double	xgrid, ygrid;
-	double	xlon, ylat, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	double	dx, dy, dxuse, dyuse;
-	int	ok;
-	int	i, j, k;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       which:            %d\n",which);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* deal with start of new area */
-	if (which == MBV_AREALENGTH_DOWN
-		|| (which == MBV_AREALENGTH_MOVE)
-			&& data->area_type == MBV_AREA_NONE)
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-				
-		/* use any good point */
-		if (found == MB_YES)
-			{
-			/* set the first endpoint */
-			data->area_type = MBV_AREA_ONEPOINT;
-			data->area.endpoints[0].xgrid = xgrid;
-			data->area.endpoints[0].ygrid = ygrid;
-			data->area.endpoints[0].xlon = xlon;
-			data->area.endpoints[0].ylat = ylat;
-			data->area.endpoints[0].zdata = zdata;
-			data->area.endpoints[0].xdisplay = xdisplay;
-			data->area.endpoints[0].ydisplay = ydisplay;
-			data->area.endpoints[0].zdisplay = zdisplay;
-			}
-		}
-
-	/* deal with definition or change of second endpoint */
-	else if (which == MBV_AREALENGTH_MOVE)
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-				
-		/* ignore an identical pair of points */
-		if (found == MB_YES
-			&& data->area.endpoints[0].xgrid
-				== data->area.endpoints[1].xgrid
-			&& data->area.endpoints[0].ygrid
-				== data->area.endpoints[1].ygrid)
-			{
-			XBell(view->dpy,100);
-			}
-			
-		/* use any good pair of points */
-		else if (found == MB_YES)
-			{
-			/* set the second endpoint */
-			data->area_type = MBV_AREA_QUAD;
-			data->area.endpoints[1].xgrid = xgrid;
-			data->area.endpoints[1].ygrid = ygrid;
-			data->area.endpoints[1].xlon = xlon;
-			data->area.endpoints[1].ylat = ylat;
-			data->area.endpoints[1].zdata = zdata;
-			data->area.endpoints[1].xdisplay = xdisplay;
-			data->area.endpoints[1].ydisplay = ydisplay;
-			data->area.endpoints[1].zdisplay = zdisplay;
-			
-			}
-				
-		/* ignore a bad point */
-		else if (found == MB_NO)
-			{
-			XBell(view->dpy,100);
-			}
-		}
-
-	/* recalculate any good quad area whether defined this time or previously
-		this catches which == MBV_AREAASPECT_CHANGE calls */
-	if (data->area_type == MBV_AREA_QUAD)
-		{
-			
-		/* now define the quad corners in grid coordinates */
-		dx = data->area.endpoints[1].xgrid 
-			- data->area.endpoints[0].xgrid;
-		dy = data->area.endpoints[1].ygrid 
-			- data->area.endpoints[0].ygrid;
-		dxuse = 0.5 * view->areaaspect * dy;
-		dyuse = 0.5 * view->areaaspect * dx;
-	
-		data->area.segments[0].endpoints[0]->xgrid 
-			= data->area.endpoints[0].xgrid
-				- dxuse;
-		data->area.segments[0].endpoints[0]->ygrid 
-			= data->area.endpoints[0].ygrid
-				+ dyuse;
-		data->area.segments[0].endpoints[1]->xgrid 
-			= data->area.endpoints[0].xgrid
-				+ dxuse;
-		data->area.segments[0].endpoints[1]->ygrid 
-			= data->area.endpoints[0].ygrid
-				- dyuse;
-
-		data->area.segments[1].endpoints[0]->xgrid 
-			= data->area.endpoints[0].xgrid
-				+ dxuse;
-		data->area.segments[1].endpoints[0]->ygrid 
-			= data->area.endpoints[0].ygrid
-				- dyuse;
-		data->area.segments[1].endpoints[1]->xgrid 
-			= data->area.endpoints[1].xgrid
-				+ dxuse;
-		data->area.segments[1].endpoints[1]->ygrid 
-			= data->area.endpoints[1].ygrid
-				- dyuse;
-
-		data->area.segments[2].endpoints[0]->xgrid 
-			= data->area.endpoints[1].xgrid
-				+ dxuse;
-		data->area.segments[2].endpoints[0]->ygrid 
-			= data->area.endpoints[1].ygrid
-				- dyuse;
-		data->area.segments[2].endpoints[1]->xgrid 
-			= data->area.endpoints[1].xgrid
-				- dxuse;
-		data->area.segments[2].endpoints[1]->ygrid 
-			= data->area.endpoints[1].ygrid
-				+ dyuse;
-
-		data->area.segments[3].endpoints[0]->xgrid 
-			= data->area.endpoints[1].xgrid
-				- dxuse;
-		data->area.segments[3].endpoints[0]->ygrid 
-			= data->area.endpoints[1].ygrid
-				+ dyuse;
-		data->area.segments[3].endpoints[1]->xgrid 
-			= data->area.endpoints[0].xgrid
-				- dxuse;
-		data->area.segments[3].endpoints[1]->ygrid 
-			= data->area.endpoints[0].ygrid
-				+ dyuse;
-
-		/* now project the segment points */
-		for (i=0;i<4;i++)
-			{
-			for (j=0;j<2;j++)
-				{
-				mbview_projectforward(instance, MB_YES,
-						data->area.segments[i].endpoints[j]->xgrid, 
-						data->area.segments[i].endpoints[j]->ygrid, 
-						&(data->area.segments[i].endpoints[j]->xlon), 
-						&(data->area.segments[i].endpoints[j]->ylat),
-						&(data->area.segments[i].endpoints[j]->xdisplay), 
-						&(data->area.segments[i].endpoints[j]->ydisplay));
-				mbview_getzdata(instance, 
-						data->area.segments[i].endpoints[j]->xgrid, 
-						data->area.segments[i].endpoints[j]->ygrid, 
-						&ok,
-						&(data->area.segments[i].endpoints[j]->zdata));
-				if (ok == MB_NO &&
-					(   (i == 0)
-					 || (i == 1 && j == 0)
-					 || (i == 3 && j == 1)))
-					data->area.segments[i].endpoints[j]->zdata
-						= data->area.endpoints[0].zdata;
-				else if (ok == MB_NO)
-					data->area.segments[i].endpoints[j]->zdata
-						= data->area.endpoints[1].zdata;
-				data->area.segments[i].endpoints[j]->zdisplay 
-					= view->zscale 
-						* (data->area.segments[i].endpoints[j]->zdata 
-							- view->zorigin);
-				}
-			}
-
-		/* now set and drape the quad segments */
-		for (i=0;i<4;i++)
-			{
-			/* drape the segment */
-			mbview_drapesegment(instance, &(data->area.segments[i]));
-			}
-		}
-	
-	/* ignore anything else */
-	else if (found == MB_NO)
-		{
-		XBell(view->dpy,100);
-		}	
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_pick_site_select";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	found;
-	double	xgrid, ygrid;
-	double	xlon, ylat, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	double	xx, yy, rr, rrmin;
-	int	i;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       which:            %d\n",which);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* only select sites if enabled and not in move mode */
-	if (data->site_mode != MBV_SITE_OFF
-		&& data->nsite > 0
-		&& (which == MBV_PICK_DOWN
-			|| data->site_selected == MBV_SELECT_NONE))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-
-		/* look for nearest site */
-		if (found)
-			{
-			rrmin = 1000000000.0;
-			data->site_selected = MBV_SELECT_NONE;
-			for (i=0;i<data->nsite;i++)
-				{
-				xx = xgrid - data->sites[i].point.xgrid;
-				yy = ygrid - data->sites[i].point.ygrid;
-				rr = sqrt(xx * xx + yy * yy);
-				if (rr < rrmin)
-					{
-					rrmin = rr;
-					data->site_selected = i;
-					}
-				}
-			}
-		else if (data->site_selected == MBV_SELECT_NONE)
-			{
-			data->site_selected = MBV_SELECT_NONE;
-			XBell(view->dpy,100);
-			}
-		}
-	
-	/* only move selected sites if enabled */
-	else if (data->site_mode != MBV_SITE_OFF
-		&& data->nsite > 0
-		&& (which == MBV_PICK_MOVE
-			&& data->site_selected != MBV_SELECT_NONE))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-				
-		/* reset selected site position */
-		if (found)
-			{
-			data->sites[data->site_selected].point.xgrid = xgrid;
-			data->sites[data->site_selected].point.ygrid = ygrid;
-			data->sites[data->site_selected].point.xlon = xlon;
-			data->sites[data->site_selected].point.ylat = ylat;
-			data->sites[data->site_selected].point.zdata = zdata;
-			data->sites[data->site_selected].point.xdisplay = xdisplay;
-			data->sites[data->site_selected].point.ydisplay = ydisplay;
-			data->sites[data->site_selected].point.zdisplay = zdisplay;
-			}
-		}
-
-	/* else beep */
-	else
-		{
-		data->site_selected = MBV_SELECT_NONE;
-		XBell(view->dpy,100);
-		}
-		
-	/* set what kind of pick to annotate */
-	if (data->site_selected != MBV_SELECT_NONE)
-		{
-		data->pickinfo_mode = MBV_PICK_SITE;
-		}
-	else
-		{
-		data->pickinfo_mode = data->pick_type;
-		}
-		
-	/* set pick annotation */
-	mbview_pick_text(instance);
-	
-	/* print site debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  Site data altered in function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg2  Site values:\n");
-		fprintf(stderr,"dbg2       site_view_mode:      %d\n",data->site_view_mode);
-		fprintf(stderr,"dbg2       site_mode:           %d\n",data->site_mode);
-		fprintf(stderr,"dbg2       nsite:               %d\n",data->nsite);
-		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",data->nsite_alloc);
-		fprintf(stderr,"dbg2       site_selected:       %d\n",data->site_selected);
-		for (i=0;i<data->nsite;i++)
-			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,data->sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,data->sites[i].point.ygrid);
-			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,data->sites[i].point.xlon);
-			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,data->sites[i].point.ylat);
-			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,data->sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,data->sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,data->sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,data->sites[i].point.zdisplay);
-			fprintf(stderr,"dbg2       site %d color:       %d\n",i,data->sites[i].color);
-			fprintf(stderr,"dbg2       site %d size:        %d\n",i,data->sites[i].size);
-			fprintf(stderr,"dbg2       site %d name:        %s\n",i,data->sites[i].name);
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_pick_site_add";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	found;
-	double	xgrid, ygrid;
-	double	xlon, ylat, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	double	xx, yy, rr, rrmin;
-	int	i, inew;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       which:            %d\n",which);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* only add sites if enabled and not in move mode */
-	if (data->site_mode == MBV_SITE_EDIT
-		&& (which == MBV_PICK_DOWN
-			|| data->site_selected == MBV_SELECT_NONE))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-
-		/* add site */
-		if (found)
-			{
-			/* add site after currently selected site if any */
-			if (data->site_selected == MBV_SELECT_NONE)
-				inew = data->nsite;
-			else 
-				inew = data->site_selected + 1;
-				
-			/* allocate memory if required */
-			if (data->nsite_alloc < data->nsite + 1)
-				{
-				data->nsite_alloc += MBV_ALLOC_NUM;
-				status = mb_realloc(mbv_verbose, 
-			    			data->nsite_alloc * sizeof(struct mbview_site_struct),
-			    			&(data->sites), &error);
-				if (status == MB_FAILURE)
-					{
-					data->nsite_alloc = 0;
-					}
-				else
-					{
-					for (i=data->nsite;i<data->nsite_alloc;i++)
-						{
-						data->sites[i].color = MBV_COLOR_RED;
-						data->sites[i].size = 1;
-						data->sites[i].name[0] = '\0';
-						}
-					}
-				}
-			
-			/* move old sites if necessary */
-			for (i=data->nsite;i>inew;i--)
-				{
-				data->sites[i].point.xgrid = data->sites[i-1].point.xgrid;
-				data->sites[i].point.ygrid = data->sites[i-1].point.ygrid;
-				data->sites[i].point.xlon = data->sites[i-1].point.xlon;
-				data->sites[i].point.ylat = data->sites[i-1].point.ylat;
-				data->sites[i].point.zdata = data->sites[i-1].point.zdata;
-				data->sites[i].point.xdisplay = data->sites[i-1].point.xdisplay;
-				data->sites[i].point.ydisplay = data->sites[i-1].point.ydisplay;
-				data->sites[i].point.zdisplay = data->sites[i-1].point.zdisplay;
-				data->sites[i].color = data->sites[i-1].color;
-				data->sites[i].size = data->sites[i-1].size;
-				strcpy(data->sites[i].name, data->sites[i-1].name);
-				}
-			
-			/* add the new site */
-			data->sites[inew].point.xgrid = xgrid;
-			data->sites[inew].point.ygrid = ygrid;
-			data->sites[inew].point.xlon = xlon;
-			data->sites[inew].point.ylat = ylat;
-			data->sites[inew].point.zdata = zdata;
-			data->sites[inew].point.xdisplay = xdisplay;
-			data->sites[inew].point.ydisplay = ydisplay;
-			data->sites[inew].point.zdisplay = zdisplay;
-			data->sites[inew].color = MBV_COLOR_RED;
-			data->sites[inew].size = 1;
-			sprintf(data->sites[inew].name,"Site %d", data->nsite);
-			
-			/* set nsite */
-			data->nsite++;
-			
-			/* select the new site */
-			data->site_selected = inew;
-			}
-		else if (data->site_selected == MBV_SELECT_NONE)
-			{
-			XBell(view->dpy,100);
-			}
-		}
-	
-	/* only move selected sites if enabled */
-	else if (data->site_mode != MBV_SITE_OFF
-		&& data->nsite > 0
-		&& (which == MBV_PICK_MOVE
-			&& data->site_selected != MBV_SELECT_NONE))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-				
-		/* reset selected site position */
-		if (found)
-			{
-			data->sites[data->site_selected].point.xgrid = xgrid;
-			data->sites[data->site_selected].point.ygrid = ygrid;
-			data->sites[data->site_selected].point.xlon = xlon;
-			data->sites[data->site_selected].point.ylat = ylat;
-			data->sites[data->site_selected].point.zdata = zdata;
-			data->sites[data->site_selected].point.xdisplay = xdisplay;
-			data->sites[data->site_selected].point.ydisplay = ydisplay;
-			data->sites[data->site_selected].point.zdisplay = zdisplay;
-			}
-		}
-
-	/* else beep */
-	else
-		{
-		data->site_selected = MBV_SELECT_NONE;
-		XBell(view->dpy,100);
-		}
-		
-	/* set what kind of pick to annotate */
-	if (data->site_selected != MBV_SELECT_NONE)
-		{
-		data->pickinfo_mode = MBV_PICK_SITE;
-		}
-	else
-		{
-		data->pickinfo_mode = data->pick_type;
-		}
-		
-	/* set pick annotation */
-	mbview_pick_text(instance);
-	
-	/* print site debug statements */
-	if (mbv_verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  Site data altered in function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg2  Site values:\n");
-		fprintf(stderr,"dbg2       site_view_mode:      %d\n",data->site_view_mode);
-		fprintf(stderr,"dbg2       site_mode:           %d\n",data->site_mode);
-		fprintf(stderr,"dbg2       nsite:               %d\n",data->nsite);
-		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",data->nsite_alloc);
-		fprintf(stderr,"dbg2       site_selected:       %d\n",data->site_selected);
-		for (i=0;i<data->nsite;i++)
-			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,data->sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,data->sites[i].point.ygrid);
-			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,data->sites[i].point.xlon);
-			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,data->sites[i].point.ylat);
-			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,data->sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,data->sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,data->sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,data->sites[i].point.zdisplay);
-			fprintf(stderr,"dbg2       site %d color:       %d\n",i,data->sites[i].color);
-			fprintf(stderr,"dbg2       site %d size:        %d\n",i,data->sites[i].size);
-			fprintf(stderr,"dbg2       site %d name:        %s\n",i,data->sites[i].name);
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_pick_site_delete";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	found;
-	double	xgrid, ygrid;
-	double	xlon, ylat, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	double	xx, yy, rr, rrmin;
-	int	i, idelete;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* only delete a selected site if enabled */
-	if (data->site_mode == MBV_SITE_EDIT
-		&& data->site_selected != MBV_SELECT_NONE)
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-
-		/* find closest site to pick point */
-		if (found)
-			{
-			rrmin = 1000000000.0;
-			idelete = MBV_SELECT_NONE;
-			for (i=0;i<data->nsite;i++)
-				{
-				xx = xgrid - data->sites[i].point.xgrid;
-				yy = ygrid - data->sites[i].point.ygrid;
-				rr = sqrt(xx * xx + yy * yy);
-				if (rr < rrmin)
-					{
-					rrmin = rr;
-					idelete = i;
-					}
-				}
-			}
-
-		/* delete site if its the same as previously selected */
-		if (found && data->site_selected == idelete)
-			{
-			
-			/* move site data if necessary */
-			for (i=idelete;i<data->nsite-1;i++)
-				{
-				data->sites[i].point.xgrid = data->sites[i+1].point.xgrid;
-				data->sites[i].point.ygrid = data->sites[i+1].point.ygrid;
-				data->sites[i].point.xlon = data->sites[i+1].point.xlon;
-				data->sites[i].point.ylat = data->sites[i+1].point.ylat;
-				data->sites[i].point.zdata = data->sites[i+1].point.zdata;
-				data->sites[i].point.xdisplay = data->sites[i+1].point.xdisplay;
-				data->sites[i].point.ydisplay = data->sites[i+1].point.ydisplay;
-				data->sites[i].point.zdisplay = data->sites[i+1].point.zdisplay;
-				data->sites[i].color = data->sites[i+1].color;
-				data->sites[i].size = data->sites[i+1].size;
-				strcpy(data->sites[i].name, data->sites[i+1].name);
-				}
-			
-			/* set nsite */
-			data->nsite--;
-			
-			/* select the new site */
-			data->site_selected = MBV_SELECT_NONE;
-			}
-		else
-			{
-			XBell(view->dpy,100);
-			}
-		}
-
-	/* else beep */
-	else
-		{
-		XBell(view->dpy,100);
-		}
-		
-	/* set what kind of pick to annotate */
-	if (data->site_selected != MBV_SELECT_NONE)
-		{
-		data->pickinfo_mode = MBV_PICK_SITE;
-		}
-	else
-		{
-		data->pickinfo_mode = data->pick_type;
-		}
-		
-	/* set pick annotation */
-	mbview_pick_text(instance);
-	
-	/* print site debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  Site data altered in function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg2  Site values:\n");
-		fprintf(stderr,"dbg2       site_view_mode:      %d\n",data->site_view_mode);
-		fprintf(stderr,"dbg2       site_mode:           %d\n",data->site_mode);
-		fprintf(stderr,"dbg2       nsite:               %d\n",data->nsite);
-		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",data->nsite_alloc);
-		fprintf(stderr,"dbg2       site_selected:       %d\n",data->site_selected);
-		for (i=0;i<data->nsite;i++)
-			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,data->sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,data->sites[i].point.ygrid);
-			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,data->sites[i].point.xlon);
-			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,data->sites[i].point.ylat);
-			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,data->sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,data->sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,data->sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,data->sites[i].point.zdisplay);
-			fprintf(stderr,"dbg2       site %d color:       %d\n",i,data->sites[i].color);
-			fprintf(stderr,"dbg2       site %d size:        %d\n",i,data->sites[i].size);
-			fprintf(stderr,"dbg2       site %d name:        %s\n",i,data->sites[i].name);
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_pick_route_select";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	found;
-	double	xgrid, ygrid;
-	double	xlon, ylat, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	double	xx, yy, rr, rrmin;
-	int	i, j;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       which:            %d\n",which);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* only select route points if enabled and not in move mode */
-	if (data->route_mode != MBV_ROUTE_OFF
-		&& data->nroute > 0
-		&& (which == MBV_PICK_DOWN
-			|| data->route_selected == MBV_SELECT_NONE))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-
-		/* look for nearest route point */
-		if (found)
-			{
-			rrmin = 1000000000.0;
-			data->route_selected = MBV_SELECT_NONE;
-			data->route_point_selected = MBV_SELECT_NONE;
-			for (i=0;i<data->nroute;i++)
-			for (j=0;j<data->routes[i].npoints;j++)
-				{
-				xx = xgrid - data->routes[i].points[j].xgrid;
-				yy = ygrid - data->routes[i].points[j].ygrid;
-				rr = sqrt(xx * xx + yy * yy);
-				if (rr < rrmin)
-					{
-					rrmin = rr;
-					data->route_selected = i;
-					data->route_point_selected = j;
-					}
-				}
-			}
-		else
-			{
-			data->route_selected = MBV_SELECT_NONE;
-			XBell(view->dpy,100);
-			}
-		}
-	
-	/* only move selected route points if enabled */
-	else if (data->route_mode != MBV_ROUTE_OFF
-		&& data->nroute > 0
-		&& (which == MBV_PICK_MOVE
-			&& data->route_selected != MBV_SELECT_NONE))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-				
-		/* reset selected route position */
-		if (found)
-			{
-			data->routes[data->route_selected].points[data->route_point_selected].xgrid = xgrid;
-			data->routes[data->route_selected].points[data->route_point_selected].ygrid = ygrid;
-			data->routes[data->route_selected].points[data->route_point_selected].xlon = xlon;
-			data->routes[data->route_selected].points[data->route_point_selected].ylat = ylat;
-			data->routes[data->route_selected].points[data->route_point_selected].zdata = zdata;
-			data->routes[data->route_selected].points[data->route_point_selected].xdisplay = xdisplay;
-			data->routes[data->route_selected].points[data->route_point_selected].ydisplay = ydisplay;
-			data->routes[data->route_selected].points[data->route_point_selected].zdisplay = zdisplay;
-			
-			/* drape the affected segments */
-			if (data->route_point_selected > 0)
-				{
-				/* drape the segment */
-				mbview_drapesegment(instance, &(data->routes[data->route_selected].segments[data->route_point_selected-1]));
-				}
-			if (data->route_point_selected < data->routes[data->route_selected].npoints - 1)
-				{
-				/* drape the segment */
-				mbview_drapesegment(instance, &(data->routes[data->route_selected].segments[data->route_point_selected]));
-				}
-			}
-		}
-
-	/* else beep */
-	else
-		{
-		data->route_selected = MBV_SELECT_NONE;
-		XBell(view->dpy,100);
-		}
-		
-	/* set what kind of pick to annotate */
-	if (data->route_selected != MBV_SELECT_NONE)
-		{
-		data->pickinfo_mode = MBV_PICK_ROUTE;
-		}
-	else
-		{
-		data->pickinfo_mode = data->pick_type;
-		}
-		
-	/* set pick annotation */
-	mbview_pick_text(instance);
-	
-	/* print route debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  Route data altered in function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg2  Route values:\n");
-		fprintf(stderr,"dbg2       route_view_mode:      %d\n",data->route_view_mode);
-		fprintf(stderr,"dbg2       route_mode:           %d\n",data->route_mode);
-		fprintf(stderr,"dbg2       nroute:               %d\n",data->nroute);
-		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",data->nroute_alloc);
-		fprintf(stderr,"dbg2       route_selected:       %d\n",data->route_selected);
-		fprintf(stderr,"dbg2       route_point_selected: %d\n",data->route_point_selected);
-		for (i=0;i<data->nroute;i++)
-			{
-			fprintf(stderr,"dbg2       route %d color:         %d\n",i,data->routes[i].color);
-			fprintf(stderr,"dbg2       route %d size:          %d\n",i,data->routes[i].size);
-			fprintf(stderr,"dbg2       route %d name:          %s\n",i,data->routes[i].name);
-			fprintf(stderr,"dbg2       route %d npoints:       %d\n",i,data->routes[i].npoints);
-			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,data->routes[i].npoints_alloc);
-			for (j=0;j<data->routes[i].npoints;j++)
-				{
-				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,data->routes[i].points[j].xgrid);
-				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,data->routes[i].points[j].ygrid);
-				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,data->routes[i].points[j].xlon);
-				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,data->routes[i].points[j].ylat);
-				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,data->routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,data->routes[i].points[j].xdisplay);
-				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,data->routes[i].points[j].ydisplay);
-				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,data->routes[i].points[j].zdisplay);
-				}
-			for (j=0;j<data->routes[i].npoints-1;j++)
-				{
-				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,data->routes[i].segments[j].nls);
-				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,data->routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %d\n",i,j,data->routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,data->routes[i].segments[j].endpoints[1]);
-				}
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_pick_route_add";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	found;
-	double	xgrid, ygrid;
-	double	xlon, ylat, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	double	xx, yy, rr, rrmin;
-	int	i, j, inew, jnew;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       which:            %d\n",which);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* only add route points if enabled and not in move mode */
-	if (data->route_mode == MBV_ROUTE_EDIT
-		&& (which == MBV_PICK_DOWN 
-			|| (which == MBV_PICK_MOVE
-				&& data->route_selected == MBV_SELECT_NONE)))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-
-		/* add route if necessary */
-		if (found && data->route_selected == MBV_SELECT_NONE)
-			{
-			/* add route point after currently selected route point if any */
-			inew = data->nroute;
-			jnew = 0;
-			
-			/* add the route point */
-			mbview_route_add(instance, inew, jnew,
-				xgrid, ygrid,
-				xlon, ylat, zdata,
-				xdisplay, ydisplay, zdisplay);
-			
-			/* select the new route */
-			data->route_selected = inew;
-			data->route_point_selected = jnew;
-			}
-
-		/* else just add point to currently selected route and point */
-		else if (found && data->route_selected != MBV_SELECT_NONE)
-			{
-			/* add route point after currently selected route point if any */
-			inew = data->route_selected;
-			jnew = data->route_point_selected + 1;
-			
-			/* add the route point */
-			mbview_route_add(instance, inew, jnew,
-				xgrid, ygrid,
-				xlon, ylat, zdata,
-				xdisplay, ydisplay, zdisplay);
-			
-			
-			/* select the new route */
-			data->route_selected = inew;
-			data->route_point_selected = jnew;
-			}
-
-		else
-			{
-			/* deselect the new route */
-			data->route_selected = MBV_SELECT_NONE;
-			data->route_point_selected = MBV_SELECT_NONE;
-			XBell(view->dpy,100);
-			}
-		}
-	
-	/* only move selected routes if enabled */
-	else if (data->route_mode != MBV_ROUTE_OFF
-		&& data->nroute > 0
-		&& (which == MBV_PICK_MOVE
-			&& data->route_selected != MBV_SELECT_NONE))
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-				
-		/* reset selected route position */
-		if (found)
-			{
-			/* move the point */
-			data->routes[data->route_selected].points[data->route_point_selected].xgrid = xgrid;
-			data->routes[data->route_selected].points[data->route_point_selected].ygrid = ygrid;
-			data->routes[data->route_selected].points[data->route_point_selected].xlon = xlon;
-			data->routes[data->route_selected].points[data->route_point_selected].ylat = ylat;
-			data->routes[data->route_selected].points[data->route_point_selected].zdata = zdata;
-			data->routes[data->route_selected].points[data->route_point_selected].xdisplay = xdisplay;
-			data->routes[data->route_selected].points[data->route_point_selected].ydisplay = ydisplay;
-			data->routes[data->route_selected].points[data->route_point_selected].zdisplay = zdisplay;
-			
-			/* drape the affected segments */
-			if (data->route_point_selected > 0)
-				{
-				/* drape the segment */
-				mbview_drapesegment(instance, 
-					&(data->routes[data->route_selected].segments[data->route_point_selected-1]));
-				}
-			if (data->route_point_selected < data->routes[data->route_selected].npoints - 1)
-				{
-				/* drape the segment */
-				mbview_drapesegment(instance, 
-					&(data->routes[data->route_selected].segments[data->route_point_selected]));
-				}
-			}
-		}
-
-	/* else beep */
-	else
-		{
-		data->route_selected = MBV_SELECT_NONE;
-		data->route_point_selected = MBV_SELECT_NONE;
-		XBell(view->dpy,100);
-		}
-		
-	/* set what kind of pick to annotate */
-	if (data->route_selected != MBV_SELECT_NONE)
-		{
-		data->pickinfo_mode = MBV_PICK_ROUTE;
-		}
-	else
-		{
-		data->pickinfo_mode = data->pick_type;
-		}
-		
-	/* set pick annotation */
-	mbview_pick_text(instance);
-	
-	/* print route debug statements */
-	if (mbv_verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  Route data altered in function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg2  Route values:\n");
-		fprintf(stderr,"dbg2       route_view_mode:      %d\n",data->route_view_mode);
-		fprintf(stderr,"dbg2       route_mode:           %d\n",data->route_mode);
-		fprintf(stderr,"dbg2       nroute:               %d\n",data->nroute);
-		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",data->nroute_alloc);
-		fprintf(stderr,"dbg2       route_selected:       %d\n",data->route_selected);
-		fprintf(stderr,"dbg2       route_point_selected: %d\n",data->route_point_selected);
-		for (i=0;i<data->nroute;i++)
-			{
-			fprintf(stderr,"dbg2       route %d color:         %d\n",i,data->routes[i].color);
-			fprintf(stderr,"dbg2       route %d size:          %d\n",i,data->routes[i].size);
-			fprintf(stderr,"dbg2       route %d name:          %s\n",i,data->routes[i].name);
-			fprintf(stderr,"dbg2       route %d npoints:       %d\n",i,data->routes[i].npoints);
-			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,data->routes[i].npoints_alloc);
-			for (j=0;j<data->routes[i].npoints;j++)
-				{
-				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,data->routes[i].points[j].xgrid);
-				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,data->routes[i].points[j].ygrid);
-				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,data->routes[i].points[j].xlon);
-				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,data->routes[i].points[j].ylat);
-				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,data->routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,data->routes[i].points[j].xdisplay);
-				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,data->routes[i].points[j].ydisplay);
-				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,data->routes[i].points[j].zdisplay);
-				}
-			for (j=0;j<data->routes[i].npoints-1;j++)
-				{
-				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,data->routes[i].segments[j].nls);
-				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,data->routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %d\n",i,j,data->routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,data->routes[i].segments[j].endpoints[1]);
-				}
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_pick_route_delete(int instance, int xpixel, int ypixel)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_pick_route_delete";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	found;
-	double	xgrid, ygrid;
-	double	xlon, ylat, zdata;
-	double	xdisplay, ydisplay, zdisplay;
-	double	xx, yy, rr, rrmin;
-	int	i, j, idelete, jdelete;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* only delete a selected route if enabled */
-	if (data->route_mode == MBV_ROUTE_EDIT
-		&& data->route_selected != MBV_SELECT_NONE)
-		{
-		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
-				&xgrid, &ygrid,
-				&xlon, &ylat, &zdata,
-				&xdisplay, &ydisplay, &zdisplay);
-
-		/* find closest route to pick point */
-		if (found)
-			{
-			rrmin = 1000000000.0;
-			idelete = MBV_SELECT_NONE;
-			jdelete = MBV_SELECT_NONE;
-			for (i=0;i<data->nroute;i++)
-				{
-				for (j=0;j<data->routes[i].npoints;j++)
-					{
-					xx = xgrid - data->routes[i].points[j].xgrid;
-					yy = ygrid - data->routes[i].points[j].ygrid;
-					rr = sqrt(xx * xx + yy * yy);
-					if (rr < rrmin)
-						{
-						rrmin = rr;
-						idelete = i;
-						jdelete = j;
-						}
-					}
-				}
-			}
-
-		/* delete route point if its the same as previously selected */
-		if (found && data->route_selected == idelete
-			&& data->route_point_selected == jdelete)
-			{
-			mbview_route_delete(instance, idelete, jdelete);
-			}
-
-		/* else beep */
-		else
-			{
-			XBell(view->dpy,100);
-			}
-		}
-
-	/* else beep */
-	else
-		{
-		XBell(view->dpy,100);
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mbview_route_add(int instance, int inew, int jnew, 
-				double xgrid, double ygrid,
-				double xlon, double ylat, double zdata,
-				double xdisplay, double ydisplay, double zdisplay)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_route_add";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	i, j;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       inew:             %d\n",inew);
-		fprintf(stderr,"dbg2       jnew:             %d\n",jnew);
-		fprintf(stderr,"dbg2       xgrid:            %f\n",xgrid);
-		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
-		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
-		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
-		fprintf(stderr,"dbg2       zdata:            %f\n",zdata);
-		fprintf(stderr,"dbg2       xdisplay:         %f\n",xdisplay);
-		fprintf(stderr,"dbg2       ydisplay:         %f\n",ydisplay);
-		fprintf(stderr,"dbg2       zdisplay:         %f\n",zdisplay);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* add route if required */
-	if (inew == data->nroute)
-		{
-		/* allocate memory for a new route if required */
-		if (data->nroute_alloc < data->nroute + 1)
-			{
-			data->nroute_alloc += MBV_ALLOC_NUM;
-			status = mb_realloc(mbv_verbose, 
-			    		data->nroute_alloc * sizeof(struct mbview_route_struct),
-			    		&(data->routes), &error);
-			if (status == MB_FAILURE)
-				{
-				data->nroute_alloc = 0;
-				}
-			else
-				{
-				for (i=data->nroute;i<data->nroute_alloc;i++)
-					{
-					data->routes[i].color = MBV_COLOR_RED;
-					data->routes[i].size = 1;
-					data->routes[i].name[0] = '\0';
-					data->routes[i].npoints = 0;
-					data->routes[i].npoints_alloc = MBV_ALLOC_NUM;
-					data->routes[i].points = NULL;
-					data->routes[i].segments = NULL;
-					status = mb_realloc(mbv_verbose, 
-			    				data->routes[i].npoints_alloc * sizeof(struct mbview_route_struct),
-			    				&(data->routes[i].points), &error);
-					status = mb_realloc(mbv_verbose, 
-			    				data->routes[i].npoints_alloc * sizeof(struct mbview_linesegment_struct),
-			    				&(data->routes[i].segments), &error);
-					for (j=0;j<data->routes[i].npoints_alloc-1;j++)
-						{
-						data->routes[i].segments[j].nls = 0;
-						data->routes[i].segments[j].nls_alloc = 0;
-						data->routes[i].segments[j].lspoints = NULL;
-						data->routes[i].segments[j].endpoints[0] = &(data->routes[i].points[j]);
-						data->routes[i].segments[j].endpoints[1] = &(data->routes[i].points[j+1]);
-						}
-					}
-				}
-			}
-			
-		/* set nroute */
-		data->nroute++;
-
-		/* add the new route */
-		data->routes[inew].color = MBV_COLOR_RED;
-		data->routes[inew].size = 1;
-		sprintf(data->routes[inew].name, "Route:%d", data->nroute);
-		}
-
-	/* allocate memory for point if required */
-	if (status == MB_SUCCESS
-		&& data->routes[inew].npoints_alloc < data->routes[inew].npoints + 1)
-		{
-		data->routes[inew].npoints_alloc += MBV_ALLOC_NUM;
-		status = mb_realloc(mbv_verbose, 
-			    	data->routes[inew].npoints_alloc * sizeof(struct mbview_point_struct),
-			    	&(data->routes[inew].points), &error);
-		status = mb_realloc(mbv_verbose, 
-			    	data->routes[inew].npoints_alloc * sizeof(struct mbview_linesegment_struct),
-			    	&(data->routes[inew].segments), &error);
-		if (status == MB_FAILURE)
-			{
-			data->routes[inew].npoints = 0;
-			data->routes[inew].npoints_alloc = 0;
-			}
-		}
-
-	/* add the new route point */
-	if (status == MB_SUCCESS)
-		{
-		/* move points after jnew if necessary */
-		for (j=data->routes[inew].npoints;j>jnew;j--)
-			{
-			data->routes[inew].points[j].xgrid = data->routes[inew].points[j-1].xgrid;
-			data->routes[inew].points[j].ygrid = data->routes[inew].points[j-1].ygrid;
-			data->routes[inew].points[j].xlon = data->routes[inew].points[j-1].xlon;
-			data->routes[inew].points[j].ylat = data->routes[inew].points[j-1].ylat;
-			data->routes[inew].points[j].zdata = data->routes[inew].points[j-1].zdata;
-			data->routes[inew].points[j].xdisplay = data->routes[inew].points[j-1].xdisplay;
-			data->routes[inew].points[j].ydisplay = data->routes[inew].points[j-1].ydisplay;
-			data->routes[inew].points[j].zdisplay = data->routes[inew].points[j-1].zdisplay;
-			}
-
-		/* move segments after jnew if necessary */
-		for (j=data->routes[inew].npoints-1;j>jnew;j--)
-			{
-			data->routes[inew].segments[j].nls = data->routes[inew].segments[j-1].nls;
-			data->routes[inew].segments[j].nls_alloc = data->routes[inew].segments[j-1].nls_alloc;
-			data->routes[inew].segments[j].lspoints = data->routes[inew].segments[j-1].lspoints;
-			data->routes[inew].segments[j].endpoints[0] = &(data->routes[inew].points[j]);
-			data->routes[inew].segments[j].endpoints[1] = &(data->routes[inew].points[j+1]);
-			}
-		
-		/* add the new point */
-		data->routes[inew].points[jnew].xgrid = xgrid;
-		data->routes[inew].points[jnew].ygrid = ygrid;
-		data->routes[inew].points[jnew].xlon = xlon;
-		data->routes[inew].points[jnew].ylat = ylat;
-		data->routes[inew].points[jnew].zdata = zdata;
-		data->routes[inew].points[jnew].xdisplay = xdisplay;
-		data->routes[inew].points[jnew].ydisplay = ydisplay;
-		data->routes[inew].points[jnew].zdisplay = zdisplay;
-		data->routes[inew].segments[jnew].nls = 0;
-		data->routes[inew].segments[jnew].nls_alloc = 0;
-		data->routes[inew].segments[jnew].lspoints = NULL;
-		data->routes[inew].segments[jnew].endpoints[0] = &(data->routes[inew].points[jnew]);
-		data->routes[inew].segments[jnew].endpoints[1] = &(data->routes[inew].points[jnew+1]);
-		if (jnew > 0)
-			{
-			data->routes[inew].segments[jnew-1].endpoints[0] = &(data->routes[inew].points[jnew-1]);
-			data->routes[inew].segments[jnew-1].endpoints[1] = &(data->routes[inew].points[jnew]);
-			}
-
-		/* set npoints */
-		data->routes[inew].npoints++;
-
-		/* drape the affected segments */
-		if (jnew > 0)
-			{
-			/* drape the segment */
-			mbview_drapesegment(instance, &(data->routes[inew].segments[jnew-1]));
-			}
-		if (jnew < data->routes[inew].npoints - 1)
-			{
-			/* drape the segment */
-			mbview_drapesegment(instance, &(data->routes[inew].segments[jnew]));
-			}
-		}
-
-	
-	/* print route debug statements */
-	if (mbv_verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  Route data altered in function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg2  Route values:\n");
-		fprintf(stderr,"dbg2       route_view_mode:      %d\n",data->route_view_mode);
-		fprintf(stderr,"dbg2       route_mode:           %d\n",data->route_mode);
-		fprintf(stderr,"dbg2       nroute:               %d\n",data->nroute);
-		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",data->nroute_alloc);
-		fprintf(stderr,"dbg2       route_selected:       %d\n",data->route_selected);
-		fprintf(stderr,"dbg2       route_point_selected: %d\n",data->route_point_selected);
-		for (i=0;i<data->nroute;i++)
-			{
-			fprintf(stderr,"dbg2       route %d color:         %d\n",i,data->routes[i].color);
-			fprintf(stderr,"dbg2       route %d size:          %d\n",i,data->routes[i].size);
-			fprintf(stderr,"dbg2       route %d name:          %s\n",i,data->routes[i].name);
-			fprintf(stderr,"dbg2       route %d npoints:       %d\n",i,data->routes[i].npoints);
-			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,data->routes[i].npoints_alloc);
-			for (j=0;j<data->routes[i].npoints;j++)
-				{
-				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,data->routes[i].points[j].xgrid);
-				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,data->routes[i].points[j].ygrid);
-				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,data->routes[i].points[j].xlon);
-				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,data->routes[i].points[j].ylat);
-				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,data->routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,data->routes[i].points[j].xdisplay);
-				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,data->routes[i].points[j].ydisplay);
-				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,data->routes[i].points[j].zdisplay);
-				}
-			for (j=0;j<data->routes[i].npoints-1;j++)
-				{
-				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,data->routes[i].segments[j].nls);
-				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,data->routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %f\n",i,j,data->routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,data->routes[i].segments[j].endpoints[1]);
-				}
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 0)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_route_delete(int instance, int idelete, int jdelete)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_route_delete";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	i, j;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       idelete:          %d\n",idelete);
-		fprintf(stderr,"dbg2       jdelete:          %d\n",jdelete);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* delete route point if its valid */
-	if (idelete >= 0 && idelete < data->nroute
-		&& jdelete >= 0 && jdelete < data->routes[idelete].npoints)
-		{
-		/* free segment */
-		if (data->routes[idelete].npoints > 1)
-			{
-			if (jdelete == 0)
-				{
-				mb_free(mbv_verbose,&(data->routes[idelete].segments[jdelete].lspoints),&error);
-				data->routes[idelete].segments[jdelete].nls = 0;
-				data->routes[idelete].segments[jdelete].nls_alloc = 0;
-				}
-			else
-				{
-				mb_free(mbv_verbose,&(data->routes[idelete].segments[jdelete].lspoints),&error);
-				data->routes[idelete].segments[jdelete].nls = 0;
-				data->routes[idelete].segments[jdelete].nls_alloc = 0;
-				}
-			}
-
-		/* move route point data if necessary */
-		for (j=jdelete;j<data->routes[idelete].npoints-1;j++)
-			{
-			data->routes[idelete].points[j].xgrid = data->routes[idelete].points[j+1].xgrid;
-			data->routes[idelete].points[j].ygrid = data->routes[idelete].points[j+1].ygrid;
-			data->routes[idelete].points[j].xlon = data->routes[idelete].points[j+1].xlon;
-			data->routes[idelete].points[j].ylat = data->routes[idelete].points[j+1].ylat;
-			data->routes[idelete].points[j].zdata = data->routes[idelete].points[j+1].zdata;
-			data->routes[idelete].points[j].xdisplay = data->routes[idelete].points[j+1].xdisplay;
-			data->routes[idelete].points[j].ydisplay = data->routes[idelete].points[j+1].ydisplay;
-			data->routes[idelete].points[j].zdisplay = data->routes[idelete].points[j+1].zdisplay;
-			}
-
-		/* move route segment data if necessary */
-		for (j=jdelete;j<data->routes[idelete].npoints-2;j++)
-			{
-			data->routes[idelete].segments[j] = data->routes[idelete].segments[j+1];
-			}
-
-		/* decrement npoints */
-		data->routes[idelete].npoints--;
-
-		/* if route still has points then reset affected segment endpoints */
-		if (data->routes[idelete].npoints > 0)
-			{
-			for (j=MAX(0,jdelete-1);j<MIN(data->routes[idelete].npoints-1,jdelete+1);j++)
-				{
-				data->routes[idelete].segments[j].endpoints[0] = &(data->routes[idelete].points[j]);
-				data->routes[idelete].segments[j].endpoints[1] = &(data->routes[idelete].points[j+1]);
-				mbview_drapesegment(instance, &(data->routes[idelete].segments[j]));
-				}
-			}
-
-		/* if last point deleted then move remaining routes if necessary */
-		if (data->routes[idelete].npoints <= 0)
-			{
-			/* move route data if necessary */
-			for (i=idelete;i<data->nroute-1;i++)
-				{
-				data->routes[i] = data->routes[i+1];
-				}
-
-			/* decrement nroute */
-			data->nroute--;
-			}
-
-		/* no route selection now */
-		if (data->route_selected != MBV_SELECT_NONE)
-			{
-			data->route_selected = MBV_SELECT_NONE;
-			data->route_point_selected = MBV_SELECT_NONE;
-			data->pickinfo_mode = data->pick_type;
-			}
-		}
-
-	/* else beep */
-	else
-		{
-		XBell(view->dpy,100);
-		}
-		
-	/* set pick annotation */
-	mbview_pick_text(instance);
-	
-	/* print route debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  Route data altered in function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg2  Route values:\n");
-		fprintf(stderr,"dbg2       route_view_mode:      %d\n",data->route_view_mode);
-		fprintf(stderr,"dbg2       route_mode:           %d\n",data->route_mode);
-		fprintf(stderr,"dbg2       nroute:               %d\n",data->nroute);
-		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",data->nroute_alloc);
-		fprintf(stderr,"dbg2       route_selected:       %d\n",data->route_selected);
-		fprintf(stderr,"dbg2       route_point_selected: %d\n",data->route_point_selected);
-		for (i=0;i<data->nroute;i++)
-			{
-			fprintf(stderr,"dbg2       route %d color:         %d\n",i,data->routes[i].color);
-			fprintf(stderr,"dbg2       route %d size:          %d\n",i,data->routes[i].size);
-			fprintf(stderr,"dbg2       route %d name:          %s\n",i,data->routes[i].name);
-			fprintf(stderr,"dbg2       route %d npoints:       %d\n",i,data->routes[i].npoints);
-			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,data->routes[i].npoints_alloc);
-			for (j=0;j<data->routes[i].npoints;j++)
-				{
-				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,data->routes[i].points[j].xgrid);
-				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,data->routes[i].points[j].ygrid);
-				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,data->routes[i].points[j].xlon);
-				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,data->routes[i].points[j].ylat);
-				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,data->routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,data->routes[i].points[j].xdisplay);
-				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,data->routes[i].points[j].ydisplay);
-				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,data->routes[i].points[j].zdisplay);
-				}
-			for (j=0;j<data->routes[i].npoints-1;j++)
-				{
-				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,data->routes[i].segments[j].nls);
-				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,data->routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %d\n",i,j,data->routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,data->routes[i].segments[j].endpoints[1]);
-				}
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_getzdata(int instance, 
-			double xgrid, double ygrid,
-			int *found, double *zdata)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_getzdata";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	nsum;
-	double	zdatasum;
-	int	i,j, k, l, m, n;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       xgrid:            %f\n",xgrid);
-		fprintf(stderr,"dbg2       ygrid:            %f\n",ygrid);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* get location in grid */
-	i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
-	j = (int)((ygrid - data->primary_ymin) / data->primary_dy);
-	
-	/* fail if outside grid */
-	if (i < 0 || i >= data->primary_nx - 1
-		|| j < 0 || j >= data->primary_ny - 1)
-		{
-		*found = MB_NO;
-		*zdata = 0.0;
-		}
-		
-	/* check all four points and average the good ones */
-	else
-		{
-		k = i * data->primary_ny + j;
-		l = (i + 1) * data->primary_ny + j;
-		m = i * data->primary_ny + j + 1;
-		n = (i + 1) * data->primary_ny + j + 1;
-		nsum = 0;
-		zdatasum = 0.0;
-		if (data->primary_data[k] != data->primary_nodatavalue)
-			{
-			zdatasum += data->primary_data[k];
-			nsum++;
-			}
-		if (data->primary_data[l] != data->primary_nodatavalue)
-			{
-			zdatasum += data->primary_data[l];
-			nsum++;
-			}
-		if (data->primary_data[m] != data->primary_nodatavalue)
-			{
-			zdatasum += data->primary_data[m];
-			nsum++;
-			}
-		if (data->primary_data[n] != data->primary_nodatavalue)
-			{
-			zdatasum += data->primary_data[n];
-			nsum++;
-			}
-		if (nsum > 0)
-			{
-			*zdata = zdatasum / nsum;
-			*found = MB_YES;
-			}
-		else
-			{
-			*zdata = 0.0;
-			*found = MB_NO;
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       found:           %d\n",*found);
-		fprintf(stderr,"dbg2       zdata:           %f\n",*zdata);
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_findpoint(int instance, int xpixel, int ypixel,
-			int *found, 
-			double *xgrid, double *ygrid,
-			double *xlon, double *ylat, double *zdata,
-			double *xdisplay, double *ydisplay, double *zdisplay)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_findpoint";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	rez;
-	int	ijbounds[4];
-	int	foundsave;
-	double	xgridsave, ygridsave;
-	double	xlonsave, ylatsave, zdatasave;
-	double	xdisplaysave, ydisplaysave, zdisplaysave;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* look for point at low resolution */
-	*found = MB_NO;
-	foundsave = MB_NO;
-	ijbounds[0] = 0;
-	ijbounds[1] = data->primary_nx;
-	ijbounds[2] = 0;
-	ijbounds[3] = data->primary_ny;
-	mbview_findpointrez(instance, MBV_REZ_LOW, xpixel, ypixel, 
-			ijbounds, found, 
-			xgrid, ygrid,
-			xlon, ylat, zdata,
-			xdisplay, ydisplay, zdisplay);
-
-	/* now check high rez */
-	mbview_findpointrez(instance, MBV_REZ_HIGH, xpixel, ypixel, 
-			ijbounds, found, 
-			xgrid, ygrid, 
-			xlon, ylat, zdata,
-			xdisplay, ydisplay, zdisplay);
-
-	/* repeat until found at highest resolution possible */
-	while (*found == MB_YES
-		&& ijbounds[1] > ijbounds[0]
-		&& ijbounds[3] > ijbounds[2])
-		{
-		/* save last good results */
-		foundsave = *found;
-		xgridsave = *xgrid;
-		ygridsave = *ygrid;
-		xlonsave = *xlon;
-		ylatsave = *ylat;
-		zdatasave = *zdata;
-		xdisplaysave = *xdisplay;
-		ydisplaysave = *ydisplay;
-		zdisplaysave = *zdisplay;
-		
-		/* choose resolution */
-		if ((ijbounds[1] - ijbounds[0]) 
-				> data->hirez_dimension
-			|| (ijbounds[3] - ijbounds[2]) 
-				> data->hirez_dimension)
-			rez = MBV_REZ_HIGH;
-		else
-			rez = MBV_REZ_FULL;
-		
-		/* try again */
-		mbview_findpointrez(instance, rez, xpixel, ypixel, 
-			ijbounds, found, 
-			xgrid, ygrid,
-			xlon, ylat, zdata,
-			xdisplay, ydisplay, zdisplay);
-		}
-
-	/* use the best pick location found */
-	if (*found == MB_NO && foundsave == MB_YES)
-		{
-		*found = foundsave;
-		*xgrid = xgridsave;
-		*ygrid = ygridsave;
-		*xlon = xlonsave;
-		*ylat = ylatsave;
-		*zdata = zdatasave;
-		*xdisplay = xdisplaysave;
-		*ydisplay = ydisplaysave;
-		*zdisplay = zdisplaysave;
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       found:           %d\n",*found);
-		fprintf(stderr,"dbg2       xgrid:           %f\n",*xgrid);
-		fprintf(stderr,"dbg2       ygrid:           %f\n",*ygrid);
-		fprintf(stderr,"dbg2       xlon:            %f\n",*xlon);
-		fprintf(stderr,"dbg2       ylat:            %f\n",*ylat);
-		fprintf(stderr,"dbg2       zdata:           %f\n",*zdata);
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_findpointrez(int instance, int rez, int xpixel, int ypixel,
-			int ijbounds[4], int *found, 
-			double *xgrid, double *ygrid,
-			double *xlon, double *ylat, double *zdata,
-			double *xdisplay, double *ydisplay, double *zdisplay)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_findpointrez";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	good_pick = MB_NO;
-	float	viewdistance;
-	int	stride, ipickstride, jpickstride;
-	int	i, j, k, l, m, n, kk, ll;
-	float	rgba[4];
-	int	ni, imin, imax, nj, jmin, jmax;
-	int	npickx, npicky;
-	float	rgb[3];
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
-		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
-		fprintf(stderr,"dbg2       ijbounds[0]:     %d\n",ijbounds[0]);
-		fprintf(stderr,"dbg2       ijbounds[1]:     %d\n",ijbounds[1]);
-		fprintf(stderr,"dbg2       ijbounds[2]:     %d\n",ijbounds[2]);
-		fprintf(stderr,"dbg2       ijbounds[3]:     %d\n",ijbounds[3]);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* make correct window current for OpenGL */
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
-/*fprintf(stderr,"\nmbview_findpointrez: instance:%d point:%d %d  bounds:%d %d %d %d\n", 
-instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
-	
-	/* apply projection if needed */
-	if (view->projected == MB_NO)
-		{
-		do_mbview_status("Projecting data...", instance);
-		mbview_projectdata(instance);
-		}
-
-	/* re-zscale if needed for current rez */
-	if (view->lastzscalerez < rez)
-		{
-	    	mbview_zscale(instance, rez);
-		}
-	
-	/* set projection to 2D or 3D */
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	view->right = MBV_OPENGL_WIDTH / view->size2d;
-	view->left = -MBV_OPENGL_WIDTH / view->size2d;
-	view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-	view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-	if (data->display_mode == MBV_DISPLAY_2D)
-		{
-		glOrtho(view->left, 
-			view->right, 
-			view->bottom, 
-			view->top, 
-			MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
-		}
-	else
-		{
-		gluPerspective(40.0, 
-			view->aspect_ratio, 
-			0.01 * MBV_OPENGL_WIDTH,
-			1000 * MBV_OPENGL_WIDTH);
-		}
-
-	/* set up translations */
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	if (data->display_mode == MBV_DISPLAY_2D)
-		{
-		glTranslated (view->offset2d_x, 
-				view->offset2d_y, 
-				MBV_OPENGL_ZMIN2D);
-		}
-	else if (data->display_mode == MBV_DISPLAY_3D)
-		{
-		viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
-				/ view->size3d / view->aspect_ratio;
-		glTranslated (0.0, 0.0, 
-				-viewdistance + view->viewoffset3d_z);
-		glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-		glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-		glTranslated (view->offset3d_x, 
-				view->offset3d_y, 
-				-viewdistance + view->offset3d_z);
-		glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-		glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
-		}
-
-	/* set background color */
-	glClearColor(1.0, 1.0, 1.0, 1.0);
-	glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
-	glDepthFunc(GL_LESS);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	/* enable depth test for 3D plots */
-	if (data->display_mode == MBV_DISPLAY_3D)
-		glEnable(GL_DEPTH_TEST);
-	
-	/* get bounds of interest in grid */
-	imin = ijbounds[0];
-	imax = ijbounds[1];
-	ni = imax - imin + 1;
-	jmin = ijbounds[2];
-	jmax = ijbounds[3];
-	nj = jmax - jmin + 1;
-
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-				
-	/* get number of grid cells used in picking */
-	npickx = (ni / stride);
-	ipickstride = stride * (int)floor((npickx / MBVIEW_PICK_DIVISION) + 1);
-	npicky = (nj / stride);
-	jpickstride = stride * (int)floor((npicky / MBVIEW_PICK_DIVISION) + 1);
-	
-/*fprintf(stderr,"mbview_findpointrez: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n", 
-stride, npickx, npicky, ipickstride, jpickstride);*/
-	
-	/* draw the triangles */
-	glBegin(GL_TRIANGLES);
-	for (i=imin;i<imax-stride;i+=stride)
-	{
-	for (j=jmin;j<jmax-stride;j+=stride)
-		{
-		k = i * data->primary_ny + j;
-		l = (i + stride) * data->primary_ny + j;
-		m = i * data->primary_ny + j + stride;
-		n = (i + stride) * data->primary_ny + j + stride;
-		
-		rgb[0] = (float)floor(((double)((i - imin) / ipickstride))) 
-				/ (MBVIEW_PICK_DIVISION + 1.0);
-		rgb[1] = (float)floor(((double)((j - jmin) / jpickstride)))
-				/ (MBVIEW_PICK_DIVISION + 1.0);
-		if (data->primary_data[k] != data->primary_nodatavalue
-			&& data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue)
-			{
-			rgb[2] = 0.25;
-/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
-i,j, rgb[0], rgb[1], rgb[2]);*/
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[k],
-				data->primary_y[k],
-				data->primary_z[k]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			}
-		if (data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue
-			&& data->primary_data[n] != data->primary_nodatavalue)
-			{
-			rgb[2] = 0.75;
-/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
-i,j, rgb[0], rgb[1], rgb[2]);*/
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[n],
-				data->primary_y[n],
-				data->primary_z[n]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			}
-		}
-	}
-	glEnd();
-
-	/* flush opengl buffers */
-	glFlush();
-
-	/* make sure depth test is off */
-	glDisable(GL_DEPTH_TEST);
-	
-	/* now read the color at the pick point */
-	glReadBuffer(GL_BACK);
-	glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
-	glReadBuffer(GL_FRONT);
-
-	/* calculate pick location */
-	if (rgba[0] != 1.0 
-		&& rgba[1] != 1.0)
-		{
-		*found = MB_YES;
-		
-		i = imin + ipickstride 
-				* ((int)rint((MBVIEW_PICK_DIVISION + 1.0) * rgba[0]));
-		j = jmin + jpickstride 
-				* ((int)rint((MBVIEW_PICK_DIVISION + 1.0) * rgba[1]));
-		k = i * data->primary_ny + j;
-		l = (i + stride) * data->primary_ny + j;
-		m = i * data->primary_ny + j + stride;
-		n = (i + stride) * data->primary_ny + j + stride;
-		if (rint((MBVIEW_PICK_DIVISION + 1.0) * rgba[2]) 
-			== (MBVIEW_PICK_DIVISION + 1.0) / 4.0)
-			{
-			*xgrid = data->primary_xmin 
-					+ (3 * i + stride) * data->primary_dx / 3.0;
-			*ygrid = data->primary_ymin 
-					+ (3 * j + stride) * data->primary_dy / 3.0;
-			*zdata = (data->primary_data[k] 
-					+ data->primary_data[l] 
-					+ data->primary_data[m]) / 3.0;
-			}
-		else
-			{
-			*xgrid = data->primary_xmin 
-					+ (3 * i + 2 * stride) * data->primary_dx / 3.0;
-			*ygrid = data->primary_ymin 
-					+ (3 * j + 2 * stride) * data->primary_dy / 3.0;
-			*zdata = (data->primary_data[l] 
-					+ data->primary_data[n] 
-					+ data->primary_data[m]) / 3.0;
-			}
-/*fprintf(stderr,"pickrez:%d %d   rgb: %f %f %f %f   i:%d j:%d\n",
-xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3], i, j);*/
-
-		/* project grid positions to geographic and display coordinates */
-		mbview_projectforward(instance, MB_YES,
-					*xgrid, *ygrid,
-					xlon, ylat,
-					xdisplay, ydisplay);
-		*zdisplay = view->zscale * (*zdata - view->zorigin);
-
-					
-		/* reset ijbounds */
-		ijbounds[0] = i;
-		ijbounds[2] = j;
-		if (ipickstride == 1)
-			{
-			ijbounds[1] = i;
-			ijbounds[3] = j;
-			}
-		else
-			{
-			ijbounds[1] = MIN(i + 2 * ipickstride - 1, data->primary_nx - 1);
-			ijbounds[3] = MIN(j + 2 * jpickstride - 1, data->primary_ny - 1);
-			}
-					
-/*fprintf(stderr," pickrez: %f %f %f     geo: %f %f %f\n", 
-*xx, *yy, *zz, *xlon, *ylat, *zdata);*/
-		}
-		
-	else
-		{
-		*found = MB_NO;
-/*fprintf(stderr,"pickrez bad pick!!:%d %d   rgba: %f %f %f %f\n",
-xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       ijbounds[0]:     %d\n",ijbounds[0]);
-		fprintf(stderr,"dbg2       ijbounds[1]:     %d\n",ijbounds[1]);
-		fprintf(stderr,"dbg2       ijbounds[2]:     %d\n",ijbounds[2]);
-		fprintf(stderr,"dbg2       ijbounds[3]:     %d\n",ijbounds[3]);
-		fprintf(stderr,"dbg2       found:           %d\n",*found);
-		fprintf(stderr,"dbg2       xgrid:           %f\n",*xgrid);
-		fprintf(stderr,"dbg2       ygrid:           %f\n",*ygrid);
-		fprintf(stderr,"dbg2       xlon:            %f\n",*xlon);
-		fprintf(stderr,"dbg2       ylat:            %f\n",*ylat);
-		fprintf(stderr,"dbg2       zdata:           %f\n",*zdata);
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-
-/*--------------------------------------------------------------------*/
-int mbview_viewbounds(int instance, int rez)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_viewbounds";
-	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	good_pick = MB_NO;
-	float	viewdistance;
-	int	stride, ipickstride, jpickstride;
-	int	i, j, k, l, m, n;
-	int	xpixel, ypixel;
-	int	found;
-	float	rgba[4];
-	int	npickx, npicky;
-	float	rgb[3];
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* make correct window current for OpenGL */
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
-	
-	/* apply projection if needed */
-	if (view->projected == MB_NO)
-		{
-		do_mbview_status("Projecting data...", instance);
-		mbview_projectdata(instance);
-		}
-
-	/* re-zscale if needed for current rez */
-	if (view->lastzscalerez < rez)
-		{
-	    	mbview_zscale(instance, rez);
-		}
-	
-	/* set projection to 2D or 3D */
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	view->right = MBV_OPENGL_WIDTH / view->size2d;
-	view->left = -MBV_OPENGL_WIDTH / view->size2d;
-	view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-	view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-	if (data->display_mode == MBV_DISPLAY_2D)
-		{
-		glOrtho(view->left, 
-			view->right, 
-			view->bottom, 
-			view->top, 
-			MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
-		}
-	else
-		{
-		gluPerspective(40.0, 
-			view->aspect_ratio, 
-			0.01 * MBV_OPENGL_WIDTH,
-			1000 * MBV_OPENGL_WIDTH);
-		}
-
-	/* set up translations */
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	if (data->display_mode == MBV_DISPLAY_2D)
-		{
-		glTranslated (view->offset2d_x, 
-				view->offset2d_y, 
-				MBV_OPENGL_ZMIN2D);
-		}
-	else if (data->display_mode == MBV_DISPLAY_3D)
-		{
-		viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
-				/ view->size3d / view->aspect_ratio;
-		glTranslated (0.0, 0.0, 
-				-viewdistance + view->viewoffset3d_z);
-		glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-		glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-		glTranslated (view->offset3d_x, 
-				view->offset3d_y, 
-				-viewdistance + view->offset3d_z);
-		glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-		glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
-		}
-
-	/* set background color */
-	glClearColor(1.0, 1.0, 1.0, 1.0);
-	glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
-	glDepthFunc(GL_LESS);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	/* enable depth test for 3D plots */
-	if (data->display_mode == MBV_DISPLAY_3D)
-		glEnable(GL_DEPTH_TEST);
-	
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-				
-	/* get number of grid cells used in picking */
-	npickx = (data->primary_nx / stride);
-	ipickstride = stride * (int)floor((npickx / MBVIEW_PICK_DIVISION) + 1);
-	npicky = (data->primary_ny / stride);
-	jpickstride = stride * (int)floor((npicky / MBVIEW_PICK_DIVISION) + 1);
-	
-fprintf(stderr,"mbview_viewbounds: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n", 
-stride, npickx, npicky, ipickstride, jpickstride);
-	
-	/* draw the triangles */
-	glBegin(GL_TRIANGLES);
-	for (i=0;i<data->primary_nx-stride;i+=stride)
-	{
-	for (j=0;j<data->primary_ny-stride;j+=stride)
-		{
-		k = i * data->primary_ny + j;
-		l = (i + stride) * data->primary_ny + j;
-		m = i * data->primary_ny + j + stride;
-		n = (i + stride) * data->primary_ny + j + stride;
-		
-		rgb[0] = (float)floor(((double)(i / ipickstride))) 
-				/ (MBVIEW_PICK_DIVISION + 1.0);
-		rgb[1] = (float)floor(((double)(j / jpickstride)))
-				/ (MBVIEW_PICK_DIVISION + 1.0);
-		if (data->primary_data[k] != data->primary_nodatavalue
-			&& data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue)
-			{
-			rgb[2] = 0.25;
-/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
-i,j, rgb[0], rgb[1], rgb[2]);*/
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[k],
-				data->primary_y[k],
-				data->primary_z[k]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			}
-		if (data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue
-			&& data->primary_data[n] != data->primary_nodatavalue)
-			{
-			rgb[2] = 0.75;
-/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
-i,j, rgb[0], rgb[1], rgb[2]);*/
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[n],
-				data->primary_y[n],
-				data->primary_z[n]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			}
-		}
-	}
-	glEnd();
-
-	/* flush opengl buffers */
-	glFlush();
-
-	/* make sure depth test is off */
-	glDisable(GL_DEPTH_TEST);
-	
-	/* now read the color at a number of points in the screen */
-	glReadBuffer(GL_BACK);
-	found = MB_NO;
-	data->viewbounds[0] = 0;
-	data->viewbounds[1] = data->primary_nx - 1;
-	data->viewbounds[2] = 0;
-	data->viewbounds[3] = data->primary_ny - 1;
-	for (xpixel = 0; xpixel < data->width; xpixel += 25)
-	{
-	for (ypixel = 0; ypixel < data->height; ypixel += 25)
-		{
-		glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
-/*fprintf(stderr,"xpixel:%d ypixel:%d rgba: %f %f %f %f\n",
-xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
-		if (rgba[0] != 1.0 && rgba[1] != 1.0)
-			{
-			i = ipickstride * ((int)rint((MBVIEW_PICK_DIVISION + 1.0) * rgba[0]));
-			j = jpickstride * ((int)rint((MBVIEW_PICK_DIVISION + 1.0) * rgba[1]));
-			if (found == MB_NO)
-				{
-				data->viewbounds[0] = i;
-				data->viewbounds[1] = i + stride;
-				data->viewbounds[2] = j;
-				data->viewbounds[3] = j + stride;
-				found = MB_YES;
-				}
-			else
-				{
-				data->viewbounds[0] = MIN(i, data->viewbounds[0]);
-				data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
-				data->viewbounds[2] = MIN(j, data->viewbounds[2]);
-				data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
-				}
-/*fprintf(stderr,"i:%d j:%d data->viewbounds: %d %d %d %d\n",
-i,j,data->viewbounds[0],
-data->viewbounds[1],
-data->viewbounds[2],
-data->viewbounds[3]);*/
-			}
-		}
-	}
-	glReadBuffer(GL_FRONT);
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       viewbounds[0]:   %d\n",data->viewbounds[0]);
-		fprintf(stderr,"dbg2       viewbounds[1]:   %d\n",data->viewbounds[1]);
-		fprintf(stderr,"dbg2       viewbounds[2]:   %d\n",data->viewbounds[2]);
-		fprintf(stderr,"dbg2       viewbounds[3]:   %d\n",data->viewbounds[3]);
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
-{
-
-	/* local variables */
-	char	*function_name = "mbview_drapesegment";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	istart, iend, iadd, jstart, jend, jadd;
-	int	ni, nj;
-	double	mm, bb;
-	int	found, done, insert;
-	double	xgrid, ygrid, zdata;
-	int	i, j, k, l, ii, icnt, jcnt;
-	int	iii;
-	
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       seg:              %d\n",seg);
-		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid);
-		}
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* reset done flag */
-	done = MB_NO;
-	
-	/* figure out how many points to calculate along the segment */
-	istart = (int)((seg->endpoints[0]->xgrid - data->primary_xmin)
-			/ data->primary_dx);
-	iend = (int)((seg->endpoints[1]->xgrid - data->primary_xmin)
-			/ data->primary_dx);
-	jstart = (int)((seg->endpoints[0]->ygrid - data->primary_ymin)
-			/ data->primary_dy);
-	jend = (int)((seg->endpoints[1]->ygrid - data->primary_ymin)
-			/ data->primary_dy);
-			
-	/* no need to fill in if the segment doesn't cross grid boundaries */
-	if (istart == iend && jstart == jend)
-		{
-		done = MB_YES;
-		seg->nls = 0;
-		}
-		
-	/* else allocate space for the array of points */
-	else
-		{
-		/* allocate space for the array of points */
-		if (iend > istart)
-			{
-			ni = iend - istart;
-			iadd = 1;
-			istart++;
-			iend++;
-			}
-		else
-			{
-			ni = istart - iend;
-			iadd = -1;
-			}
-		if (jend > jstart)
-			{
-			nj = jend - jstart;
-			jadd = 1;
-			jstart++;
-			jend++;
-			}
-		else
-			{
-			nj = jstart - jend;
-			jadd = -1;
-			}
-		if ((ni + nj + 2) > seg->nls_alloc)
-			{
-			seg->nls_alloc = (ni + nj + 2);
-			status = mb_realloc(mbv_verbose, 
-			    		seg->nls_alloc * sizeof(struct mbview_point_struct),
-			    		&(seg->lspoints), &error);
-			if (status == MB_FAILURE)
-				{
-				done = MB_YES;
-				seg->nls_alloc = 0;
-				}
-			}
-		}
-		
-	/* if points needed and space allocated do it */
-	if (done == MB_NO && ni + nj > 0)
-		{		
-		/* get line equation */
-		mm = (seg->endpoints[1]->ygrid - seg->endpoints[0]->ygrid) 
-			/ (seg->endpoints[1]->xgrid - seg->endpoints[0]->xgrid);
-		bb = seg->endpoints[0]->ygrid - mm * seg->endpoints[0]->xgrid;
-
-		/* put begin point in list */
-		seg->nls = 0;
-		seg->lspoints[seg->nls].xgrid = seg->endpoints[0]->xgrid;
-		seg->lspoints[seg->nls].ygrid = seg->endpoints[0]->ygrid;
-		seg->lspoints[seg->nls].zdata = seg->endpoints[0]->zdata;
-		seg->nls++;
-		
-		/* loop over xgrid */
-		insert = 1;
-		for (icnt=0;icnt<ni;icnt++)
-			{
-			i = istart + icnt * iadd;
-			xgrid = data->primary_xmin + i * data->primary_dx;
-			ygrid = mm * xgrid + bb;
-			j = (int)((ygrid - data->primary_ymin)
-					/ data->primary_dy);
-			k = i * data->primary_ny + j;
-			l = i * data->primary_ny + j + 1;
-			if (i >= 0 && i < data->primary_nx - 1
-				&& j >= 0 && j < data->primary_ny - 1
-				&& data->primary_data[k] != data->primary_nodatavalue
-				&& data->primary_data[l] != data->primary_nodatavalue)
-				{
-				/* interpolate zdata */
-				zdata = data->primary_data[k]
-					+ (ygrid - data->primary_ymin 
-							- j * data->primary_dy)
-						/ data->primary_dy
-						* (data->primary_data[l] 
-							- data->primary_data[k]);
-						
-				/* add point to list */
-				seg->lspoints[seg->nls].xgrid = xgrid;
-				seg->lspoints[seg->nls].ygrid = ygrid;
-				seg->lspoints[seg->nls].zdata = zdata;
-				seg->nls++;
-				}
-			}
-
-		/* put end point in list */
-		seg->lspoints[seg->nls].xgrid = seg->endpoints[1]->xgrid;
-		seg->lspoints[seg->nls].ygrid = seg->endpoints[1]->ygrid;
-		seg->lspoints[seg->nls].zdata = seg->endpoints[1]->zdata;
-		seg->nls++;
-		
-		/* loop over ygrid */
-		insert = 1;
-		for (jcnt=0;jcnt<nj;jcnt++)
-			{
-			j = jstart + jcnt * jadd;
-			ygrid = data->primary_ymin + j * data->primary_dy;
-			xgrid = (ygrid - bb) / mm;
-			i = (int)((xgrid - data->primary_xmin)
-					/ data->primary_dx);
-			k = i * data->primary_ny + j;
-			l = (i + 1) * data->primary_ny + j;
-			if (i >= 0 && i < data->primary_nx - 1
-				&& j >= 0 && j < data->primary_ny - 1
-				&& data->primary_data[k] != data->primary_nodatavalue
-				&& data->primary_data[l] != data->primary_nodatavalue)
-				{
-				/* interpolate zdata */
-				zdata = data->primary_data[k]
-					+ (xgrid - data->primary_xmin 
-							- i * data->primary_dx)
-						/ data->primary_dx
-						* (data->primary_data[l] 
-							- data->primary_data[k]);
-				
-				/* insert point into list */
-				found = MB_NO;
-				done = MB_NO;
-				if (jadd > 0) while (done == MB_NO)
-					{
-					if (ygrid > seg->lspoints[insert-1].ygrid
-						&& ygrid < seg->lspoints[insert].ygrid)
-						{
-						found = MB_YES;
-						done = MB_YES;
-						}
-					else if (ygrid == seg->lspoints[insert-1].ygrid
-						|| ygrid == seg->lspoints[insert].ygrid)
-						{
-						done = MB_YES;
-						}
-					else if (ygrid < seg->lspoints[insert-1].ygrid)
-						{
-						insert--;
-						}
-					else if (ygrid > seg->lspoints[insert].ygrid)
-						{
-						insert++;
-						}
-					if (insert <= 0 || insert >= seg->nls)
-						{
-						done = MB_YES;
-						}
-					}
-				else if (jadd < 0) while (done == MB_NO)
-					{
-					if (ygrid > seg->lspoints[insert].ygrid
-						&& ygrid < seg->lspoints[insert-1].ygrid)
-						{
-						found = MB_YES;
-						done = MB_YES;
-						}
-					else if (ygrid == seg->lspoints[insert].ygrid
-						|| ygrid == seg->lspoints[insert-1].ygrid)
-						{
-						done = MB_YES;
-						}
-					else if (ygrid > seg->lspoints[insert-1].ygrid)
-						{
-						insert--;
-						}
-					else if (ygrid < seg->lspoints[insert].ygrid)
-						{
-						insert++;
-						}
-					if (insert <= 0 || insert >= seg->nls)
-						{
-						done = MB_YES;
-						}
-					}
-				if (found == MB_YES)
-					{
-					for (ii=seg->nls;ii>insert;ii--)
-						{
-						seg->lspoints[ii].xgrid = seg->lspoints[ii-1].xgrid;
-						seg->lspoints[ii].ygrid = seg->lspoints[ii-1].ygrid;
-						seg->lspoints[ii].zdata = seg->lspoints[ii-1].zdata;
-						}
-					seg->lspoints[insert].xgrid = xgrid;
-					seg->lspoints[insert].ygrid = ygrid;
-					seg->lspoints[insert].zdata = zdata;
-					seg->nls++;
-					}
-				}
-			}
-			
-		/* now calculate rest of point values */
-		for (icnt=0;icnt<seg->nls;icnt++)
-			{
-			mbview_projectforward(instance, MB_YES,
-				seg->lspoints[icnt].xgrid, 
-				seg->lspoints[icnt].ygrid,
-				&(seg->lspoints[icnt].xlon),
-				&(seg->lspoints[icnt].ylat),
-				&(seg->lspoints[icnt].xdisplay),
-				&(seg->lspoints[icnt].ydisplay));
-			seg->lspoints[icnt].zdisplay 
-				= view->zscale * (seg->lspoints[icnt].zdata - view->zorigin) 
-					+ MBV_OPENGL_3D_CONTOUR_OFFSET;
-			}
-		}
-	
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		fprintf(stderr,"dbg2       seg->nls:        %d\n",seg->nls);
-		fprintf(stderr,"dbg2       seg->nls_alloc:  %d\n",seg->nls_alloc);
-		fprintf(stderr,"dbg2       seg->lspoints:\n");
-		for (i=0;i<seg->nls;i++)
-			{
-			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
-				i, seg->lspoints[i].xgrid, seg->lspoints[i].ygrid,  seg->lspoints[i].zdata,
-				 seg->lspoints[i].xlon, seg->lspoints[i].ylat, 
-				 seg->lspoints[i].xdisplay, seg->lspoints[i].ydisplay,
-				 seg->lspoints[i].zdisplay);
-			}
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 void
 do_mbview_display_2D( Widget w, XtPointer client_data, XtPointer call_data)
@@ -10602,6 +3372,7 @@ do_mbview_display_2D( Widget w, XtPointer client_data, XtPointer call_data)
     set_mbview_display_mode(instance, data->display_mode);
     set_mbview_mouse_mode(instance, data->mouse_mode);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_display_2d instance:%d mode:%d\n", 
 instance, data->display_mode);
     
@@ -10611,14 +3382,11 @@ instance, data->display_mode);
     view->contourfullrez = MB_NO;
 
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_display_2D\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_display_2D\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_2D\n");
+    mbview_plotlowhigh(instance);
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 void
 do_mbview_display_3D( Widget w, XtPointer client_data, XtPointer call_data)
@@ -10645,6 +3413,7 @@ do_mbview_display_3D( Widget w, XtPointer client_data, XtPointer call_data)
     set_mbview_display_mode(instance, data->display_mode);
     set_mbview_mouse_mode(instance, data->mouse_mode);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_display_3d instance:%d mode:%d\n", 
 instance, data->display_mode);
    
@@ -10654,14 +3423,11 @@ instance, data->display_mode);
     view->contourfullrez = MB_NO;
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_display_3D\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_display_3D\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_3D\n");
+    mbview_plotlowhigh(instance);
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 void
 do_mbview_data_primary( Widget w, XtPointer client_data, XtPointer call_data)
@@ -10684,6 +3450,7 @@ do_mbview_data_primary( Widget w, XtPointer client_data, XtPointer call_data)
     /* get mode value */
     data->grid_mode = MBV_GRID_VIEW_PRIMARY;
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_data_primary instance:%d mode:%d\n", 
 instance, data->grid_mode);
 
@@ -10693,16 +3460,14 @@ instance, data->grid_mode);
     set_mbview_colortable_mode(instance, data->primary_colortable_mode);
     set_mbview_shade_mode(instance, data->primary_shade_mode);
     
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
 	
      /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_data_primary\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_data_primary\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_data_primary\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -10727,6 +3492,7 @@ do_mbview_data_primaryslope( Widget w, XtPointer client_data, XtPointer call_dat
     /* get mode value */
     data->grid_mode = MBV_GRID_VIEW_PRIMARYSLOPE;
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_data_primaryslope instance:%d mode:%d\n", 
 instance, data->grid_mode);
 
@@ -10736,16 +3502,14 @@ instance, data->grid_mode);
     set_mbview_colortable_mode(instance, data->slope_colortable_mode);
     set_mbview_shade_mode(instance, data->slope_shade_mode);
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_data_primaryslope\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_data_primaryslope\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_data_primaryslope\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -10770,6 +3534,7 @@ do_mbview_data_secondary( Widget w, XtPointer client_data, XtPointer call_data)
     /* get mode value */
     data->grid_mode = MBV_GRID_VIEW_SECONDARY;
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_data_secondary instance:%d mode:%d\n", 
 instance, data->grid_mode);
 
@@ -10779,16 +3544,14 @@ instance, data->grid_mode);
     set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
     set_mbview_shade_mode(instance, data->secondary_shade_mode);
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_data_secondary\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_data_secondary\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_data_secondary\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -10810,6 +3573,7 @@ do_mbview_overlay_none( Widget w, XtPointer client_data, XtPointer call_data)
     view = &(mbviews[instance]);
     data = &(view->data);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_overlay_none instance:%d\n", instance);
 
     /* set mode value */
@@ -10829,16 +3593,14 @@ fprintf(stderr,"do_mbview_overlay_none instance:%d\n", instance);
 	set_mbview_shade_mode(instance, data->secondary_shade_mode);
 	}
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_none\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_none\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_none\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -10860,6 +3622,7 @@ do_mbview_overlay_slope( Widget w, XtPointer client_data, XtPointer call_data)
     view = &(mbviews[instance]);
     data = &(view->data);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_overlay_slope instance:%d\n", instance);
 
     /* set mode value */
@@ -10879,16 +3642,14 @@ fprintf(stderr,"do_mbview_overlay_slope instance:%d\n", instance);
 	set_mbview_shade_mode(instance, data->secondary_shade_mode);
 	}
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_slope\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_slope\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_slope\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -10910,6 +3671,7 @@ do_mbview_overlay_illumination( Widget w, XtPointer client_data, XtPointer call_
     view = &(mbviews[instance]);
     data = &(view->data);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_overlay_illumination instance:%d\n", instance);
 
     /* set mode value */
@@ -10929,16 +3691,14 @@ fprintf(stderr,"do_mbview_overlay_illumination instance:%d\n", instance);
 	set_mbview_shade_mode(instance, data->secondary_shade_mode);
 	}
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_illumination\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_illumination\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_illumination\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -10960,6 +3720,7 @@ do_mbview_overlay_secondary( Widget w, XtPointer client_data, XtPointer call_dat
     view = &(mbviews[instance]);
     data = &(view->data);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_overlay_secondary instance:%d\n", instance);
 
     /* set mode value */
@@ -10979,16 +3740,14 @@ fprintf(stderr,"do_mbview_overlay_secondary instance:%d\n", instance);
 	set_mbview_shade_mode(instance, data->secondary_shade_mode);
 	}
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_secondary\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_secondary\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_secondary\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -11017,16 +3776,14 @@ do_mbview_overlay_contour( Widget w, XtPointer client_data, XtPointer call_data)
     else
 	data->grid_contour_mode = MBV_VIEW_OFF;
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_overlay_contour instance:%d mode:%d\n", 
 instance, data->grid_contour_mode);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_contour\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_overlay_contour\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_contour\n");
+    mbview_plotlowhigh(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -11071,16 +3828,14 @@ do_mbview_site( Widget w, XtPointer client_data, XtPointer call_data)
 	    }
 	}
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_site instance:%d mode:%d\n", 
 instance, data->site_view_mode);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_site\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_site\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_site\n");
+    mbview_plotlowhigh(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -11126,16 +3881,14 @@ do_mbview_route( Widget w, XtPointer client_data, XtPointer call_data)
 	    }
 	}
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_route instance:%d mode:%d\n", 
 instance, data->route_view_mode);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_route\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_route\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_route\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -11165,16 +3918,14 @@ do_mbview_nav( Widget w, XtPointer client_data, XtPointer call_data)
     else
 	data->nav_view_mode = MBV_VIEW_OFF;
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_nav instance:%d mode:%d\n", 
 instance, data->nav_view_mode);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_nav\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_nav\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_nav\n");
+    mbview_plotlowhigh(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -11208,18 +3959,17 @@ do_mbview_colortable_haxby( Widget w, XtPointer client_data, XtPointer call_data
     set_mbview_colortable(instance, data->primary_colortable);
     set_mbview_colortable_mode(instance, data->primary_colortable_mode);
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_haxby instance:%d\n", instance);
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_haxby\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_haxby\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_haxby\n");
+    mbview_plotlowhigh(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -11253,19 +4003,18 @@ do_mbview_colortable_bright( Widget w, XtPointer client_data, XtPointer call_dat
     set_mbview_colortable(instance, data->primary_colortable);
     set_mbview_colortable_mode(instance, data->primary_colortable_mode);
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_bright instance:%d\n", instance);
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_bright\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_bright\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
-}
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_bright\n");
+    mbview_plotlowhigh(instance);
+ }
 /*------------------------------------------------------------------------------*/
 
 void
@@ -11298,18 +4047,17 @@ do_mbview_colortable_muted( Widget w, XtPointer client_data, XtPointer call_data
     set_mbview_colortable(instance, data->primary_colortable);
     set_mbview_colortable_mode(instance, data->primary_colortable_mode);
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_muted instance:%d\n", instance);
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_muted\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_muted\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_muted\n");
+    mbview_plotlowhigh(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -11343,18 +4091,17 @@ do_mbview_colortable_gray( Widget w, XtPointer client_data, XtPointer call_data)
     set_mbview_colortable(instance, data->primary_colortable);
     set_mbview_colortable_mode(instance, data->primary_colortable_mode);
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_gray instance:%d\n", instance);
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_gray\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_gray\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_gray\n");
+    mbview_plotlowhigh(instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -11388,18 +4135,17 @@ do_mbview_colortable_flat( Widget w, XtPointer client_data, XtPointer call_data)
     set_mbview_colortable(instance, data->primary_colortable);
     set_mbview_colortable_mode(instance, data->primary_colortable_mode);
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_flat instance:%d\n", instance);
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_flat\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_flat\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_flat\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -11434,18 +4180,17 @@ do_mbview_colortable_sealevel( Widget w, XtPointer client_data, XtPointer call_d
     set_mbview_colortable(instance, data->primary_colortable);
     set_mbview_colortable_mode(instance, data->primary_colortable_mode);
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_sealevel instance:%d\n", instance);
    
-    /* reset lastcolorrez flag */
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_sealevel\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colortable_sealevel\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_sealevel\n");
+    mbview_plotlowhigh(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -11460,6 +4205,7 @@ do_mbview_mouse_rmode( Widget w, XtPointer client_data, XtPointer call_data)
     MB3DViewData	*mb3dviewptr;
     int	    replot = MB_NO;
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_mouse_rmode: \n");
 	    
     /* do nothing unless calling widget is set */
@@ -11533,12 +4279,9 @@ fprintf(stderr,"do_mbview_mouse_rmode: \n");
 	    mbview_pick_text(instance);
 
 	    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_mouse_rmode\n");
-	    mbview_plot(instance, MBV_REZ_LOW);
-	    
-	    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_mouse_rmode\n");
-	    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_mouse_rmode\n");
+	    mbview_plotlowhigh(instance);
 	    }
 
 	}
@@ -11556,6 +4299,7 @@ do_mbview_mouse_mode( Widget w, XtPointer client_data, XtPointer call_data)
     MB3DViewData	*mb3dviewptr;
     int	    replot = MB_NO;
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_mouse_mode: \n");
 
     /* do nothing unless calling widget is set */
@@ -11629,12 +4373,9 @@ fprintf(stderr,"do_mbview_mouse_mode: \n");
 	    mbview_pick_text(instance);
 
 	    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_mouse_mode\n");
-	    mbview_plot(instance, MBV_REZ_LOW);
-	    
-	    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_mouse_mode\n");
-	    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_mouse_mode\n");
+	    mbview_plotlowhigh(instance);
 	    }
 
 	}
@@ -11649,7 +4390,8 @@ set_mbview_mouse_mode(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 
-fprintf(stderr,"set_mbview_mouse_mode: instance:%d mode:%d\n", instance, mode);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_mouse_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -11818,6 +4560,7 @@ set_mbview_grid_mode(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 	
+if (mbv_verbose >= 2)
 fprintf(stderr,"set_mbview_grid_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
@@ -11857,7 +4600,8 @@ set_mbview_shade_mode(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 	
-fprintf(stderr,"set_mbview_shade_mode: instance:%d mode:%d\n", instance, mode);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_shade_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -11903,7 +4647,8 @@ set_mbview_contour_mode(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 
-fprintf(stderr,"set_mbview_contour_mode: instance:%d mode:%d\n", instance, mode);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_contour_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -11928,7 +4673,8 @@ set_mbview_site_view_mode(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 
-fprintf(stderr,"set_mbview_site_view_mode: instance:%d mode:%d\n", instance, mode);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_site_view_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -11953,7 +4699,8 @@ set_mbview_route_view_mode(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 
-fprintf(stderr,"set_mbview_route_view_mode: instance:%d mode:%d\n", instance, mode);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_route_view_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -11978,7 +4725,8 @@ set_mbview_nav_view_mode(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 
-fprintf(stderr,"set_mbview_nav_view_mode: instance:%d mode:%d\n", instance, mode);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_nav_view_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -12003,6 +4751,7 @@ set_mbview_display_mode(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 	
+if (mbv_verbose >= 2)
 fprintf(stderr,"set_mbview_display_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
@@ -12034,7 +4783,8 @@ set_mbview_colortable(int instance, int mode)
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
 
-fprintf(stderr,"set_mbview_colortable: instance:%d mode:%d\n", instance, mode);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_colortable: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -12094,7 +4844,8 @@ set_mbview_colortable_mode(int instance, int mode)
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
-fprintf(stderr,"set_mbview_colortable_mode: instance:%d mode:%d\n", instance, mode);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_colortable_mode: instance:%d mode:%d\n", instance, mode);
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -12117,6 +4868,7 @@ do_mbview_aboutpopdown( Widget w, XtPointer client_data, XtPointer call_data)
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_aboutpopdown: instance:%d\n", instance);
 	    
 	/* get view */
@@ -12141,6 +4893,7 @@ do_mbview_aboutpopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_aboutpopup: instance:%d\n", instance);
 	    
 	/* get view */
@@ -12166,6 +4919,7 @@ do_mbview_colorboundspopup( Widget w, XtPointer client_data, XtPointer call_data
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colorboundspopup: instance:%d\n", instance);
 	    
 	/* get view */
@@ -12210,9 +4964,6 @@ fprintf(stderr,"do_mbview_colorboundspopup: instance:%d\n", instance);
 	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_slope_htoc, 
 			TRUE, TRUE);
 		}
-	sprintf(value_text,"%g", data->secondary_overlay_center);
-	XmTextFieldSetString(view->mb3dview.mbview_textField_overlaycenter, 
-			value_text);
 	sprintf(value_text,"%g", data->secondary_colortable_min);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymin, 
 			value_text);
@@ -12246,6 +4997,7 @@ do_mbview_colorboundspopdown( Widget w, XtPointer client_data, XtPointer call_da
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colorboundspopdown: instance:%d\n", instance);
 	    
 	/* get view */
@@ -12265,13 +5017,14 @@ do_mbview_colorboundsapply( Widget w, XtPointer client_data, XtPointer call_data
 	struct mbview_struct *data;
 	int	ivalue;
 	double	dvalue;
-	int	shade_mode;
+	int	change;
 
 	/* get instance */
 	ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 	    
 	/* get view */
@@ -12279,16 +5032,16 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 	data = &(view->data);
 
 	/* get values of widgets */
+
+	change = MB_NO;
+
 	get_mbview_text_string(view->mb3dview.mbview_textField_datamin, value_text);
 	sscanf(value_text,"%lf", &dvalue);
 	if (dvalue != data->primary_colortable_min)
 		{
 		data->primary_colortable_min = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 	
 	get_mbview_text_string(view->mb3dview.mbview_textField_datamax, value_text);
@@ -12297,10 +5050,7 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 		{
 		data->primary_colortable_max = dvalue;
  		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 	
 	get_mbview_text_string(view->mb3dview.mbview_textField_contours, value_text);
@@ -12312,9 +5062,7 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
     		view->contourhirez = MB_NO;
     		view->contourfullrez = MB_NO;
  		if (data->grid_contour_mode == MBV_VIEW_ON)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 	
 	ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_data_htoc);
@@ -12322,10 +5070,7 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 		{
 		data->primary_colortable_mode = ivalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 		
 	get_mbview_text_string(view->mb3dview.mbview_textField_slopemin, value_text);
@@ -12334,10 +5079,7 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 		{
 		data->slope_colortable_min = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 	
 	get_mbview_text_string(view->mb3dview.mbview_textField_slopemax, value_text);
@@ -12346,10 +5088,7 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 		{
 		data->slope_colortable_max = dvalue;
  		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 	
 	ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_slope_htoc);
@@ -12357,28 +5096,7 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 		{
 		data->slope_colortable_mode = ivalue;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
-		}
-		
-	get_mbview_text_string(view->mb3dview.mbview_textField_overlaycenter, value_text);
-	sscanf(value_text,"%lf", &dvalue);
-	if (dvalue != data->secondary_overlay_center)
-		{
-		data->secondary_overlay_center = dvalue;
-		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
-		    shade_mode = data->primary_shade_mode;
-		else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
-		    shade_mode = data->slope_shade_mode;
-		else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-		    shade_mode = data->secondary_shade_mode;
-		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 	
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlaymin, value_text);
@@ -12387,10 +5105,7 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 		{
 		data->secondary_colortable_min = dvalue;
 		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 	
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlaymax, value_text);
@@ -12399,10 +5114,7 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 		{
 		data->secondary_colortable_max = dvalue;
  		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
 		}
 	
 	ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_overlay_htoc);
@@ -12410,23 +5122,535 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
 		{
 		data->secondary_colortable_mode = ivalue;
 		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
-			{
-    			view->lastdrawrez = MBV_REZ_NONE;
-    			view->lastcolorrez = MBV_REZ_NONE;
-			}
+			change = MB_YES;
+		}
+   
+    /* clear color status array */
+    if (change == MB_YES)
+	    {
+    	    view->lastdrawrez = MBV_REZ_NONE;
+    	    mbview_setcolorparms(instance);
+	    mbview_colorclear(instance);
+	    }
+    
+    /* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colorboundsapply\n");
+    mbview_plotlowhigh(instance);
+
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_shadeparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_shadeparmspopup: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtManageChild(view->mb3dview.mbview_bulletinBoard_shadeparms);
+
+	/* set values of widgets */
+	sprintf(value_text,"%g", data->illuminate_magnitude);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_illum_amp, 
+			value_text);
+	sprintf(value_text,"%g", data->illuminate_azimuth);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_illum_azi, 
+			value_text);
+	sprintf(value_text,"%g", data->illuminate_elevation);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_illum_elev, 
+			value_text);
+	sprintf(value_text,"%g", data->slope_magnitude);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_slope_amp, 
+			value_text);
+	sprintf(value_text,"%g", data->overlay_shade_magnitude);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, 
+			value_text);
+	sprintf(value_text,"%g", data->overlay_shade_center);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_center, 
+			value_text);
+	if (data->overlay_shade_mode == MBV_COLORTABLE_NORMAL)
+		{
+	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh, 
+			TRUE, TRUE);
+		}
+	else
+		{
+	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_htoc, 
+			TRUE, TRUE);
+		}
+	
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_shadeparmspopdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_shadeparmspopdown: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_shadeparms);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_shadeparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	ivalue;
+	double	dvalue;
+	int	change;
+	int	shade_mode;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_shadeparmsapply: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* check current shading mode */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+	    shade_mode = data->primary_shade_mode;
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+	    shade_mode = data->slope_shade_mode;
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+	    shade_mode = data->secondary_shade_mode;
+
+	/* get values of widgets */
+	
+	/* handle illumination */
+	change = MB_NO;
+	
+	get_mbview_text_string(view->mb3dview.mbview_textField_illum_amp, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->illuminate_magnitude)
+		{
+		data->illuminate_magnitude = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+			change = MB_YES;
+		}
+		
+	get_mbview_text_string(view->mb3dview.mbview_textField_illum_azi, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->illuminate_azimuth)
+		{
+		data->illuminate_azimuth = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+			change = MB_YES;
+		}
+		
+	get_mbview_text_string(view->mb3dview.mbview_textField_illum_elev, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->illuminate_elevation)
+		{
+		data->illuminate_elevation = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+			change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_slope_amp, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->slope_magnitude)
+		{
+		data->slope_magnitude = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_SLOPE)
+			change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_overlay_amp, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->overlay_shade_magnitude)
+		{
+		data->overlay_shade_magnitude = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
+			change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_overlay_center, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->overlay_shade_center)
+		{
+		data->overlay_shade_center = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
+			change = MB_YES;
+		}
+	
+	ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh);
+	if (ivalue != data->overlay_shade_mode)
+		{
+		data->overlay_shade_mode = ivalue;
+		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
+			change = MB_YES;
 		}
   
-    /* reset lastcolorrez flag */
-    view->lastdrawrez = MBV_REZ_NONE;
-    view->lastcolorrez = MBV_REZ_NONE;
+    /* clear color status array */
+    if (change == MB_YES)
+	    {
+    	    view->lastdrawrez = MBV_REZ_NONE;
+    	    mbview_setcolorparms(instance);
+	    mbview_colorclear(instance);
+	    }
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colorboundsapply\n");
-    mbview_plot(instance, MBV_REZ_LOW);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_shadeparmsapply\n");
+    mbview_plotlowhigh(instance);
+
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_3dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_3dparmspopup: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtManageChild(view->mb3dview.mbview_bulletinBoard_3dparms);
+
+	/* set values of widgets */
+	sprintf(value_text,"%g", data->modelazimuth3d);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_model_azimuth, 
+			value_text);
+	sprintf(value_text,"%g", data->modelelevation3d);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_model_elevation, 
+			value_text);
+	sprintf(value_text,"%g", data->viewazimuth3d);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_azimuth, 
+			value_text);
+	sprintf(value_text,"%g", data->viewelevation3d);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_elevation, 
+			value_text);
+	sprintf(value_text,"%g", data->exageration);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_exageration, 
+			value_text);
+	sprintf(value_text,"%g", view->offset3d_x);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsetx, 
+			value_text);
+	sprintf(value_text,"%g", view->offset3d_y);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsety, 
+			value_text);
+	sprintf(value_text,"%g", view->offset3d_z);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_model_3dzoom, 
+			value_text);
+	sprintf(value_text,"%g", view->viewoffset3d_z);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, 
+			value_text);
+
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_3dparmspopdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_3dparmspopdown: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_3dparms);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_3dparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	ivalue;
+	double	dvalue;
+	int	change;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_3dparmsapply: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* get values of widgets */
+
+	change = MB_NO;
+	
+	get_mbview_text_string(view->mb3dview.mbview_textField_model_azimuth, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->modelazimuth3d)
+		{
+		data->modelazimuth3d = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_model_elevation, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->modelelevation3d)
+		{
+		data->modelelevation3d = dvalue;
+		change = MB_YES;
+		}
+	
+	get_mbview_text_string(view->mb3dview.mbview_textField_view_azimuth, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->viewazimuth3d)
+		{
+		data->viewazimuth3d = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_view_elevation, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->viewelevation3d)
+		{
+		data->viewelevation3d = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_exageration, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != data->exageration)
+		{
+		data->exageration = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != view->offset3d_x)
+		{
+		view->offset3d_x = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_view_3doffsety, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != view->offset3d_y)
+		{
+		view->offset3d_y = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_model_3dzoom, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != view->offset3d_z)
+		{
+		view->offset3d_z = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_view_3dzoom, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != view->viewoffset3d_z)
+		{
+		view->viewoffset3d_z = dvalue;
+		change = MB_YES;
+		}
+  
+    /* clear color status array */
+   if (change == MB_YES && data->display_mode == MBV_DISPLAY_3D)
+	    {
+    	    view->lastdrawrez = MBV_REZ_NONE;
+    	    mbview_setcolorparms(instance);
+	    mbview_colorclear(instance);
+	    }
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_colorboundsapply\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_3dparmsapply\n");
+    mbview_plotlowhigh(instance);
+
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_2dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_2dparmspopup: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtManageChild(view->mb3dview.mbview_bulletinBoard_2dparms);
+
+	/* set values of widgets */
+	sprintf(value_text,"%g", view->offset2d_x);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, 
+			value_text);
+	sprintf(value_text,"%g", view->offset2d_y);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsety, 
+			value_text);
+	sprintf(value_text,"%g", view->size2d);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, 
+			value_text);
+
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_2dparmspopdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_2dparmspopdown: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_2dparms);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_2dparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	ivalue;
+	double	dvalue;
+	int	change;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_2dparmsapply: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* get values of widgets */
+
+	change = MB_NO;
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != view->offset2d_x)
+		{
+		view->offset2d_x = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_view_2doffsety, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != view->offset2d_y)
+		{
+		view->offset2d_y = dvalue;
+		change = MB_YES;
+		}
+
+	get_mbview_text_string(view->mb3dview.mbview_textField_view_2dzoom, value_text);
+	sscanf(value_text,"%lf", &dvalue);
+	if (dvalue != view->size2d)
+		{
+		view->size2d = dvalue;
+		change = MB_YES;
+		}
+  
+    /* clear color status array */
+   if (change == MB_YES && data->display_mode == MBV_DISPLAY_2D)
+	    {
+    	    view->lastdrawrez = MBV_REZ_NONE;
+    	    mbview_setcolorparms(instance);
+	    mbview_colorclear(instance);
+	    }
+    
+    /* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_2dparmsapply\n");
+    mbview_plotlowhigh(instance);
 
 }
 /*------------------------------------------------------------------------------*/
@@ -12444,6 +5668,7 @@ do_mbview_resolutionpopup( Widget w, XtPointer client_data, XtPointer call_data)
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_resolutionpopup: instance:%d\n", instance);
 	    
 	/* get view */
@@ -12476,6 +5701,7 @@ do_mbview_resolutionpopdown( Widget w, XtPointer client_data, XtPointer call_dat
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_resolutionpopdown: instance:%d\n", instance);
 	    
 	/* get view */
@@ -12501,6 +5727,7 @@ do_mbview_resolutionchange( Widget w, XtPointer client_data, XtPointer call_data
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
 
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_resolutionchange: instance:%d\n", instance);
 	    
 	/* get view */
@@ -12530,26 +5757,81 @@ fprintf(stderr,"do_mbview_resolutionchange: instance:%d\n", instance);
 			XmNvalue, data->hirez_dimension, 
 			NULL);
    
-    /* reset lastcolorrez flag */
+    /* reset status flags and arrays */
     view->lastdrawrez = MBV_REZ_NONE;
-    view->lastcolorrez = MBV_REZ_NONE;
-    view->lastzscalerez = MBV_REZ_NONE;
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
+    mbview_zscaleclear(instance);
     view->contourlorez = MB_NO;
     view->contourhirez = MB_NO;
     view->contourfullrez = MB_NO;
     
+if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_resolutionchange instance:%d resolutions: %d %d\n", 
 instance, data->lorez_dimension, data->hirez_dimension);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_resolutionchange\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_resolutionchange\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_resolutionchange\n");
+    mbview_plotlowhigh(instance);
 }
 
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_sitelistpopdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_sitelistpopdown: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_sitelist);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_sitelistapply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_sitelistpopup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_sitelistpopup: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtManageChild(view->mb3dview.mbview_bulletinBoard_sitelist);
+    
+}
 /*------------------------------------------------------------------------------*/
 void
 do_mbview_full_render( Widget w, XtPointer client_data, XtPointer call_data)
@@ -12568,16 +5850,15 @@ do_mbview_full_render( Widget w, XtPointer client_data, XtPointer call_data)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	fprintf(stderr,"do_mbview_full_render\n");
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_full_render\n");
 
 	/* replot in full rez if last draw was lower rez */
 	if (view->lastdrawrez != MBV_REZ_FULL)
 	    {
-    /*view->lastzscalerez = MBV_REZ_NONE;
-    view->lastcolorrez = MBV_REZ_NONE;*/
-fprintf(stderr,"Calling mbview_plot from do_mbview_full_render: lastzscalerez:%d lastcolorrez:%d\n",
-		view->lastzscalerez, view->lastcolorrez);
-	    mbview_plot(instance, MBV_REZ_FULL);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotfull from do_mbview_full_render:\n");
+	    mbview_plotfull(instance);
 	    }
 }
 
@@ -12599,7 +5880,8 @@ do_mbview_reset_view( Widget w, XtPointer client_data, XtPointer call_data)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	fprintf(stderr,"do_mbview_reset_view\n");
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_reset_view\n");
 	
 	/* reset the the view to defaults */
 	view->offset2d_x = 0.0;
@@ -12616,20 +5898,15 @@ do_mbview_reset_view( Widget w, XtPointer client_data, XtPointer call_data)
 	data->viewazimuth3d = 0.0;
 	view->zscale = data->exageration * view->scale;
 	view->size2d = 1.0;
-	view->size3d = 1.0;
-    	view->lastzscalerez = MBV_REZ_NONE;
-
+    	mbview_zscaleclear(instance);
     
     /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_reset_view\n");
-    mbview_plot(instance, MBV_REZ_LOW);
-    
-    /* draw */
-fprintf(stderr,"Calling mbview_plot from do_mbview_reset_view\n");
-    mbview_plot(instance, MBV_REZ_HIGH);
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_reset_view\n");
+    mbview_plotlowhigh(instance);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 int
 do_mbview_status(char *message, int instance)
@@ -12652,7 +5929,7 @@ do_mbview_status(char *message, int instance)
     	return(1);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 int
 do_mbview_message_on(char *message, int instance)
@@ -12703,7 +5980,7 @@ do_mbview_message_on(char *message, int instance)
     	return(1);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 int
 do_mbview_message_off(int instance)
@@ -12723,9 +6000,9 @@ do_mbview_message_off(int instance)
     	return(1);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 /* Change label string cleanly, no memory leak */
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 void set_mbview_label_string(Widget w, String str)
 {
@@ -12741,9 +6018,9 @@ void set_mbview_label_string(Widget w, String str)
 
     XmStringFree( xstr );
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 /* Change multiline label string cleanly, no memory leak */
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 void set_mbview_label_multiline_string(Widget w, String str)
 {
@@ -12760,9 +6037,9 @@ void set_mbview_label_multiline_string(Widget w, String str)
 
     XmStringFree( xstr );
 }
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 /* Get text item string cleanly, no memory leak */
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 void get_mbview_text_string(Widget w, String str)
 {
@@ -12773,9 +6050,9 @@ void get_mbview_text_string(Widget w, String str)
     XtFree(str_tmp);
 }
 
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 /* Deal with pending X events */
-/*--------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 
 void do_mbview_xevents()
 {
@@ -12788,4 +6065,253 @@ void do_mbview_xevents()
 		}
 }
 
-/*--------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------*/
+/* Add work procedure */
+/*------------------------------------------------------------------------------*/
+
+int do_mbview_setbackgroundwork(int instance)
+{
+	int	status = MB_SUCCESS;
+    	struct mbview_world_struct *view;
+    	struct mbview_struct *data;
+	int		id;
+	    
+    	/* get view */
+    	view = &(mbviews[instance]);
+    	data = &(view->data);
+
+	/* set work function if none set for this instance */
+	if (work_function_set == MB_NO)
+		{
+		id =  XtAppAddWorkProc(app_context, 
+				(XtWorkProc)do_mbview_workfunction, 
+				(XtPointer) instance);
+		if (id > 0)
+			work_function_set = MB_YES;
+		else
+			status = MB_FAILURE;
+/*fprintf(stderr,"do_mbview_setbackgroundwork: instance:%d id:%d\n",
+instance, id);*/
+		}
+
+/*else
+fprintf(stderr,"do_mbview_setbackgroundwork: FUNCTION ALREADY SET for instance:%d!!\n",
+instance);*/
+
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+
+int do_mbview_settimer()
+{
+	int	status = MB_SUCCESS;
+	unsigned long	timeout_time;
+	int		id;
+	    
+	/* set timer function if none set for this instance */
+	if (work_function_set == MB_NO)
+		{
+		id =  XtAppAddTimeOut(app_context, 
+				(unsigned long) 100,
+				(XtTimerCallbackProc)do_mbview_workfunction, 
+				(XtPointer) -1);
+		if (id > 0)
+			work_function_set = MB_YES;
+		else
+			status = MB_FAILURE;
+/*fprintf(stderr,"do_mbview_settimer: \n");*/
+		}
+
+/*else
+fprintf(stderr,"do_mbview_settimer: FUNCTION ALREADY SET!!\n");*/
+
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+
+int do_mbview_workfunction(XtPointer client_data)
+{
+	int	status = MB_SUCCESS;
+	int	instance;
+	int	id;
+    	struct mbview_world_struct *view;
+    	struct mbview_struct *data;
+	int	plotting;
+	int	found;
+	int	mode;
+	int	kstart, kend;
+	int	i, j, k;
+ 
+    	/* set starting values */	
+	instance = (int) client_data;
+	plotting = MB_NO;
+	found = MB_NO;
+
+/*fprintf(stderr,"do_mbview_workfunction called: instance:%d\n", instance);*/
+
+	/* first make sure no plotting is active */
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+    		/* get view */
+    		view = &(mbviews[i]);
+    		data = &(view->data);
+		
+		/* check it if nothing already found */
+		if (data->primary_nxy > 0
+			&& view->plot_recursion > 0)
+			{
+			plotting = MB_YES;
+			}
+		}
+	
+
+	/* first see if possible to work with instance value */
+	if (plotting == MB_NO
+		&& instance >= 0 
+		&& instance < MBV_MAX_WINDOWS 
+		&& data->primary_nxy > 0)
+		{
+    		/* get view */
+    		view = &(mbviews[instance]);
+    		data = &(view->data);
+		
+		if (view->zscaledonecount < data->primary_nxy - 1)
+			{
+			/* set found */
+			found = MB_YES;
+			mode = MBV_BACKGROUND_ZSCALE;
+			}
+
+		/* then work on color */
+		else if (view->colordonecount < data->primary_nxy - 1)
+			{
+			/* set found */
+			found = MB_YES;
+			mode = MBV_BACKGROUND_COLOR;
+			}
+
+		/* finally do the full rez plot */
+		else if (view->lastdrawrez != MBV_REZ_FULL
+			&& timer_count > 100)
+			{
+			/* set found */
+			found = MB_YES;
+			mode = MBV_BACKGROUND_FULLPLOT;
+			}
+		}
+
+	/* if not found check all possible instances */
+	if (plotting == MB_NO
+		&& found == MB_NO)
+	    {
+	    for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+    		/* get view */
+    		view = &(mbviews[i]);
+    		data = &(view->data);
+		
+		/* check it if nothing already found */
+		if (found == MB_NO 
+			&& data->primary_nxy > 0)
+			{
+			if (view->zscaledonecount < data->primary_nxy - 1)
+				{
+				/* set found */
+				found = MB_YES;
+				mode = MBV_BACKGROUND_ZSCALE;
+				instance = i;
+				}
+
+			/* then work on color */
+			else if (view->colordonecount < data->primary_nxy - 1)
+				{
+				/* set found */
+				found = MB_YES;
+				mode = MBV_BACKGROUND_COLOR;
+				instance = i;
+				}
+
+			/* finally do the full rez plot */
+			else if (view->lastdrawrez != MBV_REZ_FULL
+				&& timer_count > 100)
+				{
+				/* set found */
+				found = MB_YES;
+				mode = MBV_BACKGROUND_FULLPLOT;
+				instance = i;
+				}
+			}
+		}
+	    }
+	
+	/* do the work if instance found */
+	if (plotting == MB_NO
+		&& found == MB_YES)
+		{	
+    		/* get view */
+    		view = &(mbviews[instance]);
+    		data = &(view->data);
+		
+		/* first work on zscale */
+		if (mode == MBV_BACKGROUND_ZSCALE)
+			{
+			/* recalculate zscale for MBV_NUMBACKGROUNDCALC cells */
+			kstart = MIN(view->zscaledonecount + 1, data->primary_nxy - 1);
+			kend = MIN(view->zscaledonecount + 1 + MBV_NUMBACKGROUNDCALC, 
+					data->primary_nxy - 1);
+			for (k=kstart;k<kend;k++)
+				{
+				if (!(data->primary_stat_z[k/8] & statmask[k%8]))
+					mbview_zscalepoint(view, data, k);
+				}
+			view->zscaledonecount = kend;
+			}
+
+		/* then work on color */
+		else if (mode == MBV_BACKGROUND_COLOR)
+			{
+			/* recalculate color for MBV_NUMBACKGROUNDCALC cells */
+			kstart = MIN(view->colordonecount + 1, data->primary_nxy - 1);
+			kend = MIN(view->colordonecount + 1 + MBV_NUMBACKGROUNDCALC, 
+					data->primary_nxy - 1);
+			for (k=kstart;k<kend;k++)
+				{
+				if (!(data->primary_stat_color[k/8] & statmask[k%8]))
+					{
+					i = k / data->primary_ny;
+					j = k % data->primary_ny;
+					mbview_colorpoint(view, data, i, j, k);
+					}
+				}
+			view->colordonecount = kend;
+			}
+
+		/* finally do the full rez plot */
+		else if (mode == MBV_BACKGROUND_FULLPLOT)
+			{
+			/* do full rez plot */
+			/*mbview_plotfull(instance);*/
+			}
+		}
+		
+	/* reset the work function as either background or timed */
+	work_function_set = MB_NO;
+	if (found == MB_YES)
+		{
+		do_mbview_setbackgroundwork(instance);
+		timer_count = 0;
+		}
+	else
+		{
+		do_mbview_settimer();
+		timer_count++;
+		}
+		
+	return(status);
+	
+}
+
+/*------------------------------------------------------------------------------*/
