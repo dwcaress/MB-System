@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.14 2004-10-06 19:10:51 caress Exp $
+#	$Id: Makefile.template,v 5.15 2004-10-18 03:37:49 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.14  2004/10/06 19:10:51  caress
+# Release 5.0.5 update.
+#
 # Revision 5.13  2004/06/18 04:08:41  caress
 # Adding support for segy i/o and working on support for Reson 7k format 88.
 #
@@ -236,11 +239,11 @@ $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDI
 		-o $(BINDIR)/mbunclean
 $(BINDIR)/mbgrid:	mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
-		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbgrid
 $(BINDIR)/mbmosaic:	mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
-		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbmosaic
 $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
@@ -268,8 +271,9 @@ $(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)
 	$(CC) $(CFLAGS) mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbsmooth
 $(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(GMTLIBDIR)/libgmt.a \
-		$(GMTLIBDIR)/libpsl.a $(LFLAGS) -o $(BINDIR)/mbps
+	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
+		$(LFLAGS) -o $(BINDIR)/mbps
 $(BINDIR)/mbstripnan:	mbstripnan.o
 	$(CC) $(CFLAGS) mbstripnan.o $(LFLAGS) -o $(BINDIR)/mbstripnan
 $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
@@ -277,7 +281,7 @@ $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(L
 		$(LFLAGS) -o $(BINDIR)/mbhistogram
 $(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
-		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbbackangle
 $(BINDIR)/mbbackangleold:	mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
@@ -320,7 +324,7 @@ $(BINDIR)/mbsegyinfo:	mbsegyinfo.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIB
 		$(LFLAGS) -o $(BINDIR)/mbsegyinfo
 $(BINDIR)/mbsegygrid:	mbsegygrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbsegygrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a \
-		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbsegygrid
 
 ### compile the source files
