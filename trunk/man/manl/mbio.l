@@ -3,7 +3,7 @@
 \fBmbio\fP - Format independent input/output library for multibeam sonar data.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH DESCRIPTION
 \fBMBIO\fP (\fBM\fPulti\fBB\fPeam \fBI\fPnput/\fBO\fPutput) is a library
@@ -12,10 +12,7 @@ data files.  \fBMBIO\fP supports a large number of data
 formats associated with different institutions and different sonar systems.
 The purpose of \fBMBIO\fP is to allow users to write processing and display
 programs which are independent of particular data formats and to provide
-a standard approach to multibeam data i/o.  Version 4.00 includes
-substantial changes to the function calls comprising \fBMBIO\fP and
-to the format id's used by \fBMBIO\fP functions; programs written 
-to use previous versions of \fBMBIO\fP will have to be modified and recompiled.
+a standard approach to multibeam data i/o.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -80,8 +77,12 @@ function \fBmb_close\fP.
  			\fBmb_buffer_load\fP
  			\fBmb_buffer_dump\fP
  			\fBmb_buffer_info\fP
+ 			\fBmb_buffer_get_next_data\fP
  			\fBmb_buffer_extract\fP
  			\fBmb_buffer_insert\fP
+ 			\fBmb_buffer_get_next_nav\fP
+ 			\fBmb_buffer_extract_nav\fP
+ 			\fBmb_buffer_insert_nav\fP
 
 The level 1 \fBMBIO\fP functions allow users to read 
 and write multibeam data independent of format, with the limitation that 
@@ -120,18 +121,18 @@ sonar.  Consequently, it is possible to read and write the complete
 data stream when using the level 2 or 3 \fBMBIO\fP functions.
 At present, formats associated with the following multibeam systems are
 supported:
- 	Hydrosweep DS 59 beam sonar 
  	Sea Beam "classic" 16 beam multibeam sonar 
- 	Sea Beam 2100 multibeam sonar 
+ 	Hydrosweep DS 59 beam sonar 
+ 	Sea Beam 2000 multibeam sonar 
+ 	Sea Beam 2100 series multibeam sonars
+	Simrad EM12 and EM1000 multibeam sonars
 	Hawaii MR-1 shallow tow sonar
-	Simrad EM12 sonar
-	Simrad EM1000 shallow water sonar
-	ELAC Bottomchart shallow water sonar
-	Reson CBAT9001 shallow water sonar
+	ELAC Bottomchart shallow water multibeam sonar
+	Reson Seabat 9001 and 9002 shallow water multibeam sonars
 	
 .SH SUPPORTED FORMATS
 With the introduction of \fBMB-System\fP version 4.00, the data format
-id's used by \fBMBIO\fP have changed considerably.  The old format id's,
+id's used by \fBMBIO\fP changed considerably.  The old format id's,
 which ranged from 1 to 9, are still supported in the sense that they
 are automatically converted to the appropriate new format id's by \fBMBIO\fP.
 Thus, old shellscripts using the old format id's will continue to work
@@ -307,6 +308,8 @@ full suite of possible error values and the associated error messages are:
   	error = -11:	"No data was loaded into the buffer",
   	error = -12:	"Data buffer is empty",
   	error = -13:	"No data was dumped from the buffer"
+  	error = -14:	"No more survey data records in buffer"
+  	error = -15:	"Data inconsistencies prevented inserting data into storage structure"
   	error = 1:	"Unable to allocate memory, initialization failed",
   	error = 2:	"Unable to open file, initialization failed",
   	error = 3:	"Illegal format identifier, initialization failed",
@@ -589,7 +592,7 @@ int *\fIkind\fP;
 .br
 int *\fIpings\fP;
 .br
-int \fItime_i\fP[6];
+int \fItime_i\fP[7];
 .br
 double *\fItime_d\fP;
 .br
@@ -648,6 +651,7 @@ The return values are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
  	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
@@ -690,7 +694,7 @@ char *\fImbio_ptr\fP;
 .br
 int \fIkind\fP
 .br
-int \fItime_i\fP[6];
+int \fItime_i\fP[7];
 .br
 double \fItime_d\fP;
 .br
@@ -744,6 +748,7 @@ The values to be output are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
  	\fItime_d\fP:		time of current ping in minutes since 
  			1/1/71 00:00:00 (used if \fItime_i\fP[0] = 0)
  	\fInavlon\fP:		longitude
@@ -787,7 +792,7 @@ int *\fIkind\fP;
 .br
 int *\fIpings\fP;
 .br
-int \fItime_i\fP[6];
+int \fItime_i\fP[7];
 .br
 double *\fItime_d\fP;
 .br
@@ -847,6 +852,7 @@ The return values are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
  	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
@@ -889,7 +895,7 @@ char *\fImbio_ptr\fP;
 .br
 int \fIkind\fP
 .br
-int \fItime_i\fP[6];
+int \fItime_i\fP[7];
 .br
 double \fItime_d\fP;
 .br
@@ -944,6 +950,7 @@ The values to be output are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
  	\fItime_d\fP:		time of current ping in minutes since 
  			1/1/71 00:00:00 (used if \fItime_i\fP[0] = 0)
  	\fInavlon\fP:		longitude
@@ -990,7 +997,7 @@ char **\fIstore_ptr\fP;
 .br
 int *\fIkind\fP;
 .br
-int \fItime_i\fP[6];
+int \fItime_i\fP[7];
 .br
 double *\fItime_d\fP;
 .br
@@ -1059,6 +1066,7 @@ The return values are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
  	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
@@ -1106,7 +1114,7 @@ int \fIusevalues\fP;
 .br
 int \fIkind\fP
 .br
-int \fItime_i\fP[6];
+int \fItime_i\fP[7];
 .br
 double \fItime_d\fP;
 .br
@@ -1180,6 +1188,7 @@ The values to be output are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
  	\fItime_d\fP:		time of current ping in minutes since 
  				1/1/71 00:00:00 (used if \fItime_i\fP[0] = 0)
  	\fInavlon\fP:		longitude
@@ -1210,9 +1219,724 @@ write failures.
 .SH LEVEL 3 FUNCTIONS
 .RE
 .IP
-I'll write this real soon now (or at least someday when someone bugs
-me a tremendous amount) - in the meantime look at the code in
-mbclean.c for an idea of how to use the mb_buffer functions.  DWC
+int \fBmb_buffer_init\fP(\fIverbose\fP, \fIbuff_ptr\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char **\fIbuff_ptr\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_init\fP initializes the data structures
+required for buffered i/0. A pointer to the buffer data structure
+is returned as *\fIbuff_ptr\fP.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+.br
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+buffer initialization failures. 
+.RE
+.IP
+int \fBmb_buffer_close\fP(\fIverbose\fP, \fIbuff_ptr\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char **\fIbuff_ptr\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_close\fP releases all memory allocated
+for buffered i/0, including the structure pointed to by *\fIbuff_ptr\fP.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+.br
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+buffer deallocation failures. 
+.RE
+.IP
+int \fBmb_buffer_load\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fInwant\fP, \fInload\fP, \fInbuff\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fInwant\fP;
+.br
+int *\fInload\fP;
+.br
+int *\fInbuff\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_load\fP loads data into the buffer pointed
+to by \fIbuff_ptr\fP from the input file initialized in the 
+\fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+  
+The input control parameters have the following significance:
+ 	\fInwant\fP:		The number of data records desired
+ 				in the buffer.
+
+The returned values are:
+ 	\fInload\fP:		The number of data records loaded into the buffer.
+ 	\fInbuff\fP:		The total number of data records in the buffer after loading.
+ 
+The buffer may already contain data records when the \fBmb_buffer_load\fP
+call is made; if the number of previously loaded records is less than
+\fInwant\fP, the function will attempt to read and load records
+until a total of \fInwant\fP records are loaded. The \fInload\fP
+value is the number of data records loaded during the current
+function call, and the \fInbuff\fP value is the number of data
+records in the buffer at the completion of the \fBmb_buffer_load\fP
+call.
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+buffer deallocation failures. 
+.RE
+.IP
+int \fBmb_buffer_dump\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fInhold\fP, \fIndump\fP, \fInbuff\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fInhold\fP;
+.br
+int *\fIndump\fP;
+.br
+int *\fInbuff\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_dump\fP dumps data from the buffer pointed
+to by *\fIbuff_ptr\fP into the output file initialized in the 
+\fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+  
+The input control parameters have the following significance:
+ 	\fInwant\fP:		The number of data records desired to be held
+ 				in the buffer.
+
+The returned values are:
+ 	\fInload\fP:		The number of data records dumped from the buffer.
+ 	\fInbuff\fP:		The total number of data records in the buffer after dumping.
+ 
+If the number of loaded records is more than
+\fInhold\fP, the function will attempt to write out records
+from the beginning of the buffer until \fInhold\fP records 
+are left in the buffer. The \fIndump\fP
+value is the number of data records dumped during the current
+function call, and the \fInbuff\fP value is the number of data
+records in the buffer at the completion of the \fBmb_buffer_dump\fP
+call.
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+buffer deallocation failures. 
+.RE
+.IP
+int \fBmb_buffer_clear\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fInhold\fP, \fIndump\fP, \fInbuff\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fInhold\fP;
+.br
+int *\fIndump\fP;
+.br
+int *\fInbuff\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_clear\fP removes data from the buffer pointed
+to by *\fIbuff_ptr\fP without writing those data records to an
+output file. An \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP
+is still required, and generally represents the \fBMBIO\fP descriptor
+used to read and load the data originally.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+  
+The input control parameters have the following significance:
+ 	\fInwant\fP:		The number of data records desired to be held
+ 				in the buffer.
+
+The returned values are:
+ 	\fInload\fP:		The number of data records cleared from the buffer.
+ 	\fInbuff\fP:		The total number of data records in the buffer after dumping.
+ 
+If the number of loaded records is more than
+\fInhold\fP, the function will attempt to clear out records
+from the beginning of the buffer until \fInhold\fP records 
+are left in the buffer. The \fIndump\fP
+value is the number of data records cleared during the current
+function call, and the \fInbuff\fP value is the number of data
+records in the buffer at the completion of the \fBmb_buffer_dump\fP
+call.
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+buffer deallocation failures. 
+.RE
+.IP
+int \fBmb_buffer_get_next_data\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fIstart\fP, \fIid\fP, 
+\fItime_i\fP, \fItime_d\fP, 
+\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
+\fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fIstart\fP;
+.br
+int *\fIid\fP;
+.br
+int \fItime_i\fP[7];
+.br
+double *\fItime_d\fP;
+.br
+double *\fInavlon\fP;
+.br
+double *\fInavlat\fP;
+.br
+double *\fIspeed\fP;
+.br
+double *\fIheading\fP;
+.br
+int *\fInbath\fP;
+.br
+int *\fInamp\fP;
+.br
+int *\fInss\fP;
+.br
+int *\fIbath\fP;
+.br
+int *\fIamp\fP;
+.br
+int *\fIbathacrosstrack\fP;
+.br
+int *\fIbathalongtrack\fP;
+.br
+int *\fIss\fP;
+.br
+int *\fIssacrosstrack\fP;
+.br
+int *\fIssalongtrack\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_get_next_data\fP searches for the
+next survey data record in the buffer, beginning at buffer
+index \fIstart\fP. Since buffer indexes begin at 0, the first
+call to \fBmb_buffer_get_next_data\fP should have \fIstart\fP = 0.
+If a survey data record is found at or beyond \fIstart\fP,
+\fBmb_buffer_get_next_data\fP returns the buffer index of that 
+record in \fIid\fP. Data is also returned in the forms of bathymetry, 
+amplitude, and sidescan survey data. No comments or other
+non-survey data records are returned.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+  
+The input control parameters have the following significance:
+ 	\fIstart\fP:		The buffer index at which to start searching for a survey data record.
+
+The returned values are:
+ 	\fIid\fP:		The buffer index of the first survey data record at or after \fIstart\fP.
+ 	\fItime_i\fP:		time of current ping
+ 			\fItime_i\fP[0]: year
+ 			\fItime_i\fP[1]: month
+ 			\fItime_i\fP[2]: day
+ 			\fItime_i\fP[3]: hour
+ 			\fItime_i\fP[4]: minute
+ 			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
+ 	\fInavlon\fP:		longitude
+ 	\fInavlat\fP:		latitude
+ 	\fIspeed\fP:		ship speed in km/s
+ 	\fIheading\fP:		ship heading in degrees
+ 	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
+ 	\fIbath\fP:		array of bathymetry values in meters
+ 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIssacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to sidescan
+ 	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to sidescan
+ 
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+failures. The most common error occurs when no more survey data
+records remain to be found in the buffer; in this case,
+\fIerror\fP = -14.
+.RE
+.IP
+int \fBmb_buffer_extract\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fIid\fP, \fIkind\fP, 
+\fItime_i\fP, \fItime_d\fP, 
+\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
+\fIcomment\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fIid\fP;
+.br
+int *\fIkind\fP;
+.br
+int \fItime_i\fP[7];
+.br
+double *\fItime_d\fP;
+.br
+double *\fInavlon\fP;
+.br
+double *\fInavlat\fP;
+.br
+double *\fIspeed\fP;
+.br
+double *\fIheading\fP;
+.br
+int *\fInbath\fP;
+.br
+int *\fInamp\fP;
+.br
+int *\fInss\fP;
+.br
+int *\fIbath\fP;
+.br
+int *\fIamp\fP;
+.br
+int *\fIbathacrosstrack\fP;
+.br
+int *\fIbathalongtrack\fP;
+.br
+int *\fIss\fP;
+.br
+int *\fIssacrosstrack\fP;
+.br
+int *\fIssalongtrack\fP;
+.br
+char \fIcomment\fP[256];
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_extract\fP extracts and returns
+a subset of the data in a buffer record.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+The buffer record is specified with the 
+buffer index \fIid\fP. The data is either
+in the form of bathymetry, 
+amplitude, and sidescan survey data or a comment string.
+  
+The input control parameters have the following significance:
+ 	\fIid\fP:		The buffer index of the data record to extract.
+
+The returned values are:
+ 	\fIkind\fP:		kind of data record extracted
+ 					1	survey data
+ 					2	comment
+ 					>=3	other data that cannot 
+ 						be passed by \fBmb_buffer_extract\fP
+ 	\fItime_i\fP:		time of current ping
+ 			\fItime_i\fP[0]: year
+ 			\fItime_i\fP[1]: month
+ 			\fItime_i\fP[2]: day
+ 			\fItime_i\fP[3]: hour
+ 			\fItime_i\fP[4]: minute
+ 			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
+ 	\fInavlon\fP:		longitude
+ 	\fInavlat\fP:		latitude
+ 	\fIspeed\fP:		ship speed in km/s
+ 	\fIheading\fP:		ship heading in degrees
+ 	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
+ 	\fIbath\fP:		array of bathymetry values in meters
+ 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIssacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to sidescan
+ 	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to sidescan
+ 	\fIcomment\fP:		comment string
+ 
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+extract failures.
+.RE
+.IP
+int \fBmb_buffer_insert\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fIid\fP, \fIkind\fP, 
+\fItime_i\fP, \fItime_d\fP, 
+\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
+\fIcomment\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fIid\fP;
+.br
+int *\fIkind\fP;
+.br
+int \fItime_i\fP[7];
+.br
+double \fItime_d\fP;
+.br
+double \fInavlon\fP;
+.br
+double \fInavlat\fP;
+.br
+double \fIspeed\fP;
+.br
+double \fIheading\fP;
+.br
+int *\fInbath\fP;
+.br
+int *\fInamp\fP;
+.br
+int *\fInss\fP;
+.br
+int *\fIbath\fP;
+.br
+int *\fIamp\fP;
+.br
+int *\fIbathacrosstrack\fP;
+.br
+int *\fIbathalongtrack\fP;
+.br
+int *\fIss\fP;
+.br
+int *\fIssacrosstrack\fP;
+.br
+int *\fIssalongtrack\fP;
+.br
+char \fIcomment\fP[256];
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_insert\fP inserts data into a
+buffer record, replacing a subset of the original values.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+The buffer record is specified with the 
+buffer index \fIid\fP. The data is either
+in the form of bathymetry, 
+amplitude, and sidescan survey data or a comment string.
+  
+The input control parameters have the following significance:
+ 	\fIid\fP:		The buffer index of the data record to insert.
+
+The returned values are:
+ 	\fIkind\fP:		kind of data record inserted
+ 					1	survey data
+ 					2	comment
+ 					>=3	other data that cannot 
+ 						be passed by \fBmb_buffer_extract\fP
+ 	\fItime_i\fP:		time of current ping
+ 			\fItime_i\fP[0]: year
+ 			\fItime_i\fP[1]: month
+ 			\fItime_i\fP[2]: day
+ 			\fItime_i\fP[3]: hour
+ 			\fItime_i\fP[4]: minute
+ 			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
+ 	\fInavlon\fP:		longitude
+ 	\fInavlat\fP:		latitude
+ 	\fIspeed\fP:		ship speed in km/s
+ 	\fIheading\fP:		ship heading in degrees
+ 	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
+ 	\fIbath\fP:		array of bathymetry values in meters
+ 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIssacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to sidescan
+ 	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to sidescan
+ 	\fIcomment\fP:		comment string
+ 
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+insert failures.
+.RE
+.IP
+int \fBmb_buffer_get_next_nav\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fIstart\fP, \fIid\fP, 
+\fItime_i\fP, \fItime_d\fP, 
+\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
+\fIroll\fP, \fIpitch\fP, \fIheave\fP, 
+\fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fIstart\fP;
+.br
+int *\fIid\fP;
+.br
+int \fItime_i\fP[7];
+.br
+double *\fItime_d\fP;
+.br
+double *\fInavlon\fP;
+.br
+double *\fInavlat\fP;
+.br
+double *\fIspeed\fP;
+.br
+double *\fIheading\fP;
+.br
+double *\fIroll\fP;
+.br
+double *\fIpitch\fP;
+.br
+double *\fIheave\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_get_next_nav\fP searches for the
+next survey data record in the buffer, beginning at buffer
+index \fIstart\fP. Since buffer indexes begin at 0, the first
+call to \fBmb_buffer_get_next_nav\fP should have \fIstart\fP = 0.
+If a survey data record is found at or beyond \fIstart\fP,
+\fBmb_buffer_get_next_nav\fP returns the buffer index of that 
+record in \fIid\fP. Navigation and vertical reference sensor
+data is also returned. No comments or other
+non-survey data records are returned.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+  
+The input control parameters have the following significance:
+ 	\fIstart\fP:		The buffer index at which to start searching for a survey data record.
+
+The returned values are:
+ 	\fIid\fP:		The buffer index of the first survey data record at or after \fIstart\fP.
+ 	\fItime_i\fP:		time of current ping
+ 			\fItime_i\fP[0]: year
+ 			\fItime_i\fP[1]: month
+ 			\fItime_i\fP[2]: day
+ 			\fItime_i\fP[3]: hour
+ 			\fItime_i\fP[4]: minute
+ 			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
+ 	\fInavlon\fP:		longitude
+ 	\fInavlat\fP:		latitude
+ 	\fIspeed\fP:		ship speed in km/s
+ 	\fIheading\fP:		ship heading in degrees
+ 	\fIroll\fP:		ship roll in degrees
+ 	\fIpitch\fP:		ship pitch in degrees
+ 	\fIheave\fP:		ship heave in meters
+ 
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+failures. The most common error occurs when no more survey data
+records remain to be found in the buffer; in this case,
+\fIerror\fP = -14.
+.RE
+.IP
+int \fBmb_buffer_extract_nav\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fIid\fP, \fIkind\fP, 
+\fItime_i\fP, \fItime_d\fP, 
+\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
+\fIroll\fP, \fIpitch\fP, \fIheave\fP, 
+\fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fIid\fP;
+.br
+int *\fIkind\fP;
+.br
+int \fItime_i\fP[7];
+.br
+double *\fItime_d\fP;
+.br
+double *\fInavlon\fP;
+.br
+double *\fInavlat\fP;
+.br
+double *\fIspeed\fP;
+.br
+double *\fIheading\fP;
+.br
+double *\fIroll\fP;
+.br
+double *\fIpitch\fP;
+.br
+double *\fIheave\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_extract_nav\fP extracts and returns
+a subset of the data in a buffer record.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+The buffer record is specified with the 
+buffer index \fIid\fP. The data returned consists of navigation
+and vertical reference sensor data.
+  
+The input control parameters have the following significance:
+ 	\fIid\fP:		The buffer index of the data record to extract.
+
+The returned values are:
+ 	\fIkind\fP:		kind of data record extracted
+ 					1	survey data
+ 					2	comment
+ 					>=3	other data that cannot 
+ 						be passed by \fBmb_buffer_extract\fP
+ 	\fItime_i\fP:		time of current ping
+ 			\fItime_i\fP[0]: year
+ 			\fItime_i\fP[1]: month
+ 			\fItime_i\fP[2]: day
+ 			\fItime_i\fP[3]: hour
+ 			\fItime_i\fP[4]: minute
+ 			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
+ 	\fInavlon\fP:		longitude
+ 	\fInavlat\fP:		latitude
+ 	\fIspeed\fP:		ship speed in km/s
+ 	\fIheading\fP:		ship heading in degrees
+ 	\fIroll\fP:		ship roll in degrees
+ 	\fIpitch\fP:		ship pitch in degrees
+ 	\fIheave\fP:		ship heave in meters
+ 
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+extract failures.
+.RE
+.IP
+int \fBmb_buffer_insert_nav\fP(\fIverbose\fP, \fIbuff_ptr\fP, 
+\fImbio_ptr\fP, \fIid\fP, \fIkind\fP, 
+\fItime_i\fP, \fItime_d\fP, 
+\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
+\fIroll\fP, \fIpitch\fP, \fIheave\fP, 
+\fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fIbuff_ptr\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+int \fIid\fP;
+.br
+int *\fIkind\fP;
+.br
+int \fItime_i\fP[7];
+.br
+double \fItime_d\fP;
+.br
+double \fInavlon\fP;
+.br
+double \fInavlat\fP;
+.br
+double \fIspeed\fP;
+.br
+double \fIheading\fP;
+.br
+double \fIroll\fP;
+.br
+double \fIpitch\fP;
+.br
+double \fIheave\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_buffer_insert_nav\fP inserts navigation
+and vertical reference sensor data into a
+buffer record, replacing a subset of the original values.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+The buffer record is specified with the 
+buffer index \fIid\fP. 
+  
+The input control parameters have the following significance:
+ 	\fIid\fP:		The buffer index of the data record to insert.
+
+The returned values are:
+ 	\fIkind\fP:		kind of data record inserted
+ 					1	survey data
+ 					2	comment
+ 					>=3	other data that cannot 
+ 						be passed by \fBmb_buffer_extract\fP
+ 	\fItime_i\fP:		time of current ping
+ 			\fItime_i\fP[0]: year
+ 			\fItime_i\fP[1]: month
+ 			\fItime_i\fP[2]: day
+ 			\fItime_i\fP[3]: hour
+ 			\fItime_i\fP[4]: minute
+ 			\fItime_i\fP[5]: second
+ 			\fItime_i\fP[6]: microsecond
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
+ 	\fInavlon\fP:		longitude
+ 	\fInavlat\fP:		latitude
+ 	\fIspeed\fP:		ship speed in km/s
+ 	\fIheading\fP:		ship heading in degrees
+ 	\fIroll\fP:		ship roll in degrees
+ 	\fIpitch\fP:		ship pitch in degrees
+ 	\fIheave\fP:		ship heave in meters
+ 
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+insert failures.
 .SH MISCELLANEOUS FUNCTIONS
 .RE
 .IP
@@ -1299,6 +2023,6 @@ status value signals success if \fIformat\fP is valid and failure otherwise.
 \fBmbsystem\fP(l), \fBmbformat\fP(l)
 
 .SH BUGS
-Undoubtably...
+What could go wrong in a mere 55,000 lines of code?
 .br
 Let us know...

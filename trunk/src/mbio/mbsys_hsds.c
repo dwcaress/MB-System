@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
- *	$Id: mbsys_hsds.c,v 4.7 1995-07-26 14:45:39 caress Exp $
+ *	$Id: mbsys_hsds.c,v 4.8 1995-08-17 14:41:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/07/26  14:45:39  caress
+ * Fixed problems related to shallow water data.
+ *
  * Revision 4.6  1995/07/13  19:13:36  caress
  * Intermediate check-in during major bug-fixing flail.
  *
@@ -94,7 +97,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_hsds.c,v 4.7 1995-07-26 14:45:39 caress Exp $";
+ static char res_id[]="$Id: mbsys_hsds.c,v 4.8 1995-08-17 14:41:09 caress Exp $";
 	char	*function_name = "mbsys_hsds_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -669,7 +672,7 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_extract_nav(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
-		error)
+		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -680,6 +683,9 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*roll;
+double	*pitch;
+double	*heave;
 int	*error;
 {
 	char	*function_name = "mbsys_hsds_extract_nav";
@@ -751,6 +757,11 @@ int	*error;
 
 		/* get speed (convert m/s to km/hr) */
 		*speed = 3.6*store->speed;
+
+		/* get roll pitch and heave */
+		*roll = store->roll;
+		*pitch = store->pitch;
+		*heave = store->heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -831,6 +842,9 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
+		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
+		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
 		}
 	if (verbose >= 2)
 		{
@@ -845,7 +859,7 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_insert_nav(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
-		error)
+		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -855,6 +869,9 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	roll;
+double	pitch;
+double	heave;
 int	*error;
 {
 	char	*function_name = "mbsys_hsds_insert_nav";
@@ -886,6 +903,9 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       roll:       %f\n",roll);
+		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
+		fprintf(stderr,"dbg2       heave:      %f\n",heave);
 		}
 
 	/* get mbio descriptor */
@@ -915,6 +935,11 @@ int	*error;
 
 		/* get speed (convert km/hr to m/s) */
 		store->speed = 0.2777777778*speed;
+
+		/* get roll pitch and heave */
+		store->roll = roll;
+		store->pitch = pitch;
+		store->heave = heave;
 		}
 
 	/* print output debug statements */

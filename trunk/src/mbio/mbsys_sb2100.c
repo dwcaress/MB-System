@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.8 1995-07-13 19:13:36 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.9 1995-08-17 14:41:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,11 +25,9 @@
  *   mbsys_sb2100_insert  - insert basic data into mbsys_sb2100_struct structure
  *   mbsys_sb2100_ttimes  - extract travel time and beam angle data from
  *                          mbsys_sb2100_struct structure
- *   mbsys_sb2100_nav_get - extract navigation and attitude 
- *			    sensor data from
+ *   mbsys_sb2100_extract_nav - extract navigation data from
  *                          mbsys_sb2100_struct structure
- *   mbsys_sb2100_nav_put - insert navigation and attitude 
- *			    sensor data into
+ *   mbsys_sb2100_insert_nav - insert navigation data into
  *                          mbsys_sb2100_struct structure
  *   mbsys_sb2100_copy	  - copy data in one mbsys_sb2100_struct structure
  *   				into another mbsys_sb2100_struct structure
@@ -37,6 +35,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1995/07/13  19:13:36  caress
+ * Intermediate check-in during major bug-fixing flail.
+ *
  * Revision 4.7  1995/06/03  03:25:13  caress
  * Fixes to handling of changes to vendor SB2100 format
  *
@@ -91,7 +92,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.8 1995-07-13 19:13:36 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.9 1995-08-17 14:41:09 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -269,8 +270,8 @@ int	*error;
 		else
 			*heading = 0.001*store->heading_36khz;
 
-		/* set speed to zero */
-		*speed = 0.001*store->speed;
+		/* get speed */
+		*speed = 0.0018553167*store->speed;
 
 		/* read beam and pixel values into storage arrays */
 		*nbath = mb_io_ptr->beams_bath;
@@ -551,7 +552,7 @@ int	*error;
 			store->heading_36khz = 1000*heading;
 
 		/* get speed */
-		store->speed = 1000.0*speed;
+		store->speed = 538.99155*speed;
 
 		/* put beam and pixel values 
 			into data structure */
@@ -736,7 +737,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb2100_nav_get(verbose,mbio_ptr,store_ptr,kind,
+int mbsys_sb2100_extract_nav(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
 		roll,pitch,heave,error)
 int	verbose;
@@ -754,7 +755,7 @@ double	*pitch;
 double	*heave;
 int	*error;
 {
-	char	*function_name = "mbsys_sb2100_nav_get";
+	char	*function_name = "mbsys_sb2100_extract_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
@@ -826,7 +827,7 @@ int	*error;
 			*heading = 0.001*store->heading_36khz;
 
 		/* get speed */
-		*speed = 0.001*store->speed;
+		*speed = 0.0018553167*store->speed;
 
 		/* get roll pitch and heave */
 		if (store->frequency[0] != 'H')
@@ -941,7 +942,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb2100_nav_put(verbose,mbio_ptr,store_ptr,
+int mbsys_sb2100_insert_nav(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
 		roll,pitch,heave,error)
 int	verbose;
@@ -958,7 +959,7 @@ double	pitch;
 double	heave;
 int	*error;
 {
-	char	*function_name = "mbsys_sb2100_nav_put";
+	char	*function_name = "mbsys_sb2100_insert_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
@@ -1024,7 +1025,7 @@ int	*error;
 			store->heading_36khz = 1000*heading;
 
 		/* get speed */
-		store->speed = 1000.0*speed;
+		store->speed = 538.99155*speed;
 
 		/* get roll pitch and heave */
 		if (store->frequency[0] != 'H')

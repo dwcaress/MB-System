@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.18 1995-07-18 15:38:29 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.19 1995-08-17 14:42:45 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1995/07/18  15:38:29  caress
+ * Added rounding to calculation of output navigation.
+ *
  * Revision 4.17  1995/07/13  19:13:36  caress
  * Intermediate check-in during major bug-fixing flail.
  *
@@ -114,7 +117,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.18 1995-07-18 15:38:29 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.19 1995-08-17 14:42:45 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -491,7 +494,7 @@ int	*error;
 			mb_io_ptr->new_heading = 0.001*data->heading_36khz;
 
 		/* get speed */
-		mb_io_ptr->new_speed = 0.0036*data->speed;
+		mb_io_ptr->new_speed = 0.0018553167*data->speed;
 
 		/* read beam and pixel values into storage arrays */
 		mb_io_ptr->beams_bath = data->num_beams;
@@ -895,7 +898,7 @@ int	*error;
 			data->heading_36khz = data->heading_36khz + 360000;
 
 		/* get speed */
-		data->speed = mb_io_ptr->new_speed/0.0036;
+		data->speed = 538.99155*mb_io_ptr->new_speed;
 
 		/* read beam and pixel values into storage arrays */
 		if (data->range_scale == 'S')
