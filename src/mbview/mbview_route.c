@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.1 2004-02-24 22:52:29 caress Exp $
+ *    $Id: mbview_route.c,v 5.2 2004-06-18 04:26:06 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/02/24 22:52:29  caress
+ * Added spherical projection to MBview.
+ *
  * Revision 5.0  2003/12/02 20:38:34  caress
  * Making version number 5.0
  *
@@ -73,7 +76,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.1 2004-02-24 22:52:29 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.2 2004-06-18 04:26:06 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -531,6 +534,10 @@ fprintf(stderr,"Called mbview_getroute:%d\n",instance);
 			{
 			/* add first point */
 			routelon[*npointtotal] = data->routes[route].points[i].xlon;
+			if (routelon[*npointtotal] < -180.0)
+				routelon[*npointtotal] += 360.0;
+			else if (routelon[*npointtotal] > 180.0)
+				routelon[*npointtotal] -= 360.0;
 			routelat[*npointtotal] = data->routes[route].points[i].ylat ;
 			waypoint[*npointtotal] = MB_YES;
 			routetopo[*npointtotal] = data->routes[route].points[i].zdata;
@@ -543,6 +550,10 @@ fprintf(stderr,"Called mbview_getroute:%d\n",instance);
 			for (j=1;j<data->routes[route].segments[i].nls-1;j++)
 				{
 				routelon[*npointtotal] = data->routes[route].segments[i].lspoints[j].xlon;
+				if (routelon[*npointtotal] < -180.0)
+					routelon[*npointtotal] += 360.0;
+				else if (routelon[*npointtotal] > 180.0)
+					routelon[*npointtotal] -= 360.0;
 				routelat[*npointtotal] = data->routes[route].segments[i].lspoints[j].ylat;
 				waypoint[*npointtotal] = MB_NO;
 				routetopo[*npointtotal] = data->routes[route].segments[i].lspoints[j].zdata;
@@ -561,6 +572,10 @@ fprintf(stderr,"Called mbview_getroute:%d\n",instance);
 		/* add last point */
 		j = data->routes[route].npoints - 1;
 		routelon[*npointtotal] = data->routes[route].points[j].xlon;
+		if (routelon[*npointtotal] < -180.0)
+			routelon[*npointtotal] += 360.0;
+		else if (routelon[*npointtotal] > 180.0)
+			routelon[*npointtotal] -= 360.0;
 		routelat[*npointtotal] = data->routes[route].points[j].ylat ;
 		waypoint[*npointtotal] = MB_YES;
 		routetopo[*npointtotal] = data->routes[route].points[j].zdata;

@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.2 2004-02-24 22:52:27 caress Exp $
+ *    $Id: mbview_pick.c,v 5.3 2004-06-18 04:26:06 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/02/24 22:52:27  caress
+ * Added spherical projection to MBview.
+ *
  * Revision 5.1  2004/01/06 21:11:03  caress
  * Added pick region capability.
  *
@@ -76,7 +79,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.2 2004-02-24 22:52:27 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.3 2004-06-18 04:26:06 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -549,6 +552,14 @@ int mbview_setlonlatstrings(double lon, double lat, char *lonstring, char *latst
 		}
 		
 	/* set the strings */
+	if (lon > 180.0)
+		{
+		lon -= 360.0;
+		}
+	if (lon < -180.0)
+		{
+		lon += 360.0;
+		}
 	if (lon < 0.0)
 		sprintf(lonstring, "%9.5f W", fabs(lon));
 	else

@@ -67,7 +67,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.3 2004-05-21 23:40:39 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.4 2004-06-18 04:26:06 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -1586,7 +1586,7 @@ fprintf(stderr,"Route Buffer: %s",buffer);
 			/* if data accumulated call mbview_addroute() */
 			if (npoint > 0)
 			    {
-			    status = mbview_addroute(2, instance,
+			    status = mbview_addroute(verbose, instance,
 			    				npoint, routelon, routelat,
 							routecolor, routesize, routename,
 							&error);
@@ -1611,7 +1611,7 @@ fprintf(stderr,"Route Buffer: %s",buffer);
 				&& npoint + 1 > npointalloc)
 			    {
 			    npointalloc += MBV_ALLOC_NUM;
-			    status = mbview_allocroutearrays(2, 
+			    status = mbview_allocroutearrays(verbose, 
 						    npointalloc,
 						    &routelon,
 						    &routelat,
@@ -1640,7 +1640,7 @@ fprintf(stderr,"Route Buffer: %s",buffer);
 		/* add last route if not already handled */
 		if (npoint > 0)
 		    {
-		    status = mbview_addroute(2, instance,
+		    status = mbview_addroute(verbose, instance,
 			    			npoint, routelon, routelat,
 						routecolor, routesize, routename,
 						&error);
@@ -2033,7 +2033,20 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 				0.5 * (data->primary_min + data->primary_max),
 				&bounds[1], &bounds[3],
 				&xd, &yd, &zd);
+		}
 
+	/* rationalize bounds and lonflip */
+	if (bounds[1] > 180.0)
+		{
+		lonflip = 1;
+		}
+	else if (bounds[0] < -180.0)
+		{
+		lonflip = -1;
+		}
+	else
+		{
+		lonflip = 0;
 		}
 	
 	/* initialize reading the swath file */
@@ -2118,8 +2131,8 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 			if (kind == MB_DATA_DATA 
 				&& *error == MB_ERROR_NO_ERROR)
 				{
-/*fprintf(stderr,"Ping %d: %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%.6.6d %f %f\n",
-npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon,lat);*/
+fprintf(stderr,"Ping %d: %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%.6.6d %f %f\n",
+npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon,lat);
 
 				/* allocate memory if required */
 				if (npoint >= npointalloc)
