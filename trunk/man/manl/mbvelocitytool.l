@@ -1,4 +1,4 @@
-.TH mbvelocitytool l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbvelocitytool l "12 February 1996" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
@@ -6,7 +6,11 @@
 Version 4.3
 
 .SH SYNOPSIS
-\fBmbvelocitytool\fP [\fB-A\fIdangle\fP \fB-D\fIdraft\fP \fB-V -H\fP]
+\fBmbvelocitytool\fP [\fB-D\fIdraft\fP \fB-V -H\fP]
+
+\fBmbvelocitytool\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
+\fB-D\fIdraft\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
+\fB-F\fIformat \fB-I\fIfile \fB-S\fIsvpfile \fB-W\fIsvpfile \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbvelocitytool\fP is an interactive water sound velocity profile 
@@ -47,17 +51,11 @@ Englewood, CO
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIdangle\fP
-This option allows the user to specify the beam angle separation
-in degrees that will be used in the raytracing calculations.  This
-is useful when MB-System does not know the proper beam
-angles associated with a particular dataset (e.g. the actual beam angle
-separation may vary among installations of a sonar on different ships,
-or MB-System may have incorrect information built in regarding certain
-sonars).  The default is to use the beam angle pattern that MB-System
-stores internally (or obtains from the data stream) for each 
-supported multibeam sonar system.
 .TP
+.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .B \fB-D\fIdraft\fP
 This option allows the user to specify the ship's draft in
 meters. This value will be added to the depths calculated
@@ -67,9 +65,38 @@ ship's draft is missing (set to zero) or inaccurate. If the
 ship's draft is zero and upward heave is reported, then the
 raytracing will fail because the ray begins above sea level!
 .TP
+.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
+.TP
+.B \fB-F\fIformat\fP
+Sets the format at startup for the input and output multibeam data using 
+\fBMBIO\fP integer format identifiers. This value can also be set
+interactively when specifying the input file.
+This program uses the \fBMBIO\fP library and will read any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+Default: \fIformat\fP = 11.
+.TP
 .B \fB-H\fP
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
+.TP
+.B \fB-I\fIfile\fP
+Sets the data file from which the input swath data will be read at startup.
+This value can also be set interactively. See below.
+.TP
+.B \fB-S\fIsvpfile\fP
+Sets the data file from which an input display sound velocity
+profile will be read at startup. See below.
+This value can also be set interactively.
+.TP
+.B \fB-W\fIsvpfile\fP
+Sets the data file from which an input editable sound velocity
+profile will be read at startup.
+This value can also be set interactively. See below.
 .TP
 .B \fB-V\fP
 Normally, \fBmbvelocitytool\fP works "silently" without outputting
