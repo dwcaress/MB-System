@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.10 1998-10-29 20:54:29 caress Exp $
+#	$Id: Makefile.template,v 4.11 2000-03-08 00:06:53 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.10  1998/10/29  20:54:29  caress
+# Added chmod to copy of mb_contour.h
+#
 # Revision 4.9  1998/10/04  04:18:07  caress
 # MB-System version 4.6beta
 #
@@ -73,7 +76,8 @@ MANDIR = ../../man/manl
 
 ### make all makes the MB-system macros and man pages
 all:	$(BINDIR)/mbcontour $(MANDIR)/mbcontour.l \
-	$(BINDIR)/mbswath $(MANDIR)/mbswath.l
+	$(BINDIR)/mbswath $(MANDIR)/mbswath.l \
+	$(BINDIR)/mbgrdtiff $(MANDIR)/mbgrdtiff.l
 
 ### make clean removes the object files
 clean:
@@ -95,6 +99,12 @@ $(BINDIR)/mbswath: mbswath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 		$(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmt.a \
 		$(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbswath
+$(BINDIR)/mbgrdtiff: mbgrdtiff.o $(LIBDIR)/libmbio.a 
+	$(CC) $(CFLAGS) mbgrdtiff.o \
+		$(LIBDIR)/libmbio.a \
+		$(GMTLIBDIR)/libgmt.a \
+		$(NETCDFLIBDIR)/libnetcdf.a \
+		$(LFLAGS) -o $(BINDIR)/mbgrdtiff
 
 ### compile the source files
 mbcontour.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_contour.h
@@ -112,6 +122,8 @@ $(INCDIR)/mb_contour.h:	 mb_contour.h
 	chmod 664 $(INCDIR)/mb_contour.h
 mbswath.o:	mbswath.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_format.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbswath.c
+mbgrdtiff.o:	mbgrdtiff.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_format.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbgrdtiff.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbcontour.l:	mbcontour.manl
@@ -120,4 +132,7 @@ $(MANDIR)/mbcontour.l:	mbcontour.manl
 $(MANDIR)/mbswath.l:	mbswath.manl
 	cp mbswath.manl $(MANDIR)/mbswath.l
 	chmod 664 $(MANDIR)/mbswath.l
+$(MANDIR)/mbgrdtiff.l:	mbgrdtiff.manl
+	cp mbgrdtiff.manl $(MANDIR)/mbgrdtiff.l
+	chmod 664 $(MANDIR)/mbgrdtiff.l
 

@@ -33,9 +33,13 @@ exists for each amplitude value and uses the bathymetry beam
 location for the amplitude.  Sidescan is generally constructed with
 a higher spatial resolution than bathymetry, and carries its
 own location parameters.  In the context of \fBMB-System\fP documentation,
-the discrete values of bathymetry and
-amplitude are referred to as "beams", and the discrete values of
-sidescan are referred to as "pixels".
+the discrete values of bathymetry and amplitude are referred 
+to as "beams", and the discrete values of
+sidescan are referred to as "pixels". An additional difference
+between "beam" and "pixel" data involves data flagging. An array
+of "beamflags" is carried by \fBMBIO\fP functions which allows
+the bathymetry (and by extension the amplitude) data to be flagged
+as bad. The details of the beamflagging scheme are presented below.
 
 \fBMBIO\fP opens and initializes sonar data files for reading
 and writing using the functions \fBmb_read_init\fP and \fBmb_write_init\fP,
@@ -69,11 +73,17 @@ function \fBmb_close\fP.
  			\fBmb_put_comment\fP
  	2	Complete reading and writing of data structures 
  		containing all of the available information.   
- 		Special include files are required to make 
+ 		Two special functions exist to extract
+ 		information for processing bathymetry and
+ 		sidescan data; otherwise special 
+ 		include files are required to make 
  		sense of the data structures passed by
  		these functions. The primary functions are:
  			\fBmb_get_all\fP
  			\fBmb_put_all\fP
+ 		The secondary functions are:
+ 			\fBmb_ttimes\fP
+ 			\fBmb_altitude\fP
  	3	Buffered reading and writing of data structures 
  		containing all of the available information. 
  		Special include files are required to make 
@@ -128,15 +138,18 @@ sonar.  Consequently, it is possible to read and write the complete
 data stream when using the level 2 or 3 \fBMBIO\fP functions.
 At present, formats associated with the following sonars are
 supported:
- 	Sea Beam "classic" 16 beam multibeam sonar 
+ 	SeaBeam "classic" 16 beam multibeam sonar 
  	Hydrosweep DS 59 beam multibeam sonar 
  	Hydrosweep MD 40 beam mid-depth multibeam sonar 
- 	Sea Beam 2000 multibeam sonar 
- 	Sea Beam 2100 series multibeam sonars
- 	Simrad EM12 and EM1000 multibeam sonars
+ 	SeaBeam 2000 multibeam sonar 
+ 	SeaBeam 2100 series multibeam sonars
+	SeaBeam 1050/1180 multibeam sonars
+ 	Simrad EM12, EM121, EM950, and EM1000 multibeam sonars
+ 	Simrad EM300 and EM3000 multibeam sonars
  	Hawaii MR-1 shallow tow interferometric sonar
  	ELAC Bottomchart shallow water multibeam sonar
- 	Reson Seabat 9001/9002 shallow water multibeam sonars
+ 	Reson Seabat 9001/9002 multibeam sonars
+ 	Reson Seabat 8101 multibeam sonars
  	WHOI DSL AMS-120 deep tow interferometric sonar
 	
 .SH SUPPORTED FORMATS
@@ -154,45 +167,45 @@ The following swath mapping sonar data formats are supported in this version of
 
     MBIO Data Format ID:  11
     Format name:          MBF_SBSIOMRG
-    Informal Description: SIO merge Sea Beam
-    Attributes:           Sea Beam, bathymetry, 16 beams, 
+    Informal Description: SIO merge SeaBeam
+    Attributes:           SeaBeam, bathymetry, 16 beams, 
                           binary, uncentered, SIO.
 
     MBIO Data Format ID:  12
     Format name:          MBF_SBSIOCEN
-    Informal Description: SIO centered Sea Beam
-    Attributes:           Sea Beam, bathymetry, 19 beams, 
+    Informal Description: SIO centered SeaBeam
+    Attributes:           SeaBeam, bathymetry, 19 beams, 
                           binary, centered, SIO.
 
     MBIO Data Format ID:  13
     Format name:          MBF_SBSIOLSI
-    Informal Description: SIO LSI Sea Beam
-    Attributes:           Sea Beam, bathymetry, 19 beams, 
+    Informal Description: SIO LSI SeaBeam
+    Attributes:           SeaBeam, bathymetry, 19 beams, 
                           binary, centered, obsolete, SIO.
 
     MBIO Data Format ID:  14
     Format name:          MBF_SBURICEN
-    Informal Description: URI Sea Beam
-    Attributes:           Sea Beam, bathymetry, 19 beams,
+    Informal Description: URI SeaBeam
+    Attributes:           SeaBeam, bathymetry, 19 beams,
                           binary, centered, URI.
 
     MBIO Data Format ID:  15
     Format name:          MBF_SBURIVAX
-    Informal Description: URI Sea Beam from VAX
-    Attributes:           Sea Beam, bathymetry, 19 beams,
+    Informal Description: URI SeaBeam from VAX
+    Attributes:           SeaBeam, bathymetry, 19 beams,
                           binary, centered, VAX byte order, 
                           URI.
 
     MBIO Data Format ID:  16
     Format name:          MBF_SBSIOSWB
     Informal Description: SIO Swath-bathy SeaBeam
-    Attributes:           Sea Beam, bathymetry, 19 beams,
+    Attributes:           SeaBeam, bathymetry, 19 beams,
                           binary, centered, SIO.
 
     MBIO Data Format ID:  17
     Format name:          MBF_SBIFREMR
     Informal Description: IFREMER Archive SeaBeam
-    Attributes:           Sea Beam, bathymetry, 19 beams, 
+    Attributes:           SeaBeam, bathymetry, 19 beams, 
                           ascii, centered, IFREMER.
 
     MBIO Data Format ID:  21
@@ -438,6 +451,22 @@ The following swath mapping sonar data formats are supported in this version of
                           amplitude, variable pixel sidescan, binary,
                           UNB
 
+    MBIO Data Format ID:  161
+    Format name:          MBF_MGD77DAT
+    Informal Description: NGDC MGD77 underway geophysics format
+    Attributes:           single beam bathymetry, nav, magnetics,
+                          gravity, ascii, NOAA NGDC
+
+    MBIO Data Format ID:  165
+    Format name:          MBF_MBARIROV
+    Informal Description: MBARI ROV navigation format
+    Attributes:           ROV navigation, MBARI
+
+    MBIO Data Format ID:  166
+    Format name:          MBF_MBPRONAV
+    Informal Description: MB-System simple navigation format
+    Attributes:           navigation, MBARI
+
 
 The institutional acronyms used above have the following meanings:
  	L-DEO	Lamont-Doherty Earth Observatory
@@ -448,6 +477,9 @@ The institutional acronyms used above have the following meanings:
  	NRL	Naval Research Laboratory
  	UNB	University of New Brunswick
  	UH	University of Hawaii
+ 	NOAA	National Oceans and Atmospheres Agency
+ 	NGDC	National Geophysical Data Center
+ 	USGS	United States Geological Survey
  	IFREMER	French government agency responsible
  		for operation of French oceanographic
  		research fleet.
@@ -546,9 +578,9 @@ int \fIlonflip\fP;
 .br
 double \fIbounds\fP[4];
 .br
-int \fIbtime_i[6]\fP;
+int \fIbtime_i[7]\fP;
 .br
-int \fIetime_i[6]\fP;
+int \fIetime_i[7]\fP;
 .br
 double \fIspeedmin\fP;
 .br
@@ -626,6 +658,7 @@ function \fBmb_buffer_load\fP does no time checking.
  	\fIbtime\fP[3] : hour
  	\fIbtime\fP[4] : minute
  	\fIbtime\fP[5] : second
+ 	\fIbtime\fP[6] : microsecond
 
 The \fIetime_i\fP array sets the desired ending time for the data.
 Data with a later time stamp will be returned with an error by 
@@ -638,6 +671,7 @@ function \fBmb_buffer_load\fP does no time checking.
  	\fIetime\fP[3] : hour
  	\fIetime\fP[4] : minute
  	\fIetime\fP[5] : second
+ 	\fIetime\fP[6] : microsecond
 
 The \fIspeedmin\fP parameter sets the minimum acceptable ship speed for 
 the data.  If the ship speed associated with any ping is less than 
@@ -756,7 +790,7 @@ int \fBmb_read\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP,
 \fIpings\fP, \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdistance\fP, 
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbeamflags\fP, \fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
 \fIss\fP, \fIsslon\fP, \fIsslat\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -788,7 +822,7 @@ int *\fInamp\fP;
 .br
 int *\fInss\fP;
 .br
-char *\fIbeamflags\fP;
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -863,7 +897,7 @@ int \fBmb_write\fP(\fIverbose\fP, \fImbio_ptr\fP,
 \fIkind\fP, \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
 \fIss\fP, \fIsslon\fP, \fIsslat\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -890,6 +924,8 @@ int \fInbath\fP;
 int \fInamp\fP;
 .br
 int \fInss\fP;
+.br
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -937,6 +973,7 @@ The values to be output are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathlon\fP:		array of of longitude values corresponding 
@@ -959,7 +996,7 @@ int \fBmb_get\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP, \fIpings\fP,
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdistance\fP, 
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
 \fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -990,6 +1027,8 @@ int *\fInbath\fP;
 int *\fInamp\fP;
 .br
 int *\fInss\fP;
+.br
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -1041,6 +1080,7 @@ The return values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIbath\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
@@ -1064,7 +1104,7 @@ int \fBmb_put\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP,
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP,  
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
 \fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -1091,6 +1131,8 @@ int \fInbath\fP;
 int \fInamp\fP;
 .br
 int \fInss\fP;
+.br
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -1140,6 +1182,7 @@ The values to be output are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIbath\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
@@ -1192,7 +1235,7 @@ int \fBmb_get_all\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIstore_ptr\fP,
 \fIkind\fP, \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdistance\fP, 
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
 \fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -1223,6 +1266,8 @@ int *\fInbath\fP;
 int *\fInamp\fP;
 .br
 int *\fInss\fP;
+.br
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -1283,8 +1328,9 @@ The return values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
  	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
@@ -1307,7 +1353,7 @@ int \fBmb_put_all\fP(\fIverbose\fP, \fImbio_ptr\fP,
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP,  
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
 \fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -1338,6 +1384,8 @@ int \fInbath\fP;
 int \fInamp\fP;
 .br
 int \fInss\fP;
+.br
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -1406,8 +1454,9 @@ The values to be output are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
  	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
@@ -1423,6 +1472,134 @@ The values to be output are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about 
 write failures. 
+.RE
+.IP
+int \fBmb_ttimes\fP(\fIverbose\fP, \fImbio_ptr\fP, 
+\fIstore_ptr\fP, \fIkind\fP, 
+\fInbeams\fP, \fIttimes\fP, \fIangles\fP, 
+\fIangles_forward\fP, \fIangles_null\fP, 
+\fIheave\fP, \fIalongtrack_offset\fP, \fIdraft\fP, 
+\fIssv\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+char *\fIstore_ptr\fP;
+.br
+int \fIkind\fP
+.br
+int *\fInbeams\fP;
+.br
+double *\fIttimes\fP;
+.br
+double *\fIangles\fP;
+.br
+double *\fIangles_forward\fP;
+.br
+double *\fIangles_null\fP;
+.br
+double *\fIheave\fP;
+.br
+double *\fIalongtrack_offset\fP;
+.br
+double *\fIdraft\fP;
+.br
+double *\fIssv\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_ttimes\fP extracts travel times and beam
+angles from a sonar-specific data structure pointed to by 
+\fIstore_ptr\fP. These values are used for calculating 
+swath bathymetry. The \fIverbose\fP value controls 
+the standard error output verbosity of the function.
+The coordinates of the beam angles can be a bit confusing.
+The angles are returned in "takeoff angle coordinates"
+appropriate for raytracing. The array angles contains the
+angle from vertical and the array angles_forward
+contains the angle from acrosstrack. This 
+coordinate system is distinct from the roll-pitch coordinates
+appropriate for correcting roll and pitch values. A description 
+of these relevent coordinate systems is given below. 
+The \fBangles_null\fP array
+contains the effective sonar array orientation for each beam. The
+\fBangles_null\fP array may be used to correct 
+beam angles using Snell's law if the \fBssv\fP is changed. 
+The \fBangles_null\fP values reflect the sonar configuration.
+For example, some multibeam sonars have a flat transducer array, and
+so the \fBangles_null\fP array consists of \fBnbeams\fP zero values.
+Other multibeams have circular arrays so that the \fBangles_null\fP
+values equal the \fBangles\fP values. The \fBalongtrack_offset\fP array
+accomodates sonars which report multiple pings in a single
+survey record; each ping occurs at a different position along the
+shiptrack, producing alongtrack offsets relative to the navigation
+for some beam values. The sum of the \fBdraft\fP value 
+and the \fBheave\fP array values gives the depth
+of the sonar for each beam. For hull mounted installations the
+\fBdraft\fP value is generally static but the \fBheave\fP values
+vary with time. For towed sonars the \fBdraft\fP varies with time
+and the \fBheave\fP values are typically zero. The \fBssv\fP value
+gives the water sound velocity at the sonar array.
+The return values are:
+ 	\fIkind\fP:		kind of data record read (error
+ 				if not survey data):
+ 					1	survey data
+ 	\fInbeams\fP:		number of beams
+	\fIttimes\fP:		array of two-way travel times in seconds
+ 	\fIangles\fP:		array of angles from vertical in degrees
+ 	\fIangles_forward\fP:	array of angles from acrosstrack in degrees
+ 	\fIangles_null\fP:	array of sonar array orientation in degrees
+ 	\fIheave\fP:		array of heave values for each beam in meters
+ 	\fIalongtrack_offset\fP:array of alongtrack distance offsets for 
+ 			each beam in meters
+ 	\fIssacrosstrack\fP:	draft of sonar in meters
+ 	\fIssacrosstrack\fP:	water sound velocity at sonar in m/seconds
+ 	\fIerror\fP:		error value
+.br
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+data extraction failures. 
+
+
+.RE
+.IP
+int \fBmb_altitude\fP(\fIverbose\fP, \fImbio_ptr\fP, 
+\fIstore_ptr\fP, \fIkind\fP, 
+\fItransducer_depth\fP, \fIaltitude\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+char *\fIstore_ptr\fP;
+.br
+int \fIkind\fP
+.br
+double *\fItransducer_depth\fP;
+.br
+double *\fIaltitude\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_altitude\fP extracts the sonar transducer 
+depth (\fBtransducer_depth\fP) below the sea surface
+and the the sonar transducer \fBaltitude\fP above the seafloor
+from a stored survey data ping. These values are useful for
+sidescan processing applications. Both transducer depths and
+altitudes are reported in meters.
+The return values are:
+ 	\fIkind\fP:		kind of data record read (error
+ 				if not survey data):
+ 					1	survey data
+ 	\fItransducer_depth\fP:	depth of sonar in meters
+	\fIaltitude\fP:		altitude of sonar above seafloor
+ 			in meters.
+ 	\fIerror\fP:		error value
+.br
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+data extraction failures. 
 .SH LEVEL 3 FUNCTIONS
 .RE
 .IP
@@ -1602,7 +1779,7 @@ int \fBmb_buffer_get_next_data\fP(\fIverbose\fP, \fIbuff_ptr\fP,
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
 \fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
 \fIerror\fP)
 .br
@@ -1633,6 +1810,8 @@ int *\fInbath\fP;
 int *\fInamp\fP;
 .br
 int *\fInss\fP;
+.br
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -1683,8 +1862,9 @@ The returned values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
  	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
@@ -1707,7 +1887,7 @@ int \fBmb_buffer_extract\fP(\fIverbose\fP, \fIbuff_ptr\fP,
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
 \fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -1738,6 +1918,8 @@ int *\fInbath\fP;
 int *\fInamp\fP;
 .br
 int *\fInss\fP;
+.br
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -1791,8 +1973,9 @@ The returned values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
  	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
@@ -1814,7 +1997,7 @@ int \fBmb_buffer_insert\fP(\fIverbose\fP, \fIbuff_ptr\fP,
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
 \fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -1845,6 +2028,8 @@ int *\fInbath\fP;
 int *\fInamp\fP;
 .br
 int *\fInss\fP;
+.br
+char *\fIbeamflag\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -1898,8 +2083,9 @@ The returned values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
  	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
@@ -2160,9 +2346,9 @@ int *\fIlonflip\fP;
 .br
 double \fIbounds\fP[4];
 .br
-int \fIbtime_i[6]\fP;
+int \fIbtime_i[7]\fP;
 .br
-int \fIetime_i[6]\fP;
+int \fIetime_i[7]\fP;
 .br
 double *\fIspeedmin\fP;
 .br
@@ -2225,6 +2411,184 @@ Given the error value \fIerror\fP, \fBmb_format_inf\fP returns a
 short error message in the string **\fImessage\fP. The \fIverbose\fP
 value controls the standard error output verbosity of the function.  The return
 status value signals success if \fIformat\fP is valid and failure otherwise.
+
+.SH COORDINATE SYSTEMS USED IN MB-SYSTEM
+I. Introduction
+.br
+The coordinate systems described below are used
+within \fBMB-System\fP for calculations involving
+the location in space of depth, amplitude, or
+sidescan data. In all cases the origin of the
+coordinate system is at the center of the sonar 
+transducers.
+
+II. Cartesian Coordinates
+.br
+The cartesian coordinate system used in \fBMB-System\fP
+is a bit odd because it is left-handed, as opposed
+to the right-handed x-y-z space conventionally
+used in most circumstances. With respect to the
+sonar (or the ship on which the sonar is mounted),
+the x-axis is athwartships with positive to starboard
+(to the right if facing forward), the y-axis is
+fore-aft with positive forward, and the z-axis is
+positive down.
+
+III. Spherical Coordinates
+.br
+There are two non-traditional spherical coordinate 
+systems used in \fBMB-System\fP. The first, referred to here 
+as takeoff angle coordinates, is useful for raytracing.
+The second, referred to here as roll-pitch 
+coordinates, is useful for taking account of 
+corrections to roll and pitch angles.
+
+III.1. Takeoff Angle Coordinates
+
+The three parameters are r, theta, and phi, where
+r is the distance from the origin, theta is the
+angle from vertical down (that is, from the 
+positive z-axis), and phi is the angle from 
+acrosstrack (the positive x-axis) in the x-y plane.
+Note that theta is always positive; the direction
+in the x-y plane is given by phi.
+Raytracing is simple in these coordinates because
+the ray takeoff angle is just theta. However,
+applying roll or pitch corrections is complicated because
+roll and pitch have components in both theta and phi.
+
+	0 <= theta <= PI/2
+	-PI/2 <= phi <= 3*PI/2
+
+	x = rSIN(theta)COS(phi) 
+	y = rSIN(theta)SIN(phi)
+	z = rCOS(theta) 
+	
+	theta = 0    ---> vertical, along positive z-axis
+	theta = PI/2 ---> horizontal, in x-y plane
+	phi = -PI/2  ---> aft, in y-z plane with y negative
+	phi = 0      ---> port, in x-z plane with x positive
+	phi = PI/2   ---> forward, in y-z plane with y positive
+	phi = PI     ---> starboard, in x-z plane with x negative
+	phi = 3*PI/2 ---> aft, in y-z plane with y negative
+
+III.2. Roll-Pitch Coordinates
+
+The three parameters are r, alpha, and beta, where
+r is the distance from the origin, alpha is the angle 
+forward (effectively pitch angle), and beta is the
+angle from horizontal in the x-z plane (effectively
+roll angle). Applying a roll or pitch correction is 
+simple in these coordinates because pitch is just alpha 
+and roll is just beta. However, raytracing is complicated 
+because deflection from vertical has components in both 
+alpha and beta.
+
+	-PI/2 <= alpha <= PI/2
+	0 <= beta <= PI
+	
+	x = rCOS(alpha)COS(beta) 
+	y = rSIN(alpha)
+	z = rCOS(alpha)SIN(beta) 
+	
+	alpha = -PI/2 ---> horizontal, in x-y plane with y negative
+	alpha = 0     ---> ship level, zero pitch, in x-z plane
+	alpha = PI/2  ---> horizontal, in x-y plane with y positive
+	beta = 0      ---> starboard, along positive x-axis
+	beta = PI/2   ---> in y-z plane rotated by alpha
+	beta = PI     ---> port, along negative x-axis
+
+IV. SeaBeam Coordinates
+
+The per-beam parameters in the SB2100 data format include
+angle-from-vertical and angle-forward. Angle-from-vertical
+is the same as theta except that it is signed based on
+the acrosstrack direction (positive to starboard, negative 
+to port). The angle-forward values are also defined 
+slightly differently from phi, in that angle-forward is 
+signed differently on the port and starboard sides. The 
+SeaBeam 2100 External Interface Specifications document 
+includes both discussion and figures illustrating the 
+angle-forward value. To summarize:
+
+    Port:
+    
+	theta = absolute value of angle-from-vertical
+	
+	-PI/2 <= phi <= PI/2  
+	is equivalent to 
+	-PI/2 <= angle-forward <= PI/2
+	
+	phi = -PI/2 ---> angle-forward = -PI/2 (aft)
+	phi = 0     ---> angle-forward = 0     (starboard)
+	phi = PI/2  ---> angle-forward = PI/2  (forward)
+
+    Starboard:
+	
+	theta = angle-from-vertical
+    
+	PI/2 <= phi <= 3*PI/2 
+	is equivalent to 
+	-PI/2 <= angle-forward <= PI/2
+	
+	phi = PI/2   ---> angle-forward = -PI/2 (forward)
+	phi = PI     ---> angle-forward = 0     (port)
+	phi = 3*PI/2 ---> angle-forward = PI/2  (aft)
+
+V. Usage of Coordinate Systems in \fBMB-System\fP
+
+Some sonar data formats provide angle values along with
+travel times. The angles are converted to takoff-angle 
+coordinates regardless of the  storage form of the 
+particular data format. Currently, most data formats
+do not contain an alongtrack component to the position
+values; in these cases the conversion is trivial since
+phi = beta = 0 and theta = alpha. The angle and travel time 
+values can be accessed using the \fBMBIO\fP function \fBmb_ttimes\fP.
+All angle values passed by \fBMB-System\fP functions are in
+degrees rather than radians.
+
+The programs \fBmbbath\fP and \fBmbvelocitytool\fP use angles in
+take-off angle coordinates to do the raytracing. If roll
+and/or pitch corrections are to be made, the angles are
+converted to roll-pitch coordinates, corrected, and then
+converted back prior to raytracing.
+
+
+.SH BEAM FLAGS USED IN MB-SYSTEM
+\fBMB-System\fP uses arrays of 1-byte "beamflag" values to indicate
+beam data quality. Each beamflag value is actually an eight bit mask
+allowing fairly complicated information to be stored regarding
+each bathymetry value. In particular, beams may be flagged as
+bad, they may be selected as being of special interest, and
+one or more reasons for flagging or selection may be indicated. 
+This scheme is very similar to the convention used in the HMPS 
+hydrographic data processing package and the SAIC Hydrobat 
+package. The beam selection mechanism is not currently used by
+any \fBMB-System\fP programs.
+
+The flag and select bits:
+  xxxxxx00 => This beam is neither flagged nor selected.
+  xxxxxx01 => This beam is flagged as bad and should be ignored.
+  xxxxxx10 => This beam has been selected.
+
+Flagging modes:
+  00000001 => Flagged because no detection was made by the sonar.
+  xxxxx101 => Flagged by manual editing.
+  xxxx1x01 => Flagged by automatic filter.
+  xxx1xx01 => Flagged because uncertainty exceeds 1 X IHO standard.
+  xx1xxx01 => Flagged because uncertainty exceeds 2 X IHO standard.
+  x1xxxx01 => Flagged because footprint is too large
+  1xxxxx01 => Flagged by sonar as unreliable.
+
+Selection modes:
+  00000010 => Selected, no reason specified.
+  xxxxx110 => Selected as least depth.
+  xxxx1x10 => Selected as average depth.
+  xxx1xx10 => Selected as maximum depth.
+  xx1xxx10 => Selected as location of sidescan contact.
+  x1xxxx10 => Selected, spare.
+  1xxxxx10 => Selected, spare.
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbformat\fP(l)

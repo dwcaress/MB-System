@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.26 1999-01-01 23:34:40 caress Exp $
+ *    $Id: mbbath.c,v 4.27 2000-03-08 00:03:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.26  1999/01/01  23:34:40  caress
+ * MB-System version 4.6beta6
+ *
  * Revision 4.25  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -168,7 +171,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.26 1999-01-01 23:34:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.27 2000-03-08 00:03:45 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -591,16 +594,17 @@ and stdout.";
 			  {
 			  if (buffer[0] != '#')
 				{
-				sscanf(buffer,"%lf %lf",&depth[nvel],&velocity[nvel]);
+				m = sscanf(buffer,"%lf %lf",&depth[nvel],&velocity[nvel]);
 	
 				/* output some debug values */
-				if (verbose >= 5)
+				if (verbose >= 5 && m == 2)
 					{
 					fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
 					fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
 						nvel,depth[nvel],nvel,velocity[nvel]);
 					}
-				nvel++;
+				if (m == 2)
+					nvel++;
 				}
 			  strncpy(buffer,"\0",sizeof(buffer));
 			  }
