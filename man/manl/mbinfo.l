@@ -1,4 +1,4 @@
-.TH mbinfo l "14 August 1995"
+.TH mbinfo l "22 November 1995"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of multibeam bathymetry data files.
 
@@ -8,7 +8,7 @@ Version 4.3
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP \fB-L\fIlonflip\fP \fB-P\fIping\fP 
-\fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-V -H\fP]
+\fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-W -V -H\fP]
 
 .SH DESCRIPTION
 \fBmbinfo\fP is an utility for reading a multibeam data file 
@@ -65,6 +65,10 @@ those values associated with very large apparent speeds
 between pings (calculated using distance and time differences
 between adjacent pings). This option is particularly useful 
 when one is trying to obtain reasonable bounds for a plot.
+.TP
+.B \fB-H\fP
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
 .TP
 .B \fB-I\fIfilename\fP
 Sets the input filename. If \fIformat\fP > 0 (set with the 
@@ -123,12 +127,13 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .B \fB-V\fP
 Normally, \fBmbinfo\fP only prints out the statistics obtained
 by reading all of the data.  If the
-\fB-V\fP flag is given, then \fBMBCOPY\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
 outputs the program version being used and all read error status messages.
 .TP
-.B \fB-H\fP
-This "help" flag cause the program to print out a description
-of its operation and then exit immediately.
+.B \fB-W\fP
+Normally, \fBmbinfo\fP reports depth values in meters. If the
+\fB-W\fP flag is given, then \fBmbinfo\fP reports these values
+in feet.
 
 .SH EXAMPLES
 Suppose one wishes to know something about the contents of 

@@ -1,4 +1,4 @@
-.TH mblist l "14 August 1995"
+.TH mblist l "22 November 1995"
 .SH NAME
 \fBmblist\fP - List data in multibeam bathymetry data files.
 
@@ -10,7 +10,7 @@ Version 4.3
 \fB-E\fIyr/mo/da/hr/mn/sc \fB-F\fIformat \fB-H \fB-I\fIinfilename 
 \fB-L\fIlonflip \fB-M\fIstart_beam/end_beam \fB-N\fIstart_pixel/end_pixel 
 \fB-O\fIoutput_format \fB-P\fIpings \fB-Q\fP \fB-R\fIwest/east/south/north 
-\fB-S\fIspeed \fB-T\fItimegap \fB-V\fP]
+\fB-S\fIspeed \fB-T\fItimegap \fB-V\fP \fB-W\fP]
 
 .SH DESCRIPTION
 \fBmblist\fP is a utility to list the contents of a multibeam 
@@ -198,6 +198,12 @@ Normally, \fBmblist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
+.TP
+.B \fB-W\fP
+Normally, \fBmblist\fP outputs bathymetry and across and along
+track distances in meters.  If the
+\fB-W\fP flag is given, then \fBmblist\fP outputs these values
+in feet.
 
 .SH EXAMPLES
 Suppose one wishes to obtain a centerbeam profile from a raw Hydrosweep file

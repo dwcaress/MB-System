@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.18 1995-09-19 14:56:59 caress Exp $
+ *    $Id: mblist.c,v 4.19 1995-11-22 22:21:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1995/09/19  14:56:59  caress
+ * Added output for ping interval.
+ *
  * Revision 4.17  1995/08/17  15:04:52  caress
  * Revision for release 4.3.
  *
@@ -161,10 +164,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.18 1995-09-19 14:56:59 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.19 1995-11-22 22:21:36 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
+	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V -W]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -269,6 +272,10 @@ char **argv;
 	double	navlon_old, navlat_old;
 	double	dx, dy, dist;
 
+	/* bathymetry feet flag */
+	int	bathy_in_feet = MB_NO;
+	double	bathy_scale;
+
 	int	read_data;
 	char	line[128];
 	int	i, j, k;
@@ -278,7 +285,7 @@ char **argv;
 		btime_i,etime_i,&speedmin,&timegap);
 
 	/* set default input to stdin */
-	strcpy (file, "stdin");
+	strcpy (read_file, "stdin");
 
 	/* set up the default list controls 
 		(lon, lat, along-track distance, center beam depth) */
@@ -292,7 +299,7 @@ char **argv;
 	dump_mode = DUMP_MODE_LIST;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:VvWwHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -384,6 +391,10 @@ char **argv;
 			sscanf (optarg,"%lf", &timegap);
 			flag++;
 			break;
+		case 'W':
+		case 'w':
+			bathy_in_feet = MB_YES;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -460,6 +471,12 @@ char **argv;
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/* set bathymetry scaling */
+	if (bathy_in_feet == MB_YES)
+		bathy_scale = 0.3048;
+	else
+		bathy_scale = 1.0;
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -794,12 +811,12 @@ char **argv;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
 					printf("%.3f",
-					bathacrosstrack[j]);
+					bathy_scale * bathacrosstrack[j]);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
 					printf("%.3f",
-					bathalongtrack[j]);
+					bathy_scale * bathalongtrack[j]);
 					break;
 				case 'H': /* heading */
 					printf("%5.1f",heading);
@@ -876,7 +893,10 @@ char **argv;
 					break;
 				case 'V': /* time in seconds since last ping */
 				case 'v': 
-					printf("%g",time_interval);
+					if ( fabs(time_interval) > 100. )
+						printf("%g",time_interval); 
+					else
+						printf("%7.3f",time_interval);
 					break;
 				case 'X': /* longitude decimal degrees */
 					if (j == beams_bath/2)
@@ -951,10 +971,10 @@ char **argv;
 						degrees, minutes, hemi);
 					break;
 				case 'Z': /* topography */
-					printf("%.3f",-bath[j]);
+					printf("%.3f",-bathy_scale * bath[j]);
 					break;
 				case 'z': /* depth */
-					printf("%.3f",bath[j]);
+					printf("%.3f",bathy_scale * bath[j]);
 					break;
 				case '#': /* beam number */
 					printf("%6d",j);
@@ -1035,12 +1055,12 @@ char **argv;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
 					printf("%.3f",
-					ssacrosstrack[j]);
+					bathy_scale * ssacrosstrack[j]);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
 					printf("%.3f",
-					ssalongtrack[j]);
+					bathy_scale * ssalongtrack[j]);
 					break;
 				case 'H': /* heading */
 					printf("%5.1f",heading);
@@ -1112,7 +1132,10 @@ char **argv;
 					break;
 				case 'V': /* time in seconds since last ping */
 				case 'v': 
-					printf("%g",time_interval);
+					if ( fabs(time_interval) > 100. )
+						printf("%g",time_interval); 
+					else
+						printf("%7.3f",time_interval);
 					break;
 				case 'X': /* longitude decimal degrees */
 					if (j == pixels_ss/2)
@@ -1187,10 +1210,10 @@ char **argv;
 						degrees, minutes, hemi);
 					break;
 				case 'Z': /* topography */
-					printf("%.3f",-bath[beams_bath/2]);
+					printf("%.3f",-bathy_scale * bath[beams_bath/2]);
 					break;
 				case 'z': /* depth */
-					printf("%.3f",bath[beams_bath/2]);
+					printf("%.3f",bathy_scale * bath[beams_bath/2]);
 					break;
 				case '#': /* pixel number */
 					printf("%6d",j);
