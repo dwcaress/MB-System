@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.11 2001-10-19 19:40:32 caress Exp $
+ *    $Id: mbset.c,v 5.12 2001-11-04 00:27:11 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2001/10/19 19:40:32  caress
+ * Now uses relative paths.
+ *
  * Revision 5.10  2001/10/19  00:56:17  caress
  * Now tries to use relative paths.
  *
@@ -90,7 +93,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.11 2001-10-19 19:40:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.12 2001-11-04 00:27:11 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -474,7 +477,19 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "SOUNDSPEEDREF:%d", &process.mbp_corrected);
 		    }
-    
+		else if (strncmp(pargv[i], "TTMODE", 6) == 0)
+		    {
+		    sscanf(pargv[i], "TTMODE:%d", &process.mbp_tt_mode);
+		    }
+		else if (strncmp(pargv[i], "TTMULTIPLY", 10) == 0)
+		    {
+		    sscanf(pargv[i], "TTMULTIPLY:%lf", &process.mbp_tt_mult);
+		    }
+		else if (strncmp(pargv[i], "ANGLEMODE", 9) == 0)
+		    {
+		    sscanf(pargv[i], "ANGLEMODE:%d", &process.mbp_angle_mode);
+		    }
+ 
 		/* draft correction */
 		else if (strncmp(pargv[i], "DRAFTMODE", 9) == 0)
 		    {
@@ -904,7 +919,9 @@ the manual pages for mbprocess and mbset. \n\n";
 	    else
 		fprintf(stderr,"  SSV set to constant.\n");
 	    fprintf(stderr,"  SSV offset/constant:           %f m/s\n", process.mbp_ssv);
-	    fprintf(stderr,"  Travel time multiplier:        %f m\n", process.mbp_tt_mult);
+	    fprintf(stderr,"  Travel time mode:              %d\n", process.mbp_tt_mode);
+	    fprintf(stderr,"  Travel time multiplier:        %f\n", process.mbp_tt_mult);
+	    fprintf(stderr,"  Raytrace angle mode:           %d\n", process.mbp_angle_mode);
 
 	    fprintf(stderr,"\nBathymetry Water Sound Speed Reference:\n");
 	    if (process.mbp_corrected == MB_YES)

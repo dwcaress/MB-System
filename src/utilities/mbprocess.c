@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.12 2001-11-02 01:03:08 caress Exp $
+ *    $Id: mbprocess.c,v 5.13 2001-11-04 00:27:29 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,10 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2001/11/02  01:03:08  caress
+ * Now handles ray source above top of SVP even when
+ * SVP begins at nonzero depth.
+ *
  * Revision 5.11  2001/10/19  00:56:17  caress
  * Now tries to use relative paths.
  *
@@ -107,7 +111,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.12 2001-11-02 01:03:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.13 2001-11-04 00:27:29 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -833,7 +837,9 @@ and mbedit edit save files.\n";
 	    else
 		fprintf(stderr,"  SSV set to constant.\n");
 	    fprintf(stderr,"  SSV offset/constant:           %f m/s\n", process.mbp_ssv);
-	    fprintf(stderr,"  Travel time multiplier:        %f m\n", process.mbp_tt_mult);
+	    fprintf(stderr,"  Travel time mode:              %d\n", process.mbp_tt_mode);
+	    fprintf(stderr,"  Travel time multiplier:        %f\n", process.mbp_tt_mult);
+	    fprintf(stderr,"  Raytrace angle mode:           %d\n", process.mbp_angle_mode);
 
 	    fprintf(stderr,"\nBathymetry Water Sound Speed Reference:\n");
 	    if (process.mbp_corrected == MB_YES)
