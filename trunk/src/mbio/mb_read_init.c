@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *    $Id: mb_read_init.c,v 5.2 2001-03-22 20:45:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -163,7 +166,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -217,42 +220,8 @@ int mb_read_init(int verbose, char *file,
 	/* get format information */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_format_info(verbose, 
-					&format, 
-					&mb_io_ptr->system, 
-					&mb_io_ptr->beams_bath_max, 
-					&mb_io_ptr->beams_amp_max, 
-					&mb_io_ptr->pixels_ss_max, 
-					&mb_io_ptr->format_name, 
-					&mb_io_ptr->system_name, 
-					&mb_io_ptr->format_description, 
-					&mb_io_ptr->numfile, 
-					&mb_io_ptr->filetype, 
-					&mb_io_ptr->variable_beams, 
-					&mb_io_ptr->traveltime, 
-					&mb_io_ptr->beam_flagging, 
-					&mb_io_ptr->nav_source, 
-					&mb_io_ptr->heading_source, 
-					&mb_io_ptr->vru_source, 
-					&mb_io_ptr->beamwidth_xtrack, 
-					&mb_io_ptr->beamwidth_ltrack, 
-					&mb_io_ptr->mb_io_format_alloc, 
-					&mb_io_ptr->mb_io_format_free, 
-					&mb_io_ptr->mb_io_store_alloc, 
-					&mb_io_ptr->mb_io_store_free, 
-					&mb_io_ptr->mb_io_read_ping, 
-					&mb_io_ptr->mb_io_write_ping, 
-					&mb_io_ptr->mb_io_extract, 
-					&mb_io_ptr->mb_io_insert, 
-					&mb_io_ptr->mb_io_extract_nav, 
-					&mb_io_ptr->mb_io_insert_nav, 
-					&mb_io_ptr->mb_io_extract_altitude, 
-					&mb_io_ptr->mb_io_insert_altitude, 
-					&mb_io_ptr->mb_io_extract_svp, 
-					&mb_io_ptr->mb_io_insert_svp, 
-					&mb_io_ptr->mb_io_ttimes, 
-					&mb_io_ptr->mb_io_copyrecord, 
-					error); 
+		status = mb_format_register(verbose, &format, 
+					*mbio_ptr, error);
 		}
 
 	/* quit if there is a problem */

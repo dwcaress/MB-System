@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *    $Id: mb_process.c,v 5.2 2001-03-22 20:45:56 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -50,9 +53,10 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -124,6 +128,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_corrected = MB_YES;
 	process->mbp_tt_mode = MBP_TT_OFF;
 	process->mbp_tt_mult = 1.0;
+	process->mbp_angle_mode = MBP_ANGLES_OK;
 	
 	/* draft correction */
 	process->mbp_draft_mode = MBP_DRAFT_OFF;
@@ -269,6 +274,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			    process->mbp_svp_mode = MBP_SVP_ON;
 			    }
 			}
+		    else if (strncmp(buffer, "SVP", 3) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_svpfile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_svp_mode = MBP_SVP_ON;
+			    }
+			}
 		    else if (strncmp(buffer, "SSVMODE", 7) == 0)
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_ssv_mode);
@@ -277,9 +290,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_ssv);
 			}
+		    else if (strncmp(buffer, "TTMODE", 6) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_tt_mode);
+			}
 		    else if (strncmp(buffer, "TTMULTIPLY", 10) == 0)
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_tt_mult);
+			}
+		    else if (strncmp(buffer, "ANGLEMODE", 9) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_angle_mode);
 			}
 		    else if (strncmp(buffer, "CORRECTED", 9) == 0)
 			{
@@ -395,19 +416,31 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	if (process->mbp_format_specified == MB_NO
 	    || process->mbp_ofile_specified == MB_NO)
 	    {
+	    /* get format if possible */
 	    status = mb_get_format(verbose, process->mbp_ifile, 
 				    fileroot, &format, error);
+				    
+	    /* deal with format */
 	    if (status == MB_SUCCESS && format > 0)
 		{
+		/* set format if found */
 		if (process->mbp_format_specified == MB_NO)
 		    {
 		    process->mbp_format = format;
 		    process->mbp_format_specified = MB_YES;
 		    }
+		    
+		/* set output file if needed */
 		if (process->mbp_ofile_specified == MB_NO
 		    && process->mbp_format_specified == MB_YES)
 		    {
-		    sprintf(process->mbp_ofile, "%sp.mb%d", 
+		    /* use .txt suffix if MBARI ROV navigation */
+		    if (process->mbp_format == MBF_MBARIROV)
+			sprintf(process->mbp_ofile, "%sedited.txt", 
+				fileroot, process->mbp_format);
+		    /* else use standard .mbXXX suffix */
+		    else
+			sprintf(process->mbp_ofile, "%sp.mb%d", 
 				fileroot, process->mbp_format);
 		    process->mbp_ofile_specified = MB_YES;
 		    }
@@ -578,6 +611,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_heave_mult:         %f\n",process->mbp_heave_mult);
 		fprintf(stderr,"dbg2       mbp_tt_mode:            %d\n",process->mbp_tt_mode);
 		fprintf(stderr,"dbg2       mbp_tt_mult:            %f\n",process->mbp_tt_mult);
+		fprintf(stderr,"dbg2       mbp_angle_mode:         %d\n",process->mbp_angle_mode);
 		fprintf(stderr,"dbg2       mbp_ssv_mode:           %d\n",process->mbp_ssv_mode);
 		fprintf(stderr,"dbg2       mbp_ssv:                %f\n",process->mbp_ssv);
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
@@ -682,7 +716,9 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "SVPFILE %s\n", process->mbp_svpfile);
 	    fprintf(fp, "SSVMODE %d\n", process->mbp_ssv_mode);
 	    fprintf(fp, "SSV %f\n", process->mbp_ssv);
+	    fprintf(fp, "TTMODE %d\n", process->mbp_tt_mode);
 	    fprintf(fp, "TTMULTIPLY %f\n", process->mbp_tt_mult);
+	    fprintf(fp, "ANGLEMODE %d\n", process->mbp_angle_mode);
 	    fprintf(fp, "CORRECTED %d\n", process->mbp_corrected);
 	    
 	    /* draft correction */
@@ -1205,6 +1241,7 @@ int mb_pr_update_ssv(int verbose, char *file,
 int mb_pr_update_svp(int verbose, char *file, 
 			int	mbp_svp_mode, 
 			char	*mbp_svpfile, 
+			int	mbp_angle_mode, 
 			int	mbp_corrected, 
 			int *error)
 {
@@ -1222,6 +1259,7 @@ int mb_pr_update_svp(int verbose, char *file,
 		fprintf(stderr,"dbg2       file:              %s\n",file);
 		fprintf(stderr,"dbg2       mbp_svp_mode:      %d\n",mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:       %s\n",mbp_svpfile);
+		fprintf(stderr,"dbg2       mbp_angle_mode:    %d\n",mbp_angle_mode);
 		fprintf(stderr,"dbg2       mbp_corrected:     %d\n",mbp_corrected);
 		}
 
@@ -1232,6 +1270,7 @@ int mb_pr_update_svp(int verbose, char *file,
 	process.mbp_svp_mode = mbp_svp_mode;
 	if (mbp_svpfile != NULL)
 	    strcpy(process.mbp_svpfile, mbp_svpfile);
+	process.mbp_angle_mode = mbp_angle_mode;
 	process.mbp_corrected = mbp_corrected;
 	    
 	/* update bathymetry recalculation mode */
@@ -1520,6 +1559,9 @@ int mb_pr_get_ofile(int verbose, char *file,
 	char	*function_name = "mb_pr_get_ofile";
 	struct mb_process_struct process;
 	int	status = MB_SUCCESS;
+	char	parfile[MBP_FILENAMESIZE], fileroot[MBP_FILENAMESIZE];
+	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
+	FILE	*fp;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1530,20 +1572,33 @@ int mb_pr_get_ofile(int verbose, char *file,
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
 		fprintf(stderr,"dbg2       file:                %s\n",file);
 		}
+		
+	/* this function looks for the output filename directly
+	 * rather than by calling mb_pr_readpar() in order to
+	 * speed up mbgrid and other programs that parse large
+	 * datalists looking for processed files
+	 */
 
-	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	/* get expected process parameter file name */
+	strcpy(parfile, file);
+	strcat(parfile, ".par");
 
-	/* set ofile value */
-	if (mbp_ofile != NULL)
+	/* open and read parameter file */
+	*mbp_ofile_specified = MB_NO;
+	if ((fp = fopen(parfile, "r")) != NULL) 
 	    {
-	    strcpy(mbp_ofile, process.mbp_ofile);
-	    *mbp_ofile_specified = process.mbp_ofile_specified;
-	    }
-	else
-	    {
-	    mbp_ofile[0] = '\0';
-	    *mbp_ofile_specified = MB_NO;
+	    while ((result = fgets(buffer,MBP_FILENAMESIZE,fp)) == buffer
+		&& *mbp_ofile_specified == MB_NO)
+		{
+		if (strncmp(buffer, "OUTFILE", 7) == 0)
+		    {
+		    sscanf(buffer, "%s %s", dummy, mbp_ofile);
+		    *mbp_ofile_specified = MB_YES;
+		    }
+		}
+		
+	    /* close file */
+	    fclose(fp);
 	    }
 
 	/* print output debug statements */
@@ -1882,6 +1937,7 @@ int mb_pr_get_ssv(int verbose, char *file,
 int mb_pr_get_svp(int verbose, char *file, 
 			int	*mbp_svp_mode, 
 			char	*mbp_svpfile, 
+			int	*mbp_angle_mode, 
 			int	*mbp_corrected, 
 			int *error)
 {
@@ -1906,6 +1962,7 @@ int mb_pr_get_svp(int verbose, char *file,
 	*mbp_svp_mode = process.mbp_svp_mode;
 	if (mbp_svpfile != NULL)
 	    strcpy(mbp_svpfile, process.mbp_svpfile);
+	*mbp_angle_mode = process.mbp_angle_mode;
 	*mbp_corrected = process.mbp_corrected;
 
 	/* print output debug statements */
@@ -1916,6 +1973,7 @@ int mb_pr_get_svp(int verbose, char *file,
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       mbp_svp_mode:      %d\n",*mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:       %s\n",mbp_svpfile);
+		fprintf(stderr,"dbg2       mbp_angle_mode:    %d\n",*mbp_angle_mode);
 		fprintf(stderr,"dbg2       mbp_corrected:     %d\n",*mbp_corrected);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

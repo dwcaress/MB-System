@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.2 2001-03-22 20:45:56 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -81,6 +84,8 @@
 #include "../../include/mb_swap.h"
 
 /* essential function prototypes */
+int mbr_register_em300mba(int verbose, char *mbio_ptr, 
+		int *error);
 int mbr_info_em300mba(int verbose, 
 			int *system, 
 			int *beams_bath_max, 
@@ -99,22 +104,6 @@ int mbr_info_em300mba(int verbose,
 			int *vru_source, 
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
-			int (**format_alloc)(), 
-			int (**format_free)(), 
-			int (**store_alloc)(), 
-			int (**store_free)(), 
-			int (**read_ping)(), 
-			int (**write_ping)(), 
-			int (**extract)(), 
-			int (**insert)(), 
-			int (**extract_nav)(), 
-			int (**insert_nav)(), 
-			int (**extract_altitude)(), 
-			int (**insert_altitude)(), 
-			int (**extract_svp)(), 
-			int (**insert_svp)(), 
-			int (**ttimes)(), 
-			int (**copyrecord)(), 
 			int *error);
 int mbr_alm_em300mba(int verbose, char *mbio_ptr, int *error);
 int mbr_dem_em300mba(int verbose, char *mbio_ptr, int *error);
@@ -184,6 +173,118 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 		struct mbf_em300mba_struct *data, int *error);
 
 /*--------------------------------------------------------------------*/
+int mbr_register_em300mba(int verbose, char *mbio_ptr, int *error)
+{
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	char	*function_name = "mbr_register_em300mba";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* get mb_io_ptr */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* set format info parameters */
+	status = mbr_info_em300mba(verbose, 
+			&mb_io_ptr->system, 
+			&mb_io_ptr->beams_bath_max, 
+			&mb_io_ptr->beams_amp_max, 
+			&mb_io_ptr->pixels_ss_max, 
+			&mb_io_ptr->format_name, 
+			&mb_io_ptr->system_name, 
+			&mb_io_ptr->format_description, 
+			&mb_io_ptr->numfile, 
+			&mb_io_ptr->filetype, 
+			&mb_io_ptr->variable_beams, 
+			&mb_io_ptr->traveltime, 
+			&mb_io_ptr->beam_flagging, 
+			&mb_io_ptr->nav_source, 
+			&mb_io_ptr->heading_source, 
+			&mb_io_ptr->vru_source, 
+			&mb_io_ptr->beamwidth_xtrack, 
+			&mb_io_ptr->beamwidth_ltrack, 
+			error);
+
+	/* set format and system specific function pointers */
+	mb_io_ptr->mb_io_format_alloc = &mbr_alm_em300mba;
+	mb_io_ptr->mb_io_format_free = &mbr_dem_em300mba; 
+	mb_io_ptr->mb_io_store_alloc = &mbsys_simrad2_alloc; 
+	mb_io_ptr->mb_io_store_free = &mbsys_simrad2_deall; 
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_em300mba; 
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_em300mba; 
+	mb_io_ptr->mb_io_extract = &mbsys_simrad2_extract; 
+	mb_io_ptr->mb_io_insert = &mbsys_simrad2_insert; 
+	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad2_extract_nav; 
+	mb_io_ptr->mb_io_insert_nav = &mbsys_simrad2_insert_nav; 
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_simrad2_extract_altitude; 
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_simrad2_extract_svp; 
+	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad2_insert_svp; 
+	mb_io_ptr->mb_io_ttimes = &mbsys_simrad2_ttimes; 
+	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad2_copy; 
+	mb_io_ptr->mb_io_extract_rawss = NULL; 
+	mb_io_ptr->mb_io_insert_rawss = NULL; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",mb_io_ptr->pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",mb_io_ptr->format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",mb_io_ptr->system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",mb_io_ptr->format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",mb_io_ptr->numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",mb_io_ptr->filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
 int mbr_info_em300mba(int verbose, 
 			int *system, 
 			int *beams_bath_max, 
@@ -202,25 +303,9 @@ int mbr_info_em300mba(int verbose,
 			int *vru_source, 
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
-			int (**format_alloc)(), 
-			int (**format_free)(), 
-			int (**store_alloc)(), 
-			int (**store_free)(), 
-			int (**read_ping)(), 
-			int (**write_ping)(), 
-			int (**extract)(), 
-			int (**insert)(), 
-			int (**extract_nav)(), 
-			int (**insert_nav)(), 
-			int (**extract_altitude)(), 
-			int (**insert_altitude)(), 
-			int (**extract_svp)(), 
-			int (**insert_svp)(), 
-			int (**ttimes)(), 
-			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mbr_info_em300mba";
 	int	status = MB_SUCCESS;
 
@@ -242,7 +327,7 @@ int mbr_info_em300mba(int verbose,
 	*pixels_ss_max = 1024;
 	strncpy(format_name, "EM300MBA", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD2", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_EM300MBA\nInformal Description: Simrad EM300/EM3000 multibeam processing format\nAttributes:           Simrad EM300/EM3000, bathymetry, amplitude, and sidescan,\n                      up to 254 beams, variable pixels, ascii + binary, MBARI.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_EM300MBA\nInformal Description: Simrad multibeam processing format\nAttributes:           Old and new Simrad multibeams, \n                      EM12S, EM12D, EM121, EM120, EM300, \n                      EM100, EM1000, EM950, EM1002, EM3000, \n                      bathymetry, amplitude, and sidescan,\n                      up to 254 beams, variable pixels, ascii + binary, MBARI.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_YES;
@@ -253,24 +338,6 @@ int mbr_info_em300mba(int verbose,
 	*vru_source = MB_DATA_ATTITUDE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
-
-	/* set format and system specific function pointers */
-	*format_alloc = &mbr_alm_em300mba;
-	*format_free = &mbr_dem_em300mba; 
-	*store_alloc = &mbsys_simrad2_alloc; 
-	*store_free = &mbsys_simrad2_deall; 
-	*read_ping = &mbr_rt_em300mba; 
-	*write_ping = &mbr_wt_em300mba; 
-	*extract = &mbsys_simrad2_extract; 
-	*insert = &mbsys_simrad2_insert; 
-	*extract_nav = &mbsys_simrad2_extract_nav; 
-	*insert_nav = &mbsys_simrad2_insert_nav; 
-	*extract_altitude = &mbsys_simrad2_extract_altitude; 
-	*insert_altitude = NULL;
-	*extract_svp = &mbsys_simrad2_extract_svp; 
-	*insert_svp = &mbsys_simrad2_insert_svp; 
-	*ttimes = &mbsys_simrad2_ttimes; 
-	*copyrecord = &mbsys_simrad2_copy; 
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -296,22 +363,6 @@ int mbr_info_em300mba(int verbose,
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -320,12 +371,10 @@ int mbr_info_em300mba(int verbose,
 	/* return status */
 	return(status);
 }
-
-
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300mba(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1887,7 +1936,10 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 	int	read_len;
 	int	i;
 	
-/*#define MBR_EM300MBA_DEBUG 1*/
+/* #define MBR_EM300MBA_DEBUG 1 */
+#ifdef MBR_EM300MBA_DEBUG
+	int	skip;
+#endif
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1945,6 +1997,9 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
+#ifdef MBR_EM300MBA_DEBUG
+			skip = 0;
+#endif
 			while (status == MB_SUCCESS
 				&& mbr_em300mba_chk_label(verbose, 
 					mbio_ptr, *type, *sonar) != MB_SUCCESS)
@@ -1957,7 +2012,10 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				}				
+				}
+#ifdef MBR_EM300MBA_DEBUG
+			    skip++;
+#endif
 			    }
 			}
 		
@@ -1974,6 +2032,7 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"\nstart of mbr_em300mba_rd_data loop:\n");
 	fprintf(stderr,"done:%d\n",done);
+	fprintf(stderr,"skip:%d\n",skip);
 	fprintf(stderr,"expect:%x\n",expect);
 	fprintf(stderr,"type:%x\n",*type);
 	fprintf(stderr,"sonar:%d\n",*sonar);
@@ -2401,7 +2460,12 @@ int mbr_em300mba_chk_label(int verbose, char *mbio_ptr, short type, short sonar)
 			|| sonar == EM2_EM3000D_4
 			|| sonar == EM2_EM3000D_5
 			|| sonar == EM2_EM3000D_6
-			|| sonar == EM2_EM3000D_7))
+			|| sonar == EM2_EM3000D_7
+			|| sonar == EM2_EM12S
+			|| sonar == EM2_EM12D
+			|| sonar == EM2_EM121
+			|| sonar == EM2_EM100
+			|| sonar == EM2_EM1000))
 			{
 			fprintf(stderr, "Bad datagram type: %d %x   %d %x\n", type, type, sonar, sonar);
 			}
@@ -2419,7 +2483,12 @@ int mbr_em300mba_chk_label(int verbose, char *mbio_ptr, short type, short sonar)
 		&& sonar != EM2_EM3000D_4
 		&& sonar != EM2_EM3000D_5
 		&& sonar != EM2_EM3000D_6
-		&& sonar != EM2_EM3000D_7)
+		&& sonar != EM2_EM3000D_7
+		&& sonar != EM2_EM12S
+		&& sonar != EM2_EM12D
+		&& sonar != EM2_EM121
+		&& sonar != EM2_EM100
+		&& sonar != EM2_EM1000)
 		{
 		status = MB_FAILURE;
 		}
@@ -3930,8 +3999,8 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp,
 	    {
 	    for (i=0;i<data->svp_num && status == MB_SUCCESS;i++)
 		{
-		read_len = fread(line,1,4,mbfp);
-		if (read_len != 4)
+		read_len = fread(line,1,EM2_SVP_SLICE_SIZE,mbfp);
+		if (read_len != EM2_SVP_SLICE_SIZE)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
@@ -4106,8 +4175,8 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 	    {
 	    for (i=0;i<data->svp_num && status == MB_SUCCESS;i++)
 		{
-		read_len = fread(line,1,4,mbfp);
-		if (read_len != 4)
+		read_len = fread(line,1,EM2_SVP2_SLICE_SIZE,mbfp);
+		if (read_len != EM2_SVP2_SLICE_SIZE)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
@@ -7085,7 +7154,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
-		for (j=0;j<EM2_SVP_SLICE_SIZE;j++)
+		for (j=0;j<EM2_SVP2_SLICE_SIZE;j++)
 		    checksum += uchar_ptr[j];
 
 		/* write out data */

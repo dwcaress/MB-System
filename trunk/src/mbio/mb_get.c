@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	1/26/93
- *    $Id: mb_get.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_get.c,v 5.1 2001-03-22 20:45:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.11  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -107,15 +110,16 @@
 /*--------------------------------------------------------------------*/
 int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings, 
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, double *speed, 
-		double *heading, double *distance,
+		double *navlon, double *navlat, 
+		double *speed, double *heading, 
+		double *distance, double *altitude, double *sonardepth,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_get.c,v 5.1 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_get";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -228,6 +232,16 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 					mb_io_ptr->new_comment, 
 					error);
 				}
+			if (status == MB_SUCCESS
+				&& mb_io_ptr->new_kind == MB_DATA_DATA)
+				{
+				status = mb_extract_altitude(verbose, 
+					mbio_ptr, store_ptr, 
+					&mb_io_ptr->new_kind,
+					sonardepth, 
+					altitude, 
+					error);
+				}
 
 			/* set errors if not survey data */
 			if (status == MB_SUCCESS)
@@ -307,8 +321,16 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 			status = MB_FAILURE;
 			*error = MB_ERROR_OUT_BOUNDS;
 			}
-		else if (mb_io_ptr->new_time_d > mb_io_ptr->etime_d 
-			|| mb_io_ptr->new_time_d < mb_io_ptr->btime_d)
+		else if (mb_io_ptr->etime_d > mb_io_ptr->btime_d
+			&& (mb_io_ptr->new_time_d > mb_io_ptr->etime_d 
+				|| mb_io_ptr->new_time_d < mb_io_ptr->btime_d))
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_OUT_TIME;
+			}
+		else if (mb_io_ptr->etime_d < mb_io_ptr->btime_d
+			&& (mb_io_ptr->new_time_d > mb_io_ptr->etime_d 
+				&& mb_io_ptr->new_time_d < mb_io_ptr->btime_d))
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_OUT_TIME;
@@ -784,6 +806,10 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 					mb_io_ptr->old_lat);
 			fprintf(stderr,"dbg4       distance:     %f\n",
 					*distance);
+			fprintf(stderr,"dbg4       altitude:     %f\n",
+					*altitude);
+			fprintf(stderr,"dbg4       sonardepth:   %f\n",
+					*sonardepth);
 			fprintf(stderr,"dbg4       delta_time:   %f\n",
 					delta_time);
 			fprintf(stderr,"dbg4       speed:        %f\n",
@@ -807,7 +833,7 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 					/(mb_io_ptr->bath_num[i]);
 				bathalongtrack[i] = (mb_io_ptr->bath_alongtrack[i])
 					/(mb_io_ptr->bath_num[i]);
-				*nbath = i;
+				*nbath = i + 1;
 				}
 			else
 				{
@@ -823,7 +849,7 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 				{
 				amp[i] = (mb_io_ptr->amp[i])
 					/(mb_io_ptr->amp_num[i]);
-				*namp = i;
+				*namp = i + 1;
 				}
 			else
 				{
@@ -840,7 +866,7 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 					/mb_io_ptr->ss_num[i];
 				ssalongtrack[i] = mb_io_ptr->ss_alongtrack[i]
 					/mb_io_ptr->ss_num[i];
-				*nss = i;
+				*nss = i + 1;
 				}
 			else
 				{
@@ -904,6 +930,8 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 		fprintf(stderr,"dbg2       speed:      %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",*heading);
 		fprintf(stderr,"dbg2       distance:   %f\n",*distance);
+		fprintf(stderr,"dbg2       altitude:   %f\n",*altitude);
+		fprintf(stderr,"dbg2       sonardepth: %f\n",*sonardepth);
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
 		if (verbose >= 3 && *nbath > 0)
 		  {
