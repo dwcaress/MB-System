@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 5.1 2004-12-18 01:32:50 caress Exp $
+ *    $Id: mb_track.c,v 5.2 2005-03-25 04:10:52 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2004 by
+ *    Copyright (c) 1993, 1994, 2000, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/12/18 01:32:50  caress
+ * Added filename annotation.
+ *
  * Revision 5.0  2000/12/01 22:53:59  caress
  * First cut at Version 5.0.
  *
@@ -84,7 +87,7 @@
 /* 	function mb_track plots the shiptrack of multibeam data. */
 void mb_track(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 5.1 2004-12-18 01:32:50 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 5.2 2005-03-25 04:10:52 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;
@@ -259,9 +262,9 @@ void mb_track(int verbose, struct swath *data, int *error)
 /*--------------------------------------------------------------------------*/
 /* 	function mb_trackname plots the filename on the shiptrack. 
 	 - contributed by Gordon Keith, CSIRO, December 2004 */
-void mb_trackname(int verbose, struct swath *data, char *file, int *error)
+void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error)
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 5.1 2004-12-18 01:32:50 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 5.2 2005-03-25 04:10:52 caress Exp $";
 	char	*function_name = "mb_trackname";
 	int	status = MB_SUCCESS;
 	double	x, y, x1, y1, x2, y2, x3, y3, x4, y4;
@@ -277,15 +280,24 @@ void mb_trackname(int verbose, struct swath *data, char *file, int *error)
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
+		fprintf(stderr,"dbg2       perpendicular:      %d\n",perpendicular);
 		fprintf(stderr,"dbg2       swath:              %d\n",data);
 		fprintf(stderr,"dbg2       file:               %s\n",file);
 		}
 
 	strncpy(label,file,MB_PATH_MAXLINE);
 	mb_get_basename(verbose,label,error);
+	if (perpendicular == MB_YES)
+		angle = 0.0 - data->pings[0].heading;
+	else
+		angle = 90.0 - data->pings[0].heading;
+	if (angle < 0.0)
+		angle += 360.0;
+	if (angle > 360.0)
+		angle -= 360.0;
 	plot_string(data->pings[0].navlon,data->pings[0].navlat,
 		    data->name_hgt,
-		    data->pings[0].heading,
+		    angle,
 		    label);
 
 	/* print output debug statements */

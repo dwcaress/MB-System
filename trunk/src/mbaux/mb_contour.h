@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 5.3 2004-12-18 01:32:50 caress Exp $
+ *    $Id: mb_contour.h,v 5.4 2005-03-25 04:10:51 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2003, 2005 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/12/18 01:32:50  caress
+ * Added filename annotation.
+ *
  * Revision 5.2  2003/04/17 20:47:57  caress
  * Release 5.0.beta30
  *
@@ -182,4 +185,4 @@ int mb_contour(
 		struct swath *data, 
 		int	*error);
 void mb_track(int verbose, struct swath *data, int *error);
-void mb_trackname(int verbose, struct swath *data, char *file, int *error);
+void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error);
