@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.25 2000-01-20 00:05:38 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.26 2000-01-25 01:46:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.25  2000/01/20  00:05:38  caress
+ * Added pick mode and two unflag buttons.
+ *
  * Revision 4.24  1999/02/12  21:19:30  caress
  * Fixed buffer size handling.
  *
@@ -221,7 +224,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.25 2000-01-20 00:05:38 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.26 2000-01-25 01:46:20 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -3174,8 +3177,8 @@ int	*nplt;
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
 		{
-		/* unflag all flagged beams in current buffer */
-		for (i=0;i<nlist;i++)
+		/* unflag all flagged beams from current point in buffer */
+		for (i=current_id;i<nlist;i++)
 		    {
 		    status = mb_buffer_get_next_data(verbose,
 			    buff_ptr,imbio_ptr,list[i],&id,
@@ -3329,6 +3332,70 @@ char	*output_file;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbedit_get_output_file(file1,file2,form)
+char	*file1;
+char	*file2;
+int	*form;
+{
+	/* local variables */
+	char	*function_name = "mbedit_get_output_file";
+	int	status = MB_SUCCESS;
+	char	mb_suffix[32];
+	int	tform;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       file1:       %s\n",file1);
+		fprintf(stderr,"dbg2       format:      %d\n",*form);
+		}
+
+	/* get filenames */
+	/* look for MB suffix convention */
+	if ((status = mb_get_format(verbose, file1, file2, 
+				    &tform, &error))
+				    == MB_SUCCESS)
+	    {
+	    if (strstr(ofile, "_") != NULL)
+		    strcat(file2, "e");
+	    else
+		    strcat(file2,"_e");
+	    *form = tform;
+	    sprintf(mb_suffix, ".mb%d", *form);
+	    strcat(file2,mb_suffix);
+	    }
+
+	/* else just at ".ed" to file name */
+	else
+		{
+		strcpy(file2,file1);
+		strcat(file2,".ed");
+		status = MB_SUCCESS;
+		error = MB_ERROR_NO_ERROR;
+		}
+		
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       file2:       %s\n",file2);
+		fprintf(stderr,"dbg2       format:      %d\n",*form);
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbedit_open_file(file,form, savemode)
 char	*file;
 int	form;
@@ -3341,7 +3408,6 @@ int	savemode;
 	char	*sb_suffix;
 	int	mb_len;
 	int	sb_len;
-	char	*start;
 	struct stat file_status;
 	int	fstat;
 	char	command[256];
@@ -3367,44 +3433,7 @@ int	savemode;
 	if (ofile_defined == MB_NO 
 		&& output_mode == MBEDIT_OUTPUT_OUTPUT)
 		{
-		/* look for MB suffix convention */
-		if ((mb_suffix = strstr(ifile,".mb")) != NULL)
-			mb_len = strlen(mb_suffix);
-
-		/* look for SeaBeam suffix convention */
-		if ((sb_suffix = strstr(ifile,".rec")) != NULL)
-			sb_len = strlen(sb_suffix);
-
-		/* if MB suffix convention used keep it */
-		if (mb_len >= 4 && mb_len <= 6)
-			{
-			/* get the output filename */
-			strncpy(ofile,"\0",128);
-			strncpy(ofile,ifile,
-				strlen(ifile)-mb_len);
-			if (strstr(ofile, "_") != NULL)
-				strcat(ofile, "e");
-			else
-				strcat(ofile,"_e");
-			strcat(ofile,mb_suffix);
-			}
-			
-		/* else look for ".rec" format 41 file */
-		else if (sb_len == 4 && form == 41)
-			{
-			/* get the output filename */
-			strncpy(ofile,"\0",128);
-			strncpy(ofile,ifile,
-				strlen(ifile)-sb_len);
-			strcat(ofile,"_e.mb41");
-			}
-
-		/* else just at ".ed" to file name */
-		else
-			{
-			strcpy(ofile,ifile);
-			strcat(ofile,".ed");
-			}
+		mbedit_get_output_file(ifile,ofile,&form);
 		}
 	format = form;
 
@@ -3562,13 +3591,7 @@ int	savemode;
 		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
 		    {
 		    /* get temporary file name */
-		    strcpy(sifile, sofile);
-		    if ((start = (char *) strrchr(sifile, '/'))
-			!= NULL)
-			start++;
-		    else
-			start = sifile;
-		    strcpy(start, "mbedit_tmp.mbesf");
+		    sprintf(sifile, "%s.mbesf.tmp", ifile);
 
 		    /* copy old edit save file to tmp file */
 		    sprintf(command, "cp %s %s\n", 
@@ -5049,7 +5072,7 @@ int	*action;
 			function_name);
 		}
 		
-	/* write out the edit */
+	/* read the edit */
 	if (sifile_open == MB_YES)
 	    {
 	    if (fread(time_d, sizeof(double), 1, sifp) != 1)
