@@ -1,4 +1,4 @@
-.TH mbsystem l "22 March 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbsystem l "24 February 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
@@ -50,7 +50,7 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH COPYRIGHT AND LICENSING
-\fBMB-System\fP Copyright (C) 1993-2002 by
+\fBMB-System\fP Copyright (C) 1993-2004 by
 .br
 David W. Caress (caress@mbari.org)
     Monterey Bay Aquarium Research Institute
