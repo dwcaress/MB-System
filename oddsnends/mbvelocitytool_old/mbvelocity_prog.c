@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 4.19 1997-09-16 21:44:24 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 4.20 1998-10-09 18:46:59 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu) 
@@ -23,6 +23,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1997/09/16  21:44:24  caress
+ * Removed draft option as it is no longer needed.
+ *
  * Revision 4.18  1997/09/15  19:10:50  caress
  * Real Version 4.5
  *
@@ -120,6 +123,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* MBIO include files */
 #include "../../include/mb_format.h"
@@ -135,9 +139,12 @@ struct profile
 	double	*depth;
 	double	*velocity;
 	};
+#define	MB_SSV_NO_USE	    0
+#define	MB_SSV_CORRECT	    1
+#define	MB_SSV_INCORRECT    2
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.19 1997-09-16 21:44:24 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.20 1998-10-09 18:46:59 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -232,13 +239,27 @@ int	nbuffer;
 int	nload;
 
 /* survey ping raytracing arrays */
+int	time_i[7];
+double	time_d;
+double	navlon, navlat;
+double	speed, heading;
+int	nbath, namp, nss;
+char	*beamflag = NULL;
+double	*bath = NULL;
+double	*amp = NULL;
+double	*bathacrosstrack = NULL;
+double	*bathalongtrack = NULL;
+double	*ss = NULL;
+double	*ssacrosstrack = NULL;
+double	*ssalongtrack = NULL;
+char	*comment = NULL;
 double	*ttimes = NULL;
 double	*angles = NULL;
 double	*angles_forward = NULL;
 double	*angles_null = NULL;
-double	*depth_offset = NULL;
+double	*heave = NULL;
 double	*alongtrack_offset = NULL;
-int	*flags = NULL;
+double	draft;
 double	*p = NULL;
 int	nraypathmax;
 int	*nraypath;
@@ -395,7 +416,7 @@ char	**argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -411,7 +432,7 @@ char	**argv;
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
 		fprintf(stderr,"dbg2       help:               %d\n",help);
-		fprintf(stderr,"dbg2       format:             %f\n",format);
+		fprintf(stderr,"dbg2       format:             %d\n",format);
 		fprintf(stderr,"dbg2       input file:         %s\n",ifile);
 		fprintf(stderr,"dbg2       display svp file:   %s\n",sfile);
 		fprintf(stderr,"dbg2       edit svp file:      %s\n",wfile);
@@ -495,11 +516,19 @@ int mbvt_quit()
 		{
 		mb_buffer_close(verbose,&buff_ptr,mbio_ptr,&error);
 		mb_close(verbose,&mbio_ptr,&error);
+		mb_free(verbose,&beamflag,&error);
+		mb_free(verbose,&bath,&error);
+		mb_free(verbose,&amp,&error);
+		mb_free(verbose,&bathacrosstrack,&error);
+		mb_free(verbose,&bathalongtrack,&error);
+		mb_free(verbose,&ss,&error);
+		mb_free(verbose,&ssacrosstrack,&error);
+		mb_free(verbose,&ssalongtrack,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles_forward,&error);
 		mb_free(verbose,&angles_null,&error);
-		mb_free(verbose,&depth_offset,&error);
+		mb_free(verbose,&heave,&error);
 		mb_free(verbose,&alongtrack_offset,&error);
 		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
@@ -569,7 +598,7 @@ int	*pixels;
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
-				pixels[i]);
+				i, pixels[i]);
 		}
 
 	/* set graphics id */
@@ -965,7 +994,7 @@ char	*file;
 	int	i;
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	/* print input debug statements */
@@ -995,9 +1024,8 @@ char	*file;
 	fprintf(fp,"# Water velocity profile created by program %s\n",
 		program_name);
 	fprintf(fp,"# Version %s\n",rcs_id);
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -2012,11 +2040,8 @@ int	form;
 	int	status = MB_SUCCESS;
 	int	format_num;
 	struct mb_buffer_struct *buff;
-	int	kind, time_i[7];
-	double	time_d;
-	double	navlon, navlat;
-	double	speed, heading;
-	double	roll, pitch, heave;
+	int	kind;
+	double	navlon_levitus, navlat_levitus;
 	double	ssv;
 	char	command[64];
 	int	i, j, k;
@@ -2051,11 +2076,19 @@ int	form;
 		{
 		mb_buffer_close(verbose,&buff_ptr,mbio_ptr,&error);
 		mb_close(verbose,&mbio_ptr,&error);
+		mb_free(verbose,&beamflag,&error);
+		mb_free(verbose,&bath,&error);
+		mb_free(verbose,&amp,&error);
+		mb_free(verbose,&bathacrosstrack,&error);
+		mb_free(verbose,&bathalongtrack,&error);
+		mb_free(verbose,&ss,&error);
+		mb_free(verbose,&ssacrosstrack,&error);
+		mb_free(verbose,&ssalongtrack,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles_forward,&error);
 		mb_free(verbose,&angles_null,&error);
-		mb_free(verbose,&depth_offset,&error);
+		mb_free(verbose,&heave,&error);
 		mb_free(verbose,&alongtrack_offset,&error);
 		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
@@ -2099,13 +2132,20 @@ int	form;
 	beam_last = beams_bath;
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathacrosstrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathalongtrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssacrosstrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssalongtrack,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth_offset,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&heave,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&alongtrack_offset,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&acrosstrack,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angle,&error);
@@ -2144,31 +2184,38 @@ int	form;
 	ssv_start = 0.0;
 	bath_min = 10000.0;
 	bath_max = 0.0;
-	navlon = 0.0;
-	navlat = 0.0;
+	navlon_levitus = 0.0;
+	navlat_levitus = 0.0;
 	for (k=0;k<nbuffer;k++)
 		{
 		if (buff->buffer_kind[k] == MB_DATA_DATA)
 			{
-			/* extract first nav */
-			if (navlon == 0.0 && navlat == 0.0)
-				status = mb_buffer_extract_nav(
-					verbose,
-					buff_ptr, mbio_ptr,
-					k, &kind, 
-					time_i, &time_d, 
-					&navlon, &navlat, 
-					&speed, &heading, 
-					&roll, &pitch, &heave, 
-					&error);
+			/* extract bathymetry - just to get flags */
+			mb_buffer_extract(verbose,buff_ptr,mbio_ptr,
+				k, &kind,
+				time_i,&time_d,&navlon,&navlat,
+				&speed,&heading,
+				&nbath,&namp,&nss,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,&error);
 			
 			/* extract travel times */
 			status = mb_ttimes(verbose,mbio_ptr,
 				buff->buffer[k],&kind,&nbeams,
 				ttimes,angles,
 				angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,&ssv,&error);
+				heave,alongtrack_offset,
+				&draft,&ssv,&error);
+			
+			/* get first nav */
+			if (navlon_levitus == 0.0 
+			    && navlat_levitus == 0.0)
+			    {
+			    navlon_levitus = navlon;
+			    navlat_levitus = navlat;
+			    }
 			
 			/* check for first nonzero ssv */
 			if (ssv > 0.0 && ssv_start == 0.0)
@@ -2176,7 +2223,7 @@ int	form;
 				
 			/* get approximate min max depths */
 			for (i=0;i<nbeams;i++)
-			    if (flags[i] == 0)
+			    if (mb_beam_ok(beamflag[i]))
 				{
 				depth[i] = 750 * ttimes[i] 
 					* cos(DTR * angles[i]);
@@ -2224,11 +2271,11 @@ int	form;
 	    mbvt_new_edit_profile();
 	    
 	/* add Levitus display profile if nav available */
-	if (navlon != 0.0 || navlat != 0.0)
+	if (navlon_levitus != 0.0 || navlat_levitus != 0.0)
 		{
 		sprintf(command, 
 			"mblevitus -R%f/%f -Ombvt_levitus_tmp.svp\n", 
-			navlon, navlat);
+			navlon_levitus, navlat_levitus);
 		system(command);
 		mbvt_open_display_profile("mbvt_levitus_tmp.svp");
 		system("rm -f mbvt_levitus_tmp.svp");
@@ -2303,6 +2350,7 @@ int mbvt_process_multibeam()
 	int	first;
 	double	ttime;
 	int	ray_stat;
+	int	ssv_mode = MB_SSV_CORRECT;
 	double	ssv;
 	double	sx, sy, sxx, sxy;
 	double	delta, a, b;
@@ -2383,12 +2431,24 @@ int mbvt_process_multibeam()
 		/* extract travel times */
 		if (buff->buffer_kind[k] == MB_DATA_DATA)
 			{
+			
+			/* extract bathymetry - just to get flags */
+			mb_buffer_extract(verbose,buff_ptr,mbio_ptr,
+				k, &kind,
+				time_i,&time_d,&navlon,&navlat,
+				&speed,&heading,
+				&nbath,&namp,&nss,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,&error);
+
 			status = mb_ttimes(verbose,mbio_ptr,
 				buff->buffer[k],&kind,&nbeams,
 				ttimes,angles,
 				angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,&ssv,&error);
+				heave,alongtrack_offset,
+				&draft,&ssv,&error);
 			
 			/* set surface sound speed to default if needed */
 			if (ssv <= 0.0)
@@ -2401,11 +2461,8 @@ int mbvt_process_multibeam()
 		if (buff->buffer_kind[k] == MB_DATA_DATA)
 		  for (i=0;i<nbeams;i++)
 		    {
-		    if (ttimes[i] <= 0.0)
-			flags[i] = 1;
-
 		    /* trace the ray */
-		    if (flags[i] == 0)
+		    if (mb_beam_ok(beamflag[i]))
 			{
 			/* trace rays */
 			if (first == MB_NO)
@@ -2415,7 +2472,7 @@ int mbvt_process_multibeam()
 			    status = mb_rt(verbose, 
 				    rt_svp, 0.0, 
 				    angles[i], 0.5*ttimes[i],
-				    ssv, angles_null[i], 
+				    ssv_mode, ssv, angles_null[i], 
 				    0, NULL, NULL, NULL, 
 				    &acrosstrack[i], &depth[i], 
 				    &ttime, &ray_stat, &error);
@@ -2431,7 +2488,7 @@ int mbvt_process_multibeam()
 			    status = mb_rt(verbose, 
 				    rt_svp, 0.0, 
 				    angles[i], 0.5*ttimes[i],
-				    ssv, angles_null[i], 
+				    ssv_mode, ssv, angles_null[i], 
 				    nraypathmax, &nraypath[i], 
 				    raypathx[i], raypathy[i], 
 				    &acrosstrack[i], &depth[i], 
@@ -2447,7 +2504,7 @@ int mbvt_process_multibeam()
 			    }
 
 			/* add to depth if needed */
-			depth[i] = depth[i] + depth_offset[i];
+			depth[i] = depth[i] + heave[i] + draft;
 
 			/* get min max depths */
 			if (depth[i] < bath_min)
@@ -2484,7 +2541,7 @@ int mbvt_process_multibeam()
 		/* get residuals */
 		if (ns > 0)
 		  for (i=0;i<nbeams;i++)
-		    if (flags[i] == 0)
+		    if (mb_beam_ok(beamflag[i]))
 			{
 			depth_predict = a + b*acrosstrack[i];
 			res = depth[i] - depth_predict;
