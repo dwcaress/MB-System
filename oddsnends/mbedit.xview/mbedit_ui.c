@@ -113,7 +113,7 @@ mbedit_window_mbedit_window_mbedit_create(ip, owner)
 		XV_KEY_DATA, INSTANCE, ip,
 		XV_WIDTH, 897,
 		XV_HEIGHT, 764,
-		XV_LABEL, "MBEDIT Version $Id: mbedit_ui.c,v 4.0 1994-03-05 23:54:35 caress Exp $",
+		XV_LABEL, "MBEDIT Version $Id: mbedit_ui.c,v 4.1 1994-10-21 12:00:33 caress Exp $",
 		FRAME_SHOW_FOOTER, TRUE,
 		FRAME_SHOW_RESIZE_CORNER, TRUE,
 		NULL);

@@ -1,0 +1,77 @@
+/******************************************************
+*                                                     *
+* $Id: mbedit_define.uil,v 4.0 1994-10-21 11:55:41 caress Exp $                                                *
+*                                                     *
+* mbedit_define.uil                                   *
+*                                                     *
+* THIS FILE DEFINES VARIABLES TO HOLD THE WIDGET      *
+* WHICH WILL BE ASSIGNED IN THE FUNCTION              *
+* "create_proc". THEY ARE USED LATER TO TELL THE      *
+* SYSTEM WHICH WIDGET TO MAP, MODIFY, MANAGE ETC.     *
+*                                                     *
+*******************************************************
+*                                                     *
+* AUTHOR: ROD MCCABE                                  *
+*         ANTARCTIC SUPPORT ASSOCIATES                *
+*         61 INVERNESS DRIVE EAST                     *
+*         ENGLEWOOD, CO.                              *
+*                                                     *
+* $Log: not supported by cvs2svn $
+# Revision 1.1  1994/07/14  21:18:49  brockda
+# Initial revision
+#                                               *
+*                                                     *
+*******************************************************
+*                                                     *
+* LANGUAGE: "C"                                       *
+*                                                     *
+* OPERATING SYSTEM: UNIX                              *
+* FOR MOTIF                                           *
+*                                                     *
+*******************************************************/
+
+value
+
+	k_run_bar		:1;
+	k_mb_main		:2;
+	k_main_graph		:3;
+	k_goto_menu		:4;
+	k_file_menu		:5;
+	k_ok_file_select	:6;
+	k_mbio_format		:7;
+	k_num_pings		:8;
+	k_next_buff		:9;
+	k_do_done		:10;
+	k_do_forward		:11;
+	k_do_reverse		:12;
+	k_do_quit		:13;
+	k_x_scale		:14;
+	k_vert_exag		:15;
+	k_pings_to_step		:16;
+	k_x_tick_marks		:17;
+	k_y_tick_marks		:18;
+	k_buff_size		:19;
+	k_buff_retain_size	:20;
+	k_pick_button		:21;
+	k_erase_button		:22;
+	k_restore_button	:23;
+	k_glf_year		:24;
+	k_glf_month		:25;
+	k_glf_day		:26;
+	k_glf_hour		:27;
+	k_glf_min		:28;
+	k_glf_sec		:29;
+	k_file_sel_box		:30;
+	k_cancel_file_sel	:31;
+	k_apply_button		:32;
+	k_file_bb_box		:33;
+	k_output_file		:34;
+	k_goto_cancel_button	:35;
+	k_grab_file_button	:36;
+	k_display_goto_menu	:37;
+
+
+/*******************************************************/
+/* END OF "mbedit_define.uil" FILE.                    */
+/*******************************************************/
+

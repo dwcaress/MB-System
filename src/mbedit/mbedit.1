@@ -1,4 +1,4 @@
-.TH MBEDIT 1 "28 February 1994"
+.TH MBEDIT 1 "15 September 1994"
 .SH NAME
 \fBMBEDIT\fP - Interactive editor used to flag bad beams in multibeam bathymetry data.
 
@@ -24,6 +24,17 @@ Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
 Lamont-Doherty Earth Observatory
 .br
 Palisades, NY 10964
+.br
+.br
+Rod McCabe (mccabe@iris-2.asa.org)
+.br
+David Brock (brockda@iris-2.asa.org)
+.br
+Antarctic Support Associates
+.br
+61 Inverness Drive East
+.br
+Englewood, CO
 
 .SH OPTIONS
 .TP
@@ -43,7 +54,10 @@ of its operation and then exit immediately.
 .TP
 .B \fB-I\fIinfile\fP
 Sets the data file from which the input data will be read at startup.
-This value can also be set interactively.  The output file will
+This value can also be set interactively.  If the input file is named
+using the \fBMB-System\fP convention of an ".mbXX" suffix (the XX
+corresponds to the \fBMBIO\fP format id), then the output file name
+will have an "e.mbXX" suffix. Otherwise, the output file will
 be \fIinfile\fP with ".ed" appended.
 .TP
 .B \fB-V\fP
@@ -208,23 +222,7 @@ while the left mouse button is held down to be unflagged.
 The edit mode can also be set using the \fBMode\fP button.
 
 .SH BUGS
-There are many shortcomings to this program:
-
-1. \fBMBEDIT\fP uses the XVIEW widget set, which is now obsolete.
-A Motif version will be written when L-DEO has a suitable
-Motif development package.
-
-2. One cannot specify or search through directories for the input files.
-The user has to run the program from the directory containing the data
-files of interest.
-
-3. The program needs a bit of color.
-
-4. The program needs a font control option.
-
-5. When an input file is specified at startup (e.g. mbedit -f1 -isbfile)
-the graphics don't show up until the user hits one of the mouse
-or keyboard buttons.
-
-6. It might be better to define the cross track distance scale
+It might be better to define the cross track distance scale
 in terms of the swath width that is desired rather than in m/100 pixels.
+User defined default values such as the default data format id
+are not used.

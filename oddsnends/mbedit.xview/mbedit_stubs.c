@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_stubs.c	4/8/93
- *    $Id: mbedit_stubs.c,v 4.0 1994-03-05 23:54:35 caress Exp $
+ *    $Id: mbedit_stubs.c,v 4.1 1994-10-21 12:00:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:54:35  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:51:47  caress
  * Fixed copyright message.
  *
@@ -144,7 +147,7 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-  static char rcs_id[]="$Id: mbedit_stubs.c,v 4.0 1994-03-05 23:54:35 caress Exp $";
+  static char rcs_id[]="$Id: mbedit_stubs.c,v 4.1 1994-10-21 12:00:33 caress Exp $";
 	int	status;
 	int	i;
 
@@ -457,7 +460,18 @@ set_scale_x(item, value, event)
 	mbedit_window_mbedit_objects *ip = (mbedit_window_mbedit_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
 	
 	xscale = value;
-	yscale = xscale/(0.01*exager);
+	yscale = (int) xscale/(0.01*exager);
+	if (yscale <= 0)
+		{
+		yscale = 1;
+		exager = (int) xscale/(0.01*yscale);
+		xv_set(Mbedit_window_mbedit->slider_scale_y,
+			PANEL_MIN_VALUE, 50,
+			PANEL_MAX_VALUE, 1000,
+			PANEL_VALUE, exager,
+			NULL);
+		}
+
 	status = mbedit_action_plot(xscale,yscale,
 		x_interval,y_interval,plot_size,&nbuffer,
 		&ngood,&icurrent,&nplot);
@@ -504,7 +518,17 @@ set_scale_y(item, value, event)
 	mbedit_window_mbedit_objects *ip = (mbedit_window_mbedit_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
 	
 	exager = value;
-	yscale = xscale/(0.01*exager);
+	yscale = (int) xscale/(0.01*exager);
+	if (yscale <= 0)
+		{
+		yscale = 1;
+		exager = (int) xscale/(0.01*yscale);
+		xv_set(Mbedit_window_mbedit->slider_scale_y,
+			PANEL_MIN_VALUE, 50,
+			PANEL_MAX_VALUE, 1000,
+			PANEL_VALUE, exager,
+			NULL);
+		}
 	status = mbedit_action_plot(xscale,yscale,
 		x_interval,y_interval,plot_size,&nbuffer,
 		&ngood,&icurrent,&nplot);

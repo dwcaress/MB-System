@@ -1,12 +1,15 @@
 /**********************************************************************
  *	XGRAPHICS
- * $Id: xgraphics.c,v 4.0 1994-03-05 23:54:35 caress Exp $
+ * $Id: xgraphics.c,v 4.1 1994-10-21 12:00:33 caress Exp $
  *	- subroutines for handling 8-bit color in Xwindows applications.
  *	- version 1.0 September 1992
  *	David W. Caress
  *	Lamont-Doherty Geological Observatory
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:54:35  caress
+ * First cut at version 4.0
+ *
  * Revision 3.2  1993/08/17  00:33:37  caress
  * Changed:
  * graphic->color[i].red =   (unsigned short) 255;
@@ -73,7 +76,7 @@ int	*colors;
 int	ncolors;
 char	*fontname;
 {
-static char rcs_id[]="$Id: xgraphics.c,v 4.0 1994-03-05 23:54:35 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 4.1 1994-10-21 12:00:33 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	int	i, j;
