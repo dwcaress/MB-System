@@ -111,7 +111,17 @@ user to save the current editable velocity profile as a file.
 Selecting this menu item brings up a popup window which allows the 
 user to select an input multibeam data file to be processed
 in conjunction with the current editable velocity profile.
-The multibeam data file must be in a format which stores
+The format id for the data file must be set appropriately
+in the editable text widget labeled "MBIO Format ID:"; this 
+program uses the \fBMBIO\fP library and will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data
+formats currently supported by \fBMBIO\fP and their
+identifier values is given in the \fBMBIO\fP manual page.
+If the multibeam data file is named using the \fBMB-System\fP
+suffix convention (format 11 files end with ".mb11", format
+41 files end with ".mb41", etc.), then the program will
+automatically use the appropriate format id.
+The multibeam data file must be in one of the formats which store
 travel time data for each beam. The first 1000 data records
 of the data file will be read into a buffer for processing.
 If there is no current editable velocity profile, then a
@@ -175,5 +185,3 @@ value of -range and a maximum value of +range.
 .SH BUGS
 Users cannot remove display sound velocity profiles from the screen
 once they are read in.
-User defined default values such as the default data format id
-are not used.
