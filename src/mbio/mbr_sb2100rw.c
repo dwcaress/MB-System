@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.15 1995-06-03 03:25:13 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.16 1995-06-06 13:28:49 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1995/06/03  03:25:13  caress
+ * Fixes to handling of changes to vendor SB2100 format
+ *
  * Revision 4.14  1995/05/08  21:26:28  caress
  * Made changes consistent with new i/o spec for SB2100 data.
  *
@@ -105,7 +108,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.15 1995-06-03 03:25:13 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.16 1995-06-06 13:28:49 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1292,7 +1295,7 @@ int	*error;
 		mb_get_int(&(data->hour),                 line+7,   2);
 		mb_get_int(&(data->minute),               line+9,   2);
 		mb_get_int(&(data->msec),                 line+11,  5);
-		if (strlen(line) >= 39)
+		if ((int)strlen(line) >= 39)
 			{
 			mb_get_int(&(data->roll_bias_port),       line+16,  6);
 			data->roll_bias_starboard = data->roll_bias_port;
