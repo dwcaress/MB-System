@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 5.2 2003-04-17 20:47:57 caress Exp $
+ *    $Id: mb_contour.h,v 5.3 2004-12-18 01:32:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 20:47:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2001/03/22 21:06:19  caress
  * Trying to make release 5.0.beta0
  *
@@ -76,6 +79,7 @@ struct swath
 	int	plot_contours;
 	int	plot_triangles;
 	int	plot_track;
+	int	plot_name;
 
 	/* contour control parameters */
 	double	contour_int;
@@ -98,6 +102,7 @@ struct swath
 	double	time_annot_int;
 	double	date_annot_int;
 	double	time_tick_len;
+	double	name_hgt;
 
 	/* triangle network */
 	int	npts;
@@ -138,3 +143,43 @@ struct swath
 	int	*justify;
 
 	};
+	
+/* mb_contour function prototypes */
+int mb_contour_init(
+		int	verbose, 
+		struct swath **data,
+		int	npings_max,
+		int	beams_bath,
+		int	contour_algorithm,
+		int	plot_contours,
+		int	plot_triangles,
+		int	plot_track,
+		int	plot_name,
+		double	contour_int,
+		double	color_int,
+		double	tick_int,
+		double	label_int,
+		double	tick_len,
+		double	label_hgt,
+		double	label_spacing,
+		int	ncolor,
+		int	nlevel,
+		double	*level_list,
+		int	*label_list,
+		int	*tick_list,
+		double	time_tick_int,
+		double	time_annot_int,
+		double	date_annot_int,
+		double	time_tick_len,
+		double	name_hgt,
+		int	*error);
+int mb_contour_deall(
+		int	verbose, 
+		struct swath *data, 
+		int	*error);
+int mb_contour(
+		int	verbose, 
+		struct swath *data, 
+		int	*error);
+void mb_track(int verbose, struct swath *data, int *error);
+void mb_trackname(int verbose, struct swath *data, char *file, int *error);
