@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_swap.c,v 5.3 2004-11-06 03:55:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -89,6 +92,22 @@ int mb_swap_float(float *a)
 int mb_swap_double(double *a)
 {
 	double b;
+	unsigned int *t1;
+	unsigned int *t2;
+
+	b = *a;
+	t1 = (unsigned int *) &b;
+	t2 = (unsigned int *) a;
+	t2[1] = mb_swap_int(t1[0]);
+	t2[0] = mb_swap_int(t1[1]);
+	
+	return(MB_SUCCESS);
+}
+/*--------------------------------------------------------------------*/
+/* function mb_swap_long swaps the bytes of an 8 byte long value */
+int mb_swap_long(mb_s_long *a)
+{
+	mb_s_long b;
 	unsigned int *t1;
 	unsigned int *t2;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.24 2004-09-16 19:02:33 caress Exp $
+ *    $Id: mb_define.h,v 5.25 2004-11-06 03:55:17 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2004/09/16 19:02:33  caress
+ * Changes to better support segy data.
+ *
  * Revision 5.23  2004/04/27 01:46:12  caress
  * Various updates of April 26, 2004.
  *
@@ -178,6 +181,10 @@ typedef char	mb_s_char;
 #ifdef OTHER
 typedef signed char	mb_s_char;
 #endif
+
+/* type definitions of signed and unsigned long int (64 bit integer) */
+typedef unsigned long long	mb_u_long;
+typedef long long	mb_s_long;
 
 /* typedef for path string */
 typedef char mb_path[MB_PATH_MAXLINE];
@@ -499,10 +506,12 @@ int mb_get_binary_short(int, void *, short *);
 int mb_get_binary_int(int, void *, int *);
 int mb_get_binary_float(int, void *, float *);
 int mb_get_binary_double(int, void *, double *);
+int mb_get_binary_long(int, void *, mb_s_long *);
 int mb_put_binary_short(int, short, void *);
 int mb_put_binary_int(int, int, void *);
 int mb_put_binary_float(int, float, void *);
 int mb_put_binary_double(int, double, void *);
+int mb_put_binary_long(int, mb_s_long, void *);
 int mb_get_bounds (char *text, double *bounds);
 double mb_ddmmss_to_degree (char *text);
 int mb_takeoff_to_rollpitch(int verbose,

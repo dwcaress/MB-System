@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.50 2004-10-06 19:04:24 caress Exp $
+ *    $Id: mb_status.h,v 5.51 2004-11-06 03:55:17 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.50  2004/10/06 19:04:24  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.49  2004/05/22 07:07:26  caress
  * Release 5.0.4
  *
@@ -269,7 +272,7 @@
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			38
+#define	MB_DATA_KINDS			44
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -309,6 +312,12 @@
 #define	MB_DATA_SUBBOTTOM_SUBBOTTOM	36	/* Reson 7k, XTF */
 #define	MB_DATA_SIDESCAN2		37	/* Reson 7k, XTF */
 #define	MB_DATA_SIDESCAN3		38	/* Reson 7k, XTF */
+#define	MB_DATA_IMAGE			39	/* Reson 7k */
+#define	MB_DATA_ROLL			40	/* Reson 7k */
+#define	MB_DATA_PITCH			41	/* Reson 7k */
+#define	MB_DATA_ABSORPTIONLOSS		42	/* Reson 7k */
+#define	MB_DATA_SPREADINGLOSS		43	/* Reson 7k */
+#define	MB_DATA_INSTALLATION		44	/* Reson 7k */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
@@ -457,6 +466,12 @@ static char *notice_msg[] =
 	"MB_DATA_SUBBOTTOM_SUBBOTTOM (ID=36): Subbottom record", 
 	"MB_DATA_SIDESCAN2 (ID=37): Secondary sidescan record", 
 	"MB_DATA_SIDESCAN3 (ID=38): Tertiary sidescan record", 
+	"MB_DATA_IMAGE (ID=39): Sonar image record", 
+	"MB_DATA_ROLL (ID=40): Roll record", 
+	"MB_DATA_PITCH (ID=41): Pitch record", 
+	"MB_DATA_ABSORPTIONLOSS (ID=42): Absorption loss record", 
+	"MB_DATA_SPREADINGLOSS (ID=43): Spreading loss record", 
+	"MB_DATA_INSTALLATION (ID=44): Installation parameter record", 
 	
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",

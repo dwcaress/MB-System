@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 5.3 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_get_value.c,v 5.4 2004-11-06 03:55:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -100,7 +103,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 5.3 2003-04-17 21:05:23 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 5.4 2004-11-06 03:55:16 caress Exp $";
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/
@@ -187,6 +190,22 @@ int mb_get_binary_double(int swapped, void *buffer, double *value)
 	return(0);
 }
 /*--------------------------------------------------------------------*/
+/*	function mb_get_binary_long copies a binary long from
+ *	a buffer, swapping if necessary
+ */
+int mb_get_binary_long(int swapped, void *buffer, mb_s_long *value)
+{
+	memcpy(value, buffer, sizeof(mb_s_long));
+#ifdef BYTESWAPPED
+	if (swapped == MB_NO)
+	    mb_swap_long(value);
+#else
+	if (swapped == MB_YES)
+	    mb_swap_long(value);
+#endif
+	return(0);
+}
+/*--------------------------------------------------------------------*/
 /*	function mb_put_binary_short copies a binary short to
  *	a buffer, swapping if necessary
  */
@@ -248,6 +267,22 @@ int mb_put_binary_double(int swapped, double value, void *buffer)
 	    mb_swap_double(&value);
 #endif
 	memcpy(buffer, &value, sizeof(double));
+	return(0);
+}
+/*--------------------------------------------------------------------*/
+/*	function mb_put_binary_long copies a binary long to
+ *	a buffer, swapping if necessary
+ */
+int mb_put_binary_long(int swapped, mb_s_long value, void *buffer)
+{
+#ifdef BYTESWAPPED
+	if (swapped == MB_NO)
+	    mb_swap_long(&value);
+#else
+	if (swapped == MB_YES)
+	    mb_swap_long(&value);
+#endif
+	memcpy(buffer, &value, sizeof(mb_s_long));
 	return(0);
 }
 /*--------------------------------------------------------------------*/
