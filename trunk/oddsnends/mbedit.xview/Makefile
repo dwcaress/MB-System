@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  5/25/93
-#	$Id: Makefile,v 1.2 1993-05-25 19:59:52 caress Exp $
+#	$Id: Makefile,v 1.3 1993-08-30 19:02:30 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,10 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 1.2  1993/05/25  19:59:52  caress
+# Added chmod command after cp command so the man page can
+# be overwritten by later makes.
+#
 # Revision 1.1  1993/05/25  19:01:54  caress
 # Initial revision
 #
@@ -74,6 +78,7 @@ LDLIBS += -lguidexv -lguide -lxview -lolgx -lX11 -lmbio
 
 # Standard targets.
 
+#all:	 $(TARGETS.other) $(PROGRAM) $(MANPAGE)
 all:	 $(TARGETS.other) $(PROGRAM) $(EXEC) $(MANPAGE)
 objects: $(SOURCES.c) $(TARGETS.c) $(TARGETS.h) $(OBJECTS)
 sources: $(SOURCES)
