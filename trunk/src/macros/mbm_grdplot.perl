@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.4 2001-11-02 21:07:40 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.5 2001-12-18 04:26:12 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.4 2001-11-02 21:07:40 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.5 2001-12-18 04:26:12 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.4  2001/11/02  21:07:40  caress
+# Adjusted handling of segmented xy files.
+#
 # Revision 5.3  2001/10/10  23:56:01  dcaress
 # Regrettably, I don't remember what I changed...
 #
@@ -503,6 +506,7 @@ if ($misc)
 		if ($cmd =~ /^[Tt][Cc]./)
 			{
 			($coast_lakefill) = $cmd =~ /^[Tt][Cc](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast resolution
@@ -515,12 +519,14 @@ if ($misc)
 		if ($cmd =~ /^[Tt][Gg]./)
 			{
 			($coast_dryfill) = $cmd =~ /^[Tt][Gg](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast rivers
 		if ($cmd =~ /^[Tt][Ii]./)
 			{
 			($coast_river) = $cmd =~ /^[Tt][Ii](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast national boundaries
@@ -528,18 +534,21 @@ if ($misc)
 			{
 			($coast_boundary) = $cmd =~ /^[Tt][Nn](.+)/;
 			push(@coast_boundaries, $coast_boundary);
+			$coast_control = 1;
 			}
 
 		# set pscoast wet fill
 		if ($cmd =~ /^[Tt][Ss]./)
 			{
 			($coast_wetfill) = $cmd =~ /^[Tt][Ss](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast coastline pen
 		if ($cmd =~ /^[Tt][Ww]./)
 			{
 			($coast_pen) = $cmd =~ /^[Tt][Ww](.+)/;
+			$coast_control = 1;
 			}
 
 		# deal with psxy options
@@ -1407,7 +1416,7 @@ if (!$contour_control && $contour_mode)
 if ($coast_control
 	&& !$coast_wetfill
 	&& !$coast_dryfill
-	&& !$coast_coast
+	&& !$coast_pen
 	&& !$coast_boundary
 	&& !$coast_river)
 	{
