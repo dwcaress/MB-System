@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.4 2001-03-22 21:09:11 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.5 2001-06-03 07:05:54 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/03/22 21:09:11  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.3  2001/01/22  07:45:59  caress
  * Version 5.0.beta01
  *
@@ -92,7 +95,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.4 2001-03-22 21:09:11 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.5 2001-06-03 07:05:54 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -641,7 +644,7 @@ int mbnavadjust_file_open(char *projectname)
 	int	i;
 
 	/* print input debug statements */
-	if (mbna_verbose >= 0)
+	if (mbna_verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);

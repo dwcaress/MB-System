@@ -70,6 +70,15 @@ Default = 11.
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
+.B \-I
+\fIimagedisplay\fP
+.br
+Sets the program used for displaying Tiff image files
+on a screen; this facility is used by shellscripts created through
+macros like \fBmbm_grdtiff\fP. The default image display
+utility is \fBxv\fP. Other common image display utilities
+are \fBgimp\fP (GNU image processing) and \fBgqview\fP.
+.TP
 .B \-L
 \fIlonflip\fP
 .br
@@ -147,6 +156,7 @@ The output will be:
  begin time: 1962 2 21 10 30 0
  end time:   2062 2 21 10 30 0
  ps viewer:  ghostview
+ img viewer: xv
  project:    none
 
 Suppose that one just wishes to see what the current default
@@ -165,11 +175,17 @@ The output will be
  begin time: 1962 2 21 10 30 0
  end time:   2062 2 21 10 30 0
  ps viewer:  ghostview
+ img viewer: xv
  project:    none
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbcontour\fP(l), 
-\fBmbswath\fP(l), \fBmbm_plot\fP(l), \fBmbm_grdplot\fP(l)
+\fBmbswath\fP(l), \fBmbm_plot\fP(l), \fBmbm_grdplot\fP(l), 
+\fBmbm_grd3dplot\fP(l), \fBmbm_grdtiff\fP(l)
 
 .SH BUGS
 Too simple to have any really interesting bugs.
+
+Well, ok, this program occassionally runs wild, destroying filesystems
+and eating young children. But don't worry, it could never
+happen to you...

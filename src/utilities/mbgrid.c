@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbgrid.c,v 5.2 2001-06-03 07:07:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -302,7 +305,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -458,14 +461,12 @@ main (int argc, char **argv)
 	double	mtodeglon, mtodeglat;
 
 	/* output char strings */
-	char	xlabel[128];
-	char	ylabel[128];
-	char	zlabel[128];
-	char	title[128];
-	char	nlabel[128];
-	char	sdlabel[128];
-	char	psviewer[128];
-	char	mbproject[128];
+	char	xlabel[MB_PATH_MAXLINE];
+	char	ylabel[MB_PATH_MAXLINE];
+	char	zlabel[MB_PATH_MAXLINE];
+	char	title[MB_PATH_MAXLINE];
+	char	nlabel[MB_PATH_MAXLINE];
+	char	sdlabel[MB_PATH_MAXLINE];
 
 	/* old color table - bright standard path through rgb space */
 /*	static int ncpt = 5;
@@ -545,7 +546,6 @@ main (int argc, char **argv)
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
-	status = mb_env(verbose, psviewer, mbproject);
 
 	/* set default input and output */
 	strcpy (filelist, "data.list");
@@ -783,7 +783,6 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       border:           %f\n",border);
 		fprintf(outfp,"dbg2       extend:           %f\n",extend);
 		fprintf(outfp,"dbg2       tension:          %f\n",tension);
-		fprintf(outfp,"dbg2       psviewer:         %s\n",psviewer);
 		fprintf(outfp,"dbg2       bathy_in_feet:    %d\n",bathy_in_feet);
 		fprintf(outfp,"dbg2       proj flag 1:      %d\n",projection_pars_f);
 		fprintf(outfp,"dbg2       proj flag 2:      %d\n",projection_origin_f);
