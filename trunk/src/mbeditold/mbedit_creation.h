@@ -77,6 +77,7 @@ EXTERNAL Widget   slider_num_pings_max_label;
 EXTERNAL Widget   slider_number_step_label;
 EXTERNAL Widget   slider_number_step;
 EXTERNAL Widget   slider_number_max_step_label;
+EXTERNAL Widget   setting_mode_toggle_toggle;
 EXTERNAL Widget   setting_mode_toggle_pick;
 EXTERNAL Widget   setting_mode_toggle_erase;
 EXTERNAL Widget   setting_mode_toggle_restore;

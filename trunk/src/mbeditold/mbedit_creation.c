@@ -77,6 +77,8 @@ extern void do_output_output(Widget, XtPointer, XtPointer);
 extern void do_output_browse(Widget, XtPointer, XtPointer);
 extern void do_event(Widget, XtPointer, XtPointer);
 extern void do_expose(Widget, XtPointer, XtPointer);
+extern void do_unflag_all(Widget, XtPointer, XtPointer);
+extern void do_unflag_view(Widget, XtPointer, XtPointer);
 extern void BxManageCB(Widget, XtPointer, XtPointer);
 extern void do_fileselection_init(Widget, XtPointer, XtPointer);
 extern void do_next_buffer(Widget, XtPointer, XtPointer);
@@ -89,6 +91,7 @@ extern void do_number_pings(Widget, XtPointer, XtPointer);
 extern void do_number_step(Widget, XtPointer, XtPointer);
 extern void do_show_flagged_on(Widget, XtPointer, XtPointer);
 extern void do_show_flagged_off(Widget, XtPointer, XtPointer);
+extern void do_mode_toggle(Widget, XtPointer, XtPointer);
 extern void do_mode_pick(Widget, XtPointer, XtPointer);
 extern void do_mode_erase(Widget, XtPointer, XtPointer);
 extern void do_mode_restore(Widget, XtPointer, XtPointer);
@@ -146,6 +149,8 @@ Createwindow_mbedit(Widget parent)
     Widget   bulletinBoard_file;
     Widget   mbedit_bboard;
     Widget   controls_mbedit;
+    Widget   pushButton_unflag_all;
+    Widget   pushButton_unflag_view;
     Widget   menuBar_controls;
     Widget   cascadeButton_controls;
     Widget   pulldownMenu_controls;
@@ -186,21 +191,22 @@ Createwindow_mbedit(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 143); ac++;
-    XtSetArg(args[ac], XmNy, 58); ac++;
-    XtSetArg(args[ac], XmNwidth, 1016); ac++;
-    XtSetArg(args[ac], XmNheight, 668); ac++;
+    XtSetArg(args[ac], XmNx, 180); ac++;
+    XtSetArg(args[ac], XmNy, 124); ac++;
+    XtSetArg(args[ac], XmNwidth, 1014); ac++;
+    XtSetArg(args[ac], XmNheight, 665); ac++;
     window_mbedit = XmCreateMainWindow(parent,
         "window_mbedit",
         args, 
         ac);
     
     ac = 0;
+    XtSetArg(args[ac], XmNnoResize, False); ac++;
     XtSetArg(args[ac], XmNmarginHeight, 0); ac++;
     XtSetArg(args[ac], XmNmarginWidth, 0); ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNwidth, 1016); ac++;
-    XtSetArg(args[ac], XmNheight, 668); ac++;
+    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_ANY); ac++;
+    XtSetArg(args[ac], XmNwidth, 1014); ac++;
+    XtSetArg(args[ac], XmNheight, 665); ac++;
     mbedit_bboard = XmCreateBulletinBoard(window_mbedit,
         "mbedit_bboard",
         args, 
@@ -214,12 +220,68 @@ Createwindow_mbedit(Widget parent)
     XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 1040); ac++;
-    XtSetArg(args[ac], XmNheight, 144); ac++;
+    XtSetArg(args[ac], XmNheight, 150); ac++;
     controls_mbedit = XmCreateBulletinBoard(mbedit_bboard,
         "controls_mbedit",
         args, 
         ac);
     XtManageChild(controls_mbedit);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(controls_mbedit, "Unflag All", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 530); ac++;
+        XtSetArg(args[ac], XmNy, 110); ac++;
+        XtSetArg(args[ac], XmNwidth, 110); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(controls_mbedit, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_unflag_all = XmCreatePushButton(controls_mbedit,
+            "pushButton_unflag_all",
+            args, 
+            ac);
+        XtManageChild(pushButton_unflag_all);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_unflag_all, XmNactivateCallback, do_unflag_all, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(controls_mbedit, "Unflag View", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 410); ac++;
+        XtSetArg(args[ac], XmNy, 110); ac++;
+        XtSetArg(args[ac], XmNwidth, 110); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(controls_mbedit, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_unflag_view = XmCreatePushButton(controls_mbedit,
+            "pushButton_unflag_view",
+            args, 
+            ac);
+        XtManageChild(pushButton_unflag_view);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_unflag_view, XmNactivateCallback, do_unflag_view, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 120); ac++;
@@ -380,7 +442,7 @@ Createwindow_mbedit(Widget parent)
         tmp0 = (XmString) BX_CONVERT(controls_mbedit, "File", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNx, 0); ac++;
         XtSetArg(args[ac], XmNy, 0); ac++;
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
@@ -545,7 +607,7 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNspacing, 10); ac++;
     XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 700); ac++;
+    XtSetArg(args[ac], XmNx, 880); ac++;
     XtSetArg(args[ac], XmNy, 110); ac++;
     XtSetArg(args[ac], XmNwidth, 114); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
@@ -616,7 +678,7 @@ Createwindow_mbedit(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 540); ac++;
+        XtSetArg(args[ac], XmNx, 730); ac++;
         XtSetArg(args[ac], XmNy, 110); ac++;
         XtSetArg(args[ac], XmNwidth, 160); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
@@ -974,19 +1036,45 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNnumColumns, 1); ac++;
-    XtSetArg(args[ac], XmNpacking, XmPACK_COLUMN); ac++;
+    XtSetArg(args[ac], XmNpacking, XmPACK_TIGHT); ac++;
     XtSetArg(args[ac], XmNradioBehavior, True); ac++;
     XtSetArg(args[ac], XmNspacing, 0); ac++;
     XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
     XtSetArg(args[ac], XmNx, 70); ac++;
     XtSetArg(args[ac], XmNy, 110); ac++;
-    XtSetArg(args[ac], XmNwidth, 255); ac++;
+    XtSetArg(args[ac], XmNwidth, 289); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     setting_mode = XmCreateRowColumn(controls_mbedit,
         "setting_mode",
         args, 
         ac);
     XtManageChild(setting_mode);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(setting_mode, "Toggle", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 75); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(setting_mode, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        setting_mode_toggle_toggle = XmCreateToggleButton(setting_mode,
+            "setting_mode_toggle_toggle",
+            args, 
+            ac);
+        XtManageChild(setting_mode_toggle_toggle);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(setting_mode_toggle_toggle, XmNvalueChangedCallback, do_mode_toggle, (XtPointer)0);
     
     ac = 0;
     {
@@ -1091,8 +1179,8 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1219); ac++;
-    XtSetArg(args[ac], XmNy, 64); ac++;
+    XtSetArg(args[ac], XmNx, 8); ac++;
+    XtSetArg(args[ac], XmNy, 32); ac++;
     XtSetArg(args[ac], XmNwidth, 521); ac++;
     XtSetArg(args[ac], XmNheight, 573); ac++;
     bulletinBoard_file = XmCreateBulletinBoard(xmDialogShell_file,
@@ -1301,8 +1389,8 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 987); ac++;
-    XtSetArg(args[ac], XmNy, 185); ac++;
+    XtSetArg(args[ac], XmNx, 8); ac++;
+    XtSetArg(args[ac], XmNy, 32); ac++;
     XtSetArg(args[ac], XmNwidth, 196); ac++;
     XtSetArg(args[ac], XmNheight, 302); ac++;
     bulletinBoard_goto = XmCreateBulletinBoard(xmDialogShell_goto,

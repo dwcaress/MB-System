@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.5 1999-09-15 21:02:07 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.6 2000-01-20 00:05:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1999/09/15  21:02:07  caress
+ * Version label now set from mb_format.h
+ *
  * Revision 4.4  1999/07/16  19:21:16  caress
  * Smaller window with new dialogs for Linux.
  *
@@ -118,9 +121,10 @@ Widget	fileSelectionText;
 #define xgfont "-misc-fixed-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
 
 /* Mode value defines */
-#define	MODE_PICK	0
-#define	MODE_ERASE	1
-#define	MODE_RESTORE	2
+#define	MODE_TOGGLE	0
+#define	MODE_PICK	1
+#define	MODE_ERASE	2
+#define	MODE_RESTORE	3
 #define	SHOW_FLAGGED_OFF	0
 #define	SHOW_FLAGGED_ON		1
 #define	OUTPUT_MODE_OUTPUT	0
@@ -159,7 +163,7 @@ int	mexager;
 int	mplot_width;
 int	mx_interval;
 int	my_interval;
-int	mode_pick = MODE_PICK;
+int	mode_pick = MODE_TOGGLE;
 int	mshow_flagged = SHOW_FLAGGED_OFF;
 int	mode_output = OUTPUT_MODE_OUTPUT;
 int	ttime_i[7];
@@ -546,10 +550,13 @@ int do_setup_data()
 	    }
 	    
 	/* set the mode toggles */
+	XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
 	XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
 	XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 	XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
-	if (mode_pick == MODE_PICK)
+	if (mode_pick == MODE_TOGGLE)
+	    XmToggleButtonSetState(setting_mode_toggle_toggle, 1, FALSE);
+	else if (mode_pick == MODE_PICK)
 	    XmToggleButtonSetState(setting_mode_toggle_pick, 1, FALSE);
 	else if (mode_pick == MODE_ERASE)
 	    XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
@@ -609,6 +616,44 @@ do_expose(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_mode_toggle(w, client_data, call_data)
+ Widget w;
+ XtPointer client_data;
+ XtPointer call_data;
+{
+    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+
+    mode_pick = MODE_TOGGLE;
+
+    myCursor = XCreateFontCursor(theDisplay, XC_target);
+    XAllocNamedColor(theDisplay,colormap,"red",&closest[0],&exact[0]);
+    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
+    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
+    XDefineCursor(theDisplay,can_xid,myCursor);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_mode_pick(w, client_data, call_data)
+ Widget w;
+ XtPointer client_data;
+ XtPointer call_data;
+{
+    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+
+    mode_pick = MODE_PICK;
+
+    myCursor = XCreateFontCursor(theDisplay, XC_target);
+    XAllocNamedColor(theDisplay,colormap,"red",&closest[0],&exact[0]);
+    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
+    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
+    XDefineCursor(theDisplay,can_xid,myCursor);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_mode_erase(w, client_data, call_data)
  Widget w;
  XtPointer client_data;
@@ -620,6 +665,25 @@ do_mode_erase(w, client_data, call_data)
 
     myCursor = XCreateFontCursor(theDisplay, XC_exchange);
     XAllocNamedColor(theDisplay,colormap,"red",&closest[0],&exact[0]);
+    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
+    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
+    XDefineCursor(theDisplay,can_xid,myCursor);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_mode_restore(w, client_data, call_data)
+ Widget w;
+ XtPointer client_data;
+ XtPointer call_data;
+{
+    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+
+    mode_pick = MODE_RESTORE;
+
+    myCursor = XCreateFontCursor(theDisplay, XC_exchange);
+    XAllocNamedColor(theDisplay,colormap,"green",&closest[0],&exact[0]);
     XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
     XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
     XDefineCursor(theDisplay,can_xid,myCursor);
@@ -1121,25 +1185,6 @@ do_filebutton_off()
 /*--------------------------------------------------------------------*/
 
 void
-do_mode_pick(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
-{
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
-
-    mode_pick = MODE_PICK;
-
-    myCursor = XCreateFontCursor(theDisplay, XC_target);
-    XAllocNamedColor(theDisplay,colormap,"red",&closest[0],&exact[0]);
-    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
-    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
-    XDefineCursor(theDisplay,can_xid,myCursor);
-}
-
-/*--------------------------------------------------------------------*/
-
-void
 do_forward(w, client_data, call_data)
  Widget w;
  XtPointer client_data;
@@ -1293,8 +1338,9 @@ do_event(w, client_data, call_data)
 	    case 'Q':
 	    case 'q':
 			    {
-			    mode_pick = MODE_PICK;
-			    XmToggleButtonSetState(setting_mode_toggle_pick, 1, FALSE);
+			    mode_pick = MODE_TOGGLE;
+			    XmToggleButtonSetState(setting_mode_toggle_toggle, 1, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
 
@@ -1310,12 +1356,13 @@ do_event(w, client_data, call_data)
 	    case 'W':
 	    case 'w':
 			    {
-			    mode_pick = MODE_ERASE;
-			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
-			    XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
+			    mode_pick = MODE_PICK;
+			    XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_pick, 1, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
 
-			    myCursor = XCreateFontCursor(theDisplay, XC_exchange);
+			    myCursor = XCreateFontCursor(theDisplay, XC_target);
 			    XAllocNamedColor(theDisplay,colormap,"red",&closest[0],&exact[0]);
 			    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
 			    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
@@ -1327,7 +1374,26 @@ do_event(w, client_data, call_data)
 	    case 'E':
 	    case 'e':
 			    {
+			    mode_pick = MODE_ERASE;
+			    XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+
+			    myCursor = XCreateFontCursor(theDisplay, XC_exchange);
+			    XAllocNamedColor(theDisplay,colormap,"red",&closest[0],&exact[0]);
+			    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
+			    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
+			    XDefineCursor(theDisplay,can_xid,myCursor);
+			    }
+		    break;
+	    case 'P':
+	    case 'p':
+	    case 'R':
+	    case 'r':
+			    {
 			    mode_pick = MODE_RESTORE;
+			    XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_restore, 1, FALSE);
@@ -1398,7 +1464,14 @@ do_event(w, client_data, call_data)
 	    while (doit)
 		{
 
-		if(mode_pick == MODE_PICK)
+		if(mode_pick == MODE_TOGGLE)
+		    status = mbedit_action_mouse_toggle(
+			    x_loc, y_loc,
+			    mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_flagged,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+		else if(mode_pick == MODE_PICK)
 		    status = mbedit_action_mouse_pick(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
@@ -1463,7 +1536,9 @@ do_event(w, client_data, call_data)
 
 		    /* If the button is still pressed then read the location */
 		    /* of the pointer and run the action mouse function again */
-		    if(mask_return == 256 && mode_pick != MODE_PICK)
+		    if(mask_return == 256 
+			&& mode_pick != MODE_TOGGLE 
+			&& mode_pick != MODE_PICK)
 		       doit = 1;
 		    else
 		       doit = 0;
@@ -1493,6 +1568,34 @@ do_event(w, client_data, call_data)
       } /* end of button pressed events */
     } /* end of inputs from window */
 } /* end do_event function */
+
+/*--------------------------------------------------------------------*/
+
+void
+do_unflag_view( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    status = mbedit_action_unflag_view(
+	    mplot_width,mexager,
+	    mx_interval,my_interval,
+	    mplot_size,mshow_flagged,
+	    &nbuffer,&ngood,&icurrent,&mnplot);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_unflag_all( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    status = mbedit_action_unflag_all(
+	    mplot_width,mexager,
+	    mx_interval,my_interval,
+	    mplot_size,mshow_flagged,
+	    &nbuffer,&ngood,&icurrent,&mnplot);
+}
 
 /*--------------------------------------------------------------------*/
 
@@ -1565,25 +1668,6 @@ do_number_step(w, client_data, call_data)
 	    set_label_string(slider_number_max_step_label, 
 			    label);
 	    }
-}
-
-/*--------------------------------------------------------------------*/
-
-void
-do_mode_restore(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
-{
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
-
-    mode_pick = MODE_RESTORE;
-
-    myCursor = XCreateFontCursor(theDisplay, XC_exchange);
-    XAllocNamedColor(theDisplay,colormap,"green",&closest[0],&exact[0]);
-    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
-    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
-    XDefineCursor(theDisplay,can_xid,myCursor);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2026,4 +2110,3 @@ Object %s is not a Shell\n", XtName(widgets[i]));
     }
     XtFree((char *)widgets);
 }
-

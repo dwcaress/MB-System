@@ -115,11 +115,12 @@ int main( int argc, char **argv)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBedit"); ac++;
     XtSetArg(args[ac], XmNiconName, "MBedit"); ac++;
+    XtSetArg(args[ac], XmNallowShellResize, False); ac++;
     XtSetArg(args[ac], XmNdeleteResponse, XmDESTROY); ac++;
-    XtSetArg(args[ac], XmNx, 153); ac++;
-    XtSetArg(args[ac], XmNy, 58); ac++;
-    XtSetArg(args[ac], XmNwidth, 1016); ac++;
-    XtSetArg(args[ac], XmNheight, 668); ac++;
+    XtSetArg(args[ac], XmNx, 180); ac++;
+    XtSetArg(args[ac], XmNy, 124); ac++;
+    XtSetArg(args[ac], XmNwidth, 1014); ac++;
+    XtSetArg(args[ac], XmNheight, 665); ac++;
     topLevelShell = XtCreatePopupShell("topLevelShell",
         topLevelShellWidgetClass,
         parent,
