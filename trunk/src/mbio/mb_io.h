@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.9 1998-12-17 23:01:15 caress Exp $
+ *    $Id: mb_io.h,v 4.10 2000-04-19 20:55:07 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+ *    Copyright (c) 1993, 1994, 2000 by 
+ *    D. W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY  10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -19,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1998/12/17  23:01:15  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.8  1998/10/05 17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -248,6 +253,16 @@ struct mb_buffer_struct
 	char *buffer[MB_BUFFER_MAX];
 	int buffer_kind[MB_BUFFER_MAX];
 	int nbuffer;
+	};
+
+/* MBIO datalist control structure */
+#define MB_DATALIST_RECURSION_MAX 25
+struct mb_datalist_struct {
+	int	open;
+	int	recursion;
+	FILE	*fp;
+	char	path[MB_PATH_MAXLINE];
+	struct mb_datalist_struct *datalist;
 	};
 
 /* end conditional include */
