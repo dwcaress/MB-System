@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.6 1996-08-12 21:13:48 caress Exp $
+#	$Id: Makefile.template,v 4.7 1999-06-25 17:53:31 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.6  1996/08/12  21:13:48  caress
+# Added mbm_dslnavfix macro.
+#
 # Revision 4.5  1995/08/17  16:43:48  caress
 # Revision for release 4.3.
 #
@@ -55,7 +58,8 @@ all:	$(MANDIR)/xbt.l \
 	$(BINDIR)/mbm_grd3dplot $(MANDIR)/mbm_grd3dplot.l \
 	$(BINDIR)/mbm_xyplot $(MANDIR)/mbm_xyplot.l \
 	$(BINDIR)/mbm_stat $(MANDIR)/mbm_stat.l \
-	$(BINDIR)/mbm_dslnavfix $(MANDIR)/mbm_dslnavfix.l 
+	$(BINDIR)/mbm_dslnavfix $(MANDIR)/mbm_dslnavfix.l \
+	$(BINDIR)/mbm_grid $(MANDIR)/mbm_grid.l
 
 ### make clean does nothing
 clean:
@@ -91,6 +95,9 @@ $(BINDIR)/mbm_stat:	mbm_stat.perl
 $(BINDIR)/mbm_dslnavfix:	mbm_dslnavfix.perl
 	cp mbm_dslnavfix.perl $(BINDIR)/mbm_dslnavfix
 	chmod 775 $(BINDIR)/mbm_dslnavfix
+$(BINDIR)/mbm_grid:	mbm_grid.perl
+	cp mbm_grid.perl $(BINDIR)/mbm_grid
+	chmod 775 $(BINDIR)/mbm_grid
 
 ### copy the man pages to the man page directory
 $(MANDIR)/xbt.l:	xbt.manl
@@ -126,4 +133,7 @@ $(MANDIR)/mbm_stat.l:	mbm_stat.manl
 $(MANDIR)/mbm_dslnavfix.l:	mbm_dslnavfix.manl
 	cp mbm_dslnavfix.manl $(MANDIR)/mbm_dslnavfix.l
 	chmod 664 $(MANDIR)/mbm_dslnavfix.l
+$(MANDIR)/mbm_grid.l:	mbm_grid.manl
+	cp mbm_grid.manl $(MANDIR)/mbm_grid.l
+	chmod 664 $(MANDIR)/mbm_grid.l
 
