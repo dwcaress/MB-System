@@ -67,7 +67,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.5 2004-07-15 19:26:44 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.6 2004-07-27 19:50:28 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -1327,7 +1327,6 @@ int do_mbgrdviz_opensite(int instance, char *input_file_ptr)
 			    &sitelon[nsite], &sitelat[nsite], &sitetopo[nsite], 
 			    &sitecolor[nsite], &sitesize[nsite],
 			    &sitename[nsite]);
-fprintf(stderr,"nget:%d\n",nget);
 		    	if (nget >= 2)
 			    site_ok = MB_YES;
 			}
@@ -1571,7 +1570,6 @@ int do_mbgrdviz_openroute(int instance, char *input_file_ptr)
 		while ((result = fgets(buffer,MB_PATH_MAXLINE,sfp)) == buffer)
 		    {
 		    /* deal with comments */
-fprintf(stderr,"Route Buffer: %s",buffer);
 		    if (buffer[0] == '#')
 		    	{
 			if (rawroutefile == MB_YES
@@ -1625,6 +1623,7 @@ fprintf(stderr,"Route Buffer: %s",buffer);
 						    NULL,
 						    NULL,
 						    NULL,
+						    NULL,
 						    &error);
 			    if (status != MB_SUCCESS)
 				    {
@@ -1662,6 +1661,7 @@ fprintf(stderr,"Route Buffer: %s",buffer);
 						    NULL,
 						    NULL,
 						    NULL,
+						    NULL,
 						    &error);
 
 		/* close the input file */
@@ -1691,6 +1691,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 	double	*routelat = NULL;
 	int	*waypoint = NULL;
 	double	*routetopo = NULL;
+	double	*routebearing = NULL;
 	double	*distlateral = NULL;
 	double	*distovertopo = NULL;
 	double	*slope = NULL;
@@ -1740,7 +1741,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 				user_ptr,host,date);
 			fprintf(sfp, "## Number of routes: %d\n",nroute); 
 			fprintf(sfp, "## Route point format:\n"); 
-			fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <waypoint (boolean)> <topography (m)> <lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n"); 
+			fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <waypoint (boolean)> <topography (m)> <bearing (deg)> <lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n"); 
 			}
 			
 		/* output error message */
@@ -1774,6 +1775,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 						    &routelat,
 						    &waypoint,
 						    &routetopo,
+						    &routebearing,
 						    &distlateral,
 						    &distovertopo,
 						    &slope,
@@ -1803,6 +1805,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 					    routelat,
 					    waypoint,
 					    routetopo,
+					    routebearing,
 					    distlateral,
 					    distovertopo,
 					    slope,
@@ -1821,9 +1824,10 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 		    /* write the route points */
 		    for (j=0;j<npointtotal;j++)
 			    {
-			    fprintf(sfp,"%f %f %f %d %f %f %f",
-				    routelon[j], routelat[j], routetopo[j],
-				    waypoint[j],
+			    fprintf(sfp,"%f %f %f %d %f %f %f %f",
+				    routelon[j], routelat[j], 
+				    routetopo[j],
+				    waypoint[j], routebearing[j],
 				    distlateral[j], distovertopo[j], slope[j]);
 			    if (waypoint[j] == MB_YES)
 			    	fprintf(sfp," ## WAYPOINT\n");
@@ -1846,6 +1850,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 					    &routelat,
 					    &waypoint,
 					    &routetopo,
+					    &routebearing,
 					    &distlateral,
 					    &distovertopo,
 					    &slope,
@@ -2136,8 +2141,8 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 			if (kind == MB_DATA_DATA 
 				&& *error == MB_ERROR_NO_ERROR)
 				{
-fprintf(stderr,"Ping %d: %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%.6.6d %f %f\n",
-npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon,lat);
+/*fprintf(stderr,"Ping %d: %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%.6.6d %f %f\n",
+npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon,lat);*/
 
 				/* allocate memory if required */
 				if (npoint >= npointalloc)
@@ -2379,7 +2384,6 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 #ifdef GMT3_0
 	if (read_grd_info (grdfile, &header)) 
 #else
-fprintf(stderr,"calling GMT_read_grd_info: %s header:%d\n",grdfile, header.nx);
 	if (GMT_read_grd_info (grdfile, &header)) 
 #endif
 	    {
@@ -2390,7 +2394,6 @@ fprintf(stderr,"calling GMT_read_grd_info: %s header:%d\n",grdfile, header.nx);
 	    		program_name);
 	    exit(error);
 	    }
-fprintf(stderr,"done calling GMT_read_grd_info: %s header:%d\n",grdfile, header.nx);
 
 	/* set up internal arrays */
     	*nodatavalue = MIN(MBV_DEFAULT_NODATA, header.z_min - 10 * (header.z_max - header.z_min));
