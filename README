@@ -2,6 +2,9 @@ April 16, 1993
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 3.2  1993/08/25  14:41:41  dale
+# Add porting, and requirements, and bugs and stuff for 3.2
+#
 # Revision 3.1  1993/04/22  16:09:21  dale
 # Update and clarify the text, add third reason
 #
@@ -9,9 +12,9 @@ $Log: not supported by cvs2svn $
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 3.2 1993-08-25 14:41:41 dale Exp $
+RCS ID: $Id: README,v 3.3 1993-11-04 17:46:36 caress Exp $
 
-MBSYSTEM 3.20 RELEASE Notes:
+MBSYSTEM 3.30 RELEASE Notes:
 ----------------------------
 
 This directory structure contains a release of the MBSYSTEM software
@@ -19,20 +22,74 @@ package for processing and display of multibeam data.  There are
 undoubtably numerous bugs in this software - the user should beware
 (and let us know about it!).
 
-"Bugs": 
-------- 
-The program mbedit should not be made from scratch
-unless the user has access to the development tool Devguide (sold by
-Sun Microsystems or SunSoft?) - an executable (for Sun Sparc) has been
-left in the src/mbedit directory. See further discussion below.
+Copyright:
+----------
+Copyright 1992, 1993 by David W. Caress and Dale N. Chayes
+All Rights Reserved.
 
-Mbedit displays cross profiles with port-most beams to the right.
+Caveat:
+-------
+The MB-System does not come with any warranties, nor is it guarenteed 
+to work on your computer.  The user assumes full responsibility for 
+the use of this system.  In particular, the Lamont-Doherty Earth 
+Observatory of Columbia University, David W. Caress, Dale N. Chayes, 
+or any other individuals involved in the design and maintenance of 
+the MB-System are NOT responsible for any damage that may follow 
+from correct or incorrect use of these programs.
 
-The program mblevitus depends on a 16 MByte data file that is not
-included in the MB-System tarfile.  It is in the 'annual.Z' file which
-is available by anonymous ftp from lamont.ldgo.columbia.edu in the
-swath_data subdirectory.
+Other required software:
+------------------------
+        You will need some other readily available code to use
+MB-System fully.  MB-System uses the GMT-2 system plus extensions
+for lots of its graphics and GMT-2 requires NetCDF. Some of the 
+MB-System utilities (macros) are written in the perl scripting
+language. Some L-DEO extensions to GMT for handling underway data 
+are also used. The source code for these required software packages
+is available as follows:
 
+	MB-System v 3.3
+	- available from L-DEO via anonymous ftp to
+	  lamont.ldgo.columbia.edu
+	- compressed tar file MB-System3.3.tar.Z
+	  in directory pub/swath_data
+
+	GMT v 2.1r4 or later
+	- available from SOEST (U. Hawaii) via anonymous ftp to
+	  kiawe.soest.hawaii.edu
+	- compressed tar files in directory pub/gmt
+
+	Net-CDF v 2.3r2 or later
+	- available from NCAR via anonymous ftp to 
+	  unidata.ucar.edu
+	- compressed tar file netcdf.tar.Z
+
+	L-DEO GMT extensions for underway data
+	- available from L-DEO via anonymous ftp to
+	  lamont.ldgo.columbia.edu
+	- compressed tar file cdf.tar.Z
+
+	PERL v 4.0r19 or later
+	- available on CD as part of the O'Rielly "Unix Power Tools
+	  book.
+	- available via anonymous ftp to 
+	  ftp.uu.net
+	- compressed tar file perl-4.0.19.tar.Z in directory gnu
+
+Installing MB-System:
+--------------------
+	The user will need to alter some of the Makefiles in the
+MB-System directory structure to reflect the local environment
+before compiling.  In particular, environment variables related
+to the location of GMT libraries and include files (GMTBINDIR, 
+GMTINCDIR, and GMTLIBDIR) must be set correctly in the following 
+Makefiles:
+	src/utilities/Makefile
+	src/macros/Makefile
+	src/gmt/Makefile
+Also, the location of the Levitus annual database file must be
+set in the environment variable LEVITUS in the Makefile
+	src/utilities/Makefile
+if mblevitus is to be used.
 
 "Supported" Platforms:
 ----------------------
@@ -43,16 +100,20 @@ after it is thought to be stable. Since Lamont has a huge collection
 of (mostly SPARC) Suns, its a fair bet that we will be using Suns in
 the forseeable future.
 
-Other required software:
-------------------------
-        You will need some other readily available code to use
-MB-System fully.  MB-System uses the GMT-2 system for lots of its
-graphics and GMT-2 requires NetCDF. Some of the MB-System utilities
-(macros) are written in in perl. If you don't have perl the trival way
-to get it is buy a copy of the O'Rielly "Unix Power Tools" book and
-install it from the CD-ROM. Alternatively, it is freely available via
-anonymous ftp from most archive sites, and it is easy to build and
-install.
+PORTING:
+--------
+	We have not made any particular effort to insure that this
+version of MB-System is portable across vaious varients of Unix-based
+operating systems. (NSF elected to provide only about 1/2 of the funds
+we ask for in the first year so portability and enhanced documentation
+in the form of cookbooks haven't happened yet.) Earlier versions were
+compiled and run with minimal effort on SGI 4D/20 under IRIX.
+	Other than the graphial tools, MB-System is not tightly
+coupled to any particular OS. We hope to make future releases portable
+and would be quite pleased to get feedback from porting efforts so
+that we can fold that back into the package. Eventually, we expect
+that the code will be POSIX compliant and we will be able to stay in
+the mainstream of the evolution of GUIs and WIMPS.
 
 Xview/Motif/COSE maddness:
 --------------------------
@@ -72,28 +133,24 @@ experience at your organizaion.
 provided in the 3.2 distribution on Suns (if you can) while the GUI
 builder issue settles out.
 
+"Bugs": 
+------- 
+The programs mbedit and hsvelocitytool should not be made from scratch
+unless the user has access to the development tool Devguide (sold by
+Sun Microsystems or SunSoft?) - an executable (for Sun Sparc) has been
+left in the src/mbedit directory. See further discussion below.
 
-PORTING:
---------
-	We have not made any particular effort to insure that this
-version of MB-System is portable across vaious varients of Unix-based
-operating systems. (NSF elected to provide only about 1/2 of the funds
-we ask for in the first year so portability and enhanced documentation
-in the form of cookbooks haven't happened yet.) Earlier versions were
-compiled and run with minimal effort on SGI 4D/20 under IRIX.
-	Other than the graphial tools, MB-System is not tightly
-coupled to any particular OS. We hope to make future releases portable
-and would be quite pleased to get feedback from porting efforts so
-that we can fold that back into the package. Eventually, we expect
-that the code will be POSIX compliant and we will be able to stay in
-the mainstream of the evolution of GUIs and WIMPS.
+The program mblevitus depends on a 16 MByte data file that is not
+included in the MB-System tarfile.  It is in the 'annual.Z' file which
+is available by anonymous ftp from lamont.ldgo.columbia.edu in the
+swath_data subdirectory.
  
 Contributions:
 --------------
 	We are actively soliciting contributions for inclusion in the
 MB-System . In particular support for additional data formats in the
-mbio.a library such as EM-12, HS-MD, MR-1, etc would helpful. More,
-cleaverer ideas for 'mbclean', etc.
+mbio.a library such as EM-12, HS-MD, MR-1, etc would helpful, as would
+new, clever tools for data manipulation and processing.
 
 Good Luck!!
 
