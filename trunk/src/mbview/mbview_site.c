@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.0 2003-12-02 20:38:32 caress Exp $
+ *    $Id: mbview_site.c,v 5.1 2004-02-24 22:52:28 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:32  caress
+ * Making version number 5.0
+ *
  * Revision 1.2  2003/11/25 01:43:19  caress
  * MBview version generated during EW0310.
  *
@@ -78,7 +81,7 @@ extern char	*mbsystem_library_name;
 Cardinal 	ac = 0;
 Arg      	args[256];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.0 2003-12-02 20:38:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.1 2004-02-24 22:52:28 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -283,9 +286,8 @@ int mbview_addsites(int verbose, int instance,
 	struct mbview_struct *data;
 	double	xgrid, ygrid, zdata;
 	double	xdisplay, ydisplay, zdisplay;
-	int	nfound;
 	int	nadded;
-	int	i, ii, jj, iii, jjj, kkk;
+	int	i;
 
 fprintf(stderr,"Called mbview_addsites:%d\n",instance);
 
@@ -349,47 +351,21 @@ data->nsite_alloc, data->nsite, nsite, data->nsite + nsite);
 	nadded = 0;
 	for (i=0;i<nsite;i++)
 		{
-		/* get site positions in grid and display coordinates */
-		status = mbview_projectfromlonlat(instance,
+		/* get site positions in grid coordinates */
+		status = mbview_projectll2xyzgrid(instance,
 				sitelon[i], sitelat[i], 
-				&xgrid, &ygrid,
-				&xdisplay, &ydisplay);
-				
-		/* get topo from primary grid if needed */
-		if (sitetopo[i] == MBV_DEFAULT_NODATA)
-		    {
-		    nfound = 0;
-		    zdata = 0.0;
-		    ii = (int)((xgrid - data->primary_xmin) / data->primary_dx);
-		    jj = (int)((ygrid - data->primary_ymin) / data->primary_dy);
-		    if (ii >= 0 && ii < data->primary_nx - 1
-			    && jj >= 0 && jj < data->primary_ny - 1)
-			{
-			for (iii=ii;iii<=ii+1;iii++)
-			for (jjj=jj;jjj<=jj+1;jjj++)
-			    {
-			    kkk = iii * data->primary_ny + jjj;
-			    if (data->primary_data[kkk] != data->primary_nodatavalue)
-				{
-				nfound++;
-				zdata += data->primary_data[kkk];
-				}
-			    }
-			}
-		    if (nfound > 0)
-		        zdata /= (double)nfound;
-		    else
-		    	zdata = 0.0;
-		    }
+				&xgrid, &ygrid, &zdata);
 				
 		/* use provided topo */
-		else
+		if (sitetopo[i] != MBV_DEFAULT_NODATA)
 		    {
 		    zdata = sitetopo[i];
 		    }
-		    
-		/* add site */
-		zdisplay = view->zscale * (zdata - view->zorigin);
+
+		/* get site positions in display coordinates */
+		status = mbview_projectll2display(instance,
+				sitelon[i], sitelat[i], zdata,
+				&xdisplay, &ydisplay, &zdisplay);
 
 		/* add the new site */
 		data->sites[data->nsite].point.xgrid = xgrid;

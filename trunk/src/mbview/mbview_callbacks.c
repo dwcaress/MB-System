@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.1 2004-01-06 21:11:04 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.2 2004-02-24 22:52:28 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/01/06 21:11:04  caress
+ * Added pick region capability.
+ *
  * Revision 5.0  2003/12/02 20:38:31  caress
  * Making version number 5.0
  *
@@ -93,7 +96,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.1 2004-01-06 21:11:04 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.2 2004-02-24 22:52:28 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 
@@ -637,6 +640,15 @@ int mbview_reset(int instance)
 		view->plot_recursion = 0;
 		view->plot_done = MB_NO;
 		view->plot_interrupt_allowed = MB_YES;
+		view->work_function_set = MB_NO;
+		view->naction = 0;
+		for (i=0;i<MBV_NUM_ACTIONS;i++)
+			{
+			view->actionsensitive[i] = 0;
+			view->pushButton_action[i] = NULL;
+			}
+
+    		/* drawing variables */
 		view->gl_width = 0;
 		view->gl_height = 0;
 		view->projected = MB_NO;
@@ -656,7 +668,6 @@ int mbview_reset(int instance)
 		view->yorigin = 0.0;
 		view->zorigin = 0.0;
 		view->scale = 0.0;
-		view->zscale = 0.0;
 
 		view->offset2d_x = 0.0;
 		view->offset2d_y = 0.0;
@@ -1078,7 +1089,9 @@ int mbview_setviewcontrols(int verbose, int instance,
 			int	display_mode,
 			int	mouse_mode,
 			int	grid_mode,
-			int	shade_mode,
+			int	primary_shade_mode,
+			int	slope_shade_mode,
+			int	secondary_shade_mode,
 			int	grid_contour_mode,
 			int	site_view_mode,
 			int	route_view_mode,
@@ -1111,7 +1124,7 @@ int mbview_setviewcontrols(int verbose, int instance,
 fprintf(stderr,"Called mbview_setviewcontrols:%d\n",instance);
 
 	/* print starting debug statements */
-	if (verbose >= 2)
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1123,7 +1136,9 @@ fprintf(stderr,"Called mbview_setviewcontrols:%d\n",instance);
 		fprintf(stderr,"dbg2       display_mode:              %d\n", display_mode);
 		fprintf(stderr,"dbg2       mouse_mode:                %d\n", mouse_mode);
 		fprintf(stderr,"dbg2       grid_mode:                 %d\n", grid_mode);
-		fprintf(stderr,"dbg2       shade_mode:                %d\n", shade_mode);
+		fprintf(stderr,"dbg2       primary_shade_mode:        %d\n", primary_shade_mode);
+		fprintf(stderr,"dbg2       slope_shade_mode:          %d\n", slope_shade_mode);
+		fprintf(stderr,"dbg2       secondary_shade_mode:      %d\n", secondary_shade_mode);
 		fprintf(stderr,"dbg2       grid_contour_mode:         %d\n", grid_contour_mode);
 		fprintf(stderr,"dbg2       site_view_mode:            %d\n", site_view_mode);
 		fprintf(stderr,"dbg2       route_view_mode:           %d\n", route_view_mode);
@@ -1154,9 +1169,9 @@ fprintf(stderr,"Called mbview_setviewcontrols:%d\n",instance);
         data->display_mode = display_mode;
         data->mouse_mode = mouse_mode;
         data->grid_mode = grid_mode;
-        data->primary_shade_mode = shade_mode;
-        data->slope_shade_mode = shade_mode;
-        data->secondary_shade_mode = shade_mode;
+        data->primary_shade_mode = primary_shade_mode;
+        data->slope_shade_mode = slope_shade_mode;
+        data->secondary_shade_mode = secondary_shade_mode;
         data->grid_contour_mode = grid_contour_mode;
         data->site_view_mode = site_view_mode;
         data->route_view_mode = route_view_mode;
@@ -1606,6 +1621,8 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_controls, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_colorbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_resolution, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_sitelist, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_projections, args, ac);
 		XtSetValues(view->mb3dview.mbview_cascadeButton_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_move, args, ac);
@@ -1744,6 +1761,15 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		XtSetValues(view->mb3dview.mbview_label_2d_offset, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_view_2d_apply, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_view_2d_dismiss, args, ac);
+		XtSetValues(view->mb3dview.mbview_dialogShell_projection, args, ac);
+		XtSetValues(view->mb3dview.mbview_bulletinBoard_projection, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_displayprojection, args, ac);
+		XtSetValues(view->mb3dview.mbview_radioBox_projection, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_geographic, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_utm, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_spheroid, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_projection, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_projection_dismiss, args, ac);
 		XtSetValues(view->glwmda, args, ac);
 
 		/* set the initialization flag */
@@ -1911,7 +1937,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	i;
+	int	i, j;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -1930,6 +1956,19 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	data = &(view->data);
 	
 	/* set widget sensitivity */
+
+	ac = 0;
+	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+		{
+		XtSetArg(args[ac], XmNsensitive, False); ac++;
+		data->display_mode = MBV_DISPLAY_3D;
+		}
+	else
+		{
+		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_display_2D, args, ac);
+
 	ac = 0;
 	if (data->primary_nxy <= 0 || data->primary_data == NULL)
 		{
@@ -2061,7 +2100,10 @@ fprintf(stderr,"nav_mode:%d\n",data->nav_mode);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_nav, "Pick Nav");
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
-		
+	
+	/* now set action buttons according to current pick states */
+	mbview_action_sensitivity(instance);
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -2071,6 +2113,88 @@ fprintf(stderr,"nav_mode:%d\n",data->nav_mode);
 		fprintf(stderr,"dbg2       error:        %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_action_sensitivity(int instance)
+{
+	/* local variables */
+	char	*function_name = "mbview_action_sensitivity";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	i, j;
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* now set action buttons according to current pick states */
+	for (i=0;i<view->naction;i++)
+		{
+		if (view->pushButton_action[i] != NULL)
+			{
+			ac = 0;
+			XtSetArg(args[ac], XmNsensitive, False);
+			if (view->actionsensitive[i] == MBV_PICKMASK_NONE)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_ONEPOINT
+				&& data->pick_type == MBV_PICK_ONEPOINT)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_TWOPOINT
+				&& data->pick_type == MBV_PICK_TWOPOINT)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_AREA
+				&& data->area_type == MBV_AREA_QUAD)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_REGION
+				&& data->region_type == MBV_REGION_QUAD)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_SITE
+				&& data->site_selected >= 0)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_ROUTE
+				&& data->route_selected >= 0)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVONEPOINT
+				&& data->navpick_type == MBV_PICK_ONEPOINT)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVTWOPOINT
+				&& data->navpick_type == MBV_PICK_TWOPOINT)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVANY)
+				{
+				for (j=0;j<data->nnav;j++)
+					{
+					if (data->navs[j].nselected > 0)
+						XtSetArg(args[ac], XmNsensitive, True);
+					}
+				}
+			ac++;
+			XtSetValues(view->pushButton_action[i], args, ac);
+			}
 		}
 
 	/* return */
@@ -2102,6 +2226,12 @@ int mbview_set_widgets(int verbose, int instance, int *error)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+    
+    	/* check for spheroid projection */
+	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+		{
+		data->display_mode = MBV_DISPLAY_3D;
+		}
 		
 	/* set widgets */
 	set_mbview_display_mode(instance, data->display_mode);
@@ -2143,6 +2273,83 @@ int mbview_set_widgets(int verbose, int instance, int *error)
 		
 	/* set pick annotation */
 	mbview_pick_text(instance);
+
+	/* set projection label */
+	do_mbview_set_projection_label(instance);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_addaction(int verbose, int instance,
+			void	(mbview_action_notify)(Widget, XtPointer, XtPointer),
+			char	*label,
+			int	sensitive,
+			int *error)
+{
+	/* local variables */
+	char	*function_name = "mbview_addaction";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+        Cardinal ac = 0;
+        Arg      args[256];
+        Cardinal cdc = 0;
+        Boolean  argok = False;
+        XmString    tmp0;
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
+		fprintf(stderr,"dbg2       instance:             %d\n",instance);
+		fprintf(stderr,"dbg2       mbview_action_notify: %d\n",mbview_action_notify);
+		fprintf(stderr,"dbg2       label:                %s\n",label);
+		fprintf(stderr,"dbg2       sensitive:            %d\n",sensitive);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+		
+	/* add pushbutton to action menu */
+    	ac = 0;
+        tmp0 = (XmString) BX_CONVERT(view->mb3dview.mbview_pulldownMenu_action, label, 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(view->mb3dview.mbview_pulldownMenu_action, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)instance); ac++;
+        view->pushButton_action[view->naction] = (Widget) XmCreatePushButton(view->mb3dview.mbview_pulldownMenu_action,
+            label,
+            args, 
+            ac);
+	view->actionsensitive[view->naction] = sensitive;
+        XmStringFree((XmString)tmp0);
+        XtManageChild(view->pushButton_action[view->naction]);
+	XtAddCallback(view->pushButton_action[view->naction], XmNactivateCallback, mbview_action_notify, (XtPointer)instance);
+	view->naction++;
+
+	/* now set action buttons according to current pick states */
+	mbview_action_sensitivity(instance);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -3023,7 +3230,12 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    data->exageration = view->exageration_save 
 			    * exp(((double)(view->button_down_y - view->button_move_y)) 
 				    / ((double)data->height));
-		    view->zscale = data->exageration * view->scale;
+		    if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
+			{
+		    	view->zorigin = data->exageration 
+		    			* 0.5 * (data->primary_min 
+							+ data->primary_max);
+			}
 		    if (XtIsManaged(view->mb3dview.mbview_textField_exageration))
 			    {
 			    sprintf(value_text,"%g", data->exageration);
@@ -3340,6 +3552,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	  /* replot in high rez if last draw was low rez */
 	  if (view->lastdrawrez == MBV_REZ_LOW)
 	  	{
+		mbview_action_sensitivity(instance);
 		mbview_plothigh(instance);
 		}
     
@@ -3391,19 +3604,44 @@ do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
     	ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
-if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_dismiss instance:%d\n", instance);
+fprintf(stderr,"\ndo_mbview_dismiss instance:%d\n", instance);
 	
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* hide the widgets for this instance for possible later use */
-	mbview_destroy(mbv_verbose, instance, &error);
+	/* destroy the widgets for this instance  */
+	mbview_destroy(mbv_verbose, instance, MB_YES, &error);
+}
+
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_goaway( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	error = MB_ERROR_NO_ERROR;
+	int	i;
+	
+	/* get instance */
+    	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+fprintf(stderr,"\ndo_mbview_goaway instance:%d\n", instance);
+	
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* destroy the widgets for this instance  */
+	mbview_destroy(mbv_verbose, instance, MB_NO, &error);
 }
 /*------------------------------------------------------------------------------*/
 
-int mbview_destroy(int verbose, int instance, int *error)
+int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 {
 	/* local variables */
 	char	*function_name = "mbview_destroy";
@@ -3421,31 +3659,41 @@ int mbview_destroy(int verbose, int instance, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       instance:        %d\n",instance);
+		fprintf(stderr,"dbg2       destroywidgets:  %d\n",destroywidgets);
 		}
 		
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
 	
-	/* make correct window current for OpenGL */
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
-
-	/* delete old glx_context if it exists */
-	if (view->glx_init == MB_YES)
+	/* handle destruction if not already handled */
+	if (data->active == MB_YES)
+	    {
+	    /* destroy the widgets */
+	    if (destroywidgets == MB_YES)
 		{
-		glXDestroyContext(view->dpy, view->glx_context);
-		view->glx_init = MB_NO;
+		/* delete old glx_context if it exists */
+		if (view->glx_init == MB_YES)
+		    {
+		    /* make correct window current for OpenGL */
+		    GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
+
+		    glXDestroyContext(view->dpy, view->glx_context);
+		    view->glx_init = MB_NO;
+		    }
+
+		/* destroy the topLevelShell and all its children */
+		XtDestroyWidget(view->topLevelShell);
 		}
 
-	/* destroy the widgets */
-	XtDestroyWidget(view->topLevelShell);
-    	view->init = MBV_WINDOW_NULL;
-	mbv_ninstance--;
+	    data->active = MB_NO;
+	    view->init = MBV_WINDOW_NULL;
+	    mbv_ninstance--;
+	    }
 	
 	/* deallocate memory */
 fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
-	data->active = MB_NO;
     	if (status == MB_SUCCESS 
 		&& data->primary_data != NULL)
     	status = mb_free(mbv_verbose, &data->primary_data, error);
@@ -3531,14 +3779,14 @@ fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
 		exit(0);
 		}
 	
+	/* initialize view for next use */
+fprintf(stderr, "Calling mbview_reset() for mbview instance:%d\n", instance);
+	mbview_reset(instance);
+	
 	/* let the calling program know */
 fprintf(stderr, "Calling mbview_dismiss_notify function (%d) for mbview instance:%d\n",
 data->mbview_dismiss_notify, instance);
 	(data->mbview_dismiss_notify)(instance);
-	
-	/* initialize view for next use */
-fprintf(stderr, "Calling mbview_reset() for mbview instance:%d\n", instance);
-	mbview_reset(instance);
 	
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -3578,7 +3826,7 @@ int mbview_quit(int verbose, int *error)
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 		{
 		if (mbviews[i].init == MB_YES)
-			mbview_destroy(verbose, i, error);
+			mbview_destroy(verbose, i, MB_YES, error);
 		}
 	
 	/* print output debug statements */
@@ -5828,6 +6076,12 @@ fprintf(stderr,"do_mbview_3dparmsapply: instance:%d\n", instance);
 	if (dvalue != data->exageration)
 		{
 		data->exageration = dvalue;
+		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
+			{
+			view->zorigin = data->exageration 
+		    			* 0.5 * (data->primary_min 
+							+ data->primary_max);
+			}
 		change = MB_YES;
 		}
 
@@ -6247,7 +6501,6 @@ fprintf(stderr,"do_mbview_reset_view\n");
 	data->modelazimuth3d = 0.0;
 	data->viewelevation3d = 90.0;
 	data->viewazimuth3d = 0.0;
-	view->zscale = data->exageration * view->scale;
 	view->size2d = 1.0;
 	
 	/* rescale grid */
@@ -6621,7 +6874,7 @@ int do_mbview_workfunction(XtPointer client_data)
 			for (k=kstart;k<kend;k++)
 				{
 				if (!(data->primary_stat_z[k/8] & statmask[k%8]))
-					mbview_zscalepoint(view, data, k);
+					mbview_zscalegridpoint(instance, k);
 				}
 			view->zscaledonecount = kend;
 			}
@@ -6669,5 +6922,405 @@ int do_mbview_workfunction(XtPointer client_data)
 	return(status);
 	
 }
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_projection_popup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+fprintf(stderr,"do_mbview_projection_popup: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtManageChild(view->mb3dview.mbview_bulletinBoard_projection);
+
+	/* set values of widgets */
+	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+		{
+	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic, 
+			TRUE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
+			FALSE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
+			FALSE, FALSE);
+		}
+	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED
+		|| data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		{
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic, 
+			FALSE, FALSE);
+	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
+			TRUE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
+			FALSE, FALSE);
+		}
+	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+		{
+	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
+			TRUE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
+			FALSE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
+			FALSE, FALSE);
+		}
+		
+	/* set label */
+	do_mbview_set_projection_label(instance);
+	
+}
+
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_set_projection_label(int instance)
+{
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	projectionid;
+	mb_path	tmptext;
+
+fprintf(stderr,"do_mbview_set_projection_label: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+		
+	/* set projection label */
+	sprintf(value_text,":::t\"Primary Grid Projection:\"");
+	if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+		{
+		strcat(value_text, ":t\"  Geographic\"");
+		}
+	else if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
+		|| data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		{
+		if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid == 32661)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
+				data->secondary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid == 32761)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
+				data->secondary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid >= 32600 && projectionid < 32700)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
+				data->primary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid >= 32700 && projectionid < 32800)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
+				data->primary_grid_projection_id,
+				projectionid - 32700);
+			strcat(value_text, tmptext);
+			}
+		else
+			{
+			sprintf(tmptext,":t\"  Projected: %s\"", data->primary_grid_projection_id);
+			strcat(value_text, tmptext);
+			}
+		}
+	else if (data->primary_grid_projection_mode == MBV_PROJECTION_SPHEROID)
+		{
+		strcat(value_text, ":t\"  Spheroid\"");
+		}
+
+	if (data->secondary_nxy > 0)
+		{
+		strcat(value_text,":t\"Secondary Grid Projection:\"");
+		if (data->secondary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+			{
+			strcat(value_text, ":t\"  Geographic\"");
+			}
+		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED
+			|| data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+			{
+			if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
+				&& projectionid == 32661)
+				{
+				sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
+					data->secondary_grid_projection_id,
+					projectionid - 32600);
+				strcat(value_text, tmptext);
+				}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
+				&& projectionid == 32761)
+				{
+				sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
+					data->secondary_grid_projection_id,
+					projectionid - 32600);
+				strcat(value_text, tmptext);
+				}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
+				&& projectionid >= 32600 && projectionid < 32700)
+				{
+				sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
+					data->secondary_grid_projection_id,
+					projectionid - 32600);
+				strcat(value_text, tmptext);
+				}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
+				&& projectionid >= 32700 && projectionid < 32800)
+				{
+				sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d S\"",
+					data->secondary_grid_projection_id,
+					projectionid - 32700);
+				strcat(value_text, tmptext);
+				}
+			else
+				{
+				sprintf(tmptext,":t\"  Projected: %s\"", data->secondary_grid_projection_id);
+				strcat(value_text, tmptext);
+				}
+			}
+		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_SPHEROID)
+			{
+			strcat(value_text, ":t\"  Spheroid\"");
+			}
+		}
+
+	strcat(value_text,":t\"Display Grid Projection:\"");
+	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+		{
+		strcat(value_text, ":t\"  Geographic\"");
+		}
+	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED
+		|| data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		{
+		if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid == 32661)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
+				data->secondary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid == 32761)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
+				data->secondary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid >= 32600 && projectionid < 32700)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N",
+				data->display_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid >= 32700 && projectionid < 32800)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d S\"",
+				data->display_projection_id,
+				projectionid - 32700);
+			strcat(value_text, tmptext);
+			}
+		else
+			{
+			sprintf(tmptext,":t\"  Projected: %s\"", data->display_projection_id);
+			strcat(value_text, tmptext);
+			}
+		}
+	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+		{
+		strcat(value_text, ":t\"  Spheroid\"");
+		}
+        set_mbview_label_multiline_string(view->mb3dview.mbview_label_projection, value_text);
+	
+}
+
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_projection_popdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_projection_popdown: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_projection);
+}
+
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_display_spheroid( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+    
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+fprintf(stderr,"do_mbview_display_spheroid: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* reproject as spheroid if the togglebutton has been set */
+	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_spheroid))
+		{
+		data->display_projection_mode = MBV_PROJECTION_SPHEROID;
+		view->plot_done = MB_NO;
+		view->projected = MB_NO;
+		
+		/* set label */
+		do_mbview_set_projection_label(instance);
+		
+		/* clear zscale for grid */
+		mbview_zscaleclear(instance);
+
+		/* project and scale data other than the grid */
+		mbview_zscale(instance);
+
+		/* draw */
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_spheroid\n");
+		mbview_plotlowhigh(instance);
+		}
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_display_geographic( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+    
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+fprintf(stderr,"do_mbview_display_geographic: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* reproject as geographic if the togglebutton has been set */
+	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_geographic))
+		{
+		data->display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+		view->plot_done = MB_NO;
+		view->projected = MB_NO;
+		
+		/* set label */
+		do_mbview_set_projection_label(instance);
+		
+		/* clear zscale for grid */
+		mbview_zscaleclear(instance);
+
+		/* project and scale data other than the grid */
+		mbview_zscale(instance);
+
+		/* draw */
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_geographic\n");
+		mbview_plotlowhigh(instance);
+		}
+}
+
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_display_utm( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	projectionid, utmzone;
+	double	reference_lon;
+    
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+fprintf(stderr,"do_mbview_display_utm: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* reproject as utm if the togglebutton has been set */
+	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_utm))
+		{
+		data->display_projection_mode = MBV_PROJECTION_PROJECTED;
+		view->plot_done = MB_NO;
+		view->projected = MB_NO;
+		reference_lon = 0.5 * (data->primary_xmin + data->primary_xmax);
+		if (reference_lon > 180.0)
+			reference_lon -= 360.0;
+		utmzone = (int)(((reference_lon + 183.0)
+				/ 6.0) + 0.5);
+		if (0.5 * (data->primary_ymin + data->primary_ymax) >= 0.0)
+			projectionid = 32600 + utmzone;
+		else
+			projectionid = 32700 + utmzone;
+		sprintf(data->display_projection_id, "epsg%d", projectionid);
+		
+		/* set label */
+		do_mbview_set_projection_label(instance);
+		
+		/* clear zscale for grid */
+		mbview_zscaleclear(instance);
+
+		/* project and scale data other than the grid */
+		mbview_zscale(instance);
+
+		/* draw */
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_utm\n");
+		mbview_plotlowhigh(instance);
+		}
+}
+
+
 
 /*------------------------------------------------------------------------------*/

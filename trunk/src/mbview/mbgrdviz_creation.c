@@ -59,11 +59,11 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 /*
  * Declarations for callbacks and handlers.
  */
+extern void do_mbgrdviz_quit(Widget, XtPointer, XtPointer);
+extern void BxExitCB(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_openfile(Widget, XtPointer, XtPointer);
 extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_fileSelectionBox(Widget, XtPointer, XtPointer);
-extern void do_mbgrdviz_quit(Widget, XtPointer, XtPointer);
-extern void BxExitCB(Widget, XtPointer, XtPointer);
 extern void BxManageCB(Widget, XtPointer, XtPointer);
 
 /*
@@ -122,8 +122,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 257); ac++;
-    XtSetArg(args[ac], XmNy, 196); ac++;
+    XtSetArg(args[ac], XmNx, 299); ac++;
+    XtSetArg(args[ac], XmNy, 85); ac++;
     XtSetArg(args[ac], XmNwidth, 197); ac++;
     XtSetArg(args[ac], XmNheight, 214); ac++;
     mainWindow_mbgrdviz = XmCreateMainWindow(parent,
@@ -179,8 +179,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 262); ac++;
-    XtSetArg(args[ac], XmNy, 225); ac++;
+    XtSetArg(args[ac], XmNx, 304); ac++;
+    XtSetArg(args[ac], XmNy, 114); ac++;
     XtSetArg(args[ac], XmNwidth, 160); ac++;
     XtSetArg(args[ac], XmNheight, 224); ac++;
     pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
@@ -310,8 +310,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 416); ac++;
-    XtSetArg(args[ac], XmNy, 304); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 1); ac++;
     XtSetArg(args[ac], XmNheight, 1); ac++;
     pulldownMenu_opensite = XmCreatePulldownMenu(XtParent(cascadeButton_opensite),
@@ -347,8 +347,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 416); ac++;
-    XtSetArg(args[ac], XmNy, 328); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 1); ac++;
     XtSetArg(args[ac], XmNheight, 1); ac++;
     pulldownMenu_opennav = XmCreatePulldownMenu(XtParent(cascadeButton_opennav),
@@ -384,8 +384,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 416); ac++;
-    XtSetArg(args[ac], XmNy, 352); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 1); ac++;
     XtSetArg(args[ac], XmNheight, 1); ac++;
     pulldownMenu_openswath = XmCreatePulldownMenu(XtParent(cascadeButton_openswath),
@@ -591,8 +591,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 66); ac++;
-    XtSetArg(args[ac], XmNy, 410); ac++;
+    XtSetArg(args[ac], XmNx, 26); ac++;
+    XtSetArg(args[ac], XmNy, 306); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
     XtSetArg(args[ac], XmNheight, 528); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(dialogShell_about,
@@ -830,8 +830,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, True); ac++;
-        XtSetArg(args[ac], XmNx, 83); ac++;
-        XtSetArg(args[ac], XmNy, 440); ac++;
+        XtSetArg(args[ac], XmNx, 57); ac++;
+        XtSetArg(args[ac], XmNy, 319); ac++;
         XtSetArg(args[ac], XmNwidth, 334); ac++;
         XtSetArg(args[ac], XmNheight, 505); ac++;
         fileSelectionBox = XmCreateFileSelectionBox(dialogShell_open,
