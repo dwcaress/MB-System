@@ -46,8 +46,8 @@ object window_mbvelocity : XmMainWindow
 	{
         XmNx = 0;
         XmNy = 0;
-        XmNwidth = 1105;
-        XmNheight = 868;
+        XmNwidth = 1024;
+        XmNheight = 768;
     	};
     	controls 
 	{
@@ -68,7 +68,7 @@ object mb_menubar : XmMenuBar widget
     arguments 
     {
         XmNorientation = XmHORIZONTAL;
-        XmNspacing = 400;
+        XmNspacing = 370;
     };
     controls 
     {
@@ -393,7 +393,7 @@ object button_process_mb : XmCascadeButton widget
     arguments 
     {
         XmNlabelString = compound_string("Process MultiBeam");
-        XmNx = 479;
+        XmNx = 438;
         XmNy = 85;
         XmNwidth = 142;
         XmNheight = 19;
@@ -416,7 +416,7 @@ object button_quit : XmCascadeButton widget
     arguments 
     {
         XmNlabelString = compound_string("Quit");
-        XmNx = 900;
+        XmNx = 800;
         XmNy = 85;
         XmNwidth = 45;
         XmNheight = 19;
@@ -444,8 +444,8 @@ object main_input_board : XmBulletinBoard widget
         XmNresizePolicy = XmRESIZE_GROW;
 	XmNx = 0;
 	XmNy = 30;
-        XmNwidth = 1105;
-        XmNheight = 925;
+        XmNwidth = 1024;
+        XmNheight = 751;
     };
     controls 
     {
@@ -470,7 +470,7 @@ object input_screen : XmBulletinBoard widget
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
         XmNy = 10;
-        XmNwidth = 1095;
+        XmNwidth = 1019;
         XmNheight = 175;
     };
     controls 
@@ -890,7 +890,7 @@ object slider_maxdepth : XmScale widget
         XmNhighlightThickness = 1;
         XmNx = 180;
         XmNy = 0;
-        XmNwidth = 820;
+        XmNwidth = 770;
         XmNheight = 31;
     };
     controls 
@@ -912,7 +912,7 @@ object max_depth_max_label : XmLabel widget
         XmNlabelString = compound_string("13000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 1000;
+        XmNx = 950;
         XmNy = 15;
         XmNwidth = 50;
         XmNheight = 10;
@@ -948,7 +948,7 @@ object slider_velrange : XmScale widget
         XmNhighlightThickness = 1;
         XmNx = 180;
         XmNy = 35;
-        XmNwidth = 820;
+        XmNwidth = 770;
         XmNheight = 31;
     };
     controls 
@@ -970,7 +970,7 @@ object vel_range_max_label : XmLabel widget
         XmNlabelString = compound_string("1000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 1000;
+        XmNx = 950;
         XmNy = 50;
         XmNwidth = 40;
         XmNheight = 10;
@@ -1006,7 +1006,7 @@ object slider_residual_range : XmScale widget
         XmNhighlightThickness = 1;
         XmNx = 180;
         XmNy = 70;
-        XmNwidth = 820;
+        XmNwidth = 770;
         XmNheight = 31;
     };
     controls 
@@ -1028,7 +1028,7 @@ object res_range_max_label : XmLabel widget
         XmNlabelString = compound_string("200");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 1000;
+        XmNx = 950;
         XmNy = 85;
         XmNwidth = 30;
         XmNheight = 10;
@@ -1044,8 +1044,8 @@ object canvas_base : XmDrawingArea widget
         XmNborderWidth = 1;
         XmNx = 2;
         XmNy = 185;
-        XmNwidth = 1099;
-        XmNheight = 650;
+        XmNwidth = 1019;
+        XmNheight = 550;
 	XmNbackground = white;
     };
     controls 
