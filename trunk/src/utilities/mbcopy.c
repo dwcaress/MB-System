@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.11 1999-04-21 05:44:42 caress Exp $
+ *    $Id: mbcopy.c,v 4.12 1999-08-08 04:17:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1999/04/21 05:44:42  caress
+ * Fixed error printing.
+ *
  * Revision 4.10  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -94,6 +97,15 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
+#include "../../include/mbsys_xse.h"
+#include "../../include/mbsys_elacmk2.h"
+
+/* defines for special copying routines */
+#define	MBCOPY_PARTIAL		0
+#define	MBCOPY_FULL		1
+#define	MBCOPY_ELACMK2_TO_XSE	2
+#define	MBCOPY_XSE_TO_ELACMK2	3
 
 /*--------------------------------------------------------------------*/
 
@@ -102,7 +114,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.11 1999-04-21 05:44:42 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 4.12 1999-08-08 04:17:40 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -149,7 +161,10 @@ char **argv;
 	char	*ombio_ptr = NULL;
 
 	/* MBIO read and write values */
-	char	*store_ptr;
+	struct mb_io_struct *omb_io_ptr;
+	struct mb_io_struct *imb_io_ptr;
+	char	*istore_ptr;
+	char	*ostore_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -186,7 +201,7 @@ char **argv;
 	int	insertcomments = MB_NO;
 	char	commentfile[256];
 	int	stripcomments = MB_NO;
-	int	fullcopy = MB_NO;
+	int	copymode = MBCOPY_PARTIAL;
 	int	use_sleep = MB_NO;
 	
 	/* sleep variable */
@@ -410,9 +425,17 @@ char **argv;
 	if (pings == 1 
 		&& mb_system_table[iformat_num] != MB_SYS_NONE 
 		&& mb_system_table[iformat_num] == mb_system_table[oformat_num])
-		fullcopy = MB_YES;
+		copymode = MBCOPY_FULL;
+	else if (pings == 1 
+		&& mb_system_table[iformat_num] == MB_SYS_ELACMK2 
+		&& mb_system_table[oformat_num] == MB_SYS_XSE)
+		copymode = MBCOPY_ELACMK2_TO_XSE;
+	else if (pings == 1 
+		&& mb_system_table[iformat_num] == MB_SYS_XSE 
+		&& mb_system_table[oformat_num] == MB_SYS_ELACMK2)
+		copymode = MBCOPY_XSE_TO_ELACMK2;
 	else
-		fullcopy = MB_NO;
+		copymode = MBCOPY_PARTIAL;
 
 	/* print debug statements */
 	if (verbose >= 2)
@@ -423,10 +446,10 @@ char **argv;
 		fprintf(stderr,"dbg2       iformat:       %d\n",iformat);
 		fprintf(stderr,"dbg2       oformat:       %d\n",oformat);
 		fprintf(stderr,"dbg2       isystem:       %d\n",
-			mb_system_table[iformat]);
+			mb_system_table[iformat_num]);
 		fprintf(stderr,"dbg2       osystem:       %d\n",
-			mb_system_table[oformat]);
-		fprintf(stderr,"dbg2       fullcopy:      %d\n",fullcopy);
+			mb_system_table[oformat_num]);
+		fprintf(stderr,"dbg2       copymode:      %d\n",copymode);
 			}
 
 	/* initialize reading the input swath sonar file */
@@ -443,6 +466,7 @@ char **argv;
 			program_name);
 		exit(error);
 		}
+	imb_io_ptr = (struct mb_io_struct *) imbio_ptr; 
 
 	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
@@ -456,6 +480,7 @@ char **argv;
 			program_name);
 		exit(error);
 		}
+	omb_io_ptr = (struct mb_io_struct *) ombio_ptr; 
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,ibeams_bath*sizeof(char),&ibeamflag,&error);
@@ -653,8 +678,8 @@ char **argv;
 		/* read some data */
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
-		if (fullcopy == MB_YES)
-			status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
+		if (copymode != MBCOPY_PARTIAL)
+			status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&nbath,&namp,&nss,
@@ -681,7 +706,7 @@ char **argv;
 			icomment++;
 
 		/* check numbers of input and output beams */
-		if (fullcopy == MB_NO
+		if (copymode == MBCOPY_PARTIAL
 			&& kind == MB_DATA_DATA
 			&& error == MB_ERROR_NO_ERROR
 			&& nbath != ibeams_bath)
@@ -692,7 +717,7 @@ char **argv;
 			setup_transfer_rules(verbose,ibeams_bath,obeams_bath,
 				&istart_bath,&iend_bath,&offset_bath,&error);
 			}
-		if (fullcopy == MB_NO
+		if (copymode == MBCOPY_PARTIAL
 			&& kind == MB_DATA_DATA
 			&& error == MB_ERROR_NO_ERROR
 			&& namp != ibeams_amp)
@@ -703,7 +728,7 @@ char **argv;
 			setup_transfer_rules(verbose,ibeams_amp,obeams_amp,
 				&istart_amp,&iend_amp,&offset_amp,&error);
 			}
-		if (fullcopy == MB_NO
+		if (copymode == MBCOPY_PARTIAL
 			&& kind == MB_DATA_DATA
 			&& error == MB_ERROR_NO_ERROR
 			&& nss != ipixels_ss)
@@ -775,7 +800,7 @@ char **argv;
 			}
 
 		/* process some data */
-		if (fullcopy == MB_NO
+		if (copymode == MBCOPY_PARTIAL
 			&& kind == MB_DATA_DATA
 			&& error == MB_ERROR_NO_ERROR)
 			{
@@ -839,14 +864,37 @@ char **argv;
 				ossalongtrack[j] = 0.0;
 				}
 			}
+			
+		/* handle special full translation cases */
+		if (copymode == MBCOPY_FULL
+			&& error == MB_ERROR_NO_ERROR)
+			{
+			ostore_ptr = istore_ptr;
+			}
+		else if (copymode == MBCOPY_ELACMK2_TO_XSE
+			&& error == MB_ERROR_NO_ERROR)
+			{
+			ostore_ptr = omb_io_ptr->store_data;
+			imb_io_ptr->new_kind = kind;
+			status = mbcopy_elacmk2_to_xse(verbose, 
+				    istore_ptr, ostore_ptr, &error);
+			}
+		else if (copymode == MBCOPY_XSE_TO_ELACMK2
+			&& error == MB_ERROR_NO_ERROR)
+			{
+			ostore_ptr = omb_io_ptr->store_data;
+			imb_io_ptr->new_kind = kind;
+			status = mbcopy_xse_to_elacmk2(verbose, 
+				    istore_ptr, ostore_ptr, &error);
+			}
 
 		/* write some data */
 		if ((error == MB_ERROR_NO_ERROR && kind != MB_DATA_COMMENT)
 			|| (kind == MB_DATA_COMMENT && stripcomments == MB_NO))
 			{
-			if (fullcopy == MB_YES)
+			if (copymode != MBCOPY_PARTIAL)
 				status = mb_put_all(verbose,ombio_ptr,
-					store_ptr,MB_NO,kind,
+					ostore_ptr,MB_NO,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					obeams_bath,obeams_amp,opixels_ss,
@@ -873,7 +921,7 @@ char **argv;
 			else
 				{
 				mb_error(verbose,error,&message);
-				if (fullcopy == MB_YES)
+				if (copymode != MBCOPY_PARTIAL)
 				    fprintf(stderr,"\nMBIO Error returned from function <mb_put_all>:\n%s\n",message);
 				else
 				    fprintf(stderr,"\nMBIO Error returned from function <mb_put>:\n%s\n",message);
@@ -986,6 +1034,431 @@ int	*error;
 		fprintf(stderr,"dbg2       istart:     %d\n",*istart);
 		fprintf(stderr,"dbg2       iend:       %d\n",*iend);
 		fprintf(stderr,"dbg2       offset:     %d\n",*offset);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbcopy_elacmk2_to_xse(verbose, istore, ostore, error)
+int	verbose;
+struct mbsys_elacmk2_struct *istore;
+struct mbsys_xse_struct *ostore;
+int	*error;
+{
+	char	*function_name = "mbcopy_elacmk2_to_xse";
+	int	status = MB_SUCCESS;
+	double	time_d;
+	int	time_i[7];
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBCOPY function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       istore:     %d\n",istore);
+		fprintf(stderr,"dbg2       ostore:     %d\n",ostore);
+		}
+
+	/* copy the data  */
+	if (istore != NULL && ostore != NULL && istore != ostore)
+		{
+		/* type of data record */
+		ostore->kind = istore->kind;  /* Survey, nav, Comment */
+		
+		/* parameter (ship frames) */
+		ostore->par_source = 0;		/* sensor id */
+		mb_fix_y2k(verbose, istore->par_year, &time_i[0]);
+		time_i[1] = istore->par_month;
+		time_i[2] = istore->par_day;
+		time_i[3] = istore->par_hour;
+		time_i[4] = istore->par_minute;
+		time_i[5] = istore->par_second;
+		time_i[6] = 10000*istore->par_hundredth_sec 
+			+ 100*istore->par_thousandth_sec;
+		mb_get_time(verbose,time_i,&time_d);
+		ostore->par_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
+		ostore->par_usec = (time_d - ((int) time_d)) * 1000000;		/* microseconds */
+		ostore->par_roll_bias = DTR * 0.01 * istore->roll_offset;		/* radians */
+		ostore->par_pitch_bias = DTR * 0.01 * istore->pitch_offset;		/* radians */
+		ostore->par_heading_bias = DTR * 0.01 * istore->heading_offset;	/* radians */
+		ostore->par_time_delay = 0.01 * istore->time_delay;		/* nav time lag, seconds */
+		ostore->par_trans_x_port = 0.01 * istore->transducer_port_x;	/* port transducer x position, meters */
+		ostore->par_trans_y_port = 0.01 * istore->transducer_port_y;	/* port transducer y position, meters */
+		ostore->par_trans_z_port = 0.01 * istore->transducer_port_depth;	/* port transducer z position, meters */
+		ostore->par_trans_x_stbd = 0.01 * istore->transducer_starboard_x;	/* starboard transducer x position, meters */
+		ostore->par_trans_y_stbd = 0.01 * istore->transducer_starboard_y;	/* starboard transducer y position, meters */
+		ostore->par_trans_z_stbd = 0.01 * istore->transducer_starboard_depth;	/* starboard transducer z position, meters */
+		ostore->par_trans_err_port = 0.01 * istore->transducer_port_error;	/* port transducer rotation in roll direction, radians */
+		ostore->par_trans_err_stbd = 0.01 * istore->transducer_starboard_error;	/* starboard transducer rotation in roll direction, radians */
+		ostore->par_nav_x = 0.01 * istore->antenna_x;		/* navigation antenna x position, meters */
+		ostore->par_nav_y = 0.01 * istore->antenna_y;		/* navigation antenna y position, meters */
+		ostore->par_nav_z = 0.01 * istore->antenna_height;		/* navigation antenna z position, meters */
+		ostore->par_hrp_x = 0.01 * istore->vru_x;		/* motion sensor x position, meters */
+		ostore->par_hrp_y = 0.01 * istore->vru_y;		/* motion sensor y position, meters */
+		ostore->par_hrp_z = 0.01 * istore->vru_height;		/* motion sensor z position, meters */
+	
+		/* svp (sound velocity frames) */
+		ostore->svp_source = 0;		/* sensor id */
+		mb_fix_y2k(verbose, istore->svp_year, &time_i[0]);
+		time_i[1] = istore->svp_month;
+		time_i[2] = istore->svp_day;
+		time_i[3] = istore->svp_hour;
+		time_i[4] = istore->svp_minute;
+		time_i[5] = istore->svp_second;
+		time_i[6] = 10000*istore->svp_hundredth_sec 
+			+ 100*istore->svp_thousandth_sec;
+		mb_get_time(verbose,time_i,&time_d);
+		ostore->svp_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
+		ostore->svp_usec = (time_d - ((int) time_d)) * 1000000;		/* microseconds */
+		ostore->svp_nsvp = istore->svp_num;		/* number of depth values */
+		ostore->svp_nctd = 0;		/* number of ctd values */
+		ostore->svp_ssv = istore->sound_vel;				/* m/s */
+		for (i=0;i<ostore->svp_nsvp;i++)
+		    {
+		    ostore->svp_depth[i] = 0.1 * istore->svp_depth[i];		/* m */
+		    ostore->svp_velocity[i] = 0.1 * istore->svp_vel[i];	/* m/s */
+		    ostore->svp_conductivity[i] = 0.0;	/* mmho/cm */
+		    ostore->svp_salinity[i] = 0.0;	/* o/oo */
+		    ostore->svp_temperature[i] = 0.0;	/* degree celcius */
+		    ostore->svp_pressure[i] = 0.0;	/* bar */
+		    }
+	
+		/* position (navigation frames) */
+		ostore->nav_source = 0;		/* sensor id */
+		mb_fix_y2k(verbose, istore->pos_year, &time_i[0]);
+		time_i[1] = istore->pos_month;
+		time_i[2] = istore->pos_day;
+		time_i[3] = istore->pos_hour;
+		time_i[4] = istore->pos_minute;
+		time_i[5] = istore->pos_second;
+		time_i[6] = 10000*istore->pos_hundredth_sec 
+			+ 100*istore->pos_thousandth_sec;
+		mb_get_time(verbose,time_i,&time_d);
+		ostore->nav_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
+		ostore->nav_usec = (time_d - ((int) time_d)) * 1000000;		/* microseconds */
+		ostore->nav_quality = 0;
+		ostore->nav_status = 0;
+		ostore->nav_description_len = 0;
+		for (i=0;i<MBSYS_XSE_DESCRIPTION_LENGTH;i++)
+		    ostore->nav_description[i] = 0;
+		ostore->nav_x = DTR * 0.00000009 * istore->pos_longitude;			/* eastings (m) or 
+						    longitude (radians) */
+		ostore->nav_y = DTR * 0.00000009 * istore->pos_latitude;			/* northings (m) or 
+						    latitude (radians) */
+		ostore->nav_z = 0.0;			/* height (m) or 
+						    ellipsoidal height (m) */
+		ostore->nav_speed_ground = 0.0;	/* m/s */
+		ostore->nav_course_ground = DTR * 0.01 * istore->heading;	/* radians */
+		ostore->nav_speed_water = 0.0;	/* m/s */
+		ostore->nav_course_water = 0.0;	/* radians */
+		
+		/* survey depth (multibeam frames) */
+		if (ostore->kind == MB_DATA_DATA)
+		    {
+		    ostore->mul_frame = MB_YES;	/* boolean flag - multibeam frame read */
+		    ostore->mul_group_beam = MB_NO;	/* boolean flag - beam group read */
+		    ostore->mul_group_tt = MB_YES;	/* boolean flag - tt group read */
+		    ostore->mul_group_quality = MB_YES;/* boolean flag - quality group read */
+		    ostore->mul_group_amp = MB_YES;	/* boolean flag - amp group read */
+		    ostore->mul_group_delay = MB_YES;	/* boolean flag - delay group read */
+		    ostore->mul_group_lateral = MB_YES;/* boolean flag - lateral group read */
+		    ostore->mul_group_along = MB_YES;	/* boolean flag - along group read */
+		    ostore->mul_group_depth = MB_YES;	/* boolean flag - depth group read */
+		    ostore->mul_group_angle = MB_YES;	/* boolean flag - angle group read */
+		    ostore->mul_group_heave = MB_YES;	/* boolean flag - heave group read */
+		    ostore->mul_group_roll = MB_YES;	/* boolean flag - roll group read */
+		    ostore->mul_group_pitch = MB_YES;	/* boolean flag - pitch group read */
+		    }
+		else
+		    {
+		    ostore->mul_frame = MB_NO;	/* boolean flag - multibeam frame read */
+		    ostore->mul_group_beam = MB_NO;	/* boolean flag - beam group read */
+		    ostore->mul_group_tt = MB_NO;	/* boolean flag - tt group read */
+		    ostore->mul_group_quality = MB_NO;/* boolean flag - quality group read */
+		    ostore->mul_group_amp = MB_NO;	/* boolean flag - amp group read */
+		    ostore->mul_group_delay = MB_NO;	/* boolean flag - delay group read */
+		    ostore->mul_group_lateral = MB_NO;/* boolean flag - lateral group read */
+		    ostore->mul_group_along = MB_NO;	/* boolean flag - along group read */
+		    ostore->mul_group_depth = MB_NO;	/* boolean flag - depth group read */
+		    ostore->mul_group_angle = MB_NO;	/* boolean flag - angle group read */
+		    ostore->mul_group_heave = MB_NO;	/* boolean flag - heave group read */
+		    ostore->mul_group_roll = MB_NO;	/* boolean flag - roll group read */
+		    ostore->mul_group_pitch = MB_NO;	/* boolean flag - pitch group read */
+		    }
+		ostore->mul_source = 0;		/* sensor id */
+		mb_fix_y2k(verbose, istore->pos_year, &time_i[0]);
+		time_i[1] = istore->month;
+		time_i[2] = istore->day;
+		time_i[3] = istore->hour;
+		time_i[4] = istore->minute;
+		time_i[5] = istore->second;
+		time_i[6] = 10000*istore->hundredth_sec 
+			+ 100*istore->thousandth_sec;
+		mb_get_time(verbose,time_i,&time_d);
+		ostore->mul_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
+		ostore->mul_usec = (time_d - ((int) time_d)) * 1000000;		/* microseconds */
+		ostore->mul_x = istore->longitude;		/* interpolated longitude in degrees */
+		ostore->mul_y = istore->latitude;		/* interpolated latitude in degrees */
+		ostore->mul_ping = istore->ping_num;		/* ping number */
+		ostore->mul_frequency = 0.0;	/* transducer frequency (Hz) */
+		ostore->mul_pulse = istore->pulse_length;		/* transmit pulse length (sec) */
+		ostore->mul_power = istore->source_power;		/* transmit power (dB) */
+		ostore->mul_bandwidth = 0.0;	/* receive bandwidth (Hz) */
+		ostore->mul_sample = 0.0;		/* receive sample interval (sec) */
+		ostore->mul_swath = 0.0;		/* swath width (radians) */
+		ostore->mul_num_beams = istore->beams_bath;	/* number of beams */
+		for (i=0;i<ostore->mul_num_beams;i++)
+		    {
+		    j = istore->beams_bath - i - 1;
+		    ostore->beams[i].tt = 0.0001 * istore->beams[j].tt;
+		    ostore->beams[i].delay = 0.0005 * istore->beams[j].time_offset;
+		    ostore->beams[i].lateral = 0.01 * istore->beams[j].bath_acrosstrack;
+		    ostore->beams[i].along = 0.01 * istore->beams[j].bath_alongtrack;
+		    ostore->beams[i].depth = 0.01 * istore->beams[j].bath;
+		    ostore->beams[i].angle = DTR * 0.005 * istore->beams[j].angle;
+		    ostore->beams[i].heave = 0.001 * istore->beams[j].heave;
+		    ostore->beams[i].roll = DTR * 0.005 * istore->beams[j].roll;
+		    ostore->beams[i].pitch = DTR * 0.005 * istore->beams[j].pitch;
+		    ostore->beams[i].beam = i + 1;
+		    ostore->beams[i].quality = istore->beams[j].quality;
+		    ostore->beams[i].amplitude = istore->beams[j].amplitude;		    
+		    }
+		
+		/* survey sidescan (sidescan frames) */
+		ostore->sid_frame = MB_NO;	/* boolean flag - sidescan frame read */
+		ostore->sid_source = 0;		/* sensor id */
+		ostore->sid_sec = 0;		/* sec since 1/1/1901 00:00 */
+		ostore->sid_usec = 0;		/* microseconds */
+		ostore->sid_ping = 0;		/* ping number */
+		ostore->sid_frequency = 0.0;		/* transducer frequency (Hz) */
+		ostore->sid_pulse = 0.0;		/* transmit pulse length (sec) */
+		ostore->sid_power = 0.0;		/* transmit power (dB) */
+		ostore->sid_bandwidth = 0.0;		/* receive bandwidth (Hz) */
+		ostore->sid_sample = 0.0;		/* receive sample interval (sec) */
+		ostore->sid_bin_size = 0;		/* bin size in mm */
+		ostore->sid_offset = 0;		/* lateral offset in mm */
+		ostore->sid_num_pixels = 0;		/* number of pixels */
+		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
+		    ostore->ss[i] = 0; /* sidescan amplitude in dB */
+	
+		/* comment */
+		for (i=0;i<MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH);i++)
+			ostore->comment[i] = istore->comment[i];
+	
+		/* unsupported frame */
+		ostore->rawsize = 0;
+		for (i=0;i<MBSYS_XSE_BUFFER_SIZE;i++)
+		    ostore->raw[i] = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBCOPY function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbcopy_xse_to_elacmk2(verbose, istore, ostore, error)
+int	verbose;
+struct mbsys_xse_struct *istore;
+struct mbsys_elacmk2_struct *ostore;
+int	*error;
+{
+	char	*function_name = "mbcopy_xse_to_elacmk2";
+	int	status = MB_SUCCESS;
+	double	time_d;
+	int	time_i[7];
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBCOPY function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       istore:     %d\n",istore);
+		fprintf(stderr,"dbg2       ostore:     %d\n",ostore);
+		fprintf(stderr,"dbg2       kind:       %d\n",istore->kind);
+		}
+
+	/* copy the data  */
+	if (istore != NULL && ostore != NULL && istore != ostore)
+		{
+		/* type of data record */
+		ostore->kind = istore->kind;
+		ostore->sonar = MBSYS_ELACMK2_UNKNOWN;
+	
+		/* parameter telegram */
+		time_d = istore->par_sec 
+			    - MBSYS_XSE_TIME_OFFSET
+			    + 0.000001 * istore->par_usec;
+		mb_get_date(verbose,time_d,time_i);
+		mb_unfix_y2k(verbose, time_i[0], &ostore->par_year);
+		ostore->par_month = time_i[1];
+		ostore->par_day = time_i[2];
+		ostore->par_hour = time_i[3];
+		ostore->par_minute = time_i[4];
+		ostore->par_second = time_i[5];
+		ostore->par_hundredth_sec = time_i[6]/10000;
+		ostore->par_thousandth_sec 
+			= (time_i[6] 
+			- 10000 * ostore->par_hundredth_sec)/100;
+		ostore->roll_offset = RTD * 100 * istore->par_roll_bias;		/* roll offset (degrees) */
+		ostore->pitch_offset = RTD * 100 * istore->par_pitch_bias;	/* pitch offset (degrees) */
+		ostore->heading_offset = RTD * 100 * istore->par_heading_bias;	/* heading offset (degrees) */
+		ostore->time_delay = 100 * istore->par_time_delay;		/* positioning system delay (sec) */
+		ostore->transducer_port_height = 0;
+		ostore->transducer_starboard_height = 0;
+		ostore->transducer_port_depth = 200 * istore->par_trans_z_port;
+		ostore->transducer_starboard_depth = 200 * istore->par_trans_z_stbd;
+		ostore->transducer_port_x = 200 * istore->par_trans_x_port;
+		ostore->transducer_starboard_x = 200 * istore->par_trans_x_port;
+		ostore->transducer_port_y = 200 * istore->par_trans_x_port;
+		ostore->transducer_starboard_y = 200 * istore->par_trans_x_port;
+		ostore->transducer_port_error = 200 * RTD * istore->par_trans_err_port;
+		ostore->transducer_starboard_error = 200 * RTD * istore->par_trans_err_stbd;
+		ostore->antenna_height = 200 * istore->par_nav_z;
+		ostore->antenna_x = 200 * istore->par_nav_x;
+		ostore->antenna_y = 200 * istore->par_nav_y;
+		ostore->vru_height = 200 * istore->par_hrp_z;
+		ostore->vru_x = 200 * istore->par_hrp_x;
+		ostore->vru_y =200 * istore->par_hrp_y;
+		ostore->line_number = 0;
+		ostore->start_or_stop = 0;
+		ostore->transducer_serial_number = 0;
+		for (i=0;i<MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH);i++)
+			ostore->comment[i] = istore->comment[i];
+	
+		/* position (position telegrams) */
+		time_d = istore->nav_sec 
+			    - MBSYS_XSE_TIME_OFFSET
+			    + 0.000001 * istore->nav_usec;
+		mb_get_date(verbose,time_d,time_i);
+		mb_unfix_y2k(verbose, time_i[0], &ostore->pos_year);
+		ostore->pos_month = time_i[1];
+		ostore->pos_day = time_i[2];
+		ostore->pos_hour = time_i[3];
+		ostore->pos_minute = time_i[4];
+		ostore->pos_second = time_i[5];
+		ostore->pos_hundredth_sec = time_i[6]/10000;
+		ostore->pos_thousandth_sec 
+			= (time_i[6] 
+			- 10000 * ostore->pos_hundredth_sec)/100;
+		ostore->pos_latitude = RTD * istore->nav_y / 0.00000009;
+		ostore->pos_longitude = RTD * istore->nav_x / 0.00000009;
+		ostore->utm_northing = 0;
+		ostore->utm_easting = 0;
+		ostore->utm_zone_lon = 0;
+		ostore->utm_zone = 0;
+		ostore->hemisphere = 0;
+		ostore->ellipsoid = 0;
+		ostore->pos_spare = 0;
+		ostore->semi_major_axis = 0;
+		ostore->other_quality = 0;
+	
+		/* sound velocity profile */
+		time_d = istore->svp_sec 
+			    - MBSYS_XSE_TIME_OFFSET
+			    + 0.000001 * istore->svp_usec;
+		mb_get_date(verbose,time_d,time_i);
+		mb_unfix_y2k(verbose, time_i[0], &ostore->svp_year);
+		ostore->svp_month = time_i[1];
+		ostore->svp_day = time_i[2];
+		ostore->svp_hour = time_i[3];
+		ostore->svp_minute = time_i[4];
+		ostore->svp_second = time_i[5];
+		ostore->svp_hundredth_sec = time_i[6]/10000;
+		ostore->svp_thousandth_sec 
+			= (time_i[6] 
+			- 10000 * ostore->svp_hundredth_sec)/100;
+		ostore->svp_num = istore->svp_nsvp;
+		for (i=0;i<500;i++)
+			{
+			ostore->svp_depth[i] = 10 * istore->svp_depth[i]; /* 0.1 meters */
+			ostore->svp_vel[i] = 10 * istore->svp_velocity[i];	/* 0.1 meters/sec */
+			}
+	
+		/* depth telegram */
+		time_d = istore->mul_sec 
+			    - MBSYS_XSE_TIME_OFFSET
+			    + 0.000001 * istore->mul_usec;
+		mb_get_date(verbose,time_d,time_i);
+		mb_unfix_y2k(verbose, time_i[0], &ostore->year);
+		ostore->month = time_i[1];
+		ostore->day = time_i[2];
+		ostore->hour = time_i[3];
+		ostore->minute = time_i[4];
+		ostore->second = time_i[5];
+		ostore->hundredth_sec = time_i[6]/10000;
+		ostore->thousandth_sec 
+			= (time_i[6] 
+			- 10000 * ostore->hundredth_sec)/100;
+		ostore->longitude = istore->mul_x;
+		ostore->latitude = istore->mul_y;
+		ostore->ping_num = istore->mul_ping;
+		ostore->sound_vel = 10 * istore->svp_ssv;
+		ostore->heading = 100 * RTD * istore->nav_course_ground;
+		ostore->pulse_length = istore->mul_pulse;
+		ostore->mode = 0;
+		ostore->source_power = istore->mul_power;
+		ostore->receiver_gain_stbd = 0;
+		ostore->receiver_gain_port = 0;
+		ostore->reserved = 0;
+		ostore->beams_bath = 0;
+		for (i=0;i<MBSYS_ELACMK2_MAXBEAMS;i++)
+			{
+			ostore->beams[i].bath = 0;
+			ostore->beams[i].bath_acrosstrack = 0;
+			ostore->beams[i].bath_alongtrack = 0;
+			ostore->beams[i].tt = 0;
+			ostore->beams[i].quality = 0;
+			ostore->beams[i].amplitude = 0;
+			ostore->beams[i].time_offset = 0;
+			ostore->beams[i].heave = 0;
+			ostore->beams[i].roll = 0;
+			ostore->beams[i].pitch = 0;
+			ostore->beams[i].angle = 0;
+			}
+		ostore->beams_bath = istore->beams[istore->mul_num_beams-1].beam;
+		for (i=0;i<istore->mul_num_beams;i++)
+			{
+			j = ostore->beams_bath - istore->beams[i].beam;
+			ostore->beams[j].bath = 100 * istore->beams[i].depth;
+			ostore->beams[j].bath_acrosstrack = -100 * istore->beams[i].lateral;
+			ostore->beams[j].bath_alongtrack = 100 * istore->beams[i].along;
+			ostore->beams[j].tt = 10000 * istore->beams[i].tt;
+			ostore->beams[j].quality = istore->beams[i].quality;
+			ostore->beams[j].amplitude = istore->beams[i].amplitude;
+			ostore->beams[j].time_offset = 10000 * istore->beams[i].delay;
+			ostore->beams[j].heave = 1000 * istore->beams[i].heave;
+			ostore->beams[j].roll = 200 * RTD * istore->beams[i].roll;
+			ostore->beams[j].pitch = 200 * RTD * istore->beams[i].pitch;
+			ostore->beams[j].angle = 200 * istore->beams[i].angle;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBCOPY function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
