@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.6 2001-10-12 21:08:37 caress Exp $
+ *    $Id: mb_read_init.c,v 5.7 2002-01-24 02:30:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/10/12  21:08:37  caress
+ * Added interpolation of attitude data.
+ *
  * Revision 5.5  2001/07/20 00:31:11  caress
  * Release 5.0.beta03
  *
@@ -158,6 +161,10 @@
 #ifdef HPUX
 #include <rpc/rpc.h>
 #endif
+#ifdef DARWIN
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#endif
 #ifdef OTHER
 #include <rpc/xdr.h>
 #endif
@@ -178,7 +185,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.6 2001-10-12 21:08:37 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.7 2002-01-24 02:30:58 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -679,6 +686,17 @@ int mb_read_init(int verbose, char *file,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",*mbio_ptr);
+		fprintf(stderr,"dbg2       ->numfile:  %d\n",mb_io_ptr->numfile);
+		fprintf(stderr,"dbg2       ->file:     %s\n",mb_io_ptr->file);
+		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2) 
+		    fprintf(stderr,"dbg2       ->file2:    %s\n",mb_io_ptr->file2);
+		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3) 
+		    fprintf(stderr,"dbg2       ->file3:    %s\n",mb_io_ptr->file3);
+		fprintf(stderr,"dbg2       ->mbfp:     %d\n",mb_io_ptr->mbfp);
+		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2) 
+		    fprintf(stderr,"dbg2       ->mbfp2:    %d\n",mb_io_ptr->mbfp2);
+		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3) 
+		    fprintf(stderr,"dbg2       ->mbfp3:    %d\n",mb_io_ptr->mbfp3);
 		fprintf(stderr,"dbg2       btime_d:    %f\n",*btime_d);
 		fprintf(stderr,"dbg2       etime_d:    %f\n",*etime_d);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);
