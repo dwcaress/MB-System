@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.14 1999-12-28 00:23:32 caress Exp $
+ *    $Id: mbfilter.c,v 4.15 1999-12-28 00:28:40 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1999/12/28  00:23:32  caress
+ * Fixed bug in calculating data records to hold in buffer.
+ *
  * Revision 4.13  1999/02/04  23:55:08  caress
  * MB-System version 4.6beta7
  *
@@ -151,7 +154,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.14 1999-12-28 00:23:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.15 1999-12-28 00:28:40 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -1352,8 +1355,8 @@ The default input and output streams are stdin and stdout.\n";
 			}
 		else
 			nhold = 0;
-fprintf(stderr, "done:%d jbeg:%d jend:%d nbuff:%d nhold_ping:%d nhold:%d\n", 
-done, jbeg, jend, nbuff, nhold_ping, nhold);
+/*fprintf(stderr, "done:%d jbeg:%d jend:%d nbuff:%d nhold_ping:%d nhold:%d\n", 
+done, jbeg, jend, nbuff, nhold_ping, nhold);*/
 
 		/* reset pings to be dumped */
 		if (ndata > 0)
