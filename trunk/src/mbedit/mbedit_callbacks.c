@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.1 2001-01-22 07:40:13 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.2 2001-06-30 17:39:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:40:13  caress
+ * Version 5.0.0beta01
+ *
  * Revision 5.0  2000/12/01  22:54:35  caress
  * First cut at Version 5.0.
  *
@@ -226,6 +229,7 @@ XColor db_color;
 static int mb_borders[4] =
 	{ 0, 1016, 0, 525 };
 
+void do_load(int save_mode);
 void do_filebutton_on();
 void do_filebutton_off();
 void set_label_string(Widget, String);
@@ -377,6 +381,10 @@ Object %s is not a Shell\n", XtName(widgets[i]));
 void
 do_mbedit_init(int argc, char **argv)
 {
+    struct stat file_status;
+    int	    fstat;
+    int	    save_mode;
+    char    save_file[128];
     int	    i;
     
     /* make sure expose plots are off */
@@ -463,14 +471,49 @@ do_mbedit_init(int argc, char **argv)
 		    NCOLORS, mpixel_values);
     
     /* initialize mbedit proper */
-    status = mbedit_init(argc,argv,&startup_file);
+    status = mbedit_init(argc,argv, &startup_file);
+    
+    /* get startup parameters if needed */
+    if (startup_file == MB_YES)
+	status = mbedit_get_startup(&save_mode, 
+			    input_file, &mformat);
     
     /* set up the widgets */
     do_setup_data();
     
-    /* if a startup file has been specified open it */
-    if (startup_file)
-	    mbedit_startup_file();
+    /* if startup indicated try to open it */
+    if (startup_file == MB_YES)
+	{
+	/* check for edit save file */
+	sprintf(save_file, "%s.esf", input_file);
+	fstat = stat(save_file, &file_status);
+	if (fstat != 0
+	    || (file_status.st_mode & S_IFMT) == S_IFDIR)
+	    {
+	    sprintf(save_file, "%s.mbesf", input_file);
+	    fstat = stat(save_file, &file_status);
+	    }
+	
+	/* if esf file exists deal with it */
+	if (fstat == 0 
+	    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+	    {
+	    /* if save_mode set load data using esf */
+	    if (save_mode == MB_YES)
+		do_load(MB_YES);
+
+	    /* else bring up dialog asking
+		if esf should be used */
+	    else
+		do_checkuseprevious();
+	    }
+	    
+	/* else just try to load the data without an esf */
+	else
+	    {
+	    (void) do_load(MB_NO);
+	    }
+	}
     
     /* finally allow expose plots */
     expose_plot_ok = False;
@@ -992,50 +1035,78 @@ do_y_interval( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_load(int save_mode)
+{    
+    int	    form;
+    
+    /* turn off expose plots */
+    expose_plot_ok = False;
+
+    /* get format, if needed */
+    if (mformat == 0
+	&& (status = mbedit_get_format(input_file, &form)) 
+		== MB_SUCCESS)
+	{
+	mformat = form;
+	}
+
+    /* process input file name */
+    status = mbedit_action_open(input_file, mformat,
+		    save_mode, 
+		    mode_output,
+		    mplot_width, mexager, mx_interval,
+		    my_interval, mplot_size, mshow_flagged, 
+		    &buffer_size, &buffer_size_max, 
+		    &hold_size,
+		    &ndumped, &nloaded, &nbuffer,
+		    &ngood, &icurrent, &mnplot);
+    if (status == 0) XBell(theDisplay,100);
+    
+    /* display data from chosen file */
+    status = mbedit_action_plot(mplot_width, mexager,
+	    mx_interval, my_interval, 
+	    mplot_size, mshow_flagged, 
+	    &nbuffer, &ngood, &icurrent, &mnplot);
+    if (status == 0) XBell(theDisplay,100);
+
+    /* set widget values */
+    do_setup_data();
+    
+    /* turn on expose plots */
+    expose_plot_ok = True;
+
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_load_ok( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmFileSelectionBoxCallbackStruct *acs=(XmFileSelectionBoxCallbackStruct*)call_data;
 
     static  char format_text[40];
 
+    /* if file selected in dialog open it */
     if (selected > 0)
 	    {
 	    /* read the mbio format number from the screen */
 	    get_text_string(textfield_format, format_text);
 	    sscanf(format_text, "%d", &mformat);
 	    
-	    /* turn off expose plots */
-	    expose_plot_ok = False;
-
-	    /* process input file name */
-	    status = mbedit_action_open(input_file, mformat,
-			    use_save_file, 
-			    mode_output,
-			    mplot_width, mexager, mx_interval,
-			    my_interval, mplot_size, mshow_flagged, 
-			    &buffer_size, &buffer_size_max, 
-			    &hold_size,
-			    &ndumped, &nloaded, &nbuffer,
-			    &ngood, &icurrent, &mnplot);
-	    if (status == 0) XBell(theDisplay,100);
-	    
-	    /* display data from chosen file */
-	    status = mbedit_action_plot(mplot_width, mexager,
-		    mx_interval, my_interval, 
-		    mplot_size, mshow_flagged, 
-		    &nbuffer, &ngood, &icurrent, &mnplot);
-	    if (status == 0) XBell(theDisplay,100);
-
-	    /* set widget values */
-	    do_setup_data();
-	    
-	    /* turn on expose plots */
-	    expose_plot_ok = True;
-
+	    /* load the data */
+	    do_load(use_save_file);
 	    }
+    
+    /* else if startup file indicated try to open it */
+    else if (startup_file == MB_YES)
+	    {
+	    /* load the data */
+	    do_load(use_save_file);
+	    }
+
     else
 	    {
-	    fprintf(stderr,"\nno input multibeam file selected\n");
+	    fprintf(stderr,"\nNo input multibeam file selected\n");
 	    }
 }
 
@@ -1085,7 +1156,7 @@ do_load_check( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (fstat == 0 
 		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
 		{
-		XtManageChild(bulletinBoard_editsave);
+		do_checkuseprevious();
 		}
 		
 	    /* else just try to load the data */
@@ -1098,6 +1169,14 @@ do_load_check( Widget w, XtPointer client_data, XtPointer call_data)
 	    {
 	    fprintf(stderr,"\nno input multibeam file selected\n");
 	    }
+}
+
+/*--------------------------------------------------------------------*/
+
+int
+do_checkuseprevious( )
+{
+    XtManageChild(bulletinBoard_editsave);
 }
 
 /*--------------------------------------------------------------------*/

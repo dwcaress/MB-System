@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.0 2001-06-29 22:49:07 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.1 2001-06-30 17:40:14 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	June 25, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/06/29  22:49:07  caress
+ * Added support for HSDS2RAW
+ *
  *
  *
  */
@@ -50,7 +53,7 @@
 int mbsys_surf_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_surf.c,v 5.0 2001-06-29 22:49:07 caress Exp $";
+ static char res_id[]="$Id: mbsys_surf.c,v 5.1 2001-06-30 17:40:14 caress Exp $";
 	char	*function_name = "mbsys_surf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -417,7 +420,7 @@ int mbsys_surf_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		*heading = RTD * store->start_heading;
 
 		/* get speed  */
-		*speed = store->pr_speed;
+		*speed = 3.6 * store->pr_speed;
 
 		/* read distance and depth values into storage arrays */
 		*nbath = store->tt_beam_cnt;
@@ -672,7 +675,7 @@ int mbsys_surf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		store->start_heading = DTR * heading;
 
 		/* get speed  */
-		store->pr_speed = speed;
+		store->pr_speed = speed / 3.6;
 
 		/* read distance and depth values into storage arrays */
 		store->tt_beam_cnt = nbath;
@@ -1027,8 +1030,8 @@ int mbsys_surf_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		*draft = store->tt_draught;
 
 		/* get roll pitch and heave */
-		*roll = store->start_roll;
-		*pitch = store->start_pitch;
+		*roll = RTD * store->start_roll;
+		*pitch = RTD * store->start_pitch;
 		*heave = store->start_heave;
 
 		/* print debug statements */
@@ -1201,8 +1204,8 @@ int mbsys_surf_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		store->tt_draught = draft;
 
 		/* get roll pitch and heave */
-		store->start_roll = roll;
-		store->start_pitch = pitch;
+		store->start_roll = DTR * roll;
+		store->start_pitch = DTR * pitch;
 		store->start_heave = heave;
 		}
 

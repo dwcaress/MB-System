@@ -67,7 +67,7 @@ Set the shade (0\-255) or color
 (r/g/b) [Default is no fill]. To reset no fill,
 use \fIfill\fP = "N".
 For polygons, you may optionally specify 
-\fB\-Gp\fP\fIicon_size/pattern\fP, where 
+\fB-Gp\fP\fIicon_size/pattern\fP, where 
 \fIpattern\fP gives the number of the
 image pattern (1-32) OR the name of a 
 icon-format file.  \fIicon_size\fP sets 

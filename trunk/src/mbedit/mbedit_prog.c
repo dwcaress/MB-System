@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.4 2001-03-22 21:06:55 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.5 2001-06-30 17:39:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/03/22  21:06:55  caress
+ * Trying to make release 5.0.beta0
+ *
  * Revision 5.3  2001/01/23  01:17:34  caress
  * Removed some unused variable declarations.
  *
@@ -260,7 +263,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.4 2001-03-22 21:06:55 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.5 2001-06-30 17:39:31 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -412,6 +415,7 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 	char	*function_name = "mbedit_init";
 	int	status = MB_SUCCESS;
 	int	fileflag = 0;
+	int	form;
 	int	i;
 
 	/* parsing variables */
@@ -579,47 +583,6 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       startup_file: %d\n",*startup_file);
 		fprintf(stderr,"dbg2       error:        %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbedit_startup_file()
-{
-	/* local variables */
-	char	*function_name = "mbedit_startup_file";
-	int	status = MB_SUCCESS;
-	int	i;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		}
-
-	/* open startup file */
-	status = mbedit_action_open(ifile,format,
-			startup_save_mode, output_mode, 
-			plot_width, exager,
-			x_interval, y_interval, plot_size,
-			show_flagged, 
-			&buff_size, &buff_size_max,
-			&holdd_size, 
-			&ndump, &nload, &nbuff,
-			&nbuff, &current_id, &nplot);
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -854,6 +817,49 @@ int mbedit_get_defaults(
 			fprintf(stderr,"dbg2       ttime[%d]:    %d\n",
 				i, ttime_i[i]);
 		fprintf(stderr,"dbg2       outmode:     %d\n",*outmode);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_get_startup(
+		int	*save_mode, 
+		char	*file, 
+		int	*form)
+{
+	/* local variables */
+	char	*function_name = "mbedit_get_startup";
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* get save mode */
+	*save_mode = startup_save_mode;
+
+	/* get file */
+	strcpy(file, ifile);
+
+	/* get format */
+	*form = format;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       save_mode:   %d\n",*save_mode);
+		fprintf(stderr,"dbg2       file:        %s\n",file);
+		fprintf(stderr,"dbg2       format:      %d\n",*form);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
