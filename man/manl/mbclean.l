@@ -136,13 +136,14 @@ Default: \fImin/max\fP = 0.01/0.25.
 .B \-F
 \fIformat\fP
 .br
-Sets the format for the input and output swath sonar data using 
-\fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read or write any swath sonar
+Sets the data format used if the input is read from stdin
+or from a file. If \fIformat\fP < 0, then the input file specified
+with the \fB-I\fP option will actually contain a list of input swath sonar
+data files. This program uses the \fBMBIO\fP library 
+and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page.
-Default: \fIformat\fP = 11.
+is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
 .B \-G
 \fIfraction_low/fraction_high\fP
