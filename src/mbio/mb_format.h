@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.6 2001-07-20 17:00:20 caress Exp $
+ *    $Id: mb_format.h,v 5.7 2001-09-17 23:25:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/20 17:00:20  caress
+ * Added RCS controlled update date and revision string.
+ *
  * Revision 5.5  2001/07/20  00:32:54  caress
  * Release 5.0.beta03
  *
@@ -181,7 +184,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2001-07-20 17:00:20 $ $Revision: 5.6 $";
+static char mb_format_updatedate[] = "$Date: 2001-09-17 23:25:13 $ $Revision: 5.7 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -209,7 +212,7 @@ static char mb_format_updatedate[] = "$Date: 2001-07-20 17:00:20 $ $Revision: 5.
 #define	MB_SYS_SURF		22
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	50
+#define	MB_FORMATS	51
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -310,6 +313,18 @@ static char mb_format_updatedate[] = "$Date: 2001-07-20 17:00:20 $ $Revision: 5.
  					bathymetry,
  					ASCII, read-only,
 					Coastal Oceanographics. */
+#define	MBF_XTFR8101	84	/* Reson SeaBat 8XXX multibeam, 250 beams
+ 					bathymetry,
+ 					binary, read-only,
+					Triton-Elics XTF format. */
+#define	MBF_RESONS8K	85	/* Reson SeaBat 8XXX multibeam, 250 beams
+ 					bathymetry,
+ 					binary, read-only,
+					Reson 6042 format. */
+#define	MBF_SBATPROC	86	/* Reson SeaBat 8XXX multibeam, 250 beams
+ 					bathymetry,
+ 					binary,
+					MBARI processing format. */
 #define	MBF_BCHRTUNB	91	/* Elac BottomChart multibeam, 56 beams
  					bathymetry and amplitude,
  					binary, University of New Brunswick. */
