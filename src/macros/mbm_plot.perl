@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.2 2001-10-10 23:56:01 dcaress Exp $
+#    $Id: mbm_plot.perl,v 5.3 2001-10-11 01:32:11 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.2 2001-10-10 23:56:01 dcaress Exp $
+#   $Id: mbm_plot.perl,v 5.3 2001-10-11 01:32:11 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.2  2001/10/10  23:56:01  dcaress
+# Regrettably, I don't remember what I changed...
+#
 #   Revision 5.1  2001-03-22 13:05:45-08  caress
 #   Trying to make release 5.0.beta0
 #
@@ -891,13 +894,27 @@ if ($format >= 0)
 	}
 else
 	{
-	MBparsedatalist($file_data);
+	# we used to use this perl function
+	# 	MBparsedatalist($file_data);
+	# but now we use the program mbdatalist
+	@mbdatalist = `mbdatalist -F-1 -I$file_data`;
+	while (@mbdatalist)
+		{
+		$line = shift @mbdatalist;
+		if ($line =~ /(\S+)\s+(\S+)/)
+			{
+			($file_mb,$format_mb) = 
+				$line =~ /(\S+)\s+(\S+)/;
+			push(@files_data, $file_mb);
+			push(@formats, $format_mb);
+			}
+		}
 	}
 if ($bounds)
 	{
 	$bounds_info = "-R$bounds";
 	}
-$cnt = -1;
+$cnt = 0;
 foreach $file_mb (@files_data)
 	{
 	# use .inf file if it exists and no time or space bounds applied
@@ -927,7 +944,6 @@ foreach $file_mb (@files_data)
 			{
 			print "Running mbinfo on file $file_mb...\n";
 			}
-		$cnt++;
 		if ($mb_btime)
 			{
 			$time_info = "-B$mb_btime";
@@ -997,6 +1013,7 @@ print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
 		$smin_data = &min($smin_data, $smin_f);
 		$smax_data = &max($smax_data, $smax_f);
 		}
+	$cnt++;
 	}
 
 # use user defined data limits for bathymetry if supplied
