@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -71,7 +74,7 @@
 int mbsys_simrad2_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -362,6 +365,9 @@ int mbsys_simrad2_alloc(int verbose, char *mbio_ptr, char **store_ptr,
 	/* pointer to heading data structure */
 	store->heading = NULL;
 
+	/* pointer to ssv data structure */
+	store->ssv = NULL;
+
 	/* pointer to survey data structure */
 	store->ping = NULL;
 
@@ -386,7 +392,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -534,8 +540,43 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		    ping->png_beamflag[i] = MB_FLAG_NULL;	
 				/* uses standard MB-System beamflags */
 		    }
+		    
+		/* raw beam record */
+		ping->png_raw_read = MB_NO;	
+				/* flag indicating actual reading of rawbeam record */
+		ping->png_nrawbeams = 0;	
+				/* number of raw travel times and angles
+				    - nonzero only if raw beam record read */
+		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
+		    {
+		    ping->png_rawpointangle[i] = 0;
+				/* Raw beam pointing angles in 0.01 degree,
+					positive to port. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+		    ping->png_rawtiltangle[i] = 0;
+				/* Raw transmit tilt angles in 0.01 degree,
+					positive forward. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+		    ping->png_rawrange[i] = 0;
+				/* Ranges as raw two way travel times in time 
+					units defined as one-fourth the inverse 
+					sampling rate. These values have not 
+					been corrected for changes in the
+					heave during the ping cycle. */
+		    ping->png_rawamp[i] = 0;		
+				/* 0.5 dB */
+		    ping->png_rawbeam_num[i] = 0;	
+				/* beam 128 is first beam on 
+				    second head of EM3000D */
+		    }
 	
 		/* sidescan */
+		ping->png_ss_read = MB_NO;	
+				/* flag indicating actual reading of sidescan record */
 		ping->png_max_range = 0;  
 				/* max range of ping in number of samples */
 		ping->png_r_zero = 0;	
@@ -612,7 +653,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -700,7 +741,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -776,6 +817,84 @@ int mbsys_simrad2_heading_alloc(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_simrad2_ssv_alloc(int verbose, 
+			char *mbio_ptr, char *store_ptr, 
+			int *error)
+{
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
+	char	*function_name = "mbsys_simrad2_ssv_alloc";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_ssv_struct *ssv;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* allocate memory for data structure if needed */
+	if (store->ssv == NULL)
+		status = mb_malloc(verbose,
+			sizeof(struct mbsys_simrad2_ssv_struct),
+			&(store->ssv),error);
+			
+	if (status == MB_SUCCESS)
+		{
+
+		/* get data structure pointer */
+		ssv = (struct mbsys_simrad2_ssv_struct *) store->ssv;
+
+		/* initialize everything */
+		ssv->ssv_date = 0;	
+				/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		ssv->ssv_msec = 0;	
+				/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		ssv->ssv_count = 0;	
+				/* sequential counter or input identifier */
+		ssv->ssv_serial = 0;	
+				/* system 1 or system 2 serial number */
+		ssv->ssv_ndata = 0;	
+				/* number of ssv data */
+		for (i=0;i<MBSYS_SIMRAD2_MAXSSV;i++)
+		    {
+		    ssv->ssv_time[i] = 0;
+				/* time since record start (msec) */
+		    ssv->ssv_ssv[i] = 0;
+				/* ssv (0.1 m/s) */
+		    }
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_simrad2_deall(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
@@ -809,6 +928,10 @@ int mbsys_simrad2_deall(int verbose, char *mbio_ptr, char **store_ptr,
 	/* deallocate memory for heading data structure */
 	if (store->heading != NULL)
 		status = mb_free(verbose,&(store->heading),error);
+
+	/* deallocate memory for ssv data structure */
+	if (store->ssv != NULL)
+		status = mb_free(verbose,&(store->ssv),error);
 
 	/* deallocate memory for data structure */
 	status = mb_free(verbose,store_ptr,error);
@@ -1678,6 +1801,7 @@ int mbsys_simrad2_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	double	depthscale, dacrscale;
 	double	bath_best;
 	double	xtrack_min;
+	int	found;
 	int	i, j;
 
 	/* print input debug statements */
@@ -1711,23 +1835,20 @@ int mbsys_simrad2_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 				+ 655.36 * ping->png_offset_multiplier;
 		depthscale = 0.01 * ping->png_depth_res;
 		dacrscale  = 0.01 * ping->png_distance_res;
+		found = MB_NO;
 		bath_best = 0.0;
-		if (ping->png_depth[ping->png_nbeams/2] > 0)
-		    bath_best = depthscale * ping->png_depth[ping->png_nbeams/2];
-		else
+		xtrack_min = 99999999.9;
+		for (i=0;i<ping->png_nbeams;i++)
 		    {
-		    xtrack_min = 99999999.9;
-		    for (i=0;i<ping->png_nbeams;i++)
+		    if (mb_beam_ok(ping->png_beamflag[i])
+			&& fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min)
 			{
-			if (ping->png_quality[i] > 10
-			    && fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min)
-			    {
-			    xtrack_min = fabs(dacrscale * ping->png_acrosstrack[i]);
-			    bath_best = depthscale * ping->png_depth[i];
-			    }
-			}		
-		    }
-		if (bath_best <= 0.0)
+			xtrack_min = fabs(dacrscale * ping->png_acrosstrack[i]);
+			bath_best = depthscale * ping->png_depth[i];
+			found = MB_YES;
+			}
+		    }		
+		if (found == MB_NO)
 		    {
 		    xtrack_min = 99999999.9;
 		    for (i=0;i<ping->png_nbeams;i++)
@@ -1737,10 +1858,14 @@ int mbsys_simrad2_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 			    {
 			    xtrack_min = fabs(dacrscale * ping->png_acrosstrack[i]);
 			    bath_best = depthscale * ping->png_depth[i];
+			    found = MB_YES;
 			    }
 			}		
 		    }
-		*altitude = bath_best;
+		if (found == MB_YES)
+		    *altitude = bath_best - *transducer_depth;
+		else
+		    *altitude = 0.0;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -2407,6 +2532,9 @@ int mbsys_simrad2_copy(int verbose, char *mbio_ptr,
 	struct mbsys_simrad2_heading_struct *heading_store;
 	struct mbsys_simrad2_heading_struct *heading_copy;
 	char	*heading_save;
+	struct mbsys_simrad2_ssv_struct *ssv_store;
+	struct mbsys_simrad2_ssv_struct *ssv_copy;
+	char	*ssv_save;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2477,6 +2605,22 @@ int mbsys_simrad2_copy(int verbose, char *mbio_ptr,
 		/* save pointer value */
 		heading_save = (char *)copy->heading;
 		}
+	
+	/* check if ssv data needs to be copied */
+	if (store->ssv != NULL)
+		{
+		/* make sure a ssv data structure exists to
+			be copied into */
+		if (copy->ssv == NULL)
+			{
+			status = mbsys_simrad2_ssv_alloc(
+					verbose,mbio_ptr,
+					copy_ptr,error);
+			}
+			
+		/* save pointer value */
+		ssv_save = (char *)copy->ssv;
+		}
 
 	/* copy the main structure */
 	*copy = *store;
@@ -2510,6 +2654,15 @@ int mbsys_simrad2_copy(int verbose, char *mbio_ptr,
 		heading_store = (struct mbsys_simrad2_heading_struct *) store->heading;
 		heading_copy = (struct mbsys_simrad2_heading_struct *) copy->heading;
 		*heading_copy = *heading_store;
+		}
+	
+	/* if needed copy the ssv data structure */
+	if (store->ssv != NULL && status == MB_SUCCESS)
+		{
+		copy->ssv = (struct mbsys_simrad2_ssv_struct *) ssv_save;
+		ssv_store = (struct mbsys_simrad2_ssv_struct *) store->ssv;
+		ssv_copy = (struct mbsys_simrad2_ssv_struct *) copy->ssv;
+		*ssv_copy = *ssv_store;
 		}
 
 	/* print output debug statements */

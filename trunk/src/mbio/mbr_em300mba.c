@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.2 2001-03-22 20:45:56 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.3 2001-05-24 23:18:07 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -82,6 +85,9 @@
 
 /* include for byte swapping */
 #include "../../include/mb_swap.h"
+	
+/* turn on debug statements here */
+/* #define MBR_EM300MBA_DEBUG 1 */
 
 /* essential function prototypes */
 int mbr_register_em300mba(int verbose, char *mbio_ptr, 
@@ -130,6 +136,9 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp,
 int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, 
 		struct mbf_em300mba_struct *data, 
 		short sonar, int *error);
+int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, 
+		struct mbf_em300mba_struct *data, 
+		short sonar, int *error);
 int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, 
 		struct mbf_em300mba_struct *data, 
 		short sonar, int *error);
@@ -145,6 +154,9 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, 
 		struct mbf_em300mba_struct *data, 
 		int *match, short sonar, int *error);
+int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, 
+		struct mbf_em300mba_struct *data, 
+		short sonar, int *error);
 int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, 
 		struct mbf_em300mba_struct *data, 
 		short sonar, int *match, int *error);
@@ -161,6 +173,8 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp,
 		struct mbf_em300mba_struct *data, int *error);
 int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, 
 		struct mbf_em300mba_struct *data, int *error);
+int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, 
+		struct mbf_em300mba_struct *data, int *error);
 int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, 
 		struct mbf_em300mba_struct *data, int *error);
 int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, 
@@ -169,13 +183,15 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp,
 		struct mbf_em300mba_struct *data, int *error);
 int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, 
 		struct mbf_em300mba_struct *data, int *error);
+int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, 
+		struct mbf_em300mba_struct *data, int *error);
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, 
 		struct mbf_em300mba_struct *data, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
 	char	*function_name = "mbr_register_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -305,7 +321,7 @@ int mbr_info_em300mba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
 	char	*function_name = "mbr_info_em300mba";
 	int	status = MB_SUCCESS;
 
@@ -374,10 +390,11 @@ int mbr_info_em300mba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300mba(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.3 2001-05-24 23:18:07 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	int	*wrapper;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -406,6 +423,8 @@ int mbr_alm_em300mba(int verbose, char *mbio_ptr, int *error)
 
 	/* initialize everything to zeros */
 	mbr_zero_em300mba(verbose,mb_io_ptr->raw_data,error);
+	wrapper = (int *) &mb_io_ptr->save5;
+	*wrapper = -1;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -905,6 +924,39 @@ int mbr_zero_em300mba(int verbose, char *data_ptr, int *error)
 		    data->png_beamflag[i] = MB_FLAG_NULL;	
 				/* uses standard MB-System beam flags */
 		    }
+		data->png_raw_read = MB_NO;	
+				/* flag indicating actual reading of rawbeam record */
+		data->png_nrawbeams = 0;	
+				/* number of raw travel times and angles
+				    - nonzero only if raw beam record read */
+		for (i=0;i<MBF_EM300MBA_MAXBEAMS;i++)
+		    {
+		    data->png_rawpointangle[i] = 0;
+				/* Raw beam pointing angles in 0.01 degree,
+					positive to port. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+		    data->png_rawtiltangle[i] = 0;
+				/* Raw transmit tilt angles in 0.01 degree,
+					positive forward. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+		    data->png_rawrange[i] = 0;
+				/* Ranges as raw two way travel times in time 
+					units defined as one-fourth the inverse 
+					sampling rate. These values have not 
+					been corrected for changes in the
+					heave during the ping cycle. */
+		    data->png_rawamp[i] = 0;		
+				/* 0.5 dB */
+		    data->png_rawbeam_num[i] = 0;	
+				/* beam 128 is first beam on 
+				    second head of EM3000D */
+		    }
+		data->png_ss_read = MB_NO;	
+				/* flag indicating actual reading of sidescan record */
 		data->png_ss_date = 0;	
 				/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -1507,6 +1559,17 @@ int mbr_rt_em300mba(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			    ping->png_beam_num[i] = data->png_beam_num[i];	
 			    ping->png_beamflag[i] = data->png_beamflag[i];
 			    }
+			ping->png_raw_read = data->png_raw_read;	
+			ping->png_nrawbeams = data->png_nrawbeams;	
+			for (i=0;i<ping->png_nrawbeams;i++)
+			    {
+			    ping->png_rawpointangle[i] = data->png_rawpointangle[i];	
+			    ping->png_rawtiltangle[i] = data->png_rawtiltangle[i];	
+			    ping->png_rawrange[i] = data->png_rawrange[i];	
+			    ping->png_rawamp[i] = data->png_rawamp[i];	
+			    ping->png_rawbeam_num[i] = data->png_rawbeam_num[i];	
+			    }
+			ping->png_ss_read = data->png_ss_read;	
 			ping->png_max_range = data->png_max_range;  
 			ping->png_r_zero = data->png_r_zero;	
 			ping->png_r_zero_corr = data->png_r_zero_corr;
@@ -1861,6 +1924,17 @@ int mbr_wt_em300mba(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			    data->png_beam_num[i] = ping->png_beam_num[i];	
 			    data->png_beamflag[i] = ping->png_beamflag[i];	
 			    }
+			data->png_raw_read = ping->png_raw_read;	
+			data->png_nrawbeams = ping->png_nrawbeams;	
+			for (i=0;i<data->png_nrawbeams;i++)
+			    {
+			    data->png_rawpointangle[i] = ping->png_rawpointangle[i];	
+			    data->png_rawtiltangle[i] = ping->png_rawtiltangle[i];	
+			    data->png_rawrange[i] = ping->png_rawrange[i];	
+			    data->png_rawamp[i] = ping->png_rawamp[i];	
+			    data->png_rawbeam_num[i] = ping->png_rawbeam_num[i];	
+			    }
+			data->png_ss_read = ping->png_ss_read;	
 			data->png_ss_date = ping->png_date;	
 			data->png_ss_msec = ping->png_msec;	
 			data->png_max_range = ping->png_max_range;  
@@ -1923,6 +1997,7 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 	char	*data_ptr;
 	FILE	*mbfp;
 	int	done;
+	int	*wrapper;
 	char	*label;
 	int	*label_save_flag;
 	short	expect;
@@ -1932,15 +2007,12 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 	short	*expect_save;
 	int	*expect_save_flag;
 	short	*first_type_save;
+	short	*typelast;
 	int	match;
 	int	read_len;
+	int	skip = 0;
 	int	i;
 	
-/* #define MBR_EM300MBA_DEBUG 1 */
-#ifdef MBR_EM300MBA_DEBUG
-	int	skip;
-#endif
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1960,6 +2032,7 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 	mbfp = mb_io_ptr->mbfp;
 	
 	/* get saved values */
+	wrapper = (int *) &mb_io_ptr->save5;
 	label = (char *) mb_io_ptr->save_label;
 	type = (short *) mb_io_ptr->save_label;
 	sonar = (short *) (&mb_io_ptr->save_label[2]);
@@ -1967,6 +2040,7 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 	expect_save_flag = (int *) &mb_io_ptr->save_flag;
 	expect_save = (short *) &mb_io_ptr->save1;
 	first_type_save = (short *) &mb_io_ptr->save2;
+	typelast = (short *) &mb_io_ptr->save6;
 	if (*expect_save_flag == MB_YES)
 		{
 		expect = *expect_save;
@@ -1977,6 +2051,10 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 		{
 		expect = EM2_NONE;
 		first_type = EM2_NONE;
+		data->png_raw_read = MB_NO;
+		data->png_ss_read = MB_NO;
+		data->png_nrawbeams = 0;
+		data->png_nbeams_ss = 0;
 		}
 
 	/* set file position */
@@ -1990,6 +2068,18 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 		/* if no label saved get next record label */
 		if (*label_save_flag == MB_NO)
 			{
+			/* read four byte wrapper if data stream is known
+				to have wrappers */
+			if (*wrapper == MB_YES)
+				{
+				if ((read_len = fread(label,
+					1,4,mb_io_ptr->mbfp)) != 4)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					}
+				}
+				
 			/* look for label */
 			if ((read_len = fread(label,
 				1,4,mb_io_ptr->mbfp)) != 4)
@@ -1997,9 +2087,10 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
-#ifdef MBR_EM300MBA_DEBUG
+
+			/* check label - if not a good label read a byte 
+				at a time until a good label is found */
 			skip = 0;
-#endif
 			while (status == MB_SUCCESS
 				&& mbr_em300mba_chk_label(verbose, 
 					mbio_ptr, *type, *sonar) != MB_SUCCESS)
@@ -2013,9 +2104,31 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
-#ifdef MBR_EM300MBA_DEBUG
 			    skip++;
-#endif
+			    }
+			    
+			/* report problem */
+			if (skip > 0 && !(skip == 4 || *wrapper < 0))
+			    {
+			    fprintf(stderr, 
+"\nThe MBF_EM300MBA module skipped %d bytes between\n\
+identified data records %d:%x and %d:%x \n\
+Something is broken...\n\
+We recommend you send a data sample and problem \n\
+description to the MB-System team: \n\
+(caress@mbari.org and dale@ldeo.columbia.edu)\n\
+Have a nice day....\n", 
+skip, *typelast, *typelast, *type, *type);
+			    }
+			*typelast = *type;
+
+			/* set wrapper status if needed */
+			if (*wrapper < 0)
+			    {
+			    if (skip == 0) 
+					*wrapper = MB_NO;
+			    else if (skip == 4)
+					*wrapper = MB_YES;
 			    }
 			}
 		
@@ -2068,11 +2181,13 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& *type != EM2_TIDE
 			&& *type != EM2_HEIGHT
 			&& *type != EM2_HEADING
+			&& *type != EM2_SSV
 			&& *type != EM2_ATTITUDE
 			&& *type != EM2_POS
 			&& *type != EM2_SVP
 			&& *type != EM2_SVP2
 			&& *type != EM2_BATH_MBA
+			&& *type != EM2_RAWBEAM
 			&& *type != EM2_SS_MBA)
 			{
 #ifdef MBR_EM300MBA_DEBUG
@@ -2204,6 +2319,26 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 					*expect_save_flag = MB_NO;
 				}
 			}
+		else if (*type == EM2_SSV)
+			{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_rd_ssv type %x\n",*type);
+#endif
+			status = mbr_em300mba_rd_ssv(
+				verbose,mbfp,data,*sonar,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				if (expect != EM2_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					}
+				else
+					*expect_save_flag = MB_NO;
+				}
+			}
 		else if (*type == EM2_ATTITUDE)
 			{
 #ifdef MBR_EM300MBA_DEBUG
@@ -2320,6 +2455,16 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 					}
 				}
 			}
+		else if (*type == EM2_RAWBEAM)
+			{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_rd_rawbeam type %x\n",*type);
+#endif
+			status = mbr_em300mba_rd_rawbeam(
+				verbose,mbfp,data,*sonar,error);
+			if (status == MB_SUCCESS)
+				data->png_raw_read = MB_YES;
+			}
 		else if (*type == EM2_SS_MBA 
 			&& expect != EM2_NONE 
 			&& expect != EM2_SS_MBA)
@@ -2342,6 +2487,7 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, int *error)
 				verbose,mbfp,data,*sonar,&match,error);
 			if (status == MB_SUCCESS)
 				{
+				data->png_ss_read = MB_YES;
 				if (first_type == EM2_NONE
 					|| match == MB_NO)
 					{
@@ -2439,11 +2585,13 @@ int mbr_em300mba_chk_label(int verbose, char *mbio_ptr, short type, short sonar)
 		&& type != EM2_TIDE
 		&& type != EM2_HEIGHT
 		&& type != EM2_HEADING
+		&& type != EM2_SSV
 		&& type != EM2_ATTITUDE
 		&& type != EM2_POS
 		&& type != EM2_SVP
 		&& type != EM2_SVP2
 		&& type != EM2_BATH_MBA
+		&& type != EM2_RAWBEAM
 		&& type != EM2_SS_MBA)
 		{
 		status = MB_FAILURE;
@@ -2608,6 +2756,8 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 			&& line[len-1] != '\n')
 			{
 			done = MB_YES;
+			if (len > 1)
+			    line[0] = line[len-1];
 			}
 		else if (status == MB_SUCCESS 
 			&& line[len-1] == ','
@@ -2782,10 +2932,29 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 		    data->kind = MB_DATA_START;
 		}
 		
-	/* read last two check sum bytes */
+	/* read end of record and last two check sum bytes */
 	if (status == MB_SUCCESS)
 	    {
-	    read_len = fread(&line[0],2,1,mbfp);
+	    /* if EM2_END not yet found then the 
+		next byte should be EM2_END */
+/*fprintf(stderr, "endbyte1: %d:%x:%c\n", line[0], line[0], line[0]);*/
+	    if (line[0] != EM2_END)
+		{
+		read_len = fread(&line[0],1,1,mbfp);
+/*fprintf(stderr, "endbyte2: %d:%x:%c\n", line[0], line[0], line[0]);*/
+		}
+		
+	    /* if EM2_END not yet found then the 
+		next byte should be EM2_END */
+	    if (line[0] != EM2_END)
+		{
+		read_len = fread(&line[0],1,1,mbfp);
+/*fprintf(stderr, "endbyte3: %d:%x:%c\n", line[0], line[0], line[0]);*/
+		}
+		
+	    /* if we got the end byte then get check sum bytes */
+	    if (line[0] == EM2_END)
+		read_len = fread(&line[0],2,1,mbfp);
 	    /* don't check success of read
 	        - return success here even if read fails
 	        because all of the
@@ -3534,6 +3703,163 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp,
 			fprintf(stderr,"dbg5        %4d      %7d          %7d\n",
 				i, data->hed_time[i], data->hed_heading[i]);
 		fprintf(stderr,"dbg5       hed_heading_status: %d\n",data->hed_heading_status);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, 
+		struct mbf_em300mba_struct *data, 
+		short sonar, int *error)
+{
+	char	*function_name = "mbr_em300mba_rd_ssv";
+	int	status = MB_SUCCESS;
+	char	line[16];
+	short	*short_ptr;
+	int	*int_ptr;
+	int	read_len, len;
+	int	done;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		}
+		
+	/* set kind and type values */
+	data->kind = MB_DATA_SSV;
+	data->type = EM2_SSV;
+	data->sonar = sonar;
+
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM2_SSV_HEADER_SIZE,mbfp);
+	if (read_len == EM2_SSV_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+#ifdef BYTESWAPPED
+		int_ptr = (int *) &line[0];
+		data->ssv_date = (int) mb_swap_int(*int_ptr);
+		data->date = data->ssv_date;
+		int_ptr = (int *) &line[4];
+		data->ssv_msec = (int) mb_swap_int(*int_ptr);
+		data->msec = data->ssv_msec;
+		short_ptr = (short *) &line[8];
+		data->ssv_count = (unsigned short) mb_swap_short(*short_ptr);
+		short_ptr = (short *) &line[10];
+		data->ssv_serial = (unsigned short) mb_swap_short(*short_ptr);
+		short_ptr = (short *) &line[12];
+		data->ssv_ndata = (int) mb_swap_short(*short_ptr);
+#else
+		int_ptr = (int *) &line[0];
+		data->ssv_date = (int) *int_ptr;
+		data->date = data->ssv_date;
+		int_ptr = (int *) &line[4];
+		data->ssv_msec = (int) *int_ptr;
+		data->msec = data->ssv_msec;
+		short_ptr = (short *) &line[8];
+		data->ssv_count = (unsigned short) *short_ptr;
+		short_ptr = (short *) &line[10];
+		data->ssv_serial = (unsigned short) *short_ptr;
+		short_ptr = (short *) &line[12];
+		data->ssv_ndata = (int) *short_ptr;
+#endif
+		}
+
+	/* read binary heading values */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<data->ssv_ndata && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM2_SSV_SLICE_SIZE,mbfp);
+		if (read_len == EM2_SSV_SLICE_SIZE 
+			&& i < MBF_EM300MBA_MAXSSV)
+			{
+			status = MB_SUCCESS;
+#ifdef BYTESWAPPED
+			short_ptr = (short *) &line[0];
+			data->ssv_time[i] = (unsigned short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[2];
+			data->ssv_ssv[i] = (unsigned short) mb_swap_short(*short_ptr);
+#else
+			short_ptr = (short *) &line[0];
+			data->ssv_time[i] = (unsigned short) *short_ptr;
+			short_ptr = (short *) &line[2];
+			data->ssv_ssv[i] = (unsigned short) *short_ptr;
+#endif
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+	    data->ssv_ndata = MIN(data->ssv_ndata, MBF_EM300MBA_MAXSSV);
+	    }
+		
+	/* now get last bytes of record */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread(&line[0],1,4,mbfp);
+		if (read_len == 4)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			/* return success here because all of the
+			    important information in this record has
+			    already been read - next attempt to read
+			    file will return error */
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",data->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",data->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",data->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",data->msec);
+		fprintf(stderr,"dbg5       ssv_date:        %d\n",data->ssv_date);
+		fprintf(stderr,"dbg5       ssv_msec:        %d\n",data->ssv_msec);
+		fprintf(stderr,"dbg5       ssv_count:       %d\n",data->ssv_count);
+		fprintf(stderr,"dbg5       ssv_serial:      %d\n",data->ssv_serial);
+		fprintf(stderr,"dbg5       ssv_ndata:       %d\n",data->ssv_ndata);
+		fprintf(stderr,"dbg5       count    time (msec)    ssv (0.1 m/s)\n");
+		fprintf(stderr,"dbg5       -----    -----------    ------------------\n");
+		for (i=0;i<data->ssv_ndata;i++)
+			fprintf(stderr,"dbg5        %4d      %7d          %7d\n",
+				i, data->ssv_time[i], data->ssv_ssv[i]);
 		}
 
 	/* print output debug statements */
@@ -4467,7 +4793,8 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
-		if (data->png_beam_num[0] > data->png_nbeams_max)
+		if (data->png_nbeams > 0
+		    && data->png_beam_num[0] > data->png_nbeams_max)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
@@ -4539,6 +4866,206 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       match:      %d\n",*match);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, 
+		struct mbf_em300mba_struct *data, 
+		short sonar, int *error)
+{
+	char	*function_name = "mbr_em300mba_rd_rawbeam";
+	int	status = MB_SUCCESS;
+	char	line[EM2_BATH_HEADER_SIZE];
+	short	*short_ptr;
+	int	*int_ptr;
+	int	read_len, len;
+	int	done;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		}
+		
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM2_RAWBEAM_HEADER_SIZE,mbfp);
+	if (read_len == EM2_RAWBEAM_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+#ifdef BYTESWAPPED
+		int_ptr = (int *) &line[0];
+		data->png_date = (int) mb_swap_int(*int_ptr);
+		data->date = data->png_date;
+		int_ptr = (int *) &line[4];
+		data->png_msec = (int) mb_swap_int(*int_ptr);
+		data->msec = data->png_msec;
+		short_ptr = (short *) &line[8];
+		data->png_count = (unsigned short) mb_swap_short(*short_ptr);
+		short_ptr = (short *) &line[10];
+		data->png_serial = (unsigned short) mb_swap_short(*short_ptr);
+		data->png_nbeams_max = (mb_u_char) line[12];
+		data->png_nrawbeams = (mb_u_char) line[13];
+		short_ptr = (short *) &line[14];
+		data->png_ssv = (unsigned short) mb_swap_short(*short_ptr);
+#else
+		int_ptr = (int *) &line[0];
+		data->png_date = (int) *int_ptr;
+		data->date = data->png_date;
+		int_ptr = (int *) &line[4];
+		data->png_msec = (int) *int_ptr;
+		data->msec = data->png_msec;
+		short_ptr = (short *) &line[8];
+		data->png_count = (unsigned short) *short_ptr;
+		short_ptr = (short *) &line[10];
+		data->png_serial = (unsigned short) *short_ptr;
+		data->png_nbeams_max = (mb_u_char) line[12];
+		data->png_nrawbeams = (mb_u_char) line[13];
+		short_ptr = (short *) &line[14];
+		data->png_ssv = (unsigned short) *short_ptr;
+#endif
+		}
+		
+	/* check for some indicators of a broken record 
+	    - these do happen!!!! */
+	if (status == MB_SUCCESS)
+		{
+		if (data->png_nrawbeams > data->png_nbeams_max
+			|| data->png_nrawbeams < 0
+			|| data->png_nbeams_max < 0
+			|| data->png_nrawbeams > MBF_EM300MBA_MAXBEAMS
+			|| data->png_nbeams_max > MBF_EM300MBA_MAXBEAMS)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		}
+
+	/* read binary beam values */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<data->png_nrawbeams && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM2_RAWBEAM_BEAM_SIZE,mbfp);
+		if (read_len == EM2_RAWBEAM_BEAM_SIZE 
+			&& i < MBF_EM300MBA_MAXBEAMS)
+			{
+			status = MB_SUCCESS;
+#ifdef BYTESWAPPED
+			short_ptr = (short *) &line[0];
+			data->png_rawpointangle[i] = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[2];
+			data->png_rawtiltangle[i] = (unsigned short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[4];
+			data->png_rawrange[i] = (unsigned short) mb_swap_short(*short_ptr);
+			data->png_rawamp[i] = (mb_s_char) line[6];
+			data->png_rawbeam_num[i] = (mb_u_char) line[7];
+#else
+			short_ptr = (short *) &line[0];
+			data->png_rawpointangle[i] = (short) *short_ptr;
+			short_ptr = (short *) &line[2];
+			data->png_rawtiltangle[i] = (unsigned short) *short_ptr;
+			short_ptr = (short *) &line[4];
+			data->png_rawrange[i] = (unsigned short) *short_ptr;
+			data->png_rawamp[i] = (mb_s_char) line[6];
+			data->png_rawbeam_num[i] = (mb_u_char) line[7];
+#endif
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+	    }
+		
+	/* now get last bytes of record */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread(&line[0],1,4,mbfp);
+		if (read_len == 4)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+		
+	/* check for some other indicators of a broken record 
+	    - these do happen!!!! */
+	if (status == MB_SUCCESS)
+		{
+		if (data->png_nbeams > 0
+		    && data->png_rawbeam_num[0] > data->png_nbeams_max)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		for (i=1;i<data->png_nrawbeams;i++)
+			{
+			if (data->png_rawbeam_num[i] < data->png_rawbeam_num[i-1]
+				|| data->png_rawbeam_num[i] > data->png_nbeams_max)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				}
+			}
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",data->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",data->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",data->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",data->msec);
+		fprintf(stderr,"dbg5       png_date:        %d\n",data->png_date);
+		fprintf(stderr,"dbg5       png_msec:        %d\n",data->png_msec);
+		fprintf(stderr,"dbg5       png_count:       %d\n",data->png_count);
+		fprintf(stderr,"dbg5       png_serial:      %d\n",data->png_serial);
+		fprintf(stderr,"dbg5       png_nbeams_max:  %d\n",data->png_nbeams_max);
+		fprintf(stderr,"dbg5       png_nrawbeams:   %d\n",data->png_nrawbeams);
+		fprintf(stderr,"dbg5       png_ssv:         %d\n",data->png_ssv);
+		fprintf(stderr,"dbg5       cnt  point   tilt   rng  amp num\n");
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		for (i=0;i<data->png_nrawbeams;i++)
+			fprintf(stderr,"dbg5       %3d %5d %5d %5d %3d %3d\n",
+				i, data->png_rawpointangle[i], data->png_rawtiltangle[i], 
+				data->png_rawrange[i], data->png_rawamp[i], 
+				data->png_rawbeam_num[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -4732,7 +5259,8 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
-		if (data->png_beam_index[0] > MBF_EM300MBA_MAXBEAMS)
+		if (data->png_nbeams_ss > 0
+		    && data->png_beam_index[0] > MBF_EM300MBA_MAXBEAMS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
@@ -4976,62 +5504,106 @@ int mbr_em300mba_wr_data(int verbose, char *mbio_ptr, int *error)
 		|| data->kind == MB_DATA_START
 		|| data->kind == MB_DATA_STOP)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_start kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_start kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_start(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_RUN_PARAMETER)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_run_parameter kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_run_parameter kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_run_parameter(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_CLOCK)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_clock kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_clock kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_clock(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_TIDE)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_tide kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_tide kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_tide(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_HEIGHT)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_height kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_height kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_height(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_HEADING)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_heading kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_heading kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_heading(verbose,mbfp,data,error);
+		}
+	else if (data->kind == MB_DATA_SSV)
+		{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_ssv kind:%d type %x\n",data->kind,data->type);
+#endif
+		status = mbr_em300mba_wr_ssv(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_ATTITUDE)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_attitude kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_attitude kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_attitude(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_NAV)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_pos kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_pos kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_pos(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_VELOCITY_PROFILE)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_svp kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_svp kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_svp(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_DATA)
 		{
-	/*fprintf(stderr,"call mbr_em300mba_wr_bath kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_bath kind:%d type %x\n",data->kind,data->type);
+#endif
 		status = mbr_em300mba_wr_bath(verbose,mbfp,data,error);
-		if (data->png_nbeams_ss > 0)
+		if (data->png_raw_read == MB_YES)
 		    {
-	/*fprintf(stderr,"call mbr_em300mba_wr_ss kind:%d type %x\n",data->kind,data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_rawbeam kind:%d type %x\n",data->kind,data->type);
+#endif
+		    status = mbr_em300mba_wr_rawbeam(verbose,mbfp,data,error);
+		    }
+#ifdef MBR_EM300MBA_DEBUG
+	else fprintf(stderr,"NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n",data->kind,data->type);
+#endif
+		if (data->png_ss_read == MB_YES)
+		    {
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_ss kind:%d type %x\n",data->kind,data->type);
+#endif
 		    status = mbr_em300mba_wr_ss(verbose,mbfp,data,error);
 		    }
+#ifdef MBR_EM300MBA_DEBUG
+	else fprintf(stderr,"NOT call mbr_em300raw_wr_ss kind:%d type %x\n",data->kind,data->type);
+#endif
 		}
 	else
 		{
-	/*fprintf(stderr,"call nothing bad kind: %d type %x\n", data->kind, data->type);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call nothing bad kind: %d type %x\n", data->kind, data->type);
+#endif
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
 		}
@@ -5840,8 +6412,8 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp,
 #endif
 
 		/* write out data */
-		write_len = fwrite(line,1,EM2_CLOCK_SIZE,mbfp);
-		if (write_len != EM2_CLOCK_SIZE)
+		write_len = fwrite(line,1,EM2_CLOCK_SIZE-4,mbfp);
+		if (write_len != EM2_CLOCK_SIZE-4)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -6023,8 +6595,8 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp,
 #endif
 
 		/* write out data */
-		write_len = fwrite(line,1,EM2_TIDE_SIZE,mbfp);
-		if (write_len != EM2_TIDE_SIZE)
+		write_len = fwrite(line,1,EM2_TIDE_SIZE-4,mbfp);
+		if (write_len != EM2_TIDE_SIZE-4)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -6198,8 +6770,8 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp,
 #endif
 
 		/* write out data */
-		write_len = fwrite(line,1,EM2_HEIGHT_SIZE,mbfp);
-		if (write_len != EM2_HEIGHT_SIZE)
+		write_len = fwrite(line,1,EM2_HEIGHT_SIZE-4,mbfp);
+		if (write_len != EM2_HEIGHT_SIZE-4)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -6420,6 +6992,242 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 		{
 		line[0] = (mb_u_char) data->hed_heading_status;
+		line[1] = 0x03;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		checksum += uchar_ptr[0];
+	    
+		/* set checksum */
+		short_ptr = (short *) &line[2];
+#ifdef BYTESWAPPED
+		*short_ptr = (unsigned short) mb_swap_short(checksum);
+#else
+		*short_ptr = (unsigned short) checksum;
+#endif
+
+		/* write out data */
+		write_len = fwrite(line,1,4,mbfp);
+		if (write_len != 4)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, 
+		struct mbf_em300mba_struct *data, int *error)
+{
+	char	*function_name = "mbr_em300mba_wr_ssv";
+	int	status = MB_SUCCESS;
+	char	line[EM2_SSV_HEADER_SIZE];
+	short	label;
+	int	write_len;
+	int	write_size;
+	unsigned short checksum;
+	short	*short_ptr;
+	int	*int_ptr;
+	mb_u_char   *uchar_ptr;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",data->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",data->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",data->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",data->msec);
+		fprintf(stderr,"dbg5       ssv_date:        %d\n",data->ssv_date);
+		fprintf(stderr,"dbg5       ssv_msec:        %d\n",data->ssv_msec);
+		fprintf(stderr,"dbg5       ssv_count:       %d\n",data->ssv_count);
+		fprintf(stderr,"dbg5       ssv_serial:      %d\n",data->ssv_serial);
+		fprintf(stderr,"dbg5       ssv_ndata:       %d\n",data->ssv_ndata);
+		fprintf(stderr,"dbg5       count    time (msec)    ssv (0.1 m/s)\n");
+		fprintf(stderr,"dbg5       -----    -----------    ------------------\n");
+		for (i=0;i<data->ssv_ndata;i++)
+			fprintf(stderr,"dbg5        %4d      %7d          %7d\n",
+				i, data->ssv_time[i], data->ssv_ssv[i]);
+		}
+		
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	write_size = EM2_SSV_HEADER_SIZE 
+			+ EM2_SSV_SLICE_SIZE * data->ssv_ndata + 8;
+#ifdef BYTESWAPPED
+	write_size = (int) mb_swap_int(write_size);
+#endif
+	write_len = fwrite(&write_size,1,4,mbfp);
+	if (write_len != 4)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write the record label */
+	if (status == MB_SUCCESS)
+		{
+		label = EM2_SSV;
+#ifdef BYTESWAPPED
+		label = (short) mb_swap_short(label);
+#endif
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[1];
+		}
+
+	/* write the sonar id */
+	if (status == MB_SUCCESS)
+		{
+		label = data->sonar;
+#ifdef BYTESWAPPED
+		label = (short) mb_swap_short(label);
+#endif
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+		}
+
+	/* output binary header data */
+	if (status == MB_SUCCESS)
+		{
+#ifdef BYTESWAPPED
+		int_ptr = (int *) &line[0];
+		*int_ptr = (int) mb_swap_int(data->ssv_date);
+		int_ptr = (int *) &line[4];
+		*int_ptr = (int) mb_swap_int(data->ssv_msec);
+		short_ptr = (short *) &line[8];
+		*short_ptr = (unsigned short) mb_swap_short(data->ssv_count);
+		short_ptr = (short *) &line[10];
+		*short_ptr = (unsigned short) mb_swap_short(data->ssv_serial);
+		short_ptr = (short *) &line[12];
+		*short_ptr = (unsigned short) mb_swap_short(data->ssv_ndata);
+#else
+		int_ptr = (int *) &line[0];
+		*int_ptr = (int) data->ssv_date;
+		int_ptr = (int *) &line[4];
+		*int_ptr = (int) data->ssv_msec;
+		short_ptr = (short *) &line[8];
+		*short_ptr = (unsigned short) data->ssv_count;
+		short_ptr = (short *) &line[10];
+		*short_ptr = (unsigned short) data->ssv_serial;
+		short_ptr = (short *) &line[12];
+		*short_ptr = (unsigned short) data->ssv_ndata;
+#endif
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_SSV_HEADER_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_SSV_HEADER_SIZE,mbfp);
+		if (write_len != EM2_SSV_HEADER_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary ssv data */
+	if (status == MB_SUCCESS)
+	    for (i=0;i<data->ssv_ndata;i++)
+		{
+#ifdef BYTESWAPPED
+		short_ptr = (short *) &line[0];
+		*short_ptr = (unsigned short) mb_swap_short(data->ssv_time[i]);
+		short_ptr = (short *) &line[2];
+		*short_ptr = (unsigned short) mb_swap_short(data->ssv_ssv[i]);
+#else
+		short_ptr = (short *) &line[0];
+		*short_ptr = (unsigned short) data->ssv_time[i];
+		short_ptr = (short *) &line[2];
+		*short_ptr = (unsigned short) data->ssv_ssv[i];
+#endif
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_SSV_SLICE_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_SSV_SLICE_SIZE,mbfp);
+		if (write_len != EM2_SSV_SLICE_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output end of record */
+	if (status == MB_SUCCESS)
+		{
+		line[0] = 0;
 		line[1] = 0x03;
 		
 		/* compute checksum */
@@ -7495,6 +8303,258 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 		{
 		line[0] = (mb_s_char) data->png_offset_multiplier;
+		line[1] = 0x03;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		checksum += uchar_ptr[0];
+	    
+		/* set checksum */
+		short_ptr = (short *) &line[2];
+#ifdef BYTESWAPPED
+		*short_ptr = (unsigned short) mb_swap_short(checksum);
+#else
+		*short_ptr = (unsigned short) checksum;
+#endif
+
+		/* write out data */
+		write_len = fwrite(line,1,4,mbfp);
+		if (write_len != 4)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, 
+		struct mbf_em300mba_struct *data, int *error)
+{
+	char	*function_name = "mbr_em300mba_wr_rawbeam";
+	int	status = MB_SUCCESS;
+	char	line[EM2_BATH_HEADER_SIZE];
+	short	label;
+	int	write_len;
+	int	write_size;
+	unsigned short checksum;
+	short	*short_ptr;
+	int	*int_ptr;
+	mb_u_char   *uchar_ptr;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",data->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",data->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",data->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",data->msec);
+		fprintf(stderr,"dbg5       png_date:        %d\n",data->png_date);
+		fprintf(stderr,"dbg5       png_msec:        %d\n",data->png_msec);
+		fprintf(stderr,"dbg5       png_count:       %d\n",data->png_count);
+		fprintf(stderr,"dbg5       png_serial:      %d\n",data->png_serial);
+		fprintf(stderr,"dbg5       png_nbeams_max:  %d\n",data->png_nbeams_max);
+		fprintf(stderr,"dbg5       png_nrawbeams:   %d\n",data->png_nrawbeams);
+		fprintf(stderr,"dbg5       png_ssv:         %d\n",data->png_ssv);
+		fprintf(stderr,"dbg5       cnt  point   tilt   rng  amp num\n");
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		for (i=0;i<data->png_nrawbeams;i++)
+			fprintf(stderr,"dbg5       %3d %5d %5d %5d %3d %3d\n",
+				i, data->png_rawpointangle[i], data->png_rawtiltangle[i], 
+				data->png_rawrange[i], data->png_rawamp[i], 
+				data->png_rawbeam_num[i]);
+		}
+		
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	write_size = EM2_RAWBEAM_HEADER_SIZE 
+			+ EM2_RAWBEAM_BEAM_SIZE * data->png_nrawbeams + 8;
+#ifdef BYTESWAPPED
+	write_size = (int) mb_swap_int(write_size);
+#endif
+	write_len = fwrite(&write_size,1,4,mbfp);
+	if (write_len != 4)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write the record label */
+	if (status == MB_SUCCESS)
+		{
+		label = EM2_RAWBEAM;
+#ifdef BYTESWAPPED
+		label = (short) mb_swap_short(label);
+#endif
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[1];
+		}
+
+	/* write the sonar id */
+	if (status == MB_SUCCESS)
+		{
+		label = data->sonar;
+#ifdef BYTESWAPPED
+		label = (short) mb_swap_short(label);
+#endif
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+		}
+
+	/* output binary header data */
+	if (status == MB_SUCCESS)
+		{
+#ifdef BYTESWAPPED
+		int_ptr = (int *) &line[0];
+		*int_ptr = (int) mb_swap_int(data->png_date);
+		int_ptr = (int *) &line[4];
+		*int_ptr = (int) mb_swap_int(data->png_msec);
+		short_ptr = (short *) &line[8];
+		*short_ptr = (unsigned short) mb_swap_short(data->png_count);
+		short_ptr = (short *) &line[10];
+		*short_ptr = (unsigned short) mb_swap_short(data->png_serial);
+		line[12] = (mb_u_char) data->png_nbeams_max;
+		line[13] = (mb_u_char) data->png_nrawbeams;
+		short_ptr = (short *) &line[14];
+		*short_ptr = (unsigned short) mb_swap_short(data->png_ssv);
+#else
+		int_ptr = (int *) &line[0];
+		*int_ptr = (int) data->png_date;
+		int_ptr = (int *) &line[4];
+		*int_ptr = (int) data->png_msec;
+		short_ptr = (short *) &line[8];
+		*short_ptr = (unsigned short) data->png_count;
+		short_ptr = (short *) &line[10];
+		*short_ptr = (unsigned short) data->png_serial;
+		line[12] = (mb_u_char) data->png_nbeams_max;
+		line[13] = (mb_u_char) data->png_nrawbeams;
+		short_ptr = (short *) &line[14];
+		*short_ptr = (unsigned short) data->png_ssv;
+#endif
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_RAWBEAM_HEADER_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_RAWBEAM_HEADER_SIZE,mbfp);
+		if (write_len != EM2_RAWBEAM_HEADER_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary beam data */
+	if (status == MB_SUCCESS)
+	    for (i=0;i<data->png_nrawbeams;i++)
+		{
+#ifdef BYTESWAPPED
+		short_ptr = (short *) &line[0];
+		*short_ptr = (short) mb_swap_short(data->png_rawpointangle[i]);
+		short_ptr = (short *) &line[2];
+		*short_ptr = (unsigned short) mb_swap_short(data->png_rawtiltangle[i]);
+		short_ptr = (short *) &line[4];
+		*short_ptr = (unsigned short) mb_swap_short(data->png_rawrange[i]);
+		line[6] = (mb_s_char) data->png_rawamp[i];
+		line[7] = (mb_u_char) data->png_rawbeam_num[i];
+#else
+		short_ptr = (short *) &line[0];
+		*short_ptr = (short) data->png_rawpointangle[i];
+		short_ptr = (short *) &line[2];
+		*short_ptr = (unsigned short) data->png_rawtiltangle[i];
+		short_ptr = (short *) &line[4];
+		*short_ptr = (unsigned short) data->png_rawrange[i];
+		line[6] = (mb_s_char) data->png_rawamp[i];
+		line[7] = (mb_u_char) data->png_rawbeam_num[i];
+#endif
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_RAWBEAM_BEAM_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_RAWBEAM_BEAM_SIZE,mbfp);
+		if (write_len != EM2_RAWBEAM_BEAM_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output end of record */
+	if (status == MB_SUCCESS)
+		{
+		line[0] = 0;
 		line[1] = 0x03;
 		
 		/* compute checksum */

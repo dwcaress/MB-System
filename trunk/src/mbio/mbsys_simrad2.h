@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.3 2001-05-24 23:18:07 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -269,6 +272,7 @@
 #define	MBSYS_SIMRAD2_MAXSVP		1024
 #define	MBSYS_SIMRAD2_MAXATTITUDE	100
 #define	MBSYS_SIMRAD2_MAXHEADING	100
+#define	MBSYS_SIMRAD2_MAXSSV		100
 #define	MBSYS_SIMRAD2_COMMENT_LENGTH	256
 
 /* sonar model numbers */
@@ -304,12 +308,14 @@
 #define	EM2_TIDE		0x0254
 #define	EM2_HEIGHT		0x0268
 #define	EM2_HEADING		0x0248
+#define	EM2_SSV			0x0247
 #define	EM2_ATTITUDE		0x0241
 #define	EM2_POS			0x0250
 #define	EM2_SVP			0x0256
 #define	EM2_SVP2		0x0255
 #define	EM2_BATH		0x0244
 #define	EM2_BATH_MBA		0x02E1
+#define	EM2_RAWBEAM		0x0246
 #define	EM2_SS			0x0253
 #define	EM2_SS_MBA		0x02E2
 
@@ -321,6 +327,8 @@
 #define	EM2_START_HEADER_SIZE		14
 #define	EM2_HEADING_HEADER_SIZE		14
 #define	EM2_HEADING_SLICE_SIZE		4
+#define	EM2_SSV_HEADER_SIZE		14
+#define	EM2_SSV_SLICE_SIZE		4
 #define	EM2_ATTITUDE_HEADER_SIZE	14
 #define	EM2_ATTITUDE_SLICE_SIZE		12
 #define	EM2_POS_HEADER_SIZE		30
@@ -332,6 +340,8 @@
 #define	EM2_BATH_BEAM_SIZE		16
 #define	EM2_BATH_MBA_HEADER_SIZE	34
 #define	EM2_BATH_MBA_BEAM_SIZE		18
+#define	EM2_RAWBEAM_HEADER_SIZE		16
+#define	EM2_RAWBEAM_BEAM_SIZE		8
 #define	EM2_SS_HEADER_SIZE		28
 #define	EM2_SS_BEAM_SIZE		6
 #define	EM2_SS_MBA_HEADER_SIZE		32
@@ -440,8 +450,37 @@ struct mbsys_simrad2_ping_struct
 				    second head of EM3000D */
 	char	png_beamflag[MBSYS_SIMRAD2_MAXBEAMS];	
 				/* uses standard MB-System beamflags */
-	
+				
+	/* raw travel time and angle data */
+	int	png_raw_read;	/* flag indicating actual reading of rawbeam record */
+	int	png_nrawbeams;	/* number of raw travel times and angles
+				    - nonzero only if raw beam record read */
+	int	png_rawpointangle[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Raw beam pointing angles in 0.01 degree,
+					positive to port. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+	int	png_rawtiltangle[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Raw transmit tilt angles in 0.01 degree,
+					positive forward. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+	int	png_rawrange[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Ranges as raw two way travel times in time 
+					units defined as one-fourth the inverse 
+					sampling rate. These values have not 
+					been corrected for changes in the
+					heave during the ping cycle. */
+	int	png_rawamp[MBSYS_SIMRAD2_MAXBEAMS];		
+				/* 0.5 dB */
+	int	png_rawbeam_num[MBSYS_SIMRAD2_MAXBEAMS];	
+				/* beam 128 is first beam on 
+				    second head of EM3000D */
+
 	/* sidescan */
+	int	png_ss_read;	/* flag indicating actual reading of sidescan record */
 	int	png_max_range;	/* old: max range of ping in number of samples */
 				/* current: mean absorption coefficient in 0.01 db/km */
 				/* also: used to store sidescan pixel size in range (m)
@@ -527,6 +566,22 @@ struct mbsys_simrad2_heading_struct
 				/* heading (0.01 degree) */
 	int	hed_heading_status;
 				/* heading status (0=inactive) */
+	};
+
+/* internal data structure for ssv data */
+struct mbsys_simrad2_ssv_struct
+	{
+	int	ssv_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	ssv_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	ssv_count;	/* sequential counter or input identifier */
+	int	ssv_serial;	/* system 1 or system 2 serial number */
+	int	ssv_ndata;	/* number of ssv data */
+	int	ssv_time[MBSYS_SIMRAD2_MAXSSV];
+				/* time since record start (msec) */
+	int	ssv_ssv[MBSYS_SIMRAD2_MAXSSV];
+				/* ssv (0.1 m/s) */
 	};
 	
 /* internal data structure */
@@ -776,6 +831,9 @@ struct mbsys_simrad2_struct
 
 	/* pointer to heading data structure */
 	struct mbsys_simrad2_heading_struct *heading;
+
+	/* pointer to ssv data structure */
+	struct mbsys_simrad2_ssv_struct *ssv;
 
 	/* pointer to survey data structure */
 	struct mbsys_simrad2_ping_struct *ping;
