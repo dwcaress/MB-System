@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.23 1999-04-02 19:52:50 caress Exp $
+ *    $Id: mbmerge.c,v 4.24 1999-10-21 22:42:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.23  1999/04/02  19:52:50  caress
+ * Fixed handling of asynchronous nav.
+ *
  * Revision 4.22  1999/03/31  18:33:06  caress
  * MB-System 4.6beta7
  *
@@ -136,7 +139,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.23 1999-04-02 19:52:50 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.24 1999-10-21 22:42:10 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -874,6 +877,13 @@ char **argv;
 
 		/* time gaps do not matter to mbmerge */
 		if (error == MB_ERROR_TIME_GAP)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* out of boundss do not matter to mbmerge */
+		if (error == MB_ERROR_OUT_BOUNDS)
 			{
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
