@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.23 2000-09-30 06:52:17 caress Exp $
+ *    $Id: mbcontour.c,v 4.24 2000-10-11 00:53:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.23  2000/09/30  06:52:17  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.22  2000/09/11  20:09:14  caress
  * Linked to new datalist parsing functions. Now supports recursive datalists
  * and comments in datalists.
@@ -154,11 +157,9 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv) 
-int argc;
-char **argv; 
+main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.23 2000-09-30 06:52:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.24 2000-10-11 00:53:45 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -1001,12 +1002,7 @@ char **argv;
 	plot_exit(argc,argv);
 }
 /*--------------------------------------------------------------------*/
-int ping_copy(verbose,one,two,swath,error)
-int	verbose;
-int	one;
-int	two;
-struct swath *swath;
-int	*error;
+int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 {
 	char	*function_name = "ping_copy";
 	int	status = MB_SUCCESS;

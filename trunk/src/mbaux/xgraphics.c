@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 4.5 2000-09-30 06:54:58 caress Exp $
+ *    $Id: xgraphics.c,v 4.6 2000-10-11 00:54:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  2000/09/30  06:54:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.4  1999/12/29  00:59:34  caress
  * Release 4.6.8
  *
@@ -79,13 +82,10 @@ struct xg_graphic
  *	XG_INIT
  *	- initializes plotting variables, the colortable, and the GC
  **********************************************************************/
-int xg_init(display,can_xid,can_bounds,fontname)
-Display	*display;
-Window	can_xid;
-int	*can_bounds;
-char	*fontname;
+int xg_init(Display *display, Window can_xid, 
+		int *can_bounds, char *fontname)
 {
-static char rcs_id[]="$Id: xgraphics.c,v 4.5 2000-09-30 06:54:58 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 4.6 2000-10-11 00:54:20 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;
@@ -215,8 +215,7 @@ static char rcs_id[]="$Id: xgraphics.c,v 4.5 2000-09-30 06:54:58 caress Exp $";
  *	XG_FREE
  *	- deallocates xg_graphic structure when no longer needed
  **********************************************************************/
-void xg_free(xgid)
-int	xgid;
+void xg_free(int xgid)
 {
 	struct xg_graphic *graphic;
 
@@ -227,11 +226,7 @@ int	xgid;
  *	XG_DRAWPOINT
  *	- draws a pixel
  **********************************************************************/
-void xg_drawpoint(xgid, x, y, pixel, style)
-int	xgid;
-int	x, y;
-unsigned int	pixel;
-int	style;
+void xg_drawpoint(int xgid, int x, int y, unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
 	GC *gc;
@@ -248,11 +243,8 @@ int	style;
  *	XG_DRAWLINE
  *	- draws a line
  **********************************************************************/
-void xg_drawline(xgid, x1, y1, x2, y2, pixel, style)
-int	xgid;
-int	x1, y1, x2, y2;
-unsigned int	pixel;
-int	style;
+void xg_drawline(int xgid, int x1, int y1, int x2, int y2, 
+		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
 	GC *gc;
@@ -269,11 +261,8 @@ int	style;
  *	XG_DRAWRECTANGLE
  *	- draws a rectangle outline
  **********************************************************************/
-void xg_drawrectangle(xgid, x, y, width, height, pixel, style)
-int	xgid;
-int	x, y, width, height;
-unsigned int	pixel;
-int	style;
+void xg_drawrectangle(int xgid, int x, int y, int width, int height, 
+		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
 	GC *gc;
@@ -291,11 +280,9 @@ int	style;
  *	XG_DRAWTRIANGLE
  *	- draws a triangle outline
  **********************************************************************/
-void xg_drawtriangle(xgid, x1, y1, x2, y2, x3, y3, pixel, style)
-int	xgid;
-int	x1, y1, x2, y2, x3, y3;
-unsigned int	pixel;
-int	style;
+void xg_drawtriangle(int xgid, 
+		int x1, int y1, int x2, int y2, int x3, int y3, 
+		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
 	GC *gc;
@@ -327,11 +314,8 @@ int	style;
  *	XG_FILLRECTANGLE
  *	- fills a rectangle
  **********************************************************************/
-void xg_fillrectangle(xgid, x, y, width, height, pixel, style)
-int	xgid;
-int	x, y, width, height;
-unsigned int	pixel;
-int	style;
+void xg_fillrectangle(int xgid, int x, int y, int width, int height, 
+		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
 	GC *gc;
@@ -349,11 +333,9 @@ int	style;
  *	XG_FILLTRIANGLE
  *	- fills a triangle
  **********************************************************************/
-void xg_filltriangle(xgid, x1, y1, x2, y2, x3, y3, pixel, style)
-int	xgid;
-int	x1, y1, x2, y2, x3, y3;
-unsigned int	pixel;
-int	style;
+void xg_filltriangle(int xgid, 
+		int x1, int y1, int x2, int y2, int x3, int y3, 
+		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
 	GC *gc;
@@ -381,12 +363,8 @@ int	style;
  *	XG_DRAWSTRING
  *	- draws a string
  **********************************************************************/
-void xg_drawstring(xgid, x, y, string, pixel, style)
-int	xgid;
-int	x, y;
-char	*string;
-unsigned int	pixel;
-int	style;
+void xg_drawstring(int xgid, int x, int y, char *string, 
+		unsigned int pixel, int style)
 {
 	struct xg_graphic *graphic;
 	GC *gc;
@@ -406,12 +384,8 @@ int	style;
  *	XG_JUSTIFY
  *	- figures out the dimensions of a string when drawn
  **********************************************************************/
-void xg_justify(xgid, string, width, ascent, descent)
-int	xgid;
-char	*string;
-int	*width;
-int	*ascent;
-int	*descent;
+void xg_justify(int xgid, char *string, 
+		int *width, int *ascent, int *descent)
 {
 	struct xg_graphic *graphic;
 	int	string_length;
@@ -432,9 +406,7 @@ int	*descent;
  *	XG_SETCLIP
  *	- sets clipping mask for all gc's
  **********************************************************************/
-void xg_setclip(xgid, x, y, width, height)
-int	xgid;
-int	x, y, width, height;
+void xg_setclip(int xgid, int x, int y, int width, int height)
 {
 	struct xg_graphic *graphic;
 	XRectangle rectangle[1];
