@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.6 1994-12-21 20:23:30 caress Exp $
+ *    $Id: mbswath.c,v 4.7 1995-01-05 23:59:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,13 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1994/12/21  20:23:30  caress
+ * Allows the alongtrack beam footprint to be determined
+ * by alongtrack beam width in degrees. The alongtrack
+ * beam width is set using a negative argument in the
+ * -A option. This will be made the standard mode soon,
+ * but is an undocumented feature for now.
+ *
  * Revision 4.5  1994/10/25  12:32:41  caress
  * Fixed memory overwrite that causing early exits.
  *
@@ -171,7 +178,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.6 1994-12-21 20:23:30 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.7 1995-01-05 23:59:20 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -190,8 +197,8 @@ char **argv;
 	char	*message = NULL;
 
 	/* MBIO read control parameters */
-	char	filelist[128];
-        int     use_stdin;
+	char	read_file[128];
+        int     read_datalist = MB_NO;
 	int	read_data;
 	FILE	*fp;
 	int	format;
@@ -258,9 +265,12 @@ char **argv;
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 
+	/* set default input to stdin */
+	strcpy (read_file, "stdin");
+
 	/* initialize some values */
-	strcpy (file, "stdin");
-        use_stdin = MB_YES;
+	format = -1;
+        read_datalist = MB_NO;
 	strcpy (cptfile,"cpt");
 	borders[0] = 0.0;
 	borders[1] = 0.0;
@@ -380,8 +390,7 @@ char **argv;
 			break;
 		case 'I':
 		case 'i':
-			sscanf (optarg,"%s", filelist);
-			use_stdin = MB_NO;
+			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
 		case 'L':
@@ -480,8 +489,7 @@ char **argv;
 		fprintf(stderr,"dbg2       etime_i[6]:       %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:         %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:          %f\n",timegap);
-		fprintf(stderr,"dbg2       file list:        %s\n",filelist);
-		fprintf(stderr,"dbg2       use_stdin:        %d\n",use_stdin);
+		fprintf(stderr,"dbg2       input file:       %s\n",read_file);
 		fprintf(stderr,"dbg2       borders[0]:       %f\n",borders[0]);
 		fprintf(stderr,"dbg2       borders[1]:       %f\n",borders[1]);
 		fprintf(stderr,"dbg2       borders[2]:       %f\n",borders[2]);
@@ -600,32 +608,33 @@ char **argv;
 			}
 		}
 
+	/* determine whether to read one file or a list of files */
+	if (format < 0)
+		read_datalist = MB_YES;
+
 	/* open file list */
-	if (use_stdin == MB_NO)
-	if ((fp = fopen(filelist,"r")) == NULL)
+	if (read_datalist == MB_YES)
+	    {
+	    if ((fp = fopen(read_file,"r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
-			filelist);
+			read_file);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
 		}
-
-	/* read first file */
-	if (use_stdin == MB_NO)
-		{
-		if (fgets(line,128,fp) != NULL
-			&& sscanf(line,"%s %d",file,&format) == 2)
-			read_data = MB_YES;
-		else
-			read_data = MB_NO;
-		}
-	else
-		{
-		strcpy(file,"stdin");
+	    if (fgets(line,128,fp) != NULL
+		&& sscanf(line,"%s %d",file,&format) == 2)
 		read_data = MB_YES;
-		}
+	    else
+		read_data = MB_NO;
+	    }
+	else
+	    {
+	    strcpy(file,read_file);
+	    read_data = MB_YES;
+	    }
 
 	/* loop over files in file list */
 	if (verbose == 1) 
@@ -936,7 +945,7 @@ char **argv;
 	mb_free(verbose,&swath_plot,&error);
 
 	/* figure out whether and what to read next */
-        if (use_stdin == MB_NO)
+        if (read_datalist == MB_YES)
                 {
                 if (fgets(line,128,fp) != NULL
                         && sscanf(line,"%s %d",file,&format) == 2)
@@ -951,7 +960,8 @@ char **argv;
 
 	/* end loop over files in list */
 	}
-	fclose (fp);
+	if (read_datalist == MB_YES)
+		fclose (fp);
 
 	/* turn off clipping */
 	ps_clipoff();

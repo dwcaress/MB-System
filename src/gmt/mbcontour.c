@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.6 1994-12-21 20:23:30 caress Exp $
+ *    $Id: mbcontour.c,v 4.7 1995-01-05 23:59:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1994/12/21  20:23:30  caress
+ * Allows plotting in triangle mode when ship's lon and lat
+ * doesn't change.
+ *
  * Revision 4.5  1994/10/21  11:34:20  caress
  * Release V4.0
  *
@@ -102,7 +106,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.6 1994-12-21 20:23:30 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.7 1995-01-05 23:59:20 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -127,7 +131,9 @@ char **argv;
 	char	*message = NULL;
 
 	/* MBIO read control parameters */
-	char	filelist[128];
+	char	read_file[128];
+        int     read_datalist;
+	int	read_data;
 	FILE	*fp;
 	int	format;
 	int	pings;
@@ -214,8 +220,6 @@ char **argv;
 	char	labelstr[128], tickstr[128];
 	int	count;
 	int	setcolors;
-        int     use_stdin;
-	int	read_data;
 	double	navlon_old;
 	double	navlat_old;
 	int	i;
@@ -224,9 +228,13 @@ char **argv;
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 
+	/* set default input to stdin */
+	strcpy (read_file, "stdin");
+
 	/* initialize some values */
+	format = -1;
+        read_datalist = MB_NO;
 	contour_algorithm = MB_CONTOUR_OLD;
-	strcpy (file, "stdin");
 	strcpy (contourfile,"\0");
 	set_contours = MB_NO;
 	bounds[0] = 0.0;
@@ -250,7 +258,6 @@ char **argv;
 	nlevel = 0;
 	plot_contours = MB_NO;
 	plot_triangles = MB_NO;
-        use_stdin = MB_YES;
 
 	/* deal with mb options */
 	while ((c = getopt(argc, argv, "VvHhA:a:b:C:c:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:F:MJ:KOPR:UX:x:Y:y:Z:z:#:")) != -1)
@@ -299,8 +306,7 @@ char **argv;
 			break;
 		case 'I':
 		case 'i':
-			sscanf (optarg,"%s", filelist);
-			use_stdin = MB_NO;
+			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
 		case 'J':
@@ -446,8 +452,7 @@ char **argv;
 		fprintf(stderr,"dbg2       etime_i[6]:       %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:         %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:          %f\n",timegap);
-		fprintf(stderr,"dbg2       file list:        %s\n",filelist);
-		fprintf(stderr,"dbg2       use_stdin:        %d\n",use_stdin);
+		fprintf(stderr,"dbg2       read file:        %s\n",read_file);
 		fprintf(stderr,"dbg2       bounds[0]:        %f\n",bounds[0]);
 		fprintf(stderr,"dbg2       bounds[1]:        %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:        %f\n",bounds[2]);
@@ -593,33 +598,34 @@ char **argv;
 	/* set colors */
 	set_colors(ncolor,red,green,blue);
 
+	/* determine whether to read one file or a list of files */
+	if (format < 0)
+		read_datalist = MB_YES;
+
 	/* open file list */
 	nping_read = 0;
-	if (use_stdin == MB_NO)
-	if ((fp = fopen(filelist,"r")) == NULL)
+	if (read_datalist == MB_YES)
+	    {
+	    if ((fp = fopen(read_file,"r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
-			filelist);
+			read_file);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
 		}
-
-	/* read first file */
-	if (use_stdin == MB_NO)
-		{
-		if (fgets(line,128,fp) != NULL
-			&& sscanf(line,"%s %d",file,&format) == 2)
-			read_data = MB_YES;
-		else
-			read_data = MB_NO;
-		}
-	else
-		{
-		strcpy(file,"stdin");
+	    if (fgets(line,128,fp) != NULL
+		&& sscanf(line,"%s %d",file,&format) == 2)
 		read_data = MB_YES;
-		}
+	    else
+		read_data = MB_NO;
+	    }
+	else
+	    {
+	    strcpy(file,read_file);
+	    read_data = MB_YES;
+	    }
 
 	/* loop over files in file list */
 	if (verbose == 1) 
@@ -830,7 +836,7 @@ char **argv;
 	status = mb_contour_deall(verbose,swath_plot,&error);
 
 	/* figure out whether and what to read next */
-        if (use_stdin == MB_NO)
+        if (read_datalist == MB_YES)
                 {
                 if (fgets(line,128,fp) != NULL
                         && sscanf(line,"%s %d",file,&format) == 2)
@@ -845,7 +851,7 @@ char **argv;
 
 	/* end loop over files in list */
 	}
-	if (use_stdin == MB_NO)
+	if (read_datalist == MB_YES)
 		fclose (fp);
 
 	/* end plot */
