@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_xtfr8101.c,v 5.4 2002-09-19 01:12:39 caress Exp $
+ *	$Id: mbr_xtfr8101.c,v 5.5 2002-09-25 20:41:04 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 26, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/09/19 01:12:39  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.3  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -87,7 +90,7 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.4 2002-09-19 01:12:39 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.5 2002-09-25 20:41:04 caress Exp $";
 	char	*function_name = "mbr_register_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -217,7 +220,7 @@ int mbr_info_xtfr8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.4 2002-09-19 01:12:39 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.5 2002-09-25 20:41:04 caress Exp $";
 	char	*function_name = "mbr_info_xtfr8101";
 	int	status = MB_SUCCESS;
 
@@ -286,7 +289,7 @@ int mbr_info_xtfr8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.4 2002-09-19 01:12:39 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.5 2002-09-25 20:41:04 caress Exp $";
 	char	*function_name = "mbr_alm_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1409,6 +1412,21 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		    *error = MB_ERROR_EOF;
 		    done = MB_YES;
 		    }
+		    
+		/* check for corrupted record */
+		if (pingchanportheader->ChannelNumber 
+			> (fileheader->NumberOfSonarChannels 
+				+ fileheader->NumberOfBathymetryChannels - 1))
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		else if (pingchanportheader->NumSamples 
+			> fileheader->chaninfo[pingchanportheader->ChannelNumber].SamplesPerChannel)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 
 		/* read port sidescan data */
 		if (status == MB_SUCCESS)
@@ -1506,6 +1524,21 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		    *error = MB_ERROR_EOF;
 		    done = MB_YES;
 		    }
+		    
+		/* check for corrupted record */
+		if (pingchanstbdheader->ChannelNumber 
+			> (fileheader->NumberOfSonarChannels 
+				+ fileheader->NumberOfBathymetryChannels - 1))
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		else if (pingchanstbdheader->NumSamples 
+			> fileheader->chaninfo[pingchanstbdheader->ChannelNumber].SamplesPerChannel)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 
 		/* read starboard sidescan data */
 		if (status == MB_SUCCESS)
@@ -1681,7 +1714,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		read_len = fread(line,1,242,mb_io_ptr->mbfp);
 		if (read_len == 242)
 		    {
-		    /* parse the rest of the sidescan header */
+		    /* parse the rest of the bathymetry header */
 		    index = 0;
 
 		    mb_get_binary_short(MB_YES, &line[index], (short int *)&(bathheader->Year)); 
@@ -2054,8 +2087,11 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	    /* else read rest of unknown packet */
 	    else if (status == MB_SUCCESS)
 		{
-		for (i=0;i<packetheader.NumBytesThisRecord-14;i++)
+		for (i=0;i<((int)packetheader.NumBytesThisRecord)-14;i++)
+			{
 			read_len = fread(line,1,1,mb_io_ptr->mbfp);
+fprintf(stderr,"i:%d read_len:%d\n",i,read_len);
+			}
 		if (read_len != 1)
 		    {
 		    status = MB_FAILURE;
