@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.17 1995-07-13 19:13:36 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.18 1995-07-18 15:38:29 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1995/07/13  19:13:36  caress
+ * Intermediate check-in during major bug-fixing flail.
+ *
  * Revision 4.16  1995/06/06  13:28:49  caress
  * Explicit cast to int on line 1298 fixes warning under Solaris 2.4
  *
@@ -111,7 +114,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.17 1995-07-13 19:13:36 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.18 1995-07-18 15:38:29 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1125,7 +1128,6 @@ int	*error;
 				done = MB_YES;
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
-fprintf(stderr, "BROKEN RECORD!\n");
 				}
 			}
 		}
@@ -2463,7 +2465,7 @@ int	*error;
 		else
 			status = fprintf(mbfp,"N");
 		idegrees = (int) degrees;
-		minutes = (int) (600000.0*(degrees - idegrees));
+		minutes = (int) (600000.0*(degrees - idegrees) + 0.5);
 		status = fprintf(mbfp,"%2.2d",idegrees);
 		status = fprintf(mbfp,"%6.6d",minutes);
 		degrees = data->longitude;
@@ -2479,7 +2481,7 @@ int	*error;
 		else
 			status = fprintf(mbfp,"E");
 		idegrees = (int) degrees;
-		minutes = (int) (600000.0*(degrees - idegrees));
+		minutes = (int) (600000.0*(degrees - idegrees) + 0.5);
 		status = fprintf(mbfp,"%3.3d",idegrees);
 		status = fprintf(mbfp,"%6.6d",minutes);
 		status = fprintf(mbfp,"%+07d",data->speed);
@@ -2730,7 +2732,7 @@ int	*error;
 		else
 			status = fprintf(mbfp,"N");
 		idegrees = (int) degrees;
-		minutes = (int) (600000.0*(degrees - idegrees));
+		minutes = (int) (600000.0*(degrees - idegrees) + 0.5);
 		status = fprintf(mbfp,"%2.2d",idegrees);
 		status = fprintf(mbfp,"%6.6d",minutes);
 		degrees = data->longitude;
@@ -2746,7 +2748,7 @@ int	*error;
 		else
 			status = fprintf(mbfp,"E");
 		idegrees = (int) degrees;
-		minutes = (int) (600000.0*(degrees - idegrees));
+		minutes = (int) (600000.0*(degrees - idegrees) + 0.5);
 		status = fprintf(mbfp,"%3.3d",idegrees);
 		status = fprintf(mbfp,"%6.6d",minutes);
 		status = fprintf(mbfp,"%+07d",data->speed);
