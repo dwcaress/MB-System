@@ -1,4 +1,4 @@
-.TH mbcontour l "15 December 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbcontour l "23 March 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -13,7 +13,7 @@ Version 5.0
 \fB-C\fIcontourfile\fP \fB-c\fIcopies\fP 
 \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP 
 \fB-E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-f\fIformat\fP \fB-F\fIred/green/blue\fP \fB-G\fIname_hgt\fP  
+\fB-f\fIformat\fP \fB-F\fIred/green/blue\fP \fB-G\fIname_hgt[/name_perp]\fP  
 \fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP 
 \fB-N\fInplot\fP \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
 \fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP 
@@ -163,10 +163,13 @@ is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
 Sets the color used for Frame and annotation. [Default is black]
 .TP
 .B \-G
-\fIname_hgt\fP
+\fIname_hgt[/name_perp]\fP
 .br
 Turns on swath file name annotation. The \fIname_hgt\fP parameter
-sets the height of the lettering in inches. The \fB-G\fP option implies 
+sets the height of the lettering in inches. By default, the file
+name will be plotted along the shiptrack. If the \fIname_perp\fP
+parameter is given as 1, then the file name will be plotted
+perpendicular to the shiptrack. The \fB-G\fP option implies 
 track plotting, so if the \fB-D\fP option is not also specified, then
 track plotting will be turned on with default parameters.
 Default: \fIname_hgt\fP = 0.1.

@@ -418,6 +418,11 @@ of the surrounding unselected data. If the selection extends to the
 edge of the data, the selected data will be replaced by the first
 unselected datum on the other side.
 .TP
+.B Interpolate Repeats
+This button causes any repeated values in the selected data to be 
+replaced by linear interpolation between the first of the repeated
+values and the next different value. 
+.TP
 .B Revert Selection
 This button causes the selected data to revert to their
 original values.

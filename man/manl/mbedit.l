@@ -1,4 +1,4 @@
-.TH mbedit l "16 March 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit l "23 March 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -47,10 +47,17 @@ be supported for \fBMB-System\fP version 5.0. However,
 no improvements will be made to the old program, and
 it may be dropped from later \fBMB-System\fP distributions.
 
-The \fBmbedit\fP display consists of several 
-bathymetry profiles plotted within
+The default \fBmbedit\fP display consists of several 
+bathymetry acrosstrack profiles plotted with vertical
+offsets between each profile (in waterfall fashion). The
+profiles are plotted within
 a box with annotation showing the scaling of the x 
-(acrosstrack distance) and y (depth) axes. The number of pings displayed,
+(acrosstrack distance) and y (depth) axes. Alternatively, the
+display can show the profiles without the waterfall offsets,
+with the view being either in the alongtrack direction, or in
+the acrosstrack dimension.
+
+The number of pings displayed,
 and the width, vertical exageration, and annotation of the plot 
 are all set by the user. Unflagged bathymetry points
 are shown as small filled black squares, and flagged bathymtetry points
@@ -283,6 +290,9 @@ stacked bathymetry profiles.
 .TP
 .B View
 This button accesses a pulldown menu with several toggle buttons: 
+\fBWaterfall View\fP, 
+\fBAlongtrack View\fP, 
+\fBAcrosstrack View\fP, 
 \fBShow Flagged Profile\fP, 
 \fBShow Bottom Detect Algorithms\fP, 
 \fBWide Bathymetry Profiles\fP, 
@@ -298,11 +308,28 @@ This button accesses a pulldown menu with several toggle buttons:
 \fBPlot Roll\fP, 
 \fBPlot Pitch\fP, and
 \fBPlot Heave\fP.
-The first two toggle buttons set simple display options
+The first three toggle buttons set the view mode, which may
+be a waterfall view, an alongtrack view, or an acrosstrack
+view. The next two toggle buttons set simple display options
 and may be set or unset individually.
 The remaining toggle buttons control the display plot
-modes; only one mode and therefore one toggle button may
+modes; only one mode and therefore one of these toggle buttons may
 be set at any time.
+.TP
+.B View->Waterfall View
+Sets the \fBmbedit\fP display so that the 
+bathymetry acrosstrack profiles are plotted with vertical
+offsets between each profile (in waterfall fashion). 
+.TP
+.B View->Alongtrack View
+Sets the \fBmbedit\fP display so that the 
+bathymetry acrosstrack profiles are viewed in the alongtrack
+direction without vertical offsets between the pings. 
+.TP
+.B View->Acrosstrack View
+Sets the \fBmbedit\fP display so that the 
+bathymetry acrosstrack profiles are viewed in the acrosstrack
+direction without vertical offsets between the pings. 
 .TP
 .B View->Show Flagged Profile
 This toggle allows the user to specify whether the acrosstrack
@@ -761,6 +788,21 @@ Pressing one of these keys sets the edit mode to "info" so that
 clicking the left mouse button will cause information about the
 nearest beam to be displayed above the bathymetry profile box.
 The edit mode can also be set using the \fBMode\fP toggle buttons.
+.TP
+.B '2'
+Sets the \fBmbedit\fP display so that the 
+bathymetry acrosstrack profiles are plotted with vertical
+offsets between each profile (in waterfall fashion). 
+.TP
+.B '3'
+Sets the \fBmbedit\fP display so that the 
+bathymetry acrosstrack profiles are viewed in the alongtrack
+direction without vertical offsets between the pings. 
+.TP
+.B '4'
+Sets the \fBmbedit\fP display so that the 
+bathymetry acrosstrack profiles are viewed in the acrosstrack
+direction without vertical offsets between the pings. 
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbprocess\fP(l), \fBmbset\fP(l), 
@@ -768,5 +810,4 @@ The edit mode can also be set using the \fBMode\fP toggle buttons.
 
 .SH BUGS
 This program is only fun when the data are good. The main
-window for \fBmbedit\fP is too large for use on screens
-smaller than 1024 X 768 pixels.
+window for \fBmbedit\fP is not resizeable.
