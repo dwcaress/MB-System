@@ -1,0 +1,1 @@
+#define IRIX64

@@ -1,0 +1,101 @@
+#     The MB-system:	Makefile.template  6/1/2002
+#	$Id: Makefile.template,v 5.0 2002-06-02 01:35:51 caress Exp $
+#
+#     Copyright (c) 2002 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, CA 95039
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
+#       Lamont-Doherty Earth Observatory
+#       Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system at the src/surf directory level
+# Author:	D. W. Caress
+# Date:		June 1, 2002
+#
+# $Log: not supported by cvs2svn $
+#
+#
+
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+# 
+# Compilers 
+CC = cc
+#
+# Compile and load flags:
+CFLAGS = -g -DIRIX
+ARCHIVE = ar rcv
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
+
+LIBDIR = ../../lib
+INCDIR = ../../include
+MANDIR = ../../man/manl
+
+### make all makes the sapi library, man page, and associated include files
+all:	$(LIBDIR)/libsapi.a \
+	$(INCDIR)/sapi.h $(INCDIR)/surf.h 
+
+### make clean removes the object files
+clean:
+	rm -f *.o
+
+### put together the library
+$(LIBDIR)/libsapi.a:	mem_surf.o pb_math.o sapi_build.o \
+		sapi_data.o sapi_files.o sapi_globals.o \
+		sapi_simple.o util_surf.o xdr_surf.o
+	$(ARCHIVE) $(LIBDIR)/libsapi.a \
+		mem_surf.o pb_math.o sapi_build.o \
+		sapi_data.o sapi_files.o sapi_globals.o \
+		sapi_simple.o util_surf.o xdr_surf.o
+	ranlib $(LIBDIR)/libsapi.a
+
+
+### compile the source files
+mem_surf.o:      mem_surf.c \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) mem_surf.c
+pb_math.o:      pb_math.c  \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) pb_math.c
+sapi_build.o:      sapi_build.c  \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) sapi_build.c
+sapi_data.o:      sapi_data.c  \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) sapi_data.c
+sapi_files.o:      sapi_files.c  \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) sapi_files.c
+sapi_globals.o:      sapi_globals.c  \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) sapi_globals.c
+sapi_simple.o:      sapi_simple.c  \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) sapi_simple.c
+util_surf.o:      util_surf.c  \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) util_surf.c
+xdr_surf.o:      xdr_surf.c  \
+		mem_surf.h sapi.h xdr_surf.h \
+		pb_math.h surf.h util_surf.h
+	$(CC) -c $(CFLAGS) xdr_surf.c
+
+### copy the include files to the include file directory
+$(INCDIR)/sapi.h:	sapi.h
+	cp sapi.h $(INCDIR)/sapi.h
+	chmod 664 $(INCDIR)/sapi.h
+$(INCDIR)/surf.h:	surf.h
+	cp surf.h $(INCDIR)/surf.h
+	chmod 664 $(INCDIR)/surf.h
+
