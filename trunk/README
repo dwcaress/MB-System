@@ -7,7 +7,7 @@ swath sonar data. Version 4.6 includes significant enhancements
 relative to version 4.5. 
 
 The primary enhancements for version 4.6 include support
-for two new data formats and a large number of bug fixes.
+for four new data formats and a large number of bug fixes.
 
 The first newly supported format is the Generic Sensor 
 Format (GSF) developed by Science Applications International 
@@ -17,6 +17,12 @@ number of different sonars.
 
 The second new format is MSTIFF, a TIFF file variant used
 in conjunction with PC Sea Scan towed sidescan sonars.
+
+The two additional new formats involve data from Simrad
+EM300 and EM3000 sonars. The raw vendor format for the
+current generation of Simrad sonars is supported as MBIO 
+format 56. A similar, but enhanced processing/archiving format
+is supported as MBIO format 57.
 
 Minor enhancements and bug fixes include:
 
@@ -47,12 +53,17 @@ have the major parameters defined at the beginning as
 environment variables. This makes editing of the scripts
 easier.
 
+The program mbnavedit now operates on the asynchronous
+navigation data records in Simrad vendor formats
+(MBIO formats 51, 52, 53, 55, and 56), allowing
+the navigation to actually be edited.
+
 Of course, a larger number of minor bug fixes are also 
 incorporated in the new release.
 
 RELEASE DATE:
 ------------
-October 6, 1998
+December 17, 1998
 
 Authors:
 --------
@@ -321,10 +332,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.15 1998-10-05 22:12:48 caress Exp $
+RCS ID: $Id: README,v 4.16 1998-12-17 23:09:42 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.15  1998/10/05  22:12:48  caress
+# MB-System version 4.6beta
+#
 # Revision 4.14  1997/09/15  21:33:33  caress
 # Fixed typo.
 #
