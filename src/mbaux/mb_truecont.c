@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $
+ *    $Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -68,7 +68,7 @@ int mb_contour_init(
 		double	time_tick_len,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -94,7 +94,8 @@ int mb_contour_init(
 			plot_triangles);
 		fprintf(stderr,"dbg2       plot track:       %d\n",
 			plot_track);
-		fprintf(stderr,"dbg2       contour interval: %f\n",contour_int);		fprintf(stderr,"dbg2       color interval:   %f\n",color_int);
+		fprintf(stderr,"dbg2       contour interval: %f\n",contour_int);
+		fprintf(stderr,"dbg2       color interval:   %f\n",color_int);
 		fprintf(stderr,"dbg2       tick interval:    %f\n",tick_int);
 		fprintf(stderr,"dbg2       label interval:   %f\n",label_int);
 		fprintf(stderr,"dbg2       tick length:      %f\n",tick_len);
@@ -332,7 +333,7 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -468,7 +469,7 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -496,6 +497,43 @@ int mb_tcontour(
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       data->contour_algorithm: %d\n",data->contour_algorithm);
+		fprintf(stderr,"dbg2       data->plot_contours:     %d\n",data->plot_contours);
+		fprintf(stderr,"dbg2       data->plot_triangles:    %d\n",data->plot_triangles);
+		fprintf(stderr,"dbg2       data->plot_track:        %d\n",data->plot_track);
+		fprintf(stderr,"dbg2       data->contour_int:      %f\n",data->contour_int);
+		fprintf(stderr,"dbg2       data->color_int:        %f\n",data->color_int);
+		fprintf(stderr,"dbg2       data->tick_int:         %f\n",data->tick_int);
+		fprintf(stderr,"dbg2       data->label_int:        %f\n",data->label_int);
+		fprintf(stderr,"dbg2       data->tick_len:         %f\n",data->tick_len);
+		fprintf(stderr,"dbg2       data->label_hgt:        %f\n",data->label_hgt);
+		fprintf(stderr,"dbg2       data->label_spacing:    %f\n",data->label_spacing);
+		fprintf(stderr,"dbg2       data->ncolor:           %d\n",data->ncolor);
+		fprintf(stderr,"dbg2       data->nlevel:           %d\n",data->nlevel);
+		fprintf(stderr,"dbg2       data->nlevelset:        %d\n",data->nlevelset);
+		if (data->nlevelset == MB_YES)
+		for (i=0;i<data->nlevel;i++)
+			{
+			fprintf(stderr,"dbg2          level[%3d]:  %f %d %d %d\n",
+				i,data->level_list[i],data->label_list[i],data->tick_list[i],data->color_list[i]);
+			}
+		fprintf(stderr,"dbg2       data->npings:     %d\n",data->npings);
+		fprintf(stderr,"dbg2       data->npings_max: %d\n",data->npings_max);
+		fprintf(stderr,"dbg2       data->beams_bath: %d\n",data->beams_bath);
+		for (i=0;i<data->npings;i++)
+			{
+			fprintf(stderr,"dbg2          ping[%4d]: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d:%6.6d %f %f %f %f\n",
+				i,data->pings[i].time_i[0],data->pings[i].time_i[1],data->pings[i].time_i[2],
+				data->pings[i].time_i[3],data->pings[i].time_i[4],data->pings[i].time_i[5],data->pings[i].time_i[6],
+				data->pings[i].time_d,data->pings[i].navlon,data->pings[i].navlat,data->pings[i].heading);
+			for (j=0;j<data->beams_bath;j++)
+				{
+				if (mb_beam_ok(data->pings[i].beamflag[j]))
+				fprintf(stderr,"dbg2          beam[%4d:%3d]:  %2d %f %f %f\n",
+					i,j,data->pings[i].beamflag[j],data->pings[i].bath[j],
+					data->pings[i].bathlon[j],data->pings[i].bathlat[j]);
+				}
+			}
 		}
 
 	/* put good bathymetry data into x arrays */
@@ -1149,7 +1187,7 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1181,6 +1219,43 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       data->contour_algorithm: %d\n",data->contour_algorithm);
+		fprintf(stderr,"dbg2       data->plot_contours:     %d\n",data->plot_contours);
+		fprintf(stderr,"dbg2       data->plot_triangles:    %d\n",data->plot_triangles);
+		fprintf(stderr,"dbg2       data->plot_track:        %d\n",data->plot_track);
+		fprintf(stderr,"dbg2       data->contour_int:      %f\n",data->contour_int);
+		fprintf(stderr,"dbg2       data->color_int:        %f\n",data->color_int);
+		fprintf(stderr,"dbg2       data->tick_int:         %f\n",data->tick_int);
+		fprintf(stderr,"dbg2       data->label_int:        %f\n",data->label_int);
+		fprintf(stderr,"dbg2       data->tick_len:         %f\n",data->tick_len);
+		fprintf(stderr,"dbg2       data->label_hgt:        %f\n",data->label_hgt);
+		fprintf(stderr,"dbg2       data->label_spacing:    %f\n",data->label_spacing);
+		fprintf(stderr,"dbg2       data->ncolor:           %d\n",data->ncolor);
+		fprintf(stderr,"dbg2       data->nlevel:           %d\n",data->nlevel);
+		fprintf(stderr,"dbg2       data->nlevelset:        %d\n",data->nlevelset);
+		if (data->nlevelset == MB_YES)
+		for (i=0;i<data->nlevel;i++)
+			{
+			fprintf(stderr,"dbg2          level[%3d]:  %f %d %d %d\n",
+				i,data->level_list[i],data->label_list[i],data->tick_list[i],data->color_list[i]);
+			}
+		fprintf(stderr,"dbg2       data->npings:     %d\n",data->npings);
+		fprintf(stderr,"dbg2       data->npings_max: %d\n",data->npings_max);
+		fprintf(stderr,"dbg2       data->beams_bath: %d\n",data->beams_bath);
+		for (i=0;i<data->npings;i++)
+			{
+			fprintf(stderr,"dbg2          ping[%4d]: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d:%6.6d %f %f %f %f\n",
+				i,data->pings[i].time_i[0],data->pings[i].time_i[1],data->pings[i].time_i[2],
+				data->pings[i].time_i[3],data->pings[i].time_i[4],data->pings[i].time_i[5],data->pings[i].time_i[6],
+				data->pings[i].time_d,data->pings[i].navlon,data->pings[i].navlat,data->pings[i].heading);
+			for (j=0;j<data->beams_bath;j++)
+				{
+				if (mb_beam_ok(data->pings[i].beamflag[j]))
+				fprintf(stderr,"dbg2          beam[%4d:%3d]:  %2d %f %f %f\n",
+					i,j,data->pings[i].beamflag[j],data->pings[i].bath[j],
+					data->pings[i].bathlon[j],data->pings[i].bathlat[j]);
+				}
+			}
 		}
 
 	/* zero flags */
