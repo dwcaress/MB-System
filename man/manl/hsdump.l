@@ -1,9 +1,9 @@
-.TH hsdump l "14 February 1995"
+.TH hsdump l "14 August 1995"
 .SH NAME
 \fBhsdump\fP - hsdump lists the information contained in Hydrosweep DS data files.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBhsdump\fP [\fB-F\fIformat \fB-I\fIinfile \fB-O\fIkind \fB-V -H\fP]

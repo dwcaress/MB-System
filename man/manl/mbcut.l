@@ -1,11 +1,11 @@
-.TH mbcut l "14 February 1995"
+.TH mbcut l "14 August 1995"
 .SH NAME
 \fBmbcut\fP - Removes data in specified regions of a swath,
 defined either in terms of acrosstrack distance or 
 beam or pixel numbers.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbcut\fP [\fB-A\fIkind/mode/min/max\fP \fB-B\fIyr/mo/da/hr/mn/sc 

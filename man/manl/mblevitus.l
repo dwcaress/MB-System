@@ -1,11 +1,11 @@
-.TH mblevitus l "14 February 1995"
+.TH mblevitus l "14 August 1995"
 .SH NAME
 \fBmblevitus\fP - Create a water velocity profile which is representative
 of the mean annual water column for a specified 1 degree by 1 degree
 region.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmblevitus\fP [\fB-R\fIlon/lat \fB-O\fIoutfile \fB-V -H\fP]

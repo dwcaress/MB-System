@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	6/18/93
-#    $Id: mbm_rollerror.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
+#    $Id: mbm_rollerror.perl,v 4.3 1995-08-17 14:52:53 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,10 +33,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_rollerror.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
+#   $Id: mbm_rollerror.perl,v 4.3 1995-08-17 14:52:53 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.2  1995/05/12  17:43:23  caress
+# Made exit status values consistent with Unix convention.
+# 0: ok  nonzero: error
+#
 # Revision 4.1  1994/10/21  11:36:58  caress
 # Release V4.0
 #
@@ -94,11 +98,11 @@ open(FOUT,"> $corfile");
 while ($line1 = <F1>)
 	{
 	($time1, $dat) = $line1 =~ /(\S+)\s(\S+)/;
-#	print "time1:",$time1," dat:",$dat,"\n";
+	print "time1:",$time1," dat:",$dat,"\n";
 	$line2 = <F2>;
 	($time2, $flt) = $line2 =~ /(\S+)\s(\S+)/;
 	$res = $dat - $flt;
-#	print "time1:",$time1," dat:",$dat," time2:",$time2," flt:",$flt," res:",$res,"\n";
+	print "time1:",$time1," dat:",$dat," time2:",$time2," flt:",$flt," res:",$res,"\n";
 	print FOUT $time1,"\t",$res,"\n";
 	}
 close(F1);
@@ -106,7 +110,7 @@ close(F2);
 close(FOUT);
 
 # remove excess files
-`rm -f $datfile $fltfile`
+`rm -f $datfile $fltfile`;
 
 # Announce success whether it is deserved or not.
 print "All done!\n";

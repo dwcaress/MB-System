@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.23 1995-08-09 13:27:57 caress Exp $
+ *    $Id: mbgrid.c,v 4.24 1995-08-17 15:04:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Rerewrite:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.23  1995/08/09  13:27:57  caress
+ * Adapted to GMT version 3.
+ *
  * Revision 4.22  1995/05/17  21:51:20  caress
  * Stopped checking status of write_grd, as it seems nonsensical.
  *
@@ -191,7 +194,7 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.23 1995-08-09 13:27:57 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.24 1995-08-17 15:04:52 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -2160,8 +2163,31 @@ char **argv;
 			argc,argv,&error);
 
 		/* execute mbm_grdplot */
-		sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -C -V -L\"File grd_%s - %s:%s\"", 
-			fileroot, fileroot, title, zlabel);
+		if (datatype == MBGRID_DATA_BATHYMETRY)
+			{
+			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -C -D -V -L\"File grd_%s - %s:%s\"", 
+				fileroot, fileroot, title, zlabel);
+			}
+		else if (datatype == MBGRID_DATA_TOPOGRAPHY)
+			{
+			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -C -V -L\"File grd_%s - %s:%s\"", 
+				fileroot, fileroot, title, zlabel);
+			}
+		else if (datatype == MBGRID_DATA_AMPLITUDE)
+			{
+			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -W1/4 -S -V -L\"File grd_%s - %s:%s\"", 
+				fileroot, fileroot, title, zlabel);
+			}
+		else
+			{
+			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -W1/4 -S -V -L\"File grd_%s - %s:%s\"", 
+				fileroot, fileroot, title, zlabel);
+			}
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
 		plot_status = system(plot_cmd);
 		if (plot_status == -1)
 			{
@@ -2225,6 +2251,11 @@ char **argv;
 			/* execute mbm_grdplot */
 			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s_num -G1 -W1/2 -V -L\"File grd_%s - %s:%s\"", 
 				fileroot, fileroot, title, nlabel);
+			if (verbose)
+				{
+				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+					plot_cmd);
+				}
 			plot_status = system(plot_cmd);
 			if (plot_status == -1)
 				{
@@ -2286,6 +2317,11 @@ char **argv;
 			/* execute mbm_grdplot */
 			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s_sd -G1 -W1/2 -V -L\"File grd_%s - %s:%s\"", 
 				fileroot, fileroot, title, sdlabel);
+			if (verbose)
+				{
+				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+					plot_cmd);
+				}
 			plot_status = system(plot_cmd);
 			if (plot_status == -1)
 				{

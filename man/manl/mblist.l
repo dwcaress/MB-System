@@ -1,9 +1,9 @@
-.TH mblist l "14 February 1995"
+.TH mblist l "14 August 1995"
 .SH NAME
 \fBmblist\fP - List data in multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmblist\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIdumpmode 
@@ -136,6 +136,7 @@ of one or more of the following characters:
  	\fBE\fP  for bathymetry alongtrack distance (m)
  	\fBe\fP  for sidescan alongtrack distance (m)
  	\fBH\fP  for heading (degrees)
+ 	\fBh\fP  for course made good (degrees)
   	\fBJ\fP  for a time string (yyyy jd hh mm ss.ssssss) 
                  where jd is the julian day of the year
   	\fBj\fP  for a time string (yyyy jd dm ss.ssssss) 
@@ -146,6 +147,7 @@ of one or more of the following characters:
  	\fBm\fP  for time in decimal seconds since first record
  	\fBN\fP  for ping count
   	\fBS\fP  for speed (km/hr)
+  	\fBs\fP  for speed made good (km/hr)
   	\fBT\fP  for a time string (yyyy/mm/dd/hh/mm/ss)
  	\fBt\fP  for a time string (yyyy mm dd hh mm ss)
  	\fBU\fP  for unix time in integer seconds since 1/1/70 00:00:00

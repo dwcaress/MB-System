@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.0 1995-08-07 18:33:22 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.1 1995-08-17 14:58:12 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/08/07  18:33:22  caress
+ * First cut.
+ *
  *
  */
 
@@ -1157,9 +1160,17 @@ XtPointer call;
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	if (XmToggleButtonGetState(toggleButton_output_on))
+		{
 		output_mode = OUTPUT_MODE_OUTPUT;
+		XtManageChild(textField_output_file);
+		XtManageChild(label_filename);
+		}
 	else
+		{
 		output_mode = OUTPUT_MODE_BROWSE;
+		XtUnmanageChild(textField_output_file);
+		XtUnmanageChild(label_filename);
+		}
 }
 
 /*--------------------------------------------------------------------*/
@@ -1173,9 +1184,17 @@ XtPointer call;
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	if (XmToggleButtonGetState(toggleButton_output_off))
+		{
 		output_mode = OUTPUT_MODE_BROWSE;
+		XtUnmanageChild(textField_output_file);
+		XtUnmanageChild(label_filename);
+		}
 	else
+		{
 		output_mode = OUTPUT_MODE_OUTPUT;
+		XtManageChild(textField_output_file);
+		XtManageChild(label_filename);
+		}
 }
 
 /*--------------------------------------------------------------------*/
@@ -1535,5 +1554,40 @@ do_toggle_vru(w, client_data, call_data)
  XtPointer client_data;
  XtPointer call_data;
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+	int	screen_height;
+
+        XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+
+	plot_roll = XmToggleButtonGetState(toggleButton_vru);
+	plot_pitch = XmToggleButtonGetState(toggleButton_vru);
+	plot_heave = XmToggleButtonGetState(toggleButton_vru);
+
+	/* get and set size of canvas */
+	number_plots = 0;
+	if (plot_lon == MB_YES)
+		number_plots++;
+	if (plot_lat == MB_YES)
+		number_plots++;
+	if (plot_speed == MB_YES)
+		number_plots++;
+	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_roll == MB_YES)
+		number_plots++;
+	if (plot_pitch == MB_YES)
+		number_plots++;
+	if (plot_heave == MB_YES)
+		number_plots++;
+	screen_height = number_plots*plot_height;
+	if (screen_height <= 0)
+		screen_height = plot_height;
+	XtVaSetValues(drawingArea, 
+			XmNwidth, plot_width, 
+			XmNheight, screen_height, 
+			NULL);	
+
+	/* replot */
+	mbnavedit_plot_all();
 }
+/*--------------------------------------------------------------------*/
+

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.13 1995-08-07 17:31:39 caress Exp $
+ *    $Id: mbswath.c,v 4.14 1995-08-17 14:49:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,11 +21,15 @@
  *   Mode 3:  Bathymetry shaded by amplitude
  *   Mode 4:  amplitude
  *   Mode 5:  sidescan
+ *   Mode 6:  Bathymetry shaded by amplitude using cpt gray data
  *
  * Author:	D. W. Caress
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1995/08/07  17:31:39  caress
+ * Moved to GMT V3.
+ *
  * Revision 4.12  1995/07/13  19:15:53  caress
  * Fixed problems with footprints for sidescan.
  *
@@ -126,6 +130,7 @@
 #define	MBSWATH_BATH_AMP	3
 #define	MBSWATH_AMP		4
 #define	MBSWATH_SS		5
+#define	MBSWATH_BATH_AMP_CPT	6
 #define MBSWATH_FOOTPRINT_REAL	1
 #define MBSWATH_FOOTPRINT_FAKE	2
 
@@ -201,10 +206,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.13 1995-08-07 17:31:39 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.14 1995-08-17 14:49:26 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
-	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
+	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
 
 	extern char *optarg;
 	extern int optkind;
@@ -259,6 +264,11 @@ char **argv;
 	/* gmt control variables */
 	double	borders[4];
 	char	cptfile[128];
+	char	cptshadefile[128];
+	int	ampshademode = 0;
+	int	nshadelevel = 0;
+	double	*shadelevel;
+	int	*shadelevelgray;
 	double	magnitude = 1.0;
 	double	azimuth = 90.0;
 	int	ampscale_mode = 0;
@@ -284,6 +294,8 @@ char **argv;
 	double	clipx[4], clipy[4];
 
 	/* other variables */
+	int	r1, g1, b1, r2, g2, b2;
+	int	count;
 	int	i, j;
 	char	line[128];
 
@@ -298,6 +310,7 @@ char **argv;
 	format = -1;
         read_datalist = MB_NO;
 	strcpy (cptfile,"cpt");
+	strcpy (cptshadefile,"\0");
 	borders[0] = 0.0;
 	borders[1] = 0.0;
 	borders[2] = 0.0;
@@ -374,7 +387,7 @@ char **argv;
 		}
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:KL:l:MOPp:Q:R:S:s:T:t:UVvX:x:Y:y:Z:z:012")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:KL:l:MN:n:OPp:Q:R:S:s:T:t:UVvX:x:Y:y:Z:z:012")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -421,6 +434,12 @@ char **argv;
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf (optarg,"%s", cptshadefile);
+			ampshademode = 1;
 			flag++;
 			break;
 		case 'p':
@@ -481,6 +500,12 @@ char **argv;
 		exit(error);
 		}
 
+	/* adjust mode if ampshademode == 1 */
+	if (ampshademode == 1 && mode == MBSWATH_BATH_AMP)
+		{
+		mode = MBSWATH_BATH_AMP_CPT;
+		}
+
 	/* print starting message */
 	if (verbose == 1)
 		{
@@ -522,6 +547,8 @@ char **argv;
 		fprintf(stderr,"dbg2       borders[1]:       %f\n",borders[1]);
 		fprintf(stderr,"dbg2       borders[2]:       %f\n",borders[2]);
 		fprintf(stderr,"dbg2       borders[3]:       %f\n",borders[3]);
+		fprintf(stderr,"dbg2       cptfile:          %s\n",cptfile);
+		fprintf(stderr,"dbg2       cptshadefile:     %s\n",cptshadefile);
 		fprintf(stderr,"dbg2       shade magnitude:  %f\n",magnitude);
 		fprintf(stderr,"dbg2       shade azimuth:    %f\n",azimuth);
 		fprintf(stderr,"dbg2       amp scale mode:   %d\n",ampscale_mode);
@@ -578,6 +605,79 @@ char **argv;
 			program_name);
 		error = MB_ERROR_BAD_PARAMETER;
 		exit(error);
+		}
+
+	/* if overlaying amplitude on bathymetry and cptshadefile specified
+		read in grayscale cpt to modulate shading */
+	if (mode == MBSWATH_BATH_AMP_CPT)
+		{
+		/* open shade control cpt file */
+		if ((fp = fopen(cptshadefile,"r")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open shading control cpt file: %s\n",
+				cptshadefile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* count lines in file */
+		nshadelevel = 0;
+		while (fgets(line,128,fp) != NULL)
+			nshadelevel++;
+		nshadelevel++;
+		fclose(fp);
+
+		/* allocate memory */
+		status = mb_malloc(verbose,nshadelevel*sizeof(double),&shadelevel,&error);
+		status = mb_malloc(verbose,nshadelevel*sizeof(int),&shadelevelgray,&error);
+
+		/* reopen shade control cpt file */
+		if ((fp = fopen(cptshadefile,"r")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open shading control cpt file: %s\n",
+				cptshadefile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* read shading levels from file */
+		nshadelevel = 0;
+		while (fgets(line,128,fp) != NULL)
+			{
+			count = sscanf(line,"%lf %d %d %d %lf %d %d %d",
+				&shadelevel[nshadelevel], &r1, &g1, &b1, 
+				&shadelevel[nshadelevel+1], &r2, &g2, &b2);
+			shadelevelgray[nshadelevel] = (int)(r1 + g1 + b1)/3;
+			shadelevelgray[nshadelevel] = 
+				min(255, shadelevelgray[nshadelevel]);
+			shadelevelgray[nshadelevel] = 
+				max(0, shadelevelgray[nshadelevel]);
+			shadelevelgray[nshadelevel+1] = (int)(r2 + g2 + b2)/3;
+			shadelevelgray[nshadelevel+1] = 
+				min(255, shadelevelgray[nshadelevel+1]);
+			shadelevelgray[nshadelevel+1] = 
+				max(0, shadelevelgray[nshadelevel+1]);
+			if (count == 8)
+				nshadelevel++;
+			}
+		if (nshadelevel > 0)
+			nshadelevel++;
+		fclose(fp);
+
+		/* check if cpt data was read */
+		if (nshadelevel < 2)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to read proper shading control cpt data from file: %s\n",
+				cptshadefile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 		}
 
 	/* initialize plotting */
@@ -813,6 +913,7 @@ char **argv;
 		/* scale amplitudes if necessary */
 		if (error == MB_ERROR_NO_ERROR
 			&& (mode == MBSWATH_BATH_AMP
+			|| mode == MBSWATH_BATH_AMP_CPT
 			|| mode == MBSWATH_AMP)
 			&& ampscale_mode > 0)
 			{
@@ -915,10 +1016,14 @@ char **argv;
 
 			/* get shading */
 			if (mode == MBSWATH_BATH_RELIEF 
-				|| mode == MBSWATH_BATH_AMP)
+				|| mode == MBSWATH_BATH_AMP
+				|| mode == MBSWATH_BATH_AMP_CPT)
 				status = get_shading(verbose,mode,swath_plot,
 					mtodeglon,mtodeglat,
-					magnitude,azimuth,&error);
+					magnitude,azimuth,
+					nshadelevel, shadelevel, 
+					shadelevelgray,
+					&error);
 
 			/* plot data */
 			if (start == MB_YES)
@@ -1629,7 +1734,9 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int get_shading(verbose,mode,swath,mtodeglon,
-		mtodeglat,magnitude,azimuth,error)
+		mtodeglat,magnitude,azimuth,
+		nshadelevel, shadelevel, shadelevelgray, 
+		error)
 int	verbose;
 int	mode;
 struct swath *swath;
@@ -1637,6 +1744,9 @@ double	mtodeglon;
 double	mtodeglat;
 double	magnitude;
 double	azimuth;
+int	nshadelevel;
+double	*shadelevel;
+int	*shadelevelgray;
 int	*error;
 {
 	char	*function_name = "get_shading";
@@ -1650,7 +1760,8 @@ int	*error;
 	double	drvx, drvy;
 	double	sinx,cosy;
 	double	median;
-	int	i, j;
+	double	graylevel;
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1797,9 +1908,56 @@ int	*error;
 	      if (ping1->bath[j] > 0.0)
 		{
 
-		/* calculate directional derivative */
+		/* calculate shading */
 		if (ping1->amp[j] > 0)
 			ping1->bathshade[j] = magnitude*(ping1->amp[j] - median);
+		else
+			ping1->bathshade[j] = 0.0;
+
+		}
+	    }
+	  }
+
+	/* get shading from amplitude data */
+	if (mode == MBSWATH_BATH_AMP_CPT)
+	  {
+	  /* get median value from value entered as azimuth */
+	  median = azimuth;
+
+	  /* loop over the pings and beams */
+	  for (i=0;i<swath->npings;i++)
+	    {
+	    if (i > 0) ping0 = &swath->data[i-1];
+	    ping1 = &swath->data[i];
+	    if (i < swath->npings - 1) ping2 = &swath->data[i+1];
+	    for (j=0;j<swath->beams_bath;j++)
+	      if (ping1->bath[j] > 0.0)
+		{
+
+		/* calculate shading */
+		if (ping1->amp[j] > 0)
+			{
+			/* get shading value from cpt grayscale */
+			if (ping1->amp[j] < shadelevel[0])
+			    graylevel = shadelevelgray[0];
+			else if (ping1->amp[j] > shadelevel[nshadelevel-1])
+			    graylevel = shadelevelgray[nshadelevel-1];
+			else 
+			    {
+			    for (k=0;k<nshadelevel-1;k++)
+				{
+				if (ping1->amp[j] > shadelevel[k]
+				    && ping1->amp[j] <= shadelevel[k+1])
+				    {
+				    graylevel = shadelevelgray[k] 
+					+ (ping1->amp[j] - shadelevel[k])
+					*(shadelevelgray[k+1] - shadelevelgray[k])
+					/(shadelevel[k+1] - shadelevel[k]);
+				    }
+				}
+			    }
+			ping1->bathshade[j] = magnitude*(graylevel - median)/128.;
+			}
 		else
 			ping1->bathshade[j] = 0.0;
 
@@ -1882,8 +2040,10 @@ int	*error;
 		fprintf(stderr,"dbg2       nplot:      %d\n",nplot);
 		}
 
-	if (mode == MBSWATH_BATH || mode == MBSWATH_BATH_RELIEF
-		|| mode == MBSWATH_BATH_AMP)
+	if (mode == MBSWATH_BATH 
+		|| mode == MBSWATH_BATH_RELIEF
+		|| mode == MBSWATH_BATH_AMP 
+		|| mode == MBSWATH_BATH_AMP_CPT)
 		{
 		/* loop over all pings and beams and plot the good ones */
 		for (i=first;i<first+nplot;i++)
@@ -1899,7 +2059,8 @@ int	*error;
 					geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				get_rgb24(pingcur->bath[j],&red,&green,&blue);
 				if (mode == MBSWATH_BATH_RELIEF 
-					|| mode == MBSWATH_BATH_AMP)
+					|| mode == MBSWATH_BATH_AMP
+					|| mode == MBSWATH_BATH_AMP_CPT)
 					illuminate(pingcur->bathshade[j],
 						&red,&green,&blue);
 				status = plot_box(verbose,xx,yy,

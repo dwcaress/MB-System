@@ -1,9 +1,9 @@
-.TH MBPS l "14 February 1995"
+.TH MBPS l "14 August 1995"
 .SH NAME
 \fBmbps\fP - Generates a PostScript perspective plot of a piece of multibeam data.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbps\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-E\fIyr/mo/da/hr/mn/sc 

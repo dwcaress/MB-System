@@ -1,9 +1,9 @@
-.TH mbbath l "14 February 1995"
+.TH mbbath l "14 August 1995"
 .SH NAME
 \fBmbbath\fP - Generates bathymetry from travel times in multibeam data.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbbath\fP [\fB-A\fIangle\fP \fB-B\fIroll_bias\fP \fB-D\fIdraught\fP 

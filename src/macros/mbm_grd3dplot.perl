@@ -2,8 +2,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                     & eval 'exec perl -S $0 $argv:q'
                          if 0;
 #--------------------------------------------------------------------
-#    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.3 1995-08-17 14:52:53 caress Exp $
+#    The MB-system:	mbm_grd3dplot.perl	8/6/95
+#    $Id: mbm_grd3dplot.perl,v 4.0 1995-08-17 14:51:59 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -15,20 +15,19 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #--------------------------------------------------------------------
 #
 # Command:
-#   mbm_grdplot
+#   mbm_grd3dplot
 #
 # Purpose:
-#   Macro to generate a shellscript of GMT commands which, 
-#   when executed, will generate a Postscript plot of gridded 
-#   data.  Several styles of plots can be generated, including 
-#   color fill maps, contour maps, color fill maps overlaid with
-#   contours, shaded relief color maps, text labels, and xy data
-#   in lines or symbols. Five different color schemes are included.
-#   The plot will be scaled to fit on the specified page size 
-#   or, if the scale is user defined, the page size will be 
+#   Macro to generate a shellscript of GMT commands which, when
+#   executed, will generate a 3D perspective Postscript plot of 
+#   gridded data.  Several styles of plots can be generated,
+#   including color fill views, color shaded relief views, mesh 
+#   plot views, and text labels. Five different color schemes are
+#   included. The plot will be scaled to fit on the specified page 
+#   size or, if the scale is user defined, the page size will be 
 #   chosen in accordance with the plot size. The primary purpose 
 #   of this macro is to allow the simple, semi-automated
-#   production of nice looking maps with a few command line
+#   production of nice looking plots with a few command line
 #   arguments. For users seeking more control over the plot
 #   appearance, a number of additional optional arguments are
 #   provided. Truly ambitious users may edit the plot shellscript 
@@ -36,51 +35,40 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   macro.
 #
 # Basic Usage: 
-#   mbm_grdplot -Ifile [-Amagnitude[/azimuth] -C[contour_control] 
-#            -Gcolor_mode -H -Kintensity_file -Oroot -Ppagesize
+#   mbm_grd3dplot -Ifile [-A[magnitude/azimuth] 
+#            -C[contour_control] -Dflipcolor/flipshade 
+#            -Eview_az/view_el
+#            -Gcolor_mode -H -Kintensity_file 
+#            -Ndrape_file -Oroot -Ppagesize 
 #            -S[color/shade] -Uorientation -V 
-#            -Wcolor_style[/pallette[/ncolors]] ]
+#            -Wcolor_style[/pallette] ]
 #
 # Additional Options:
-#            [-Btickinfo -Dflipcolor/flipshade 
-#            -Jprojection[/scale | width] -Ltitle[:scale_label]
+#            [-Btickinfo 
+#            -Jprojection[/scale | width] -Ltitle[:scale_label] 
 #            -Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max]
 #
 # Miscellaneous Options:
-#            [-MGDgmtdef/value -MGFscale_loc";
+#            [-MGDgmtdef/value -FMGscale_loc 
 #            -MGL[f][x]lon0/lat0/slat/length[m]
 #            -MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text
-#            -MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]
-#            -MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]
-#            -MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]
+#            -MGU[/dx/dy/][label] -MVMmesh_pen -MVNnull ]
 #
 # Author:
 #   David W. Caress
 #   Lamont-Doherty Earth Observatory
 #   Palisades, NY  10964
-#   October 19, 1994
+#   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.3 1995-08-17 14:52:53 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.0 1995-08-17 14:51:59 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
-# Revision 4.2  1995/05/12  17:43:23  caress
-# Made exit status values consistent with Unix convention.
-# 0: ok  nonzero: error
-#
-# Revision 4.1  1995/02/14  19:50:31  caress
-# Version 4.2
-#
-# Revision 4.0  1994/10/21  11:49:39  caress
-# Release V4.0
-#
-# Revision 1.1  1994/10/21  11:36:58  caress
-# Initial revision
 #
 #
 #
-$program_name = "mbm_grdplot";
+$program_name = "mbm_grd3dplot";
 
 # set page size database
 @page_size_names = (  
@@ -187,15 +175,20 @@ $ncpt = 11;
 	@cptbg5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbb5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 
+# define degrees to radians conversion
+$PI = 3.1415926;
+$DTR = $PI / 180.0;
+
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('A:a:B:b:C%c%D%d%G%g%HhI:i:J:j:K:k:L:l:M+m+O:o:P:p:QqR:r:S%s%T%t%U:u:VvW:w:XxYyZ:z:');
+&MBGetopts('A:a:B:b:C%c%D%d%E:e:e:G%g%HhI:i:J+j+K:k:L:l:M+m+N:n:O:o:P:p:QqR:r:S%s%T%t%U:u:VvW:w:XxYyZ:z:');
 $shade_control = 	($opt_A || $opt_a);
 $tick_info = 		($opt_B || $opt_b);
 $contour_mode = 	($flg_C || $flg_c);
 $contour_control = 	($opt_C || $opt_c);
 $color_flip_mode = 	($flg_D || $flg_d);
 $color_flip_control = 	($opt_D || $opt_d);
+$view_control = 	($opt_E || $opt_e);
 $color_mode =   	($opt_G || $opt_g);
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
@@ -203,6 +196,7 @@ $map_scale =    	($opt_J || $opt_j);
 $file_intensity =    	($opt_K || $opt_k);
 $labels =    		($opt_L || $opt_l);
 $misc = 		($opt_M || $opt_m);
+$file_drape =    	($opt_N || $opt_n);
 $root =    		($opt_O || $opt_o);
 $pagesize = 		($opt_P || $opt_p);
 $no_view_ps = 		($opt_Q || $opt_q);
@@ -222,14 +216,13 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nMacro to generate a shellscript of GMT commands which, \n";
-	print "when executed, will generate a Postscript plot of gridded \n";
-	print "data.  Several styles of plots can be generated, including \n";
-	print "color fill maps, contour maps, color fill maps overlaid with\n";
-	print "contours, shaded relief color maps, text labels, and xy data\n";
-	print "in lines or symbols. Five different color schemes are included.\n";
-	print "The plot will be scaled to fit on the specified page size \n";
-	print "or, if the scale is user defined, the page size will be \n";
+	print "\nMacro to generate a shellscript of GMT commands which, when \n";
+	print "executed, will generate a 3D perspective Postscript plot of  \n";
+	print "gridded data.  Several styles of plots can be generated, \n";
+	print "including color fill views, color shaded relief views, mesh  \n";
+	print "plot views, and text labels. Five different color schemes are \n";
+	print "included. The plot will be scaled to fit on the specified page  \n";
+	print "size or, if the scale is user defined, the page size will be  \n";
 	print "chosen in accordance with the plot size. The primary purpose \n";
 	print "of this macro is to allow the simple, semi-automated \n";
 	print "production of nice looking maps with a few command line \n";
@@ -239,20 +232,21 @@ if ($help)
 	print "to take advantage of GMT capabilites not supported by this \n";
 	print "macro.\n";
 	print "\nBasic Usage: \n";
-	print "\t$program_name -Ifile [-Amagnitude[/azimuth] -C[contour_control] \n";
-	print "\t\t-Gcolor_mode -H -Kintensity_file -Oroot -Ppagesize -S[color/shade]\n";
-	print "\t\t-Uorientation -V -Wcolor_style[/pallette[/ncolors]] ]\n";
+	print "\t$program_name -Ifile [-Amagnitude[/azimuth] \n";
+	print "\t\t-C[contour_control] -Eview_az/view_el \n";
+	print "\t\t-Gcolor_mode -H -Kintensity_file \n";
+	print "\t\t-Ndrape_file -Oroot -Ppagesize \n";
+	print "\t\t-S[color/shade] -Uorientation -V\n";
+	print "\t\t-Wcolor_style[/pallette] ]\n";
 	print "Additional Options:\n";
-	print "\t\t[-Btickinfo -Dflipcolor/flipshade \n";
-	print "\t\t-Jprojection[/scale | width] -Ltitle[:scale_label]\n";
+	print "\t\t[-Btickinfo -Dflipcolor/flipshade\n";
+	print "\t\t-Jprojection[/scale | width] -Ltitle[:scale_label] \n";
 	print "\t\t-Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max]\n";
 	print "Miscellaneous Options:\n";
-	print "\t\t[-MGDgmtdef/value  -MGFscale_loc\n";
+	print "\t\t[-MGDgmtdef/value -MGFscale_loc\n";
 	print "\t\t-MGL[f][x]lon0/lat0/slat/length[m]\n";
 	print "\t\t-MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text\n";
-	print "\t\t-MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]\n";
-	print "\t\t-MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]\n";
-	print "\t\t-MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]\n";
+	print "\t\t-MGU[/dx/dy/][label] -MVMmesh_pen -MVNnull ]\n";
 	exit 0;
 	}
 
@@ -272,16 +266,16 @@ if ($file_intensity && ! -r $file_intensity)
 	print "\a";
 	die "\nSpecified intensity input file $file_intensity cannot be opened!\n$program_name aborted\n";
 	}
-if ($color_mode > 2 && !$file_intensity)
+if ($file_drape && ! -r $file_drape)
 	{
 	print "\a";
-	die "\nShading with intensity file set but no intensity input file specified!\n$program_name aborted\n";
+	die "\nSpecified drape input file $file_drape cannot be opened!\n$program_name aborted\n";
 	}
 
 # parse misc commands
 if ($misc)
 	{
-	@misc_cmd = split(/:/, $misc);
+	@misc_cmd = split(/:::::::/, $misc);
 	foreach $cmd (@misc_cmd) {
 
 		# deal with general options
@@ -351,90 +345,32 @@ if ($misc)
 			$unix_stamp_on = 1;
 			}
 
-		# deal with grdcontour options
+		# deal with grdview options
 		##############################
 
-		# set contour annotation interval
-		if ($cmd =~ /^[Cc][Aa]./)
+		# set grdview mesh pen attributes
+		if ($cmd =~ /^[Vv][Mm]./)
 			{
-			($contour_anot_int) = $cmd =~ 
-				/^[Cc][Aa](\S+)/;
+			($grdview_mesh_pen) = $cmd =~ 
+				/^[Vv][Mm](\S+)/;
 			}
 
-		# set contour gap specs
-		if ($cmd =~ /^[Cc][Gg]./)
+		# set grdview null plane level and color
+		if ($cmd =~ /^[Vv][Nn]./)
 			{
-			($contour_gap) = $cmd =~ 
-				/^[Cc][Gg](\S+)/;
-			}
-
-		# set contour point lower limit
-		if ($cmd =~ /^[Cc][Qq]./)
-			{
-			($contour_cut) = $cmd =~ 
-				/^[Cc][Qq](\S+)/;
-			}
-
-		# set contour ticks
-		if ($cmd =~ /^[Cc][Tt]/)
-			{
-			$contour_tick_on = 1;
-			}
-		elsif ($cmd =~ /^[Cc][Tt]./)
-			{
-			($contour_tick) = $cmd =~ 
-				/^[Cc][Tt](\S+)/;
-			$contour_tick_on = 1;
-			}
-
-		# set contour pen attributes
-		if ($cmd =~ /^[Cc][Ww]./)
-			{
-			($contour_pen) = $cmd =~ 
-				/^[Cc][Ww](\S+)/;
-			}
-
-		# deal with psxy options
-		##############################
-
-		# set xy symbol fill
-		if ($cmd =~ /^[Xx][Gg]./)
-			{
-			($xyfill) = $cmd =~ /^[Xx][Gg](.+)/;
-			}
-
-		# set xy data to be plotted
-		if ($cmd =~ /^[Xx][Ii]./)
-			{
-			($xyfile) = $cmd =~ /^[Xx][Ii](.+)/;
-			push(@xyfiles, $xyfile);
-			if (!$xysymbol)
+			($grdview_null) = $cmd =~ 
+				/^[Vv][Nn](\S+)/;
+			if (!$grdview_null)
 				{
-				$xysymbol = "N";
+				$grdview_null_no = 1;
 				}
-			if (!$xyfill)
-				{
-				$xyfill = "N";
-				}
-			if (!$xypen)
-				{
-				$xypen = "N";
-				}
-			push(@xysymbols, $xysymbol);
-			push(@xyfills, $xyfill);
-			push(@xypens, $xypen);
 			}
 
-		# set xy symbol
-		if ($cmd =~ /^[Xx][Ss]./)
+		# set grdview contour pen attributes
+		if ($cmd =~ /^[Vv][Ww]./)
 			{
-			($xysymbol) = $cmd =~ /^[Xx][Ss](.+)/;
-			}
-
-		# set xy pen
-		if ($cmd =~ /^[Xx][Ww]./)
-			{
-			($xypen) = $cmd =~ /^[Xx][Ww](.+)/;
+			($grdview_contour_pen) = $cmd =~ 
+				/^[Vv][Ww](\S+)/;
 			}
 		}
 	}
@@ -467,6 +403,7 @@ if ($shade_control)
 		($magnitude) = 
 			$shade_control =~ /^(\S+).*/;
 		}
+print "\nmagnitude:$magnitude azimuth:$azimuth\n";
 	}
 if ($file_intensity && !$color_mode)
 	{
@@ -483,6 +420,19 @@ if ($color_mode == 2 && !$magnitude)
 elsif ($color_mode == 3 && !$magnitude)
 	{
 	$magnitude = -0.4;
+	}
+if (!$view_control)
+	{
+	$view_control = "240/30";
+	($view_azimuth, $view_elevation) = $view_control
+		=~ /(\S+)\/(\S+)/;
+	$view_azimuth = "240";
+	$view_elevation = "30";
+	}
+else
+	{
+	($view_azimuth, $view_elevation) = $view_control
+		=~ /(\S+)\/(\S+)/;
 	}
 if ($color_control)
 	{
@@ -625,117 +575,59 @@ if (!$ps_viewer)
 	$ps_viewer = "ghostview";
 	}
 
-# see if data file is a grd file or a list of grdfiles
-@grdinfo = `grdinfo $file_data 2>&1`;
-while (@grdinfo)
-	{
-	$line = shift @grdinfo;
-	if ($line =~ /\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
-		{
-		$file_data_no_list = 1;
-		}
-	}
-if ($file_data_no_list)
-	{
-	push(@files_data, $file_data);
-	}
-else
-	{
-	if (open(FILEDATA,"<$file_data"))
-		{
-		while (<FILEDATA>)
-			{
-			chop($_);
-			push(@files_data, $_);
-			}
-		close FILEDATA;
-		}
-	}
-
-# see if intensity file is a grd file or a list of grdfiles
-if ($file_intensity)
-	{
-	@grdinfo = `grdinfo $file_intensity 2>&1`;
-	while (@grdinfo)
-		{
-		$line = shift @grdinfo;
-		if ($line =~ /\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
-			{
-			$file_intensity_no_list = 1;
-			}
-		}
-	if ($file_intensity_no_list)
-		{
-		push(@files_intensity, $file_intensity);
-		}
-	else
-		{
-		if (open(FILEDATA,"<$file_intensity"))
-			{
-			while (<FILEDATA>)
-				{
-				chop($_);
-				push(@files_intensity, $_);
-				}
-			close FILEDATA;
-			}
-		}
-	}
-
-# get limits of files using grdinfo
+# get limits of data file using grdinfo
 if (!$bounds || !$zbounds)
 	{
-	foreach $file_grd (@files_data) {
-
-	@grdinfo = `grdinfo $file_grd`;
+	@grdinfo = `grdinfo $file_data`;
 	while (@grdinfo)
 		{
 		$line = shift @grdinfo;
 		if ($line =~ 
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 			{
-			($xmin_f,$xmax_f) = $line =~ 
+			($xmin,$xmax) = $line =~ 
 				/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/;
 			}
 		if ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/)
 			{
-			($ymin_f,$ymax_f) = $line =~ 
+			($ymin,$ymax) = $line =~ 
 				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/;
 			}
 		if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/)
 			{
-			($zmin_f,$zmax_f) = $line =~ 
+			($zmin,$zmax) = $line =~ 
 				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
 			}
 		}
 
-	if (!$first_grd)
+	# check that there is data
+	if ($xmin >= $xmax || $ymin >= $ymax || $zmin >= $zmax)
 		{
-		$first_grd = 1;
-		$xmin = $xmin_f;
-		$xmax = $xmax_f;
-		$ymin = $ymin_f;
-		$ymax = $ymax_f;
-		$zmin = $zmin_f;
-		$zmax = $zmax_f;
+		print "\a";
+		die "The program grdinfo does not appear to have worked properly!\n$program_name aborted.\n"
 		}
-	else
+	}
+
+# get limits of drape data file using grdinfo
+if ($file_drape && !$zbounds)
+	{
+	@grdinfo = `grdinfo $file_drape`;
+	while (@grdinfo)
 		{
-		$xmin = &min($xmin, $xmin_f);
-		$xmax = &max($xmax, $xmax_f);
-		$ymin = &min($ymin, $ymin_f);
-		$ymax = &max($ymax, $ymax_f);
-		$zmin = &min($zmin, $zmin_f);
-		$zmax = &max($zmax, $zmax_f);
+		$line = shift @grdinfo;
+		if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/)
+			{
+			($zmin,$zmax) = $line =~ 
+				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
+			}
 		}
 
 	# check that there is data
-	if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f || $zmin_f >= $zmax_f)
+	if ($zmin >= $zmax)
 		{
 		print "\a";
-		die "The program grdinfo does not appear to have worked \nproperly with file $file_grd!\n$program_name aborted.\n"
+		die "The program grdinfo does not appear to have worked properly!\n$program_name aborted.\n"
 		}
-	}
 	}
 
 # use user defined geographic limits
@@ -809,6 +701,19 @@ if ($data_scale)
 # get user constraints on map scale 
 if ($map_scale)
 	{
+	# break up map_scale into -Jz and -Jproj
+	@J = split(/:::::::/, $map_scale);
+	if (scalar(@J) == 2 && $J[0] =~ /^-Jz.*/)
+		{
+		$map_zscale = $J1;
+		$map_scale = $J2;
+		}
+	elsif (scalar(@J) == 2)
+		{
+		$map_zscale = $J2;
+		$map_scale = $J1;
+		}
+
 	# sets $plot_scale or $plot_width if possible
 	&GetProjection;
 	}
@@ -870,8 +775,22 @@ if ($dxx == 0.0 && $dyy == 0.0)
 # figure out scaling issues
 if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 	{
-	$plot_width = $dxx;
-	$plot_height = $dyy;
+	# set axis lengths
+	$plot_width_xaxis = $dxx;
+	$plot_height_yaxis = $dyy;
+
+	# adjust plotscale for 3D
+	$x_axis_rot = &abs($dxx * cos($DTR * $view_azimuth));
+	$y_axis_rot = &abs($dyy * sin($DTR * $view_azimuth));
+	$plot_width_factor = ($x_axis_rot + $y_axis_rot) / $dxx;
+	$plot_width = $plot_width_factor * $plot_width_xaxis;
+	$plot_height = $plot_width_factor * $plot_height_yaxis;
+	if (!$map_zscale)
+		{
+		$map_zscale = 2.0/($zmax - $zmin);
+		}
+printf "\nx_axis_rot:%f y_axis_rot:%f factor:%f\n",
+$x_axis_rot,$y_axis_rot,$plot_scale_factor;
 
 	# decide which plot orientation to use
 	if ($orientation == 1)
@@ -1001,9 +920,23 @@ elsif ($use_scale)
 		$height = $page_height_in{$pagesize};
 		}
 
-	# set plot width
+	# set raw plot width
 	$plot_width = $dxx * $plot_scale;
 	$plot_height = $dyy * $plot_scale;
+
+	# adjust plotscale for 3D
+	$x_axis_rot = &abs($dxx * cos($DTR * $view_azimuth));
+	$y_axis_rot = &abs($dyy * sin($DTR * $view_azimuth));
+	$plot_scale_factor = $dxx / ($x_axis_rot + $y_axis_rot);
+	$plot_scale = $plot_scale_factor * $plot_scale;
+	if (!$map_zscale)
+		{
+		$map_zscale = 2.0/($zmax - $zmin);
+		}
+
+	# set plot width
+	$plot_width_xaxis = $plot_scale_factor * $plot_width;
+	$plot_height_yaxis = $plot_scale_factor * $plot_height;
 
 	# reset plot_scale if ratio required
 	if ($use_ratio)
@@ -1070,9 +1003,20 @@ elsif ($use_width)
 		$height = $page_height_in{$pagesize};
 		}
 
+	# adjust plotwidth for 3D (kluge)
+	$x_axis_rot = &abs($dxx * cos($DTR * $view_azimuth));
+	$y_axis_rot = &abs($dyy * sin($DTR * $view_azimuth));
+	$plots_width_factor = $dxx / ($x_axis_rot + $y_axis_rot);
+	$plot_width_xaxis = $plot_width_factor * $plot_width;
+	$plot_height_yaxis = $plot_width_factor * $plot_height;
+	if (!$map_zscale)
+		{
+		$map_zscale = 2.0/($zmax - $zmin);
+		}
+
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = "$projection_pars$separator$plot_width";
+	$projection_pars = "$projection_pars$separator$plot_width_xaxis";
 
 	# handle special case for linear projections
 	if ($geographic)
@@ -1182,6 +1126,12 @@ elsif ($color_mode)
 	$color_int = 1.02 * ($zmax - $zmin)/($ncolors_use - 1);
 	$color_start = $zmin - 0.01*($zmax - $zmin);
 	$color_end = $color_start + $color_int * ($ncolors_use - 1);
+	}
+
+# get null plane level
+if (!$grdview_null && !$grdview_null_no)
+	{
+	$grdview_null = "$zmin/200/200/200";
 	}
 
 # get colors to use by interpolating defined color pallette
@@ -1458,24 +1408,15 @@ elsif ($color_mode)
 		}
 	}
 
-# now loop over all of the grid files
-foreach $file_grd (@files_data) {
-
-# get intensity file
-if (@files_intensity)
-	{
-	$file_int = shift @files_intensity;
-	}
-
 # scale data if needed
-$file_use = $file_grd;
+$file_use = $file_data;
 if ($data_scale)
 	{
 	printf FCMD "#\n# Rescale data\n";
 	printf FCMD "echo Rescaling data by $data_scale...\n";
 	printf FCMD "echo Running grdmath...\n";
-	printf FCMD "grdmath $file_grd $data_scale x = $file_grd.scale\n";
-	$file_use = "$file_grd.scale";
+	printf FCMD "grdmath $file_data $data_scale x = $file_data.scale\n";
+	$file_use = "$file_data.scale";
 	}
 
 # get shading by illumination if needed
@@ -1484,13 +1425,13 @@ if ($color_mode == 2)
 	printf FCMD "#\n# Get shading array\n";
 	printf FCMD "echo Getting shading array...\n";
 	printf FCMD "echo Running grdgradient...\n";
-	printf FCMD "grdgradient $file_use -A$azimuth -G$file_grd.grad -N -M\n";
+	printf FCMD "grdgradient $file_use -A$azimuth -G$file_data.grad -N -M\n";
 	printf FCMD "echo Running grdhisteq...\n";
-	printf FCMD "grdhisteq $file_grd.grad -G$file_grd.eq -N\n";
+	printf FCMD "grdhisteq $file_data.grad -G$file_data.eq -N\n";
 	printf FCMD "echo Running grdmath...\n";
-	printf FCMD "grdmath $file_grd.eq $magnitude x = $file_grd.int\n";
-	printf FCMD "rm -f $file_grd.grad $file_grd.eq\n";
-	$file_shade = "$file_grd.int";
+	printf FCMD "grdmath $file_data.eq $magnitude x = $file_data.int\n";
+	printf FCMD "rm -f $file_data.grad $file_data.eq\n";
+	$file_shade = "$file_data.int";
 	}
 
 # get equalized shading by intensity file if needed
@@ -1499,96 +1440,17 @@ if ($color_mode == 3 && $file_intensity && $stretch_shade)
 	printf FCMD "#\n# Get shading array\n";
 	printf FCMD "echo Getting shading array...\n";
 	printf FCMD "echo Running grdhisteq...\n";
-	printf FCMD "grdhisteq $file_int -G$file_int.eq -N\n";
+	printf FCMD "grdhisteq $file_intensity -G$file_intensity.eq -N\n";
 	printf FCMD "echo Running grdmath...\n";
-	printf FCMD "grdmath $file_int.eq $magnitude x = $file_int.int\n";
-	printf FCMD "rm -f $file_int.eq\n";
-	$file_shade = "$file_int.int";
+	printf FCMD "grdmath $file_intensity.eq $magnitude x = $file_intensity.int\n";
+	printf FCMD "rm -f $file_intensity.eq\n";
+	$file_shade = "$file_intensity.int";
 	}
 # get shading by unaltered intensity file
-elsif ($color_mode == 3 && $file_int)
+elsif ($color_mode == 3 && $file_intensity)
 	{
-	$file_shade = $file_int;
+	$file_shade = $file_intensity;
 	}
-
-# do grdimage plot
-if ($color_mode)
-	{
-	printf FCMD "#\n# Make color image\n";
-	printf FCMD "echo Running grdimage...\n";
-	printf FCMD "grdimage $file_use -J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot -C$cptfile \\\n\t";
-	if ($color_mode > 1)
-		{
-		printf FCMD "-I$file_shade \\\n\t";
-		}
-	if ($dpi)
-		{
-		printf FCMD "-E$dpi \\\n\t";
-		}
-	if ($portrait)
-	    {
-	    printf FCMD "-P ";
-	    }
-	if ($first_gmt == 1)
-		{
-		$first_gmt = 0;
-		printf FCMD "$first\n";
-		}
-	else
-		{
-		printf FCMD "$middle\n";
-		}
-	}
-
-# do grdcontour plot
-if ($contour_mode)
-	{
-	printf FCMD "#\n# Make contour plot\n";
-	printf FCMD "echo Running grdcontour...\n";
-	printf FCMD "grdcontour $file_use -J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot \\\n\t";
-	printf FCMD "-C$contour_control \\\n\t";
-	printf FCMD "-L$zmin/$zmax -Wc1p \\\n\t";
-	if ($contour_anot_int)
-		{
-		printf FCMD "-A$contour_anot_int \\\n\t";
-		}
-	if ($contour_gap)
-		{
-		printf FCMD "-G$contour_gap \\\n\t";
-		}
-	if ($contour_cut)
-		{
-		printf FCMD "-Q$contour_cut \\\n\t";
-		}
-	if ($contour_tick_on && $contour_tick)
-		{
-		printf FCMD "-T$contour_tick \\\n\t";
-		}
-	elsif ($contour_tick_on)
-		{
-		printf FCMD "-T \\\n\t";
-		}
-	if ($contour_pen)
-		{
-		printf FCMD "-W$contour_pen \\\n\t";
-		}
-	if ($portrait)
-		{
-		printf FCMD "-P ";
-		}
-	if ($first_gmt == 1)
-		{
-		$first_gmt = 0;
-		printf FCMD "$first\n";
-		}
-	else
-		{
-		printf FCMD "$middle\n";
-		}
-	}
-} # end loop over grd data files
 
 # figure out labels
 $nlabels = 0;
@@ -1629,33 +1491,65 @@ else
 	{
 	# figure out some reasonable tick intervals for the basemap
 	&GetBaseTick;
-	$axes = "$base_tick/$base_tick:.\"$tlabel\":";
+	if ($view_azimuth >= 0.0 && $view_azimuth < 90.0)
+		{
+		$axes = "$base_tick/$base_tick:.\"$tlabel\":NEZ";
+		}
+	elsif ($view_azimuth >= 90.0 && $view_azimuth < 180.0)
+		{
+		$axes = "$base_tick/$base_tick:.\"$tlabel\":SEZ";
+		}
+	elsif ($view_azimuth >= 180.0 && $view_azimuth < 270.0)
+		{
+		$axes = "$base_tick/$base_tick:.\"$tlabel\":WSZ";
+		}
+	elsif ($view_azimuth >= 270.0 && $view_azimuth < 360.0)
+		{
+		$axes = "$base_tick/$base_tick:.\"$tlabel\":WNZ";
+		}
 	}
 
-# do xy plots
-for ($i = 0; $i < scalar(@xyfiles); $i++) 
+# do grdview plot
+if ($color_mode)
 	{
-	printf FCMD "#\n# Make xy data plot\n";
-	printf FCMD "echo Running psxy...\n";
-	printf FCMD "psxy $xyfiles[$i] \\\n\t";
-	printf FCMD "-J$projection$projection_pars \\\n\t";
+	printf FCMD "#\n# Make 3D view\n";
+	printf FCMD "echo Running grdview...\n";
+	printf FCMD "grdview $file_use \\\n\t";
+	printf FCMD "-J$projection$projection_pars -Jz$map_zscale \\\n\t";
+	printf FCMD "-E$view_control \\\n\t";
 	printf FCMD "-R$bounds_plot \\\n\t";
-	if ($xyfills[$i] ne "N")
+	if ($color_mode != 4)
 		{
-		printf FCMD "-G$xyfills[$i] \\\n\t";
+		printf FCMD "-C$cptfile \\\n\t";
 		}
-	if ($xysymbols[$i] ne "N")
+	if ($grdview_null)
 		{
-		printf FCMD "-S$xysymbols[$i] \\\n\t";
+		printf FCMD "-N$grdview_null \\\n\t";
 		}
-	if ($xypens[$i] ne "N")
+	if ($color_mode > 1 && $color_mode < 4)
 		{
-		printf FCMD "-W$xypens[$i] \\\n\t";
+		printf FCMD "-I$file_shade \\\n\t";
+		}
+	if ($file_drape)
+		{
+		printf FCMD "-G$file_drape \\\n\t";
+		}
+	if ($color_mode <= 3)
+		{
+		printf FCMD "-Qi$dpi \\\n\t";
+		}
+	elsif ($color_mode >= 4)
+		{
+		printf FCMD "-Qm \\\n\t";
+		}
+	if ($color_mode == 5)
+		{
+		printf FCMD "-W$grdview_contour_pen \\\n\t";
 		}
 	if ($portrait)
-		{
-		printf FCMD "-P ";
-		}
+	    {
+	    printf FCMD "-P ";
+	    }
 	if ($first_gmt == 1)
 		{
 		$first_gmt = 0;
@@ -1668,7 +1562,7 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 	}
 
 # do psscale plot
-if ($color_mode && $color_pallette != 5)
+if ($color_mode && $color_mode < 5 && $color_pallette != 5)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
@@ -1690,7 +1584,8 @@ if (@text)
 	{
 	printf FCMD "#\n# Make text labels\n";
 	printf FCMD "echo Running pstext...\n";
-	printf FCMD "pstext -J$projection$projection_pars \\\n\t";
+	printf FCMD "pstext -J$projection$projection_pars -Jz$map_zscale \\\n\t";
+	printf FCMD "-E$view_control \\\n\t";
 	printf FCMD "-R$bounds_plot \\\n\t";
 	printf FCMD "$middle <<EOT\n";
 	foreach $text_info (@text) {
@@ -1706,7 +1601,8 @@ if (@text)
 # do psbasemap plot
 printf FCMD "#\n# Make basemap\n";
 printf FCMD "echo Running psbasemap...\n";
-printf FCMD "psbasemap -J$projection$projection_pars \\\n\t";
+printf FCMD "psbasemap -J$projection$projection_pars -Jz$map_zscale \\\n\t";
+	printf FCMD "-E$view_control \\\n\t";
 printf FCMD "-R$bounds_plot \\\n\t";
 printf FCMD "-B$axes \\\n\t";
 if ($length_scale)
@@ -1781,27 +1677,32 @@ if ($verbose)
 	print "\n  Plot Style:\n";
 	if ($color_mode == 1)
 		{
-		print "    Color Fill\n";
+		print "    3D Color Fill\n";
 		}
 	elsif ($color_mode == 2)
 		{
-		print "    Color Shaded Relief\n";
+		print "    3D Color Shaded Relief\n";
 		}
-	elsif ($color_mode == 3 && $file_intensity && $stretch_shade)
+	elsif ($color_mode == 3 && $file_intensity
+		&& $stretch_shade)
 		{
-		print "    Color Shaded by Equalized Intensity File\n";
+		print "    3D Color Shaded by Equalized Intensity File\n";
 		}
 	elsif ($color_mode == 3 && $file_intensity)
 		{
-		print "    Color Shaded by Unaltered Intensity File\n";
+		print "    3D Color Shaded by Unaltered Intensity File\n";
+		}
+	elsif ($color_mode == 4)
+		{
+		print "    3D Mesh\n";
+		}
+	elsif ($color_mode == 5)
+		{
+		print "    3D Mesh with Contours\n";
 		}
 	if ($contour_mode)
 		{
-		print "    Contours\n";
-		}
-	if (@xyfiles)
-		{
-		print "    XY Plots of ", scalar(@xyfiles), " Datasets\n";
+		print "    Contour Plot\n";
 		}
 	if ($color_mode && $color_pallette != 5)
 		{
@@ -1827,31 +1728,15 @@ if ($verbose)
 		print "    Unix time stamp\n";
 		}
 	print "\n  Input Files:\n";
-	if ($file_data_no_list)
-		{
-		print "    Data GRD File:            $file_data\n";
-		}
-	else
-		{
-		print "    Data GRD List File:       $file_data\n";
-		foreach $file_data (@files_data) {
-			print "    Data GRD File:            $file_data\n";
-		}
-		}
-	if ($file_intensity_no_list)
+	print "    Data GRD File:            $file_data\n";
+	if ($file_intensity)
 		{
 		print "    Intensity GRD File:       $file_intensity\n";
 		}
-	else
+	if ($file_drape)
 		{
-		print "    Intensity GRD List File:   $file_intensity\n";
-		foreach $file_int (@files_intensity) {
-			print "    Data GRD File:            $file_int\n";
+		print "    Drape GRD File:           $file_drape\n";
 		}
-		}
-	foreach $xyfile (@xyfiles) {
-		print "    XY Data File:             $xyfile\n";
-	}
 	print "\n  Output Files:\n";
 	print "    Output plot name root:    $root\n";
 	print "    Color pallette table:     $cptfile\n";
@@ -1860,10 +1745,13 @@ if ($verbose)
 	print "\n  Plot Attributes:\n";
 	printf "    Plot width:               %.4f\n", $plot_width;
 	printf "    Plot height:              %.4f\n", $plot_height;
+	printf "    X-axis length:            %.4f\n", $plot_width_xaxis;
+	printf "    Y-axis length:            %.4f\n", $plot_height_yaxis;
 	print "    Page size:                $pagesize\n";
 	print "    Page width:               $width\n";
 	print "    Page height:              $height\n";
 	print "    Projection:               -J$projection$projection_pars\n";
+	print "    Z Projection:             -Jz$map_zscale\n";
 	print "    Axes annotation:          $axes\n";
 	if ($portrait)
 		{
@@ -1878,20 +1766,12 @@ if ($verbose)
 		print "    Number of colors:         $ncolors\n";
 		print "    Color Pallette:           ", 
 			"@color_pallette_names[$color_pallette - 1]\n";
-		if ($color_flip && color_pallette < 4)
-			{
-			print "    Colors reversed\n";
-			}
-		elsif ($color_flip)
-			{
-			print "    Grayscale reversed\n";
-			}
-		if ($shade_flip)
-			{
-			print "    Shading reversed\n";
-			}
 		}
 	print "\n  Grid Data Attributes:\n";
+	if ($data_down)
+		{
+		print "    Data treated as positive downward\n";
+		}
 	if ($data_scale)
 		{
 		print "    Data scale factor:        $data_scale\n";
@@ -1907,13 +1787,7 @@ if ($verbose)
 		{
 		print "    Contour control:          $contour_control\n";
 		}
-	if ($color_mode && $stretch_color)
-		{
-		printf "    Color start datum:        %f\n", $color_start;
-		printf "    Color end datum:          %f\n", $color_end;
-		printf "    Histogram stretch applied to color pallette\n";
-		}
-	elsif ($color_mode)
+	if ($color_mode)
 		{
 		printf "    Color start datum:        %f\n", $color_start;
 		printf "    Color end datum:          %f\n", $color_end;
@@ -1923,7 +1797,7 @@ if ($verbose)
 		{
 		printf "    Image dots-per-inch:      $dpi\n";
 		}
-	if ($color_mode == 3 && !$file_intensity)
+	if ($color_mode == 3)
 		{
 		printf "    Shading Magnitude:        %f\n", $magnitude;
 		}
@@ -1932,22 +1806,8 @@ if ($verbose)
 		printf "    Illumination Azimuth:     %f\n", $azimuth;
 		printf "    Illumination Magnitude:   %f\n", $magnitude;
 		}
-	if (@xyfiles)
-		{
-		print "\n  Primary XY Plotting Controls:\n";
-		printf "    symbol     pen        fill       file\n";
-		printf "    ------     ---        ----       ----\n";
-		for ($i = 0; $i < scalar(@xyfiles); $i++) 
-			{
-			printf "    %-10s %-10s %-10s %s\n", 
-				$xysymbols[$i], $xypens[$i], 
-				$xyfills[$i], $xyfiles[$i];
-			}
-		}
-	if ($length_scale || $contour_anot_int 
-		|| $contour_anot_int || $contour_cut
-		|| $contour_gap || $contour_tick
-		|| $contour_pen)
+	if ($length_scale || $grdview_null
+		|| $grdview_mesh_pen || $grdview_contour_pen)
 		{
 		print "\n  Miscellaneous Plotting Controls:\n";
 		}
@@ -1955,29 +1815,17 @@ if ($verbose)
 		{
 		printf "    Length scale:             $length_scale\n";
 		}
-	if ($contour_anot_int)
+	if ($grdview_null)
 		{
-		printf "    Contour annotation:       $contour_anot_int\n";
+		printf "    Null plane level:         $grdview_null\n";
 		}
-	if ($contour_anot_int)
+	if ($grdview_mesh_pen)
 		{
-		printf "    Contour Annotation:       $contour_anot_int\n";
+		printf "    Mesh pen attributes:      $grdview_mesh_pen\n";
 		}
-	if ($contour_cut)
+	if ($grdview_contour_pen)
 		{
-		printf "    Contour cut threshold:    $contour_cut\n";
-		}
-	if ($contour_gap)
-		{
-		printf "    Contour gap control:      $contour_gap\n";
-		}
-	if ($contour_tick)
-		{
-		printf "    Contour tick control:     $contour_tick\n";
-		}
-	if ($contour_pen)
-		{
-		printf "    Contour pen attributes:   $contour_pen\n";
+		printf "    Contour pen attributes:   $grdview_contour_pen\n";
 		}
 	print "\n  GMT Default Values Reset in Script:\n";
 	foreach $gmt_def (@gmt_macro_defs) {
@@ -2016,6 +1864,23 @@ if ($execute)
 	}
 
 exit 0;
+
+#-----------------------------------------------------------------------
+sub abs {
+
+	# make local variables
+	local ($abs);
+	
+	# get the absolute value of the argument
+	if ($_[0] <= 0.0)
+		{
+		$abs = -$_[0];
+		}
+	else
+		{
+		$abs = $_[0];
+		}
+}
 
 #-----------------------------------------------------------------------
 sub min {
@@ -2614,7 +2479,7 @@ sub MBGetopts {
 		}
 		if (eval "\$opt_$first") {
 		    eval "\$opt_$first = \$opt_$first 
-				. \":\" . \$rest;";
+				. \":::::::\" . \$rest;";
 		}
 		else {
 		    eval "\$opt_$first = \$rest;";

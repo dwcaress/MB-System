@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.0 1995-08-07 18:33:22 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.1 1995-08-17 14:58:12 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/08/07  18:33:22  caress
+ * First cut.
+ *
  *
  */
 
@@ -51,6 +54,9 @@ struct mbnavedit_ping_struct
 	double	lat;
 	double	speed;
 	double	heading;
+	double	roll;
+	double	pitch;
+	double	heave;
 	double	lon_org;
 	double	lat_org;
 	double	speed_org;
@@ -93,7 +99,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.0 1995-08-07 18:33:22 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.1 1995-08-17 14:58:12 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -162,7 +168,7 @@ int	ndump_total = 0;
 int	first_read = MB_NO;
 
 /* plotting control variables */
-#define	NUMBER_PLOTS_MAX	4
+#define	NUMBER_PLOTS_MAX	7
 #define	DEFAULT_PLOT_WIDTH	837
 #define	DEFAULT_PLOT_HEIGHT	300
 #define	MBNAVEDIT_PICK_DISTANCE		50
@@ -173,7 +179,7 @@ double	plot_start_time;
 double	plot_end_time;
 int	nplot;
 int	mbnavedit_xgid;
-struct mbnavedit_plot_struct plot[4];
+struct mbnavedit_plot_struct plot[7];
 int	data_save;
 double	file_start_time_d;
 
@@ -857,6 +863,8 @@ int	hold;
 				ping[iping].time_i,ping[iping].time_d,
 				ping[iping].lon,ping[iping].lat,
 				ping[iping].speed,ping[iping].heading,
+				ping[iping].roll,ping[iping].pitch, 
+				ping[iping].heave, 
 				&error);
 			}
 		}
@@ -948,6 +956,8 @@ int mbnavedit_load_data()
 			ping[nlist].time_i,&ping[nlist].time_d,
 			&ping[nlist].lon,&ping[nlist].lat,
 			&ping[nlist].speed,&ping[nlist].heading,
+			&ping[nlist].roll,&ping[nlist].pitch,
+			&ping[nlist].heave,
 			&error);
 		if (status == MB_SUCCESS)
 			{
@@ -978,14 +988,16 @@ int mbnavedit_load_data()
 				{
 				fprintf(stderr,"\ndbg5  Next good data found in function <%s>:\n",
 					function_name);
-				fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f %11.6f %5.2f %5.1f\n",
+				fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f %11.6f %5.2f %5.1f %5.2f %5.2f %5.2f\n",
 					nlist,ping[nlist].id,ping[nlist].record,
 					ping[nlist].time_i[1],ping[nlist].time_i[2],
 					ping[nlist].time_i[0],ping[nlist].time_i[3],
 					ping[nlist].time_i[4],ping[nlist].time_i[5],
 					ping[nlist].time_i[6],
 					ping[nlist].lon, ping[nlist].lat, 
-					ping[nlist].speed, ping[nlist].heading);
+					ping[nlist].speed, ping[nlist].heading, 
+					ping[nlist].roll, ping[nlist].pitch, 
+					ping[nlist].heave);
 				}
 
 			/* increment counting variables */
@@ -2804,8 +2816,15 @@ int mbnavedit_plot_all()
 	double	speed_max;
 	double	heading_min;
 	double	heading_max;
+	double	roll_min;
+	double	roll_max;
+	double	pitch_min;
+	double	pitch_max;
+	double	heave_min;
+	double	heave_max;
 	double	center, range;
 	int	margin_x, margin_y;
+	int	iyzero;
 	int	iplot;
 	int	center_x, center_y;
 	int	swidth, sascent, sdescent;
@@ -2871,6 +2890,12 @@ int mbnavedit_plot_all()
 	speed_max = ping[current_id].speed;
 	heading_min = ping[current_id].heading;
 	heading_max = ping[current_id].heading;
+	roll_min = ping[current_id].roll;
+	roll_max = ping[current_id].roll;
+	pitch_min = ping[current_id].pitch;
+	pitch_max = ping[current_id].pitch;
+	heave_min = ping[current_id].heave;
+	heave_max = ping[current_id].heave;
 	for (i=current_id+1;i<current_id+nplot;i++)
 		{
 		lon_min = min(ping[i].lon, lon_min);
@@ -2915,6 +2940,12 @@ int mbnavedit_plot_all()
 			heading_max = max(ping[i].course_made_good, 
 				heading_max);
 			}
+		roll_min = min(ping[i].roll, roll_min);
+		roll_max = max(ping[i].roll, roll_max);
+		pitch_min = min(ping[i].pitch, pitch_min);
+		pitch_max = max(ping[i].pitch, pitch_max);
+		heave_min = min(ping[i].heave, heave_min);
+		heave_max = max(ping[i].heave, heave_max);
 		}
 
 	/* scale the min max a bit larger so all points fit on plots */
@@ -2943,6 +2974,12 @@ int mbnavedit_plot_all()
 	range = 0.55*(heading_max - heading_min);
 	heading_min = center - range;
 	heading_max = center + range;
+	roll_max = 1.1*max(fabs(roll_min), fabs(roll_max));
+	roll_min = -roll_max;
+	pitch_max = 1.1*max(fabs(pitch_min), fabs(pitch_max));
+	pitch_min = -pitch_max;
+	heave_max = 1.1*max(fabs(heave_min), fabs(heave_max));
+	heave_min = -heave_max;
 
 	/* make sure lon and lat scaled the same if both plotted */
 	if (plot_lon == MB_YES && plot_lat == MB_YES)
@@ -2982,6 +3019,24 @@ int mbnavedit_plot_all()
 		heading_min = center - 5;
 		heading_max = center + 5;
 		}
+	if ((roll_max - roll_min) < 2.0)
+		{
+		center = 0.5*(roll_min + roll_max);
+		roll_min = center - 1;
+		roll_max = center + 1;
+		}
+	if ((pitch_max - pitch_min) < 2.0)
+		{
+		center = 0.5*(pitch_min + pitch_max);
+		pitch_min = center - 1;
+		pitch_max = center + 1;
+		}
+	if ((heave_max - heave_min) < 0.02)
+		{
+		center = 0.5*(heave_min + heave_max);
+		heave_min = center - 0.01;
+		heave_max = center + 0.01;
+		}
 
 	/* print out information */
 	if (verbose >= 2)
@@ -2996,7 +3051,9 @@ int mbnavedit_plot_all()
 				ping[i].time_i[4],ping[i].time_i[5],
 				ping[i].time_i[6],
 				ping[i].lon, ping[i].lat, 
-				ping[i].speed, ping[i].heading);
+				ping[i].speed, ping[i].heading, 
+				ping[i].roll, ping[i].pitch, 
+				ping[i].heave);
 		}
 
 	/* get plot margins */
@@ -3137,6 +3194,105 @@ int mbnavedit_plot_all()
 			"(degrees)");
 		number_plots++;
 		}
+	if (plot_roll == MB_YES)
+		{
+		plot[number_plots].type = PLOT_ROLL;
+		plot[number_plots].ixmin = 1.75*margin_x;
+		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].iymin = plot_height - margin_y
+			+ number_plots*plot_height;
+		plot[number_plots].iymax = number_plots*plot_height 
+			+ margin_y;
+		plot[number_plots].xmin = time_min;
+		plot[number_plots].xmax = time_max;
+		plot[number_plots].ymin = roll_min;
+		plot[number_plots].ymax = roll_max;
+		plot[number_plots].xscale = 
+			(plot[number_plots].ixmax 
+			- plot[number_plots].ixmin)
+			/(plot[number_plots].xmax 
+			- plot[number_plots].xmin);
+		plot[number_plots].yscale = 
+			(plot[number_plots].iymax 
+			- plot[number_plots].iymin)
+			/(plot[number_plots].ymax 
+			- plot[number_plots].ymin);
+		plot[number_plots].xinterval = 100.0;
+		plot[number_plots].yinterval = 45.0;
+		sprintf(plot[number_plots].xlabel, 
+			"Time From Start of File (seconds)");
+		sprintf(plot[number_plots].ylabel1, 
+			"Roll");
+		sprintf(plot[number_plots].ylabel2, 
+			"(degrees)");
+		number_plots++;
+		}
+	if (plot_pitch == MB_YES)
+		{
+		plot[number_plots].type = PLOT_PITCH;
+		plot[number_plots].ixmin = 1.75*margin_x;
+		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].iymin = plot_height - margin_y
+			+ number_plots*plot_height;
+		plot[number_plots].iymax = number_plots*plot_height 
+			+ margin_y;
+		plot[number_plots].xmin = time_min;
+		plot[number_plots].xmax = time_max;
+		plot[number_plots].ymin = pitch_min;
+		plot[number_plots].ymax = pitch_max;
+		plot[number_plots].xscale = 
+			(plot[number_plots].ixmax 
+			- plot[number_plots].ixmin)
+			/(plot[number_plots].xmax 
+			- plot[number_plots].xmin);
+		plot[number_plots].yscale = 
+			(plot[number_plots].iymax 
+			- plot[number_plots].iymin)
+			/(plot[number_plots].ymax 
+			- plot[number_plots].ymin);
+		plot[number_plots].xinterval = 100.0;
+		plot[number_plots].yinterval = 45.0;
+		sprintf(plot[number_plots].xlabel, 
+			"Time From Start of File (seconds)");
+		sprintf(plot[number_plots].ylabel1, 
+			"Pitch");
+		sprintf(plot[number_plots].ylabel2, 
+			"(degrees)");
+		number_plots++;
+		}
+	if (plot_heave == MB_YES)
+		{
+		plot[number_plots].type = PLOT_HEAVE;
+		plot[number_plots].ixmin = 1.75*margin_x;
+		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].iymin = plot_height - margin_y
+			+ number_plots*plot_height;
+		plot[number_plots].iymax = number_plots*plot_height 
+			+ margin_y;
+		plot[number_plots].xmin = time_min;
+		plot[number_plots].xmax = time_max;
+		plot[number_plots].ymin = heave_min;
+		plot[number_plots].ymax = heave_max;
+		plot[number_plots].xscale = 
+			(plot[number_plots].ixmax 
+			- plot[number_plots].ixmin)
+			/(plot[number_plots].xmax 
+			- plot[number_plots].xmin);
+		plot[number_plots].yscale = 
+			(plot[number_plots].iymax 
+			- plot[number_plots].iymin)
+			/(plot[number_plots].ymax 
+			- plot[number_plots].ymin);
+		plot[number_plots].xinterval = 100.0;
+		plot[number_plots].yinterval = 45.0;
+		sprintf(plot[number_plots].xlabel, 
+			"Time From Start of File (seconds)");
+		sprintf(plot[number_plots].ylabel1, 
+			"Heave");
+		sprintf(plot[number_plots].ylabel2, 
+			"(meters)");
+		number_plots++;
+		}
 
 	/* clear screen */
 	status = mbnavedit_clear_screen();
@@ -3230,6 +3386,30 @@ int mbnavedit_plot_all()
 			string,
 			pixel_values[BLACK],XG_SOLIDLINE);
 
+		/* plot zero values */
+		if (plot[iplot].ymax > 0.0 && plot[iplot].ymin < 0.0)
+			{
+			if (plot[iplot].type == PLOT_LONGITUDE ||
+				plot[iplot].type == PLOT_LATITUDE)
+				strcpy(yformat, "%11.6f");
+			else
+				strcpy(yformat, "%6.2f");
+			sprintf(string, yformat, 0.0);
+			xg_justify(mbnavedit_xgid,
+				string,
+				&swidth,&sascent,&sdescent);
+			iyzero = plot[iplot].iymin - plot[iplot].yscale*plot[iplot].ymin;
+			xg_drawstring(mbnavedit_xgid,
+				(int)(plot[iplot].ixmin - swidth - 0.03*margin_x), 
+				(int)(iyzero + 0.5*sascent),
+				string,
+				pixel_values[BLACK],XG_SOLIDLINE);
+			xg_drawline(mbnavedit_xgid,
+				plot[iplot].ixmin, iyzero, 
+				plot[iplot].ixmax, iyzero, 
+				pixel_values[BLACK],XG_DASHLINE);
+			}
+
 		/* plot bounding box */
 		xg_drawline(mbnavedit_xgid,
 			plot[iplot].ixmin, 
@@ -3265,6 +3445,12 @@ int mbnavedit_plot_all()
 			mbnavedit_plot_speed(iplot);
 		else if (plot[iplot].type == PLOT_HEADING)
 			mbnavedit_plot_heading(iplot);
+		else if (plot[iplot].type == PLOT_ROLL)
+			mbnavedit_plot_roll(iplot);
+		else if (plot[iplot].type == PLOT_PITCH)
+			mbnavedit_plot_pitch(iplot);
+		else if (plot[iplot].type == PLOT_HEAVE)
+			mbnavedit_plot_heave(iplot);
 		}
 
 	}
@@ -3640,6 +3826,204 @@ int	iplot;
 				ping[i].heading_y-2, 4, 4, 
 				pixel_values[BLACK],XG_SOLIDLINE);
 		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_plot_roll(iplot)
+int	iplot;
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_plot_roll";
+	int	status = MB_SUCCESS;
+	int	ixmin, ixmax, iymin, iymax;
+	double	xmin, xmax, ymin, ymax;
+	double	xscale, yscale;
+	int	ix, iy;
+	int	roll_x1, roll_y1, roll_x2, roll_y2;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iplot:       %d\n",iplot);
+		}
+
+	/* get scaling values */
+	ixmin = plot[iplot].ixmin;
+	ixmax = plot[iplot].ixmax;
+	iymin = plot[iplot].iymin;
+	iymax = plot[iplot].iymax;
+	xmin = plot[iplot].xmin;
+	xmax = plot[iplot].xmax;
+	ymin = plot[iplot].ymin;
+	ymax = plot[iplot].ymax;
+	xscale = plot[iplot].xscale;
+	yscale = plot[iplot].yscale;
+
+	/* plot roll data */
+	if (plot_roll == MB_YES)
+	{
+	roll_x1 = ixmin + xscale*(ping[current_id].file_time_d - xmin);
+	roll_y1 = iymin + yscale*(ping[current_id].roll - ymin);
+	for (i=current_id+1;i<current_id+nplot;i++)
+		{
+		roll_x2 = ixmin + xscale*(ping[i].file_time_d - xmin);
+		roll_y2 = iymin + yscale*(ping[i].roll - ymin);
+		xg_drawline(mbnavedit_xgid,
+			roll_x1, roll_y1, roll_x2, roll_y2, 
+			pixel_values[GREEN],XG_SOLIDLINE);
+		roll_x1 = roll_x2;
+		roll_y1 = roll_y2;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_plot_pitch(iplot)
+int	iplot;
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_plot_pitch";
+	int	status = MB_SUCCESS;
+	int	ixmin, ixmax, iymin, iymax;
+	double	xmin, xmax, ymin, ymax;
+	double	xscale, yscale;
+	int	ix, iy;
+	int	pitch_x1, pitch_y1, pitch_x2, pitch_y2;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iplot:       %d\n",iplot);
+		}
+
+	/* get scaling values */
+	ixmin = plot[iplot].ixmin;
+	ixmax = plot[iplot].ixmax;
+	iymin = plot[iplot].iymin;
+	iymax = plot[iplot].iymax;
+	xmin = plot[iplot].xmin;
+	xmax = plot[iplot].xmax;
+	ymin = plot[iplot].ymin;
+	ymax = plot[iplot].ymax;
+	xscale = plot[iplot].xscale;
+	yscale = plot[iplot].yscale;
+
+	/* plot pitch data */
+	if (plot_pitch == MB_YES)
+	{
+	pitch_x1 = ixmin + xscale*(ping[current_id].file_time_d - xmin);
+	pitch_y1 = iymin + yscale*(ping[current_id].pitch - ymin);
+	for (i=current_id+1;i<current_id+nplot;i++)
+		{
+		pitch_x2 = ixmin + xscale*(ping[i].file_time_d - xmin);
+		pitch_y2 = iymin + yscale*(ping[i].pitch - ymin);
+		xg_drawline(mbnavedit_xgid,
+			pitch_x1, pitch_y1, pitch_x2, pitch_y2, 
+			pixel_values[GREEN],XG_SOLIDLINE);
+		pitch_x1 = pitch_x2;
+		pitch_y1 = pitch_y2;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_plot_heave(iplot)
+int	iplot;
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_plot_heave";
+	int	status = MB_SUCCESS;
+	int	ixmin, ixmax, iymin, iymax;
+	double	xmin, xmax, ymin, ymax;
+	double	xscale, yscale;
+	int	ix, iy;
+	int	heave_x1, heave_y1, heave_x2, heave_y2;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iplot:       %d\n",iplot);
+		}
+
+	/* get scaling values */
+	ixmin = plot[iplot].ixmin;
+	ixmax = plot[iplot].ixmax;
+	iymin = plot[iplot].iymin;
+	iymax = plot[iplot].iymax;
+	xmin = plot[iplot].xmin;
+	xmax = plot[iplot].xmax;
+	ymin = plot[iplot].ymin;
+	ymax = plot[iplot].ymax;
+	xscale = plot[iplot].xscale;
+	yscale = plot[iplot].yscale;
+
+	/* plot heave data */
+	if (plot_heave == MB_YES)
+	{
+	heave_x1 = ixmin + xscale*(ping[current_id].file_time_d - xmin);
+	heave_y1 = iymin + yscale*(ping[current_id].heave - ymin);
+	for (i=current_id+1;i<current_id+nplot;i++)
+		{
+		heave_x2 = ixmin + xscale*(ping[i].file_time_d - xmin);
+		heave_y2 = iymin + yscale*(ping[i].heave - ymin);
+		xg_drawline(mbnavedit_xgid,
+			heave_x1, heave_y1, heave_x2, heave_y2, 
+			pixel_values[GREEN],XG_SOLIDLINE);
+		heave_x1 = heave_x2;
+		heave_y1 = heave_y2;
+		}
+	}
 
 	/* print output debug statements */
 	if (verbose >= 2)

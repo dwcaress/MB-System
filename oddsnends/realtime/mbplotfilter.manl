@@ -1,10 +1,10 @@
-.TH mbplotfilter l "14 February 1995"
+.TH mbplotfilter l "14 August 1995"
 .SH NAME
 mbplotfilter - Produce L-DGO metafile graphics from output 
 of mbcontourfilter.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbplotfilter\fP \fB-R\fIwest/east/south/north [-Wwidth -V]

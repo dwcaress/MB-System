@@ -1,11 +1,11 @@
-.TH mbm_vrefcheck l "14 February 1995"
+.TH mbm_vrefcheck l "14 August 1995"
 .SH NAME
 \fBmbm_vrefcheck\fP - Macro to generate plot of crosstrack seafloor slope
 from a multibeam file.  The noise in this time series largely reflects
 noise in the vertical reference used by the sonar.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbm_vrefcheck\fP \fB-F\fIformat \fB-I\fIfile \fP[\fB-S\fIscale \fB-X\fIxaxis \fB-A\fIxmin \fB-B\fIxmax\fP]
