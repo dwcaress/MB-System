@@ -1,90 +1,92 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
-<HTML>
-<HEAD>
-   <TITLE>MB-System Future Development</TITLE>
-   <META NAME="GENERATOR" CONTENT="Mozilla/3.01SGoldC-SGI (X11; I; IRIX64 6.4 IP30) [Netscape]">
-</HEAD>
-<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.75 [en] (X11; U; Linux 2.2.16-22 i686) [Netscape]">
+   <title>MB-System Future Development</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#336699" vlink="#997040" alink="#CC9900">
 
-<CENTER><P><!-- WEBMAGIC VERSION NUMBER="2.0.2" --><!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" --><!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" --></P></CENTER>
+<center><!-- WEBMAGIC VERSION NUMBER="2.0.2" --><!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" --><!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" --></center>
 
-<H1 ALIGN=CENTER>Plans for Future MB-System
-Development</H1>
+<center>
+<h1>
+Plans for Future MB-System Development</h1></center>
+Listed below are some notions for the future development of MB-System.
+We include these here not as a promise of what we will do, but rather to
+encourage discussion with MB-System users regarding what we might do. Comments
+and suggestions are welcome: <a href="mailto: caress@mbari.org,dale@ldeo.columbia.edu">email
+us</a>!
+<ul>
+<li>
+Data formats we would like to support:</li>
 
-<P>Listed below are some notions for the
-future development of MB-System. We include these here not as a promise
-of what we will do, but rather to encourage discussion with MB-System users
-regarding what we might do. Comments and suggestions are welcome: <A HREF="mailto: caress@mbari.org,dale@ldeo.columbia.edu">email
-us</A>!</P>
+<ul>
+<li>
+Atlas SURF format (Fansweep and Odom sonars) - Atlas has now released the
+source code for an API&nbsp;to read and write SURF data (under the GNU
+GPL!). We will support the SURF format as soon as we find time. A large
+amount of German and Australian government mapping data are in the SURF
+format.</li>
 
-<UL>
-<LI>Data formats we would like to support:</LI>
+<li>
+Caris HDCS format (the result of processing swath bathymetry data with
+the Caris HIPS software package) - this is another propritary format. A
+large amount of multibeam data collected by and for NOAA's hydrographic
+groups are in this format. These data will not be available to the general
+public until the format is known or the data is translated to an open format.</li>
 
-<UL>
-<LI>Atlas SURF format (Fansweep and Odom
-sonars) - this is a proprietary format, so we can't support it until Atlas
-releases the format specification to us. A large amount of German and Australian
-government mapping data are in the SURF format.</LI>
+<li>
+Triton-Elics XTF format (produced by the Triton-Elics Isis datalogging
+systems). This is an open, widely used mapping data collection format.
+We will support this sooner or later...</li>
 
-<LI>Caris HDCS format (the result of processing
-swath bathymetry data with the Caris HIPS software package) - this is another
-propritary format. A large amount of multibeam data collected by and for
-NOAA's hydrographic groups are in this format. These data will not be available
-to the general public until the format is known or the data is translated
-to an open format.</LI>
+<li>
+New HMRG format. We will have to support this revision of the HMRG MR1
+format because it will be used, starting this year, for both HMRG MR1 data
+and WHOI DSL AMS120 data.</li>
+</ul>
 
-<LI>Triton-Elics XTF format (produced by
-the Triton-Elics Isis datalogging systems). This is an open, widely used
-mapping data collection format. We will support this sooner or later...</LI>
+<li>
+Capabilities we would like to add to MB-System:</li>
 
-<LI>New HMRG format. We will have to support
-this revision of the HMRG MR1 format because it will be used, starting
-this year, for both HMRG MR1 data and WHOI&nbsp;DSL&nbsp;AMS120 data.<BR>
-</LI>
-</UL>
+<ul>
+<li>
+Patch test tool. We need an interactive tool for determining roll, pitch,
+and heading bias from arbitrary parts of a survey.</li>
 
-<LI>Capabilities we would like to add to
-MB-System:</LI>
+<li>
+Improved mblevitus. We need an updated tool to deliver water sound speed
+models based on more complete and recent databases than the 1982 Levitus
+database used now.</li>
 
-<UL>
-<LI>Patch test tool. We need an interactive
-tool for determining roll, pitch, and heading bias from arbitrary parts
-of a survey.</LI>
+<li>
+Graphical project management tool. With the release of version 5.0, MB-System
+now has most of the low-level elements in place to enable efficient processing
+project management. Now we need to make a tool that uses the underlying
+structure provided by mbprocess and the related programs.</li>
 
-<LI>Improved mblevitus. We need an updated
-tool to deliver water sound speed models based on more complete and recent
-databases than the 1982 Levitus database used now.</LI>
+<li>
+Improved sidescan processing. We need to incorporate sidescan correction
+and filtering into the new mbprocess scheme. We also need an interactive
+tool for developing sidescan correction parameters.</li>
 
-<LI>Graphical project management tool. With
-the release of version 5.0, MB-System now has most of the low-level elements
-in place to enable efficient processing project management. Now we need
-to make a tool that uses the underlying structure provided by mbprocess
-and the related programs.</LI>
+<li>
+Extended grid format including sums and weights so that grids can be updated
+when that is more efficient than recreating from scratch.</li>
 
-<LI>Improved sidescan processing. We need
-to incorporate sidescan correction and filtering into the new mbprocess
-scheme. We also need an interactive tool for developing sidescan correction
-parameters.</LI>
+<li>
+Survey visualization tool. We would like a flexible tool for viewing surveys
+with interactively controlled scales and map styles.</li>
+</ul>
+</ul>
 
-<LI>Extended grid format including sums and
-weights so that grids can be updated when that is more efficient than recreating
-from scratch.</LI>
+<center>
+<p><br>Last Updated: $Date: 2001-11-16 01:46:12 $ $Revision: 5.3 $</center>
 
-<LI>Survey visualization tool. We would like
-a flexible tool for viewing surveys with interactively controlled scales
-and map styles. </LI>
-</UL>
-</UL>
-
-<CENTER><P><BR>
-Last Updated: $Date: 2001/03/14 21:15:24
-$ $Revision: 5.2 $</P></CENTER>
-
-<P>
-<HR WIDTH="67%"></P>
-
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
-
-</BODY>
-</HTML>
+<p>
+<hr WIDTH="67%">
+<p><a href="mbsystem_home.html"><img SRC="mbsystem_logo_small.gif" BORDER=0 height=55 width=158 align=BOTTOM></a><a href="mbsystem_home.html">Back
+to MB-System Home Page...</a>
+</body>
+</html>
