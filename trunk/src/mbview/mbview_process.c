@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.6 2005-02-02 08:23:53 caress Exp $
+ *    $Id: mbview_process.c,v 5.7 2005-02-08 22:37:42 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -94,7 +94,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.6 2005-02-02 08:23:53 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.7 2005-02-08 22:37:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)

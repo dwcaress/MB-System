@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.30 2004-12-18 01:34:43 caress Exp $
+ *    $Id: mb_process.c,v 5.31 2005-02-08 22:37:38 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.30  2004/12/18 01:34:43  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.29  2004/12/02 06:33:30  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -140,7 +143,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.30 2004-12-18 01:34:43 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.31 2005-02-08 22:37:38 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -1554,14 +1557,12 @@ int mb_pr_writepar(int verbose, char *file,
 	    {
 	    strcpy(pwd, file);
 	    pwd[strlen(file) - strlen(lastslash)] = '\0';
-	    strcpy(process->mbp_ifile, &lastslash[1]);
 	    }
 	else
 	    {
 	    getcwd(pwd, MB_PATH_MAXLINE);
 	    if (lastslash != NULL)
 		{
-		strcpy(process->mbp_ifile, &lastslash[1]);
 		strcat(pwd, "/");
 		strcat(pwd, file);
 		lastslash = strrchr(pwd, '/');
@@ -1570,19 +1571,6 @@ int mb_pr_writepar(int verbose, char *file,
 	    }
 	mb_get_shortest_path(verbose, pwd, error);
 	
-	/* try to make all pathnames relative */
-	status = mb_get_relative_path(verbose, process->mbp_ifile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_ofile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_navfile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_navadjfile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_attitudefile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_editfile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_svpfile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_tidefile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_staticfile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_ampcorrfile, pwd, error);
-	status = mb_get_relative_path(verbose, process->mbp_sscorrfile, pwd, error);
-
 	/* get expected process parameter file name */
 	strcpy(parfile, file);
 	strcat(parfile, ".par");

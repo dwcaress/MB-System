@@ -175,7 +175,17 @@ the different directories associated with recursive
 datalists has been fixed. The nature of and fix to this
 bug were determined by Gordon Keith.
 
+Fixed makefiles to link libpsl.a with all programs making
+libgmt.a calls. This was necessitated by changes to the
+GMT4.0 release relative to the GMT4.0beta release.
+
 Implemented latest GSF release (2.0.3).
+
+Fixed, but not satisfactorily, a problem reading some older
+EM3000 data with the current format 56 i/o module.
+
+Added release version of simple grid visualization demo 
+mbgrdviz.
 
 MB-SYSTEM VERSION 5.0.5 RELEASE NOTES:
 ------------------------------------------
@@ -926,10 +936,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.54 2005-01-04 18:36:59 caress Exp $
+RCS ID: $Id: README,v 5.55 2005-02-08 22:37:37 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.54  2005/01/04 18:36:59  caress
+Working towards release 5.0.6
+
 Revision 5.53  2004/12/18 01:23:24  caress
 Working towards 5.0.6 release.
 

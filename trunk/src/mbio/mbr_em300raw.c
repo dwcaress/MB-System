@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.23 2004-06-20 18:40:47 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.24 2005-02-08 22:37:38 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2004/06/20 18:40:47  caress
+ * Fixed problem reading EM3000D data.
+ *
  * Revision 5.22  2004/02/24 22:29:02  caress
  * Fixed errors in handling Simrad datagrams and edit save files on byteswapped machines (e.g. Intel or AMD processors).
  *
@@ -151,7 +154,7 @@
 #include "../../include/mb_swap.h"
 	
 /* turn on debug statements here */
-/* #define MBR_EM300RAW_DEBUG 1 */
+#define MBR_EM300RAW_DEBUG 1
 	
 /* essential function prototypes */
 int mbr_register_em300raw(int verbose, void *mbio_ptr, 
@@ -264,7 +267,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.23 2004-06-20 18:40:47 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.24 2005-02-08 22:37:38 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -1057,20 +1060,20 @@ Have a nice day...\n");
 			    }
 			*typelast = *type;
 
-			/* set wrapper status if needed */
-			if (*wrapper < 0)
-			    {
-			    if (skip == 0) 
-					*wrapper = MB_NO;
-			    else if (skip == 4)
-					*wrapper = MB_YES;
-			    }
-
 			/* swap bytes if necessary */
 #ifdef BYTESWAPPED
 			*type = (short) mb_swap_short(*type);
 			*sonar = (short) mb_swap_short(*sonar);
 #endif
+
+			/* set wrapper status if needed */
+			if (*wrapper < 0)
+			    {
+			    if (skip == 0) 
+					*wrapper = MB_NO;
+			    else if (skip == 4 && *type != EM2_START)
+					*wrapper = MB_YES;
+			    }
 			}
 		
 		/* else use saved label */
@@ -1079,7 +1082,7 @@ Have a nice day...\n");
 
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"\nstart of mbr_em300raw_rd_data loop:\n");
-	fprintf(stderr,"skip:%d expect:%x type:%x first_type:%x sonar:%d recsize:%d done:%d\n",
+	fprintf(stderr,"skip:%d expect:%x type:%x first_type:%x sonar:%d recsize:%u done:%d\n",
 		skip, expect, *type, first_type, *sonar, record_size_save, done);
 #endif
 		
@@ -3258,11 +3261,13 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp,
 			done = MB_YES;
 			status = MB_SUCCESS;
 			/* get last two check sum bytes */
-			read_len = fread(&line[0],2,1,mbfp);
+			if (sonar != MBSYS_SIMRAD2_EM3000)
+				read_len = fread(&line[0],2,1,mbfp);
 #ifdef MBR_EM300RAW_DEBUG
-	fprintf(stderr, " %4.4hX %d", 
-		*((short int *)&(line[0])), 
-		*((short int *)&(line[0])));
+	if (sonar != MBSYS_SIMRAD2_EM3000)
+		fprintf(stderr, " %4.4hX %d", 
+			*((short int *)&(line[0])), 
+			*((short int *)&(line[0])));
 #endif
 			}
 		else if (read_len == 1)

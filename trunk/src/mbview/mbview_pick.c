@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.5 2005-02-02 08:23:50 caress Exp $
+ *    $Id: mbview_pick.c,v 5.6 2005-02-08 22:37:42 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -89,7 +89,7 @@ Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.5 2005-02-02 08:23:50 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.6 2005-02-08 22:37:42 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/

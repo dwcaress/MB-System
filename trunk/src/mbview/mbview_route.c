@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.6 2005-02-02 08:23:52 caress Exp $
+ *    $Id: mbview_route.c,v 5.7 2005-02-08 22:37:43 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -92,7 +92,7 @@ Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.6 2005-02-02 08:23:52 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.7 2005-02-08 22:37:43 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -1989,15 +1989,12 @@ int mbview_drawroute(int instance, int rez)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	on, flip;
-	int	stride;
-	int	ixmin, ixmax, jymin, jymax;
-	int	ix, jy;
-	int	ixsize, jysize;
-	int	isite;
-	int	icolor;
+	GLUquadricObj *globj;
+	double	routesizesmall, routesizelarge;
+	double	rr, xx, yy;
 	int	iroute, jpoint;
-	int	i, j, k, l, m, n, kk, ll;
+	int	icolor;
+	int	k, k0, k1;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2014,272 +2011,104 @@ int mbview_drawroute(int instance, int rez)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
-	/* draw route points in 2D */
+	
+	/* Generate GL lists to be plotted */
 	if (shared.shareddata.route_mode != MBV_ROUTE_OFF
-		&& data->display_mode == MBV_DISPLAY_2D
 		&& data->route_view_mode == MBV_VIEW_ON
 		&& shared.shareddata.nroute > 0)
 		{
-		/* set stride for looping over data */
-		stride = 1;
+		/* get size according to viewbounds */
+		k0 = data->viewbounds[0] * data->primary_ny + data->viewbounds[2];
+		k1 = data->viewbounds[1] * data->primary_ny + data->viewbounds[3];
+		xx = data->primary_x[k1] - data->primary_x[k0];
+		yy = data->primary_y[k1] - data->primary_y[k0];
+		routesizesmall = 0.004 * sqrt(xx * xx + yy * yy);
+		routesizelarge = 1.4 * routesizesmall;
+		
+		/* Use disks for 2D plotting */
+		if (data->display_mode == MBV_DISPLAY_2D)
+			{
+			/* make list for small route */
+	    		glNewList((GLuint)MBV_GLLIST_ROUTESMALL, GL_COMPILE);
+			globj = gluNewQuadric();
+			gluDisk(globj, 0.0, routesizesmall, 4, 1);
+			gluDeleteQuadric(globj);
+			icolor = MBV_COLOR_BLACK;
+			glColor3f(colortable_object_red[icolor], 
+				colortable_object_green[icolor], 
+				colortable_object_blue[icolor]);
+			globj = gluNewQuadric();
+			gluDisk(globj, 0.8 * routesizesmall, routesizesmall, 10, 1);
+			gluDeleteQuadric(globj);
+			glEndList();
+
+			/* make list for large route */
+	    		glNewList((GLuint)MBV_GLLIST_ROUTELARGE, GL_COMPILE);
+			globj = gluNewQuadric();
+			gluDisk(globj, 0.0, routesizelarge, 4, 1);
+			gluDeleteQuadric(globj);
+			icolor = MBV_COLOR_BLACK;
+			glColor3f(colortable_object_red[icolor], 
+				colortable_object_green[icolor], 
+				colortable_object_blue[icolor]);
+			globj = gluNewQuadric();
+			gluDisk(globj, 0.8 * routesizelarge, routesizelarge, 10, 1);
+			gluDeleteQuadric(globj);
+			glEndList();
+			}
+		
+		/* Use spheres for 3D plotting */
+		else if (data->display_mode == MBV_DISPLAY_3D)
+			{
+			/* make list for small route */
+	    		glNewList((GLuint)MBV_GLLIST_ROUTESMALL, GL_COMPILE);
+			globj = gluNewQuadric();
+			gluSphere(globj, routesizesmall, 4, 3);
+			gluDeleteQuadric(globj);
+			glEndList();
+
+			/* make list for large route */
+	    		glNewList((GLuint)MBV_GLLIST_ROUTELARGE, GL_COMPILE);
+			globj = gluNewQuadric();
+			gluSphere(globj, routesizelarge, 4, 3);
+			gluDeleteQuadric(globj);
+			glEndList();	
+			}
 		
 		/* loop over the route points */
 		for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
 			{
 			for (jpoint=0;jpoint<shared.shareddata.routes[iroute].npoints;jpoint++)
 				{
-				/* get grid bounds for plotting */
-				ix = (shared.shareddata.routes[iroute].points[jpoint].xgrid[instance] - data->primary_xmin) 
-						/ data->primary_dx;
-				jy = (shared.shareddata.routes[iroute].points[jpoint].ygrid[instance] - data->primary_ymin) 
-						/ data->primary_dy;
 
-				if (ix >= 0 && ix < data->primary_nx
-					&& jy >= 0 && jy < data->primary_ny)
-					{
-					ixsize = MAX(data->viewbounds[1] - data->viewbounds[0] + 1, 
-							data->viewbounds[3] - data->viewbounds[2] + 1);
-					if (iroute == shared.shareddata.route_selected
-						&& jpoint == shared.shareddata.route_point_selected)
-						ixsize /= 200;
-					else
-						ixsize /= 300;
-					if (ixsize < 1) ixsize = 1;
-					jysize = (int)((ixsize * (1000.0 * data->primary_dy 
-								/ data->primary_dx)) / 1000.0);
-					if (ixsize < 1) ixsize = 1;
-					if (jysize < 1) jysize = 1;
-					ixmin = MAX(ix - ixsize, 0);
-					ixmax = MIN(ix + ixsize, data->primary_nx - stride);
-					jymin = MAX(jy - jysize, 0);
-					jymax = MIN(jy + jysize, data->primary_ny - stride);
+				/* set the color for this route */
+				if (iroute == shared.shareddata.route_selected
+					&& jpoint == shared.shareddata.route_point_selected)
+					icolor = MBV_COLOR_RED;
+				else
+					icolor = shared.shareddata.routes[iroute].color;
+				glColor3f(colortable_object_red[icolor], 
+					colortable_object_green[icolor], 
+					colortable_object_blue[icolor]);
 
-					/* set the color for this route */
-					if (iroute == shared.shareddata.route_selected
-						&& jpoint == shared.shareddata.route_point_selected)
-						icolor = MBV_COLOR_RED;
-					else
-						icolor = shared.shareddata.routes[iroute].color;
-					glColor3f(colortable_object_red[icolor], 
-						colortable_object_green[icolor], 
-						colortable_object_blue[icolor]);
+				/* draw the site as a disk or sphere using GLUT */
 
-					/* draw the route box */
-					glLineWidth(2.0);
-					glBegin(GL_QUADS);
-					k = ixmin * data->primary_ny + jymin;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmax * data->primary_ny + jymin;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmax * data->primary_ny + jymax;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmin * data->primary_ny + jymax;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					glEnd();
+				glTranslatef(shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
+						shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
+						shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
+				if (iroute == shared.shareddata.route_selected
+					&& jpoint == shared.shareddata.route_point_selected)
+	    				glCallList((GLuint)MBV_GLLIST_SITELARGE);
+				else
+	    				glCallList((GLuint)MBV_GLLIST_SITESMALL);
+				glTranslatef(-shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
+						-shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
+						-shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
 
-					/* draw the boundary */
-					icolor = MBV_COLOR_BLACK;
-					glColor3f(colortable_object_red[icolor], 
-						colortable_object_green[icolor], 
-						colortable_object_blue[icolor]);
-					glLineWidth(2.0);
-					glBegin(GL_LINE_LOOP);
-					k = ixmin * data->primary_ny + jymin;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmax * data->primary_ny + jymin;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmax * data->primary_ny + jymax;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmin * data->primary_ny + jymax;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					glEnd();
-					}
+
 				}
-			}
-		}
-		
-	/* draw route points in 3D */
-	else if (shared.shareddata.route_mode != MBV_ROUTE_OFF
-		&& data->display_mode == MBV_DISPLAY_3D
-		&& data->route_view_mode == MBV_VIEW_ON
-		&& shared.shareddata.nroute > 0)
-		{
-		/* set stride for looping over data */
-		stride = 1;
-		
-		/* loop over the route points */
-		for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
-			{
-			for (jpoint=0;jpoint<shared.shareddata.routes[iroute].npoints;jpoint++)
-				{
-				/* get grid bounds for plotting */
-				ix = (shared.shareddata.routes[iroute].points[jpoint].xgrid[instance] - data->primary_xmin) 
-						/ data->primary_dx;
-				jy = (shared.shareddata.routes[iroute].points[jpoint].ygrid[instance] - data->primary_ymin) 
-						/ data->primary_dy;
-				if (ix >= 0 && ix < data->primary_nx
-					&& jy >= 0 && jy < data->primary_ny)
-					{
-					ixsize = MAX(data->viewbounds[1] - data->viewbounds[0] + 1, 
-							data->viewbounds[3] - data->viewbounds[2] + 1);
-					if (iroute == shared.shareddata.route_selected
-						&& jpoint == shared.shareddata.route_point_selected)
-						ixsize /= 200;
-					else
-						ixsize /= 300;
-					if (ixsize < 1) ixsize = 1;
-					jysize = (int)((ixsize * (1000.0 * data->primary_dy 
-								/ data->primary_dx)) / 1000.0);
-					if (ixsize < 1) ixsize = 1;
-					jysize = (int)((ixsize * (1000.0 * data->primary_dy / data->primary_dx)) / 1000.0);
-					if (ixsize < 1) ixsize = 1;
-					ixmin = MAX(stride * ((ix - ixsize) / stride), 0);
-					ixmax = MIN(stride * ((ix + ixsize) / stride + 1), 
-							data->primary_nx - stride);
-					jymin = MAX(stride * ((jy - jysize) / stride), 0);
-					jymax = MIN(stride * ((jy + jysize) / stride + 1), 
-							data->primary_ny - stride);
 
-					/* set the color for this site */
-					if (iroute == shared.shareddata.route_selected
-						&& jpoint == shared.shareddata.route_point_selected)
-						icolor = MBV_COLOR_RED;
-					else
-						icolor = shared.shareddata.routes[iroute].color;
-					glColor3f(colortable_object_red[icolor], 
-						colortable_object_green[icolor], 
-						colortable_object_blue[icolor]);
-
-					/* draw the data as triangle strips */
-					for (i=ixmin;i<ixmax;i+=stride)
-						{
-						on = MB_NO;
-						flip = MB_NO;
-						for (j=jymin;j<=jymax;j+=stride)
-							{
-							k = i * data->primary_ny + j;
-							l = (i + stride) * data->primary_ny + j;
-							if (flip == MB_NO)
-								{
-								kk = k;
-								ll = l;
-								}
-							else
-								{
-								kk = l;
-								ll = k;
-								}
-							if (data->primary_data[kk] != data->primary_nodatavalue)
-								{
-								if (on == MB_NO)
-									{
-									glBegin(GL_TRIANGLE_STRIP);
-									on = MB_YES;
-									if (kk == k)
-										flip = MB_NO;
-									else
-										flip = MB_YES;
-									}
-								glVertex3f(data->primary_x[kk],
-									data->primary_y[kk],
-									data->primary_z[kk]+MBV_OPENGL_3D_LINE_OFFSET);
-								}
-							else
-								{
-								glEnd();
-								on = MB_NO;
-								flip = MB_NO;
-								}
-							if (data->primary_data[ll] != data->primary_nodatavalue)
-								{
-								if (on == MB_NO)
-									{
-									glBegin(GL_TRIANGLE_STRIP);
-									on = MB_YES;
-									if (ll == l)
-										flip = MB_NO;
-									else
-										flip = MB_YES;
-									}
-								glVertex3f(data->primary_x[ll],
-									data->primary_y[ll],
-									data->primary_z[ll]+MBV_OPENGL_3D_LINE_OFFSET);
-								}
-							else
-								{
-								glEnd();
-								on = MB_NO;
-								flip = MB_NO;
-								}
-							}
-						if (on == MB_YES)
-							{
-							glEnd();
-							on = MB_NO;
-							flip = MB_NO;
-							}
-						glEnd();
-						}
-
-					/* draw the boundary */
-					if (iroute == shared.shareddata.route_selected
-						&& jpoint == shared.shareddata.route_point_selected)
-						icolor = MBV_COLOR_BLACK;
-					else
-						icolor = shared.shareddata.routes[iroute].color;
-					glColor3f(colortable_object_red[icolor], 
-						colortable_object_green[icolor], 
-						colortable_object_blue[icolor]);
-					glLineWidth(2.0);
-					glBegin(GL_LINE_LOOP);
-					k = ixmin * data->primary_ny + jymin;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmax * data->primary_ny + jymin;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmax * data->primary_ny + jymax;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					k = ixmin * data->primary_ny + jymax;
-					glVertex3f(data->primary_x[k],
-						   data->primary_y[k],
-						   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-					glEnd();
-					}
-				}
-			}
-		}
-		
-		
-	/* draw draped route line segments */
-	if (shared.shareddata.route_mode != MBV_ROUTE_OFF
-		&& data->route_view_mode == MBV_VIEW_ON
-		&& shared.shareddata.nroute > 0)
-		{
-		/* loop over the routes */
-		for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
-			{
+			/* draw draped route line segments */
 			glColor3f(0.0, 0.0, 0.0);
 			glLineWidth((float)(2.0));
 			glBegin(GL_LINE_STRIP);
