@@ -1,5 +1,5 @@
-#     The MB-system:	Makefile	3.00  8/12/93
-#	$Id: Makefile,v 4.0 1994-03-06 00:12:00 caress Exp $
+#     The MB-system:	Makefile	8/12/93
+#	$Id: Makefile,v 4.1 1994-04-12 21:03:58 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,17 +14,52 @@
 # Date:		August 12, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/06  00:12:00  caress
+# First cut at version 4.0
+#
 # Revision 1.1  1993/11/05  18:56:23  caress
 # Initial revision
 #
 #
 #
 
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+#
+# Locations of GMT libraries, binaries, and include files:
+#
+# - For L-DEO installation:
+GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
+GMTINCDIR = /ocean/mgg/gmt2/src
+GMTBINDIR = /ocean/mgg/gmt2/sun4
+#
+# - For Ewing installation:
+#GMTLIBDIR = /net/heezen/packages/gmt2/bin
+#GMTINCDIR = /net/heezen/packages/gmt2/src
+#GMTBINDIR = /net/heezen/packages/gmt2/bin
+#
+# - For generic installation:
+#GMTLIBDIR = /usr/local/lib
+#GMTINCDIR = /usr/local/include
+#GMTBINDIR = /usr/local/bin
+#
+#
+# Compile and load flags:
+#
+# - For installations under SunOs:
 CFLAGS = -O2
 FFLAGS = -O2
 FWITHCFLAGS = -lF77
-LFLAGS = -lc -lm
+LFLAGS = -lm
+#
+# - For installations under IRIX:
+#CFLAGS = -O2
+#FFLAGS = -O2
+#FWITHCFLAGS = -lF77
+#LFLAGS = -lm -lsun
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
+### sets locations of vital objects
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
