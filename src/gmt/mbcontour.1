@@ -113,7 +113,7 @@ Defaults: \fIcontour_int\fP = 25; \fIcolor_int\fP = 100;
 .B \fB-B\fItickinfo\fP
 Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
 .TP
-.B \fB-C\fPcontourfile
+.B \fB-C\fIcontourfile\fP
 Sets the file from which the contour levels and their style and color are read.
 This file consists of lines in the format:
  	\fIlevel label tick red green blue\fP
@@ -159,8 +159,7 @@ no ping averaging is performed. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
 ping.  If \fIpings\fP = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
-beam spacing. If ping averaging is used (\fIpings\fP != 1), then
-only a partial data stream can be copied (see the \fB-F\fP option).
+beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
 .B \fB-T\fItimegap\fP
