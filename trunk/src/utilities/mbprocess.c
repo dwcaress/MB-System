@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.16 2001-12-18 04:29:57 caress Exp $
+ *    $Id: mbprocess.c,v 5.17 2002-03-26 07:45:14 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2001/12/18 04:29:57  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.15  2001/11/20  02:00:19  caress
  * Now inserts metadata tags before comments.
  *
@@ -120,7 +123,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.16 2001-12-18 04:29:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.17 2002-03-26 07:45:14 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -262,14 +265,13 @@ and mbedit edit save files.\n";
 	int	ntide = 0;
 	int	size, nchar, len, nget, nav_ok, tide_ok;
 	int	time_j[5], stime_i[7], ftime_i[7];
-	int	ihr, isec;
+	int	ihr;
 	double	sec, hr;
 	char	*bufftmp;
 	char	NorS[2], EorW[2];
 	double	mlon, llon, mlat, llat;
-	int	degree, minute, time_set;
+	int	degree, time_set;
 	double	dminute;
-	double	second;
 	double	splineflag;
 	double	*ntime, *nlon, *nlat, *nheading, *nspeed, *ndraft;
 	double	*natime, *nalon, *nalat;
@@ -281,7 +283,6 @@ and mbedit edit save files.\n";
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dz, r, dist;
 	double	lever_heave = 0.0;
-	int	intstat;
 	double	time_d_old = 0.0;
 	double	navlon_old = 0.0;
 	double	navlat_old = 0.0;
@@ -304,7 +305,7 @@ and mbedit edit save files.\n";
 	double	draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
 	double	ttime, range;
 	double	xx, zz, vsum, vavg;
-	double	alpha, beta, theta, phi;
+	double	alpha, beta;
 	int	ray_stat;
 	double	*ttimes = NULL;
 	double	*angles = NULL;
@@ -319,12 +320,11 @@ and mbedit edit save files.\n";
 	double	ssv_default;
 	double	ssv_start;
 	
-	int	stat_status;
-	struct stat statbuf;
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	int	nbeams;
 	int	istart, iend, icut;
-	int	i, j, k, l, m, n, mm;
+	int	intstat;
+	int	i, j, k, mm;
 	
 	char	*ctime();
 	char	*getenv();
@@ -2017,6 +2017,10 @@ and mbedit edit save files.\n";
 		    {
 		    fprintf(stderr,"\n%d bathymetry edits read\n",nedit);
 		    }
+/*for (i=0;i<nedit;i++)
+fprintf(stderr, "edit %d %f %d %d\n", 
+i, edit_time_d[i], edit_beam[i], edit_action[i]);
+*/
 	    }
 
 	/*--------------------------------------------
@@ -2914,7 +2918,7 @@ and mbedit edit save files.\n";
 			icomment++;
 		else if (error <= MB_ERROR_NO_ERROR)
 			iother++;
-
+		
 		/* time gaps do not matter to mbprocess */
 		if (error == MB_ERROR_TIME_GAP)
 			{

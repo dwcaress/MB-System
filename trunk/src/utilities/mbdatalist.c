@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.2 2002-02-22 09:07:08 caress Exp $
+ *    $Id: mbdatalist.c,v 5.3 2002-03-26 07:45:14 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/02/22 09:07:08  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.1  2001/10/19  00:56:17  caress
  * Now tries to use relative paths.
  *
@@ -44,10 +47,10 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.2 2002-02-22 09:07:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.3 2002-03-26 07:45:14 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
-	static char usage_message[] = "mbdatalist [-Fformat -Ifile -P -R -V -H]";
+	static char usage_message[] = "mbdatalist [-Fformat -Ifile -O -P -Rw/e/s/n -U -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -65,6 +68,8 @@ main (int argc, char **argv)
 	char	read_file[MB_PATH_MAXLINE];
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
+	int	look_bounds = MB_NO;
+	int	file_in_bounds = MB_NO;
 	double	file_weight = 1.0;
 	int	format;
 	int	pings;
@@ -94,7 +99,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:OoPpRr")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:OoPpR:r:Uu")) != -1)
 	  switch (c) 
 		{
 		case 'F':
@@ -123,6 +128,12 @@ main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
+			mb_get_bounds(optarg, bounds);
+			look_bounds = MB_YES;
+			flag++;
+			break;
+		case 'U':
+		case 'u':
 			look_processed = MB_DATALIST_LOOK_NO;
 			flag++;
 			break;
@@ -217,7 +228,24 @@ main (int argc, char **argv)
 		    system(command);
 		    }
 		else
-		    fprintf(output, "%s %d %f\n", read_file, format, file_weight);
+		    {
+		    /* check for mbinfo file if bounds checking enabled */
+		    if (look_bounds == MB_YES)
+			{
+			status = mb_check_info(verbose, read_file, lonflip, bounds, 
+				    &file_in_bounds, &error);
+			if (status == MB_FAILURE)
+			    {
+			    file_in_bounds = MB_YES;
+			    status = MB_SUCCESS;
+			    error = MB_ERROR_NO_ERROR;
+			    }
+			}
+			
+		    /* ouput file if no bounds checking or in bounds */
+		    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
+			fprintf(output, "%s %d %f\n", read_file, format, file_weight);
+		    }
 		}
 		
 	/* else parse datalist */
@@ -246,7 +274,25 @@ main (int argc, char **argv)
 			    system(command);
 			    }
 			else
-			    fprintf(output, "%s %d %f\n", file, format, file_weight);
+			    {
+			    /* check for mbinfo file if bounds checking enabled */
+			    if (look_bounds == MB_YES)
+				{
+				status = mb_check_info(verbose, file, lonflip, bounds, 
+					    &file_in_bounds, &error);
+				if (status == MB_FAILURE)
+				    {
+				    file_in_bounds = MB_YES;
+				    status = MB_SUCCESS;
+				    error = MB_ERROR_NO_ERROR;
+				    }
+				}
+				
+			    /* ouput file if no bounds checking or in bounds */
+			    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
+				fprintf(output, "%s %d %f\n", file, format, file_weight);
+			    }
+			    
 			}
 		mb_datalist_close(verbose,&datalist,&error);
 		}

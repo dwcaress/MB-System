@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 5.4 2002-02-26 07:50:41 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 5.5 2002-03-26 07:43:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/02/26 07:50:41  caress
+ * Release 5.0.beta14
+ *
  * Revision 5.3  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -142,7 +145,7 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsuricen(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsuricen.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
+	static char res_id[]="$Id: mbr_hsuricen.c,v 5.5 2002-03-26 07:43:25 caress Exp $";
 	char	*function_name = "mbr_register_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -272,7 +275,7 @@ int mbr_info_hsuricen(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsuricen.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
+	static char res_id[]="$Id: mbr_hsuricen.c,v 5.5 2002-03-26 07:43:25 caress Exp $";
 	char	*function_name = "mbr_info_hsuricen";
 	int	status = MB_SUCCESS;
 
@@ -341,7 +344,7 @@ int mbr_info_hsuricen(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsuricen(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 5.5 2002-03-26 07:43:25 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -563,16 +566,21 @@ int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->speed_reference[0] = data->speed_ref;
 		store->pitch = 0.1*data->pitch;
 		store->track = 0;
-		store->depth_center 
-			= data->deph[MBSYS_HSDS_BEAMS/2];
 		store->depth_scale = 0.01*data->scale;
+		store->depth_center 
+			= store->depth_scale * data->deph[MBSYS_HSDS_BEAMS/2];
 		store->spare = 1;
 		id = MBSYS_HSDS_BEAMS - 1;
 		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
 			{
+			store->distance[i] = data->dist[i];
+			store->depth[i] = data->deph[i];
+			}
+/*		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+			{
 			store->distance[id-i] = data->dist[i];
 			store->depth[id-i] = data->deph[i];
-			}
+			}*/
 
 		/* travel time data (ERGNSLZT) */
 		store->course_ground = 0.1*data->course;
@@ -755,9 +763,14 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			id = MBSYS_HSDS_BEAMS - 1;
 			for (i=0;i<MBSYS_HSDS_BEAMS;i++)
 				{
+				data->dist[i] = store->distance[i];
+				data->deph[i] = store->depth[i];
+				}
+/*			for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+				{
 				data->dist[i] = store->distance[id-i];
 				data->deph[i] = store->depth[id-i];
-				}
+				}*/
 			}
 
 		/* comment */

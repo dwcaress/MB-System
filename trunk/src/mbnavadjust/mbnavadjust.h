@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.2 2001-10-19 00:55:42 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.3 2002-03-26 07:43:57 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/10/19 00:55:42  caress
+ * Now tries to use relative paths.
+ *
  * Revision 5.1  2001/07/20  00:33:43  caress
  * Release 5.0.beta03
  *
@@ -170,6 +173,7 @@ struct mbna_project {
 	struct mbna_crossing *crossings;
 	int	num_ties;
 	double	section_length;
+	int	section_soundings;
 	double	cont_int;
 	double	col_int;
 	double	tick_int;
