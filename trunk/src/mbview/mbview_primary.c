@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_primary.c	9/25/2003
- *    $Id: mbview_primary.c,v 5.2 2005-02-08 22:37:42 caress Exp $
+ *    $Id: mbview_primary.c,v 5.3 2005-02-18 07:32:55 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2005/02/08 22:37:42  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.0  2003/12/02 20:38:33  caress
  * Making version number 5.0
  *
@@ -76,7 +79,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_primary.c,v 5.2 2005-02-08 22:37:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_primary.c,v 5.3 2005-02-18 07:32:55 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, int instance,
@@ -103,10 +106,8 @@ int mbview_setprimarygrid(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-fprintf(stderr,"Called mbview_setprimarygrid:%d\n",instance);
-
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -234,10 +235,8 @@ int mbview_setprimarycolortable(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-fprintf(stderr,"Called mbview_setprimarycolortable:%d\n",instance);
-
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -292,10 +291,8 @@ int mbview_setslopecolortable(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-fprintf(stderr,"Called mbview_setslopecolortable:%d\n",instance);
-
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);

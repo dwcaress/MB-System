@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.4 2005-02-08 22:37:42 caress Exp $
+ *    $Id: mbview_plot.c,v 5.5 2005-02-18 07:32:55 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/02/08 22:37:42  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.2  2004/02/24 22:52:29  caress
  * Added spherical projection to MBview.
  *
@@ -82,7 +85,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.4 2005-02-08 22:37:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.5 2005-02-18 07:32:55 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -1906,8 +1909,8 @@ data->viewbounds[3]);*/
 		/* reset buffer mode */
 		glReadBuffer(GL_FRONT);
 	}
-fprintf(stderr,"data->viewbounds: %d %d %d %d\n",
-data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[3]);
+/*fprintf(stderr,"data->viewbounds: %d %d %d %d\n",
+data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[3]);*/
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

@@ -91,7 +91,7 @@ int	survey_color = MBV_COLOR_BLACK;
 char	survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.11 2005-02-17 07:35:07 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.12 2005-02-18 07:32:54 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -109,6 +109,7 @@ Widget	fileSelectionList;
 Widget	fileSelectionText;
 
 /* function prototypes */
+void do_mbgrdviz_sensitivity();
 int do_mbgrdviz_dismiss_notify(int instance);
 void do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data);
@@ -376,8 +377,64 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	    {
 	    mbview_id[i] = MB_NO;
 	    }
-	
+	    
+	/* set sensitivity of widgets that require an mbview instance to be active */
+	do_mbgrdviz_sensitivity( );
+
 	return(0);
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_sensitivity()
+{
+   	int	mbview_active;
+   	int	mbview_allactive;
+        Cardinal ac = 0;
+        Arg	args[256];
+	int	i;
+    
+    	/* set file opening menu items only if an mbview instance is active */
+	mbview_active = MB_NO;
+	mbview_allactive = MB_YES;
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (mbview_id[i] == MB_YES)
+			mbview_active = MB_YES;
+		else
+			mbview_allactive = MB_NO;
+		}
+    
+    	/* set file opening menu item only if not all mbview instances are active */
+	if (mbview_allactive != MB_YES)
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		}
+	else
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, False); ac++; 
+		}
+	XtSetValues(pushButton_file_openprimary, args, ac);
+    
+    	/* set other file opening menu items only if an mbview instance is active */
+	if (mbview_active == MB_YES)
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		}
+	else
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, False); ac++; 
+		}
+	XtSetValues(pushButton_opensite, args, ac);
+	XtSetValues(pushButton_openroute, args, ac);
+	XtSetValues(pushButton_opennav, args, ac);
+	XtSetValues(pushButton_openswath, args, ac);
+	XtSetValues(pushButton_savesite, args, ac);
+	XtSetValues(pushButton_saveroute, args, ac);
+    
 }
 /*---------------------------------------------------------------------------------------*/
 void
@@ -664,20 +721,18 @@ int do_mbgrdviz_dismiss_notify(int instance)
 	int	verbose = 0;
 	int	i, j, k;
 	
-fprintf(stderr, "Function %s called for instance %d with id %d\n", function_name, instance, mbview_id[instance]);
-	
 	/* set mbview window <id> to inactive */
 	if (instance >= 0 && instance < MBV_MAX_WINDOWS
 		&& mbview_id[instance] == MB_YES)
 		{
 		mbview_id[instance] = MB_NO;
-	   	fprintf(stderr, "Freeing mbview window %d in local list...\n", 
-				instance);
+	   	/* fprintf(stderr, "Freeing mbview window %d in local list...\n", 
+				instance); */
 		}
 	else
 	    	{
-	   	fprintf(stderr, "Unable to free mbview - mbview window %d not found in local list...\n", 
-				instance);
+	   	/* fprintf(stderr, "Unable to free mbview - mbview window %d not found in local list...\n", 
+				instance); */
 	    	}
 
 	/* update widgets of remaining mbview windows */
@@ -686,6 +741,9 @@ fprintf(stderr, "Function %s called for instance %d with id %d\n", function_name
 		if (mbview_id[i] == MB_YES)
 			status = mbview_update(verbose, i, &error);
 		}
+	    
+	/* set sensitivity of widgets that require an mbview instance to be active */
+	do_mbgrdviz_sensitivity( );
 	
 	return(status);
 }
@@ -703,8 +761,6 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
         Cardinal ac = 0;
         Arg      args[256];
     XmFileSelectionBoxCallbackStruct *acs=(XmFileSelectionBoxCallbackStruct*)call_data;
-
-fprintf(stderr,"do_mbgrdviz_openfile\n");
 
     	/* figure out what kind of file is to be opened */
 
@@ -731,7 +787,6 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 	if (mode <= MBGRDVIZ_OPENGRID)
 		{
 		/* read the grid and open mbview window */
-		fprintf(stderr, "call do_mbgrdviz_openprimary\n");
 		status = do_mbgrdviz_openprimary(file_ptr);
 		}
 	
@@ -740,7 +795,6 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		{
 		/* read the grid and update mbview window */
 		do_mbview_message_on("Reading overlay grid...", instance);
-		fprintf(stderr, "call do_mbgrdviz_openoverlay\n");
 		status = do_mbgrdviz_openoverlay(instance, file_ptr);
 		}
 	
@@ -749,7 +803,6 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		{
 		/* read route file and update mbview window */
 		do_mbview_message_on("Reading route data...", instance);
-		fprintf(stderr, "call do_mbgrdviz_openroute\n");
 		status = do_mbgrdviz_openroute(instance, file_ptr);
 		}
 	
@@ -758,7 +811,6 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		{
 		/* read site file and update mbview window */
 		do_mbview_message_on("Reading site data...", instance);
-		fprintf(stderr, "call do_mbgrdviz_opensite\n");
 		status = do_mbgrdviz_opensite(instance, file_ptr);
 		}
 	
@@ -767,7 +819,6 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		{
 		/* read nav file and update mbview window */
 		do_mbview_message_on("Reading navigation data...", instance);
-		fprintf(stderr, "call do_mbgrdviz_opennav\n");
 		status = do_mbgrdviz_opennav(instance, MB_NO, file_ptr);
 		}
 	
@@ -776,7 +827,6 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		{
 		/* read nav file and update mbview window */
 		do_mbview_message_on("Reading swath data...", instance);
-		fprintf(stderr, "call do_mbgrdviz_opennav\n");
 		status = do_mbgrdviz_opennav(instance, MB_YES, file_ptr);
 		}
 	
@@ -785,7 +835,6 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		{
 		/* write site file */
 		do_mbview_message_on("Saving site data...", instance);
-		fprintf(stderr, "call do_mbgrdviz_savesite\n");
 		status = do_mbgrdviz_savesite(instance, file_ptr);
 		}
 	
@@ -794,7 +843,6 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		{
 		/* write route file */
 		do_mbview_message_on("Saving route data...", instance);
-		fprintf(stderr, "call do_mbgrdviz_saveroute\n");
 		status = do_mbgrdviz_saveroute(instance, file_ptr);
 		}
 
@@ -906,11 +954,6 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 	    
 	else if (instance >= 0)
 		{
-if (input_file_ptr != NULL)
-fprintf(stderr, "opening input grid:%s\n",input_file_ptr);
-else
-fprintf(stderr, "using internal test grid...\n");
-
 		/* get button name */
 		if (input_file_ptr != NULL)
 			{
@@ -1163,13 +1206,11 @@ fprintf(stderr, "using internal test grid...\n");
 		/* open up mbview window */
 		if (status == MB_SUCCESS)
 			{
-fprintf(stderr,"about to open mbview instance:%d\n",instance);
 			status = mbview_open(verbose, instance, &error);
 			if (status == MB_SUCCESS)
 				mbview_id[instance] = MB_YES;
 			else
 				mbview_id[instance] = MB_NO;
-fprintf(stderr,"done opening mbview instance:%d\n",instance);
 
 			/* add action button */
 			if (status == MB_SUCCESS)
@@ -1206,15 +1247,17 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_open_region,
 					"Open Region as New View", 
-					MBV_PICKMASK_REGION, &error);
+					MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_make_survey,
 					"Generate Survey Route from Area", 
 					MBV_PICKMASK_AREA, &error);
 				}
 			}
-
 		}
+	    
+	/* set sensitivity of widgets that require an mbview instance to be active */
+	do_mbgrdviz_sensitivity( );
 }
 /*---------------------------------------------------------------------------------------*/
 
@@ -1450,7 +1493,7 @@ int do_mbgrdviz_opensite(int instance, char *input_file_ptr)
 			}
 
 		    /* output some debug values */
-		    if (verbose >= 0 && site_ok == MB_YES)
+		    if (verbose > 0 && site_ok == MB_YES)
 			    {
 			    fprintf(stderr,"\ndbg5  Site point read in program <%s>\n",program_name);
 			    fprintf(stderr,"dbg5       site[%d]: %f %f %f  %d %d  %s\n",
@@ -1458,7 +1501,7 @@ int do_mbgrdviz_opensite(int instance, char *input_file_ptr)
 				    sitecolor[nsite],sitesize[nsite],
 				    sitename[nsite]);
 			    }
-		    else if (verbose >= 0 && site_ok == MB_NO)
+		    else if (verbose > 0 && site_ok == MB_NO)
 			    {
 			    fprintf(stderr,"\ndbg5  Unintelligible line read from site file in program <%s>\n",program_name);
 			    fprintf(stderr,"dbg5       buffer:  %s\n",
@@ -2014,7 +2057,6 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 						mb_get_fbt(verbose, swathfile, &format, &error);
 
 					/* read the swath or nav data using mbio calls */
-fprintf(stderr,"Trying to read nav from %s\n",swathfile);
 					do_mbgrdviz_readnav(instance, swathfile, 
 								format, weight, &error);
 					}
@@ -2632,7 +2674,7 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 		}	
 
 	/* print debug info */
-	if (verbose >= 0)
+	if (verbose > 0)
 	    {
 	    fprintf(stderr,"Grid read:\n");
 	    fprintf(stderr,"  Dimensions: %d %d\n", header.nx, header.ny);
@@ -3046,7 +3088,7 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_open_region,
 					"Open Region as New View", 
-					MBV_PICKMASK_REGION, &error);
+					MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_make_survey,
 					"Generate Survey Route from Area", 
@@ -3055,6 +3097,9 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 			}
 
 		}
+	    
+	/* set sensitivity of widgets that require an mbview instance to be active */
+	do_mbgrdviz_sensitivity( );
 }
 /*---------------------------------------------------------------------------------------*/
 

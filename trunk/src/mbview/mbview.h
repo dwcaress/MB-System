@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.8 2005-02-17 07:35:08 caress Exp $
+ *    $Id: mbview.h,v 5.9 2005-02-18 07:32:56 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/02/17 07:35:08  caress
+ * Moving towards 5.0.6 release.
+ *
  * Revision 5.7  2005/02/08 22:37:40  caress
  * Heading towards 5.0.6 release.
  *
@@ -202,6 +205,7 @@
 #define MBV_PICKMASK_NAVONEPOINT		64
 #define MBV_PICKMASK_NAVTWOPOINT		128
 #define MBV_PICKMASK_NAVANY			256
+#define MBV_PICKMASK_NEWINSTANCE		512
 
 /* structure declarations */
 struct mbview_contoursegment_struct {

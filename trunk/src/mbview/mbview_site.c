@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.3 2005-02-08 22:37:43 caress Exp $
+ *    $Id: mbview_site.c,v 5.4 2005-02-18 07:32:55 caress Exp $
  *
  *    Copyright (c) 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/02/08 22:37:43  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.1  2004/02/24 22:52:28  caress
  * Added spherical projection to MBview.
  *
@@ -88,7 +91,7 @@ Cardinal 	ac = 0;
 Arg      	args[256];
 char	value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.3 2005-02-08 22:37:43 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.4 2005-02-18 07:32:55 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -101,8 +104,6 @@ int mbview_getsitecount(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_getsitecount:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -154,8 +155,6 @@ int mbview_allocsitearrays(int verbose,
 	/* local variables */
 	char	*function_name = "mbview_allocsitearrays";
 	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_allocsitearrays: nsite:%d\n", nsite);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -224,8 +223,6 @@ int mbview_freesitearrays(int verbose,
 	/* local variables */
 	char	*function_name = "mbview_freesitearrays";
 	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_freesitearrays:\n");
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -296,10 +293,8 @@ int mbview_addsites(int verbose, int instance,
 	int	nadded;
 	int	i;
 
-fprintf(stderr,"Called mbview_addsites:%d\n",instance);
-
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -439,8 +434,6 @@ int mbview_getsites(int verbose, int instance,
 	struct mbview_struct *data;
 	int	i;
 
-fprintf(stderr,"Called mbview_getsites:%d\n",instance);
-
 	/* print starting debug statements */
 	if (verbose >= 2)
 		{
@@ -522,8 +515,6 @@ int mbview_enableviewsites(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-fprintf(stderr,"Called mbview_enableviewsites:%d\n",instance);
-
 	/* print starting debug statements */
 	if (verbose >= 2)
 		{
@@ -572,8 +563,6 @@ int mbview_enableeditsites(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_enableeditsites:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
