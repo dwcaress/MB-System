@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 5.3 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -62,7 +65,7 @@
 int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 5.2 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 5.3 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -327,6 +330,92 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 					* 1.0E-07 + M_PI / 2.0;
 	    /* get speed */
 	    *speed = 3.6e-3 * store->vesselVelocity;
+			
+	    /* set beamwidths in mb_io structure */
+	    if (store->toolType == MBSYS_HDCS_SingleBeam)
+		{
+		mb_io_ptr->beamwidth_ltrack = 4.0;
+		mb_io_ptr->beamwidth_xtrack = 4.0;
+		}
+	    else if (store->toolType == MBSYS_HDCS_ELAC_BottomChart)
+		{
+		mb_io_ptr->beamwidth_ltrack = 6.0;
+		mb_io_ptr->beamwidth_xtrack = 3.0;
+		}
+	    else if (store->toolType == MBSYS_HDCS_SeaBeam_1180_MkII)
+		{
+		mb_io_ptr->beamwidth_ltrack = 1.5;
+		mb_io_ptr->beamwidth_xtrack = 2.8;
+		}
+	    else if (store->toolType == MBSYS_HDCS_EM12_single
+		|| store->toolType == MBSYS_HDCS_EM12_dual)
+		{
+		mb_io_ptr->beamwidth_ltrack = 1.7;
+		mb_io_ptr->beamwidth_xtrack = 3.5;
+		}
+	    else if (store->toolType == MBSYS_HDCS_EM100_depth
+		|| store->toolType == MBSYS_HDCS_EM100_depth_ss
+		|| store->toolType == MBSYS_HDCS_EM1000
+		|| store->toolType == MBSYS_HDCS_EM1000_ampl)
+		{
+		mb_io_ptr->beamwidth_ltrack = 3.3;
+		mb_io_ptr->beamwidth_xtrack = 3.3;
+		}
+	    else if (store->toolType == MBSYS_HDCS_FanSweep
+		|| store->toolType == MBSYS_HDCS_FanSweep_10A
+		|| store->toolType == MBSYS_HDCS_FanSweep_20)
+		{
+		mb_io_ptr->beamwidth_ltrack = 2.0;
+		mb_io_ptr->beamwidth_xtrack = 2.0;
+		}
+	    else if (store->toolType == MBSYS_HDCS_SeaBeam)
+		{
+		mb_io_ptr->beamwidth_ltrack = 2.67;
+		mb_io_ptr->beamwidth_xtrack = 2.67;
+		}
+	    else if (store->toolType == MBSYS_HDCS_EM3000
+		|| store->toolType == MBSYS_HDCS_EM3000D)
+		{
+		mb_io_ptr->beamwidth_ltrack = 1.5;
+		mb_io_ptr->beamwidth_xtrack = 1.5;
+		}
+	    else if (store->toolType == MBSYS_HDCS_Navitronics_Smith)
+		{
+		mb_io_ptr->beamwidth_ltrack = 4.0;
+		mb_io_ptr->beamwidth_xtrack = 4.0;
+		}
+	    else if (store->toolType == MBSYS_HDCS_SB2100
+		|| store->toolType == MBSYS_HDCS_SB2K)
+		{
+		mb_io_ptr->beamwidth_ltrack = 2.0;
+		mb_io_ptr->beamwidth_xtrack = 2.0;
+		}
+	    else if (store->toolType == MBSYS_HDCS_ISIS_Submetrix
+		|| store->toolType == MBSYS_HDCS_ISIS_SWA)
+		{
+		mb_io_ptr->beamwidth_ltrack = 2.0;
+		mb_io_ptr->beamwidth_xtrack = 2.0;
+		}
+	    else if (store->toolType == MBSYS_HDCS_Seabat9001)
+		{
+		mb_io_ptr->beamwidth_ltrack = 1.5;
+		mb_io_ptr->beamwidth_xtrack = 1.5;
+		}
+	    else if (store->toolType == MBSYS_HDCS_SeaBat_8101)
+		{
+		mb_io_ptr->beamwidth_ltrack = 1.5;
+		mb_io_ptr->beamwidth_xtrack = 1.5;
+		}
+	    else if (store->toolType == MBSYS_HDCS_EM300)
+		{
+		mb_io_ptr->beamwidth_ltrack = 2.0;
+		mb_io_ptr->beamwidth_xtrack = 2.0;
+		}
+	    else if (store->toolType == MBSYS_HDCS_EM121A)
+		{
+		mb_io_ptr->beamwidth_ltrack = 1.0;
+		mb_io_ptr->beamwidth_xtrack = 1.0;
+		}
 
 	    /* read distance, depth, and backscatter 
 		    values into storage arrays */

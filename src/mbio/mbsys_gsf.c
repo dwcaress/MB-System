@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_gsf.c,v 5.4 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -82,7 +85,7 @@
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 5.4 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -245,6 +248,97 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = 1.852 * mb_ping->speed;
+		
+		/* set beamwidths in mb_io structure */
+		if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 2.67;
+		    mb_io_ptr->beamwidth_xtrack = 2.67;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 3.3;
+		    mb_io_ptr->beamwidth_xtrack = 3.3;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 3.3;
+		    mb_io_ptr->beamwidth_xtrack = 3.3;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 1.0;
+		    mb_io_ptr->beamwidth_xtrack = 1.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 1.0;
+		    mb_io_ptr->beamwidth_xtrack = 1.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 2.0;
+		    mb_io_ptr->beamwidth_xtrack = 2.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 1.5;
+		    mb_io_ptr->beamwidth_xtrack = 1.5;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 3.3;
+		    mb_io_ptr->beamwidth_xtrack = 3.3;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 2.67;
+		    mb_io_ptr->beamwidth_xtrack = 2.67;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 2.0;
+		    mb_io_ptr->beamwidth_xtrack = 2.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 1.5;
+		    mb_io_ptr->beamwidth_xtrack = 1.5;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 1.5;
+		    mb_io_ptr->beamwidth_xtrack = 1.5;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 2.0;
+		    mb_io_ptr->beamwidth_xtrack = 2.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 1.5;
+		    mb_io_ptr->beamwidth_xtrack = 2.8;
+		    }
+		else
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 2.0;
+		    mb_io_ptr->beamwidth_xtrack = 2.0;
+		    }
 
 		/* get numbers of beams and pixels */
 		if (mb_ping->depth != NULL)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.c	2/26/93
- *	$Id: mbsys_sb.c,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_sb.c,v 5.3 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -121,7 +124,7 @@
 int mbsys_sb_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb.c,v 5.2 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb.c,v 5.3 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_sb_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -276,6 +279,10 @@ int mbsys_sb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* set speed to zero */
 		*speed = 0.0;
+			
+		/* set beamwidths in mb_io structure */
+		mb_io_ptr->beamwidth_ltrack = 2.67;
+		mb_io_ptr->beamwidth_xtrack = 2.67;
 
 		/* read distance and depth values into storage arrays */
 		/* switch order of data as it is read into the global arrays */

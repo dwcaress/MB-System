@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.4 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.5 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.3  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -138,7 +141,7 @@
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 5.5 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -270,7 +273,7 @@ int mbsys_simrad_survey_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 5.5 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -508,6 +511,37 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed = 3.6*store->speed;
+			
+		/* set beamwidths in mb_io structure */
+		if (store->sonar == MBSYS_SIMRAD_EM1000)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 3.3;
+		    mb_io_ptr->beamwidth_xtrack = 3.3;
+		    }
+		else if (store->sonar == MBSYS_SIMRAD_EM12S
+			|| store->sonar == MBSYS_SIMRAD_EM12D)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 1.7;
+		    mb_io_ptr->beamwidth_xtrack = 3.5;
+		    }
+		else if (store->sonar == MBSYS_SIMRAD_EM121)
+		    {
+		    if (ping->bath_mode == 3)
+			{
+			mb_io_ptr->beamwidth_ltrack = 4.0;
+			mb_io_ptr->beamwidth_xtrack = 4.0;
+			}
+		    else if (ping->bath_mode == 2)
+			{
+			mb_io_ptr->beamwidth_ltrack = 2.0;
+			mb_io_ptr->beamwidth_xtrack = 2.0;
+			}
+		    else
+			{
+			mb_io_ptr->beamwidth_ltrack = 1.0;
+			mb_io_ptr->beamwidth_xtrack = 1.0;
+			}
+		    }
 
 		/* read distance and depth values into storage arrays */
 		*nbath = ping->beams_bath;

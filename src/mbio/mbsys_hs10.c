@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hs10.c	12/4/00
- *	$Id: mbsys_hs10.c,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_hs10.c,v 5.3 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -48,7 +51,7 @@
 int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hs10.c,v 5.2 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_hs10.c,v 5.3 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_hs10_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -206,6 +209,10 @@ int mbsys_hs10_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = 0.0;
+			
+		/* set beamwidths in mb_io structure */
+		mb_io_ptr->beamwidth_ltrack = 3.0;
+		mb_io_ptr->beamwidth_xtrack = 3.0;
 
 		/* read distance and depth values into storage arrays */
 		*nbath = MBSYS_HS10_BEAMS;

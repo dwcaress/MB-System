@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.c	3.00	8/5/96
- *	$Id: mbsys_dsl.c,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_dsl.c,v 5.3 2001-08-25 00:54:13 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -80,7 +83,7 @@
 int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_dsl.c,v 5.2 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_dsl.c,v 5.3 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_dsl_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -306,6 +309,10 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed = 0.0;
+			
+		/* set beamwidths in mb_io structure */
+		mb_io_ptr->beamwidth_ltrack = 2.0;
+		mb_io_ptr->beamwidth_xtrack = 0.2;
 
 		/* read bathymetry values into storage arrays */
 		*nbath = 2 * store->bat_num_bins;
