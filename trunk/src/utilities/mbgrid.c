@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.43 1999-09-14 21:28:50 caress Exp $
+ *    $Id: mbgrid.c,v 4.44 1999-09-24 23:11:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.43  1999/09/14  21:28:50  caress
+ * Fixed memory allocation errors relating to median filter gridding.
+ *
  * Revision 4.42  1999/08/08  04:17:40  caress
  * Unknown changes.
  *
@@ -261,7 +264,7 @@
 int mb_double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.43 1999-09-14 21:28:50 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.44 1999-09-24 23:11:07 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -839,6 +842,8 @@ char **argv;
 		if (set_spacing == MB_YES)
 			{
 			xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
+			if (dy_set <= 0.0)
+				dy_set = dx_set;
 			ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -868,6 +873,8 @@ char **argv;
 			&& (units[0] == 'M' || units[0] == 'm'))
 			{
 			xdim = (gbnd[1] - gbnd[0])/(mtodeglon*dx_set) + 1;
+			if (dy_set <= 0.0)
+				dy_set = mtodeglon * dx_set / mtodeglat;
 			ydim = (gbnd[3] - gbnd[2])/(mtodeglat*dy_set) + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -880,6 +887,8 @@ char **argv;
 			&& (units[0] == 'K' || units[0] == 'k'))
 			{
 			xdim = (gbnd[1] - gbnd[0])*deglontokm/dx_set + 1;
+			if (dy_set <= 0.0)
+				dy_set = deglattokm * dx_set / deglontokm;
 			ydim = (gbnd[3] - gbnd[2])*deglattokm/dy_set + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -892,6 +901,8 @@ char **argv;
 			&& (units[0] == 'F' || units[0] == 'f'))
 			{
 			xdim = (gbnd[1] - gbnd[0])/(mtodeglon*0.3048*dx_set) + 1;
+			if (dy_set <= 0.0)
+				dy_set = mtodeglon * dx_set / mtodeglat;
 			ydim = (gbnd[3] - gbnd[2])/(mtodeglat*0.3048*dy_set) + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -903,6 +914,8 @@ char **argv;
 		else if (set_spacing == MB_YES)
 			{
 			xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
+			if (dy_set <= 0.0)
+				dy_set = dx_set;
 			ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -3036,7 +3049,7 @@ int	*error;
 		fprintf(fp, "nrows %d\n", ny);
 		fprintf(fp, "xllcorner %f\n", xmin);
 		fprintf(fp, "yllcorner %f\n", ymin);
-		fprintf(fp, "cellsize %f\n", dx);
+		fprintf(fp, "cellsize %g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
 		for (j=0;j<ny;j++)
 		    {

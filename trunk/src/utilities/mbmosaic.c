@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.6 1999-08-08 04:17:40 caress Exp $
+ *    $Id: mbmosaic.c,v 4.7 1999-09-24 23:11:07 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1999/08/08  04:17:40  caress
+ * Unknown changes.
+ *
  * Revision 4.5  1999/04/16  01:29:39  caress
  * Version 4.6 final release?
  *
@@ -90,7 +93,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.6 1999-08-08 04:17:40 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.7 1999-09-24 23:11:07 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -691,6 +694,8 @@ char **argv;
 		if (set_spacing == MB_YES)
 			{
 			xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
+			if (dy_set <= 0.0)
+				dy_set = dx_set;
 			ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -720,6 +725,8 @@ char **argv;
 			&& (units[0] == 'M' || units[0] == 'm'))
 			{
 			xdim = (gbnd[1] - gbnd[0])/(mtodeglon*dx_set) + 1;
+			if (dy_set <= 0.0)
+				dy_set = mtodeglon * dx_set / mtodeglat;
 			ydim = (gbnd[3] - gbnd[2])/(mtodeglat*dy_set) + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -732,6 +739,8 @@ char **argv;
 			&& (units[0] == 'K' || units[0] == 'k'))
 			{
 			xdim = (gbnd[1] - gbnd[0])*deglontokm/dx_set + 1;
+			if (dy_set <= 0.0)
+				dy_set = deglattokm * dx_set / deglontokm;
 			ydim = (gbnd[3] - gbnd[2])*deglattokm/dy_set + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -744,6 +753,8 @@ char **argv;
 			&& (units[0] == 'F' || units[0] == 'f'))
 			{
 			xdim = (gbnd[1] - gbnd[0])/(mtodeglon * 0.3048 * dx_set) + 1;
+			if (dy_set <= 0.0)
+				dy_set = mtodeglon * dx_set / mtodeglat;
 			ydim = (gbnd[3] - gbnd[2])/(mtodeglat * 0.3048 * dy_set) + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -755,6 +766,8 @@ char **argv;
 		else if (set_spacing == MB_YES)
 			{
 			xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
+			if (dy_set <= 0.0)
+				dy_set = dx_set;
 			ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
 			if (spacing_priority == MB_YES)
 				{
@@ -2393,7 +2406,7 @@ int	*error;
 		fprintf(fp, "nrows %d\n", ny);
 		fprintf(fp, "xllcorner %f\n", xmin);
 		fprintf(fp, "yllcorner %f\n", ymin);
-		fprintf(fp, "cellsize %f\n", dx);
+		fprintf(fp, "cellsize %g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
 		for (j=0;j<ny;j++)
 		    {
