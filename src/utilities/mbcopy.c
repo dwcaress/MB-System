@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.14 2003-12-10 02:18:04 caress Exp $
+ *    $Id: mbcopy.c,v 5.15 2004-09-16 01:00:01 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2003/12/10 02:18:04  caress
+ * Fixed bug in which pings could not be found inbounds when a timegap error occurred.
+ *
  * Revision 5.13  2003/11/24 22:56:20  caress
  * Added inbounds check so that ancillary data records are only output when the last survey record was within the specified or default time and space bounds. This should allow time and space windowing for data formats containing large numbers of ancillary records.
  *
@@ -211,7 +214,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.14 2003-12-10 02:18:04 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.15 2004-09-16 01:00:01 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
