@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 4.1 1995-08-17 14:59:39 caress Exp $
+ *    $Id: mbnavedit.h,v 4.2 1996-04-05 20:07:02 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/08/17  14:59:39  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.0  1995/08/07  18:33:22  caress
  * First cut.
  *
@@ -40,6 +43,7 @@
 
 /* mbnavedit global control parameters */
 EXTERNAL int	output_mode;
+EXTERNAL int	gui_mode;
 EXTERNAL int	data_show_max;
 EXTERNAL int	data_show_size;
 EXTERNAL int	data_step_max;
