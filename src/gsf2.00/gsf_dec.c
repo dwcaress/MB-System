@@ -67,7 +67,11 @@
 
 /* rely on the network type definitions of (u_short, and u_long) */
 #include <sys/types.h>
+#ifndef __WINDOWS__
 #include <netinet/in.h>
+#else
+#include <winsock.h>
+#endif
 
 /* gsf library interface description */
 #include "gsf.h"
