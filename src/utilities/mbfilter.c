@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.17 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbfilter.c,v 4.18 2000-10-28 00:40:19 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.16  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -160,7 +163,7 @@ int mb_double_compare();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.17 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.18 2000-10-28 00:40:19 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -1366,7 +1369,7 @@ done, jbeg, jend, nbuff, nhold_ping, nhold);*/
 
 		/* reset pings to be dumped */
 		if (ndata > 0)
-		for (j=0;j<ndata-nhold;j++)
+		for (j=0;j<ndata-nhold_ping;j++)
 		  {
 		  if (datakind == MBFILTER_BATH)
 		    status = mb_buffer_insert(verbose,
