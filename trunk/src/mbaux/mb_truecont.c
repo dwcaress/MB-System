@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $
+ *    $Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -77,7 +77,7 @@ double	date_annot_int;
 double	time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -232,18 +232,18 @@ int	*error;
 	if (contour_algorithm == MB_CONTOUR_TRIANGLES)
 	  {
 	  dataptr->npts = 0;
-	  status = mb_malloc(verbose,npings_max*beams_bath*sizeof(double),
+	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(double),
 			&(dataptr->x),error);
-	  status = mb_malloc(verbose,npings_max*beams_bath*sizeof(double),
+	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(double),
 			&(dataptr->y),error);
-	  status = mb_malloc(verbose,npings_max*beams_bath*sizeof(double),
+	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(double),
 			&(dataptr->z),error);
-	  status = mb_malloc(verbose,npings_max*beams_bath*sizeof(int),
+	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(int),
 			&(dataptr->edge),error);
-	  status = mb_malloc(verbose,npings_max*beams_bath*sizeof(int),
+	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(int),
 			&(dataptr->pingid),error);
 	  dataptr->ntri = 0;
-	  ntri_max = 2*npings_max*beams_bath + 1;
+	  ntri_max = 3*npings_max*beams_bath + 1;
 	  for (i=0;i<3;i++)
 		{
 		status = mb_malloc(verbose,ntri_max*sizeof(int),
@@ -302,13 +302,13 @@ int	*error;
 	dataptr->ylabel = NULL;
 	dataptr->angle = NULL;
 	dataptr->justify = NULL;
-	status = mb_malloc(verbose,(2*npings_max)*sizeof(double),
+	status = mb_malloc(verbose,(5*npings_max)*sizeof(double),
 				&(dataptr->xlabel),error);
-	status = mb_malloc(verbose,(2*npings_max)*sizeof(double),
+	status = mb_malloc(verbose,(5*npings_max)*sizeof(double),
 				&(dataptr->ylabel),error);
-	status = mb_malloc(verbose,(2*npings_max)*sizeof(double),
+	status = mb_malloc(verbose,(5*npings_max)*sizeof(double),
 				&(dataptr->angle),error);
-	status = mb_malloc(verbose,(2*npings_max)*sizeof(int),
+	status = mb_malloc(verbose,(5*npings_max)*sizeof(int),
 				&(dataptr->justify),error);
 
 	/* print output debug statements */
@@ -333,7 +333,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -468,7 +468,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1155,7 +1155,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
