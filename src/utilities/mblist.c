@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.4 1994-06-05 22:31:22 caress Exp $
+ *    $Id: mblist.c,v 4.5 1994-06-21 22:53:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,11 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/06/05  22:31:22  caress
+ * Major revision changing the manner in which complete
+ * dumps occur.  Options added to control the range of beams
+ * or pixels which are output.
+ *
  * Revision 4.3  1994/06/01  21:00:55  caress
  * Added new dump modes with acrosstrack and alongtrack
  * values. Added topography dumps.
@@ -110,7 +115,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.4 1994-06-05 22:31:22 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.5 1994-06-21 22:53:08 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -692,7 +697,7 @@ char **argv;
 					time_tm.tm_hour = time_i[3];
 					time_tm.tm_min = time_i[4];
 					time_tm.tm_sec = time_i[5];
-#ifdef IRIX
+#if defined (IRIX) || defined (LYNX)
 					time_u = mktime(&time_tm);
 #else
 					time_u = timegm(time_tm);
@@ -706,7 +711,7 @@ char **argv;
 					time_tm.tm_hour = time_i[3];
 					time_tm.tm_min = time_i[4];
 					time_tm.tm_sec = time_i[5];
-#ifdef IRIX
+#if defined (IRIX) || defined (LYNX)
 					time_u = mktime(&time_tm);
 #else
 					time_u = timegm(time_tm);
@@ -892,7 +897,7 @@ char **argv;
 					time_tm.tm_hour = time_i[3];
 					time_tm.tm_min = time_i[4];
 					time_tm.tm_sec = time_i[5];
-#ifdef IRIX
+#if defined (IRIX) || defined (LYNX)
 					time_u = mktime(&time_tm);
 #else
 					time_u = timegm(time_tm);
@@ -906,7 +911,7 @@ char **argv;
 					time_tm.tm_hour = time_i[3];
 					time_tm.tm_min = time_i[4];
 					time_tm.tm_sec = time_i[5];
-#ifdef IRIX
+#if defined (IRIX) || defined (LYNX)
 					time_u = mktime(&time_tm);
 #else
 					time_u = timegm(time_tm);

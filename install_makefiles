@@ -1,7 +1,7 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.0 1994-05-24 20:40:50 caress Exp $
+#    $Id: install_makefiles,v 4.1 1994-06-21 22:52:01 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,15 +39,24 @@
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.0 1994-05-24 20:40:50 caress Exp $
+#   $Id: install_makefiles,v 4.1 1994-06-21 22:52:01 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1994/05/24  20:40:50  caress
+# First cut.
+#
 #
 #
 #
 # The important parameters to be set are:
-#	OS		Operating system (e.g. SUN or IRIX).
+#	OS		Operating system (e.g. SUN, IRIX, or LYNX).
+#	BYTESWAPPED	If set to "YES" will enable byte swapping
+#				of input and output binary data.
+#				Otherwise byte swapping is disabled.
+#				Byte swapping needs to be enabled
+#				when installing on "little endian"
+#				machines such as PCs or VAXs.
 #	CFLAGS		Compile flags for C source files.
 #	FFLAGS		Compile flags for F77 source files.
 #	LFLAGS		Load flags for all object files.
@@ -65,51 +74,70 @@
 #				include file graphics.h
 #
 # Example for installing on L-DEO Sun workstations:
-#	OS = SUN
-#	CFLAGS = -O2 -D$OS
-#	FFLAGS = -O2
-#	LFLAGS = -lm
-#	FWITHCFLAGS = -lF77
-#	GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
-#	GMTINCDIR = /ocean/mgg/gmt2/src
-#	NETCDFDIR = /ocean/mgg/netcdf/sun4/lib
-#	LEVITUS = /ocean/mgg/levitus/annual
-#	REALTIME = 1
-#	GRPHLIBDIR = /otter/home/graphics/lib
-#	GRPHINCDIR = /otter/home/graphics/lib
+#	$OS = "SUN";
+#	$BYTESWAPPED = "NO";
+#	$CFLAGS = "-O2";
+#	$FFLAGS = "-O2";
+#	$LFLAGS = "-lm";
+#	$FWITHCFLAGS = "-lF77";
+#	$GMTLIBDIR = "/ocean/mgg/gmt2/sun4/lib";
+#	$GMTINCDIR = "/ocean/mgg/gmt2/src";
+#	$NETCDFDIR = "/ocean/mgg/netcdf/sun4/lib";
+#	$LEVITUS = "/ocean/mgg/levitus/annual";
+#	$REALTIME = 1;
+#	$GRPHLIBDIR = "/otter/home/graphics/lib";
+#	$GRPHINCDIR = "/otter/home/graphics/lib";
 #
 # Example for installing on R/V Ewing Sun workstations:
-#	OS = SUN
-#	CFLAGS = -O2 -D$OS
-#	FFLAGS = -O2
-#	LFLAGS = -lm
-#	FWITHCFLAGS = -lF77
-#	GMTLIBDIR = /net/heezen/packages/gmt2/bin
-#	GMTINCDIR = /net/heezen/packages/gmt2/src
-#	NETCDFDIR = /net/heezen/packages/netcdf/lib
-#	LEVITUS = /net/heezen/packages/levitus/annual
-#	REALTIME = 1
-#	GRPHLIBDIR = /otter/home/graphics/lib
-#	GRPHINCDIR = /otter/home/graphics/lib
+#	$OS = "SUN";
+#	$BYTESWAPPED = "NO";
+#	$CFLAGS = "-O2";
+#	$FFLAGS = "-O2";
+#	$LFLAGS = "-lm";
+#	$FWITHCFLAGS = "-lF77";
+#	$GMTLIBDIR = "/net/heezen/packages/gmt2/bin";
+#	$GMTINCDIR = "/net/heezen/packages/gmt2/src";
+#	$NETCDFDIR = "/net/heezen/packages/netcdf/lib";
+#	$LEVITUS = "/net/heezen/packages/levitus/annual";
+#	$REALTIME = 1;
+#	$GRPHLIBDIR = "/otter/home/graphics/lib";
+#	$GRPHINCDIR = "/otter/home/graphics/lib";
 #
 # Example for installing on SeaBeam Instruments SGI IRIX workstations:
-#	OS = IRIX
-#	CFLAGS = -O2 -D$OS
-#	FFLAGS = -O2
-#	LFLAGS = -lm -lsun
-#	FWITHCFLAGS = -lF77 -lU77 -lI77 -lisam -lfgl
-#	GMTLIBDIR = /usr/local/gmt/src
-#	GMTINCDIR = /usr/local/gmt/src
-#	NETCDFDIR = /usr/local/netcdf/lib
-#	LEVITUS = /usr/local/levitus/annual
-#	REALTIME = 1
-#	GRPHLIBDIR = /usr/local/lamont_graphics/graphics/src
-#	GRPHINCDIR = /usr/local/lamont_graphics/graphics/src
+#	$OS = "IRIX";
+#	$BYTESWAPPED = "NO";
+#	$CFLAGS = "-O2";
+#	$FFLAGS = "-O2";
+#	$LFLAGS = "-lm -lsun";
+#	$FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam -lfgl";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFDIR = "/usr/local/netcdf/lib";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#	$REALTIME = 1;
+#	$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
+#	$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
+#
+# Example for installing on SeaBeam Instruments Lynx PC:
+#	$OS = "LYNX";
+#	$BYTESWAPPED = "YES";
+#	$CFLAGS = "-O";
+#	$FFLAGS = "-O";
+#	$LFLAGS = "-lm -X";
+#	$FWITHCFLAGS = "-lMEPC -lVEPC -lCEPC";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFDIR = "/usr/local/netcdf/lib";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#	$REALTIME = 1;
+#	$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
+#	$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
 #
 # **** EDIT THE PARAMETERS HERE ****
 # Set the environment parameters:
 $OS =	   "SUN";
-$CFLAGS =  "-O2 -D$OS";
+$BYTESWAPPED = "NO";
+$CFLAGS =  "-O2";
 $FFLAGS =  "-O2";
 $LFLAGS =  "-lm";
 $FWITHCFLAGS = "-lF77";
@@ -126,9 +154,26 @@ $GRPHINCDIR = "/otter/home/graphics/lib";
 # Program Name:
 $program_name = "install_makefiles";
 
+# add operating system to CFLAGS
+$CFLAGS = "$CFLAGS -D$OS";
+
+# add byte swapping to CFLAGS if necessary
+if ($BYTESWAPPED eq "YES")
+	{
+	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
+	}
+
 # outputting attributes:
 print "\nParameters defined for Makefiles:\n";
 print "Operating System:          $OS\n";
+if ($BYTESWAPPED eq "YES")
+	{
+	print "Byte swapping:             enabled\n";
+	}
+else
+	{
+	print "Byte swapping:             disabled\n";
+	}
 print "C Compile Flags:           $CFLAGS\n";
 print "F77 Compile Flags:         $FFLAGS\n";
 print "Load Flags:                $LFLAGS\n";
