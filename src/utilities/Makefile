@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile  1/21/93
-#	$Id: Makefile,v 4.3 1994-04-19 17:20:12 caress Exp $
+#	$Id: Makefile,v 4.4 1994-05-05 20:31:24 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.3  1994/04/19  17:20:12  caress
+# More changes for compatibility with IRIX.
+#
 # Revision 4.2  1994/04/12  20:58:30  caress
 # Changed for version 4.0beta4
 #
@@ -89,7 +92,7 @@ GMTBINDIR = /ocean/mgg/gmt2/sun4
 # Location of Levitus annual database file
 #
 # - For L-DEO installation:
-LEVITUS = /ocean/mgg/multibeam/levitus/annual
+LEVITUS = /ocean/mgg/levitus/annual
 #
 # - For Ewing installation:
 #LEVITUS = /net/heezen/packages/levitus/annual
@@ -102,14 +105,10 @@ LEVITUS = /ocean/mgg/multibeam/levitus/annual
 #
 # - For installations under SunOs:
 CFLAGS = -O2
-FFLAGS = -O2
-FWITHCFLAGS = -lF77
 LFLAGS = -lm
 #
 # - For installations under IRIX:
 #CFLAGS = -O2 -D$(OS)
-#FFLAGS = -O2
-#FWITHCFLAGS = -lF77 -lI77 -lisam -lfgl
 #LFLAGS = -lm -lsun
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
@@ -162,8 +161,8 @@ $(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbclean.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbclean
 $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbunclean
-$(BINDIR)/mbgrid:	mbgrid.o zgrid.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbgrid.o zgrid.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a -lnetcdf $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbgrid
+$(BINDIR)/mbgrid:	mbgrid.o surfunc.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbgrid.o surfunc.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a -lnetcdf $(LFLAGS) -o $(BINDIR)/mbgrid
 $(BINDIR)/mblevitus:	mblevitus.o
 	$(CC) $(CFLAGS) mblevitus.o $(LFLAGS) -o $(BINDIR)/mblevitus
 $(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a
@@ -205,9 +204,9 @@ mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
-zgrid.o:	zgrid.f
-	$(FC) -c $(FFLAGS) zgrid.f
-mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
+surfunc.o:	surfunc.c
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) surfunc.c
+mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbbath.c
 hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
 	$(CC) -c $(CFLAGS) hsdump.c
