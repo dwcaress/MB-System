@@ -118,7 +118,7 @@ and returns the following output:
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbextractsegy\fP(l), \fBmbsegylist\fP(l), \fBmbsegygrid\fP(l),
-\fBSIOSEIS\fP(http://sioseis.ucsd.edu/)
+\fBSIOSEIS\fP(http://sioseis.ucsd.edu/ )
 
 .SH BUGS
 Maybe. Depends on who's asking...
