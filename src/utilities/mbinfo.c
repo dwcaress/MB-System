@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.11 2002-07-20 20:56:55 caress Exp $
+ *    $Id: mbinfo.c,v 5.12 2002-09-19 00:28:12 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/07/20 20:56:55  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.10  2002/05/29 23:43:09  caress
  * Release 5.0.beta18
  *
@@ -187,7 +190,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.11 2002-07-20 20:56:55 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.12 2002-09-19 00:28:12 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -258,7 +261,27 @@ main (int argc, char **argv)
 	double	*sslat = NULL;
 	char	comment[256];
 	int	icomment = 0;
+	
+	/* metadata controls */
 	int	imetadata = 0;
+	int	meta_vessel = 0;
+	int	meta_institution = 0;
+	int	meta_platform = 0;
+	int	meta_sonar = 0;
+	int	meta_sonarversion = 0;
+	int	meta_cruiseid = 0;
+	int	meta_cruisename = 0;
+	int	meta_pi = 0;
+	int	meta_piinstitution = 0;
+	int	meta_client = 0;
+	int	meta_svcorrected = 0;
+	int	meta_tidecorrected = 0;
+	int	meta_batheditmanual = 0;
+	int	meta_batheditauto = 0;
+	int	meta_rollbias = 0;
+	int	meta_pitchbias = 0;
+	int	meta_headingbias = 0;
+	int	meta_draft = 0;
 
 	/* mbinfo control parameters */
 	int	comments = MB_NO;
@@ -823,6 +846,26 @@ main (int argc, char **argv)
 		for (i=0;i<mask_nx*mask_ny;i++)
 		    mask[i] = MB_NO;
 		}
+		
+	/* initialize metadata counters */
+	meta_vessel = 0;
+	meta_institution = 0;
+	meta_platform = 0;
+	meta_sonar = 0;
+	meta_sonarversion = 0;
+	meta_cruiseid = 0;
+	meta_cruisename = 0;
+	meta_pi = 0;
+	meta_piinstitution = 0;
+	meta_client = 0;
+	meta_svcorrected = 0;
+	meta_tidecorrected = 0;
+	meta_batheditmanual = 0;
+	meta_batheditauto = 0;
+	meta_rollbias = 0;
+	meta_pitchbias = 0;
+	meta_headingbias = 0;
+	meta_draft = 0;
 
 	/* printf out file and format */
 	if (pass == 0)
@@ -902,76 +945,148 @@ main (int argc, char **argv)
 					imetadata++;
 					}
 				if (strncmp(comment, "METAVESSEL:", 11) == 0)
-					fprintf(output,"Vessel:                 %s\n", &comment[11]);
+					{
+					if (meta_vessel == 0)
+					    fprintf(output,"Vessel:                 %s\n", &comment[11]);
+					meta_vessel++;
+					}
 				else if (strncmp(comment, "METAINSTITUTION:", 16) == 0)
-					fprintf(output,"Institution:            %s\n", &comment[16]);
+					{
+					if (meta_institution == 0)
+					    fprintf(output,"Institution:            %s\n", &comment[16]);
+					meta_institution++;
+					}
 				else if (strncmp(comment, "METAPLATFORM:", 13) == 0)
-					fprintf(output,"Platform:               %s\n", &comment[13]);
+					{
+					if (meta_platform == 0)
+					    fprintf(output,"Platform:               %s\n", &comment[13]);
+					meta_platform++;
+					}
 				else if (strncmp(comment, "METASONARVERSION:", 17) == 0)
-					fprintf(output,"Sonar Version:          %s\n", &comment[17]);
+					{
+					if (meta_sonarversion == 0)
+					    fprintf(output,"Sonar Version:          %s\n", &comment[17]);
+					meta_sonarversion++;
+					}
 				else if (strncmp(comment, "METASONAR:", 10) == 0)
-					fprintf(output,"Sonar:                  %s\n", &comment[10]);
+					{
+					if (meta_sonar == 0)
+					    fprintf(output,"Sonar:                  %s\n", &comment[10]);
+					meta_sonar++;
+					}
 				else if (strncmp(comment, "METACRUISEID:", 13) == 0)
-					fprintf(output,"Cruise ID:              %s\n", &comment[13]);
+					{
+					if (meta_cruiseid == 0)
+					    fprintf(output,"Cruise ID:              %s\n", &comment[13]);
+					meta_cruiseid++;
+					}
 				else if (strncmp(comment, "METACRUISENAME:", 15) == 0)
-					fprintf(output,"Cruise Name:            %s\n", &comment[15]);
+					{
+					if (meta_cruisename == 0)
+					    fprintf(output,"Cruise Name:            %s\n", &comment[15]);
+					meta_cruisename++;
+					}
 				else if (strncmp(comment, "METAPI:", 7) == 0)
-					fprintf(output,"PI:                     %s\n", &comment[7]);
+					{
+					if (meta_pi == 0)
+					    fprintf(output,"PI:                     %s\n", &comment[7]);
+					meta_pi++;
+					}
 				else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0)
-					fprintf(output,"PI Institution:         %s\n", &comment[18]);
+					{
+					if (meta_piinstitution == 0)
+					    fprintf(output,"PI Institution:         %s\n", &comment[18]);
+					meta_piinstitution++;
+					}
 				else if (strncmp(comment, "METACLIENT:", 11) == 0)
-					fprintf(output,"Client:                 %s\n", &comment[11]);
+					{
+					if (meta_client == 0)
+					    fprintf(output,"Client:                 %s\n", &comment[11]);
+					meta_client++;
+					}
 				else if (strncmp(comment, "METASVCORRECTED:", 16) == 0)
 					{
-					sscanf(comment, "METASVCORRECTED:%d", &val_int);
-					if (val_int == MB_YES)
-					    fprintf(output,"Corrected Depths:       YES\n");
-					else
-					    fprintf(output,"Corrected Depths:       NO\n");
+					if (meta_svcorrected == 0)
+					    {
+					    sscanf(comment, "METASVCORRECTED:%d", &val_int);
+					    if (val_int == MB_YES)
+						fprintf(output,"Corrected Depths:       YES\n");
+					    else
+						fprintf(output,"Corrected Depths:       NO\n");
+					    }
+					meta_svcorrected++;
 					}
 				else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0)
 					{
-					sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-					if (val_int == MB_YES)
-					    fprintf(output,"Tide Corrected:         YES\n");
-					else
-					    fprintf(output,"Tide Corrected:         NO\n");
+					if (meta_tidecorrected == 0)
+					    {
+					    sscanf(comment, "METATIDECORRECTED:%d", &val_int);
+					    if (val_int == MB_YES)
+						fprintf(output,"Tide Corrected:         YES\n");
+					    else
+						fprintf(output,"Tide Corrected:         NO\n");
+					    }
+					meta_tidecorrected++;
 					}
 				else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0)
 					{
-					sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-					if (val_int == MB_YES)
-					    fprintf(output,"Depths Manually Edited: YES\n");
-					else
-					    fprintf(output,"Depths Manually Edited: NO\n");
+					if (meta_batheditmanual == 0)
+					    {
+					    sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
+					    if (val_int == MB_YES)
+						fprintf(output,"Depths Manually Edited: YES\n");
+					    else
+						fprintf(output,"Depths Manually Edited: NO\n");
+					    }
+					meta_batheditmanual++;
 					}
 				else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0)
 					{
-					sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-					if (val_int == MB_YES)
-					    fprintf(output,"Depths Auto-Edited:     YES\n");
-					else
-					    fprintf(output,"Depths Auto-Edited:     NO\n");
+					if (meta_batheditauto == 0)
+					    {
+					    sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
+					    if (val_int == MB_YES)
+						fprintf(output,"Depths Auto-Edited:     YES\n");
+					    else
+						fprintf(output,"Depths Auto-Edited:     NO\n");
+					    }
+					meta_batheditauto++;
 					}
 				else if (strncmp(comment, "METAROLLBIAS:", 13) == 0)
 					{
-					sscanf(comment, "METAROLLBIAS:%lf", &val_double);
-					fprintf(output,"Roll Bias:              %f degrees\n", val_double);
+					if (meta_rollbias == 0)
+					    {
+					    sscanf(comment, "METAROLLBIAS:%lf", &val_double);
+					    fprintf(output,"Roll Bias:              %f degrees\n", val_double);
+					    }
+					meta_rollbias++;
 					}
 				else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0)
 					{
-					sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
-					fprintf(output,"Pitch Bias:             %f degrees\n", val_double);
+					if (meta_pitchbias == 0)
+					    {
+					    sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
+					    fprintf(output,"Pitch Bias:             %f degrees\n", val_double);
+					    }
+					meta_pitchbias++;
 					}
 				else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0)
 					{
-					sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
-					fprintf(output,"Heading Bias:           %f degrees\n", val_double);
+					if (meta_headingbias == 0)
+					    {
+					    sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
+					    fprintf(output,"Heading Bias:           %f degrees\n", val_double);
+					    }
+					meta_headingbias++;
 					}
 				else if (strncmp(comment, "METADRAFT:", 10) == 0)
 					{
-					sscanf(comment, "METADRAFT:%lf", &val_double);
-					fprintf(output,"Draft:                  %f m\n", val_double);
+					if (meta_draft == 0)
+					    {
+					    sscanf(comment, "METADRAFT:%lf", &val_double);
+					    fprintf(output,"Draft:                  %f m\n", val_double);
+					    }
+					meta_draft++;
 					}
 				}
 

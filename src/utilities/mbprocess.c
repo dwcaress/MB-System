@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.23 2002-09-07 04:49:23 caress Exp $
+ *    $Id: mbprocess.c,v 5.24 2002-09-19 00:28:12 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2002/09/07 04:49:23  caress
+ * Added slope mode option to mb_process.
+ *
  * Revision 5.22  2002/07/25 19:07:17  caress
  * Release 5.0.beta21
  *
@@ -146,12 +149,38 @@ struct mbprocess_sscorr_struct
 	double	*sigma;
 	};
 
+/* function prototypes */
+int check_ss_for_bath(int verbose,
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int nss, double *ss, double *ssacrosstrack, 
+	int *error);
+int set_bathyslope(int verbose,
+	int nsmooth, 
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	double *depthsmooth, 
+	int *error);
+int get_bathyslope(int verbose,
+	int ndepths, double *depths, double *depthacrosstrack,
+	int nslopes, double *slopes, double *slopeacrosstrack, 
+	double acrosstrack, double *depth, double *slope,
+	int *error);
+int get_corrtable(int verbose,
+	double time_d, int ncorrtable, int ncorrangle, 
+	struct mbprocess_sscorr_struct	*corrtable, 
+	struct mbprocess_sscorr_struct	*corrtableuse, 
+	int *error);
+int get_anglecorr(int verbose,
+	int nangle, double *angles, double *corrs,
+	double angle, double *corr, int *error);
+
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.23 2002-09-07 04:49:23 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.24 2002-09-19 00:28:12 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -384,7 +413,6 @@ and mbedit edit save files.\n";
 	int	nbeams;
 	int	istart, iend, icut;
 	int	intstat;
-	double	factor;
 	int	i, j, k, mm;
 	
 	char	*ctime();
@@ -502,7 +530,7 @@ and mbedit edit save files.\n";
 	    exit(error);
 	    }
 
-	/* try to datalist.mb-1 as input */
+	/* try datalist.mb-1 as input */
 	if (mbp_ifile_specified == MB_NO)
 	    {
 	    if ((fstat = stat("datalist.mb-1", &file_status)) == 0
@@ -4318,61 +4346,11 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			&& nampcorrtable > 0
 			&& nampcorrangle > 0)
 			{
-			/* find the correction table */
-			if (nampcorrtable == 1
-				|| time_d <= ampcorrtable[0].time_d)
-				{
-				ampcorrtableuse.time_d = ampcorrtable[0].time_d;
-				ampcorrtableuse.nangle = ampcorrtable[0].nangle;
-				for (i=0;i<nampcorrangle;i++)
-					{
-					ampcorrtableuse.angle[i] = ampcorrtable[0].angle[i];
-					ampcorrtableuse.amplitude[i] = ampcorrtable[0].amplitude[i];
-					ampcorrtableuse.sigma[i] = ampcorrtable[0].sigma[i];
-					}
-				}
-			else if (time_d > ampcorrtable[nampcorrtable-1].time_d)
-				{
-				ampcorrtableuse.time_d = ampcorrtable[nampcorrtable-1].time_d;
-				ampcorrtableuse.nangle = ampcorrtable[nampcorrtable-1].nangle;
-				for (i=0;i<nampcorrangle;i++)
-					{
-					ampcorrtableuse.angle[i] = ampcorrtable[nampcorrtable-1].angle[i];
-					ampcorrtableuse.amplitude[i] = ampcorrtable[nampcorrtable-1].amplitude[i];
-					ampcorrtableuse.sigma[i] = ampcorrtable[nampcorrtable-1].sigma[i];
-					}
-				}
-			else
-				{
-				itable = 0;
-				for (i=0;i<nampcorrtable-1;i++)
-					{
-					if (ampcorrtable[i].time_d <= time_d
-						&& ampcorrtable[i+1].time_d > time_d)
-						itable = i;
-					}
-				factor = (time_d - ampcorrtable[itable].time_d)
-						/ (ampcorrtable[itable+1].time_d 
-							- ampcorrtable[itable].time_d);
-				ampcorrtableuse.time_d = time_d;
-				ampcorrtableuse.nangle = MIN(ampcorrtable[itable].nangle,
-								ampcorrtable[itable].nangle);
-				for (i=0;i<ampcorrtableuse.nangle;i++)
-					{
-					ampcorrtableuse.angle[i]
-						= ampcorrtable[itable].angle[i]
-							+ factor * (ampcorrtable[itable+1].angle[i]
-									- ampcorrtable[itable].angle[i]);
-					ampcorrtableuse.amplitude[i]
-						= ampcorrtable[itable].amplitude[i]
-							+ factor * (ampcorrtable[itable+1].amplitude[i]
-									- ampcorrtable[itable].amplitude[i]);
-					ampcorrtableuse.sigma[i]
-						= ampcorrtable[itable].sigma[i]
-							+ factor * (ampcorrtable[itable+1].sigma[i]
-									- ampcorrtable[itable].sigma[i]);
-					}
-				}
+			/* calculate the correction table */
+			status = get_corrtable(verbose,
+				    time_d, nampcorrtable, nampcorrangle, 
+				    ampcorrtable, &ampcorrtableuse, 
+				    &error);
 				
 			/* set the reference amplitudes */
 			status = get_anglecorr(verbose, 
@@ -4459,8 +4437,8 @@ i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]
 								ampcorrtableuse.angle, 
 								ampcorrtableuse.amplitude, 
 								angle, &correction, &error);
-/*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f amp: %f", 
-j, i, slopeangle, rawangle, correction, amp[i]);*/
+/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f", 
+j, i, slopeangle, rawangle, correction, reference_amp, amp[i]);*/
 						if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
 				    			amp[i] = amp[i] - correction + reference_amp;
 						else
@@ -4480,61 +4458,11 @@ j, i, slopeangle, rawangle, correction, amp[i]);*/
 			&& nsscorrtable > 0
 			&& nsscorrangle > 0)
 			{
-			/* find the correction table */
-			if (nsscorrtable == 1
-				|| time_d <= sscorrtable[0].time_d)
-				{
-				sscorrtableuse.time_d = sscorrtable[0].time_d;
-				sscorrtableuse.nangle = sscorrtable[0].nangle;
-				for (i=0;i<nsscorrangle;i++)
-					{
-					sscorrtableuse.angle[i] = sscorrtable[0].angle[i];
-					sscorrtableuse.amplitude[i] = sscorrtable[0].amplitude[i];
-					sscorrtableuse.sigma[i] = sscorrtable[0].sigma[i];
-					}
-				}
-			else if (time_d > sscorrtable[nsscorrtable-1].time_d)
-				{
-				sscorrtableuse.time_d = sscorrtable[nsscorrtable-1].time_d;
-				sscorrtableuse.nangle = sscorrtable[nsscorrtable-1].nangle;
-				for (i=0;i<nsscorrangle;i++)
-					{
-					sscorrtableuse.angle[i] = sscorrtable[nsscorrtable-1].angle[i];
-					sscorrtableuse.amplitude[i] = sscorrtable[nsscorrtable-1].amplitude[i];
-					sscorrtableuse.sigma[i] = sscorrtable[nsscorrtable-1].sigma[i];
-					}
-				}
-			else
-				{
-				itable = 0;
-				for (i=0;i<nsscorrtable-1;i++)
-					{
-					if (sscorrtable[i].time_d <= time_d
-						&& sscorrtable[i+1].time_d > time_d)
-						itable = i;
-					}
-				factor = (time_d - sscorrtable[itable].time_d)
-						/ (sscorrtable[itable+1].time_d 
-							- sscorrtable[itable].time_d);
-				sscorrtableuse.time_d = time_d;
-				sscorrtableuse.nangle = MIN(sscorrtable[itable].nangle,
-								sscorrtable[itable].nangle);
-				for (i=0;i<sscorrtableuse.nangle;i++)
-					{
-					sscorrtableuse.angle[i]
-						= sscorrtable[itable].angle[i]
-							+ factor * (sscorrtable[itable+1].angle[i]
-									- sscorrtable[itable].angle[i]);
-					sscorrtableuse.amplitude[i]
-						= sscorrtable[itable].amplitude[i]
-							+ factor * (sscorrtable[itable+1].amplitude[i]
-									- sscorrtable[itable].amplitude[i]);
-					sscorrtableuse.sigma[i]
-						= sscorrtable[itable].sigma[i]
-							+ factor * (sscorrtable[itable+1].sigma[i]
-									- sscorrtable[itable].sigma[i]);
-					}
-				}
+			/* calculate the correction table */
+			status = get_corrtable(verbose,
+				    time_d, nsscorrtable, nsscorrangle, 
+				    sscorrtable, &sscorrtableuse, 
+				    &error);
 				
 			/* set the reference amplitudes */
 			status = get_anglecorr(verbose, 
@@ -4621,8 +4549,8 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 								sscorrtableuse.angle, 
 								sscorrtableuse.amplitude, 
 								angle, &correction, &error);
-/*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f ss: %f", 
-j, i, slopeangle, rawangle, correction, ss[i]);*/
+/*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f reference:%f ss: %f", 
+j, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 				    			ss[i] = ss[i] - correction + reference_amp;
 						else
@@ -5211,6 +5139,178 @@ int get_bathyslope(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int get_corrtable(int verbose,
+	double time_d, int ncorrtable, int ncorrangle, 
+	struct mbprocess_sscorr_struct	*corrtable, 
+	struct mbprocess_sscorr_struct	*corrtableuse, 
+	int *error)
+{
+	char	*function_name = "get_anglecorr";
+	int	status = MB_SUCCESS;
+	double	factor;
+	int	ifirst, ilast, irecent, inext;
+	int	i, ii, itable;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBPROCESS function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
+		fprintf(stderr,"dbg2       time_d:      %f\n",time_d);
+		fprintf(stderr,"dbg2       ncorrtable:  %d\n",ncorrtable);
+		fprintf(stderr,"dbg2       ncorrangle:  %d\n",ncorrangle);
+		fprintf(stderr,"dbg2       corrtable:   %d\n",corrtable);
+		}
+
+	/* find the correction table */
+	if (ncorrtable == 1
+		|| time_d <= corrtable[0].time_d)
+		{
+		corrtableuse->time_d = corrtable[0].time_d;
+		corrtableuse->nangle = corrtable[0].nangle;
+		for (i=0;i<ncorrangle;i++)
+			{
+			corrtableuse->angle[i] = corrtable[0].angle[i];
+			corrtableuse->amplitude[i] = corrtable[0].amplitude[i];
+			corrtableuse->sigma[i] = corrtable[0].sigma[i];
+			}
+		}
+	else if (time_d > corrtable[ncorrtable-1].time_d)
+		{
+		corrtableuse->time_d = corrtable[ncorrtable-1].time_d;
+		corrtableuse->nangle = corrtable[ncorrtable-1].nangle;
+		for (i=0;i<ncorrangle;i++)
+			{
+			corrtableuse->angle[i] = corrtable[ncorrtable-1].angle[i];
+			corrtableuse->amplitude[i] = corrtable[ncorrtable-1].amplitude[i];
+			corrtableuse->sigma[i] = corrtable[ncorrtable-1].sigma[i];
+			}
+		}
+	else
+		{
+		itable = 0;
+		for (i=0;i<ncorrtable-1;i++)
+			{
+			if (corrtable[i].time_d <= time_d
+				&& corrtable[i+1].time_d > time_d)
+				itable = i;
+			}
+		factor = (time_d - corrtable[itable].time_d)
+				/ (corrtable[itable+1].time_d 
+					- corrtable[itable].time_d);
+		corrtableuse->time_d = time_d;
+		corrtableuse->nangle = MIN(corrtable[itable].nangle,
+						corrtable[itable].nangle);
+		for (i=0;i<corrtableuse->nangle;i++)
+		    {
+		    corrtableuse->angle[i]
+			    = corrtable[itable].angle[i]
+				    + factor * (corrtable[itable+1].angle[i]
+						    - corrtable[itable].angle[i]);
+		    if (corrtable[itable].amplitude[i] > 0.0
+			    && corrtable[itable+1].amplitude[i] > 0.0)
+			{
+			corrtableuse->amplitude[i]
+			    = corrtable[itable].amplitude[i]
+				    + factor * (corrtable[itable+1].amplitude[i]
+						    - corrtable[itable].amplitude[i]);
+			corrtableuse->sigma[i]
+			    = corrtable[itable].sigma[i]
+				    + factor * (corrtable[itable+1].sigma[i]
+						    - corrtable[itable].sigma[i]);
+			}
+		    else if (corrtable[itable].amplitude[i] > 0.0)
+			{
+			corrtableuse->amplitude[i]
+			    = corrtable[itable].amplitude[i];
+			corrtableuse->sigma[i]
+			    = corrtable[itable].sigma[i];
+			}
+		    else
+			{
+			corrtableuse->amplitude[i]
+			    = corrtable[itable+1].amplitude[i];
+			corrtableuse->sigma[i]
+			    = corrtable[itable+1].sigma[i];
+			}
+		    }
+		}
+	
+	/* now interpolate or extrapolate any zero values */
+	ifirst = ncorrangle;
+	ilast = -1;
+	for (i=0;i<ncorrangle;i++)
+		{
+		if (corrtableuse->amplitude[i] > 0.0)
+		    {
+		    ifirst = MIN(i, ifirst);
+		    ilast = MAX(i, ilast);
+		    }
+		}
+	for (i=0;i<ncorrangle;i++)
+		{
+		if (corrtableuse->amplitude[i] > 0.0)
+		    irecent = i;
+		if (i < ifirst)
+		    {
+		    corrtableuse->amplitude[i] = corrtableuse->amplitude[ifirst];
+		    corrtableuse->sigma[i] = corrtableuse->sigma[ifirst];
+		    }
+		else if (i > ilast)
+		    {
+		    corrtableuse->amplitude[i] = corrtableuse->amplitude[ilast];
+		    corrtableuse->sigma[i] = corrtableuse->sigma[ilast];
+		    }
+		else if (corrtableuse->amplitude[i] <= 0.0)
+		    {
+		    inext = -1;
+		    for (ii=i+1;ii<ilast;ii++)
+			{
+			if (corrtableuse->amplitude[ii] > 0.0
+			    && inext < 0)
+			    inext = ii;
+			}
+		    if (irecent < i && inext > i)
+			{
+			factor = ((double)(i - irecent))
+				/ ((double)(inext - irecent));
+			corrtableuse->amplitude[i]
+			    = corrtableuse->amplitude[irecent]
+				    + factor * (corrtableuse->amplitude[inext]
+						    - corrtableuse->amplitude[irecent]);
+			corrtableuse->sigma[i]
+			    = corrtableuse->sigma[irecent]
+				    + factor * (corrtableuse->sigma[inext]
+						    - corrtableuse->sigma[irecent]);
+			}
+		    }
+		}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBPROCESS function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ncorrangle:      %d\n",ncorrangle);
+		for (i=0;i<ncorrangle;i++)
+		fprintf(stderr,"dbg2       correction[%d]: %f %f %f\n", 
+		    i, corrtableuse->angle[i], corrtableuse->amplitude[i], corrtableuse->sigma[i]);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int get_anglecorr(int verbose,
 	int nangle, double *angles, double *corrs,
 	double angle, double *corr, int *error)
@@ -5218,6 +5318,7 @@ int get_anglecorr(int verbose,
 	char	*function_name = "get_anglecorr";
 	int	status = MB_SUCCESS;
 	int	iangle, found;
+	int	ifirst, ilast;
 	int	i;
 
 	/* print input debug statements */
@@ -5242,7 +5343,7 @@ int get_anglecorr(int verbose,
 			iangle = i;
 			}
 
-	/* set the correction */
+	/* interpolate the correction */
 	if (found == MB_YES)
 		{
 		*corr = corrs[iangle] 
@@ -5251,11 +5352,38 @@ int get_anglecorr(int verbose,
 			/(angles[iangle+1] - angles[iangle]);
 		}
 	else if (angle < angles[0])
+		{
+		iangle = 0;
 		*corr = corrs[0];
+		}
 	else if (angle > angles[nangle-1])
+		{
+		iangle = nangle - 1;
 		*corr = corrs[nangle-1];
+		}
 	else
 		*corr = 0.0;
+		
+	/* use outermost value if angle outside nonzero range */
+	if (*corr == 0.0)
+		{
+		ifirst = nangle - 1;
+		ilast = 0;
+		for (i=0;i<nangle;i++)
+			{
+			if (corr[i] != 0.0)
+				{
+				if (ifirst > i)
+					ifirst = i;
+				if (ilast < i)
+					ilast = i;
+				}
+			}
+		if (angle < 0.0)
+			*corr = corrs[ifirst];
+		if (angle > 0.0)
+			*corr = corrs[ilast];
+		}
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.6 2002-08-02 01:00:25 caress Exp $
+ *    $Id: mbmosaic.c,v 5.7 2002-09-19 00:28:12 caress Exp $
  *
- *    Copyright (c) 1997, 2000 by
+ *    Copyright (c) 1997, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/08/02 01:00:25  caress
+ * Release 5.0.beta22
+ *
  * Revision 5.5  2002/04/06 02:53:45  caress
  * Release 5.0.beta16
  *
@@ -132,13 +135,13 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.6 2002-08-02 01:00:25 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.7 2002-09-19 00:28:12 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
 -Rwest/east/south/north [-Adatatype \n\
           -Bborder -Cclip -Dxdim/ydim -Edx/dy/units \n\
-          -Fpriority_range -Ggridkind -H -Jprojection[/zone] -Llonflip -M -N -Ppings \n\
+          -Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings \n\
           -Sspeed -Ttension -Uazimuth/factor -V -Wscale -Xextend \n\
           -Ypriority_file -Zbathdef]";
 
@@ -273,12 +276,11 @@ main (int argc, char **argv)
 	/* projected grid parameters */
 	int	use_projection = MB_NO;
 	int	projection_pars_f = MB_NO;
-	double	reference_lon;
+	double	reference_lon, reference_lat;
 	int	utm_zone = 1;
 	char	projection_type;
 	char	projection_pars[128];
 	char	projection_id[128];
-	char	ellipsoid[128];
 	int	proj_status;
 	void	*pjptr;
 	double	p_lon_1, p_lon_2;
@@ -325,7 +327,6 @@ main (int argc, char **argv)
 	/* initialize some values */
 	strcpy(fileroot,"grid");
 	strcpy(projection_id,"Geographic");
-	strcpy(ellipsoid,"WGS84");
 	gbnd[0] = 0.0;
 	gbnd[1] = 0.0;
 	gbnd[2] = 0.0;
@@ -564,7 +565,6 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       proj flag 1:      %d\n",projection_pars_f);
 		fprintf(outfp,"dbg2       projection_id:    %s\n",projection_id);
 		fprintf(outfp,"dbg2       utm_zone:         %d\n",utm_zone);
-		fprintf(outfp,"dbg2       ellipsoid:        %s\n",ellipsoid);
 		}
 
 	/* if help desired then print it and exit */
@@ -607,146 +607,142 @@ main (int argc, char **argv)
 		outclipvalue = NaN;
 		}
 
-
-	/* deal with projected gridding - UTM only for now */
+	/* deal with projected gridding */
 	if (projection_pars_f == MB_YES)
 		{
-		/* extract UTM parameters */
-		nscan = sscanf(projection_pars, "%c/%d/%s",
-			&projection_type, &utm_zone, ellipsoid);
-		if (nscan > 0 
-			&& (projection_type == 'u'
-				|| projection_type == 'U'))
+		/* check for UTM with undefined zone */
+		if (strcmp(projection_pars, "UTM") == 0
+			|| strcmp(projection_pars, "U") == 0
+			|| strcmp(projection_pars, "utm") == 0
+			|| strcmp(projection_pars, "u") == 0)
 			{
-			/* set utm zone */
-			if (nscan == 1 && projection_type == 'u')
-				{
-				reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
-				if (reference_lon < 180.0)
-					reference_lon += 360.0;
-				if (reference_lon >= 180.0)
-					reference_lon -= 360.0;
-				utm_zone = (int)(((reference_lon + 183.0)
-					/ 6.0) + 0.5);
-				}
-			
-			/* set projection_id */
-			sprintf(projection_id, "UTM Zone %d", utm_zone);
-			
-			/* make sure ellipsoid is ok */
-			if (strcmp(ellipsoid, "WGS84") != 0
-				&& strcmp(ellipsoid, "wgs84") != 0)
-				{
-				strcpy(ellipsoid, "WGS84");
-				}
-				
-			/* set projection flag */
-			use_projection = MB_YES;
-			proj_status = mb_proj_init(verbose,utm_zone, ellipsoid, 
-				&(pjptr), &error);
-
-			/* tranlate lon lat bounds to UTM if required */
-			if (projection_type == 'u')
-				{
-				/* copy gbnd to obnd */
-				obnd[0] = gbnd[0];
-				obnd[1] = gbnd[1];
-				obnd[2] = gbnd[2];
-				obnd[3] = gbnd[3];
-
-				/* first point */
-				xlon = obnd[0];
-				ylat = obnd[2];
-				mb_proj_forward(verbose, pjptr, xlon, ylat,
-						&xx, &yy, &error);
-				gbnd[0] = xx;
-				gbnd[1] = xx;
-				gbnd[2] = yy;
-				gbnd[3] = yy;
-				
-				/* second point */
-				xlon = obnd[1];
-				ylat = obnd[2];
-				mb_proj_forward(verbose, pjptr, xlon, ylat,
-						&xx, &yy, &error);
-				gbnd[0] = MIN(gbnd[0], xx);
-				gbnd[1] = MAX(gbnd[1], xx);
-				gbnd[2] = MIN(gbnd[2], yy);
-				gbnd[3] = MAX(gbnd[3], yy);
-				
-				/* third point */
-				xlon = obnd[0];
-				ylat = obnd[3];
-				mb_proj_forward(verbose, pjptr, xlon, ylat,
-						&xx, &yy, &error);
-				gbnd[0] = MIN(gbnd[0], xx);
-				gbnd[1] = MAX(gbnd[1], xx);
-				gbnd[2] = MIN(gbnd[2], yy);
-				gbnd[3] = MAX(gbnd[3], yy);
-				
-				/* fourth point */
-				xlon = obnd[1];
-				ylat = obnd[3];
-				mb_proj_forward(verbose, pjptr, xlon, ylat,
-						&xx, &yy, &error);
-				gbnd[0] = MIN(gbnd[0], xx);
-				gbnd[1] = MAX(gbnd[1], xx);
-				gbnd[2] = MIN(gbnd[2], yy);
-				gbnd[3] = MAX(gbnd[3], yy);
-				}
-			if (projection_type == 'U')
-				{
-				/* first point */
-				xx = gbnd[0];
-				yy = gbnd[2];
-				mb_proj_inverse(verbose, pjptr, xx, yy,
-						&xlon, &ylat, &error);
-				obnd[0] = xlon;
-				obnd[1] = xlon;
-				obnd[2] = ylat;
-				obnd[3] = ylat;
-
-				/* second point */
-				xx = gbnd[1];
-				yy = gbnd[2];
-				mb_proj_inverse(verbose, pjptr, xx, yy,
-						&xlon, &ylat, &error);
-				obnd[0] = MIN(obnd[0], xlon);
-				obnd[1] = MAX(obnd[1], xlon);
-				obnd[2] = MIN(obnd[2], ylat);
-				obnd[3] = MAX(obnd[3], ylat);
-
-				/* third point */
-				xx = gbnd[0];
-				yy = gbnd[3];
-				mb_proj_inverse(verbose, pjptr, xx, yy,
-						&xlon, &ylat, &error);
-				obnd[0] = MIN(obnd[0], xlon);
-				obnd[1] = MAX(obnd[1], xlon);
-				obnd[2] = MIN(obnd[2], ylat);
-				obnd[3] = MAX(obnd[3], ylat);
-
-				/* fourth point */
-				xx = gbnd[1];
-				yy = gbnd[3];
-				mb_proj_inverse(verbose, pjptr, xx, yy,
-						&xlon, &ylat, &error);
-				obnd[0] = MIN(obnd[0], xlon);
-				obnd[1] = MAX(obnd[1], xlon);
-				obnd[2] = MIN(obnd[2], ylat);
-				obnd[3] = MAX(obnd[3], ylat);
-				}
+			reference_lon = 0.5 * (gbnd[0] + gbnd[1]);
+			if (reference_lon < 180.0)
+				reference_lon += 360.0;
+			if (reference_lon >= 180.0)
+				reference_lon -= 360.0;
+			utm_zone = (int)(((reference_lon + 183.0)
+				/ 6.0) + 0.5);
+			reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
+			if (reference_lat >= 0.0)
+				sprintf(projection_id, "UTM%2.2dN", utm_zone); 
+			else
+				sprintf(projection_id, "UTM%2.2dS", utm_zone); 
 			}
-			
-		/* check for error */
+		else
+			strcpy(projection_id, projection_pars);
+
+		/* set projection flag */
+		use_projection = MB_YES;
+		proj_status = mb_proj_init(verbose,projection_id, 
+			&(pjptr), &error);
+
+		/* if projection not successfully initialized then quit */
 		if (proj_status != MB_SUCCESS)
 			{
-			fprintf(outfp,"\nError setting up special projection:\n\t-J%s\n",
-				projection_pars);
+			fprintf(outfp,"\nOutput projection %s not found in database\n",
+				projection_id);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			exit(error);
+			}
+
+		/* tranlate lon lat bounds from UTM if required */
+		if (gbnd[0] < -360.0 || gbnd[0] > 360.0
+			|| gbnd[1] < -360.0 || gbnd[1] > 360.0
+			|| gbnd[2] < -90.0 || gbnd[2] > 90.0
+			|| gbnd[3] < -90.0 || gbnd[3] > 90.0)
+			{
+			/* first point */
+			xx = gbnd[0];
+			yy = gbnd[2];
+			mb_proj_inverse(verbose, pjptr, xx, yy,
+					&xlon, &ylat, &error);
+			obnd[0] = xlon;
+			obnd[1] = xlon;
+			obnd[2] = ylat;
+			obnd[3] = ylat;
+
+			/* second point */
+			xx = gbnd[1];
+			yy = gbnd[2];
+			mb_proj_inverse(verbose, pjptr, xx, yy,
+					&xlon, &ylat, &error);
+			obnd[0] = MIN(obnd[0], xlon);
+			obnd[1] = MAX(obnd[1], xlon);
+			obnd[2] = MIN(obnd[2], ylat);
+			obnd[3] = MAX(obnd[3], ylat);
+
+			/* third point */
+			xx = gbnd[0];
+			yy = gbnd[3];
+			mb_proj_inverse(verbose, pjptr, xx, yy,
+					&xlon, &ylat, &error);
+			obnd[0] = MIN(obnd[0], xlon);
+			obnd[1] = MAX(obnd[1], xlon);
+			obnd[2] = MIN(obnd[2], ylat);
+			obnd[3] = MAX(obnd[3], ylat);
+
+			/* fourth point */
+			xx = gbnd[1];
+			yy = gbnd[3];
+			mb_proj_inverse(verbose, pjptr, xx, yy,
+					&xlon, &ylat, &error);
+			obnd[0] = MIN(obnd[0], xlon);
+			obnd[1] = MAX(obnd[1], xlon);
+			obnd[2] = MIN(obnd[2], ylat);
+			obnd[3] = MAX(obnd[3], ylat);
+			}
+		
+		/* else translate bounds to UTM */
+		else
+			{
+			/* copy gbnd to obnd */
+			obnd[0] = gbnd[0];
+			obnd[1] = gbnd[1];
+			obnd[2] = gbnd[2];
+			obnd[3] = gbnd[3];
+
+			/* first point */
+			xlon = obnd[0];
+			ylat = obnd[2];
+			mb_proj_forward(verbose, pjptr, xlon, ylat,
+					&xx, &yy, &error);
+			gbnd[0] = xx;
+			gbnd[1] = xx;
+			gbnd[2] = yy;
+			gbnd[3] = yy;
+
+			/* second point */
+			xlon = obnd[1];
+			ylat = obnd[2];
+			mb_proj_forward(verbose, pjptr, xlon, ylat,
+					&xx, &yy, &error);
+			gbnd[0] = MIN(gbnd[0], xx);
+			gbnd[1] = MAX(gbnd[1], xx);
+			gbnd[2] = MIN(gbnd[2], yy);
+			gbnd[3] = MAX(gbnd[3], yy);
+
+			/* third point */
+			xlon = obnd[0];
+			ylat = obnd[3];
+			mb_proj_forward(verbose, pjptr, xlon, ylat,
+					&xx, &yy, &error);
+			gbnd[0] = MIN(gbnd[0], xx);
+			gbnd[1] = MAX(gbnd[1], xx);
+			gbnd[2] = MIN(gbnd[2], yy);
+			gbnd[3] = MAX(gbnd[3], yy);
+
+			/* fourth point */
+			xlon = obnd[1];
+			ylat = obnd[3];
+			mb_proj_forward(verbose, pjptr, xlon, ylat,
+					&xx, &yy, &error);
+			gbnd[0] = MIN(gbnd[0], xx);
+			gbnd[1] = MAX(gbnd[1], xx);
+			gbnd[2] = MIN(gbnd[2], yy);
+			gbnd[3] = MAX(gbnd[3], yy);
 			}
 
 		/* calculate grid properties */
@@ -771,11 +767,11 @@ main (int argc, char **argv)
 				strcpy(units, "unknown");
 			}
 
-fprintf(stderr," UTM on: proj_status:%d  type:%c zone:%d ellipsoid:%s\n",
-proj_status, projection_type, utm_zone, ellipsoid);
+fprintf(stderr," Projected coordinates on: proj_status:%d  projection:%s\n",
+proj_status, projection_id);
 fprintf(stderr," Lon Lat Bounds: %f %f %f %f\n",
 obnd[0], obnd[1], obnd[2], obnd[3]);
-fprintf(stderr," UTM Bounds: %f %f %f %f\n",
+fprintf(stderr," XY Bounds: %f %f %f %f\n",
 gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		}
 
@@ -1001,8 +997,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		fprintf(outfp,"Grid projection: %s\n", projection_id);
 		if (use_projection == MB_YES)
 			{
-			fprintf(outfp,"Projection parameters: %s\n", projection_pars);
-			fprintf(outfp,"Ellipsoid:   %s\n",ellipsoid);
+			fprintf(outfp,"Projection ID: %s\n", projection_id);
 			}
 		fprintf(outfp,"Grid dimensions: %d %d\n",xdim,ydim);
 		fprintf(outfp,"Grid bounds:\n");
