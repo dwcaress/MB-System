@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.8 1999-03-31 18:11:35 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.9 1999-09-14 20:39:11 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.7  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -79,13 +82,21 @@ int    verbose;
 char   *mbio_ptr;
 int    *error;
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.8 1999-03-31 18:11:35 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.9 1999-09-14 20:39:11 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdldih";
 	int	 status = MB_SUCCESS;
 	int	 i;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsmdldih_struct *data;
 	char	 *data_ptr;
+	double *FirstReftime;	/* time from the first header */
+	int  *Header_count; /* number of header records encounterd */
+	int  *Rev_count;	   /* Raw Event counter */
+	int  *Nav_count;	   /* number of Nav records */
+	int  *Angle_count;  /* etc....... */
+	int  *Svp_count;
+	int  *Raw_count;
+	int  *MDevent_count;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -115,6 +126,24 @@ int    *error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	data = (struct mbf_hsmdldih_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
+	
+	/* initialize saved values */
+	FirstReftime = &mb_io_ptr->saved1;	/* time from the first header */
+	Header_count = &mb_io_ptr->save1; /* number of header records encounterd */
+	Rev_count = &mb_io_ptr->save2;	   /* Raw Event counter */
+	Nav_count = &mb_io_ptr->save3;	   /* number of Nav records */
+	Angle_count = &mb_io_ptr->save4;  /* etc....... */
+	Svp_count = &mb_io_ptr->save5;
+	Raw_count = &mb_io_ptr->save6;
+	MDevent_count = &mb_io_ptr->save7;
+	*FirstReftime = 0.0;	/* time from the first header */
+	*Header_count = 0; /* number of header records encounterd */
+	*Rev_count = 0;	   /* Raw Event counter */
+	*Nav_count = 0;	   /* number of Nav records */
+	*Angle_count = 0;  /* etc....... */
+	*Svp_count = 0;
+	*Raw_count = 0;
+	*MDevent_count = 0;
 
 	/* initialize everything to zeros */
 	mbr_zero_hsmdldih(verbose,data_ptr,error);
@@ -229,7 +258,7 @@ int    *error;
 		data->hour = 0;
 		data->minute = 0;
 		data->second = 0;
-		data->millisecond = 0.;
+		data->millisecond = 0.0;
 
 		data->lon = 0.0;
 		data->lat = 0.0;
@@ -304,6 +333,10 @@ int    *error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsmdldih_struct *data;
 	struct mbsys_hsmd_struct *store;
+	double	dd, dt, dx, dy;
+	double	mtodeglon, mtodeglat;
+	double	headingx, headingy;
+	int	ifix;
 	int	 i, j, k;
 
 	/* print input debug statements */
@@ -361,7 +394,6 @@ int    *error;
 		fprintf(stderr,"dbg5:\t Status:\t%d\n", status);
 		fprintf(stderr,"dbg5:\t data->kind:\t%d\n", data->kind);
 		fprintf(stderr,"dbg5:\t store_ptr: \t%d\n",store_ptr);
-		fprintf(stderr,"dbg5:\t Beams_Bath \t%d\n",mb_io_ptr->beams_bath);
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -380,9 +412,35 @@ int    *error;
 		mb_io_ptr->new_time_i[3] = data->hour;
 		mb_io_ptr->new_time_i[4] = data->minute;
 		mb_io_ptr->new_time_i[5] = data->second;
-		mb_io_ptr->new_time_i[6] = data->millisecond;
+		mb_io_ptr->new_time_i[6] = 1000 * data->millisecond;
 		mb_get_time(verbose, mb_io_ptr->new_time_i, 
 			&mb_io_ptr->new_time_d);
+		}
+			
+	/* save fix if nav data */
+	if (data->kind == MB_DATA_NAV)
+		{
+		/* make room for latest fix */
+		if (mb_io_ptr->nfix >= MB_NAV_SAVE_MAX)
+			{
+			for (i=0;i<mb_io_ptr->nfix-1;i++)
+				{
+				mb_io_ptr->fix_time_d[i]
+				    = mb_io_ptr->fix_time_d[i+1];
+				mb_io_ptr->fix_lon[i]
+				    = mb_io_ptr->fix_lon[i+1];
+				mb_io_ptr->fix_lat[i]
+				    = mb_io_ptr->fix_lat[i+1];
+				}
+			mb_io_ptr->nfix--;
+			}
+		
+		/* add latest fix */
+		mb_io_ptr->fix_time_d[mb_io_ptr->nfix] 
+			= mb_io_ptr->new_time_d;
+		mb_io_ptr->fix_lon[mb_io_ptr->nfix] = data->lon;
+		mb_io_ptr->fix_lat[mb_io_ptr->nfix] = data->lat;
+		mb_io_ptr->nfix++;
 		}
 
 	/* copy comment to mbio descriptor structure */
@@ -434,9 +492,7 @@ int    *error;
 			else if (mb_io_ptr->new_lon < 0.)
 				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
 			}
-
-		/* HSMD Raw files don't have speed */
-		mb_io_ptr->new_speed = 0.0;
+		mb_io_ptr->new_speed = data->speed;
 
 		/* print debug statements */
 		if (verbose >= 5)	
@@ -477,12 +533,104 @@ int    *error;
 		if (verbose >= 5)
 			fprintf(stderr,"\ndbg5:\t DATA w/:Port == %d\n",data->Port);
 
-		mb_io_ptr->new_lon = data->lon; /* Shove in the pseudo Nav */
-		mb_io_ptr->new_lat = data->lat;
-    		mb_io_ptr->new_heading = data->heading_tx;
+		/* interpolate from saved nav if possible */
+		if (mb_io_ptr->nfix > 1)
+			{
+			/* get speed */
+			mb_coor_scale(verbose,
+			    mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
+			    &mtodeglon,&mtodeglat);
+			dx = (mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
+			    - mb_io_ptr->fix_lon[0])/mtodeglon;
+			dy = (mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
+			    - mb_io_ptr->fix_lat[0])/mtodeglat;
+			dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
+			    - mb_io_ptr->fix_time_d[0];
+			data->speed = sqrt(dx*dx + dy*dy) /dt / 3.6; /* km/hr */
 
-		/* HSMD Raw files don't have speed */
-		mb_io_ptr->new_speed = 0.0;
+			/* interpolation possible */
+			if (mb_io_ptr->new_time_d 
+				>= mb_io_ptr->fix_time_d[0]
+			    && mb_io_ptr->new_time_d
+				<= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			    {
+			    ifix = 0;
+			    while (mb_io_ptr->new_time_d
+				> mb_io_ptr->fix_time_d[ifix+1])
+				ifix++;
+			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[ifix]
+				+ (mb_io_ptr->fix_lon[ifix+1] 
+				    - mb_io_ptr->fix_lon[ifix])
+				* (mb_io_ptr->new_time_d
+				    - mb_io_ptr->fix_time_d[ifix])
+				/ (mb_io_ptr->fix_time_d[ifix+1]
+				    - mb_io_ptr->fix_time_d[ifix]);
+			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[ifix]
+				+ (mb_io_ptr->fix_lat[ifix+1] 
+				    - mb_io_ptr->fix_lat[ifix])
+				* (mb_io_ptr->new_time_d
+				    - mb_io_ptr->fix_time_d[ifix])
+				/ (mb_io_ptr->fix_time_d[ifix+1]
+				    - mb_io_ptr->fix_time_d[ifix]);
+			    }
+			
+			/* extrapolate from first fix */
+			else if (mb_io_ptr->new_time_d 
+				< mb_io_ptr->fix_time_d[0])
+			    {
+			    dd = (mb_io_ptr->new_time_d 
+				- mb_io_ptr->fix_time_d[0])
+				* 3.6 * data->speed;
+			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[0],
+				&mtodeglon,&mtodeglat);
+			    headingx = sin(DTR*data->heading_tx);
+			    headingy = cos(DTR*data->heading_tx);
+			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[0] 
+				+ headingx*mtodeglon*dd;
+			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[0] 
+				+ headingy*mtodeglat*dd;
+			    }
+			
+			/* extrapolate from last fix */
+			else if (mb_io_ptr->new_time_d 
+				> mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			    {
+			    dd = (mb_io_ptr->new_time_d 
+				- mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+				* 3.6 * data->speed;
+			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
+				&mtodeglon,&mtodeglat);
+			    headingx = sin(DTR*data->heading_tx);
+			    headingy = cos(DTR*data->heading_tx);
+			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
+				+ headingx*mtodeglon*dd;
+			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
+				+ headingy*mtodeglat*dd;
+			    }
+			
+			/* use last fix */
+			else
+			    {
+			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1];
+			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1];
+			    }
+			}
+			
+		/* else just take last position */
+		else if (mb_io_ptr->nfix == 1)
+			{
+			mb_io_ptr->new_lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1];
+			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1];
+			mb_io_ptr->new_speed = 0.0;
+			}
+		else
+			{
+			mb_io_ptr->new_lon = 0.0;
+			mb_io_ptr->new_lat = 0.0;
+			mb_io_ptr->new_speed = 0.0;
+			}
+		mb_io_ptr->new_speed = data->speed;
+    		mb_io_ptr->new_heading = data->heading_tx;
 
 		/* get bathymetry */
 
@@ -816,9 +964,10 @@ int    *error;
 		data->reftime = 0;
     		}
 
-	/* else check for ping data to be copied from mb_io_ptr */
-	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_DATA)
+	/* check for time and nav data to be copied from mb_io_ptr */
+	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
+		&& (mb_io_ptr->new_kind == MB_DATA_DATA
+		    || mb_io_ptr->new_kind == MB_DATA_NAV))
 		{
 		/* get time */
 		data->year = mb_io_ptr->new_time_i[0];
@@ -827,7 +976,7 @@ int    *error;
 		data->hour = mb_io_ptr->new_time_i[3];
 		data->minute = mb_io_ptr->new_time_i[4];
 		data->second = mb_io_ptr->new_time_i[5];
-		data->millisecond = mb_io_ptr->new_time_i[6];
+		data->millisecond = mb_io_ptr->new_time_i[6] / 1000;
 
 		/* get navigation */
 		data->lon = mb_io_ptr->new_lon;
@@ -835,6 +984,12 @@ int    *error;
 
 		/* get speed (convert km/hr to m/s) */
 		data->speed = mb_io_ptr->new_speed;
+		}
+
+	/* else check for ping data to be copied from mb_io_ptr */
+	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
+		&& mb_io_ptr->new_kind == MB_DATA_DATA)
+		{
 
 		/* figure out if port or starboard ping */
 		first = -1;
@@ -941,25 +1096,19 @@ int    *error;
 	int     i;
 	int     time_i[7];
 	double	scale;
-
-	static double FirstReftime=0.;	/* time from the first header */
-	static double PingTime=0.;	/* Synthesised time of this ping 
+	double	PingTime;	/* Synthesised time of this ping 
 				 		PingTime = Base_time 
 				 		+ (current.datuhr 
 						- FirstReftime) */
-	static double OldPingTime = 0.0; /* time of the previous ping */
-	static double DatUhr = 0.;	/* unix seconds of first record */
 
-	static double LastLat;	/* Really ugly kludge to get some kind  */
-	static double LastLon;	/* of Nav into data */
-
-	static int  Header_count = 0; /* number of header records encounterd */
-	static int  Rev_count = 0;	   /* Raw Event counter */
-	static int  Nav_count = 0;	   /* number of Nav records */
-	static int  Angle_count = 0;  /* etc....... */
-	static int  Svp_count = 0;
-	static int  Raw_count = 0;
-	static int  MDevent_count = 0;
+	double *FirstReftime;	/* time from the first header */
+	int  *Header_count; /* number of header records encounterd */
+	int  *Rev_count;	   /* Raw Event counter */
+	int  *Nav_count;	   /* number of Nav records */
+	int  *Angle_count;  /* etc....... */
+	int  *Svp_count;
+	int  *Raw_count;
+	int  *MDevent_count;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -979,16 +1128,56 @@ int    *error;
 	data_ptr = (char *) data;	/* The data structure pointer */
 	mbfp = mb_io_ptr->mbfp;		/* The file pointer */
 	xdrs = mb_io_ptr->xdrs;
-
-	/* initialize everything to zeros */
-	mbr_zero_hsmdldih(verbose,data_ptr,error);
+	FirstReftime = &mb_io_ptr->saved1;	/* time from the first header */
+	Header_count = &mb_io_ptr->save1; /* number of header records encounterd */
+	Rev_count = &mb_io_ptr->save2;	   /* Raw Event counter */
+	Nav_count = &mb_io_ptr->save3;	   /* number of Nav records */
+	Angle_count = &mb_io_ptr->save4;  /* etc....... */
+	Svp_count = &mb_io_ptr->save5;
+	Raw_count = &mb_io_ptr->save6;
+	MDevent_count = &mb_io_ptr->save7;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* Start reading an HSMD Header structure */
+	/* read the first four bytes */
 	for (i=0;i<4;i++)
 		status = xdr_char(xdrs, &data->scsid[i]);
+		
+	/* loop until the beginning of a record is found */
+	while (status == MB_SUCCESS
+		&& strncmp(data->scsid, "DXT", 3) != 0)
+		{
+		if (data->scsid[1] == 'D'
+		    || data->scsid[2] == 'D'
+		    || data->scsid[3] == 'D')
+		    {
+		    for (i=0;i<3;i++)
+			    data->scsid[i] = data->scsid[i+1];		    
+		    status = xdr_char(xdrs, &data->scsid[3]);		
+		    }
+		else
+		    {
+		    while (status == MB_SUCCESS
+			&& data->scsid[0] != 'D')
+			{
+			if ((status = fread(&data->scsid[0],
+				1,1,mb_io_ptr->mbfp)) != 1)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				}
+			}
+		    if (status == MB_SUCCESS)
+			{
+			for (i=1;i<4;i++)
+			    status = xdr_char(xdrs, &data->scsid[i]);
+			}	
+		    }
+		}
+		
+	/* now read the rest of the record */
 	if (status == MB_SUCCESS)
 		for (i=0;i<4;i++)
 			status = xdr_char(xdrs, &data->scsart[i]);
@@ -1006,11 +1195,12 @@ int    *error;
 	/* get first time and initialize the time base */
 	if (status == MB_SUCCESS)
 		status = xdr_double(xdrs, &data->reftime);
-	if (status == MB_SUCCESS)
+	if (status == MB_SUCCESS
+		&& data->transid != MBF_HSMDLDIH_COM)
 		{
-		Header_count++;
-		if (Header_count == 1)	
-			FirstReftime = data->reftime;
+		(*Header_count)++;
+		if (*Header_count == 1)	
+			*FirstReftime = data->reftime;
 		}
 
 	/* check status */
@@ -1024,7 +1214,7 @@ int    *error;
 		{
 		fprintf(stderr,"\ndbg2: ========================== \n");
 		fprintf(stderr,"dbg2: HED (0) # %d\t%.3lf\t%.3lf \n", 
-				Header_count,data->reftime, data->reftime-FirstReftime);
+				*Header_count,data->reftime, data->reftime-*FirstReftime);
 		}
 	if (verbose >= 5 && status == MB_SUCCESS)
 		{
@@ -1057,7 +1247,7 @@ int    *error;
 	    			{
 				data->kind = MB_DATA_DATA; 
 
-	      			Raw_count++;	/* the number of this kind of record */
+	      			(*Raw_count)++;	/* the number of this kind of record */
 
 				/* get water velocity and travel time data */
 	      			if (status == MB_SUCCESS)
@@ -1073,6 +1263,22 @@ int    *error;
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i++)
 						status = xdr_long(xdrs, &data->spfb[i]);
+
+				/* Check for bad beams - broken records produce
+				    bogus data - it happens with HSMD systems!!! */
+				if (data->skals)
+					scale = 0.00015;
+				else
+					scale = 0.000015;
+				if (status == MB_SUCCESS)
+				for (i=0; i<MBF_HSMDLDIH_BEAMS_PING; i++ )
+		    			{
+	 				if (data->spfb[i] < -65535
+					    || data->spfb[i] > 65535)
+					    {
+					    data->spfb[i] = 0;
+					    }
+					}
 
 				/* Calculate bathymetry.
 					The travel times are scaled to 
@@ -1093,7 +1299,7 @@ int    *error;
 	 				data->distance[i] = 
 	    					data->depth[i] 
 						* tan(data->angle[i] * DTR );
-	  				if (data->spfb[i] < 0.0)
+	  				if (data->spfb[i] < 0)
 	   					data->depth[i] = 
 							-data->depth[i];
 					if (data->Port == -1)
@@ -1133,8 +1339,8 @@ int    *error;
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = DatUhr + (data->reftime 
-						- FirstReftime);
+					PingTime = data->datuhr + (data->reftime 
+						- *FirstReftime);
 					status = mb_get_date(verbose,PingTime,time_i);
 
 					data->PingTime 		= PingTime;
@@ -1145,10 +1351,6 @@ int    *error;
 					data->minute 		= time_i[4];
 					data->second 		= time_i[5];
 					data->millisecond 	= time_i[6] / 1000;
-
-					/* Kludge in some Nav data */
-					data->lat = LastLat;
-					data->lon = LastLon;
 					}
 
 	      			/* output some debug messages */
@@ -1230,7 +1432,6 @@ int    *error;
 				if (status == MB_SUCCESS)
 					{
 	      				*error = MB_ERROR_NO_ERROR;
-					OldPingTime = PingTime;
 					}
 				else
 	      				*error = MB_ERROR_EOF;
@@ -1241,7 +1442,7 @@ int    *error;
 	    			{
 				data->kind = MB_DATA_DATA; 
 
-	      			Raw_count++;	/* the number of this kind of record */
+	      			(*Raw_count)++;	/* the number of this kind of record */
 
 				/* get time and position */
 	      			if (status == MB_SUCCESS)
@@ -1393,7 +1594,6 @@ int    *error;
 				if (status == MB_SUCCESS)
 					{
 	      				*error = MB_ERROR_NO_ERROR;
-					OldPingTime = PingTime;
 					}
 				else
 	      				*error = MB_ERROR_EOF;
@@ -1402,7 +1602,7 @@ int    *error;
 	      
 	  		case (MBF_HSMDLDIH_NAV): /* 2, Navigation data record */
 	    			{
-				Nav_count++;
+				(*Nav_count)++;
 				data->kind = MB_DATA_NAV;
 
 				/* get nav data */
@@ -1427,7 +1627,7 @@ int    *error;
 					/* break decimal seconds into integer
 						seconds and msec */
 					data->second = (int) data->secf;
-					data->millisecond = data->secf - data->second;
+					data->millisecond = (int) (1000 * (data->secf - data->second));
 					}
 
 				/* get position */
@@ -1449,8 +1649,8 @@ int    *error;
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = DatUhr + (data->reftime 
-						- FirstReftime);
+					PingTime = data->datuhr + (data->reftime 
+						- *FirstReftime);
 					status = mb_get_date(verbose,PingTime,time_i);
 
 					data->PingTime 		= PingTime;
@@ -1461,15 +1661,12 @@ int    *error;
 					data->minute 		= time_i[4];
 					data->second 		= time_i[5];
 					data->millisecond 	= time_i[6] / 1000;
-
-					LastLat = data->lat;
-					LastLon = data->lon;
 					}
 
 	      			/* output some debug messages */
 				if (verbose >= 2 && status == MB_SUCCESS)
 					fprintf(stderr,"\ndbg2: NAV (2) # %3d\t%4d %2d %2d %2d:%2d:%2d.%3d\n", 
-						Nav_count, data->year, data->month, data->day, 
+						*Nav_count, data->year, data->month, data->day, 
 						data->hour, data->minute, data->second, data->millisecond);
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
@@ -1513,7 +1710,7 @@ int    *error;
 
 			case (MBF_HSMDLDIH_MDE):		/* 3, MD Event */
 	    			{
-				MDevent_count++;
+				(*MDevent_count)++;
 				data->kind = MB_DATA_EVENT; 
 	      
 				if (status == MB_SUCCESS)
@@ -1531,8 +1728,8 @@ int    *error;
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = DatUhr + (data->reftime 
-						- FirstReftime);
+					PingTime = data->datuhr + (data->reftime 
+						- *FirstReftime);
 					status = mb_get_date(verbose,
 						    PingTime,time_i);
 
@@ -1549,7 +1746,7 @@ int    *error;
 				/* output some debug messages */
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
-					fprintf(stderr,"MDE (3) # %d\n", MDevent_count);
+					fprintf(stderr,"MDE (3) # %d\n", *MDevent_count);
 					}
 	      			if (verbose >= 2 && status == MB_SUCCESS)
 					{
@@ -1568,7 +1765,7 @@ int    *error;
 
 			case (MBF_HSMDLDIH_ANG): /* Transid == 4, Beam Angles */
 	    			{
-				Angle_count++;
+				(*Angle_count)++;
 				data->kind = MB_DATA_ANGLE;
 	      
 				if (status == MB_SUCCESS)
@@ -1589,8 +1786,8 @@ int    *error;
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = DatUhr + (data->reftime 
-						- FirstReftime);
+					PingTime = data->datuhr + (data->reftime 
+						- *FirstReftime);
 					status = mb_get_date(verbose,
 						    PingTime,time_i);
 
@@ -1607,7 +1804,7 @@ int    *error;
 				/* output some debug messages */
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
-					fprintf(stderr,"\ndbg2: ANG (4) # %d\n", Angle_count);
+					fprintf(stderr,"\ndbg2: ANG (4) # %d\n", *Angle_count);
 					}
 				if ( verbose >= 5 && status == MB_SUCCESS)
 					{
@@ -1633,7 +1830,7 @@ int    *error;
 	    
 			case (MBF_HSMDLDIH_SVP): /* 5, Sound Velocity Profile */
 	    			{
-				Svp_count++;
+				*Svp_count++;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 				
 				data->num_vel = 20;
@@ -1651,8 +1848,8 @@ int    *error;
 				 * to convert to UTC. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = DatUhr + (data->reftime 
-						- FirstReftime);
+					PingTime = data->datuhr + (data->reftime 
+						- *FirstReftime);
 					status = mb_get_date(verbose,
 						    PingTime,time_i);
 
@@ -1669,7 +1866,7 @@ int    *error;
 				/* output some debug messages */
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
-					fprintf(stderr,"\ndbg2: SVP (5) # %d\n",Svp_count);
+					fprintf(stderr,"\ndbg2: SVP (5) # %d\n",*Svp_count);
 					}
 
 				/* check status */
@@ -1683,12 +1880,10 @@ int    *error;
 	    
 			case (MBF_HSMDLDIH_REV):	/* 6, An Interrupt event? */
 	    			{
-				Rev_count++;
+				(*Rev_count)++;
 	      
 				if (status == MB_SUCCESS)
 					status = xdr_double(xdrs, &data->datuhr);
-				if (status == MB_SUCCESS)
-					DatUhr = data->datuhr;
 				if (status == MB_SUCCESS)
 					for (i=0;i<8;i++)
 						status = xdr_char(xdrs, &data->mksysint[i]);
@@ -1702,7 +1897,8 @@ int    *error;
 				 * to get time of day. */
 				if (status == MB_SUCCESS)
 					{
-					PingTime = data->datuhr;
+					PingTime = data->datuhr + (data->reftime 
+						- *FirstReftime);
 					status = mb_get_date(verbose,
 						    PingTime,time_i);
 
@@ -1720,7 +1916,7 @@ int    *error;
 	      			if (verbose >= 2 && status == MB_SUCCESS)
 					{
 					fprintf(stderr,"dbg2:\n REV (6) # %d\t%.3lf",
-						Rev_count, data->datuhr );
+						*Rev_count, data->datuhr );
 					}
 				if (verbose >= 5 && status == MB_SUCCESS)
 					{
@@ -1779,7 +1975,7 @@ int    *error;
 					}
 				break;
 	    			}
-	  		} 
+	  		}
       		}
 		
 	/* get file position */

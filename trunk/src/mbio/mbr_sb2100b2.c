@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100b2.c	3/3/94
- *	$Id: mbr_sb2100b2.c,v 4.2 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_sb2100b2.c,v 4.3 1999-09-14 20:39:11 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.1  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *
@@ -62,7 +65,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100b2.c,v 4.2 1998-10-05 17:46:15 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b2.c,v 4.3 1999-09-14 20:39:11 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100b2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -225,7 +228,7 @@ int	*error;
 		data->pitch = 0.0;			/* degrees */
 		data->heave = 0.0;			/* m */
 		data->ssv = 0.0;			/* m/sec */
-		data->frequency = 'L';			/* L=12kHz; H=36kHz */
+		data->frequency = 'L';			/* L=12kHz; H=36kHz; 2=20kHz */
 		data->depth_gate_mode = 'A';		/* A=Auto, M=Manual */
 		data->ping_gain = 0;			/* dB */
 		data->ping_pulse_width = 0;		/* msec */

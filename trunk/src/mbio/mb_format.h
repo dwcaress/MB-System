@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.25 1999-08-08 04:16:03 caress Exp $
+ *    $Id: mb_format.h,v 4.26 1999-09-14 20:39:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.25  1999/08/08  04:16:03  caress
+ * Added ELMK2XSE format.
+ *
  * Revision 4.24  1999/07/16 19:24:15  caress
  * Yet another version.
  *
@@ -1014,7 +1017,7 @@ static int mb_no_flag_table[] =
 	};
 
 /* Table of the data record types containing the primary navigation */
-static float mb_nav_source[] = 
+static int mb_nav_source[] = 
 	{
 	MB_DATA_NONE,	/* NULL */
 	MB_DATA_DATA,	/* MBF_SBSIOMRG */
@@ -1054,8 +1057,8 @@ static float mb_nav_source[] =
 	MB_DATA_NAV,	/* MBF_ELMK2UNB */
 	MB_DATA_NAV,	/* MBF_BCHRXUNB */
 	MB_DATA_NAV,	/* MBF_ELMK2XSE */
-	MB_DATA_DATA,   /* MBF_HSMDARAW */
-	MB_DATA_DATA,   /* MBF_HSMDLDIH */
+	MB_DATA_NAV,    /* MBF_HSMDARAW */
+	MB_DATA_NAV,    /* MBF_HSMDLDIH */
 	MB_DATA_DATA,   /* MBF_DSL120PF */
 	MB_DATA_DATA,   /* MBF_DSL120SF */
 	MB_DATA_DATA,   /* MBF_GSFGENMB */
@@ -1068,7 +1071,7 @@ static float mb_nav_source[] =
 	};
 
 /* Table of the data record types containing the primary heading */
-static float mb_heading_source[] = 
+static int mb_heading_source[] = 
 	{
 	MB_DATA_NONE,	/* NULL */
 	MB_DATA_DATA,	/* MBF_SBSIOMRG */
@@ -1122,7 +1125,7 @@ static float mb_heading_source[] =
 	};
 
 /* Table of the data record types containing the primary vru */
-static float mb_vru_source[] = 
+static int mb_vru_source[] = 
 	{
 	MB_DATA_NONE,	/* NULL */
 	MB_DATA_DATA,	/* MBF_SBSIOMRG */
