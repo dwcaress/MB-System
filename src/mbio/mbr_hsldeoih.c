@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.10 1996-04-24 01:14:38 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.11 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,14 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1996/04/24  01:14:38  caress
+ * Code now keeps any water sound velocity or position offset
+ * data encountered in memory.
+ *
+ * Revision 4.10  1996/04/24  01:14:38  caress
+ * Code now keeps any water sound velocity or position offset
+ * data encountered in memory.
+ *
  * Revision 4.9  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -97,7 +105,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.10 1996-04-24 01:14:38 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.11 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;

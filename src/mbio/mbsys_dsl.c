@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.c	3.00	8/5/96
- *	$Id: mbsys_dsl.c,v 4.0 1996-08-26 17:29:56 caress Exp $
+ *	$Id: mbsys_dsl.c,v 4.1 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,12 @@
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1996/08/26  17:29:56  caress
+ * Release 4.4 revision.
+ *
+ * Revision 4.0  1996/08/26  17:29:56  caress
+ * Release 4.4 revision.
+ *
  * Revision 1.1  1996/08/26  17:24:56  caress
  * Initial revision
  *
@@ -65,7 +71,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_dsl.c,v 4.0 1996-08-26 17:29:56 caress Exp $";
+ static char res_id[]="$Id: mbsys_dsl.c,v 4.1 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbsys_dsl_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 4.7 1995-06-07 20:41:47 caress Exp $
+ *	$Id: mbf_sb2100rw.h,v 4.8 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/06/07  20:41:47  caress
+ * Fixed some typos.
+ *
+ * Revision 4.7  1995/06/07  20:41:47  caress
+ * Fixed some typos.
+ *
  * Revision 4.6  1995/05/08  21:26:28  caress
  * Made changes consistent with new i/o spec for SB2100 data.
  *

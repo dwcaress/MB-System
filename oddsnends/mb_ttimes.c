@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.10 1996-08-26 17:24:56 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.11 1997-04-21 17:02:07 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -181,6 +181,12 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1996/08/26  17:24:56  caress
+ * Release 4.4 revision.
+ *
+ * Revision 4.10  1996/08/26  17:24:56  caress
+ * Release 4.4 revision.
+ *
  * Revision 4.9  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -249,7 +255,7 @@ double	*depthadd;
 double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.10 1996-08-26 17:24:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.11 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 4.4 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 4.5 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.4  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.3  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -65,7 +71,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sb2000ss.c,v 4.4 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000ss.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -517,8 +523,8 @@ int	*error;
 			{
 			for (i=1;i<=data->pixels_ss;i++)
 				{
-				short_ptr = &data->ss[4+i*2];
-				*short_ptr = mb_swap_short(*short_ptr);
+				short_ptr = (unsigned short *) &data->ss[4+i*2];
+				*short_ptr = (unsigned short) mb_swap_short(*short_ptr);
 				}
 			}
 		}
@@ -1236,8 +1242,8 @@ int	*error;
 			{
 			for (i=1;i<=data->pixels_ss;i++)
 				{
-				short_ptr = &data->ss[4+i*2];
-				*short_ptr = mb_swap_short(*short_ptr);
+				short_ptr = (unsigned short *) &data->ss[4+i*2];
+				*short_ptr = (unsigned short) mb_swap_short(*short_ptr);
 				}
 			}
 		data->ping_number = mb_swap_long(data->ping_number);

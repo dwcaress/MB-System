@@ -1,10 +1,10 @@
-.TH mbswath l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbswath l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
-swath plots of multibeam data using Postscript.
+swath plots of swath sonar data using Postscript.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbswath\fP \fB-C\fIcptfile\fP \fB-J\fIparameters\fP 
@@ -20,7 +20,7 @@ Version 4.4
 \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbswath\fP is an utility for plotting multibeam swath data in color fill
+\fBmbswath\fP is an utility for plotting swath sonar data in color fill
 or color shaded relief using Postscript.  Like \fBmbcontour\fP, \fBmbswath\fP
 is fully compatible with the GMT package version 3, including the use
 of GMT style color pallete (cpt) files to control the color table. 
@@ -29,7 +29,7 @@ three methods. Unless individual polygon fills are used (\fB-1\fP option),
 only one call to \fBmbswath\fP can be made for each plot because the
 color image produced covers the entire plot space.
 The program can read data from stdin (the default) or from one 
-or more multibeam files.
+or more swath sonar files.
 
 Before opening an input swath data file, \fBmbmbswath\fP checks for
 an ascii file in the same directory having the same name except
@@ -123,10 +123,10 @@ Sets the color used for Frame and annotation. [Default is black]
 .B \fB-f\fIformat\fP
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input multibeam
+with the \fB-I\fP option will actually contain a list of input swath sonar
 data files. This program uses the \fBMBIO\fP library 
-and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
 .TP
@@ -151,9 +151,9 @@ of its operation and then exit immediately.
 .TP
 .B \fB-I\fIinfile\fP
 Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-f\fP option) then the multibeam data contained in \fIinfile\fP 
+\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
-is assumed to be an ascii file containing a list of the input multibeam
+is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read 
 and plot the data in each one of these files.
 In the \fIinfile\fP file, each
@@ -161,8 +161,8 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
@@ -242,7 +242,7 @@ More details can be found in the \fBpsbasemap\fP manpages.
 More \fIPostScript\fP code will be appended later [Default terminates the plot system].
 .TP
 .B \fB-L\fIlonflip\fP
-Sets the range of the longitude values returned by the multibeam i/o routines.
+Sets the range of the longitude values returned by the swath sonar i/o routines.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
 then the longitude values will be in
@@ -279,7 +279,7 @@ in pixels per inch (except when the \fB-1\fP option is used to force individual
 polygon color fills). Default: \fIdpi\fP = 100.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds within which multibeam 
+Sets the longitude and latitude bounds within which swath sonar 
 data will be read and plotted. Only the data which lies within 
 these bounds will be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
@@ -348,7 +348,7 @@ which generates such a plot and then displays it on the screen (assuming
 you have a Sun workstation):
 
  #
- # Shellscript to create Postscript plot of multibeam data
+ # Shellscript to create Postscript plot of swath sonar data
  # Created by macro mbm_plot
  #
  # Make datalist file 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_init.c	2/3/93
- *    $Id: mb_mem_init.c,v 4.10 1996-08-26 17:24:56 caress Exp $
+ *    $Id: mb_mem_init.c,v 4.11 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,12 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.10  1996/08/26  17:24:56  caress
+ * Release 4.4 revision.
+ *
  * Revision 4.9  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -90,7 +96,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem_init.c,v 4.10 1996-08-26 17:24:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem_init.c,v 4.11 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mb_mem_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -179,6 +185,14 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_SB2100RW)
 		{
 		status = mbr_alm_sb2100rw(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_SB2100B1)
+		{
+		status = mbr_alm_sb2100b1(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_SB2100B2)
+		{
+		status = mbr_alm_sb2100b2(verbose,mbio_ptr,error);
 		}
 	else if (mb_io_ptr->format == MBF_EM1000RW)
 		{

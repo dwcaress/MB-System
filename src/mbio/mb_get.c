@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	1/26/93
- *    $Id: mb_get.c,v 4.6 1996-04-22 13:21:19 caress Exp $
+ *    $Id: mb_get.c,v 4.7 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,12 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
+ * Revision 4.6  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.5  1996/04/22  10:57:09  caress
  * DTR define now in mb_io.h
  *
@@ -112,7 +118,7 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get.c,v 4.6 1996-04-22 13:21:19 caress Exp $";
+  static char rcs_id[]="$Id: mb_get.c,v 4.7 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mb_get";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

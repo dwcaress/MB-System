@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_dsl120sf.h	8/9/96
- *	$Id: mbf_dsl120sf.h,v 4.0 1996-08-26 17:29:56 caress Exp $
+ *	$Id: mbf_dsl120sf.h,v 4.1 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,12 @@
  * Author:	D. W. Caress
  * Date:	August 9, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.0  1996/08/26  17:29:56  caress
+ * Release 4.4 revision.
+ *
  * Revision 1.1  1996/08/26  17:24:56  caress
  * Initial revision
  *
@@ -87,7 +93,7 @@
 /* maximum number of beams and pixels */
 #define	MBF_DSL120SF_MAXBEAMS_SIDE	    1024
 #define	MBF_DSL120SF_MAXBEAMS	    2 * MBF_DSL120SF_MAXBEAMS_SIDE
-#define	MBF_DSL120SF_MAXPIXELS_SIDE    1024
+#define	MBF_DSL120SF_MAXPIXELS_SIDE    4096
 #define	MBF_DSL120SF_MAXPIXELS	    2 * MBF_DSL120SF_MAXPIXELS_SIDE
 #define	MBF_DSL120SF_COMMENT_LENGTH	80
 

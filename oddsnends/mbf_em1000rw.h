@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em1000rw.h	8/8/94
- *	$Id: mbf_em1000rw.h,v 4.4 1996-08-26 19:03:38 caress Exp $
+ *	$Id: mbf_em1000rw.h,v 4.5 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.4  1996/08/26  19:03:38  caress
+ * REALLY changed "signed char" to "char".
+ *
  * Revision 4.3  1996/08/26  18:33:50  caress
  * Changed "signed char" to "char" for SunOs 4.1 compiler compatibility.
  *
@@ -75,7 +81,8 @@
 
 /* maximum number of beams and pixels */
 #define	MBF_EM1000RW_MAXBEAMS	60
-#define	MBF_EM1000RW_MAXPIXELS	50*MBF_EM1000RW_MAXBEAMS
+/*#define	MBF_EM1000RW_MAXPIXELS	50*MBF_EM1000RW_MAXBEAMS*/
+#define	MBF_EM1000RW_MAXPIXELS	50*121
 
 struct mbf_em1000rw_struct
 	{
@@ -210,9 +217,9 @@ struct mbf_em1000rw_struct
 					EM-1000:         0.05 msec 
 					EM-12 high res:  0.20 msec 
 					EM-12 low res:   0.80 msec */
-	char	amp[MBF_EM1000RW_MAXBEAMS];	    /* 0.5 dB */
+	signed char	amp[MBF_EM1000RW_MAXBEAMS];	    /* 0.5 dB */
 	unsigned char	quality[MBF_EM1000RW_MAXBEAMS];	    /* meters */
-	char	heave[MBF_EM1000RW_MAXBEAMS];	    /* 0.1 meters */
+	signed char	heave[MBF_EM1000RW_MAXBEAMS];	    /* 0.1 meters */
 	
 	/* sidescan */
 	int	pixels_ss;	/* total number of samples for this ping */
@@ -235,7 +242,7 @@ struct mbf_em1000rw_struct
 	short int beam_start_sample[MBF_EM1000RW_MAXBEAMS];
 				/* start beam sample number among samples
 					from entire ping */
-	char	ss[MBF_EM1000RW_MAXPIXELS];
+	signed char	ss[MBF_EM1000RW_MAXPIXELS];
 
 };
 

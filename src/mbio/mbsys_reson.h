@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.h	8/20/94
- *	$Id: mbsys_reson.h,v 4.1 1995-07-13 19:15:09 caress Exp $
+ *	$Id: mbsys_reson.h,v 4.2 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/07/13  19:15:09  caress
+ * Intermediate check-in during major bug-fixing flail.
+ *
+ * Revision 4.1  1995/07/13  19:15:09  caress
+ * Intermediate check-in during major bug-fixing flail.
+ *
  * Revision 4.0  1994/10/21  12:35:08  caress
  * Release V4.0
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.11 1996-08-26 17:24:56 caress Exp $
+ *    $Id: mb_buffer.c,v 4.12 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,12 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1996/08/26  17:24:56  caress
+ * Release 4.4 revision.
+ *
+ * Revision 4.11  1996/08/26  17:24:56  caress
+ * Release 4.4 revision.
+ *
  * Revision 4.10  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -123,7 +129,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.11 1996-08-26 17:24:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.12 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;

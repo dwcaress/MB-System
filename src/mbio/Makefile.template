@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.8 1996-08-26 15:39:12 caress Exp $
+#	$Id: Makefile.template,v 4.9 1997-04-21 17:02:07 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,12 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.9  1997/04/17  15:07:36  caress
+# MB-System 4.5 Beta Release
+#
+# Revision 4.8  1996/08/26  15:39:12  caress
+# Release 4.4 revision.
+#
 # Revision 4.7  1996/04/22  13:21:19  caress
 # Now have DTR and MIN/MAX defines in mb_define.h
 #
@@ -72,6 +78,7 @@ all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
 	$(INCDIR)/mbf_hsldedmb.h $(INCDIR)/mbf_hsuricen.h \
 	$(INCDIR)/mbf_hsldeoih.h $(INCDIR)/mbf_sb2100rw.h \
+	$(INCDIR)/mbf_sb2100b1.h $(INCDIR)/mbf_sb2100b2.h \
 	$(INCDIR)/mbf_em1000rw.h $(INCDIR)/mbf_em12darw.h \
 	$(INCDIR)/mbf_em12sraw.h $(INCDIR)/mbf_em12draw.h \
 	$(INCDIR)/mbf_em121raw.h \
@@ -90,7 +97,8 @@ clean:
 ### put together the library
 $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
-		mb_mem_init.o mb_mem_deall.o mb_mem.o mb_coor_scale.o \
+		mb_mem_init.o mb_mem_deall.o mb_mem.o \
+		mb_coor_scale.o mb_check_info.o \
 		mb_time.o mb_get_value.o mb_defaults.o \
 		mb_get.o mb_put.o mb_get_all.o mb_put_all.o \
 		mb_read.o mb_write.o mb_buffer.o \
@@ -103,7 +111,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mbr_sburicen.o mbr_sburivax.o mbr_sbifremr.o \
 		mbr_hsatlraw.o mbr_hsldedmb.o \
 		mbr_hsuricen.o mbr_hsurivax.o mbr_hsldeoih.o \
-		mbr_sb2100rw.o mbr_em1000rw.o mbr_em12darw.o \
+		mbr_sb2100rw.o mbr_sb2100b1.o mbr_sb2100b2.o \
+		mbr_em1000rw.o mbr_em12darw.o \
 		mbr_em12sraw.o mbr_em12draw.o mbr_em121raw.o \
 		mbr_mr1prhig.o mbr_mr1aldeo.o mbr_mr1bldeo.o \
 		mbr_mbldeoih.o mbr_cbat9001.o \
@@ -114,7 +123,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
-		mb_mem_init.o mb_mem_deall.o mb_mem.o mb_coor_scale.o \
+		mb_mem_init.o mb_mem_deall.o mb_mem.o \
+		mb_coor_scale.o mb_check_info.o\
 		mb_time.o mb_get_value.o mb_defaults.o \
 		mb_get.o mb_put.o mb_get_all.o mb_put_all.o \
 		mb_read.o mb_write.o mb_buffer.o \
@@ -128,6 +138,7 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mbr_hsatlraw.o mbr_hsldedmb.o \
 		mbr_hsuricen.o mbr_hsurivax.o \
 		mbr_hsldeoih.o mbr_sb2100rw.o \
+		mbr_sb2100b1.o mbr_sb2100b2.o \
 		mbr_em1000rw.o mbr_em12darw.o \
 		mbr_em12sraw.o mbr_em12draw.o mbr_em121raw.o \
 		mbr_mr1prhig.o mbr_mr1aldeo.o mbr_mr1bldeo.o \
@@ -161,6 +172,8 @@ mb_mem.o:	mb_mem.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_mem.c
 mb_coor_scale.o:	mb_coor_scale.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_coor_scale.c
+mb_check_info.o:	mb_check_info.c $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mb_check_info.c
 mb_time.o:	mb_time.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_time.c
 mb_get_value.o:	mb_get_value.c
@@ -235,6 +248,10 @@ mbr_hsldeoih.o: mbr_hsldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_hsldeoih.c
 mbr_sb2100rw.o: mbr_sb2100rw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100rw.h
 	$(CC) -c $(CFLAGS) mbr_sb2100rw.c
+mbr_sb2100b1.o: mbr_sb2100b1.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100b1.h
+	$(CC) -c $(CFLAGS) mbr_sb2100b1.c
+mbr_sb2100b2.o: mbr_sb2100b2.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100b2.h
+	$(CC) -c $(CFLAGS) mbr_sb2100b2.c
 mbr_em1000rw.o: mbr_em1000rw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_em1000rw.h
 	$(CC) -c $(CFLAGS) mbr_em1000rw.c
 mbr_em12darw.o: mbr_em12darw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_em12darw.h
@@ -359,6 +376,12 @@ $(INCDIR)/mbf_hsldeoih.h:	mbf_hsldeoih.h
 $(INCDIR)/mbf_sb2100rw.h:	mbf_sb2100rw.h
 	cp mbf_sb2100rw.h $(INCDIR)/mbf_sb2100rw.h
 	chmod 664 $(INCDIR)/mbf_sb2100rw.h
+$(INCDIR)/mbf_sb2100b1.h:	mbf_sb2100b1.h
+	cp mbf_sb2100b1.h $(INCDIR)/mbf_sb2100b1.h
+	chmod 664 $(INCDIR)/mbf_sb2100b1.h
+$(INCDIR)/mbf_sb2100b2.h:	mbf_sb2100b2.h
+	cp mbf_sb2100b2.h $(INCDIR)/mbf_sb2100b2.h
+	chmod 664 $(INCDIR)/mbf_sb2100b2.h
 $(INCDIR)/mbf_em1000rw.h:	mbf_em1000rw.h
 	cp mbf_em1000rw.h $(INCDIR)/mbf_em1000rw.h
 	chmod 664 $(INCDIR)/mbf_em1000rw.h

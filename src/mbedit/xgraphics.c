@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 4.1 1994-12-28 14:46:05 caress Exp $
+ *    $Id: xgraphics.c,v 4.2 1997-04-21 16:56:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,15 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/04/16  21:29:30  caress
+ * Complete rewrite without uid file.
+ *
+ * Revision 4.1  1994/12/28  14:46:05  caress
+ * Added support for TrueColor displays as per Peter Lemmond's mods.
+ *
+ * Revision 4.1  1994/12/28  14:46:05  caress
+ * Added support for TrueColor displays as per Peter Lemmond's mods.
+ *
  * Revision 4.0  1994/10/21  11:55:41  caress
  * Release V4.0
  *
@@ -65,7 +74,7 @@ Window	can_xid;
 int	*can_bounds;
 char	*fontname;
 {
-static char rcs_id[]="$Id: xgraphics.c,v 4.1 1994-12-28 14:46:05 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 4.2 1997-04-21 16:56:14 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;

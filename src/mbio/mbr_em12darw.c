@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.7 1996-08-26 20:05:02 caress Exp $
+ *	$Id: mbr_em12darw.c,v 4.8 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/08/26  20:05:02  caress
+ * Changed "signed char" to "char".
+ *
+ * Revision 4.7  1996/08/26  20:05:02  caress
+ * Changed "signed char" to "char".
+ *
  * Revision 4.6  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -76,7 +82,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.7 1996-08-26 20:05:02 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.8 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 4.5 1995-06-07 20:39:59 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 4.6 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,12 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.5  1995/06/07  20:39:59  caress
+ * Fixed some typos.
+ *
  * Revision 4.4  1995/05/08  21:26:28  caress
  * Made changes consistent with new i/o spec for SB2100 data.
  *
@@ -43,30 +49,45 @@
  */
 /*
  * Notes on the MBSYS_SB2100 data structure:
- *   1. SeaBeam 1000/2100 multibeam systems output raw data in an
- *      ascii format.  The data consists of a number of different
- *      multi-line ascii records.
- *   2. The 2100/2100 systems output 151 beams of bathymetry and 2000 pixels
- *      of sidescan measurements, along with a plethora of other
- *      information.
+ *   1. SeaBeam 2100 multibeam sonars output raw data in two
+ *      formats,  with a third created in post processing. 
+ *      The older format is mostly ascii with binary
+ *      sidescan (format 41).  The newer formats are entirely 
+ *      binary. Format 42 contains all information; format 43
+ *      is identical to format 42 except that the sidescan
+ *      data has been removed.
+ *   2. The SeaBeam 2100 sonars output up to 151 beams of 
+ *      bathymetry and 2000 pixels of sidescan, along with a 
+ *      plethora of other information.
  *   3. The records all include navigation and time stamp information.
- *      The record types are:
+ *      The record types are for format 41 are:
  *        PR:  sonar parameter record (roll bias, pitch bias, sound velocity profile)
  *        TR:  sonar text record (comments)
- *        SB:  sub-bottom data record (undefined as yet)
  *        DR:  bathymetry data record (bathymetry and per-beam amplitudes)
  *        SS:  side scan data record
- *   4. A single ping usually results in both DR and SS records.  The PR record
- *      occurs every 30 minutes or when the sound velocity profile is changed.
+ *      The record types are for format 42 are:
+ *        PR:  sonar parameter record (roll bias, pitch bias, sound velocity profile)
+ *        TR:  sonar text record (comments)
+ *        DH:  ping data header (one per ping)
+ *        BR:  bathymetry data record (bathymetry and per-beam amplitudes)
+ *        SR:  side scan data record
+ *   4. For format 41 a single ping usually results in both DR and SS 
+ *      records.  The PR record occurs every 30 minutes or when 
+ *      the sound velocity profile or bias parameters are changed.
+ *   5. For format 42 a single ping results in DH, BR, and SR records.
+ *      Format 42 files created directly by the sonars will have
+ *      PR records at the beginning; format 42 files created by
+ *      translating format 41 files will have the same frequency of
+ *      PR records as in the original files.
  *   5. The kind value in the mbsys_sb2k_struct indicates whether the
  *      mbsys_sb2k_data_struct structure holds data from a ping or
  *      data from some other record:
  *        kind = 1 : data from a ping 
- *                   (DR + SS)
+ *                   (DR + SS) or (DH + BR + SR)
  *        kind = 2 : comment (TR)
  *        kind = 8 : sonar parameter (PR)
  *   6. The data structure defined below includes all of the values
- *      which are passed in SeaBeam 1000/2100 records.
+ *      which are passed in SeaBeam 2100 records.
  */
 
 /* maximum number of depth-velocity pairs */
@@ -80,107 +101,112 @@
 
 /* maximum number of sidescan pixels for SeaBeam 1000/2100 */
 #define MBSYS_SB2100_PIXELS 2000
-
-/* center beam for SeaBeam 1000/2100 */
-#define MBSYS_SB2100_CENTER_BEAM 75
-
-/* center pixel for SeaBeam 1000/2100 */
-#define MBSYS_SB2100_CENTER_PIXEL 1000
+	
+struct mbsys_sb2100_svp_struct
+	{
+	float	depth;			/* m */
+	float	velocity;		/* m/sec */	   
+	};
+	
+struct mbsys_sb2100_beam_struct
+	{
+	float	depth;			/* m */
+	float	acrosstrack;		/* m */
+	float	alongtrack;		/* m */
+	float	range;			/* seconds */
+	float	angle_across;		/* degrees */
+	float	angle_forward;		/* degrees */
+	short	amplitude;		/* 0.25 dB */
+	short	signal_to_noise;	/* dB */
+	short	echo_length;		/* samples */
+	char	quality;		/* 0=no data, 
+						Q=poor quality, 
+						blank otherwise */
+	char	source;			/* B=BDI, W=WMT */
+	};
+	
+struct mbsys_sb2100_ss_struct
+	{
+	float	amplitude;		/* sidescan value */
+	float	alongtrack;		/* m */	   
+	};
 
 struct mbsys_sb2100_struct
 	{
 	/* type of data record */
 	int	kind;
 
-	/* time stamp (all records ) */
-	int	year;
-	int	jday;
-	int	hour;
-	int	minute;
-	long int	msec;			/* msec */
-
-	/* sonar parameters (PR) */
-	int	roll_bias_port;			/* 0.01 deg */
-	int	roll_bias_starboard;		/* 0.01 deg */
-	int	pitch_bias;			/* 0.01 deg */
-	int	ship_draft;			/* 0.01 m */
+	/* sonar parameters (SB21BIPR) */
+	float	roll_bias_port;			/* deg */
+	float	roll_bias_starboard;		/* deg */
+	float	pitch_bias;			/* deg */
+	float	ship_draft;			/* m */
+	float	offset_x;			/* m */
+	float	offset_y;			/* m */
+	float	offset_z;			/* m */
 	int	num_svp;
-	int	vdepth[MBSYS_SB2100_MAXVEL];	/* 0.01 m */
-	int	velocity[MBSYS_SB2100_MAXVEL];	/* 0.01 m/sec */
-
-	/* DR and SS header info */
-	double	longitude;
-	double	latitude;
-	int	speed;			/* 0.001 m/sec */
-	int	heave; 			/* 0.001 m; + up */
-	char	range_scale; 		/* D = m; I = 0.1 m; S = 0.01 m */
-	int	surface_sound_velocity;	/* 0.01 m/sec */
+	struct mbsys_sb2100_svp_struct  svp[MBSYS_SB2100_MAXVEL];
+	
+	/* sonar data header (SB21BIDH) */
+	short	year;
+	short	jday;
+	short	hour;
+	short	minute;
+	short	sec;
+	short	msec;
+	double	longitude;		/* degrees */
+	double	latitude;		/* degrees */
+	float	heading;		/* degrees */
+	float	speed;			/* m/sec */
+	float	roll;			/* degrees */
+	float	pitch;			/* degrees */
+	float	heave;			/* m */
+	float	ssv;			/* m/sec */
+	char	frequency;		/* L=12kHz; H=36kHz */
+	char	depth_gate_mode;	/* A=Auto, M=Manual */
+	char	ping_gain;		/* dB */
+	char	ping_pulse_width;	/* msec */
+	char	transmitter_attenuation;    /* dB */
 	char	ssv_source;		/* V=Velocimeter, M=Manual, 
 						T=Temperature */
-	char	depth_gate_mode;	/* A=Auto, M=Manual */
-
-	/* DR header info */
-	int	num_beams;		/* number of formed beams recorded */
-	char	svp_corr_beams;		/* 0=None; A=True Xtrack 
+	char	svp_correction;		/* 0=None; A=True Xtrack 
 						and Apparent Depth;
 						T=True Xtrack and True Depth */
+	char	pixel_algorithm;	/* pixel intensity algorithm
+						D = logarithm, L = linear */
+	float	pixel_size;		/* m */
+	int	nbeams;			/* up to 151 */
+	int	npixels;		/* up to 2000 */
+	short	spare1;
+	short	spare2;
+	short	spare3;
+	short	spare4;
+	short	spare5;
+	short	spare6;
+	
+	/* bathymetry record (SB21BIBR) */
+	struct mbsys_sb2100_beam_struct beams[MBSYS_SB2100_BEAMS];
+	
+	/* sidescan record (SB21BISR) */
+	struct mbsys_sb2100_ss_struct pixels[MBSYS_SB2100_PIXELS];
+	
+	/* parameters unique to MBF_SB2100RW format */
+	char	range_scale; 		/* D = m; I = 0.1 m; S = 0.01 m */
 	char	spare_dr[2];
 	int	num_algorithms;		/* If 1 then only "best" algorithm 
 						recorded, else multiple 
 						algorithm results recorded */
 	char	algorithm_order[4];	/* blank if num_algorithms=1; 
 						W=WMT and B=BDI */
-
-	/* SS header info */
-	int	num_pixels;		/* number of sidescan pixels recorded */
 	char	svp_corr_ss;		/* 0=off; 1=on */
 	int	ss_data_length;		/* number of bytes of sidescan data */
-	char	pixel_algorithm;	/* pixel intensity algorithm
-						D = logarithm, L = linear */
-	int	num_pixels_12khz;
-	double	pixel_size_12khz;	/* meters */
-	int	num_pixels_36khz;
-	double	pixel_size_36khz;	/* meters */
-	char	spare_ss;
 	char	pixel_size_scale;
+	char	spare_ss;
 
-	/* transmit parameters and navigation (DR and SS) */
-	char	frequency[2];		/* LL=12kHz; HH=36kHz; number=36kHz
-						until this angle 
-						in degrees then 12kHz */
-	int	ping_gain_12khz;			/* dB */
-	int	ping_pulse_width_12khz;			/* msec */
-	int	transmitter_attenuation_12khz;		/* dB */
-	int	pitch_12khz;				/* 0.001 deg */
-	int	roll_12khz;				/* 0.001 deg */
-	int	heading_12khz;				/* 0.001 deg */
-	int	ping_gain_36khz;			/* dB */
-	int	ping_pulse_width_36khz;			/* msec */
-	int	transmitter_attenuation_36khz;		/* dB */
-	int	pitch_36khz;				/* 0.001 deg */
-	int	roll_36khz;				/* 0.001 deg */
-	int	heading_36khz;				/* 0.001 deg */
-
-	/* formed beam data (DR) */
-	char		source[MBSYS_SB2100_BEAMS];	/* B=BDI, W=WMT */
-	int	travel_time[MBSYS_SB2100_BEAMS];	/*  msec */
-	int	angle_across[MBSYS_SB2100_BEAMS];	/* 0.001 deg */
-	int	angle_forward[MBSYS_SB2100_BEAMS];	/* 0.01 deg */
-	int	depth[MBSYS_SB2100_BEAMS];		/* m or cm */
-	int	acrosstrack_beam[MBSYS_SB2100_BEAMS];	/* m or cm */
-	int	alongtrack_beam[MBSYS_SB2100_BEAMS];	/* m or cm */
-	int	amplitude_beam[MBSYS_SB2100_BEAMS];	/* 0.25 dB */
-	int	signal_to_noise[MBSYS_SB2100_BEAMS];	/* dB */
-	int	echo_length[MBSYS_SB2100_BEAMS];	/* samples */
-	char		quality[MBSYS_SB2100_BEAMS];	/* 0=no data, 
-							Q=poor quality, 
-							blank otherwise */
-
-	/* sidescan data (SS) */
-	int	amplitude_ss[MBSYS_SB2100_PIXELS];	/* range 0-65535 */
-	int	alongtrack_ss[MBSYS_SB2100_PIXELS];	/* m or cm */
-
-	/* comment (TR) */
-	char	comment[MBSYS_SB2100_MAXLINE ];
+	/* comment (SB21BITR) - comments are stored by
+	    recasting pointer to roll_bias_port to a char ptr 
+	    and writing over up to MBSYS_SB2100_MAXLINE
+	    bytes in structure */
+	char	*comment;
 };
 

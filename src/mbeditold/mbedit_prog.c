@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.13 1996-07-31 18:40:14 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.14 1997-04-21 16:56:14 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995 by 
+ *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -14,15 +14,24 @@
  * MBEDIT is an interactive beam editor for multibeam bathymetry data.
  * It can work with any data format supported by the MBIO library.
  * This version uses the MOTIF toolkit and has been developed using
- * the DEVGUIDE package.  This file contains
+ * the Builder Xsessory package by ICS.  This file contains
  * the code that does not directly depend on the MOTIF interface - the 
  * companion file mbedit.c contains the user interface related 
  * code.
  *
  * Author:	D. W. Caress
  * Date:	April 8, 1993
+ * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1997/04/16  21:29:30  caress
+ * Complete rewrite without uid file.
+ *
+ * Revision 4.13  1996/07/31  18:40:14  caress
+ * The program now checks if the format being opened supports
+ * sidescan - if it does support sidescan the maximum buffer
+ * size is 1000 rather than 5000.
+ *
  * Revision 4.12  1996/04/22  13:20:55  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -122,6 +131,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <sys/stat.h>
 
 /* MBIO include files */
 #include "mb_format.h"
@@ -133,11 +143,22 @@
 #define	MBEDIT_OUTPUT_OUTPUT 0
 #define	MBEDIT_OUTPUT_BROWSE 1
 
+/* edit action defines */
+#define	MBEDIT_FLAG	1
+#define	MBEDIT_UNFLAG	2
+#define	MBEDIT_ZERO	3
+
+/* edit outbounds defines */
+#define	MBEDIT_OUTBOUNDS_NONE		0
+#define	MBEDIT_OUTBOUNDS_FLAGGED	1
+#define	MBEDIT_OUTBOUNDS_UNFLAGGED	2
+
 /* ping structure definition */
 struct mbedit_ping_struct 
 	{
 	int	id;
 	int	record;
+	int	outbounds;
 	int	time_i[7];
 	double	time_d;
 	double	navlon;
@@ -153,13 +174,25 @@ struct mbedit_ping_struct
 	double	*ss;
 	int	*bath_x;
 	int	*bath_y;
+	int	label_x;
+	int	label_y;
+	int	zap_x1;
+	int	zap_x2;
+	int	zap_y1;
+	int	zap_y2;
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.13 1996-07-31 18:40:14 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.14 1997-04-21 16:56:14 caress Exp $";
 static char program_name[] = "MBEDIT";
-static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
-static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
+static char help_message[] =  
+"MBedit is an interactive editor used to identify and flag\n\
+artifacts in swath sonar bathymetry data. Once a file has\n\
+been read in, MBedit displays the bathymetry profiles from\n\
+several pings, allowing the user to identify and flag\n\
+anomalous beams. Flagging is handled internally by setting\n\
+depth values negative, so that no information is lost.";
+static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -S -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -187,6 +220,7 @@ char	*imbio_ptr = NULL;
 char	*ombio_ptr = NULL;
 int	output_mode = MBEDIT_OUTPUT_OUTPUT;
 int	gui_mode = MB_NO;
+int	startup_save_mode = MB_NO;
 
 /* mbio read and write values */
 char	*store_ptr = NULL;
@@ -232,6 +266,14 @@ int	nload_total = 0;
 int	ndump_total = 0;
 char	last_ping[128];
 
+/* save file control variables */
+int	sifile_open = MB_NO;
+int	sofile_open = MB_NO;
+char	sifile[128];
+char	sofile[128];
+FILE	*sifp;
+FILE	*sofp;
+
 /* ping drawing control variables */
 #define	MBEDIT_MAX_PINGS	100
 #define	MBEDIT_PICK_DISTANCE	50
@@ -251,6 +293,7 @@ int	xscale;
 int	yscale;
 int	x_interval = 1000;
 int	y_interval = 250;
+int	show_flagged = MB_NO;
 int	beam_save = MB_NO;
 int	iping_save = 0;
 int	jbeam_save = 0;
@@ -321,7 +364,7 @@ int	*startup_file;
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:O:o:S:s:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -375,6 +418,11 @@ int	*startup_file;
 			ofile_defined = MB_YES;
 			flag++;
 			break;
+		case 'S':
+		case 's':
+			startup_save_mode = MB_YES;
+			flag++;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -408,6 +456,8 @@ int	*startup_file;
 		fprintf(stderr,"dbg2       help:            %d\n",help);
 		fprintf(stderr,"dbg2       format:          %d\n",format);
 		fprintf(stderr,"dbg2       input file:      %s\n",ifile);
+		fprintf(stderr,"dbg2       save mode:       %d\n",startup_save_mode);
+		fprintf(stderr,"dbg2       output mode:     %d\n",output_mode);
 		}
 
 	/* if help desired then print it and exit */
@@ -433,13 +483,14 @@ int	*startup_file;
 	/* if file specified then use it */
 	if (fileflag > 0)
 		{
-		status = mbedit_action_open(ifile,format,output_mode, 
-				plot_width,exager,
-				x_interval,y_interval,plot_size,
-				&buff_size,&buff_size_max,
+		status = mbedit_action_open(ifile,format,
+				startup_save_mode, output_mode, 
+				plot_width, exager,
+				x_interval, y_interval, plot_size,
+				&buff_size, &buff_size_max,
 				&holdd_size, 
-				&ndump,&nload,&nbuff,
-				&nlist,&current_id,&nplot);
+				&ndump, &nload, &nbuff,
+				&nlist, &current_id, &nplot);
 		if (status = MB_SUCCESS)
 			*startup_file = MB_YES;
 		}
@@ -502,11 +553,11 @@ int	*pixels;
 		pixel_values[i] = pixels[i];
 
 	/* set scaling */
-	margin = (borders[1] - borders[0])/15;
+	margin = (borders[1] - borders[0])/16;
 	xmin = 5*margin;
 	xmax = borders[1] - margin;
 	ymin = margin;
-	ymax = borders[3] - margin;
+	ymax = borders[3] - margin/2;
 	xscale = 100*plot_width/(xmax - xmin);
 	yscale = (xscale*exager)/100;
 
@@ -524,11 +575,12 @@ int	*pixels;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_get_defaults(plt_size_max,plt_size,
+int mbedit_get_defaults(plt_size_max,plt_size,sh_flggd,
 	buffer_size_max,buffer_size,hold_size,form,
 	plwd,exgr,xntrvl,yntrvl,ttime_i,outmode)
 int	*plt_size_max;
 int	*plt_size;
+int	*sh_flggd;
 int	*buffer_size_max;
 int	*buffer_size;
 int	*hold_size;
@@ -555,6 +607,9 @@ int	*outmode;
 	/* get maximum number of pings to plot */
 	*plt_size_max = MBEDIT_MAX_PINGS;
 	*plt_size = plot_size;
+	
+	/* get show flagged flag */
+	*sh_flggd = show_flagged;
 
 	/* get maximum and starting buffer sizes */
 	*buffer_size_max = buff_size_max;
@@ -604,6 +659,7 @@ int	*outmode;
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       plot max:    %d\n",*plt_size_max);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",*plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",*sh_flggd);
 		fprintf(stderr,"dbg2       buffer max:  %d\n",*buffer_size_max);
 		fprintf(stderr,"dbg2       buffer_size: %d\n",*buffer_size);
 		fprintf(stderr,"dbg2       hold_size:   %d\n",*hold_size);
@@ -624,18 +680,20 @@ int	*outmode;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_open(file,form,outmode,
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+int mbedit_action_open(file,form,savemode,outmode,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	buffer_size,buffer_size_max,hold_size,
 	ndumped,nloaded,nbuffer,ngood,icurrent,nplt)
 char	*file;
 int	form;
+int	savemode;
 int	outmode;
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*buffer_size;
 int	*buffer_size_max;
 int	*hold_size;
@@ -658,12 +716,14 @@ int	*nplt;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file:            %s\n",file);
 		fprintf(stderr,"dbg2       format:          %d\n",form);
+		fprintf(stderr,"dbg2       savemode:        %d\n",savemode);
 		fprintf(stderr,"dbg2       outmode:         %d\n",outmode);
 		fprintf(stderr,"dbg2       plot_width:      %d\n",plwd);
 		fprintf(stderr,"dbg2       exager:          %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:      %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:      %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:       %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:    %d\n",sh_flggd);
 		fprintf(stderr,"dbg2       buffer_size:     %d\n",*buffer_size);
 		fprintf(stderr,"dbg2       buffer_size_max: %d\n",*buffer_size_max);
 		fprintf(stderr,"dbg2       hold_size:       %d\n",*hold_size);
@@ -676,7 +736,7 @@ int	*nplt;
 	status = mbedit_clear_screen();
 
 	/* open the file */
-	status = mbedit_open_file(file,form);
+	status = mbedit_open_file(file, form, savemode);
 	
 	/* check buffer size */
 	if (status == MB_SUCCESS)
@@ -692,25 +752,36 @@ int	*nplt;
 
 	/* load the buffer */
 	if (status == MB_SUCCESS)
-		status = mbedit_load_data(*buffer_size,nloaded,nbuffer,
-			ngood,icurrent);
-
-	/* keep going until good data or end of file found */
-	while (*nloaded > 0 && *ngood == 0)
 		{
-		/* dump the buffer */
-		status = mbedit_dump_data(*hold_size,ndumped,nbuffer);
-
-		/* load the buffer */
 		status = mbedit_load_data(*buffer_size,nloaded,nbuffer,
 			ngood,icurrent);
+
+		/* keep going until good data or end of file found */
+		while (*nloaded > 0 && *ngood == 0)
+			{
+			/* dump the buffer */
+			status = mbedit_dump_data(*hold_size,ndumped,nbuffer);
+	
+			/* load the buffer */
+			status = mbedit_load_data(*buffer_size,nloaded,nbuffer,
+				ngood,icurrent);
+			}
+			
+		if (*ngood <= 0)
+			do_error_dialog("No data were read from the input", 
+					"file. You may have specified an", 
+					"incorrect MB-System format id!");
 		}
 
 	/* set up plotting */
 	if (*ngood > 0)
-		{
+		{		
+		/* turn file button off */
+		do_filebutton_off();
+
+		/* now plot it */
 		status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
-			    plt_size,nplt, MB_YES);
+			    plt_size,sh_flggd,nplt,MB_YES);
 		}
 
 	/* reset beam_save */
@@ -741,7 +812,7 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_next_buffer(hold_size,buffer_size,
-	plwd,exgr,xntrvl,yntrvl,plt_size,ndumped,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,ndumped,
 	nloaded,nbuffer,ngood,icurrent,nplt)
 int	hold_size;
 int	buffer_size;
@@ -750,6 +821,7 @@ int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*ndumped;
 int	*nloaded;
 int	*nbuffer;
@@ -775,6 +847,7 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
 	/* clear the screen */
@@ -811,7 +884,7 @@ int	*nplt;
 		else
 			{
 			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
-				plt_size,nplt, MB_NO);
+				plt_size,sh_flggd,nplt,MB_YES);
 			}
 		}
 
@@ -1080,7 +1153,7 @@ int	*icurrent;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_step(step,plwd,exgr,xntrvl,yntrvl,plt_size,
+int mbedit_action_step(step,plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	step;
 int	plwd;
@@ -1088,6 +1161,7 @@ int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -1110,6 +1184,7 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
 	/* check if a file has been opened */
@@ -1135,7 +1210,7 @@ int	*nplt;
 		if (*ngood > 0)
 			{
 			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
-				    plt_size,nplt, MB_NO);
+				    plt_size,sh_flggd,nplt,MB_NO);
 			}
 
 		/* set failure flag if no step was made */
@@ -1176,13 +1251,14 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_plot(plwd,exgr,xntrvl,yntrvl,plt_size,
+int mbedit_action_plot(plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -1204,7 +1280,11 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
+		
+	/* clear the screen */
+	mbedit_clear_screen();
 
 	/* check if a file has been opened */
 	if (file_open == MB_YES)
@@ -1220,7 +1300,7 @@ int	*nplt;
 		if (*ngood > 0)
 			{
 			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
-					plt_size,nplt, MB_NO);
+					plt_size,sh_flggd,nplt,MB_NO);
 			}
 		}
 
@@ -1256,7 +1336,7 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_pick(x_loc,y_loc,
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	x_loc;
 int	y_loc;
@@ -1265,6 +1345,7 @@ int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -1273,6 +1354,7 @@ int	*nplt;
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_pick";
 	int	status = MB_SUCCESS;
+	int	zap_box, zap_ping;
 	int	ix, iy, range, range_min;
 	int	found;
 	int	iping, jbeam;
@@ -1292,12 +1374,40 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
-	/* check if a file has been opened */
+	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
 		{
+		/* check if a zap box has been picked */
+		zap_box = MB_NO;
+		for (i=0;i<nplot;i++)
+			{
+			if (ping[i].outbounds == MBEDIT_OUTBOUNDS_UNFLAGGED)
+			    {
+			    if (x_loc >= ping[i].zap_x1
+				&& x_loc <= ping[i].zap_x2
+				&& y_loc >= ping[i].zap_y1
+				&& y_loc <= ping[i].zap_y2)
+				{
+				zap_box = MB_YES;
+				zap_ping = i;
+				}
+			    }
+			}
+			
+		/* if a zap box has been picked call zap routine */
+		if (zap_box == MB_YES)
+			status = mbedit_action_zap_outbounds(zap_ping,
+				plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
+				nbuffer,ngood,icurrent,nplt);
+		}
 
+	/* do not look for beam pick unless file has been opened 
+		and no zap box was picked */
+	if (file_open == MB_YES && zap_box == MB_NO)
+		{
 		/* check if a beam has been picked */
 		iping = 0;
 		jbeam = 0;
@@ -1339,6 +1449,22 @@ int	*nplt;
 		/* reset picked beam */
 		if (found == MB_YES)
 			{
+			/* write edit to save file */
+			if (sofile_open == MB_YES)
+			    {
+			    if (ping[iping].bath[jbeam] > 0.0)
+				mbedit_save_edit(
+				    ping[iping].time_d, 
+				    jbeam, 
+				    MBEDIT_FLAG);
+			    else if (ping[iping].bath[jbeam] < 0.0)
+				mbedit_save_edit(
+				    ping[iping].time_d, 
+				    jbeam, 
+				    MBEDIT_UNFLAG);
+			    }
+			
+			/* apply edit */
 			ping[iping].bath[jbeam] = 
 				-ping[iping].bath[jbeam];
 			status = mb_buffer_insert(verbose,
@@ -1374,20 +1500,21 @@ int	*nplt;
 		current = list[current_id];
 
 		/* replot the affected beam and ping */
-/*		if (found && *ngood > 0)*/
-			{
-			status = mbedit_plot_ping(iping);
-			status = mbedit_plot_beam(iping,jbeam-1);
-			status = mbedit_plot_beam(iping,jbeam);
-			status = mbedit_plot_beam(iping,jbeam+1);
-			}
-/*
-		else
-			status = MB_FAILURE;
-*/
+		status = mbedit_plot_ping(iping);
+		status = mbedit_plot_beam(iping,jbeam-1);
+		status = mbedit_plot_beam(iping,jbeam);
+		status = mbedit_plot_beam(iping,jbeam+1);
+		
+		/* if beam out of bounds replot label */
+		if (ping[iping].bath_x[jbeam] < xmin
+		    || ping[iping].bath_x[jbeam] > xmax
+		    || ping[iping].bath_y[jbeam] < ymin
+		    || ping[iping].bath_y[jbeam] > ymax)
+		    status = mbedit_plot_ping_label(iping, MB_NO);
 		}
+		
 	/* if no file open set failure status */
-	else
+	else if (file_open == MB_NO)
 		{
 		status = MB_FAILURE;
 		*nbuffer = nbuff;
@@ -1418,7 +1545,7 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_erase(x_loc,y_loc,
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	x_loc;
 int	y_loc;
@@ -1427,6 +1554,7 @@ int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -1435,8 +1563,10 @@ int	*nplt;
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_erase";
 	int	status = MB_SUCCESS;
+	int	zap_box, zap_ping;
 	int	ix, iy, range;
 	int	found;
+	int	replot_label;
 	char	comment[128];
 	int	i, j;
 
@@ -1453,16 +1583,46 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
-	/* check if a file has been opened */
+	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
+	    {
+	    /* check if a zap box has been picked */
+	    zap_box = MB_NO;
+	    for (i=0;i<nplot;i++)
+		{
+		if (ping[i].outbounds == MBEDIT_OUTBOUNDS_UNFLAGGED)
+		    {
+		    if (x_loc >= ping[i].zap_x1
+			&& x_loc <= ping[i].zap_x2
+			&& y_loc >= ping[i].zap_y1
+			&& y_loc <= ping[i].zap_y2)
+			{
+			zap_box = MB_YES;
+			zap_ping = i;
+			}
+		    }
+		}
+		    
+	    /* if a zap box has been picked call zap routine */
+	    if (zap_box == MB_YES)
+		status = mbedit_action_zap_outbounds(zap_ping,
+			plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
+			nbuffer,ngood,icurrent,nplt);
+	    }
+
+	/* do not look for beam erase unless file has been opened 
+		and no zap box was picked */
+	if (file_open == MB_YES && zap_box == MB_NO)
 	  {
 
 	  /* look for beams to be erased */
 	  for (i=0;i<nplot;i++)
 	    {
 	    found = MB_NO;
+	    replot_label = MB_NO;
 	    for (j=0;j<beams_bath;j++)
 	      {
 	      if (ping[i].bath[j] > 0.0)
@@ -1472,6 +1632,14 @@ int	*nplt;
 		range = (int) sqrt((double) (ix*ix + iy*iy));
 		if (range < MBEDIT_ERASE_DISTANCE && *ngood > 0)
 			{
+			/* write edit to save file */
+			if (sofile_open == MB_YES)
+			    {
+			    mbedit_save_edit(
+				    ping[i].time_d, 
+				    j, MBEDIT_FLAG);
+			    }
+			
 	          	/* unplot the affected beam and ping */
 			status = mbedit_unplot_ping(i);
 			status = mbedit_unplot_beam(i,j);
@@ -1510,6 +1678,13 @@ int	*nplt;
 			status = mbedit_plot_beam(i,j-1);
 			status = mbedit_plot_beam(i,j);
 			status = mbedit_plot_beam(i,j+1);
+		
+			/* if beam out of bounds replot label */
+			if (ping[i].bath_x[j] < xmin
+			    || ping[i].bath_x[j] > xmax
+			    || ping[i].bath_y[j] < ymin
+			    || ping[i].bath_y[j] > ymax)
+			    replot_label = MB_YES;
 			}
 		}
 	      }
@@ -1517,6 +1692,8 @@ int	*nplt;
 	    /* replot affected ping */
 	    if (found == MB_YES && *ngood > 0)
 			status = mbedit_plot_ping(i);
+	    if (replot_label == MB_YES)
+		    status = mbedit_plot_ping_label(i, MB_NO);
 	    }
 
 	  /* set some return values */
@@ -1525,9 +1702,9 @@ int	*nplt;
 	  *icurrent = current_id;
 	  current = list[current_id];
 	  }
-
+		
 	/* if no file open set failure status */
-	else
+	else if (file_open == MB_NO)
 		{
 		status = MB_FAILURE;
 		*nbuffer = nbuff;
@@ -1558,7 +1735,7 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_restore(x_loc,y_loc,
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	x_loc;
 int	y_loc;
@@ -1567,6 +1744,7 @@ int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -1575,8 +1753,10 @@ int	*nplt;
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_restore";
 	int	status = MB_SUCCESS;
+	int	zap_box, zap_ping;
 	int	ix, iy, range;
 	int	found;
+	int	replot_label;
 	char	comment[128];
 	int	i, j;
 
@@ -1593,16 +1773,46 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
-	/* check if a file has been opened */
+	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
+	    {
+	    /* check if a zap box has been picked */
+	    zap_box = MB_NO;
+	    for (i=0;i<nplot;i++)
+		{
+		if (ping[i].outbounds == MBEDIT_OUTBOUNDS_UNFLAGGED)
+		    {
+		    if (x_loc >= ping[i].zap_x1
+			&& x_loc <= ping[i].zap_x2
+			&& y_loc >= ping[i].zap_y1
+			&& y_loc <= ping[i].zap_y2)
+			{
+			zap_box = MB_YES;
+			zap_ping = i;
+			}
+		    }
+		}
+		    
+	    /* if a zap box has been picked call zap routine */
+	    if (zap_box == MB_YES)
+		status = mbedit_action_zap_outbounds(zap_ping,
+			plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
+			nbuffer,ngood,icurrent,nplt);
+	    }
+
+	/* do not look for beam restore unless file has been opened 
+		and no zap box was picked */
+	if (file_open == MB_YES && zap_box == MB_NO)
 	  {
 
 	  /* look for beams to be erased */
 	  for (i=0;i<nplot;i++)
 	    {
 	    found = MB_NO;
+	    replot_label = MB_NO;
 	    for (j=0;j<beams_bath;j++)
 	      {
 	      if (ping[i].bath[j] < 0.0)
@@ -1612,6 +1822,14 @@ int	*nplt;
 		range = (int) sqrt((double) (ix*ix + iy*iy));
 		if (range < MBEDIT_ERASE_DISTANCE && *ngood > 0)
 			{
+			/* write edit to save file */
+			if (sofile_open == MB_YES)
+			    {
+			    mbedit_save_edit(
+				    ping[i].time_d, 
+				    j, MBEDIT_UNFLAG);
+			    }
+			
 	          	/* unplot the affected beam and ping */
 			if (found == MB_NO)
 				status = mbedit_unplot_ping(i);
@@ -1651,13 +1869,22 @@ int	*nplt;
 			status = mbedit_plot_beam(i,j-1);
 			status = mbedit_plot_beam(i,j);
 			status = mbedit_plot_beam(i,j+1);
+		
+			/* if beam out of bounds replot label */
+			if (ping[i].bath_x[j] < xmin
+			    || ping[i].bath_x[j] > xmax
+			    || ping[i].bath_y[j] < ymin
+			    || ping[i].bath_y[j] > ymax)
+			    replot_label = MB_YES;
 			}
 		}
 	      }
 
 	    /* replot affected ping */
 	    if (found == MB_YES && *ngood > 0)
-			status = mbedit_plot_ping(i);
+		    status = mbedit_plot_ping(i);
+	    if (replot_label == MB_YES)
+		    status = mbedit_plot_ping_label(i, MB_NO);
 	    }
 
 	  /* set some return values */
@@ -1666,9 +1893,154 @@ int	*nplt;
 	  *icurrent = current_id;
 	  current = list[current_id];
 	  }
-
+		
 	/* if no file open set failure status */
-	else
+	else if (file_open == MB_NO)
+		{
+		status = MB_FAILURE;
+		*nbuffer = nbuff;
+		*nbuffer = nbuff;
+		*ngood = nlist;
+		current_id = 0;
+		*icurrent = current_id;
+		current = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
+		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
+		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
+		fprintf(stderr,"dbg2       nplt:        %d\n",*nplt);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_action_zap_outbounds(iping,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
+	nbuffer,ngood,icurrent,nplt)
+int	iping;
+int	plwd;
+int	exgr;
+int	xntrvl;
+int	yntrvl;
+int	plt_size;
+int	sh_flggd;
+int	*nbuffer;
+int	*ngood;
+int	*icurrent;
+int	*nplt;
+{
+	/* local variables */
+	char	*function_name = "mbedit_action_zap_outbounds";
+	int	status = MB_SUCCESS;
+	int	found;
+	char	comment[128];
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iping:       %d\n",iping);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
+		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
+		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
+		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
+		}
+
+	/* do nothing unless file has been opened */
+	if (file_open == MB_YES)
+	    {
+
+	    /* look for beams to be erased */
+	    found = MB_NO;
+	    for (j=0;j<beams_bath;j++)
+	      {
+	      if (ping[iping].bath[j] > 0.0
+		    && (ping[iping].bath_x[j] < xmin
+			|| ping[iping].bath_x[j] > xmax
+			|| ping[iping].bath_y[j] < ymin
+			|| ping[iping].bath_y[j] > ymax))
+		    {
+		    /* write edit to save file */
+		    if (sofile_open == MB_YES)
+			{
+			mbedit_save_edit(
+				ping[iping].time_d, 
+				j, MBEDIT_FLAG);
+			}
+		    
+		    /* unplot the affected beam and ping */
+		    status = mbedit_unplot_ping(iping);
+		    status = mbedit_unplot_beam(iping,j);
+
+		    /* reset the beam value */
+		    if (ping[iping].bath[j] > 0.0)
+		    ping[iping].bath[j] = 
+			    -ping[iping].bath[j];
+		    status = mb_buffer_insert(verbose,
+			    buff_ptr,imbio_ptr,ping[iping].id,
+			    ping[iping].time_i,ping[iping].time_d,
+			    ping[iping].navlon,ping[iping].navlat,
+			    ping[iping].speed,ping[iping].heading,
+			    beams_bath,beams_amp,pixels_ss,
+			    ping[iping].bath,
+			    ping[iping].amp,
+			    ping[iping].bathacrosstrack,
+			    ping[iping].bathalongtrack,
+			    ping[iping].ss,
+			    ping[iping].ssacrosstrack,
+			    ping[iping].ssalongtrack,
+			    comment,
+			    &error);
+		    if (verbose >= 1)
+			    {
+			    fprintf(stderr,"\nping: %d beam:%d depth:%10.3f ",
+				    i,j,ping[iping].bath[j]);
+			    fprintf(stderr," flagged\n");
+			    }
+
+		    /* replot the affected beams */
+		    found = MB_YES;
+		    beam_save = MB_YES;
+		    iping_save = iping;
+		    jbeam_save = j;
+		    status = mbedit_plot_beam(iping,j-1);
+		    status = mbedit_plot_beam(iping,j);
+		    status = mbedit_plot_beam(iping,j+1);
+		    }
+	      }
+
+	   /* replot affected ping */
+	   if (found == MB_YES && *ngood > 0)
+		    {
+		    status = mbedit_plot_ping(iping);
+		    status = mbedit_plot_ping_label(iping, MB_NO);
+		    }
+
+	   /* set some return values */
+	   *nbuffer = nbuff;
+	   *ngood = nlist;
+	   *icurrent = current_id;
+	   current = list[current_id];
+	   }
+		
+	/* if no file open set failure status */
+	else if (file_open == MB_NO)
 		{
 		status = MB_FAILURE;
 		*nbuffer = nbuff;
@@ -1699,13 +2071,14 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_bad_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -1728,12 +2101,23 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
 	if (file_open == MB_YES && beam_save == MB_YES)
 		{
+		/* write edits to save file */
+		if (sofile_open == MB_YES)
+		    {
+		    for (j=0;j<beams_bath;j++)
+			if (ping[iping_save].bath[j] > 0.0)
+			    mbedit_save_edit(
+				ping[iping_save].time_d, 
+				j, MBEDIT_FLAG);
+		    }
+
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
 		for (j=0;j<beams_bath;j++)
@@ -1773,6 +2157,10 @@ int	*nplt;
 		status = mbedit_plot_ping(iping_save);
 		for (j=0;j<beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
+			
+		/* if ping has outbounds flag replot label */
+		if (ping[iping_save].outbounds != MBEDIT_OUTBOUNDS_NONE)
+			status = mbedit_plot_ping_label(iping_save, MB_NO);
 		}
 
 	/* if no file open or beam saved set failure status */
@@ -1801,13 +2189,14 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_good_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -1830,12 +2219,22 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
 	if (file_open == MB_YES && beam_save == MB_YES)
 		{
+		/* write edits to save file */
+		if (sofile_open == MB_YES)
+		    {
+		    for (j=0;j<beams_bath;j++)
+			if (ping[iping_save].bath[j] < 0.0)
+			    mbedit_save_edit(
+				ping[iping_save].time_d, 
+				j, MBEDIT_UNFLAG);
+		    }
 
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
@@ -1876,6 +2275,10 @@ int	*nplt;
 		status = mbedit_plot_ping(iping_save);
 		for (j=0;j<beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
+			
+		/* if ping has outbounds flag replot label */
+		if (ping[iping_save].outbounds != MBEDIT_OUTBOUNDS_NONE)
+			status = mbedit_plot_ping_label(iping_save, MB_NO);
 		}
 
 	/* if no file open or beam saved set failure status */
@@ -1904,13 +2307,14 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_left_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -1933,12 +2337,22 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
 	if (file_open == MB_YES && beam_save == MB_YES)
 		{
+		/* write edits to save file */
+		if (sofile_open == MB_YES)
+		    {
+		    for (j=0;j<=jbeam_save;j++)
+			if (ping[iping_save].bath[j] > 0.0)
+			    mbedit_save_edit(
+				ping[iping_save].time_d, 
+				j, MBEDIT_FLAG);
+		    }
 
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
@@ -1979,6 +2393,10 @@ int	*nplt;
 		status = mbedit_plot_ping(iping_save);
 		for (j=0;j<beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
+			
+		/* if ping has outbounds flag replot label */
+		if (ping[iping_save].outbounds != MBEDIT_OUTBOUNDS_NONE)
+			status = mbedit_plot_ping_label(iping_save, MB_NO);
 		}
 
 	/* if no file open or beam saved set failure status */
@@ -2007,13 +2425,14 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_right_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -2036,12 +2455,22 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
 	if (file_open == MB_YES && beam_save == MB_YES)
 		{
+		/* write edits to save file */
+		if (sofile_open == MB_YES)
+		    {
+		    for (j=jbeam_save;j<beams_bath;j++)
+			if (ping[iping_save].bath[j] > 0.0)
+			    mbedit_save_edit(
+				ping[iping_save].time_d, 
+				j, MBEDIT_FLAG);
+		    }
 
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
@@ -2082,6 +2511,10 @@ int	*nplt;
 		status = mbedit_plot_ping(iping_save);
 		for (j=0;j<beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
+			
+		/* if ping has outbounds flag replot label */
+		if (ping[iping_save].outbounds != MBEDIT_OUTBOUNDS_NONE)
+			status = mbedit_plot_ping_label(iping_save, MB_NO);
 		}
 
 	/* if no file open or beam saved set failure status */
@@ -2110,13 +2543,14 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_zero_ping(
-	plwd,exgr,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
 	nbuffer,ngood,icurrent,nplt)
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nbuffer;
 int	*ngood;
 int	*icurrent;
@@ -2139,12 +2573,23 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
 	if (file_open == MB_YES && beam_save == MB_YES)
 		{
+		/* write edits to save file */
+		if (sofile_open == MB_YES)
+		    {
+		    for (j=0;j<beams_bath;j++)
+			if (ping[iping_save].bath[j] != 0.0)
+			    mbedit_save_edit(
+				ping[iping_save].time_d, 
+				j, MBEDIT_ZERO);
+		    }
+
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
 		for (j=0;j<beams_bath;j++)
@@ -2188,6 +2633,10 @@ int	*nplt;
 		status = mbedit_plot_ping(iping_save);
 		for (j=0;j<beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
+			
+		/* if ping has outbounds flag replot label */
+		if (ping[iping_save].outbounds != MBEDIT_OUTBOUNDS_NONE)
+			status = mbedit_plot_ping_label(iping_save, MB_NO);
 		}
 
 	/* if no file open or beam saved set failure status */
@@ -2258,9 +2707,10 @@ char	*output_file;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_open_file(file,form)
+int mbedit_open_file(file,form, savemode)
 char	*file;
 int	form;
+int	savemode;
 {
 	/* local variables */
 	char	*function_name = "mbedit_open_file";
@@ -2269,11 +2719,15 @@ int	form;
 	char	*sb_suffix;
 	int	mb_len;
 	int	sb_len;
+	char	*start;
+	struct stat file_status;
+	int	fstat;
+	char	command[256];
 	int	i;
 
 	/* time, user, host variables */
 	long int	right_now;
-	char	date[25], user[128], host[128];
+	char	date[25], user[128], *user_ptr, host[128];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2283,6 +2737,7 @@ int	form;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file:        %s\n",file);
 		fprintf(stderr,"dbg2       format:      %d\n",form);
+		fprintf(stderr,"dbg2       savemode:    %d\n",savemode);
 		}
 
 	/* get filenames */
@@ -2342,6 +2797,9 @@ int	form;
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
 		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
 		status = MB_FAILURE;
+		do_error_dialog("Unable to open input file.", 
+				"You may not have read", 
+				"permission in this directory!");
 		return(status);
 		}
 
@@ -2357,6 +2815,9 @@ int	form;
 			fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
 			fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
 			status = MB_FAILURE;
+			do_error_dialog("Unable to open output file.", 
+					"You may not have write", 
+					"permission in this directory!");
 			return(status);
 			}
 		}
@@ -2451,7 +2912,12 @@ int	form;
 		strncpy(date,"\0",25);
 		right_now = time((long *)0);
 		strncpy(date,ctime(&right_now),24);
-		strcpy(user,getenv("USER"));
+		if ((user_ptr = getenv("USER")) == NULL)
+			user_ptr = getenv("LOGNAME");
+		if (user_ptr != NULL)
+			strcpy(user,user_ptr);
+		else
+			strcpy(user, "unknown");
 		gethostname(host,128);
 		strncpy(comment,"\0",256);
 		sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
@@ -2515,6 +2981,67 @@ int	form;
 			comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
+		
+	/* now deal with old edit save file */
+	sifile_open = MB_NO;
+	if (status == MB_SUCCESS && savemode == MB_YES)
+		{
+		/* check if old edit save file exists */
+		sprintf(sofile, "%s.mbesf", ifile);
+		fstat = stat(sofile, &file_status);
+		if (fstat == 0 
+		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+		    {
+		    /* get temporary file name */
+		    strcpy(sifile, sofile);
+		    if ((start = (char *) strrchr(sifile, '/'))
+			!= NULL)
+			start++;
+		    else
+			start = sifile;
+		    strcpy(start, "mbedit_tmp.mbesf");
+
+		    /* copy old edit save file to tmp file */
+		    sprintf(command, "cp %s %s\n", 
+			sofile, sifile);
+		    system(command);
+		    
+		    /* open the old edit file */
+		    if ((sifp = fopen(sifile,"r")) != NULL)
+			sifile_open = MB_YES;
+		    else
+			{
+			sifile_open = MB_NO;
+			fprintf(stderr, "\nUnable to open old edit save file %s\n", 
+			    sifile);
+			do_error_dialog("Unable to copy and open old edit", 
+					"save file. You may not have write", 
+					"or read permission in this directory!");
+			}
+		    }
+		}
+		
+	/* now deal with new edit save file */
+	sofile_open = MB_NO;
+	if (status == MB_SUCCESS 
+		&& output_mode == MBEDIT_OUTPUT_OUTPUT)
+		{
+		/* get edit save file exists */
+		sprintf(sofile, "%s.mbesf", ifile);
+		    
+		/* open the edit save file */
+		if ((sofp = fopen(sofile,"w")) != NULL)
+		    sofile_open = MB_YES;
+		else
+		    {
+		    sofile_open = MB_NO;
+		    fprintf(stderr, "\nUnable to open new edit save file %s\n", 
+			sofile);
+		    do_error_dialog("Unable to open new edit save file.", 
+				    "You may not have write", 
+				    "permission in this directory!");
+		    }
+		}
 
 	/* if we got here we must have succeeded */
 	if (verbose >= 0)
@@ -2561,6 +3088,16 @@ int mbedit_close_file()
 	if (ombio_ptr != NULL)
 		status = mb_close(verbose,&ombio_ptr,&error);
 	ofile_defined = MB_NO;
+	if (sifile_open == MB_YES)
+	    {
+	    fclose(sifp);
+	    sifile_open = MB_NO;
+	    }
+	if (sofile_open == MB_YES)
+	    {
+	    fclose(sofp);
+	    sofile_open = MB_NO;
+	    }
 
 	/* deallocate memory for data arrays */
 	mb_free(verbose,&bath,&error);
@@ -2601,6 +3138,9 @@ int mbedit_close_file()
 	file_open = MB_NO;
 	nload_total = 0;
 	ndump_total = 0;
+	
+	/* turn file button on */
+	do_filebutton_on();
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2640,15 +3180,28 @@ int	*nbuffer;
 	if (nbuff > 0)
 		{
 		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
+			{
+			/* turn message on */
+			do_message_on("MBedit is dumping data...");
+
 			status = mb_buffer_dump(verbose,
 					buff_ptr,ombio_ptr,
 					hold_size,&ndump,&nbuff,
 					&error);
+			}
 		else
+			{
+			/* turn message on */
+			do_message_on("MBedit is clearing data...");
+
 			status = mb_buffer_clear(verbose,
 					buff_ptr,imbio_ptr,
 					hold_size,&ndump,&nbuff,
 					&error);
+			}
+
+		/* turn message off */
+		do_message_off();
 		}
 	*ndumped = ndump;
 	ndump_total += ndump;
@@ -2704,6 +3257,10 @@ int	*icurrent;
 	/* local variables */
 	char	*function_name = "mbedit_load_data";
 	int	status = MB_SUCCESS;
+	int	found;
+	double	stime_d;
+	int	sbeam;
+	int	saction;
 	int	i;
 	int	start;
 
@@ -2715,6 +3272,9 @@ int	*icurrent;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
 		}
+		
+	/* turn message on */
+	do_message_on("MBedit is loading data...");
 
 	/* load data into buffer */
 	status = mb_buffer_load(verbose,buff_ptr,imbio_ptr,buffer_size,
@@ -2775,6 +3335,66 @@ int	*icurrent;
 		}
 	*icurrent = current_id;
 	current = list[current_id];
+	
+	/* if desired apply saved edits */
+	if (sifile_open == MB_YES)
+		{
+		/* reset message */
+		do_message_on("MBedit is applying saved edits...");
+		
+		/* rewinds saved edit file */
+		rewind(sifp);
+		
+		/* loop over reading saved edits */
+		while (mbedit_retrieve_edit(&stime_d, &sbeam, &saction) 
+		    == MB_SUCCESS)
+		    {
+		    /* find ping of interest if possible */
+		    found = MB_NO;
+		    for (i = 0; i < nlist && found == MB_NO ; i++)
+			{
+			status = mb_buffer_get_next_data(verbose,
+				buff_ptr,imbio_ptr,list[i],&id,
+				time_i,&time_d,
+				&navlon,&navlat,
+				&speed,&heading,
+				&beams_bath,&beams_amp,&pixels_ss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				&error);
+			if (time_d == stime_d && sbeam >= 0 
+			    && sbeam < beams_bath)
+			    {
+			    /* apply edit */
+			    found = MB_YES;
+			    if (saction == MBEDIT_FLAG)
+				bath[sbeam] = -fabs(bath[sbeam]);
+			    else if (saction == MBEDIT_UNFLAG)
+				bath[sbeam] = fabs(bath[sbeam]);
+			    else if (saction == MBEDIT_ZERO)
+				bath[sbeam] = 0.0;
+				
+			    /* write saved edit to current edit save file */
+			    if (sofile_open == MB_YES)
+				mbedit_save_edit(stime_d, sbeam, saction);
+				
+			    /* reinsert data */
+			    status = mb_buffer_insert(verbose,
+				    buff_ptr, imbio_ptr, id,
+				    time_i, time_d,
+				    navlon, navlat, speed, heading,
+				    beams_bath, beams_amp, pixels_ss,
+				    bath, amp, bathacrosstrack, bathalongtrack,
+				    ss, ssacrosstrack, ssalongtrack,
+				    comment,
+				    &error);
+			    }
+			}
+		    }
+		}
+		
+	/* turn message off */
+	do_message_off();
 
 	/* print out information */
 	if (verbose >= 0)
@@ -2843,12 +3463,14 @@ int mbedit_clear_screen()
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt,autoscale)
+int mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,
+		    nplt,autoscale)
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*nplt;
 int	autoscale;
 {
@@ -2882,6 +3504,7 @@ int	autoscale;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       nplt:        %d\n",nplt);
 		fprintf(stderr,"dbg2       autoscale:   %d\n",autoscale);
 		}
@@ -2891,6 +3514,7 @@ int	autoscale;
 	exager = exgr;
 	x_interval = xntrvl;
 	y_interval = yntrvl;
+	show_flagged = sh_flggd;
 
 	/* figure out which pings to plot */
 	plot_size = plt_size;
@@ -2921,6 +3545,7 @@ int	autoscale;
 		if (status == MB_SUCCESS)
 			{
 			ping[i].record = ping[i].id + ndump_total;
+			ping[i].outbounds = MBEDIT_OUTBOUNDS_NONE;
 			for (j=0;j<beams_bath;j++)
 				{
 				if (ping[i].bath[j] > 0.0)
@@ -2953,7 +3578,7 @@ int	autoscale;
 		for (i=0;i<ndec;i++)
 			maxx = maxx * 10;
 		maxx = (plot_width / maxx + 1) * maxx;
-		reset_scale_x(plot_width, maxx);
+		do_reset_scale_x(plot_width, maxx);
 		}
 
 	/* print out information */
@@ -2992,21 +3617,23 @@ int	autoscale;
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,xcen-swidth/2,
-		ymin-margin/2-sascent,string,pixel_values[BLACK],XG_SOLIDLINE);
-	sprintf(string,"Crosstrack Distances and Depths in Meters");
+		ymin-margin/2+sascent,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	sprintf(string,"Acrosstrack Distances and Depths in Meters");
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,xcen-swidth/2,
-		ymin-margin/2+sascent,string,pixel_values[BLACK],XG_SOLIDLINE);
+		ymin-margin/2+2*(sascent+sdescent),string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* plot filename */
 	sprintf(string,"Current Data File:");
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,50,
-		ymin-margin/2-sascent,string,pixel_values[BLACK],XG_SOLIDLINE);
-	xg_drawstring(mbedit_xgid,50,
-		ymin-margin/2+sascent,ifile,pixel_values[BLACK],XG_SOLIDLINE);
+		ymin-margin/2-3*sascent/2,string,pixel_values[BLACK],XG_SOLIDLINE);
+	xg_drawstring(mbedit_xgid,50+swidth,
+		ymin-margin/2-3*sascent/2,ifile,pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* plot scale bars */
 	dx_width = (xmax - xmin)/dxscale;
@@ -3058,23 +3685,10 @@ int	autoscale;
 	/* plot pings */
 	for (i=0;i<nplot;i++)
 		{
-		/* set and draw info string */
-		y = ymax - dy/2 - i*dy;
-		sprintf(string,"%d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %10.3f",
-			ping[i].record,
-			ping[i].time_i[1],ping[i].time_i[2],
-			ping[i].time_i[0],ping[i].time_i[3],
-			ping[i].time_i[4],ping[i].time_i[5],
-			ping[i].time_i[6],
-			ping[i].bath[jbeam_cen]);
-		xg_justify(mbedit_xgid,string,&swidth,&sascent,&sdescent);
-		xg_drawstring(mbedit_xgid,5*margin-swidth-5,y,
-			string,pixel_values[BLACK],XG_SOLIDLINE);
-
-		/* save string to show last ping seen at end of program */
-		strcpy(last_ping,string);
-
 		/* set beam plotting locations */
+		y = ymax - dy / 2 - i * dy;
+		ping[i].label_x = 5 * margin - 5;
+		ping[i].label_y = y;
 		for (j=0;j<beams_bath;j++)
 			{
 			if (ping[i].bath[j] != 0.0)
@@ -3099,6 +3713,8 @@ int	autoscale;
 		/* plot the ping profile */
 		status = mbedit_plot_ping(i);
 
+		/* set and draw info string */
+		mbedit_plot_ping_label(i, MB_YES);
 		}
 
 	/* set status */
@@ -3179,7 +3795,8 @@ int	iping;
 	char	*function_name = "mbedit_plot_ping";
 	int	status = MB_SUCCESS;
 	int	j;
-	int	first, xold, yold;
+	int	first, last_flagged;
+	int	xold, yold;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3192,24 +3809,168 @@ int	iping;
 
 	/* plot the ping profile */
 	first = MB_YES;
+	last_flagged = MB_NO;
 	for (j=0;j<beams_bath;j++)
 		{
-		if (ping[iping].bath[j] > 0 && first == MB_YES)
+		if (show_flagged == MB_YES 
+			&& ping[iping].bath[j] < 0.0 && first == MB_YES)
 			{
 			first = MB_NO;
+			last_flagged = MB_YES;
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];
 			}
-		else if (ping[iping].bath[j] > 0)
+		else if (ping[iping].bath[j] > 0.0 && first == MB_YES)
+			{
+			first = MB_NO;
+			last_flagged = MB_NO;
+			xold = ping[iping].bath_x[j];
+			yold = ping[iping].bath_y[j];
+			}
+		else if (last_flagged == MB_NO 
+			&& ping[iping].bath[j] > 0.0)
 			{
 			xg_drawline(mbedit_xgid,xold,yold,
 					ping[iping].bath_x[j],
 					ping[iping].bath_y[j],
 					pixel_values[BLACK],XG_SOLIDLINE);
+			last_flagged = MB_NO;
+			xold = ping[iping].bath_x[j];
+			yold = ping[iping].bath_y[j];
+			}
+		else if (ping[iping].bath[j] > 0.0)
+			{
+			xg_drawline(mbedit_xgid,xold,yold,
+					ping[iping].bath_x[j],
+					ping[iping].bath_y[j],
+					pixel_values[RED],XG_SOLIDLINE);
+			last_flagged = MB_NO;
+			xold = ping[iping].bath_x[j];
+			yold = ping[iping].bath_y[j];
+			}
+		else if (show_flagged == MB_YES 
+			&& ping[iping].bath[j] < 0.0)
+			{
+			xg_drawline(mbedit_xgid,xold,yold,
+					ping[iping].bath_x[j],
+					ping[iping].bath_y[j],
+					pixel_values[RED],XG_SOLIDLINE);
+			last_flagged = MB_YES;
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];
 			}
 		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_plot_ping_label(iping, save)
+int	iping;
+int	save;
+{
+	/* local variables */
+	char	*function_name = "mbedit_plot_ping_label";
+	int	status = MB_SUCCESS;
+	int	sascent, sdescent, swidth;
+	char	string[50];
+	int	j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iping:       %d\n",iping);
+		fprintf(stderr,"dbg2       save:        %d\n",save);
+		}
+
+	/* get the ping outbounds value */
+	ping[iping].outbounds = MBEDIT_OUTBOUNDS_NONE;
+	for (j=0;j<beams_bath;j++)
+		{
+		if (ping[iping].bath[j] != 0.0
+		    && (ping[iping].bath_x[j] < xmin
+		    || ping[iping].bath_x[j] > xmax
+		    || ping[iping].bath_y[j] < ymin
+		    || ping[iping].bath_y[j] > ymax))
+		    {
+		    if (ping[iping].bath[j] > 0.0)
+			ping[iping].outbounds 
+			    = MBEDIT_OUTBOUNDS_UNFLAGGED;
+		    else if (ping[iping].bath[j] < 0.0
+			&& ping[iping].outbounds != MBEDIT_OUTBOUNDS_UNFLAGGED)
+			ping[iping].outbounds 
+			    = MBEDIT_OUTBOUNDS_FLAGGED;
+		    }
+		}
+
+	/* set info string */
+	sprintf(string,"%5d %2d/%2d/%4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
+		ping[iping].record,
+		ping[iping].time_i[1],ping[iping].time_i[2],
+		ping[iping].time_i[0],ping[iping].time_i[3],
+		ping[iping].time_i[4],ping[iping].time_i[5],
+		(int)(0.001 * ping[iping].time_i[6]),
+		ping[iping].bath[beams_bath/2]);
+	xg_justify(mbedit_xgid,string,&swidth,&sascent,&sdescent);
+
+	/* save string to show last ping seen at end of program */
+	if (save == MB_YES)
+		strcpy(last_ping,string);
+
+	/* unplot the ping label */
+	xg_fillrectangle(mbedit_xgid,
+		ping[iping].label_x - swidth - 21, 
+		ping[iping].label_y - sascent - 1, 
+		swidth + 22, 
+		sascent + sdescent + 2, 
+		pixel_values[WHITE],XG_SOLIDLINE);
+		
+	/* plot the ping label */
+	if (ping[iping].outbounds == MBEDIT_OUTBOUNDS_UNFLAGGED)
+	    {
+	    xg_fillrectangle(mbedit_xgid,
+		    ping[iping].label_x - swidth, 
+		    ping[iping].label_y - sascent, 
+		    swidth, 
+		    sascent + sdescent, 
+		    pixel_values[RED],XG_SOLIDLINE);
+	    ping[iping].zap_x1 = ping[iping].label_x - swidth - 20;
+	    ping[iping].zap_x2 =  ping[iping].zap_x1 + 10;
+	    ping[iping].zap_y1 = ping[iping].label_y - sascent;
+	    ping[iping].zap_y2 =  ping[iping].zap_y1 + sascent + sdescent;
+	    xg_drawrectangle(mbedit_xgid,
+		    ping[iping].zap_x1, 
+		    ping[iping].zap_y1, 
+		    10, 
+		    sascent + sdescent, 
+		    pixel_values[BLACK],XG_SOLIDLINE);
+	    }
+	else if (ping[iping].outbounds == MBEDIT_OUTBOUNDS_FLAGGED)
+	    xg_fillrectangle(mbedit_xgid,
+		    ping[iping].label_x - swidth, 
+		    ping[iping].label_y - sascent, 
+		    swidth, 
+		    sascent + sdescent, 
+		    pixel_values[GREEN],XG_SOLIDLINE);
+	xg_drawstring(mbedit_xgid,
+		    ping[iping].label_x - swidth,
+		    ping[iping].label_y,
+		    string,
+		    pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -3245,7 +4006,7 @@ int	jbeam;
 		fprintf(stderr,"dbg2       jbeam:       %d\n",jbeam);
 		}
 
-	/* plot the beam */
+	/* unplot the beam */
 	if (jbeam >= 0 && jbeam < beams_bath)
 		{
 		if (ping[iping].bath[jbeam] > 0.0)
@@ -3293,7 +4054,7 @@ int	iping;
 		fprintf(stderr,"dbg2       iping:       %d\n",iping);
 		}
 
-	/* plot the ping profile */
+	/* unplot the ping profile */
 	first = MB_YES;
 	for (j=0;j<beams_bath;j++)
 		{
@@ -3330,7 +4091,7 @@ int	iping;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_goto(ttime_i,hold_size,buffer_size,
-	plwd,exgr,xntrvl,yntrvl,plt_size,ndumped,
+	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,ndumped,
 	nloaded,nbuffer,ngood,icurrent,nplt)
 int	ttime_i[7];
 int	hold_size;
@@ -3340,6 +4101,7 @@ int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	sh_flggd;
 int	*ndumped;
 int	*nloaded;
 int	*nbuffer;
@@ -3374,6 +4136,7 @@ int	*nplt;
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		}
 
 	/* let the world know... */
@@ -3483,8 +4246,8 @@ int	*nplt;
 	/* set up plotting */
 	if (*ngood > 0)
 		{
-		status = mbedit_plot_all(plwd,exgr,
-			    xntrvl,yntrvl,plt_size,nplt, MB_NO);
+		status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
+				plt_size,sh_flggd,nplt, MB_NO);
 		}
 
 	/* let the world know... */
@@ -3586,6 +4349,119 @@ int	*buffer_size_max;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbedit_save_edit(time_d, beam, action)
+double	time_d;
+int	beam;
+int	action;
+{
+	/* local variables */
+	char	*function_name = "mbedit_save_edit";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       time_d:          %f\n",time_d);
+		fprintf(stderr,"dbg2       beam:            %d\n",beam);
+		fprintf(stderr,"dbg2       action:          %d\n",action);
+		}
+		
+	/* write out the edit */
+	if (sofile_open == MB_YES)
+	    {
+	    if (fwrite(&time_d, sizeof(double), 1, sofp) != 1)
+		{
+		status = MB_FAILURE;
+		error = MB_ERROR_WRITE_FAIL;
+		}
+	    if (status == MB_SUCCESS
+		&& fwrite(&beam, sizeof(int), 1, sofp) != 1)
+		{
+		status = MB_FAILURE;
+		error = MB_ERROR_WRITE_FAIL;
+		}
+	    if (status == MB_SUCCESS
+		&& fwrite(&action, sizeof(int), 1, sofp) != 1)
+		{
+		status = MB_FAILURE;
+		error = MB_ERROR_WRITE_FAIL;
+		}
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_retrieve_edit(time_d, beam, action)
+double	*time_d;
+int	*beam;
+int	*action;
+{
+	/* local variables */
+	char	*function_name = "mbedit_save_edit";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+		
+	/* write out the edit */
+	if (sifile_open == MB_YES)
+	    {
+	    if (fread(time_d, sizeof(double), 1, sifp) != 1)
+		{
+		status = MB_FAILURE;
+		error = MB_ERROR_EOF;
+		}
+	    if (status == MB_SUCCESS
+		&& fread(beam, sizeof(int), 1, sifp) != 1)
+		{
+		status = MB_FAILURE;
+		error = MB_ERROR_EOF;
+		}
+	    if (status == MB_SUCCESS
+		&& fread(action, sizeof(int), 1, sifp) != 1)
+		{
+		status = MB_FAILURE;
+		error = MB_ERROR_EOF;
+		}
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       time_d:          %f\n",*time_d);
+		fprintf(stderr,"dbg2       beam:            %d\n",*beam);
+		fprintf(stderr,"dbg2       action:          %d\n",*action);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 /* 	function sort sorts the data.  
  *	Uses the shell method from Numerical Recipes.
  */
@@ -3627,6 +4503,3 @@ double *r;
 }
 /*--------------------------------------------------------------------*/
 
-/*********************************************************************/
-/* END OF "mbedit_prog.c" FILE.                                      */
-/*********************************************************************/

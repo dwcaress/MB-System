@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12darw.h	1/20/93
- *	$Id: mbf_em12darw.h,v 4.0 1994-10-21 12:35:05 caress Exp $
+ *	$Id: mbf_em12darw.h,v 4.1 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,12 @@
  *		R. B. Owens (University of Oxford)
  * Date:	January 20, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:35:05  caress
+ * Release V4.0
+ *
+ * Revision 4.0  1994/10/21  12:35:05  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/10/21  12:20:01  caress
  * Initial revision
  *

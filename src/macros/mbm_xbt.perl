@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id: mbm_xbt.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
+#    $Id: mbm_xbt.perl,v 4.3 1997-04-21 16:54:41 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -56,10 +56,18 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   David Brock of ASA added the Sippican MK12 header parsing code and switch
 #
 # Version:
-# $Id: mbm_xbt.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
+# $Id: mbm_xbt.perl,v 4.3 1997-04-21 16:54:41 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1997/03/26  17:50:15  caress
+# Fixed handling of MK12 xbt file when the first temperature
+# value is less than zero.
+#
+# Revision 4.2  1995/05/12  17:43:23  caress
+# Made exit status values consistent with Unix convention.
+# 0: ok  nonzero: error
+#
 # Revision 4.1  1995/02/14  19:50:31  caress
 # Version 4.2
 #
@@ -459,7 +467,7 @@ sub MK12header {
    # is 48, and ASCII 9 is 57). The both these values are numbers,
    # then we have found the start of the header
    if ( ($depAscii > 47 && $depAscii < 58) && 
-        ($tempAscii > 47 && $tempAscii < 58) ) {
+        (($tempAscii > 47 && $tempAscii < 58) || $tempAscii == 45) ) {
       $foundData = "YES";
    }
 

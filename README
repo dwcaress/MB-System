@@ -1,42 +1,60 @@
-MB-SYSTEM VERSION 4.4 RELEASE NOTES:
+MB-SYSTEM VERSION 4.5 RELEASE NOTES:
 -----------------------------------
 
-This directory structure contains the version 4.4 release  
+This directory structure contains the version 4.5 release  
 of the MB-System software package for processing and display of 
-multibeam data. Version 4.4 includes significant enhancements
-and bug fixes relative to version 4.3. 
+swath sonar data. Version 4.5 includes significant enhancements
+and bug fixes relative to version 4.5. 
 
-The primary enhancements for version 4.4 are new i/o
-modules supporting swath data collected using the
-WHOI DSL AMS-120 deep-towed interferometric sonar and
-data collected using Simrad EM-121 and EM12S sonars.
+The primary enhancements for version 4.5 include a new
+program, called mbmosaic, for mosaicing of sidescan
+and amplitude data, improvements to the graphical tools
+mbedit, mbnavedit, and mbvelocitytool, and support for
+two new fully binary SeaBeam 2100 data formats.
 
-So many users have been clamoring for support of these
-data formats that we felt a new version and release
-was justified.
+MBmosaic allows users to prioritize sidescan data according to
+the associated grazing angle and according to look azimuth.
+Individual mosaic bin values can be either the value of the
+highest priority sample in the bin or the Gaussian weighted
+mean of the highest priority samples in the neighborhood of
+the bin (the samples used here are those with priorities
+within a specified range of the highest priority sample
+found). Users can thus construct mosaics which are
+dominantly from a particular part of the swath (e.g.
+prioritize the outer swath higher than the inner swath) or
+which are dominantly from a particular look azimuth (e.g.
+construct an east-looking mosaic by specifying a preferred
+look azimuth of 90 degrees).
 
-The programs mbgrid, mbswath, and mbcontour also have a
-new feature which should increase the efficiency of gridding
-and plotting of swath data. These programs now check for
-".inf" files associated with each of the input data files,
-where the ".inf" files are assumed to contain the mbinfo
-output for the associated data files. If a ".inf" file exists,
-it is checked for the longitude and latitude bounds of
-the data; if the data file does not contain data within
-the bounds of gridding or plotting interest, the file is
-skipped. This feature allows users to maintain single
-master datalists without causing gridding and plotting
-to spend inordinate amounts of time reading data files
-with no data in the area of interest. We recommend that
-users maintain ".inf" files parallel to all of the data
-files used for gridding or plotting.
+The improvements to the graphical tools are mostly
+style, but with some substance for mbedit and mbvelocitytool.
+In particular, see the mbedit man page for a description
+of the new edit save facility and the new facility
+for easily flagging errant soundings which are plotted
+outside the standard view (such soundings were easily
+missed when working with prior versions of mbedit).
+
+The new SeaBeam 2100 data formats speed up processing
+considerably over the original partly ASCII format.
+The second binary format stores bathymetry only,
+allowing users to substantially reduce file size
+when sidescan data are not required.
 
 Of course, a number of bug fixes are also incorporated
-in the new release.
+in the new release. In particular, problems with 
+mbfilter and with handling of DSL AMS-120 data 
+have been fixed.
+
+Users should note that the install_makefiles script
+(see below) has changed somewhat. Thus, when installing
+MB-System users should edit the install_makefiles that
+comes with version 4.5 rather than copy over an 
+install_makefiles script from a previous installation
+of MB-System.
 
 RELEASE DATE:
 ------------
-September 5, 1996
+May 1, 1997
 
 Authors:
 --------
@@ -44,15 +62,17 @@ David W. Caress* (caress@ldeo.columbia.edu)
                  (caress@seabeam.com)
 Dale N. Chayes (dale@ldeo.columbia.edu)
 Lamont-Doherty Earth Observatory of Columbia University
+Rte 9W
 Palisades, NY 10964
 
 *Also at: 
 SeaBeam Instruments
+141 Washington St.
 East Walpole, MA 02032
 
 Copyright:
 ----------
-Copyright 1993, 1994, 1995, 1996 
+MB-System Copyright 1993, 1994, 1995, 1996, 1997
 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
@@ -77,10 +97,10 @@ MB-System utilities (macros) are written in the Perl scripting
 language. The source code for these required software packages
 is available as follows:
 
-	MB-System v 4.4
+	MB-System v 4.5
 	- available from L-DEO via anonymous ftp to
 	  lamont.ldeo.columbia.edu
-	- compressed tar file MB-System4.0.tar.Z
+	- compressed tar file MB-System4.5.tar.Z
 	  in directory pub/swath_data
 
 	GMT v 3.0 or later
@@ -108,11 +128,11 @@ reflected in the source code archives available via
 anonymous ftp at lamont.ldeo.columbia.edu. When changes are
 made to the distributed source code, this is reflected in
 the names of the compressed tar files in the ftp archive.
-For example, the initial MB-System 4.4 distribution will be
-available in a file called MB-System4.4.tar.Z. After the
+For example, the initial MB-System 4.5 distribution will be
+available in a file called MB-System4.5.tar.Z. After the
 first incremental update, the filename will change to
-MB-System4.4a.tar.Z; subsequent incremental updates will
-be 4.4b, 4.4c, etc.  At all times, a link to the current
+MB-System4.5a.tar.Z; subsequent incremental updates will
+be 4.5b, 4.5c, etc.  At all times, a link to the current
 MB-System distribution file called MB-System.tar.Z will be
 maintained in the ftp archive; this allows the Lamont World
 Wide Web page to always access the current distribution.
@@ -122,8 +142,8 @@ Installing MB-System:
 The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
 
-		% uncompress MB-System4.4.tar.Z
-		% tar xvf MB-System4.4.tar
+		% uncompress MB-System4.5.tar.Z
+		% tar xvf MB-System4.5.tar
 
 This will create a directory structure called mbsystem. 
 In order to configure your installation, you must edit the
@@ -148,20 +168,16 @@ The important parameters to be set in install_makefiles are:
  				when installing on "little endian"
  				machines such as PCs or VAXs.
  	CC		C compiler to be used (optional).
- 	FC		Fortran compiler to be used (optional).
  	CFLAGS		Compile flags for C source files.
- 	FFLAGS		Compile flags for F77 source files.
  	LFLAGS		Load flags for all object files.
- 	FWITHCFLAGS	Load flags for C and F77 object files together.
 	GRAPHICAL	If set to "YES" will enable the installation
-			of the Motif based graphical utilities mbedit
-			and mbvelocitytool. If Motif is not available
-			but the nongraphical utilities are desired then
-			disable with "NO" (optional, default is "YES").
+			of the Motif based graphical utilities mbedit,
+			mbnavedit, and mbvelocitytool. If Motif is not
+			available but the nongraphical utilities are 
+			desired then disable with "NO" (optional, 
+			default is "YES").
         MOTIFINCDIR	Location of Motif include files.
         MOTIFLIBS	X and Motif libraries required for graphical tools.
-        UIL		Location of Motif tool used to compile
- 				interface definition files.
  	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
  	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
  				and pslib.h
@@ -233,32 +249,18 @@ that back into the package. Eventually, we expect that the code will
 be POSIX compliant and we will be able to stay in the mainstream of 
 the evolution of GUIs and WIMPS.
 
-Xview/Motif:
+Motif:
 --------------------------
-The graphical tools mbedit and mbvelocitytool now use the Motif
-widget set rather than the XVIEW widget set used prior to
-version 4.0.  Motif libraries are required to successfully link
-and install these programs. However, we will, for now, continue to 
-make available Xview based executables of mbedit and mbvelocitytool
-which have been statically linked (executables which do not
-require any particular run-time libraries) on Sun workstations
-running under SunOs 4.1.X. These executables are available 
-via anonymous ftp in the same manner as the standard 
-MB-System distribution. Users should be aware that development
-of the Xview versions has stopped, and thus that the Xview
-versions of mbedit and mbvelocitytool do not have the complete
-functionality of the Motif versions. Also, the new Motif based 
-program mbnavedit is not available in an Xview version. 
-
-We STRONGLY RECOMMEND that users purchase the libraries 
-necessary to compile and link Motif based programs. 
+The graphical tools mbedit, mbnavedit, and mbvelocitytool 
+now use the Motif widget set rather than the XVIEW widget 
+set used prior to version 4.0.  Motif libraries are required 
+to successfully link and install these programs. 
  
 Continued Support:
 -----------------
 We are pleased to have received five years of continued 
 NSF funding for the support and development of MB-System. 
-We are now midway through the second year of this NSF
-project.
+We are now early the third year of this NSF project.
 
 SeaBeam Instruments is also actively participating in
 MB-System development, with an obvious emphasis on
@@ -309,10 +311,16 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.11 1996-09-05 12:57:11 caress Exp $
+RCS ID: $Id: README,v 4.12 1997-04-21 16:51:19 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.12  1997/04/17  17:37:59  caress
+# MB-System 4.5 Beta Release.
+#
+# Revision 4.11  1996/09/05  12:57:11  caress
+# Actual V4.4 release.
+#
 # Revision 4.10  1996/08/26  15:38:28  caress
 # Release 4.4 revision.
 #

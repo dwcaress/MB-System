@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.13 1996-06-05 21:06:27 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.14 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,14 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.13  1996/06/05  21:06:27  caress
+ * Fixed problem handling gain of sidescan and amplitude data.
+ * Previously transmit attenuation was treated as a gain value
+ * (positive) rather than an attenuation value.
+ *
  * Revision 4.12  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -105,10 +113,11 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.13 1996-06-05 21:06:27 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.14 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_sb2100_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -126,6 +135,12 @@ int	*error;
 	/* allocate memory for data structure */
 	status = mb_malloc(verbose,sizeof(struct mbsys_sb2100_struct),
 				store_ptr,error);
+
+	/* get store structure pointer */
+	store = (struct mbsys_sb2100_struct *) *store_ptr;
+				
+	/* set comment pointer */
+	store->comment = (char *) &(store->roll_bias_port);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -217,9 +232,9 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
 	int	time_j[5];
-	double	scale,  pixel_size, pixel_scale;
 	double	gain_db;
 	double	gain_factor;
+	int	center_pixel;
 	int	i;
 
 	/* print input debug statements */
@@ -249,8 +264,8 @@ int	*error;
 		time_j[0] = store->year;
 		time_j[1] = store->jday;
 		time_j[2] = 60*store->hour + store->minute;
-		time_j[3] = 0.001*store->msec;
-		time_j[4] = 1000*(store->msec - 1000*time_j[3]);
+		time_j[3] = store->sec;
+		time_j[4] = 1000 * store->msec;
 		mb_get_itime(verbose,time_j,time_i);
 		mb_get_time(verbose,time_i,time_d);
 
@@ -280,61 +295,37 @@ int	*error;
 			}
 
 		/* get heading */
-		if (store->frequency[0] != 'H')
-			*heading = 0.001*store->heading_12khz;
-		else
-			*heading = 0.001*store->heading_36khz;
+		*heading = store->heading;
 
 		/* get speed */
-		*speed = 0.0018553167*store->speed;
+		*speed = 0.18553167*store->speed;
 
 		/* read beam and pixel values into storage arrays */
-		*nbath = mb_io_ptr->beams_bath;
-		*namp = mb_io_ptr->beams_amp;
-		*nss = mb_io_ptr->pixels_ss;
-		if (store->range_scale == 'S')
-			scale = 0.01;
-		else if (store->range_scale == 'I')
-			scale = 0.1;
-		else
-			scale = 1.0;
-		if (store->pixel_size_scale == 'S')
-			pixel_scale = 0.01;
-		else if (store->pixel_size_scale == 'I')
-			pixel_scale = 0.1;
-		else
-			pixel_scale = 1.0;
-		if (store->frequency[0] == 'L')
-			{
-			pixel_size = store->pixel_size_12khz;
-			gain_db = store->ping_gain_12khz 
-				- store->transmitter_attenuation_12khz
-				- 30.0;
-			}
-		else
-			{
-			pixel_size = store->pixel_size_36khz;
-			gain_db = store->ping_gain_36khz 
-				- store->transmitter_attenuation_36khz
-				- 30.0;
-			}
+		*nbath = store->nbeams;
+		*namp = store->nbeams;
+		*nss = store->npixels;
+		center_pixel = store->npixels / 2;
+		gain_db = store->ping_gain 
+			- store->transmitter_attenuation
+			+ 10.0 * log10( store->ping_pulse_width / 5.0)
+			- 30.0;
 		gain_factor = pow(10.0, (-gain_db / 20.0));
 		for (i=0;i<*nbath;i++)
 			{
-			bath[i] = scale*store->depth[i];
-			bathacrosstrack[i] = scale*store->acrosstrack_beam[i];
-			bathalongtrack[i] = scale*store->alongtrack_beam[i];
+			bath[i] = store->beams[i].depth;
+			bathacrosstrack[i] = store->beams[i].acrosstrack;
+			bathalongtrack[i] = store->beams[i].alongtrack;
 			}
 		for (i=0;i<*namp;i++)
 			{
-			amp[i] = 0.25 * store->amplitude_beam[i] - gain_db;
+			amp[i] = 0.25 * store->beams[i].amplitude - gain_db;
 			}
 		for (i=0;i<*nss;i++)
 			{
-			ss[i] = gain_factor * store->amplitude_ss[i];
-			ssacrosstrack[i] = pixel_scale*pixel_size
-				*(i - MBSYS_SB2100_CENTER_PIXEL);
-			ssalongtrack[i] = scale*store->alongtrack_ss[i];
+			ss[i] = gain_factor * store->pixels[i].amplitude;
+			ssacrosstrack[i] = store->pixel_size
+				* (i - center_pixel);
+			ssalongtrack[i] = store->pixels[i].alongtrack;
 			}
 
 		/* print debug statements */
@@ -505,10 +496,10 @@ int	*error;
 	struct mbsys_sb2100_struct *store;
 	int	kind;
 	int	time_j[5];
-	double	scale, pixel_size;
 	int	set_pixel_size;
 	double	gain_db;
 	double	gain_factor;
+	int	center_pixel;
 	int	i;
 
 	/* print input debug statements */
@@ -565,7 +556,13 @@ int	*error;
 		store->jday = time_j[1];
 		store->hour = time_j[2]/60;
 		store->minute = time_j[2] - 60*store->hour;
-		store->msec = 1000*time_j[3] + (int) (0.001*time_j[4]);
+		store->sec = time_j[3];
+		store->msec = (int) (0.001 * time_j[4]);
+
+		/* get number of beams and pixels */
+		store->nbeams = nbath;
+		store->npixels = nss;
+		center_pixel = store->npixels / 2;
 
 		/* get navigation */
 		if (navlon < 0.0) navlon = navlon + 360.0;
@@ -573,69 +570,39 @@ int	*error;
 		store->latitude = navlat;
 
 		/* get heading */
-		store->heading_12khz = 1000*heading;
-		if (store->frequency[0] != 'H')
-			store->heading_12khz = 1000*heading;
-		else
-			store->heading_36khz = 1000*heading;
+		store->heading = heading;
 
 		/* get speed */
-		store->speed = 538.99155*speed;
+		store->speed = 5.3899155 * speed;
 
 		/* put beam and pixel values 
 			into data structure */
-		if (store->range_scale == 'S')
-			scale = 100.0;
-		else if (store->range_scale == 'I')
-			scale = 10.0;
-		else
-			{
-			scale = 1.0;
-			store->range_scale = 'D';
-			}
-		if (store->frequency[0] == 'L')
-			gain_db = store->ping_gain_12khz 
-				- store->transmitter_attenuation_12khz
-				- 30.0;
-		else
-			gain_db = store->ping_gain_36khz 
-				- store->transmitter_attenuation_36khz
-				- 30.0;
+		gain_db = store->ping_gain 
+			- store->transmitter_attenuation
+			+ 10.0 * log10( store->ping_pulse_width / 5.0)
+			- 30.0;
 		gain_factor = pow(10.0, (gain_db / 20.0));
 		for (i=0;i<nbath;i++)
 			{
-			store->depth[i] = scale*bath[i];
-			store->acrosstrack_beam[i] = scale*bathacrosstrack[i];
-			store->alongtrack_beam[i] = scale*bathalongtrack[i];
+			store->beams[i].depth = bath[i];
+			store->beams[i].acrosstrack = bathacrosstrack[i];
+			store->beams[i].alongtrack = bathalongtrack[i];
 			}
 		for (i=0;i<namp;i++)
-			store->amplitude_beam[i] = 4.0 * (amp[i] + gain_db);
-		if ((store->frequency[0] == 'H' 
-			    && store->pixel_size_36khz <= 0.0)
-			|| (store->frequency[0] != 'H' 
-			    && store->pixel_size_12khz <= 0.0))
+			store->beams[i].amplitude = 4.0 * (amp[i] + gain_db);
+		if (store->pixel_size <= 0.0)
 			set_pixel_size = MB_YES;
 		else
 			set_pixel_size = MB_NO;
 		for (i=0;i<nss;i++)
 			{
-			store->amplitude_ss[i] = gain_factor * ss[i];
-			store->alongtrack_ss[i] = scale*ssalongtrack[i];
+			store->pixels[i].amplitude = gain_factor * ss[i];
+			store->pixels[i].alongtrack = ssalongtrack[i];
 			if (set_pixel_size == MB_YES
 				&& ssacrosstrack[i] > 0)
 				{
-				pixel_size = ssacrosstrack[i]/
-					(i - MBSYS_SB2100_CENTER_PIXEL);
-				if (store->pixel_size_scale == 'S')
-					pixel_size = 100*pixel_size;
-				else if (store->pixel_size_scale == 'I')
-					pixel_size = 10*pixel_size;
-				else 
-					store->pixel_size_scale = 'D';
-				if (store->frequency[0] == 'H')
-					store->pixel_size_36khz = pixel_size;
-				else
-					store->pixel_size_12khz = pixel_size;
+				store->pixel_size = ssacrosstrack[i]/
+					(i - center_pixel);
 				set_pixel_size = MB_NO;
 				}
 			}
@@ -714,14 +681,14 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get nbeams */
-		*nbeams = mb_io_ptr->beams_bath;
+		*nbeams = store->nbeams;
 
 		/* get travel times, angles, and flags */
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
+		for (i=0;i<*nbeams;i++)
 			{
-			ttimes[i] = 0.001*store->travel_time[i];
-			angles[i] = 0.001*store->angle_across[i];
-			angles_forward[i] = 0.01*store->angle_forward[i];
+			ttimes[i] = store->beams[i].range;
+			angles[i] = store->beams[i].angle_across;
+			angles_forward[i] = store->beams[i].angle_forward;
 			if (angles[i] < 0.0)
 				{
 				angles[i] = -angles[i];
@@ -729,15 +696,15 @@ int	*error;
 					+ 180.0;
 				}
 			angles_null[i] = 0.0;
-			if (store->quality[i] != ' ')
+			if (store->beams[i].quality != ' ')
 				flags[i] = MB_YES;
 			else
 				flags[i] = MB_NO;
 			}
 
 		/* get depth offset (heave + heave offset) */
-		*depthadd = 0.001*store->heave + 100.0*store->ship_draft;
-		*ssv = 0.01*store->surface_sound_velocity;
+		*depthadd = store->heave + store->ship_draft;
+		*ssv = store->ssv;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -815,7 +782,6 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
 	int	time_j[5];
-	double	scale,  pixel_size, pixel_scale;
 	int	i;
 
 	/* print input debug statements */
@@ -845,8 +811,8 @@ int	*error;
 		time_j[0] = store->year;
 		time_j[1] = store->jday;
 		time_j[2] = 60*store->hour + store->minute;
-		time_j[3] = 0.001*store->msec;
-		time_j[4] = 1000*(store->msec - 1000*time_j[3]);
+		time_j[3] = store->sec;
+		time_j[4] = 1000 * store->msec;
 		mb_get_itime(verbose,time_j,time_i);
 		mb_get_time(verbose,time_i,time_d);
 
@@ -876,26 +842,15 @@ int	*error;
 			}
 
 		/* get heading */
-		if (store->frequency[0] != 'H')
-			*heading = 0.001*store->heading_12khz;
-		else
-			*heading = 0.001*store->heading_36khz;
+		*heading = store->heading;
 
 		/* get speed */
-		*speed = 0.0018553167*store->speed;
+		*speed = 0.18553167*store->speed;
 
 		/* get roll pitch and heave */
-		if (store->frequency[0] != 'H')
-			{
-			*roll = 0.001*store->roll_12khz;
-			*pitch = 0.001*store->pitch_12khz;
-			}
-		else
-			{
-			*roll = 0.001*store->roll_36khz;
-			*pitch = 0.001*store->pitch_36khz;
-			}
-		*heave = 0.001*store->heave;
+		*roll = store->roll;
+		*pitch = store->pitch;
+		*heave = store->heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1065,7 +1020,8 @@ int	*error;
 		store->jday = time_j[1];
 		store->hour = time_j[2]/60;
 		store->minute = time_j[2] - 60*store->hour;
-		store->msec = 1000*time_j[3] + (int) (0.001*time_j[4]);
+		store->sec = time_j[3];
+		store->msec = (int) (0.001 * time_j[4]);
 
 		/* get navigation */
 		if (navlon < 0.0) navlon = navlon + 360.0;
@@ -1073,27 +1029,15 @@ int	*error;
 		store->latitude = navlat;
 
 		/* get heading */
-		store->heading_12khz = 1000*heading;
-		if (store->frequency[0] != 'H')
-			store->heading_12khz = 1000*heading;
-		else
-			store->heading_36khz = 1000*heading;
+		store->heading = heading;
 
 		/* get speed */
-		store->speed = 538.99155*speed;
+		store->speed = 5.3899155*speed;
 
 		/* get roll pitch and heave */
-		if (store->frequency[0] != 'H')
-			{
-			store->roll_12khz = roll*1000.0;
-			store->pitch_12khz = pitch*1000.0;
-			}
-		else
-			{
-			store->roll_36khz = roll*1000.0;
-			store->pitch_36khz = pitch*1000.0;
-			}
-		store->heave = heave*1000.0;
+		store->roll = roll;
+		store->pitch = pitch;
+		store->heave = heave;
 		}
 
 	/* print output debug statements */
@@ -1145,6 +1089,9 @@ int	*error;
 
 	/* copy the data */
 	*copy = *store;
+	
+	/* reset the comment pointer */
+	copy->comment = (char *) &(copy->roll_bias_port);
 
 	/* print output debug statements */
 	if (verbose >= 2)

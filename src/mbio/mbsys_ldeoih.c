@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 4.10 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 4.11 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,12 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
+ * Revision 4.10  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.9  1995/11/27  21:51:35  caress
  * New version of mb_ttimes with ssv and angles_null.
  *
@@ -106,7 +112,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_ldeoih.c,v 4.10 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_ldeoih.c,v 4.11 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbsys_ldeoih_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
