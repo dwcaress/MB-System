@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.9 1995-07-14 14:09:01 caress Exp $
+#    $Id: install_makefiles,v 4.10 1995-08-07 17:25:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.9 1995-07-14 14:09:01 caress Exp $
+#   $Id: install_makefiles,v 4.10 1995-08-07 17:25:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.9  1995/07/14  14:09:01  caress
+# Check during serious bug fix flail.
+#
 # Revision 4.8  1995/06/06  14:18:26  caress
 # Updated example for installing under Solaris 2.4
 #
@@ -106,7 +109,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
 #	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
 #				and pslib.h
-#	NETCDFDIR	Location of NetCDF library libnetcdf.a
+#	NETCDFLIBDIR	Location of NetCDF library libnetcdf.a
+#	NETCDFINCDIR	Location of NetCDF include file netcdf.h
 #	LEVITUS		Path for Levitus data file annual.
 #	REALTIME	If set to 1, enables installation of realtime
 #			pen plotting programs (0 disables installation).
@@ -129,7 +133,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/ocean/mgg/gmt2/sun4/lib";
 #	$GMTINCDIR = "/ocean/mgg/gmt2/src";
-#	$NETCDFDIR = "/ocean/mgg/netcdf/sun4/lib";
+#	$NETCDFLIBDIR = "/ocean/mgg/netcdf/sun4/lib";
+#	$NETCDFINCDIR = "/ocean/mgg/netcdf/include";
 #	$LEVITUS = "/ocean/mgg/levitus/annual";
 #	$REALTIME = 1;
 #	$GRPHLIBDIR = "/otter/home/graphics/lib";
@@ -149,7 +154,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/net/heezen/packages/gmt2/bin";
 #	$GMTINCDIR = "/net/heezen/packages/gmt2/src";
-#	$NETCDFDIR = "/net/heezen/packages/netcdf/lib";
+#	$NETCDFLIBDIR = "/net/heezen/packages/netcdf/lib";
+#	$NETCDFINCDIR = "/net/heezen/packages/netcdf/include";
 #	$LEVITUS = "/net/heezen/packages/levitus/annual";
 #	$REALTIME = 1;
 #	$GRPHLIBDIR = "/otter/home/graphics/lib";
@@ -169,7 +175,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$UIL = "/usr/dt/bin/uil";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
-#	$NETCDFDIR = "/usr/local/netcdf/lib";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
 #	$REALTIME = 0;
 #	$GRPHLIBDIR = "";
@@ -189,7 +196,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
-#	$NETCDFDIR = "/usr/local/netcdf/lib";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
 #	$REALTIME = 1;
 #	$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
@@ -211,7 +219,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
-#	$NETCDFDIR = "/usr/local/netcdf/lib";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
 #	$REALTIME = 1;
 #	$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
@@ -232,7 +241,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
-#	$NETCDFDIR = "/usr/local/gmt/lib";
+#	$NETCDFLIBDIR = "/usr/local/gmt/lib";
+#	$NETCDFINCDIR = "/usr/local/gmt/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
 #	$REALTIME = 0;
 #	$GRPHLIBDIR = "";
@@ -251,9 +261,10 @@ $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
 $UIL = "/usr/bin/X11/uil";
-$GMTLIBDIR = "/usr/local/gmt/src";
-$GMTINCDIR = "/usr/local/gmt/src";
-$NETCDFDIR = "/usr/local/netcdf/lib";
+$GMTLIBDIR = "/SB3/local/gmt_3.0/src";
+$GMTINCDIR = "/SB3/local/gmt_3.0/src";
+$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+$NETCDFINCDIR = "/usr/local/netcdf/include";
 $LEVITUS = "/usr/local/levitus/annual";
 $REALTIME = 1;
 $GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
@@ -337,7 +348,8 @@ print "Motif Libraries:           $MOTIFLIBS\n";
 print "UIL compiler:              $UIL\n";
 print "GMT Library Location:      $GMTLIBDIR\n";
 print "GMT Include Location:      $GMTINCDIR\n";
-print "NetCDF Library Location:   $NETCDFDIR\n";
+print "NetCDF Library Location:   $NETCDFLIBDIR\n";
+print "NetCDF Include Location:   $NETCDFINCDIR\n";
 print "Levitus Data Location:     $LEVITUS\n";
 print "Realtime Enable Flag:      $REALTIME\n";
 print "Graphics Library Location: $GRPHLIBDIR\n";
@@ -438,9 +450,13 @@ while (@files)
 			{
 			print MAK "GMTINCDIR = $GMTINCDIR\n";
 			}
-		elsif (index($_,"NETCDFDIR",0) == 0)
+		elsif (index($_,"NETCDFLIBDIR",0) == 0)
 			{
-			print MAK "NETCDFDIR = $NETCDFDIR\n";
+			print MAK "NETCDFLIBDIR = $NETCDFLIBDIR\n";
+			}
+		elsif (index($_,"NETCDFINCDIR",0) == 0)
+			{
+			print MAK "NETCDFINCDIR = $NETCDFINCDIR\n";
 			}
 		elsif (index($_,"GRPHLIBDIR",0) == 0)
 			{
