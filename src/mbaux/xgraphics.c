@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 4.0 1994-10-21 11:55:41 caress Exp $
+ *    $Id: xgraphics.c,v 4.1 1994-12-28 14:46:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  11:55:41  caress
+ * Release V4.0
+ *
  *
  */
 /*--------------------------------------------------------------------*/
@@ -62,7 +65,7 @@ Window	can_xid;
 int	*can_bounds;
 char	*fontname;
 {
-static char rcs_id[]="$Id: xgraphics.c,v 4.0 1994-10-21 11:55:41 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 4.1 1994-12-28 14:46:05 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;
@@ -104,15 +107,27 @@ static char rcs_id[]="$Id: xgraphics.c,v 4.0 1994-10-21 11:55:41 caress Exp $";
 		graphic->display_type = PseudoColor;
 		graphic->visual = graphic->visinfo.visual;  
 		}
+	else if (graphic->display_depth == 24)
+		{
+		if (XMatchVisualInfo(graphic->dpy, DefaultScreen(graphic->dpy),
+			24,TrueColor,&(graphic->visinfo)) == 0)
+			{
+			fprintf(stderr,"Error: Could not Match a 24 bit TrueColor plane\n");
+			exit(-1);
+			}
+		graphic->display_type = TrueColor;
+		graphic->visual = graphic->visinfo.visual;  
+		}
 	else
 		{
-		fprintf(stderr, "Error: Could not Match an eight bit or one bit plane\n");
+		fprintf(stderr, "Error: Could not Match a one, eight, or twentyfour bit plane\n");
 		exit(-1);
 		}
 
 	/* set foreground and background colors */
 	if (graphic->display_type == StaticGray 
-		|| graphic->display_type == PseudoColor)
+		|| graphic->display_type == PseudoColor
+	        || graphic->display_type == TrueColor)
 		{
 		graphic->bg_pixel = WhitePixel(graphic->dpy, 
 			DefaultScreen(graphic->dpy));
@@ -121,7 +136,7 @@ static char rcs_id[]="$Id: xgraphics.c,v 4.0 1994-10-21 11:55:41 caress Exp $";
 		}
 	else
 		{
-		fprintf(stderr, "Error: Could not Match an eight bit or one bit plane\n");
+		fprintf(stderr, "Error: Could not Match a one, eight, or twentyfour bit plane\n");
 		exit(-1);
 		}
 
