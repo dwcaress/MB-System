@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_rt.c	11/14/94
- *    $Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $
+ *    $Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	November 14, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/09/12  18:51:10  caress
+ * Moved mb_rt.c to own directory.
+ *
  *
  */
 
@@ -44,6 +47,9 @@
 #define	MB_RT_OUT_BOTTOM 5
 #define	MB_RT_OUT_TOP 6
 #define	MB_RT_NUMBER_SEGMENTS 5
+#define	MB_SSV_NO_USE	    0
+#define	MB_SSV_CORRECT	    1
+#define	MB_SSV_INCORRECT    2
 
 /* velocity model structure */
 struct	velocity_model
@@ -95,7 +101,7 @@ double	*velocity;
 char	**modelptr;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -187,7 +193,7 @@ int	verbose;
 char	**modelptr;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -226,7 +232,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------------*/
 mb_rt(verbose, modelptr, source_depth, source_angle, end_time, 
-	surface_vel, null_angle, 
+	ssv_mode, surface_vel, null_angle, 
 	nplot_max, nplot, xplot, zplot, 
 	x, z, travel_time, ray_stat, error)
 int	verbose;
@@ -234,6 +240,7 @@ char	*modelptr;
 double	source_depth;
 double	source_angle;
 double	end_time;
+int	ssv_mode;
 double	surface_vel;
 double	null_angle;
 int	nplot_max;
@@ -246,7 +253,7 @@ double	*travel_time;
 int	*ray_stat;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	double	diff_angle;
@@ -286,6 +293,7 @@ int	*error;
 		fprintf(stderr,"dbg2       source_depth:     %f\n",source_depth);
 		fprintf(stderr,"dbg2       source_angle:     %f\n",source_angle);
 		fprintf(stderr,"dbg2       end_time:         %f\n",end_time);
+		fprintf(stderr,"dbg2       ssv_mode:         %d\n",ssv_mode);
 		fprintf(stderr,"dbg2       surface_vel:      %f\n",surface_vel);
 		fprintf(stderr,"dbg2       null_angle:       %f\n",null_angle);
 		fprintf(stderr,"dbg2       nplot_max:        %d\n",nplot_max);
@@ -315,9 +323,29 @@ int	*error;
 	vv_source = model->layer_vel_top[layer] 
 		+ model->layer_gradient[layer]*(source_depth - model->layer_depth_top[layer]);
 
-	/* reset takeoff angle using Snell's law and
-		surface velocity if available */
-	if (surface_vel > 0.0)
+	/* reset takeoff angle because of surface sound velocity change:
+	    ssv_mode == MB_SSV_NO_USE:
+	      Do nothing to angles before raytracing.
+	    ssv_mode == MB_SSV_CORRECT:
+	      Adjust the angle assuming the original SSV was correct. 
+	      This means use a horizontal layer assumption and Snell's
+	      law to adjust angle as ray goes from original SSV
+	      to the velocity in the SVP at the initial depth. The
+	      null angle is ignored.
+	    ssv_mode == MB_SSV_INCORRECT:
+	      Adjust the angle assuming the original SSV was incorrect. 
+	      This means use Snell's law law to adjust angle in a
+	      rotated frame of reference (rotated by null angle) as 
+	      ray goes from original SSV to the velocity in the 
+	      SVP at the initial depth. This insures that the geometry 
+	      of the receiving transducer array is properly handled.
+	 */
+	if (ssv_mode == MB_SSV_CORRECT && surface_vel > 0.0)
+		{
+		pp = sin(DTR*source_angle)/surface_vel;
+		source_angle = asin(pp * vv_source) * RTD;
+		}
+	else if (ssv_mode == MB_SSV_INCORRECT && surface_vel > 0.0)
 		{
 		diff_angle = source_angle - null_angle;
 		pp = sin(DTR*diff_angle)/surface_vel;
@@ -457,7 +485,7 @@ mb_rt_circular(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_circular";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -503,7 +531,7 @@ mb_rt_quad1(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_quad1";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -632,7 +660,7 @@ mb_rt_quad2(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_quad2";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -705,7 +733,7 @@ mb_rt_quad3(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_quad3";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -778,7 +806,7 @@ mb_rt_quad4(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_quad4";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -911,7 +939,7 @@ int	turn_sign;
 double	*depth;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_get_depth";
 	int	status = MB_SUCCESS;
 	double	alpha;
@@ -958,7 +986,7 @@ mb_rt_plot_circular(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_plot_circular";
 	int	status = MB_SUCCESS;
 	double	ai;
@@ -1011,7 +1039,7 @@ mb_rt_line(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_line";
 	int	status = MB_SUCCESS;
 	double	theta;
@@ -1093,7 +1121,7 @@ mb_rt_vertical(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.6 1997-09-12 18:51:10 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.7 1998-10-05 19:18:30 caress Exp $";
 	char	*function_name = "mb_rt_vertical";
 	int	status = MB_SUCCESS;
 	double	vi;

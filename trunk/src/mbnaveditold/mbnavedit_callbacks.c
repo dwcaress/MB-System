@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.6 1997-09-15 19:10:20 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.7 1998-10-05 19:17:39 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/09/15  19:10:20  caress
+ * Real Version 4.5
+ *
  * Revision 4.5  1997/04/22  19:25:57  caress
  * Fixed startup mode.
  *
@@ -129,7 +132,7 @@ int key_d_down = 0;
 /* Set the colors used for this program here. */
 #define NCOLORS 6
 XColor colors[NCOLORS];
-unsigned long mpixel_values[NCOLORS];
+unsigned int mpixel_values[NCOLORS];
 XColor db_color;
 
 /* Set these to the dimensions of your canvas drawing */

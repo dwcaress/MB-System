@@ -83,6 +83,18 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
+.B \-L
+\fIlonflip\fP
+.br
+Sets the range of the longitude values returned.
+If \fIlonflip\fP=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If \fIlonflip\fP=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If \fIlonflip\fP=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: \fIlonflip\fP = 0.
+.TP
 .B \-O
 \fIoutfile\fP
 .br

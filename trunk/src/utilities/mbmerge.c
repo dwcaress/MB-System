@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.18 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbmerge.c,v 4.19 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.17  1997/07/25  14:28:10  caress
  * Version 4.5beta2
  *
@@ -103,6 +106,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -120,7 +124,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.18 1997-09-15 19:11:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.19 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -174,6 +178,7 @@ char **argv;
 	int	nbath;
 	int	namp;
 	int	nss;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -188,7 +193,7 @@ char **argv;
 	char	comment[256];
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	/* navigation handling variables */
@@ -331,7 +336,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -758,6 +763,7 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -789,9 +795,8 @@ char **argv;
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -836,7 +841,7 @@ char **argv;
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -987,7 +992,7 @@ char **argv;
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					beams_bath,beams_amp,pixels_ss,
-					bath,amp,bathacrosstrack,bathalongtrack,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 				status = mb_put_all(verbose,ombio_ptr,
@@ -995,7 +1000,7 @@ char **argv;
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					beams_bath,beams_amp,pixels_ss,
-					bath,amp,bathacrosstrack,bathalongtrack,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 				}
@@ -1006,7 +1011,7 @@ char **argv;
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					beams_bath,beams_amp,pixels_ss,
-					bath,amp,bathacrosstrack,bathalongtrack,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 				}
@@ -1019,7 +1024,7 @@ char **argv;
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					beams_bath,beams_amp,pixels_ss,
-					bath,amp,bathacrosstrack,bathalongtrack,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			if (status == MB_SUCCESS)
@@ -1056,6 +1061,7 @@ char **argv;
 	mb_free(verbose,&nlat,&error);
 	mb_free(verbose,&nlonspl,&error);
 	mb_free(verbose,&nlatspl,&error);
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&amp,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 

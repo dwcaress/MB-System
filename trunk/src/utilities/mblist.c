@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.22 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mblist.c,v 4.23 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,7 +11,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBLIST prints the specified contents of a multibeam data  
+ * MBLIST prints the specified contents of a swath sonar data  
  * file to stdout. The form of the output is quite flexible; 
  * MBLIST is tailored to produce ascii files in spreadsheet  
  * style with data columns separated by tabs.
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.21  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -170,9 +173,9 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.22 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.23 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBLIST";
-	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
+	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V -W]";
 	extern char *optarg;
 	extern int optkind;
@@ -240,6 +243,7 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -416,7 +420,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -517,7 +521,7 @@ char **argv;
 	while (read_data == MB_YES)
 	{
 
-	/* initialize reading the multibeam file */
+	/* initialize reading the swath file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -564,6 +568,7 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&bathacrosstrack,&error);
@@ -597,7 +602,7 @@ char **argv;
 		status = mb_get(verbose,mbio_ptr,&kind,&pings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
 			&beams_bath,&beams_amp,&pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 
@@ -761,9 +766,9 @@ char **argv;
 		  {
 		  /* check beam status */
 		  beam_status = MB_SUCCESS;
-		  if (check_bath == MB_YES && bath[j] <= 0)
+		  if (check_bath == MB_YES && !mb_beam_ok(beamflag[j]))
 			beam_status = MB_FAILURE;
-		  if (check_amp == MB_YES && amp[j] <= 0)
+		  if (check_amp == MB_YES && !mb_beam_ok(beamflag[j]))
 			beam_status = MB_FAILURE;
 		  if (check_ss == MB_YES && j != beams_bath/2)
 			beam_status = MB_FAILURE;
@@ -788,7 +793,7 @@ char **argv;
 					sxx = 0.0;
 					sxy = 0.0;
 					for (k=0;k<beams_bath;k++)
-					  if (bath[k] > 0.0)
+					  if (mb_beam_ok(beamflag[k]))
 					    {
 					    sx += bathacrosstrack[k];
 					    sy += bath[k];
@@ -905,29 +910,19 @@ char **argv;
 						printf("%7.3f",time_interval);
 					break;
 				case 'X': /* longitude decimal degrees */
-					if (j == beams_bath/2)
-						printf("%11.6f",navlon);
-					else
-						{
-						dlon = navlon 
-						+ headingy*mtodeglon
-							*bathacrosstrack[j]
-						+ headingx*mtodeglon
-							*bathalongtrack[j];
-						printf("%11.6f",dlon);
-						}
+					dlon = navlon 
+					+ headingy*mtodeglon
+						*bathacrosstrack[j]
+					+ headingx*mtodeglon
+						*bathalongtrack[j];
+					printf("%11.6f",dlon);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
-					if (j == beams_bath/2)
-						dlon = navlon;
-					else
-						{
-						dlon = navlon 
-						+ headingy*mtodeglon
-							*bathacrosstrack[j]
-						+ headingx*mtodeglon
-							*bathalongtrack[j];
-						}
+					dlon = navlon 
+					+ headingy*mtodeglon
+						*bathacrosstrack[j]
+					+ headingx*mtodeglon
+						*bathalongtrack[j];
 					if (dlon < 0.0)
 						{
 						hemi = 'W';
@@ -941,29 +936,19 @@ char **argv;
 						degrees, minutes, hemi);
 					break;
 				case 'Y': /* latitude decimal degrees */
-					if (j == beams_bath/2)
-						printf("%11.6f",navlat);	
-					else
-						{
-						dlat = navlat 
-						- headingx*mtodeglat
-							*bathacrosstrack[j]
-						+ headingy*mtodeglat
-							*bathalongtrack[j];
-						printf("%11.6f",dlat);
-						}
+					dlat = navlat 
+					- headingx*mtodeglat
+						*bathacrosstrack[j]
+					+ headingy*mtodeglat
+						*bathalongtrack[j];
+					printf("%11.6f",dlat);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
-					if (j == beams_bath/2)
-						dlat = navlat;	
-					else
-						{
-						dlat = navlat 
-						- headingx*mtodeglat
-							*bathacrosstrack[j]
-						+ headingy*mtodeglat
-							*bathalongtrack[j];
-						}
+					dlat = navlat 
+					- headingx*mtodeglat
+						*bathacrosstrack[j]
+					+ headingy*mtodeglat
+						*bathalongtrack[j];
 					if (dlat < 0.0)
 						{
 						hemi = 'S';
@@ -1005,12 +990,12 @@ char **argv;
 		  if (check_bath == MB_YES && j != pixels_ss/2)
 			pixel_status = MB_FAILURE;
 		  else if (check_bath == MB_YES && j == pixels_ss/2)
-			if (bath[beams_bath/2] <= 0)
+			if (!mb_beam_ok(beamflag[beams_bath/2]))
 				pixel_status = MB_FAILURE;
 		  if (check_amp == MB_YES && j != pixels_ss/2)
 			pixel_status = MB_FAILURE;
 		  else if (check_amp == MB_YES && j == pixels_ss/2)
-			if (amp[beams_bath/2] <= 0)
+			if (!mb_beam_ok(beamflag[beams_bath/2]))
 				pixel_status = MB_FAILURE;
 		  if (check_ss == MB_YES && ss[j] <= 0)
 			pixel_status = MB_FAILURE;
@@ -1032,7 +1017,7 @@ char **argv;
 					sxx = 0.0;
 					sxy = 0.0;
 					for (k=0;k<beams_bath;k++)
-					  if (bath[k] > 0.0)
+					  if (mb_beam_ok(beamflag[k]))
 					    {
 					    sx += bathacrosstrack[k];
 					    sy += bath[k];
@@ -1144,29 +1129,19 @@ char **argv;
 						printf("%7.3f",time_interval);
 					break;
 				case 'X': /* longitude decimal degrees */
-					if (j == pixels_ss/2)
-						printf("%11.6f",navlon);
-					else
-						{
-						dlon = navlon 
-						+ headingy*mtodeglon
-							*ssacrosstrack[j]
-						+ headingx*mtodeglon
-							*ssalongtrack[j];
-						printf("%11.6f",dlon);
-						}
+					dlon = navlon 
+					+ headingy*mtodeglon
+						*ssacrosstrack[j]
+					+ headingx*mtodeglon
+						*ssalongtrack[j];
+					printf("%11.6f",dlon);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
-					if (j == pixels_ss/2)
-						dlon = navlon;
-					else
-						{
-						dlon = navlon 
-						+ headingy*mtodeglon
-							*ssacrosstrack[j]
-						+ headingx*mtodeglon
-							*ssalongtrack[j];
-						}
+					dlon = navlon 
+					+ headingy*mtodeglon
+						*ssacrosstrack[j]
+					+ headingx*mtodeglon
+						*ssalongtrack[j];
 					if (dlon < 0.0)
 						{
 						hemi = 'W';
@@ -1180,29 +1155,19 @@ char **argv;
 						degrees, minutes, hemi);
 					break;
 				case 'Y': /* latitude decimal degrees */
-					if (j == pixels_ss/2)
-						printf("%11.6f",navlat);	
-					else
-						{
-						dlat = navlat 
-						- headingx*mtodeglat
-							*ssacrosstrack[j]
-						+ headingy*mtodeglat
-							*ssalongtrack[j];
-						printf("%11.6f",dlat);
-						}
+					dlat = navlat 
+					- headingx*mtodeglat
+						*ssacrosstrack[j]
+					+ headingy*mtodeglat
+						*ssalongtrack[j];
+					printf("%11.6f",dlat);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
-					if (j == pixels_ss/2)
-						dlat = navlat;	
-					else
-						{
-						dlat = navlat 
-						- headingx*mtodeglat
-							*ssacrosstrack[j]
-						+ headingy*mtodeglat
-							*ssalongtrack[j];
-						}
+					dlat = navlat 
+					- headingx*mtodeglat
+						*ssacrosstrack[j]
+					+ headingy*mtodeglat
+						*ssalongtrack[j];
 					if (dlat < 0.0)
 						{
 						hemi = 'S';
@@ -1243,10 +1208,11 @@ char **argv;
 
 		}
 
-	/* close the multibeam file */
+	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory used for data arrays */
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 
 	mb_free(verbose,&bathalongtrack,&error); 

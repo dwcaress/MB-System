@@ -1,4 +1,4 @@
-.TH mbclean l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbclean l "16 September 1998" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbclean\fP - Identifies and flags bad beams in swath sonar bathymetry data.
 
@@ -18,14 +18,33 @@ Several algorithms are available for identifying artifacts; multiple
 algorithms can be applied in a single pass.
 The most commonly used approach is to identify artifacts  
 based on excessive bathymetric slopes. 
-If desired, \fBmbclean\fP will also flag beams associated with "rails" where
-outer beams have smaller crosstrack distances than more inner beams.
+If desired, \fBmbclean\fP will also flag beams 
+associated with "rails" where
+outer beams have smaller acrosstrack distances 
+than more inner beams (\fB-Q\fP option).
 Low and high bounds on acceptable depth values can be set; depth values
 outside the acceptable range will be flagged. The acceptable depth
 ranges can either be absolute (\fB-B\fP option), relative to
 the local median depth (\fB-A\fP option) or defined by low
 and high fractions of the local median depth (\fB-G\fP option).
 A set number of outer beams can also be flagged.
+
+The order in which the flagging algorithms are applied is
+as follows:
+.br
+ 	1. Flag specified number of outer beams (\fB-X\fP option).
+ 	2. Flag soundings outside specified acceptable 
+ 		depth range (\fB-B\fP option).
+ 	3. Flag soundings outside acceptable depth range using
+ 		fractions of local median depth (\fB-G\fP option).
+ 	4. Flag soundings outside acceptable depth range using
+ 		deviation from local median depth (\fB-A\fP option).
+ 	5. Flag soundings associated with excessive slopes 
+ 		(\fB-C\fP option or default).
+ 	6. Zap "rails" (\fB-Q\fP option).
+ 	7. Flag all soundings in pings with too few 
+ 		good soundings (\fB-U\fP option).
+
 The default input and output streams 
 are stdin and stdout.
 
@@ -230,7 +249,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.11 1997-09-17 19:22:06 caress Exp $
+ 	Version $Id: mbclean.l,v 4.12 1998-10-05 19:19:24 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

@@ -167,6 +167,9 @@ tasks easily.  These are the current MB-system macros:
  		and outputs a sound velocity profile 
  		file which can be used to process 
  		swath sonar data.
+ \fBmbm_xyplot\fP:  Reads one or more ASCII "X-Y" 
+ 		data files and writes a shellscript 
+ 		which will generate an XY plot of the data.
 
 .SH PROCESSING SEABEAM 2100 DATA
 

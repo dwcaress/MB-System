@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.10 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbps.c,v 4.11 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -12,7 +12,7 @@
  *--------------------------------------------------------------------*/
 /*
  * MBPS is a program that plots an almost correct perspective view
- * of a piece of multibeam data. Input is some multibeam data
+ * of a piece of swath data. Input is some swath data
  * file; output is PostScript code.
  *
  * Authors:	Russ Alexander, UCSB
@@ -21,6 +21,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.9  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -104,6 +107,7 @@
 
 struct ping
 	{
+	char	*beamflag;
 	double	*bath;
 	double	*bathacrosstrack;
 	double	*bathalongtrack;
@@ -118,9 +122,9 @@ int argc;
 char **argv; 
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 4.10 1997-09-15 19:11:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.11 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBPS";
-	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
+	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
 	extern char *optarg;
 	extern int optkind;
@@ -187,6 +191,7 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
+	char	*beamflag;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -384,7 +389,7 @@ char **argv;
 	}
 
 	/* print starting message */
-	if (verbose == 1) {
+	if (verbose == 1 || help) {
 		fprintf(output,"\nProgram %s\n",program_name);
 		fprintf(output,"Version %s\n",rcs_id);
 		fprintf(output,"MB-system Version %s\n",MB_VERSION);
@@ -424,7 +429,7 @@ char **argv;
 		exit(error);
 	}
 
-	/* initialize reading the multibeam file */
+	/* initialize reading the swath file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings_get,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -446,6 +451,7 @@ char **argv;
 					&data[i],&error);
 		if (error == MB_ERROR_NO_ERROR) {
 			datacur = data[i];
+			datacur->beamflag = NULL;
 			datacur->bath = NULL;
 			datacur->amp = NULL;
 			datacur->bathacrosstrack = NULL;
@@ -453,6 +459,8 @@ char **argv;
 			datacur->ss = NULL;
 			datacur->ssacrosstrack = NULL;
 			datacur->ssalongtrack = NULL;
+			status = mb_malloc(verbose,beams_bath*sizeof(char),
+					&datacur->beamflag,&error);
 			status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&datacur->bath,&error);
 			status = mb_malloc(verbose,beams_amp*sizeof(double),
@@ -498,6 +506,7 @@ char **argv;
 
 			/* read a ping of data */
 			datacur = data[nread];
+			beamflag = datacur->beamflag;
 			bath = datacur->bath;
 			bathacrosstrack = datacur->bathacrosstrack;
 			bathalongtrack = datacur->bathalongtrack;
@@ -509,7 +518,7 @@ char **argv;
 				time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathacrosstrack,
+				beamflag,bath,amp,bathacrosstrack,
 				bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
@@ -581,8 +590,7 @@ char **argv;
 			if (status==MB_SUCCESS) {
 				distot+=distance*1000.0;	/* dist in meters */
 				for (j=0; j<beams_bath; j++) {
-					if (bath[j]>0.0) {
-					/* bath[] > 0 for unflagged data */
+					if (mb_beam_ok(beamflag[j])) {
 					    if (viewdir=='S' || viewdir=='s') {
 						xp[irec-1][j]=distot+bathacrosstrack[j]*
 							sin_eta*cos_alpha;
@@ -897,13 +905,14 @@ char **argv;
 	/* end the postscript file */
 	ps_plotend(1);
 
-	/* close the multibeam file */
+	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory */
 	for (i=0;i<pings;i++) {
 		if (error == MB_ERROR_NO_ERROR) {
 			datacur = data[i];
+			mb_free(verbose,&datacur->beamflag,&error);
 			mb_free(verbose,&datacur->bath,&error);
 			mb_free(verbose,&datacur->amp,&error);
 			mb_free(verbose,&datacur->bathacrosstrack,&error);

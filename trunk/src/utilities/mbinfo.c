@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.16 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbinfo.c,v 4.17 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,12 +11,12 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBINFO reads a multibeam data file and outputs
+ * MBINFO reads a swath sonar data file and outputs
  * some basic statistics.  If pings are averaged (pings > 2)
- * MBINFO estimates the variance for each of the multibeam 
+ * MBINFO estimates the variance for each of the swath 
  * bathymetry beams by reading a set number of pings (>2) and then finding 
  * the variance of the detrended values for each beam. The variances
- * for the multibeam amplitude beams and sidescan values are 
+ * for the amplitude beams and sidescan values are 
  * calculated without detrending.
  * The results are dumped to stdout.
  *
@@ -24,6 +24,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.16  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -119,6 +122,7 @@
 #define MBINFO_MAXPINGS 50
 struct ping
 	{
+	char	*beamflag;
 	double	*bath;
 	double	*bathlon;
 	double	*bathlat;
@@ -134,9 +138,9 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.16 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.17 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBINFO";
-	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
+	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
 	extern char *optarg;
 	extern int optkind;
@@ -191,6 +195,7 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathlon = NULL;
 	double	*bathlat = NULL;
@@ -410,7 +415,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(output,"\nProgram %s\n",program_name);
 		fprintf(output,"Version %s\n",rcs_id);
@@ -511,7 +516,7 @@ char **argv;
 		be aliased to current id if old format id given */
 	status = mb_format(verbose,&format,&format_num,&error);
 
-	/* initialize reading the multibeam file */
+	/* initialize reading the swath file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings_get,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -538,6 +543,7 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR)
 			{
 			datacur = data[i];
+			datacur->beamflag = NULL;
 			datacur->bath = NULL;
 			datacur->amp = NULL;
 			datacur->bathlon = NULL;
@@ -546,6 +552,9 @@ char **argv;
 			datacur->sslon = NULL;
 			datacur->sslat = NULL;
 			}
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_bath_alloc*sizeof(char),
+					&datacur->beamflag,&error);
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_malloc(verbose,beams_bath_alloc*sizeof(double),
 					&datacur->bath,&error);
@@ -648,6 +657,7 @@ char **argv;
 
 			/* read a ping of data */
 			datacur = data[nread];
+			beamflag = datacur->beamflag;
 			bath = datacur->bath;
 			amp = datacur->amp;
 			bathlon = datacur->bathlon;
@@ -659,7 +669,7 @@ char **argv;
 				time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathlon,bathlat,
+				beamflag,bath,amp,bathlon,bathlat,
 				ss,sslon,sslat,
 				comment,&error);
 
@@ -792,7 +802,7 @@ char **argv;
 					}
 				if (beginbath == MB_NO && beams_bath > 0)
 					for (i=0;i<beams_bath;i++)
-						if (bath[i] > 0.0)
+						if (mb_beam_ok(beamflag[i]))
 							{
 							bathmin = bath[i];
 							bathmax = bath[i];
@@ -800,7 +810,7 @@ char **argv;
 							}
 				if (beginamp == MB_NO && beams_amp > 0)
 					for (i=0;i<beams_amp;i++)
-						if (amp[i] > 0.0)
+						if (mb_beam_ok(beamflag[i]))
 							{
 							ampmin = amp[i];
 							ampmax = amp[i];
@@ -825,7 +835,7 @@ char **argv;
 					}
 				for (i=0;i<beams_bath;i++)
 					{
-					if (bath[i] > 0.0)
+					if (mb_beam_ok(beamflag[i]))
 						{
 						if (good_nav == MB_YES && beginnav == MB_YES)
 							{
@@ -838,20 +848,20 @@ char **argv;
 						bathmax = MAX(bathmax, bath[i]);
 						ngdbeams++;
 						}
-					else if (bath[i] == 0.0)
+					else if (beamflag[i] == MB_FLAG_NULL)
 						nzdbeams++;
 					else
 						nfdbeams++;
 					}
 				for (i=0;i<beams_amp;i++)
 					{
-					if (amp[i] > 0)
+					if (mb_beam_ok(beamflag[i]))
 						{
 						ampmin = MIN(ampmin, amp[i]);
 						ampmax = MAX(ampmax, amp[i]);
 						ngabeams++;
 						}
-					else if (amp[i] == 0.0)
+					else if (beamflag[i] == MB_FLAG_NULL)
 						nzabeams++;
 					else
 						nfabeams++;
@@ -915,7 +925,7 @@ char **argv;
 					{
 					datacur = data[j];
 					bath = datacur->bath;
-					if (bath[i] > 0.0)
+					if (mb_beam_ok(beamflag[i]))
 					  {
 					  nbath++;
 					  sumx  = sumx + j;
@@ -933,7 +943,7 @@ char **argv;
 					  {
 					  datacur = data[j];
 					  bath = datacur->bath;
-					  if (bath[i] > 0.0)
+					  if (mb_beam_ok(beamflag[i]))
 					    {
 					    dev = bath[i] - a - b*j;
 					    variance = variance + dev*dev;
@@ -957,7 +967,7 @@ char **argv;
 					{
 					datacur = data[j];
 					amp = datacur->amp;
-					if (amp[i] > 0.0)
+					if (mb_beam_ok(beamflag[i]))
 					  {
 					  namp++;
 					  mean  = mean + amp[i];
@@ -970,7 +980,7 @@ char **argv;
 					  {
 					  datacur = data[j];
 					  amp = datacur->amp;
-					  if (amp[i] > 0.0)
+					  if (mb_beam_ok(beamflag[i]))
 					    {
 					    dev = amp[i] - mean;
 					    variance = variance + dev*dev;
@@ -1033,7 +1043,7 @@ char **argv;
 			}
 		}
 
-	/* close the multibeam file */
+	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory used for data arrays */

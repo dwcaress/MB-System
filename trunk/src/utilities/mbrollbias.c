@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrollbias.c	5/16/93
- *    $Id: mbrollbias.c,v 4.8 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbrollbias.c,v 4.9 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -12,7 +12,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBROLLBIAS is an utility used to assess roll bias of multibeam 
+ * MBROLLBIAS is an utility used to assess roll bias of swath 
  * sonar systems using data from two swaths covering the same  
  * seafloor in opposite directions. The program takes two input  
  * files and calculates best fitting planes for each dataset.   
@@ -31,6 +31,9 @@
  * Date:	May 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.7  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -98,9 +101,9 @@ struct bathptr
 	};
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbrollbias.c,v 4.8 1997-09-15 19:11:06 caress Exp $";
+static char rcs_id[] = "$Id: mbrollbias.c,v 4.9 1998-10-05 19:19:24 caress Exp $";
 static char program_name[] = "MBROLLBIAS";
-static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of multibeam \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the multibeam system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
+static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of swath \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the swath system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
 static char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
 
 /*--------------------------------------------------------------------*/
@@ -160,6 +163,7 @@ char **argv;
 	int	nbath;
 	int	namp;
 	int	nss;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathlon = NULL;
 	double	*bathlat = NULL;
@@ -193,10 +197,6 @@ char **argv;
 	double	matrix[3][3];
 	double	vector[3];
 	double	xx[3];
-
-	/* time, user, host variables */
-	long int	right_now;
-	char	date[25], user[128], host[128];
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		stderr if verbose > 1) */
@@ -308,7 +308,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(outfp,"\nProgram %s\n",program_name);
 		fprintf(outfp,"Version %s\n",rcs_id);
@@ -420,9 +420,9 @@ char **argv;
 		jcount[i] = 0;
 		}
 
-	/* count data in first multibeam file */
+	/* count data in first swath file */
 
-	/* initialize the first multibeam file */
+	/* initialize the first swath file */
 	ndatafile = 0;
 	if ((status = mb_read_init(
 		verbose,ifile,iformat,pings,lonflip,bounds,
@@ -439,6 +439,7 @@ char **argv;
 		}
 
 	/* allocate memory for reading data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
@@ -465,7 +466,7 @@ char **argv;
 			&rpings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
 			&beams_bath,&beams_amp,&pixels_ss,
-			bath,amp,bathlon,bathlat,
+			beamflag,bath,amp,bathlon,bathlat,
 			ss,sslon,sslat,
 			comment,&error);
 
@@ -491,7 +492,7 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR)
 			{
 			for (ib=0;ib<beams_bath;ib++) 
-				if (bath[ib] > 0.0)
+				if (mb_beam_ok(beamflag[ib]))
 				{
 				ix = (bathlon[ib] - bounds[0])/dx;
 				iy = (bathlat[ib] - bounds[2])/dy;
@@ -506,6 +507,7 @@ char **argv;
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathlon,&error); 
 	mb_free(verbose,&bathlat,&error); 
@@ -520,9 +522,9 @@ char **argv;
 	fprintf(outfp,"%d depth points counted in %s\n",
 			ndatafile,ifile);
 
-	/* count data in second multibeam file */
+	/* count data in second swath file */
 
-	/* initialize the first multibeam file */
+	/* initialize the second swath file */
 	ndatafile = 0;
 	if ((status = mb_read_init(
 		verbose,jfile,jformat,pings,lonflip,bounds,
@@ -539,6 +541,7 @@ char **argv;
 		}
 
 	/* allocate memory for reading data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
@@ -565,7 +568,7 @@ char **argv;
 			&rpings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
 			&beams_bath,&beams_amp,&pixels_ss,
-			bath,amp,bathlon,bathlat,
+			beamflag,bath,amp,bathlon,bathlat,
 			ss,sslon,sslat,
 			comment,&error);
 
@@ -591,7 +594,7 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR)
 			{
 			for (ib=0;ib<beams_bath;ib++) 
-				if (bath[ib] > 0.0)
+				if (mb_beam_ok(beamflag[ib]))
 				{
 				ix = (bathlon[ib] - bounds[0])/dx;
 				iy = (bathlat[ib] - bounds[2])/dy;
@@ -606,6 +609,7 @@ char **argv;
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathlon,&error); 
 	mb_free(verbose,&bathlat,&error); 
@@ -659,9 +663,9 @@ char **argv;
 		exit(error);
 		}
 
-	/* read data in first multibeam file */
+	/* read data in first swath file */
 
-	/* initialize the first multibeam file */
+	/* initialize the first swath file */
 	ndatafile = 0;
 	if ((status = mb_read_init(
 		verbose,ifile,iformat,pings,lonflip,bounds,
@@ -678,6 +682,7 @@ char **argv;
 		}
 
 	/* allocate memory for reading data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
@@ -704,7 +709,7 @@ char **argv;
 			&rpings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
 			&beams_bath,&beams_amp,&pixels_ss,
-			bath,amp,bathlon,bathlat,
+			beamflag,bath,amp,bathlon,bathlat,
 			ss,sslon,sslat,
 			comment,&error);
 
@@ -730,7 +735,7 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR)
 			{
 			for (ib=0;ib<beams_bath;ib++) 
-				if (bath[ib] > 0.0)
+				if (mb_beam_ok(beamflag[ib]))
 				{
 				ix = (bathlon[ib] - bounds[0])/dx;
 				iy = (bathlat[ib] - bounds[2])/dy;
@@ -755,6 +760,7 @@ char **argv;
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathlon,&error); 
 	mb_free(verbose,&bathlat,&error); 
@@ -769,9 +775,9 @@ char **argv;
 	fprintf(outfp,"%d depth points read from %s\n",
 			ndatafile,ifile);
 
-	/* read data in second multibeam file */
+	/* read data in second swath file */
 
-	/* initialize the first multibeam file */
+	/* initialize the second swath file */
 	ndatafile = 0;
 	if ((status = mb_read_init(
 		verbose,jfile,jformat,pings,lonflip,bounds,
@@ -788,6 +794,7 @@ char **argv;
 		}
 
 	/* allocate memory for reading data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
@@ -814,7 +821,7 @@ char **argv;
 			&rpings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
 			&beams_bath,&beams_amp,&pixels_ss,
-			bath,amp,bathlon,bathlat,
+			beamflag,bath,amp,bathlon,bathlat,
 			ss,sslon,sslat,
 			comment,&error);
 
@@ -840,7 +847,7 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR)
 			{
 			for (ib=0;ib<beams_bath;ib++) 
-				if (bath[ib] > 0.0)
+				if (mb_beam_ok(beamflag[ib]))
 				{
 				ix = (bathlon[ib] - bounds[0])/dx;
 				iy = (bathlat[ib] - bounds[2])/dy;
@@ -865,6 +872,7 @@ char **argv;
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathlon,&error); 
 	mb_free(verbose,&bathlat,&error); 
@@ -1039,7 +1047,7 @@ char **argv;
 				fprintf(outfp,"Roll bias:   %f (%f degrees)\n",
 					roll_bias,atan(roll_bias)/DTR);
 				fprintf(outfp,"Roll bias is positive to starboard, negative to port.\n");
-				fprintf(outfp,"A postive roll bias means the vertical reference used by \n    the multibeam system is biased to starboard, \n    giving rise to shallow bathymetry to port and \n    deep bathymetry to starboard.\n");
+				fprintf(outfp,"A postive roll bias means the vertical reference used by \n    the swath system is biased to starboard, \n    giving rise to shallow bathymetry to port and \n    deep bathymetry to starboard.\n");
 				}
 			else
 				fprintf(outfp,"Track headings too similar to calculate roll bias!\n");

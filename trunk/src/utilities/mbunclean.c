@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 4.9 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbunclean.c,v 4.10 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.8  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -59,6 +62,9 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.8  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -105,6 +111,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -118,9 +125,9 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 4.9 1997-09-15 19:11:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 4.10 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
-	static char help_message[] =  "MBUNCLEAN unflags multibeam bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
+	static char help_message[] =  "MBUNCLEAN unflags swath bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
 
 	/* parsing variables */
@@ -168,6 +175,7 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -187,7 +195,7 @@ char **argv;
 	double	depth_high;
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	int	i, j, k, l, m;
@@ -279,7 +287,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -362,6 +370,7 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&bathacrosstrack,&error);
@@ -393,9 +402,8 @@ char **argv;
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -451,7 +459,7 @@ char **argv;
 			time_i,&time_d,&navlon,&navlat,&speed,
 			&heading,&distance,
 			&beams_bath,&beams_amp,&pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 
@@ -512,28 +520,23 @@ char **argv;
 			{
 			for (i=0;i<beams_bath;i++)
 				{
-				if (check_range == MB_NO && bath[i] < 0.0)
+				if (check_range == MB_NO 
+					&& mb_beam_check_flag(beamflag[i]))
 					{
-					bath[i] = -bath[i];
+					beamflag[i] = MB_FLAG_NONE;
 					data_use = MB_YES;
 					unflag++;
 					}
-				else if (check_range == MB_YES && bath[i] < 0.0
-					&& (-bath[i] >= depth_low
-						&& -bath[i] <= depth_high))
+				else if (check_range == MB_YES 
+					&& mb_beam_check_flag(beamflag[i])
+					&& (bath[i] <= depth_low
+						&& bath[i] >= depth_high))
 					{
-					bath[i] = -bath[i];
+					beamflag[i] = MB_FLAG_NONE;
 					data_use = MB_YES;
 					unflag++;
 					}
 				}
-			for (i=0;i<beams_amp;i++)
-				if (amp[i] < 0 && bath[i] > 0.0)
-					{
-					amp[i] = -amp[i];
-					data_use = MB_YES;
-					unflag++;
-					}
 			}
 
 		/* write some data */
@@ -545,7 +548,7 @@ char **argv;
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					beams_bath,beams_amp,pixels_ss,
-					bath,amp,bathacrosstrack,bathalongtrack,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			if (status == MB_SUCCESS)
@@ -577,6 +580,7 @@ char **argv;
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&amp,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 

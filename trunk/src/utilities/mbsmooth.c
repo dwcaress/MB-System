@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.13 1997-10-03 18:59:04 caress Exp $
+ *    $Id: mbsmooth.c,v 4.14 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1997/10/03  18:59:04  caress
+ * Removed unused sort function.
+ *
  * Revision 4.12  1997/09/15  19:11:06  caress
  * Real Version 4.5
  *
@@ -94,6 +97,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -123,6 +127,7 @@ struct mbsmooth_ping_struct
 	double	navlat;
 	double	speed;
 	double	heading;
+	char	*beamflag;
 	double	*bath;
 	double	*bathacrosstrack;
 	double	*bathalongtrack;
@@ -153,11 +158,11 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.13 1997-10-03 18:59:04 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.14 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
-domain gaussian filter to multibeam \nbathymetry data in order to \
-smooth out noise in multibeam \nbathymetry data.";
+domain gaussian filter to swath \nbathymetry data in order to \
+smooth out noise in the data.";
 	static char usage_message[] = "mbsmooth [-Fformat -Gwidth -Iinfile \
 -Llonflip -Nbuffersize -Ooutfile \n\t-Wfilterfile -V -H]";
 	extern char *optarg;
@@ -209,7 +214,7 @@ smooth out noise in multibeam \nbathymetry data.";
 	double	headingy;
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	/* processing variables */
@@ -324,7 +329,7 @@ smooth out noise in multibeam \nbathymetry data.";
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -408,6 +413,7 @@ smooth out noise in multibeam \nbathymetry data.";
 	/* allocate memory for data arrays */
 	for (i=0;i<n_buffer_max;i++)
 		{
+		ping[i].beamflag = NULL;
 		ping[i].bath = NULL;
 		ping[i].amp = NULL;
 		ping[i].bathacrosstrack = NULL;
@@ -418,6 +424,8 @@ smooth out noise in multibeam \nbathymetry data.";
 		ping[i].bathx = NULL;
 		ping[i].bathy = NULL;
 		ping[i].bathsmooth = NULL;
+		status = mb_malloc(verbose,beams_bath*sizeof(char),
+			&ping[i].beamflag,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&ping[i].bath,&error);
 		status = mb_malloc(verbose,beams_amp*sizeof(double),
@@ -498,9 +506,8 @@ smooth out noise in multibeam \nbathymetry data.";
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -575,6 +582,7 @@ smooth out noise in multibeam \nbathymetry data.";
 				&ping[ndata].navlon,&ping[ndata].navlat,
 				&ping[ndata].speed,&ping[ndata].heading,
 				&beams_bath,&beams_amp,&pixels_ss,
+				ping[ndata].beamflag,
 				ping[ndata].bath,ping[ndata].amp,
 				ping[ndata].bathacrosstrack,
 				ping[ndata].bathalongtrack,
@@ -648,14 +656,14 @@ smooth out noise in multibeam \nbathymetry data.";
 		  for (i=0;i<beams_bath;i++)
 		    {
 		    ping[j].bathsmooth[i] = ping[j].bath[i];
-		    if (ping[j].bath[i] > 0)
+		    if (mb_beam_ok(ping[j].beamflag[i]))
 		      {
 		      sum = 0.0;
 		      weightsum = 0.0;
 		      for (jj=ja;jj<=jb;jj++)
 			for (ii=0;ii<beams_bath;ii++)
 			  {
-			  if (ping[jj].bath[ii] > 0)
+			  if (mb_beam_ok(ping[jj].beamflag[ii]))
 			    {
 			    dx = ping[jj].bathx[ii] - ping[j].bathx[i];
 			    dy = ping[jj].bathy[ii] - ping[j].bathy[i];
@@ -679,6 +687,7 @@ smooth out noise in multibeam \nbathymetry data.";
 				ping[j].navlon,ping[j].navlat,
 				ping[j].speed,ping[j].heading,
 				beams_bath,beams_amp,pixels_ss,
+				ping[j].beamflag,
 				ping[j].bath,ping[j].amp,
 				ping[j].bathacrosstrack,
 				ping[j].bathalongtrack,
@@ -726,6 +735,7 @@ smooth out noise in multibeam \nbathymetry data.";
 	/* free the memory */
 	for (j=0;j<3;j++)
 		{
+		mb_free(verbose,&ping[j].beamflag,&error); 
 		mb_free(verbose,&ping[j].bath,&error); 
 		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
 		mb_free(verbose,&ping[j].bathalongtrack,&error); 
