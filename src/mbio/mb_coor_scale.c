@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	1/21/93
- *    $Id: mb_coor_scale.c,v 4.6 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_coor_scale.c,v 4.7 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,12 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -86,7 +92,7 @@ double	latitude;
 double	*mtodeglon;
 double	*mtodeglat;
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.6 1997-04-21 17:02:07 caress Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.7 1998-10-05 18:32:27 caress Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_sb.c	2/26/93
- *	$Id: mbsys_sb.c,v 4.12 1998-10-05 18:32:27 caress Exp $
+ *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
+ *	$Id: mbsys_gsf.c,v 4.0 1998-10-05 18:30:03 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
+ *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -11,93 +11,38 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_sb.c contains the functions for handling the data structure
- * used by MBIO functions to store data from the 16-beam Sea Beam 
- * multibeam sonar systems.
- * The data formats which are commonly used to store Sea Beam
+ * mbsys_gsf.c contains the functions for handling the data structure
+ * used by MBIO functions to store data 
+ * from Gsf BottomChart Mark II multibeam sonar systems.
+ * The data formats which are commonly used to store Gsf 
  * data in files include
- *      MBF_SBSIOMRG : MBIO ID 11
- *      MBF_SBSIOCEN : MBIO ID 12
- *      MBF_SBSIOLSI : MBIO ID 13
- *      MBF_SBURICEN : MBIO ID 14
- *      MBF_SBURIVAX : MBIO ID 15
- *      MBF_SBSIOSWB : MBIO ID 16
- *      MBF_SBIFREMR : MBIO ID 17
+ *      MBF_ELUNB : MBIO ID 92
+ *
  * These functions include:
- *   mbsys_sb_alloc	- allocate memory for mbsys_sb_struct structure
- *   mbsys_sb_deall	- deallocate memory for mbsys_sb_struct structure
- *   mbsys_sb_extract	- extract basic data from mbsys_sb_struct structure
- *   mbsys_sb_insert	- insert basic data into mbsys_sb_struct structure
- *   mbsys_sb_ttimes    - would extract travel time and beam angle data from
- *                        mbsys_sb_struct structure if there were any
- *   mbsys_sb_extract_nav - extract navigation data from
- *                          mbsys_sb_struct structure
- *   mbsys_sb_insert_nav - insert navigation data into
- *                          mbsys_sb_struct structure
- *   mbsys_sb_copy	- copy data in one mbsys_sb_struct structure
- *   				into another mbsys_sb_struct structure
+ *   mbsys_gsf_alloc	  - allocate memory for mbsys_gsf_struct structure
+ *   mbsys_gsf_deall	  - deallocate memory for mbsys_gsf_struct structure
+ *   mbsys_gsf_extract - extract basic data from mbsys_gsf_struct 
+ *				structure
+ *   mbsys_gsf_insert  - insert basic data into mbsys_gsf_struct structure
+ *   mbsys_gsf_ttimes  - extract travel time data from
+ *				mbsys_gsf_struct structure
+ *   mbsys_gsf_extract_nav - extract navigation data from
+ *                          mbsys_gsf_struct structure
+ *   mbsys_gsf_insert_nav - insert navigation data into
+ *                          mbsys_gsf_struct structure
+ *   mbsys_gsf_copy	  - copy data in one mbsys_gsf_struct structure
+ *   				into another mbsys_gsf_struct structure
  *
  * Author:	D. W. Caress
- * Date:	February 26, 1993
+ * Date:	March 5, 1998
+ *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1998/10/05  18:22:40  caress
+ * Initial revision
+ *
  * Revision 1.1  1998/10/05  17:46:15  caress
  * Initial revision
  *
- * Revision 4.11  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.10  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.9  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.9  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.8  1995/11/27  21:52:49  caress
- * New version of mb_ttimes with ssv and angles_null.
- *
- * Revision 4.7  1995/09/28  18:10:48  caress
- * Various bug fixes working toward release 4.3.
- *
- * Revision 4.6  1995/08/17  14:41:09  caress
- * Revision for release 4.3.
- *
- * Revision 4.5  1995/07/13  19:13:36  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.4  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.3  1994/11/09  21:40:34  caress
- * Changed ttimes extraction routines to handle forward beam angles
- * so that alongtrack distances can be calculated.
- *
- * Revision 4.2  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/04/11  23:34:41  caress
- * Added function to extract travel time and beam angle data
- * from multibeam data in an internal data structure.
- *
- * Revision 4.1  1994/04/11  23:34:41  caress
- * Added function to extract travel time and beam angle data
- * from multibeam data in an internal data structure.
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/02/20  04:13:19  caress
- * First cut at new version.  Now passes unused arrays for
- * amplitude and sidescan data.
- *
- * Revision 3.0  1993/05/14  23:05:12  sohara
- * initial version
  *
  */
 
@@ -111,19 +56,22 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
-#include "../../include/mbsys_sb.h"
+#include "../../include/gsf.h"
+#include "../../include/mbsys_gsf.h"
 
 /*--------------------------------------------------------------------*/
-int mbsys_sb_alloc(verbose,mbio_ptr,store_ptr,error)
+int mbsys_gsf_alloc(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb.c,v 4.12 1998-10-05 18:32:27 caress Exp $";
-	char	*function_name = "mbsys_sb_alloc";
+ static char res_id[]="$Id: mbsys_gsf.c,v 4.0 1998-10-05 18:30:03 caress Exp $";
+	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_gsf_struct *store;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -139,8 +87,9 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_sb_struct),
+	status = mb_malloc(verbose,sizeof(struct mbsys_gsf_struct),
 				store_ptr,error);
+	memset(*store_ptr, 0, sizeof(struct mbsys_gsf_struct));
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -158,16 +107,17 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_deall(verbose,mbio_ptr,store_ptr,error)
+int mbsys_gsf_deall(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
-	char	*function_name = "mbsys_sb_deall";
+	char	*function_name = "mbsys_gsf_deall";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_sb_struct *store;
+	struct mbsys_gsf_struct *store;
+	gsfRecords	    *records;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -181,6 +131,9 @@ int	*error;
 		}
 
 	/* deallocate memory for data structure */
+	store =  (struct mbsys_gsf_struct *) *store_ptr;
+	records = &(store->records);
+	gsfFree(records);
 	status = mb_free(verbose,store_ptr,error);
 
 	/* print output debug statements */
@@ -198,7 +151,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_extract(verbose,mbio_ptr,store_ptr,kind,
+int mbsys_gsf_extract(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
 		beamflag,bath,amp,bathacrosstrack,bathalongtrack,
@@ -228,13 +181,14 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-	char	*function_name = "mbsys_sb_extract";
+	char	*function_name = "mbsys_gsf_extract";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_sb_struct *store;
-	int	time_j[5];
-	int	id;
-	int	i;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -251,7 +205,9 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb_struct *) store_ptr;
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	dataID = &(store->dataID);
+	records = &(store->records);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -259,18 +215,16 @@ int	*error;
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
+		mb_ping = &(records->mb_ping);
+
 		/* get time */
-		time_j[0] = store->year;
-		time_j[1] = store->day;
-		time_j[2] = store->min;
-		time_j[3] = store->sec;
-		time_j[4] = 0;
-		mb_get_itime(verbose,time_j,time_i);
-		mb_get_time(verbose,time_i,time_d);
+		*time_d = mb_ping->ping_time.tv_sec 
+				+ 0.000000001 * mb_ping->ping_time.tv_nsec;
+		mb_get_date(verbose,*time_d,time_i);
 
 		/* get navigation */
-		*navlon = store->lon2u/60. + store->lon2b/600000.;
-		*navlat = store->lat2u/60. + store->lat2b/600000. - 90.;
+		*navlon = mb_ping->longitude;
+		*navlat = mb_ping->latitude;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -293,38 +247,50 @@ int	*error;
 				*navlon = *navlon + 360.;
 			}
 
-		/* get heading (360 degrees = 65536) */
-		*heading = store->sbhdg*0.0054932;
+		/* get heading */
+		*heading = mb_ping->heading;
 
-		/* set speed to zero */
-		*speed = 0.0;
+		/* get speed */
+		*speed = 1.852 * mb_ping->speed;
 
-		/* read distance and depth values into storage arrays */
-		/* switch order of data as it is read into the global arrays */
-		*nbath = mb_io_ptr->beams_bath;
-		*namp = 0;
+		/* get numbers of beams and pixels */
+		if (mb_ping->depth != NULL)
+		    *nbath = mb_ping->number_beams;
+		else
+		    *nbath = 0;
+		if (mb_ping->mc_amplitude != NULL
+		    || mb_ping->mr_amplitude != NULL)
+		    *namp = mb_ping->number_beams;
+		else
+		    *namp = 0;
 		*nss = 0;
-		id = *nbath - 1;
+
+		/* read depth and beam location values into storage arrays */
 		for (i=0;i<*nbath;i++)
 			{
-			if (store->deph[i] > 0)
-			    {
-			    beamflag[id-i] = MB_FLAG_NONE;
-			    bath[id-i] = store->deph[i];
-			    }
-			else if (store->deph[i] < 0)
-			    {
-			    beamflag[id-i] 
-				= MB_FLAG_MANUAL + MB_FLAG_FLAG;
-			    bath[id-i] = -store->deph[i];
-			    }
-			else
-			    {
-			    beamflag[id-i] = MB_FLAG_NULL;
-			    bath[id-i] = store->deph[i];
-			    }
-			bathacrosstrack[id-i] = store->dist[i];
-			bathalongtrack[id-i] = 0.0;
+			beamflag[i] = mb_ping->beam_flags[i];
+			bath[i] = mb_ping->depth[i];
+			bathacrosstrack[i] = mb_ping->across_track[i];
+			bathalongtrack[i] = mb_ping->along_track[i];
+			}
+
+		/* set beamflags if ping flag set */
+		if (mb_ping->ping_flags != 0)
+		    for (i=0;i<*nbath;i++)
+			if (mb_beam_ok(beamflag[i]))
+			    beamflag[i] 
+				= mb_beam_set_flag_manual(beamflag[i]);
+
+		/* read amplitude values into storage arrays */
+		if (mb_ping->mc_amplitude != NULL)
+		for (i=0;i<*namp;i++)
+			{
+			amp[i] = mb_ping->mc_amplitude[i];
+			}
+		else if (mb_ping->mr_amplitude != NULL)
+		for (i=0;i<*namp;i++)
+			{
+			amp[i] = mb_ping->mr_amplitude[i];
 			}
 
 		/* print debug statements */
@@ -364,8 +330,13 @@ int	*error;
 			fprintf(stderr,"dbg4       nbath:      %d\n",
 				*nbath);
 			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       beam:%2d  flag:%3d  bath:%f  bathdist:%f\n",
-				i,beamflag[i],bath[i],bathacrosstrack[i]);
+			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,beamflag[i],bath[i],bathacrosstrack[i],bathalongtrack[i]);
+			fprintf(stderr,"dbg4        namp:     %d\n",
+				*namp);
+			for (i=0;i<*namp;i++)
+			  fprintf(stderr,"dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 			}
 
 		/* done translating values */
@@ -376,7 +347,7 @@ int	*error;
 	else if (*kind == MB_DATA_COMMENT)
 		{
 		/* copy comment */
-		strcpy(comment,store->comment);
+		strncpy(comment, records->comment.comment, MB_COMMENT_MAXLINE);
 
 		/* print debug statements */
 		if (verbose >= 4)
@@ -424,10 +395,19 @@ int	*error;
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
 		&& *kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg2       nbath:         %d\n",*nbath);
+		fprintf(stderr,"dbg2       nbath:      %d\n",
+			*nbath);
 		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       beam:%2d  flag:%3d  bath:%f  bathdist:%f\n",
-			i,beamflag[i],bath[i],bathacrosstrack[i]);
+		  fprintf(stderr,"dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
+		fprintf(stderr,"dbg2        namp:     %d\n",
+			*namp);
+		for (i=0;i<*namp;i++)
+		  fprintf(stderr,"dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+		fprintf(stderr,"dbg2        nss:      %d\n",
+			*nss);
 		}
 	if (verbose >= 2)
 		{
@@ -440,7 +420,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_insert(verbose,mbio_ptr,store_ptr,
+int mbsys_gsf_insert(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
 		beamflag,bath,amp,bathacrosstrack,bathalongtrack,
@@ -469,14 +449,14 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-	char	*function_name = "mbsys_sb_insert";
+	char	*function_name = "mbsys_gsf_insert";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_sb_struct *store;
-	int	kind;
-	int	time_j[5];
-	int	id;
-	int	i;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -502,69 +482,154 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       flag[%d]: %d  bath[%d]: %f  bathdist[%d]: %f\n",
-			i,beamflag[i],i,bath[i],i,bathacrosstrack[i]);
+		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
 		if (verbose >= 3) 
 		 for (i=0;i<namp;i++)
-		  fprintf(stderr,"dbg3        amp[%d]: %f\n",
-			i,amp[i]);
-		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
-		 for (i=0;i<nss;i++)
-		  fprintf(stderr,"dbg3        ss[%d]: %f    ssdist[%d]: %f\n",
-			i,ss[i],i,ssacrosstrack[i]);
-		fprintf(stderr,"dbg2       comment:    %s\n",comment);
+		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		}
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb_struct *) store_ptr;
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	records = &(store->records);
+	dataID = &(store->dataID);
+	mb_ping = &(records->mb_ping);
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
+		dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
+		mb_ping = &(records->mb_ping);
+
 		/* get time */
-		mb_get_jtime(verbose,time_i,time_j);
-		store->year = time_j[0];
-		store->day = time_j[1];
-		store->min = time_j[2];
-		store->sec = time_j[3];
+		mb_ping->ping_time.tv_sec = (int) time_d;
+		mb_ping->ping_time.tv_nsec 
+			= (int) (1000000000 
+			    * (time_d 
+				    - mb_ping->ping_time.tv_sec));
 
 		/* get navigation */
-		if (navlon < 0.0) navlon = navlon + 360.0;
-		store->lon2u = (short int) 60.0*navlon;
-		store->lon2b = (short int) (600000.0*(navlon 
-			- store->lon2u/60.0));
-		navlat = navlat + 90.0;
-		store->lat2u = (short int) 60.0*navlat;
-		store->lat2b = (short int) (600000.0*(navlat 
-			- store->lat2u/60.0));
+		mb_ping->longitude = navlon;
+		mb_ping->latitude = navlat;
 
-		/* get heading (360 degrees = 65536) */
-		store->sbhdg = 182.044444*heading;
+		/* get heading */
+		mb_ping->heading = heading;
 
-		/* put distance and depth values 
-			into sbsiocen data structure */
-		/* switch order of data as it is read 
-			into the output arrays */
-		id = nbath - 1;
+		/* get speed */
+		mb_ping->speed = speed / 1.852;
+
+		/* get numbers of beams */
+		mb_ping->number_beams = nbath;
+		
+		/* allocate memory in arrays if required */
+		if (nbath > 0)
+		    {
+		    mb_ping->beam_flags 
+			= (unsigned char *) 
+			    realloc(mb_ping->beam_flags,
+					nbath * sizeof(char));
+		    mb_ping->depth 
+			= (double *) 
+			    realloc(mb_ping->depth,
+					nbath * sizeof(double));
+		    mb_ping->across_track 
+			= (double *) 
+			    realloc(mb_ping->across_track,
+					nbath * sizeof(double));
+		    mb_ping->along_track 
+			= (double *) 
+			    realloc(mb_ping->along_track,
+					nbath * sizeof(double));
+		    if (mb_ping->beam_flags == NULL
+			|| mb_ping->depth == NULL
+			|| mb_ping->across_track == NULL
+			|| mb_ping->along_track == NULL)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			}
+		    }
+		if (namp > 0
+		    && mb_ping->mc_amplitude != NULL)
+		    {
+		    mb_ping->mc_amplitude 
+			= (double *) 
+			    realloc(mb_ping->mc_amplitude,
+					namp * sizeof(double));
+		    if (mb_ping->mc_amplitude == NULL)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			}
+		    }
+		else if (namp > 0)
+		    {
+		    mb_ping->mr_amplitude 
+			= (double *) 
+			    realloc(mb_ping->mr_amplitude,
+					namp * sizeof(double));
+		    if (mb_ping->mr_amplitude == NULL)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			}
+		    }
+
+		/* read depth and beam location values into storage arrays */
 		for (i=0;i<nbath;i++)
 			{
-			if (mb_beam_check_flag(beamflag[id-i]))
-			    store->deph[i] = -bath[id-i];
-			else
-			    store->deph[i] = bath[id-i];
-			store->dist[i] = bathacrosstrack[id-i];
+			mb_ping->beam_flags[i] = beamflag[i];
+			mb_ping->depth[i] = bath[i];
+			mb_ping->across_track[i] = bathacrosstrack[i];
+			mb_ping->along_track[i] = bathalongtrack[i];
+			}
+
+		/* read amplitude values into storage arrays */
+		if (mb_ping->mc_amplitude != NULL)
+		for (i=0;i<namp;i++)
+			{
+			mb_ping->mc_amplitude[i] = amp[i];
+			}
+		else if (mb_ping->mr_amplitude != NULL)
+		for (i=0;i<namp;i++)
+			{
+			mb_ping->mr_amplitude[i] = amp[i];
 			}
 		}
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT)
 		{
-		strcpy(store->comment,comment);
+		dataID->recordID = GSF_RECORD_COMMENT;
+		if (records->comment.comment_length < strlen(comment) + 1)
+		    {
+		    if ((records->comment.comment 
+				= (char *) 
+				    realloc(records->comment.comment,
+					strlen(comment+1)))
+					    == NULL) 
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			records->comment.comment_length = 0;
+			}
+		    }
+		if (status = MB_SUCCESS && records->comment.comment != NULL)
+		    {
+		    strcpy(records->comment.comment, comment);
+		    records->comment.comment_length = strlen(comment);
+		    records->comment.comment_time.tv_sec = (int) time_d;
+		    records->comment.comment_time.tv_nsec 
+			    = (int) (1000000000 
+				* (time_d 
+					- records->comment.comment_time.tv_sec));
+		    }
 		}
 
 	/* print output debug statements */
@@ -582,7 +647,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
+int mbsys_gsf_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
 	ttimes,angles,angles_forward,angles_null,
 	heave,alongtrack_offset,draft,ssv,error)
 int	verbose;
@@ -600,11 +665,14 @@ double	*draft;
 double	*ssv;
 int	*error;
 {
-	char	*function_name = "mbsys_sb_ttimes";
+	char	*function_name = "mbsys_gsf_ttimes";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_sb_struct *store;
-	int	i;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -627,39 +695,166 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb_struct *) store_ptr;
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	records = &(store->records);
+	dataID = &(store->dataID);
+	mb_ping = &(records->mb_ping);
 
 	/* get data kind */
 	*kind = store->kind;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
+	    {
+	    /* get nbeams */
+	    *nbeams = mb_ping->number_beams;
+
+	    /* get travel times, angles */
+	    if (mb_ping->travel_time != NULL
+		&& mb_ping->beam_angle != NULL)
 		{
-		/* get nbeams */
-		*nbeams = mb_io_ptr->beams_bath;
-
-		/* get travel times, angles */
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			ttimes[i] = 0.0;
-			angles[i] = 0.0;
-			angles_forward[i] = 0.0;
+		for (i=0;i<*nbeams;i++)
+		    {
+		    ttimes[i] = mb_ping->travel_time[i];
+		    angles[i] = fabs(mb_ping->beam_angle[i]);
+		    if (mb_ping->across_track[i] < 0.0)
+			    angles_forward[i] = 180.0;
+		    else
+			    angles_forward[i] = 0.0;
+		    heave[i] = mb_ping->heave;
+		    alongtrack_offset[i] = 0.0;
+		    }
+		
+		/* get surface sound velocity and 
+		    effective array mount angles */
+		if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC)
+		    {
+		    *ssv = 1500.0;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
 			angles_null[i] = 0.0;
-			heave[i] = 0.0;
-			alongtrack_offset[i] = 0.0;
-			}
-
-		/* get ssv */
-		*ssv = 0.0;
-		*draft = 0.0;
-
-		/* set status */
-		*error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
-
-		/* done translating values */
-
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC)
+		    {
+		    *ssv = 1500.0;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = angles[i];
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfEM950Specific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = angles[i];
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfEM121ASpecific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			angles_null[i] = 0.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfEM121Specific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			angles_null[i] = 0.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
+		    {
+		    *ssv = 1500.0;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = 50.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfSeaBatSpecific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = angles[i];
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfEM1000Specific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = angles[i];
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC)
+		    {
+		    *ssv = 1500.0;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			angles_null[i] = 0.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC)
+		    {
+		    *ssv = 1500.0;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			angles_null[i] = 0.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfSeaBatIISpecific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = angles[i];
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfSeaBat8101Specific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = angles[i];
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfSeaBeam2112Specific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			angles_null[i] = 0.0;
+		    }
+		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfElacMkIISpecific.sound_vel;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = 37.5;
+		    }
+		else
+		    {
+		    *ssv = 1500.0;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			angles_null[i] = 0.0;
+		    }
 		}
+
+	    /* set status */
+	    *error = MB_ERROR_NO_ERROR;
+	    status = MB_SUCCESS;
+
+	    /* done translating values */
+
+	    }
 
 	/* deal with comment */
 	else if (*kind == MB_DATA_COMMENT)
@@ -707,7 +902,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_altitude(verbose,mbio_ptr,store_ptr,
+int mbsys_gsf_altitude(verbose,mbio_ptr,store_ptr,
 	kind,transducer_depth,altitude,error)
 int	verbose;
 char	*mbio_ptr;
@@ -717,13 +912,16 @@ double	*transducer_depth;
 double	*altitude;
 int	*error;
 {
-	char	*function_name = "mbsys_sb_altitude";
+	char	*function_name = "mbsys_gsf_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_sb_struct *store;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
 	double	bath_best;
 	double	xtrack_min;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -740,53 +938,74 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb_struct *) store_ptr;
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	records = &(store->records);
+	dataID = &(store->dataID);
+	mb_ping = &(records->mb_ping);
 
 	/* get data kind */
 	*kind = store->kind;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
+	    {
+	    *transducer_depth = mb_ping->depth_corrector;
+
+	    /* get altitude if available */
+	    if (mb_ping->sensor_id 
+		== GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
+		{
+		*altitude = mb_ping->sensor_data.gsfSeamapSpecific.altitude;
+		}
+		
+	    /* else get altitude from depth */
+	    else if (mb_ping->depth != NULL)
 		{
 		bath_best = 0.0;
-		if (store->deph[mb_io_ptr->beams_bath/2] > 0.0)
-		    bath_best = store->deph[mb_io_ptr->beams_bath/2];
+		if (mb_ping->depth[mb_ping->number_beams/2] > 0.0)
+		    bath_best = mb_ping->depth[mb_ping->number_beams/2];
 		else
 		    {
 		    xtrack_min = 99999999.9;
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    for (i=0;i<mb_ping->number_beams;i++)
 			{
-			if (store->deph[i] > 0.0
-			    && fabs(store->dist[i]) < xtrack_min)
+			if (mb_beam_check_flag(mb_ping->beam_flags[i])
+			    && fabs(mb_ping->across_track[i]) < xtrack_min)
 			    {
-			    xtrack_min = fabs(store->dist[i]);
-			    bath_best = store->deph[i];
+			    xtrack_min = fabs(mb_ping->across_track[i]);
+			    bath_best = mb_ping->depth[i];
 			    }
 			}		
 		    }
 		if (bath_best <= 0.0)
 		    {
 		    xtrack_min = 99999999.9;
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    for (i=0;i<mb_ping->number_beams;i++)
 			{
-			if (store->deph[i] < 0.0
-			    && fabs(store->dist[i]) < xtrack_min)
+			if (!mb_beam_check_flag(mb_ping->beam_flags[i])
+			    && fabs(mb_ping->across_track[i]) < xtrack_min)
 			    {
-			    xtrack_min = fabs(store->dist[i]);
-			    bath_best = -store->deph[i];
+			    xtrack_min = fabs(mb_ping->across_track[i]);
+			    bath_best = mb_ping->depth[i];
 			    }
 			}		
 		    }
-		*transducer_depth = 0.0;
 		*altitude = bath_best - *transducer_depth;
-
-		/* set status */
-		*error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
-
-		/* done translating values */
-
 		}
+	    
+	    /* else no info */
+	    else
+		{
+		*altitude = 0.0;
+		}
+
+	    /* set status */
+	    *error = MB_ERROR_NO_ERROR;
+	    status = MB_SUCCESS;
+
+	    /* done translating values */
+
+	    }
 
 	/* deal with comment */
 	else if (*kind == MB_DATA_COMMENT)
@@ -822,7 +1041,98 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_extract_nav(verbose,mbio_ptr,store_ptr,kind,
+int mbsys_gsf_insert_altitude(verbose,mbio_ptr,store_ptr,
+	transducer_depth,altitude,error)
+int	verbose;
+char	*mbio_ptr;
+char	*store_ptr;
+double	transducer_depth;
+double	altitude;
+int	*error;
+{
+	char	*function_name = "mbsys_gsf_insert_altitude";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:            %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:         %d\n",store_ptr);
+		fprintf(stderr,"dbg2       transducer_depth:  %f\n",transducer_depth);
+		fprintf(stderr,"dbg2       altitude:          %f\n",altitude);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	records = &(store->records);
+	dataID = &(store->dataID);
+	mb_ping = &(records->mb_ping);
+
+	/* insert data into structure */
+	if (store->kind == MB_DATA_DATA)
+	    {
+	    mb_ping->depth_corrector = transducer_depth;
+
+	    /* set altitude if possible */
+	    if (mb_ping->sensor_id 
+		== GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
+		{
+		mb_ping->sensor_data.gsfSeamapSpecific.altitude = altitude;
+		}
+
+	    /* set status */
+	    *error = MB_ERROR_NO_ERROR;
+	    status = MB_SUCCESS;
+
+	    /* done translating values */
+
+	    }
+
+	/* deal with comment */
+	else if (store->kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_gsf_extract_nav(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
 		roll,pitch,heave,error)
 int	verbose;
@@ -840,13 +1150,14 @@ double	*pitch;
 double	*heave;
 int	*error;
 {
-	char	*function_name = "mbsys_sb_extract_nav";
+	char	*function_name = "mbsys_gsf_extract_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_sb_struct *store;
-	int	time_j[5];
-	int	id;
-	int	i;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -863,7 +1174,10 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb_struct *) store_ptr;
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	records = &(store->records);
+	dataID = &(store->dataID);
+	mb_ping = &(records->mb_ping);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -872,17 +1186,13 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_j[0] = store->year;
-		time_j[1] = store->day;
-		time_j[2] = store->min;
-		time_j[3] = store->sec;
-		time_j[4] = 0;
-		mb_get_itime(verbose,time_j,time_i);
-		mb_get_time(verbose,time_i,time_d);
+		*time_d = mb_ping->ping_time.tv_sec 
+				+ 0.000000001 * mb_ping->ping_time.tv_nsec;
+		mb_get_date(verbose,time_d,time_i);
 
 		/* get navigation */
-		*navlon = store->lon2u/60. + store->lon2b/600000.;
-		*navlat = store->lat2u/60. + store->lat2b/600000. - 90.;
+		*navlon = mb_ping->longitude;
+		*navlat = mb_ping->latitude;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -905,16 +1215,16 @@ int	*error;
 				*navlon = *navlon + 360.;
 			}
 
-		/* get heading (360 degrees = 65536) */
-		*heading = store->sbhdg*0.0054932;
+		/* get heading */
+		*heading = mb_ping->heading;
 
-		/* set speed to zero */
-		*speed = 0.0;
+		/* get speed */
+		*speed = 1.852 * mb_ping->speed;
 
 		/* get roll pitch and heave */
-		*roll = 0.0;
-		*pitch = 0.0;
-		*heave = 0.0;
+		*roll = mb_ping->roll;
+		*pitch = mb_ping->pitch;
+		*heave = mb_ping->heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1016,7 +1326,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_insert_nav(verbose,mbio_ptr,store_ptr,
+int mbsys_gsf_insert_nav(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
 		roll,pitch,heave,error)
 int	verbose;
@@ -1033,14 +1343,15 @@ double	pitch;
 double	heave;
 int	*error;
 {
-	char	*function_name = "mbsys_sb_insert_nav";
+	char	*function_name = "mbsys_gsf_insert_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_sb_struct *store;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
 	int	kind;
-	int	time_j[5];
-	int	id;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1072,32 +1383,36 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb_struct *) store_ptr;
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	records = &(store->records);
+	dataID = &(store->dataID);
+	mb_ping = &(records->mb_ping);
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
+
 		/* get time */
-		mb_get_jtime(verbose,time_i,time_j);
-		store->year = time_j[0];
-		store->day = time_j[1];
-		store->min = time_j[2];
-		store->sec = time_j[3];
+		mb_ping->ping_time.tv_sec = (int) time_d;
+		mb_ping->ping_time.tv_nsec 
+			= (int) (1000000000 
+			    * (time_d 
+				    - mb_ping->ping_time.tv_sec));
 
 		/* get navigation */
-		if (navlon < 0.0) navlon = navlon + 360.0;
-		store->lon2u = (short int) 60.0*navlon;
-		store->lon2b = (short int) (600000.0*(navlon 
-			- store->lon2u/60.0));
-		navlat = navlat + 90.0;
-		store->lat2u = (short int) 60.0*navlat;
-		store->lat2b = (short int) (600000.0*(navlat 
-			- store->lat2u/60.0));
+		mb_ping->longitude = navlon;
+		mb_ping->latitude = navlat;
 
-		/* get heading (360 degrees = 65536) */
-		store->sbhdg = 182.044444*heading;
+		/* get heading */
+		mb_ping->heading = heading;
+
+		/* get speed */
+		mb_ping->speed = speed / 1.852;
 
 		/* get roll pitch and heave */
+		mb_ping->roll = roll;
+		mb_ping->pitch = pitch;
+		mb_ping->heave = heave;
 		}
 
 	/* print output debug statements */
@@ -1115,18 +1430,18 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_sb_copy(verbose,mbio_ptr,store_ptr,copy_ptr,error)
+int mbsys_gsf_copy(verbose,mbio_ptr,store_ptr,copy_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 char	*copy_ptr;
 int	*error;
 {
-	char	*function_name = "mbsys_sb_copy";
+	char	*function_name = "mbsys_gsf_copy";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_sb_struct *store;
-	struct mbsys_sb_struct *copy;
+	struct mbsys_gsf_struct *store;
+	struct mbsys_gsf_struct *copy;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1144,11 +1459,14 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_sb_struct *) store_ptr;
-	copy = (struct mbsys_sb_struct *) copy_ptr;
-
-	/* copy the data */
-	*copy = *store;
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	copy = (struct mbsys_gsf_struct *) copy_ptr;
+	
+	/* clear copy structure */
+	gsfFree(&(copy->records));
+	gsfCopyRecords(&(copy->records), &(store->records));
+	copy->kind = store->kind;
+	copy->dataID = store->dataID;
 
 	/* print output debug statements */
 	if (verbose >= 2)

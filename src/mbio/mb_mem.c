@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 4.6 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_mem.c,v 4.7 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,12 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1994/10/28  03:52:18  caress
  * Got rid of realloc call - will try this again later. Will
  * just use malloc for now.
@@ -84,7 +90,7 @@ int	size;
 char	**ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 4.6 1997-04-21 17:02:07 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem.c,v 4.7 1998-10-05 18:32:27 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
 	int	iptr;

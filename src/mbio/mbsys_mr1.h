@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.h	7/19/94
- *	$Id: mbsys_mr1.h,v 4.2 1996-01-26 21:27:27 caress Exp $
+ *	$Id: mbsys_mr1.h,v 4.3 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,15 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1998/10/05  17:46:15  caress
+ * Initial revision
+ *
+ * Revision 4.2  1996/01/26  21:27:27  caress
+ * Version 4.3 distribution.
+ *
+ * Revision 4.2  1996/01/26  21:27:27  caress
+ * Version 4.3 distribution.
+ *
  * Revision 4.1  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *

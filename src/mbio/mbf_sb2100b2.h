@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100B2.h	1/16/94
- *	$Id: mbf_sb2100b2.h,v 4.1 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbf_sb2100b2.h,v 4.2 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Author:	D. W. Caress
  * Date:	March 20, 1997
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
+ * Revision 4.1  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.0  1997/04/21  16:59:50  caress
  * MB-System 4.5 Beta Release.
  *
