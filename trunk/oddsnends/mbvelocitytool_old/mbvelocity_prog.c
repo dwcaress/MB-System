@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.1 1994-11-10 01:16:07 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.2 1994-11-18 18:58:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/11/10  01:16:07  caress
+ * Set program to do raytracing for every ping rather than once at beginning.
+ *
  * Revision 4.0  1994/10/21  12:43:44  caress
  * Release V4.0
  *
@@ -76,11 +79,10 @@ struct profile
 	char	name[128];
 	double	*depth;
 	double	*velocity;
-	double	*velocity_layer;
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.1 1994-11-10 01:16:07 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.2 1994-11-18 18:58:19 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -97,7 +99,6 @@ struct profile	profile_display[MAX_PROFILES];
 struct profile	profile_edit;
 int	*edit_x = NULL;
 int	*edit_y = NULL;
-int	*edit_xl = NULL;
 char	editfile[128];
 int	edit = 0;
 int	ndisplay = 0;
@@ -114,6 +115,9 @@ double	xscale, yscale;
 int	xrmin, xrmax, yrmin, yrmax;
 double	xrminimum, xrmaximum, yrminimum, yrmaximum;
 double	xrscale, yrscale;
+int	xpmin, xpmax, ypmin, ypmax;
+double	xpminimum, xpmaximum, ypminimum, ypmaximum;
+double	xpscale, ypscale;
 int	active = -1;
 
 /* default edit profile */
@@ -159,8 +163,10 @@ double	*angles = NULL;
 double	*angles_forward = NULL;
 int	*flags = NULL;
 double	*p = NULL;
-double	**ttime_tab;
-double	**dist_tab;
+int	nraypathmax;
+int	*nraypath;
+double	**raypathx;
+double	**raypathy;
 double	*depth = NULL;
 double	*acrosstrack = NULL;
 double	dangle = 0.0;
@@ -238,7 +244,7 @@ char	**argv;
 	etime_i[5] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
-	nbeams = 59;
+	nbeams = 16;
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:VvHh")) != -1)
@@ -357,13 +363,14 @@ int mbvt_quit()
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles_forward,&error);
 		mb_free(verbose,&p,&error);
+		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
 			{
-			mb_free(verbose,&ttime_tab[i],&error);
-			mb_free(verbose,&dist_tab[i],&error);
+			mb_free(verbose,&raypathx[i],&error);
+			mb_free(verbose,&raypathy[i],&error);
 			}
-		mb_free(verbose,&ttime_tab,&error);
-		mb_free(verbose,&dist_tab,&error);
+		mb_free(verbose,&raypathx,&error);
+		mb_free(verbose,&raypathy,&error);
 		mb_free(verbose,&depth,&error);
 		mb_free(verbose,&acrosstrack,&error);
 		mb_free(verbose,&residual,&error);
@@ -606,10 +613,8 @@ char	*file;
 		strcpy(profile->name,"\0");
 		mb_free(verbose,&edit_x,&error);
 		mb_free(verbose,&edit_y,&error);
-		mb_free(verbose,&edit_xl,&error);
 		mb_free(verbose,&profile->depth,&error);
 		mb_free(verbose,&profile->velocity,&error);
-		mb_free(verbose,&profile->velocity_layer,&error);
 		}
 
 	/* open the file if possible and count the velocity points */
@@ -629,11 +634,9 @@ char	*file;
 	size = profile->n*sizeof(int);
 	status = mb_malloc(verbose,size,&edit_x,&error);
 	status = mb_malloc(verbose,size,&edit_y,&error);
-	status = mb_malloc(verbose,size,&edit_xl,&error);
 	size = profile->n*sizeof(double);
 	status = mb_malloc(verbose,size,&(profile->depth),&error);
 	status = mb_malloc(verbose,size,&(profile->velocity),&error);
-	status = mb_malloc(verbose,size,&(profile->velocity_layer),&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -735,10 +738,8 @@ int mbvt_new_edit_profile()
 		strcpy(profile->name,"\0");
 		mb_free(verbose,&edit_x,&error);
 		mb_free(verbose,&edit_y,&error);
-		mb_free(verbose,&edit_xl,&error);
 		mb_free(verbose,&profile->depth,&error);
 		mb_free(verbose,&profile->velocity,&error);
-		mb_free(verbose,&profile->velocity_layer,&error);
 		}
 
 	/* allocate space for the velocity profile and raytracing tables */
@@ -746,14 +747,11 @@ int mbvt_new_edit_profile()
 	size = profile->n*sizeof(int);
 	status = mb_malloc(verbose,size,&edit_x,&error);
 	status = mb_malloc(verbose,size,&edit_y,&error);
-	status = mb_malloc(verbose,size,&edit_xl,&error);
 	size = profile->n*sizeof(double);
 	profile->depth = NULL;
 	profile->velocity = NULL;
-	profile->velocity_layer = NULL;
 	status = mb_malloc(verbose,size,&(profile->depth),&error);
 	status = mb_malloc(verbose,size,&(profile->velocity),&error);
-	status = mb_malloc(verbose,size,&(profile->velocity_layer),&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1150,8 +1148,12 @@ int mbvt_plot()
 	double	deltaxr, deltayr;
 	int	nxr_int, nyr_int;
 	int	xr_int, yr_int;
+	int	xpcen, ypcen;
+	double	deltaxp, deltayp;
+	int	nxp_int, nyp_int;
+	int	xp_int, yp_int;
 	int	xx, vx, yy, vy;
-	int	xxo, yyo, xxl, xxh, yyh, yyn;
+	int	xxo, yyo, xxh, yyh, yyn;
 	int	swidth, sascent, sdescent;
 	char	string[128];
 	int	color;
@@ -1183,11 +1185,11 @@ int mbvt_plot()
 		pixel_values[WHITE],XG_SOLIDLINE);
 
 	/* set scaling */
-	margin = (borders[1] - borders[0])/15;
-	xmin = 2*margin;
-	xmax = borders[1] - margin;
+	margin = (borders[3] - borders[2])/15;
+	xmin = 2.25*margin;
+	xmax = 0.5*(borders[1] - borders[0]) - margin;
 	ymin = margin;
-	ymax = borders[3] - 6*margin;
+	ymax = 0.5*(borders[3] - borders[2]);
 	xcen = xmin + (xmax - xmin)/2;
 	ycen = ymin + (ymax - ymin)/2;
 	xminimum = 1490.0 - velrange/2;
@@ -1286,13 +1288,6 @@ int mbvt_plot()
 	/* plot edit profile */
 	if (edit == MB_YES)
 	  {
-
-	  /* construct layered velocity model from discrete model */
-	  for (i=0;i<profile_edit.n-1;i++)
-		profile_edit.velocity_layer[i] = 0.5*(profile_edit.velocity[i] 
-				+ profile_edit.velocity[i+1]);
-	  profile_edit.velocity_layer[profile_edit.n-1] = 0.0;
-
 	  for (j=0;j<profile_edit.n;j++)
 		{
 		xx = xmin + (profile_edit.velocity[j] - xminimum)*xscale;
@@ -1301,27 +1296,15 @@ int mbvt_plot()
 			pixel_values[BLACK],XG_SOLIDLINE);
 		if (j > 0)
 			{
-			xxl = xmin + (profile_edit.velocity_layer[j-1] 
-				- xminimum)*xscale;
-/*			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,
-				pixel_values[BLACK],XG_SOLIDLINE);*/
-			xg_drawline(mbvt_xgid,xxl,yyo,xxl,yy,
-				pixel_values[BLACK],XG_SOLIDLINE);
-			}
-		if (j > 1)
-			{
-			xg_drawline(mbvt_xgid,edit_xl[j-2],yyo,xxl,yyo,
+			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,
 				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		xxo = xx;
 		yyo = yy;
 		edit_x[j] = xx;
 		edit_y[j] = yy;
-		if (j > 0)
-			edit_xl[j-1] = xxl;
 		}
 	  }
-
 
 	/* now plot grid for Multibeam Residuals */
 	/* turn clip mask back to whole canvas */
@@ -1330,10 +1313,10 @@ int mbvt_plot()
 		borders[1]-borders[0],borders[3]-borders[2]);
 
 	/* set scaling */
-	xrmin = 2*margin;
-	xrmax = borders[1] - margin;
-	yrmin = borders[3] - 4*margin;
-	yrmax = borders[3] - margin;
+	xrmin = 0.5*(borders[1] - borders[0]) + 2*margin;
+	xrmax = borders[1] - 0.5*margin;
+	yrmin = margin;
+	yrmax = 0.5*(borders[3] - borders[2]);
 	xrcen = xrmin + (xrmax - xrmin)/2;
 	yrcen = yrmin + (yrmax - yrmin)/2;
 	xrminimum = -1.0;
@@ -1347,7 +1330,7 @@ int mbvt_plot()
 	deltayr = 0.1*(yrmaximum - yrminimum);
 	yrscale = (yrmax - yrmin)/(yrmaximum - yrminimum);	
 	yr_int = deltayr*yrscale;
-	nyr_int = (yrmaximum - yrminimum)/deltayr + 1;
+	nyr_int = (yrmaximum - yrminimum)/deltayr/2 + 1;
 
 	/* plot grid */
 	xg_drawline(mbvt_xgid,xrmin,yrmin,xrmin,yrmax,
@@ -1373,8 +1356,18 @@ int mbvt_plot()
 		pixel_values[BLACK],XG_SOLIDLINE);
 	for (i=0;i<nyr_int;i++)
 		{
-		yy = yrmin + i*yr_int;
-		vy = yrminimum + i*deltayr;
+		yy = yrcen + i*yr_int;
+		vy = i*deltayr;
+		xg_drawline(mbvt_xgid,xrmin,yy,xrmax,yy,
+			pixel_values[BLACK],XG_DASHLINE);
+		sprintf(string,"%1d",vy);
+		xg_justify(mbvt_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbvt_xgid,xrmin-swidth-5,
+			yy+sascent/2,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		yy = yrcen - i*yr_int;
+		vy = -i*deltayr;
 		xg_drawline(mbvt_xgid,xrmin,yy,xrmax,yy,
 			pixel_values[BLACK],XG_DASHLINE);
 		sprintf(string,"%1d",vy);
@@ -1390,8 +1383,9 @@ int mbvt_plot()
 			bath_min, bath_max);
 		xg_justify(mbvt_xgid,string,&swidth,
 			&sascent,&sdescent);
-		xg_drawstring(mbvt_xgid,xrcen-swidth/2,
-			yrmin-4*sascent+10,string,
+		xg_drawstring(mbvt_xgid,
+			borders[1]/2-swidth/2,
+			yrmin-4*sascent+12,string,
 			pixel_values[BLACK],XG_SOLIDLINE);
 		}
 	strcpy(string,"Multibeam Bathymetry Beam Residuals");
@@ -1438,8 +1432,126 @@ int mbvt_plot()
 		}
 	     }
 
-	/* turn clipping on for velocity profile box */
+	/* now plot grid for raypaths */
+	/* turn clip mask back to whole canvas */
 
+	xg_setclip(mbvt_xgid,borders[0],borders[2],
+		borders[1]-borders[0],borders[3]-borders[2]);
+
+	/* set scaling */
+	xpmin = 2.25*margin;
+	xpmax = borders[1] - 0.5*margin;
+	ypmin = 0.5*(borders[3] - borders[2]) + 1.5*margin;
+	ypmax = ypmin + (xpmax - xpmin)/4.5;
+	xpcen = xpmin + (xpmax - xpmin)/2;
+	ypcen = ypmin + (ypmax - ypmin)/2;
+	xpminimum = -2.25*maxdepth;
+	xpmaximum = 2.25*maxdepth;
+	deltaxp = (int) (0.4*maxdepth);
+	xpscale = (xpmax - xpmin)/(xpmaximum - xpminimum);
+	xp_int = deltaxp*xpscale;
+	nxp_int = (xpmaximum - xpminimum)/deltaxp/2 + 1;
+	ypminimum = 0.0;
+	ypmaximum = maxdepth;
+	deltayp = 0.2*(ypmaximum - ypminimum);
+	ypscale = (ypmax - ypmin)/(ypmaximum - ypminimum);	
+	yp_int = deltayp*ypscale;
+	nyp_int = (ypmaximum - ypminimum)/deltayp + 1;
+
+	/* plot grid */
+	xg_drawline(mbvt_xgid,xpmin,ypmin,xpmin,ypmax,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid,xpmax,ypmin,xpmax,ypmax,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	for (i=0;i<nxp_int;i++)
+		{
+		xx = xpcen + i*xp_int;
+		vx = i*deltaxp;
+		xg_drawline(mbvt_xgid,xx,ypmin,xx,ypmax,
+			pixel_values[BLACK],XG_DASHLINE);
+		sprintf(string,"%1d",vx);
+		xg_justify(mbvt_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbvt_xgid,xx-swidth/2,
+			ypmax+sascent+5,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		xx = xpcen - i*xp_int;
+		vx = -i*deltaxp;
+		xg_drawline(mbvt_xgid,xx,ypmin,xx,ypmax,
+			pixel_values[BLACK],XG_DASHLINE);
+		sprintf(string,"%1d",vx);
+		xg_justify(mbvt_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbvt_xgid,xx-swidth/2,
+			ypmax+sascent+5,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		}
+	xg_drawline(mbvt_xgid,xpmin,ypmin,xpmax,ypmin,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid,xpmin,ypmax,xpmax,ypmax,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	for (i=0;i<nyp_int;i++)
+		{
+		yy = ypmin + i*yp_int;
+		vy = ypminimum + i*deltayp;
+		xg_drawline(mbvt_xgid,xpmin,yy,xpmax,yy,
+			pixel_values[BLACK],XG_DASHLINE);
+		sprintf(string,"%1d",vy);
+		xg_justify(mbvt_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbvt_xgid,xpmin-swidth-5,
+			yy+sascent/2,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		}
+	strcpy(string,"Raypaths");
+	xg_justify(mbvt_xgid,string,&swidth,
+		&sascent,&sdescent);
+	xg_drawstring(mbvt_xgid,xpcen-swidth/2,
+		ypmin-2*sascent+10,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	strcpy(string,"Acrosstrack Distance (m)");
+	xg_justify(mbvt_xgid,string,&swidth,
+		&sascent,&sdescent);
+	xg_drawstring(mbvt_xgid,xpcen-swidth/2,
+		ypmax+2*sascent+10,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	strcpy(string,"Depth");
+	xg_justify(mbvt_xgid,string,&swidth,
+		&sascent,&sdescent);
+	xg_drawstring(mbvt_xgid,xpmin-2*swidth-10,
+		ypcen-sascent,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	strcpy(string,"(m)");
+	xg_drawstring(mbvt_xgid,xpmin-2*swidth,
+		ypcen+sascent,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
+
+	/* turn clipping on for raypath plot box */
+	xg_setclip(mbvt_xgid,xpmin,ypmin,(xpmax-xpmin),(ypmax-ypmin));
+
+	/* plot raypaths */
+	if (nbuffer > 0)
+	  for (i=0;i<nbeams;i++)
+	    {
+	    if (nraypath[i] > 0)
+		{
+		xxo = xpmin + (raypathx[i][0] - xpminimum)*xpscale;
+		yyo = ypmin + (raypathy[i][0] - ypminimum)*ypscale;
+		for (j=1;j<nraypath[i];j++)
+			{
+			xx = xpmin + (raypathx[i][j] - xpminimum)*xpscale;
+			yy = ypmin + (raypathy[i][j] - ypminimum)*ypscale;
+			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,
+				pixel_values[BLACK],XG_SOLIDLINE);
+			xxo = xx;
+			yyo = yy;
+			}
+		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4,
+			pixel_values[RED],XG_SOLIDLINE);
+		}
+	     }
+
+	/* turn clipping on for velocity profile box */
 	xg_setclip(mbvt_xgid,xmin,ymin,(xmax-xmin),(ymax-ymin));
 
 	/* print output debug statements */
@@ -1623,42 +1735,16 @@ int	y;
 			pixel_values[WHITE],XG_SOLIDLINE);
 		if (active > 0)
 			{
-/*			xg_drawline(mbvt_xgid,
+			xg_drawline(mbvt_xgid,
 				edit_x[active-1],edit_y[active-1],
 				edit_x[active],edit_y[active],
-				pixel_values[WHITE],XG_SOLIDLINE);*/
-			xg_drawline(mbvt_xgid,
-				edit_xl[active-1],edit_y[active-1],
-				edit_xl[active-1],edit_y[active],
-				pixel_values[WHITE],XG_SOLIDLINE);
-			xg_drawline(mbvt_xgid,
-				edit_xl[active-1],edit_y[active],
-				edit_xl[active-0],edit_y[active],
-				pixel_values[WHITE],XG_SOLIDLINE);
-			}
-		if (active > 1)
-			{
-			xg_drawline(mbvt_xgid,
-				edit_xl[active-2],edit_y[active-1],
-				edit_xl[active-1],edit_y[active-1],
 				pixel_values[WHITE],XG_SOLIDLINE);
 			}
 		if (active < profile_edit.n - 1)
 			{
-/*			xg_drawline(mbvt_xgid,
+			xg_drawline(mbvt_xgid,
 				edit_x[active],edit_y[active],
 				edit_x[active+1],edit_y[active+1],
-				pixel_values[WHITE],XG_SOLIDLINE);*/
-			xg_drawline(mbvt_xgid,
-				edit_xl[active],edit_y[active],
-				edit_xl[active],edit_y[active+1],
-				pixel_values[WHITE],XG_SOLIDLINE);
-			}
-		if (active < profile_edit.n - 1 && active > 1)
-			{
-			xg_drawline(mbvt_xgid,
-				edit_xl[active],edit_y[active+1],
-				edit_xl[active+1],edit_y[active+1],
 				pixel_values[WHITE],XG_SOLIDLINE);
 			}
 
@@ -1667,64 +1753,20 @@ int	y;
 		edit_y[active] = y;
 		profile_edit.velocity[active] = (x - xmin)/xscale + xminimum;
 		profile_edit.depth[active] = (y - ymin)/yscale + yminimum;
-		if (active > 0)
-			{
-			profile_edit.velocity_layer[active-1] = 0.5*
-				(profile_edit.velocity[active-1] 
-				+ profile_edit.velocity[active]);
-			edit_xl[active-1] = xmin 
-				+ (profile_edit.velocity_layer[active-1] 
-				- xminimum)*xscale;
-			}
-		if (active < profile_edit.n - 1)
-			{
-			profile_edit.velocity_layer[active] = 0.5*
-				(profile_edit.velocity[active] 
-				+ profile_edit.velocity[active+1]);
-			edit_xl[active] = xmin 
-				+ (profile_edit.velocity_layer[active] 
-				- xminimum)*xscale;
-			}
 
-		/* replot the current ping */
+		/* replot the current svp */
 		if (active > 0)
 			{
-/*			xg_drawline(mbvt_xgid,
+			xg_drawline(mbvt_xgid,
 				edit_x[active-1],edit_y[active-1],
 				edit_x[active],edit_y[active],
-				pixel_values[BLACK],XG_SOLIDLINE);*/
-			xg_drawline(mbvt_xgid,
-				edit_xl[active-1],edit_y[active-1],
-				edit_xl[active-1],edit_y[active],
-				pixel_values[BLACK],XG_SOLIDLINE);
-			xg_drawline(mbvt_xgid,
-				edit_xl[active-1],edit_y[active],
-				edit_xl[active-0],edit_y[active],
-				pixel_values[BLACK],XG_SOLIDLINE);
-			}
-		if (active > 1)
-			{
-			xg_drawline(mbvt_xgid,
-				edit_xl[active-2],edit_y[active-1],
-				edit_xl[active-1],edit_y[active-1],
 				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		if (active < profile_edit.n - 1)
 			{
-/*			xg_drawline(mbvt_xgid,
+			xg_drawline(mbvt_xgid,
 				edit_x[active],edit_y[active],
 				edit_x[active+1],edit_y[active+1],
-				pixel_values[BLACK],XG_SOLIDLINE);*/
-			xg_drawline(mbvt_xgid,
-				edit_xl[active],edit_y[active],
-				edit_xl[active],edit_y[active+1],
-				pixel_values[BLACK],XG_SOLIDLINE);
-			}
-		if (active < profile_edit.n - 1 && active > 1)
-			{
-			xg_drawline(mbvt_xgid,
-				edit_xl[active],edit_y[active+1],
-				edit_xl[active+1],edit_y[active+1],
 				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		if (active > 0)
@@ -1818,13 +1860,14 @@ int	form;
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles_forward,&error);
 		mb_free(verbose,&p,&error);
+		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
 			{
-			mb_free(verbose,&ttime_tab[i],&error);
-			mb_free(verbose,&dist_tab[i],&error);
+			mb_free(verbose,&raypathx[i],&error);
+			mb_free(verbose,&raypathy[i],&error);
 			}
-		mb_free(verbose,&ttime_tab,&error);
-		mb_free(verbose,&dist_tab,&error);
+		mb_free(verbose,&raypathx,&error);
+		mb_free(verbose,&raypathy,&error);
 		mb_free(verbose,&depth,&error);
 		mb_free(verbose,&acrosstrack,&error);
 		mb_free(verbose,&residual,&error);
@@ -1852,10 +1895,19 @@ int	form;
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&p,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),&nraypath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double *),
-				&ttime_tab,&error);
+				&raypathx,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double *),
-				&dist_tab,&error);
+				&raypathy,&error);
+	nraypathmax = 100*profile_edit.n;
+	for (i=0;i<beams_bath;i++)
+		{
+		status = mb_malloc(verbose,nraypathmax*sizeof(double *),
+				&raypathx[i],&error);
+		status = mb_malloc(verbose,nraypathmax*sizeof(double *),
+				&raypathy[i],&error);
+		}
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&acrosstrack,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&residual,&error);
@@ -1928,12 +1980,12 @@ int mbvt_process_multibeam()
 	char	*function_name = "mbvt_process_multibeam";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
-	double	*ttime;
-	double	*dist;
 	double	*dep;
 	double	*vel;
 	int	nvel;
-	double	factor;
+	char	*rt_svp = NULL;
+	double	ttime;
+	int	ray_stat;
 	double	sx, sy, sxx, sxy;
 	double	delta, a, b;
 	int	ns;
@@ -1963,31 +2015,12 @@ int mbvt_process_multibeam()
 		return(status);
 		}
 
-	/* construct layered velocity model from discrete model */
-	nvel = profile_edit.n;
-	vel = profile_edit.velocity_layer;
-	dep = profile_edit.depth;
-	for (i=0;i<nvel-1;i++)
-		vel[i] = 0.5*(profile_edit.velocity[i] 
-				+ profile_edit.velocity[i+1]);
-	vel[nvel-1] = 0.0;
-
-	/* allocate memory for raytracing tables */
-	for (i=0;i<beams_bath;i++)
-		{
-		mb_free(verbose,&ttime_tab[i],&error);
-		mb_free(verbose,&dist_tab[i],&error);
-		status = mb_malloc(verbose,nvel*sizeof(double),
-				&(ttime_tab[i]),&error);
-		status = mb_malloc(verbose,nvel*sizeof(double),
-				&(dist_tab[i]),&error);
-		}
-
-	/* initialize residuals */
+	/* initialize residuals and raypaths */
 	for (i=0;i<nbeams;i++)
 		{
 		residual[i] = 0.0;
 		nresidual[i] = 0;
+		nraypath[i] = 0;
 		}
 
 	/* initialize min-max variables */
@@ -1996,9 +2029,12 @@ int mbvt_process_multibeam()
 
 	/* get buffer structure */
 	buff = (struct mb_buffer_struct *) buff_ptr;
+
+	/* set up raytracing */
 	nvel = profile_edit.n;
-	vel = profile_edit.velocity_layer;
+	vel = profile_edit.velocity;
 	dep = profile_edit.depth;
+	status = mb_rt_init(verbose, nvel, dep, vel, &rt_svp, &error);
 
 	/* loop over the data records */
 	for (k=0;k<nbuffer;k++)
@@ -2036,82 +2072,45 @@ int mbvt_process_multibeam()
 			    for (i=0;i<nbeams;i++)
 				angles[i] = (i - icenter)*dangle;
 			    }
-
-			/* set the beam ray parameters */
-			for (i=0;i<nbeams;i++)
-			    p[i] = sin(DTR*angles[i])/vel[0];
-
-			/* set up the raytracing tables */
-			for (i=0;i<nbeams;i++)
-			    {
-			    ttime = ttime_tab[i];
-			    dist = dist_tab[i];
-			    ttime[0] = 0.0;
-			    dist[0] = 0.0;
-			    for (j=0;j<nvel-1;j++)
-				{
-				dr = (dep[j+1] - dep[j])/sqrt(1. 
-					- p[i]*p[i]*vel[j]*vel[j]);
-				dx = dr*p[i]*vel[j];
-				ttime[j+1] = ttime[j] + 2.*dr/vel[j];
-				dist[j+1] = dist[j] + dx;
-				}
-
-			    /* output some debug values */
-			    if (verbose >= 5)
-				{
-				fprintf(stderr,"\ndbg5  Raytracing table created for survey beam %d in program <%s>:\n",i,program_name);
-				fprintf(stderr,"dbg5       angle: %f\n",angles[i]);
-				fprintf(stderr,"dbg5       p:     %f\n",p[i]);
-				fprintf(stderr,"dbg5      beam    depth      vel        time      dist\n",j,dep[j],vel[j],ttime[j],dist[j]);
-				for (j=0;j<nvel;j++)
-				    fprintf(stderr,"dbg5       %2d   %8.2f   %7.2f   %8.2f  %9.2f\n",j,dep[j],vel[j],ttime[j],dist[j]);
-				}
-			    }
 			}
 
 		/* loop over the beams */
 		if (buff->buffer_kind[k] == MB_DATA_DATA)
 		  for (i=0;i<nbeams;i++)
 		    {
-		    ttime = ttime_tab[i];
-		    dist = dist_tab[i];
-
-		    /* calculate the depths 
-			and crosstrack distances */ 
-		    depth[i] = 0.0;
-		    acrosstrack[i] = 0.0;
-		    if (ttimes[i] > 0.0)
+		    /* trace the ray */
+		    if (flags[i] == 0)
 			{
-			for (j=0;j<nvel-1;j++)
-			  if (ttimes[i] > ttime[j] && ttimes[i] <= ttime[j+1])
-				{
-				factor = (ttimes[i] - ttime[j])
-					/(ttime[j+1] - ttime[j]);
-				depth[i] = dep[j] 
-					+ factor*(dep[j+1] - dep[j]) + 5.5;
-				acrosstrack[i] = dist[j]
-					+ factor*(dist[j+1] - dist[j]);
-				if (flags[i] == MB_YES)
-					depth[i] = -depth[i];
-				else
-					{
-					if (depth[i] < bath_min)
-						bath_min = depth[i];
-					if (depth[i] > bath_max)
-						bath_max = depth[i];
-					}
-				}
-			}
+			if (nraypath[i] > 0)
+			status = mb_rt(verbose, rt_svp, 0.0, 
+				    angles[i], 0.5*ttimes[i],
+				    0, NULL, NULL, NULL, 
+				    &acrosstrack[i], &depth[i], 
+				    &ttime, &ray_stat, &error);
+			else
+			status = mb_rt(verbose, rt_svp, 0.0, 
+				    angles[i], 0.5*ttimes[i],
+				    nraypathmax, &nraypath[i], 
+				    raypathx[i], raypathy[i], 
+				    &acrosstrack[i], &depth[i], 
+				    &ttime, &ray_stat, &error);
 
-		    /* output some debug values */
-		    if (verbose >= 5)
-			fprintf(stderr,"  %5.0f %5.0f\n",
-				acrosstrack[i],depth[i]);
+			/* reset acrosstrack distances */
+			if (angles[i] < 0.0)
+			    acrosstrack[i] = -acrosstrack[i];
 
-		    /* get sums for linear fit */
-		    if (depth[i] > 0.0)
-			{
+			/* get min max depths */
+			if (depth[i] < bath_min)
+			    bath_min = depth[i];
+			if (depth[i] > bath_max)
+			    bath_max = depth[i];
+
+			/* output some debug values */
+			if (verbose >= 5)
+			    fprintf(stderr,"dbg5       %d %5.0f %5.0f\n",
+				i, acrosstrack[i],depth[i]);
+
+			/* get sums for linear fit */
 			sx += acrosstrack[i];
 			sy += depth[i];
 			sxx += acrosstrack[i]*acrosstrack[i];
@@ -2131,7 +2130,7 @@ int mbvt_process_multibeam()
 		/* get residuals */
 		if (ns > 0)
 		  for (i=0;i<nbeams;i++)
-		    if (depth[i] > 0.0)
+		    if (flags[i] == 0)
 			{
 			depth_predict = a + b*acrosstrack[i];
 			res = depth[i] - depth_predict;
@@ -2145,6 +2144,9 @@ int mbvt_process_multibeam()
 					depth_predict,res);
 			}
 		}
+
+	/* end raytracing */
+	status = mb_rt_deall(verbose, &rt_svp, &error);
 
 	/* calculate final residuals */
 	for (i=0;i<nbeams;i++)
@@ -2177,7 +2179,4 @@ int mbvt_process_multibeam()
 	/* return */
 	return(status);
 }
-/************************************************************/
-/* END OF FILE "mbvelocity_prog.c".                         */
-/************************************************************/
-
+/*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
-.TH mbvelocitytool l "31 October 1994"
+.TH mbvelocitytool l "18 November 1994"
 .SH NAME
-\fBmbvelocitytool\fP - Interactive water velocity profile editor.
+\fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
 .SH VERSION
 Version 4.1
@@ -9,13 +9,21 @@ Version 4.1
 \fBmbvelocitytool\fP [\fBA\fIdangle\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbvelocitytool\fP is an interactive water velocity profile editor
-used to examine multiple water velocity profiles and to create
-new water velocity profiles which can be used for the processing
+\fBmbvelocitytool\fP is an interactive water sound velocity profile 
+(SVP) editor used to examine multiple SVPs and to create
+new SVPs which can be used for the processing
 of multibeam sonar data.  In general, this tool is used to examine
-water velocity profiles obtained from XBTs, CTDs, or databases,
+SVPs obtained from XBTs, CTDs, or databases,
 and to construct new profiles consistent with these various
-sources of information.
+sources of information. The SVPs are represented by a set
+of paired depth and velocity values which are connected
+by linear interpolation. In order to calculate bathymetry
+values from travel time observations, geometrical raypaths
+are traced through the SVP for each beam. Because the sound
+velocity gradients are uniform between the depth-velocity
+nodes (linear interpolation), the raypaths are be calculated
+analytically as pieces of circular arcs. This raytracing algorithm
+is the same used in the program \fBmbbath\fP.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -47,7 +55,8 @@ angles associated with a particular dataset (e.g. the actual beam angle
 separation may vary among installations of a sonar on different ships,
 or MB-System may have incorrect information built in regarding certain
 sonars).  The default is to use the beam angle pattern that MB-System
-stores internally for each supported multibeam sonar system.
+stores internally (or obtains from the data stream) for each 
+supported multibeam sonar system.
 .TP
 .B \fB-H\fP
 This "help" flag cause the program to print out a description
@@ -76,7 +85,8 @@ black in the order that they are loaded.
 .TP
 .B \fBFile->Open Editable Profile\fP
 Selecting this menu item brings up a popup window which allows the 
-user to select an input water velocity profile file to be edited. The profile
+user to select an input water velocity profile file to be edited. 
+The profile
 will be displayed in a depth vs velocity plot along with any
 display profiles that have been opened.  This profile will be plotted
 as black lines with small black squares at the velocity depth points.
@@ -85,7 +95,7 @@ to change the editable velocity profile.
 .TP
 .B \fBFile->New Editable Profile\fP
 Selecting this menu item creates a default editable velocity profile
-consisting of 14 velocity-depth points with a velocity of 1490 m/s. 
+consisting of 14 velocity-depth points with a velocity of 1500 m/s. 
 Any previously defined editable velocity profile will disappear. The profile
 will be displayed in a depth vs velocity plot along with any
 display profiles that have been opened.  This profile will be plotted
@@ -103,18 +113,26 @@ user to select an input multibeam data file to be processed
 in conjunction with the current editable velocity profile.
 The multibeam data file must be in a format which stores
 travel time data for each beam. The first 1000 data records
-of the data file will be read into a buffer for later processing.
+of the data file will be read into a buffer for processing.
+If there is no current editable velocity profile, then a
+default profile consisting of 14 velocity-depth points 
+with a velocity of 1500 m/s will be created. The travel time
+data will then be processed and displayed in the manner described
+below for the \fBProcess Multibeam data\fP button.
 .TP
 .B \fBProcess Multibeam data\fP
 Selecting this button causes the multibeam travel time data to be
 processed into bathymetry using the current editable velocity profile.
 The processing involves full raytracing throught the water velocity model.
-No calculations are performed or results plotted if an editable
-velocity profile has not been loaded.
 The bathymetry of each ping is fit with a line, and bathymetry residuals
 are calculated for each good beam relative to the linear fit.  The
-average of the bathymetry residuals is displayed in the lower part of
-the window as a function of beam number. Anomalously shallow
+average of the bathymetry residuals is displayed in the 
+upper right part of
+the window as a function of beam number. Raypaths are displayed without
+vertical exageration in
+the lower part of the window; these represent the first raypath
+calculated for each beam while processing the current data (most will
+be from the first ping). Anomalously shallow
 bathymetry maps into negative residuals and deep bathymetry into positive
 residuals; the residuals are displayed so that shallow is up and deep
 is down. If the seafloor is reasonably smooth so that
@@ -125,17 +143,20 @@ velocity profile is significantly in error, then the outer beam depths
 may anomalously shallow (edge curl up) or deep (edge curl down).  In practice,
 the editable velocity profile is altered interactively until a reasonably
 residual pattern is achieved; reference velocity profiles obtained from
-CTD casts, XBT's, or data bases (see manual page for program \fBMBLEVITUS\fP)
+CTD casts, XBT's, or data bases (see manual page for program \fBmblevitus\fP)
 may be read in as display profiles to guide the editing process.
 .TP
 .B \fBQuit\fP
 This button causes the program to exit gracefully, but without asking
-any questions.  If you haven't already saved you edited velocity profile
+any questions.  If you haven't already saved your edited velocity profile
 it will be lost when you quit.
 .TP
 .B \fBMaximum Depth\fP
-This slider sets the maximum depth in meters of the velocity profile 
-display; the minimum depth is always zero.
+This slider sets the maximum depth in meters of both the velocity profile 
+display and the raypath display. The minimum depths of these
+displays are always zero. The acrosstrack distance axis of the raypath
+display automatically adjusts so that the rays are plotted with
+no vertical exageration.
 .TP
 .B \fBVelocity Range\fP
 This slider sets the minimum and maximum velocity values of the velocity
