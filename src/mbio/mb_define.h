@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.14 2002-04-06 02:43:39 caress Exp $
+ *    $Id: mb_define.h,v 5.15 2002-04-08 20:59:38 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.13  2002/02/22 09:03:43  caress
  * Release 5.0.beta13
  *
@@ -216,7 +219,7 @@ int mb_get_shortest_path(int verbose,
 int mb_check_info(int verbose, char *file, int lonflip, 
 		    double bounds[4], int *file_in_bounds,
 		    int *error);
-int mb_make_info(int verbose, 
+int mb_make_info(int verbose, int force,
 		    char *file, int format, int *error);
 int mb_read_init(int verbose, char *file, 
 		int format, int pings, int lonflip, double bounds[4],
