@@ -1,4 +1,4 @@
-.TH mbvelocitytool l "5 April 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbvelocitytool l "6 October 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
@@ -18,53 +18,65 @@ data. SVPs created using \fBMBvelocitytool\fP can be used by the program
 \fBmbprocess\fP to recalculate swath bathymetry from raw travel time
 and angle data.  
 
-In general, \fBMBvelocitytool\fP is used to examine
-SVPs obtained from swath data files (see \fBmbsvplist\fP
-manual page), XBTs, CTDs, or databases,
-and to construct new profiles consistent with these various
-sources of information. The SVPs are represented by a set
-of paired depth and velocity values which are connected
-by linear interpolation. Users may load a number of SVPs
-for display. Users may load or create a single editable
-SVP and then interactively modify this profile. 
+In general, \fBMBvelocitytool\fP is used to examine SVPs obtained from 
+swath data files (see \fBmbsvplist\fP manual page), XBTs, CTDs, or 
+databases, and to construct new profiles consistent with these various
+sources of information. The SVPs are represented by a set of paired 
+depth and velocity values which are connected by linear interpolation. 
+Users may load a number of SVPs for display. Users may load or create 
+a single editable SVP and then interactively modify this profile. 
 
-When users load swath bathymetry
-data containing raw travel time and angle data (many but not
-all swath data format include this information), 
-\fBMBvelocitytool\fP  recalculates the bathymetry by raytracing
-through the current SVP model. The bathymetry of each 
-ping is fit with a line, and bathymetry residuals
-are calculated for each good beam relative to the linear fit.  The
-average of the bathymetry residuals is displayed along with "error bars"
-indicating the standard deviations of the residuals. 
-Anomalously shallow
-bathymetry maps into negative residuals and deep bathymetry into positive
-residuals; the residuals are displayed so that shallow is up and deep
-is down. If the seafloor is reasonably smooth so that
-a linear fit is appropriate, then the residuals will accurately reflect
-any problems with the water velocity profile.  If the water velocity profile
-is correct, then the residual plot will be roughly flat.  If the water
-velocity profile is significantly in error, then the outer beam depths
-may anomalously shallow (edge curl up) or deep (edge curl down).  In practice,
-the editable velocity profile is altered interactively until a reasonably
-residual pattern is achieved.
+When users load swath bathymetry data containing raw travel time and 
+angle data (many but not all swath data format include this information), 
+\fBMBvelocitytool\fP  recalculates the bathymetry by raytracing through 
+the current SVP model. The bathymetry of each ping is fit with a line, 
+and bathymetry residuals are calculated for each good beam relative 
+to the linear fit.  The average of the bathymetry residuals is displayed 
+along with "error bars" indicating the standard deviations of the 
+residuals. Anomalously shallow  bathymetry maps into negative residuals 
+and deep bathymetry into positive residuals; the residuals are displayed 
+so that shallow is up and deep is down. If the seafloor is reasonably 
+smooth so that a linear fit is appropriate, then the residuals will 
+accurately reflect any problems with the water velocity profile.  If 
+the water velocity profile is correct, then the residual plot will be 
+roughly flat.  If the water velocity profile is significantly in error, 
+then the outer beam depths may anomalously shallow (edge curl up) or 
+deep (edge curl down).  In practice, the editable velocity profile is 
+altered interactively until a reasonably residual pattern is achieved.
 
-In order to calculate bathymetry
-values from travel time observations, geometrical raypaths
-are traced through the SVP for each beam. Because the sound
-velocity gradients are uniform between the depth-velocity
+In order to calculate bathymetry values from travel time observations, 
+geometrical raypaths are traced through the SVP for each beam. Because 
+the sound velocity gradients are uniform between the depth-velocity
 nodes (linear interpolation), the raypaths are be calculated
 analytically as pieces of circular arcs. This raytracing algorithm
 is the same used in the program \fBmbprocess\fP.
 
+One important aspect of the raytracing is the handling of the initial
+takeoff angles associated with each beam or sounding. In general, the
+raytracing will begin at a point in the sound speed model that has a
+sound velocity different than the surface sound velocity (SSV) used by 
+the mapping sonar for the original beamforming. The usual approach is to 
+use Snell's law to adjust the starting angle for this change in sound 
+velocity. This amounts to an assumption that the original SSV was correct 
+and that  the rays pass through an insignificantly thick layer in which the 
+sound speed equals the SSV before transitioning to the sound speed implied 
+by the SVP. This is the default setting for raytracing in \fBMB-System\fP. 
+Alternatively, one can proceed with raytracing using the original angle 
+but this is rarely useful or correct. Finally, if the SSV used by the sonar is
+judged to have been incorrect, then the takeoff angle must be corrected for 
+the erroneous beamforming as well as for the difference between the SSV
+and the initial raytracing sound velocity. This correction must take the 
+sonar geometry into account because the impact of changing the SSV on a beam 
+angle from a flat receive array is very different from a V-shaped or curved 
+array. All three of these angle correction modes are available in \fBmbvelocitytool\fP. 
+
 \fBMBvelocitytool\fP can be used in conjunction with \fBmbprocess\fP.
-If the user uses the \fBSave swath svp file\fP option to 
-save an SVP model developed through the analysis of a
-particular swath data file,\fBMBvelocitytool\fP also sets
-the associated \fBmbprocess\fP parameter file so that \fBmbprocess\fP
-recalculates the bathymetry using the new SVP model. The program
-\fBmbset\fP may be used to set the SVP file in the parameter file for
-any swath data file. Users may also save SVP models without setting
+If the user uses the \fBSave swath svp file\fP option to save an SVP model 
+developed through the analysis of a particular swath data file,
+\fBMBvelocitytool\fP also sets the associated \fBmbprocess\fP parameter file 
+so that \fBmbprocess\fP recalculates the bathymetry using the new SVP model. 
+The program \fBmbset\fP may be used to set the SVP file in the parameter 
+file for any swath data file. Users may also save SVP models without setting
 any \fBmbprocess\fP parameters by using the \fBSave editable profile\fP
 option.
 
@@ -81,13 +93,12 @@ If a user attempts to read in swath bathymetry that does not
 contain the travel time and beam angle data required for bathymetry
 recalculation, \fBMBvelocitytool\fP will estimate the travel times
 and angles from the bathymetry by assuming a 1500 m/s half-space 
-(and then post a warning dialog).
-Although the user can proceed to model bathymetry recalculation
-by modifying the active SVP just as with proper data, the
-travel times and angles are not in general correct and so the
-modeling and any results it gives are, well, bogus. A more
-useful approach is to leave the SVP alone and simply export the
-residuals to be applied as static corrections in mbprocess.
+(and then post a warning dialog). Although the user can proceed 
+to model bathymetry recalculation by modifying the active SVP just 
+as with proper data, the travel times and angles are not in general 
+correct and so the modeling and any results it gives are, well, bogus. 
+A more useful approach is to leave the SVP alone and simply export 
+the residuals to be applied as static corrections in mbprocess.
 This approach allows users a practical means of correcting
 older multibeam bathymetry that was originally calculated with
 an incorrect SVP but which contains no travel time or angle data.
@@ -233,7 +244,9 @@ Selecting this menu item saves the current editable velocity
 profile as a file. The SVP filename is that of the current
 swath data input file with a ".svp" suffix added. \fBMBvelocitytool\fP
 also sets the swath data file's \fBmbprocess\fP parameter file
-to recalculate bathymetry using the new SVP file.
+to recalculate bathymetry using the new SVP file and using the same
+angle mode setting applied in the interactive modeling (see the Angle 
+Mode dialog description below).
 .TP
 .B File->Save Residuals As Offsets
 Selecting this menu item saves the current bathymetry residuals 
@@ -264,31 +277,59 @@ This slider sets the minimum and maximum bathymetry residual values
 of the bathymetry residual display.  The residual plot has a minimum
 value of -range and a maximum value of +range. 
 .TP
+.B Angle Mode
+This button brings up a dialog containing three choices for how the starting
+beam angles are corrected during raytracing. The selected angle mode is
+used by \fBmbvelocitytool\fP in the interactive modeling, and is also passed
+on to the \fBmbprocess\fP parameter file created or modified when an SVP
+file is saved.
+.TP
+.B Angle Mode->Do Not Change Beam Angles
+This button sets the angle mode so that the starting beam angles are not
+corrected before raytracing for the difference between the surface sound
+velocity (SSV) and the sound velocity of the starting depth in the SVP. 
+.TP
+.B Angle Mode->Adjust Angles Using Snell's Law
+This button sets the angle mode so that the starting beam angles are  
+corrected before raytracing, using Snell's Law, for the difference between the  
+surface sound velocity (SSV) and the sound velocity of the starting depth in 
+the SVP. This amounts to an assumption that the original SSV was correct 
+and that  the rays pass through an insignificantly thick layer in which the 
+sound speed equals the SSV before transitioning to the sound speed implied 
+by the SVP. This is the default setting for raytracing in \fBmbvelocitytool\fP
+and in \fBMB-System\fP in general.
+.TP
+.B Angle Mode->Adjust Angles Using Sonar Geometry
+This button sets the angle mode so that the starting beam angles are  
+corrected before raytracing, using Snell's Law and the sonar geometry, for 
+the difference between the surface sound velocity (SSV) and the sound velocity 
+of the starting depth in the SVP. This option is relevant to situations where
+the SSV used by the sonar for beamforming was incorrect, and so the initial
+angles themselves must be adjusted. This mode is indistinguishable from
+that of "Adjust Angles Using Snell's Law" for multibeam sonars with flat, 
+horizontal receive arrays, but deviates strongly for sonars with tilted,
+V-shaped, or curved receive arrays.
+.TP
 .B Reprocess
-Selecting this button causes the swath sonar travel time data to be
-processed into bathymetry using the current editable velocity profile.
-The processing involves full raytracing throught the water velocity model.
-The bathymetry of each ping is fit with a line, and bathymetry residuals
-are calculated for each good beam relative to the linear fit.  The
-average of the bathymetry residuals is displayed in the 
-upper right part of
-the window as a function of beam number, along with "error bars"
-indicating the standard deviations of the residuals. 
-Raypaths are displayed without
-vertical exageration in
-the lower part of the window; these represent the first raypath
-calculated for each beam while processing the current data (most will
-be from the first ping). Anomalously shallow
-bathymetry maps into negative residuals and deep bathymetry into positive
-residuals; the residuals are displayed so that shallow is up and deep
-is down. If the seafloor is reasonably smooth so that
-a linear fit is appropriate, then the residuals will accurately reflect
-any problems with the water velocity profile.  If the water velocity profile
-is correct, then the residual plot will be roughly flat.  If the water
-velocity profile is significantly in error, then the outer beam depths
-may anomalously shallow (edge curl up) or deep (edge curl down).  In practice,
-the editable velocity profile is altered interactively until a reasonably
-residual pattern is achieved; reference velocity profiles obtained from
+Selecting this button causes the swath sonar travel time data to be processed 
+into bathymetry using the current editable velocity profile. The processing 
+involves full raytracing throught the water velocity model. The bathymetry of 
+each ping is fit with a line, and bathymetry residuals are calculated for each 
+good beam relative to the linear fit.  The average of the bathymetry residuals 
+is displayed in the upper right part of the window as a function of beam number, 
+along with "error bars" indicating the standard deviations of the residuals. 
+Raypaths are displayed without vertical exageration in the lower part of the 
+window; these represent the first raypath calculated for each beam while 
+processing the current data (most will be from the first ping). Anomalously 
+shallow bathymetry maps into negative residuals and deep bathymetry into positive 
+residuals; the residuals are displayed so that shallow is up and deep is down. 
+If the seafloor is reasonably smooth so that a linear fit is appropriate, then 
+the residuals will accurately reflect any problems with the water velocity profile. 
+If the water velocity profile is correct, then the residual plot will be roughly 
+flat.  If the water velocity profile is significantly in error, then the outer 
+beam depths may anomalously shallow (edge curl up) or deep (edge curl down). 
+In practice, the editable velocity profile is altered interactively until a 
+reasonably residual pattern is achieved; reference velocity profiles obtained from
 CTD casts, XBT's, or data bases (see manual page for program \fBmblevitus\fP)
 may be read in as display profiles to guide the editing process.
 .TP

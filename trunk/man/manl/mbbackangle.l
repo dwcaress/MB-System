@@ -1,4 +1,4 @@
-.TH mbbackangle l "7 September 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbbackangle l "28 September 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbbackangle\fP - Generates tables of the average amplitude or 
 sidescan values in swath sonar data as a function of 
@@ -9,8 +9,10 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbbackangle\fP [\fB-A\fIkind\fP 
-\fB-C\fP \fB-D\fP \fB-F\fIformat\fP \fB-I\fIfile\fP  
-\fB-N\fInangle/anglemax\fP \fB-P\fIpings\fP
+\fB-C\fP \fB-D\fP \fB-F\fIformat\fP  
+\fB-G\fIkind/angle/max/nx/ny\fP
+\fB-I\fIfile\fP  
+\fB-N\fInangle/anglemax\fP \fB-P\fIpings\fP \fB-Q\fP
 \fB-Z\fIaltitude\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
@@ -21,23 +23,40 @@ the grazing angle with the seafloor. These tables can be used
 by the program \fBmbprocess\fP to correct the sidescan or
 amplitude data for the variation with grazing angle. No assumption
 is made about the nature of the data or the sonar used to
-collect it. The user specifies the angular width 
+collect it. 
+
+The user specifies the angular width 
 of the swath considered and the number of angular bins in that
 swath; the average amplitude or sidescan value within each bin
-form the output data. The user also specifies the number of pings
-to be read to generate each table The results are written to a file named by 
+form the output data. By default, the grazing angle is calculated simply using the
+acrosstrack distance and depth at the beam or pixel location. 
+If bathymetry is not available, the seafloor is assumed to be flat 
+with a sonar altitude specified by the \fB-Z\fP option.
+If the \fB-Q\fP option is used, then the acrosstrack bottom slope
+at the beam or pixel location is factored into the grazing angle
+values. For bins outside the nadir region (angles > 15.0 degrees
+from vertical), the averaging extends over the neighboring bins (three bins
+averaged for each value). The user also specifies the number of pings
+to be read to generate each table; the default is 50 pings. 
+
+The results are written to a file named by 
 adding a ".sga" suffix to the swath filename for sidescan and
 ".aga" for amplitude. These files contain a series of amplitude vs.
 grazing angle tables, each time tagged according to the average time
 of the pings used to generate that table. The swath file's 
 \fBmbprocess\fP parameter file is also modified (or created if necessary)
 so that sidescan or amplitude correction is enabled. The correction
-tables are read and interpolated according to ping time by mbprocess.
-If bathymetry is
-not available, the seafloor is assumed to be flat with a sonar altitude
-specified by the \fB-Z\fP option. In this case the takeoff
-angle for each beam or pixel arrival is projected to the seafloor; 
-no raytracing is done. 
+tables are read and interpolated according to ping time by \fBmbprocess\fP.
+
+If the \fB-G\fP option is used, then \fBmbbackangle\fP also generates
+gridded histograms of the amplitude versus grazing angle values for
+each swath data file processed. The user specifies the bounds and dimensions
+of the grids; the \fB-G\fP option must be given twice to produce grids
+of both amplitude and sidescan histograms. In addition to outputting the
+grids, \fBmbbackangle\fP uses \fBmbm_grdplot\fP to generate \fBGMT\fP
+shellscripts that, when executed, will generate plots of the gridded
+histograms overlain with the amplitude versus grazing angle tables in
+the ".aga" and ".sga" files.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -78,6 +97,23 @@ for the input file specified with the
 \fB-I\fP option. By default, \fBmbbackangle\fP
 infers the format from the "*.mbXX" \fBMB-System\fP suffix
 convention. 
+.TP
+.B \-G
+\fIkind/angle/max/nx/ny\fP
+.br
+This option causes \fBmbbackangle\fP to output gridded histograms
+of the amplitude versus grazing angle data for each swath file
+processed. The program also generates a shellscript to produce a
+first-cut \fBGMT\fP postscript plot of the histogram overlain by
+the amplitude versus grazing angle tables used by \fBmbprocess\fP.
+The \fIkind\fP parameter indicates whether an amplitude (\fIkind\fP = 1)
+or sidescan (\fIkind\fP = 2) histogram is desired; the \fB-G\fP command
+must be given twice (once with \fIkind\fP = 1 and once with \fIkind\fP = 2)
+to generate both amplitude and sidescan histograms. The histogram grid
+consists of \fInx\fP bins extending from -\fIangle\fP to +\fIangle\fP degrees in the
+x-dimension, and \fIny\fP bins extending from 0.0 to \fImax\fP in the
+y-dimension. The values of the histogram are normalized so that they sum
+to 1000.0 within each angle bin.
 .TP
 .B \-H
 This "help" flag causes the program to print out a description
@@ -127,6 +163,15 @@ each table. A table may be output averaged over a lesser number
 of beams if a time gap is encountered in the data, and also at
 the end of the file. Default: \fIpings\fP = 25.
 .TP
+.B \-Q
+By default, \fBmbbackangle\fP does not use seafloor slopes in
+calculating the grazing angles for each amplitude beam and sidescan
+pixel. This option causes the program to calculate acrosstrack slopes
+from swath bathymetry, if available, and to factor these slopes
+into the grazing angle calculation for each data point. In general,
+this option does not work well.
+slopes 
+.TP
 .B \-V
 Normally, \fBmbbackangle\fP works "silently" without outputting
 anything to the stderr stream.  If the
@@ -149,222 +194,161 @@ vs grazing angle table.
 .SH EXAMPLE
 Suppose one has a Simrad EM300 data file called
        0003_20020425_022926.mb57
-which contains 131 pings. In order to correct the sidescan 
+which contains 131 pings. In order to correct the beam amplitude and sidescan 
 with mbprocess, first use \fBmbbackangle\fP to generate the
 amplitude vs grazing angle tables:
- 	mbbackangle -I 0003_20020425_022926.mb57 \
- 			-N161/80.0 -P25 -V
-Here the angle bins will be 1.0 degree wide, the table
+ 	mbbackangle -I mbari_1998_988_msn.mb57 \\
+ 			-N81/80.0 -P50 \\
+ 			-G1/80/60/81/121 \\
+ 			-G2/80/60/81/121 \\
+ 			-V
+.br
+Here the angle bins will be 2.0 degree wide, the table
 will extend from -80.0 degees (port) to +80.0 (starboard),
-and each table will represent the averages over up to 25
+and each table will represent the averages over up to 50
 pings. The output looks like:
 
  	Program mbbackangle
- 	Version $Id: mbbackangle.l,v 5.6 2002-09-19 00:28:12 caress Exp $
- 	MB-system Version 5.0.beta20
+ 	Version $Id: mbbackangle.l,v 5.7 2004-10-06 18:51:39 caress Exp $
+ 	MB-system Version 5.0.4
  	
- 	Pings to average:    25
- 	Number of angle bins: 161
+ 	Pings to average:    50
+ 	Number of angle bins: 81
  	Maximum angle:         80.000000
  	Default altitude:      0.000000
-        Working on beam amplitude data...
+ 	Working on beam amplitude data...
  	Working on sidescan data...
+ 	Using flat bottom assumption in calculating correction tables...
+ 	Outputting gridded histograms of beam amplitude vs grazing angle...
+ 	Outputting gridded histograms of sidescan amplitude vs grazing angle...
  	
- 	processing swath file: 0003_20020425_022926.mb57 57
- 	6 tables written to 0003_20020425_022926.mb57.aga
- 	6 tables written to 0003_20020425_022926.mb57.sga
- 	131 records processed
- 	97128 data processed
+ 	processing swath file: mbari_1998_988_msn.mb57 57
  	
- 	6 total tables written
- 	131 total records processed
- 	97128 total data processed
+ 	7274 records processed
+ 	805564 amplitude data processed
+ 	146 tables written to mbari_1998_988_msn.mb57.aga
+ 	5371412 sidescan data processed
+ 	146 tables written to mbari_1998_988_msn.mb57.sga
 
-The \fBmbprocess\fP parameter file has also been either
+ 	Plot generation shellscript <mbari_1998_988_msn.mb57_aga.grd.cmd> created.
+ 	Plot generation shellscript <mbari_1998_988_msn.mb57_sga.grd.cmd> created.
+ 	
+ 	7274 total records processed
+ 	805564 total amplitude data processed
+ 	146 total aga tables written
+ 	5371412 total sidescan data processed
+ 	146 total sga tables written
+
+The output files include the amplitude versus grazing angle tables in
+mbari_1998_988_msn.mb57.aga and mbari_1998_988_msn.mb57.sga, the
+gridded histogram files mbari_1998_988_msn.mb57_aga.grd and 
+mbari_1998_988_msn.mb57_sga.grd, and the plotting shellscripts 
+mbari_1998_988_msn.mb57_aga.grd.cmd and 
+mbari_1998_988_msn.mb57_sga.grd.cmd. The \fBmbprocess\fP parameter file 
+mbari_1998_988_msn.mb57.par has also been either
 created (if necessary) or modified to enable sidescan
 correction using the ".sga" tables. The first of the six tables
-in 0003_20020425_022926.mb57.sga looks like:
+in mbari_1998_988_msn.mb57.sga looks like:
  	## Sidescan correction table files generated by program mbbackangle
- 	## Version $Id: mbbackangle.l,v 5.6 2002-09-19 00:28:12 caress Exp $
- 	## MB-system Version 5.0.beta20
+ 	## Version $Id: mbbackangle.l,v 5.7 2004-10-06 18:51:39 caress Exp $
+ 	## MB-system Version 5.0.4
  	## Table file format: 1.0.0
- 	## Run by user <caress> on cpu <nbp-128-146.nbp.usap.gov> at <Sun Jul 21 17:01:11 2002>
- 	## Input swath file:      0003_20020425_022926.mb57
+ 	## Run by user <caress> on cpu <hess> at <Fri Oct  1 11:18:30 2004>
+ 	## Input swath file:      mbari_1998_988_msn.mb57
  	## Input swath format:    57
- 	## Output table file:     0003_20020425_022926.mb57.sga
- 	## Pings to average:      25
- 	## Number of angle bins:  161
+ 	## Output table file:     mbari_1998_988_msn.mb57.sga
+ 	## Pings to average:      50
+ 	## Number of angle bins:  81
  	## Maximum angle:         80.000000
  	## Default altitude:      0.000000
  	## Data type:             sidescan
  	# table: 0
- 	# nping: 25
- 	# time:  2002/04/25 02:30:49.674399    1019701849.674400
- 	# nangles: 161
+ 	# nping: 50
+ 	# time:  1998/06/10 14:55:24.979779    897490524.979780
+ 	# nangles: 81
  	-80.0000       0.0000       0.0000
- 	-79.0000       0.0000       0.0000
  	-78.0000       0.0000       0.0000
- 	-77.0000       0.0000       0.0000
  	-76.0000       0.0000       0.0000
- 	-75.0000       0.0000       0.0000
  	-74.0000       0.0000       0.0000
- 	-73.0000       0.0000       0.0000
- 	-72.0000      32.2739       5.1205
- 	-71.0000      33.8169       4.5096
- 	-70.0000      32.5683       4.1676
- 	-69.0000      33.3233       4.5819
- 	-68.0000      33.2733       4.3618
- 	-67.0000      32.7095       4.5116
- 	-66.0000      33.1693       4.4164
- 	-65.0000      33.4931       4.2788
- 	-64.0000      33.4072       4.2757
- 	-63.0000      33.6430       4.5740
- 	-62.0000      33.7174       4.4539
- 	-61.0000      33.4760       4.2332
- 	-60.0000      33.4768       4.3316
- 	-59.0000      33.7259       4.5100
- 	-58.0000      33.7861       4.2651
- 	-57.0000      33.9738       4.4992
- 	-56.0000      33.7753       4.6273
- 	-55.0000      34.0484       4.4099
- 	-54.0000      34.3366       4.5408
- 	-53.0000      34.1053       4.2912
- 	-52.0000      34.3885       4.2946
- 	-51.0000      34.3664       4.4912
- 	-50.0000      34.7203       4.2428
- 	-49.0000      34.5826       4.3700
- 	-48.0000      34.7410       4.6414
- 	-47.0000      35.4736       4.1617
- 	-46.0000      34.8456       4.7846
- 	-45.0000      35.6649       4.6107
- 	-44.0000      36.0851       5.3508
- 	-43.0000      36.6807       4.3003
- 	-42.0000      36.3087       4.2519
- 	-41.0000      36.6893       4.2447
- 	-40.0000      36.2372       4.3403
- 	-39.0000      36.2227       4.3308
- 	-38.0000      36.0223       4.1694
- 	-37.0000      36.2182       4.3674
- 	-36.0000      36.3618       4.4440
- 	-35.0000      36.1489       4.2543
- 	-34.0000      36.2703       4.4830
- 	-33.0000      36.6548       4.9095
- 	-32.0000      36.7752       4.8813
- 	-31.0000      37.0692       4.7108
- 	-30.0000      37.3190       4.5877
- 	-29.0000      37.2481       4.8750
- 	-28.0000      36.8861       5.6123
- 	-27.0000      37.1561       5.0761
- 	-26.0000      37.6518       5.3463
- 	-25.0000      38.1557       5.5696
- 	-24.0000      37.5547       5.8475
- 	-23.0000      37.5606       5.6230
- 	-22.0000      37.3771       5.3460
- 	-21.0000      38.0293       5.5573
- 	-20.0000      37.6278       5.4099
- 	-19.0000      37.5382       5.1906
- 	-18.0000      37.1919       6.3249
- 	-17.0000      37.0054       6.1842
- 	-16.0000      37.5196       5.8413
- 	-15.0000      37.0851       5.6107
- 	-14.0000      37.6514       5.3717
- 	-13.0000      38.8210       5.1755
- 	-12.0000      37.8904       5.2884
- 	-11.0000      38.2412       5.9632
- 	-10.0000      38.1898       5.8135
- 	-9.0000      37.8771       7.7696
- 	-8.0000      36.5629       7.1477
- 	-7.0000      37.5029       5.9113
- 	-6.0000      36.4109       6.0910
- 	-5.0000      37.3796       6.4721
- 	-4.0000      39.5517       4.8289
- 	-3.0000      38.5109       6.5044
- 	-2.0000      39.4625       5.2427
- 	-1.0000      42.5517       4.8802
- 	 0.0000      38.9211       5.7999
- 	 1.0000      42.5517       4.8802
- 	 2.0000      39.4625       5.2427
- 	 3.0000      38.5109       6.5044
- 	 4.0000      39.5517       4.8289
- 	 5.0000      37.3796       6.4721
- 	 6.0000      36.4109       6.0910
- 	 7.0000      37.5029       5.9113
- 	 8.0000      36.5629       7.1477
- 	 9.0000      37.8771       7.7696
- 	10.0000      38.1898       5.8135
- 	11.0000      38.2412       5.9632
- 	12.0000      37.8904       5.2884
- 	13.0000      38.8210       5.1755
- 	14.0000      37.6514       5.3717
- 	15.0000      37.0851       5.6107
- 	16.0000      37.5196       5.8413
- 	17.0000      37.0054       6.1842
- 	18.0000      37.1919       6.3249
- 	19.0000      37.5382       5.1906
- 	20.0000      37.6278       5.4099
- 	21.0000      38.0293       5.5573
- 	22.0000      37.3771       5.3460
- 	23.0000      37.5606       5.6230
- 	24.0000      37.5547       5.8475
- 	25.0000      38.1557       5.5696
- 	26.0000      37.6518       5.3463
- 	27.0000      37.1561       5.0761
- 	28.0000      36.8861       5.6123
- 	29.0000      37.2481       4.8750
- 	30.0000      37.3190       4.5877
- 	31.0000      37.0692       4.7108
- 	32.0000      36.7752       4.8813
- 	33.0000      36.6548       4.9095
- 	34.0000      36.2703       4.4830
- 	35.0000      36.1489       4.2543
- 	36.0000      36.3618       4.4440
- 	37.0000      36.2182       4.3674
- 	38.0000      36.0223       4.1694
- 	39.0000      36.2227       4.3308
- 	40.0000      36.2372       4.3403
- 	41.0000      36.6893       4.2447
- 	42.0000      36.3087       4.2519
- 	43.0000      36.6807       4.3003
- 	44.0000      36.0851       5.3508
- 	45.0000      35.6649       4.6107
- 	46.0000      34.8456       4.7846
- 	47.0000      35.4736       4.1617
- 	48.0000      34.7410       4.6414
- 	49.0000      34.5826       4.3700
- 	50.0000      34.7203       4.2428
- 	51.0000      34.3664       4.4912
- 	52.0000      34.3885       4.2946
- 	53.0000      34.1053       4.2912
- 	54.0000      34.3366       4.5408
- 	55.0000      34.0484       4.4099
- 	56.0000      33.7753       4.6273
- 	57.0000      33.9738       4.4992
- 	58.0000      33.7861       4.2651
- 	59.0000      33.7259       4.5100
- 	60.0000      33.4768       4.3316
- 	61.0000      33.4760       4.2332
- 	62.0000      33.7174       4.4539
- 	63.0000      33.6430       4.5740
- 	64.0000      33.4072       4.2757
- 	65.0000      33.4931       4.2788
- 	66.0000      33.1693       4.4164
- 	67.0000      32.7095       4.5116
- 	68.0000      33.2733       4.3618
- 	69.0000      33.3233       4.5819
- 	70.0000      32.5683       4.1676
- 	71.0000      33.8169       4.5096
- 	72.0000      32.2739       5.1205
- 	73.0000       0.0000       0.0000
+ 	-72.0000       0.0000       0.0000
+ 	-70.0000       0.0000       0.0000
+ 	-68.0000       0.0000       0.0000
+ 	-66.0000       0.0000       0.0000
+ 	-64.0000      33.4828       7.5915
+ 	-62.0000      32.4068       5.4016
+ 	-60.0000      31.9667       5.3320
+ 	-58.0000      31.7880       5.1880
+ 	-56.0000      31.6249       5.0681
+ 	-54.0000      31.6362       4.9521
+ 	-52.0000      31.5590       5.0482
+ 	-50.0000      31.3955       5.1242
+ 	-48.0000      31.0372       5.2364
+ 	-46.0000      30.9569       5.1092
+ 	-44.0000      30.8126       4.9848
+ 	-42.0000      30.3497       4.9611
+ 	-40.0000      29.7660       4.9479
+ 	-38.0000      29.2746       4.9727
+ 	-36.0000      29.1929       4.9734
+ 	-34.0000      29.1729       4.9893
+ 	-32.0000      28.7375       5.0295
+ 	-30.0000      28.6560       5.0031
+ 	-28.0000      28.0609       5.1757
+ 	-26.0000      27.3652       5.2692
+ 	-24.0000      26.2536       5.1193
+ 	-22.0000      25.2113       4.8437
+ 	-20.0000      24.9033       4.5717
+ 	-18.0000      24.4118       4.5952
+ 	-16.0000      24.4341       4.5824
+ 	-14.0000      24.3251       4.7864
+ 	-12.0000      23.6965       4.1409
+ 	-10.0000      24.1326       3.7653
+ 	-8.0000      26.1912       4.2246
+ 	-6.0000      27.9516       4.5724
+ 	-4.0000      31.1992       5.6401
+ 	-2.0000      29.2624       5.8076
+ 	 0.0000      27.4466       4.3310
+ 	 2.0000      24.9780       4.1345
+ 	 4.0000      24.2328       4.0980
+ 	 6.0000      23.3917       4.6856
+ 	 8.0000      24.0867       4.5882
+ 	10.0000      23.2293       4.6383
+ 	12.0000      24.1375       4.5005
+ 	14.0000      25.1402       4.6843
+ 	16.0000      25.1948       4.9131
+ 	18.0000      25.0986       5.0503
+ 	20.0000      25.0798       5.0769
+ 	22.0000      25.0582       5.1801
+ 	24.0000      25.6108       5.1108
+ 	26.0000      25.8393       5.0068
+ 	28.0000      26.3232       4.9469
+ 	30.0000      26.4346       5.0686
+ 	32.0000      26.6474       5.1690
+ 	34.0000      27.0092       5.2098
+ 	36.0000      27.1987       5.1664
+ 	38.0000      27.3710       5.2504
+ 	40.0000      27.1160       5.1788
+ 	42.0000      27.0691       5.1418
+ 	44.0000      27.2547       4.8907
+ 	46.0000      27.7406       4.9654
+ 	48.0000      28.1568       4.9277
+ 	50.0000      28.4015       4.9687
+ 	52.0000      28.4042       4.9034
+ 	54.0000      28.3741       4.9500
+ 	56.0000      28.5195       4.9799
+ 	58.0000      28.6455       5.0142
+ 	60.0000      28.9284       4.9876
+ 	62.0000      28.9028       5.0380
+ 	64.0000       0.0000       0.0000
+ 	66.0000       0.0000       0.0000
+ 	68.0000       0.0000       0.0000
+ 	70.0000       0.0000       0.0000
+ 	72.0000       0.0000       0.0000
  	74.0000       0.0000       0.0000
- 	75.0000       0.0000       0.0000
  	76.0000       0.0000       0.0000
- 	77.0000       0.0000       0.0000
  	78.0000       0.0000       0.0000
- 	79.0000       0.0000       0.0000
  	80.0000       0.0000       0.0000
  	#
  	#
-
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbanglecorrect\fP(l), \fBmbfilter\fP(l)
