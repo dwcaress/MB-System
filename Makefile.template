@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template	5/24/94
-#     $Id: Makefile.template,v 4.3 1994-11-29 01:39:03 caress Exp $
+#     $Id: Makefile.template,v 4.4 2000-09-30 05:06:44 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,10 @@
 # Date:		May 24, 1994
 
 # $Log: not supported by cvs2svn $
+# Revision 4.3  1994/11/29  01:39:03  caress
+# Added "-" to make clean calls so rm failures
+# are ignored on SGI's.
+#
 # Revision 4.2  1994/11/01  15:04:00  caress
 # Updates.
 #
@@ -35,6 +39,7 @@ clean:
 	- cd bin; rm -f *
 	- cd lib; rm -f *
 	- cd include; rm -f *
+	- cd html; rm -f *
 	- cd man/manl; rm -f *
 	- cd man; rm -f -r catl whatis
 	- cd src; make clean
