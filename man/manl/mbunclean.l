@@ -1,4 +1,4 @@
-.TH mbunclean l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbunclean l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbunclean\fP - Unflags edited beams in swath sonar bathymetry data.
 
@@ -10,7 +10,7 @@ Version 5.0
 \fB-I\fIinfile \fB-O\fIoutfile \fB-N \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbunclean\fP  is an utility for reversing previous attempts to edit
+\fBmbunclean\fP  is a utility for reversing previous attempts to edit
 swath sonar bathymetry data.  Bad data is conventionally flagged by
 setting depth values negative; \fBmbunclean\fP sets negative depths
 positive. All flagged depths will be unflagged unless depth range checking 

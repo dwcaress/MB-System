@@ -1,4 +1,4 @@
-.TH mbmerge l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbmerge l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmerge\fP - Merges swath sonar data with new navigation.
 
@@ -12,7 +12,7 @@ Version 5.0
 \fB-N\fInavfile\fP \fB-Z -V -H\fP]
 
 .SH DESCRIPTION
-\fBmbmerge\fP is an utility for merging navigation with swath sonar
+\fBmbmerge\fP is a utility for merging navigation with swath sonar
 echosounder data.  The input navigation can be in one of several
 formats, including the L-DEO shipboard processing format. 
 

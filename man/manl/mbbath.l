@@ -1,4 +1,4 @@
-.TH mbbath l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbbath l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbbath\fP - Recalculates bathymetry swath bathymetry data using
 new sound velocity profile, roll bias, pitch bias and draft values.
@@ -15,7 +15,7 @@ Version 5.0
 \fB-U\fP \fB-W\fIvelfile\fP \fB-Z -V -H\fP]
 
 .SH DESCRIPTION
-\fBmbbath\fP is an utility for recalculating swath
+\fBmbbath\fP is a utility for recalculating swath
 bathymetry data using new values for some of the fundamental
 sonar operational parameters. Users may apply changes to the
 water sound velocity profile, roll bias, pitch bias, and draft

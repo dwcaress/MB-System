@@ -1,4 +1,4 @@
-.TH mbgrid l "29 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -16,7 +16,7 @@ Version 5.0
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
 
 .SH DESCRIPTION
-\fBmbgrid\fP is an utility used to grid bathymetry, amplitude, or sidescan 
+\fBmbgrid\fP is a utility used to grid bathymetry, amplitude, or sidescan 
 data contained in a set of swath sonar data files. This program uses 
 one of four algorithms to grid regions covered by swath sonar 
 swaths and then can fill in gaps between the swaths (to the degree 
@@ -444,7 +444,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.1 2001-03-22 21:17:36 caress Exp $
+ Version $Id: mbgrid.l,v 5.2 2001-07-13 19:52:33 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

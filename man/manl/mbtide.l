@@ -1,4 +1,4 @@
-.TH mbtide l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbtide l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbtide\fP - MBTIDE corrects swath sonar bathymetry data for tides.
 
@@ -10,7 +10,7 @@ Version 5.0
 \fB-M\fItideformat\fP \fB-T\fItidefile\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbtide\fP is an utility for correcting swath bathymetry for
+\fBmbtide\fP is a utility for correcting swath bathymetry for
 tides.  The input tide data can be in one of several ascii table
 formats. A simple spline interpolation of the tide values is
 used to calculate the tide correction for each ping. The tide

@@ -1,4 +1,4 @@
-.TH mbcontour l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbcontour l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -21,7 +21,7 @@ Version 5.0
 \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbcontour\fP is an utility for swath contouring of swath bathymetry 
+\fBmbcontour\fP is a utility for swath contouring of swath bathymetry 
 data using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
 is fully compatible with the GMT package version 3. Two contouring
 algorithms are available. The first draws contours between successive

@@ -1,4 +1,4 @@
-.TH mbformat l "16 March 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbformat l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbformat\fP -  List information about swath sonar data formats
 supported by the \fBMBIO\fP library.
@@ -9,7 +9,7 @@ Version 5.0
 .SH SYNOPSIS\fBmbformat\fP [\fB -F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-L -V -H\fP]
 
 .SH DESCRIPTION
-\fBmbformat\fP is an utility which identifies the swath sonar data formats
+\fBmbformat\fP is a utility which identifies the swath sonar data formats
 associated with \fBmbio\fP format id's.  If no format id or input filename
 is specified,
 \fBmbformat\fP lists all of the currently supported formats. If a format id
