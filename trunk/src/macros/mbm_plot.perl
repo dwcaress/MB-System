@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.8 1995-05-12 17:43:23 caress Exp $
+#    $Id: mbm_plot.perl,v 4.9 1995-07-18 17:24:57 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,10 +39,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.8 1995-05-12 17:43:23 caress Exp $
+#   $Id: mbm_plot.perl,v 4.9 1995-07-18 17:24:57 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.8  1995/05/12  17:43:23  caress
+# Made exit status values consistent with Unix convention.
+# 0: ok  nonzero: error
+#
 # Revision 4.7  1995/05/05  17:00:23  caress
 # Fixed typo.
 #
@@ -198,7 +202,7 @@ if ($verbose)
 	{
 	print "\nRunning $program_name...\nRunning mbinfo...\n";
 	}
-@mbinfo = `mbinfo -F$format -I$file $rbounds`;
+@mbinfo = `mbinfo -F$format -I$file $rbounds -G`;
 while (@mbinfo)
 	{
 	$line = shift @mbinfo;
