@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	10/19/94
-#    $Id: mbm_grdplot.perl,v 1.1 1994-10-21 11:36:58 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.0 1994-10-21 11:49:39 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 1.1 1994-10-21 11:36:58 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.0 1994-10-21 11:49:39 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 1.1  1994/10/21  11:36:58  caress
+# Initial revision
+#
 #
 #
 $program_name = "mbm_grdplot";
