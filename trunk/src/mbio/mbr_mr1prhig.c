@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 1.1 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.0 1994-07-29 18:59:33 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1994/07/29  18:46:51  caress
+ * Initial revision
+ *
  *
  *
  */
@@ -45,7 +48,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 1.1 1994-07-29 18:46:51 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.0 1994-07-29 18:59:33 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
