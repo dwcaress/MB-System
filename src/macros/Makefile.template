@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.8 1999-10-06 20:42:31 caress Exp $
+#	$Id: Makefile.template,v 4.9 1999-12-29 00:17:55 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.8  1999/10/06  20:42:31  caress
+# Added mbm_grd2arc
+#
 # Revision 4.7  1999/06/25  17:53:31  caress
 # Added mbm_grid macro.
 #
@@ -63,7 +66,8 @@ all:	$(MANDIR)/xbt.l \
 	$(BINDIR)/mbm_stat $(MANDIR)/mbm_stat.l \
 	$(BINDIR)/mbm_dslnavfix $(MANDIR)/mbm_dslnavfix.l \
 	$(BINDIR)/mbm_grid $(MANDIR)/mbm_grid.l \
-	$(BINDIR)/mbm_grd2arc $(MANDIR)/mbm_grd2arc.l
+	$(BINDIR)/mbm_grd2arc $(MANDIR)/mbm_grd2arc.l \
+	$(BINDIR)/mbm_grdtiff $(MANDIR)/mbm_grdtiff.l
 
 ### make clean does nothing
 clean:
@@ -105,6 +109,9 @@ $(BINDIR)/mbm_grid:	mbm_grid.perl
 $(BINDIR)/mbm_grd2arc:	mbm_grd2arc.perl
 	cp mbm_grd2arc.perl $(BINDIR)/mbm_grd2arc
 	chmod 775 $(BINDIR)/mbm_grd2arc
+$(BINDIR)/mbm_grdtiff:	mbm_grdtiff.perl
+	cp mbm_grdtiff.perl $(BINDIR)/mbm_grdtiff
+	chmod 775 $(BINDIR)/mbm_grdtiff
 
 ### copy the man pages to the man page directory
 $(MANDIR)/xbt.l:	xbt.manl
@@ -146,4 +153,7 @@ $(MANDIR)/mbm_grid.l:	mbm_grid.manl
 $(MANDIR)/mbm_grd2arc.l:	mbm_grd2arc.manl
 	cp mbm_grd2arc.manl $(MANDIR)/mbm_grd2arc.l
 	chmod 664 $(MANDIR)/mbm_grd2arc.l
+$(MANDIR)/mbm_grdtiff.l:	mbm_grdtiff.manl
+	cp mbm_grdtiff.manl $(MANDIR)/mbm_grdtiff.l
+	chmod 664 $(MANDIR)/mbm_grdtiff.l
 
