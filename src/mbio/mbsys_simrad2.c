@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.7 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.6  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -88,7 +91,7 @@
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.7 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -175,6 +178,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    {
 	    store->par_p1g[i] = '\0';	/* position system 1 geodetic datum */
 	    }
+	strcpy(store->par_p1g, "WGS_84");
 	store->par_p2m = 0;	/* position system 2 motion compensation (boolean) */
 	store->par_p2t = 0;	/* position system 2 time stamp used 
 				    (0=system time, 1=position input time) */
@@ -406,7 +410,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.7 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -667,7 +671,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.7 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -755,7 +759,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.7 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -835,7 +839,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.7 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1557,10 +1561,10 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_latitude = 20000000 * navlat;
 
 		/* get heading */
-		ping->png_heading = (int) (heading * 100);
+		ping->png_heading = (int) rint(heading * 100);
 
 		/* get speed  */
-		ping->png_speed = (int)(speed / 0.036);
+		ping->png_speed = (int) rint(speed / 0.036);
 
 		/* insert distance and depth values into storage arrays */
 		if (store->sonar == MBSYS_SIMRAD2_UNKNOWN)
@@ -1632,16 +1636,16 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				j = ping->png_nbeams;
 				ping->png_beam_num[j] = i + 1;
-				ping->png_depth[j] = (bath[i] - depthoffset)
-							/ depthscale;
+				ping->png_depth[j] = (int) rint((bath[i] - depthoffset)
+							/ depthscale);
 				ping->png_beamflag[j] = beamflag[i];
 				ping->png_acrosstrack[j]
-					= bathacrosstrack[i] / dacrscale;
+				        = (int) rint(bathacrosstrack[i] / dacrscale);
 				ping->png_alongtrack[j] 
-					= bathalongtrack[i] / daloscale;
+					= (int) rint(bathalongtrack[i] / daloscale);
 				if (amp[i] != 0.0)
-					ping->png_amp[j] = (amp[i] - 64) 
-						/ reflscale;
+					ping->png_amp[j] = (int) rint((amp[i] - 64) 
+						/ reflscale);
 				else
 					ping->png_amp[j] = 0;
 				ping->png_nbeams++;
@@ -1653,16 +1657,16 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			for (j=0;j<ping->png_nbeams;j++)
 				{
 				i = ping->png_beam_num[j] - 1;
-				ping->png_depth[j] = (bath[i] - depthoffset)
-							/ depthscale;
+				ping->png_depth[j] = (int) rint((bath[i] - depthoffset)
+							/ depthscale);
 				ping->png_beamflag[j] = beamflag[i];
 				ping->png_acrosstrack[j]
-					= bathacrosstrack[i] / dacrscale;
+					= (int) rint(bathacrosstrack[i] / dacrscale);
 				ping->png_alongtrack[j] 
-					= bathalongtrack[i] / daloscale;
+					= (int) rint(bathalongtrack[i] / daloscale);
 				if (amp[i] != 0.0)
-					ping->png_amp[j] = (amp[i] - 64) 
-						/ reflscale;
+					ping->png_amp[j] = (int) rint((amp[i] - 64) 
+						/ reflscale);
 				else
 					ping->png_amp[j] = 0;
 				}
@@ -1671,8 +1675,8 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			for (i=0;i<nss;i++)
 				{
-				ping->png_ss[i] = 100 * ss[i];
-				ping->png_ssalongtrack[i] = ssalongtrack[i] / daloscale;
+				ping->png_ss[i] = (int) rint(100 * ss[i]);
+				ping->png_ssalongtrack[i] = (int) rint(ssalongtrack[i] / daloscale);
 				}
 			}
 		}
@@ -1697,10 +1701,10 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_latitude = 20000000 * navlat;
 
 		/* get heading */
-		store->pos_heading = (int) (heading * 100);
+		store->pos_heading = (int) rint(heading * 100);
 
 		/* get speed  */
-		store->pos_speed = (int)(speed / 0.036);
+		store->pos_speed = (int) rint(speed / 0.036);
 
 		/* get roll pitch and heave */
 		}
@@ -2432,10 +2436,10 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_latitude = 20000000 * navlat;
 
 		/* get heading */
-		ping->png_heading = (int) (heading * 100);
+		ping->png_heading = (int) rint(heading * 100);
 
 		/* get speed  */
-		ping->png_speed = (int) (speed / 0.036);
+		ping->png_speed = (int) rint(speed / 0.036);
 
 		/* get draft  */
 		ping->png_offset_multiplier = (int)(draft / 655.36);
@@ -2465,10 +2469,10 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_latitude = 20000000 * navlat;
 
 		/* get heading */
-		store->pos_heading = (int) (heading * 100);
+		store->pos_heading = (int) rint(heading * 100);
 
 		/* get speed  */
-		store->pos_speed = (int)(speed / 0.036);
+		store->pos_speed = (int) rint(speed / 0.036);
 
 		/* get roll pitch and heave */
 		}
@@ -3108,9 +3112,9 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 		    ping->png_pixels_ss = 0;
 		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 		    {
-		    ping->png_ss[i] = (short)(100 * ss[i]);
+		    ping->png_ss[i] = (short) rint(100 * ss[i]);
 		    ping->png_ssalongtrack[i] 
-			    = (short)(ssalongtrack[i] / daloscale);
+			    = (short) rint(ssalongtrack[i] / daloscale);
 		    }
 
 		/* print debug statements */

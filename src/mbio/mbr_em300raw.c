@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.8 2001-07-20 00:31:11 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.9 2001-08-04 01:00:02 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/07/20  00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.7  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -107,7 +110,7 @@
 	
 /* turn on debug statements here */
 /* #define MBR_EM300RAW_DEBUG 1 */
-
+	
 /* essential function prototypes */
 int mbr_register_em300raw(int verbose, void *mbio_ptr, 
 		int *error);
@@ -177,7 +180,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 		short sonar, int *error);
 int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *match, int *error);
+		short sonar, int length, int *match, int *error);
 int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_em300raw_wr_start(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
@@ -199,6 +202,8 @@ int mbr_em300raw_wr_pos(int verbose, FILE *mbfp,
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300raw_wr_svp(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
+int mbr_em300raw_wr_svp2(int verbose, FILE *mbfp, 
+		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp, 
@@ -209,7 +214,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.8 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.9 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbr_register_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -339,7 +344,7 @@ int mbr_info_em300raw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.8 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.9 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbr_info_em300raw";
 	int	status = MB_SUCCESS;
 
@@ -408,7 +413,7 @@ int mbr_info_em300raw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.8 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.9 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -619,25 +624,26 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		else
 		    {
 		    /* check for some indicators of broken records */
-		    if (ping->png_nbeams != ping->png_nbeams_ss)
+		    if (ping->png_nbeams < ping->png_nbeams_ss
+			|| ping->png_nbeams > ping->png_nbeams_ss + 1)
+			{
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			status = MB_FAILURE;
+			}
+		    else if (ping->png_nbeams == ping->png_nbeams_ss)
+			{
+			for (i=0;i<ping->png_nbeams;i++)
 			    {
-			    *error = MB_ERROR_UNINTELLIGIBLE;
-			    status = MB_FAILURE;
-			    }
-		    else
-			    {
-			    for (i=0;i<ping->png_nbeams;i++)
+			    if (ping->png_beam_num[i] != 
+				    ping->png_beam_index[i] + 1
+				&& ping->png_beam_num[i] != 
+				    ping->png_beam_index[i] - 1)
 				{
-				if (ping->png_beam_num[i] != 
-					ping->png_beam_index[i] + 1
-				    && ping->png_beam_num[i] != 
-					ping->png_beam_index[i] - 1)
-				    {
-				    *error = MB_ERROR_UNINTELLIGIBLE;
-				    status = MB_FAILURE;
-				    }
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				status = MB_FAILURE;
 				}
 			    }
+			}
 		    }
 		}
 
@@ -704,7 +710,6 @@ ping->png_bso);*/
 			else if (plon < 0.)
 				plon = plon + 360.;
 			}
-
 		if (plon == 0.0
 		    && plat == 0.0)
 		    {
@@ -713,10 +718,10 @@ ping->png_bso);*/
 		    }
 		else
 		    {
-		    ping->png_longitude = (int) (10000000 * plon);
-		    ping->png_latitude = (int) (20000000 * plat);
+		    ping->png_longitude = (int) rint(10000000 * plon);
+		    ping->png_latitude =  (int) rint(20000000 * plat);
 		    }
-		ping->png_speed = (int) (pspeed / 0.036);
+		ping->png_speed = (int) rint(pspeed / 0.036);
 
 		/* generate processed sidescan */
 		ping->png_pixel_size = 0;
@@ -818,6 +823,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	short	*first_type_save;
 	short	*typelast;
 	int	*nbadrec;
+	int     *length;
 	int	match;
 	int	read_len;
 	int	skip = 0;
@@ -855,6 +861,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	first_type_save = (short *) &mb_io_ptr->save2;
 	typelast = (short *) &mb_io_ptr->save6;
 	nbadrec = (int *) &mb_io_ptr->save7;
+	length = (int *) &mb_io_ptr->save8;
 	if (*expect_save_flag == MB_YES)
 		{
 		expect = *expect_save;
@@ -899,6 +906,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				
 			/* look for label */
+			*length = 0;
 			if ((read_len = fread(label,
 				1,4,mb_io_ptr->mbfp)) != 4)
 				{
@@ -914,6 +922,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					mbio_ptr, *type, *sonar) != MB_SUCCESS)
 			    {
 			    /* get next byte */
+			    *length = ((*length & 0x00ffffff) << 8) | (0x000000ff &label[0]);
 			    for (i=0;i<3;i++)
 				label[i] = label[i+1];
 			    if ((read_len = fread(&label[3],
@@ -1060,6 +1069,22 @@ Have a nice day...\n");
 #endif
 			done = MB_NO;
 			}
+		else if ((*type == EM2_START
+			    || *type == EM2_STOP
+			    || *type == EM2_STOP2
+			    || *type == EM2_OFF
+			    || *type == EM2_ON) 
+			&& expect != EM2_NONE)
+			{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
+#endif
+			done = MB_YES;
+			expect = EM2_NONE;
+			*type = first_type;
+			*label_save_flag = MB_YES;
+			store->kind = MB_DATA_DATA;
+			}
 		else if (*type == EM2_START
 			|| *type == EM2_STOP
 			|| *type == EM2_STOP2
@@ -1072,17 +1097,17 @@ Have a nice day...\n");
 			status = mbr_em300raw_rd_start(
 				verbose,mbfp,store,*type,*sonar,version,error);
 			if (status == MB_SUCCESS)
+			    {
+			    done = MB_YES;
+			    if (expect != EM2_NONE)
 				{
-				done = MB_YES;
-				if (expect != EM2_NONE)
-					{
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-					}
-				else
-					*expect_save_flag = MB_NO;
+				*expect_save = expect;
+				*expect_save_flag = MB_YES;
+				*first_type_save = first_type;
 				}
+			    else
+				*expect_save_flag = MB_NO;
+			    }
 			}
 		else if (*type == EM2_RUN_PARAMETER)
 			{
@@ -1354,23 +1379,35 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_ss type %x\n",*type);
 #endif
 			status = mbr_em300raw_rd_ss(
-				verbose,mbfp,store,*sonar,&match,error);
+				verbose,mbfp,store,*sonar,*length,&match,error);
 			if (status == MB_SUCCESS)
+			    {
+			    ping->png_ss_read = MB_YES;
+			    if (first_type == EM2_NONE
+				|| match == MB_NO)
 				{
-				ping->png_ss_read = MB_YES;
-				if (first_type == EM2_NONE
-					|| match == MB_NO)
-					{
-					done = MB_NO;
-					first_type = EM2_SS;
-					expect = EM2_BATH;
-					}
-				else
-					{
-					done = MB_YES;
-					expect = EM2_NONE;
-					}
+				done = MB_NO;
+				first_type = EM2_SS;
+				expect = EM2_BATH;
 				}
+			    else
+				{
+				done = MB_YES;
+				expect = EM2_NONE;
+				}
+			    }
+
+                        /* salvage bath even if sidescan is corrupt */
+			else
+			    {
+			    if (first_type == EM2_BATH 
+				&& match == MB_YES)
+				{
+				status = MB_SUCCESS;
+				done = MB_YES;
+				expect = EM2_NONE;
+				}
+			    }
 			}
 
 		/* bail out if there is an error */
@@ -1410,7 +1447,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 	char	*function_name = "mbr_em300raw_chk_label";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	char	*startid;
+	char	startid;
 	short	*sonar_save;
 
 	/* print input debug statements */
@@ -1428,6 +1465,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	sonar_save = (short *) (&mb_io_ptr->save4);
+	startid = *((char*) &type);
 
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "Check label: %4.4hX %4.4hX | %d %d\n", type, sonar, type, sonar);
@@ -1466,8 +1504,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 		&& type != EM2_SS)
 		{
 		status = MB_FAILURE;
-		startid = (char *) &type;
-		if ((verbose >= 1 && *startid == 2)
+		if ((verbose >= 1 && startid == 2)
 		    && (sonar == MBSYS_SIMRAD2_EM120
 			|| sonar == MBSYS_SIMRAD2_EM300
 			|| sonar == MBSYS_SIMRAD2_EM1002
@@ -2453,7 +2490,7 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -2595,7 +2632,7 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -2745,7 +2782,7 @@ int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -3053,7 +3090,7 @@ int mbr_em300raw_rd_svp(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -3194,7 +3231,7 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -3378,7 +3415,7 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 		
@@ -3586,7 +3623,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 		
@@ -3653,7 +3690,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *match, int *error)
+		short sonar, int length, int *match, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_ss";
 	int	status = MB_SUCCESS;
@@ -3676,6 +3713,7 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		fprintf(stderr,"dbg2       length:     %d\n",length);
 		}
 		
 	/* get  storage structure */
@@ -3771,10 +3809,21 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp,
 				ping->png_beam_samples[i] = 0;
 			}
 		}
+
+	    /* check for no pixel data - frequently occurs with EM1002 */
+	    if (length == EM2_SS_HEADER_SIZE + ping->png_nbeams_ss * EM2_SS_BEAM_SIZE + 8)
+		{
+		if (verbose > 0)
+		    fprintf(stderr, "WARNING: No Simrad multibeam sidescan pixels in data record!\n");
+		junk_bytes = 0;
+		ping->png_npixels = 0;
+		}
+
+	    /* check for too much pixel data */
 	    if (ping->png_npixels > MBSYS_SIMRAD2_MAXRAWPIXELS)
 		{
 		if (verbose > 0)
-		    fprintf(stderr, "WARNING: EM300/3000 sidescan pixels %d exceed maximum %d!\n", 
+		    fprintf(stderr, "WARNING: Simrad multibeam sidescan pixels %d exceed maximum %d!\n", 
 			    ping->png_npixels, MBSYS_SIMRAD2_MAXRAWPIXELS);
 		junk_bytes = ping->png_npixels - MBSYS_SIMRAD2_MAXRAWPIXELS;
 		ping->png_npixels = MBSYS_SIMRAD2_MAXRAWPIXELS;
@@ -4063,7 +4112,10 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"call mbr_em300raw_wr_svp kind:%d type %x\n",store->kind,store->type);
 #endif
-		status = mbr_em300raw_wr_svp(verbose,mbfp,store,error);
+	        if (store->type == EM2_SVP)
+		  status = mbr_em300raw_wr_svp(verbose,mbfp,store,error);
+		else
+		  status = mbr_em300raw_wr_svp2(verbose,mbfp,store,error); 
 		}
 	else if (store->kind == MB_DATA_DATA)
 		{
@@ -5883,6 +5935,205 @@ int mbr_em300raw_wr_svp(int verbose, FILE *mbfp,
 		struct mbsys_simrad2_struct *store, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_svp";
+	int	status = MB_SUCCESS;
+	char	line[EM2_SVP_HEADER_SIZE];
+	short	label;
+	int	write_len;
+	int	write_size;
+	unsigned short checksum;
+	mb_u_char   *uchar_ptr;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       svp_use_date:    %d\n",store->svp_use_date);
+		fprintf(stderr,"dbg5       svp_use_msec:    %d\n",store->svp_use_msec);
+		fprintf(stderr,"dbg5       svp_count:       %d\n",store->svp_count);
+		fprintf(stderr,"dbg5       svp_serial:      %d\n",store->svp_serial);
+		fprintf(stderr,"dbg5       svp_origin_date: %d\n",store->svp_origin_date);
+		fprintf(stderr,"dbg5       svp_origin_msec: %d\n",store->svp_origin_msec);
+		fprintf(stderr,"dbg5       svp_num:         %d\n",store->svp_num);
+		fprintf(stderr,"dbg5       svp_depth_res:   %d\n",store->svp_depth_res);
+		fprintf(stderr,"dbg5       count    depth    speed\n");
+		fprintf(stderr,"dbg5       -----------------------\n");
+		for (i=0;i<store->svp_num;i++)
+			fprintf(stderr,"dbg5        %d   %d  %d\n",
+				i, store->svp_depth[i], store->svp_vel[i]);
+		}
+		
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	mb_put_binary_int(MB_NO, (int) (EM2_SVP_HEADER_SIZE 
+			+ EM2_SVP_SLICE_SIZE * store->svp_num + 8), (void *) &write_size); 
+	write_len = fwrite(&write_size,1,4,mbfp);
+	if (write_len != 4)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write the record label */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(MB_NO, (short) (EM2_SVP), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[1];
+		}
+
+	/* write the sonar id */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+		}
+
+	/* output binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_int(MB_NO, (int) store->svp_use_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) store->svp_use_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_serial, (void *) &line[10]);
+		mb_put_binary_int(MB_NO, (int) store->svp_origin_date, (void *) &line[12]); 
+		mb_put_binary_int(MB_NO, (int) store->svp_origin_msec, (void *) &line[16]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_num, (void *) &line[20]);
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_depth_res, (void *) &line[22]);
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_SVP_HEADER_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_SVP_HEADER_SIZE,mbfp);
+		if (write_len != EM2_SVP_HEADER_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary svp data */
+	if (status == MB_SUCCESS)
+	    for (i=0;i<store->svp_num;i++)
+		{
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_depth[i], (void *) &line[0]); 
+		mb_put_binary_short(MB_NO, (unsigned short) store->svp_vel[i], (void *) &line[4]); 
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_SVP_SLICE_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_SVP_SLICE_SIZE,mbfp);
+		if (write_len != EM2_SVP_SLICE_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output end of record */
+	if (status == MB_SUCCESS)
+		{
+		line[0] = '\0';
+		line[1] = 0x03;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		checksum += uchar_ptr[0];
+	    
+		/* set checksum */
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
+
+		/* write out data */
+		write_len = fwrite(line,1,4,mbfp);
+		if (write_len != 4)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300raw_wr_svp2(int verbose, FILE *mbfp, 
+		struct mbsys_simrad2_struct *store, int *error)
+{
+	char	*function_name = "mbr_em300raw_wr_svp2";
 	int	status = MB_SUCCESS;
 	char	line[EM2_SVP2_HEADER_SIZE];
 	short	label;
