@@ -50,7 +50,7 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the starting time for data allowed in the input data.
-The \f-E\fP option sets the ending time for data. If the 
+The \fB-E\fP option sets the ending time for data. If the 
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -63,7 +63,7 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the ending time for data allowed in the input data.
-The \f-B\fP option sets the starting time for data. If the 
+The \fB-B\fP option sets the starting time for data. If the 
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
