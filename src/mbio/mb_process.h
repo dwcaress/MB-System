@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.3 2001-06-01 00:14:06 caress Exp $
+ *    $Id: mb_process.h,v 5.4 2001-06-03 06:54:56 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -153,7 +153,7 @@
  *   LEVERMODE mode                 # sets heave correction by lever correction [0]
  *                                  #   0: no heave correction by lever calculation
  *                                  #   1: heave correction by lever calculation
- *				    		# - note: lever calculation finds heave at the
+ *				    # - note: lever calculation finds heave at the
  *                                  #   sonar head location by adding motion
  *                                  #   inferred from roll and pitch projected
  *                                  #   from the vru location.
@@ -275,6 +275,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/01  00:14:06  caress
+ * Added support for metadata insertion.
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -313,6 +316,7 @@
 #define MBP_BATHRECALC_OFFSET	3
 #define MBP_SVP_OFF		0
 #define MBP_SVP_ON		1
+#define MBP_SVP_SOUNDSPEEDREF	2
 #define MBP_SSV_OFF		0
 #define MBP_SSV_OFFSET		1
 #define MBP_SSV_SET		2

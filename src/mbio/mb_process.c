@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.3 2001-06-01 00:14:06 caress Exp $
+ *    $Id: mb_process.c,v 5.4 2001-06-03 06:54:56 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/01  00:14:06  caress
+ * Added support for metadata insertion.
+ *
  * Revision 5.2  2001/03/22  20:45:56  caress
  * Trying to make 5.0.beta0...
  *
@@ -59,7 +62,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.3 2001-06-01 00:14:06 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.4 2001-06-03 06:54:56 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -321,6 +324,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_svp_mode);
 			}
+		    else if (strncmp(buffer, "SVPMODE", 7) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_svp_mode);
+			}
 		    else if (strncmp(buffer, "SVPFILE", 7) == 0)
 			{
 			sscanf(buffer, "%s %s", dummy, process->mbp_svpfile);
@@ -358,6 +365,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			sscanf(buffer, "%s %d", dummy, &process->mbp_angle_mode);
 			}
 		    else if (strncmp(buffer, "CORRECTED", 9) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_corrected);
+			}
+		    else if (strncmp(buffer, "SOUNDSPEEDREF", 13) == 0)
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_corrected);
 			}
@@ -885,14 +896,14 @@ int mb_pr_writepar(int verbose, char *file,
 	    
 	    /* bathymetry recalculation */
 	    fprintf(fp, "##\n## Bathymetry Recalculation:\n");
-	    fprintf(fp, "RAYTRACE %d\n", process->mbp_svp_mode);
+	    fprintf(fp, "SVPMODE %d\n", process->mbp_svp_mode);
 	    fprintf(fp, "SVPFILE %s\n", process->mbp_svpfile);
 	    fprintf(fp, "SSVMODE %d\n", process->mbp_ssv_mode);
 	    fprintf(fp, "SSV %f\n", process->mbp_ssv);
 	    fprintf(fp, "TTMODE %d\n", process->mbp_tt_mode);
 	    fprintf(fp, "TTMULTIPLY %f\n", process->mbp_tt_mult);
 	    fprintf(fp, "ANGLEMODE %d\n", process->mbp_angle_mode);
-	    fprintf(fp, "CORRECTED %d\n", process->mbp_corrected);
+	    fprintf(fp, "SOUNDSPEEDREF %d\n", process->mbp_corrected);
 	    
 	    /* draft correction */
 	    fprintf(fp, "##\n## Draft Correction:\n");
@@ -1003,14 +1014,15 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 	/* figure out bathymetry recalculation mode */
 	if (process->mbp_svp_mode == MBP_SVP_ON)
 	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_RAYTRACE;
-	else if (process->mbp_svp_mode == MBP_SVP_OFF
+	else if (process->mbp_svp_mode != MBP_SVP_ON
 	    && (process->mbp_rollbias_mode != MBP_ROLLBIAS_OFF
 		|| process->mbp_pitchbias_mode != MBP_PITCHBIAS_OFF))
 	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_ROTATE;
-	else if (process->mbp_svp_mode == MBP_SVP_OFF
+	else if (process->mbp_svp_mode != MBP_SVP_ON
 	    && process->mbp_rollbias_mode == MBP_ROLLBIAS_OFF
 		&& (process->mbp_draft_mode != MBP_DRAFT_OFF
-		    || process->mbp_lever_mode != MBP_DRAFT_OFF))
+		    || process->mbp_lever_mode != MBP_LEVER_OFF
+		    || process->mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF))
 	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFFSET;
 
 	/* print output debug statements */
