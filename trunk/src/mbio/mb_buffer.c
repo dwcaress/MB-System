@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.3 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_buffer.c,v 4.4 1995-02-10 22:10:46 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,7 @@
  *   mb_buffer_close	- close buffer structure
  *   mb_buffer_load	- load data from file into buffer
  *   mb_buffer_dump	- dump data from buffer into file
+ *   mb_buffer_clear	- clear data from buffer
  *   mb_buffer_info	- get system and kind of specified record 
  *   				in buffer
  *   mb_buffer_extract	- extract navigation and bathymetry/backscatter 
@@ -32,6 +33,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -94,7 +98,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.3 1994-10-21 12:11:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.4 1995-02-10 22:10:46 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -511,6 +515,211 @@ int	*error;
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 
+			/* print debug statements */
+			if (verbose >= 4)
+				{
+				fprintf(stderr,"\ndbg4  Deallocating record in MBIO function <%s>\n",
+					function_name);
+				fprintf(stderr,"dbg4       record:      %d\n",
+					i);
+				fprintf(stderr,"dbg4       ptr:         %d\n",
+					buff->buffer[i]);
+				fprintf(stderr,"dbg4       kind:        %d\n",
+					buff->buffer_kind[i]);
+				}
+
+			status = mb_buffer_deall(verbose,buff_ptr,mbio_ptr,
+				&buff->buffer[i],error);
+			buff->buffer[i] = NULL;
+
+			/* print debug statements */
+			if (verbose >= 4)
+				{
+				fprintf(stderr,"\ndbg4  Done dumping record in MBIO function <%s>\n",
+					function_name);
+				fprintf(stderr,"dbg4       record:      %d\n",
+					i);
+				fprintf(stderr,"dbg4       ptr:         %d\n",
+					buff->buffer[i]);
+				fprintf(stderr,"dbg4       kind:        %d\n",
+					buff->buffer_kind[i]);
+				}
+			}
+		for (i=0;i<nhold;i++)
+			{
+			/* print debug statements */
+			if (verbose >= 4)
+				{
+				fprintf(stderr,"\ndbg4  Moving buffer record in MBIO function <%s>\n",
+					function_name);
+				fprintf(stderr,"dbg4       old:         %d\n",
+					*ndump + i);
+				fprintf(stderr,"dbg4       new:         %d\n",
+					i);
+				fprintf(stderr,"dbg4       old ptr:     %d\n",
+					buff->buffer[*ndump + i]);
+				fprintf(stderr,"dbg4       new ptr:     %d\n",
+					buff->buffer[i]);
+				fprintf(stderr,"dbg4       old kind:    %d\n",
+					buff->buffer_kind[*ndump + i]);
+				fprintf(stderr,"dbg4       new kind:    %d\n",
+					buff->buffer_kind[i]);
+				}
+
+			buff->buffer[i] = 
+				buff->buffer[*ndump + i];
+			buff->buffer_kind[i] = 
+				buff->buffer_kind[*ndump + i];
+			buff->buffer[*ndump + i] = NULL;
+			buff->buffer_kind[*ndump + i] = 0;
+
+			/* print debug statements */
+			if (verbose >= 4)
+				{
+				fprintf(stderr,"\ndbg4  Done moving buffer record in MBIO function <%s>\n",
+					function_name);
+				fprintf(stderr,"dbg4       old:         %d\n",
+					*ndump + i);
+				fprintf(stderr,"dbg4       new:         %d\n",
+					i);
+				fprintf(stderr,"dbg4       old ptr:     %d\n",
+					buff->buffer[*ndump + i]);
+				fprintf(stderr,"dbg4       new ptr:     %d\n",
+					buff->buffer[i]);
+				fprintf(stderr,"dbg4       old kind:    %d\n",
+					buff->buffer_kind[*ndump + i]);
+				fprintf(stderr,"dbg4       new kind:    %d\n",
+					buff->buffer_kind[i]);
+				}
+			}
+		buff->nbuffer = buff->nbuffer - *ndump;
+		}
+
+	/* print debug statements */
+	if (verbose >= 4)
+		{
+		fprintf(stderr,"\ndbg4  Buffer list at end of MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg4       nbuffer:     %d\n",buff->nbuffer);
+		for (i=0;i<buff->nbuffer;i++)
+			{
+			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%d\n",
+			i,buff->buffer_kind[i],buff->buffer[i]);
+			}
+		}
+
+	/* set return value */
+	*nbuff = buff->nbuffer;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ndump:      %d\n",*ndump);
+		fprintf(stderr,"dbg2       nbuff:      %d\n",*nbuff);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_buffer_clear(verbose,buff_ptr,mbio_ptr,nhold,ndump,nbuff,error)
+int	verbose;
+char	*buff_ptr;
+char	*mbio_ptr;
+int	nhold;
+int	*ndump;
+int	*nbuff;
+int	*error;
+{
+	char	*function_name = "mb_buffer_clear";
+	int	status = MB_SUCCESS;
+	struct mb_buffer_struct *buff;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* mbio dummy write values */
+	int	time_i[7];
+	double	time_d;
+	double	navlon;
+	double	navlat;
+	double	speed;
+	double	heading;
+	double	distance;
+	int	nbath;
+	int	namp;
+	int	nss;
+	double	*bath;
+	double	*amp;
+	double	*bathacrosstrack;
+	double	*bathalongtrack;
+	double	*ss;
+	double	*ssacrosstrack;
+	double	*ssalongtrack;
+	char	comment[256];
+
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       nhold:      %d\n",nhold);
+		}
+
+	/* get buffer structure */
+	buff = (struct mb_buffer_struct *) buff_ptr;
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* figure out how much to dump */
+	*ndump = buff->nbuffer - nhold;
+	if (buff->nbuffer <= 0)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BUFFER_EMPTY;
+		*ndump = 0;
+		}
+	else if (*ndump <= 0)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_NO_DATA_DUMPED;
+		*ndump = 0;
+		}
+
+	/* print debug statements */
+	if (verbose >= 4)
+		{
+		fprintf(stderr,"\ndbg4  Buffer list in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg4       nbuffer:     %d\n",buff->nbuffer);
+		for (i=0;i<buff->nbuffer;i++)
+			{
+			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%d\n",
+			i,buff->buffer_kind[i],buff->buffer[i]);
+			}
+		}
+
+	/* set beam and pixel numbers */
+	nbath = mb_io_ptr->beams_bath;
+	namp = mb_io_ptr->beams_amp;
+	nss = mb_io_ptr->pixels_ss;
+
+	/* dump records from buffer */
+	if (status == MB_SUCCESS)
+		{
+		for (i=0;i<*ndump;i++)
+			{
 			/* print debug statements */
 			if (verbose >= 4)
 				{
