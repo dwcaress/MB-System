@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12draw.h	7/8/96
- *	$Id: mbf_em12draw.h,v 4.0 1996-07-31 20:34:16 caress Exp $
+ *	$Id: mbf_em12draw.h,v 4.1 1996-08-26 18:33:50 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1996/07/31  20:34:16  caress
+ * Initial revision.
+ *
  * Revision 4.0  1996/07/26  21:07:59  caress
  * Initial version.
  *
@@ -227,7 +230,7 @@ struct mbf_em12draw_struct
 	short int beam_start_sample[MBF_EM12DRAW_MAXBEAMS];
 				/* start beam sample number among samples
 					from entire ping */
-	signed char ss[MBF_EM12DRAW_MAXPIXELS];
+	char	ss[MBF_EM12DRAW_MAXPIXELS];
 	short int ssp[MBF_EM12DRAW_MAXPIXELS];
 
 };

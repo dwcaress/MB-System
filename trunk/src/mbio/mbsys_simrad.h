@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.2 1996-08-05 15:25:43 caress Exp $
+ *	$Id: mbsys_simrad.h,v 4.3 1996-08-26 18:33:50 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1996/08/05  15:25:43  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.1  1996/07/26  21:06:00  caress
  * Version after first cut of handling em12s and em121 data.
  *
@@ -260,7 +263,7 @@ struct mbsys_simrad_survey_struct
 	short int beam_start_sample[MBSYS_SIMRAD_MAXBEAMS];
 				/* start beam sample number among samples
 					from entire ping */
-	signed char ss[MBSYS_SIMRAD_MAXPIXELS];
+	char	ss[MBSYS_SIMRAD_MAXPIXELS];
 	short int ssp[MBSYS_SIMRAD_MAXPIXELS];
 	};
 
