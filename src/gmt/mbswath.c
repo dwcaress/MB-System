@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.32 2000-09-30 06:52:17 caress Exp $
+ *    $Id: mbswath.c,v 4.33 2000-10-11 00:53:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.32  2000/09/30  06:52:17  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.31  2000/09/11  20:09:14  caress
  * Linked to new datalist parsing functions. Now supports recursive datalists
  * and comments in datalists.
@@ -265,11 +268,9 @@ unsigned char r, g, b, gray;
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.32 2000-09-30 06:52:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.33 2000-10-11 00:53:45 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -1384,17 +1385,10 @@ char **argv;
 #endif
 }
 /*--------------------------------------------------------------------*/
-int get_footprints(verbose,mode,fp_mode,factor,depth_def,
-			swath,mtodeglon,mtodeglat,error)
-int	verbose;
-int	mode;
-int	fp_mode;
-double	factor;
-double	depth_def;
-struct swath *swath;
-double	mtodeglon;
-double	mtodeglat;
-int	*error;
+int get_footprints(int verbose, int mode, int fp_mode,
+		double factor, double depth_def,
+		struct swath *swath, 
+		double mtodeglon, double mtodeglat, int *error)
 {
 	char	*function_name = "get_footprints";
 	int	status = MB_SUCCESS;
@@ -1984,21 +1978,11 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int get_shading(verbose,mode,swath,mtodeglon,
-		mtodeglat,magnitude,azimuth,
-		nshadelevel, shadelevel, shadelevelgray, 
-		error)
-int	verbose;
-int	mode;
-struct swath *swath;
-double	mtodeglon;
-double	mtodeglat;
-double	magnitude;
-double	azimuth;
-int	nshadelevel;
-double	*shadelevel;
-int	*shadelevelgray;
-int	*error;
+int get_shading(int verbose, int mode, struct swath *swath,
+		double mtodeglon, double mtodeglat,
+		double magnitude, double azimuth,
+		int nshadelevel, double *shadelevel, 
+		double *shadelevelgray, int *error)
 {
 	char	*function_name = "get_shading";
 	int	status = MB_SUCCESS;
@@ -2260,13 +2244,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int plot_data_footprint(verbose,mode,swath,first,nplot,error)
-int	verbose;
-int	mode;
-struct swath *swath;
-int	first;
-int	nplot;
-int	*error;
+int plot_data_footprint(int verbose, int mode,
+		struct swath *swath, int first, int nplot, int *error)
 {
 	char	*function_name = "plot_data_footprint";
 	int	status = MB_SUCCESS;
@@ -2404,13 +2383,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int plot_data_point(verbose,mode,swath,first,nplot,error)
-int	verbose;
-int	mode;
-struct swath *swath;
-int	first;
-int	nplot;
-int	*error;
+int plot_data_point(int verbose, int mode, 
+		struct swath *swath, int first, int nplot, int *error)
 {
 	char	*function_name = "plot_data_point";
 	int	status = MB_SUCCESS;
@@ -2546,14 +2520,8 @@ int	*error;
 /*--------------------------------------------------------------------*/
 /* version for GMT 3.0 */
 #ifdef GMT3_0
-int plot_box(verbose,x,y,red,green,blue,error)
-int	verbose;
-double	*x;
-double	*y;
-int	red;
-int	green;
-int	blue;
-int	*error;
+int plot_box(int verbose, double *x, double *y, 
+		int red, int green, int blue, int *error)
 {
 	char	*function_name = "plot_box";
 	int	status = MB_SUCCESS;
@@ -2745,12 +2713,7 @@ int	*error;
 /*--------------------------------------------------------------------*/
 /* version for GMT 3.1 */
 #else
-int plot_box(verbose,x,y,rgb,error)
-int	verbose;
-double	*x;
-double	*y;
-int	*rgb;
-int	*error;
+int plot_box(int verbose, double *x, double *y, int *rgb, int *error)
 {
 	char	*function_name = "plot_box";
 	int	status = MB_SUCCESS;
@@ -2943,7 +2906,8 @@ int	*error;
 /*--------------------------------------------------------------------*/
 /* version for GMT 3.0 */
 #ifdef GMT3_0
-int plot_point(verbose,x,y,red,green,blue,error)
+int plot_point(int verbose, double x, double y, 
+		int red, int green, int blue, int *error)
 int	verbose;
 double	x;
 double	y;
@@ -3028,12 +2992,7 @@ int	*error;
 /*--------------------------------------------------------------------*/
 /* version for GMT 3.1 */
 #else
-int plot_point(verbose,x,y,rgb,error)
-int	verbose;
-double	x;
-double	y;
-int	*rgb;
-int	*error;
+int plot_point(int verbose, double x, double y, int *rgb, int *error)
 {
 	char	*function_name = "plot_point";
 	int	status = MB_SUCCESS;
@@ -3110,12 +3069,7 @@ int	*error;
 }
 #endif
 /*--------------------------------------------------------------------*/
-int ping_copy(verbose,one,two,swath,error)
-int	verbose;
-int	one;
-int	two;
-struct swath *swath;
-int	*error;
+int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 {
 	char	*function_name = "ping_copy";
 	int	status = MB_SUCCESS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $
+ *    $Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -41,41 +41,33 @@
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to
 	contour multibeam bathymetry data. */
-int mb_contour_init(verbose,data,npings_max,beams_bath,
-			contour_algorithm,
-			plot_contours,plot_triangles,plot_track,
-			contour_int,color_int,tick_int,label_int,
-			tick_len,label_hgt,ncolor,
-			nlevel,level_list,label_list,tick_list,
-			time_tick_int,time_annot_int,
-			date_annot_int,time_tick_len,
-			error)
-int	verbose;
-struct swath **data;
-int	npings_max;
-int	beams_bath;
-int	contour_algorithm;
-int	plot_contours;
-int	plot_triangles;
-int	plot_track;
-double	contour_int;
-double	color_int;
-double	tick_int;
-double	label_int;
-double	tick_len;
-double	label_hgt;
-int	ncolor;
-int	nlevel;
-double	*level_list;
-int	*label_list;
-int	*tick_list;
-double	time_tick_int;
-double	time_annot_int;
-double	date_annot_int;
-double	time_tick_len;
-int	*error;
+int mb_contour_init(
+		int	verbose, 
+		struct swath **data,
+		int	npings_max,
+		int	beams_bath,
+		int	contour_algorithm,
+		int	plot_contours,
+		int	plot_triangles,
+		int	plot_track,
+		double	contour_int,
+		double	color_int,
+		double	tick_int,
+		double	label_int,
+		double	tick_len,
+		double	label_hgt,
+		int	ncolor,
+		int	nlevel,
+		double	*level_list,
+		int	*label_list,
+		int	*tick_list,
+		double	time_tick_int,
+		double	time_annot_int,
+		double	date_annot_int,
+		double	time_tick_len,
+		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -329,12 +321,12 @@ int	*error;
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_deall deallocates the memory required to
 	contour multibeam bathymetry data. */
-int mb_contour_deall(verbose,data,error)
-int	verbose;
-struct swath *data;
-int	*error;
+int mb_contour_deall(
+		int	verbose, 
+		struct swath *data, 
+		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -423,10 +415,10 @@ int	*error;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour calls the appropriate contouring routine. */
-int mb_contour(verbose,data,error)
-int	verbose;
-struct swath *data;
-int	*error;
+int mb_contour(
+		int	verbose, 
+		struct swath *data, 
+		int	*error)
 {
   	static char rcs_id[]="";
 	char	*function_name = "mb_contour";
@@ -465,12 +457,12 @@ int	*error;
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_tcontour contours multibeam data. */
-int mb_tcontour(verbose,data,error)
-int	verbose;
-struct swath *data;
-int	*error;
+int mb_tcontour(
+		int	verbose, 
+		struct swath *data, 
+		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -882,12 +874,12 @@ int	*error;
 
 /*--------------------------------------------------------------------------*/
 /* 	function get_start_tri finds next contour starting point. */
-int get_start_tri(data,itri,iside1,iside2,closed)
-struct swath *data;
-int	*itri;
-int	*iside1;
-int	*iside2;
-int	*closed;
+int get_start_tri(
+		struct swath *data, 
+		int	*itri, 
+		int	*iside1, 
+		int	*iside2, 
+		int	*closed)
 {
 	int	isave;
 	int	i, j, jj;
@@ -938,14 +930,14 @@ int	*closed;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_next_tri finds next contour component if it exists */
-int get_next_tri(data,itri,iside1,iside2,closed,itristart,isidestart)
-struct swath *data;
-int	*itri;
-int	*iside1;
-int	*iside2;
-int	*closed;
-int	*itristart;
-int	*isidestart;
+int get_next_tri(
+		struct swath *data, 
+		int	*itri, 
+		int	*iside1, 
+		int	*iside2, 
+		int	*closed, 
+		int	*itristart, 
+		int	*isidestart)
 {
 	double	xs, ys;
 	int	itrisave, isidesave;
@@ -1016,14 +1008,14 @@ int	*isidestart;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_pos_tri finds position of contour crossing point */
-int get_pos_tri(data,eps,itri,iside,value,x,y)
-struct swath *data;
-double	eps;
-int	itri;
-int	iside;
-double	value;
-double	*x;
-double	*y;
+int get_pos_tri(
+		struct swath *data, 
+		double	eps, 
+		int	itri, 
+		int	iside, 
+		double	value, 
+		double	*x, 
+		double	*y)
 {
 	double	factor;
 	int	v1, v2, pt1, pt2;
@@ -1046,11 +1038,11 @@ double	*y;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_azimuth_tri gets azimuth across track for a label */
-int get_azimuth_tri(data,itri,iside,angle)
-struct swath *data;
-int	itri;
-int	iside;
-double	*angle;
+int get_azimuth_tri(
+		struct swath *data, 
+		int	itri, 
+		int	iside, 
+		double	*angle)
 {
 	double	heading;
 
@@ -1065,9 +1057,8 @@ double	*angle;
 /*--------------------------------------------------------------------------*/
 /* 	function check_label checks if new label will overwrite any recent
  *	labels. */
-int check_label(data,nlab)
-struct swath *data;
-int	nlab;
+int check_label(struct swath *data, 
+		int	nlab)
 {
 #define	MAXHIS 30
 	static double xlabel_his[MAXHIS], ylabel_his[MAXHIS];
@@ -1106,9 +1097,7 @@ int	nlab;
 /*--------------------------------------------------------------------------*/
 /* 	function dump_contour dumps the contour stored in xsave and ysave
  *	to the plotting routines */
-int dump_contour(data,value)
-struct swath *data;
-double	value;
+int dump_contour(struct swath *data, double value)
 {
 	int	i;
 	char	label[25];
@@ -1152,12 +1141,9 @@ double	value;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function mb_ocontour contours multibeam data. */
-int mb_ocontour(verbose,data,error)
-int	verbose;
-struct swath *data;
-int	*error;
+int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1547,9 +1533,8 @@ int	*error;
 /*--------------------------------------------------------------------------*/
 /* 	function get_start_old finds next contour starting point.
  *	the borders are searched first and then the interior */
-int get_start_old(data,k,i,j,d,closed)
-struct swath *data;
-int	*k, *i, *j, *d, *closed;
+int get_start_old(struct swath *data, 
+		int *k, int *i, int *j, int *d, int *closed)
 {
 	int	nn, ii, jj;
 
@@ -1628,9 +1613,9 @@ int	*k, *i, *j, *d, *closed;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_next_old finds next contour component if it exists */
-int get_next_old(data,nk,ni,nj,nd,k,i,j,d,kbeg,ibeg,jbeg,dbeg,closed)
-struct swath *data;
-int	*nk, *ni, *nj, *nd, k, i, j, d, kbeg, ibeg, jbeg, dbeg, *closed;
+int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
+		int k, int i, int j, int d, 
+		int kbeg, int ibeg, int jbeg, int dbeg, int *closed)
 {
 	static int ioff[3][2][2] =
 		{
@@ -1742,12 +1727,8 @@ int	*nk, *ni, *nj, *nd, k, i, j, d, kbeg, ibeg, jbeg, dbeg, *closed;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_pos_old finds position of contour crossing point */
-int get_pos_old(data,eps,x,y,k,i,j,value)
-struct swath *data;
-double	eps;
-double	*x, *y;
-int	k, i, j;
-double	value;
+int get_pos_old(struct swath *data, double eps, double *x, double *y,
+		int k, int i, int j, double value)
 {
 	int	i2, j2;
 	double	x1, y1, x2, y2, v1, v2, factor;
@@ -1783,9 +1764,8 @@ double	value;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_hand_old finds handedness of contour */
-int get_hand_old(data,hand,k,i,j,d)
-struct swath *data;
-int	*hand, k, i, j, d;
+int get_hand_old(struct swath *data, int *hand, 
+		int k, int i, int j, int d)
 {
 	if (k == 0 && d == 0)
 		{
@@ -1820,10 +1800,7 @@ int	*hand, k, i, j, d;
 
 /*--------------------------------------------------------------------------*/
 /* 	function get_azimuth_old gets azimuth across shiptrack at ping iping */
-int get_azimuth_old(data,iping,angle)
-struct swath *data;
-int	iping;
-double	*angle;
+int get_azimuth_old(struct swath *data, int iping, double *angle)
 {
 	double	heading;
 
