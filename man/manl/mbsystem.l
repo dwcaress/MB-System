@@ -584,6 +584,9 @@ marked with an *:
  \fBmbcontour\fP*:  Generate GMT compatible Postscript 
  		color swath contour plots.
  \fBmbcopy\fP*:  Copy swath sonar data files. 
+ \fBmbdatalist\fP:  Parses recursive datalist files 
+  		and outputs the  complete  list  of  
+ 		data  files,  formats,  and  file weights.
  \fBmbdefaults\fP*:  Set or list default mbio parameters 
  		for reading and writing swath sonar data 
  \fBmbedit\fP:  Interactive editor used to flag bad 
@@ -695,6 +698,10 @@ tasks easily.  These are the current MB-system macros:
  		and eastings and outputs a navigation file
  		containing longitude and latitude which is
  		suitable for use with \fBmbmerge\fP.
+ \fBmbm_grd2geovrml\fP:  Create and execute commands which 
+  		generate a TerraVision tileset and GeoVRML 
+ 		set  of  files  that can  be combined with 
+ 		other data and viewed in a web browser.
  \fBmbm_grdplot\fP:  Reads a GMT GRD grid file and 
  		writes a shellscript which will 
  		generate a GMT map of the data.
