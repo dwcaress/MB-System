@@ -2,7 +2,6 @@
 <HTML>
 <HEAD>
    <TITLE>MB-System Supported Data Formats</TITLE>
-   <META NAME="GENERATOR" CONTENT="Mozilla/3.01SGoldC-SGI (X11; I; IRIX64 6.4 IP30) [Netscape]">
 </HEAD>
 <BODY>
 
@@ -26,577 +25,653 @@ sonars are supported: </P>
 
 <LI>Sea Beam 2000 multibeam sonar </LI>
 
-<LI>Sea Beam 2100 series multibeam sonars </LI>
+<LI>Sea Beam 2112 and 2136 multibeam sonars </LI>
 
-<LI>Simrad EM12, EM121, EM300, EM950, EM1000, and EM3000 multibeam sonars
-</LI>
+<LI>Sea Beam 2120 multibeam sonars </LI>
+
+<LI>Simrad EM12, EM121, EM950, and EM1000 multibeam sonars </LI>
+
+<LI>Simrad EM120, EM300, and EM3000 multibeam sonars</LI>
+
+<LI>Simrad Mesotech SM2000 multibeam sonar</LI>
 
 <LI>Hawaii MR-1 shallow tow interferometric sonar </LI>
 
-<LI>ELAC Bottomchart and Bottomchart MkII shallow water multibeam sonars
-</LI>
+<LI>ELAC Bottomchart and Bottomchart MkII shallow water multibeam sonars</LI>
 
 <LI>Reson Seabat 9001/9002/8081 shallow water multibeam sonars </LI>
 
 <LI>WHOI DSL AMS-120 deep tow interferometric sonar </LI>
 
 <LI>Sea Scan sidescan sonar</LI>
+
+<LI>Furuno HS-1 multibeam sonar</LI>
+
 </UL>
 
-<P>The following swath mapping sonar data formats are currently supported
-by MB-System:</P>
+<P>The following swath mapping sonar data formats are currently supported by MB-System:</P>
+
 
 <UL>
-<LI>MBIO Data Format ID: 11 </LI>
+<LI>MBIO Data Format ID:  11 </LI>
 
 <UL>
-<LI>Format name: MBF_SBSIOMRG </LI>
+<LI>Format name:          MBF_SBSIOMRG</LI>
 
-<LI>Informal Description: SIO merge Sea Beam </LI>
+<LI>Informal Description: SIO merge Sea Beam</LI>
 
-<LI>Attributes: Sea Beam, bathymetry, 16 beams, binary, uncentered, SIO.</LI>
-</UL>
-</UL>
-
-<UL>
-<LI>MBIO Data Format ID: 12 </LI>
-
-<UL>
-<LI>Format name: MBF_SBSIOCEN </LI>
-
-<LI>Informal Description: SIO centered Sea Beam </LI>
-
-<LI>Attributes: Sea Beam, bathymetry, 19 beams, binary, centered, SIO.</LI>
+<LI>Attributes:           Sea Beam, bathymetry, 16 beams, binary, uncentered,
+                      SIO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 13 </LI>
+<LI>MBIO Data Format ID:  12 </LI>
 
 <UL>
-<LI>Format name: MBF_SBSIOLSI </LI>
+<LI>Format name:          MBF_SBSIOCEN</LI>
 
-<LI>Informal Description: SIO LSI Sea Beam Attributes: Sea Beam, bathymetry,
-19 beams, binary, centered, obsolete, SIO.</LI>
+<LI>Informal Description: SIO centered Sea Beam</LI>
+
+<LI>Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered,
+                      SIO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 14 </LI>
+<LI>MBIO Data Format ID:  13 </LI>
 
 <UL>
-<LI>Format name: MBF_SBURICEN </LI>
+<LI>Format name:          MBF_SBSIOLSI</LI>
 
-<LI>Informal Description: URI Sea Beam </LI>
+<LI>Informal Description: SIO LSI Sea Beam</LI>
 
-<LI>Attributes: Sea Beam, bathymetry, 19 beams, binary, centered, URI.</LI>
+<LI>Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered, 
+                      obsolete, SIO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 15 </LI>
+<LI>MBIO Data Format ID:  14 </LI>
 
 <UL>
-<LI>Format name: MBF_SBURIVAX </LI>
+<LI>Format name:          MBF_SBURICEN</LI>
 
-<LI>Informal Description: URI Sea Beam from VAX </LI>
+<LI>Informal Description: URI Sea Beam</LI>
 
-<LI>Attributes: Sea Beam, bathymetry, 19 beams, binary, centered, VAX byte
-order, URI.</LI>
+<LI>Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered,
+                      URI.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 16 </LI>
+<LI>MBIO Data Format ID:  15 </LI>
 
 <UL>
-<LI>Format name: MBF_SBSIOSWB </LI>
+<LI>Format name:          MBF_SBURIVAX</LI>
 
-<LI>Informal Description: SIO Swath-bathy SeaBeam </LI>
+<LI>Informal Description: URI Sea Beam from VAX</LI>
 
-<LI>Attributes: Sea Beam, bathymetry, 19 beams, binary, centered, SIO.</LI>
+<LI>Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered,
+                      VAX byte order, URI.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 17 </LI>
+<LI>MBIO Data Format ID:  16 </LI>
 
 <UL>
-<LI>Format name: MBF_SBIFREMR </LI>
+<LI>Format name:          MBF_SBSIOSWB</LI>
 
-<LI>Informal Description: IFREMER Archive SeaBeam </LI>
+<LI>Informal Description: SIO Swath-bathy SeaBeam</LI>
 
-<LI>Attributes: Sea Beam, bathymetry, 19 beams, ascii, centered, IFREMER.</LI>
+<LI>Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered,
+                      SIO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 21 </LI>
+<LI>MBIO Data Format ID:  17 </LI>
 
 <UL>
-<LI>Format name: MBF_HSATLRAW </LI>
+<LI>Format name:          MBF_SBIFREMR</LI>
 
-<LI>Informal Description: Raw Hydrosweep </LI>
+<LI>Informal Description: IFREMER Archive SeaBeam</LI>
 
-<LI>Attributes: Hydrosweep DS, bathymetry and amplitude, 59 beams, ascii,
-Atlas Electronik.</LI>
+<LI>Attributes:           Sea Beam, bathymetry, 19 beams, ascii, centered,
+                      IFREMER.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 22 </LI>
+<LI>MBIO Data Format ID:  21 </LI>
 
 <UL>
-<LI>Format name: MBF_HSLDEDMB </LI>
+<LI>Format name:          MBF_HSATLRAW</LI>
 
-<LI>Informal Description: EDMB Hydrosweep </LI>
+<LI>Informal Description: Raw Hydrosweep</LI>
 
-<LI>Attributes: Hydrosweep DS, bathymetry, 59 beams, binary, NRL.</LI>
+<LI>Attributes:           Hydrosweep DS, bathymetry and amplitude, 59 beams,
+                      ascii, Atlas Electronik.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 23 </LI>
+<LI>MBIO Data Format ID:  22 </LI>
 
 <UL>
-<LI>Format name: MBF_HSURICEN </LI>
+<LI>Format name:          MBF_HSLDEDMB</LI>
 
-<LI>Informal Description: URI Hydrosweep </LI>
+<LI>Informal Description: EDMB Hydrosweep</LI>
 
-<LI>Attributes: Hydrosweep DS, 59 beams, bathymetry, binary, URI.</LI>
+<LI>Attributes:           Hydrosweep DS, bathymetry, 59 beams, binary, NRL.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 24 </LI>
+<LI>MBIO Data Format ID:  23 </LI>
 
 <UL>
-<LI>Format name: MBF_HSLDEOIH </LI>
+<LI>Format name:          MBF_HSURICEN</LI>
 
-<LI>Informal Description: L-DEO in-house binary Hydrosweep </LI>
+<LI>Informal Description: URI Hydrosweep</LI>
 
-<LI>Attributes: Hydrosweep DS, 59 beams, bathymetry and amplitude, binary,
-centered, L-DEO.</LI>
+<LI>Attributes:           Hydrosweep DS, 59 beams, bathymetry, binary, URI.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 25 </LI>
+<LI>MBIO Data Format ID:  24 </LI>
 
 <UL>
-<LI>Format name: MBF_HSURIVAX </LI>
+<LI>Format name:          MBF_HSLDEOIH</LI>
 
-<LI>Informal Description: URI Hydrosweep from VAX </LI>
+<LI>Informal Description: L-DEO in-house binary Hydrosweep</LI>
 
-<LI>Attributes: Hydrosweep DS, 59 beams, bathymetry, binary, VAX byte order,
-URI.</LI>
+<LI>Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, 
+                      binary, centered, L-DEO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 32 </LI>
+<LI>MBIO Data Format ID:  25 </LI>
 
 <UL>
-<LI>Format name: MBF_SB2000SB </LI>
+<LI>Format name:          MBF_HSURIVAX</LI>
 
-<LI>Informal Description: SIO Swath-bathy SeaBeam 2000 format </LI>
+<LI>Informal Description: URI Hydrosweep from VAX</LI>
 
-<LI>Attributes: SeaBeam 2000, bathymetry, 121 beams, binary, SIO.</LI>
+<LI>Attributes:           Hydrosweep DS, 59 beams, bathymetry, binary,
+                      VAX byte order, URI.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 33 </LI>
+<LI>MBIO Data Format ID:  32 </LI>
 
 <UL>
-<LI>Format name: MBF_SB2000SS </LI>
+<LI>Format name:          MBF_SB2000SB</LI>
 
-<LI>Informal Description: SIO Swath-bathy SeaBeam 2000 format </LI>
+<LI>Informal Description: SIO Swath-bathy SeaBeam 2000 format</LI>
 
-<LI>Attributes: SeaBeam 2000, sidescan, 1000 pixels for 4-bit sidescan,
-2000 pixels for 12+-bit sidescan, binary, SIO.</LI>
+<LI>Attributes:           SeaBeam 2000, bathymetry, 121 beams, 
+                      binary,  SIO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 41 </LI>
+<LI>MBIO Data Format ID:  33 </LI>
 
 <UL>
-<LI>Format name: MBF_SB2100RW </LI>
+<LI>Format name:          MBF_SB2000SS</LI>
 
-<LI>Informal Description: SeaBeam 2100 series vender format </LI>
+<LI>Informal Description: SIO Swath-bathy SeaBeam 2000 format</LI>
 
-<LI>Attributes: SeaBeam 2100, bathymetry, amplitude and sidescan, 151 beams
-and 2000 pixels, ascii with binary sidescan, SeaBeam Instruments.</LI>
+<LI>Attributes:           SeaBeam 2000, sidescan,
+                      1000 pixels for 4-bit sidescan,
+                      2000 pixels for 12+-bit sidescan,
+                      binary,  SIO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 42 </LI>
+<LI>MBIO Data Format ID:  41 </LI>
 
 <UL>
-<LI>Format name: MBF_SB2100B1 </LI>
+<LI>Format name:          MBF_SB2100RW</LI>
 
-<LI>Informal Description: SeaBeam 2100 series vender format </LI>
+<LI>Informal Description: SeaBeam 2100 series vender format</LI>
 
-<LI>Attributes: SeaBeam 2100, bathymetry, amplitude and sidescan, 151 beams
-bathymetry, 2000 pixels sidescan, binary, SeaBeam Instruments and L-DEO.</LI>
+<LI>Attributes:           SeaBeam 2100, bathymetry, amplitude 
+                      and sidescan, 151 beams and 2000 pixels, ascii 
+                      with binary sidescan, SeaBeam Instruments.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 43 </LI>
+<LI>MBIO Data Format ID:  42 </LI>
 
 <UL>
-<LI>Format name: MBF_SB2100B2 </LI>
+<LI>Format name:          MBF_SB2100B1</LI>
 
-<LI>Informal Description: SeaBeam 2100 series vender format </LI>
+<LI>Informal Description: SeaBeam 2100 series vender format</LI>
 
-<LI>Attributes: SeaBeam 2100, bathymetry and amplitude, 151 beams bathymetry,
-binary, SeaBeam Instruments and L-DEO.</LI>
+<LI>Attributes:           SeaBeam 2100, bathymetry, amplitude 
+                      and sidescan, 151 beams bathymetry,
+                      2000 pixels sidescan, binary,
+                      SeaBeam Instruments and L-DEO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 51 </LI>
+<LI>MBIO Data Format ID:  43 </LI>
 
 <UL>
-<LI>Format name: MBF_EM1000RW </LI>
+<LI>Format name:          MBF_SB2100B2</LI>
 
-<LI>Informal Description: Simrad EM1000 vendor format </LI>
+<LI>Informal Description: SeaBeam 2100 series vender format</LI>
 
-<LI>Attributes: Simrad EM1000, bathymetry, amplitude, and sidescan, 60
-beams, variable pixels, ascii + binary, Simrad.</LI>
+<LI>Attributes:           SeaBeam 2100, bathymetry and amplitude,  
+                      151 beams bathymetry,
+                      binary,
+                      SeaBeam Instruments and L-DEO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 52 </LI>
+<LI>MBIO Data Format ID:  51 </LI>
 
 <UL>
-<LI>Format name: MBF_EM12SRAW </LI>
+<LI>Format name:          MBF_EMOLDRAW</LI>
 
-<LI>Informal Description: Simrad EM12S vendor format </LI>
+<LI>Informal Description: Old Simrad vendor multibeam format</LI>
 
-<LI>Attributes: Simrad EM12S, bathymetry, amplitude, and sidescan, 81 beams,
-variable pixels, ascii + binary, Simrad.</LI>
+<LI>Attributes:           Simrad EM1000, EM12S, EM12D, 
+                      and EM121 multibeam sonars,
+                      bathymetry, amplitude, and sidescan,
+                      60 beams for EM1000, 81 beams for EM12S/D,
+		      121 beams for EM121, variable pixels,
+		      ascii + binary, Simrad.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 54 </LI>
+<LI>MBIO Data Format ID:  53 </LI>
 
 <UL>
-<LI>Format name: MBF_EM12DARW </LI>
+<LI>Format name:          MBF_EM12IFRM</LI>
 
-<LI>Informal Description: Simrad EM12S RRS Darwin processed format </LI>
+<LI>Informal Description: IFREMER TRISMUS format for Simrad EM12</LI>
 
-<LI>Attributes: Simrad EM12S, bathymetry and amplitude, 81 beams, binary,
-Oxford University.</LI>
+<LI>Attributes:           Simrad EM12S and EM12D,
+                      bathymetry, amplitude, and sidescan
+                      81 beams, variable pixels, binary, IFREMER.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 55 </LI>
+<LI>MBIO Data Format ID:  54 </LI>
 
 <UL>
-<LI>Format name: MBF_EM121RAW </LI>
+<LI>Format name:          MBF_EM12DARW</LI>
 
-<LI>Informal Description: Simrad EM121 vendor format </LI>
+<LI>Informal Description: Simrad EM12S RRS Darwin processed format</LI>
 
-<LI>Attributes: Simrad EM121, bathymetry, amplitude, and sidescan, 121
-beams, variable pixels, ascii + binary, Simrad.</LI>
+<LI>Attributes:           Simrad EM12S, bathymetry and amplitude,
+                      81 beams, binary, Oxford University.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 56 </LI>
+<LI>MBIO Data Format ID:  56 </LI>
 
 <UL>
-<LI>Format name: MBF_EM300RAW </LI>
+<LI>Format name:          MBF_EM300RAW</LI>
 
-<LI>Informal Description: Simrad EM300/EM3000 multibeam vendor format</LI>
+<LI>Informal Description: Simrad current multibeam vendor format</LI>
 
-<LI>Attributes: Simrad EM300/EM3000, bathymetry, amplitude, and sidescan,
-up to 254 beams, variable pixels, ascii + binary, Simrad.</LI>
+<LI>Attributes:           Simrad EM120, EM300, EM1002, EM3000, 
+                      bathymetry, amplitude, and sidescan,
+                      up to 254 beams, variable pixels, ascii + binary, Simrad.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 57 </LI>
+<LI>MBIO Data Format ID:  57 </LI>
 
 <UL>
-<LI>Format name: MBF_EM300MBA </LI>
+<LI>Format name:          MBF_EM300MBA</LI>
 
-<LI>Informal Description: Simrad EM300/EM3000 multibeam processing format</LI>
+<LI>Informal Description: Simrad multibeam processing format</LI>
 
-<LI>Attributes: Simrad EM300/EM3000, bathymetry, amplitude, and sidescan,
-up to 254 beams, variable pixels, ascii + binary, MBARI.</LI>
+<LI>Attributes:           Old and new Simrad multibeams, 
+                      EM12S, EM12D, EM121, EM120, EM300, 
+                      EM100, EM1000, EM950, EM1002, EM3000, 
+                      bathymetry, amplitude, and sidescan,
+                      up to 254 beams, variable pixels, ascii + binary, MBARI.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 61 </LI>
+<LI>MBIO Data Format ID:  61 </LI>
 
 <UL>
-<LI>Format name: MBF_MR1PRHIG </LI>
+<LI>Format name:          MBF_MR1PRHIG</LI>
 
-<LI>Informal Description: SOEST MR1 post processed format </LI>
+<LI>Informal Description: SOEST MR1 post processed format</LI>
 
-<LI>Attributes: SOEST MR1, bathymetry and sidescan, variable beams and
-pixels, xdr binary, SOEST, University of Hawaii.</LI>
+<LI>Attributes:           SOEST MR1, bathymetry and sidescan,
+                      variable beams and pixels, xdr binary, 
+                      SOEST, University of Hawaii.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 62 </LI>
+<LI>MBIO Data Format ID:  62 </LI>
 
 <UL>
-<LI>Format name: MBF_MR1ALDEO </LI>
+<LI>Format name:          MBF_MR1ALDEO</LI>
 
 <LI>Informal Description: L-DEO MR1 post processed format with travel times</LI>
 
-<LI>Attributes: L-DEO MR1, bathymetry and sidescan, variable beams and
-pixels, xdr binary, L-DEO.</LI>
+<LI>Attributes:           L-DEO MR1, bathymetry and sidescan,
+                      variable beams and pixels, xdr binary, 
+                      L-DEO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 63 </LI>
+<LI>MBIO Data Format ID:  63 </LI>
 
 <UL>
-<LI>Format name: MBF_MR1BLDEO </LI>
+<LI>Format name:          MBF_MR1BLDEO</LI>
 
-<LI>Informal Description: L-DEO small MR1 post processed format with travel
-times </LI>
+<LI>Informal Description: L-DEO small MR1 post processed format with travel times</LI>
 
-<LI>Attributes: L-DEO MR1, bathymetry and sidescan, variable beams and
-pixels, xdr binary, L-DEO.</LI>
+<LI>Attributes:           L-DEO MR1, bathymetry and sidescan,
+                      variable beams and pixels, xdr binary, 
+                      L-DEO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 71 </LI>
+<LI>MBIO Data Format ID:  71 </LI>
 
 <UL>
-<LI>Format name: MBF_MBLDEOIH </LI>
+<LI>Format name:          MBF_MBLDEOIH</LI>
 
-<LI>Informal Description: L-DEO in-house generic multibeam </LI>
+<LI>Informal Description: L-DEO in-house generic multibeam</LI>
 
-<LI>Attributes: Data from all sonar systems, bathymetry, amplitude and
-sidescan, variable beams and pixels, binary, centered, L-DEO.</LI>
+<LI>Attributes:           Data from all sonar systems, bathymetry, 
+                      amplitude and sidescan, variable beams and pixels, 
+                      binary, centered, L-DEO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 81 </LI>
+<LI>MBIO Data Format ID:  81 </LI>
 
 <UL>
-<LI>Format name: MBF_CBAT9001 </LI>
+<LI>Format name:          MBF_CBAT9001</LI>
 
-<LI>Informal Description: Reson SeaBat 9001 shallow water multibeam </LI>
+<LI>Informal Description: Reson SeaBat 9001 shallow water multibeam</LI>
 
-<LI>Attributes: 60 beam bathymetry and amplitude, binary, University of
-New Brunswick.</LI>
+<LI>Attributes:           60 beam bathymetry and amplitude,
+                      binary, University of New Brunswick.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 91 </LI>
+<LI>MBIO Data Format ID:  82 </LI>
 
 <UL>
-<LI>Format name: MBF_BCHRTUNB </LI>
+<LI>Format name:          MBF_CBAT8101</LI>
 
-<LI>Informal Description: Elac BottomChart shallow water multibeam </LI>
+<LI>Informal Description: Reson SeaBat 8101 shallow water multibeam</LI>
 
-<LI>Attributes: 56 beam bathymetry and amplitude, binary, University of
-New Brunswick.</LI>
+<LI>Attributes:           101 beam bathymetry and amplitude,
+                      binary, SeaBeam Instruments.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 92 </LI>
+<LI>MBIO Data Format ID:  83 </LI>
 
 <UL>
-<LI>Format name: MBF_ELMK2UNB </LI>
+<LI>Format name:          MBF_HYPC8101</LI>
 
-<LI>Informal Description: Elac BottomChart shallow water multibeam </LI>
+<LI>Informal Description: Reson SeaBat 8101 shallow water multibeam</LI>
 
-<LI>Attributes: 56 beam bathymetry and amplitude, binary, University of
-New Brunswick.</LI>
+<LI>Attributes:           101 beam bathymetry,
+                      ASCII, read-only, Coastal Oceanographics.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 93 </LI>
+<LI>MBIO Data Format ID:  91 </LI>
 
 <UL>
-<LI>Format name: MBF_BCHRXUNB </LI>
+<LI>Format name:          MBF_BCHRTUNB</LI>
 
-<LI>Informal Description: Elac BottomChart shallow water multibeam </LI>
+<LI>Informal Description: Elac BottomChart shallow water multibeam</LI>
 
-<LI>Attributes: 56 beam bathymetry and amplitude, binary, University of
-New Brunswick.</LI>
+<LI>Attributes:           56 beam bathymetry and amplitude,
+                      binary, University of New Brunswick.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 94 </LI>
+<LI>MBIO Data Format ID:  92 </LI>
 
 <UL>
-<LI>Format name: MBF_ELMK2XSE </LI>
+<LI>Format name:          MBF_ELMK2UNB</LI>
 
-<LI>Informal Description: ELAC and SeaBeam multibeam </LI>
+<LI>Informal Description: Elac BottomChart MkII shallow water multibeam</LI>
 
-<LI>Attributes: 151 beam bathymetry and amplitude, 2000 pixels sidescan, 
-binary, L-3 Communications ELAC Nautik.</LI>
+<LI>Attributes:           126 beam bathymetry and amplitude,
+                      binary, University of New Brunswick.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 101 </LI>
+<LI>MBIO Data Format ID:  93 </LI>
 
 <UL>
-<LI>Format name: MBF_HSMDARAW </LI>
+<LI>Format name:          MBF_BCHRXUNB</LI>
 
-<LI>Informal Description: Atlas HSMD medium depth multibeam raw format
-</LI>
+<LI>Informal Description: Elac BottomChart shallow water multibeam</LI>
 
-<LI>Attributes: 40 beam bathymetry, 160 pixel sidescan, XDR (binary), STN
-Atlas Elektronik.</LI>
+<LI>Attributes:           56 beam bathymetry and amplitude,
+                      binary, University of New Brunswick.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 102 </LI>
+<LI>MBIO Data Format ID:  94 </LI>
 
 <UL>
-<LI>Format name: MBF_HSMDLDIH </LI>
+<LI>Format name:          MBF_ELMK2XSE</LI>
+
+<LI>Informal Description: ELAC and SeaBeam multibeam</LI>
+
+<LI>Attributes:           151 beam bathymetry and amplitude,
+                      2000 pixels sidescan, 
+                      binary, L-3 Communications ELAC Nautik.</LI>
+</UL>
+</UL>
+
+<UL>
+<LI>MBIO Data Format ID:  101 </LI>
+
+<UL>
+<LI>Format name:          MBF_HSMDARAW</LI>
+
+<LI>Informal Description: Atlas HSMD medium depth multibeam raw format</LI>
+
+<LI>Attributes:           40 beam bathymetry, 160 pixel sidescan,
+                      XDR (binary), STN Atlas Elektronik.</LI>
+</UL>
+</UL>
+
+<UL>
+<LI>MBIO Data Format ID:  102 </LI>
+
+<UL>
+<LI>Format name:          MBF_HSMDLDIH</LI>
 
 <LI>Informal Description: Atlas HSMD medium depth multibeam processed format</LI>
 
-<LI>Attributes: 40 beam bathymetry, 160 pixel sidescan, XDR (binary), L-DEO.</LI>
+<LI>Attributes:           40 beam bathymetry, 160 pixel sidescan,
+                      XDR (binary), L-DEO.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 111 </LI>
+<LI>MBIO Data Format ID:  111 </LI>
 
 <UL>
-<LI>Format name: MBF_DSL120PF </LI>
+<LI>Format name:          MBF_DSL120SF</LI>
 
-<LI>Informal Description: WHOI DSL AMS-120 processed format </LI>
+<LI>Informal Description: WHOI DSL AMS-120 processed format</LI>
 
-<LI>Attributes: 2048 beam bathymetry, 8192 pixel sidescan, binary, parallel
-bathymetry and amplitude files, WHOI DSL.</LI>
+<LI>Attributes:           2048 beam bathymetry, 8192 pixel sidescan,
+                      binary, single files, WHOI DSL.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 112 </LI>
+<LI>MBIO Data Format ID:  112 </LI>
 
 <UL>
-<LI>Format name: MBF_DSL120SF </LI>
+<LI>Format name:          MBF_DSL120PF</LI>
 
-<LI>Informal Description: WHOI DSL AMS-120 processed format </LI>
+<LI>Informal Description: WHOI DSL AMS-120 processed format</LI>
 
-<LI>Attributes: 2048 beam bathymetry, 8192 pixel sidescan, binary, single
-files, WHOI DSL. </LI>
+<LI>Attributes:           2048 beam bathymetry, 8192 pixel sidescan,
+                      binary, parallel bathymetry and amplitude files, WHOI DSL.</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 121 </LI>
+<LI>MBIO Data Format ID:  121 </LI>
 
 <UL>
-<LI>Format name: MBF_GSFGENMB </LI>
+<LI>Format name:          MBF_GSFGENMB</LI>
 
-<LI>Informal Description: SAIC Generic Sensor Format (GSF),</LI>
+<LI>Informal Description: SAIC Generic Sensor Format (GSF)</LI>
 
-<LI>Attributes: variable beams, bathymetry and amplitude, binary, single
-files, SAIC. </LI>
+<LI>Attributes:           variable beams,  bathymetry and amplitude,
+                      binary, single files, SAIC. </LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 131 </LI>
+<LI>MBIO Data Format ID:  131 </LI>
 
 <UL>
-<LI>Format name: MBF_MSTIFFSS </LI>
+<LI>Format name:          MBF_MSTIFFSS</LI>
 
 <LI>Informal Description: MSTIFF sidescan format</LI>
 
-<LI>Attributes: variable pixels, sidescan, binary TIFF variant, single
-files, Sea Scan. </LI>
+<LI>Attributes:           variable pixels,  sidescan,
+                      binary TIFF variant, single files, Sea Scan. </LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 141 </LI>
+<LI>MBIO Data Format ID:  141 </LI>
 
 <UL>
-<LI>Format name: MBF_OICGEODA </LI>
+<LI>Format name:          MBF_OICGEODA</LI>
 
 <LI>Informal Description: OIC swath sonar format</LI>
 
-<LI>Attributes: variable beam bathymetry and amplitude, variable pixel
-sidescan, binary, Oceanic Imaging Consultants. </LI>
+<LI>Attributes:           variable beam bathymetry and
+                      amplitude, variable pixel sidescan, binary,
+		      Oceanic Imaging Consultants</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 142 </LI>
+<LI>MBIO Data Format ID:  142 </LI>
 
 <UL>
-<LI>Format name: MBF_OICMBARI </LI>
+<LI>Format name:          MBF_OICMBARI</LI>
 
 <LI>Informal Description: OIC-style extended swath sonar format</LI>
 
-<LI>Attributes: variable beam bathymetry and amplitude, variable pixel
-sidescan, binary, MBARI. </LI>
+<LI>Attributes:           variable beam bathymetry and
+                      amplitude, variable pixel sidescan, binary,
+		      MBARI</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 151 </LI>
+<LI>MBIO Data Format ID:  151 </LI>
 
 <UL>
-<LI>Format name: MBF_OMGHDCSJ </LI>
+<LI>Format name:          MBF_OMGHDCSJ</LI>
 
 <LI>Informal Description: UNB OMG HDCS format (the John Hughes Clarke format)</LI>
 
-<LI>Attributes: variable beam bathymetry and amplitude, variable pixel
-sidescan, binary, UNB. </LI>
+<LI>Attributes:           variable beam bathymetry and
+                      amplitude, variable pixel sidescan, binary,
+		      UNB</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 161 </LI>
+<LI>MBIO Data Format ID:  161 </LI>
 
 <UL>
-<LI>Format name: MBF_MGD77DAT </LI>
+<LI>Format name:          MBF_MGD77DAT</LI>
 
 <LI>Informal Description: NGDC MGD77 underway geophysics format</LI>
 
-<LI>Attributes: single beam bathymetry, nav, magnetics,
-gravity, ascii, NOAA NGDC. </LI>
+<LI>Attributes:           single beam bathymetry, nav, magnetics,
+                      gravity, ascii, NOAA NGDC</LI>
 </UL>
 </UL>
 
 <UL>
-<LI>MBIO Data Format ID: 165 </LI>
+<LI>MBIO Data Format ID:  165 </LI>
 
 <UL>
-<LI>Format name: MBF_MBARIROV </LI>
+<LI>Format name:          MBF_MBARIROV</LI>
 
 <LI>Informal Description: MBARI ROV navigation format</LI>
 
-<LI>Attributes: ROV navigation, MBARI. </LI>
+<LI>Attributes:           ROV navigation, MBARI</LI>
+</UL>
+</UL>
+
+<UL>
+<LI>MBIO Data Format ID:  166 </LI>
+
+<UL>
+<LI>Format name:          MBF_MBPRONAV</LI>
+
+<LI>Informal Description: MB-System simple navigation format</LI>
+
+<LI>Attributes:           navigation, MBARI</LI>
+</UL>
+</UL>
+
+<UL>
+<LI>MBIO Data Format ID:  171 </LI>
+
+<UL>
+<LI>Format name:          MBF_HS10JAMS</LI>
+
+<LI>Informal Description: Furuno HS-10 multibeam format,</LI>
+
+<LI>Attributes:           45 beams bathymetry and amplitude,
+                      ascii, JAMSTEC</LI>
 </UL>
 </UL>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2001-01-22 08:13:38 $ $Revision: 5.0 $</P></CENTER>
+Last Updated: $Date: 2001-03-23 01:49:16 $ $Revision: 5.1 $</P></CENTER>
 
 <P>
 <HR WIDTH="100%"></P>

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 4.3 1997-09-17 21:48:31 caress Exp $
+#    $Id: make_mbhtml,v 5.0 2001-03-23 01:48:38 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 4.3 1997-09-17 21:48:31 caress Exp $
+#   $Id: make_mbhtml,v 5.0 2001-03-23 01:48:38 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1997/09/17  21:48:31  caress
+# Fixed typo.
+#
 # Revision 4.2  1997/09/17  21:46:07  caress
 # Put last update into man page html files.
 #
@@ -49,8 +52,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Set program name
 $program_name = "make_mbhtml";
 
+# generate mbsystem_formats.html using special option for mbformat
+print "mbformat -W > mbsystem_formats.html\n";
+`mbformat -W > mbsystem_formats.html`;
+
 # Copy necessary files
-@preformatted_files = `/bin/ls -1 mbsystem*.html caress.gif chayes.gif mbsystem*.gif`;
+@preformatted_files = `/bin/ls -1 mbsystem*.html gpl.html caress2001.gif chayes.gif mbsystem*.gif`;
 foreach $file (@preformatted_files) {
     chop($file);
     print "cp $file ../../html\n";
