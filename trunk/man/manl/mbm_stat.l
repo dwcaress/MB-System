@@ -41,8 +41,8 @@ more executions of \fBmbinfo\fP.
 Causes \fBmbm_stat\fP to operate in "verbose" mode so that it outputs
 more information than usual.
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbinfo\fP(l)
+
 .SH BUGS
-
-
-
-
+Too simple to have any really interesting bugs.

@@ -134,8 +134,8 @@ In order to generate a contour map of the topography:
 	mbm_plot -F24 -Ihs_ew9302_157_bcen.mb24 -C -X
 
 .SH SEE ALSO
-\fBmbm_grdplot\fP(l), \fBmbgrid\fP(l), \fBmbcontour\fP(l), 
-\fBmbswath\fP(l), \fBmbdefaults\fP(l)
+\fBmbsystem\fP(l), \fBmbcontour\fP(l), 
+\fBmbswath\fP(l), \fBmbdefaults\fP(l), \fBmbm_grdplot\fP(l)
 
 .SH BUGS
 Uses only the standard mercator projection and is thus useless for

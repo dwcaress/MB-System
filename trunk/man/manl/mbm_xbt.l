@@ -58,6 +58,7 @@ Causes \fBmbm_xbt\fP to operate in "verbose" mode so that it outputs
 more information than usual.
 
 .SH SEE ALSO
+\fBmbsystem\fP(l), \fBxbt\fP(l), 
 \fBmbvelocitytool\fP(l), \fBmblevitus\fP(l)
 
 .SH BUGS
