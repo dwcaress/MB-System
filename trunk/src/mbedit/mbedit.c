@@ -114,8 +114,6 @@ int	status;
 
 /* file opening parameters */
 int	startup_file = 0;
-int	open_files_count = 0;
-struct direct **open_files;
 
 int screen_num, can_screen_num;
 int theDepth;
