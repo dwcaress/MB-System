@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.23 2004-05-21 23:26:04 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.24 2004-12-02 06:31:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2004/05/21 23:26:04  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.22  2003/07/30 16:39:32  caress
  * Fixed ping nulling (shift-! key macro).
  * Augmented patience window.
@@ -301,6 +304,11 @@
 #define MBEDIT_PLOT_PITCH		11
 #define MBEDIT_PLOT_HEAVE		12
 
+/* view modes */
+#define MBEDIT_VIEW_WATERFALL		0
+#define MBEDIT_VIEW_ALONGTRACK		1
+#define MBEDIT_VIEW_ACROSSTRACK		2
+
 /* ping structure definition */
 struct mbedit_ping_struct 
 	{
@@ -338,7 +346,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.23 2004-05-21 23:26:04 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.24 2004-12-02 06:31:02 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -472,10 +480,11 @@ double	filter_cutangle_end = 0.0;
 double	filter_cutangle_max = 90.0;
 
 /* ping drawing control variables */
-#define	MBEDIT_MAX_PINGS	100
+#define	MBEDIT_MAX_PINGS	250
 #define	MBEDIT_PICK_DISTANCE	50
 #define	MBEDIT_ERASE_DISTANCE	15
 struct mbedit_ping_struct	ping[MBEDIT_BUFFER_SIZE];
+int	view_mode = MBEDIT_VIEW_WATERFALL;
 int	plot_size = 10;
 int	nplot = 0;
 int	mbedit_xgid;
@@ -1116,6 +1125,69 @@ int mbedit_get_startup(
 		fprintf(stderr,"dbg2       save_mode:   %d\n",*save_mode);
 		fprintf(stderr,"dbg2       file:        %s\n",file);
 		fprintf(stderr,"dbg2       format:      %d\n",*form);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_get_viewmode(int *vw_mode)
+{
+	/* local variables */
+	char	*function_name = "mbedit_get_viewmode";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* get view mode */
+	*vw_mode = view_mode;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       view_mode:   %d\n",*vw_mode);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_set_viewmode(int vw_mode)
+{
+	/* local variables */
+	char	*function_name = "mbedit_set_viewmode";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       view_mode:   %d\n",vw_mode);
+		}
+
+	/* get view mode */
+	view_mode = vw_mode;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
@@ -4762,8 +4834,8 @@ int mbedit_load_data(int buffer_size,
 			    ping[nbuff].bathacrosstrack[i] = bathacrosstrack[i];
 			    ping[nbuff].bathalongtrack[i] = bathalongtrack[i];
 			    ping[nbuff].detect[i] = detect[i];
-			    ping[nbuff].bath_x[i] = 0.0;
-			    ping[nbuff].bath_y[i] = 0.0;
+			    ping[nbuff].bath_x[i] = 0;
+			    ping[nbuff].bath_y[i] = 0;
 			    }
 			}
 		if (status == MB_SUCCESS)
@@ -4961,7 +5033,7 @@ int mbedit_plot_all(
 	int	xx, vx, yy, vy;
 	int	swidth, sascent, sdescent;
 	int	sxstart;
-	int	xcen;
+	int	xcen, ycen;
 	int	x0, y0, x, y, dy;
 	char	string[MB_PATH_MAXLINE];
 	char	*string_ptr;
@@ -5099,6 +5171,7 @@ int mbedit_plot_all(
 
 	/* set scaling */
 	xcen = xmin + (xmax - xmin)/2;
+	ycen = ymin + (ymax - ymin)/2;
 	dy = (ymax - ymin)/plot_size;
 	xscale = 100*plot_width/(xmax - xmin);
 	yscale = (xscale*100)/exager;
@@ -5351,11 +5424,30 @@ int mbedit_plot_all(
 			{
 			if (ping[i].beamflag[j] != MB_FLAG_NULL)
 				{
-				ping[i].bath_x[j] = xcen 
-					+ dxscale*ping[i].bathacrosstrack[j];
-				ping[i].bath_y[j] = y + dyscale*
-					(fabs((double)ping[i].bath[j]) 
-					- bathmedian);
+				if (view_mode == MBEDIT_VIEW_WATERFALL)
+					{
+					ping[i].bath_x[j] = xcen 
+						+ dxscale*ping[i].bathacrosstrack[j];
+					ping[i].bath_y[j] = y + dyscale*
+						(fabs((double)ping[i].bath[j]) 
+						- bathmedian);
+					}
+				else if (view_mode == MBEDIT_VIEW_ALONGTRACK)
+					{
+					ping[i].bath_x[j] = xcen 
+						+ dxscale*ping[i].bathacrosstrack[j];
+					ping[i].bath_y[j] = ycen + dyscale*
+						(fabs((double)ping[i].bath[j]) 
+						- bathmedian);
+					}
+				else
+					{
+					ping[i].bath_x[j] = xcen 
+						+ dxscale*ping[i].bathacrosstrack[j];
+					ping[i].bath_y[j] = y + dyscale*
+						(fabs((double)ping[i].bath[j]) 
+						- bathmedian);
+					}
 				}
 			else
 				{
