@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.0 2003-12-02 20:38:31 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.1 2004-01-06 21:11:04 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:31  caress
+ * Making version number 5.0
+ *
  * Revision 1.4  2003/11/25 22:02:25  caress
  * Fixed problem with display of mouse mode buttons.
  *
@@ -90,7 +93,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.0 2003-12-02 20:38:31 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.1 2004-01-06 21:11:04 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 
@@ -478,6 +481,38 @@ int mbview_reset(int instance)
 			data->pick.xsegments[j].endpoints[i] 
 		    		    = &(data->pick.xpoints[2*j+i]);
 			}
+		    }
+
+		/* region pick data */
+		data->region_type = MBV_REGION_NONE;
+	    	data->region.width = 0.0;
+	    	data->region.height = 0.0;
+		for (i=0;i<4;i++)
+		    {
+		    data->region.cornerpoints[i].xgrid = 0.0;
+		    data->region.cornerpoints[i].ygrid = 0.0;
+		    data->region.cornerpoints[i].xlon = 0.0;
+		    data->region.cornerpoints[i].ylat = 0.0;
+		    data->region.cornerpoints[i].zdata = 0.0;
+		    data->region.cornerpoints[i].xdisplay = 0.0;
+		    data->region.cornerpoints[i].ydisplay = 0.0;
+		    data->region.cornerpoints[i].zdisplay = 0.0;
+		    }
+		for (i=0;i<4;i++)
+		    {
+		    if (i == 0)
+		    	ii = 1;
+		    else if (i == 1)
+		    	ii = 3;
+		    else if (i == 2)
+		    	ii = 0;
+		    else if (i == 3)
+		    	ii = 2;
+		    data->region.segments[i].endpoints[0] = &(data->region.cornerpoints[i]);
+		    data->region.segments[i].endpoints[1] = &(data->region.cornerpoints[ii]);
+		    data->region.segments[i].nls = 0;
+		    data->region.segments[i].nls_alloc = 0;
+		    data->region.segments[i].lspoints = NULL;
 		    }
 
 		/* area pick data */
@@ -2283,7 +2318,6 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    || data->mouse_mode == MBV_MOUSE_ROTATE
 		    || data->mouse_mode == MBV_MOUSE_SHADE
 		    || data->mouse_mode == MBV_MOUSE_VIEWPOINT
-		    || data->mouse_mode == MBV_MOUSE_AREA
 		    || data->mouse_mode == MBV_MOUSE_NAV)
 		    {		
 		    /* set cursor for pick */
@@ -2294,6 +2328,21 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
 			    
+		    /* replot */
+		    mbview_plotlow(instance);
+		    }
+					    
+		/* handle region picking */
+		else if (data->mouse_mode == MBV_MOUSE_AREA)
+		    {				    		
+		    /* set cursor for area */
+		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
+
+		    /* process area */
+		    mbview_region(instance, MBV_REGION_DOWN,
+				    view->button_down_x, 
+				    data->height - view->button_down_y);
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -2645,7 +2694,6 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    || data->mouse_mode == MBV_MOUSE_ROTATE
 		    || data->mouse_mode == MBV_MOUSE_SHADE
 		    || data->mouse_mode == MBV_MOUSE_VIEWPOINT
-		    || data->mouse_mode == MBV_MOUSE_AREA
 		    || data->mouse_mode == MBV_MOUSE_NAV)
 		    {		
 		    /* process pick */
@@ -2653,6 +2701,21 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				view->button_move_x, 
 				data->height - view->button_move_y);
 			
+		    /* replot */
+		    mbview_plotlow(instance);
+		    }
+					    
+		/* handle region picking */
+		else if (data->mouse_mode == MBV_MOUSE_AREA)
+		    {				    
+		    /* set cursor for region */
+		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
+
+		    /* process region */
+		    mbview_region(instance, MBV_REGION_MOVE,
+				    view->button_move_x, 
+				    data->height - view->button_move_y);
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3129,7 +3192,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		/* handle editing sites */
 		else if (data->mouse_mode == MBV_MOUSE_SITE)
 		    {				    		
-		    /* set cursor for area */
+		    /* set cursor for sites */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
@@ -3139,7 +3202,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		/* handle editing routes */
 		else if (data->mouse_mode == MBV_MOUSE_ROUTE)
 		    {				    		
-		    /* set cursor for area */
+		    /* set cursor for routes */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
 		    /* replot */
@@ -3185,7 +3248,6 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    || data->mouse_mode == MBV_MOUSE_ROTATE
 		    || data->mouse_mode == MBV_MOUSE_SHADE
 		    || data->mouse_mode == MBV_MOUSE_VIEWPOINT
-		    || data->mouse_mode == MBV_MOUSE_AREA
 		    && (view->button_down_x != view->button_up_x
 		    	|| view->button_down_y != view->button_up_y))
 		    {		
@@ -3197,6 +3259,23 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_up_x, 
 				    data->height - view->button_up_y);
 			    
+		    /* replot */
+		    mbview_plotlow(instance);
+		    }
+
+		/* handle area picking */
+		else if (data->mouse_mode == MBV_MOUSE_AREA
+		    && (view->button_down_x != view->button_up_x
+		    	|| view->button_down_y != view->button_up_y))
+		    {				    
+		    /* set cursor for area */
+		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
+
+		    /* process area */
+		    mbview_region(instance, MBV_REGION_UP,
+				    view->button_up_x, 
+				    data->height - view->button_up_y);
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3424,6 +3503,13 @@ fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
 		&& data->area.segments[i].lspoints != 0
 		&& data->area.segments[i].lspoints != NULL)
    		status = mb_free(mbv_verbose, &data->area.segments[i].lspoints, error);
+		}
+	for (i=0;i<4;i++)
+		{
+     		if (status == MB_SUCCESS
+		&& data->region.segments[i].lspoints != 0
+		&& data->region.segments[i].lspoints != NULL)
+   		status = mb_free(mbv_verbose, &data->region.segments[i].lspoints, error);
 		}
 	if (status == MB_SUCCESS
 		&& data->navpick.segment.nls_alloc != 0
@@ -4778,7 +4864,7 @@ fprintf(stderr,"do_mbview_mouse_mode: instance:%d mode:%d\n", instance, mode);
     else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT)
 	sprintf(value_text,":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: View Rotate\":t\"R: Exageration\"");
     else if (data->mouse_mode == MBV_MOUSE_AREA)
-	sprintf(value_text,":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Drag Area\":t\"R: Area Width\"");
+	sprintf(value_text,":::t\"Mouse Mode:\":t\"L: Drag Region\":t\"M: Drag Area\":t\"R: Area Width\"");
     else if (data->mouse_mode == MBV_MOUSE_SITE)
 	sprintf(value_text,":::t\"Mouse Mode:\":t\"L: Select Site\":t\"M: Add Site\":t\"R: Delete Site\"");
     else if (data->mouse_mode == MBV_MOUSE_ROUTE)

@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.0 2003-12-02 20:38:33 caress Exp $
+ *    $Id: mbview_plot.c,v 5.1 2004-01-06 21:11:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:33  caress
+ * Making version number 5.0
+ *
  * Revision 1.2  2003/11/25 01:43:18  caress
  * MBview version generated during EW0310.
  *
@@ -70,7 +73,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.0 2003-12-02 20:38:33 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.1 2004-01-06 21:11:04 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -438,6 +441,9 @@ int mbview_drawdata(int instance, int rez)
 		
 	/* draw current area */
 	mbview_drawarea(instance);
+		
+	/* draw current region */
+	mbview_drawregion(instance);
 
 	/* draw current navpick */
 	mbview_drawnavpick(instance);		
@@ -1618,7 +1624,7 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 	
 
 	/* print starting debug statements */
-	if (mbv_verbose >= 2)
+	if (mbv_verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1703,11 +1709,6 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 	/* if points needed and space allocated do it */
 	if (done == MB_NO && ni + nj > 0)
 		{		
-		/* get line equation */
-		mm = (seg->endpoints[1]->ygrid - seg->endpoints[0]->ygrid) 
-			/ (seg->endpoints[1]->xgrid - seg->endpoints[0]->xgrid);
-		bb = seg->endpoints[0]->ygrid - mm * seg->endpoints[0]->xgrid;
-
 		/* put begin point in list */
 		seg->nls = 0;
 		seg->lspoints[seg->nls].xgrid = seg->endpoints[0]->xgrid;
@@ -1715,6 +1716,14 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 		seg->lspoints[seg->nls].zdata = seg->endpoints[0]->zdata;
 		seg->nls++;
 		
+		/* get line equation */
+		if (ni > 0 && seg->endpoints[1]->xgrid != seg->endpoints[0]->xgrid) 
+			{
+			mm = (seg->endpoints[1]->ygrid - seg->endpoints[0]->ygrid) 
+				/ (seg->endpoints[1]->xgrid - seg->endpoints[0]->xgrid);
+			bb = seg->endpoints[0]->ygrid - mm * seg->endpoints[0]->xgrid;
+			}
+
 		/* loop over xgrid */
 		insert = 1;
 		for (icnt=0;icnt<ni;icnt++)
@@ -1753,13 +1762,21 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 		seg->lspoints[seg->nls].zdata = seg->endpoints[1]->zdata;
 		seg->nls++;
 		
+		/* get line equation */
+		if (nj > 0 && seg->endpoints[1]->ygrid != seg->endpoints[0]->ygrid) 
+			{
+			mm = (seg->endpoints[1]->xgrid - seg->endpoints[0]->xgrid) 
+				/ (seg->endpoints[1]->ygrid - seg->endpoints[0]->ygrid);
+			bb = seg->endpoints[0]->xgrid - mm * seg->endpoints[0]->ygrid;
+			}
+
 		/* loop over ygrid */
 		insert = 1;
 		for (jcnt=0;jcnt<nj;jcnt++)
 			{
 			j = jstart + jcnt * jadd;
 			ygrid = data->primary_ymin + j * data->primary_dy;
-			xgrid = (ygrid - bb) / mm;
+			xgrid = mm * ygrid + bb;
 			i = (int)((xgrid - data->primary_xmin)
 					/ data->primary_dx);
 			k = i * data->primary_ny + j;
@@ -1864,6 +1881,13 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 			}
 		}
 	
+fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+	function_name);
+fprintf(stderr,"dbg2  Return status:\n");
+fprintf(stderr,"dbg2       status:          %d\n",status);
+fprintf(stderr,"dbg2       seg->nls:        %d\n",seg->nls);
+fprintf(stderr,"dbg2       seg->nls_alloc:  %d\n",seg->nls_alloc);
+fprintf(stderr,"dbg2       seg->lspoints:\n");
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.0 2003-12-02 20:38:34 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.1 2004-01-06 21:11:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:34  caress
+ * Making version number 5.0
+ *
  * Revision 1.3  2003/11/25 22:14:03  caress
  * Fixed problem with display of mouse mode buttons.
  *
@@ -60,6 +63,9 @@
 #define MBV_AREALENGTH_MOVE	2
 #define MBV_AREALENGTH_UP	3
 #define MBV_AREAASPECT_CHANGE	4
+#define MBV_REGION_DOWN	1
+#define MBV_REGION_MOVE	2
+#define MBV_REGION_UP	3
 
 #define MBV_WINDOW_NULL 	0
 #define MBV_WINDOW_HIDDEN 	1
