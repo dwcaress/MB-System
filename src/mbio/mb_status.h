@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.10 1998-10-07 22:48:34 caress Exp $
+ *    $Id: mb_status.h,v 4.11 1998-10-20 05:00:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1998/10/07  22:48:34  caress
+ * Fixed typo.
+ *
  * Revision 4.9  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -72,7 +75,7 @@
  */
 
 /* MB-system version id */
-#define	MB_VERSION	"4.5"
+#define	MB_VERSION	"4.6"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
@@ -92,14 +95,20 @@
 #define	MB_DATA_START			9	/* Simrad */
 #define	MB_DATA_STOP			10	/* Simrad */
 #define	MB_DATA_NAV			11	/* Simrad */
-#define	MB_DATA_ANGLE			12	/* HSMD */
-#define	MB_DATA_EVENT			13	/* HSMD */
-#define	MB_DATA_HISTORY			14	/* GSF */
-#define	MB_DATA_SUMMARY			15	/* GSF */
-#define	MB_DATA_PROCESSING_PARAMETERS	16	/* GSF */
-#define	MB_DATA_SENSOR_PARAMETERS	17	/* GSF */
-#define	MB_DATA_NAVIGATION_ERROR	18	/* GSF */
-#define	MB_DATA_RAW_LINE		19	/* uninterpretable line
+#define	MB_DATA_RUN_PARAMETER		12	/* Simrad */
+#define	MB_DATA_CLOCK			13	/* Simrad */
+#define	MB_DATA_TIDE			14	/* Simrad */
+#define	MB_DATA_HEIGHT			15	/* Simrad */
+#define	MB_DATA_HEADING			16	/* Simrad */
+#define	MB_DATA_ATTITUDE		17	/* Simrad */
+#define	MB_DATA_ANGLE			18	/* HSMD */
+#define	MB_DATA_EVENT			19	/* HSMD */
+#define	MB_DATA_HISTORY			20	/* GSF */
+#define	MB_DATA_SUMMARY			21	/* GSF */
+#define	MB_DATA_PROCESSING_PARAMETERS	22	/* GSF */
+#define	MB_DATA_SENSOR_PARAMETERS	23	/* GSF */
+#define	MB_DATA_NAVIGATION_ERROR	24	/* GSF */
+#define	MB_DATA_RAW_LINE		25	/* uninterpretable line
 							for ascii formats */
 
 /* MBIO function status convention */
