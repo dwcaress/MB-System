@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.19 1996-07-26 21:03:26 caress Exp $
+ *    $Id: mbswath.c,v 4.20 1996-08-13 16:10:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1996/07/26  21:03:26  caress
+ * Fixed code to handle variable numbers of beams and pixels properly.
+ *
  * Revision 4.18  1996/04/22  13:20:25  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -217,7 +220,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.19 1996-07-26 21:03:26 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.20 1996-08-13 16:10:07 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -943,6 +946,21 @@ char **argv;
 				error);
 			fprintf(stderr,"dbg2       status:         %d\n",
 				status);
+			for (i=0;i<pingcur->beams_bath;i++)
+				{
+				fprintf(stderr, "bath[%4d]:  %f  %f  %f\n", 
+					i, bath[i], bathlon[i], bathlat[i]);
+				}
+			for (i=0;i<pingcur->beams_amp;i++)
+				{
+				fprintf(stderr, "amp[%4d]:  %f  %f  %f\n", 
+					i, amp[i], bathlon[i], bathlat[i]);
+				}
+			for (i=0;i<pingcur->pixels_ss;i++)
+				{
+				fprintf(stderr, "ss[%4d]:  %f  %f  %f\n", 
+					i, ss[i], sslon[i], sslat[i]);
+				}
 			}
 
 		/* update bookkeeping */
@@ -1598,6 +1616,7 @@ int	*error;
 			print->x[3] = x + dlon1 + pingcur->lonfor;
 			print->y[3] = y + dlat1 + pingcur->latfor;
 			}
+
 		  j = pingcur->beams_bath-1;
 		  if (pingcur->bath[j] > 0.0 && pingcur->bath[j-1] > 0)
 			{
@@ -1663,9 +1682,13 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
+				if (pingcur->beams_bath > 0 
+					&& pingcur->bath[pingcur->beams_bath] > 0.0)
+					dddepth = pingcur->bath[pingcur->beams_bath];
+				else if (dddepth <= 0.0)
+					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
-					+ ddlaty*ddlaty 
-					+ pingcur->ss[j]*pingcur->ss[j]);
+					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
 				pingcur->lonfor = r*headingx*mtodeglon;
