@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontourfilter.c	8/13/93
- *    $Id: mbcontourfilter.c,v 4.0 1994-03-06 00:09:08 caress Exp $
+ *    $Id: mbcontourfilter.c,v 4.1 1994-04-19 01:35:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -67,9 +67,9 @@ struct	ping
 	double	heading;
 	double	distance;
 	double	*bath;
-	double	*amp;
 	double	*bathlon;
 	double	*bathlat;
+	double	*amp;
 	double	*ss;
 	double	*sslon;
 	double	*sslat;
@@ -102,7 +102,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontourfilter.c,v 4.0 1994-03-06 00:09:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontourfilter.c,v 4.1 1994-04-19 01:35:32 caress Exp $";
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a swath contouring utility designed for use with \nan old fashioned pen plotter. The output consists of ascii pen plotting \ncalls in geographic (longitude and latitude) coordinates.  These plot \ncalls can be piped to a filter which translates them to calls which \ncan be handled by a plotter.  The primary use of this utility is as \npart of a shipboard realtime plotting package using four color pen \nplotters. The contour levels and colors are controlled using contour \nand color change intervals. Contours can also be set to have ticks \npointing downhill.";
 	static char usage_message[] = "mbcontourfilter.c -Fformat -Iinfile -Rwest/east/south/north \n\t[-Atime_tick/time_annot/date_annot/time_tick_len -Byr/mo/da/hr/mn/sc \n\t-Ccontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Eyr/mo/da/hr/mn/sc -Jscale -Llonflip -Nnplot \n\t-Ppings -Sspeed -Ttimegap -V -H]";
