@@ -1,4 +1,4 @@
-.TH mbm_plot l "29 October 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_plot l "22 April 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of swath sonar swath data.

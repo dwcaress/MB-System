@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.12 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_plot.perl,v 5.13 2003-04-22 21:10:12 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.12 2003-04-17 20:42:48 caress Exp $
+#   $Id: mbm_plot.perl,v 5.13 2003-04-22 21:10:12 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.12  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 5.11  2002/09/19 00:35:04  caress
 #   Release 5.0.beta23
 #
@@ -479,13 +482,17 @@ if ($help)
 # check for input file
 if (!$file_data)
 	{
-	print "\a";
-	die "No input file specified - $program_name aborted\n";
+	$file_data = "datalist.mb-1";
+	if (! -e $file_data)
+		{
+		print "\a";
+		die "No input file specified and default $file_data cannot be opened...\n$program_name aborted\n";
+		}
 	}
 elsif (! -e $file_data)
 	{
 	print "\a";
-	die "Specified input file cannot be opened - $program_name aborted\n";
+	die "Specified input file $file_data cannot be opened...\n$program_name aborted\n";
 	}
 
 # tell the world we got started
