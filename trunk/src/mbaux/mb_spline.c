@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_spline.c	10/11/00
- *    $Id: mb_spline.c,v 5.0 2000-12-01 22:53:59 caress Exp $
+ *    $Id: mb_spline.c,v 5.1 2004-12-02 06:29:26 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	October 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:53:59  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.0  2000/10/11  21:49:27  caress
  * Initial revision - code derived from functions previously
  * found in mbmerge.c, mbtide.c, and mbprocess.c.
@@ -47,7 +50,7 @@
 int mb_spline_init(int verbose, double *x, double *y, 
 	int n, double yp1, double ypn, double *y2, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.1 2004-12-02 06:29:26 caress Exp $";
 	char	*function_name = "mb_spline_init";
 	int	status = MB_SUCCESS;
 	int	i, k;
@@ -121,7 +124,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 	int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.1 2004-12-02 06:29:26 caress Exp $";
 	char	*function_name = "mb_spline_interp";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
@@ -178,7 +181,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 int mb_linear_interp(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.1 2004-12-02 06:29:26 caress Exp $";
 	char	*function_name = "mb_linear_interp";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
@@ -210,6 +213,67 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 	if (klo == n) klo = n - 1;
 	h=xa[khi]-xa[klo];
 	b = (ya[khi] - ya[klo]) / h;
+	*y = ya[klo] + b * (x - xa[klo]);
+	*i=klo;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       y:          %f\n",*y);
+		fprintf(stderr,"dbg2       i:          %d\n",*i);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+	
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error)
+{
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.1 2004-12-02 06:29:26 caress Exp $";
+	char	*function_name = "mb_linear_interp_degrees";
+	int	status = MB_SUCCESS;
+	int	klo, khi, k;
+	double	h, b;
+	double	yahi, yalo;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
+		fprintf(stderr,"dbg2       xa:               %d\n",xa);
+		fprintf(stderr,"dbg2       ya:               %d\n",ya);
+		fprintf(stderr,"dbg2       n:                %d\n",n);
+		fprintf(stderr,"dbg2       x:                %f\n",x);
+		}
+
+	/* perform interpolation */
+	klo=1;
+	khi=n;
+	while (khi-klo > 1) 
+		{
+		k=(khi+klo) >> 1;
+		if (xa[k] > x) khi=k;
+		else klo=k;
+		}
+	if (khi == 1) khi = 2;
+	if (klo == n) klo = n - 1;
+	h=xa[khi]-xa[klo];
+	yahi = ya[khi];
+	yalo = ya[klo];
+	if (yahi - yalo > 180.0)
+		yahi -= 360.0;
+	else if (yahi - yalo < -180.0)
+		yahi += 360.0;
+	b = (yahi - yalo) / h;
 	*y = ya[klo] + b * (x - xa[klo]);
 	*i=klo;
 
