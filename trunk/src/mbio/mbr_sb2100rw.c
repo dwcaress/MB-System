@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.1 1994-03-13 04:48:05 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.2 1994-03-25 14:02:38 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/13  04:48:05  caress
+ * Changed order in which parameters are read and written.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -52,7 +55,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.1 1994-03-13 04:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.2 1994-03-25 14:02:38 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -427,7 +430,7 @@ int	*error;
 			mb_io_ptr->new_heading = 0.01*data->heading_36khz;
 
 		/* get speed */
-		mb_io_ptr->new_speed = 0.001*data->speed;
+		mb_io_ptr->new_speed = 360.0*data->speed;
 
 		/* read beam and pixel values into storage arrays */
 		mb_io_ptr->beams_bath = data->num_beams;
@@ -805,7 +808,7 @@ int	*error;
 			data->heading_36khz = data->heading_36khz + 36000;
 
 		/* get speed */
-		data->speed = 1000.0*mb_io_ptr->new_speed;
+		data->speed = mb_io_ptr->new_speed/360.0;
 
 		/* read beam and pixel values into storage arrays */
 		if (data->range_scale == 'S')
@@ -1286,7 +1289,7 @@ int	*error;
 	int	shift;
 	char	ew, ns;
 	int	degrees, minutes;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1323,22 +1326,22 @@ int	*error;
 		data->longitude = degrees + 0.0001*minutes/60.;
 		if (ew == 'W' || ns == 'w')
 			data->longitude = -data->longitude;
-		mb_get_int(&(data->speed),                 line+35,5);
+		mb_get_int(&(data->speed),                 line+35,7);
 
 		/* now get other stuff */
-		mb_get_int(&(data->num_beams),            line+40,  3);
-		data->svp_corr_beams = line[43];
-		data->frequency[0] = line[44];
-		data->frequency[1] = line[45];
+		mb_get_int(&(data->num_beams),            line+42,  4);
+		data->svp_corr_beams = line[46];
+		data->frequency[0] = line[47];
+		data->frequency[1] = line[48];
 		for (i=0;i<8;i++)
-			data->spare[i] = line[46+i];
-		data->range_scale = line[54];
-		mb_get_int(&(data->surface_sound_velocity),line+55,6);
-		data->ssv_source = line[61];
-		data->depth_gate_mode = line[62];
+			data->spare[i] = line[49+i];
+		data->range_scale = line[57];
+		mb_get_int(&(data->surface_sound_velocity),line+58,6);
+		data->ssv_source = line[64];
+		data->depth_gate_mode = line[65];
 
 		/* handle 12 kHz parameters if not in 36 kHz mode */
-		shift = 63;
+		shift = 66;
 		if (data->frequency[0] != 'H')
 		  {
 		  mb_get_int(&(data->ping_gain_12khz),    line+shift,    2);
@@ -1346,10 +1349,10 @@ int	*error;
 							  line+2+shift,  2);
 		  mb_get_int(&(data->transmitter_attenuation_12khz),
 							  line+4+shift,  2);
-		  mb_get_int(&(data->pitch_12khz),        line+6+shift,  5);
-		  mb_get_int(&(data->roll_12khz),         line+11+shift, 5);
-		  mb_get_int(&(data->heading_12khz),      line+16+shift, 5);
-		  shift = shift + 21;
+		  mb_get_int(&(data->pitch_12khz),        line+6+shift,  6);
+		  mb_get_int(&(data->roll_12khz),         line+12+shift, 6);
+		  mb_get_int(&(data->heading_12khz),      line+18+shift, 6);
+		  shift = shift + 24;
 		  }
 
 		/* handle 36 kHz parameters if if in 36 kHz 
@@ -1361,10 +1364,10 @@ int	*error;
 							  line+2+shift,  2);
 		  mb_get_int(&(data->transmitter_attenuation_36khz),
 							  line+4+shift,  2);
-		  mb_get_int(&(data->pitch_36khz),        line+6+shift,  5);
-		  mb_get_int(&(data->roll_36khz),         line+11+shift, 5);
-		  mb_get_int(&(data->heading_36khz),      line+16+shift, 5);
-		  shift = shift + 21;
+		  mb_get_int(&(data->pitch_36khz),        line+6+shift,  6);
+		  mb_get_int(&(data->roll_36khz),         line+12+shift, 6);
+		  mb_get_int(&(data->heading_36khz),      line+18+shift, 6);
+		  shift = shift + 24;
 		  }
 
 		/* now get last things in header */
@@ -1457,7 +1460,7 @@ int	*error;
 		mb_get_int(&(data->amplitude_beam[i]),   line+34, 3);
 		mb_get_int(&(data->signal_to_noise[i]),  line+37, 2);
 		mb_get_int(&(data->echo_length[i]),      line+39, 3);
-		data->quality[i] = line[0];
+		data->quality[i] = line[43];
 		}
 	  }
 
@@ -1509,7 +1512,7 @@ int	*error;
 	char	line[MBF_SB2100RW_MAXLINE];
 	int	shift;
 	char	ew, ns;
-	char	read_ss[2*MBF_SB2100RW_PIXELS+2];
+	char	read_ss[4*MBF_SB2100RW_PIXELS+2];
 	int	degrees, minutes;
 	int	i;
 
@@ -1548,56 +1551,54 @@ int	*error;
 		data->longitude = degrees + 0.0001*minutes/60.;
 		if (ew == 'W' || ns == 'w')
 			data->longitude = -data->longitude;
-		mb_get_int(&(data->speed),                 line+35,5);
+		mb_get_int(&(data->speed),                 line+35,  7);
 
 		/* now get other stuff */
-		mb_get_int(&(data->num_pixels),           line+40,  3);
-		data->svp_corr_beams = line[43];
-		data->frequency[0] = line[44];
-		data->frequency[1] = line[45];
+		mb_get_int(&(data->ss_data_length),        line+42,  4);
+		data->num_pixels = (data->ss_data_length)/4;
+		data->svp_corr_beams = line[46];
+		data->frequency[0] = line[47];
+		data->frequency[1] = line[48];
 		for (i=0;i<8;i++)
-			data->spare[i] = line[46+i];
-		data->range_scale = line[54];
-		mb_get_int(&(data->surface_sound_velocity),line+55,6);
-		data->ssv_source = line[61];
-		data->depth_gate_mode = line[62];
+			data->spare[i] = line[49+i];
+		data->range_scale = line[57];
+		mb_get_int(&(data->surface_sound_velocity),line+58,6);
+		data->ssv_source = line[64];
+		data->depth_gate_mode = line[65];
 
 		/* handle 12 kHz parameters if not in 36 kHz mode */
-		shift = 63;
+		shift = 66;
 		if (data->frequency[0] != 'H')
 		  {
-		  mb_get_int(&(data->num_pixels_12khz),   line+shift,     3);
-		  mb_get_int(&(data->pixel_size_12khz),   line+3+shift,   3);
-		  mb_get_int(&(data->ping_gain_12khz),    line+6+shift,   2);
+		  mb_get_int(&(data->num_pixels_12khz),   line+shift,     4);
+		  mb_get_int(&(data->pixel_size_12khz),   line+4+shift,   4);
+		  mb_get_int(&(data->ping_gain_12khz),    line+8+shift,   2);
 		  mb_get_int(&(data->ping_pulse_width_12khz),
-							  line+8+shift,   2);
+							  line+10+shift,   2);
 		  mb_get_int(&(data->transmitter_attenuation_12khz),
-							  line+10+shift,  2);
-		  mb_get_int(&(data->pitch_12khz),        line+12+shift,  5);
-		  mb_get_int(&(data->roll_12khz),         line+17+shift,  5);
-		  mb_get_int(&(data->heading_12khz),      line+22+shift,  5);
-		  shift = shift + 27;
+							  line+12+shift,  2);
+		  mb_get_int(&(data->pitch_12khz),        line+14+shift,  6);
+		  mb_get_int(&(data->roll_12khz),         line+20+shift,  6);
+		  mb_get_int(&(data->heading_12khz),      line+26+shift,  6);
+		  shift = shift + 32;
 		  }
 
 		/* handle 36 kHz parameters if if in 36 kHz 
 			or dual frequency mode */
 		if (data->frequency[0] != 'L')
 		  {
-		  mb_get_int(&(data->num_pixels_36khz),   line+shift,  3);
-		  mb_get_int(&(data->pixel_size_36khz),   line+3+shift,  3);
-		  mb_get_int(&(data->ping_gain_36khz),    line+6+shift,2);
+		  mb_get_int(&(data->num_pixels_36khz),   line+shift,  4);
+		  mb_get_int(&(data->pixel_size_36khz),   line+4+shift,  4);
+		  mb_get_int(&(data->ping_gain_36khz),    line+8+shift,2);
 		  mb_get_int(&(data->ping_pulse_width_36khz),
-							  line+8+shift,2);
-		  mb_get_int(&(data->transmitter_attenuation_36khz),
 							  line+10+shift,2);
-		  mb_get_int(&(data->pitch_36khz),        line+12+shift,5);
-		  mb_get_int(&(data->roll_36khz),         line+17+shift,5);
-		  mb_get_int(&(data->heading_36khz),      line+22+shift,5);
-		  shift = shift + 27;
+		  mb_get_int(&(data->transmitter_attenuation_36khz),
+							  line+12+shift,2);
+		  mb_get_int(&(data->pitch_36khz),        line+14+shift,6);
+		  mb_get_int(&(data->roll_36khz),         line+20+shift,6);
+		  mb_get_int(&(data->heading_36khz),      line+26+shift,6);
+		  shift = shift + 32;
 		  }
-
-		/* now get last thing in header */
-		mb_get_int(&(data->ss_data_length),       line+shift,  4);
 		}
 
 	/* print debug statements */
@@ -1672,8 +1673,8 @@ int	*error;
 		}
 
 	/* read sidescan data from character array */
-	if ((status = fread(read_ss,1,data->ss_data_length,
-		mbfp)) != data->ss_data_length)
+	if ((status = fread(read_ss,1,data->ss_data_length+2,
+		mbfp)) != data->ss_data_length+2)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1818,7 +1819,7 @@ int	*error;
 		}
 
 	/* write label in file */
-	sprintf(line,"%9s\r\n",mbf_sb2100rw_labels[type]);
+	sprintf(line,"%8s\r\n",mbf_sb2100rw_labels[type]);
 	status = mbr_sb2100rw_write_line(verbose,mbfp,line,error);
 
 	/* print output debug statements */
@@ -2271,8 +2272,8 @@ int	*error;
 		minutes = (int) (600000.0*(degrees - idegrees));
 		status = fprintf(mbfp,"%3d",idegrees);
 		status = fprintf(mbfp,"%6d",minutes);
-		status = fprintf(mbfp,"%5d",data->speed);
-		status = fprintf(mbfp,"%3d",data->num_beams);
+		status = fprintf(mbfp,"%7d",data->speed);
+		status = fprintf(mbfp,"%4d",data->num_beams);
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
 			data->frequency[0],data->frequency[1]);
@@ -2289,9 +2290,9 @@ int	*error;
 				data->ping_pulse_width_12khz);
 			status = fprintf(mbfp,"%2d",
 				data->transmitter_attenuation_12khz);
-			status = fprintf(mbfp,"%5d",data->pitch_12khz);
-			status = fprintf(mbfp,"%5d",data->roll_12khz);
-			status = fprintf(mbfp,"%5d",data->heading_12khz);
+			status = fprintf(mbfp,"%6d",data->pitch_12khz);
+			status = fprintf(mbfp,"%6d",data->roll_12khz);
+			status = fprintf(mbfp,"%6d",data->heading_12khz);
 			}
 		if (data->frequency[0] != 'L')
 			{
@@ -2300,9 +2301,9 @@ int	*error;
 				ping_pulse_width_36khz);
 			status = fprintf(mbfp,"%2d",
 				data->transmitter_attenuation_36khz);
-			status = fprintf(mbfp,"%5d",data->pitch_36khz);
-			status = fprintf(mbfp,"%5d",data->roll_36khz);
-			status = fprintf(mbfp,"%5d",data->heading_36khz);
+			status = fprintf(mbfp,"%6d",data->pitch_36khz);
+			status = fprintf(mbfp,"%6d",data->roll_36khz);
+			status = fprintf(mbfp,"%6d",data->heading_36khz);
 			}
 		status = fprintf(mbfp,"%1d",data->num_algorithms);
 		for (i=0;i<4;i++)
@@ -2502,8 +2503,9 @@ int	*error;
 		minutes = (int) (600000.0*(degrees - idegrees));
 		status = fprintf(mbfp,"%3d",idegrees);
 		status = fprintf(mbfp,"%6d",minutes);
-		status = fprintf(mbfp,"%5d",data->speed);
-		status = fprintf(mbfp,"%3d",data->num_pixels);
+		status = fprintf(mbfp,"%7d",data->speed);
+		data->ss_data_length = 4*data->num_pixels;
+		status = fprintf(mbfp,"%4d",data->ss_data_length);
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
 			data->frequency[0],data->frequency[1]);
@@ -2515,43 +2517,39 @@ int	*error;
 		status = fprintf(mbfp,"%c",data->depth_gate_mode);
 		if (data->frequency[0] != 'H')
 			{
-			status = fprintf(mbfp,"%3d",data->num_pixels_12khz);
-			status = fprintf(mbfp,"%3d",data->pixel_size_12khz);
+			status = fprintf(mbfp,"%4d",data->num_pixels_12khz);
+			status = fprintf(mbfp,"%4d",data->pixel_size_12khz);
 			status = fprintf(mbfp,"%2d",data->ping_gain_12khz);
 			status = fprintf(mbfp,"%2d",
 				data->ping_pulse_width_12khz);
 			status = fprintf(mbfp,"%2d",
 				data->transmitter_attenuation_12khz);
-			status = fprintf(mbfp,"%5d",data->pitch_12khz);
-			status = fprintf(mbfp,"%5d",data->roll_12khz);
-			status = fprintf(mbfp,"%5d",data->heading_12khz);
+			status = fprintf(mbfp,"%6d",data->pitch_12khz);
+			status = fprintf(mbfp,"%6d",data->roll_12khz);
+			status = fprintf(mbfp,"%6d",data->heading_12khz);
 			}
 		if (data->frequency[0] != 'L')
 			{
-			status = fprintf(mbfp,"%3d",data->num_pixels_36khz);
-			status = fprintf(mbfp,"%3d",data->pixel_size_36khz);
+			status = fprintf(mbfp,"%4d",data->num_pixels_36khz);
+			status = fprintf(mbfp,"%4d",data->pixel_size_36khz);
 			status = fprintf(mbfp,"%2d",data->ping_gain_36khz);
 			status = fprintf(mbfp,"%2d",data->
 				ping_pulse_width_36khz);
 			status = fprintf(mbfp,"%2d",
 				data->transmitter_attenuation_36khz);
-			status = fprintf(mbfp,"%5d",data->pitch_36khz);
-			status = fprintf(mbfp,"%5d",data->roll_36khz);
-			status = fprintf(mbfp,"%5d",data->heading_36khz);
+			status = fprintf(mbfp,"%6d",data->pitch_36khz);
+			status = fprintf(mbfp,"%6d",data->roll_36khz);
+			status = fprintf(mbfp,"%6d",data->heading_36khz);
 			}
-		data->ss_data_length = 2*data->num_pixels + 2;
-		status = fprintf(mbfp,"%4d",data->ss_data_length);
 		status = fprintf(mbfp,"\r\n");
 
 		/* construct and write out sidescan data */
 		for (i=0;i<data->num_pixels;i++)
 			{
-			write_ss[2*i] = (unsigned char) data->amplitude_ss[i];
+			write_ss[2*i] = (short int) data->amplitude_ss[i];
 			write_ss[2*i+1] 
-				= (unsigned char) data->alongtrack_ss[i];
+				= (short int) data->alongtrack_ss[i];
 	  		}
-		write_ss[2*data->num_pixels+1] = '\r';
-		write_ss[2*data->num_pixels+2] = '\n';
 		if ((status = fwrite(write_ss,1,data->ss_data_length,mbfp))
 			!= data->ss_data_length)
 			{
@@ -2562,6 +2560,7 @@ int	*error;
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
+			status = fprintf(mbfp,"\r\n");
 			}
 
 		/* check for an error */
