@@ -203,6 +203,9 @@ Hydrosweep data in the raw "real-time" ascii format (format 21).
  		which will run \fBGMT\fP programs to 
  		display the data.
 
+.SH SEE ALSO
+\fBmbio\fP(l)
+
 .SH BUGS
 It doesn't do everything we want it to yet, it doesn't work with
 every kind of multibeam data ever collected, and sometimes it

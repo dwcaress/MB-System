@@ -94,7 +94,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 4.1 1994-10-31 21:54:07 caress Exp $
+ Version $Id: mbrollbias.l,v 4.2 1994-10-31 23:10:21 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:
@@ -129,6 +129,9 @@ The output looks like:
  A postive roll bias means the ship rolls to port, 
      giving rise to shallow bathymetry to port and 
      deep bathymetry to starboard.
+
+.SH SEE ALSO
+\fBmbsystem\fP(l)
 
 .SH BUGS
 Probably.

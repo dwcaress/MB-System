@@ -147,6 +147,10 @@ The program will output some information:
  	beams deleted:          3672 (12%)
  	number of zapped pings: 4
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbunclean\fP(l), \fBmbedit\fP(l), 
+\fBmbinfo\fP(l)
+
 .SH BUGS
 This algorithm simply doesn't detect all bathymetric artifacts that
 are obvious to the eye on contour charts.  In particular, bad beams 

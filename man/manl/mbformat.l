@@ -49,5 +49,8 @@ Suppose one wishes to list all of the currently supported data formats:
 The following will suffice:
 	mbformat
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbio\fP(l)
+
 .SH BUGS
 No known bugs.

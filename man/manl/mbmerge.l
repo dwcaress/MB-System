@@ -197,5 +197,8 @@ contains real-time navigation.
 The following will suffice:
  	mbmerge -F21 -Nnavhs -Ihsraw -Ohsgood
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmblist\fP(l)
+
 .SH BUGS
 You tell me.

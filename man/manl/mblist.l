@@ -352,6 +352,8 @@ Either way, the output is as follows:
  	-49.298639	  12.163530	    14
  	.....
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
 \fBmblist\fP is not able to list all of the information available in some

@@ -123,6 +123,9 @@ L-DGO edmb format (data.edmb), starting at 09:00 and ending at
 
  	mbps -F22 -Idata.edmb -B1991/9/3/9/0/0 -E1991/9/3/10/30/0 > fred
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbcontour\fP(l), \fBmbswath\fP(l)
+
 .SH BUGS
 \fBmbps\fP assumes that the ship was moving on a straight line. Weird
 plots will result if this is not the case.  \fBmbps \fPonly draws polygons bewteen 3 adjacent good points; if isolated points without 2 neighbors exist they will not be apparent in the final plot.  The filling of bad polygons is not perfect and gaps in the black fill, especially at the edges of swaths, may occur.

@@ -201,5 +201,9 @@ The contents of the output file velocity_profile are:
  	11500.000000 1620.397705
  	12000.000000 1627.130371
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbvelocitytool\fP(l), \fBmbbath\fP(l), 
+\fBmbm_xbt\fP(l), \fBxbt\fP(l)
+
 .SH BUGS
 None known.

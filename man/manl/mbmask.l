@@ -131,6 +131,10 @@ a flagging mask file from the edited edmb file:
 .br
 Then, apply the mask to the raw file as follows:
  	mbmask -F24 -Mhs_ew9103_143.mask -Ihs_ew9103_143.mb24 -Ohs_ew9103_143_m.mb24
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbedit\fP(l), \fBmbclean\fP(l), \fBmbunclean\fP(l)
+
 .SH BUGS
 The program \fBmbmask\fP occasionally seems to hang on the last 
 data record.  We will probably fix this the next time we have to use it.

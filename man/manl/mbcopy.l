@@ -140,5 +140,9 @@ data is in a raw Hydrosweep file (format 21).  The following will work:
 
 where a pipe (|) has been used to direct the stdout stream from \fBmbcopy\fP
 to the stdin stream of thrash_prog.
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbio\fP(l)
+
 .SH BUGS
 Certainly.
