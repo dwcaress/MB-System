@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.3 2001-05-24 23:18:07 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.4 2001-05-30 17:57:26 caress Exp $
  *
- *    Copyright (c) 1998, 2000 by
+ *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/05/24  23:18:07  caress
+ * Fixed handling of Revelle EM120 data (first cut).
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -274,6 +277,7 @@
 #define	MBSYS_SIMRAD2_MAXHEADING	100
 #define	MBSYS_SIMRAD2_MAXSSV		100
 #define	MBSYS_SIMRAD2_COMMENT_LENGTH	256
+#define	MBSYS_SIMRAD2_BUFFER_SIZE	2048
 
 /* sonar model numbers */
 #define	EM2_EM120		120
@@ -481,6 +485,10 @@ struct mbsys_simrad2_ping_struct
 
 	/* sidescan */
 	int	png_ss_read;	/* flag indicating actual reading of sidescan record */
+	int	png_ss_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	png_ss_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
 	int	png_max_range;	/* old: max range of ping in number of samples */
 				/* current: mean absorption coefficient in 0.01 db/km */
 				/* also: used to store sidescan pixel size in range (m)
