@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.4 2004-07-15 19:26:44 caress Exp $
+ *    $Id: mbview_process.c,v 5.5 2004-09-16 21:44:40 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/07/15 19:26:44  caress
+ * Improvements to survey planning.
+ *
  * Revision 5.3  2004/05/21 23:40:40  caress
  * Moved to new version of BX GUI builder
  *
@@ -85,7 +88,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.4 2004-07-15 19:26:44 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.5 2004-09-16 21:44:40 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -164,6 +167,11 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 		view->xmax = data->primary_xmax;
 		view->ymin = data->primary_ymin;
 		view->ymax = data->primary_ymax;
+
+		/* get origin */
+		view->xorigin = 0.5 * (view->xmin + view->xmax);
+		view->yorigin = 0.5 * (view->ymin + view->ymax);
+		view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
 
 		/* set projection for getting lon lat */
 		proj_status = mb_proj_init(mbv_verbose, 
