@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.1 1994-04-09 15:49:21 caress Exp $
+ *    $Id: mb_format.h,v 4.2 1994-04-11 23:22:28 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/04/09  15:49:21  caress
+ * Altered to fit latest iteration of SeaBeam 2100 vendor format.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -243,6 +246,25 @@ static int mb_system_table[] =
 	MB_SYS_SB2100,	/* MBF_SB2100IH */
 	MB_SYS_EM12,	/* MBF_EM12DARW */
 	MB_SYS_LDEOIH,	/* MBF_MBLDEOIH */
+	};
+
+/* Table of which multibeam data formats include 
+	travel time data */
+static int mb_traveltime_table[] = 
+	{
+	0,		/* NULL */
+	0,		/* MBF_SBSIOMRG */
+	0,		/* MBF_SBSIOCEN */
+	0,		/* MBF_SBSIOLSI */
+	0,		/* MBF_SBURICEN */
+	1,		/* MBF_HSATLRAW */
+	0,		/* MBF_HSLDEDMB */
+	0,		/* MBF_HSURICEN */
+	1,		/* MBF_HSLDEOIH */
+	1,		/* MBF_SB2100RW */
+	1,		/* MBF_SB2100IH */
+	1,		/* MBF_EM12DARW */
+	0,		/* MBF_MBLDEOIH */
 	};
 
 /* Table of which multibeam data formats support 
