@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.36 2005-03-25 04:39:01 caress Exp $
+ *    $Id: mbprocess.c,v 5.37 2005-04-06 17:29:40 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.36  2005/03/25 04:39:01  caress
+ * Sonar depth merging has been added to mbprocess and mbset. This is controlled by the SONARDEPTHMODE, SONARDEPTHFILE, and SONARDEPTHFORMAT mbprocess parameters.
+ *
  * Revision 5.35  2004/12/02 06:37:42  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -207,7 +210,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.36 2005-03-25 04:39:01 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.37 2005-04-06 17:29:40 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -3040,7 +3043,7 @@ and mbedit edit save files.\n";
 	    }
 
 	/*--------------------------------------------
-	  now read the file
+	  now open the swath files
 	  --------------------------------------------*/
 
 	/* initialize reading the input swath sonar file */
@@ -3110,6 +3113,9 @@ and mbedit edit save files.\n";
 		exit(error);
 		}
 	
+	/*--------------------------------------------
+	  read the input file to get first ssv if necessary
+	  --------------------------------------------*/
 	/* read input file until a surface sound velocity value
 		is obtained, then close and reopen the file 
 		this provides the starting surface sound velocity
@@ -3196,6 +3202,10 @@ and mbedit edit save files.\n";
 	/* reset error */
 	error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
+
+	/*--------------------------------------------
+	  output comments
+	  --------------------------------------------*/
 
 	/* write comments to beginning of output file */
 	if (strip_comments == MB_NO)
@@ -3991,6 +4001,10 @@ and mbedit edit save files.\n";
 	/* initialize time_d_lastping */
 	time_d_lastping = 0.0;
 
+	/*--------------------------------------------
+	  loop over reading input
+	  --------------------------------------------*/
+
 	/* read and write */
 	while (error <= MB_ERROR_NO_ERROR)
 		{
@@ -4089,6 +4103,10 @@ and mbedit edit save files.\n";
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5]);
 			}
+
+	/*--------------------------------------------
+	  handle navigation merging
+	  --------------------------------------------*/
 
 		/* apply kluge001 */
 		if (process.mbp_kluge001 == MB_YES
@@ -4192,6 +4210,10 @@ and mbedit edit save files.\n";
 			    }
 			}
 
+	/*--------------------------------------------
+	  handle adjusted navigation merging
+	  --------------------------------------------*/
+
 		/* interpolate the adjusted navigation if desired */
 		if (error == MB_ERROR_NO_ERROR
 			&& process.mbp_navadj_mode == MBP_NAV_ON
@@ -4225,6 +4247,10 @@ and mbedit edit save files.\n";
 			    }
 			}
 
+	/*--------------------------------------------
+	  handle attitude merging
+	  --------------------------------------------*/
+
 		/* interpolate the attitude if desired */
 		if (error == MB_ERROR_NO_ERROR
 			&& process.mbp_attitude_mode == MBP_ATTITUDE_ON
@@ -4246,6 +4272,10 @@ and mbedit edit save files.\n";
 					&error);
 			}
 
+	/*--------------------------------------------
+	  handle sonar depth merging
+	  --------------------------------------------*/
+
 		/* interpolate the sonardepth if desired */
 		if (error == MB_ERROR_NO_ERROR
 			&& process.mbp_sonardepth_mode == MBP_SONARDEPTH_ON
@@ -4258,6 +4288,10 @@ and mbedit edit save files.\n";
 					nsonardepth, time_d, &draft, &iatime, 
 					&error);
 			}
+
+	/*--------------------------------------------
+	  handle draft correction
+	  --------------------------------------------*/
     
 		/* add user specified draft correction if desired */
 		if (error == MB_ERROR_NO_ERROR
@@ -4273,6 +4307,10 @@ and mbedit edit save files.\n";
 			else if (process.mbp_draft_mode == MBP_DRAFT_SET)
 				draft = process.mbp_draft;
 			}
+
+	/*--------------------------------------------
+	  handle lever arm correction
+	  --------------------------------------------*/
 			
 		/* do lever calculation to find heave implied by roll and pitch
 		   for a sonar displaced from the vru - this will be added to the
@@ -4309,6 +4347,10 @@ and mbedit edit save files.\n";
 /*fprintf(stderr, "alpha:%f beta:%f lever:%f\n", 
 alpha, beta, lever_heave);*/
 			}
+
+	/*--------------------------------------------
+	  handle speed and heading calculation
+	  --------------------------------------------*/
 
 		/* make up heading and speed if required */
 		calculatespeedheading = MB_NO;
@@ -4387,11 +4429,20 @@ alpha, beta, lever_heave);*/
 			    heading += 360.0;
 			}
 
+	/*--------------------------------------------
+	  deal with bathymetry
+	  --------------------------------------------*/
+
 		/* if survey data encountered, 
 			get the bathymetry */
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA))
 			{
+
+	/*--------------------------------------------
+	  get travel time values
+	  --------------------------------------------*/
+	  
 			/* extract travel times if they exist */
 			if (traveltime == MB_YES)
 			    {
@@ -4432,6 +4483,10 @@ alpha, beta, lever_heave);*/
 				}
 			    }
 
+	/*--------------------------------------------
+	  handle adjustments to ssv, heave, and travel times
+	  --------------------------------------------*/
+
 			/* set surface sound speed to default if needed */
 			if (ssv <= 0.0)
 				ssv = ssv_start;
@@ -4471,6 +4526,10 @@ alpha, beta, lever_heave);*/
 			    {
 			    ssv += process.mbp_ssv;
 			    }
+
+	/*--------------------------------------------
+	  recalculate the bathymetry
+	  --------------------------------------------*/
 
 			/* if svp specified recalculate bathymetry
 			    by raytracing  */
@@ -4705,6 +4764,10 @@ time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 time_i[0], time_i[1], time_i[2], time_i[3], 
 time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    }
+
+	/*--------------------------------------------
+	  change water sound reference if needed
+	  --------------------------------------------*/
 			    
 			/* change bathymetry water sound reference if required */
 			if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF
@@ -4747,13 +4810,17 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				    }
 				}
 			    }
+
+	/*--------------------------------------------
+	  apply per-beam static offsets
+	  --------------------------------------------*/
 			    
 			/* apply static corrections */
 			if (process.mbp_static_mode == MBP_STATIC_ON
 			    && nstatic > 0 
 			    && nstatic <= nbath)
 			    {
-			    for (i=0;i<nbath;i++)
+			    for (i=0;i<nstatic;i++)
 				{
 				if (staticbeam[i] >= 0 
 				    && staticbeam[i] < nbath)
@@ -4762,40 +4829,25 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					bath[staticbeam[i]] -= staticoffset[i];
 				    }
 				}
-			    }
-			    
-			/* apply tide corrections */
-			if (process.mbp_tide_mode == MBP_TIDE_ON
-			    && ntide > 1)
-			    {
-			    /* interpolate tide */
-			    intstat = mb_linear_interp(verbose, 
-					tidetime-1, tide-1,
-					ntide, time_d, &tideval, &itime, 
-					&error);
-
-			    /* apply tide to all valid beams */
-			    for (i=0;i<nbath;i++)
-				{
-				if (beamflag[i] != MB_FLAG_NULL)
-					bath[i] -= tideval;
-				}
-			    }
-			
+			    }			
 
 			/* output some debug messages */
 			if (verbose >= 5)
 			    {
 			    fprintf(stderr,"\ndbg5  Depth values calculated in program <%s>:\n",program_name);
 			    fprintf(stderr,"dbg5       kind:  %d\n",kind);
-			    fprintf(stderr,"dbg5      beam    time      depth        dist\n");	
+			    fprintf(stderr,"dbg5      beam    time      depth        dist      flag\n");	
 			    for (i=0;i<nbath;i++)
-				fprintf(stderr,"dbg5       %2d   %f   %f   %f   %f\n",
+				fprintf(stderr,"dbg5       %2d   %f   %f   %f   %f   %d\n",
 				    i,ttimes[i],
 				    bath[i],bathacrosstrack[i],
 				    bathalongtrack[i]);
 			    }
 			}
+
+	/*--------------------------------------------
+	  apply beam edits
+	  --------------------------------------------*/
 			
 		/* apply the saved edits */
 		if (process.mbp_edit_mode == MBP_EDIT_ON
@@ -4808,6 +4860,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		    		time_d, nbath, 
 				beamflag, &error);
 		    }
+
+	/*--------------------------------------------
+	  apply data cutting to bathymetry
+	  --------------------------------------------*/
 
 		/* apply data cutting to bathymetry if specified */
 		if (process.mbp_cut_num > 0
@@ -4860,6 +4916,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			}
 		    }
 
+	/*--------------------------------------------
+	  insert data as altered so far (not done yet)
+	  --------------------------------------------*/
+
 		/* insert the altered navigation if available */
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
@@ -4899,6 +4959,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			}
+
+	/*--------------------------------------------
+	  apply data cutting to amplitude and sidescan
+	  --------------------------------------------*/
 
 		/* apply data cutting to sidescan and amplitude if specified */
 		if (process.mbp_cut_num > 0
@@ -4989,6 +5053,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    }
 			}
 		    }
+
+	/*--------------------------------------------
+	  apply grazing angle corrections to amplitude and sidescan
+	  --------------------------------------------*/
 
 		/* get seafloor slopes if needed for amplitude or sidescan correction */
 		if (error == MB_ERROR_NO_ERROR
@@ -5212,6 +5280,34 @@ idata, i, slope, angle, correction, reference_amp, ss[i]);*/
 				}
 			}
 
+	/*--------------------------------------------
+	  apply tide correction
+	  --------------------------------------------*/
+			    
+		/* apply tide corrections */
+		if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& process.mbp_tide_mode == MBP_TIDE_ON
+			&& ntide > 1)
+		    {
+		    /* interpolate tide */
+		    intstat = mb_linear_interp(verbose, 
+				tidetime-1, tide-1,
+				ntide, time_d, &tideval, &itime, 
+				&error);
+
+		    /* apply tide to all valid beams */
+		    for (i=0;i<nbath;i++)
+			{
+			if (beamflag[i] != MB_FLAG_NULL)
+				bath[i] -= tideval;
+			}
+		    }
+
+	/*--------------------------------------------
+	  insert the altered data (now done)
+	  --------------------------------------------*/
+
 		/* insert the altered data if available */
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
@@ -5226,6 +5322,10 @@ idata, i, slope, angle, correction, reference_amp, ss[i]);*/
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			}
+
+	/*--------------------------------------------
+	  write the processed data
+	  --------------------------------------------*/
 
 		/* write some data */
 		if (error == MB_ERROR_NO_ERROR
@@ -5282,6 +5382,10 @@ i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
 fprintf(stderr,"BEAM FLAG USED:              i:%d edit: %f %d %d   %d\n",
 i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);*/
 }
+
+	/*--------------------------------------------
+	  close files and deallocate memory
+	  --------------------------------------------*/
 
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
