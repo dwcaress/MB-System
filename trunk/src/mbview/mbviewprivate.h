@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 1.1 2003-11-07 00:39:16 caress Exp $
+ *    $Id: mbviewprivate.h,v 1.2 2003-11-25 02:52:55 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -284,6 +284,9 @@ struct mbview_world_struct
     double scale;
     double zscale;
     
+    /* relevant mbio defaults */
+    double timegap;
+    
     float offset2d_x;
     float offset2d_y;
     float offset2d_x_save;
@@ -321,7 +324,7 @@ struct mbview_world_struct
     int button_move_y;
     int button_up_x;
     int button_up_y;
-	
+   	
     };
 
 	
@@ -351,6 +354,7 @@ void set_mbview_contour_mode(int instance, int mode);
 void set_mbview_site_view_mode(int instance, int mode);
 void set_mbview_route_view_mode(int instance, int mode);
 void set_mbview_nav_view_mode(int instance, int mode);
+void set_mbview_navdrape_view_mode(int instance, int mode);
 void set_mbview_display_mode(int instance, int mode);
 void set_mbview_colortable_mode(int instance, int mode);
 void set_mbview_colortable(int instance, int mode);

@@ -65,6 +65,7 @@ typedef struct _MB3DViewData
     Widget mbview_toggleButton_site;
     Widget mbview_toggleButton_route;
     Widget mbview_toggleButton_nav;
+    Widget mbview_toggleButton_navdrape;
     Widget mbview_separator8;
     Widget mbview_toggleButton_colortable_haxby;
     Widget mbview_toggleButton_colortable_bright;

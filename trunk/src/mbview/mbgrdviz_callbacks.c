@@ -23,6 +23,7 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_format.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -65,7 +66,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 1.2 2003-11-07 01:10:53 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 1.3 2003-11-25 02:47:23 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -474,6 +475,8 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 	mode = actionid / MBV_MAX_WINDOWS;
 	if (mode > 0)
 		instance = actionid - mode * MBV_MAX_WINDOWS;
+	else
+		instance = 0;
 
 	/* read the input file name */
 	XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, 
@@ -496,6 +499,7 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 	else if (mode == MBGRDVIZ_OPENOVERLAY)
 		{
 		/* read the grid and update mbview window */
+		do_mbview_message_on("Reading overlay grid...", instance);
 		fprintf(stderr, "call do_mbgrdviz_openoverlay\n");
 		status = do_mbgrdviz_openoverlay(instance, file_ptr);
 		}
@@ -504,6 +508,7 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 	else if (mode == MBGRDVIZ_OPENROUTE)
 		{
 		/* read route file and update mbview window */
+		do_mbview_message_on("Reading route data...", instance);
 		fprintf(stderr, "call do_mbgrdviz_openroute\n");
 		status = do_mbgrdviz_openroute(instance, file_ptr);
 		}
@@ -512,6 +517,7 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 	else if (mode == MBGRDVIZ_OPENSITE)
 		{
 		/* read site file and update mbview window */
+		do_mbview_message_on("Reading site data...", instance);
 		fprintf(stderr, "call do_mbgrdviz_opensite\n");
 		status = do_mbgrdviz_opensite(instance, file_ptr);
 		}
@@ -520,14 +526,16 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 	else if (mode == MBGRDVIZ_OPENNAV)
 		{
 		/* read nav file and update mbview window */
+		do_mbview_message_on("Reading navigation data...", instance);
 		fprintf(stderr, "call do_mbgrdviz_opennav\n");
-		status = do_mbgrdviz_opennav(instance, file_ptr);
+		status = do_mbgrdviz_opennav(instance, MB_NO, file_ptr);
 		}
 	
 	/* else write site data */
 	else if (mode == MBGRDVIZ_SAVESITE)
 		{
 		/* write site file */
+		do_mbview_message_on("Saving site data...", instance);
 		fprintf(stderr, "call do_mbgrdviz_savesite\n");
 		status = do_mbgrdviz_savesite(instance, file_ptr);
 		}
@@ -536,6 +544,7 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 	else if (mode == MBGRDVIZ_SAVEROUTE)
 		{
 		/* write route file */
+		do_mbview_message_on("Saving route data...", instance);
 		fprintf(stderr, "call do_mbgrdviz_saveroute\n");
 		status = do_mbgrdviz_saveroute(instance, file_ptr);
 		}
@@ -547,6 +556,9 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		file_ptr = NULL;
 		}
 
+	/* close the message */
+	if (mode > MBGRDVIZ_OPENGRID)
+		do_mbview_message_off(instance);
 }
 /*---------------------------------------------------------------------------------------*/
 
@@ -585,6 +597,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 	int	mbv_site_view_mode;
 	int	mbv_route_view_mode;
 	int	mbv_nav_view_mode;
+	int	mbv_navdrape_view_mode;
 	int	mbv_primary_colortable;
 	int	mbv_primary_colortable_mode;
 	double	mbv_primary_colortable_min;
@@ -730,6 +743,7 @@ fprintf(stderr, "using internal test grid...\n");
 		mbv_site_view_mode = MBV_VIEW_OFF;
 		mbv_route_view_mode = MBV_VIEW_OFF;
 		mbv_nav_view_mode = MBV_VIEW_OFF;
+		mbv_navdrape_view_mode = MBV_VIEW_OFF;
 		mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
 		mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
 		mbv_primary_colortable_min = mbv_primary_min;
@@ -817,6 +831,7 @@ fprintf(stderr, "using internal test grid...\n");
 					mbv_site_view_mode,
 					mbv_route_view_mode,
 					mbv_nav_view_mode,
+					mbv_navdrape_view_mode,
 					mbv_exageration,
 					mbv_modelelevation3d,
 					mbv_modelazimuth3d,
@@ -1736,7 +1751,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_opennav(int instance, char *input_file_ptr)
+int do_mbgrdviz_opennav(int instance, int nav_only, char *input_file_ptr)
 {
 	char function_name[] = "do_mbgrdviz_opennav";
 	int	status = MB_SUCCESS;
@@ -1760,9 +1775,21 @@ int do_mbgrdviz_opennav(int instance, char *input_file_ptr)
 				{
 				if (status = mb_datalist_read(verbose,datalist,
 						swathfile,&format,&weight,&error)
-						== MB_SUCCESS)
+						== MB_SUCCESS
+					&& format != MBF_ASCIIXYZ
+					&& format != MBF_ASCIIYXZ)
 					{
-					fprintf(stderr,"\nReady to read file %s %d %f\n",swathfile,format,weight);
+
+					/* check for available nav file if that is
+					   all that is needed */
+					if (nav_only == MB_YES)
+						mb_get_fnv(verbose, swathfile, &format, &error);
+
+					/* else check for available fbt file  */
+					else
+						mb_get_fbt(verbose, swathfile, &format, &error);
+
+					/* read the swath or nav data using mbio calls */
 					do_mbgrdviz_readnav(instance, swathfile, 
 								format, weight, &error);
 					}
@@ -1839,6 +1866,8 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 	double	*navlon = NULL;
 	double	*navlat = NULL;
 	double	*navz = NULL;
+	double	*navheading = NULL;
+	double	*navspeed = NULL;
 	double	*navportlon = NULL;
 	double	*navportlat = NULL;
 	double	*navstbdlon = NULL;
@@ -1851,21 +1880,31 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 	int	swathbounds;
 	int	shot;
 	int	cdp;
+
+	struct mbview_struct *data;
 	
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
+	double	xd, yd;
 
 	int	form;
 	int	icenter, iport, istbd;
 	double	centerdistance, portdistance, stbddistance;
+	char	*lastslash;
 	int	i;
 	
 	*error = MB_ERROR_NO_ERROR;
 
 	/* initialize nav values */
 	color = MBV_COLOR_BLACK;
-	size = 1;
-	name[0] = '\0';
+	size = 2;
+	name[0] = '\0'; 
+	lastslash = strrchr(swathfile, '/');
+	if ((lastslash = strrchr(swathfile, '/')) != NULL)
+		strcpy(name,&(lastslash[1]));
+	else
+		strcpy(name,swathfile);
+
 	swathbounds = MB_NO;
 	shot = MB_NO;
 	cdp = MB_NO;
@@ -1876,6 +1915,25 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 	status = mb_defaults(verbose,&form,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 
+	/* get data structure of current instance */
+	status = mbview_getdataptr(verbose, instance, &data, error);
+	if (status == MB_SUCCESS)
+		{
+		bounds[0] = data->primary_xmin;
+		bounds[1] = data->primary_xmax;
+		bounds[2] = data->primary_ymin;
+		bounds[3] = data->primary_ymax;
+		status = mbview_projectforward(instance, MB_YES,
+				data->primary_xmin, data->primary_ymin,
+				&bounds[0], &bounds[2],
+				&xd, &yd);
+		status = mbview_projectforward(instance, MB_YES,
+				data->primary_xmax, data->primary_ymax,
+				&bounds[1], &bounds[3],
+				&xd, &yd);
+
+		}
+	
 	/* initialize reading the swath file */
 	if ((status = mb_read_init(
 		verbose,swathfile,format,pings,lonflip,bounds,
@@ -1928,6 +1986,12 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 	/* read data */
 	if (status == MB_SUCCESS)
 		{
+		/* set swathbounds true if nore than one beam is expected */
+		if (beams_bath > 1)
+			swathbounds = MB_YES;
+		
+		/* loop over successful reads and nonfatal errors 
+		   until a fatal error is encountered */
 		while (*error <= MB_ERROR_NO_ERROR)
 			{
 			/* read a ping of data */
@@ -1942,7 +2006,6 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 			/* ignore minor errors */
 			if (kind == MB_DATA_DATA
 				&& (*error == MB_ERROR_TIME_GAP
-					|| *error == MB_ERROR_OUT_BOUNDS
 					|| *error == MB_ERROR_OUT_TIME
 					|| *error == MB_ERROR_SPEED_TOO_SMALL))
 				{
@@ -1971,6 +2034,12 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 					if (status == MB_SUCCESS)
 						status = mb_realloc(verbose,npointalloc*sizeof(double),
 									&navz,error);
+					if (status == MB_SUCCESS)
+						status = mb_realloc(verbose,npointalloc*sizeof(double),
+									&navheading,error);
+					if (status == MB_SUCCESS)
+						status = mb_realloc(verbose,npointalloc*sizeof(double),
+									&navspeed,error);
 					if (status == MB_SUCCESS)
 						status = mb_realloc(verbose,npointalloc*sizeof(double),
 									&navportlon,error);
@@ -2004,36 +2073,32 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				icenter = -1;
 				iport = -1;
 				istbd = -1;
-				centerdistance = 1000000.0;
+				centerdistance = 0.0;
 				portdistance = 0.0;
 				stbddistance = 0.0;
 				for (i=0;i<beams_bath;i++)
 					{
 					if (mb_beam_ok(beamflag[i]))
 						{
-						if (fabs(bathacrosstrack[i]) < centerdistance)
+						if (icenter == -1
+							|| fabs(bathacrosstrack[i]) < centerdistance)
 							{
 							icenter = i;
 							centerdistance = bathacrosstrack[i];
 							}
-						if (bathacrosstrack[i] < portdistance)
+						if (iport == -1
+							|| bathacrosstrack[i] < portdistance)
 							{
 							iport = i;
 							portdistance = bathacrosstrack[i];
 							}
-						if (bathacrosstrack[i] > stbddistance)
+						if (istbd == -1
+							|| bathacrosstrack[i] > stbddistance)
 							{
 							istbd = i;
 							stbddistance = bathacrosstrack[i];
 							}
 						}
-					}
-				if (icenter >= 0)
-					{
-					if (iport == -1)
-						iport = icenter;
-					if (istbd = -1)
-						istbd = icenter;
 					}
 					
 				/* store the navigation values */
@@ -2041,6 +2106,8 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				navlon[npoint] = lon;
 				navlat[npoint] = lat;
 				navz[npoint] = sonardepth;
+				navheading[npoint] = heading;
+				navspeed[npoint] = speed;
 
 				mb_coor_scale(verbose,lat,&mtodeglon,&mtodeglat);
 				headingx = sin(heading * DTR);
@@ -2081,12 +2148,15 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 		status = mb_close(verbose,&mbio_ptr,error);
 		
 		/* insert nav data to mbview */
+		if (npoint > 0)
 		status = mbview_addnav(verbose, instance,
 				npoint,
 				navtime_d,
 				navlon,
 				navlat,
 				navz,
+				navheading,
+				navspeed,
 				navportlon,
 				navportlat,
 				navstbdlon,
@@ -2115,6 +2185,8 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 		mb_free(verbose,&navlon,error);
 		mb_free(verbose,&navlat,error);
 		mb_free(verbose,&navz,error);
+		mb_free(verbose,&navheading,error);
+		mb_free(verbose,&navspeed,error);
 		mb_free(verbose,&navportlon,error);
 		mb_free(verbose,&navportlat,error);
 		mb_free(verbose,&navstbdlon,error);
