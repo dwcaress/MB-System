@@ -175,7 +175,7 @@ main(int argc, char *argv[])
         }
 
         /* Window on time if we received a start time */
-        if (gsfRec.mb_ping.ping_time.tv_sec < StartTime)
+        if (gsfRec.mb_ping.ping_time.tv_sec < StartTime
         {
             continue;
         }
