@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elacmk2.c,v 4.1 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbsys_elacmk2.c,v 4.2 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.0  1997/07/25  14:25:40  caress
  * Version 4.5beta2.
  *
@@ -106,7 +109,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elacmk2.c,v 4.1 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_elacmk2.c,v 4.2 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbsys_elacmk2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -362,7 +365,7 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_i[0] = store->year + 1900;
+		mb_fix_y2k(verbose, store->year, &time_i[0]);
 		time_i[1] = store->month;
 		time_i[2] = store->day;
 		time_i[3] = store->hour;
@@ -649,7 +652,7 @@ int	*error;
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->year);
 		store->month = time_i[1];
 		store->day = time_i[2];
 		store->hour = time_i[3];
@@ -1050,7 +1053,7 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_i[0] = store->year + 1900;
+		mb_fix_y2k(verbose, store->year, &time_i[0]);
 		time_i[1] = store->month;
 		time_i[2] = store->day;
 		time_i[3] = store->hour;
@@ -1265,7 +1268,7 @@ int	*error;
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->year);
 		store->month = time_i[1];
 		store->day = time_i[2];
 		store->hour = time_i[3];

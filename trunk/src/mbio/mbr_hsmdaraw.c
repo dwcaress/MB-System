@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdaraw.c	2/11/93
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.7 1998-10-05 17:46:15 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.8 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	August 11, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.6  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -97,7 +100,7 @@ int    verbose;
 char   *mbio_ptr;
 int    *error;
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.7 1998-10-05 17:46:15 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.8 1999-03-31 18:11:35 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdaraw";
 	int	 status = MB_SUCCESS;
 	int	 i;
@@ -1430,7 +1433,7 @@ int    *error;
 				if (status == MB_SUCCESS)
 					status = xdr_long(xdrs,&data->year);
 				if (status == MB_SUCCESS)
-					data->year = data->year + 1900; /* add year offset once! */
+					mb_fix_y2k(verbose, data->year, &data->year);
 				if (status == MB_SUCCESS)
 					status = xdr_long(xdrs,&data->month);
 				if (status == MB_SUCCESS)
@@ -2030,9 +2033,9 @@ int	*error;
 				if (status == MB_SUCCESS)
 					status = xdr_long(xdrs, &data->navid);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->year);
+					mb_unfix_y2k(verbose, data->year, &data->year);
 				if (status == MB_SUCCESS)
-					data->year = data->year + 1900; /* add year offset once! */
+					status = xdr_long(xdrs,&data->year);
 				if (status == MB_SUCCESS)
 					status = xdr_long(xdrs,&data->month);
 				if (status == MB_SUCCESS)

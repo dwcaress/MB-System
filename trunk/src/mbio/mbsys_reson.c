@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 4.13 1999-01-01 23:41:06 caress Exp $
+ *	$Id: mbsys_reson.c,v 4.14 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1999/01/01  23:41:06  caress
+ * MB-System version 4.6beta6
+ *
  * Revision 4.12  1998/10/05 17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -108,7 +111,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_reson.c,v 4.13 1999-01-01 23:41:06 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 4.14 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -360,9 +363,7 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_i[0] = store->year + 1900;
-		if (store->year < 62) 
-		    time_i[0] += 100;
+		mb_fix_y2k(verbose, store->year, &time_i[0]);
 		time_i[1] = store->month;
 		time_i[2] = store->day;
 		time_i[3] = store->hour;
@@ -495,9 +496,7 @@ int	*error;
 	else if (*kind == MB_DATA_NAV)
 		{
 		/* get time */
-		time_i[0] = store->pos_year + 1900;
-		if (store->pos_year < 62) 
-		    time_i[0] += 100;
+		mb_fix_y2k(verbose, store->pos_year, &time_i[0]);
 		time_i[1] = store->pos_month;
 		time_i[2] = store->pos_day;
 		time_i[3] = store->pos_hour;
@@ -740,7 +739,7 @@ int	*error;
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->year = time_i[0] % 100;
+		mb_unfix_y2k(verbose, time_i[0], &store->year);
 		store->month = time_i[1];
 		store->day = time_i[2];
 		store->hour = time_i[3];
@@ -796,7 +795,7 @@ int	*error;
 	else if (store->kind == MB_DATA_NAV)
 		{
 		/* get time */
-		store->pos_year = time_i[0] % 100;
+		mb_unfix_y2k(verbose, time_i[0], &store->pos_year);
 		store->pos_month = time_i[1];
 		store->pos_day = time_i[2];
 		store->pos_hour = time_i[3];
@@ -1143,7 +1142,7 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_i[0] = store->year + 1900;
+		mb_fix_y2k(verbose, store->year, &time_i[0]);
 		time_i[1] = store->month;
 		time_i[2] = store->day;
 		time_i[3] = store->hour;
@@ -1239,9 +1238,7 @@ int	*error;
 	else if (*kind == MB_DATA_NAV)
 		{
 		/* get time */
-		time_i[0] = store->pos_year + 1900;
-		if (store->pos_year < 62) 
-		    time_i[0] += 100;
+		mb_fix_y2k(verbose, store->pos_year, &time_i[0]);
 		time_i[1] = store->pos_month;
 		time_i[2] = store->pos_day;
 		time_i[3] = store->pos_hour;
@@ -1438,7 +1435,7 @@ int	*error;
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->year);
 		store->month = time_i[1];
 		store->day = time_i[2];
 		store->hour = time_i[3];
@@ -1465,7 +1462,7 @@ int	*error;
 	else if (store->kind == MB_DATA_NAV)
 		{
 		/* get time */
-		store->pos_year = time_i[0] % 100;
+		mb_unfix_y2k(verbose, time_i[0], &store->pos_year);
 		store->pos_month = time_i[1];
 		store->pos_day = time_i[2];
 		store->pos_hour = time_i[3];

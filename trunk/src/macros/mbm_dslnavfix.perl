@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
-#    $Id: mbm_dslnavfix.perl,v 4.2 1997-07-25 13:50:21 caress Exp $
+#    $Id: mbm_dslnavfix.perl,v 4.3 1999-03-31 18:09:36 caress Exp $
 #
 #    Copyright (c) 1996 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1996
 #
 # Version:
-#   $Id: mbm_dslnavfix.perl,v 4.2 1997-07-25 13:50:21 caress Exp $
+#   $Id: mbm_dslnavfix.perl,v 4.3 1999-03-31 18:09:36 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.2  1997/07/25  13:50:21  caress
+# Added ellipsoid option.
+#
 # Revision 4.1  1997/04/21  16:54:41  caress
 # MB-System 4.5 Beta Release.
 #
@@ -53,8 +56,9 @@ $program_name = "mbm_dslnavfix";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('E:e:HhI:i:J:j:O:o:Vv');
-$ellipsoid_use = 	($opt_E || $opt_e || "Clarke-1866");
+&MBGetopts('E:e:F:f:HhI:i:J:j:O:o:Vv');
+$ellipsoid_use = 	($opt_E || $opt_e || "WGS-84");
+$format =    		($opt_F || $opt_f || 2);
 $help =    		($opt_H || $opt_h);
 $infile =    		($opt_I || $opt_i);
 $map_scale =    	($opt_J || $opt_j);
@@ -71,7 +75,7 @@ if ($help)
 	print "can be merged with the DSL AMS-120 bathymetry and sidescan \n";
 	print "data using mbmerge (use the -M2 option of mbmerge). \n";
         print "\nBasic Usage:  \n";
-        print "mbm_dslnavfix -Iinfile -Ooutfile -Jutm_zone [-V -H] \n\n";
+        print "mbm_dslnavfix -Iinfile -Ooutfile -Jutm_zone -F1 [-V -H] \n\n";
 	exit 0;
 	}
 
@@ -160,6 +164,7 @@ if ($verbose)
 	{
 	print "\nProgram Status:\n";
 	print "--------------\n\n";
+	print "  Input DSL navigation format:   $format\n";
 	print "  Input DSL navigation file:     $infile\n";
 	print "  Output navigation file:        $outfile\n";
 	print "  Temporary projected nav file:  $tmp_proj_navfile\n";
@@ -190,42 +195,158 @@ if (!open(OTMP,">$tmp_proj_navfile"))
 	}
 	
 # now read the raw DSL navigation data
+$daysec_old = -9999;
 while ($line = <INP>)
 	{
-	if (($date, $time, $easting, $northing) 
-		= $line =~ /^\S+\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+\S+\s+(\S+)\s+(\S+)/)
+	if ($format == 1)
 		{
-		# get time stamp
-		($year, $month, $day)
-			= $date =~ /^(.{2}).{1}(.{2}).{1}(.{2})/;
-		($hour, $minute, $second)
-			= $time =~ /^(.{2}).{1}(.{2}).{1}(.{5})/;
-		$year = $year + 1900;
-		push(@nyear, $year);
-		push(@nmonth, $month);
-		push(@nday, $day);
-		push(@nhour, $hour);
-		push(@nminute, $minute);
-		push(@nsecond, $second);
-
-		# get projected values in desired units 
-		if ($units_feet)
+		if (($date, $time, $easting, $northing) 
+			= $line =~ /^\S+\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+\S+\s+(\S+)\s+(\S+)/)
 			{
-			$xx = 12.0 / 1000000 *($easting - $org_x_ft);
-			$yy = 12.0 / 1000000 *($northing - $org_y_ft);
+			# get time stamp
+			($year, $month, $day)
+				= $date =~ /^(.{2}).{1}(.{2}).{1}(.{2})/;
+			($hour, $minute, $second)
+				= $time =~ /^(.{2}).{1}(.{2}).{1}(.{5})/;
+			if ($year > 61)
+				{
+				$year = $year + 1900;
+				}
+			else
+				{
+				$year = $year + 2000;
+				}
+			$daysec = $second + 60 * ($minute + 60 * $hour);
+			if ($daysec != $daysec_old)
+				{
+				push(@nyear, $year);
+				push(@nmonth, $month);
+				push(@nday, $day);
+				push(@nhour, $hour);
+				push(@nminute, $minute);
+				push(@nsecond, $second);
+		
+				# get projected values in desired units 
+				if ($units_feet)
+					{
+					$xx = 12.0 / 1000000 *($easting - $org_x_ft);
+					$yy = 12.0 / 1000000 *($northing - $org_y_ft);
+					}
+				elsif ($units_meters)
+					{
+					$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
+					$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
+					}
+					
+				#print "$year $month $day $hour:$minute:$second $easting $northing\n";
+				print OTMP "$xx $yy\n";
+				}
+			$daysec_old = $daysec;
 			}
-		elsif ($units_meters)
+		else
 			{
-			$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
-			$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
+			print "Unable to parse navigation from line:\n$line\n";
 			}
-			
-		#print "$year $month $day $hour:$minute:$second $easting $northing\n";
-		print OTMP "$xx $yy\n";
 		}
-	else
+	elsif ($format == 2)
 		{
-		die "\nUnable to parse navigation from line:\n$line\n$program_name aborted\n";
+		if (($date, $time, $easting, $northing) 
+			= $line =~ /^(\S+),(\S+),\S+,\S+,\S+,(\S+),(\S+)/)
+			{
+			# get time stamp
+			($year, $month, $day)
+				= $date =~ /^(.{2}).{1}(.{2}).{1}(.{2})/;
+			($hour, $minute, $second)
+				= $time =~ /^(.{2}).{1}(.{2}).{1}(.{2})/;
+			if ($year > 61)
+				{
+				$year = $year + 1900;
+				}
+			else
+				{
+				$year = $year + 2000;
+				}
+			$daysec = $second + 60 * ($minute + 60 * $hour);
+			if ($daysec != $daysec_old)
+				{
+				push(@nyear, $year);
+				push(@nmonth, $month);
+				push(@nday, $day);
+				push(@nhour, $hour);
+				push(@nminute, $minute);
+				push(@nsecond, $second);
+		
+				# get projected values in desired units 
+				if ($units_feet)
+					{
+					$xx = 12.0 / 1000000 *($easting - $org_x_ft);
+					$yy = 12.0 / 1000000 *($northing - $org_y_ft);
+					}
+				elsif ($units_meters)
+					{
+					$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
+					$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
+					}
+					
+				#print "$year $month $day $hour:$minute:$second $easting $northing\n";
+				print OTMP "$xx $yy\n";
+				}
+			$daysec_old = $daysec;
+			}
+		else
+			{
+			print "Unable to parse navigation from line:\n$line\n";
+			}
+		}
+	elsif ($format == 3)
+		{
+		if (($date, $time, $easting, $northing) 
+			= $line =~ /^(\S+)-(\S+) \S+ \S+ \S+ (\S+) (\S+)/)
+			{
+			# get time stamp
+			($year, $month, $day)
+				= $date =~ /^(.{2}).{1}(.{2}).{1}(.{2})/;
+			($hour, $minute, $second)
+				= $time =~ /^(.{2}).{1}(.{2}).{1}(.{2})/;
+			if ($year > 61)
+				{
+				$year = $year + 1900;
+				}
+			else
+				{
+				$year = $year + 2000;
+				}
+			$daysec = $second + 60 * ($minute + 60 * $hour);
+			if ($daysec != $daysec_old)
+				{
+				push(@nyear, $year);
+				push(@nmonth, $month);
+				push(@nday, $day);
+				push(@nhour, $hour);
+				push(@nminute, $minute);
+				push(@nsecond, $second);
+		
+				# get projected values in desired units 
+				if ($units_feet)
+					{
+					$xx = 12.0 / 1000000 *($easting - $org_x_ft);
+					$yy = 12.0 / 1000000 *($northing - $org_y_ft);
+					}
+				elsif ($units_meters)
+					{
+					$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
+					$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
+					}
+					
+				#print "$year $month $day $hour:$minute:$second $easting $northing\n";
+				print OTMP "$xx $yy\n";
+				}
+			$daysec_old = $daysec;
+			}
+		else
+			{
+			print "Unable to parse navigation from line:\n$line\n";
+			}
 		}
 	}
 

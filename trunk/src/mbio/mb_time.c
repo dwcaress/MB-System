@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.10 1998-10-05 18:32:27 caress Exp $
+ *    $Id: mb_time.c,v 4.11 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.9  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -92,7 +95,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.10 1998-10-05 18:32:27 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.11 1999-03-31 18:11:35 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from
@@ -355,6 +358,111 @@ int time_i[7];
 		fprintf(stderr,"dbg2       minute:     %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       second:     %d\n",time_i[5]);
 		fprintf(stderr,"dbg2       microsecond:%d\n",time_i[6]);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_fix_y2k translates a two digit year value
+ *      into a four digit year value using the following rule:
+ *          if (year_short >= 62)
+ *		year_long = year_short + 1900;
+ *          else
+ *              year_long = year_short + 2000;
+ *      The rationale for this rule is that multibeam sonars were
+ *      patented and first built in 1962. Thus, no digital swath
+ *      data can have timestamps dating prior to 1962.
+ */
+int mb_fix_y2k(verbose,year_short,year_long)
+int verbose;
+int year_short;
+int *year_long;
+{
+	char	*function_name = "mb_fix_y2k";
+	int	status;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       year_short: %d\n",year_short);
+		}
+
+	/* get the four digit year value */
+	if (year_short >= 62)
+	    *year_long = year_short + 1900;
+	else
+	    *year_long = year_short + 2000;
+
+	/* assume success */
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       year_long:  %d\n",*year_long);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_unfix_y2k translates a four digit year value
+ *      into a two digit year value using the following rule:
+ *          if (year_long < 2000)
+ *		year_short = year_long - 1900;
+ *          else
+ *              year_short = year_long - 2000;
+ *      The rationale for this rule is that multibeam sonars were
+ *      patented and first built in 1962. Thus, no digital swath
+ *      data can have timestamps dating prior to 1962.
+ *
+ *      Of course, if you look below you will see that the
+ *      same thing was accomplished using
+ *          year_short = year_long % 100;
+ */
+int mb_unfix_y2k(verbose,year_long,year_short)
+int verbose;
+int year_long;
+int *year_short;
+{
+	char	*function_name = "mb_unfix_y2k";
+	int	status;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       year_long:  %d\n",year_long);
+		}
+
+	/* get the two digit year value */
+	*year_short = year_long % 100;
+
+	/* assume success */
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       year_short: %d\n",*year_short);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}

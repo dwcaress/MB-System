@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbifremr.c	3/29/96
- *	$Id: mbr_sbifremr.c,v 4.5 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_sbifremr.c,v 4.6 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Location:	152 39.061W; 34 09.150S on R/V Ewing
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.4  1997/07/28  15:04:13  caress
  * Fixed time_j typo.
  *
@@ -72,7 +75,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbifremr.c,v 4.5 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbr_sbifremr.c,v 4.6 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbr_alm_sbifremr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -702,7 +705,7 @@ int	*error;
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
 		{
 		/* do time */
-		time_i[0] = year + 1900;
+		mb_fix_y2k(verbose,year, &time_i[0]);
 		time_i[1] = month;
 		time_i[2] = day;
 		time_i[3] = hour;
@@ -926,7 +929,7 @@ int	*error;
 		time_j[3] = data->sec;
 		time_j[4] = 0;
 		mb_get_itime(verbose,time_j,time_i);
-		year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose,time_i[0],&year);
 		month = time_i[1];
 		day = time_i[2];
 		hour = time_i[3];

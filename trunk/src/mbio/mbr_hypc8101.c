@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hypc8101.c	8/8/94
- *	$Id: mbr_hypc8101.c,v 4.0 1999-01-01 23:38:01 caress Exp $
+ *	$Id: mbr_hypc8101.c,v 4.1 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/01/01  23:38:01  caress
+ * MB-System version 4.6beta6
+ *
  *
  */
 
@@ -47,7 +50,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 4.0 1999-01-01 23:38:01 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 4.1 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbr_alm_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -372,9 +375,8 @@ int	*error;
 			|| data->kind == MB_DATA_HEADING
 			|| data->kind == MB_DATA_ATTITUDE)
 			{
-			mb_io_ptr->new_time_i[0] = data->year + 1900;
-			if (data->year < 62)
-			    mb_io_ptr->new_time_i[0] += 100;
+			mb_fix_y2k(verbose, data->year, 
+				    &mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->month;
 			mb_io_ptr->new_time_i[2] = data->day;
 			mb_io_ptr->new_time_i[3] = data->hour;
@@ -385,9 +387,8 @@ int	*error;
 			}
 		else if (data->kind == MB_DATA_PARAMETER)
 			{
-			mb_io_ptr->new_time_i[0] = data->par_year + 1900;
-			if (data->par_year < 62)
-			    mb_io_ptr->new_time_i[0] += 100;
+			mb_fix_y2k(verbose, data->par_year, 
+				    &mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->par_month;
 			mb_io_ptr->new_time_i[2] = data->par_day;
 			mb_io_ptr->new_time_i[3] = data->par_hour;
@@ -398,9 +399,8 @@ int	*error;
 			}
 		else if (data->kind == MB_DATA_VELOCITY_PROFILE)
 			{
-			mb_io_ptr->new_time_i[0] = data->svp_year + 1900;
-			if (data->svp_year < 62)
-			    mb_io_ptr->new_time_i[0] += 100;
+			mb_fix_y2k(verbose, data->svp_year, 
+				    &mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->svp_month;
 			mb_io_ptr->new_time_i[2] = data->svp_day;
 			mb_io_ptr->new_time_i[3] = data->svp_hour;
@@ -411,9 +411,8 @@ int	*error;
 			}
 		else if (data->kind == MB_DATA_NAV)
 			{
-			mb_io_ptr->new_time_i[0] = data->pos_year + 1900;
-			if (data->pos_year < 62)
-			    mb_io_ptr->new_time_i[0] += 100;
+			mb_fix_y2k(verbose, data->pos_year, 
+				    mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->pos_month;
 			mb_io_ptr->new_time_i[2] = data->pos_day;
 			mb_io_ptr->new_time_i[3] = data->pos_hour;
@@ -900,7 +899,7 @@ int	*error;
 			    /* get time tag */
 			    time_d = data->start_time_d + hcp_clock;
 			    mb_get_date(verbose, time_d, time_i);
-			    data->year = time_i[0] % 100;
+			    mb_unfix_y2k(verbose, time_i[0], &data->year);
 			    data->month = time_i[1];
 			    data->day = time_i[2];
 			    data->hour = time_i[3];
@@ -988,7 +987,7 @@ int	*error;
 			    /* get time tag */
 			    time_d = data->start_time_d + gyr_clock;
 			    mb_get_date(verbose, time_d, time_i);
-			    data->year = time_i[0] % 100;
+			    mb_unfix_y2k(verbose, time_i[0], &data->year);
 			    data->month = time_i[1];
 			    data->day = time_i[2];
 			    data->hour = time_i[3];
@@ -1071,7 +1070,7 @@ int	*error;
 			    /* get time tag */
 			    time_d = data->start_time_d + pos_clock;
 			    mb_get_date(verbose, time_d, time_i);
-			    data->year = time_i[0] % 100;
+			    mb_unfix_y2k(verbose, time_i[0], &data->year);
 			    data->month = time_i[1];
 			    data->day = time_i[2];
 			    data->hour = time_i[3];
@@ -1165,7 +1164,7 @@ int	*error;
 			    /* get time tag */
 			    time_d = data->start_time_d + raw_clock;
 			    mb_get_date(verbose, time_d, time_i);
-			    data->pos_year = time_i[0] % 100;
+			    mb_unfix_y2k(verbose, time_i[0], &data->pos_year);
 			    data->pos_month = time_i[1];
 			    data->pos_day = time_i[2];
 			    data->pos_hour = time_i[3];
@@ -1453,7 +1452,7 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 			    /* get time tag */
 			    time_d = data->start_time_d + sb2_clock;
 			    mb_get_date(verbose, time_d, time_i);
-			    data->year = time_i[0] % 100;
+			    mb_unfix_y2k(verbose, time_i[0], &data->year);
 			    data->month = time_i[1];
 			    data->day = time_i[2];
 			    data->hour = time_i[3];
@@ -1526,8 +1525,7 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 					&smon, &sday, &syr);
 			if (nscan == 6)
 			    {
-			    time_i[0] = 1900 + syr;
-			    if (syr < 62) time_i[0] += 100;
+			    mb_fix_y2k(verbose, syr, &time_i[0]);
 			    time_i[1] = smon;
 			    time_i[2] = sday;
 			    time_i[3] = shour;

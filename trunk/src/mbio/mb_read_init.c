@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 4.13 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_read_init.c,v 4.14 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.12  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -160,7 +163,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 4.13 1998-10-05 17:46:15 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 4.14 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	int	format_num;
@@ -427,20 +430,36 @@ int	*error;
 	    /* open the second file if required */
 	    if (status == MB_SUCCESS 
 		&& mb_numfile_table[format_num] >= 2)
+		{
 		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r")) == NULL) 
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
 		    }
+		}
     
+	    /* or open the second file if desired and possible */
+	    else if (status == MB_SUCCESS 
+		&& mb_numfile_table[format_num] <= -2)
+		{
+		mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r");
+		}
+ 
 	    /* open the third file if required */
 	    if (status == MB_SUCCESS 
 		&& mb_numfile_table[format_num] >= 3)
+		{
 		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r")) == NULL) 
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
 		    }
+		}
+ 
+	    /* or open the third file if desired and possible */
+	    else if (status == MB_SUCCESS 
+		&& mb_numfile_table[format_num] <= -3)
+		mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r");
 
 	    /* if needed, initialize XDR stream */
 	    if (status == MB_SUCCESS 

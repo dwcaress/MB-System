@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.21 1999-02-04 23:52:54 caress Exp $
+ *    $Id: mb_format.h,v 4.22 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  1999/02/04  23:52:54  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.20  1999/01/01  23:41:06  caress
  * MB-System version 4.6beta6
  *
@@ -151,6 +154,8 @@
 #define MB_SYS_DSL      14
 #define MB_SYS_GSF      15
 #define MB_SYS_MSTIFF   16
+#define MB_SYS_OIC	17
+#define MB_SYS_HDCS	18
 
 /* Table of the swath sonar system miniumum frequencies */
 static int frequency_table[] = 
@@ -172,10 +177,12 @@ static int frequency_table[] =
 	120,	/* MB_SYS_DSL */
 	12,	/* MB_SYS_GSF */
 	100,	/* MB_SYS_MSTIFF */
+	120,	/* MB_SYS_OIC */
+	12,	/* MB_SYS_HDCS */
 	};
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	42
+#define	MB_FORMATS	46
 
 /* Data formats supported by MBIO */
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
@@ -306,6 +313,16 @@ static int frequency_table[] =
 #define MBF_MSTIFFSS    131     /* MSTIFF sidescan format,
 					variable pixels,  sidescan, 
 					binary TIFF variant, single files, Sea Scan */
+#define MBF_OICGEODA    141     /* OIC swath sonar format, variable beam 
+					bathymetry and amplitude, variable
+					pixel sidescan, binary, Oceanic Imaging 
+					Consultants */ 
+#define MBF_OICMBARI    142     /* OIC-style extended swath sonar format, variable  
+					beam bathymetry and amplitude, variable
+					pixel sidescan, binary, MBARI */ 
+#define MBF_OMGHDCSJ    151     /* UNB OMG HDCS format, variable  
+					beam bathymetry and amplitude, variable
+					pixel sidescan, binary, UNB */ 
  
 /* Translation table of the format id's */
 static int format_table[] = 
@@ -353,6 +370,9 @@ static int format_table[] =
 	112,    /* MBF_DSL120SF */
 	121,    /* MBF_GSFGENMB */
 	131,    /* MBF_MSTIFFSS */
+	141,    /* MBF_OICGEODA */
+	142,    /* MBF_OICMBARI */
+	151,    /* MBF_OMGHDCSJ */
 	};
 
 /* Table of which formats are really supported */
@@ -401,6 +421,9 @@ static int supported_format_table[] =
 	1,      /* MBF_DSL120SF */
 	1,      /* MBF_GSFGENMB */
 	1,      /* MBF_MSTIFFSS */
+	1,      /* MBF_OICGEODA */
+	1,      /* MBF_OICMBARI */
+	1,      /* MBF_OMGHDCSJ */
 	};
 
 /* Alias table for old (pre-version 4.0) format id's */
@@ -464,6 +487,9 @@ static char *format_description[] =
 	"Format name:          MBF_DSL120SF\nInformal Description: WHOI DSL AMS-120 processed format\nAttributes:           2048 beam bathymetry, 8192 pixel sidescan,\n                      binary, single files, WHOI DSL.\n",
 	"Format name:          MBF_GSFGENMB\nInformal Description: SAIC Generic Sensor Format (GSF)\nAttributes:           variable beams,  bathymetry and amplitude,\n                      binary, single files, SAIC. \n",
 	"Format name:          MBF_MSTIFFSS\nInformal Description: MSTIFF sidescan format\nAttributes:           variable pixels,  sidescan,\n                      binary TIFF variant, single files, Sea Scan. \n",
+	"Format name:          MBF_OICGEODA\nInformal Description: OIC swath sonar format\nAttributes:           variable beam bathymetry and\n                      amplitude, variable pixel sidescan, binary,\n		      Oceanic Imaging Consultants\n",
+	"Format name:          MBF_OICMBARI\nInformal Description: OIC-style extended swath sonar format\nAttributes:           variable beam bathymetry and\n                      amplitude, variable pixel sidescan, binary,\n		      MBARI\n",
+	"Format name:          MBF_OMGHDCSJ\nInformal Description: UNB OMG HDCS format (the John Hughes Clarke format)\nAttributes:           variable beam bathymetry and\n                      amplitude, variable pixel sidescan, binary,\n		      UNB\n",
 	};
 
 /* Table of which swath sonar system each data format 
@@ -513,6 +539,9 @@ static int mb_system_table[] =
 	MB_SYS_DSL,     /* MBF_DSL120SF */
 	MB_SYS_GSF,     /* MBF_GSFGENMB */
 	MB_SYS_MSTIFF,  /* MBF_MSTIFFSS */
+	MB_SYS_OIC,	/* MBF_OICGEODA */
+	MB_SYS_OIC,	/* MBF_OICMBARI */
+	MB_SYS_HDCS,	/* MBF_OMGHDCSJ */
 	};
 
 /* Table of the number of parallel files required for i/o */
@@ -561,6 +590,9 @@ static int mb_numfile_table[] =
 	1,		/* MBF_DSL120SF */
 	1,		/* MBF_GSFGENMB */
 	1,		/* MBF_MSTIFFSS */
+	1,		/* MBF_OICGEODA */
+	1,		/* MBF_OICMBARI */
+	-2,		/* MBF_OMGHDCSJ */
 	};
 
 /* Table of what type files are used by swath sonar data formats */
@@ -612,6 +644,9 @@ static int mb_filetype_table[] =
 	MB_FILETYPE_NORMAL,	/* MBF_DSL120SF */
 	MB_FILETYPE_GSF,	/* MBF_GSFGENMB */
 	MB_FILETYPE_NORMAL,	/* MBF_MSTIFFSS */
+	MB_FILETYPE_NORMAL,	/* MBF_OICGEODA */
+	MB_FILETYPE_NORMAL,	/* MBF_OICMBARI */
+	MB_FILETYPE_NORMAL,	/* MBF_OMGHDCSJ */
 	};
 
 /* Table of the maximum number of bathymetry beams for each format */
@@ -660,6 +695,9 @@ static int beams_bath_table[] =
 	2048,   /* MBF_DSL120SF */
 	151,    /* MBF_GSFGENMB */
 	0,      /* MBF_MSTIFFSS */
+	1024,	/* MBF_OICGEODA */
+	1024,	/* MBF_OICMBARI */
+	1440,	/* MBF_OMGHDCSJ */
 	};
 
 /* Table of the maximum number of amplitude beams for each format */
@@ -708,6 +746,9 @@ static int beams_amp_table[] =
 	0,      /* MBF_DSL120SF */
 	151,    /* MBF_GSFGENMB */
 	0,      /* MBF_MSTIFFSS */
+	256,	/* MBF_OICGEODA */
+	256,	/* MBF_OICMBARI */
+	1440,	/* MBF_OMGHDCSJ */
 	};
 
 /* Table of the maximum number of sidescan pixels for each format */
@@ -756,6 +797,9 @@ static int pixels_ss_table[] =
 	8192,   /* MBF_DSL120SF */
 	0,      /* MBF_GSFGENMB */
 	1024,   /* MBF_MSTIFFSS */
+	2048,   /* MBF_OICGEODA */
+	2048,   /* MBF_OICMBARI */
+	1024,   /* MBF_OMGHDCSJ */
 	};
 
 /* Table of which data formats have variable numbers of beams */
@@ -804,6 +848,9 @@ static int variable_beams_table[] =
 	0,      /* MBF_DSL120SF */
 	1,      /* MBF_GSFGENMB */
 	0,      /* MBF_MSTIFFSS */
+	1,      /* MBF_OICGEODA */
+	1,      /* MBF_OICMBARI */
+	1,      /* MBF_OMGHDCSJ */
 	};
 
 /* Table of which swath sonar data formats include 
@@ -853,6 +900,9 @@ static int mb_traveltime_table[] =
 	0,      /* MBF_DSL120SF */
 	1,      /* MBF_GSFGENMB */
 	0,      /* MBF_MSTIFFSS */
+	1,      /* MBF_OICGEODA */
+	1,      /* MBF_OICMBARI */
+	1,      /* MBF_OMGHDCSJ */
 	};
 
 /* Table of which swath sonar data formats CANNOT support 
@@ -902,6 +952,9 @@ static int mb_no_flag_table[] =
 	0,      /* MBF_DSL120SF */
 	0,      /* MBF_GSFGENMB */
 	1,      /* MBF_MSTIFFSS */
+	0,      /* MBF_OICGEODA */
+	0,      /* MBF_OICMBARI */
+	0,      /* MBF_OMGHDCSJ */
 	};
 
 /* Table of the data record types containing the primary navigation */
@@ -950,6 +1003,9 @@ static float mb_nav_source[] =
 	MB_DATA_DATA,   /* MBF_DSL120SF */
 	MB_DATA_DATA,   /* MBF_GSFGENMB */
 	MB_DATA_DATA,   /* MBF_MSTIFFSS */
+	MB_DATA_DATA,   /* MBF_OICGEODA */
+	MB_DATA_DATA,   /* MBF_OICMBARI */
+	MB_DATA_DATA,   /* MBF_OMGHDCSJ */
 	};
 
 /* Table of the data record types containing the primary heading */
@@ -998,6 +1054,9 @@ static float mb_heading_source[] =
 	MB_DATA_DATA,   /* MBF_DSL120SF */
 	MB_DATA_DATA,   /* MBF_GSFGENMB */
 	MB_DATA_DATA,   /* MBF_MSTIFFSS */
+	MB_DATA_DATA,   /* MBF_OICGEODA */
+	MB_DATA_DATA,   /* MBF_OICMBARI */
+	MB_DATA_DATA,   /* MBF_OMGHDCSJ */
 	};
 
 /* Table of the data record types containing the primary vru */
@@ -1046,6 +1105,9 @@ static float mb_vru_source[] =
 	MB_DATA_DATA,   /* MBF_DSL120SF */
 	MB_DATA_DATA,   /* MBF_GSFGENMB */
 	MB_DATA_DATA,   /* MBF_MSTIFFSS */
+	MB_DATA_DATA,   /* MBF_OICGEODA */
+	MB_DATA_DATA,   /* MBF_OICMBARI */
+	MB_DATA_DATA,   /* MBF_OMGHDCSJ */
 	};
 
 /* Table of the fore-aft beamwidths */
@@ -1094,6 +1156,9 @@ static float mb_foreaft_beamwidth_table[] =
 	2.00,   /* MBF_DSL120SF */
 	2.00,   /* MBF_GSFGENMB */
 	1.00,   /* MBF_MSTIFFSS */
+	1.00,   /* MBF_OICGEODA */
+	1.00,   /* MBF_OICMBARI */
+	1.00,   /* MBF_OMGHDCSJ */
 	};
 
 /* names of formats for use in button or label names */
@@ -1140,11 +1205,10 @@ static char *mb_button_name[] =
 	" DSL120SF ", 
 	" GSFGENMB ", 
 	" MSTIFFSS ", 
+	" OICGEODA ", 
+	" OICMBARI ", 
+	" OMGHDCSJ ", 
         };
-
-
-
-
 
 
 /* end conditional include */

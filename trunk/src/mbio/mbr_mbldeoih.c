@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 4.8 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 4.9 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -12,7 +12,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_mbldeoih.c contains the functions for reading and writing
- * multibeam data in the MBLDEOIH format.  
+ * multibeam data in the MBF_MBLDEOIH format.  
  * These functions include:
  *   mbr_alm_mbldeoih	- allocate read/write memory
  *   mbr_dem_mbldeoih	- deallocate read/write memory
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.7  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -89,7 +92,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 4.8 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbr_mbldeoih.c,v 4.9 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
