@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.18 2002-09-07 04:49:23 caress Exp $
+ *    $Id: mbset.c,v 5.19 2002-09-19 00:28:12 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2002/09/07 04:49:23  caress
+ * Added slope mode option to mb_process.
+ *
  * Revision 5.17  2002/07/25 19:07:17  caress
  * Release 5.0.beta21
  *
@@ -111,7 +114,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.18 2002-09-07 04:49:23 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.19 2002-09-19 00:28:12 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -154,7 +157,6 @@ the manual pages for mbprocess and mbset. \n\n";
 	double	file_weight;
 	int	lookforfiles = 0;
  	int	format = 0;
-	int	mbp_ifile_specified;
 	char	mbp_ifile[MBP_FILENAMESIZE];
 	int	mbp_format;
 	int	nscan;
@@ -164,9 +166,8 @@ the manual pages for mbprocess and mbset. \n\n";
 	char	*getenv();
 
 	/* set default input and output */
-	mbp_ifile_specified = MB_NO;
 	strcpy (mbp_ifile, "\0");
-	strcpy (read_file, "\0");
+	strcpy (read_file, "datalist.mb-1");
 	
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhEeF:f:I:i:LlP:p:")) != -1)
@@ -192,7 +193,6 @@ the manual pages for mbprocess and mbset. \n\n";
 			break;
 		case 'I':
 		case 'i':
-			mbp_ifile_specified = MB_YES;
 			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
@@ -240,17 +240,6 @@ the manual pages for mbprocess and mbset. \n\n";
 	    fprintf(stderr,"MB-System Version %s\n",MB_VERSION);
 	    fprintf(stderr,"\n%s\n",help_message);
 	    fprintf(stderr,"\nusage: %s\n", usage_message);
-	    exit(error);
-	    }
-
-	/* quit if no input file specified */
-	if (mbp_ifile_specified == MB_NO)
-	    {
-	    fprintf(stderr,"\nProgram <%s> requires an input data file.\n",program_name);
-	    fprintf(stderr,"The input file must be specified with the -I option.\n");
-	    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		    program_name);
-	    error = MB_ERROR_OPEN_FAIL;
 	    exit(error);
 	    }
 

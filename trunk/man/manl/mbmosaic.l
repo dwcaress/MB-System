@@ -11,7 +11,7 @@ Version 5.0
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
 \fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range\fP 
-\fB-G\fIgridkind\fP  \fB-J\fIprojection/fP[\fI/zone/ellipsoid\fP]
+\fB-G\fIgridkind\fP  \fB-J\fIprojection\fP
 \fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP 
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP 
@@ -289,20 +289,24 @@ Default: \fIdatalist\fP = datalist.mb-1
 .TP
 .B \-J
 \fIprojection/fP[\fI/zone/ellipsoid\fP]
-This option causes \fBmbmosaic\fP to generate a mosaic in UTM projected
-coordinates (eastings and northings in meters) rather than in
+This option causes \fBmbmosaic\fP to generate a grid in projected
+coordinates (eastings and northings in meters or some other
+distance unit) rather than in
 the default geographic coordinates (longitude and latitude in degrees).
-If \fB-J\fP\fIu\fP is given, then the longitude and latitude bounds
+The most common projected coordinate system is UTM. The user may specify
+a particular northern UTM zone by seting \fIprojection\fP = UTMXXN where XX gives
+the UTM zone (defined from 01 to 60). As an example, a northern UTM
+zone 12 projection can be specified using \fB-J\fP\fIUTM12N\fP.
+Southern UTM zones are specified as UTMXXS. If the projected coordinate
+system is fully specified, then the grid bounds may be specified using
+\fB-R\fP in either longitude and latitude or in eastings and northings.
+Alternatively, one may indicate a UTM projection without specifying the
+zone by using \fB-J\fP\fIU\fP. In this case, the 
+UTM zone will be inferred from the midpoint of the 
+specified longitude and latitude bounds, and then the longitude and latitude bounds
 given with the \fB-fR\fP option are translated to UTM eastings and northings.
-In this case, the UTM zone parameter \fIzone\fP is optional, and by default
-the zone will be inferred from the midpoint of the specified longitude
-bounds.
-If \fB-J\fP\fIU\fP is given, then the bounds provided with \fB-R\fP must
-already be in eastings and northings. In this case the UTM zone parameter
-\fIzone\fP must be provided so that the specified bounds can be related
-to the data's geographic coordinates. The default ellipsoid is WGS84.
-UTM grids and mosaics
-produced by \fBMB-System\fP programs contain identifiers that are recognized
+UTM grids and mosaics produced by \fBMB-System\fP 
+programs contain identifiers that are recognized
 by the plotting macros \fBmbm_grdplot\fP, \fBmbm_grd3dplot\fP, and \fBmbm_grdtiff\fP.
 These plotting macros automatically use a linear map projection whenever they
 encounter grids and mosaics that are already in a projected coordinate system.
@@ -525,7 +529,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.3 2002-08-02 01:00:25 caress Exp $
+ Version $Id: mbmosaic.l,v 5.4 2002-09-19 00:28:12 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:
