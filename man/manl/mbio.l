@@ -1,4 +1,4 @@
-.TH mbio l "12 March 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbio l "30 May 2002" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
@@ -412,6 +412,12 @@ The following swath mapping sonar data formats are supported in this version of
                           bathymetry, amplitude and  
                           sidescan, variable beams and  
                           pixels, binary, centered, L-DEO.
+
+    MBIO Data Format ID:  75
+    Format name:          MBF_MBNETCDF
+    Informal Description: CARAIBES CDF multibeam
+    Attributes:           Data from all sonar systems, bathymetry only, 
+                          variable beams, netCDF, IFREMER.
     
     MBIO Data Format ID:  81
     Format name:          MBF_CBAT9001
@@ -559,6 +565,11 @@ The following swath mapping sonar data formats are supported in this version of
     Informal Description: MB-System simple navigation  
                           format
     Attributes:           navigation, MBARI
+
+    MBIO Data Format ID:  167
+    Format name:          MBF_MBNETCDF
+    Informal Description: CARAIBES CDF navigation
+    Attributes:           netCDF, IFREMER.
     
     MBIO Data Format ID:  171
     Format name:          MBF_HS10JAMS
