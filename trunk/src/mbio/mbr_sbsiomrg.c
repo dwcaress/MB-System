@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiomrg.c	3.00	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 3.0 1993-05-14 22:58:04 sohara Exp $
+ *	$Id: mbr_sbsiomrg.c,v 3.1 1993-07-03 02:28:20 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/05/14  22:58:04  sohara
+ * initial version
+ *
  */
 
 /* standard include files */
@@ -42,7 +45,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiomrg.c,v 3.0 1993-05-14 22:58:04 sohara Exp $";
+ static char res_id[]="$Id: mbr_sbsiomrg.c,v 3.1 1993-07-03 02:28:20 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiomrg";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -335,7 +338,7 @@ int	*error;
 						}
 					}
 				}
-			if (jpos != 0 && jneg != 0)
+			if (jpos != 0 && jneg != 0 && jpos != jneg)
 				{
 				apos = jpos;
 				aneg = jneg;
