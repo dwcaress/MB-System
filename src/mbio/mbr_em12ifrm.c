@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.11 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.12 2003-12-04 23:10:22 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.10  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -116,7 +119,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.11 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.12 2003-12-04 23:10:22 caress Exp $";
 	char	*function_name = "mbr_register_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -249,7 +252,7 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.11 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.12 2003-12-04 23:10:22 caress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -319,7 +322,7 @@ int mbr_info_em12ifrm(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.11 2003-05-20 18:05:32 caress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.12 2003-12-04 23:10:22 caress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -906,7 +909,21 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			ping->ss_mode = 0;
 			for (i=0;i<ping->beams_bath;i++)
 				{
-				ping->bath[i] = data->bath[i];
+				if (data->bath[i] > 0)
+					{
+					ping->bath[i] = data->bath[i];
+					ping->beamflag[i] = MB_FLAG_NONE;
+					}
+				else if (data->bath[i] < 0)
+					{
+					ping->bath[i] = -data->bath[i];
+					ping->beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+					}
+				else
+					{
+					ping->bath[i] = data->bath[i];
+					ping->beamflag[i] = MB_FLAG_NULL;
+					}
 				ping->bath_acrosstrack[i] = data->bath_acrosstrack[i];
 				ping->bath_alongtrack[i] = data->bath_alongtrack[i];
 				ping->tt[i] = data->tt[i];
@@ -1098,7 +1115,12 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->ss_mode = ping->ss_mode;
 			for (i=0;i<data->beams_bath;i++)
 				{
-				data->bath[i] = ping->bath[i];
+				if (ping->beamflag[i] == MB_FLAG_NULL)
+					data->bath[i] = 0;
+				else if (!mb_beam_ok(ping->beamflag[i]))
+					data->bath[i] = -ping->bath[i];
+				else
+					data->bath[i] = ping->bath[i];
 				data->bath_acrosstrack[i] = ping->bath_acrosstrack[i];
 				data->bath_alongtrack[i] = ping->bath_alongtrack[i];
 				data->tt[i] = ping->tt[i];

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 5.11 2003-08-07 21:21:50 caress Exp $
+#    $Id: make_mbhtml,v 5.12 2003-12-04 23:10:21 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 5.11 2003-08-07 21:21:50 caress Exp $
+#   $Id: make_mbhtml,v 5.12 2003-12-04 23:10:21 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.11  2003/08/07 21:21:50  caress
+#   Changed to reflect use of CVS instead of raw RCS and the placement of source manual pages in mbystem/man/manl instead of src/* directories.
+#
 #   Revision 5.10  2003/04/17 21:43:48  caress
 #   Release 5.0.beta30
 #
@@ -91,7 +94,7 @@ print "mbformat -W > mbsystem_formats.html\n";
 `mbformat -W > mbsystem_formats.html`;
 
 # Copy necessary files
-@preformatted_files = `/bin/ls -1 mbsystem*.html gpl.html caress2001.gif chayes.gif schmidt.gif mbsystem*.gif`;
+@preformatted_files = `/bin/ls -1 mbsystem*.html gpl.html MBTeamJul2003.gif caress2001.gif ChayesJul2003.gif ValJul2003.gif mbsystem*.gif`;
 foreach $file (@preformatted_files) {
     chop($file);
     print "cp $file ../../html\n";

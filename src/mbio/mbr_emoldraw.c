@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_emoldraw.c	3/4/2001
- *	$Id: mbr_emoldraw.c,v 5.7 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_emoldraw.c,v 5.8 2003-12-04 23:10:23 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 4, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.6  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -100,7 +103,7 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type);
 /*--------------------------------------------------------------------*/
 int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.8 2003-12-04 23:10:23 caress Exp $";
 	char	*function_name = "mbr_register_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -233,7 +236,7 @@ int mbr_info_emoldraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.8 2003-12-04 23:10:23 caress Exp $";
 	char	*function_name = "mbr_info_emoldraw";
 	int	status = MB_SUCCESS;
 
@@ -260,7 +263,7 @@ int mbr_info_emoldraw(int verbose,
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_NO;
 	*traveltime = MB_YES;
-	*beam_flagging = MB_YES;
+	*beam_flagging = MB_NO;
 	*nav_source = MB_DATA_NAV;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -303,7 +306,7 @@ int mbr_info_emoldraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.8 2003-12-04 23:10:23 caress Exp $";
 	char	*function_name = "mbr_alm_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2220,6 +2223,10 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp,
 			ping->amp[i] = (mb_s_char) beamarray[8];
 			ping->quality[i] = (mb_u_char) beamarray[9];
 			ping->heave[i] = (mb_s_char) beamarray[10];
+			if (ping->bath[i] == 0)
+				ping->beamflag[i] = MB_FLAG_NULL;
+			else
+				ping->beamflag[i] = MB_FLAG_NONE;
 			}
 		ping->bath_res = 0;
 		if (ping->bath_mode >= 3 && ping->bath_mode <= 7)
@@ -2358,6 +2365,10 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp,
 			ping->amp[i] = (mb_s_char) beamarray[8];
 			ping->quality[i] = (mb_u_char) beamarray[9];
 			ping->heave[i] = (mb_s_char) beamarray[10];
+			if (ping->bath[i] == 0)
+				ping->beamflag[i] = MB_FLAG_NULL;
+			else
+				ping->beamflag[i] = MB_FLAG_NONE;
 			}
 		}
 
@@ -2491,6 +2502,10 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp,
 			ping->amp[i] = (mb_s_char) beamarray[8];
 			ping->quality[i] = (mb_u_char) beamarray[9];
 			ping->heave[i] = (mb_s_char) beamarray[10];
+			if (ping->bath[i] == 0)
+				ping->beamflag[i] = MB_FLAG_NULL;
+			else
+				ping->beamflag[i] = MB_FLAG_NONE;
 			}
 		}
 
@@ -3955,6 +3970,8 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp,
 		mb_put_binary_short(MB_YES, (short) ping->sound_vel, (void *) &line[30]);
 		for (i=0;i<MBSYS_EM1000_MAXBEAMS;i++)
 			{
+			if (!mb_beam_ok(ping->beamflag[i]))
+				ping->bath[i] = 0;
 			mb_put_binary_short(MB_YES, (short) ping->bath[i], (void *) &beamarray[0]);
 			mb_put_binary_short(MB_YES, (short) ping->bath_acrosstrack[i], (void *) &beamarray[2]);
 			mb_put_binary_short(MB_YES, (short) ping->bath_alongtrack[i], (void *) &beamarray[4]);
@@ -4118,6 +4135,8 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp,
 		line[31] = (char) 0;
 		for (i=0;i<MBSYS_EM12_MAXBEAMS;i++)
 			{
+			if (!mb_beam_ok(ping->beamflag[i]))
+				ping->bath[i] = 0;
 			mb_put_binary_short(MB_YES, (short) ping->bath[i], (void *) &beamarray[0]);
 			mb_put_binary_short(MB_YES, (short) ping->bath_acrosstrack[i], (void *) &beamarray[2]);
 			mb_put_binary_short(MB_YES, (short) ping->bath_alongtrack[i], (void *) &beamarray[4]);
@@ -4292,6 +4311,8 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp,
 		line[39] = (char) ping->range_res;
 		for (i=0;i<MBSYS_EM121_MAXBEAMS;i++)
 			{
+			if (!mb_beam_ok(ping->beamflag[i]))
+				ping->bath[i] = 0;
 			mb_put_binary_short(MB_YES, (short) ping->bath[i], (void *) &beamarray[0]);
 			mb_put_binary_short(MB_YES, (short) ping->bath_acrosstrack[i], (void *) &beamarray[2]);
 			mb_put_binary_short(MB_YES, (short) ping->bath_alongtrack[i], (void *) &beamarray[4]);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.c	4/11/2002
- *	$Id: mbsys_netcdf.c,v 5.4 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_netcdf.c,v 5.5 2003-12-04 23:10:23 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	April 11, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.3  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -50,7 +53,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_netcdf.h"
 
-static char res_id[]="$Id: mbsys_netcdf.c,v 5.4 2003-04-17 21:05:23 caress Exp $";
+static char res_id[]="$Id: mbsys_netcdf.c,v 5.5 2003-12-04 23:10:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1030,7 +1033,7 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			else if (store->mbSFlag[i] == 2)
 			    beamflag[i] = MB_FLAG_NONE;
 			else
-			    beamflag[i] = MB_FLAG_FLAG;
+			    beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 			bath[i] = depthscale * store->mbDepth[i];
 			bathacrosstrack[i] = distancescale * store->mbAcrossDistance[i];
 			bathalongtrack[i] = distancescale * store->mbAlongDistance[i];
@@ -1606,7 +1609,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    store->mbSFlag[i] = 2;
 			else if (beamflag[i] == MB_FLAG_NULL)
 			    store->mbSFlag[i] = 0;
-			else if (beamflag[i] == MB_FLAG_NULL)
+			else if (!mb_beam_ok(beamflag[i]))
 			    store->mbSFlag[i] = 4;
 			if (beamflag[i] != MB_FLAG_NULL)
 			    {
