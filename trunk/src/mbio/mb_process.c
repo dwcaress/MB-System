@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.10 2001-08-10 22:41:19 dcaress Exp $
+ *    $Id: mb_process.c,v 5.11 2001-09-17 23:22:51 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2001/08/10  22:41:19  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.9  2001-08-03 18:00:02-07  caress
  * Added cut by speed.
  *
@@ -80,7 +83,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.10 2001-08-10 22:41:19 dcaress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.11 2001-09-17 23:22:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -708,10 +711,6 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			strncpy(process->mbp_meta_piinstitution, &buffer[18], MBP_FILENAMESIZE);
 			}
-		    else if (strncmp(buffer, "METAPI", 6) == 0)
-			{
-			strncpy(process->mbp_meta_pi, &buffer[7], MBP_FILENAMESIZE);
-			}
 		    else if (strncmp(buffer, "METACLIENT", 10) == 0)
 			{
 			strncpy(process->mbp_meta_client, &buffer[11], MBP_FILENAMESIZE);
@@ -736,13 +735,13 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "METAROLLBIAS %lf", &process->mbp_meta_rollbias);
 			}
-		    else if (strncmp(buffer, "METAROLLBIAS", 12) == 0)
-			{
-			sscanf(buffer, "METAROLLBIAS %lf", &process->mbp_meta_rollbias);
-			}
 		    else if (strncmp(buffer, "METAPITCHBIAS", 13) == 0)
 			{
 			sscanf(buffer, "METAPITCHBIAS %lf", &process->mbp_meta_pitchbias);
+			}
+		    else if (strncmp(buffer, "METAPI", 6) == 0)
+			{
+			strncpy(process->mbp_meta_pi, &buffer[7], MBP_FILENAMESIZE);
 			}
 		    else if (strncmp(buffer, "METAHEADINGBIAS", 15) == 0)
 			{
@@ -1232,6 +1231,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "SSINTERPOLATE %d\n", process->mbp_ssrecalc_interpolate);
 	    
 	    /* metadata insertion */
+	    fprintf(fp, "##\n## Metadata Insertion:\n");
 	    fprintf(fp, "METAVESSEL %s\n", process->mbp_meta_vessel);
 	    fprintf(fp, "METAINSTITUTION %s\n", process->mbp_meta_institution);
 	    fprintf(fp, "METAPLATFORM %s\n", process->mbp_meta_platform);

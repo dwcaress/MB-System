@@ -15,7 +15,8 @@ Version 5.0
 \fBMBinfo\fP is a utility for reading a swath sonar data file 
 or files and outputting some basic statistics.  The table generated
 shows the filename, the data format id, a brief description of
-the format, data counts, navigation totals, time and navigation
+the format, any metadata that have been inserted into the data,
+data counts, navigation totals, time and navigation
 of the first and last data records, minimum and maximum
 data values, and the geographic bounding box of the data. 
 The data counts include the total number of bathymetry,
@@ -42,6 +43,12 @@ such as \fBmbm_plot\fP and \fBmbm_grid\fP run \fBmbinfo\fP on
 input files to determine the data bounds. The availability
 of ".inf" files allows this information to be determined without
 having to read through each swath file.
+
+The program \fBmbprocess\fP can insert metadata recognized
+and printed by \fBmbinfo\fP. These metadata include items
+such as the sonar model, the vessel name, and bias parameters.
+See the \fBmbprocess\fP and
+\fBmbset\fP manual pages for details.
 
 The data input may be averaged over several pings
 and/or windowed in time and space.  Comments in the data 
