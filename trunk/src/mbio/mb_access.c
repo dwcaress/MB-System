@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.8 2004-04-27 01:46:13 caress Exp $
+ *    $Id: mb_access.c,v 5.9 2004-05-21 23:46:22 caress Exp $
 
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2004/04/27 01:46:13  caress
+ * Various updates of April 26, 2004.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -59,7 +62,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.8 2004-04-27 01:46:13 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.9 2004-05-21 23:46:22 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -1390,7 +1393,8 @@ int mb_extract_segyheader(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       emute_mils:        %d\n",mb_segyheader_ptr->emute_mils);
 		fprintf(stderr,"dbg2       nsamps:            %d\n",mb_segyheader_ptr->nsamps);
 		fprintf(stderr,"dbg2       si_micros:         %d\n",mb_segyheader_ptr->si_micros);
-		fprintf(stderr,"dbg2       other_1[19]:       %d\n",mb_segyheader_ptr->other_1[19]);
+		for (i=0;i<19;i++)
+		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segyheader_ptr->other_1[i]);
 		fprintf(stderr,"dbg2       year:              %d\n",mb_segyheader_ptr->year);
 		fprintf(stderr,"dbg2       day_of_yr:         %d\n",mb_segyheader_ptr->day_of_yr);
 		fprintf(stderr,"dbg2       hour:              %d\n",mb_segyheader_ptr->hour);
@@ -1398,7 +1402,8 @@ int mb_extract_segyheader(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       sec:               %d\n",mb_segyheader_ptr->sec);
 		fprintf(stderr,"dbg2       mils:              %d\n",mb_segyheader_ptr->mils);
 		fprintf(stderr,"dbg2       tr_weight:         %d\n",mb_segyheader_ptr->tr_weight);
-		fprintf(stderr,"dbg2       other_2[5]:        %d\n",mb_segyheader_ptr->other_2[5]);
+		for (i=0;i<5;i++)
+		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segyheader_ptr->other_2[i]);
 		fprintf(stderr,"dbg2       delay:             %d\n",mb_segyheader_ptr->delay);
 		fprintf(stderr,"dbg2       smute_sec:         %d\n",mb_segyheader_ptr->smute_sec);
 		fprintf(stderr,"dbg2       emute_sec:         %d\n",mb_segyheader_ptr->emute_sec);
@@ -1512,7 +1517,8 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       emute_mils:     %d\n",mb_segyheader_ptr->emute_mils);
 		fprintf(stderr,"dbg2       nsamps:         %d\n",mb_segyheader_ptr->nsamps);
 		fprintf(stderr,"dbg2       si_micros:      %d\n",mb_segyheader_ptr->si_micros);
-		fprintf(stderr,"dbg2       other_1[19]:    %d\n",mb_segyheader_ptr->other_1[19]);
+		for (i=0;i<19;i++)
+		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segyheader_ptr->other_1[i]);
 		fprintf(stderr,"dbg2       year:           %d\n",mb_segyheader_ptr->year);
 		fprintf(stderr,"dbg2       day_of_yr:      %d\n",mb_segyheader_ptr->day_of_yr);
 		fprintf(stderr,"dbg2       hour:           %d\n",mb_segyheader_ptr->hour);
@@ -1520,7 +1526,8 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       sec:            %d\n",mb_segyheader_ptr->sec);
 		fprintf(stderr,"dbg2       mils:           %d\n",mb_segyheader_ptr->mils);
 		fprintf(stderr,"dbg2       tr_weight:      %d\n",mb_segyheader_ptr->tr_weight);
-		fprintf(stderr,"dbg2       other_2[5]:     %d\n",mb_segyheader_ptr->other_2[5]);
+		for (i=0;i<5;i++)
+		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segyheader_ptr->other_2[i]);
 		fprintf(stderr,"dbg2       delay:          %d\n",mb_segyheader_ptr->delay);
 		fprintf(stderr,"dbg2       smute_sec:      %d\n",mb_segyheader_ptr->smute_sec);
 		fprintf(stderr,"dbg2       emute_sec:      %d\n",mb_segyheader_ptr->emute_sec);
@@ -1610,7 +1617,8 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       emute_mils:     %d\n",mb_segyheader_ptr->emute_mils);
 		fprintf(stderr,"dbg2       nsamps:         %d\n",mb_segyheader_ptr->nsamps);
 		fprintf(stderr,"dbg2       si_micros:      %d\n",mb_segyheader_ptr->si_micros);
-		fprintf(stderr,"dbg2       other_1[19]:    %d\n",mb_segyheader_ptr->other_1[19]);
+		for (i=0;i<19;i++)
+		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segyheader_ptr->other_1[i]);
 		fprintf(stderr,"dbg2       year:           %d\n",mb_segyheader_ptr->year);
 		fprintf(stderr,"dbg2       day_of_yr:      %d\n",mb_segyheader_ptr->day_of_yr);
 		fprintf(stderr,"dbg2       hour:           %d\n",mb_segyheader_ptr->hour);
@@ -1618,7 +1626,8 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       sec:            %d\n",mb_segyheader_ptr->sec);
 		fprintf(stderr,"dbg2       mils:           %d\n",mb_segyheader_ptr->mils);
 		fprintf(stderr,"dbg2       tr_weight:      %d\n",mb_segyheader_ptr->tr_weight);
-		fprintf(stderr,"dbg2       other_2[5]:     %d\n",mb_segyheader_ptr->other_2[5]);
+		for (i=0;i<5;i++)
+		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segyheader_ptr->other_2[i]);
 		fprintf(stderr,"dbg2       delay:          %d\n",mb_segyheader_ptr->delay);
 		fprintf(stderr,"dbg2       smute_sec:      %d\n",mb_segyheader_ptr->smute_sec);
 		fprintf(stderr,"dbg2       emute_sec:      %d\n",mb_segyheader_ptr->emute_sec);

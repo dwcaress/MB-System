@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.0 2004-04-27 01:50:16 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.1 2004-05-21 23:44:50 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/04/27 01:50:16  caress
+ * Adding support for Reson 7k sonar data, including segy extensions.
+ *
  *
  */
 /*
@@ -443,6 +446,7 @@ typedef struct s7kr_survey_struct
 	double		longitude;		/* Sonar longitude at ping (degrees) */
 	double		latitude;		/* Sonar latitude at ping (degrees) */
 	float		sonar_depth;		/* Sonar depth at ping (meters) */
+	float		sonar_altitude;		/* Sonar altitude at ping (meters) */
 	float		heading;		/* Heading at ping (degrees) */
 	float		speed;			/* Sonar speed at ping (m/sec) */
 	float		beamwidthx;		/* Sonar nadir acrosstrack beamwidth */

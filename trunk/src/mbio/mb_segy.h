@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_segy.h,v 5.0 2004-04-27 01:50:15 caress Exp $
+ *    $Id: mb_segy.h,v 5.1 2004-05-21 23:44:49 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,10 +26,48 @@
  * Date:	April 13, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/04/27 01:50:15  caress
+ * Adding support for Reson 7k sonar data, including segy extensions.
+ *
  *
  */
 
 #define   MB_SEGY_HEADER_LENGTH  240
+struct mb_segyasciiheader_struct
+	{
+	char line[80][40];
+	};
+struct mb_segytapeheader_struct
+	{
+	int	jobid;
+	int	line;
+	int	reel;
+	short	channels;
+	short	aux_channels;
+	short	sample_interval;
+	short	sample_interval_org;
+	short	number_samples;
+	short	number_samples_org;
+	short	format; /* 5 = IEEE floating point */
+	short	cdp_fold;
+	short	trace_sort;
+	short	vertical_sum;
+	short	sweep_start;
+	short	sweep_end;
+	short	sweep_length;
+	short	sweep_type;
+	short	sweep_trace;
+	short	sweep_taper_start;
+	short	sweep_taper_end;
+	short	sweep_taper;
+	short	correlated;
+	short	binary_gain;
+	short	amplitude;
+	short	units;
+	short	impulse_polarity;
+	short	vibrate_polarity;
+	char	extra[340];
+	};
 struct mb_segyheader_struct 
 	{ 
         long            seq_num;        /* bytes 0-3, trace sequence number in the line */
