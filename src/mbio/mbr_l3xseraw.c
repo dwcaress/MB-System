@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.7 2001-08-23 20:50:24 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.8 2001-10-23 02:34:12 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/08/23  20:50:24  caress
+ * Fixed problems with SB2120 data.
+ *
  * Revision 5.6  2001/08/10  22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -107,7 +110,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.7 2001-08-23 20:50:24 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.8 2001-10-23 02:34:12 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -237,7 +240,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.7 2001-08-23 20:50:24 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.8 2001-10-23 02:34:12 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -306,7 +309,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.7 2001-08-23 20:50:24 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.8 2001-10-23 02:34:12 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2135,24 +2138,41 @@ for(i=0;i<store->mul_num_beams;i++)
 	    store->mul_group_along = MB_YES;
 	    store->mul_group_depth = MB_YES;
 	    for (i=0;i<store->mul_num_beams;i++)
-			{
-			beta = 90.0 - RTD * store->beams[i].angle;
-			alpha = RTD * store->beams[i].pitch;
-			mb_rollpitch_to_takeoff(verbose, 
-			    alpha, beta, &theta, 
-			    &phi, error);
-			/* divide range by 2 because of round trip travel time */
-			rr = 1500.0 * store->beams[i].tt/2.0;
-			xx = rr * sin(DTR * theta);
-			zz = rr * cos(DTR * theta);
-			store->beams[i].lateral 
-				= xx * cos(DTR * phi);
-			store->beams[i].along 
-				= xx * sin(DTR * phi) 
-			    + 0.5 * store->nav_speed_ground 
-				* store->beams[i].delay;
-			store->beams[i].depth = zz;
-			}
+		{
+		beta = 90.0 - RTD * store->beams[i].angle;
+		alpha = RTD * store->beams[i].pitch;
+		mb_rollpitch_to_takeoff(verbose, 
+		    alpha, beta, &theta, 
+		    &phi, error);
+		/* divide range by 2 because of round trip travel time */
+		rr = 1500.0 * store->beams[i].tt/2.0;
+		xx = rr * sin(DTR * theta);
+		zz = rr * cos(DTR * theta);
+		store->beams[i].lateral 
+			= xx * cos(DTR * phi);
+		store->beams[i].along 
+			= xx * sin(DTR * phi) 
+		    + 0.5 * store->nav_speed_ground 
+			* store->beams[i].delay;
+		store->beams[i].depth = zz;
+		}
+	    }
+	    
+	/* check for sensible bathymetry */
+	if (status == MB_SUCCESS
+	    && store->mul_group_depth == MB_YES)
+	    {
+	    for (i=0;i<store->mul_num_beams;i++)
+		{
+		if (fabs(store->beams[i].depth) > 11000.0)
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_UNINTELLIGIBLE;
+		    
+		    if (fabs(store->beams[i].heave) > 100.0)
+			store->beams[i].heave = 0.0;
+		    }
+		}
 	    }
 	    
 	/* now if sidescan already read but bin size lacking then
