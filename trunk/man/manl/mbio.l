@@ -258,6 +258,20 @@ The following multibeam data formats are supported in this version of
                           sidescan, variable beams and 
                           pixels, xdr binary, SOEST, UH.
 
+    MBIO data format id: 62
+    Format name:          MBF_MR1ALDEO
+    Informal Description: L-DEO MR1 post processed format with travel times
+    Attributes:           L-DEO MR1, bathymetry and sidescan,
+                          variable beams and pixels, xdr binary, 
+                          L-DEO.
+
+    MBIO data format id: 63
+    Format name:          MBF_MR1BLDEO
+    Informal Description: L-DEO small MR1 post processed format with travel times
+    Attributes:           L-DEO MR1, bathymetry and sidescan,
+                          variable beams and pixels, xdr binary, 
+                          L-DEO.
+
     MBIO Data Format ID:  71
     Format name:          MBF_MBLDEOIH
     Informal Description: L-DEO in-house generic multibeam

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.6 1995-11-27 21:49:01 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.7 1996-03-12 17:21:55 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/11/27  21:49:01  caress
+ * New version of mb_ttimes with ssv and angles_null.
+ *
  * Revision 4.5  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *
@@ -74,7 +77,7 @@ double	*depthadd;
 double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.6 1995-11-27 21:49:01 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.7 1996-03-12 17:21:55 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -136,6 +139,13 @@ int	*error;
 	else if (system == MB_SYS_MR1)
 		{
 		status = mbsys_mr1_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
+		}
+	else if (system == MB_SYS_MR1B)
+		{
+		status = mbsys_mr1b_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
 				flags,depthadd,ssv,error);

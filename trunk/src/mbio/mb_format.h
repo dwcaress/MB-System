@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.10 1996-01-26 21:27:27 caress Exp $
+ *    $Id: mb_format.h,v 4.11 1996-03-12 17:23:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1996/01/26  21:27:27  caress
+ * Version 4.3 distribution.
+ *
  * Revision 4.9  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *
@@ -95,13 +98,14 @@
 #define	MB_SYS_SB2100	4
 #define	MB_SYS_SIMRAD	5
 #define	MB_SYS_MR1	6
-#define	MB_SYS_LDEOIH	7
-#define	MB_SYS_RESON	8
-#define	MB_SYS_ELAC	9
-#define MB_SYS_HSMD     10
+#define	MB_SYS_MR1B	7
+#define	MB_SYS_LDEOIH	8
+#define	MB_SYS_RESON	9
+#define	MB_SYS_ELAC	10
+#define MB_SYS_HSMD     11
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	28
+#define	MB_FORMATS	29
 
 /* Data formats supported by MBIO */
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
@@ -170,6 +174,9 @@
 #define	MBF_MR1ALDEO	62	/* MR1 Lamont format with travel times, 
 					variable beam bathymetry, variable
 					pixel sidescan, xdr binary, L-DEO */ 
+#define	MBF_MR1BLDEO	63	/* MR1 small Lamont format with travel times, 
+					variable beam bathymetry, variable
+					pixel sidescan, xdr binary, L-DEO */ 
 #define	MBF_MBLDEOIH	71	/* Generic in-house multibeam, variable beam, 
  					bathymetry, amplitude, and sidescan
  					binary, centered, L-DEO. */
@@ -214,6 +221,7 @@ static int format_table[] =
 	54,	/* MBF_EM12DARW */
 	61,	/* MBF_MR1PRHIG */
 	62,	/* MBF_MR1ALDEO */
+	63,	/* MBF_MR1BLDEO */
 	71,	/* MBF_MBLDEOIH */
 	81,	/* MBF_CBAT9001 */
 	91,	/* MBF_BCHRTUNB */
@@ -248,6 +256,7 @@ static int supported_format_table[] =
 	1,	/* MBF_EM12DARW */
 	1,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MR1ALDEO */
+	1,	/* MBF_MR1BLDEO */
 	1,	/* MBF_MBLDEOIH */
 	1,	/* MBF_CBAT9001 */
 	1,	/* MBF_BCHRTUNB */
@@ -297,6 +306,7 @@ static char *format_description[] =
 	"Format name:          MBF_EM12DARW\nInformal Description: Simrad EM12S RRS Darwin processed format\nAttributes:           Simrad EM12S, bathymetry and amplitude,\n                      81 beams, binary, Oxford University.\n",
 	"Format name:          MBF_MR1PRHIG\nInformal Description: SOEST MR1 post processed format\nAttributes:           SOEST MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      SOEST, University of Hawaii.\n",
 	"Format name:          MBF_MR1ALDEO\nInformal Description: L-DEO MR1 post processed format with travel times\nAttributes:           L-DEO MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      L-DEO.\n",
+	"Format name:          MBF_MR1BLDEO\nInformal Description: L-DEO small MR1 post processed format with travel times\nAttributes:           L-DEO MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      L-DEO.\n",
 	"Format name:          MBF_MBLDEOIH\nInformal Description: L-DEO in-house generic multibeam\nAttributes:           Data from all sonar systems, bathymetry, \n                      amplitude and sidescan, variable beams and pixels, \n                      binary, centered, L-DEO.\n",
 	"Format name:          MBF_CBAT9001\nInformal Description: Reson SeaBat 9001 shallow water multibeam\nAttributes:           60 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
 	"Format name:          MBF_BCHRTUNB\nInformal Description: Elac BottomChart shallow water multibeam\nAttributes:           56 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
@@ -332,6 +342,7 @@ static int mb_system_table[] =
 	MB_SYS_SIMRAD,	/* MBF_EM12DARW */
 	MB_SYS_MR1,	/* MBF_MR1PRHIG */
 	MB_SYS_MR1,	/* MBF_MR1ALDEO */
+	MB_SYS_MR1B,	/* MBF_MR1BLDEO */
 	MB_SYS_LDEOIH,	/* MBF_MBLDEOIH */
 	MB_SYS_RESON,	/* MBF_CBAT9001 */
 	MB_SYS_ELAC,	/* MBF_BCHRTUNB */
@@ -367,6 +378,7 @@ static int mb_xdr_table[] =
 	0,		/* MBF_EM12DARW */
 	1,		/* MBF_MR1PRHIG */
 	1,		/* MBF_MR1ALDEO */
+	1,		/* MBF_MR1BLDEO */
 	0,		/* MBF_MBLDEOIH */
 	0,		/* MBF_CBAT9001 */
 	0,		/* MBF_BCHRTUNB */
@@ -401,6 +413,7 @@ static int beams_bath_table[] =
 	81,	/* MBF_EM12DARW */
 	3003,	/* MBF_MR1PRHIG */
 	3003,	/* MBF_MR1ALDEO */
+	153,	/* MBF_MR1BLDEO */
 	200,	/* MBF_MBLDEOIH */
 	60,	/* MBF_CBAT9001 */
 	56,	/* MBF_BCHRTUNB */
@@ -435,6 +448,7 @@ static int beams_amp_table[] =
 	81,	/* MBF_EM12DARW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
+	0,	/* MBF_MR1BLDEO */
 	200,	/* MBF_MBLDEOIH */
 	60,	/* MBF_CBAT9001 */
 	56,	/* MBF_BCHRTUNB */
@@ -469,6 +483,7 @@ static int pixels_ss_table[] =
 	0,	/* MBF_EM12DARW */
 	7003,	/* MBF_MR1PRHIG */
 	7003,	/* MBF_MR1ALDEO */
+	4003,	/* MBF_MR1BLDEO */
 	10000,	/* MBF_MBLDEOIH */
 	0,	/* MBF_CBAT9001 */
 	0,	/* MBF_BCHRTUNB */
@@ -503,6 +518,7 @@ static int variable_beams_table[] =
 	0,	/* MBF_EM12DARW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
+	0,	/* MBF_MR1BLDEO */
 	1,	/* MBF_MBLDEOIH */
 	0,	/* MBF_CBAT9001 */
 	1,	/* MBF_BCHRTUNB */
@@ -538,6 +554,7 @@ static int mb_traveltime_table[] =
 	1,	/* MBF_EM12DARW */
 	1,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MR1ALDEO */
+	1,	/* MBF_MR1BLDEO */
 	0,	/* MBF_MBLDEOIH */
 	1,	/* MBF_CBAT9001 */
 	1,	/* MBF_BCHRTUNB */
@@ -573,6 +590,7 @@ static int mb_bath_flag_table[] =
 	0,	/* MBF_EM12DARW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
+	0,	/* MBF_MR1BLDEO */
 	0,	/* MBF_MBLDEOIH */
 	0,	/* MBF_CBAT9001 */
 	0,	/* MBF_BCHRTUNB */
@@ -608,6 +626,7 @@ static int mb_amp_flag_table[] =
 	0,	/* MBF_EM12DARW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
+	0,	/* MBF_MR1BLDEO */
 	0,	/* MBF_MBLDEOIH */
 	0,	/* MBF_CBAT9001 */
 	0,	/* MBF_BCHRTUNB */
@@ -643,6 +662,7 @@ static int mb_ss_flag_table[] =
 	0,	/* MBF_EM12DARW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
+	0,	/* MBF_MR1BLDEO */
 	0,	/* MBF_MBLDEOIH */
 	0,	/* MBF_CBAT9001 */
 	0,	/* MBF_BCHRTUNB */
@@ -677,6 +697,7 @@ static float mb_foreaft_beamwidth_table[] =
 	2.00,	/* MBF_EM12DARW */
 	2.00,	/* MBF_MR1PRHIG */
 	2.00,	/* MBF_MR1ALDEO */
+	2.00,	/* MBF_MR1BLDEO */
 	2.00,	/* MBF_MBLDEOIH */
 	2.00,	/* MBF_CBAT9001 */
 	6.00,	/* MBF_BCHRTUNB */
@@ -711,6 +732,7 @@ static char *mb_button_name[] =
         " EM12DARW ",
         " MR1PRHIG ",
         " MR1ALDEO ",
+        " MR1BLDEO ",
         " MBLDEOIH ",
         " CBAT9001 ",
         " BCHRTUNB ",
