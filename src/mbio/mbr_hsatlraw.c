@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.14 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.15 2000-03-06 21:54:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.13  1997/09/12  14:58:34  caress
  * Set size of tape block headers to exclude at 12 characters.
  *
@@ -119,7 +122,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.14 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.15 2000-03-06 21:54:21 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -1175,6 +1178,10 @@ int	*error;
 				}
 			}
 		}
+		
+	/* handle Hydrosweep Y2K problem */
+	if (status == MB_SUCCESS && data->year < 1962)
+		data->year = 2000 + (data->year % 100);
 
 	/* print output debug statements */
 	if (verbose >= 2)
