@@ -12,7 +12,8 @@ Version 5.0
 \fB-B\fItickinfo\fP \fB-b\fIyr/mo/da/hr/mn/sc\fP 
 \fB-C\fIcontourfile\fP \fB-c\fIcopies\fP 
 \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP 
-\fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIred/green/blue\fP 
+\fB-E\fIyr/mo/da/hr/mn/sc\fP 
+\fB-f\fIformat\fP \fB-F\fIred/green/blue\fP  
 \fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP 
 \fB-N\fInplot\fP \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
 \fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP 
