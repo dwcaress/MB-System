@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.7 2001-07-27 19:07:16 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.8 2001-08-23 20:50:24 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/07/27  19:07:16  caress
+ * Fixed handling 1180 data.
+ *
  * Revision 5.6  2001/07/22 21:17:01  caress
  * Fixed bug initialized too much in ttimes function.
  *
@@ -78,7 +81,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.7 2001-07-27 19:07:16 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.8 2001-08-23 20:50:24 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -335,6 +338,7 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_xse_struct *store;
 	double	xtrackmin, xtrackmax;
 	int	ixtrackmin, ixtrackmax;
+	double	dsign;
 	int	i, j;
 
 	/* print input debug statements */
@@ -395,7 +399,7 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*heading = RTD * store->nav_course_ground;
 
 		/* get speed  */
-		*speed  = 1.8 * store->nav_speed_ground;
+		*speed  = 3.6 * store->nav_speed_ground;
 
 		/* get distance and depth values */
 		*nbath = 0;
@@ -427,14 +431,19 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			    ixtrackmax = i;
 			    }
 			}
+		    if (ixtrackmax > ixtrackmin)
+			dsign = -1.0;
+		    else
+			dsign = 1.0;
+/*
+fprintf(stderr, "itrack: %d %d   freq:%f\n", 
+ixtrackmin, ixtrackmax, store->mul_frequency);
+*/
 
 		    /* now extract the bathymetry */		  
 		    for (i=0;i<store->mul_num_beams;i++)
 			{
-			if (ixtrackmax > ixtrackmin)
-			    j = store->mul_num_beams - store->beams[i].beam;
-			else
-			    j = store->beams[i].beam - 1;
+			j = store->mul_num_beams - store->beams[i].beam;
 			if (store->beams[i].quality == 1)
 			    beamflag[j] = MB_FLAG_NONE;
 			else if (store->beams[i].quality < 8)
@@ -454,7 +463,7 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			else
 			    bath[j] += store->par_trans_z_stbd;
 			bathacrosstrack[j] 
-				= -store->beams[i].lateral;
+				= dsign * store->beams[i].lateral;
 			bathalongtrack[j] 
 				= store->beams[i].along;
 			amp[j] = store->beams[i].amplitude;
@@ -522,7 +531,7 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*heading = RTD * store->nav_course_ground;
 
 		/* get speed  */
-		*speed  = 1.8 * store->nav_speed_ground;
+		*speed  = 3.6 * store->nav_speed_ground;
 
 		/* get distance and depth values */
 		*nbath = 0;
@@ -626,6 +635,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_xse_struct *store;
 	double	maxoffset, xtrackmin, xtrackmax;
 	int	imaxoffset, ixtrackmin, ixtrackmax;
+	double	dsign;
 	int	i, j;
 
 	/* print input debug statements */
@@ -706,7 +716,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->nav_course_ground = DTR * heading;
 
 		/* get speed */
-		store->nav_speed_ground = speed / 1.8;
+		store->nav_speed_ground = speed / 3.6;
 
 		/* insert distance and depth values into storage arrays */
 		xtrackmin = 0.0;
@@ -730,14 +740,15 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    ixtrackmax = i;
 			    }
 			}
+		    if (ixtrackmax > ixtrackmin)
+			dsign = -1.0;
+		    else
+			dsign = 1.0;
 
 		    /* now insert the bathymetry */		  
 		    for (i=0;i<store->mul_num_beams;i++)
 			{
-			if (ixtrackmax > ixtrackmin)
-			    j = store->mul_num_beams - store->beams[i].beam;
-			else
-			    j = store->beams[i].beam - 1;
+			j = store->mul_num_beams - store->beams[i].beam;
 			if (j < nbath)
 			    {
 			    if (mb_beam_check_flag(beamflag[j]))
@@ -755,7 +766,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				store->beams[i].quality = 1;
 			    store->beams[i].depth 
 				    = bath[j] - store->beams[i].heave;
-			    store->beams[i].lateral = -bathacrosstrack[j];
+			    store->beams[i].lateral = dsign * bathacrosstrack[j];
 			    store->beams[i].along = bathalongtrack[j];
 			    store->beams[i].amplitude = (int) (amp[j]);
 			    }
@@ -783,10 +794,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		    for (i=0;i<store->sid_num_pixels;i++)
 			{
-			if (ixtrackmax > ixtrackmin)
-			    j = store->sid_num_pixels - i - 1;
-			else
-			    j = i;
+			j = store->sid_num_pixels - i - 1;
 			if (j < nss)
 			    {
 			    store->ss[i]= ss[j];
@@ -809,7 +817,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->nav_course_ground = DTR * heading;
 
 		/* get speed */
-		store->nav_speed_ground = speed / 1.8;
+		store->nav_speed_ground = speed / 3.6;
 		}
 
 	/* insert comment in structure */
@@ -846,6 +854,7 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_xse_struct *store;
 	double	maxoffset, xtrackmin, xtrackmax;
 	int	imaxoffset, ixtrackmin, ixtrackmax;
+	double	dsign;
 	double	alpha, beta;
 	int	i, j;
 
@@ -908,14 +917,15 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    ixtrackmax = i;
 			    }
 			}
+		    if (ixtrackmax > ixtrackmin)
+			dsign = -1.0;
+		    else
+			dsign = 1.0;
 
 		    /* loop over beams */
 		    for (i=0;i<store->mul_num_beams;i++)
 			{
-			if (ixtrackmax > ixtrackmin)
-			    j = store->mul_num_beams - store->beams[i].beam;
-			else
-			    j = store->beams[i].beam - 1;
+			j = store->mul_num_beams - store->beams[i].beam;
 			*nbeams = MAX(store->beams[i].beam, *nbeams);
 			ttimes[j] = store->beams[i].tt;
 			beta = 90.0 + RTD * store->beams[i].angle;
@@ -1043,35 +1053,39 @@ int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		*transducer_depth = 0.5 * (store->par_trans_z_port
 				    + store->par_trans_z_stbd);
 		bath_best = 0.0;
-		if (store->beams[store->mul_num_beams/2].quality == 1)
-		    bath_best = store->beams[store->mul_num_beams/2].depth;
-		else
+		if (store->mul_num_beams > 0)
 		    {
-		    xtrack_min = 99999999.9;
-		    for (i=0;i<store->mul_num_beams;i++)
+		    *transducer_depth -= store->beams[store->mul_num_beams/2].heave;
+		    if (store->beams[store->mul_num_beams/2].quality == 1)
+			bath_best = store->beams[store->mul_num_beams/2].depth;
+		    else
 			{
-			if (store->beams[i].quality == 1
-			    && fabs(store->beams[i].lateral) 
-				< xtrack_min)
+			xtrack_min = 99999999.9;
+			for (i=0;i<store->mul_num_beams;i++)
 			    {
-			    xtrack_min = fabs(store->beams[i].lateral);
-			    bath_best = store->beams[i].depth;
-			    }
-			}		
-		    }
-		if (bath_best <= 0.0)
-		    {
-		    xtrack_min = 99999999.9;
-		    for (i=0;i<store->mul_num_beams;i++)
+			    if (store->beams[i].quality == 1
+				&& fabs(store->beams[i].lateral) 
+				    < xtrack_min)
+				{
+				xtrack_min = fabs(store->beams[i].lateral);
+				bath_best = store->beams[i].depth;
+				}
+			    }		
+			}
+		    if (bath_best <= 0.0)
 			{
-			if (store->beams[i].quality < 8
-			    && fabs(store->beams[i].lateral) 
-				< xtrack_min)
+			xtrack_min = 99999999.9;
+			for (i=0;i<store->mul_num_beams;i++)
 			    {
-			    xtrack_min = fabs(store->beams[i].lateral);
-			    bath_best = store->beams[i].depth;
-			    }
-			}		
+			    if (store->beams[i].quality < 8
+				&& fabs(store->beams[i].lateral) 
+				    < xtrack_min)
+				{
+				xtrack_min = fabs(store->beams[i].lateral);
+				bath_best = store->beams[i].depth;
+				}
+			    }		
+			}
 		    }
 		*altitude = bath_best - *transducer_depth;
 
@@ -1188,7 +1202,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*heading = RTD * store->nav_course_ground;
 
 		/* get speed  */
-		*speed  = 1.8 * store->nav_speed_ground;
+		*speed  = 3.6 * store->nav_speed_ground;
 
 		/* get draft */
 		*draft = 0.5 * (store->par_trans_z_port
@@ -1250,7 +1264,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*heading = RTD * store->nav_course_ground;
 
 		/* get speed  */
-		*speed  = 1.8 * store->nav_speed_ground;
+		*speed  = 3.6 * store->nav_speed_ground;
 
 		/* get draft */
 		*draft = 0.5 * (store->par_trans_z_port
@@ -1392,7 +1406,7 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->nav_course_ground = DTR * heading;
 
 		/* get speed */
-		store->nav_speed_ground = speed / 1.8;
+		store->nav_speed_ground = speed / 3.6;
 
 		/* get draft */
 		store->par_trans_z_port = draft;
@@ -1417,7 +1431,7 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->nav_course_ground = DTR * heading;
 
 		/* get speed */
-		store->nav_speed_ground = speed / 1.8;
+		store->nav_speed_ground = speed / 3.6;
 
 		/* get draft */
 		store->par_trans_z_port = draft;

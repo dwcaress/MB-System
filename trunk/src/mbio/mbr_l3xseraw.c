@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.6 2001-08-10 22:41:19 dcaress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.7 2001-08-23 20:50:24 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/08/10  22:41:19  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.5  2001-07-22 14:17:01-07  caress
  * Fixed bug that deallocated an unallocated array.
  *
@@ -104,7 +107,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.6 2001-08-10 22:41:19 dcaress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.7 2001-08-23 20:50:24 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -234,7 +237,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.6 2001-08-10 22:41:19 dcaress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.7 2001-08-23 20:50:24 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -303,7 +306,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.6 2001-08-10 22:41:19 dcaress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.7 2001-08-23 20:50:24 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -667,7 +670,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 				}
 		    }
 #ifdef MB_DEBUG
-fprintf(stderr, "buffer_size=%u\n", buffer_size);
+fprintf(stderr, "\nBUFFER SIZE: %u\n", buffer_size);
 #endif
 
 		/* parse header values */
@@ -693,23 +696,27 @@ fprintf(stderr, "buffer_size=%u\n", buffer_size);
 	    if (status == MB_SUCCESS)
 			{
 #ifdef MB_DEBUG
-fprintf(stderr, "frame_id=%u\n",frame_id);
+fprintf(stderr, "FRAME ID: %u\n",frame_id);
 #endif
 			if (frame_id == MBSYS_XSE_NAV_FRAME)
 			    {
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NAV\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
-			    store->kind = MB_DATA_NAV;
 			    status = mbr_l3xseraw_rd_nav(verbose,buffer_size,buffer,store_ptr,error);
+			    if (store->nav_source > 0)
+				store->kind = MB_DATA_NAV;
+#ifdef MB_DEBUG
+fprintf(stderr,"nav_source:%d  time:%u.%6.6u\n",store->nav_source,store->nav_sec,store->nav_usec);
+#endif
+			    else
+				store->kind = MB_DATA_RAW_LINE;
 			    done = MB_YES;
 			    }
 			else if (frame_id == MBSYS_XSE_SVP_FRAME)
 			    {
 #ifdef MB_DEBUG
 fprintf(stderr, "READ SVP\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 			    store->kind = MB_DATA_VELOCITY_PROFILE;
 			    status = mbr_l3xseraw_rd_svp(verbose,buffer_size,buffer,store_ptr,error);
@@ -719,7 +726,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ TIDE\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_tide(verbose,buffer_size,buffer,store_ptr,error);
@@ -729,7 +735,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 			    {
 #ifdef MB_DEBUG
 fprintf(stderr, "READ PARAMETER\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 			    store->kind = MB_DATA_PARAMETER;
 			    status = mbr_l3xseraw_rd_ship(verbose,buffer_size,buffer,store_ptr,error);
@@ -739,7 +744,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 			    {
 #ifdef MB_DEBUG
 fprintf(stderr, "READ SIDESCAN\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 			    store->kind = MB_DATA_DATA;
 			    status = mbr_l3xseraw_rd_sidescan(verbose,buffer_size,buffer,store_ptr,error);
@@ -751,7 +755,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 			    {
 #ifdef MB_DEBUG
 fprintf(stderr, "READ MULTIBEAM\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 			    store->kind = MB_DATA_DATA;
 			    status = mbr_l3xseraw_rd_multibeam(verbose,buffer_size,buffer,store_ptr,error);
@@ -764,7 +767,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ SINGLEBEAM\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_singlebeam(verbose,buffer_size,buffer,store_ptr,error);
@@ -774,7 +776,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ CONTROL\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_control(verbose,buffer_size,buffer,store_ptr,error);
@@ -784,7 +785,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ BATHYMETRY\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_bathymetry(verbose,buffer_size,buffer,store_ptr,error);
@@ -794,7 +794,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ PRODUCT\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_product(verbose,buffer_size,buffer,store_ptr,error);
@@ -804,7 +803,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NATIVE\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_native(verbose,buffer_size,buffer,store_ptr,error);
@@ -814,7 +812,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ GEODETIC\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_geodetic(verbose,buffer_size,buffer,store_ptr,error);
@@ -824,7 +821,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ SEABEAM\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				status = mbr_l3xseraw_rd_seabeam(verbose,buffer_size,buffer,store_ptr,error);
 				if (store->sbm_properties == MB_YES)
@@ -837,7 +833,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "READ MESSAGE\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_message(verbose,buffer_size,buffer,store_ptr,error);
@@ -847,7 +842,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 			    {
 #ifdef MB_DEBUG
 fprintf(stderr, "READ COMMENT\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 			    store->kind = MB_DATA_COMMENT;
 			    status = mbr_l3xseraw_rd_comment(verbose,buffer_size,buffer,store_ptr,error);
@@ -857,7 +851,6 @@ fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 			    {
 #ifdef MB_DEBUG
 fprintf(stderr, "READ OTHER\n");
-fprintf(stderr, "buffer_size=%u\n", (unsigned long)buffer_size);
 #endif
 			    store->kind = MB_DATA_RAW_LINE;
 			    }
@@ -1891,7 +1884,7 @@ fprintf(stderr, "swath=%f\n", store->mul_swath);
 #ifdef MB_DEBUG
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
-	fprintf(stderr, "tt[%d]=%d\n", i, store->beams[i].tt);
+	fprintf(stderr, "tt[%d]=%f\n", i, store->beams[i].tt);
 #endif
 				}
 	    
@@ -1909,7 +1902,7 @@ for(i=0;i<store->mul_num_beams;i++)
 #ifdef MB_DEBUG
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
-	fprintf(stderr, "quality[%d]=%uc\n", i, store->beams[i].quality);
+	fprintf(stderr, "quality[%d]=%u\n", i, store->beams[i].quality);
 #endif
 				}
 	    
