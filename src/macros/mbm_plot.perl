@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.9 2002-07-25 19:05:02 caress Exp $
+#    $Id: mbm_plot.perl,v 5.10 2002-09-07 03:13:59 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.9 2002-07-25 19:05:02 caress Exp $
+#   $Id: mbm_plot.perl,v 5.10 2002-09-07 03:13:59 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.9  2002/07/25 19:05:02  caress
+#   Release 5.0.beta21
+#
 #   Revision 5.8  2002/04/06 02:51:54  caress
 #   Release 5.0.beta16
 #
@@ -1130,7 +1133,6 @@ print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
 		}
 			
 	# reset longitude min max if they conflict with $lonflip
-print "lonflip:$lonflip xminmax: $xmin_f $xmax_f\n";
 	if ($lonflip == 0
 		&& $xmin_f < -180.0) 
 		{
@@ -1155,7 +1157,6 @@ print "lonflip:$lonflip xminmax: $xmin_f $xmax_f\n";
 		$xmin_f = $xmin_f + 360.0;
 		$xmax_f = $xmax_f + 360.0;
 		}
-print "lonflip:$lonflip xminmax: $xmin_f $xmax_f\n";
 
 	if (!$first_mb && $nrec_f > 0)
 		{
