@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.5 2001-12-20 20:48:51 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.6 2001-12-30 20:36:13 caress Exp $
  *
- *    Copyright (c) 2000 by 
+ *    Copyright (c) 2000, 2001 by 
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/12/20 20:48:51  caress
+ * Release 5.0.beta11
+ *
  * Revision 5.4  2001/07/22  21:19:23  caress
  * Removed redundant define.
  *
@@ -160,6 +163,7 @@
 /* maximum number of beams and pixels */
 #define	MBSYS_XSE_MAXBEAMS		151
 #define	MBSYS_XSE_MAXPIXELS		2000
+#define	MBSYS_XSE_MAXSAMPLES		8192
 #define	MBSYS_XSE_MAXSVP		200
 #define MBSYS_XSE_MAXDRAFT		200
 #define	MBSYS_XSE_COMMENT_LENGTH	200
@@ -441,7 +445,7 @@ struct mbsys_xse_struct
 	double	sbm_pitch;		/* pitch (radians) */
 	int	sbm_center_beam;	/* beam number for center beam profile */
 	int	sbm_center_count;	/* number of samples in center beam profile */
-	float	sbm_center_amp[MBSYS_XSE_MAXPIXELS];	/* center beam profile values */
+	float	sbm_center_amp[MBSYS_XSE_MAXSAMPLES];	/* center beam profile values */
 	int	sbm_message_id;		/* seabeam message id */
 	int	sbm_message_len;	/* seabeam message length */
 	char	sbm_message_txt[MBSYS_XSE_COMMENT_LENGTH]; /* seabeam message */
