@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  1/21/93
-#	$Id: Makefile,v 1.9 1993-11-05 16:02:14 caress Exp $
+#	$Id: Makefile,v 1.10 1993-11-05 18:10:34 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,12 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.9  1993/11/05  16:02:14  caress
+# Set up mblevitus so that location of annual database file
+# is found from an include file generated each time make is
+# called.  Thus, the database location can be set in the
+# Makefile rather than hardwired in the code.
+#
 # Revision 1.8  1993/11/04  19:35:01  caress
 # Added mbps.
 #
@@ -77,7 +83,7 @@ all:	$(MANDIR)/mbsystem.1 \
 	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.1 \
 	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.1 \
 	$(BINDIR)/mbmask $(MANDIR)/mbmask.1 \
-	$(BINDIR)/mbsmooth \
+	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.1 \
 	$(BINDIR)/mbps $(MANDIR)/mbps.1
 
 ### make clean removes the object files
@@ -208,6 +214,9 @@ $(MANDIR)/mbgetmask.1:	mbmask.1
 $(MANDIR)/mbmask.1:	mbmask.1
 	cp mbmask.1 $(MANDIR)/mbmask.1
 	chmod 664 $(MANDIR)/mbmask.1
+$(MANDIR)/mbsmooth.1:	mbsmooth.1
+	cp mbsmooth.1 $(MANDIR)/mbsmooth.1
+	chmod 664 $(MANDIR)/mbsmooth.1
 $(MANDIR)/mbps.1:	mbps.1
 	cp mbps.1 $(MANDIR)/mbps.1
 	chmod 664 $(MANDIR)/mbps.1
