@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.8 2001-10-23 02:34:12 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.9 2001-12-20 20:48:51 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/10/23  02:34:12  caress
+ * Added error checking for corrupted depth and heave values.
+ *
  * Revision 5.7  2001/08/23  20:50:24  caress
  * Fixed problems with SB2120 data.
  *
@@ -71,6 +74,7 @@
 
 /*
 #define MB_DEBUG 1
+#define MB_DEBUG2 1
 */
 
 /* set up byte swapping scenario */
@@ -110,7 +114,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.8 2001-10-23 02:34:12 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.9 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -240,7 +244,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.8 2001-10-23 02:34:12 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.9 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -309,7 +313,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.8 2001-10-23 02:34:12 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.9 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -708,10 +712,12 @@ fprintf(stderr, "READ NAV\n");
 #endif
 			    status = mbr_l3xseraw_rd_nav(verbose,buffer_size,buffer,store_ptr,error);
 			    if (store->nav_source > 0)
+				{
 				store->kind = MB_DATA_NAV;
 #ifdef MB_DEBUG
 fprintf(stderr,"nav_source:%d  time:%u.%6.6u\n",store->nav_source,store->nav_sec,store->nav_usec);
 #endif
+				}
 			    else
 				store->kind = MB_DATA_RAW_LINE;
 			    done = MB_YES;
@@ -751,8 +757,25 @@ fprintf(stderr, "READ SIDESCAN\n");
 			    store->kind = MB_DATA_DATA;
 			    status = mbr_l3xseraw_rd_sidescan(verbose,buffer_size,buffer,store_ptr,error);
 			    store->sid_frame = MB_YES;
-			    *frame_expect = MBSYS_XSE_MBM_FRAME;
-			    done = MB_NO;
+			    if (frame_id == *frame_expect
+				    && store->sid_ping == store->mul_ping)
+				    {
+				    *frame_expect = MBSYS_XSE_NONE_FRAME;
+				    done = MB_YES;
+				    }
+			    else if (frame_id == *frame_expect)
+				    {
+				    *frame_expect = MBSYS_XSE_MBM_FRAME;
+				    done = MB_NO;
+				    }
+			    else if (*frame_expect == MBSYS_XSE_NONE_FRAME)
+				    {
+				    *frame_expect = MBSYS_XSE_MBM_FRAME;
+				    done = MB_NO;
+				    }
+#ifdef MB_DEBUG
+fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_num_pixels);
+#endif
 			    }
 			else if (frame_id == MBSYS_XSE_MBM_FRAME)
 			    {
@@ -762,9 +785,25 @@ fprintf(stderr, "READ MULTIBEAM\n");
 			    store->kind = MB_DATA_DATA;
 			    status = mbr_l3xseraw_rd_multibeam(verbose,buffer_size,buffer,store_ptr,error);
 			    store->mul_frame = MB_YES;
-			    if (frame_id == *frame_expect)
-					*frame_expect = MBSYS_XSE_NONE_FRAME;
-			    done = MB_YES;
+			    if (frame_id == *frame_expect
+				    && store->sid_ping == store->mul_ping)
+				    {
+				    *frame_expect = MBSYS_XSE_NONE_FRAME;
+				    done = MB_YES;
+				    }
+			    else if (frame_id == *frame_expect)
+				    {
+				    *frame_expect = MBSYS_XSE_SSN_FRAME;
+				    done = MB_NO;
+				    }
+			    else if (*frame_expect == MBSYS_XSE_NONE_FRAME)
+				    {
+				    *frame_expect = MBSYS_XSE_SSN_FRAME;
+				    done = MB_NO;
+				    }
+#ifdef MB_DEBUG
+fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_num_pixels);
+#endif
 			    }
 			else if (frame_id == MBSYS_XSE_SNG_FRAME)
 				{
@@ -919,6 +958,7 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 	int	done;
 	int	index;
 	int	nchar;
+	int	skip;
 	int	i;
 
 	/* print input debug statements */
@@ -949,11 +989,15 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 		&& done == MB_NO)
 	    {
 	    /* look for group start or frame end */
+	    skip = 0;
 #ifdef DATAINPCBYTEORDER
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "GSH$", 4)
 			&& strncmp(&buffer[index], "FSH#", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "FSH#", 4))
 			done = MB_YES;
@@ -963,12 +1007,19 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "$HSG", 4)
 			&& strncmp(&buffer[index], "#HSF", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "#HSF", 4))
 			done = MB_YES;
 	    else
 			index += 4;
+#endif
+	    
+#ifdef MB_DEBUG
+if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -984,11 +1035,17 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 			    fprintf(stderr,"\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				    group_id, byte_count, function_name);
 			    }
+#ifdef MB_DEBUG
+fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+				    group_id, byte_count, function_name);
+#endif
 	    
 		    /* handle general group */
 		    if (group_id == MBSYS_XSE_NAV_GROUP_GEN)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_GEN\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_GEN\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_quality); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_status); index += 4;
 				}
@@ -996,7 +1053,9 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle point group */
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_POS)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_POS\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_POS\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_description_len); index += 4;
 				for (i=0;i<store->nav_description_len;i++)
 				    {
@@ -1012,7 +1071,9 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle motion ground truth group */
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONGT)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_MOTIONGT\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_MOTIONGT\n");
+#endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_ground); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_ground); index += 8;
 				}
@@ -1020,31 +1081,39 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle motion through water group */
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONTW)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_MOTIONTW\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_MOTIONTW\n");
+#endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_water); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_water); index += 8;
-				/* fprintf(stderr, "MTW Group Heading: %lf\n", store->nav_course_water); */
+/* fprintf(stderr, "MTW Group Heading: %lf\n", store->nav_course_water); */
 				}
 
 			/* handle current track steering properties group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_TRACK)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_TRACK\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_TRACK\n");
+#endif
 				/* currently unused by MB-System */
 				}
 
 			/* handle the heaverollpitch group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_HRP)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_HRP\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_HRP\n");
+#endif
 				/* currently unused by MB-System */
-				/* heave, roll, and pitch are obtained from the multibeam frame */
+				/* heave, roll, and pitch are best obtained from the multibeam frame */
 				}
 		    
 			/* handle the heave group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_HEAVE)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_HEAVE\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_HEAVE\n");
+#endif
 				/* currently unused by MB-System */
 				/* heave is obtained from the multibeam frame */
 				}
@@ -1052,7 +1121,9 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 			/* handle the roll group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_ROLL)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_ROLL\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_ROLL\n");
+#endif
 				/* currently unused by MB-System */
 				/* roll is obtained from the multibeam frame */
 				}
@@ -1060,7 +1131,9 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 			/* handle the pitch group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_PITCH)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_PITCH\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_PITCH\n");
+#endif
 				/* currently unused by MB-System */
 				/* pitch is obtained from the multibeam frame */
 				}
@@ -1068,7 +1141,9 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 			/* handle the heading group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_HEADING)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_HEADING\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_HEADING\n");
+#endif
 				/* Let the Heading Group course value override the MTW Group course value */
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_water); index += 8;
 				/* fprintf(stderr, "Heading Group Heading: %lf\n", store->nav_course_water*RTD); */
@@ -1077,7 +1152,9 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 			/* handle the log group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_LOG)
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_LOG\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_LOG\n");
+#endif
 				/* currently unused by MB-System */
 				/* speed is obtained from the motion ground truth */
 				/* and motion through water groups */
@@ -1085,7 +1162,9 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 
 			else
 				{
-				/*fprintf(stderr, "READ NAV_GROUP_OTHER\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_OTHER\n");
+#endif
 				}
 			}
 	    }
@@ -1135,6 +1214,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 	int	group_id;
 	int	done;
 	int	index;
+	int	skip;
 	int	i;
 
 	/* print input debug statements */
@@ -1165,11 +1245,15 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 		&& done == MB_NO)
 	    {
 	    /* look for group start or frame end */
+	    skip = 0;
 #ifdef DATAINPCBYTEORDER
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "GSH$", 4)
 			&& strncmp(&buffer[index], "FSH#", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "FSH#", 4))
 			done = MB_YES;
@@ -1179,12 +1263,19 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "$HSG", 4)
 			&& strncmp(&buffer[index], "#HSF", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "#HSF", 4))
 			done = MB_YES;
 	    else
 			index += 4;
+#endif
+	    
+#ifdef MB_DEBUG
+if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -1200,18 +1291,26 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 			    fprintf(stderr,"\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				    group_id, byte_count, function_name);
 			    }
+#ifdef MB_DEBUG
+fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+				    group_id, byte_count, function_name);
+#endif
 
 			/* handle general group */
 			if (group_id == MBSYS_XSE_SVP_GROUP_GEN)
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_GEN\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_GEN\n");
+#endif
 				/* currently unused by MB-System */
 				}
 	    
 		    /* handle depth group */
 		    if (group_id == MBSYS_XSE_SVP_GROUP_DEPTH) 
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_DEPTH\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_DEPTH\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nsvp); index += 4;
 				for (i=0;i<store->svp_nsvp;i++)
 				    {
@@ -1225,7 +1324,9 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle velocity group */
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_VELOCITY)
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_VELOCITY\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_VELOCITY\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nsvp); index += 4;
 				for (i=0;i<store->svp_nsvp;i++)
 				    {
@@ -1239,7 +1340,9 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle conductivity group */
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_CONDUCTIVITY)
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_CONDUCTIVITY\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_CONDUCTIVITY\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
 				    {
@@ -1253,7 +1356,9 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle salinity group */
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_SALINITY)
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_SALINITY\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_SALINITY\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
 				    {
@@ -1267,7 +1372,9 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle temperature group */
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_TEMP)
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_TEMP\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_TEMP\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
 				    {
@@ -1281,7 +1388,9 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle pressure group */
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_PRESSURE)
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_PRESSURE\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_PRESSURE\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
 				    {
@@ -1295,20 +1404,26 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 		    /* handle ssv group */
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_SSV)
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_SSV\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_SSV\n");
+#endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_ssv); index += 8;
 				}
 
 			/* handle point group */
 			else if (group_id == MBSYS_XSE_SVP_GROUP_POS)
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_POS\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_POS\n");
+#endif
 				/* currently unused by MB-System */
 				}
 
 			else
 				{
-				/*fprintf(stderr, "READ SVP_GROUP_OTHER\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SVP_GROUP_OTHER\n");
+#endif
 				}
 			}
 	    }
@@ -1357,6 +1472,7 @@ int mbr_l3xseraw_rd_tide(int verbose,int buffer_size,char *buffer,void *store_pt
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -1400,6 +1516,7 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 	int	group_id;
 	int	done;
 	int	index;
+	int	skip;
 	int	i;
 
 	/* print input debug statements */
@@ -1430,11 +1547,15 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 		&& done == MB_NO)
 	    {
 	    /* look for group start or frame end */
+	    skip = 0;
 #ifdef DATAINPCBYTEORDER
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "GSH$", 4)
 			&& strncmp(&buffer[index], "FSH#", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "FSH#", 4))
 			done = MB_YES;
@@ -1444,12 +1565,19 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "$HSG", 4)
 			&& strncmp(&buffer[index], "#HSF", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "#HSF", 4))
 			done = MB_YES;
 	    else
 			index += 4;
+#endif
+	    
+#ifdef MB_DEBUG
+if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -1465,6 +1593,10 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 			    fprintf(stderr,"\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				    group_id, byte_count, function_name);
 			    }
+#ifdef MB_DEBUG
+fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+				    group_id, byte_count, function_name);
+#endif
 
 			/* handle general group */
 			if (group_id == MBSYS_XSE_SHP_GROUP_GEN)
@@ -1585,6 +1717,9 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 	int	group_id;
 	int	done;
 	int	index;
+	int	ngoodss;
+	double	xmin, xmax, binsize;
+	int	skip;
 	int	i;
 
 	/* print input debug statements */
@@ -1615,11 +1750,15 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 		&& done == MB_NO)
 	    {
 	    /* look for group start or frame end */
+	    skip = 0;
 #ifdef DATAINPCBYTEORDER
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "GSH$", 4)
 			&& strncmp(&buffer[index], "FSH#", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "FSH#", 4))
 			done = MB_YES;
@@ -1629,12 +1768,19 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "$HSG", 4)
 			&& strncmp(&buffer[index], "#HSF", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "#HSF", 4))
 			done = MB_YES;
 	    else
 			index += 4;
+#endif
+	    
+#ifdef MB_DEBUG
+if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -1650,37 +1796,57 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 			    fprintf(stderr,"\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				    group_id, byte_count, function_name);
 			    }
+#ifdef MB_DEBUG
+fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+				    group_id, byte_count, function_name);
+#endif
 	    
 		    /* handle general group */
 		    if (group_id == MBSYS_XSE_SSN_GROUP_GEN)
 				{
-				/*fprintf(stderr, "READ SSN_GROUP_GEN\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SSN_GROUP_GEN\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_ping); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_frequency); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_pulse); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_power); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_bandwidth); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_sample); index += 4;
+#ifdef MB_DEBUG
+fprintf(stderr, "ping=%u\n", store->sid_ping);
+fprintf(stderr, "frequency=%f\n", store->sid_frequency);
+fprintf(stderr, "pulse=%f\n", store->sid_pulse);
+fprintf(stderr, "power=%f\n", store->sid_power);
+fprintf(stderr, "bandwidth=%f\n", store->sid_bandwidth);
+fprintf(stderr, "sample=%f\n", store->sid_sample);
+#endif
 				}
 	
 			/* handle amplitude vs traveltime group */
 			else if (group_id == MBSYS_XSE_SSN_GROUP_AMPVSTT)
 				{
-				/*fprintf(stderr, "READ SSN_GROUP_AMPVSTT\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SSN_GROUP_AMPVSTT\n");
+#endif
 				/* currently unused by MB-System */
 				}
 
 			/* handle phase vs traveltime group */  
 			else if (group_id == MBSYS_XSE_SSN_GROUP_PHASEVSTT)
 				{
-				/*fprintf(stderr, "READ SSN_GROUP_PHASEVSTT\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SSN_GROUP_PHASEVSTT\n");
+#endif
 				/* currently unused by MB-System */
 				}
 	    
 		    /* handle amplitude vs lateral group */
 		    else if (group_id == MBSYS_XSE_SSN_GROUP_AMPVSLAT)
 				{
-				/*fprintf(stderr, "READ SSN_GROUP_AMPVSLAT\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SSN_GROUP_AMPVSLAT\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_bin_size); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_offset); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_num_pixels); index += 4;
@@ -1693,14 +1859,47 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 
 			else if (group_id == MBSYS_XSE_SSN_GROUP_PHASEVSLAT)
 				{
-				/*fprintf(stderr, "READ SSN_GROUP_PHASEVSLAT\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SSN_GROUP_PHASEVSLAT\n");
+#endif
 				/* currently unused by MB-System */
 				}
 
 			else
 				{
-				/*fprintf(stderr, "READ SSN_GROUP_OTHER\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SSN_GROUP_OTHER\n");
+#endif
 				}
+			}
+	    }
+	    
+	/* now if multibeam already read but bin size lacking then
+	   calculate bin size from bathymetry */
+	if (store->mul_frame == MB_YES
+	    && store->mul_num_beams > 1
+	    && store->sid_num_pixels > 1
+	    && store->sid_bin_size <= 0)
+	    {
+	    /* get width of bathymetry swath size */
+	    xmin = 9999999.9;
+	    xmax = -9999999.9;
+	    for (i=0;i<store->mul_num_beams;i++)
+			{
+			xmin = MIN(xmin, store->beams[i].lateral);
+			xmax = MAX(xmax, store->beams[i].lateral);
+			}
+	    
+	    /* get number of nonzero pixels */
+	    ngoodss = 0;
+	    for (i=0;i<store->sid_num_pixels;i++)
+			if (store->ss[i] != 0) ngoodss++;
+		
+	    /* get bin size */
+	    if (xmax > xmin && ngoodss > 1)
+			{
+			binsize = (xmax - xmin) / (ngoodss - 1);
+			store->sid_bin_size = 1000 * binsize;
 			}
 	    }
 
@@ -1754,6 +1953,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 	double	rr, xx, zz;
 	double	xmin, xmax, binsize;
 	int	ngoodss;
+	int	skip;
 	int	i;
 
 	/* print input debug statements */
@@ -1798,11 +1998,15 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 		&& done == MB_NO)
 	    {
 	    /* look for group start or frame end */
+	    skip = 0;
 #ifdef DATAINPCBYTEORDER
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "GSH$", 4)
 			&& strncmp(&buffer[index], "FSH#", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "FSH#", 4))
 			done = MB_YES;
@@ -1812,12 +2016,19 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "$HSG", 4)
 			&& strncmp(&buffer[index], "#HSF", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "#HSF", 4))
 			done = MB_YES;
 	    else
 			index += 4;
+#endif
+
+#ifdef MB_DEBUG
+if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -1833,11 +2044,17 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 			    fprintf(stderr,"\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				    group_id, byte_count, function_name);
 			    }
+#ifdef MB_DEBUG
+fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+				    group_id, byte_count, function_name);
+#endif
 	    
 		    /* handle general group */
 		    if (group_id == MBSYS_XSE_MBM_GROUP_GEN)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_GEN\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_GEN\n");
+#endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_ping); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_frequency); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_pulse); index += 4;
@@ -1859,7 +2076,9 @@ fprintf(stderr, "swath=%f\n", store->mul_swath);
 		    /* handle beam group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_BEAM)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_BEAM\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_BEAM\n");
+#endif
 				store->mul_group_beam = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -1874,7 +2093,9 @@ fprintf(stderr, "swath=%f\n", store->mul_swath);
 		    /* handle traveltime group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_TT)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_TT\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_TT\n");
+#endif
 				store->mul_group_tt = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -1884,7 +2105,7 @@ fprintf(stderr, "swath=%f\n", store->mul_swath);
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].tt); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "tt[%d]=%f\n", i, store->beams[i].tt);
@@ -1894,7 +2115,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle quality group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_QUALITY)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_QUALITY\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_QUALITY\n");
+#endif
 				store->mul_group_quality = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -1902,7 +2125,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				    if (i < MBSYS_XSE_MAXBEAMS)
 						store->beams[i].quality = buffer[index++];
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "quality[%d]=%u\n", i, store->beams[i].quality);
@@ -1912,7 +2135,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle amplitude group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_AMP)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_AMP\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_AMP\n");
+#endif
 				store->mul_group_amp = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -1922,7 +2147,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->beams[i].amplitude); index += 2;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "amp[%d]=%d\n", i, store->beams[i].amplitude);
@@ -1932,7 +2157,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle delay group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_DELAY)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_DELAY\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_DELAY\n");
+#endif
 				store->mul_group_delay = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -1942,7 +2169,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].delay); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "delay[%d]=%lf\n", i, store->beams[i].delay);
@@ -1952,7 +2179,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle lateral group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_LATERAL)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_LATERAL\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_LATERAL\n");
+#endif
 				store->mul_group_lateral = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -1962,7 +2191,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].lateral); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "lateral[%d]=%lf\n", i, store->beams[i].lateral);
@@ -1972,7 +2201,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle along group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ALONG)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_ALONG\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_ALONG\n");
+#endif
 				store->mul_group_along = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -1982,7 +2213,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].along); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "along[%d]=%lf\n", i, store->beams[i].along);
@@ -1992,7 +2223,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle depth group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_DEPTH)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_DEPTH\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_DEPTH\n");
+#endif
 				store->mul_group_depth = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -2002,7 +2235,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].depth); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "depth[%d]=%lf\n", i, store->beams[i].depth);
@@ -2012,7 +2245,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle angle group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ANGLE)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_ANGLE\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_ANGLE\n");
+#endif
 				store->mul_group_angle = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -2022,7 +2257,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].angle); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "angle[%d]=%lf\n", i, store->beams[i].angle);
@@ -2032,7 +2267,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle heave group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_HEAVE)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_HEAVE\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_HEAVE\n");
+#endif
 				store->mul_group_heave = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -2042,7 +2279,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].heave); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "heave[%d]=%lf\n", i, store->beams[i].heave);
@@ -2052,7 +2289,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle roll group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ROLL)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_ROLL\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_ROLL\n");
+#endif
 				store->mul_group_roll = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -2062,7 +2301,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].roll); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "roll[%d]=%lf\n", i, store->beams[i].roll);
@@ -2072,7 +2311,9 @@ for(i=0;i<store->mul_num_beams;i++)
 		    /* handle pitch group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_PITCH)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_PITCH\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_PITCH\n");
+#endif
 				store->mul_group_pitch = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
@@ -2082,7 +2323,7 @@ for(i=0;i<store->mul_num_beams;i++)
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].pitch); index += 8;
 						}
 				    }
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "pitch[%d]=%lf\n", i, store->beams[i].pitch);
@@ -2092,34 +2333,99 @@ for(i=0;i<store->mul_num_beams;i++)
 			/* handle gates group */
 			else if (group_id == MBSYS_XSE_MBM_GROUP_GATES)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_GATES\n");*/
-				/* currently unused by MB-System */
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_GATES\n");
+#endif
+				store->mul_group_gates = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
+				for (i=0;i<store->mul_num_beams;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].gate_angle); index += 8;
+						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].gate_start); index += 8;
+						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].gate_stop); index += 8;
+						}
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_beams);
+for(i=0;i<store->mul_num_beams;i++)
+	fprintf(stderr, "gate_angle[%d]=%lf gate_start[%d]=%lf gate_stop[%d]=%lf\n", 
+	    i, store->beams[i].gate_angle, store->beams[i].gate_start, store->beams[i].gate_stop);
+#endif
 				}
 
 			/* handle noise group */
 			else if (group_id == MBSYS_XSE_MBM_GROUP_NOISE)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_NOISE\n");*/
-				/* currently unused by MB-System */
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_NOISE\n");
+#endif
+				store->mul_group_noise = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
+				for (i=0;i<store->mul_num_beams;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_float(SWAPFLAG, &buffer[index], &store->beams[i].noise); index += 4;
+						}
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_beams);
+for(i=0;i<store->mul_num_beams;i++)
+	fprintf(stderr, "noise[%d]=%f\n", i, store->beams[i].noise);
+#endif
 				}
 
 			/* handle length group */
 			else if (group_id == MBSYS_XSE_MBM_GROUP_LENGTH)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_LENGTH\n");*/
-				/* currently unused by MB-System */
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_LENGTH\n");
+#endif
+				store->mul_group_length = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
+				for (i=0;i<store->mul_num_beams;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_float(SWAPFLAG, &buffer[index], &store->beams[i].length); index += 4;
+						}
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_beams);
+for(i=0;i<store->mul_num_beams;i++)
+	fprintf(stderr, "length[%d]=%f\n", i, store->beams[i].length);
+#endif
 				}
 
 			/* handle hits group */
 			else if (group_id == MBSYS_XSE_MBM_GROUP_HITS)
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_HITS\n");*/
-				/* currently unused by MB-System */
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_HITS\n");
+#endif
+				store->mul_group_hits = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
+				for (i=0;i<store->mul_num_beams;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->beams[i].hits); index += 4;
+						}
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_beams);
+for(i=0;i<store->mul_num_beams;i++)
+	fprintf(stderr, "hits[%d]=%d\n", i, store->beams[i].hits);
+#endif
 				}
 
 			else
 				{
-				/*fprintf(stderr, "READ MBM_GROUP_OTHER\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_OTHER\n");
+#endif
 				}
 		    }
 		}
@@ -2272,6 +2578,7 @@ int mbr_l3xseraw_rd_singlebeam(int verbose,int buffer_size,char *buffer,void *st
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -2315,6 +2622,7 @@ int mbr_l3xseraw_rd_message(int verbose,int buffer_size,char *buffer,void *store
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -2358,6 +2666,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -2378,9 +2687,9 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 		
 	/* get source and time */
 	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_source); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_sec); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_usec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_source); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_sec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_usec); index += 4;
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -2389,11 +2698,15 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 		&& done == MB_NO)
 	    {
 	    /* look for group start or frame end */
+	    skip = 0;
 #ifdef DATAINPCBYTEORDER
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "GSH$", 4)
 			&& strncmp(&buffer[index], "FSH#", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "FSH#", 4))
 			done = MB_YES;
@@ -2403,12 +2716,19 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "$HSG", 4)
 			&& strncmp(&buffer[index], "#HSF", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "#HSF", 4))
 			done = MB_YES;
 	    else
 			index += 4;
+#endif
+	    
+#ifdef MB_DEBUG
+if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -2424,11 +2744,17 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 			fprintf(stderr,"\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				group_id, byte_count, function_name);
 			}
+#ifdef MB_DEBUG
+fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+				    group_id, byte_count, function_name);
+#endif
 		    
 		    /* handle properties group */
 		    if (group_id == MBSYS_XSE_SBM_GROUP_PROPERTIES)
 				{
-				/*fprintf(stderr, "READ SBM_GROUP_PROPERTIES\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SBM_GROUP_PROPERTIES\n");
+#endif
 				store->sbm_properties = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_ping); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_ping_gain); index += 4;
@@ -2439,12 +2765,17 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_time_slice); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_depth_mode); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_beam_mode); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_ssv); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_frequency); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_bandwidth); index += 4;
 				}
 		    
 		    /* handle hrp group */
 		    if (group_id == MBSYS_XSE_SBM_GROUP_HRP)
 				{
-				/*fprintf(stderr, "READ SBM_GROUP_HRP\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SBM_GROUP_HRP\n");
+#endif
 				store->sbm_hrp = MB_YES;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->sbm_heave); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->sbm_roll); index += 8;
@@ -2454,7 +2785,9 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 		    /* handle center group */
 		    if (group_id == MBSYS_XSE_SBM_GROUP_CENTER)
 				{
-				/*fprintf(stderr, "READ SBM_GROUP_CENTER\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SBM_GROUP_CENTER\n");
+#endif
 				store->sbm_center = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_beam); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_count); index += 4;
@@ -2468,7 +2801,9 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 		    /* handle message group */
 		    if (group_id == MBSYS_XSE_SBM_GROUP_MESSAGE)
 				{
-				/*fprintf(stderr, "READ SBM_GROUP_MESSAGE\n");*/
+#ifdef MB_DEBUG
+fprintf(stderr, "READ SBM_GROUP_MESSAGE\n");
+#endif
 				store->sbm_message = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_message_id); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_message_len); index += 4;
@@ -2504,6 +2839,9 @@ if (store->sbm_message_len > buffer_size)
 	    fprintf(stderr,"dbg5       sbm_time_slice:      %f\n",store->sbm_time_slice);
 	    fprintf(stderr,"dbg5       sbm_depth_mode:      %d\n",store->sbm_depth_mode);
 	    fprintf(stderr,"dbg5       sbm_beam_mode:       %d\n",store->sbm_beam_mode);
+	    fprintf(stderr,"dbg5       sbm_ssv:             %f\n",store->sbm_ssv);
+	    fprintf(stderr,"dbg5       sbm_frequency:       %f\n",store->sbm_frequency);
+	    fprintf(stderr,"dbg5       sbm_bandwidth:       %f\n",store->sbm_bandwidth);
 	    }
 	if (verbose >= 5 && store->sbm_hrp == MB_YES)
 	    {
@@ -2550,6 +2888,7 @@ int mbr_l3xseraw_rd_geodetic(int verbose,int buffer_size,char *buffer,void *stor
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -2593,6 +2932,7 @@ int mbr_l3xseraw_rd_native(int verbose,int buffer_size,char *buffer,void *store_
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -2636,6 +2976,7 @@ int mbr_l3xseraw_rd_product(int verbose,int buffer_size,char *buffer,void *store
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -2679,6 +3020,7 @@ int mbr_l3xseraw_rd_bathymetry(int verbose,int buffer_size,char *buffer,void *st
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -2722,6 +3064,7 @@ int mbr_l3xseraw_rd_control(int verbose,int buffer_size,char *buffer,void *store
 	int group_id;
 	int done;
 	int index;
+	int	skip;
 	int i;
 
 	/* print input debug statements */
@@ -2765,6 +3108,7 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store
 	int	group_id;
 	int	done;
 	int	index;
+	int	skip;
 	int	i;
 
 	/* print input debug statements */
@@ -2795,11 +3139,15 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store
 		&& done == MB_NO)
 	    {
 	    /* look for group start or frame end */
+	    skip = 0;
 #ifdef DATAINPCBYTEORDER
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "GSH$", 4)
 			&& strncmp(&buffer[index], "FSH#", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "FSH#", 4))
 			done = MB_YES;
@@ -2809,12 +3157,19 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store
 	    while (index < buffer_size
 			&& strncmp(&buffer[index], "$HSG", 4)
 			&& strncmp(&buffer[index], "#HSF", 4))
+			{
 			index++;
+			skip++;
+			}
 	    if (index >= buffer_size
 			|| !strncmp(&buffer[index], "#HSF", 4))
 			done = MB_YES;
 	    else
 			index += 4;
+#endif
+	    
+#ifdef MB_DEBUG
+if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -2830,11 +3185,15 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store
 			    fprintf(stderr,"\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				    group_id, byte_count, function_name);
 			    }
+#ifdef MB_DEBUG
+fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+				    group_id, byte_count, function_name);
+#endif
 	    
 		    /* handle general group */
 		    if (group_id == MBSYS_XSE_COM_GROUP_GEN)
 				{
-				for (i=0;i<byte_count-4;i++)
+				for (i=0;i<byte_count;i++)
 				    {
 				    if (i<MBSYS_XSE_COMMENT_LENGTH-1)
 						store->comment[i] = buffer[index++];
@@ -2898,8 +3257,15 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	mbfp = mb_io_ptr->mbfp;
 	buffer = mb_io_ptr->hdr_comment;
 
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE KIND: %d\n",store->kind);
+#endif
+
 	if (store->kind == MB_DATA_COMMENT)
 		{
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE COMMMENT\n");
+#endif
 		status = mbr_l3xseraw_wr_comment(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
 			{
@@ -2909,6 +3275,9 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		}
 	else if (store->kind == MB_DATA_NAV)
 		{
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE NAV\n");
+#endif
 		status = mbr_l3xseraw_wr_nav(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
 			{
@@ -2918,6 +3287,9 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		}
 	else if (store->kind == MB_DATA_VELOCITY_PROFILE)
 		{
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE SVP\n");
+#endif
 		status = mbr_l3xseraw_wr_svp(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
 			{
@@ -2927,6 +3299,9 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		}
 	else if (store->kind == MB_DATA_PARAMETER)
 		{
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE SHIP\n");
+#endif
 		status = mbr_l3xseraw_wr_ship(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
 			{
@@ -2936,6 +3311,9 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		}
 	else if (store->kind == MB_DATA_DATA)
 		{
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE SIDESCAN\n");
+#endif
 		if (store->sid_frame == MB_YES)
 		    {
 		    status = mbr_l3xseraw_wr_sidescan(verbose,&buffer_size,buffer,store_ptr,error);
@@ -2945,6 +3323,9 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 			status = MB_FAILURE;
 			}
 		    }
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE MULTIBEAM\n");
+#endif
 		if (store->mul_frame == MB_YES)
 		    {
 		    status = mbr_l3xseraw_wr_multibeam(verbose,&buffer_size,buffer,store_ptr,error);
@@ -2957,6 +3338,9 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		}
 	else if (store->kind == MB_DATA_RUN_PARAMETER)
 		{
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE RUN PARAMETER\n");
+#endif
 		status = mbr_l3xseraw_wr_seabeam(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
 		    {
@@ -2966,6 +3350,9 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		}
 	else if (store->kind == MB_DATA_RAW_LINE)
 		{
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE RAW LINE\n");
+#endif
 		if (store->rawsize > 0)
 		    {
 		    if ((write_size = fwrite(store->raw,1,store->rawsize,mbfp)) != store->rawsize)
@@ -2977,6 +3364,9 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		}
 	else
 		{
+#ifdef MB_DEBUG
+fprintf(stderr, "WRITE FAILURE BAD KIND\n");
+#endif
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
 		}
@@ -3065,7 +3455,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 
 	/* start the frame byte count, but don't write it to buffer yet */
 	/* increment index so we skip the count value in the buffer */
-	frame_count = 4;
+	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
 	
@@ -3084,11 +3474,10 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	strncpy(&buffer[index], "$HSG", 4);
 #endif
 	index += 4;
-	frame_count += 4;
 
 	/* start the group byte count, but don't write it to buffer yet */
 	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 4;
+	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
 	
@@ -3103,7 +3492,6 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	mb_put_binary_double(SWAPFLAG, store->nav_x, &buffer[index]); index += 8;
 	mb_put_binary_double(SWAPFLAG, store->nav_y, &buffer[index]); index += 8;
 	mb_put_binary_double(SWAPFLAG, store->nav_z, &buffer[index]); index += 8;
-	group_count += 4 + 4 + store->nav_description_len + 24;
 
 	/* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3112,13 +3500,13 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	strncpy(&buffer[index], "#HSG", 4);
 #endif
 	index += 4;
-	group_count += 4;
+	group_count += store->nav_description_len + 32;
 
 	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
 	/* add group count to the frame count */
-	frame_count += group_count;
+	frame_count += group_count + 12;
 
 	/* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -3127,11 +3515,10 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	strncpy(&buffer[index], "$HSG", 4);
 #endif
 	index += 4;
-	frame_count += 4;
 
 	/* start the group byte count, but don't write it to buffer yet */
 	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 4;
+	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
 	
@@ -3140,7 +3527,6 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	mb_put_binary_double(SWAPFLAG, store->nav_speed_ground, &buffer[index]); index += 8;
 	mb_put_binary_double(SWAPFLAG, store->nav_course_ground, &buffer[index]); index += 8;
-	group_count += 4 + 16;
 
 	/* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3149,62 +3535,109 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	strncpy(&buffer[index], "#HSG", 4);
 #endif
 	index += 4;
-	group_count += 4;
+	group_count += 20;
 
 	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
 	/* add group count to the frame count */
-	frame_count += group_count;
+	frame_count += group_count + 12;
 
-	/* get group label */
+	/* write MBSYS_XSE_NAV_GROUP_MOTIONTW group if data available */
+	if (store->nav_speed_water != 0.0 && store->nav_course_water != 0.0)
+		{
+		/* get group label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH$", 4);
+		strncpy(&buffer[index], "GSH$", 4);
 #else
-	strncpy(&buffer[index], "$HSG", 4);
+		strncpy(&buffer[index], "$HSG", 4);
 #endif
-	index += 4;
-	frame_count += 4;
-
-	/* start the group byte count, but don't write it to buffer yet */
-	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 4;
-	group_cnt_index = index;
-	index += 4;
+		index += 4;
 	
-	/* get motion through water group */
-	group_id = MBSYS_XSE_NAV_GROUP_MOTIONTW;
-	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-	mb_put_binary_double(SWAPFLAG, store->nav_speed_water, &buffer[index]); index += 8;
-	mb_put_binary_double(SWAPFLAG, store->nav_course_water, &buffer[index]); index += 8;
-	group_count += 4 + 16;
-
-	/* get end of group label */
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_MOTIONTW;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_speed_water, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_course_water, &buffer[index]); index += 8;
+	
+		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH#", 4);
+		strncpy(&buffer[index], "GSH#", 4);
 #else
-	strncpy(&buffer[index], "#HSG", 4);
+		strncpy(&buffer[index], "#HSG", 4);
 #endif
-	index += 4;
-	group_count += 4;
-
-	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
-
-	/* add group count to the frame count */
-	frame_count += group_count;
-
-	/* get end of frame label */
+		index += 4;
+		group_count += 20;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+	
+		/* get end of frame label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "FSH#", 4);
+		strncpy(&buffer[index], "FSH#", 4);
 #else
-	strncpy(&buffer[index], "#HSF", 4);
+		strncpy(&buffer[index], "#HSF", 4);
 #endif
-	index += 4;	
-	frame_count += 4;
+		index += 4;	
+		}
+
+	/* else write MBSYS_XSE_NAV_GROUP_HEADING group */
+	else
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+	
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_HEADING;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_course_water, &buffer[index]); index += 8;
+	
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 12;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+	
+		/* get end of frame label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "FSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSF", 4);
+#endif
+		index += 4;	
+		}
 
 	/* go back and fill in frame byte count */
-	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
 	
 	/* set buffer size */
 	*buffer_size = index;
@@ -3285,7 +3718,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 
 	/* start the frame byte count, but don't write it to buffer yet */
 	/* increment index so we skip the count value in the buffer */
-	frame_count = 4;
+	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
 	
@@ -3307,23 +3740,21 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
-    
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get depth array */
-		group_id = MBSYS_XSE_SVP_GROUP_DEPTH;
+	    group_id = MBSYS_XSE_SVP_GROUP_DEPTH;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->svp_nsvp, &buffer[index]); index += 4;
 	    for (i=0;i<store->svp_nsvp;i++)
 		{
 		mb_put_binary_double(SWAPFLAG, store->svp_depth[i], &buffer[index]); index += 8;
 		}
-		group_count += 4 + 4 + store->svp_nsvp*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3332,13 +3763,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->svp_nsvp*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -3347,23 +3778,21 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
-    
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get depth array */
-		group_id = MBSYS_XSE_SVP_GROUP_VELOCITY;
+	    group_id = MBSYS_XSE_SVP_GROUP_VELOCITY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->svp_nsvp, &buffer[index]); index += 4;
 	    for (i=0;i<store->svp_nsvp;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->svp_velocity[i], &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->svp_nsvp*8;		
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3372,13 +3801,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->svp_nsvp*8;		
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get ctd groups */
@@ -3391,23 +3820,21 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
-    
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get conductivity array */
-		group_id = MBSYS_XSE_SVP_GROUP_CONDUCTIVITY;
+	    group_id = MBSYS_XSE_SVP_GROUP_CONDUCTIVITY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->svp_nctd, &buffer[index]); index += 4;
 	    for (i=0;i<store->svp_nctd;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->svp_conductivity[i], &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->svp_nctd*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3416,13 +3843,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->svp_nctd*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -3431,23 +3858,21 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get salinity array */
-		group_id = MBSYS_XSE_SVP_GROUP_SALINITY;
+	    group_id = MBSYS_XSE_SVP_GROUP_SALINITY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->svp_nctd, &buffer[index]); index += 4;
 	    for (i=0;i<store->svp_nctd;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->svp_salinity[i], &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->svp_nctd*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3456,13 +3881,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->svp_nctd*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -3471,23 +3896,21 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
 
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get temperature array */
-		group_id = MBSYS_XSE_SVP_GROUP_TEMP;
+	    group_id = MBSYS_XSE_SVP_GROUP_TEMP;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->svp_nctd, &buffer[index]); index += 4;
 	    for (i=0;i<store->svp_nctd;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->svp_temperature[i], &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->svp_nctd*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3496,13 +3919,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->svp_nctd*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -3511,23 +3934,21 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get pressure array */
-		group_id = MBSYS_XSE_SVP_GROUP_PRESSURE;
+	    group_id = MBSYS_XSE_SVP_GROUP_PRESSURE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->svp_nctd, &buffer[index]); index += 4;
 	    for (i=0;i<store->svp_nctd;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->svp_pressure[i], &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->svp_nctd*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3536,13 +3957,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->svp_nctd*8;
+	    
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
-
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 	    
 	if (store->svp_ssv > 0.0)
@@ -3554,19 +3975,17 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get ssv */
-		group_id = MBSYS_XSE_SVP_GROUP_SSV;
+	    group_id = MBSYS_XSE_SVP_GROUP_SSV;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_double(SWAPFLAG, store->svp_ssv, &buffer[index]); index += 8;
-		group_count += 4 + 8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3575,13 +3994,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 12;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get end of frame label */
@@ -3591,10 +4010,9 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
 	index += 4;	
-	frame_count += 4;
 
 	/* go back and fill in frame byte count */
-	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
  	
 	/* set buffer size */	
 	*buffer_size = index;
@@ -3683,7 +4101,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 
 	/* start the frame byte count, but don't write it to buffer yet */
 	/* increment index so we skip the count value in the buffer */
-	frame_count = 4;
+	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
 	
@@ -3702,11 +4120,10 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	strncpy(&buffer[index], "$HSG", 4);
 #endif
 	index += 4;
-	frame_count += 4;
 
 	/* start the group byte count, but don't write it to buffer yet */
 	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 4;
+	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
 	
@@ -3731,7 +4148,6 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	mb_put_binary_float(SWAPFLAG, store->par_hrp_x, &buffer[index]); index += 4;
 	mb_put_binary_float(SWAPFLAG, store->par_hrp_y, &buffer[index]); index += 4;
 	mb_put_binary_float(SWAPFLAG, store->par_hrp_z, &buffer[index]); index += 4;
-	group_count += 76;
 
 	/* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3740,13 +4156,13 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	strncpy(&buffer[index], "#HSG", 4);
 #endif
 	index += 4;
-	group_count += 4;
+	group_count += 76;
 
 	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
 	/* add group count to the frame count */
-	frame_count += group_count;
+	frame_count += group_count + 12;
 
 	/* get end of frame label */
 #ifdef DATAINPCBYTEORDER
@@ -3755,10 +4171,9 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
 	index += 4;	
-	frame_count += 4;
 
 	/* go back and fill in frame byte count */
-	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
         
 	/* set buffer size */
 	*buffer_size = index;
@@ -3863,7 +4278,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 
 	/* start the frame byte count, but don't write it to buffer yet */
 	/* increment index so we skip the count value in the buffer */
-	frame_count = 4;
+	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
 	
@@ -3882,11 +4297,10 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	strncpy(&buffer[index], "$HSG", 4);
 #endif
 	index += 4;
-	frame_count += 4;
 
 	/* start the group byte count, but don't write it to buffer yet */
 	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 4;
+	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
 	
@@ -3900,7 +4314,6 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	mb_put_binary_float(SWAPFLAG, store->mul_bandwidth, &buffer[index]); index += 4;
 	mb_put_binary_float(SWAPFLAG, store->mul_sample, &buffer[index]); index += 4;
 	mb_put_binary_float(SWAPFLAG, store->mul_swath, &buffer[index]); index += 4;
-	group_count += 32;
 
 	/* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3909,13 +4322,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	strncpy(&buffer[index], "#HSG", 4);
 #endif
 	index += 4;
-	group_count += 4;
+	group_count += 32;
 
 	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
 	/* add group count to the frame count */
-	frame_count += group_count;
+	frame_count += group_count + 12;
 
 	/* get beam groups */
 	if (store->mul_group_beam == MB_YES)
@@ -3927,23 +4340,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
 
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get beam array */
-		group_id = MBSYS_XSE_MBM_GROUP_BEAM;
+	    group_id = MBSYS_XSE_MBM_GROUP_BEAM;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_short(SWAPFLAG, store->beams[i].beam, &buffer[index]); index += 2;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*2;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3952,13 +4363,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*2;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get tt groups */
@@ -3971,23 +4382,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get tt array */
-		group_id = MBSYS_XSE_MBM_GROUP_TT;
+	    group_id = MBSYS_XSE_MBM_GROUP_TT;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].tt, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3996,13 +4405,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get quality groups */
@@ -4015,23 +4424,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get quality array */
-		group_id = MBSYS_XSE_MBM_GROUP_QUALITY;
+	    group_id = MBSYS_XSE_MBM_GROUP_QUALITY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			buffer[index] = store->beams[i].quality; index++;		    
 			}
-		group_count += 4 + 4 + store->mul_num_beams;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4040,13 +4447,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += sizeof(int);
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get amplitude groups */
@@ -4059,23 +4466,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get amplitude array */
-		group_id = MBSYS_XSE_MBM_GROUP_AMP;
+	    group_id = MBSYS_XSE_MBM_GROUP_AMP;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_short(SWAPFLAG, store->beams[i].amplitude, &buffer[index]); index += 2;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*2;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4084,13 +4489,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*2;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get delay groups */
@@ -4103,23 +4508,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get delay array */
-		group_id = MBSYS_XSE_MBM_GROUP_DELAY;
+	    group_id = MBSYS_XSE_MBM_GROUP_DELAY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].delay, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4128,13 +4531,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get lateral groups */
@@ -4147,23 +4550,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get lateral array */
-		group_id = MBSYS_XSE_MBM_GROUP_LATERAL;
+	    group_id = MBSYS_XSE_MBM_GROUP_LATERAL;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].lateral, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4172,13 +4573,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get along groups */
@@ -4191,23 +4592,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get along array */
-		group_id = MBSYS_XSE_MBM_GROUP_ALONG;
+	    group_id = MBSYS_XSE_MBM_GROUP_ALONG;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].along, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4216,13 +4615,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += sizeof(int);
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get depth groups */
@@ -4235,23 +4634,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get depth array */
-		group_id = MBSYS_XSE_MBM_GROUP_DEPTH;
+	    group_id = MBSYS_XSE_MBM_GROUP_DEPTH;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].depth, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4260,13 +4657,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += sizeof(int);
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get angle groups */
@@ -4279,23 +4676,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get angle array */
-		group_id = MBSYS_XSE_MBM_GROUP_ANGLE;
+	    group_id = MBSYS_XSE_MBM_GROUP_ANGLE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].angle, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4304,13 +4699,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get heave groups */
@@ -4323,23 +4718,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get heave array */
-		group_id = MBSYS_XSE_MBM_GROUP_HEAVE;
+	    group_id = MBSYS_XSE_MBM_GROUP_HEAVE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].heave, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4348,13 +4741,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get roll groups */
@@ -4367,23 +4760,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
 
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get roll array */
-		group_id = MBSYS_XSE_MBM_GROUP_ROLL;
+	    group_id = MBSYS_XSE_MBM_GROUP_ROLL;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].roll, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4392,13 +4783,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get pitch groups */
@@ -4411,23 +4802,21 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-		frame_count += 4;
     
-		/* start the group byte count, but don't write it to buffer yet */
-		/* mark the byte count spot in the buffer and increment index so we skip it */
-		group_count = 4;
-		group_cnt_index = index;
-		index += 4;
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
 	    
 	    /* get pitch array */
-		group_id = MBSYS_XSE_MBM_GROUP_PITCH;
+	    group_id = MBSYS_XSE_MBM_GROUP_PITCH;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
 			mb_put_binary_double(SWAPFLAG, store->beams[i].pitch, &buffer[index]); index += 8;
 			}
-		group_count += 4 + 4 + store->mul_num_beams*8;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4436,13 +4825,183 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-		group_count += 4;
+	    group_count += 8 + store->mul_num_beams*8;
 
-		/* go back and fill in group byte count */
-		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-		/* add group count to the frame count */
-		frame_count += group_count;
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get gates groups */
+	if (store->mul_group_gates == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+    
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+	    
+	    /* get gates array */
+	    group_id = MBSYS_XSE_MBM_GROUP_GATES;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_num_beams;i++)
+			{
+			mb_put_binary_double(SWAPFLAG, store->beams[i].gate_angle, &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->beams[i].gate_start, &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->beams[i].gate_stop, &buffer[index]); index += 8;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 8 + store->mul_num_beams*24;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get noise groups */
+	if (store->mul_group_noise == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+    
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+	    
+	    /* get noise array */
+	    group_id = MBSYS_XSE_MBM_GROUP_NOISE;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_num_beams;i++)
+			{
+			mb_put_binary_float(SWAPFLAG, store->beams[i].noise, &buffer[index]); index += 4;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 8 + store->mul_num_beams*4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get length groups */
+	if (store->mul_group_length == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+    
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+	    
+	    /* get length array */
+	    group_id = MBSYS_XSE_MBM_GROUP_LENGTH;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_num_beams;i++)
+			{
+			mb_put_binary_float(SWAPFLAG, store->beams[i].length, &buffer[index]); index += 4;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 8 + store->mul_num_beams*4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get hits groups */
+	if (store->mul_group_hits == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+    
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+	    
+	    /* get hits array */
+	    group_id = MBSYS_XSE_MBM_GROUP_HITS;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_num_beams;i++)
+			{
+			mb_put_binary_int(SWAPFLAG, store->beams[i].hits, &buffer[index]); index += 4;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 8 + store->mul_num_beams*4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
 	    }
 
 	/* get end of frame label */
@@ -4452,10 +5011,9 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
 	index += 4;	
-	frame_count += 4;
 
 	/* go back and fill in frame byte count */
-	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
 	
 	/* set buffer size */
 	*buffer_size = index;
@@ -4538,7 +5096,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 
 	/* start the frame byte count, but don't write it to buffer yet */
 	/* increment index so we skip the count value in the buffer */
-	frame_count = 4;
+	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
 	
@@ -4557,11 +5115,10 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	strncpy(&buffer[index], "$HSG", 4);
 #endif
 	index += 4;
-	frame_count += 4;
 
 	/* start the group byte count, but don't write it to buffer yet */
 	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 4;
+	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
 	
@@ -4574,7 +5131,6 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	mb_put_binary_float(SWAPFLAG, store->sid_power, &buffer[index]); index += 4;
 	mb_put_binary_float(SWAPFLAG, store->sid_bandwidth, &buffer[index]); index += 4;
 	mb_put_binary_float(SWAPFLAG, store->sid_sample, &buffer[index]); index += 4;
-	group_count += 28;
 
 	/* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4583,13 +5139,13 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	strncpy(&buffer[index], "#HSG", 4);
 #endif
 	index += 4;
-	group_count += 4;
+	group_count += 28;
 
 	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
 	/* add group count to the frame count */
-	frame_count += group_count;
+	    frame_count += group_count + 12;
 
 	/* get amplitude vs lateral groups */
 	/* get group label */
@@ -4599,11 +5155,10 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	strncpy(&buffer[index], "$HSG", 4);
 #endif
 	index += 4;
-	frame_count += 4;
 
 	/* start the group byte count, but don't write it to buffer yet */
 	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 4;
+	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
 	
@@ -4617,7 +5172,6 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	    {
 	    mb_put_binary_short(SWAPFLAG, store->ss[i], &buffer[index]); index += 2;
 	    }
-	group_count += 16 + store->sid_num_pixels*2;
 
 	/* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4626,13 +5180,13 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	strncpy(&buffer[index], "#HSG", 4);
 #endif
 	index += 4;
-	group_count += 4;
+	group_count += 16 + store->sid_num_pixels*2;
 
 	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
 	/* add group count to the frame count */
-	frame_count += group_count;
+	frame_count += group_count + 12;
 
 	/* get end of frame label */
 #ifdef DATAINPCBYTEORDER
@@ -4641,10 +5195,9 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
 	index += 4;	
-	frame_count += 4;
 
 	/* go back and fill in frame byte count */
-	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
 
 	/* set buffer size */
 	*buffer_size = index;
@@ -4714,6 +5267,9 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    fprintf(stderr,"dbg5       sbm_time_slice:      %f\n",store->sbm_time_slice);
 	    fprintf(stderr,"dbg5       sbm_depth_mode:      %d\n",store->sbm_depth_mode);
 	    fprintf(stderr,"dbg5       sbm_beam_mode:       %d\n",store->sbm_beam_mode);
+	    fprintf(stderr,"dbg5       sbm_ssv:             %f\n",store->sbm_ssv);
+	    fprintf(stderr,"dbg5       sbm_frequency:       %f\n",store->sbm_frequency);
+	    fprintf(stderr,"dbg5       sbm_bandwidth:       %f\n",store->sbm_bandwidth);
 	    }
 	if (verbose >= 5 && store->sbm_hrp == MB_YES)
 	    {
@@ -4747,16 +5303,16 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 
 	/* start the frame byte count, but don't write it to buffer yet */
 	/* increment index so we skip the count value in the buffer */
-	frame_count = 4;
+	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
 	
 	/* get frame time */
 	frame_id = MBSYS_XSE_SBM_FRAME;
 	mb_put_binary_int(SWAPFLAG, frame_id, &buffer[index]); index += 4;
-	mb_put_binary_int(SWAPFLAG, store->nav_source, &buffer[index]); index += 4;
-	mb_put_binary_int(SWAPFLAG, store->nav_sec, &buffer[index]); index += 4;
-	mb_put_binary_int(SWAPFLAG, store->nav_usec, &buffer[index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, store->sbm_source, &buffer[index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, store->sbm_sec, &buffer[index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, store->sbm_usec, &buffer[index]); index += 4;
 	frame_count += 16;
 
 	/* deal with properties group */
@@ -4769,16 +5325,16 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-	    frame_count += 4;
     
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
-	    group_count = 4;
+	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
 	    
 	    /* get properties group */
 	    group_id = MBSYS_XSE_SBM_GROUP_PROPERTIES;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_ping, &buffer[index]); index += 4;
 	    mb_put_binary_float(SWAPFLAG, store->sbm_ping_gain, &buffer[index]); index += 4;
 	    mb_put_binary_float(SWAPFLAG, store->sbm_pulse_width, &buffer[index]); index += 4;
@@ -4788,7 +5344,10 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    mb_put_binary_float(SWAPFLAG, store->sbm_time_slice, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_depth_mode, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_beam_mode, &buffer[index]); index += 4;
-	    group_count += 36;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_ssv, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_frequency, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_bandwidth, &buffer[index]); index += 4;
+	    group_count += 52;
     
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4797,13 +5356,12 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-	    group_count += 4;
     
 	    /* go back and fill in group byte count */
-	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
     
 	    /* add group count to the frame count */
-	    frame_count += group_count;
+	    frame_count += group_count + 12;
 	    }
 
 	/* deal with hrp group */
@@ -4816,20 +5374,20 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-	    frame_count += 4;
     
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
-	    group_count = 4;
+	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
 	    
 	    /* get hrp group */
 	    group_id = MBSYS_XSE_SBM_GROUP_HRP;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_double(SWAPFLAG, store->sbm_heave, &buffer[index]); index += 8;
 	    mb_put_binary_double(SWAPFLAG, store->sbm_roll, &buffer[index]); index += 8;
 	    mb_put_binary_double(SWAPFLAG, store->sbm_pitch, &buffer[index]); index += 8;
-	    group_count += 24;
+	    group_count += 28;
     
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4838,13 +5396,12 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-	    group_count += 4;
     
 	    /* go back and fill in group byte count */
-	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
     
 	    /* add group count to the frame count */
-	    frame_count += group_count;
+	    frame_count += group_count + 12;
 	    }
 
 	/* deal with center group */
@@ -4857,16 +5414,16 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-	    frame_count += 4;
     
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
-	    group_count = 4;
+	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
 	    
 	    /* get center group */
 	    group_id = MBSYS_XSE_SBM_GROUP_CENTER;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_center_beam, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_center_count, &buffer[index]); index += 4;
 	    for (i=0;i<store->sbm_center_count;i++)
@@ -4874,7 +5431,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 		mb_put_binary_float(SWAPFLAG, store->sbm_center_amp[i], &buffer[index]); 
 		index += 8;
 		}
-	    group_count += 8 + 4 * store->sbm_center_count;
+	    group_count += 12 + 4 * store->sbm_center_count;
     
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4883,13 +5440,12 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-	    group_count += 4;
     
 	    /* go back and fill in group byte count */
-	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
     
 	    /* add group count to the frame count */
-	    frame_count += group_count;
+	    frame_count += group_count + 12;
 	    }
 
 	/* deal with message group */
@@ -4902,16 +5458,16 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-	    frame_count += 4;
     
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
-	    group_count = 4;
+	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
 	    
 	    /* get center group */
 	    group_id = MBSYS_XSE_SBM_GROUP_MESSAGE;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_message_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_message_len, &buffer[index]); index += 4;
 	    for (i=0;i<store->sbm_message_len;i++)
@@ -4919,7 +5475,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 		buffer[index] = store->sbm_message_txt[i]; 
 		index++;
 		}
-	    group_count += 8 + store->sbm_message_len;
+	    group_count += 12 + store->sbm_message_len;
     
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4928,13 +5484,12 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-	    group_count += 4;
     
 	    /* go back and fill in group byte count */
-	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
     
 	    /* add group count to the frame count */
-	    frame_count += group_count;
+	    frame_count += group_count + 12;
 	    }
 
 	/* get end of frame label */
@@ -4944,10 +5499,9 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
 	index += 4;	
-	frame_count += 4;
 
 	/* go back and fill in frame byte count */
-	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
 	
 	/* set buffer size */
 	*buffer_size = index;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $
+ *    $Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2001/12/18  04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.11  2001/11/16  01:30:02  caress
  * Added mb_get_shortest_path()
  *
@@ -138,7 +141,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -166,29 +169,36 @@ int mb_format_register(int verbose,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* check for old format id and provide alias if needed */
-	if (*format > 0 && *format < 10)
-		{
-		/* find current format value */
+	if (*format > 0 
+	    && (*format < 10 || *format == 44 
+		|| *format == 52 || *format == 55))
+	    {
+	    /* replace original mbio id's */
+	    if (*format < 10)
 		i = format_alias_table[*format];
-
-		/* print output debug statements */
-		if (verbose >= 2)
-			{
-			fprintf(stderr,"\ndbg2  Old format id aliased to current value in MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg2  Old format value:\n");
-			fprintf(stderr,"dbg2       format:     %d\n",*format);
-			fprintf(stderr,"dbg2  Current format value:\n");
-			fprintf(stderr,"dbg2       format:     %d\n",i);
-			}
-
-		/* set new format value */
-		*format = i;
-		}
+    
+	    /* handle incorrectly identified SeaBeam 2120 data */
+	    else if (*format == 44)
+		i = MBF_L3XSERAW;
 		
-	/* handle old Simrad EM12 and EM121 formats */
-	else if (*format == 52 || *format == 55)
-		*format = 51;
+	    /* handle old Simrad EM12 and EM121 formats */
+	    else if (*format == 52 || *format == 55)
+		i = MBF_EMOLDRAW;
+
+	    /* print output debug statements */
+	    if (verbose >= 2)
+		    {
+		    fprintf(stderr,"\ndbg2  Old format id aliased to current value in MBIO function <%s>\n",
+			    function_name);
+		    fprintf(stderr,"dbg2  Old format value:\n");
+		    fprintf(stderr,"dbg2       format:     %d\n",*format);
+		    fprintf(stderr,"dbg2  Current format value:\n");
+		    fprintf(stderr,"dbg2       format:     %d\n",i);
+		    }
+
+	    /* set new format value */
+	    *format = i;
+	    }
 		
 	/* set format value */
 	mb_io_ptr->format = *format;
@@ -482,28 +492,36 @@ int mb_format_info(int verbose,
 		}
 
 	/* check for old format id and provide alias if needed */
-	if (*format > 0 && *format < 10)
-		{
-		/* find current format value */
+	if (*format > 0 
+	    && (*format < 10 || *format == 44 
+		|| *format == 52 || *format == 55))
+	    {
+	    /* replace original mbio id's */
+	    if (*format < 10)
 		i = format_alias_table[*format];
+    
+	    /* handle incorrectly identified SeaBeam 2120 data */
+	    else if (*format == 44)
+		i = MBF_L3XSERAW;
+		
+	    /* handle old Simrad EM12 and EM121 formats */
+	    else if (*format == 52 || *format == 55)
+		i = MBF_EMOLDRAW;
 
-		/* print output debug statements */
-		if (verbose >= 2)
-			{
-			fprintf(stderr,"\ndbg2  Old format id aliased to current value in MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg2  Old format value:\n");
-			fprintf(stderr,"dbg2       format:     %d\n",*format);
-			fprintf(stderr,"dbg2  Current format value:\n");
-			fprintf(stderr,"dbg2       format:     %d\n",i);
-			}
+	    /* print output debug statements */
+	    if (verbose >= 2)
+		    {
+		    fprintf(stderr,"\ndbg2  Old format id aliased to current value in MBIO function <%s>\n",
+			    function_name);
+		    fprintf(stderr,"dbg2  Old format value:\n");
+		    fprintf(stderr,"dbg2       format:     %d\n",*format);
+		    fprintf(stderr,"dbg2  Current format value:\n");
+		    fprintf(stderr,"dbg2       format:     %d\n",i);
+		    }
 
-		/* set new format value */
-		*format = i;
-		}
-	/* handle old Simrad EM12 and EM121 formats */
-	else if (*format == 52 || *format == 55)
-		*format = 51;
+	    /* set new format value */
+	    *format = i;
+	    }
 
 	/* look for a corresponding format */
 	if (*format == MBF_SBSIOMRG)
@@ -1190,7 +1208,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1258,7 +1276,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1325,7 +1343,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1389,7 +1407,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1459,7 +1477,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1529,7 +1547,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1897,13 +1915,24 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    }
 
 	/* check for old format id and provide alias if needed */
-	if (found == MB_YES && *format > 0 && *format < 10)
+	if (found == MB_YES && *format > 0 
+	    && (*format < 10 || *format == 44 
+		|| *format == 52 || *format == 55))
 	    {
-	    /* find current format value */
-	    i = format_alias_table[*format];
+	    /* replace original mbio id's */
+	    if (*format < 10)
+		i = format_alias_table[*format];
+    
+	    /* handle incorrectly identified SeaBeam 2120 data */
+	    else if (*format == 44)
+		i = MBF_L3XSERAW;
+		
+	    /* handle old Simrad EM12 and EM121 formats */
+	    else if (*format == 52 || *format == 55)
+		i = MBF_EMOLDRAW;
 
 	    /* print output debug statements */
-	    if (verbose >= 0)
+	    if (verbose >= 2)
 		    {
 		    fprintf(stderr,"\ndbg2  Old format id aliased to current value in MBIO function <%s>\n",
 			    function_name);
@@ -2111,6 +2140,7 @@ int mb_datalist_read(int verbose,
 		fprintf(stderr,"dbg2       datalist_ptr->recursion:  %d\n",datalist_ptr->recursion);
 		fprintf(stderr,"dbg2       datalist_ptr->path:       %s\n",datalist_ptr->path);
 		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %d\n",datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
 		}
 		
 	/* loop over reading from datalist_ptr */
@@ -2161,6 +2191,7 @@ int mb_datalist_read(int verbose,
 
 				/* get path */
 				if (nscan >= 1 && path[0] != '/'
+					&& strrchr(datalist_ptr->path,'/') != NULL
 					&& (len = strrchr(datalist_ptr->path,'/') 
 						    - datalist_ptr->path + 1) > 1)
 				    {
@@ -2191,6 +2222,7 @@ int mb_datalist_read(int verbose,
 				    mb_pr_get_ofile(verbose, path, 
 					    &pfile_specified, pfile, error);
 				    if (strlen(pfile) > 0 && pfile[0] != '/'
+					    && strrchr(path,'/') != NULL
 					    && (len = strrchr(path,'/') 
 							- path + 1) > 1)
 					{

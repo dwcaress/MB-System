@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.4 2001-07-22 21:19:23 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.5 2001-12-20 20:48:51 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/22  21:19:23  caress
+ * Removed redundant define.
+ *
  * Revision 5.3  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -275,6 +278,12 @@ struct mbsys_xse_beam_struct
 	short	    beam;
 	char	    quality;
 	short	    amplitude;
+	double	    gate_angle;
+	double	    gate_start;
+	double	    gate_stop;
+	float	    noise;
+	float	    length;
+	unsigned int hits;
 	};
 
 struct mbsys_xse_struct
@@ -372,6 +381,10 @@ struct mbsys_xse_struct
 	int	mul_group_heave;	/* boolean flag - heave group read */
 	int	mul_group_roll;		/* boolean flag - roll group read */
 	int	mul_group_pitch;	/* boolean flag - pitch group read */
+	int	mul_group_gates;	/* boolean flag - gates group read */
+	int	mul_group_noise;	/* boolean flag - noise group read */
+	int	mul_group_length;	/* boolean flag - length group read */
+	int	mul_group_hits;		/* boolean flag - hits group read */
 	int	mul_source;		/* sensor id */
 	unsigned int	mul_sec;	/* sec since 1/1/1901 00:00 */
 	unsigned int	mul_usec;	/* microseconds */
@@ -420,6 +433,9 @@ struct mbsys_xse_struct
 	float	sbm_time_slice;		/* time slice (s) */
 	int	sbm_depth_mode;		/* depth mode (1=shallow, 2=deep) */
 	int	sbm_beam_mode;		/* focused beam mode (0=off, 1=on) */
+	float	sbm_ssv;		/* surface sound velocity (m/s) */
+	float	sbm_frequency;		/* sonar frequency (kHz) */
+	float	sbm_bandwidth;		/* receiver bandwidth (kHz) */
 	double	sbm_heave;		/* heave (m) */
 	double	sbm_roll;		/* roll (radians) */
 	double	sbm_pitch;		/* pitch (radians) */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.9 2001-08-25 00:54:13 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.10 2001-12-20 20:48:51 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001/08/25  00:54:13  caress
+ * Adding beamwidth values to extract functions.
+ *
  * Revision 5.8  2001/08/23  20:50:24  caress
  * Fixed problems with SB2120 data.
  *
@@ -84,7 +87,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.10 2001-12-20 20:48:51 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -189,6 +192,10 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->mul_group_heave = MB_NO;	/* boolean flag - heave group read */
 	store->mul_group_roll = MB_NO;	/* boolean flag - roll group read */
 	store->mul_group_pitch = MB_NO;	/* boolean flag - pitch group read */
+	store->mul_group_gates = MB_NO;	/* boolean flag - gates group read */
+	store->mul_group_noise = MB_NO;	/* boolean flag - noise group read */
+	store->mul_group_length = MB_NO;/* boolean flag - length group read */
+	store->mul_group_hits = MB_NO;	/* boolean flag - hits group read */
 	store->mul_source = 0;		/* sensor id */
 	store->mul_sec = 0;		/* sec since 1/1/1901 00:00 */
 	store->mul_usec = 0;		/* microseconds */
@@ -216,6 +223,12 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->beams[i].beam = i + 1;
 	    store->beams[i].quality = 0;
 	    store->beams[i].amplitude = 0;		    
+	    store->beams[i].gate_angle = 0.0;
+	    store->beams[i].gate_start = 0.0;
+	    store->beams[i].gate_stop = 0.0;
+	    store->beams[i].noise = 0.0;
+	    store->beams[i].length = 0.0;
+	    store->beams[i].hits = 0;
 	    }
 	
 	/* survey sidescan (sidescan frames) */
@@ -252,6 +265,9 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->sbm_time_slice = 0.0;		/* time slice (s) */
 	store->sbm_depth_mode = 0;		/* depth mode (1=shallow, 2=deep) */
 	store->sbm_beam_mode = 0;		/* focused beam mode (0=off, 1=on) */
+	store->sbm_ssv = 0.0;			/* surface sound velocity (m/s) */
+	store->sbm_frequency = 0.0;		/* sonar frequency (kHz) */
+	store->sbm_bandwidth = 0.0;		/* receiver bandwidth (kHz) */
 	store->sbm_heave = 0.0;			/* heave (m) */
 	store->sbm_roll = 0.0;			/* roll (radians) */
 	store->sbm_pitch = 0.0;			/* pitch (radians) */
@@ -912,7 +928,10 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				    + store->par_trans_z_stbd);
 
 		/* get ssv */
-		*ssv = store->svp_ssv;
+		if (store->sbm_ssv > 0.0)
+		    *ssv = store->sbm_ssv;
+		else
+		    *ssv = store->svp_ssv;
 
 		/* get travel times, angles */
 		*nbeams = 0;
