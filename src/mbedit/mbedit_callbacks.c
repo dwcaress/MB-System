@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.10 2003-04-17 20:50:01 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.11 2004-02-25 20:48:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2003/04/17 20:50:01  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.9  2003/04/17 20:45:42  caress
  * Release 5.0.beta30
  *
@@ -1426,8 +1429,23 @@ do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
-    status = mbedit_action_step(step,mplot_width,mexager,mx_interval,
-				my_interval,mplot_size,
+    status = mbedit_action_step(step,mplot_width,mexager,
+    				mx_interval,my_interval,mplot_size,
+				mshow_detects, mshow_flagged,mshow_time,
+				&nbuffer,&ngood,&icurrent,&mnplot);
+    if (status == 0) XBell(theDisplay,100);
+
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+
+    status = mbedit_action_step(-step,mplot_width,mexager,
+	    			mx_interval,my_interval,mplot_size,
 				mshow_detects, mshow_flagged,mshow_time,
 				&nbuffer,&ngood,&icurrent,&mnplot);
     if (status == 0) XBell(theDisplay,100);
@@ -2122,19 +2140,6 @@ do_done( Widget w, XtPointer client_data, XtPointer call_data)
 	    exit(0);
 }
 
-/*--------------------------------------------------------------------*/
-
-void
-do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
-
-    status = mbedit_action_step(-step,mplot_width,mexager,
-	    mx_interval,my_interval,mplot_size,mshow_detects, mshow_flagged,&nbuffer,
-	    &ngood,&icurrent,&mnplot);
-    if (status == 0) XBell(theDisplay,100);
-
-}
 
 /*--------------------------------------------------------------------*/
 
