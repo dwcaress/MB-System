@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.14 2003-03-10 07:39:54 caress Exp $
+#	$Id: Makefile.template,v 5.0 2003-07-27 20:52:57 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000 by
+#     Copyright (c) 1993, 1994, 2000, 2003 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.14  2003/03/10 07:39:54  caress
+# Added mr1pr library
+#
 # Revision 4.13  2002/08/21 00:54:20  caress
 # Release 5.0.beta22
 #
@@ -68,29 +71,27 @@
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/manl
 
 ### make all makes the MB-system macros and man pages
-all:	$(MANDIR)/xbt.l \
-	$(BINDIR)/mbm_xbt $(MANDIR)/mbm_xbt.l \
-	$(BINDIR)/mbm_fmtvel $(MANDIR)/mbm_fmtvel.l \
-	$(BINDIR)/mbm_vrefcheck $(MANDIR)/mbm_vrefcheck.l \
-	$(BINDIR)/mbm_rollerror $(MANDIR)/mbm_rollerror.l \
-	$(BINDIR)/mbm_plot $(MANDIR)/mbm_plot.l \
-	$(BINDIR)/mbm_grdplot $(MANDIR)/mbm_grdplot.l \
-	$(BINDIR)/mbm_grd3dplot $(MANDIR)/mbm_grd3dplot.l \
-	$(BINDIR)/mbm_xyplot $(MANDIR)/mbm_xyplot.l \
-	$(BINDIR)/mbm_stat $(MANDIR)/mbm_stat.l \
-	$(BINDIR)/mbm_dslnavfix $(MANDIR)/mbm_dslnavfix.l \
-	$(BINDIR)/mbm_grid $(MANDIR)/mbm_grid.l \
-	$(BINDIR)/mbm_grd2arc $(MANDIR)/mbm_grd2arc.l \
-	$(BINDIR)/mbm_arc2grd $(MANDIR)/mbm_arc2grd.l \
-	$(BINDIR)/mbm_grdcut $(MANDIR)/mbm_grdcut.l \
-	$(BINDIR)/mbm_grdinfo $(MANDIR)/mbm_grdinfo.l \
-	$(BINDIR)/mbm_grdtiff $(MANDIR)/mbm_grdtiff.l \
-	$(BINDIR)/mbm_utm $(MANDIR)/mbm_utm.l \
-	$(BINDIR)/mbm_grd2geovrml $(MANDIR)/mbm_grd2geovrml.l \
-	$(BINDIR)/mbm_copy $(MANDIR)/mbm_copy.l
+all:	$(BINDIR)/mbm_xbt \
+	$(BINDIR)/mbm_fmtvel \
+	$(BINDIR)/mbm_vrefcheck \
+	$(BINDIR)/mbm_rollerror \
+	$(BINDIR)/mbm_plot \
+	$(BINDIR)/mbm_grdplot \
+	$(BINDIR)/mbm_grd3dplot \
+	$(BINDIR)/mbm_xyplot \
+	$(BINDIR)/mbm_stat \
+	$(BINDIR)/mbm_dslnavfix \
+	$(BINDIR)/mbm_grid \
+	$(BINDIR)/mbm_grd2arc \
+	$(BINDIR)/mbm_arc2grd \
+	$(BINDIR)/mbm_grdcut \
+	$(BINDIR)/mbm_grdinfo \
+	$(BINDIR)/mbm_grdtiff \
+	$(BINDIR)/mbm_utm \
+	$(BINDIR)/mbm_grd2geovrml \
+	$(BINDIR)/mbm_copy
 
 ### make clean does nothing
 clean:
@@ -153,66 +154,3 @@ $(BINDIR)/mbm_grd2geovrml:	mbm_grd2geovrml.perl
 $(BINDIR)/mbm_copy:	mbm_copy.perl
 	cp mbm_copy.perl $(BINDIR)/mbm_copy
 	chmod 775 $(BINDIR)/mbm_copy
-
-### copy the man pages to the man page directory
-$(MANDIR)/xbt.l:	xbt.manl
-	cp xbt.manl $(MANDIR)/xbt.l
-	chmod 664 $(MANDIR)/xbt.l
-$(MANDIR)/mbm_xbt.l:	mbm_xbt.manl
-	cp mbm_xbt.manl $(MANDIR)/mbm_xbt.l
-	chmod 664 $(MANDIR)/mbm_xbt.l
-$(MANDIR)/mbm_fmtvel.l:	mbm_fmtvel.manl
-	cp mbm_fmtvel.manl $(MANDIR)/mbm_fmtvel.l
-	chmod 664 $(MANDIR)/mbm_fmtvel.l
-$(MANDIR)/mbm_vrefcheck.l:	mbm_vrefcheck.manl
-	cp mbm_vrefcheck.manl $(MANDIR)/mbm_vrefcheck.l
-	chmod 664 $(MANDIR)/mbm_vrefcheck.l
-$(MANDIR)/mbm_rollerror.l:	mbm_rollerror.manl
-	cp mbm_rollerror.manl $(MANDIR)/mbm_rollerror.l
-	chmod 664 $(MANDIR)/mbm_rollerror.l
-$(MANDIR)/mbm_plot.l:	mbm_plot.manl
-	cp mbm_plot.manl $(MANDIR)/mbm_plot.l
-	chmod 664 $(MANDIR)/mbm_plot.l
-$(MANDIR)/mbm_grdplot.l:	mbm_grdplot.manl
-	cp mbm_grdplot.manl $(MANDIR)/mbm_grdplot.l
-	chmod 664 $(MANDIR)/mbm_grdplot.l
-$(MANDIR)/mbm_grd3dplot.l:	mbm_grd3dplot.manl
-	cp mbm_grd3dplot.manl $(MANDIR)/mbm_grd3dplot.l
-	chmod 664 $(MANDIR)/mbm_grd3dplot.l
-$(MANDIR)/mbm_xyplot.l:	mbm_xyplot.manl
-	cp mbm_xyplot.manl $(MANDIR)/mbm_xyplot.l
-	chmod 664 $(MANDIR)/mbm_xyplot.l
-$(MANDIR)/mbm_stat.l:	mbm_stat.manl
-	cp mbm_stat.manl $(MANDIR)/mbm_stat.l
-	chmod 664 $(MANDIR)/mbm_stat.l
-$(MANDIR)/mbm_dslnavfix.l:	mbm_dslnavfix.manl
-	cp mbm_dslnavfix.manl $(MANDIR)/mbm_dslnavfix.l
-	chmod 664 $(MANDIR)/mbm_dslnavfix.l
-$(MANDIR)/mbm_grid.l:	mbm_grid.manl
-	cp mbm_grid.manl $(MANDIR)/mbm_grid.l
-	chmod 664 $(MANDIR)/mbm_grid.l
-$(MANDIR)/mbm_grd2arc.l:	mbm_grd2arc.manl
-	cp mbm_grd2arc.manl $(MANDIR)/mbm_grd2arc.l
-	chmod 664 $(MANDIR)/mbm_grd2arc.l
-$(MANDIR)/mbm_arc2grd.l:	mbm_arc2grd.manl
-	cp mbm_arc2grd.manl $(MANDIR)/mbm_arc2grd.l
-	chmod 664 $(MANDIR)/mbm_arc2grd.l
-$(MANDIR)/mbm_grdcut.l:	mbm_grdcut.manl
-	cp mbm_grdcut.manl $(MANDIR)/mbm_grdcut.l
-	chmod 664 $(MANDIR)/mbm_grdcut.l
-$(MANDIR)/mbm_grdinfo.l:	mbm_grdinfo.manl
-	cp mbm_grdinfo.manl $(MANDIR)/mbm_grdinfo.l
-	chmod 664 $(MANDIR)/mbm_grdinfo.l
-$(MANDIR)/mbm_grdtiff.l:	mbm_grdtiff.manl
-	cp mbm_grdtiff.manl $(MANDIR)/mbm_grdtiff.l
-	chmod 664 $(MANDIR)/mbm_grdtiff.l
-$(MANDIR)/mbm_utm.l:	mbm_utm.manl
-	cp mbm_utm.manl $(MANDIR)/mbm_utm.l
-	chmod 664 $(MANDIR)/mbm_utm.l
-$(MANDIR)/mbm_grd2geovrml.l:	mbm_grd2geovrml.manl
-	cp mbm_grd2geovrml.manl $(MANDIR)/mbm_grd2geovrml.l
-	chmod 664 $(MANDIR)/mbm_grd2geovrml.l
-$(MANDIR)/mbm_copy.l:	mbm_copy.manl
-	cp mbm_copy.manl $(MANDIR)/mbm_copy.l
-	chmod 664 $(MANDIR)/mbm_copy.l
-

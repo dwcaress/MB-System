@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  1/12/98
-#	$Id: Makefile.template,v 4.4 2002-04-06 02:50:59 caress Exp $
+#	$Id: Makefile.template,v 5.0 2003-07-27 20:52:51 caress Exp $
 #
-#     Copyright (c) 1998, 2000 by
+#     Copyright (c) 1998, 2000, 2003 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		January 12, 1998
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.4  2002/04/06 02:50:59  caress
+# Release 5.0.beta16
+#
 # Revision 4.3  2001/06/30 17:36:01  caress
 # Fixed problem with cc.
 #
@@ -44,7 +47,6 @@ ARCHIVE = ar rcv
 
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/manl
 
 ### make all makes the gsf library, man page, and associated include files
 all:	$(LIBDIR)/libgsf.a \

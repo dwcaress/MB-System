@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.12 2003-03-10 19:58:12 caress Exp $
+#	$Id: Makefile.template,v 5.0 2003-07-27 20:53:01 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000 by
+#     Copyright (c) 1993, 1994, 2000, 2003 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		August 2, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.12  2003/03/10 19:58:12  caress
+# Added mr1pr library.
+#
 # Revision 4.11  2002/07/20 20:45:22  caress
 # Release 5.0.beta20
 #
@@ -76,10 +79,9 @@ LFLAGS = -lm
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/manl
 
 ### make all makes the executable and man page
-all: $(BINDIR)/mbeditold $(MANDIR)/mbeditold.l
+all: $(BINDIR)/mbeditold
 
 ### link the executable
 $(BINDIR)/mbeditold: mbedit.o mbedit_prog.o \
@@ -117,11 +119,6 @@ mbedit_prog.o: mbedit_prog.c  $(INCDIR)/mb_format.h \
 mbedit_callbacks.o: mbedit_callbacks.c  $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbedit_callbacks.c
-
-### copy the man page to the man page directory
-$(MANDIR)/mbeditold.l:	mbedit.manl
-	cp mbedit.manl $(MANDIR)/mbeditold.l
-	chmod 664 $(MANDIR)/mbeditold.l
 
 clean: 
 	rm -f core *.o
