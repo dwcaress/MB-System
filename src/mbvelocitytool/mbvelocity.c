@@ -12,7 +12,7 @@
 /*                                                          */
 /************************************************************/
 /*    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocity.c,v 4.7 1995-09-28 18:03:58 caress Exp $
+ *    $Id: mbvelocity.c,v 4.8 1995-10-23 20:10:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/09/28  18:03:58  caress
+ * Improved handling of .mbxxx file suffix convention.
+ *
  * Revision 4.6  1995/06/06  13:34:20  caress
  * Fixed warnings under Solaris by explicit casting of strlen result.
  *
@@ -1366,7 +1369,7 @@ static void get_file_selection(w, tag, list)
 			format_gui = 41;
 			sprintf(value_text,"%d",format_gui);
 			XmTextFieldSetString(
-				widget_array[format_gui], 
+				widget_array[k_mbio_format], 
 				value_text);
 			}
 		}
