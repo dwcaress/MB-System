@@ -1,4 +1,4 @@
-.TH mbdatalist l "30 May 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbdatalist l "1 October 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdatalist\fP - parses recursive datalist files and outputs the
 complete list of data files, formats, and file weights.
@@ -7,7 +7,7 @@ complete list of data files, formats, and file weights.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdatalist\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-N -O -P -Q -R -U -V -H\fP]
+\fBmbdatalist\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-N -O -P -Q -R -U -Z -V -H\fP]
 
 .SH DESCRIPTION
 \fBMBdatalist\fP is a utility for parsing datalist files. 
@@ -84,7 +84,17 @@ files, edit save files, etc.)
 referenced in its mbprocess parameter file 
 (if the parameter file exists). 
 
-All output is to stdout.
+The \fB-Z\fP option causes the program to generate a datalist file
+named "datalistp.mb-1" and then exit. This datalist has the following form:
+.br
+ 	$PROCESSED
+ 	datalist.mb-1 -1
+.br
+This file is a commonly used convenience because it allows users to easily
+reference the swath files listed (directly or recursively) through
+the datalist "datalist.mb-1" with the $PROCESSED flag on. So, in order to
+grid the processed bathymetry rather than the raw bathymetry, run \fBmbgrid\fP
+with "datalistp.mb-1" as the input rather than "datalist.mb-1".
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -191,6 +201,14 @@ to only output raw file names.
 Normally, \fBmbdatalist\fP only prints out the filenames and formats.  
 If the \fB-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
 outputs the program version being used.
+.TP
+.B \-Z
+The \fB-Z\fP option causes the program to generate a datalist file
+named "datalistp.mb-1", and then exit. This datalist file has the following form:
+.br
+ 	$PROCESSED
+ 	datalist.mb-1 -1
+.br
 
 .SH EXAMPLES
 Suppose we have two swath data files from an EM3000 multibeam

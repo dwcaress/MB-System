@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.11 2004-09-16 19:11:48 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.12 2004-10-06 18:56:11 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.11 2004-09-16 19:11:48 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.12 2004-10-06 18:56:11 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.11  2004/09/16 19:11:48  caress
+#   Supports postscript viewer ggv.
+#
 #   Revision 5.10  2004/06/18 04:16:55  caress
 #   Adding support for segy i/o and working on support for Reson 7k format 88.
 #
@@ -617,6 +620,10 @@ if ($misc)
 				{
 				$xysegment = "N";
 				}
+			if (!$xysegchar)
+				{
+				$xysegchar = ">";
+				}
 			if (!$xypen)
 				{
 				$xypen = "N";
@@ -624,12 +631,21 @@ if ($misc)
 			push(@xysymbols, $xysymbol);
 			push(@xyfills, $xyfill);
 			push(@xysegments, $xysegment);
+			push(@xysegchars, $xysegchar);
 			push(@xypens, $xypen);
 			}
 
 		# set xy segment
 		if ($cmd =~ /^[Xx][Mm]/)
 			{
+			if ($cmd =~ /^[Xx][Mm]\S/)
+				{
+				($xysegchar) = $cmd =~ /^[Xx][Mm](\S)/
+				}
+			else
+				{
+				$xysegchar = ">";
+				}
 			if (!$xysegment)
 				{
 				$xysegment = "Y";
@@ -928,7 +944,12 @@ if (!$bounds || !$zbounds)
 		if ($line =~ 
 			/\s+Projection: SeismicProfile/)
 			{
-			$gridprojected = 1;
+			$gridprojected = 2;
+			}
+		if ($line =~ 
+			/\s+Projection: GenericLinear/)
+			{
+			$gridprojected = 3;
 			}
 		if ($line =~ 
 			/\s+Projection: Geographic/)
@@ -936,12 +957,23 @@ if (!$bounds || !$zbounds)
 			$gridprojected = 0;
 			}
 		if ($line =~ 
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:\s+(.+)\s+nx:\s+(\S+)/)
+			{
+			($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+				/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:\s+(.+)\s+nx:\s+(\S+)/;
+			}
+		elsif ($line =~ 
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 			{
 			($xmin_f,$xmax_f) = $line =~ 
 				/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/;
 			}
-		if ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/)
+		if ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:\s+(.+)\s+ny:\s+(\S+)/)
+			{
+			($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:\s+(.+)\s+ny:\s+(\S+)/;
+			}
+		elsif ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/)
 			{
 			($ymin_f,$ymax_f) = $line =~ 
 				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/;
@@ -953,8 +985,8 @@ if (!$bounds || !$zbounds)
 			}
 		if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
 			{
-			($zmin_f,$zmax_f) = $line =~ 
-				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/;
+			($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(\S+)/;
 			}
 		}
 
@@ -979,7 +1011,8 @@ if (!$bounds || !$zbounds)
 		}
 
 	# check that there is data
-	if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f || $zmin_f >= $zmax_f)
+	if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f 
+		|| ($zmin_f >= $zmax_f && !$zbounds))
 		{
 		print "\a";
 		die "The program grdinfo does not appear to have worked \nproperly with file $file_grd!\n$program_name aborted.\n"
@@ -1020,8 +1053,9 @@ if ($bounds)
 	}
 
 # set grid to projected if outside geographic bounds
-if ($xmin < -360.0 || $xmax > 360.0
-	|| $ymin < -90.0 || $ymax > 90.0)
+if ($gridprojected == 0 
+	&& ($xmin < -360.0 || $xmax > 360.0
+		|| $ymin < -90.0 || $ymax > 90.0))
 	{
 	$gridprojected = 1;
 	}
@@ -1082,7 +1116,7 @@ elsif ($use_scale || $use_width)
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
 	$projection_pars = "$projection_pars" . "$separator" . "$trial_value";
 	}
-elsif ($gridprojected)
+elsif ($gridprojected > 0)
 	{
 	$projection = "x";
 	$projection_pars = "1.0";
@@ -1281,7 +1315,7 @@ elsif ($use_scale)
 	$projection_pars = sprintf ("$projection_pars$separator%1.5g", $plot_scale);
 
 	# handle special case for linear projections
-	if ($linear && !$gridprojected)
+	if ($linear && $gridprojected == 0)
 		{
 		$projection_pars = "$projection_pars" . "d";
 		}
@@ -1339,7 +1373,7 @@ elsif ($use_width)
 	$projection_pars = sprintf ("$projection_pars$separator%1.5g", $plot_width);
 
 	# handle special case for linear projections
-	if ($linear && !$gridprojected)
+	if ($linear && $gridprojected == 0)
 		{
 		$projection_pars = "$projection_pars" . "d";
 		}
@@ -1386,6 +1420,10 @@ else
 	$colorscale_offx = 0.5*$plot_width;
 	$colorscale_offy = -0.045454545 * $page_height_in{$pagesize};
 	$colorscale_vh = "h";
+	}
+if ($colorscale_length < 3.0)
+	{
+	$colorscale_length = 3.0;
 	}
 
 # figure out reasonable color and contour intervals
@@ -1809,7 +1847,7 @@ if ($data_scale)
 #	printf FCMD "echo Getting shading array...\n";
 #	printf FCMD "echo Running grdgradient...\n";
 #	printf FCMD "grdgradient $file_use -A$azimuth -G\$DATA_FILE.grad -N";
-#	if (!$gridprojected)
+#	if ($gridprojected == 0)
 #		{
 #		printf FCMD " -M";
 #		}
@@ -1834,14 +1872,14 @@ if ($color_mode == 2)
 	printf FCMD "echo Getting shading array...\n";
 	printf FCMD "echo Running grdgradient to get x component of the gradient...\n";
 	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx";
-	if (!$gridprojected)
+	if ($gridprojected == 0)
 		{
 		printf FCMD " -M";
 		}
 	printf FCMD "\n";
 	printf FCMD "echo Running grdgradient to get y component of the gradient...\n";
 	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy";
-	if (!$gridprojected)
+	if ($gridprojected == 0)
 		{
 		printf FCMD " -M";
 		}
@@ -1902,14 +1940,14 @@ elsif ($color_mode >= 4)
 	printf FCMD "echo Getting slope array...\n";
 	printf FCMD "echo Running grdgradient to get x component of the gradient...\n";
 	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx";
-	if (!$gridprojected)
+	if ($gridprojected == 0)
 		{
 		printf FCMD " -M";
 		}
 	printf FCMD "\n";
 	printf FCMD "echo Running grdgradient to get y component of the gradient...\n";
 	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy";
-	if (!$gridprojected)
+	if ($gridprojected == 0)
 		{
 		printf FCMD " -M";
 		}
@@ -2057,7 +2095,7 @@ else
 	{
 	# figure out some reasonable tick intervals for the basemap
 	&GetBaseTick;
-	$axes = "$base_tick/$base_tick:.\"$tlabel\":";
+	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":";
 	}
 
 # do coastline plots
@@ -2129,7 +2167,14 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 		}
 	if ($xysegments[$i] ne "N")
 		{
-		printf FCMD "-M \\\n\t";
+		if ($xysegchars[$i] eq "#")
+			{
+			printf FCMD "-M\\# \\\n\t";
+			}
+		else
+			{
+			printf FCMD "-M$xysegchars[$i] \\\n\t";
+			}
 		}
 	if ($xypens[$i] ne "N")
 		{
@@ -2528,9 +2573,9 @@ if ($verbose)
 		printf "    ------     ---        ----      -------      ----\n";
 		for ($i = 0; $i < scalar(@xyfiles); $i++) 
 			{
-			printf "    %-10s %-10s %-10s %-10s %s\n", 
+			printf "    %-10s %-10s %-10s %s%-9s %s\n", 
 				$xysymbols[$i], $xypens[$i], 
-				$xyfills[$i], $xysegments[$i], 
+				$xyfills[$i], $xysegments[$i], $xysegchars[$i], 
 				$xyfiles[$i];
 			}
 		}
@@ -3055,6 +3100,7 @@ sub GetProjection {
 			}
 		else
 			{
+			$linear = 1;
 			($plot_scale) = $map_scale =~ /^x(\S+)$/; 
 			}
 		$use_scale = 1;
@@ -3069,6 +3115,7 @@ sub GetProjection {
 			}
 		else
 			{
+			$linear = 1;
 			($plot_width) = $map_scale =~ /^X(\S+)$/; 
 			}
 		$use_width = 1;
@@ -3079,88 +3126,131 @@ sub GetProjection {
 sub GetBaseTick {
 
 	# figure out some reasonable tick intervals for the basemap
-	$base_tick_x = ($xmax - $xmin) / 5;
+	if ($gridprojected == 2)
+		{
+		if ($xmax - $xmin > 200)
+			{
+			$base_tick_x = 200;
+			}
+		else
+			{
+			$base_tick_x = $xmax - $xmin;
+			}
+		}
+	else
+		{
+		$base_tick_x = ($ymax - $ymin) / 5;
+		}
 	$base_tick_y = ($ymax - $ymin) / 5;
-	$base_tick = &min($base_tick_x, $base_tick_y);
-	if ($base_tick < 0.0002777777)
+	
+	# deal with seismic grids (time vs trace number)
+	if ($gridprojected == 2)
 		{
-		$base_tick = "1c";
+		$base_tick_x = "$base_tick_x" . "\":Trace Number:\"";
+		$base_tick_y = "$base_tick_y" . "\":Time (sec):\"";
 		}
-	elsif ($base_tick < 0.0005555555)
+	
+	# deal with generic linear grids 
+	elsif ($gridprojected == 3)
 		{
-		$base_tick = "2c";
+		$base_tick_x = "$base_tick_x" . "\":$xunits:\"";
+		$base_tick_y = "$base_tick_y" . "\":$yunits:\"";
 		}
-	elsif ($base_tick < 0.0013888889)
+		
+	# deal with linear plot of projected grid
+	elsif ($gridprojected == 1)
 		{
-		$base_tick = "5c";
+		$base_tick = &min($base_tick_x, $base_tick_y);
+		$base_tick_x = $base_tick;
+		$base_tick_y = $base_tick;
 		}
-	elsif ($base_tick < 0.0027777778)
+		
+	# deal with geographic grid
+	elsif ($gridprojected == 0)
 		{
-		$base_tick = "10c";
-		}
-	elsif ($base_tick < 0.0041666667)
-		{
-		$base_tick = "15c";
-		}
-	elsif ($base_tick < 0.0083333333)
-		{
-		$base_tick = "30c";
-		}
-	elsif ($base_tick < 0.0166667)
-		{
-		$base_tick = "1m";
-		}
-	elsif ($base_tick < 0.0333333)
-		{
-		$base_tick = "2m";
-		}
-	elsif ($base_tick < 0.0833333)
-		{
-		$base_tick = "5m";
-		}
-	elsif ($base_tick < 0.1666667)
-		{
-		$base_tick = "10m";
-		}
-	elsif ($base_tick < 0.25)
-		{
-		$base_tick = "15m";
-		}
-	elsif ($base_tick < 0.5)
-		{
-		$base_tick = "30m";
-		}
-	elsif ($base_tick < 1.0)
-		{
-		$base_tick = "1";
-		}
-	elsif ($base_tick < 2.0)
-		{
-		$base_tick = "2";
-		}
-	elsif ($base_tick < 5.0)
-		{
-		$base_tick = "5";
-		}
-	elsif ($base_tick < 10.0)
-		{
-		$base_tick = "10";
-		}
-	elsif ($base_tick < 15.0)
-		{
-		$base_tick = "15";
-		}
-	elsif ($base_tick < 30.0)
-		{
-		$base_tick = "30";
-		}
-	elsif ($base_tick < 30.0)
-		{
-		$base_tick = "30";
-		}
-	elsif ($base_tick < 360.0)
-		{
-		$base_tick = "60";
+		$base_tick = &min($base_tick_x, $base_tick_y);
+		if ($base_tick < 0.0002777777)
+			{
+			$base_tick = "1c";
+			}
+		elsif ($base_tick < 0.0005555555)
+			{
+			$base_tick = "2c";
+			}
+		elsif ($base_tick < 0.0013888889)
+			{
+			$base_tick = "5c";
+			}
+		elsif ($base_tick < 0.0027777778)
+			{
+			$base_tick = "10c";
+			}
+		elsif ($base_tick < 0.0041666667)
+			{
+			$base_tick = "15c";
+			}
+		elsif ($base_tick < 0.0083333333)
+			{
+			$base_tick = "30c";
+			}
+		elsif ($base_tick < 0.0166667)
+			{
+			$base_tick = "1m";
+			}
+		elsif ($base_tick < 0.0333333)
+			{
+			$base_tick = "2m";
+			}
+		elsif ($base_tick < 0.0833333)
+			{
+			$base_tick = "5m";
+			}
+		elsif ($base_tick < 0.1666667)
+			{
+			$base_tick = "10m";
+			}
+		elsif ($base_tick < 0.25)
+			{
+			$base_tick = "15m";
+			}
+		elsif ($base_tick < 0.5)
+			{
+			$base_tick = "30m";
+			}
+		elsif ($base_tick < 1.0)
+			{
+			$base_tick = "1";
+			}
+		elsif ($base_tick < 2.0)
+			{
+			$base_tick = "2";
+			}
+		elsif ($base_tick < 5.0)
+			{
+			$base_tick = "5";
+			}
+		elsif ($base_tick < 10.0)
+			{
+			$base_tick = "10";
+			}
+		elsif ($base_tick < 15.0)
+			{
+			$base_tick = "15";
+			}
+		elsif ($base_tick < 30.0)
+			{
+			$base_tick = "30";
+			}
+		elsif ($base_tick < 30.0)
+			{
+			$base_tick = "30";
+			}
+		elsif ($base_tick < 360.0)
+			{
+			$base_tick = "60";
+			}
+		$base_tick_x = $base_tick;
+		$base_tick_y = $base_tick;
 		}
 
 }

@@ -637,6 +637,8 @@ marked with an *:
  		for reading and writing swath sonar data 
  \fBmbedit\fP:  Interactive editor used to flag bad 
  		beams in swath sonar bathymetry data. 
+ \fBmbextractsegy\fP: Extract subbottom profiler or 
+ 		center beam reflection data to segy files.
  \fBmbformat\fP*:   List information about swath sonar 
  		data formats supported by the \fBMBIO\fP library. 
  \fBmbgetesf\fP*:  Extract list of flagging or unflagging 
@@ -674,6 +676,12 @@ marked with an *:
  		sidescan.
  \fBmbps\fP*:    Simple perspective views of swath
  		bathymetry in Postscript. 
+ \fBmbsegygrid\fP: Generate time vs. trace number 
+ 		grids of seismic data from segy files.
+ \fBmbsegyinfo\fP: Output some basic statistics of 
+ 		segy seismic data files.
+ \fBmbsegylist\fP: List selected header values in 
+ 		segy seismic data files.
  \fBmbset\fP:  Create and modify \fBmbprocess\fP
  		parameter files. 
  \fBmbsvplist\fP*:  List water sound velocity profiles in swath
