@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_coor_scale.c	3.00	1/21/93
- *    $Id: mb_coor_scale.c,v 3.1 1993-05-14 22:32:39 sohara Exp $
+ *    The MB-system:	mb_coor_scale.c	1/21/93
+ *    $Id: mb_coor_scale.c,v 4.0 1994-03-05 23:55:38 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -20,6 +20,18 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/21  04:03:10  caress
+ * First cut at new version.  No changes.
+ *
+ * Revision 3.1  1993/05/14  22:32:39  sohara
+ * fixed rcs_id message
+ *
+ * Revision 3.1  1993/05/14  22:32:39  sohara
+ * fixed rcs_id message
+ *
  * Revision 3.0  1993/04/23  15:45:07  dale
  * Initial version
  *
@@ -53,7 +65,7 @@ double	latitude;
 double	*mtodeglon;
 double	*mtodeglat;
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 3.1 1993-05-14 22:32:39 sohara Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.0 1994-03-05 23:55:38 caress Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;

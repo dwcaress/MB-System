@@ -1,6 +1,9 @@
 /* @(#) crosshairs.h v1.3 (5/15/92) / Copyright (C) (P) 1992 by Edward Stickgold */
-/* $Id: crosshair.h,v 3.0 1993-04-22 19:06:59 dale Exp $
+/* $Id: crosshair.h,v 4.0 1994-03-05 23:54:35 caress Exp $
 /* $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/22  19:06:59  dale
+ * *** empty log message ***
+ *
 /* Format_version=1, Width=64, Height=64, Depth=1, Valid_bits_per_item=16
  */
 	0x0000,0x0000,0x8000,0x0000,

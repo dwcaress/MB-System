@@ -16,18 +16,20 @@ typedef struct {
 	Xv_opaque	controls_mbedit;
 	Xv_opaque	button_file;
 	Xv_opaque	button_quit;
-	Xv_opaque	slider_number_pings;
-	Xv_opaque	textfield_x_interval;
 	Xv_opaque	slider_scale_x;
+	Xv_opaque	textfield_x_interval;
+	Xv_opaque	slider_scale_y;
 	Xv_opaque	textfield_y_interval;
 	Xv_opaque	button_next_buffer;
 	Xv_opaque	button_done;
-	Xv_opaque	slider_scale_y;
+	Xv_opaque	slider_number_pings;
 	Xv_opaque	slider_buffer_size;
 	Xv_opaque	button_forward;
 	Xv_opaque	button_reverse;
 	Xv_opaque	textfield_number_step;
 	Xv_opaque	slider_buffer_hold;
+	Xv_opaque	setting_mode;
+	Xv_opaque	button_goto;
 	Xv_opaque	canvas_mbedit;
 } mbedit_window_mbedit_objects;
 
@@ -37,18 +39,20 @@ extern Xv_opaque	mbedit_window_mbedit_window_mbedit_create();
 extern Xv_opaque	mbedit_window_mbedit_controls_mbedit_create();
 extern Xv_opaque	mbedit_window_mbedit_button_file_create();
 extern Xv_opaque	mbedit_window_mbedit_button_quit_create();
-extern Xv_opaque	mbedit_window_mbedit_slider_number_pings_create();
-extern Xv_opaque	mbedit_window_mbedit_textfield_x_interval_create();
 extern Xv_opaque	mbedit_window_mbedit_slider_scale_x_create();
+extern Xv_opaque	mbedit_window_mbedit_textfield_x_interval_create();
+extern Xv_opaque	mbedit_window_mbedit_slider_scale_y_create();
 extern Xv_opaque	mbedit_window_mbedit_textfield_y_interval_create();
 extern Xv_opaque	mbedit_window_mbedit_button_next_buffer_create();
 extern Xv_opaque	mbedit_window_mbedit_button_done_create();
-extern Xv_opaque	mbedit_window_mbedit_slider_scale_y_create();
+extern Xv_opaque	mbedit_window_mbedit_slider_number_pings_create();
 extern Xv_opaque	mbedit_window_mbedit_slider_buffer_size_create();
 extern Xv_opaque	mbedit_window_mbedit_button_forward_create();
 extern Xv_opaque	mbedit_window_mbedit_button_reverse_create();
 extern Xv_opaque	mbedit_window_mbedit_textfield_number_step_create();
 extern Xv_opaque	mbedit_window_mbedit_slider_buffer_hold_create();
+extern Xv_opaque	mbedit_window_mbedit_setting_mode_create();
+extern Xv_opaque	mbedit_window_mbedit_button_goto_create();
 extern Xv_opaque	mbedit_window_mbedit_canvas_mbedit_create();
 
 typedef struct {
@@ -70,4 +74,28 @@ extern Xv_opaque	mbedit_popup_load_textfield_format_create();
 extern Xv_opaque	mbedit_popup_load_textfield_output_create();
 extern Xv_opaque	mbedit_popup_load_button_load_cancel_create();
 extern Xv_opaque	mbedit_popup_load_button_load_ok_create();
+
+typedef struct {
+	Xv_opaque	popup_goto;
+	Xv_opaque	controls1;
+	Xv_opaque	textfield_year;
+	Xv_opaque	textfield_month;
+	Xv_opaque	textfield_day;
+	Xv_opaque	textfield_hour;
+	Xv_opaque	textfield_minute;
+	Xv_opaque	textfield_second;
+	Xv_opaque	button_goto_apply;
+} mbedit_popup_goto_objects;
+
+extern mbedit_popup_goto_objects	*mbedit_popup_goto_objects_initialize();
+
+extern Xv_opaque	mbedit_popup_goto_popup_goto_create();
+extern Xv_opaque	mbedit_popup_goto_controls1_create();
+extern Xv_opaque	mbedit_popup_goto_textfield_year_create();
+extern Xv_opaque	mbedit_popup_goto_textfield_month_create();
+extern Xv_opaque	mbedit_popup_goto_textfield_day_create();
+extern Xv_opaque	mbedit_popup_goto_textfield_hour_create();
+extern Xv_opaque	mbedit_popup_goto_textfield_minute_create();
+extern Xv_opaque	mbedit_popup_goto_textfield_second_create();
+extern Xv_opaque	mbedit_popup_goto_button_goto_apply_create();
 #endif

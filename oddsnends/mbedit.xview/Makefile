@@ -1,5 +1,5 @@
-#     The MB-system:	Makefile	3.00  5/25/93
-#	$Id: Makefile,v 1.3 1993-08-30 19:02:30 caress Exp $
+#     The MB-system:	Makefile  5/25/93
+#	$Id: Makefile,v 4.0 1994-03-05 23:54:35 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,15 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/05  22:47:41  caress
+# First cut at new version.
+#
+# Revision 1.4  1994/03/01  00:22:07  caress
+# First cut at new version.
+#
+# Revision 1.3  1993/08/30  19:02:30  caress
+# Current version.
+#
 # Revision 1.2  1993/05/25  19:59:52  caress
 # Added chmod command after cp command so the man page can
 # be overwritten by later makes.

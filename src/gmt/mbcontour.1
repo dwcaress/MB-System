@@ -1,10 +1,10 @@
-.TH MBCONTOUR 1 "20 June 1993"
+.TH MBCONTOUR 1 "26 February 1994"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
 
 .SH VERSION
-Version 3.00
+Version 4.00
 
 .SH SYNOPSIS
 \fBmbcontour\fP \fB-I\fIdatalist \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIcontour_int/color_int/tick_int/label_int/tick_len/label_hgt \fB-B\fItickinfo \fB-C\fIcontourfile \fB-F\fIred/green/blue \fB-K\fI \fB-L\fIlonflip \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-#\fIcopies \fB-V -H\fP]
@@ -28,17 +28,51 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \-C
-Sets the color palette file which controls the color of the plot.
-See documentation of the GMT package for a complete description
-of cpt files.
+.B \fB-A\fIcontour_int/color_int/tick_int/label_int/tick_len/label_hgt\fP
+If specific contour levels are not specified with the \fI-C\fP option,
+then contours will be
+generated in four colors (black, red, green, and blue) with intervals,
+annotations, and tickmarks controlled by these parameters.  Contours will be
+generated at invervals of \fIcontour_int\fP meters.  Color changes
+will occur at intervals of \fIcolor_int\fP meters.  Contours will have
+downhill facing tickmarks \fItick_len\fP inches long every \fItick_int\fP
+meters. Contours will have annotations 
+\fIlabel_len\fP inches high every \fIlabel_int\fP meters.
+Defaults: \fIcontour_int\fP = 25; \fIcolor_int\fP = 100; 
+\fItick_int\fP = 100; \fIlabel_int\fP = 100; \fItick_len\fP = 0.1; 
+\fIlabel_len\fP = 0.05.
+.TP
+.B \fB-B\fItickinfo\fP
+Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
+.TP
+.B \fB-C\fIcontourfile\fP
+Sets the file from which the contour levels and their style and color are read.
+This file consists of lines in the format:
+ 	\fIlevel label tick red green blue\fP
+.br
+where \fIlevel\fP is the depth value to be contoured in meters, \fIlabel\fP
+is either 'a' for annotated or 'n' for not annotated, \fItick\fP is either
+'t' for tick marks or 'n' for no tick marks, and \fIred\fP, \fIgreen\fP,
+and \fIblue\fP set the color of the contour lines (these values can
+range from 0 to 255). If a GMT cpt file is given as the \fIcontourfile\fP,
+the color boundaries specified in the cpt file will be interpreted as
+contour levels to be plotted with unannotated, unticked, black contours.
+If contours are specified using the \fB-C\fP option, then any use
+of the \fB-A\fP option will be ignored.
+.TP
+.B \fB-F\fIred/green/blue\fP
+Sets the color used for Frame and annotation. [Default is black]
+.TP
+.B \fB-H\fP
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
 .TP
 .B \fB-I\fIdatalist\fP
 Sets the filename of the file containing a list of the input multibeam
 data files and their formats.  In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
- 	datafile1 1
- 	datafile2 8
+ 	datafile1 11
+ 	datafile2 24
 .br
 This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
@@ -90,47 +124,6 @@ Selects the map projection.  Choose one of the following:
 .br
 More details can be found in the \fBpsbasemap\fP man pages.
 .TP
-.B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds within which multibeam 
-data will be read and plotted. Only the data which lies within 
-these bounds will be read. 
-Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
-.TP
-.B \fB-A\fIcontour_int/color_int/tick_int/label_int/tick_len/label_hgt\fP
-If specific contour levels are not specified with the \fI-C\fP option,
-then contours will be
-generated in four colors (black, red, green, and blue) with intervals,
-annotations, and tickmarks controlled by these parameters.  Contours will be
-generated at invervals of \fIcontour_int\fP meters.  Color changes
-will occur at intervals of \fIcolor_int\fP meters.  Contours will have
-downhill facing tickmarks \fItick_len\fP inches long every \fItick_int\fP
-meters. Contours will have annotations 
-\fIlabel_len\fP inches high every \fIlabel_int\fP meters.
-Defaults: \fIcontour_int\fP = 25; \fIcolor_int\fP = 100; 
-\fItick_int\fP = 100; \fIlabel_int\fP = 100; \fItick_len\fP = 0.1; 
-\fIlabel_len\fP = 0.05.
-.TP
-.B \fB-B\fItickinfo\fP
-Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
-.TP
-.B \fB-C\fIcontourfile\fP
-Sets the file from which the contour levels and their style and color are read.
-This file consists of lines in the format:
- 	\fIlevel label tick red green blue\fP
-.br
-where \fIlevel\fP is the depth value to be contoured in meters, \fIlabel\fP
-is either 'a' for annotated or 'n' for not annotated, \fItick\fP is either
-'t' for tick marks or 'n' for no tick marks, and \fIred\fP, \fIgreen\fP,
-and \fIblue\fP set the color of the contour lines (these values can
-range from 0 to 255). If a GMT cpt file is given as the \fIcontourfile\fP,
-the color boundaries specified in the cpt file will be interpreted as
-contour levels to be plotted with unannotated, unticked, black contours.
-If contours are specified using the \fB-C\fP option, then any use
-of the \fB-A\fP option will be ignored.
-.TP
-.B \fB-F\fIred/green/blue\fP
-Sets the color used for Frame and annotation. [Default is black]
-.TP
 .B \-K
 More \fIPostScript\fP code will be appended later [Default terminates the plot system].
 .TP
@@ -162,6 +155,12 @@ be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
+.B \fB-R\fIwest/east/south/north\fP
+Sets the longitude and latitude bounds within which multibeam 
+data will be read and plotted. Only the data which lies within 
+these bounds will be read. 
+Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
+.TP
 .B \fB-T\fItimegap\fP
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
@@ -170,21 +169,17 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 Draw Unix System time stamp on plot.  Optionally, append a label, or 'c' which will plot
 the command string.
 .TP
+.B \-V
+Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
+.TP
 .B \-X \-Y
 Shift origin of plot by (\fIx-shift,y-shift\fP) inches  [Default is (1,1) for new plots, (0,0) for overlays].
 .TP
 .B \-#
 Specifies the number of plot copies. [Default is 1]
-.TP
-.B \-V
-Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
-.TP
-.B \fB-H\fP
-This "help" flag cause the program to print out a description
-of its operation and then exit immediately.
 .SH EXAMPLES
 Suppose the user has a Hydrosweep data file in the L-DEO in-house
-binary format (\fBMBIO\fP format id 8) called hs_ew9302_161_mn.mb8
+binary format (\fBMBIO\fP format id 24) called hs_ew9302_161_mn.mb24
 which lies in the region w/s/e/n = -32.1874/-26.6236/54.6349/56.7536.
 The following will suffice to generate a traditional four-color contour plot:
  	mbcontour -Idatalist -Jm2.44652 -R-25.7252/-23.0683/59.7415/61.0699 
@@ -192,7 +187,7 @@ The following will suffice to generate a traditional four-color contour plot:
  		-p1 -P -X1 -Y1 -K -V > mbcontour.ps
 .br
 where the file datalist contains:
- 	hs_ew9302_161_mn.mb8 8
+ 	hs_ew9302_161_mn.mb24 24
 .br
 A more complicated plot including a navigation track
 can be created using \fBmbcontour\fP in conjunction with other GMT
@@ -206,32 +201,32 @@ you have a Sun workstation):
  #
  # Make datalist file 
  echo Making datalist file...
- echo hs_ew9302_161_bmn.mb8 8 > datalist
+ echo hs_ew9302_161_bmn.mb24 24 > datalist
  #
  # Run mbcontour
  echo Running mbcontour...
  mbcontour -Idatalist -Jm2.44652 -R-25.7252/-23.0683/59.7415/61.0699 \
- 	-Ba0.5314g0.5314":.Data File hs_ew9302_161_bmn.mb8:" \
+ 	-Ba0.5314g0.5314":.Data File hs_ew9302_161_bmn.mb24:" \
  	-A50.0000/250.0000/250.0000/250.0000/0.01/0.1 -p1 -P -X1 \
- 	-Y1 -K -V > hs_ew9302_161_bmn.mb8.ps
+ 	-Y1 -K -V > hs_ew9302_161_bmn.mb24.ps
  #
  # Run mblist
  echo Running mblist...
- mblist -F8 -Ihs_ew9302_161_bmn.mb8 -OXYU > hs_ew9302_161_bmn.mb8.nav
+ mblist -F24 -Ihs_ew9302_161_bmn.mb24 -OXYU > hs_ew9302_161_bmn.mb24.nav
  #
  # Run pstrack
  echo Running pstrack...
- pstrack hs_ew9302_161_bmn.mb8.nav -Jm2.44652 -R-25.7252/-23.0683/59.7415/61.0699 \
- 	-Ba0.5314g0.5314":.Data File hs_ew9302_161_bmn.mb8:" -W2 \
- 	-Mt15ma1h -P -O >> hs_ew9302_161_bmn.mb8.ps
+ pstrack hs_ew9302_161_bmn.mb24.nav -Jm2.44652 -R-25.7252/-23.0683/59.7415/61.0699 \
+ 	-Ba0.5314g0.5314":.Data File hs_ew9302_161_bmn.mb24:" -W2 \
+ 	-Mt15ma1h -P -O >> hs_ew9302_161_bmn.mb24.ps
  #
  # Delete surplus files
  echo Deleting surplus files...
- rm -f hs_ew9302_161_bmn.mb8.cpt datalist hs_ew9302_161_bmn.mb8.nav
+ rm -f hs_ew9302_161_bmn.mb24.cpt datalist hs_ew9302_161_bmn.mb24.nav
  #
  # Run pageview
  echo Running pageview in background...
- pageview hs_ew9302_161_bmn.mb8.ps &
+ pageview hs_ew9302_161_bmn.mb24.ps &
  #
  # All done!
  echo All done!

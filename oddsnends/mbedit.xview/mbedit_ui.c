@@ -66,20 +66,20 @@ mbedit_window_mbedit_objects_initialize(ip, owner)
 		ip->button_file = mbedit_window_mbedit_button_file_create(ip, ip->controls_mbedit);
 	if (!ip->button_quit)
 		ip->button_quit = mbedit_window_mbedit_button_quit_create(ip, ip->controls_mbedit);
-	if (!ip->slider_number_pings)
-		ip->slider_number_pings = mbedit_window_mbedit_slider_number_pings_create(ip, ip->controls_mbedit);
-	if (!ip->textfield_x_interval)
-		ip->textfield_x_interval = mbedit_window_mbedit_textfield_x_interval_create(ip, ip->controls_mbedit);
 	if (!ip->slider_scale_x)
 		ip->slider_scale_x = mbedit_window_mbedit_slider_scale_x_create(ip, ip->controls_mbedit);
+	if (!ip->textfield_x_interval)
+		ip->textfield_x_interval = mbedit_window_mbedit_textfield_x_interval_create(ip, ip->controls_mbedit);
+	if (!ip->slider_scale_y)
+		ip->slider_scale_y = mbedit_window_mbedit_slider_scale_y_create(ip, ip->controls_mbedit);
 	if (!ip->textfield_y_interval)
 		ip->textfield_y_interval = mbedit_window_mbedit_textfield_y_interval_create(ip, ip->controls_mbedit);
 	if (!ip->button_next_buffer)
 		ip->button_next_buffer = mbedit_window_mbedit_button_next_buffer_create(ip, ip->controls_mbedit);
 	if (!ip->button_done)
 		ip->button_done = mbedit_window_mbedit_button_done_create(ip, ip->controls_mbedit);
-	if (!ip->slider_scale_y)
-		ip->slider_scale_y = mbedit_window_mbedit_slider_scale_y_create(ip, ip->controls_mbedit);
+	if (!ip->slider_number_pings)
+		ip->slider_number_pings = mbedit_window_mbedit_slider_number_pings_create(ip, ip->controls_mbedit);
 	if (!ip->slider_buffer_size)
 		ip->slider_buffer_size = mbedit_window_mbedit_slider_buffer_size_create(ip, ip->controls_mbedit);
 	if (!ip->button_forward)
@@ -90,6 +90,10 @@ mbedit_window_mbedit_objects_initialize(ip, owner)
 		ip->textfield_number_step = mbedit_window_mbedit_textfield_number_step_create(ip, ip->controls_mbedit);
 	if (!ip->slider_buffer_hold)
 		ip->slider_buffer_hold = mbedit_window_mbedit_slider_buffer_hold_create(ip, ip->controls_mbedit);
+	if (!ip->setting_mode)
+		ip->setting_mode = mbedit_window_mbedit_setting_mode_create(ip, ip->controls_mbedit);
+	if (!ip->button_goto)
+		ip->button_goto = mbedit_window_mbedit_button_goto_create(ip, ip->controls_mbedit);
 	if (!ip->canvas_mbedit)
 		ip->canvas_mbedit = mbedit_window_mbedit_canvas_mbedit_create(ip, ip->window_mbedit);
 	return ip;
@@ -109,7 +113,7 @@ mbedit_window_mbedit_window_mbedit_create(ip, owner)
 		XV_KEY_DATA, INSTANCE, ip,
 		XV_WIDTH, 897,
 		XV_HEIGHT, 764,
-		XV_LABEL, "MBEDIT Version $Id: mbedit_ui.c,v 1.1 1993-08-17 00:30:34 caress Exp $",
+		XV_LABEL, "MBEDIT Version $Id: mbedit_ui.c,v 4.0 1994-03-05 23:54:35 caress Exp $",
 		FRAME_SHOW_FOOTER, TRUE,
 		FRAME_SHOW_RESIZE_CORNER, TRUE,
 		NULL);
@@ -131,7 +135,7 @@ mbedit_window_mbedit_controls_mbedit_create(ip, owner)
 		XV_X, 0,
 		XV_Y, 0,
 		XV_WIDTH, WIN_EXTEND_TO_EDGE,
-		XV_HEIGHT, 107,
+		XV_HEIGHT, 134,
 		WIN_BORDER, FALSE,
 		NULL);
 	return obj;
@@ -179,14 +183,14 @@ mbedit_window_mbedit_button_quit_create(ip, owner)
 }
 
 /*
- * Create object `slider_number_pings' in the specified instance.
+ * Create object `slider_scale_x' in the specified instance.
  */
 Xv_opaque
-mbedit_window_mbedit_slider_number_pings_create(ip, owner)
+mbedit_window_mbedit_slider_scale_x_create(ip, owner)
 	mbedit_window_mbedit_objects	*ip;
 	Xv_opaque	owner;
 {
-	extern void		set_number_pings();
+	extern void		set_scale_x();
 	Xv_opaque	obj;
 	
 	obj = xv_create(owner, PANEL_SLIDER,
@@ -195,15 +199,15 @@ mbedit_window_mbedit_slider_number_pings_create(ip, owner)
 		XV_Y, 8,
 		PANEL_SLIDER_WIDTH, 100,
 		PANEL_TICKS, 0,
-		PANEL_LABEL_STRING, "Number of pings shown:",
+		PANEL_LABEL_STRING, "X Scale (m/100 pixels):",
 		PANEL_DIRECTION, PANEL_HORIZONTAL,
 		PANEL_SLIDER_END_BOXES, FALSE,
 		PANEL_SHOW_RANGE, TRUE,
 		PANEL_SHOW_VALUE, TRUE,
 		PANEL_MIN_VALUE, 1,
-		PANEL_MAX_VALUE, 20,
-		PANEL_VALUE, 10,
-		PANEL_NOTIFY_PROC, set_number_pings,
+		PANEL_MAX_VALUE, 50000,
+		PANEL_VALUE, 1000,
+		PANEL_NOTIFY_PROC, set_scale_x,
 		NULL);
 	return obj;
 }
@@ -221,7 +225,7 @@ mbedit_window_mbedit_textfield_x_interval_create(ip, owner)
 	
 	obj = xv_create(owner, PANEL_NUMERIC_TEXT,
 		XV_KEY_DATA, INSTANCE, ip,
-		XV_X, 560,
+		XV_X, 616,
 		XV_Y, 8,
 		PANEL_VALUE_DISPLAY_LENGTH, 5,
 		PANEL_VALUE_STORED_LENGTH, 80,
@@ -237,14 +241,14 @@ mbedit_window_mbedit_textfield_x_interval_create(ip, owner)
 }
 
 /*
- * Create object `slider_scale_x' in the specified instance.
+ * Create object `slider_scale_y' in the specified instance.
  */
 Xv_opaque
-mbedit_window_mbedit_slider_scale_x_create(ip, owner)
+mbedit_window_mbedit_slider_scale_y_create(ip, owner)
 	mbedit_window_mbedit_objects	*ip;
 	Xv_opaque	owner;
 {
-	extern void		set_scale_x();
+	extern void		set_scale_y();
 	Xv_opaque	obj;
 	
 	obj = xv_create(owner, PANEL_SLIDER,
@@ -253,15 +257,15 @@ mbedit_window_mbedit_slider_scale_x_create(ip, owner)
 		XV_Y, 32,
 		PANEL_SLIDER_WIDTH, 100,
 		PANEL_TICKS, 0,
-		PANEL_LABEL_STRING, "X Scale (m/100 pixels):",
+		PANEL_LABEL_STRING, "Vertical Exageration (X 0.01):",
 		PANEL_DIRECTION, PANEL_HORIZONTAL,
 		PANEL_SLIDER_END_BOXES, FALSE,
 		PANEL_SHOW_RANGE, TRUE,
 		PANEL_SHOW_VALUE, TRUE,
 		PANEL_MIN_VALUE, 1,
-		PANEL_MAX_VALUE, 10000,
-		PANEL_VALUE, 1000,
-		PANEL_NOTIFY_PROC, set_scale_x,
+		PANEL_MAX_VALUE, 5000,
+		PANEL_VALUE, 100,
+		PANEL_NOTIFY_PROC, set_scale_y,
 		NULL);
 	return obj;
 }
@@ -279,7 +283,7 @@ mbedit_window_mbedit_textfield_y_interval_create(ip, owner)
 	
 	obj = xv_create(owner, PANEL_NUMERIC_TEXT,
 		XV_KEY_DATA, INSTANCE, ip,
-		XV_X, 560,
+		XV_X, 616,
 		XV_Y, 32,
 		PANEL_VALUE_DISPLAY_LENGTH, 5,
 		PANEL_VALUE_STORED_LENGTH, 80,
@@ -337,14 +341,14 @@ mbedit_window_mbedit_button_done_create(ip, owner)
 }
 
 /*
- * Create object `slider_scale_y' in the specified instance.
+ * Create object `slider_number_pings' in the specified instance.
  */
 Xv_opaque
-mbedit_window_mbedit_slider_scale_y_create(ip, owner)
+mbedit_window_mbedit_slider_number_pings_create(ip, owner)
 	mbedit_window_mbedit_objects	*ip;
 	Xv_opaque	owner;
 {
-	extern void		set_scale_y();
+	extern void		set_number_pings();
 	Xv_opaque	obj;
 	
 	obj = xv_create(owner, PANEL_SLIDER,
@@ -353,15 +357,15 @@ mbedit_window_mbedit_slider_scale_y_create(ip, owner)
 		XV_Y, 56,
 		PANEL_SLIDER_WIDTH, 100,
 		PANEL_TICKS, 0,
-		PANEL_LABEL_STRING, "Y Scale (m/100 pixels):",
+		PANEL_LABEL_STRING, "Number of pings shown:",
 		PANEL_DIRECTION, PANEL_HORIZONTAL,
 		PANEL_SLIDER_END_BOXES, FALSE,
 		PANEL_SHOW_RANGE, TRUE,
 		PANEL_SHOW_VALUE, TRUE,
 		PANEL_MIN_VALUE, 1,
-		PANEL_MAX_VALUE, 10000,
-		PANEL_VALUE, 1000,
-		PANEL_NOTIFY_PROC, set_scale_y,
+		PANEL_MAX_VALUE, 20,
+		PANEL_VALUE, 10,
+		PANEL_NOTIFY_PROC, set_number_pings,
 		NULL);
 	return obj;
 }
@@ -379,7 +383,7 @@ mbedit_window_mbedit_slider_buffer_size_create(ip, owner)
 	
 	obj = xv_create(owner, PANEL_SLIDER,
 		XV_KEY_DATA, INSTANCE, ip,
-		XV_X, 560,
+		XV_X, 552,
 		XV_Y, 56,
 		PANEL_SLIDER_WIDTH, 100,
 		PANEL_TICKS, 0,
@@ -410,7 +414,7 @@ mbedit_window_mbedit_button_forward_create(ip, owner)
 	obj = xv_create(owner, PANEL_BUTTON,
 		XV_KEY_DATA, INSTANCE, ip,
 		XV_X, 8,
-		XV_Y, 80,
+		XV_Y, 72,
 		PANEL_LABEL_STRING, "Forward",
 		PANEL_NOTIFY_PROC, do_forward,
 		NULL);
@@ -431,7 +435,7 @@ mbedit_window_mbedit_button_reverse_create(ip, owner)
 	obj = xv_create(owner, PANEL_BUTTON,
 		XV_KEY_DATA, INSTANCE, ip,
 		XV_X, 88,
-		XV_Y, 80,
+		XV_Y, 72,
 		PANEL_LABEL_STRING, "Reverse",
 		PANEL_NOTIFY_PROC, do_reverse,
 		NULL);
@@ -479,7 +483,7 @@ mbedit_window_mbedit_slider_buffer_hold_create(ip, owner)
 	
 	obj = xv_create(owner, PANEL_SLIDER,
 		XV_KEY_DATA, INSTANCE, ip,
-		XV_X, 560,
+		XV_X, 552,
 		XV_Y, 80,
 		PANEL_SLIDER_WIDTH, 100,
 		PANEL_TICKS, 0,
@@ -492,6 +496,56 @@ mbedit_window_mbedit_slider_buffer_hold_create(ip, owner)
 		PANEL_MAX_VALUE, 100,
 		PANEL_VALUE, 0,
 		PANEL_NOTIFY_PROC, do_buffer_hold,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `setting_mode' in the specified instance.
+ */
+Xv_opaque
+mbedit_window_mbedit_setting_mode_create(ip, owner)
+	mbedit_window_mbedit_objects	*ip;
+	Xv_opaque	owner;
+{
+	extern void		mbedit_window_mbedit_setting_mode_notify_callback();
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_CHOICE,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 8,
+		XV_Y, 104,
+		PANEL_CHOICE_NROWS, 1,
+		PANEL_LAYOUT, PANEL_HORIZONTAL,
+		PANEL_CHOOSE_NONE, FALSE,
+		PANEL_LABEL_STRING, "Mode:",
+		PANEL_NOTIFY_PROC, mbedit_window_mbedit_setting_mode_notify_callback,
+		PANEL_CHOICE_STRINGS,
+			"Pick",
+			"Erase",
+			"Restore",
+			NULL,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `button_goto' in the specified instance.
+ */
+Xv_opaque
+mbedit_window_mbedit_button_goto_create(ip, owner)
+	mbedit_window_mbedit_objects	*ip;
+	Xv_opaque	owner;
+{
+	extern void		mbedit_window_mbedit_button_goto_notify_callback();
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_BUTTON,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 272,
+		XV_Y, 104,
+		PANEL_LABEL_STRING, "Go To",
+		PANEL_NOTIFY_PROC, mbedit_window_mbedit_button_goto_notify_callback,
 		NULL);
 	return obj;
 }
@@ -722,6 +776,259 @@ mbedit_popup_load_button_load_ok_create(ip, owner)
 		XV_Y, 336,
 		PANEL_LABEL_STRING, "OK",
 		PANEL_NOTIFY_PROC, do_load_ok,
+		NULL);
+	return obj;
+}
+
+/*
+ * Initialize an instance of object `popup_goto'.
+ */
+mbedit_popup_goto_objects *
+mbedit_popup_goto_objects_initialize(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	if (!ip && !(ip = (mbedit_popup_goto_objects *) calloc(1, sizeof (mbedit_popup_goto_objects))))
+		return (mbedit_popup_goto_objects *) NULL;
+	if (!ip->popup_goto)
+		ip->popup_goto = mbedit_popup_goto_popup_goto_create(ip, owner);
+	if (!ip->controls1)
+		ip->controls1 = mbedit_popup_goto_controls1_create(ip, ip->popup_goto);
+	if (!ip->textfield_year)
+		ip->textfield_year = mbedit_popup_goto_textfield_year_create(ip, ip->controls1);
+	if (!ip->textfield_month)
+		ip->textfield_month = mbedit_popup_goto_textfield_month_create(ip, ip->controls1);
+	if (!ip->textfield_day)
+		ip->textfield_day = mbedit_popup_goto_textfield_day_create(ip, ip->controls1);
+	if (!ip->textfield_hour)
+		ip->textfield_hour = mbedit_popup_goto_textfield_hour_create(ip, ip->controls1);
+	if (!ip->textfield_minute)
+		ip->textfield_minute = mbedit_popup_goto_textfield_minute_create(ip, ip->controls1);
+	if (!ip->textfield_second)
+		ip->textfield_second = mbedit_popup_goto_textfield_second_create(ip, ip->controls1);
+	if (!ip->button_goto_apply)
+		ip->button_goto_apply = mbedit_popup_goto_button_goto_apply_create(ip, ip->controls1);
+	return ip;
+}
+
+/*
+ * Create object `popup_goto' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_popup_goto_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, FRAME_CMD,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_WIDTH, 179,
+		XV_HEIGHT, 220,
+		XV_LABEL, "Great Leap Forward?",
+		XV_SHOW, FALSE,
+		FRAME_SHOW_FOOTER, TRUE,
+		FRAME_SHOW_RESIZE_CORNER, TRUE,
+		FRAME_CMD_PUSHPIN_IN, FALSE,
+		NULL);
+	xv_set(xv_get(obj, FRAME_CMD_PANEL), WIN_SHOW, FALSE, NULL);
+	return obj;
+}
+
+/*
+ * Create object `controls1' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_controls1_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 0,
+		XV_Y, 0,
+		XV_WIDTH, WIN_EXTEND_TO_EDGE,
+		XV_HEIGHT, WIN_EXTEND_TO_EDGE,
+		WIN_BORDER, FALSE,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `textfield_year' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_textfield_year_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_NUMERIC_TEXT,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 24,
+		XV_Y, 24,
+		PANEL_VALUE_DISPLAY_LENGTH, 4,
+		PANEL_VALUE_STORED_LENGTH, 4,
+		PANEL_LABEL_STRING, "Year:",
+		PANEL_LAYOUT, PANEL_HORIZONTAL,
+		PANEL_MAX_VALUE, 2062,
+		PANEL_MIN_VALUE, 1962,
+		PANEL_VALUE, 0,
+		PANEL_READ_ONLY, FALSE,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `textfield_month' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_textfield_month_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_NUMERIC_TEXT,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 24,
+		XV_Y, 48,
+		PANEL_VALUE_DISPLAY_LENGTH, 2,
+		PANEL_VALUE_STORED_LENGTH, 2,
+		PANEL_LABEL_STRING, "Month:",
+		PANEL_LAYOUT, PANEL_HORIZONTAL,
+		PANEL_MAX_VALUE, 12,
+		PANEL_MIN_VALUE, 1,
+		PANEL_VALUE, 2,
+		PANEL_READ_ONLY, FALSE,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `textfield_day' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_textfield_day_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_NUMERIC_TEXT,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 24,
+		XV_Y, 72,
+		PANEL_VALUE_DISPLAY_LENGTH, 2,
+		PANEL_VALUE_STORED_LENGTH, 2,
+		PANEL_LABEL_STRING, "Day:",
+		PANEL_LAYOUT, PANEL_HORIZONTAL,
+		PANEL_MAX_VALUE, 31,
+		PANEL_MIN_VALUE, 1,
+		PANEL_VALUE, 21,
+		PANEL_READ_ONLY, FALSE,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `textfield_hour' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_textfield_hour_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_NUMERIC_TEXT,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 24,
+		XV_Y, 96,
+		PANEL_VALUE_DISPLAY_LENGTH, 2,
+		PANEL_VALUE_STORED_LENGTH, 2,
+		PANEL_LABEL_STRING, "Hour:",
+		PANEL_LAYOUT, PANEL_HORIZONTAL,
+		PANEL_MAX_VALUE, 23,
+		PANEL_MIN_VALUE, 0,
+		PANEL_VALUE, 0,
+		PANEL_READ_ONLY, FALSE,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `textfield_minute' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_textfield_minute_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_NUMERIC_TEXT,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 24,
+		XV_Y, 120,
+		PANEL_VALUE_DISPLAY_LENGTH, 2,
+		PANEL_VALUE_STORED_LENGTH, 2,
+		PANEL_LABEL_STRING, "Minute:",
+		PANEL_LAYOUT, PANEL_HORIZONTAL,
+		PANEL_MAX_VALUE, 59,
+		PANEL_MIN_VALUE, 0,
+		PANEL_VALUE, 0,
+		PANEL_READ_ONLY, FALSE,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `textfield_second' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_textfield_second_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_NUMERIC_TEXT,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 24,
+		XV_Y, 144,
+		PANEL_VALUE_DISPLAY_LENGTH, 2,
+		PANEL_VALUE_STORED_LENGTH, 2,
+		PANEL_LABEL_STRING, "Second:",
+		PANEL_LAYOUT, PANEL_HORIZONTAL,
+		PANEL_MAX_VALUE, 59,
+		PANEL_MIN_VALUE, 0,
+		PANEL_VALUE, 0,
+		PANEL_READ_ONLY, FALSE,
+		NULL);
+	return obj;
+}
+
+/*
+ * Create object `button_goto_apply' in the specified instance.
+ */
+Xv_opaque
+mbedit_popup_goto_button_goto_apply_create(ip, owner)
+	mbedit_popup_goto_objects	*ip;
+	Xv_opaque	owner;
+{
+	extern void		mbedit_popup_goto_button_goto_apply_notify_callback();
+	Xv_opaque	obj;
+	
+	obj = xv_create(owner, PANEL_BUTTON,
+		XV_KEY_DATA, INSTANCE, ip,
+		XV_X, 56,
+		XV_Y, 176,
+		PANEL_LABEL_STRING, "Apply",
+		PANEL_NOTIFY_PROC, mbedit_popup_goto_button_goto_apply_notify_callback,
 		NULL);
 	return obj;
 }

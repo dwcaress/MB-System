@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	hsvelocitytool_stubs.c	3.00	6/6/93
- *    $Id: hsvelocitytool_stubs.c,v 1.1 1993-08-16 23:28:30 caress Exp $
+ *    The MB-system:	hsvelocitytool_stubs.c	6/6/93
+ *    $Id: hsvelocitytool_stubs.c,v 4.0 1994-03-05 23:51:19 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -23,6 +23,15 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:53:26  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/27  00:17:23  caress
+ * First cut at new version.
+ *
+ * Revision 1.1  1993/08/16  23:28:30  caress
+ * Initial revision
+ *
  *
  */
 
@@ -112,7 +121,7 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-	static char rcs_id[]="$Id: hsvelocitytool_stubs.c,v 1.1 1993-08-16 23:28:30 caress Exp $";
+	static char rcs_id[]="$Id: hsvelocitytool_stubs.c,v 4.0 1994-03-05 23:51:19 caress Exp $";
 	int	status;
 	int	i;
 

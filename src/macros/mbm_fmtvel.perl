@@ -1,9 +1,9 @@
 #! /usr/local/bin/perl
 #--------------------------------------------------------------------
-#    The MB-system:	mbm_fmtvel.perl	3.00	6/18/93
-#    $Id  $
+#    The MB-system:	mbm_fmtvel.perl	6/18/93
+#    $Id: mbm_fmtvel.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
 #
-#    Copyright (c) 1993 by 
+#    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -20,7 +20,7 @@
 #   velocity) and ckeel (surface water velocity) used by Hydrosweep
 #   in its internal processing.  This macro executes the program
 #   hsdump and then scans the output for the desired values.
-#   The only allowed formats are 5 (raw Hydrosweep data) and 8
+#   The only allowed formats are 21 (raw Hydrosweep data) and 24
 #   (L-DEO in-house binary Hydrosweep data).
 #
 # Usage:
@@ -34,10 +34,19 @@
 #   May 19, 1993
 #
 # Version:
-#   $Id: mbm_fmtvel.perl,v 1.4 1993-08-17 16:58:36 caress Exp $
+#   $Id: mbm_fmtvel.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1994/03/03  04:11:13  caress
+# Fixed copyright message.
+#
+# Revision 4.0  1994/02/26  19:37:57  caress
+# First cut at new version.
+#
+# Revision 1.4  1993/08/17  16:58:36  caress
+# Set location of perl to /usr/local/bin/perl
+#
 # Revision 1.3  1993/08/16  23:03:15  caress
 # I'm not sure what the changes are - I'm just checking in the
 # current version.
@@ -76,7 +85,7 @@ if (!$file)
 	}
 if (!$format) 
 	{
-	$format = "8";
+	$format = "24";
 	}
 
 # get user id and time
@@ -187,7 +196,7 @@ sub Getopts {
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP
 ;# Modified March 1990, Feb 1991 to properly handle timezones
-;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 1.4 $$Date: 1993-08-17 16:58:36 $
+;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 4.0 $$Date: 1994-03-05 23:52:40 $
 ;#   Marion Hakanson (hakanson@cse.ogi.edu)
 ;#   Oregon Graduate Institute of Science and Technology
 ;#

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_buffer.c	3.00	2/25/93
- *    $Id: mb_buffer.c,v 3.3 1993-06-15 06:08:02 caress Exp $
+ *    The MB-system:	mb_buffer.c	2/25/93
+ *    $Id: mb_buffer.c,v 4.0 1994-03-05 23:55:38 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -32,6 +32,28 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/03/05  22:51:44  caress
+ * Added ability to handle Simrad EM12 system and
+ * format MBF_EM12DARW.
+ *
+ * Revision 4.3  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.2  1994/02/25  01:56:17  caress
+ * Fixed some significant bugs that caused seg faults.
+ *
+ * Revision 4.1  1994/02/24  05:23:36  caress
+ * Fixed some major problems with buffered i/o - the
+ * switch to bath,amp,ss hadn't been completed for all
+ * the functions!
+ *
+ * Revision 4.0  1994/02/20  03:49:44  caress
+ * First cut at new version. Now supports both amplitude
+ * and sidescan data.
+ *
+ * Revision 3.3  1993/06/15  06:08:02  caress
+ * Added some debug messages in mb_buffer_close.
+ *
  * Revision 3.2  1993/06/10  05:43:19  caress
  * Added facility in mb_buffer_close to deallocate memory associate
  * with any remaining records in buffer before deallocating the
@@ -61,7 +83,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 3.3 1993-06-15 06:08:02 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.0 1994-03-05 23:55:38 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -180,11 +202,15 @@ int	*error;
 	double	heading;
 	double	distance;
 	int	nbath;
+	int	namp;
+	int	nss;
 	int	*bath;
-	int	*bathdist;
-	int	nback;
-	int	*back;
-	int	*backdist;
+	int	*amp;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	char	comment[256];
 
 	int	i;
@@ -211,9 +237,12 @@ int	*error;
 		for dummy reading arrays - there's no binning
 		when using buffer */
 	bath = mb_io_ptr->bath;
-	bathdist = mb_io_ptr->bathdist;
-	back = mb_io_ptr->back;
-	backdist = mb_io_ptr->backdist;
+	amp = mb_io_ptr->amp;
+	bathacrosstrack = mb_io_ptr->bath_acrosstrack;
+	bathalongtrack = mb_io_ptr->bath_alongtrack;
+	ss = mb_io_ptr->ss;
+	ssacrosstrack = mb_io_ptr->ss_acrosstrack;
+	ssalongtrack = mb_io_ptr->ss_alongtrack;
 
 	/* can't get more than the buffer will hold */
 	nget = nwant - buff->nbuffer;
@@ -240,8 +269,9 @@ int	*error;
 		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
 			time_i,&time_d,&navlon,&navlat,&speed,
 			&heading,&distance,
-			&nbath,bath,bathdist,
-			&nback,back,backdist,
+			&nbath,&namp,&nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 
 		/* print debug statements */
@@ -372,11 +402,15 @@ int	*error;
 	double	heading;
 	double	distance;
 	int	nbath;
+	int	namp;
+	int	nss;
 	int	*bath;
-	int	*bathdist;
-	int	nback;
-	int	*back;
-	int	*backdist;
+	int	*amp;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	char	comment[256];
 
 	int	i;
@@ -427,6 +461,11 @@ int	*error;
 			}
 		}
 
+	/* set beam and pixel numbers */
+	nbath = mb_io_ptr->beams_bath;
+	namp = mb_io_ptr->beams_amp;
+	nss = mb_io_ptr->pixels_ss;
+
 	/* dump records from buffer */
 	if (status == MB_SUCCESS)
 		{
@@ -450,8 +489,9 @@ int	*error;
 				buff->buffer_kind[i],
 				time_i,time_d,
 				navlon,navlat,speed,heading,
-				nbath,bath,bathdist,
-				nback,back,backdist,
+				nbath,namp,nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 
 			/* print debug statements */
@@ -596,7 +636,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get multibeam system id */
-	*system = mb_system_table[mb_io_ptr->format];
+	*system = mb_system_table[mb_io_ptr->format_num];
 
 	/* get record kind */
 	if (id < 0 || id >= buff->nbuffer)
@@ -630,7 +670,9 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_next_data(verbose,buff_ptr,mbio_ptr,start,id,
 		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,bath,bathdist,nback,back,backdist,error)
+		nbath,namp,nss,
+		bath,amp,bathacrosstrack,bathalongtrack,
+		ss,ssacrosstrack,ssalongtrack,error)
 int	verbose;
 char	*buff_ptr;
 char	*mbio_ptr;
@@ -643,11 +685,15 @@ double	*navlat;
 double	*speed;
 double	*heading;
 int	*nbath;
+int	*namp;
+int	*nss;
 int	*bath;
-int	*bathdist;
-int	*nback;
-int	*back;
-int	*backdist;
+int	*amp;
+int	*bathacrosstrack;
+int	*bathalongtrack;
+int	*ss;
+int	*ssacrosstrack;
+int	*ssalongtrack;
 int	*error;
 {
 	char	*function_name = "mb_buffer_get_next_data";
@@ -701,7 +747,9 @@ int	*error;
 	if (found == MB_YES)
 		status = mb_buffer_extract(verbose,buff_ptr,mbio_ptr,*id,&kind,
 			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,bath,bathdist,nback,back,backdist,
+			nbath,namp,nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 
 	/* print output debug statements */
@@ -725,14 +773,30 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
-		fprintf(stderr,"dbg2       nbath:         %d\n",*nbath);
-		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       bath[%d]: %d  bathdist[%d]: %d\n",
-			i,bath[i],i,bathdist[i]);
-		fprintf(stderr,"dbg2       nback:         %d\n",*nback);
-		for (i=0;i<*nback;i++)
-		  fprintf(stderr,"dbg2       back[%d]: %d  backdist[%d]: %d\n",
-			i,back[i],i,backdist[i]);
+		fprintf(stderr,"dbg4       nbath:         %d\n",*nbath);
+		if (*nbath > 0)
+		  {
+		  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
+		  for (i=0;i<*nbath;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg4       namp:          %d\n",*namp);
+		if (*namp > 0)
+		  {
+		  fprintf(stderr,"dbg4       beam    amp  crosstrack alongtrack\n");
+		  for (i=0;i<*nbath;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg4       nss:           %d\n",*nss);
+		if (*nss > 0)
+		  {
+		  fprintf(stderr,"dbg4       pixel sidescan crosstrack alongtrack\n");
+		  for (i=0;i<*nss;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
+		  }
 		}
 	if (verbose >= 2)
 		{
@@ -747,7 +811,9 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mb_buffer_extract(verbose,buff_ptr,mbio_ptr,id,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,bath,bathdist,nback,back,backdist,
+		nbath,namp,nss,
+		bath,amp,bathacrosstrack,bathalongtrack,
+		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
 char	*buff_ptr;
@@ -761,11 +827,15 @@ double	*navlat;
 double	*speed;
 double	*heading;
 int	*nbath;
+int	*namp;
+int	*nss;
 int	*bath;
-int	*bathdist;
-int	*nback;
-int	*back;
-int	*backdist;
+int	*amp;
+int	*bathacrosstrack;
+int	*bathalongtrack;
+int	*ss;
+int	*ssacrosstrack;
+int	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -805,37 +875,72 @@ int	*error;
 		{
 		store_ptr = buff->buffer[id];
 		*kind = buff->buffer_kind[id];
+		*error = MB_ERROR_NO_ERROR;
 		}
 
-	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format];
+	/* if no error then proceed */
+	if (status == MB_SUCCESS)
+		{
 
-	/* call appropriate extraction routine */
-	if (system == MB_SYS_SB)
-		{
-		status = mbsys_sb_extract(verbose,mbio_ptr,store_ptr,kind,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,bath,bathdist,nback,back,backdist,
-			comment,error);
-		}
-	else if (system == MB_SYS_HSDS)
-		{
-		status = mbsys_hsds_extract(verbose,mbio_ptr,store_ptr,kind,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,bath,bathdist,nback,back,backdist,
-			comment,error);
-		}
-	else if (system == MB_SYS_LDEOIH)
-		{
-		status = mbsys_ldeoih_extract(verbose,mbio_ptr,store_ptr,kind,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,bath,bathdist,nback,back,backdist,
-			comment,error);
-		}
-	else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
+		/* get multibeam system id */
+		system = mb_system_table[mb_io_ptr->format_num];
+
+		/* call appropriate extraction routine */
+		if (system == MB_SYS_SB)
+			{
+			status = mbsys_sb_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
+		else if (system == MB_SYS_HSDS)
+			{
+			status = mbsys_hsds_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
+		else if (system == MB_SYS_SB2100)
+			{
+			status = mbsys_sb2100_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
+		else if (system == MB_SYS_EM12)
+			{
+			status = mbsys_em12_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
+		else if (system == MB_SYS_LDEOIH)
+			{
+			status = mbsys_ldeoih_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_SYSTEM;
+			}
 		}
 
 	/* print output debug statements */
@@ -870,14 +975,30 @@ int	*error;
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
 		&& *kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg2       nbath:         %d\n",*nbath);
-		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       bath[%d]: %d  bathdist[%d]: %d\n",
-			i,bath[i],i,bathdist[i]);
-		fprintf(stderr,"dbg2       nback:         %d\n",*nback);
-		for (i=0;i<*nback;i++)
-		  fprintf(stderr,"dbg2       back[%d]: %d  backdist[%d]: %d\n",
-			i,back[i],i,backdist[i]);
+		fprintf(stderr,"dbg4       nbath:         %d\n",*nbath);
+		if (*nbath > 0)
+		  {
+		  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
+		  for (i=0;i<*nbath;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg4       namp:          %d\n",*namp);
+		if (*namp > 0)
+		  {
+		  fprintf(stderr,"dbg4       beam    amp  crosstrack alongtrack\n");
+		  for (i=0;i<*nbath;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg4       nss:           %d\n",*nss);
+		if (*nss > 0)
+		  {
+		  fprintf(stderr,"dbg4       pixel sidescan crosstrack alongtrack\n");
+		  for (i=0;i<*nss;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
+		  }
 		}
 	if (verbose >= 2)
 		{
@@ -892,7 +1013,9 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mb_buffer_insert(verbose,buff_ptr,mbio_ptr,id,
 		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,bath,bathdist,nback,back,backdist,
+		nbath,namp,nss,
+		bath,amp,bathacrosstrack,bathalongtrack,
+		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
 char	*buff_ptr;
@@ -905,11 +1028,15 @@ double	navlat;
 double	speed;
 double	heading;
 int	nbath;
+int	namp;
+int	nss;
 int	*bath;
-int	*bathdist;
-int	nback;
-int	*back;
-int	*backdist;
+int	*amp;
+int	*bathacrosstrack;
+int	*bathalongtrack;
+int	*ss;
+int	*ssacrosstrack;
+int	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -941,16 +1068,30 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
-		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
-		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       bath[%d]: %d  bathdist[%d]: %d\n",
-			i,bath[i],i,bathdist[i]);
-		fprintf(stderr,"dbg2       nback:      %d\n",nback);
-		if (verbose >= 3) 
-		 for (i=0;i<nback;i++)
-		  fprintf(stderr,"dbg3       back[%d]: %d  backdist[%d]: %d\n",
-			i,back[i],i,backdist[i]);
+		fprintf(stderr,"dbg4       nbath:      %d\n",nbath);
+		if (nbath > 0)
+		  {
+		  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
+		  for (i=0;i<nbath;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg4       namp:          %d\n",namp);
+		if (namp > 0)
+		  {
+		  fprintf(stderr,"dbg4       beam    amp  crosstrack alongtrack\n");
+		  for (i=0;i<nbath;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg4       nss:           %d\n",nss);
+		if (nss > 0)
+		  {
+		  fprintf(stderr,"dbg4       pixel sidescan crosstrack alongtrack\n");
+		  for (i=0;i<nss;i++)
+		    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
+		  }
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}
 
@@ -972,28 +1113,52 @@ int	*error;
 		}
 
 	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format];
+	system = mb_system_table[mb_io_ptr->format_num];
 
 	/* call appropriate insertion routine */
 	if (system == MB_SYS_SB)
 		{
 		status = mbsys_sb_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,bath,bathdist,nback,back,backdist,
+			nbath,namp,nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
 	else if (system == MB_SYS_HSDS)
 		{
 		status = mbsys_hsds_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,bath,bathdist,nback,back,backdist,
+			nbath,namp,nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
+		}
+	else if (system == MB_SYS_SB2100)
+		{
+		status = mbsys_sb2100_insert(verbose,mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
+		}
+	else if (system == MB_SYS_EM12)
+		{
+		status = mbsys_em12_insert(verbose,mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
 	else if (system == MB_SYS_LDEOIH)
 		{
 		status = mbsys_ldeoih_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,bath,bathdist,nback,back,backdist,
+			nbath,namp,nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
 	else
@@ -1047,7 +1212,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format];
+	system = mb_system_table[mb_io_ptr->format_num];
 
 	/* call appropriate memory allocation routine */
 	if (system == MB_SYS_SB)
@@ -1057,6 +1222,14 @@ int	*error;
 	else if (system == MB_SYS_HSDS)
 		{
 		status = mbsys_hsds_alloc(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_SB2100)
+		{
+		status = mbsys_sb2100_alloc(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_EM12)
+		{
+		status = mbsys_em12_alloc(verbose,mbio_ptr,store_ptr,error);
 		}
 	else if (system == MB_SYS_LDEOIH)
 		{
@@ -1115,7 +1288,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format];
+	system = mb_system_table[mb_io_ptr->format_num];
 
 	/* call appropriate memory deallocation routine */
 	if (system == MB_SYS_SB)
@@ -1184,7 +1357,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format];
+	system = mb_system_table[mb_io_ptr->format_num];
 
 	/* call appropriate memory copy routine */
 	if (system == MB_SYS_SB)
@@ -1195,6 +1368,16 @@ int	*error;
 	else if (system == MB_SYS_HSDS)
 		{
 		status = mbsys_hsds_copy(verbose,mbio_ptr,
+			store_ptr,copy_ptr,error);
+		}
+	else if (system == MB_SYS_SB2100)
+		{
+		status = mbsys_sb2100_copy(verbose,mbio_ptr,
+			store_ptr,copy_ptr,error);
+		}
+	else if (system == MB_SYS_EM12)
+		{
+		status = mbsys_em12_copy(verbose,mbio_ptr,
 			store_ptr,copy_ptr,error);
 		}
 	else if (system == MB_SYS_LDEOIH)

@@ -1,9 +1,9 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
-#    The MB-system:	mbm_plot.perl	3.00	6/18/93
-#    $Id  $
+#    The MB-system:	mbm_plot.perl	6/18/93
+#    $Id: mbm_plot.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
 #
-#    Copyright (c) 1993 by 
+#    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -18,13 +18,17 @@
 # Purpose:
 #   Perl shellscript to generate a gmt plot of the multibeam data contained 
 #   in the specified file.  The plot will be scaled to fit on an 8.5 X 11
-#   inch page.  The plot may be color fill (-G), color shaded relief (-S), or
-#   four color contoured (-C).  A gmt shellscript will be created which
-#   generates a postscript image and then displays it using pageview. 
+#   inch page.  The plot may include bathymetry color fill (-G1), 
+#   bathymetry color shaded relief (-G2), bathymetry shaded with amplitudes
+#   (-G3), greyshade fill amplitude (-G4), or greyshade fill sidescan (-G5).
+#   The plot may also include four color contoured bathymetry (-C).  
+#   A gmt shellscript will be created which generates 
+#   a postscript image and then displays it using pageview. 
 #   The -X option will cause the shellscript to be executed immediately.
 #
 # Usage:
-#   mbm_plot -Fformat -Ifile [-Oroot -Rw/e/s/n -G -S -C -N -X -P -V -H]
+#   mbm_plot -Fformat -Ifile [-Oroot -Rw/e/s/n -Gmode -Amagnitude/azimuth
+#            -C -N -X -P -V -H]
 #
 # Author:
 #   David W. Caress
@@ -33,10 +37,26 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 3.7 1993-11-27 18:31:54 caress Exp $
+#   $Id: mbm_plot.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1994/03/05  03:01:33  caress
+# Added capability to handle amplitude and sidescan plots.
+#
+# Revision 4.2  1994/03/03  04:11:13  caress
+# Fixed copyright message.
+#
+# Revision 4.1  1994/02/26  21:15:42  caress
+# Altered parsing of mbinfo output to be consistent
+# with changes in version 4 mbinfo.
+#
+# Revision 4.0  1994/02/26  19:37:57  caress
+# First cut at new version.
+#
+# Revision 3.7  1993/11/27  18:31:54  caress
+# Fixed syntax error in last fix.
+#
 # Revision 3.6  1993/11/27  18:24:07  caress
 # Made choice of tick interval more rational.
 #
@@ -66,12 +86,12 @@
 $program_name = "mbm_plot";
 
 # Deal with command line arguments
-&Getopts('F:f:I:i:O:o:R:r:GgCcSsNnA:a:XxPpVvHh');
+&Getopts('F:f:I:i:O:o:R:r:G:g:CcNnA:a:XxPpVvHh');
 $file =    ($opt_I || $opt_i);
 $root =    ($opt_O || $opt_o);
 $format =  ($opt_F || $opt_f);
 $bounds =  ($opt_R || $opt_r);
-$color =   ($opt_G || $opt_g);
+$color = ($opt_G || $opt_g);
 $shade =   ($opt_S || $opt_s);
 $contour = ($opt_C || $opt_c);
 $navigation = ($opt_N || $opt_n);
@@ -85,8 +105,8 @@ $verbose = ($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nPerl shellscript to generate a gmt plot of the multibeam data contained \nin the specified file.  The plot will be scaled to fit on an 8.5 X 11 \ninch page.  The plot may be color fill (-G), color shaded relief (-S), or \nfour color contoured (-C).  A gmt shellscript will be created which \ngenerates a postscript image and then displays it using pageview. \nThe -X option will cause the shellscript to be executed immediately.\n";
-	print "\nUsage: $program_name -Fformat -Ifile [-Oroot -Rw/e/s/n -G -S -C -N -X -P -V -H]\n";
+	print "\nPerl shellscript to generate a gmt plot of the multibeam data contained \nin the specified file.  The plot will be scaled to fit on an 8.5 X 11 \ninch page.  The plot may include bathymetry color fill (-G1),\nbathymetry color shaded relief (-G2), bathymetry shaded with amplitudes\n(-G3), greyshade fill amplitude (-G4), or greyshade fill sidescan (-G5).\nThe plot may also include four color contoured bathymetry (-C).  A gmt shellscript will be created which \ngenerates a postscript image and then displays it using pageview. \nThe -X option will cause the shellscript to be executed immediately.\n";
+	print "\nUsage: $program_name -Fformat -Ifile [-Oroot -Rw/e/s/n -Gmode -AfImagnitude/azimuth -C -N -X -P -V -H]\n";
 	die "\n";
 	}
 
@@ -101,9 +121,9 @@ if (!$root)
 	}
 if (!$format) 
 	{
-	$format = "8";
+	$format = "24";
 	}
-if (!$color && !$contour && !$shade && !$navigation)
+if (!$color && !$contour && !$navigation)
 	{
 	$navigation = 1;
 	}
@@ -128,17 +148,17 @@ if ($verbose)
 while (@mbinfo)
 	{
 	$line = shift @mbinfo;
-	if ($line =~ /\s+Minimum Lon:\s+(\S+)\s+Maximum Lon:\s+(\S+)/)
+	if ($line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 		{
 		print "$line";
 		($xmin,$xmax) = 
-			$line =~ /\s+Minimum Lon:\s+(\S+)\s+Maximum Lon:\s+(\S+)/;
+			$line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
 		}
-	if ($line =~ /\s+Minimum Lat:\s+(\S+)\s+Maximum Lat:\s+(\S+)/)
+	if ($line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
 		{
 		print "$line";
 		($ymin,$ymax) = 
-			$line =~ /\s+Minimum Lat:\s+(\S+)\s+Maximum Lat:\s+(\S+)/;
+			$line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
 		}
 	if ($line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
 		{
@@ -146,12 +166,36 @@ while (@mbinfo)
 		($zmin,$zmax) = 
 		$line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/;
 		}
+	if ($line =~ /Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/)
+		{
+		print "$line";
+		($amin,$amax) = 
+		$line =~ /Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/;
+		}
+	if ($line =~ /Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/)
+		{
+		print "$line";
+		($smin,$smax) = 
+		$line =~ /Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/;
+		}
 	}
 
 # check that there is data
-if ($xmin >= $xmax || $ymin >= $ymax || $zmin >= $zmax)
+if ($xmin >= $xmax || $ymin >= $ymax)
 	{
 	die "Does not appear to be any data in the input!\n$program_name aborted.\n"
+	}
+if (($color == 1 || $color == 2 || $color == 3) && ($zmin >= $zmax))
+	{
+	die "Does not appear to be any bathymetry data in the input!\n$program_name aborted.\n"
+	}
+if (($color == 3 || $color == 4) && ($amin >= $amax))
+	{
+	die "Does not appear to be any amplitude data in the input!\n$program_name aborted.\n"
+	}
+if (($color == 5) && ($smin >= $smax))
+	{
+	die "Does not appear to be any sidescan data in the input!\n$program_name aborted.\n"
 	}
 
 # either use specified bounds
@@ -335,7 +379,7 @@ print FCMD "echo Making datalist file...\n";
 print FCMD "echo $file $format > $listfile\n";
 
 # generate color pallette table file if needed
-if ($color || $shade)
+if ($color == 1 || $color == 2 || $color == 3)
 	{
 	print FCMD "#\n# Make color pallette table file\n";
 	print FCMD "echo Making color pallette table file...\n";
@@ -364,8 +408,46 @@ if ($color || $shade)
 		}
 	}
 
+# generate greyscale pallette table file if needed
+if ($color == 4 || $color == 5)
+	{
+	print FCMD "#\n# Make greyshade pallette table file\n";
+	print FCMD "echo Making greyshade pallette table file...\n";
+	$ncpt = 15;
+	@cptbr = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
+	@cptbg = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
+	@cptbb = (0, 17, 35, 53, 71, 89, 107, 125, 143,  161,  179,   197,  215,  233,  255);
+	if ($color == 4)
+		{
+		$dd = 1.1 * ($amax - $amin)/($ncpt - 1);
+		$d1 = $amin - 0.05*($amax - $amin);
+		}
+	if ($color == 5)
+		{
+		$dd = 1.1 * ($smax - $smin)/($ncpt - 1);
+		$d1 = $smin - 0.05*($smax - $smin);
+		}
+	foreach $i (0 .. $ncpt - 2)
+		{
+		$d2 = $d1 + $dd;
+		printf FCMD "echo %.0f %d %d %d %.0f %d %d %d",
+			$d1,@cptbr[$i],@cptbg[$i],@cptbb[$i],
+			$d2,@cptbr[$i+1],@cptbg[$i+1],@cptbb[$i+1];
+		if ($i == 0)
+			{
+			print FCMD " >";
+			}
+		else
+			{
+			print FCMD " >>";
+			}
+		print FCMD " $cptfile\n";
+		$d1 = $d2
+		}
+	}
+
 # do swath plot if needed
-if ($color || $shade)
+if ($color)
 	{
 	print FCMD "#\n# Run mbswath\n";
 	print FCMD "echo Running mbswath...\n";
@@ -373,10 +455,10 @@ if ($color || $shade)
 	printf FCMD " -R%.4f/%.4f/%.4f/%.4f", $xmin,$xmax,$ymin,$ymax;
 	printf FCMD " -Ba%.4fg%.4f\":.Data File %s:\"", 
 		$base_tick,$base_tick,$file;
-	print FCMD " -C$cptfile -p1 -A1 -Q100";
-	if ($shade)
+	print FCMD " -C$cptfile -p1 -A1 -Q100 -Z$color";
+	if ($color == 2 || $color == 3)
 		{
-		print FCMD " -G$shadecontrol -Z2";
+		print FCMD " -G$shadecontrol";
 		}
 	if ($portrait)
 		{
@@ -395,7 +477,7 @@ if ($contour)
 	printf FCMD " -R%.4f/%.4f/%.4f/%.4f", $xmin,$xmax,$ymin,$ymax;
 	printf FCMD " -Ba%.4fg%.4f\":.Data File %s:\"", 
 		$base_tick,$base_tick,$file;
-	if ($color || $shade)
+	if ($color)
 		{
 		print FCMD " -C$cptfile";
 		}
@@ -409,11 +491,11 @@ if ($contour)
 		{
 		print FCMD " -P";
 		}
-	if (!$color && !$shade)
+	if (!$color)
 		{
 		print FCMD " -X1 -Y1 -K -V > $psfile\n";
 		}
-	elsif ($color || $shade)
+	elsif ($color)
 		{
 		print FCMD " -O -K -V >> $psfile\n";
 		}
