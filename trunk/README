@@ -134,6 +134,24 @@ files using grd2xyz as well as through raster databases using
 grdraster. See the -Kbackground option documentation in the
 mbgrid manual page.
 
+The -G option of mbinfo now avoids reporting zero starting 
+positions (it always ignored zero positions for the reported
+data bounds).
+
+Provides read-only support for Edgetech sidescan and subbottom
+profiler data in the new Reson 6046 format (format id 88).
+
+A new program mbextractsegy allows for the extraction of 
+subbottom profiler data into separate files in the SEGY
+format (this can apply only to data formats that incorporate
+subbottom data in with swath sonar data, and at present only
+supports format 88).
+
+A new program mbsegygrid generates grids from subbottom
+profiler data (and seismic reflection data, and potentially
+other seismic data) in the SEGY format. These grids can then
+be displayed using GMT (through mbm_grdviz if desired).
+
 MB-SYSTEM VERSION 5.0.4 RELEASE NOTES:
 ------------------------------------------
 
@@ -800,10 +818,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.50 2004-06-18 02:58:15 caress Exp $
+RCS ID: $Id: README,v 5.51 2004-09-16 21:49:59 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.50  2004/06/18 02:58:15  caress
+Added first notes for 5.0.5 release.
+
 Revision 5.49  2004/05/22 05:58:18  caress
 Release 5.0.4
 
