@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.21 1999-02-04 23:55:08 caress Exp $
+ *    $Id: mbmerge.c,v 4.22 1999-03-31 18:33:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  1999/02/04  23:55:08  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.20  1998/12/17  22:50:20  caress
  * MB-System version 4.6beta4
  *
@@ -130,7 +133,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.21 1999-02-04 23:55:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.22 1999-03-31 18:33:06 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -238,12 +241,6 @@ char **argv;
 
 	char	*ctime();
 	char	*getenv();
-
-double xxx,xxxx;
-xxx = 5.0;
-xxxx = rint(xxx);
-fprintf(stderr, "rint check: x:%f rint(x):%f\n", xxx, xxxx);
-
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -516,7 +513,8 @@ fprintf(stderr, "rint check: x:%f rint(x):%f\n", xxx, xxxx);
 		else if (nformat == 5)
 			{
 			strncpy(tmp,"\0",128);
-			time_j[0] = atoi(strncpy(tmp,buffer,2)) + 1900;
+			time_j[0] = atoi(strncpy(tmp,buffer,2));
+			mb_fix_y2k(verbose, time_j[0], &time_j[0]);
 			strncpy(tmp,"\0",128);
 			time_j[1] = atoi(strncpy(tmp,buffer+3,3));
 			strncpy(tmp,"\0",128);
@@ -645,7 +643,7 @@ fprintf(stderr, "rint check: x:%f rint(x):%f\n", xxx, xxxx);
 			mb_get_int(&(time_i[2]), buffer+2,  2);
 			mb_get_int(&(time_i[1]), buffer+4,  2);
 			mb_get_int(&(time_i[0]), buffer+6,  2);
-			time_i[0] += 1900;
+			mb_fix_y2k(verbose, time_i[0], &time_i[0]);
 			mb_get_int(&(time_i[3]), buffer+9,  2);
 			mb_get_int(&(time_i[4]), buffer+11, 2);
 			mb_get_int(&(time_i[5]), buffer+13, 2);

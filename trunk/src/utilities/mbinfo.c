@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.17 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbinfo.c,v 4.18 1999-03-31 18:33:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.16  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -138,7 +141,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.17 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.18 1999-03-31 18:33:06 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -1049,6 +1052,7 @@ char **argv;
 	/* deallocate memory used for data arrays */
 	for (i=0;i<pings_read;i++)
 		{
+		mb_free(verbose,&data[i]->beamflag,&error);
 		mb_free(verbose,&data[i]->bath,&error);
 		mb_free(verbose,&data[i]->amp,&error);
 		mb_free(verbose,&data[i]->bathlon,&error);
