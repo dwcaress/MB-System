@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mbmerge.c,v 4.2 1994-04-29 18:00:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -55,10 +59,10 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.2 1994-04-29 18:00:51 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
-	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Nnavfile]";
+	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -93,6 +97,7 @@ char **argv;
 	char	ofile[128];
 	char	*ombio_ptr;
 	char	nfile[128];
+	int	nformat = 5;
 	FILE	*nfp;
 
 	/* mbio read and write values */
@@ -170,7 +175,7 @@ char **argv;
 	strcpy (nfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:N:n:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:M:m:N:n:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -199,6 +204,11 @@ char **argv;
 		case 'O':
 		case 'o':
 			sscanf (optarg,"%s", ofile);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			sscanf (optarg,"%d", &nformat);
 			flag++;
 			break;
 		case 'N':
@@ -260,6 +270,7 @@ char **argv;
 		fprintf(stderr,"dbg2       input file:      %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:     %s\n",ofile);
 		fprintf(stderr,"dbg2       navigation file: %s\n",nfile);
+		fprintf(stderr,"dbg2       nav format:      %d\n",nformat);
 		}
 
 	/* if help desired then print it and exit */
@@ -314,35 +325,88 @@ char **argv;
 	strncpy(buffer,"\0",sizeof(buffer));
 	while ((result = fgets(buffer,128,nfp)) == buffer)
 		{
-		strncpy(tmp,"\0",128);
-		time_j[0] = atoi(strncpy(tmp,buffer,2)) + 1900;
-		strncpy(tmp,"\0",128);
-		time_j[1] = atoi(strncpy(tmp,buffer+3,3));
-		strncpy(tmp,"\0",128);
-		hr = atoi(strncpy(tmp,buffer+7,2));
-		strncpy(tmp,"\0",128);
-		time_j[2] = atoi(strncpy(tmp,buffer+10,2))
-			+ 60*hr;
-		strncpy(tmp,"\0",128);
-		time_j[3] = atof(strncpy(tmp,buffer+13,3));
-		mb_get_itime(verbose,time_j,time_i);
-		mb_get_time(verbose,time_i,&time_d);
-		ntime[nnav] = time_d;
+		/* deal with nav in form: time_d lon lat */
+		if (nformat == 1)
+			{
+			sscanf(buffer,"%lf %lf %lf",
+				&ntime[nnav],&nlon[nnav],&nlat[nnav]);
+			}
 
-		strncpy(NorS,"\0",sizeof(NorS));
-		strncpy(NorS,buffer+20,1);
-		strncpy(tmp,"\0",128);
-		mlat = atof(strncpy(tmp,buffer+21,3));
-		strncpy(tmp,"\0",128);
-		llat = atof(strncpy(tmp,buffer+24,8));
-		strncpy(EorW,"\0",sizeof(EorW));
-		strncpy(EorW,buffer+33,1);
-		strncpy(tmp,"\0",128);
-		mlon = atof(strncpy(tmp,buffer+34,4));
-		strncpy(tmp,"\0",128);
-		llon = atof(strncpy(tmp,buffer+38,8));
-		nlon[nnav] = mlon + llon/60.;
-		if (strncmp(EorW,"W",1) == 0) nlon[nnav] = -nlon[nnav];
+		/* deal with nav in form: yr mon day hour min sec lon lat */
+		else if (nformat == 2)
+			{
+			sscanf(buffer,"%d %d %d %d %d %d %lf %lf",
+				&time_i[0],&time_i[1],&time_i[2],
+				&time_i[3],&time_i[4],&time_i[5],
+				&nlon[nnav],&nlat[nnav]);
+			mb_get_time(verbose,time_i,&time_d);
+			ntime[nnav] = time_d;
+			}
+
+		/* deal with nav in form: yr jday hour min sec lon lat */
+		else if (nformat == 3)
+			{
+			sscanf(buffer,"%d %d %d %d %d %lf %lf",
+				&time_j[0],&hr,&time_j[1],
+				&time_j[2],&time_j[3],
+				&nlon[nnav],&nlat[nnav]);
+			time_j[2] = time_j[2] + 60*hr;
+			mb_get_itime(verbose,time_j,time_i);
+			mb_get_time(verbose,time_i,&time_d);
+			ntime[nnav] = time_d;
+			}
+
+		/* deal with nav in form: yr jday daymin sec lon lat */
+		else if (nformat == 4)
+			{
+			sscanf(buffer,"%d %d %d %d %lf %lf",
+				&time_j[0],&time_j[1],&time_j[2],
+				&time_j[3],
+				&nlon[nnav],&nlat[nnav]);
+			mb_get_itime(verbose,time_j,time_i);
+			mb_get_time(verbose,time_i,&time_d);
+			ntime[nnav] = time_d;
+			}
+
+		/* deal with nav in L-DEO processed nav format */
+		else
+			{
+			strncpy(tmp,"\0",128);
+			time_j[0] = atoi(strncpy(tmp,buffer,2)) + 1900;
+			strncpy(tmp,"\0",128);
+			time_j[1] = atoi(strncpy(tmp,buffer+3,3));
+			strncpy(tmp,"\0",128);
+			hr = atoi(strncpy(tmp,buffer+7,2));
+			strncpy(tmp,"\0",128);
+			time_j[2] = atoi(strncpy(tmp,buffer+10,2))
+				+ 60*hr;
+			strncpy(tmp,"\0",128);
+			time_j[3] = atof(strncpy(tmp,buffer+13,3));
+			mb_get_itime(verbose,time_j,time_i);
+			mb_get_time(verbose,time_i,&time_d);
+			ntime[nnav] = time_d;
+
+			strncpy(NorS,"\0",sizeof(NorS));
+			strncpy(NorS,buffer+20,1);
+			strncpy(tmp,"\0",128);
+			mlat = atof(strncpy(tmp,buffer+21,3));
+			strncpy(tmp,"\0",128);
+			llat = atof(strncpy(tmp,buffer+24,8));
+			strncpy(EorW,"\0",sizeof(EorW));
+			strncpy(EorW,buffer+33,1);
+			strncpy(tmp,"\0",128);
+			mlon = atof(strncpy(tmp,buffer+34,4));
+			strncpy(tmp,"\0",128);
+			llon = atof(strncpy(tmp,buffer+38,8));
+			nlon[nnav] = mlon + llon/60.;
+			if (strncmp(EorW,"W",1) == 0) 
+				nlon[nnav] = -nlon[nnav];
+			nlat[nnav] = mlat + llat/60.;
+			if (strncmp(NorS,"S",1) == 0) 
+				nlat[nnav] = -nlat[nnav];
+			}
+
+		/* make sure longitude is defined according to lonflip */
 		if (lonflip == -1 && nlon[nnav] > 0.0)
 			nlon[nnav] = nlon[nnav] - 360.0;
 		else if (lonflip == 0 && nlon[nnav] < -180.0)
@@ -351,8 +415,7 @@ char **argv;
 			nlon[nnav] = nlon[nnav] - 360.0;
 		else if (lonflip == 1 && nlon[nnav] < 0.0)
 			nlon[nnav] = nlon[nnav] + 360.0;
-		nlat[nnav] = mlat + llat/60.;
-		if (strncmp(NorS,"S",1) == 0) nlat[nnav] = -nlat[nnav];
+
 
 		/* output some debug values */
 		if (verbose >= 5)
@@ -365,12 +428,6 @@ char **argv;
 		strncpy(buffer,"\0",sizeof(buffer));
 		}
 
-	/* give the statistics */
-	if (verbose >= 1)
-		{
-		fprintf(stderr,"\n%d input navigation records\n",nnav);
-		}
-
 	/* set up spline interpolation of nav points */
 	splineflag = 1.0e30;
 	spline(ntime-1,nlon-1,nnav,splineflag,splineflag,nlonspl-1);
@@ -379,7 +436,7 @@ char **argv;
 	/* give the statistics */
 	if (verbose >= 1)
 		{
-		fprintf(stderr,"\n%d input navigation records\n",nnav);
+		fprintf(stderr,"\n%d navigation records read\n",nnav);
 		}
 
 	/* initialize reading the input multibeam file */
@@ -397,12 +454,6 @@ char **argv;
 		exit(MB_FAILURE);
 		}
 
-	/* give the statistics */
-	if (verbose >= 1)
-		{
-		fprintf(stderr,"\n%d input navigation records\n",nnav);
-		}
-
 	/* initialize writing the output multibeam file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
@@ -414,12 +465,6 @@ char **argv;
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(MB_FAILURE);
-		}
-
-	/* give the statistics */
-	if (verbose >= 1)
-		{
-		fprintf(stderr,"\n%d input navigation records\n",nnav);
 		}
 
 	/* allocate memory for data arrays */
@@ -692,7 +737,8 @@ char **argv;
 	/* give the statistics */
 	if (verbose >= 1)
 		{
-		fprintf(stderr,"\n%d input data records\n",idata);
+		fprintf(stderr,"\n%d input navigation records\n",nnav);
+		fprintf(stderr,"%d input data records\n",idata);
 		fprintf(stderr,"%d input comment records\n",icomment);
 		fprintf(stderr,"%d output data records\n",odata);
 		fprintf(stderr,"%d output comment records\n",ocomment);
