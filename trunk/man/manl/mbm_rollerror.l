@@ -61,9 +61,6 @@ slope correction file:
 The output will be in a file called hs_ew9302_157_bcen.mb24.cor
 
 .SH BUGS
-The roll corrections don't seem to do much good, so this utility
-isn't very useful.  Why don't we call it "experimental".
-
-
-
-
+So far it is pretty rare for this utility 
+to significantly improve bathymetry data 
+(but occasionally it happens!).

@@ -6,7 +6,7 @@
 Version 4.1
 
 .SH SYNOPSIS
-\fBmbm_stat\fP infilename -V -H
+\fBmbm_stat\fP \fB-I\fIfile\fP [\fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbm_stat\fP is a perl shellscript that extracts beam statistics from the
@@ -34,10 +34,11 @@ This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
 .B \fB-I\fIfile\fP
-Data file from which the input data will be read.
+Data file to be processed which contains the output of one or
+more executions of \fBmbinfo\fP.
 .TP
 .B \fB-V\fP
-Causes \fBmbm_plot\fP to operate in "verbose" mode so that it outputs
+Causes \fBmbm_stat\fP to operate in "verbose" mode so that it outputs
 more information than usual.
 
 .SH BUGS
