@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 1.2 2003-11-25 01:43:19 caress Exp $
+ *    $Id: mbview_nav.c,v 5.0 2003-12-02 20:38:33 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2003/11/25 01:43:19  caress
+ * MBview version generated during EW0310.
+ *
  *
  */
 /*------------------------------------------------------------------------------*/
@@ -64,7 +67,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 1.2 2003-11-25 01:43:19 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.0 2003-12-02 20:38:33 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 1.4 2003-11-25 22:02:25 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.0 2003-12-02 20:38:31 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2003/11/25 22:02:25  caress
+ * Fixed problem with display of mouse mode buttons.
+ *
  * Revision 1.3  2003/11/25 01:43:18  caress
  * MBview version generated during EW0310.
  *
@@ -87,7 +90,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 1.4 2003-11-25 22:02:25 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.0 2003-12-02 20:38:31 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 
