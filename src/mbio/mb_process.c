@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.16 2001-12-18 04:27:45 caress Exp $
+ *    $Id: mb_process.c,v 5.17 2001-12-20 21:03:18 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2001/12/18  04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.15  2001/11/16  01:30:02  caress
  * Fixed handling of paths.
  *
@@ -98,7 +101,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.16 2001-12-18 04:27:45 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.17 2001-12-20 21:03:18 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -2650,11 +2653,11 @@ int mb_pr_update_kluges(int verbose, char *file,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                  %d\n",verbose);
 		fprintf(stderr,"dbg2       file:                     %s\n",file);
-		fprintf(stderr,"dbg2       mbp_kluge001:             %d\n",process.mbp_kluge001);
-		fprintf(stderr,"dbg2       mbp_kluge002:             %d\n",process.mbp_kluge002);
-		fprintf(stderr,"dbg2       mbp_kluge003:             %d\n",process.mbp_kluge003);
-		fprintf(stderr,"dbg2       mbp_kluge004:             %d\n",process.mbp_kluge004);
-		fprintf(stderr,"dbg2       mbp_kluge005:             %d\n",process.mbp_kluge005);
+		fprintf(stderr,"dbg2       mbp_kluge001:             %d\n",mbp_kluge001);
+		fprintf(stderr,"dbg2       mbp_kluge002:             %d\n",mbp_kluge002);
+		fprintf(stderr,"dbg2       mbp_kluge003:             %d\n",mbp_kluge003);
+		fprintf(stderr,"dbg2       mbp_kluge004:             %d\n",mbp_kluge004);
+		fprintf(stderr,"dbg2       mbp_kluge005:             %d\n",mbp_kluge005);
 		}
 
 	/* get known process parameters */
