@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.2 2001-06-03 07:07:34 caress Exp $
+ *    $Id: mbset.c,v 5.3 2001-06-08 21:45:46 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/03  07:07:34  caress
+ * Release 5.0.beta01.
+ *
  * Revision 5.1  2001/03/22 21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -63,7 +66,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.3 2001-06-08 21:45:46 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -393,6 +396,60 @@ the manual pages for mbprocess and mbset. \n\n";
 			}
 		    }
     
+		/* lever correction */
+		else if (strncmp(pargv[i], "LEVERMODE", 9) == 0)
+		    {
+		    sscanf(pargv[i], "LEVERMODE:%d", &process.mbp_lever_mode);
+		    }
+		else if (strncmp(pargv[i], "VRUOFFSETX", 10) == 0)
+		    {
+		    sscanf(pargv[i], "VRUOFFSETX:%lf", &process.mbp_vru_offsetx);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_lever_mode = MBP_LEVER_ON;
+			}
+		    }
+		else if (strncmp(pargv[i], "VRUOFFSETY", 10) == 0)
+		    {
+		    sscanf(pargv[i], "VRUOFFSETY:%lf", &process.mbp_vru_offsety);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_lever_mode = MBP_LEVER_ON;
+			}
+		    }
+		else if (strncmp(pargv[i], "VRUOFFSETZ", 10) == 0)
+		    {
+		    sscanf(pargv[i], "VRUOFFSETZ:%lf", &process.mbp_vru_offsetz);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_lever_mode = MBP_LEVER_ON;
+			}
+		    }
+		else if (strncmp(pargv[i], "SONAROFFSETX", 12) == 0)
+		    {
+		    sscanf(pargv[i], "SONAROFFSETX:%lf", &process.mbp_sonar_offsetx);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_lever_mode = MBP_LEVER_ON;
+			}
+		    }
+		else if (strncmp(pargv[i], "SONAROFFSETY", 12) == 0)
+		    {
+		    sscanf(pargv[i], "SONAROFFSETY:%lf", &process.mbp_sonar_offsety);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_lever_mode = MBP_LEVER_ON;
+			}
+		    }
+		else if (strncmp(pargv[i], "SONAROFFSETZ", 12) == 0)
+		    {
+		    sscanf(pargv[i], "SONAROFFSETZ:%lf", &process.mbp_sonar_offsetz);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_lever_mode = MBP_LEVER_ON;
+			}
+		    }
+    
 		/* roll correction */
 		else if (strncmp(pargv[i], "ROLLBIASMODE", 12) == 0)
 		    {
@@ -457,6 +514,24 @@ the manual pages for mbprocess and mbset. \n\n";
 			}
 		    }
     
+		/* tide correction */
+		else if (strncmp(pargv[i], "TIDEMODE", 8) == 0)
+		    {
+		    sscanf(pargv[i], "TIDEMODE:%d", &process.mbp_tide_mode);
+		    }
+		else if (strncmp(pargv[i], "TIDEFILE", 8) == 0)
+		    {
+		    sscanf(pargv[i], "TIDEFILE:%s", process.mbp_tidefile);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_tide_mode = MBP_TIDE_ON;
+			}
+		    }
+		else if (strncmp(pargv[i], "TIDEFORMAT", 10) == 0)
+		    {
+		    sscanf(pargv[i], "TIDEFORMAT:%d", &process.mbp_tide_format);
+		    }
+    
 		/* sidescan recalculation */
 		else if (strncmp(pargv[i], "SSRECALCMODE", 12) == 0)
 		    {
@@ -499,6 +574,13 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "METACLIENT", 10) == 0)
 		    {
 			strcpy(process.mbp_meta_client,&(pargv[i][11]));
+		    }
+   
+		/* unrecognized command */
+		else
+		    {
+		    fprintf(stderr, "\nUnrecognized %s command: %s\n", 
+			    program_name, pargv[i]);
 		    }
 		}
 		
@@ -609,10 +691,30 @@ the manual pages for mbprocess and mbset. \n\n";
 		fprintf(stderr,"  SSV set to constant.\n");
 	    fprintf(stderr,"  SSV offset/constant:           %f m/s\n", process.mbp_ssv);
 	    fprintf(stderr,"  Travel time multiplier:        %f m\n", process.mbp_tt_mult);
+
+	    fprintf(stderr,"\nBathymetry Water Sound Speed Reference:\n");
 	    if (process.mbp_corrected == MB_YES)
-		fprintf(stderr,"  Bathymetry reference:          CORRECTED\n");
+		fprintf(stderr,"  Output bathymetry reference:   CORRECTED\n");
 	    else if (process.mbp_corrected == MB_NO)
 		fprintf(stderr,"  Bathymetry reference:          UNCORRECTED\n");
+	    if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF)
+		{
+		if (process.mbp_corrected == MB_YES)
+		    fprintf(stderr,"  Depths modified from uncorrected to corrected\n");
+		else
+		    fprintf(stderr,"  Depths modified from corrected to uncorrected\n");
+		}
+	    else if (process.mbp_svp_mode == MBP_SVP_ON)
+		{
+		if (process.mbp_corrected == MB_YES)
+		    fprintf(stderr,"  Depths recalculated as corrected\n");
+		else
+		    fprintf(stderr,"  Depths recalculated as uncorrected\n");
+		}
+	    else
+		{
+		fprintf(stderr,"  Depths unmodified with respect to water sound speed reference\n");
+		}
 
 	    fprintf(stderr,"\nDraft Correction:\n");
 	    if (process.mbp_draft_mode == MBP_DRAFT_OFF)
@@ -640,6 +742,31 @@ the manual pages for mbprocess and mbset. \n\n";
 		fprintf(stderr,"  Heave multiplied and offset by constants.\n");
 	    fprintf(stderr,"  Heave offset:                  %f m\n", process.mbp_heave);
 	    fprintf(stderr,"  Heave multiplier:              %f m\n", process.mbp_heave_mult);
+
+	    fprintf(stderr,"\nLever Correction:\n");
+	    if (process.mbp_lever_mode == MBP_LEVER_OFF)
+		fprintf(stderr,"  Lever calculation off.\n");
+	    else
+		{
+		fprintf(stderr,"  Lever calculation used to calculate heave correction.\n");
+	    	fprintf(stderr,"  Heave offset:                  %f m\n", process.mbp_heave);
+	    	fprintf(stderr,"  VRU offset x:                  %f m\n", process.mbp_vru_offsetx);
+	    	fprintf(stderr,"  VRU offset y:                  %f m\n", process.mbp_vru_offsety);
+	    	fprintf(stderr,"  VRU offset z:                  %f m\n", process.mbp_vru_offsetz);
+	    	fprintf(stderr,"  Sonar offset x:                %f m\n", process.mbp_sonar_offsetx);
+	    	fprintf(stderr,"  Sonar offset y:                %f m\n", process.mbp_sonar_offsety);
+	    	fprintf(stderr,"  Sonar offset z:                %f m\n", process.mbp_sonar_offsetz);
+		}
+
+	    fprintf(stderr,"\nTide Correction:\n");
+	    if (process.mbp_tide_mode == MBP_TIDE_OFF)
+		fprintf(stderr,"  Tide calculation off.\n");
+	    else
+		{
+		fprintf(stderr,"  Tide correction applied to bathymetry.\n");
+	    	fprintf(stderr,"  Tide file:                     %s m\n", process.mbp_tidefile);
+	    	fprintf(stderr,"  Tide format:                   %d m\n", process.mbp_tide_format);
+ 		}
 
 	    fprintf(stderr,"\nRoll Correction:\n");
 	    if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.3 2001-03-22 20:50:02 caress Exp $
+ *    $Id: mb_io.h,v 5.4 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.2  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -199,6 +202,7 @@ struct mb_io_struct
 
 	/* working variables */
 	int	ping_count;	/* number of pings read or written so far */
+	int	nav_count;	/* number of nav records read or written so far */
 	int	comment_count;	/* number of comments read or written so far */
 	int	pings_avg;	/* number of pings currently averaged */
 	int	pings_read;	/* number of pings read this binning cycle */
@@ -209,6 +213,9 @@ struct mb_io_struct
 	double	old_time_d;
 	double	old_lon;
 	double	old_lat;
+	double	old_ntime_d;
+	double	old_nlon;
+	double	old_nlat;
 
 	/* data binning variables */
 	int	pings_binned;

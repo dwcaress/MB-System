@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 5.2 2001-03-22 20:45:56 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 5.3 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -129,7 +132,7 @@ int mbr_wt_bchrtunb(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_bchrtunb(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_register_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -259,7 +262,7 @@ int mbr_info_bchrtunb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_info_bchrtunb";
 	int	status = MB_SUCCESS;
 
@@ -329,7 +332,7 @@ int mbr_info_bchrtunb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_bchrtunb(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -640,7 +643,7 @@ int mbr_rt_bchrtunb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			+ 100*data->profile[0].thousandth_sec;
 		mb_get_time(verbose,time_i, &time_d);
 		heading = 0.01 * data->profile[0].heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
 				    &lon, &lat, &speed, error);
 		data->profile[0].longitude = (int) (lon / 0.00000009);
 		data->profile[0].latitude = (int) (lat / 0.00000009);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.2 2001-06-03 06:54:56 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/03  06:54:56  caress
+ * Fixed support for xse format on byte swapped computers.
+ *
  * Revision 5.1  2001/04/09  18:04:51  caress
  * Fixed bug related to nav handling.
  *
@@ -92,7 +95,7 @@ int mbr_wt_l3xseraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.2 2001-06-03 06:54:56 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -222,7 +225,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.2 2001-06-03 06:54:56 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -291,7 +294,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.2 2001-06-03 06:54:56 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -419,36 +422,10 @@ store->mul_frame, store->sid_frame);*/
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->nav_usec;
 			    
-		/* only add to navlist if timestamp updated */
-		if (mb_io_ptr->nfix == 0
-		    || time_d > mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-		    {
-		    /* make room for latest fix */
-		    if (mb_io_ptr->nfix >= MB_NAV_SAVE_MAX)
-			    {
-			    for (i=0;i<mb_io_ptr->nfix-1;i++)
-				    {
-				    mb_io_ptr->fix_time_d[i]
-					= mb_io_ptr->fix_time_d[i+1];
-				    mb_io_ptr->fix_lon[i]
-					= mb_io_ptr->fix_lon[i+1];
-				    mb_io_ptr->fix_lat[i]
-					= mb_io_ptr->fix_lat[i+1];
-				    }
-			    mb_io_ptr->nfix--;
-			    }
-			    
-		    /* add latest fix */
-		    mb_io_ptr->fix_time_d[mb_io_ptr->nfix] 
-			    = time_d;
-		    mb_io_ptr->fix_lon[mb_io_ptr->nfix] = RTD * store->nav_x;
-		    mb_io_ptr->fix_lat[mb_io_ptr->nfix] = RTD * store->nav_y;
-/*fprintf(stderr, "time:%f  lon: %f %f   lat:%f %f\n", 
-time_d, store->nav_x, mb_io_ptr->fix_lon[mb_io_ptr->nfix], 
-store->nav_y, mb_io_ptr->fix_lat[mb_io_ptr->nfix]);*/
-    
-		    mb_io_ptr->nfix++;
-		    }
+		/* add to navlist */
+		mb_navint_add(verbose, mbio_ptr, time_d, 
+				RTD * store->nav_x, 
+				RTD * store->nav_y, error);	    
 		}
 
 	/* interpolate navigation for survey pings if needed */
@@ -460,11 +437,10 @@ store->nav_y, mb_io_ptr->fix_lat[mb_io_ptr->nfix]);*/
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->mul_usec;
 		heading = RTD * store->nav_course_ground;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, (double) store->nav_speed_ground, 
 				    &lon, &lat, &speed, error);
 		store->mul_x = lon;
 		store->mul_y = lat;
-/*fprintf(stderr, "multibeam nav: %f %f\n", store->mul_x, store->mul_y);*/
 		}
 
 	/* print output debug statements */

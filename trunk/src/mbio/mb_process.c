@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.4 2001-06-03 06:54:56 caress Exp $
+ *    $Id: mb_process.c,v 5.5 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/03  06:54:56  caress
+ * Improved handling of lever calculation.
+ *
  * Revision 5.3  2001/06/01  00:14:06  caress
  * Added support for metadata insertion.
  *
@@ -62,7 +65,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.4 2001-06-03 06:54:56 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -135,10 +138,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_svpfile[0] = '\0';
 	process->mbp_ssv_mode = MBP_SSV_OFF;
 	process->mbp_ssv = 0.0;
-	process->mbp_corrected = MB_YES;
 	process->mbp_tt_mode = MBP_TT_OFF;
 	process->mbp_tt_mult = 1.0;
 	process->mbp_angle_mode = MBP_ANGLES_OK;
+	process->mbp_corrected = MB_YES;
 	
 	/* draft correction */
 	process->mbp_draft_mode = MBP_DRAFT_OFF;

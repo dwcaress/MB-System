@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elacmk2.h	6/10/97
- *	$Id: mbsys_elacmk2.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_elacmk2.h,v 5.2 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -205,6 +208,7 @@ struct mbsys_elacmk2_struct
 	int	thousandth_sec;
 	double	longitude;
 	double	latitude;
+	double	speed;
 	int	ping_num;
 	int	sound_vel;		/* 0.1 m/s */
 	int	heading;		/* 0.01 deg */

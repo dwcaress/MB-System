@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
- *	$Id: mbr_elmk2unb.c,v 5.2 2001-03-22 20:45:56 caress Exp $
+ *	$Id: mbr_elmk2unb.c,v 5.3 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -113,7 +116,7 @@ int mbr_wt_elmk2unb(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_elmk2unb(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_register_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -243,7 +246,7 @@ int mbr_info_elmk2unb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_info_elmk2unb";
 	int	status = MB_SUCCESS;
 
@@ -312,7 +315,7 @@ int mbr_info_elmk2unb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_elmk2unb(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -619,7 +622,7 @@ int mbr_rt_elmk2unb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			+ 100*data->thousandth_sec;
 		mb_get_time(verbose,time_i, &time_d);
 		heading = 0.01 * data->heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
 				    &lon, &lat, &speed, error);
 		data->longitude = (int) (lon / 0.00000009);
 		data->latitude = (int) (lat / 0.00000009);
@@ -735,8 +738,9 @@ int mbr_rt_elmk2unb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			    = data->hundredth_sec;
 		    store->thousandth_sec 
 			    = data->thousandth_sec;
-		    store->longitude = 0.00000009 * data->longitude;
-		    store->latitude = 0.00000009 * data->latitude;
+		    store->longitude = lon;
+		    store->latitude = lat;
+		    store->speed = speed;
 		    store->ping_num = data->ping_num;
 		    store->sound_vel = data->sound_vel;
 		    store->heading = data->heading;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.6 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/01  00:14:06  caress
+ * Redid support for current Simrad multibeam data.
+ *
  * Revision 5.4  2001/05/30  17:57:26  caress
  * Fixed New Simrad data handling, plus removed use of
  * intermediate data structure. Still need to reduce use
@@ -82,7 +85,7 @@
 int mbsys_simrad2_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.6 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -400,7 +403,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.6 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -661,7 +664,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.6 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -749,7 +752,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.6 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -829,7 +832,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.6 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1777,24 +1780,24 @@ int mbsys_simrad2_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 				+ 655.36 * ping->png_offset_multiplier;
 
 		/* get travel times, angles */
-		if (store->sonar == EM2_EM120 
-		    || store->sonar == EM2_EM300 
-		    || store->sonar == EM2_EM1002 
-		    || store->sonar == EM2_EM2000 
-		    || store->sonar == EM2_EM3000)
+		if (store->sonar == MBSYS_SIMRAD2_EM120 
+		    || store->sonar == MBSYS_SIMRAD2_EM300 
+		    || store->sonar == MBSYS_SIMRAD2_EM1002 
+		    || store->sonar == MBSYS_SIMRAD2_EM2000 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000)
 		    ttscale = 0.5 / ping->png_sample_rate;
-		else if (store->sonar == EM2_EM3000D_1 
-		    || store->sonar == EM2_EM3000D_2 
-		    || store->sonar == EM2_EM3000D_3 
-		    || store->sonar == EM2_EM3000D_4 
-		    || store->sonar == EM2_EM3000D_5 
-		    || store->sonar == EM2_EM3000D_6 
-		    || store->sonar == EM2_EM3000D_7)
+		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_3 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7)
 		    ttscale = 0.5 / 14000;
-		else if (store->sonar == EM2_EM12S
-		    || store->sonar == EM2_EM12D
-		    || store->sonar == EM2_EM121
-		    || store->sonar == EM2_EM1000)
+		else if (store->sonar == MBSYS_SIMRAD2_EM12S
+		    || store->sonar == MBSYS_SIMRAD2_EM12D
+		    || store->sonar == MBSYS_SIMRAD2_EM121
+		    || store->sonar == MBSYS_SIMRAD2_EM1000)
 		    {
 		    ttscale = 1.0 / ping->png_sample_rate;
 		    }
@@ -1815,31 +1818,31 @@ int mbsys_simrad2_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			angles[j] = 90.0 - 0.01 * ping->png_depression[i];
 			angles_forward[j] = 90 - 0.01 * ping->png_azimuth[i];
 			if (angles_forward[j] < 0.0) angles_forward[j] += 360.0;
-			if (store->sonar == EM2_EM120 
-				|| store->sonar == EM2_EM300 
-				|| store->sonar == EM2_EM1002 
-				|| store->sonar == EM2_EM2000 
-				|| store->sonar == EM2_EM3000
-				|| store->sonar == EM2_EM3000D_1 
-				|| store->sonar == EM2_EM3000D_2 
-				|| store->sonar == EM2_EM3000D_3 
-				|| store->sonar == EM2_EM3000D_4 
-				|| store->sonar == EM2_EM3000D_5 
-				|| store->sonar == EM2_EM3000D_6 
-				|| store->sonar == EM2_EM3000D_7)
+			if (store->sonar == MBSYS_SIMRAD2_EM120 
+				|| store->sonar == MBSYS_SIMRAD2_EM300 
+				|| store->sonar == MBSYS_SIMRAD2_EM1002 
+				|| store->sonar == MBSYS_SIMRAD2_EM2000 
+				|| store->sonar == MBSYS_SIMRAD2_EM3000
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_1 
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_2 
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_3 
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_7)
 			    angles_null[i] = angles[i];
-			else if (store->sonar == EM2_EM1000)
+			else if (store->sonar == MBSYS_SIMRAD2_EM1000)
 			    angles_null[i] = angles[i];
-			else if (store->sonar == EM2_EM12S
-				|| store->sonar == EM2_EM12D
-				|| store->sonar == EM2_EM121)
+			else if (store->sonar == MBSYS_SIMRAD2_EM12S
+				|| store->sonar == MBSYS_SIMRAD2_EM12D
+				|| store->sonar == MBSYS_SIMRAD2_EM121)
 			    angles_null[i] = 0.0;
 			heave[j] = heave_use;
 			alongtrack_offset[j] = 0.0;
 			}
 		
 		/* reset null angles for EM1000 outer beams */
-		if (store->sonar == EM2_EM1000
+		if (store->sonar == MBSYS_SIMRAD2_EM1000
 		    && *nbeams == 60)
 			{
 			for (i=0;i<6;i++)
@@ -2871,7 +2874,7 @@ int mbsys_simrad2_makess(int verbose, char *mbio_ptr, char *store_ptr,
 		daloscale  = 0.01 * ping->png_distance_res;
 		reflscale  = 0.5;
 		ssoffset = 64.0;
-		if (store->sonar == EM2_EM300
+		if (store->sonar == MBSYS_SIMRAD2_EM300
 		    && store->run_mode == 4)
 		    {
 		    if (depthscale * ping->png_depth[ping->png_nbeams/2] > 3500.0
@@ -2883,30 +2886,30 @@ int mbsys_simrad2_makess(int verbose, char *mbio_ptr, char *store_ptr,
 		    }
 
 		/* get raw pixel size */
-		if (store->sonar == EM2_EM120 
-		    || store->sonar == EM2_EM300 
-		    || store->sonar == EM2_EM1002 
-		    || store->sonar == EM2_EM2000 
-		    || store->sonar == EM2_EM3000)
+		if (store->sonar == MBSYS_SIMRAD2_EM120 
+		    || store->sonar == MBSYS_SIMRAD2_EM300 
+		    || store->sonar == MBSYS_SIMRAD2_EM1002 
+		    || store->sonar == MBSYS_SIMRAD2_EM2000 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000)
 		    ss_spacing = 750.0 / ping->png_sample_rate;
-		else if (store->sonar == EM2_EM3000D_1 
-		    || store->sonar == EM2_EM3000D_2 
-		    || store->sonar == EM2_EM3000D_3 
-		    || store->sonar == EM2_EM3000D_4 
-		    || store->sonar == EM2_EM3000D_5 
-		    || store->sonar == EM2_EM3000D_6 
-		    || store->sonar == EM2_EM3000D_7)
+		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_3 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7)
 		    ss_spacing = 750.0 / 14000;
-		else if (store->sonar == EM2_EM12S
-		    || store->sonar == EM2_EM12D
-		    || store->sonar == EM2_EM121
-		    || store->sonar == EM2_EM1000)
+		else if (store->sonar == MBSYS_SIMRAD2_EM12S
+		    || store->sonar == MBSYS_SIMRAD2_EM12D
+		    || store->sonar == MBSYS_SIMRAD2_EM121
+		    || store->sonar == MBSYS_SIMRAD2_EM1000)
 		    {
 		    ss_spacing = 0.01 * ping->png_max_range;
 		    }
 
 		/* get beam angle size */
-		if (store->sonar == EM2_EM1000)
+		if (store->sonar == MBSYS_SIMRAD2_EM1000)
 		    {
 		    beamwidth = 2.5;
 		    }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.5 2001-06-01 00:14:06 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.6 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/01  00:14:06  caress
+ * Redid support for current Simrad multibeam data.
+ *
  * Revision 5.4  2001/05/30  17:57:26  caress
  * Fixed New Simrad data handling, plus removed use of
  * intermediate data structure. Still need to reduce use
@@ -259,6 +262,7 @@
 #define	MBSYS_SIMRAD2_EM1002	1002
 #define	MBSYS_SIMRAD2_EM2000	2000
 #define	MBSYS_SIMRAD2_EM3000	3000
+#define	MBSYS_SIMRAD2_EM3000D_1	3001
 #define	MBSYS_SIMRAD2_EM3000D_2	3002
 #define	MBSYS_SIMRAD2_EM3000D_3	3003
 #define	MBSYS_SIMRAD2_EM3000D_4	3004
@@ -283,26 +287,6 @@
 #define	MBSYS_SIMRAD2_MAXSSV		100
 #define	MBSYS_SIMRAD2_COMMENT_LENGTH	256
 #define	MBSYS_SIMRAD2_BUFFER_SIZE	2048
-
-/* sonar model numbers */
-#define	EM2_EM120		120
-#define	EM2_EM300		300
-#define	EM2_EM1002		1002
-#define	EM2_EM2000		2000
-#define	EM2_EM3000		3000
-#define	EM2_EM3000D_1		3002
-#define	EM2_EM3000D_2		3003
-#define	EM2_EM3000D_3		3004
-#define	EM2_EM3000D_4		3005
-#define	EM2_EM3000D_5		3006
-#define	EM2_EM3000D_6		3007
-#define	EM2_EM3000D_7		3008
-
-#define	EM2_EM12S		9901
-#define	EM2_EM12D		9902
-#define	EM2_EM121		9903
-#define	EM2_EM100		9904
-#define	EM2_EM1000		9905
 
 /* datagram types */
 #define	EM2_END			0x03

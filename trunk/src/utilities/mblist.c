@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mblist.c,v 5.2 2001-06-08 21:45:46 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22  21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -238,7 +241,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 5.2 2001-06-08 21:45:46 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W]";
@@ -263,6 +266,7 @@ main (int argc, char **argv)
 	double	file_weight;
 	int	format;
 	int	pings;
+	int	pings_read;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -307,6 +311,7 @@ main (int argc, char **argv)
 
 	/* MBIO read values */
 	char	*mbio_ptr = NULL;
+	char	*store_ptr = NULL;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -317,6 +322,10 @@ main (int argc, char **argv)
 	double	distance;
 	double	altitude;
 	double	sonardepth;
+	double	draft;
+	double	roll;
+	double	pitch;
+	double	heave;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -737,7 +746,26 @@ main (int argc, char **argv)
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* read a ping of data */
-		status = mb_get(verbose,mbio_ptr,&kind,&pings,time_i,&time_d,
+		if (pings == 1)
+		    {
+		    status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
+			time_i,&time_d,&navlon,&navlat,
+			&speed,&heading,
+			&distance,&altitude,&sonardepth,
+			&beams_bath,&beams_amp,&pixels_ss,
+			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,&error);
+		    if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA)
+			status = mb_extract_nav(verbose,mbio_ptr,store_ptr,&kind,
+					time_i,&time_d,&navlon,&navlat,
+					&speed,&heading,&draft,&roll,&pitch,&heave,&error);
+		    }
+		else
+		    {
+		    status = mb_get(verbose,mbio_ptr,&kind,&pings_read,
+			time_i,&time_d,
 			&navlon,&navlat,
 			&speed,&heading,
 			&distance,&altitude,&sonardepth,
@@ -745,6 +773,12 @@ main (int argc, char **argv)
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
+		    }
+		    
+		/* make sure non survey data records are ignored */
+		if (error == MB_ERROR_NO_ERROR
+			&& kind != MB_DATA_DATA)
+			error = MB_ERROR_OTHER;
 
 		/* time gaps are not a problem here */
 		if (error == MB_ERROR_TIME_GAP)
@@ -1272,6 +1306,22 @@ main (int argc, char **argv)
 					    fwrite(&b, sizeof(double), 1, stdout);
 					    }
 					break;
+				case 'P': /* pitch */
+					printsimplevalue(verbose, pitch, 5, 2, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'p': /* draft */
+					printsimplevalue(verbose, draft, 5, 2, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'R': /* roll */
+					printsimplevalue(verbose, roll, 5, 2, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'r': /* heave */
+					printsimplevalue(verbose, heave, 5, 2, ascii, 
+							    &invert_next_value, &error);
+					break;
 				case 'S': /* speed */
 					printsimplevalue(verbose, speed, 5, 2, ascii, 
 							    &invert_next_value, &error);
@@ -1693,6 +1743,22 @@ main (int argc, char **argv)
 					    b = nread;
 					    fwrite(&b, sizeof(double), 1, stdout);
 					    }
+					break;
+				case 'P': /* pitch */
+					printsimplevalue(verbose, pitch, 5, 2, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'p': /* draft */
+					printsimplevalue(verbose, draft, 5, 2, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'R': /* roll */
+					printsimplevalue(verbose, roll, 5, 2, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'r': /* heave */
+					printsimplevalue(verbose, heave, 5, 2, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'S': /* speed */
 					printsimplevalue(verbose, speed, 5, 2, ascii, 
