@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.4 1995-01-03 22:49:33 caress Exp $
+ *    $Id: mb_time.c,v 4.5 1995-02-14 21:59:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/01/03  22:49:33  caress
+ * Fixed bug in mb_get_date() as per David Brock of ASA.
+ *
  * Revision 4.3  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -65,7 +68,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.4 1995-01-03 22:49:33 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.5 1995-02-14 21:59:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from
@@ -292,6 +295,7 @@ int time_i[7];
 		leapday = 1;
 	else
 		leapday = 0;
+	time_i[1] = 0;
 	for (i=0;i<12;i++)
 		if (time_j[1] > (yday[i] + leapday)) time_i[1] = i + 1;
 	time_i[2] = time_j[1] - yday[time_i[1]-1] - leapday;
