@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#    $Id: mbm_plot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#   $Id: mbm_plot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.0  2000/12/01  22:58:01  caress
+# First cut at Version 5.0.
+#
 # Revision 4.28  2000/10/03  21:42:17  caress
 # Snapshot for Dale.
 #
@@ -671,15 +674,24 @@ if ($misc)
 		}
 	}
 
-# set plot mode
+# set root name if needed
 if (!$root)
 	{
 	$root = $file_data;
 	}
+
+# get format if needed
 if (!$format) 
 	{
-	$format = "-1";
+	$line = `mbformat -I $file_data -L`;
+	($format) = $line =~ /(\S+)/;
+	if ($format == 0)
+		{
+		$format = -1;
+		}
 	}
+
+# set plot mode if needed
 if (!$color_mode && !$contour_mode && !$navigation_mode)
 	{
 	$navigation_mode = 1;
@@ -919,10 +931,10 @@ foreach $file_mb (@files_data)
 			}
 		if ($mb_etime)
 			{
-			$time_info = $time_info . "-B$mb_btime";
+			$time_info = $time_info . "-E$mb_etime";
 			}
-		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G`;
-		}
+print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
+		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G`;		}
 
 	# now parse the mbinfo input 
 	while (@mbinfo)
@@ -2722,7 +2734,7 @@ sub max {
 }
 #-----------------------------------------------------------------------
 sub MBparsedatalist {
-	local ($FILEDATA, $line, $file_tmp, $format_tmp);
+	local ($FILEDATA, $line, $file_tmp, $format_tmp, @datalists);
 
  	if (open(FILEDATA,"<$_[0]"))
         	{
@@ -2739,12 +2751,19 @@ sub MBparsedatalist {
         			}
 			    elsif ($file_tmp && $format_tmp == -1)
 				{
-				MBparsedatalist($file_tmp);
+        			push(@datalists, $file_tmp);
 				}
 			    }
         		}
         	close FILEDATA;
         	}
+
+	# loop over datalists 
+	foreach $datalist (@datalists)
+		{
+		MBparsedatalist($datalist);
+		}
+
 }
 #-----------------------------------------------------------------------
 sub GetDecimalDegrees {

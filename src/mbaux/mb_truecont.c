@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $
+ *    $Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -56,6 +56,7 @@ int mb_contour_init(
 		double	label_int,
 		double	tick_len,
 		double	label_hgt,
+		double	label_spacing,
 		int	ncolor,
 		int	nlevel,
 		double	*level_list,
@@ -67,7 +68,7 @@ int mb_contour_init(
 		double	time_tick_len,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -98,6 +99,7 @@ int mb_contour_init(
 		fprintf(stderr,"dbg2       label interval:   %f\n",label_int);
 		fprintf(stderr,"dbg2       tick length:      %f\n",tick_len);
 		fprintf(stderr,"dbg2       label height:     %f\n",label_hgt);
+		fprintf(stderr,"dbg2       label spacing:    %f\n",label_spacing);
 		fprintf(stderr,"dbg2       number of colors: %d\n",ncolor);
 		fprintf(stderr,"dbg2       number of levels: %d\n",nlevel);
 		for (i=0;i<nlevel;i++)
@@ -167,6 +169,10 @@ int mb_contour_init(
 	dataptr->label_int = label_int;
 	dataptr->tick_len = tick_len;
 	dataptr->label_hgt = label_hgt;
+	if (label_spacing > 0.0)
+	    dataptr->label_spacing = label_spacing;
+	else
+	    dataptr->label_spacing = label_hgt;
 	dataptr->ncolor = ncolor;
 	dataptr->nlevel = nlevel;
 	dataptr->nlevelset = MB_NO;
@@ -326,7 +332,7 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -462,7 +468,7 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1069,7 +1075,7 @@ int check_label(struct swath *data,
 
 	good = 1;
 	ilab = 0;
-	rad_label_his = data->label_hgt;
+	rad_label_his = data->label_spacing;
 	while (good && ilab < nlabel_his)
 		{
 		dx = xlabel_his[ilab] - data->xlabel[nlab];
@@ -1143,7 +1149,7 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.1 2001-03-22 21:06:19 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;

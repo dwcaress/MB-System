@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 5.0 2000-12-01 22:53:59 caress Exp $
+ *    $Id: mb_contour.h,v 5.1 2001-03-22 21:06:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:53:59  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.3  2000/09/30  06:54:58  caress
  * Snapshot for Dale.
  *
@@ -78,6 +81,7 @@ struct swath
 	double	label_int;
 	double	tick_len;
 	double	label_hgt;
+	double	label_spacing;
 	int	ncolor;
 	int	nlevel;
 	int	nlevelset;

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_vrefcheck.perl	6/18/93
-#    $Id: mbm_vrefcheck.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#    $Id: mbm_vrefcheck.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_vrefcheck.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#   $Id: mbm_vrefcheck.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.0  2000/12/01  22:58:01  caress
+# First cut at Version 5.0.
+#
 # Revision 4.4  2000/10/03  21:42:17  caress
 # Snapshot for Dale.
 #
@@ -80,11 +83,18 @@ $xaxis = ($opt_X || $opt_x);
 $xmin = ($opt_A || $opt_a);
 $xmax = ($opt_B || $opt_b);
 
-# if needed set defaults
+# get format if needed
 if (!$format) 
 	{
-	$format = "24";
+	$line = `mbformat -I $file -L`;
+	($format) = $line =~ /(\S+)/;
+	if ($format == 0)
+		{
+		$format = -1;
+		}
 	}
+
+# if needed set defaults
 if (!$xscale) 
 	{
 	$xscale = "1.2";
@@ -96,8 +106,6 @@ $datfile = "vrefcheck_$$.dat";
 $fltfile = "vrefcheck_$$.flt";
 $resfile = "vrefcheck_$$.res";
 $psfile = "vrefcheck_$$.ps";
-$rasfile = "vrefcheck_$$.rast";
-$rtlfile = "vrefcheck_$$.rtl";
 
 # Get going.
 print "\nMacro mbm_vrefcheck running...\n";
@@ -149,22 +157,35 @@ print "Running psxy...\n";
 `psxy $resfile -JX$xaxis/9 -R$xmin/$xmax/-2/2 -B1g0.25:"Time From Beginning of File (hours)":/0.25g0.25:"Apparent Vertical Reference Noise (degrees)"::."Multibeam Data File - $file": -P > $psfile`;
 `rm -f $datfile $fltfile $resfile`;
 
-# Translate the postscript plot into a Sun rasterfile.
-print "Running ps2ras...\n";
-`ps2ras -w $pagex -h 11.5 -d 1 -p 300 $psfile $rasfile`;
-`rm -f $psfile`;
+# get postscript viewer
+# check environment variable
+if ($ENV{"MB_PS_VIEWER"})
+	{
+	$ps_viewer = $ENV{"MB_PS_VIEWER"};
+	}
+# check for .mbio_defaults file
+if (!$ps_viewer)
+	{
+	$home = $ENV{"HOME"};
+	$mbdef = "$home/.mbio_defaults";
+	if (open(MBDEF,"<$mbdef"))
+		{
+		while (<MBDEF>)
+			{
+			if (/ps viewer:\s+(\S+)/)
+				{
+				($ps_viewer) = /ps viewer:\s+(\S+)/;
+				}
+			}
+		}
+	}
+# just set it to ghostview
+if (!$ps_viewer)
+	{
+	$ps_viewer = "ghostview";
+	}
 
-# Translate the rasterfile into an rtl file for the Novajet plotter.
-print "Running image alchemy...\n";
-`alchemy $rasfile $rtlfile --r10`;
-`rm -f $rasfile`;
-
-# Shove the mess at the plotter.
-print "Sending image to plotter...";
-`cat $rtlfile > /dev/bpp0`;
-`rm -f $rtlfile`;
-
-#`pageview $psfile &`;
+`$ps_viewer $psfile &`;
 
 # Announce success whether it is deserved or not.
 print "All done!\n";
