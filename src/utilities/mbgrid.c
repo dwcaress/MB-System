@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.46 1999-12-29 00:35:11 caress Exp $
+ *    $Id: mbgrid.c,v 4.47 2000-06-20 21:00:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.46  1999/12/29  00:35:11  caress
+ * Release 4.6.8
+ *
  * Revision 4.45  1999/10/05  22:04:18  caress
  * Improved the facility for outputting ArcView grids.
  *
@@ -280,7 +283,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.46 1999-12-29 00:35:11 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.47 2000-06-20 21:00:19 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -3105,38 +3108,6 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			zmin,zmax,dx,dy,
 			xlabel,ylabel,zlabel,title,projection_id, 
 			argc,argv,&error);
-
-		/* execute mbm_grdplot */
-		if (datatype == MBGRID_DATA_BATHYMETRY)
-			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -C -D -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, zlabel);
-			}
-		else if (datatype == MBGRID_DATA_TOPOGRAPHY)
-			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -C -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, zlabel);
-			}
-		else if (datatype == MBGRID_DATA_AMPLITUDE)
-			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, zlabel);
-			}
-		else
-			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, zlabel);
-			}
-		if (verbose)
-			{
-			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
-				plot_cmd);
-			}
-		plot_status = system(plot_cmd);
-		if (plot_status == -1)
-			{
-			fprintf(stderr, "\nError executing mbm_grdplot on output file %s\n", ofile);
-			}
 		}
 	if (status != MB_SUCCESS)
 		{
@@ -3197,20 +3168,6 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				zmin,zmax,dx,dy,
 				xlabel,ylabel,nlabel,title,projection_id, 
 				argc,argv,&error);
-
-			/* execute mbm_grdplot */
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, nlabel);
-			if (verbose)
-				{
-				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
-					plot_cmd);
-				}
-			plot_status = system(plot_cmd);
-			if (plot_status == -1)
-				{
-				fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
-				}
 			}
 		if (status != MB_SUCCESS)
 			{
@@ -3269,20 +3226,6 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				zmin,zmax,dx,dy,
 				xlabel,ylabel,sdlabel,title,projection_id, 
 				argc,argv,&error);
-
-			/* execute mbm_grdplot */
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
-				ofile, ofile, title, sdlabel);
-			if (verbose)
-				{
-				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
-					plot_cmd);
-				}
-			plot_status = system(plot_cmd);
-			if (plot_status == -1)
-				{
-				fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
-				}
 			}
 		if (status != MB_SUCCESS)
 			{
@@ -3303,6 +3246,80 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 	mb_free(verbose,&sigma,&error); 
 	mb_free(verbose,&firsttime,&error); 
 	mb_free(verbose,&output,&error); 
+
+	/* run mbm_grdplot */
+	if (gridkind == MBGRID_CDFGRD)
+		{
+		/* execute mbm_grdplot */
+		strcpy(ofile,fileroot);
+		strcat(ofile,".grd");
+		if (datatype == MBGRID_DATA_BATHYMETRY)
+			{
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -C -D -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
+			}
+		else if (datatype == MBGRID_DATA_TOPOGRAPHY)
+			{
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -C -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
+			}
+		else if (datatype == MBGRID_DATA_AMPLITUDE)
+			{
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
+			}
+		else
+			{
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
+			}
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on output file %s\n", ofile);
+			}
+		}
+	if (more == MB_YES
+		&& gridkind == MBGRID_CDFGRD)
+		{
+		/* execute mbm_grdplot */
+		strcpy(ofile,fileroot);
+		strcat(ofile,"_num.grd");
+		sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
+			ofile, ofile, title, nlabel);
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+			}
+
+		/* execute mbm_grdplot */
+		strcpy(ofile,fileroot);
+		strcat(ofile,"_sd.grd");
+		sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
+			ofile, ofile, title, sdlabel);
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+			}
+		}
+
 	if (verbose > 0)
 		fprintf(outfp,"\nDone.\n\n");
 
