@@ -1,9 +1,9 @@
-.TH MBDEFAULTS 1 "7 October 1994"
+.TH mbdefaults l "31 October 1994"
 .SH NAME
 \fBmbdefaults\fP - Set or list default mbio parameters for reading and writing multibeam bathymetry data
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbdefaults\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIpsdisplay \fB-E\fIyr/mo/da/hr/mn/sc 
@@ -11,16 +11,16 @@ Version 4.00
 \fB-S\fIspeed \fB-T\fItimegap \fB-W\fIproject \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBMBDEFAULTS\fP is an utility for setting or listing the default read
+\fBmbdefaults\fP is an utility for setting or listing the default read
 parameters used by some \fBMBIO\fP utilities such as \fBMBCOPY\fP.  
 If a user wishes to set default
 parameters different from those set by the \fBMBIO\fP library, then
 these specialized default values must be stored
 in the file .mbio_defaults in the users home directory.  If any option
-flag is given in invoking \fBMBDEFAULTS\fP, then a new .mbio_defaults
+flag is given in invoking \fBmbdefaults\fP, then a new .mbio_defaults
 file will be written incorporating the newly set parameters along with
 any old parameters which have not been reset. If no option flag
-is given, then \fBMBDEFAULTS\fP will list the current default values
+is given, then \fBmbdefaults\fP will list the current default values
 (set by \fBmbio\fP if no .mbio_defaults file exists).
 
 .SH AUTHORSHIP
@@ -98,9 +98,9 @@ Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
 .B \fB-V\fP
-Normally, \fBMBDEFAULTS\fP outputs only a list of the default values 
+Normally, \fBmbdefaults\fP outputs only a list of the default values 
 to the stdout stream.  If the
-\fB-V\fP flag is given, then \fBMBDEFAULTS\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbdefaults\fP works in a "verbose" mode and
 also outputs the program version being used.
 .TP
 .B \fB-W\fIproject\fP

@@ -1,16 +1,16 @@
-.TH MBUNCLEAN 1 "23 February 1994"
+.TH mbunclean l "31 October 1994"
 .SH NAME
 \fBmbunclean\fP - Unflags edited beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbunclean\fP [\fB-B\fIlow/high \fB-F\fIformat \fB-L\fIlonflip\fP 
 \fB-I\fIinfile \fB-O\fIoutfile \fB-N \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBMBUNCLEAN\fP  is an utility for reversing previous attempts to edit
+\fBmbunclean\fP  is an utility for reversing previous attempts to edit
 multibeam bathymetry data.  Bad data is conventionally flagged by
 setting depth values negative; \fBmbunclean\fP sets negative depths
 positive. All flagged depths will be unflagged unless depth range checking 
@@ -69,9 +69,9 @@ no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
 .B \fB-V\fP
-Normally, \fBMBUNCLEAN\fP works "silently" without outputting
+Normally, \fBmbunclean\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBMBUNCLEAN\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbunclean\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages, 
 and the number of unflagged beams.
 

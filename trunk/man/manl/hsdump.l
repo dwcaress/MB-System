@@ -1,15 +1,15 @@
-.TH HSDUMP 1 "23 February 1994"
+.TH hsdump l "31 October 1994"
 .SH NAME
-\fBhsdump\fP - HSDUMP lists the information contained in Hydrosweep DS data files.
+\fBhsdump\fP - hsdump lists the information contained in Hydrosweep DS data files.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBhsdump\fP [\fB-F\fIformat \fB-I\fIinfile \fB-O\fIkind \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBHSDUMP\fP HSDUMP lists the information contained in data records on 
+\fBhsdump\fP hsdump lists the information contained in data records on 
 Hydrosweep DS data files, including survey, calibrate, water velocity 
 and comment records. The default input stream is stdin.
 
@@ -58,9 +58,9 @@ This option can be given multiple times to set more than one
 kind of data record for listing.
 .TP
 .B \fB-V\fP
-Normally, \fBHSDUMP\fP lists only the contents of the data records 
+Normally, \fBhsdump\fP lists only the contents of the data records 
 which are specified with the \fB-O\fP option.  If the
-\fB-V\fP flag is given, then \fBHSDUMP\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBhsdump\fP works in a "verbose" mode and
 outputs the program version being used, any comment records encountered
 in the data stream, and all error status messages.
 

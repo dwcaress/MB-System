@@ -1,9 +1,9 @@
-.TH MBLIST 1 "23 February 1994"
+.TH mblist l "31 October 1994"
 .SH NAME
 \fBmblist\fP - List data in multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmblist\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIdumpmode 
@@ -13,11 +13,11 @@ Version 4.00
 \fB-S\fIspeed \fB-T\fItimegap \fB-V\fP]
 
 .SH DESCRIPTION
-\fBMBLIST\fP is a utility to list the contents of a multibeam 
-data file to stdout. \fBMBLIST\fP is tailored to 
+\fBmblist\fP is a utility to list the contents of a multibeam 
+data file to stdout. \fBmblist\fP is tailored to 
 produce ASCII files in
 spreadsheet style, with data columns separated by tabs. The output of
-\fBMBLIST\fP can be piped to plotting and data analysis programs. The
+\fBmblist\fP can be piped to plotting and data analysis programs. The
 option \fB-O\fP\fIoutput_format\fP can be used to control the data types that
 are sent to stdout. The data input may be averaged or windowed in time
 and space before it is listed.  Complete dumps of bathymetry,
@@ -177,9 +177,9 @@ Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
 .B \fB-V\fP
-Normally, \fBMBLIST\fP works "silently" without outputting
+Normally, \fBmblist\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBMBLIST\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 
 .SH EXAMPLES
@@ -354,5 +354,5 @@ Either way, the output is as follows:
 
 
 .SH BUGS
-\fBMBLIST\fP is not able to list all of the information available in some
+\fBmblist\fP is not able to list all of the information available in some
 multibeam formats.
