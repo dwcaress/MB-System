@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.4 2001-10-29 20:07:39 caress Exp $
+#    $Id: mbm_plot.perl,v 5.5 2001-11-02 21:07:40 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.4 2001-10-29 20:07:39 caress Exp $
+#   $Id: mbm_plot.perl,v 5.5 2001-11-02 21:07:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.4  2001/10/29  20:07:39  caress
+# Now checks that the number of records is > 0 before
+# using the min max data values in mbinfo output.
+#
 # Revision 5.3  2001/10/11  01:32:11  caress
 # Replaced use of perl function MBparsedatalist
 # with call to new program mbdatalist.
@@ -445,7 +449,7 @@ if ($help)
 	print "\t\t-MMTtimegap -MMZalgorithm\n";
 	print "\t\t-MTCfill -MTDresolution -MTGfill -MTIriver[/pen]\n";
 	print "\t\t-MTNborder[/pen] -MTSfill -MTWpen\n";
-	print "\t\t-MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]\n";
+	print "\t\t-MXGfill -MXIxy_file -MXM -MXSsymbol/size -MXWpen]\n";
 	exit 0;
 	}
 
@@ -661,13 +665,35 @@ if ($misc)
 				{
 				$xyfill = "N";
 				}
+			if (!$xysegment)
+				{
+				$xysegment = "N";
+				}
 			if (!$xypen)
 				{
 				$xypen = "N";
 				}
 			push(@xysymbols, $xysymbol);
 			push(@xyfills, $xyfill);
+			push(@xysegments, $xysegment);
 			push(@xypens, $xypen);
+			}
+
+		# set xy segment
+		if ($cmd =~ /^[Xx][Mm]/)
+			{
+			if (!$xysegment)
+				{
+				$xysegment = "Y";
+				}
+			elsif ($xysegment ne "N") 
+				{
+				$xysegment = "N";
+				}
+			else 
+				{
+				$xysegment = "Y";
+				}
 			}
 
 		# set xy symbol
@@ -2254,6 +2280,10 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 		{
 		printf FCMD "-S$xysymbols[$i] \\\n\t";
 		}
+	if ($xysegments[$i] ne "N")
+		{
+		printf FCMD "-M \\\n\t";
+		}
 	if ($xypens[$i] ne "N")
 		{
 		printf FCMD "-W$xypens[$i] \\\n\t";
@@ -2679,13 +2709,14 @@ if ($verbose)
 	if (@xyfiles)
 		{
 		print "\n  Primary XY Plotting Controls:\n";
-		printf "    symbol     pen        fill       file\n";
-		printf "    ------     ---        ----       ----\n";
+		printf "    symbol     pen        fill      segment      file\n";
+		printf "    ------     ---        ----      -------      ----\n";
 		for ($i = 0; $i < scalar(@xyfiles); $i++) 
 			{
-			printf "    %-10s %-10s %-10s %s\n", 
+			printf "    %-10s %-10s %-10s %-10s %s\n", 
 				$xysymbols[$i], $xypens[$i], 
-				$xyfills[$i], $xyfiles[$i];
+				$xyfills[$i], $xysegments[$i], 
+				$xyfiles[$i];
 			}
 		}
 	if ($length_scale || $contour_anot_int 

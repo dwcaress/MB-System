@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.2 2001-10-10 23:56:01 dcaress Exp $
+#    $Id: mbm_xyplot.perl,v 5.3 2001-11-02 21:07:40 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.2 2001-10-10 23:56:01 dcaress Exp $
+#   $Id: mbm_xyplot.perl,v 5.3 2001-11-02 21:07:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.2  2001/10/10  23:56:01  dcaress
+# Regrettably, I don't remember what I changed...
+#
 #   Revision 5.1  2001-06-30 10:36:53-07  caress
 #   Release 5.0.beta02
 #
@@ -370,6 +373,10 @@ if (!$xysegment)
 	{
 	$xysegment = "N";
 	}
+else
+	{
+	$xysegment = "Y";
+	}
 
 # parse list of data files
 @data_file_list = split(/:::::::/, $file_data);
@@ -395,9 +402,9 @@ foreach $xyfile_raw (@data_file_list) {
 			{
 			($xypen_f) = $filearg[$i] =~ /W(\S+)/;
 			}
-		if ($filearg[$i] =~ /N(\S+)/)
+		if ($filearg[$i] =~ /N/)
 			{
-			($xysegment_f) = $filearg[$i] =~ /N(\S+)/;
+			$xysegment_f = "Y";
 			}
 	}
 
