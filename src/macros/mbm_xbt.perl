@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id: mbm_xbt.perl,v 5.1 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_xbt.perl,v 5.2 2004-09-16 19:14:49 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -58,10 +58,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   David Brock of ASA added the Sippican MK12 header parsing code and switch
 #
 # Version:
-# $Id: mbm_xbt.perl,v 5.1 2003-04-17 20:42:48 caress Exp $
+# $Id: mbm_xbt.perl,v 5.2 2004-09-16 19:14:49 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 5.0  2000/12/01 22:58:01  caress
 #   First cut at Version 5.0.
 #
@@ -160,6 +163,8 @@ $foundData = "NO";
 $SPARTON = 1;
 $MK12    = 2;
 
+# minimum plausible seawater temperature - used for sanity check before output
+$MINIMUMTEMPERATURE = -2.0;
 
 # Deal with command line arguments
 &Getopts('I:i:S:s:F:f:L:l:VvHh');
@@ -313,9 +318,14 @@ while (<F>) {
 # Lovett:      
      
      # Output the result
-     if ($temp > 0.0)
+     if ($temp > $MINIMUMTEMPERATURE)
 	    {
 	    printf O "%.2f %.2f\n", $depth, $velocity;
+	    }
+     else
+            {
+            printf STDERR "Error: data (%.2f %.2f) ignored because temperature %.2f < minimum %.2f\n",
+	    			$depth, $velocity, $temp, $MINIMUMTEMPERATURE;
 	    }
     }
     
