@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_surface.c	5/2/94
- *    $Id: mb_surface.c,v 5.1 2003-04-29 20:27:48 caress Exp $
+ *    $Id: mb_surface.c,v 5.2 2005-03-25 04:09:53 caress Exp $
  *
  *    Inclusion in MB-System:
  *    Copyright (c) 1994, 2003 by
@@ -57,6 +57,9 @@
  * Date:	May 2, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2003/04/29 20:27:48  caress
+ * Fixed multiple definitions of "error".
+ *
  * Revision 5.0  2003/03/22 03:10:36  caress
  * Reinserting this code into MB-System for first time in years.
  *
@@ -93,91 +96,79 @@
 #define CNULL		((char *)NULL)
 
 #define OUTSIDE 2000000000	/* Index number indicating data is outside useable area */
- 
-int n_alloc = GMT_CHUNK;
-int npoints=0;			/* Number of data points */
-int nx=0;			/* Number of nodes in x-dir. */
-int ny=0;			/* Number of nodes in y-dir. (Final grid) */
-int	mx = 0;
-int	my = 0;
-int	ij_sw_corner, ij_se_corner, ij_nw_corner, ij_ne_corner;
-int block_nx;			/* Number of nodes in x-dir for a given grid factor */
-int block_ny;			/* Number of nodes in y-dir for a given grid factor */
-int max_iterations=250;		/* Max iter per call to iterate */
-int total_iterations = 0;
-int grid, old_grid;		/* Node spacings  */
-int	grid_east;
-int n_fact = 0;			/* Number of factors in common (ny-1, nx-1) */
-int factors[32];		/* Array of common factors */
-int local_verbose = FALSE;
-int local_error = MB_ERROR_NO_ERROR;
-int status = MB_SUCCESS;
-int n_empty;			/* No of unconstrained nodes at initialization  */
-int set_low = 0;		/* 0 unconstrained,1 = by min data value, 2 = by user value */
-int set_high = 0;		/* 0 unconstrained,1 = by max data value, 2 = by user value */
-int constrained = FALSE;	/* TRUE if set_low or set_high is TRUE */
-double low_limit, high_limit;	/* Constrains on range of solution */
-double xmin, xmax, ymin, ymax;	/* minmax coordinates */
-float *lower, *upper;		/* arrays for minmax values, if set */
-double xinc, yinc;		/* Size of each grid cell (final size) */
-double grid_xinc, grid_yinc;	/* size of each grid cell for a given grid factor */
-double r_xinc, r_yinc, r_grid_xinc, r_grid_yinc;	/* Reciprocals  */
-double converge_limit = 0.0;	/* Convergence limit */
-double radius = 0.0;			/* Search radius for initializing grid  */
-double	tension = 0.00;		/* Tension parameter on the surface  */
-double	boundary_tension = 0.0;
-double	interior_tension = 0.0;
-double	a0_const_1, a0_const_2;	/* Constants for off grid point equation  */
-double	e_2, e_m2, one_plus_e2;
-double eps_p2, eps_m2, two_plus_ep2, two_plus_em2;
-double	x_edge_const, y_edge_const;
-double	epsilon = 1.0;
-double	z_mean;
-double	z_scale = 1.0;		/* Root mean square range of z after removing planar trend  */
-double	r_z_scale = 1.0;	/* reciprocal of z_scale  */
-double	plane_c0, plane_c1, plane_c2;	/* Coefficients of best fitting plane to data  */
-double small;			/* Let data point coincide with node if distance < small */
-float *u;			/* Pointer to grid array */
-float *v2;			/* Pointer to v.2.0 grid array */
-char *iu;			/* Pointer to grid info array */
-char mode_type[2] = {'I','D'};	/* D means include data points when iterating
-				 * I means just interpolate from larger grid */
 
-int	offset[25][12];		/* Indices of 12 nearby points in 25 cases of edge conditions  */
-double		coeff[2][12];	/* Coefficients for 12 nearby points, constrained and unconstrained  */
-
-double relax_old, relax_new = 1.4;	/* Coefficients for relaxation factor to speed up convergence */
-
-int compare_points();
-
-struct DATA {
+struct MB_SURFACE_DATA {
 	float x;
 	float y;
 	float z;
 	int index;
-} *data;		/* Data point and index to node it currently constrains  */
+};
 
-struct BRIGGS {
+struct MB_SURFACE_BRIGGS {
 	double b[6];
-} *briggs;		/* Coefficients in Taylor series for Laplacian(z) a la I. C. Briggs (1974)  */
+};
+ 
+static int n_alloc = GMT_CHUNK;
+static int npoints=0;			/* Number of data points */
+static int nx=0;			/* Number of nodes in x-dir. */
+static int ny=0;			/* Number of nodes in y-dir. (Final grid) */
+static int	mx = 0;
+static int	my = 0;
+static int	ij_sw_corner, ij_se_corner, ij_nw_corner, ij_ne_corner;
+static int block_nx;			/* Number of nodes in x-dir for a given grid factor */
+static int block_ny;			/* Number of nodes in y-dir for a given grid factor */
+static int max_iterations=250;		/* Max iter per call to iterate */
+static int total_iterations = 0;
+static int grid, old_grid;		/* Node spacings  */
+static int	grid_east;
+static int n_fact = 0;			/* Number of factors in common (ny-1, nx-1) */
+static int factors[32];		/* Array of common factors */
+static int local_verbose = FALSE;
+static int local_error = MB_ERROR_NO_ERROR;
+static int status = MB_SUCCESS;
+static int n_empty;			/* No of unconstrained nodes at initialization  */
+static int set_low = 0;		/* 0 unconstrained,1 = by min data value, 2 = by user value */
+static int set_high = 0;		/* 0 unconstrained,1 = by max data value, 2 = by user value */
+static int constrained = FALSE;	/* TRUE if set_low or set_high is TRUE */
+static double low_limit, high_limit;	/* Constrains on range of solution */
+static double xmin, xmax, ymin, ymax;	/* minmax coordinates */
+static float *lower, *upper;		/* arrays for minmax values, if set */
+static double xinc, yinc;		/* Size of each grid cell (final size) */
+static double grid_xinc, grid_yinc;	/* size of each grid cell for a given grid factor */
+static double r_xinc, r_yinc, r_grid_xinc, r_grid_yinc;	/* Reciprocals  */
+static double converge_limit = 0.0;	/* Convergence limit */
+static double radius = 0.0;			/* Search radius for initializing grid  */
+static double	tension = 0.00;		/* Tension parameter on the surface  */
+static double	boundary_tension = 0.0;
+static double	interior_tension = 0.0;
+static double	a0_const_1, a0_const_2;	/* Constants for off grid point equation  */
+static double	e_2, e_m2, one_plus_e2;
+static double eps_p2, eps_m2, two_plus_ep2, two_plus_em2;
+static double	x_edge_const, y_edge_const;
+static double	epsilon = 1.0;
+static double	z_mean;
+static double	z_scale = 1.0;		/* Root mean square range of z after removing planar trend  */
+static double	r_z_scale = 1.0;	/* reciprocal of z_scale  */
+static double	plane_c0, plane_c1, plane_c2;	/* Coefficients of best fitting plane to data  */
+static double small;			/* Let data point coincide with node if distance < small */
+static float *u;			/* Pointer to grid array */
+static float *v2;			/* Pointer to v.2.0 grid array */
+static char *iu;			/* Pointer to grid info array */
+static char mode_type[2] = {'I','D'};	/* D means include data points when iterating
+				 * I means just interpolate from larger grid */
 
-int mb_surface(verbose,ndat,xdat,ydat,zdat,
-		xxmin,xxmax,yymin,yymax,xxinc,yyinc,
-		ttension,sgrid)
-int	verbose;
-int	ndat;
-float	*xdat;
-float	*ydat;
-float	*zdat;
-double	xxmin;
-double	xxmax;
-double	yymin;
-double	yymax;
-double	xxinc;
-double	yyinc;
-double	ttension;
-float	*sgrid;
+static int	offset[25][12];		/* Indices of 12 nearby points in 25 cases of edge conditions  */
+static double		coeff[2][12];	/* Coefficients for 12 nearby points, constrained and unconstrained  */
 
+static double relax_old, relax_new = 1.4;	/* Coefficients for relaxation factor to speed up convergence */
+
+static int compare_points();
+static struct MB_SURFACE_DATA *data;		/* Data point and index to node it currently constrains  */
+static struct MB_SURFACE_BRIGGS *briggs;		/* Coefficients in Taylor series for Laplacian(z) a la I. C. Briggs (1974)  */
+
+int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
+		double xxmin, double xxmax, double yymin, double yymax, double xxinc, double yyinc,
+		double ttension, float *sgrid)
 {
 
 	int	i, j, ij, serror = FALSE, size_query = FALSE;
@@ -276,7 +267,7 @@ float	*sgrid;
 
 	/* Allocate more space  */
 	
-	status = mb_malloc(local_verbose, npoints * sizeof(struct BRIGGS), &briggs, &local_error);
+	status = mb_malloc(local_verbose, npoints * sizeof(struct MB_SURFACE_BRIGGS), &briggs, &local_error);
 	status = mb_malloc(local_verbose, mx * my * sizeof(char), &iu, &local_error);
 	status = mb_malloc(local_verbose, mx * my * sizeof(float), &u, &local_error);
 
@@ -489,8 +480,8 @@ int fill_in_forecast () {
 	iu[ij_ne_corner] = 5;
 }
 
-int compare_points (point_1, point_2)
-struct DATA *point_1, *point_2; {
+int compare_points (struct MB_SURFACE_DATA *point_1, struct MB_SURFACE_DATA *point_2)
+{
 		/*  Routine for qsort to sort data structure for fast access to data by node location.
 		    Sorts on index first, then on radius to node corresponding to index, so that index
 		    goes from low to high, and so does radius.
@@ -545,7 +536,7 @@ int set_index () {
 			data[k].index = i * block_ny + j;
 	}
 	
-	qsort ((char *)data, npoints, sizeof (struct DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), compare_points);
 	
 	npoints -= k_skipped;
 	
@@ -725,16 +716,12 @@ int new_initialize_grid()
 }
 
 /* This function rewritten by D.W. Caress 5/3/94 */
-int read_data(ndat,xdat,ydat,zdat)
-int	ndat;
-float	*xdat;
-float	*ydat;
-float	*zdat;
+int read_data(int ndat, float *xdat, float *ydat, float *zdat)
 {
 	int	i, j, k, kmax, kmin, idat;
 	double	zmin = 1.0e38, zmax = -1.0e38;
 
-	status = mb_malloc(local_verbose, ndat * sizeof(struct DATA), &data, &local_error);
+	status = mb_malloc(local_verbose, ndat * sizeof(struct MB_SURFACE_DATA), &data, &local_error);
 	
 	/* Read in xyz data and computes index no and store it in a structure */
 	k = 0;
@@ -798,8 +785,7 @@ float	*zdat;
 }
 
 /* this function rewritten from write_output() by D.W. Caress 5/3/94 */
-int get_output(sgrid)
-float	*sgrid;
+int get_output(float *sgrid)
 {
 	int	index, i, j, ij;
 	
@@ -812,8 +798,7 @@ float	*sgrid;
 			}
 }
 	
-int	iterate(mode)
-	int	mode;
+int	iterate(int mode)
 {
 
 	int	i, j, k, ij, kase, briggs_index, ij_v2;
@@ -1290,7 +1275,7 @@ int	throw_away_unusables()
 	
 	/* Sort the data  */
 	
-	qsort ((char *)data, npoints, sizeof (struct DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), compare_points);
 	
 	/* If more than one datum is indexed to same node, only the first should be kept.
 		Mark the additional ones as OUTSIDE
@@ -1308,9 +1293,9 @@ int	throw_away_unusables()
 	}
 	/* Sort again; this time the OUTSIDE points will be thrown away  */
 	
-	qsort ((char *)data, npoints, sizeof (struct DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), compare_points);
 	npoints -= n_outside;
-	status = mb_realloc(local_verbose, npoints * sizeof(struct DATA), &data, &local_error);
+	status = mb_realloc(local_verbose, npoints * sizeof(struct MB_SURFACE_DATA), &data, &local_error);
 	if (local_verbose && (n_outside)) {
 		fprintf(stderr,"surface: %ld unusable points were supplied; these will be ignored.\n", n_outside);
 		fprintf(stderr,"\tYou should have pre-processed the data with blockmean or blockmedian.\n");
@@ -1339,8 +1324,8 @@ int	rescale_z_values()
 	return (0);
 }
 
-int load_constraints (low, high)
-char *low, *high; {
+int load_constraints (char *low, char *high)
+{
 	int i, j, ij, n_trimmed;
 	double xx, yy;
 /*	struct GRD_HEADER hdr;*/
@@ -1422,8 +1407,7 @@ char *low, *high; {
 	}
 }
 
-double	guess_surface_time(nx, ny)
-int	nx, ny;
+double	guess_surface_time(int nx, int ny)
 {
 	/* Routine to guess a number proportional to the operations
 	 * required by surface working on a user-desired grid of
@@ -1496,8 +1480,7 @@ int	nx, ny;
 }
 
 
-int	get_prime_factors(n, f)
-int	n, f[];
+int	get_prime_factors(int n, int f[])
 {
 	/* Fills the integer array f with the prime factors of n.
 	 * Returns the number of locations filled in f, which is
@@ -1617,8 +1600,7 @@ int	n, f[];
 
 #define IABS(i)	(((i) < 0) ? -(i) : (i))
 
-int	gcd_euclid(a,b)
-int	a, b;
+int	gcd_euclid(int a,int b)
 {
 	/* Returns the greatest common divisor of u and v by Euclid's method.
 	 * I have experimented also with Stein's method, which involves only
