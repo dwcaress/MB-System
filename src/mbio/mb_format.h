@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.14 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_format.h,v 5.15 2003-09-23 21:02:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.13  2003/03/10 20:04:45  caress
  * Added mr1pr library.
  *
@@ -205,7 +208,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2003-04-17 21:05:23 $ $Revision: 5.14 $";
+static char mb_format_updatedate[] = "$Date: 2003-09-23 21:02:45 $ $Revision: 5.15 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -237,7 +240,7 @@ static char mb_format_updatedate[] = "$Date: 2003-04-17 21:05:23 $ $Revision: 5.
 #define	MB_SYS_SURF		26
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	54
+#define	MB_FORMATS	56
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -408,6 +411,8 @@ static char mb_format_updatedate[] = "$Date: 2003-04-17 21:05:23 $ $Revision: 5.
 #define MBF_MBARIROV    165     /* MBARI ROV navigation format, ascii, MBARI */ 
 #define MBF_MBPRONAV    166     /* MB-System simple navigation format, ascii, MBARI */ 
 #define MBF_NVNETCDF    167     /* CARAIBES CDF navigation, netCDF, IFREMER */ 
+#define MBF_ASCIIXYT    168     /* XYT (lon lat topography) soundings, ascii, generic */ 
+#define MBF_ASCIIYXT    169     /* YXT (lat lon topography) soundings, ascii, generic */ 
 #define MBF_HS10JAMS    171     /* Furuno HS10 multibeam format, 45 beams, 
 					bathymetry and amplitude, ascii, JAMSTEC */ 
 #define MBF_SAMESURF    181     /* STN Atlas processing multibeam format, 
