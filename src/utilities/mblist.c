@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	3.00	2/1/93
- *    $Id: mblist.c,v 3.0 1993-05-04 22:20:17 dale Exp $
+ *    $Id: mblist.c,v 3.1 1993-05-17 16:26:06 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/05/04  22:20:17  dale
+ * Initial version
+ *
  *
  */
 
@@ -33,6 +36,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <strings.h>
+#include <time.h>
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -50,7 +54,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 3.0 1993-05-04 22:20:17 dale Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 3.1 1993-05-17 16:26:06 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Mbath_beam -Nback_beam -Ooptions -Ddumpmode]";
@@ -117,6 +121,10 @@ char **argv;
 	double	*scatterlat;
 	char	comment[256];
 	int	icomment = 0;
+
+	/* unix time variables */
+	struct tm	time_tm;
+	time_t	time_u;
 
 	int	i, j;
 
@@ -555,6 +563,16 @@ char **argv;
 					break;
 				case 'U': /* time in minutes since 1/1/81 00:00:00 */
 					printf("%.3f",time_d);
+					break;
+				case 'u': /* unix time in seconds since 1/1/70 00:00:00 */
+					time_tm.tm_year = time_i[0] - 1900;
+					time_tm.tm_mon = time_i[1];
+					time_tm.tm_mday = time_i[2];
+					time_tm.tm_hour = time_i[3];
+					time_tm.tm_min = time_i[4];
+					time_tm.tm_sec = time_i[5];
+					time_u = timegm(time_tm);
+					printf("%d",time_u);
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
