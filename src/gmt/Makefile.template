@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.16 2002-07-20 20:44:07 caress Exp $
+#	$Id: Makefile.template,v 4.17 2003-03-10 07:39:29 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by 
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.16  2002/07/20 20:44:07  caress
+# Release 5.0.beta20
+#
 # Revision 4.15  2002/02/22 09:05:09  caress
 # Release 5.0.beta13
 #
@@ -104,6 +107,7 @@ $(BINDIR)/mbcontour: mbcontour.o \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libsapi.a  \
+		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libmbps.a
@@ -112,6 +116,7 @@ $(BINDIR)/mbcontour: mbcontour.o \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbps.a \
 		$(GMTLIBDIR)/libpsl.a \
@@ -121,12 +126,14 @@ $(BINDIR)/mbswath: mbswath.o \
 		$(LIBDIR)/libmbio.a  \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
-		$(LIBDIR)/libsapi.a 
+		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a
 	$(CC) $(CFLAGS) mbswath.o \
 		$(LIBDIR)/libmbio.a  \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
 		$(GMTLIBDIR)/libpsl.a \
 		$(GMTLIBDIR)/libgmt.a \
 		$(LFLAGS) -o $(BINDIR)/mbswath
