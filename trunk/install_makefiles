@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.7 1995-03-23 16:30:08 caress Exp $
+#    $Id: install_makefiles,v 4.8 1995-06-06 14:18:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.7 1995-03-23 16:30:08 caress Exp $
+#   $Id: install_makefiles,v 4.8 1995-06-06 14:18:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.7  1995/03/23  16:30:08  caress
+# Added -Olimit flag for compiling mbgrid.c under IRIX
+#
 # Revision 4.6  1995/03/22  19:19:27  caress
 # Added support for HPUX.
 #
@@ -149,22 +152,22 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$GRPHLIBDIR = "/otter/home/graphics/lib";
 #	$GRPHINCDIR = "/otter/home/graphics/lib";
 #
-# Example for installing on WHOI Sun workstations running Solaris:
+# Example for installing on Sun workstations running Solaris 2.4:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "SOLARIS";
 #	$BYTESWAPPED = "NO";
-#	$CFLAGS = "-O -I/usr/ucbinclude";
+#	$CFLAGS = "-O -I/usr/openwin/include -I/usr/ucbinclude";
 #	$FFLAGS = "-O";
-#	$LFLAGS = "-lrpcsvc -lnsl -lm";
+#	$LFLAGS = "-lnsl -lm";
 #	$FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam";
-#	$GRAPHICAL = "NO";
-#	$MOTIFINCDIR = "/usr/include/Xm";
-#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
-#	$UIL = "/usr/bin/X11/uil";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/dt/include";
+#	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11 -lMrm";
+#	$UIL = "/usr/dt/bin/uil";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
-#	$NETCDFDIR = "/usr/local/lib";
-#	$LEVITUS = "/usr/local/data/annual";
+#	$NETCDFDIR = "/usr/local/netcdf/lib";
+#	$LEVITUS = "/usr/local/levitus/annual";
 #	$REALTIME = 0;
 #	$GRPHLIBDIR = "";
 #	$GRPHINCDIR = "";
