@@ -47,8 +47,8 @@
  *                version GSF-v1.03.
  * jsb  10/04/96  Changed fopen argument from "wb" to "a+b" for the GSF_APPEND
  *                access mode.  Also added logic to set file pointer to top prior
- *                to trying to read the gsf header record in gsfOpen/gsfOpenBuffered 
- *                when the file access mode is GSF_APPEND.  Replaced use of 
+ *                to trying to read the gsf header record in gsfOpen/gsfOpenBuffered
+ *                when the file access mode is GSF_APPEND.  Replaced use of
  *                numOpenFiles with *handle as argument to gsfRead and gsfWrite
  *                within gsfOpen and gsfOpenBuffered.  This repairs problems which
  *                can occur when a single application is accessing multiple files.
@@ -64,6 +64,8 @@
  * dwc 1/9/98     Added a case in gsfGetSwathBathyBeamWidths for the Elac Bottomchart MkII.
  * bac  03/15/98  Added an array subrecord for signal to noise ratio.
  * bac  03/15/98  Added an array subrecord for beam angle forward.
+ * jsb  09/28/98  Added support for new navigation error record. Modified gsfPrintError
+ *                 to use gsfStringError.
  *
  * Classification : Unclassified
  *
@@ -338,14 +340,14 @@ gsfOpen(const char *filename, const int mode, int *handle)
     }
 
     /* jsb 04/16/97 Save the GSF version ID into the file table */
-    ret = sscanf (gsfFileTable[fileTableIndex].rec.header.version, "GSF-v%d.%d", 
+    ret = sscanf (gsfFileTable[fileTableIndex].rec.header.version, "GSF-v%d.%d",
         &gsfFileTable[fileTableIndex].major_version_number,
         &gsfFileTable[fileTableIndex].minor_version_number);
     if (ret != 2)
     {
         gsfError = GSF_UNRECOGNIZED_FILE;
         return (-1);
-    } 
+    }
 
     /*  Set the update flag if needed. This is used to force a call to fflush
      *  between read an write operations, on files opened for update.
@@ -647,14 +649,14 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
     }
 
     /* jsb 04/16/97 Save the GSF version ID into the file table */
-    ret = sscanf (gsfFileTable[fileTableIndex].rec.header.version, "GSF-v%d.%d", 
+    ret = sscanf (gsfFileTable[fileTableIndex].rec.header.version, "GSF-v%d.%d",
         &gsfFileTable[fileTableIndex].major_version_number,
         &gsfFileTable[fileTableIndex].minor_version_number);
     if (ret != 2)
     {
         gsfError = GSF_UNRECOGNIZED_FILE;
         return (-1);
-    } 
+    }
 
     /*  Set the update flag if needed. This is used to force a call to fflush
      *  between read an write operations, on files opened for update.
@@ -772,7 +774,7 @@ gsfClose(const int handle)
 
     /* jsb 05/14/97 Clear the contents of the gsfFileTable fields. We don't
      * want to clear the filename, this allows a performance improvement for
-     * programs which use append to log gsf files. (ie: data acquisition) 
+     * programs which use append to log gsf files. (ie: data acquisition)
      */
     gsfFileTable[handle-1].major_version_number = 0;
     gsfFileTable[handle-1].minor_version_number = 0;
@@ -789,8 +791,8 @@ gsfClose(const int handle)
 
     /* clear the contents of the index data table */
     if (gsfFileTable[handle-1].index_data.scale_factor_addr)
-    { 
-	free(gsfFileTable[handle-1].index_data.scale_factor_addr);
+    {
+        free(gsfFileTable[handle-1].index_data.scale_factor_addr);
     }
     memset (&gsfFileTable[handle-1].index_data, 0, sizeof(gsfFileTable[handle-1].index_data));
 
@@ -1294,14 +1296,24 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
             }
             break;
 
-	case (GSF_RECORD_SINGLE_BEAM_PING):
-	    ret = gsfDecodeSinglebeam(&rptr->sb_ping, dptr, &gsfFileTable[handle - 1], handle, dataSize);
-	    if (ret < 0)
-	    {
-		/* gsfError is set within gsfDecodeSinglebeam */
-		return (-1);
-	    }
-	    break;
+        case (GSF_RECORD_SINGLE_BEAM_PING):
+            ret = gsfDecodeSinglebeam(&rptr->sb_ping, dptr, &gsfFileTable[handle - 1], handle, dataSize);
+            if (ret < 0)
+            {
+                /* gsfError is set within gsfDecodeSinglebeam */
+                return (-1);
+            }
+            break;
+
+        case (GSF_RECORD_HV_NAVIGATION_ERROR):
+            ret = gsfDecodeHVNavigationError(&rptr->hv_nav_error, &gsfFileTable[handle - 1], dptr);
+            if (ret < 0)
+            {
+                gsfError = GSF_HV_NAV_ERROR_RECORD_DECODE_FAILED;
+                return (-1);
+            }
+            break;
+
 
         default:
             gsfError = GSF_UNRECOGNIZED_RECORD_ID;
@@ -1663,14 +1675,24 @@ gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr)
             }
             break;
 
-	case (GSF_RECORD_SINGLE_BEAM_PING):
-	    ret = gsfEncodeSinglebeam(ucptr, &rptr->sb_ping);
-	    if (ret < 0)
-	    {
-		gsfError = GSF_SINGLE_BEAM_ENCODE_FAILED;
-		return (-1);
-	    }
-	    break;
+        case (GSF_RECORD_SINGLE_BEAM_PING):
+            ret = gsfEncodeSinglebeam(ucptr, &rptr->sb_ping);
+            if (ret < 0)
+            {
+                gsfError = GSF_SINGLE_BEAM_ENCODE_FAILED;
+                return (-1);
+            }
+            break;
+
+        /* jsb 09/29/98 Added support for new navigation errors record */
+        case (GSF_RECORD_HV_NAVIGATION_ERROR):
+            ret = gsfEncodeHVNavigationError(ucptr, &rptr->hv_nav_error);
+            if (ret < 0)
+            {
+                gsfError = GSF_HV_NAV_ERROR_RECORD_ENCODE_FAILED;
+                return (-1);
+            }
+            break;
 
         default:
             gsfError = GSF_UNRECOGNIZED_RECORD_ID;
@@ -1686,7 +1708,7 @@ gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr)
          * created with a version of gsf prior to 1.03 we need to support it the
          * old way.
          */
-        if ((gsfFileTable[handle - 1].major_version_number == 1) && 
+        if ((gsfFileTable[handle - 1].major_version_number == 1) &&
             (gsfFileTable[handle - 1].minor_version_number <= 2))
         {
             memset(ucptr + dataSize, 0, pad);
@@ -2140,120 +2162,9 @@ gsfFree (gsfRecords *rec)
 void
 gsfPrintError(FILE * fp)
 {
-    switch (gsfError)
-    {
-        case GSF_FOPEN_ERROR:
-            fprintf(fp, "GSF Unable to open requested file\n");
-            break;
 
-        case GSF_UNRECOGNIZED_FILE:
-            fprintf(fp, "GSF Error unrecognized file\n");
-            break;
+    fprintf(fp, "%s\n", gsfStringError());
 
-        case GSF_BAD_ACCESS_MODE:
-            fprintf(fp, "GSF Error illegal access mode\n");
-            break;
-
-        case GSF_READ_ERROR:
-            fprintf(fp, "GSF Error reading input data\n");
-            break;
-
-        case GSF_WRITE_ERROR:
-            fprintf(fp, "GSF Error writing output data\n");
-            break;
-
-        case GSF_INSUFFICIENT_SIZE:
-            fprintf(fp, "GSF Error insufficient size specified\n");
-            break;
-
-        case GSF_RECORD_SIZE_ERROR:
-            fprintf(fp, "GSF Error record size is out of bounds\n");
-            break;
-
-        case GSF_CHECKSUM_FAILURE:
-            fprintf(fp, "GSF Error data checksum failure\n");
-            break;
-
-        case GSF_FILE_CLOSE_ERROR:
-            fprintf(fp, "GSF Error closing gsf file\n");
-            break;
-
-        case GSF_TOO_MANY_ARRAY_SUBRECORDS:
-            fprintf(fp, "GSF Error too many array subrecords\n");
-            break;
-
-        case GSF_TOO_MANY_OPEN_FILES:
-            fprintf(fp, "GSF Error too many open files\n");
-            break;
-
-        case GSF_MEMORY_ALLOCATION_FAILED:
-            fprintf(fp, "GSF Error memory allocation failure\n");
-            break;
-
-        case GSF_STREAM_DECODE_FAILURE:
-            fprintf(fp, "GSF Error stream decode failure\n");
-            break;
-
-        case GSF_UNRECOGNIZED_RECORD_ID:
-            fprintf(fp, "GSF Error unrecognized record id\n");
-            break;
-
-        case GSF_BAD_SEEK_OPTION:
-            fprintf(fp, "GSF Error unrecognized file seek option\n");
-            break;
-
-        case GSF_FILE_SEEK_ERROR:
-            fprintf(fp, "GSF Error file seek failed\n");
-            break;
-
-        case GSF_UNRECOGNIZED_SENSOR_ID:
-            fprintf(fp, "GSF Error unrecognized sensor specific subrecord id\n");
-            break;
-
-        case GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID:
-            fprintf(fp, "GSF Error unrecognized array subrecord id \n");
-            break;
-
-        case GSF_UNRECOGNIZED_SUBRECORD_ID:
-            fprintf(fp, "GSF Error unrecognized subrecord id\n");
-            break;
-
-        case GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER:
-            fprintf(fp, "GSF Error illegal scale factor multiplier specified\n");
-            break;
-
-        case GSF_FILE_TELL_ERROR:
-            fprintf(fp, "GSF Error file tell failed\n");
-            break;
-
-        case GSF_INDEX_FILE_OPEN_ERROR:
-            fprintf(fp, "GSF Error open of index file failed\n");
-            fprintf(fp, "%s\n", strerror(errno));
-            break;
-
-        case GSF_CORRUPT_INDEX_FILE_ERROR:
-            fprintf(fp, "GSF Error index file is corrupted, delete index file\n");
-            break;
-
-        case GSF_SCALE_INDEX_CALLOC_ERROR:
-            fprintf(fp, "GSF Error calloc of scale factor index memory failed\n");
-            break;
-
-        case GSF_RECORD_TYPE_NOT_AVAILABLE:
-            fprintf(fp, "GSF Error requested indexed record type not in gsf file\n");
-            break;
-
-	case GSF_SINGLE_BEAM_ENCODE_FAILED:
-	    fprintf(fp, "GSF Error stream encode failure\n");
-	    break;
-
-        case GSF_READ_TO_END_OF_FILE:
-            break;
-
-        default:
-            fprintf(fp, "GSF unknown error\n");
-            break;
-    }
     return;
 }
 
@@ -2261,7 +2172,7 @@ gsfPrintError(FILE * fp)
  *
  * Function Name : gsfStringError
  *
- * Description : This function is used to return a string with  
+ * Description : This function is used to return a string with
  *  a short message describing the most recent error encountered.
  *  This function need only be called if
  *  a -1 is returned from one of the gsf functions.
@@ -2282,117 +2193,235 @@ gsfStringError(void)
 
     switch (gsfError)
     {
-	case GSF_FOPEN_ERROR:
-	    ptr = "GSF Unable to open requested file";
-	    break;
+        case GSF_FOPEN_ERROR:
+            ptr = "GSF Unable to open requested file";
+            break;
 
-	case GSF_UNRECOGNIZED_FILE:
-	    ptr = "GSF Error unrecognized file";
-	    break;
+        case GSF_UNRECOGNIZED_FILE:
+            ptr = "GSF Error unrecognized file";
+            break;
 
-	case GSF_BAD_ACCESS_MODE:
-	    ptr = "GSF Error illegal access mode";
-	    break;
+        case GSF_BAD_ACCESS_MODE:
+            ptr = "GSF Error illegal access mode";
+            break;
 
-	case GSF_READ_ERROR:
-	    ptr = "GSF Error reading input data";
-	    break;
+        case GSF_READ_ERROR:
+            ptr = "GSF Error reading input data";
+            break;
 
-	case GSF_WRITE_ERROR:
-	    ptr = "GSF Error writing output data";
-	    break;
+        case GSF_WRITE_ERROR:
+            ptr = "GSF Error writing output data";
+            break;
 
-	case GSF_INSUFFICIENT_SIZE:
-	    ptr = "GSF Error insufficient size specified";
-	    break;
+        case GSF_INSUFFICIENT_SIZE:
+            ptr = "GSF Error insufficient size specified";
+            break;
 
-	case GSF_RECORD_SIZE_ERROR:
-	    ptr = "GSF Error record size is out of bounds";
-	    break;
+        case GSF_RECORD_SIZE_ERROR:
+            ptr = "GSF Error record size is out of bounds";
+            break;
 
-	case GSF_CHECKSUM_FAILURE:
-	    ptr = "GSF Error data checksum failure";
-	    break;
+        case GSF_CHECKSUM_FAILURE:
+            ptr = "GSF Error data checksum failure";
+            break;
 
-	case GSF_FILE_CLOSE_ERROR:
-	    ptr = "GSF Error closing gsf file";
-	    break;
+        case GSF_FILE_CLOSE_ERROR:
+            ptr = "GSF Error closing gsf file";
+            break;
 
-	case GSF_TOO_MANY_ARRAY_SUBRECORDS:
-	    ptr = "GSF Error too many array subrecords";
-	    break;
+        case GSF_TOO_MANY_ARRAY_SUBRECORDS:
+            ptr = "GSF Error too many array subrecords";
+            break;
 
-	case GSF_TOO_MANY_OPEN_FILES:
-	    ptr = "GSF Error too many open files";
-	    break;
+        case GSF_TOO_MANY_OPEN_FILES:
+            ptr = "GSF Error too many open files";
+            break;
 
-	case GSF_MEMORY_ALLOCATION_FAILED:
-	    ptr = "GSF Error memory allocation failure";
-	    break;
+        case GSF_MEMORY_ALLOCATION_FAILED:
+            ptr = "GSF Error memory allocation failure";
+            break;
 
-	case GSF_STREAM_DECODE_FAILURE:
-	    ptr = "GSF Error stream decode failure";
-	    break;
+        case GSF_STREAM_DECODE_FAILURE:
+            ptr = "GSF Error stream decode failure";
+            break;
 
-	case GSF_UNRECOGNIZED_RECORD_ID:
-	    ptr = "GSF Error unrecognized record id";
-	    break;
+        case GSF_UNRECOGNIZED_RECORD_ID:
+            ptr = "GSF Error unrecognized record id";
+            break;
 
-	case GSF_BAD_SEEK_OPTION:
-	    ptr = "GSF Error unrecognized file seek option";
-	    break;
+        case GSF_BAD_SEEK_OPTION:
+            ptr = "GSF Error unrecognized file seek option";
+            break;
 
-	case GSF_FILE_SEEK_ERROR:
-	    ptr = "GSF Error file seek failed";
-	    break;
+        case GSF_FILE_SEEK_ERROR:
+            ptr = "GSF Error file seek failed";
+            break;
 
-	case GSF_UNRECOGNIZED_SENSOR_ID:
-	    ptr = "GSF Error unrecognized sensor specific subrecord id";
-	    break;
+        case GSF_UNRECOGNIZED_SENSOR_ID:
+            ptr = "GSF Error unrecognized sensor specific subrecord id";
+            break;
 
-	case GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID:
-	    ptr = "GSF Error unrecognized array subrecord id";
-	    break;
+        case GSF_UNRECOGNIZED_DATA_RECORD:
+            ptr = "GSF Error unrecognized data record id";
+            break;
 
-	case GSF_UNRECOGNIZED_SUBRECORD_ID:
-	    ptr = "GSF Error unrecognized subrecord id";
-	    break;
+        case GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID:
+            ptr = "GSF Error unrecognized array subrecord id";
+            break;
 
-	case GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER:
-	    ptr = "GSF Error illegal scale factor multiplier specified";
-	    break;
+        case GSF_UNRECOGNIZED_SUBRECORD_ID:
+            ptr = "GSF Error unrecognized subrecord id";
+            break;
 
-	case GSF_FILE_TELL_ERROR:
-	    ptr = "GSF Error file tell failed";
-	    break;
+        case GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER:
+            ptr = "GSF Error illegal scale factor multiplier specified";
+            break;
 
-	case GSF_INDEX_FILE_OPEN_ERROR:
-	    ptr = "GSF Error open of index file failed";
-	    break;
+        case GSF_CANNOT_REPRESENT_PRECISION:
+            ptr = "GSF Error illegal scale factor multiplier specified";
+            break;
 
-	case GSF_CORRUPT_INDEX_FILE_ERROR:
-	    ptr = "GSF Error index file is corrupted, delete index file";
-	    break;
+        case GSF_BAD_FILE_HANDLE:
+            ptr = "GSF Error bad file handle";
+            break;
 
-	case GSF_SCALE_INDEX_CALLOC_ERROR:
-	    ptr = "GSF Error calloc of scale factor index memory failed";
-	    break;
+        case GSF_HEADER_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding header record";
+            break;
 
-	case GSF_RECORD_TYPE_NOT_AVAILABLE:
-	    ptr = "GSF Error requested indexed record type not in gsf file";
-	    break;
+        case GSF_MB_PING_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding multibeam ping record";
+            break;
 
-	case GSF_SINGLE_BEAM_ENCODE_FAILED:
-	    ptr = "GSF Error single beam encode failure";
-	    break;
+        case GSF_SVP_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding SVP record";
+            break;
 
-	case GSF_READ_TO_END_OF_FILE:
+        case GSF_PROCESS_PARAM_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding processing parameters record";
+            break;
+
+        case GSF_SENSOR_PARAM_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding sensor parameters record";
+            break;
+
+        case GSF_COMMENT_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding comment record";
+            break;
+
+        case GSF_HISTORY_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding history record";
+            break;
+
+        case GSF_NAV_ERROR_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding latitude/longitude navigation error record";
+            break;
+
+        /* jsb 10/11/98; These macro names are too long to be unique, when compiled under HP-UX 10.20
+         *  This needs to be scheduled for resolution in a future release.
+        case (GSF_HEADER_RECORD_ENCODE_FAILED):
+            ptr = "GSF Error encoding header recrod";
+            break;
+
+        case GSF_MB_PING_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding multibeam ping record";
+            break;
+
+         case GSF_SVP_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding SVP record";
+            break;
+
+         case GSF_PROCESS_PARAM_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding processing parameters record";
+            break;
+
+         case GSF_SENSOR_PARAM_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding sensor parameters record";
+            break;
+
+         case GSF_COMMENT_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding comment record";
+            break;
+
+         case GSF_HISTORY_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding history record";
+            break;
+
+         case GSF_NAV_ERROR_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding latitude/longitude navigation error record";
+            break;
+*/
+         case GSF_SETVBUF_ERROR:
+            ptr = "GSF Error setting internal file buffering";
+            break;
+
+         case GSF_FLUSH_ERROR:
+            ptr = "GSF Error flushing data buffer(s)";
+            break;
+
+         case GSF_FILE_TELL_ERROR:
+            ptr = "GSF Error file tell failed";
+            break;
+
+        case GSF_INDEX_FILE_OPEN_ERROR:
+            ptr = "GSF Error open of index file failed";
+            break;
+
+        case GSF_CORRUPT_INDEX_FILE_ERROR:
+            ptr = "GSF Error index file is corrupted, delete index file";
+            break;
+
+        case GSF_SCALE_INDEX_CALLOC_ERROR:
+            ptr = "GSF Error calloc of scale factor index memory failed";
+            break;
+
+        case GSF_RECORD_TYPE_NOT_AVAILABLE:
+            ptr = "GSF Error requested indexed record type not in gsf file";
+            break;
+
+        case GSF_SUMMARY_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding summary record";
+            break;
+
+        case GSF_SUMMARY_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding summary record";
+            break;
+
+        case GSF_INVALID_NUM_BEAMS:
+            ptr = "GSF Error invalid number of beams";
+            break;
+
+        case GSF_INVALID_RECORD_NUMBER:
+            ptr = "GSF Error invalid record number";
+            break;
+
+        case GSF_INDEX_FILE_READ_ERROR:
+            ptr = "GSF Error index file read error";
+            break;
+
+        case GSF_PARAM_SIZE_FIXED:
+            ptr = "GSF Error unable to update existing file with increased record size";
+            break;
+
+        case GSF_HV_NAV_ERROR_RECORD_ENCODE_FAILED:
+            ptr = "GSF Error encoding horizontal/vertical navigation error record";
+            break;
+
+        case GSF_HV_NAV_ERROR_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding horizontal/vertical navigation error record";
+            break;
+
+        case GSF_SINGLE_BEAM_ENCODE_FAILED:
+            ptr = "GSF Error single beam encode failure";
+            break;
+
+        case GSF_READ_TO_END_OF_FILE:
             ptr = "GSF End of File Encountered";
-	    break;
+            break;
 
-	default:
-	    ptr = "GSF unknown error";
-	    break;
+        default:
+            ptr = "GSF unknown error";
+            break;
     }
 
     return (ptr);
@@ -3207,34 +3236,34 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
     target->comment.comment_length = source->comment.comment_length;
     if (source->comment.comment_length > 0)
     {
-	if (target->comment.comment == (char *) NULL)
-	{
-	    target->comment.comment = (char *) calloc (sizeof(char), source->comment.comment_length + 1);
-	    if (target->comment.comment == (char *) NULL)
-	    {
-		gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-		return(-1);
-	    }
-	    strncpy (target->comment.comment, source->comment.comment, source->comment.comment_length);
-	    target->comment.comment_length = source->comment.comment_length;
-	}
-	else if (target->comment.comment_length < source->comment.comment_length)
-	{
-	    target->comment.comment = (char *) realloc (target->comment.comment, source->comment.comment_length + 1);
-	    if (target->comment.comment == (char *) NULL)
-	    {
-		gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-		return(-1);
-	    }
-	    strncpy (target->comment.comment, source->comment.comment, source->comment.comment_length);
-	    target->comment.comment_length = source->comment.comment_length;
-	}
+        if (target->comment.comment == (char *) NULL)
+        {
+            target->comment.comment = (char *) calloc (sizeof(char), source->comment.comment_length + 1);
+            if (target->comment.comment == (char *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+            strncpy (target->comment.comment, source->comment.comment, source->comment.comment_length);
+            target->comment.comment_length = source->comment.comment_length;
+        }
+        else if (target->comment.comment_length < source->comment.comment_length)
+        {
+            target->comment.comment = (char *) realloc (target->comment.comment, source->comment.comment_length + 1);
+            if (target->comment.comment == (char *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+            strncpy (target->comment.comment, source->comment.comment, source->comment.comment_length);
+            target->comment.comment_length = source->comment.comment_length;
+        }
     }
 
     /* Copy the history record from the source to the target */
     target->history.history_time = source->history.history_time;
     strncpy(target->history.host_name, source->history.host_name, GSF_HOST_NAME_LENGTH);
-    strncpy(target->history.operator, source->history.host_name, GSF_OPERATOR_LENGTH);
+    strncpy(target->history.operator, source->history.operator, GSF_OPERATOR_LENGTH);
 
     if (target->history.command_line != (char *) NULL)
     {
@@ -3242,12 +3271,13 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
     }
     if (source->history.command_line != (char *) NULL)
     {
-	target->history.command_line = (char *) calloc (sizeof(char), strlen(source->history.command_line) + 1);
-	if (target->history.command_line == (char *) NULL)
-	{
-	    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-	    return(-1);
-	}
+        target->history.command_line = (char *) calloc (sizeof(char), strlen(source->history.command_line) + 1);
+        if (target->history.command_line == (char *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        strncpy(target->history.command_line, source->history.command_line, strlen (source->history.command_line));
     }
 
     if (target->history.comment != (char *) NULL)
@@ -3256,12 +3286,13 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
     }
     if (source->history.comment != (char *) NULL)
     {
-	target->history.comment = (char *) calloc (sizeof(char), strlen(source->history.comment) + 1);
-	if (target->history.comment == (char *) NULL)
-	{
-	    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-	    return(-1);
-	}
+        target->history.comment = (char *) calloc (sizeof(char), strlen(source->history.comment) + 1);
+        if (target->history.comment == (char *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        strncpy(target->history.comment, source->history.comment, strlen (source->history.comment));
     }
 
     /* Copy the navigation error record from the source to the target */
@@ -4628,42 +4659,42 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             }
             else
             {
-                /* Set the F/A beam width to 2.4 here, but also set the return code to 
+                /* Set the F/A beam width to 2.4 here, but also set the return code to
                  * indicate failure.  This sonar supports multiple beam widths, and
                  * this information is NOT provided in the data stream from the sonar.
                  */
                 *fore_aft = 1.5;
                 ret = -1;
             }
-	    if (data->mb_ping.sensor_data.gsfSeaBatSpecific.mode & GSF_SEABAT_9003)
-	    {
-		*athwartship = 3.0;
+            if (data->mb_ping.sensor_data.gsfSeaBatSpecific.mode & GSF_SEABAT_9003)
+            {
+                *athwartship = 3.0;
             }
-	    else 
-	    {
+            else
+            {
                 *athwartship = 1.5;
             }
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC):
-	    *fore_aft = data->mb_ping.sensor_data.gsfSeaBatIISpecific.fore_aft_bw;
-	    *athwartship = data->mb_ping.sensor_data.gsfSeaBatIISpecific.athwart_bw;
-	    break;
+            *fore_aft = data->mb_ping.sensor_data.gsfSeaBatIISpecific.fore_aft_bw;
+            *athwartship = data->mb_ping.sensor_data.gsfSeaBatIISpecific.athwart_bw;
+            break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC):
-	    *fore_aft = data->mb_ping.sensor_data.gsfSeaBat8101Specific.fore_aft_bw;
-	    *athwartship = data->mb_ping.sensor_data.gsfSeaBat8101Specific.athwart_bw;
-	    break;
+            *fore_aft = data->mb_ping.sensor_data.gsfSeaBat8101Specific.fore_aft_bw;
+            *athwartship = data->mb_ping.sensor_data.gsfSeaBat8101Specific.athwart_bw;
+            break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC):
-	    *fore_aft = 2.0;      
-	    *athwartship = 2.0;
-	    break;
+            *fore_aft = 2.0;
+            *athwartship = 2.0;
+            break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC):
-	    *fore_aft = 2.0;      
-	    *athwartship = 2.0;
-	    break;
+            *fore_aft = 2.0;
+            *athwartship = 2.0;
+            break;
 
         default:
         {
@@ -4696,7 +4727,7 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
 int
 gsfIsStarboardPing(gsfRecords *data)
 {
-    int ret;
+    int ret = 0;
 
 
     /* Switch on the type of sonar this data came from */
@@ -4708,6 +4739,13 @@ gsfIsStarboardPing(gsfRecords *data)
 /*               (GSF_SEABAT_9002 | GSF_SEABAT_STBD_HEAD))           */
         if ( data->mb_ping.sensor_data.gsfSeaBatSpecific.mode  &  GSF_SEABAT_STBD_HEAD )
 /* zzz_ */
+        {
+           ret = 1;
+        }
+        break;
+
+        case GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC:
+        if ( data->mb_ping.sensor_data.gsfElacMkIISpecific.mode  &  GSF_MKII_STBD_HEAD )
         {
            ret = 1;
         }

@@ -20,10 +20,10 @@
  *    available.
  *
  * Change Descriptions :
- * who	when	  what
- * ---	----	  ----
- * jsb	08/25/95  Consolidated the gsfReadIndex and gsfWriteIndex functions
- *		  into gsfRead and gsfWrite.
+ * who  when      what
+ * ---  ----      ----
+ * jsb  08/25/95  Consolidated the gsfReadIndex and gsfWriteIndex functions
+ *                into gsfRead and gsfWrite.
  * jsb  11/01/95  Completed modifications to indexing to support increase in
  *                gsf file size after initial index file creation.  The size
  *                of the file is now stored in the index file header. Index
@@ -43,7 +43,9 @@
  *                displayed if DISPLAY_SPINNER is not set.
  * jsb  03/29/97  Fixed bug in indexing the swath bathymetry summary record.
  *                Fix made to both Create and Append functions. Indexing the
- *                summary record was added release 1.03. 
+ *                summary record was added release 1.03.
+ * jsb  10/07/98  Added direct access support for new navigation errors record.
+ *                 This change made in support of CRs: 98-001, and 98-002.
  *
  *
  * Classification : Unclassified
@@ -72,7 +74,7 @@
 #include "gsf_ft.h"
 
 /*  Error flag defined in gsf.c */
-extern int	gsfError;
+extern int      gsfError;
 
 /* Prototypes for local functions */
 static FILE *open_temp_file(int);
@@ -92,42 +94,42 @@ static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *
  *  index files.  Then the small index files are read and written to the
  *  final index file.  The index file header format is as follows :
  *
- *	Type	  Description
- *	----	  -----------
- *	char[16]  Text header containing "INDEX-GSF-"<"version">
- *	long	  The size of the gsf file when the index file was created.
- *	int	  Endian indicator (0x00010203 or 0x03020100 depending
- *		  upon sex of machine, if 0x03020100 then the index
- *		  data must be byte swapped).
- *	int	  Number of different record types in the index file.
- *	int[4]	  16 bytes of reserved space
+ *      Type      Description
+ *      ----      -----------
+ *      char[16]  Text header containing "INDEX-GSF-"<"version">
+ *      long      The size of the gsf file when the index file was created.
+ *      int       Endian indicator (0x00010203 or 0x03020100 depending
+ *                upon sex of machine, if 0x03020100 then the index
+ *                data must be byte swapped).
+ *      int       Number of different record types in the index file.
+ *      int[4]    16 bytes of reserved space
  *
  *
- *	int	  Record ID of first record type.
- *	long	  Address within the index file of the beginning of
- *		  the index for the first record type.
- *	int	  Number of index records for the first record type.
- *	.
- *	.
- *	.
- *	.
- *	int	  Record ID of last record type.
- *	long	  Address within the index file of the beginning of
- *		  the index for the last record type.
- *	int	  Number of index records for the last record type.
+ *      int       Record ID of first record type.
+ *      long      Address within the index file of the beginning of
+ *                the index for the first record type.
+ *      int       Number of index records for the first record type.
+ *      .
+ *      .
+ *      .
+ *      .
+ *      int       Record ID of last record type.
+ *      long      Address within the index file of the beginning of
+ *                the index for the last record type.
+ *      int       Number of index records for the last record type.
  *
  *
  *  Following the header is the index data.  The format for each index record
  *  is :
  *
- *	time_t	  Posix.4 proposed time seconds.
- *	long	  Posix.4 proposed time nanoseconds.
- *	long	  Address of the associated record within the gsf file for the
- *		  specified record type.
- *	.
- *	.
- *	.
- *	.
+ *      time_t    Posix.4 proposed time seconds.
+ *      long      Posix.4 proposed time nanoseconds.
+ *      long      Address of the associated record within the gsf file for the
+ *                specified record type.
+ *      .
+ *      .
+ *      .
+ *      .
  *
  *
  *  After the index file is opened (or created) the index records for those
@@ -151,18 +153,18 @@ static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *
 int
 gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
 {
-    int 	     ret;
-    int 	     i;
-    int 	     j;
-    char	     ndx_file[132];
+    int              ret;
+    int              i;
+    int              j;
+    char             ndx_file[132];
     GSF_INDEX_HEADER index_header;
 
-    /*	Clear the contents of the index_header structure */
+    /*  Clear the contents of the index_header structure */
     memset (&index_header, 0, sizeof(index_header));
 
-    /*	Clear the last scale factor index.  This is used to decide whether
-     *	we need to read a new scale factor record when we read a
-     *	GSF_RECORD_SWATH_BATHYMETRY_PING record.
+    /*  Clear the last scale factor index.  This is used to decide whether
+     *  we need to read a new scale factor record when we read a
+     *  GSF_RECORD_SWATH_BATHYMETRY_PING record.
      */
     ft->index_data.last_scale_factor_index = -1;
 
@@ -170,9 +172,9 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     ft->index_data.number_of_types = 0;
     for (i = 0; i < NUM_REC_TYPES; i++)
     {
-	ft->index_data.record_type[i] = -1;
-	ft->index_data.number_of_records[i] = 0;
-	ft->index_data.start_addr[i] = -1;
+        ft->index_data.record_type[i] = -1;
+        ft->index_data.number_of_records[i] = 0;
+        ft->index_data.start_addr[i] = -1;
     }
 
     /* Create the GSF index file name (assuming an extension of .n##) */
@@ -182,12 +184,12 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     /* Try to open the index file for read. */
     if ((ft->index_data.fp = fopen(ndx_file, "rb")) == NULL)
     {
-	ret = gsfCreateIndexFile(ndx_file, handle, ft);
-	if (ret)
-	{
-	    return(-1);
-	}
-	return(0);
+        ret = gsfCreateIndexFile(ndx_file, handle, ft);
+        if (ret)
+        {
+            return(-1);
+        }
+        return(0);
     }
 
     /* The index file exists. Read the version field, if we don't
@@ -196,15 +198,15 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
      */
     fread(index_header.version, GSF_INDEX_VERSION_SIZE, 1, ft->index_data.fp);
     if ((index_header.version[0] == 0) ||
-	(strncmp(index_header.version, "INDEX-GSF-", strlen("INDEX-GSF-"))))
+        (strncmp(index_header.version, "INDEX-GSF-", strlen("INDEX-GSF-"))))
     {
-	fclose (ft->index_data.fp);
-	ret = gsfCreateIndexFile(ndx_file, handle, ft);
-	if (ret)
-	{
-	    return(-1);
-	}
-	return(0);
+        fclose (ft->index_data.fp);
+        ret = gsfCreateIndexFile(ndx_file, handle, ft);
+        if (ret)
+        {
+            return(-1);
+        }
+        return(0);
     }
 
     /* If the expected header is found then compair the current gsf file
@@ -214,12 +216,12 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     fread(&index_header.gsfFileSize, 4, 1, ft->index_data.fp);
     if (index_header.gsfFileSize < ft->file_size)
     {
-	ret = gsfAppendIndexFile(ndx_file, handle, ft);
-	if (ret)
-	{
-	    return(-1);
-	}
-	return(0);
+        ret = gsfAppendIndexFile(ndx_file, handle, ft);
+        if (ret)
+        {
+            return(-1);
+        }
+        return(0);
     }
 
     /* If we get here, then the index file that exists is ready to use.
@@ -229,32 +231,32 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     fread(&index_header.endian, 4, 1, ft->index_data.fp);
     if (index_header.endian == 0x00010203)
     {
-	ft->index_data.swap = 0;
+        ft->index_data.swap = 0;
     }
     else if (index_header.endian == 0x03020100)
     {
-	ft->index_data.swap = 1;
+        ft->index_data.swap = 1;
     }
     else
     {
-	gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
-	return (-1);
+        gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
+        return (-1);
     }
 
     /* Read the number of record types in the index file. */
     fread(&index_header.number_record_types, 4, 1, ft->index_data.fp);
     if (ft->index_data.swap)
     {
-	SwapLong((unsigned long *) &index_header.number_record_types, 1);
+        SwapLong((unsigned long *) &index_header.number_record_types, 1);
     }
     ft->index_data.number_of_types = index_header.number_record_types;
 
     /* Make sure we found a valid number_of_types */
     if ((ft->index_data.number_of_types < 1) ||
-	(ft->index_data.number_of_types > NUM_REC_TYPES))
+        (ft->index_data.number_of_types > NUM_REC_TYPES))
     {
-	gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
-	return (-1);
+        gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
+        return (-1);
     }
 
     /* Read the four four byte reserved fields */
@@ -263,60 +265,60 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     fread(&index_header.spare3, 4, 1, ft->index_data.fp);
     fread(&index_header.spare4, 4, 1, ft->index_data.fp);
 
-    /*	For each record type, read the record type, start address and
-     *	number of records.
+    /*  For each record type, read the record type, start address and
+     *  number of records.
      */
     for (i = 0; i < ft->index_data.number_of_types; i++)
     {
-	fread(&j, 4, 1, ft->index_data.fp);
-	if (ft->index_data.swap)
-	{
-	    SwapLong((unsigned long *) &j, 1);
-	}
+        fread(&j, 4, 1, ft->index_data.fp);
+        if (ft->index_data.swap)
+        {
+            SwapLong((unsigned long *) &j, 1);
+        }
 
-	/*  This is not really necessary but it makes things easier to code.
-	 *  Put the record type into the record_type[record_type] member of
-	 *  the index_data structure.
-	 */
-	ft->index_data.record_type[j] = j;
+        /*  This is not really necessary but it makes things easier to code.
+         *  Put the record type into the record_type[record_type] member of
+         *  the index_data structure.
+         */
+        ft->index_data.record_type[j] = j;
 
-	fread(&ft->index_data.start_addr[j], 4, 1,
-	    ft->index_data.fp);
-	fread(&ft->index_data.number_of_records[j], 4, 1,
-	    ft->index_data.fp);
+        fread(&ft->index_data.start_addr[j], 4, 1,
+            ft->index_data.fp);
+        fread(&ft->index_data.number_of_records[j], 4, 1,
+            ft->index_data.fp);
 
-	if (ft->index_data.swap)
-	{
-	    SwapLong((unsigned long *) &ft->index_data.start_addr[i], 1);
-	    SwapLong((unsigned long *) &ft->index_data.number_of_records[i], 1);
-	}
+        if (ft->index_data.swap)
+        {
+            SwapLong((unsigned long *) &ft->index_data.start_addr[i], 1);
+            SwapLong((unsigned long *) &ft->index_data.number_of_records[i], 1);
+        }
     }
 
     /* Read the scale factor addresses into memory. */
     if (ft->index_data.record_type[0] != -1)
     {
-	ft->index_data.scale_factor_addr =
-	    (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
-	    sizeof(INDEX_REC));
+        ft->index_data.scale_factor_addr =
+            (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
+            sizeof(INDEX_REC));
 
-	/*  Couldn't calloc the memory for the scale factor addresses.  */
+        /*  Couldn't calloc the memory for the scale factor addresses.  */
 
-	if (ft->index_data.scale_factor_addr == NULL)
-	{
-	    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-	    return (-1);
-	}
+        if (ft->index_data.scale_factor_addr == NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
 
-	fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
-	for (i = 0; i < ft->index_data.number_of_records[0]; i++)
-	{
-	    fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
-		ft->index_data.fp);
-	    if (ft->index_data.swap)
-	    {
-		SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i], 3);
-	    }
-	}
+        fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
+        for (i = 0; i < ft->index_data.number_of_records[0]; i++)
+        {
+            fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
+                ft->index_data.fp);
+            if (ft->index_data.swap)
+            {
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i], 3);
+            }
+        }
     }
 
     return (0);
@@ -344,31 +346,31 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
 static int
 gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 {
-    int 	     i;
-    int 	     j;
-    int 	     err;
-    int 	     percent;
-    int 	     id;
-    int 	     old_percent;
-    int 	     total_recs;
-    int 	     count;
-    long	     endian = 0x00010203;
-    long	     eof;
-    long	     current;
-    FILE	    *temp[NUM_REC_TYPES];
-    gsfDataID	     data_id;
-    gsfRecords	     records;
-    INDEX_REC	     index_rec;
+    int              i;
+    int              j;
+    int              err;
+    int              percent;
+    int              id;
+    int              old_percent;
+    int              total_recs;
+    int              count;
+    long             endian = 0x00010203;
+    long             eof;
+    long             current;
+    FILE            *temp[NUM_REC_TYPES];
+    gsfDataID        data_id;
+    gsfRecords       records;
+    INDEX_REC        index_rec;
     GSF_INDEX_HEADER index_header;
 
     /* Make sure we can open a new file for write before we start to build
-     * the index file.	If the open is successful, close and remove the file,
+     * the index file.  If the open is successful, close and remove the file,
      * we'll create it again as soon as we need it.
      */
     if ((ft->index_data.fp = fopen(ndx_file, "wb+")) == NULL)
     {
-	gsfError = GSF_INDEX_FILE_OPEN_ERROR;
-	return (-1);
+        gsfError = GSF_INDEX_FILE_OPEN_ERROR;
+        return (-1);
     }
     fclose (ft->index_data.fp);
     remove (ndx_file);
@@ -376,7 +378,7 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     /* Clear the array of temporary file descriptors */
     for (i=0; i<NUM_REC_TYPES; i++)
     {
-	temp[i] = (FILE *) NULL;
+        temp[i] = (FILE *) NULL;
     }
 
     /* Initialize the contents of the index file header */
@@ -385,241 +387,241 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     index_header.endian = endian;
     index_header.gsfFileSize = ft->file_size;
 
-    /*	Get the address of the end of file so we can compute percentage
-     *	processed for creating the index file.
+    /*  Get the address of the end of file so we can compute percentage
+     *  processed for creating the index file.
      */
     eof = ft->file_size;
     percent = 0;
     old_percent = -1;
 
-    /*	Read each gsf record and write the time and address to the
-     *	temp index files.
+    /*  Read each gsf record and write the time and address to the
+     *  temp index files.
      */
     do
     {
-	/*  Save the current address within the gsf file.   */
+        /*  Save the current address within the gsf file.   */
 
-	if ((index_rec.addr = ftell(ft->fp)) == -1 )
-	{
-	    gsfError = GSF_FILE_TELL_ERROR;
-	    return (-1);
-	}
+        if ((index_rec.addr = ftell(ft->fp)) == -1 )
+        {
+            gsfError = GSF_FILE_TELL_ERROR;
+            return (-1);
+        }
 
-	/*  Read the gsf record and check for end of file.  */
+        /*  Read the gsf record and check for end of file.  */
 
-	if ((err = gsfRead(handle, GSF_NEXT_RECORD, &data_id, &records,
-		    NULL, 0)) != -1)
-	{
+        if ((err = gsfRead(handle, GSF_NEXT_RECORD, &data_id, &records,
+                    NULL, 0)) != -1)
+        {
 
-	    /*	Switch based on the record type that was just read.  */
+            /*  Switch based on the record type that was just read.  */
 
-	    id = data_id.recordID;
-	    switch (id)
-	    {
-		    /*	Don't index the header or the summary.  */
+            id = data_id.recordID;
+            switch (id)
+            {
+                    /*  Don't index the header or the summary.  */
 
-		case GSF_RECORD_HEADER:
-		    break;
+                case GSF_RECORD_HEADER:
+                    break;
 
-		case GSF_RECORD_SWATH_BATHY_SUMMARY:
+                case GSF_RECORD_SWATH_BATHY_SUMMARY:
 
                     /*  If this is the first record of this type open the
                         temp file and increment the number of types.    */
-                    
+
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
+                        index_header.number_record_types++;
                     }
 
                     /*  Load the index record structure and write to the
-                        temp file.	*/
+                        temp file.      */
 
                     index_rec.sec = records.summary.start_time.tv_sec;
                     index_rec.nsec = records.summary.end_time.tv_nsec;
                     fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
                     ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_SWATH_BATHYMETRY_PING:
+                case GSF_RECORD_SWATH_BATHYMETRY_PING:
 
-		    /*	If this ping record actually contained scale
-			factor information in the file, make entries to
-			two indexes; the standard ping index and the
-			index for pings with scale factor subrecords.	*/
+                    /*  If this ping record actually contained scale
+                        factor information in the file, make entries to
+                        two indexes; the standard ping index and the
+                        index for pings with scale factor subrecords.   */
 
-		    if (ft->scales_read)
-		    {
-			/*  If this is the first record of this type
-			    open the temp file and increment the
-			    number of types.	*/
+                    if (ft->scales_read)
+                    {
+                        /*  If this is the first record of this type
+                            open the temp file and increment the
+                            number of types.    */
 
-			if (temp[0] == NULL)
-			{
-			    temp[0] = open_temp_file(0);
-			    if (temp[0] == NULL)
-			    {
-				return(-1);
-			    }
-			    index_header.number_record_types++;
-			}
+                        if (temp[0] == NULL)
+                        {
+                            temp[0] = open_temp_file(0);
+                            if (temp[0] == NULL)
+                            {
+                                return(-1);
+                            }
+                            index_header.number_record_types++;
+                        }
 
-			/*  Load the index record structure and write to the
-			    temp file.	*/
+                        /*  Load the index record structure and write to the
+                            temp file.  */
 
-			index_rec.sec = records.mb_ping.ping_time.tv_sec;
-			index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
-			fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[0]);
-			ft->index_data.number_of_records[0]++;
-		    }
+                        index_rec.sec = records.mb_ping.ping_time.tv_sec;
+                        index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
+                        fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[0]);
+                        ft->index_data.number_of_records[0]++;
+                    }
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.mb_ping.ping_time.tv_sec;
-		    index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.mb_ping.ping_time.tv_sec;
+                    index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_SOUND_VELOCITY_PROFILE:
+                case GSF_RECORD_SOUND_VELOCITY_PROFILE:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.svp.application_time.tv_sec;
-		    index_rec.nsec = records.svp.application_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.svp.application_time.tv_sec;
+                    index_rec.nsec = records.svp.application_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_PROCESSING_PARAMETERS:
+                case GSF_RECORD_PROCESSING_PARAMETERS:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.process_parameters.param_time.tv_sec;
-		    index_rec.nsec =
-			records.process_parameters.param_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.process_parameters.param_time.tv_sec;
+                    index_rec.nsec =
+                        records.process_parameters.param_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_SENSOR_PARAMETERS:
+                case GSF_RECORD_SENSOR_PARAMETERS:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.sensor_parameters.param_time.tv_sec;
-		    index_rec.nsec =
-			records.sensor_parameters.param_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.sensor_parameters.param_time.tv_sec;
+                    index_rec.nsec =
+                        records.sensor_parameters.param_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_COMMENT:
+                case GSF_RECORD_COMMENT:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.comment.comment_time.tv_sec;
-		    index_rec.nsec = records.comment.comment_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.comment.comment_time.tv_sec;
+                    index_rec.nsec = records.comment.comment_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_HISTORY:
+                case GSF_RECORD_HISTORY:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.history.history_time.tv_sec;
-		    index_rec.nsec = records.history.history_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.history.history_time.tv_sec;
+                    index_rec.nsec = records.history.history_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_NAVIGATION_ERROR:
+                case GSF_RECORD_NAVIGATION_ERROR:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.nav_error.nav_error_time.tv_sec;
-		    index_rec.nsec = records.nav_error.nav_error_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.nav_error.nav_error_time.tv_sec;
+                    index_rec.nsec = records.nav_error.nav_error_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
                 case GSF_RECORD_SINGLE_BEAM_PING:
 
@@ -633,8 +635,8 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     }
 
                     /*  Load the index record structure and write to the
-                        temp file.	*/
-                    
+                        temp file.      */
+
                     index_rec.sec = records.sb_ping.ping_time.tv_sec;
                     index_rec.nsec = records.sb_ping.ping_time.tv_nsec;
                     fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
@@ -642,43 +644,65 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
                     break;
 
+                /* jsb 10/07/98 Added direct access support for new navigation errors record */
+                case GSF_RECORD_HV_NAVIGATION_ERROR:
 
-		default:
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    break;
-	    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-#ifdef DISPLAY_SPINNER            
-	    /*	Print the percent spinner to stdout.	*/
-	    if ((current = ftell(ft->fp)) == -1 )
-	    {
-		gsfError = GSF_FILE_TELL_ERROR;
-		return (-1);
-	    }
-	    percent = ((double) current  / (double) eof) * 100.0;
-	    if (old_percent != percent)
-	    {
-		printf("Reading GSF file - %03d%% complete\r", percent);
-		fflush(stdout);
-		old_percent = percent;
-	    }
+                    /*  Load the index record structure and write to the
+                        temp file.  */
+
+                    index_rec.sec = records.hv_nav_error.nav_error_time.tv_sec;
+                    index_rec.nsec = records.hv_nav_error.nav_error_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
+
+                    break;
+
+
+                default:
+
+                    break;
+            }
+
+#ifdef DISPLAY_SPINNER
+            /*  Print the percent spinner to stdout.    */
+            if ((current = ftell(ft->fp)) == -1 )
+            {
+                gsfError = GSF_FILE_TELL_ERROR;
+                return (-1);
+            }
+            percent = ((double) current  / (double) eof) * 100.0;
+            if (old_percent != percent)
+            {
+                printf("Reading GSF file - %03d%% complete\r", percent);
+                fflush(stdout);
+                old_percent = percent;
+            }
 #endif
-	}
-	else
-	{
-	    if (gsfError != GSF_READ_TO_END_OF_FILE)
-	    {
-		return(-1);
-	    }
-	}
+        }
+        else
+        {
+            if (gsfError != GSF_READ_TO_END_OF_FILE)
+            {
+                return(-1);
+            }
+        }
     }
     while (err != -1);
 
     /* Create the index file */
     if ((ft->index_data.fp = fopen(ndx_file, "wb+")) == NULL)
     {
-	gsfError = GSF_INDEX_FILE_OPEN_ERROR;
-	return (-1);
+        gsfError = GSF_INDEX_FILE_OPEN_ERROR;
+        return (-1);
     }
 
     /* Write the index file header. Note that index data is written in navive
@@ -697,115 +721,115 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     /* Set the library's table entry for the number of record types for this file */
     ft->index_data.number_of_types = index_header.number_record_types;
 
-    /*	Clear the space for the information (write dummy info for the
-     *	record type, number_of_records, and start address).
+    /*  Clear the space for the information (write dummy info for the
+     *  record type, number_of_records, and start address).
      */
     for (i = 0, j = 0; i < ft->index_data.number_of_types; i++)
     {
-	fwrite(&j, 4, 1, ft->index_data.fp);
-	fwrite(&j, 4, 1, ft->index_data.fp);
-	fwrite(&j, 4, 1, ft->index_data.fp);
+        fwrite(&j, 4, 1, ft->index_data.fp);
+        fwrite(&j, 4, 1, ft->index_data.fp);
+        fwrite(&j, 4, 1, ft->index_data.fp);
     }
 
-    /*	Reset the counters. */
+    /*  Reset the counters. */
     count = 0;
     percent = 0;
     old_percent = -1;
     total_recs = 0;
     for (i = 0; i < NUM_REC_TYPES; i++)
     {
-	total_recs += ft->index_data.number_of_records[i];
+        total_recs += ft->index_data.number_of_records[i];
     }
 
-    /*	Read the temp files and build the final index file.   */
+    /*  Read the temp files and build the final index file.   */
     j = 0;
     for (i = 0; i < NUM_REC_TYPES; i++)
     {
-	/*  If the temp file pointer is non-NULL then this record type was
-	    encountered.    */
+        /*  If the temp file pointer is non-NULL then this record type was
+            encountered.    */
 
-	if (temp[i] != NULL)
-	{
+        if (temp[i] != NULL)
+        {
 
-	    /*	Rewind the temp file and set the start address and record
-	     *	type.
-	     */
-	    fseek(temp[i], 0, 0);
-	    ft->index_data.start_addr[i] = ftell(ft->index_data.fp);
-	    ft->index_data.record_type[i] = i;
+            /*  Rewind the temp file and set the start address and record
+             *  type.
+             */
+            fseek(temp[i], 0, 0);
+            ft->index_data.start_addr[i] = ftell(ft->index_data.fp);
+            ft->index_data.record_type[i] = i;
 
-	    /*	Read through the temp file and write to the final file. */
-	    while (fread(&index_rec, sizeof(INDEX_REC), 1, temp[i]) == 1)
-	    {
-		fwrite(&index_rec, sizeof(INDEX_REC), 1,
-		    ft->index_data.fp);
+            /*  Read through the temp file and write to the final file. */
+            while (fread(&index_rec, sizeof(INDEX_REC), 1, temp[i]) == 1)
+            {
+                fwrite(&index_rec, sizeof(INDEX_REC), 1,
+                    ft->index_data.fp);
 
-		count++;
+                count++;
 
 #ifdef DISPLAY_SPINNER
-		/*  Print the percent spinner to stdout.  */
-		percent = ((float) (count) / (float) total_recs) * 100.0;
-		if (old_percent != percent)
-		{
-		    printf("Writing index file - %03d%% complete\r", percent);
-		    fflush(stdout);
-		    old_percent = percent;
-		}
+                /*  Print the percent spinner to stdout.  */
+                percent = ((float) (count) / (float) total_recs) * 100.0;
+                if (old_percent != percent)
+                {
+                    printf("Writing index file - %03d%% complete\r", percent);
+                    fflush(stdout);
+                    old_percent = percent;
+                }
 #endif
-	    }
+            }
 
-	    /*	Move to the beginning of the final file and write the
-	     *	pertinent information for this record type.  The offset
-	     *	is computed as follows :
-	     *	j is the counter for the record types stored in the
-	     *	index file, times 12 (size of the header info for each
-	     *	record type), plus 44 bytes for the format version
-	     *	id, gsf file size, endian indicator, total number of record
-	     *	types, and reserved space.
-	     */
-	    fseek(ft->index_data.fp, (j * 12) + 44, 0);
-	    fwrite(&ft->index_data.record_type[i], 4, 1,
-		ft->index_data.fp);
-	    fwrite(&ft->index_data.start_addr[i], 4, 1,
-		ft->index_data.fp);
-	    fwrite(&ft->index_data.number_of_records[i], 4, 1,
-		ft->index_data.fp);
-	    /* Advance to the end of the index file */
-	    fseek(ft->index_data.fp, 0, SEEK_END);
+            /*  Move to the beginning of the final file and write the
+             *  pertinent information for this record type.  The offset
+             *  is computed as follows :
+             *  j is the counter for the record types stored in the
+             *  index file, times 12 (size of the header info for each
+             *  record type), plus 44 bytes for the format version
+             *  id, gsf file size, endian indicator, total number of record
+             *  types, and reserved space.
+             */
+            fseek(ft->index_data.fp, (j * 12) + 44, 0);
+            fwrite(&ft->index_data.record_type[i], 4, 1,
+                ft->index_data.fp);
+            fwrite(&ft->index_data.start_addr[i], 4, 1,
+                ft->index_data.fp);
+            fwrite(&ft->index_data.number_of_records[i], 4, 1,
+                ft->index_data.fp);
+            /* Advance to the end of the index file */
+            fseek(ft->index_data.fp, 0, SEEK_END);
 
-	    /*	Get rid of the temp files.  */
+            /*  Get rid of the temp files.  */
 
-	    close_temp_file(i, temp[i]);
+            close_temp_file(i, temp[i]);
 
-	    j++;
-	}
+            j++;
+        }
     }
 
     /* Read the scale factor addresses into memory. */
     if (ft->index_data.record_type[0] != -1)
     {
-	ft->index_data.scale_factor_addr =
-	    (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
-	    sizeof(INDEX_REC));
+        ft->index_data.scale_factor_addr =
+            (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
+            sizeof(INDEX_REC));
 
-	/*  Couldn't calloc the memory for the scale factor addresses.  */
+        /*  Couldn't calloc the memory for the scale factor addresses.  */
 
-	if (ft->index_data.scale_factor_addr == NULL)
-	{
-	    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-	    return (-1);
-	}
+        if (ft->index_data.scale_factor_addr == NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
 
-	fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
-	for (i = 0; i < ft->index_data.number_of_records[0]; i++)
-	{
-	    fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
-		ft->index_data.fp);
-	}
+        fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
+        for (i = 0; i < ft->index_data.number_of_records[0]; i++)
+        {
+            fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
+                ft->index_data.fp);
+        }
     }
 
-    /*	Set the byte swap indicator off.  No need to swap on a
-     *	machine of the same sex.
+    /*  Set the byte swap indicator off.  No need to swap on a
+     *  machine of the same sex.
      */
     ft->index_data.swap = 0;
 
@@ -838,22 +862,22 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 static int
 gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 {
-    int 	     i;
-    int 	     j;
-    int 	     err;
-    int 	     id;
+    int              i;
+    int              j;
+    int              err;
+    int              id;
     int              last_record_type;
     int              last_record_number;
-    int 	     percent;
-    int 	     old_percent;
-    long	     last_index=0;
-    long	     eof;
+    int              percent;
+    int              old_percent;
+    long             last_index=0;
+    long             eof;
     long             current;
-    long	     endian = 0x00010203;
-    FILE	    *temp[NUM_REC_TYPES];
-    gsfDataID	     data_id;
-    gsfRecords	     records;
-    INDEX_REC	     index_rec;
+    long             endian = 0x00010203;
+    FILE            *temp[NUM_REC_TYPES];
+    gsfDataID        data_id;
+    gsfRecords       records;
+    INDEX_REC        index_rec;
     GSF_INDEX_HEADER index_header;
 
     /* Clear the index header data structure */
@@ -862,7 +886,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     /* Clear the array of temporary file descriptors */
     for (i=0; i<NUM_REC_TYPES; i++)
     {
-	temp[i] = (FILE *) NULL;
+        temp[i] = (FILE *) NULL;
     }
 
     /* Read the endian indicator to detect whether to swap incoming data.
@@ -871,32 +895,32 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     fread(&index_header.endian, 4, 1, ft->index_data.fp);
     if (index_header.endian == 0x00010203)
     {
-	ft->index_data.swap = 0;
+        ft->index_data.swap = 0;
     }
     else if (index_header.endian == 0x03020100)
     {
-	ft->index_data.swap = 1;
+        ft->index_data.swap = 1;
     }
     else
     {
-	gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
-	return (-1);
+        gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
+        return (-1);
     }
 
     /* Read the number of record types in the index file. */
     fread(&index_header.number_record_types, 4, 1, ft->index_data.fp);
     if (ft->index_data.swap)
     {
-	SwapLong((unsigned long *) &index_header.number_record_types, 1);
+        SwapLong((unsigned long *) &index_header.number_record_types, 1);
     }
     ft->index_data.number_of_types = index_header.number_record_types;
 
     /* Make sure we found a valid number_of_types */
     if ((ft->index_data.number_of_types < 1) ||
-	(ft->index_data.number_of_types > NUM_REC_TYPES))
+        (ft->index_data.number_of_types > NUM_REC_TYPES))
     {
-	gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
-	return (-1);
+        gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
+        return (-1);
     }
 
     /* Read the four four byte reserved fields */
@@ -905,33 +929,33 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     fread(&index_header.spare3, 4, 1, ft->index_data.fp);
     fread(&index_header.spare4, 4, 1, ft->index_data.fp);
 
-    /*	For each record type, read the record type, start address and
-     *	number of records.
+    /*  For each record type, read the record type, start address and
+     *  number of records.
      */
     for (i = 0; i < ft->index_data.number_of_types; i++)
     {
-	fread(&j, 4, 1, ft->index_data.fp);
-	if (ft->index_data.swap)
-	{
-	    SwapLong((unsigned long *) &j, 1);
-	}
+        fread(&j, 4, 1, ft->index_data.fp);
+        if (ft->index_data.swap)
+        {
+            SwapLong((unsigned long *) &j, 1);
+        }
 
-	/*  This is not really necessary but it makes things easier to code.
-	 *  Put the record type into the record_type[record_type] member of
-	 *  the index_data structure.
-	 */
-	ft->index_data.record_type[j] = j;
+        /*  This is not really necessary but it makes things easier to code.
+         *  Put the record type into the record_type[record_type] member of
+         *  the index_data structure.
+         */
+        ft->index_data.record_type[j] = j;
 
-	fread(&ft->index_data.start_addr[j], 4, 1,
-	    ft->index_data.fp);
-	fread(&ft->index_data.number_of_records[j], 4, 1,
-	    ft->index_data.fp);
+        fread(&ft->index_data.start_addr[j], 4, 1,
+            ft->index_data.fp);
+        fread(&ft->index_data.number_of_records[j], 4, 1,
+            ft->index_data.fp);
 
-	if (ft->index_data.swap)
-	{
-	    SwapLong((unsigned long *) &ft->index_data.start_addr[i], 1);
-	    SwapLong((unsigned long *) &ft->index_data.number_of_records[i], 1);
-	}
+        if (ft->index_data.swap)
+        {
+            SwapLong((unsigned long *) &ft->index_data.start_addr[i], 1);
+            SwapLong((unsigned long *) &ft->index_data.number_of_records[i], 1);
+        }
     }
 
     /* Read the index file, and create temporary files with index data for
@@ -939,83 +963,83 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
      */
     for (i=0; i<NUM_REC_TYPES; i++)
     {
-	if (ft->index_data.number_of_records[i] > 0)
-	{
+        if (ft->index_data.number_of_records[i] > 0)
+        {
             /* Move the index file's pointer to the first record for this type */
-	    fseek(ft->index_data.fp, ft->index_data.start_addr[i], 0);
-	    for(j=0; j<ft->index_data.number_of_records[i]; j++)
-	    {
-		/* Read the index record from the disk */
-		fread(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
-		if (ft->index_data.swap)
-		{
-		    SwapLong((unsigned long *) &index_rec.sec,	1);
-		    SwapLong((unsigned long *) &index_rec.nsec, 1);
-		    SwapLong((unsigned long *) &index_rec.addr, 1);
-		}
-		if (temp[i] == NULL)
-		{
-		    temp[i] = open_temp_file(i);
-		    if (temp[i] == NULL)
-		    {
-			gsfError = GSF_FOPEN_ERROR;
-			return(-1);
-		    }
-		}
-		fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[i]);
+            fseek(ft->index_data.fp, ft->index_data.start_addr[i], 0);
+            for(j=0; j<ft->index_data.number_of_records[i]; j++)
+            {
+                /* Read the index record from the disk */
+                fread(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
+                if (ft->index_data.swap)
+                {
+                    SwapLong((unsigned long *) &index_rec.sec,  1);
+                    SwapLong((unsigned long *) &index_rec.nsec, 1);
+                    SwapLong((unsigned long *) &index_rec.addr, 1);
+                }
+                if (temp[i] == NULL)
+                {
+                    temp[i] = open_temp_file(i);
+                    if (temp[i] == NULL)
+                    {
+                        gsfError = GSF_FOPEN_ERROR;
+                        return(-1);
+                    }
+                }
+                fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[i]);
 
-		/* Save the address of the last record indexed */
-		if (index_rec.addr > last_index)
-		{
-		    last_record_type = i;
-		    last_record_number = j+1;
-		    last_index = index_rec.addr;
-		}
-	    }
-	}
+                /* Save the address of the last record indexed */
+                if (index_rec.addr > last_index)
+                {
+                    last_record_type = i;
+                    last_record_number = j+1;
+                    last_index = index_rec.addr;
+                }
+            }
+        }
     }
 
     /* Read the currently indexed scale factor addresses into memory. */
     if (ft->index_data.record_type[0] != -1)
     {
-	ft->index_data.scale_factor_addr =
-	    (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
-	    sizeof(INDEX_REC));
+        ft->index_data.scale_factor_addr =
+            (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
+            sizeof(INDEX_REC));
 
-	/*  Couldn't calloc the memory for the scale factor addresses.  */
+        /*  Couldn't calloc the memory for the scale factor addresses.  */
 
-	if (ft->index_data.scale_factor_addr == NULL)
-	{
-	    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-	    return (-1);
-	}
+        if (ft->index_data.scale_factor_addr == NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
 
-	fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
-	for (i = 0; i < ft->index_data.number_of_records[0]; i++)
-	{
-	    fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
-		ft->index_data.fp);
-	}
+        fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
+        for (i = 0; i < ft->index_data.number_of_records[0]; i++)
+        {
+            fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
+                ft->index_data.fp);
+        }
     }
 
     /* If any ping records have been indexed read the last one. This is
      * required to ensure we have the most recent scale factors loaded.
-     */ 
+     */
     if (ft->index_data.number_of_records[GSF_RECORD_SWATH_BATHYMETRY_PING])
     {
-	data_id.recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
+        data_id.recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
         data_id.record_number = -1;
         err = gsfRead(handle, data_id.recordID, &data_id, &records, NULL, 0);
         if (err < 0)
         {
-	    /* gsfError will have been set in gsfRead */
-	    return(-1);
+            /* gsfError will have been set in gsfRead */
+            return(-1);
         }
     }
 
-    /* If the last indexed record is not the ping record we just loaded, then 
+    /* If the last indexed record is not the ping record we just loaded, then
      * go load the last indexed record so that the gsf file pointer is one
-     * record beyond the last record we have an index for. 
+     * record beyond the last record we have an index for.
      */
     if (last_record_type != GSF_RECORD_SWATH_BATHYMETRY_PING)
     {
@@ -1024,276 +1048,298 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         err = gsfRead(handle, data_id.recordID, &data_id, &records, NULL, 0);
         if (err < 0)
         {
-	    /* gsfError will have been set in gsfRead */
-	    return(-1);
+            /* gsfError will have been set in gsfRead */
+            return(-1);
         }
     }
 
-    /*	Get the address of the end of file so we can compute percentage
-     *	processed for creating the index file.
+    /*  Get the address of the end of file so we can compute percentage
+     *  processed for creating the index file.
      */
     eof = ft->file_size;
     percent = 0;
     old_percent = -1;
 
-    /*	Read each gsf record and write the time and address to the
-     *	temp index files.
+    /*  Read each gsf record and write the time and address to the
+     *  temp index files.
      */
     do
     {
-	/*  Save the current address within the gsf file.   */
+        /*  Save the current address within the gsf file.   */
 
-	if ((index_rec.addr = ftell(ft->fp)) == -1 )
-	{
-	    gsfError = GSF_FILE_TELL_ERROR;
-	    return (-1);
-	}
+        if ((index_rec.addr = ftell(ft->fp)) == -1 )
+        {
+            gsfError = GSF_FILE_TELL_ERROR;
+            return (-1);
+        }
 
-	/*  Read the gsf record and check for end of file.  */
+        /*  Read the gsf record and check for end of file.  */
 
-	if ((err = gsfRead(handle, GSF_NEXT_RECORD, &data_id, &records,
-		    NULL, 0)) != -1)
-	{
+        if ((err = gsfRead(handle, GSF_NEXT_RECORD, &data_id, &records,
+                    NULL, 0)) != -1)
+        {
 
-	    /*	Switch based on the record type that was just read.  */
+            /*  Switch based on the record type that was just read.  */
 
-	    id = data_id.recordID;
-	    switch (id)
-	    {
-		    /*	Don't index the header or the summary.  */
+            id = data_id.recordID;
+            switch (id)
+            {
+                    /*  Don't index the header or the summary.  */
 
-		case GSF_RECORD_HEADER:
-		    break;
+                case GSF_RECORD_HEADER:
+                    break;
 
-		case GSF_RECORD_SWATH_BATHY_SUMMARY:
+                case GSF_RECORD_SWATH_BATHY_SUMMARY:
 
                     /*  If this is the first record of this type open the
                         temp file and increment the number of types.    */
-                    
+
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
+                        index_header.number_record_types++;
                     }
 
                     /*  Load the index record structure and write to the
-                        temp file.	*/
+                        temp file.      */
 
                     index_rec.sec = records.summary.start_time.tv_sec;
                     index_rec.nsec = records.summary.end_time.tv_nsec;
                     fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
                     ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_SWATH_BATHYMETRY_PING:
+                case GSF_RECORD_SWATH_BATHYMETRY_PING:
 
-		    /*	If this ping record actually contained scale
-			factor information in the file, make entries to
-			two indexes; the standard ping index and the
-			index for pings with scale factor subrecords.	*/
+                    /*  If this ping record actually contained scale
+                        factor information in the file, make entries to
+                        two indexes; the standard ping index and the
+                        index for pings with scale factor subrecords.   */
 
-		    if (ft->scales_read)
-		    {
-			/*  If this is the first record of this type
-			    open the temp file and increment the
-			    number of types.	*/
+                    if (ft->scales_read)
+                    {
+                        /*  If this is the first record of this type
+                            open the temp file and increment the
+                            number of types.    */
 
-			if (temp[0] == NULL)
-			{
-			    temp[0] = open_temp_file(0);
-			    if (temp[0] == NULL)
-			    {
-				return(-1);
-			    }
-			    index_header.number_record_types++;
-			}
+                        if (temp[0] == NULL)
+                        {
+                            temp[0] = open_temp_file(0);
+                            if (temp[0] == NULL)
+                            {
+                                return(-1);
+                            }
+                            index_header.number_record_types++;
+                        }
 
-			/*  Load the index record structure and write to the
-			    temp file.	*/
+                        /*  Load the index record structure and write to the
+                            temp file.  */
 
-			index_rec.sec = records.mb_ping.ping_time.tv_sec;
-			index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
-			fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[0]);
-			ft->index_data.number_of_records[0]++;
-		    }
+                        index_rec.sec = records.mb_ping.ping_time.tv_sec;
+                        index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
+                        fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[0]);
+                        ft->index_data.number_of_records[0]++;
+                    }
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.mb_ping.ping_time.tv_sec;
-		    index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.mb_ping.ping_time.tv_sec;
+                    index_rec.nsec = records.mb_ping.ping_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_SOUND_VELOCITY_PROFILE:
+                case GSF_RECORD_SOUND_VELOCITY_PROFILE:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.svp.application_time.tv_sec;
-		    index_rec.nsec = records.svp.application_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.svp.application_time.tv_sec;
+                    index_rec.nsec = records.svp.application_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_PROCESSING_PARAMETERS:
+                case GSF_RECORD_PROCESSING_PARAMETERS:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.process_parameters.param_time.tv_sec;
-		    index_rec.nsec =
-			records.process_parameters.param_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.process_parameters.param_time.tv_sec;
+                    index_rec.nsec =
+                        records.process_parameters.param_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_SENSOR_PARAMETERS:
+                case GSF_RECORD_SENSOR_PARAMETERS:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.sensor_parameters.param_time.tv_sec;
-		    index_rec.nsec =
-			records.sensor_parameters.param_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.sensor_parameters.param_time.tv_sec;
+                    index_rec.nsec =
+                        records.sensor_parameters.param_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_COMMENT:
+                case GSF_RECORD_COMMENT:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.comment.comment_time.tv_sec;
-		    index_rec.nsec = records.comment.comment_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.comment.comment_time.tv_sec;
+                    index_rec.nsec = records.comment.comment_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_HISTORY:
+                case GSF_RECORD_HISTORY:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.history.history_time.tv_sec;
-		    index_rec.nsec = records.history.history_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.history.history_time.tv_sec;
+                    index_rec.nsec = records.history.history_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		case GSF_RECORD_NAVIGATION_ERROR:
+                case GSF_RECORD_NAVIGATION_ERROR:
 
-		    /*	If this is the first record of this type open the
-			temp file and increment the number of types.	*/
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
 
-		    if (temp[id] == NULL)
-		    {
-			temp[id] = open_temp_file(id);
-			index_header.number_record_types++;
-		    }
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
 
-		    /*	Load the index record structure and write to the
-			temp file.  */
+                    /*  Load the index record structure and write to the
+                        temp file.  */
 
-		    index_rec.sec = records.nav_error.nav_error_time.tv_sec;
-		    index_rec.nsec = records.nav_error.nav_error_time.tv_nsec;
-		    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
-		    ft->index_data.number_of_records[id]++;
+                    index_rec.sec = records.nav_error.nav_error_time.tv_sec;
+                    index_rec.nsec = records.nav_error.nav_error_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
 
-		    break;
+                    break;
 
-		default:
+                /* jsb 10/07/98 Added direct access support for new navigation errors record */
+                case GSF_RECORD_HV_NAVIGATION_ERROR:
 
-		    fprintf(stderr, "Unknown record ID %d\n", id);
-		    break;
-	    }
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
+
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
+
+                    /*  Load the index record structure and write to the
+                        temp file.  */
+
+                    index_rec.sec = records.hv_nav_error.nav_error_time.tv_sec;
+                    index_rec.nsec = records.hv_nav_error.nav_error_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
+
+                    break;
+
+                default:
+
+                    fprintf(stderr, "Unknown record ID %d\n", id);
+                    break;
+            }
 
 #ifdef DISPLAY_SPINNER
-	    /*	Print the percent spinner to stdout.	*/
-	    if ((current = ftell(ft->fp)) == -1 )
-	    {
-		gsfError = GSF_FILE_TELL_ERROR;
-		return (-1);
-	    }
-	    percent = ((double) current  / (double) eof) * 100.0;
-	    if (old_percent != percent)
-	    {
-		printf("Reading GSF file - %03d%% complete\r", percent);
-		fflush(stdout);
-		old_percent = percent;
-	    }
+            /*  Print the percent spinner to stdout.    */
+            if ((current = ftell(ft->fp)) == -1 )
+            {
+                gsfError = GSF_FILE_TELL_ERROR;
+                return (-1);
+            }
+            percent = ((double) current  / (double) eof) * 100.0;
+            if (old_percent != percent)
+            {
+                printf("Reading GSF file - %03d%% complete\r", percent);
+                fflush(stdout);
+                old_percent = percent;
+            }
 #endif
-	}
-	else
-	{
-	    if (gsfError != GSF_READ_TO_END_OF_FILE)
-	    {
-		return(-1);
-	    }
-	}
+        }
+        else
+        {
+            if (gsfError != GSF_READ_TO_END_OF_FILE)
+            {
+                return(-1);
+            }
+        }
     }
     while (err != -1);
 
@@ -1303,11 +1349,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     fclose (ft->index_data.fp);
     if ((ft->index_data.fp = fopen(ndx_file, "wb+")) == NULL)
     {
-	gsfError = GSF_INDEX_FILE_OPEN_ERROR;
-	return(-1);
+        gsfError = GSF_INDEX_FILE_OPEN_ERROR;
+        return(-1);
     }
 
-    /* Write the index file header information. NOTE that the data are 
+    /* Write the index file header information. NOTE that the data are
      * in native machine byte order.  There are 16 bytes of
      * space reserved in the header for future information.
      */
@@ -1326,101 +1372,101 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     /* Set the library's table entry for the number of record types for this file */
     ft->index_data.number_of_types = index_header.number_record_types;
 
-    /*	Clear the space for the information (write dummy info for the
-     *	record type, number_of_records, and start address).
+    /*  Clear the space for the information (write dummy info for the
+     *  record type, number_of_records, and start address).
      */
     for (i = 0, j = 0; i < ft->index_data.number_of_types; i++)
     {
-	fwrite(&j, 4, 1, ft->index_data.fp);
-	fwrite(&j, 4, 1, ft->index_data.fp);
-	fwrite(&j, 4, 1, ft->index_data.fp);
+        fwrite(&j, 4, 1, ft->index_data.fp);
+        fwrite(&j, 4, 1, ft->index_data.fp);
+        fwrite(&j, 4, 1, ft->index_data.fp);
     }
 
-    /*	Read the temp files and build the final index file.   */
+    /*  Read the temp files and build the final index file.   */
     j = 0;
     for (i = 0; i < NUM_REC_TYPES; i++)
     {
-	/*  If the temp file pointer is non-NULL then this record type was
-	 *  encountered.
-	 */
-	if (temp[i] != NULL)
-	{
+        /*  If the temp file pointer is non-NULL then this record type was
+         *  encountered.
+         */
+        if (temp[i] != NULL)
+        {
 
-	    /*	Rewind the temp file and set the start address and record
-	     *	type.
-	     */
-	    fseek(temp[i], 0, 0);
-	    ft->index_data.start_addr[i] = ftell(ft->index_data.fp);
-	    ft->index_data.record_type[i] = i;
+            /*  Rewind the temp file and set the start address and record
+             *  type.
+             */
+            fseek(temp[i], 0, 0);
+            ft->index_data.start_addr[i] = ftell(ft->index_data.fp);
+            ft->index_data.record_type[i] = i;
 
-	    /*	Read through the temp file and write to the final file. */
-	    while (fread(&index_rec, sizeof(INDEX_REC), 1, temp[i]) == 1)
-	    {
-		fwrite(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
-	    }
+            /*  Read through the temp file and write to the final file. */
+            while (fread(&index_rec, sizeof(INDEX_REC), 1, temp[i]) == 1)
+            {
+                fwrite(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
+            }
 
-	    /*	Move to the beginning of the final file and write the
-	     *	pertinent information for this record type.  The offset
-	     *	is computed as follows :
-	     *	j is the counter for the record types stored in the
-	     *	index file, times 12 (size of the header info for each
-	     *	record type), plus 44 bytes for the format version
-	     *	id, gsf file size, endian indicator, total number of record
-	     *	types, and reserved space.
-	     */
-	    fseek(ft->index_data.fp, (j * 12) + 44, 0);
-	    fwrite(&ft->index_data.record_type[i], 4, 1,
-		ft->index_data.fp);
-	    fwrite(&ft->index_data.start_addr[i], 4, 1,
-		ft->index_data.fp);
-	    fwrite(&ft->index_data.number_of_records[i], 4, 1,
-		ft->index_data.fp);
-	    /* Advance to the end of the index file */
-	    fseek(ft->index_data.fp, 0, SEEK_END);
+            /*  Move to the beginning of the final file and write the
+             *  pertinent information for this record type.  The offset
+             *  is computed as follows :
+             *  j is the counter for the record types stored in the
+             *  index file, times 12 (size of the header info for each
+             *  record type), plus 44 bytes for the format version
+             *  id, gsf file size, endian indicator, total number of record
+             *  types, and reserved space.
+             */
+            fseek(ft->index_data.fp, (j * 12) + 44, 0);
+            fwrite(&ft->index_data.record_type[i], 4, 1,
+                ft->index_data.fp);
+            fwrite(&ft->index_data.start_addr[i], 4, 1,
+                ft->index_data.fp);
+            fwrite(&ft->index_data.number_of_records[i], 4, 1,
+                ft->index_data.fp);
+            /* Advance to the end of the index file */
+            fseek(ft->index_data.fp, 0, SEEK_END);
 
-	    /*	Get rid of the temp files.  */
+            /*  Get rid of the temp files.  */
 
-	    close_temp_file(i, temp[i]);
+            close_temp_file(i, temp[i]);
 
-	    j++;
-	}
+            j++;
+        }
     }
 
     /* Read the scale factor addresses into memory. */
     if (ft->index_data.record_type[0] != -1)
     {
-	if (ft->index_data.scale_factor_addr == (INDEX_REC *) NULL)
-	{
-  	    ft->index_data.scale_factor_addr =
-	        (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
-	        sizeof(INDEX_REC));
+        if (ft->index_data.scale_factor_addr == (INDEX_REC *) NULL)
+        {
+            ft->index_data.scale_factor_addr =
+                (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
+                sizeof(INDEX_REC));
         }
-	else
-	{
-  	    ft->index_data.scale_factor_addr =
-	        (INDEX_REC *) realloc(ft->index_data.scale_factor_addr, 
-		ft->index_data.number_of_records[0] * sizeof(INDEX_REC));
+        else
+        {
+            ft->index_data.scale_factor_addr =
+                (INDEX_REC *) realloc(ft->index_data.scale_factor_addr,
+                ft->index_data.number_of_records[0] * sizeof(INDEX_REC));
         }
 
 
-	/*  Couldn't calloc the memory for the scale factor addresses.  */
+        /*  Couldn't calloc the memory for the scale factor addresses.  */
 
-	if (ft->index_data.scale_factor_addr == NULL)
-	{
-	    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-	    return (-1);
-	}
+        if (ft->index_data.scale_factor_addr == NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
 
-	fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
-	for (i = 0; i < ft->index_data.number_of_records[0]; i++)
-	{
-	    fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
-		ft->index_data.fp);
-	}
+        fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
+        for (i = 0; i < ft->index_data.number_of_records[0]; i++)
+        {
+            fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
+                ft->index_data.fp);
+        }
     }
 
-    /*	Set the byte swap indicator off.  No need to swap on a
-     *	machine of the same sex.
+    /*  Set the byte swap indicator off.  No need to swap on a
+     *  machine of the same sex.
      */
     ft->index_data.swap = 0;
 
@@ -1447,13 +1493,13 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
  *
  ********************************************************************/
 
-static FILE	      *
+static FILE           *
 open_temp_file(int type)
 {
-    char	    file[132];
+    char            file[132];
     char            dir[132];
-    FILE	   *fp;
-    
+    FILE           *fp;
+
     memset (&dir, 0, sizeof (dir));
 
 #ifdef OS2
@@ -1461,21 +1507,21 @@ open_temp_file(int type)
         strcpy (dir, "\\tmp");
     else
         strcpy (dir, getenv ("GSFTMPDIR"));
-    
+
     sprintf(file, "%s\\%05d%02d.ndx", dir, _getpid(), type);
 #else
     if (getenv ("GSFTMPDIR") == NULL)
         strcpy (dir, "/tmp");
     else
         strcpy (dir, getenv ("GSFTMPDIR"));
-    
+
     sprintf(file, "%s/%05d%02d.ndx", dir, getpid(), type);
 #endif
 
     if ((fp = fopen(file, "wb+")) == NULL)
     {
-	perror(file);
-	exit(-1);
+        perror(file);
+        exit(-1);
     }
 
     return (fp);
@@ -1502,7 +1548,7 @@ open_temp_file(int type)
 static void
 close_temp_file(int type, FILE * fp)
 {
-    char	    file[132];
+    char            file[132];
     char            dir[132];
 
     fclose(fp);
@@ -1511,7 +1557,7 @@ close_temp_file(int type, FILE * fp)
         strcpy (dir, "/tmp");
     else
         strcpy (dir, getenv ("GSFTMPDIR"));
-                
+
     sprintf(file, "%s/%05d%02d.ndx", dir, getpid(), type);
     unlink(file);
 
@@ -1540,60 +1586,60 @@ gsfCloseIndex(GSF_FILE_TABLE *ft)
 {
     if (fclose(ft->index_data.fp))
     {
-	gsfError = GSF_FILE_CLOSE_ERROR;
-	return (-1);
+        gsfError = GSF_FILE_CLOSE_ERROR;
+        return (-1);
     }
 
     /* Free the memory allocated for the scale factor addresses. */
     if (ft->index_data.scale_factor_addr != (INDEX_REC *) NULL)
     {
-	free(ft->index_data.scale_factor_addr);
-	ft->index_data.scale_factor_addr = (INDEX_REC *) NULL;
+        free(ft->index_data.scale_factor_addr);
+        ft->index_data.scale_factor_addr = (INDEX_REC *) NULL;
     }
 
     return(0);
 }
 
 /******************************************************************************\
-*									       *
-*   Programmer(s):	David B. Johanson				       *
-*									       *
-*   Date Written:	February, 1994					       *
-*									       *
-*   Module Name:	SwapLong					       *
-*									       *
-*   Module Security							       *
-*   Classification:	Unclassified					       *
-*									       *
-*   Data Security							       *
-*   Classification:	Unknown 					       *
-*									       *
-*   Purpose:		This function swaps four-byte words.		       *
-*									       *
-*   Inputs:		The base address of the bytes to be swapped and        *
-*			the number of words to swap.			       *
-*									       *
-*   Outputs:		The swapped bytes (by reference)		       *
-*									       *
-*   Calling Routines:	main						       *
-*									       *
-*   Routines Called:	None						       *
-*									       *
-*   Glossary:		longvalue	- the word to be byte-swapped	       *
-*			bytevalue	- bytes within the longword	       *
-*			data		- union of longvalue, bytevalue        *
-*			swap_address	- address of word to be swapped        *
-*			byte0		- temporary storage		       *
-*			byte1		- temporary storage		       *
-*			i		- counter, # of words swapped	       *
-*									       *
-*   Method:		Load short value with the next word to be swapped      *
-*			swap the bytes, repeat till done.		       *
-*									       *
-*   History:		dbj, 2/94: Modified from function written by D. Avery. *
-*			dbj, 6/94: Renamed from SwapBytes to SwapLong.	Added  *
-*				  use of typedefs plus other minor mods.       *
-*									       *
+*                                                                              *
+*   Programmer(s):      David B. Johanson                                      *
+*                                                                              *
+*   Date Written:       February, 1994                                         *
+*                                                                              *
+*   Module Name:        SwapLong                                               *
+*                                                                              *
+*   Module Security                                                            *
+*   Classification:     Unclassified                                           *
+*                                                                              *
+*   Data Security                                                              *
+*   Classification:     Unknown                                                *
+*                                                                              *
+*   Purpose:            This function swaps four-byte words.                   *
+*                                                                              *
+*   Inputs:             The base address of the bytes to be swapped and        *
+*                       the number of words to swap.                           *
+*                                                                              *
+*   Outputs:            The swapped bytes (by reference)                       *
+*                                                                              *
+*   Calling Routines:   main                                                   *
+*                                                                              *
+*   Routines Called:    None                                                   *
+*                                                                              *
+*   Glossary:           longvalue       - the word to be byte-swapped          *
+*                       bytevalue       - bytes within the longword            *
+*                       data            - union of longvalue, bytevalue        *
+*                       swap_address    - address of word to be swapped        *
+*                       byte0           - temporary storage                    *
+*                       byte1           - temporary storage                    *
+*                       i               - counter, # of words swapped          *
+*                                                                              *
+*   Method:             Load short value with the next word to be swapped      *
+*                       swap the bytes, repeat till done.                      *
+*                                                                              *
+*   History:            dbj, 2/94: Modified from function written by D. Avery. *
+*                       dbj, 6/94: Renamed from SwapBytes to SwapLong.  Added  *
+*                                 use of typedefs plus other minor mods.       *
+*                                                                              *
 \******************************************************************************/
 
 void
@@ -1601,27 +1647,27 @@ SwapLong(unsigned long *base_address, long count)
 {
     union
     {
-	unsigned long	longvalue;	/* the longword to swap 	       */
-	unsigned char	bytevalue[4];	/* bytes within the longword	       */
+        unsigned long   longvalue;      /* the longword to swap                */
+        unsigned char   bytevalue[4];   /* bytes within the longword           */
     }
     data;
 
-    unsigned char   byte0,	/* temporary storage		       */
-		    byte1;	/* temporary storage		       */
-    long	    i;		/* counter for number of words swapped */
+    unsigned char   byte0,      /* temporary storage                   */
+                    byte1;      /* temporary storage                   */
+    long            i;          /* counter for number of words swapped */
 
     for (i = 0; i < count; i++)
     {
-	/* Swap the bytes.							*/
+        /* Swap the bytes.                                                      */
 
-	data.longvalue = *(base_address + i);
-	byte0 = data.bytevalue[0];
-	byte1 = data.bytevalue[1];
-	data.bytevalue[0] = data.bytevalue[3];
-	data.bytevalue[1] = data.bytevalue[2];
-	data.bytevalue[2] = byte1;
-	data.bytevalue[3] = byte0;
-	*(base_address + i) = data.longvalue;
+        data.longvalue = *(base_address + i);
+        byte0 = data.bytevalue[0];
+        byte1 = data.bytevalue[1];
+        data.bytevalue[0] = data.bytevalue[3];
+        data.bytevalue[1] = data.bytevalue[2];
+        data.bytevalue[2] = byte1;
+        data.bytevalue[3] = byte0;
+        *(base_address + i) = data.longvalue;
     }
     return;
 }
