@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.15 1999-03-31 18:11:35 caress Exp $
+#	$Id: Makefile.template,v 4.16 1999-04-02 00:37:48 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.15  1999/03/31  18:11:35  caress
+# MB-System 4.6beta7
+#
 # Revision 4.14  1999/01/01  23:41:06  caress
 # MB-System version 4.6beta6
 #
@@ -247,21 +250,21 @@ mb_get_value.o:	mb_get_value.c
 	$(CC) -c $(CFLAGS) mb_get_value.c
 mb_defaults.o:	mb_defaults.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_defaults.c
-mb_get.o:	mb_get.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+mb_get.o:	mb_get.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_get.c
-mb_put.o:	mb_put.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+mb_put.o:	mb_put.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_put.c
-mb_put_comment.o:	mb_put_comment.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+mb_put_comment.o:	mb_put_comment.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_put_comment.c
-mb_get_all.o:	mb_get_all.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+mb_get_all.o:	mb_get_all.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_get_all.c
-mb_put_all.o:	mb_put_all.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+mb_put_all.o:	mb_put_all.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_put_all.c
-mb_read.o:	mb_read.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+mb_read.o:	mb_read.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_read.c
-mb_write.o:	mb_write.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+mb_write.o:	mb_write.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_write.c
-mb_buffer.o:	mb_buffer.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+mb_buffer.o:	mb_buffer.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_buffer.c
 mb_read_ping.o:	mb_read_ping.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_read_ping.c
