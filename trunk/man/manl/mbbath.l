@@ -178,5 +178,10 @@ The following will suffice:
 .br
 The bathymetry in the output file hsraytrace will be completely
 recalculated from the travel time data in the file hsraw.
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmblevitus\fP(l), \fBmbvelocitytool\fP(l), 
+\fBmbm_xbt\fP(l), \fBxbt\fP(l)
+
 .SH BUGS
 You tell me.

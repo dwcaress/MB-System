@@ -81,5 +81,8 @@ binary Hydrosweep file (format 24) called hs_edit.  The following will
 suffice:
  	mbunclean -F24 -Ihs_clean -Ohs_unclean
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbclean\fP(l), \fBmbedit\fP(l)
+
 .SH BUGS
 You tell me.

@@ -147,5 +147,9 @@ The output will be
  ps viewer:  ghostview
  project:    none
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbcontour\fP(l), 
+\fBmbswath\fP(l), \fBmbm_plot\fP(l), \fBmbm_grdplot\fP(l)
+
 .SH BUGS
 Too simple to have any really interesting bugs.

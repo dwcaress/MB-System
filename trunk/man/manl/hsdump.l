@@ -69,5 +69,9 @@ Suppose one wishes to list out the water velocity records
 contained in the raw Hydrosweep (format 21) file hsraw.
 The following will suffice:
  	hsdump -F21 -O4 -O5 -Ihsraw
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbinfo\fP(l), \fBmblist\fP(l)
+
 .SH BUGS
 You tell me.

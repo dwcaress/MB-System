@@ -102,6 +102,9 @@ filter with a width of 250 meters for all of the beams.
 
  	mbsmooth -F24 -Ihsnoisy -Ohssmooth -G250
 
+.SH SEE ALSO
+\fBmbsystem\fP(l)
+
 .SH BUGS
 It would be good to include other smoothing schemes as options
 in this program.  In particular, we should re-implement 

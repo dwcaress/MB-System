@@ -292,7 +292,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.1 1994-10-31 21:54:07 caress Exp $
+ Version $Id: mbgrid.l,v 4.2 1994-10-31 23:10:21 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -369,7 +369,7 @@ standard deviation values. The following will suffice:
 The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.1 1994-10-31 21:54:07 caress Exp $
+ Version $Id: mbgrid.l,v 4.2 1994-10-31 23:10:21 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -437,6 +437,9 @@ The output looks like:
  Outputting results...
 
  Done.
+
+.SH SEE ALSO
+\fBmbsystem\fP(l)
 
 .SH BUGS
 You tell me.
