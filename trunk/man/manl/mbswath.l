@@ -81,11 +81,13 @@ Sets the color used for Frame and annotation. [Default is black]
 .TP
 .B \fB-f\fIformat\fP
 Sets the data format used if the input is read from stdin
-(the default, which can be overridden with the \fB-I\fP option).
-This program uses the \fBMBIO\fP library and will read or write any multibeam
+or from a file. If \fIformat\fP < 0, then the input file specified
+with the \fB-I\fP option will actually contain a list of input multibeam
+data files. This program uses the \fBMBIO\fP library 
+and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page.
+is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
 .TP
 .B \fB-G\fImagnitude/azimuth\fP
 .B \fB-G\fImagnitude/median\fP
@@ -106,12 +108,14 @@ amplitude value which serves as the zero or neutral level.
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIdatalist\fP
-Sets the filename of the file containing a list of the input multibeam
-data files and their formats.  The program will read and plot the
-data in each one of these files instead of the default, which is
-to read and plot a single data stream from stdin.
-In the \fIdatalist\fP file, each
+.B \fB-I\fIinfile\fP
+Sets the input filename. If \fIformat\fP > 0 (set with the 
+\fB-f\fP option) then the multibeam data contained in \fIinfile\fP 
+is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
+is assumed to be an ascii file containing a list of the input multibeam
+data files to be processed and their formats.  The program will read 
+and plot the data in each one of these files.
+In the \fIinfile\fP file, each
 data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
@@ -119,7 +123,7 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page.
+is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
 .B \fB-J\fP
 Selects the map projection.  Choose one of the following:
