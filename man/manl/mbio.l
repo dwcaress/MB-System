@@ -841,19 +841,19 @@ int *\fInamp\fP;
 .br
 int *\fInss\fP;
 .br
-int *\fIbath\fP;
+double *\fIbath\fP;
 .br
-int *\fIamp\fP;
+double *\fIamp\fP;
 .br
-int *\fIbathacrosstrack\fP;
+double *\fIbathacrosstrack\fP;
 .br
-int *\fIbathalongtrack\fP;
+double *\fIbathalongtrack\fP;
 .br
-int *\fIss\fP;
+double *\fIss\fP;
 .br
-int *\fIssacrosstrack\fP;
+double *\fIssacrosstrack\fP;
 .br
-int *\fIssalongtrack\fP;
+double *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -942,19 +942,19 @@ int \fInamp\fP;
 .br
 int \fInss\fP;
 .br
-int *\fIbath\fP;
+double *\fIbath\fP;
 .br
-int *\fIamp\fP;
+double *\fIamp\fP;
 .br
-int *\fIbathacrosstrack\fP;
+double *\fIbathacrosstrack\fP;
 .br
-int *\fIbathalongtrack\fP;
+double *\fIbathalongtrack\fP;
 .br
-int *\fIss\fP;
+double *\fIss\fP;
 .br
-int *\fIssacrosstrack\fP;
+double *\fIssacrosstrack\fP;
 .br
-int *\fIssalongtrack\fP;
+double *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -1046,19 +1046,19 @@ int *\fInamp\fP;
 .br
 int *\fInss\fP;
 .br
-int *\fIbath\fP;
+double *\fIbath\fP;
 .br
-int *\fIamp\fP;
+double *\fIamp\fP;
 .br
-int *\fIbathacrosstrack\fP;
+double *\fIbathacrosstrack\fP;
 .br
-int *\fIbathalongtrack\fP;
+double *\fIbathalongtrack\fP;
 .br
-int *\fIss\fP;
+double *\fIss\fP;
 .br
-int *\fIssacrosstrack\fP;
+double *\fIssacrosstrack\fP;
 .br
-int *\fIssalongtrack\fP;
+double *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -1161,19 +1161,19 @@ int \fInamp\fP;
 .br
 int \fInss\fP;
 .br
-int *\fIbath\fP;
+double *\fIbath\fP;
 .br
-int *\fIamp\fP;
+double *\fIamp\fP;
 .br
-int *\fIbathacrosstrack\fP;
+double *\fIbathacrosstrack\fP;
 .br
-int *\fIbathalongtrack\fP;
+double *\fIbathalongtrack\fP;
 .br
-int *\fIss\fP;
+double *\fIss\fP;
 .br
-int *\fIssacrosstrack\fP;
+double *\fIssacrosstrack\fP;
 .br
-int *\fIssalongtrack\fP;
+double *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -1456,19 +1456,19 @@ int *\fInamp\fP;
 .br
 int *\fInss\fP;
 .br
-int *\fIbath\fP;
+double *\fIbath\fP;
 .br
-int *\fIamp\fP;
+double *\fIamp\fP;
 .br
-int *\fIbathacrosstrack\fP;
+double *\fIbathacrosstrack\fP;
 .br
-int *\fIbathalongtrack\fP;
+double *\fIbathalongtrack\fP;
 .br
-int *\fIss\fP;
+double *\fIss\fP;
 .br
-int *\fIssacrosstrack\fP;
+double *\fIssacrosstrack\fP;
 .br
-int *\fIssalongtrack\fP;
+double *\fIssalongtrack\fP;
 .br
 int *\fIerror\fP;
 .RS 10
@@ -1561,19 +1561,19 @@ int *\fInamp\fP;
 .br
 int *\fInss\fP;
 .br
-int *\fIbath\fP;
+double *\fIbath\fP;
 .br
-int *\fIamp\fP;
+double *\fIamp\fP;
 .br
-int *\fIbathacrosstrack\fP;
+double *\fIbathacrosstrack\fP;
 .br
-int *\fIbathalongtrack\fP;
+double *\fIbathalongtrack\fP;
 .br
-int *\fIss\fP;
+double *\fIss\fP;
 .br
-int *\fIssacrosstrack\fP;
+double *\fIssacrosstrack\fP;
 .br
-int *\fIssalongtrack\fP;
+double *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -1668,19 +1668,19 @@ int *\fInamp\fP;
 .br
 int *\fInss\fP;
 .br
-int *\fIbath\fP;
+double *\fIbath\fP;
 .br
-int *\fIamp\fP;
+double *\fIamp\fP;
 .br
-int *\fIbathacrosstrack\fP;
+double *\fIbathacrosstrack\fP;
 .br
-int *\fIbathalongtrack\fP;
+double *\fIbathalongtrack\fP;
 .br
-int *\fIss\fP;
+double *\fIss\fP;
 .br
-int *\fIssacrosstrack\fP;
+double *\fIssacrosstrack\fP;
 .br
-int *\fIssalongtrack\fP;
+double *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
