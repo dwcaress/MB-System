@@ -110,13 +110,13 @@ where the \fB-D\fP option is used so that hot colors are
 shallow and cool colors are deep.
 To generate a color shaded relief plot with illumination
 from the east use:
- 	mbm_grdplot -Igrd_seamount -G -S -A90 -D -P -V \
+ 	mbm_grdplot -Igrd_seamount -G -S -A90 -D -P -V 
  		-Oshadedrelief
 .br
 To generate a 3D perspective view with illumination from the
 east, a viewpoint azimuth of 200 degrees, and a viewpoint
 elevation of 40 degrees:
- 	mbm_grdplot -Igrd_seamount -G -S -T -A90 -E200/40 \
+ 	mbm_grdplot -Igrd_seamount -G -S -T -A90 -E200/40 
  		 -D -P -V -Othreed
 .br
 As an example, the contents of the shellscript "shadedrelief.cmd" are:
@@ -174,6 +174,9 @@ As an example, the contents of the shellscript "shadedrelief.cmd" are:
  # All done!
  echo All done!
 
+.SH SEE ALSO
+\fBmbm_plot\fP(l), \fBmbgrid\fP(l), \fBmbcontour\fP(l), 
+\fBmbswath\fP(l), \fBmbdefaults\fP(l)
 
 .SH BUGS
 Uses only the standard mercator projection and is thus useless for

@@ -13,18 +13,23 @@ Version 4.1
 \fBmbm_plot\fP is an utility which generates a shellscript for making
 a Postscript plot of the multibeam data contained in the specified file.  
 A combination of MB-system and GMT-system utilities are used.
-The plot will be scaled to fit on an 8.5 X 11 \ninch page.  
-The plot may include bathymetry color fill (-G1), 
-bathymetry color shaded relief (-G2), bathymetry shaded with amplitudes
-(-G3), greyshade fill amplitude (-G4), or greyshade fill sidescan (-G5).
-The plot may also include four color contoured bathymetry (-C).  
-An annotated navigation track may also be plotted (-N).
+The plot will be scaled to fit on an 8.5 X 11 inch page.  
+The plot may include bathymetry color fill (\fB-G\fI1\fP), 
+bathymetry color shaded relief (\fB-G\fI2\fP), bathymetry 
+shaded with amplitudes
+(\fB-G\fI3\fP), greyshade fill amplitude (\fB-G\fI4\fP), or 
+greyshade fill sidescan (\fB-G\fI5\fP).
+The plot may also include four color contoured bathymetry (\fB-C\fP).  
+An annotated navigation track may also be plotted (\fB-N\fP).
 The shellscript first creates the image and then displays it using 
-pageview. The -X option will cause the shellscript to be executed 
+pageview. The \fB-X\fP option will cause the shellscript to be executed 
 immediately.  Once the basic plotting capability exists, the user
 can edit the shellscript to obtain precisely the sort of plot desired.
 This macro makes plotting a bit easier by providing a working template
 so that the user does not always have to start from scratch.
+In particular, the shellscript created by running \fBmbm_plot\fP
+on a single file is a good starting point for plotting a survey
+comprised of many data files.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -71,8 +76,8 @@ Turns on color fill swath plot and sets the style of the plot.
  	\fImode\fP = 1:	Color fill of bathymetry data.
  	\fImode\fP = 2:	Color shaded relief bathymetry.
  	\fImode\fP = 3:	Bathymetry shaded using amplitude data.
- 	\fImode\fP = 4:	Color fill of amplitude data.
- 	\fImode\fP = 5:	Color fill of sidescan data.
+ 	\fImode\fP = 4:	Grayscale fill of amplitude data.
+ 	\fImode\fP = 5:	Grayscale fill of sidescan data.
 .TP
 .B \fB-I\fIfile\fP
 Data file from which the input data will be read.
@@ -127,6 +132,10 @@ In order to generate a shaded relief color map of the topography run:
 In order to generate a contour map of the topography:
 .br
 	mbm_plot -F24 -Ihs_ew9302_157_bcen.mb24 -C -X
+
+.SH SEE ALSO
+\fBmbm_grdplot\fP(l), \fBmbgrid\fP(l), \fBmbcontour\fP(l), 
+\fBmbswath\fP(l), \fBmbdefaults\fP(l)
 
 .SH BUGS
 Uses only the standard mercator projection and is thus useless for
