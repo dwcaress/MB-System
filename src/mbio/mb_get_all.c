@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.5 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_get_all.c,v 5.6 2003-04-16 16:47:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.4  2002/05/29 23:36:53  caress
  * Release 5.0.beta18
  *
@@ -114,7 +117,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_get_all.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+static char rcs_id[]="$Id: mb_get_all.c,v 5.6 2003-04-16 16:47:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
@@ -168,6 +171,9 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_DATA
 		    || *kind == MB_DATA_NAV
+		    || *kind == MB_DATA_NAV1
+		    || *kind == MB_DATA_NAV2
+		    || *kind == MB_DATA_NAV3
 		    || *kind == MB_DATA_COMMENT))
 		{
 		/* initialize return values */
@@ -338,7 +344,11 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 
 	/* calculate speed and distance for nav data */
 	else if (status == MB_SUCCESS
-		&& (*kind == MB_DATA_NAV))
+		&& (*kind == MB_DATA_NAV
+			|| *kind == MB_DATA_NAV
+			|| *kind == MB_DATA_NAV1
+			|| *kind == MB_DATA_NAV2
+			|| *kind == MB_DATA_NAV3))
 		{
 		/* get coordinate scaling */
 		mb_coor_scale(verbose,*navlat,&mtodeglon,&mtodeglat);

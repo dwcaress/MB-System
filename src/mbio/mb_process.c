@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.23 2002-09-07 04:48:34 caress Exp $
+ *    $Id: mb_process.c,v 5.24 2003-04-16 16:47:41 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2002/09/07 04:48:34  caress
+ * Added slope mode option to mb_process.
+ *
  * Revision 5.22  2002/07/25 19:09:04  caress
  * Release 5.0.beta21
  *
@@ -119,7 +122,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.23 2002-09-07 04:48:34 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.24 2003-04-16 16:47:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -981,19 +984,22 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		}
 
 	    /* look for edit file */
-	    strcpy(process->mbp_editfile, process->mbp_ifile);
-	    strcat(process->mbp_editfile, ".esf");
-	    if (stat(process->mbp_editfile, &statbuf) == 0)
-		{
-		process->mbp_edit_mode = MBP_EDIT_ON;
-		}
-	    else
-		{
+	    if (process->mbp_edit_mode == MBP_EDIT_OFF)
+ 		{
 		strcpy(process->mbp_editfile, process->mbp_ifile);
-		strcat(process->mbp_editfile, ".mbesf");
+		strcat(process->mbp_editfile, ".esf");
 		if (stat(process->mbp_editfile, &statbuf) == 0)
 		    {
 		    process->mbp_edit_mode = MBP_EDIT_ON;
+		    }
+		else
+		    {
+		    strcpy(process->mbp_editfile, process->mbp_ifile);
+		    strcat(process->mbp_editfile, ".mbesf");
+		    if (stat(process->mbp_editfile, &statbuf) == 0)
+			{
+			process->mbp_edit_mode = MBP_EDIT_ON;
+			}
 		    }
 		}
 	    }

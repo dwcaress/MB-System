@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.16 2002-10-02 23:55:42 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.17 2003-04-16 16:47:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2002/10/02 23:55:42  caress
+ * Release 5.0.beta24
+ *
  * Revision 5.15  2002/09/16 05:51:53  caress
  * Really fixed bug...
  *
@@ -242,7 +245,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.16 2002-10-02 23:55:42 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.17 2003-04-16 16:47:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -767,7 +770,7 @@ ping->png_bso);*/
 
 		/* interpolate from saved attitude */
 		mb_attint_interp(verbose, mbio_ptr, ptime_d,  
-				    &roll, &pitch, &heave, error);
+				    &heave, &roll, &pitch, error);
 		ping->png_roll = (int) rint(roll / 0.01);
 		ping->png_pitch = (int) rint(pitch / 0.01);
 		ping->png_heave = (int) rint(heave / 0.01);
@@ -801,7 +804,7 @@ ping->png_bso);*/
 
 		/* interpolate from saved attitude */
 		mb_attint_interp(verbose, mbio_ptr, ntime_d,  
-				    &roll, &pitch, &heave, error);
+				    &heave, &roll, &pitch, error);
 		store->pos_roll = (int) rint(roll / 0.01);
 		store->pos_pitch = (int) rint(pitch / 0.01);
 		store->pos_heave = (int) rint(heave / 0.01);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.6 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.7 2003-04-16 16:47:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.5  2002/05/02 03:55:34  caress
  * Release 5.0.beta17
  *
@@ -123,7 +126,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char res_id[]="$Id: mbsys_ldeoih.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.7 2003-04-16 16:47:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -578,7 +581,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->day = time_j[1];
 		store->min = time_j[2];
 		store->sec = time_j[3];
-		store->msec = time_j[4] / 1000;
+		store->msec = (short int)(((double)time_j[4] / 1000.0) + 0.5);
 
 		/* get navigation */
 		if (navlon < 0.0) navlon = navlon + 360.0;
