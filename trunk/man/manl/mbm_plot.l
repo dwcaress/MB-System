@@ -1,4 +1,4 @@
-.TH mbm_plot l "22 April 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_plot l "28 November 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of swath sonar swath data.
@@ -655,7 +655,7 @@ of pings contoured at a time small (e.g. use \fB-N\fP\fI5\fP).
 The time required for the "ping to ping" algorithm varies linearly
 with the number of pings contoured; thus larger numbers of pings
 may be reasonably contoured at a time (e.g. use \fB-N\fP\fI50\fP). 
-Default: \fIalgorithm\fP = 0 unless \FIformat\fP = 41.
+Default: \fIalgorithm\fP = 0 unless \fIformat\fP = 41.
 .TP
 .B \-MTC
 \fIfill\fP 
