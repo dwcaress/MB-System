@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.5 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mb_close.c,v 5.6 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.4  2002/05/02 03:55:34  caress
  * Release 5.0.beta17
  *
@@ -137,7 +140,7 @@
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 5.5 2002-07-20 20:42:40 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.6 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_navint.c,v 5.7 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.5  2002/02/22 09:03:43  caress
  * Release 5.0.beta13
  *
@@ -58,7 +61,7 @@
     #define MB_HEDINT_DEBUG 1
 */
 
-static char rcs_id[]="$Id: mb_navint.c,v 5.6 2002-07-20 20:42:40 caress Exp $";
+static char rcs_id[]="$Id: mb_navint.c,v 5.7 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal

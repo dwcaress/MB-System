@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000sb.c	10/11/94
- *	$Id: mbr_sb2000sb.c,v 5.5 2002-02-26 07:50:41 caress Exp $
+ *	$Id: mbr_sb2000sb.c,v 5.6 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1994, 2000 by
+ *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 11, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/02/26 07:50:41  caress
+ * Release 5.0.beta14
+ *
  * Revision 5.4  2002/02/22 09:03:43  caress
  * Release 5.0.beta13
  *
@@ -143,7 +146,7 @@ int mbr_dem_sb2000sb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sb2000sb.c,v 5.5 2002-02-26 07:50:41 caress Exp $";
+static char res_id[]="$Id: mbr_sb2000sb.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000sb(int verbose, void *mbio_ptr, int *error)
@@ -347,7 +350,7 @@ int mbr_info_sb2000sb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2000sb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sb2000sb.c,v 5.5 2002-02-26 07:50:41 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000sb.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000sb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

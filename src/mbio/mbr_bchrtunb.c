@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 5.4 2001-07-20 00:31:11 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 5.5 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1994, 2000 by
+ *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/20 00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.3  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -135,7 +138,7 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.4 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_register_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -265,7 +268,7 @@ int mbr_info_bchrtunb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.4 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_info_bchrtunb";
 	int	status = MB_SUCCESS;
 
@@ -335,7 +338,7 @@ int mbr_info_bchrtunb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.4 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

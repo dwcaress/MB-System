@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 5.3 2001-11-20 21:52:13 caress Exp $
+ *    $Id: mb_defaults.c,v 5.4 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,10 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/11/20 21:52:13  caress
+ * The .mbio_defaults file no longer controls format,
+ * pings, bounds, btime_i, and etime_i.
+ *
  * Revision 5.2  2001/07/20  00:31:11  caress
  * Release 5.0.beta03
  *
@@ -100,7 +104,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.3 2001-11-20 21:52:13 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -203,7 +207,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 /*--------------------------------------------------------------------*/
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.3 2001-11-20 21:52:13 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;

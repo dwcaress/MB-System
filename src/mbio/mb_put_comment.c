@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_comment.c	7/15/97
- *    $Id: mb_put_comment.c,v 5.1 2001-07-20 00:31:11 caress Exp $
+ *    $Id: mb_put_comment.c,v 5.2 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1997, 2000 by
+ *    Copyright (c) 1997, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	July 15, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/07/20 00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *

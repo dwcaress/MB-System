@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
- *	$Id: mbr_oicgeoda.c,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_oicgeoda.c,v 5.4 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1999, 2000 by
+ *    Copyright (c) 1999, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	February 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -104,7 +107,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_oicgeoda.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_oicgeoda.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_register_oicgeoda";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -234,7 +237,7 @@ int mbr_info_oicgeoda(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_oicgeoda.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_oicgeoda.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_info_oicgeoda";
 	int	status = MB_SUCCESS;
 
@@ -303,7 +306,7 @@ int mbr_info_oicgeoda(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_oicgeoda.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbr_oicgeoda.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_alm_oicgeoda";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

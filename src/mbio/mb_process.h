@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.14 2002-09-07 04:48:34 caress Exp $
+ *    $Id: mb_process.h,v 5.15 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -406,6 +406,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2002/09/07 04:48:34  caress
+ * Added slope mode option to mb_process.
+ *
  * Revision 5.13  2002/07/25 19:09:04  caress
  * Release 5.0.beta21
  *

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_ping.c	2/3/93
- *    $Id: mb_read_ping.c,v 5.2 2002-05-29 23:36:53 caress Exp $
+ *    $Id: mb_read_ping.c,v 5.3 2002-09-18 23:32:59 caress Exp $
 
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/05/29 23:36:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.1  2001/07/20 00:31:11  caress
  * Release 5.0.beta03
  *
@@ -141,7 +144,7 @@
 /*--------------------------------------------------------------------*/
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error)
 {
-  static char rcs_id[]="$Id: mb_read_ping.c,v 5.2 2002-05-29 23:36:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_read_ping.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mb_read_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

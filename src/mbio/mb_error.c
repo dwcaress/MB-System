@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
- *    $Id: mb_error.c,v 5.2 2002-05-29 23:36:53 caress Exp $
+ *    $Id: mb_error.c,v 5.3 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	February 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/05/29 23:36:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.1  2002/02/22 09:03:43  caress
  * Release 5.0.beta13
  *
@@ -84,7 +87,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 
-static char rcs_id[]="$Id: mb_error.c,v 5.2 2002-05-29 23:36:53 caress Exp $";
+static char rcs_id[]="$Id: mb_error.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message)
