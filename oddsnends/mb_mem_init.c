@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_init.c	2/3/93
- *    $Id: mb_mem_init.c,v 4.5 1996-01-26 21:23:30 caress Exp $
+ *    $Id: mb_mem_init.c,v 4.6 1996-03-12 17:21:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1996/01/26  21:23:30  caress
+ * Version 4.3 distribution
+ *
  * Revision 4.4  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *
@@ -74,7 +77,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem_init.c,v 4.5 1996-01-26 21:23:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem_init.c,v 4.6 1996-03-12 17:21:55 caress Exp $";
 	char	*function_name = "mb_mem_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -175,6 +178,10 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_MR1ALDEO)
 		{
 		status = mbr_alm_mr1aldeo(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_MR1BLDEO)
+		{
+		status = mbr_alm_mr1bldeo(verbose,mbio_ptr,error);
 		}
 	else if (mb_io_ptr->format == MBF_MBLDEOIH)
 		{

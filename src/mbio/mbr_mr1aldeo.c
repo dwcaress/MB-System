@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1aldeo.c	10/24/95
- *	$Id: mbr_mr1aldeo.c,v 1.1 1996-01-26 21:23:30 caress Exp $
+ *	$Id: mbr_mr1aldeo.c,v 1.2 1996-03-12 17:21:55 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	October 24, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1996/01/26  21:23:30  caress
+ * Initial revision
+ *
  *
  */
 
@@ -47,7 +50,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.1 1996-01-26 21:23:30 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.2 1996-03-12 17:21:55 caress Exp $";
 	char	*function_name = "mbr_alm_mr1aldeo";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -875,8 +878,11 @@ int	*error;
 		if (status == MB_SUCCESS)
 			{
 			mb_io_ptr->fileheader = MB_YES;
-			mb_io_ptr->hdr_comment_size 
-				= strlen(mb_io_ptr->hdr_comment);
+			if (mb_io_ptr->hdr_comment == NULL)
+				mb_io_ptr->hdr_comment_size = 0;
+			else
+				mb_io_ptr->hdr_comment_size 
+					= strlen(mb_io_ptr->hdr_comment);
 			mb_io_ptr->hdr_comment_loc = 0;
 			if (mb_io_ptr->hdr_comment_size > 80)
 				read_size = 80;
@@ -1449,7 +1455,10 @@ int	*error;
 	/* write header comment */
 	if (status == MB_SUCCESS)
 		{
-		len = strlen(*hdr_comment);
+		if (*hdr_comment == NULL)
+			len = 0;
+		else
+			len = strlen(*hdr_comment);
 		status = xdr_int(xdrs, &len);
 		}
 	if (status == MB_SUCCESS && len > 0)
