@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.24 2003-12-12 01:45:11 caress Exp $
+ *    $Id: mbgrid.c,v 5.25 2004-05-24 22:37:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2003/12/12 01:45:11  caress
+ * Fixed setting output stream to stdout or stderr.
+ *
  * Revision 5.23  2003/11/25 00:54:44  caress
  * Now generates datalist of all swath files actually contributing to the grid.
  *
@@ -377,7 +380,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.24 2003-12-12 01:45:11 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.25 2004-05-24 22:37:02 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -462,6 +465,7 @@ main (int argc, char **argv)
 	int	plot_status;
 	
 	int	grdrasterid = 0;
+	char	backgroundfile[MB_PATH_MAXLINE];
 	double	glonmin, glonmax;
 
 	/* mbio read values */
@@ -686,7 +690,9 @@ main (int argc, char **argv)
 			break;
 		case 'K':
 		case 'k':
-			sscanf (optarg,"%d", &grdrasterid);
+			sscanf (optarg,"%s", backgroundfile);
+			if ((grdrasterid = atoi(backgroundfile)) <= 0)
+				grdrasterid = -1;
 			flag++;
 			break;
 		case 'L':
@@ -828,6 +834,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       clipmode:             %d\n",clipmode);
 		fprintf(outfp,"dbg2       clip:                 %d\n",clip);
 		fprintf(outfp,"dbg2       grdraster background: %d\n",grdrasterid);
+		fprintf(outfp,"dbg2       backgroundfile:       %s\n",backgroundfile);
 		fprintf(outfp,"dbg2       more:                 %d\n",more);
 		fprintf(outfp,"dbg2       use_NaN:              %d\n",use_NaN);
 		fprintf(outfp,"dbg2       grid_mode:            %d\n",grid_mode);
@@ -1319,6 +1326,75 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			}
 		}
 
+	/* if backgroundfile set extract background data using grd2xyz
+		and interpolate it later onto internal grid */
+	else if (grdrasterid < 0)
+		{
+		/* get data vector */
+		sprintf(plot_cmd, "grd2xyz %s -R%f/%f/%f/%f -S",
+			backgroundfile,bounds[0],bounds[1],bounds[2],bounds[3]);
+		nbackground = 0;
+		if ((rfp = popen(plot_cmd,"r")) != NULL)
+			{
+			/* loop over reading */
+			while (fscanf(rfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
+				{
+				nbackground++;
+				}
+			pclose(rfp);
+			}
+		if (nbackground > 0 && (rfp = popen(plot_cmd,"r")) != NULL)
+			{
+			/* allocate and initialize sgrid */
+			status = mb_malloc(verbose,3*nbackground*sizeof(float),&bdata,&error);
+			if (error != MB_ERROR_NO_ERROR)
+				{
+				mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+				fprintf(outfp,"\nMBIO Error allocating background data array:\n%s\n",
+					message);
+				fprintf(outfp,"\nProgram <%s> Terminated\n",
+					program_name);
+				mb_memory_clear(verbose, &error);
+				exit(error);
+				}
+			memset((char *)bdata,0,3*nbackground*sizeof(float));
+
+			/* loop over reading */
+			nbackground = 0;
+			while (fscanf(rfp,"%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF)
+				{
+				if (lonflip == -1 && tlon > 0.0)
+					tlon -= 360.0;
+				else if (lonflip == 0 && tlon < -180.0)
+					tlon += 360.0;
+				else if (lonflip == 0 && tlon > 180.0)
+					tlon -= 360.0;
+				else if (lonflip == 1 && tlon < 0.0)
+					tlon += 360.0;
+				if (use_projection == MB_YES)
+					mb_proj_forward(verbose, pjptr, tlon, tlat,
+					&tlon, &tlat, &error);
+				bdata[nbackground*3] = (float) tlon;
+				bdata[nbackground*3+1] = (float) tlat;
+				bdata[nbackground*3+2] = (float) tvalue;
+				nbackground++;
+				}
+			pclose(rfp);
+			}
+		else
+			{
+			fprintf(outfp,"\nBackground data not extracted as per -K option\n");
+			fprintf(outfp,"The program grd2xyz may not have been found\n");
+			fprintf(outfp,"or the specified background dataset %s may not exist.\n",
+				backgroundfile);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			error = MB_ERROR_BAD_PARAMETER;
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+		}
+
 	/* output info */
 	if (verbose >= 0)
 		{
@@ -1444,8 +1520,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			fprintf(outfp,"Spline interpolation applied to fill entire grid\n");
 			fprintf(outfp,"Spline tension (range 0.0 to infinity): %f\n",tension);
 			}
-		if (grdrasterid <= 0) 
-			fprintf(outfp,"Background not obtained using grdraster\n");
+		if (grdrasterid == 0) 
+			fprintf(outfp,"Background not applied\n");
+		else if (grdrasterid < 0) 
+			fprintf(outfp,"Background obtained using grd2xyz from GMT grid file: %s\n",backgroundfile);
 		else
 			fprintf(outfp,"Background obtained using grdraster from dataset: %d\n",grdrasterid);
 		if (gridkind == MBGRID_ASCII)
@@ -1567,7 +1645,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		if (format > 0 && file[0] != '#')
 		{
 		/* check for mbinfo file - get file bounds if possible */
-		status = mb_check_info(verbose, file, lonflip, bounds, 
+		rformat = format;
+		strcpy(rfile,file);
+		status = mb_check_info(verbose, rfile, lonflip, bounds, 
 				&file_in_bounds, &error);
 		if (status == MB_FAILURE)
 			{
@@ -1580,8 +1660,6 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		if (file_in_bounds == MB_YES)
 		    {
 		    /* check for "fast bathymetry" or "fbt" file */
-		    rformat = format;
-		    strcpy(rfile,file);
 		    if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
 			{
@@ -2020,7 +2098,9 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		if (format > 0 && file[0] != '#')
 		{
 		/* check for mbinfo file - get file bounds if possible */
-		status = mb_check_info(verbose, file, lonflip, bounds, 
+		rformat = format;
+		strcpy(rfile,file);
+		status = mb_check_info(verbose, rfile, lonflip, bounds, 
 				&file_in_bounds, &error);
 		if (status == MB_FAILURE)
 			{
@@ -2033,8 +2113,6 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		if (file_in_bounds == MB_YES)
 		    {
 		    /* check for "fast bathymetry" or "fbt" file */
-		    rformat = format;
-		    strcpy(rfile,file);
 		    if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
 			{
@@ -2730,6 +2808,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		if (format > 0 && file[0] != '#')
 		{
 		/* check for mbinfo file - get file bounds if possible */
+		rformat = format;
+		strcpy(rfile,file);
 		status = mb_check_info(verbose, file, lonflip, bounds, 
 				&file_in_bounds, &error);
 		if (status == MB_FAILURE)
@@ -2743,8 +2823,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		if (file_in_bounds == MB_YES)
 		    {
 		    /* check for "fast bathymetry" or "fbt" file */
-		    rformat = format;
-		    strcpy(rfile,file);
 		    if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
 			{
@@ -3547,7 +3625,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 	/* if grdrasterid set read background data extracted using grdraster
 		then interpolate it onto internal grid */
-	if (grdrasterid > 0)
+	if (grdrasterid != 0 && nbackground > 0)
 		{		
 		/* allocate and initialize sgrid */
 		status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
