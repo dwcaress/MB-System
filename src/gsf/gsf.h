@@ -15,6 +15,17 @@
  * Not (yet!) supported on a machine with 64 bit architecture.
  ******
  *
+ ********************************************************************
+ * NONSTANDARD CHANGE FOR MB-SYSTEM!!!!
+ * MB-System Modification
+ *  Changed declaration of struct timespec to struct gsfTimespec to 
+ *  avoid checking for timespec declaration.
+ * This is a change from the standard GSF distribution!!!
+ *  David W. Caress
+ *  April 8, 2002 *
+ ********************************************************************
+ *
+ *
  * Change Descriptions :
  * who when      what
  * --- ----      ----
@@ -299,21 +310,15 @@ gsfDataID;
 
 /* define Posix.4 proposed structure for internal storage of time */
 /* MB-System Modification
-    Added _SYS_TIME_H_ to allow building on DARWIN
+    Changed declaration of struct timespec to struct gsfTimespec to 
+    avoid checking for timespec declaration.
     David W. Caress
-    April 5, 2002 */
-#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined) && !defined (_SYS_TIME_H_))
-#define _STRUCT_TIMESPEC_
-#define _TIMESPEC_T
-#define _STRUCT_TIMESPEC
-#define _SYS_TIMESPEC_H
-#define __timespec_defined
-    struct timespec
+    April 8, 2002 */
+    struct gsfTimespec
     {
         time_t          tv_sec;
         long            tv_nsec;
     };
-#endif
 
 /* Define a structure for the gsf header record */
 #define GSF_VERSION_SIZE 12
@@ -326,8 +331,8 @@ gsfHeader;
 /* Define the data structure for the swath bathymety summary record */
 typedef struct t_gsfSwathBathySummary
 {
-    struct timespec start_time;
-    struct timespec end_time;
+    struct gsfTimespec start_time;
+    struct gsfTimespec end_time;
     double          min_latitude;
     double          min_longitude;
     double          max_latitude;
@@ -577,7 +582,7 @@ t_gsfElacMkIISpecific;
 typedef struct t_gsfEM3RunTime
 {
     int             model_number;               /* from the run-time parameter datagram */
-    struct timespec dg_time;                    /* from the run-time parameter datagram */
+    struct gsfTimespec dg_time;                    /* from the run-time parameter datagram */
     int             ping_number;                /* sequential counter 0 - 65535 */
     int             serial_number;              /* The sonar head serial number */
     int             system_status;              /* normally = 0 */
@@ -775,7 +780,7 @@ typedef struct t_gsfScaleFactors
 /* Define the data structure for a ping from a swath bathymetric system */
 typedef struct t_gsfSwathBathyPing
 {
-    struct timespec ping_time;          /* seconds and nanoseconds */
+    struct gsfTimespec ping_time;          /* seconds and nanoseconds */
     double          latitude;           /* in degrees */
     double          longitude;          /* in degrees */
     short           number_beams;       /* in this ping */
@@ -819,7 +824,7 @@ gsfSwathBathyPing;
 /* Define a single beam record structure. */
 typedef struct t_gsfSingleBeamPing
 {
-    struct timespec ping_time;          /* Time the sounding was made */
+    struct gsfTimespec ping_time;          /* Time the sounding was made */
     double          latitude;           /* latitude (degrees) of sounding */
     double          longitude;          /* longitude (degrees) of sounding */
     double          tide_corrector;     /* in meters */
@@ -839,8 +844,8 @@ gsfSingleBeamPing;
 /* Define the sound velocity profile structure */
 typedef struct t_gsfSVP
 {
-    struct timespec observation_time;   /* time the SVP measurement was made            */
-    struct timespec application_time;   /* time the SVP was used by the sonar           */
+    struct gsfTimespec observation_time;   /* time the SVP measurement was made            */
+    struct gsfTimespec application_time;   /* time the SVP was used by the sonar           */
     double          latitude;           /* latitude (degrees) of SVP measurement        */
     double          longitude;          /* longitude (degrees) of SVP measurement       */
     int             number_points;      /* number of data points in the profile         */
@@ -853,7 +858,7 @@ gsfSVP;
 #define GSF_MAX_PROCESSING_PARAMETERS 128
 typedef struct t_gsfProcessingParameters
 {
-    struct timespec param_time;
+    struct gsfTimespec param_time;
     int             number_parameters;
     short           param_size[GSF_MAX_PROCESSING_PARAMETERS];  /* array of sizes of param text */
     char           *param[GSF_MAX_PROCESSING_PARAMETERS];       /* array of parameters: "param_name=param_value" */
@@ -864,7 +869,7 @@ gsfProcessingParameters;
 #define GSF_MAX_SENSOR_PARAMETERS 128
 typedef struct t_gsfSensorParameters
 {
-    struct timespec param_time;
+    struct gsfTimespec param_time;
     int             number_parameters;
     short           param_size[GSF_MAX_SENSOR_PARAMETERS];      /* array of sizes of param text */
     char           *param[GSF_MAX_SENSOR_PARAMETERS];   /* array of parameters: "param_name=param_value" */
@@ -874,7 +879,7 @@ gsfSensorParameters;
 /* Define the comment record structure */
 typedef struct t_gsfComment
 {
-    struct timespec comment_time;
+    struct gsfTimespec comment_time;
     int             comment_length;
     char           *comment;
 }
@@ -885,7 +890,7 @@ gsfComment;
 #define GSF_HOST_NAME_LENGTH 64
 typedef struct t_gsfHistory
 {
-    struct timespec history_time;
+    struct gsfTimespec history_time;
     char            host_name[GSF_HOST_NAME_LENGTH + 1];
     char            operator_name[GSF_OPERATOR_LENGTH + 1];
     char           *command_line;
@@ -900,7 +905,7 @@ gsfHistory;
  */
 typedef struct t_gsfNavigationError
 {
-    struct timespec nav_error_time;
+    struct gsfTimespec nav_error_time;
     int             record_id;          /* Containing nav with these errors */
     double          latitude_error;     /* 90% CE in meters */
     double          longitude_error;    /* 90% CE in meters */
@@ -913,7 +918,7 @@ gsfNavigationError;
  */
 typedef struct t_gsfHVNavigationError
 {
-    struct timespec nav_error_time;
+    struct gsfTimespec nav_error_time;
     int             record_id;                 /* Containing nav with these errors */
     double          horizontal_error;          /* RMS error in meters */
     double          vertical_error;            /* RMS error in meters */
