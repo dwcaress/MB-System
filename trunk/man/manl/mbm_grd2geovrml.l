@@ -1,8 +1,8 @@
-.TH mbm_grd2geovrml l "11 January 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grd2geovrml l "19 March 2003 "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grd2geovrml\fP - Create and execute commands which generate
-a TerraVision tileset and GeoVRML set of files that can be combined 
-with other data and viewed in a web browser.
+a TerraVision tileset and GeoVRML terrain set that can be combined 
+with other geospatial data for viewing in a web browser.
 
 .SH VERSION
 Version 5.0
@@ -13,6 +13,7 @@ Version 5.0
 \fB-vrmldir\fP \fIvrmlparent\fP 
 \fB-olat\fP \fIlat\fP 
 \fB-olon\fP \fIlon\fP 
+\fB-vrmlurl\fP \fIurl\fP 
 
 
 Additional Options:
@@ -21,35 +22,56 @@ Additional Options:
 \fB-nowrz\fP 
 \fB-noview\fP 
 \fB-pallette\fP \fIpal\fP 
-\fB-newimage\fP 
+\fB-newimage\fP \fItype|file\fP
 \fB-white\fP
 \fB-zmax\fP \fImaxclip\fP 
 \fB-zmin\fP \fIminclip\fP
-\fB-vrmlurl\fP \fIurl\fP 
+\fB-basename\fP \fIbasename\fP
 
 .SH DESCRIPTION
 \fBmbm_grd2geovrml\fP is a macro that takes as input a GMT
-geographic-coordinate bathymetry grid file (\fIbath_file\fP) and from it generates a shaded image
-which is paired with the elevation data in the grid file to
-create a TerraVision tileset. This tileset is then used to
+geographic-coordinate bathymetry grid file (\fIbath_file\fP) and 
+produces a terrain tile set that may be viewed in a web browser
+with an appropriate plugin.  The bathymetry (geometry) is paired with
+imagery (texture) to produce artificially illuminated terrain or slope 
+shaded terrain. Alternatively, a co-registered image may be provided 
+as a substitute to the latter imagery which is generated from the 
+bathymetry data.  This may be used to, for instance, draping a side 
+scan sonar image over the bathymetry.
+
+Before the geoVRML files can be created an intermediate TerraVision
+tile set must be created from the input GMT bathymetry file and a
+TIFF image that is either generated from the bathymetry or specified 
+from an existing file with the \fI-newimage\fP option.
+
+This tileset is then used to
 generate a GeoVRML quadtree multi-resolution set of files.  The resulting
 set of files will be created in \fIvrmlparent\fP/<basename>, where
 <basename> is the same as \fIbath_file\fP without the usual '.grd' extension.
+This behavior may be overridded with the \fB-basename\fP option.  This
+is useful if an existing image file is specified with the \fB-newimage\fP 
+\fIfile\fP option, in which case the image file base name should be used with 
+\fB-basename\fP (see second example below).
+
 The index.html file produced in this directory can be 
 loaded into Netscape 4.7 on a PC (properly configured with CosmoPlayer
-and GeoVRML) for interactive visualization. The resulting
+and GeoVRML 1.1) for interactive visualization. The resulting
 terrain can be used as a 3D basemap for use in visualizing
-other georeferenced data that has also been placed in GeoVRML.
+other georeferenced data that has also been placed in GeoVRML
+using the same \fB-olat\fP and \fB-olon\fP settings.
 
 GeoVRML (and TerraVision) expects rectangular gridded elevation data
 and browsers render all terrain data within the rectangle.  This presents a
 problem for ocean bathymetric data which often have irregular (not rectangular)
 boundaries.  Before converting a grid file to TerraVision format 
 \fBmbm_grd2geovrml\fP replaces all no-data elevation values with a coarse
-resolution spline-filled extrapolation. This results in a rectangular grid 
+resolution spline-filled extrapolation from the data in the irregular
+area. This results in a rectangular grid 
 with smooth transitions from areas of elevation data to areas of no data.  
 In the resulting GeoVRML the no data areas are colored black 
-(or white if \fB-white\fP is specified).
+(or white if \fB-white\fP is specified).  If \fB-newimage\fP 
+\fIfile\fP is specified then the outer boundaries will stay the same
+color as in the image.
 
 .SH AUTHORSHIP
 Mike McCann (mccann@mbari.org)
@@ -106,6 +128,25 @@ The GeoOrigin of the terrain must be the same as the GeoOrigin
 of any other GeoVRML content (e.g. navigation tracks, sample
 locations) that you wish to combine with the terrain.
 
+.TP
+.B \-vrmlurl
+\fIurl\fP
+.br
+All default URLs that are placed in the VRML files will be relative. 
+However, you should use the \fB-vrmlurl\fP option to specify an absolute URL 
+for the set of tiles.
+Then all of the URLs that are used in the VRML files (image
+texture links and childUrls in the GeoLOD node) will use this as 
+their base URL.
+This is generally not desirable because hardcoding absolute URLs 
+into your datasets means that the dataset is nonportable to another 
+server, or
+different location on the same server. However, it may be necessary 
+to write absolute URLs in your tile files, especially if you have 
+many levels because
+some VRML browsers have problems with relative links, resulting 
+in tiles and images that will not load.
+
 .SH DESCRIPTION OF OPTIONAL OPTIONS
 
 .TP
@@ -137,24 +178,42 @@ Specify -noview to not include a GeoViewpoint with each tile.
 
 .TP
 .B \-newimage
+\fItype|file\fP
 .br
-The orthorectified image for the bathymetry is created by running
+By default an orthorectified image for the bathymetry is created by running
 mbm_grdtiff(1) and then quadrupling the image size using ImageMagick
 mogrify(1). (The quadrupling together with the '-numpixels 16' 
 argument in the make_geovrml(1) command results in identical resolution
 of the highest level GeoVRML tiles and the original bathymetric
 data.)  Making this image can be a time consuming process.  By default,
 if a file with '.tif' appended to \fIbath_file\fP (without the .grd 
-extension) exists in $TMPDIR then 
+extension) or appended to \fIbasename\fP (if \fI-basename\fP option 
+is specified) exists in $TMPDIR then 
 a new image is not created.  To override this either remove the .tif 
 file or specify the -newimage option.
+
+.br
+\fItype|file\fP is the type used in the -G option of mbm_grdtiff(1)
+or the name of a TIFF file that you wish draped over the bathymetry.  
+
+The default type value is 2 for synthetic illumination with Haxby color
+map (this may be modified with the \fB-pallette\fP option). Use 5 to shade
+the image by slope value.  
+If <type|file> is an image file name then that file is assumed to be 
+orthorectified TIFF image (ending in .tif) that is co-registered 
+with the bathymetry file.
+This can be used to for example drape a side-scan sonar image 
+over the elevation data.
+It is up to the user to confirm the co-registration between the terrain
+data and the image data. 
 
 .TP
 .B \-white
 .br
 By default a black background is generated for the orthorectified 
-image.  If a white background is desired for printing purposes
-then use this option.
+image.  If a white background is desired (for example, for printing purposes)
+then use this option.  Typically, for computer visual display a black
+background works best.
 
 .TP
 .B \-zmax
@@ -170,29 +229,25 @@ of the standard Haxby colors between 4000 and 3000 meters
 depth use \fB-zmin -4000 -zmax -3000\fP.
 
 .TP
-.B \-vrmlurl
-\fIurl\fP
+.B \-pallette
+\fIpal\fP
+
+The number of Color Lookup Table 
+that is passed on to the -W1/ option of mbm_grdtiff(1).
+The default value is 1 - the Haxby color map.  For reference, the
+color tables values are:
+        \fIpallette\fP = 1:     Haxby colors [default]
+        \fIpallette\fP = 2:     high Intensity colors
+        \fIpallette\fP = 3:     low Intensity colors
+        \fIpallette\fP = 4:     grayscale
+        \fIpallette\fP = 5:     uniform grayscale
 .br
-All default URLs that are placed in the VRML files will be relative. 
-However, you may use the \fB-vrmlurl\fP option to specify an absolute URL 
-for the set of tiles.
-Then all of the URLs that are used in the VRML files (image
-texture links and childUrls in the GeoLOD node) will use this as 
-their base URL.
-This is generally not desirable because hardcoding absolute URLs 
-into your datasets means that the dataset is nonportable to another 
-server, or
-different location on the same server. However, it may be necessary 
-to write absolute URLs in your tile files, especially if you have 
-many levels because
-some VRML browsers have problems with relative links, resulting 
-in tiles and images that will not load.
 
 
 .SH ENVIRONMENT VARIABLE AND LOG FILE
 
 The environment variable TMPDIR must be defined.  It specifies the
-directory in which mbm_grd2geovrml does its work.  $TMPDIR should
+directory in which \fBmbm_grd2geovrml\fP does its work.  $TMPDIR should
 have sufficient space to hold the temporary grid and image
 files that get created.  The resulting 4 times magnified tiff
 images are left in $TMPDIR.  These large image files are reused unless
@@ -211,13 +266,12 @@ tile.
 .br
 
 .br
-  mbm_grd2geovrml \\
-    /hosts/menard/vol2/EM300_GRIDS/hawaii/PapauA_bath \\
-    --olat 21 --olon -157 \\
-    --tvdir ~/TileSets/Pyramids/hawaii \\
-    --vrmldir ~/TileSets/geoVRML/hawaii \\
-    --vrmlurl \\
-    http://menard.mbari.org/vrml/terrain/hawaii/PapauA_bath
+  mbm_grd2geovrml PapauA_bath \\
+    -olat 21 -olon -157 \\
+    -tvdir ~/TileSets/Pyramids/hawaii \\
+    -vrmldir ~/TileSets/geoVRML/hawaii \\
+    -nowrz -vrmlurl \\
+    http://menard/vrml/terrain/hawaii/PapauA_bath
 .br
 
 .br
@@ -225,7 +279,8 @@ tile.
 .br
 This example creates a grid file of the Northeast Pacific
 at one minute resolution and creates the GeoVRML tiles of it
-with the elevations clipped at sea level.
+with the elevations clipped at sea level.  A new synthetic
+illuminated Haxby-colored image is generated from the elevation data.
 .br
 
 .br
@@ -236,10 +291,56 @@ with the elevations clipped at sea level.
         -GNEPacific.grd \\
         -I1m -V
 
-  mbm_grd2geovrml/mbm_grd2geovrml NEPacific.grd \\
-    -tvdir /u/mccann/TileSets/Pyramids/pacific \\
-    -vrmldir /u/mccann/TileSets/geoVRML/pacific  \\
+  mbm_grd2geovrml NEPacific.grd \\
+    -tvdir ~/TileSets/Pyramids/pacific \\
+    -vrmldir ~/TileSets/geoVRML/pacific  \\
+    -vrmlurl \\
+    http://menard/vrml/terrain/hawaii/NEPacific \\
     -zmax 0 -olat 35 -olon -135 -newimage
+.br
+
+.br
+
+.br
+This example generates a slope-shaded image from the bathymetry
+data in PapauA_bath.grd and saves the geoVRML file in the directory
+~/TileSets/geoVRML/hawaii/PapauA_slope.  No viewpoints are specified.
+.br
+
+.br
+
+  mbm_grd2geovrml PapauA_bath \\
+      -olat 21 -olon -157 \\
+      -tvdir ~/TileSets/Pyramids/hawaii \\
+      -vrmldir ~/TileSets/geoVRML/hawaii \\
+      -vrmlurl \\
+      http://menard/vrml/terrain/hawaii/PapauA_slope \\
+      -noview \\
+      -newimage 5 \\
+      -basename PapauA_slope
+
+.br
+
+.br
+
+.br
+This example uses a pre-generated side-scan sonar TIFF image and drapes
+it over the bathymetry data in PapauA_bath.grd.  Viewpoints are excluded.
+Ouptut is written to ~/TileSets/geoVRML/hawaii/PapauA_ssdtl.
+.br
+
+.br
+
+  mbm_grd2geovrml PapauA_bath \\
+      -olat 21 -olon -157 \\
+      -tvdir ~/TileSets/Pyramids/hawaii \\
+      -vrmldir ~/TileSets/geoVRML/hawaii \\
+      -vrmlurl \\
+      http://menard/vrml/terrain/hawaii/PapauA_ssdtl \\
+      -noview \\
+      -newimage PapauA_ssdtl.tif \\
+      -basename PapauA_ssdtl
+
 
 
 
@@ -289,12 +390,22 @@ You need to manually clean up the leftover files that get created in $TMPDIR.
 .br
 
 .br
+The \fB-vrmlurl\fP option must be specified.  As of 19 March 2003 there is a 
+bug in \fBmake_geovrml\fP(1) where if the \fB-vrmlurl\fP option  is not 
+specified invalid VRML is 
+generated.  This is generally not a problem.  Because of bugs in VRML browsers
+all URLs must be absolute anyway.
+.br
+
+.br
 The GeoVRML content produced by this macro may be 
 viewed using Internet Explorer 
 with the Cortona 4.0 VRML plugin or in Netscape 4.7 with the CosmoPlayer 
 plugin.  Both browsers have problems with loading a second world after 
-you have viewed one.  
+you have viewed one.  Netscape 4.7 often must be closed by killing it 
+with Windows Task Manager.  Sometimes the CosmoPlayer plugin will refuse
+to load at all.  If this happens try removing all cp* files in %TEMP% or
+logging in with another Windows account so that a different profile is used.
 
 
 
-
