@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.16 1999-07-16 19:22:56 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.17 1999-11-12 21:25:21 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1999/07/16  19:22:56  caress
+ * Smaller window with new dialogs for Linux.
+ *
  * Revision 4.15  1999/04/14 04:33:10  caress
  * Final (?) version 4.6 release
  *
@@ -158,7 +161,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.16 1999-07-16 19:22:56 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.17 1999-11-12 21:25:21 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -2481,6 +2484,7 @@ int	which;
 		plot_start_time = interval_time1;
 		plot_end_time = interval_time2;
 		data_show_size = plot_end_time - plot_start_time;
+		
 		/* get current start of plotting data */
 		set = MB_NO;
 		for (i=0;i<nlist;i++)
@@ -3540,7 +3544,7 @@ int mbnavedit_plot_all()
 	margin_y = plot_height/6;
 	
 	/* get date at start of file */
-	mb_get_date(verbose, file_start_time_d, xtime_i);
+	mb_get_date(verbose, file_start_time_d + plot_start_time, xtime_i);
 
 	/* figure out how many plots to make */
 	number_plots = 0;
