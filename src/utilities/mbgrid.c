@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.22 1995-05-17 21:51:20 caress Exp $
+ *    $Id: mbgrid.c,v 4.23 1995-08-09 13:27:57 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -13,8 +13,9 @@
 /*
  * MBGRID is an utility used to grid bathymetry, amplitude, or 
  * sidescan data contained in a set of multibeam data files.  
- * This program uses a gaussian weighted average scheme to grid 
- * regions covered by multibeam swaths and then fills in gaps between 
+ * This program uses one of four algorithms (gaussian weighted mean, 
+ * median filter, minimum filter, maximum filter) to grid regions 
+ * covered by multibeam swaths and then fills in gaps between 
  * the swaths (to the degree specified by the user) using a minimum
  * curvature algorithm.
  *
@@ -30,6 +31,9 @@
  * Rerewrite:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1995/05/17  21:51:20  caress
+ * Stopped checking status of write_grd, as it seems nonsensical.
+ *
  * Revision 4.21  1995/05/12  17:15:38  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -149,7 +153,7 @@
 #include <string.h>
 
 /* GMT grd include file */
-#include <grd.h>
+#include <gmt_grd.h>
 
 /* Includes for System 5 type operating system */
 #if defined (IRIX) || defined (LYNX)
@@ -164,6 +168,8 @@
 /* gridding algorithms */
 #define	MBGRID_WEIGHTED_MEAN	1
 #define	MBGRID_MEDIAN_FILTER	2
+#define	MBGRID_MINIMUM_FILTER	3
+#define	MBGRID_MAXIMUM_FILTER	4
 
 /* grid format definitions */
 #define	MBGRID_ASCII	1
@@ -185,10 +191,10 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.22 1995-05-17 21:51:20 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.23 1995-08-09 13:27:57 caress Exp $";
 static char program_name[] = "MBGRID";
-static char help_message[] =  "MBGRID is an utility used to grid bathymetry data contained \nin a set of multibeam data files.  This program uses either a \nGaussian weighted average scheme or a median filter scheme to \ngrid regions covered by multibeam swaths and then can fill in gaps \nbetween the swaths (to the degree specified by the user) using \na minimum curvature interpolation algorithm.";
-static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n     -Bborder  -Cclip -Dxdim/ydim -Edx/dy -F -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n     -Ttension -Utime -V -Wscale -Xextend]";
+static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
+static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
 
 /*--------------------------------------------------------------------*/
 
@@ -232,8 +238,11 @@ char **argv;
 	int	xdim = 0;
 	int	ydim = 0;
 	int	set_spacing = MB_NO;
+	double	dx_set = 0.0;
+	double	dy_set = 0.0;
 	double	dx = 0.0;
 	double	dy = 0.0;
+	char	units[128];
 	int	clip = 0;
 	int	grid_mode = MBGRID_WEIGHTED_MEAN;
 	int	datatype = MBGRID_DATA_BATHYMETRY;
@@ -250,8 +259,8 @@ char **argv;
 	double	timediff = 300.0;
 	char	ifile[128];
 	char	ofile[128];
-	char	cfile[128];
-	int	filemod = 493;
+	char	plot_cmd[256];
+	int	plot_status;
 
 	/* mbio read values */
 	int	rpings;
@@ -384,7 +393,7 @@ char **argv;
 
 	/* other variables */
 	FILE	*fp, *dfp;
-	int	i, j, k, ii, jj, kk;
+	int	i, j, k, ii, jj, kk, n;
 	int	kgrid, kout, kint, ib, ix, iy;
 	int	ix1, ix2, iy1, iy2;
 
@@ -412,7 +421,7 @@ char **argv;
 	gydim = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:FfG:g:HhI:i:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -437,13 +446,16 @@ char **argv;
 			break;
 		case 'E':
 		case 'e':
-			sscanf (optarg,"%lf/%lf", &dx, &dy);
-			set_spacing = MB_YES;
+			n = sscanf (optarg,"%lf/%lf/%s", &dx_set, &dy_set, units);
+			if (n > 1)
+				set_spacing = MB_YES;
+			if (n < 3)
+				strcpy(units, "meters");
 			flag++;
 			break;
 		case 'F':
 		case 'f':
-			grid_mode = MBGRID_MEDIAN_FILTER;
+			sscanf (optarg,"%d", &grid_mode);
 			flag++;
 			break;
 		case 'G':
@@ -628,18 +640,28 @@ char **argv;
 	mb_coor_scale(verbose,0.5*(gbnd[2]+gbnd[3]),&mtodeglon,&mtodeglat);
 	deglontokm = 0.001/mtodeglon;
 	deglattokm = 0.001/mtodeglat;
-	if (set_spacing == MB_YES)
+	if (set_spacing == MB_YES 
+		&& (units[0] == 'M' || units[0] == 'm'))
 		{
-		xdim = (gbnd[1] - gbnd[0])/dx + 1;
-		ydim = (gbnd[3] - gbnd[2])/dy + 1;
-		gbnd[1] = gbnd[0] + dx*(xdim - 1);
-		gbnd[3] = gbnd[2] + dy*(ydim - 1);
+		xdim = (gbnd[1] - gbnd[0])/(mtodeglon*dx_set) + 1;
+		ydim = (gbnd[3] - gbnd[2])/(mtodeglat*dy_set) + 1;
+		strcpy(units, "meters");
 		}
-	else
+	else if (set_spacing == MB_YES 
+		&& (units[0] == 'K' || units[0] == 'k'))
 		{
-		dx = (gbnd[1] - gbnd[0])/(xdim-1);
-		dy = (gbnd[3] - gbnd[2])/(ydim-1);
+		xdim = (gbnd[1] - gbnd[0])*deglontokm/dx_set + 1;
+		ydim = (gbnd[3] - gbnd[2])*deglattokm/dy_set + 1;
+		strcpy(units, "km");
 		}
+	else if (set_spacing == MB_YES)
+		{
+		xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
+		ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
+		strcpy(units, "degrees");
+		}
+	dx = (gbnd[1] - gbnd[0])/(xdim-1);
+	dy = (gbnd[3] - gbnd[2])/(ydim-1);
 	offx = 0;
 	offy = 0;
 	if (extend > 0.0)
@@ -684,6 +706,10 @@ char **argv;
 		fprintf(outfp,"Gridding algorithm:  ");
 		if (grid_mode == MBGRID_MEDIAN_FILTER)
 			fprintf(outfp,"Median Filter\n");
+		else if (grid_mode == MBGRID_MINIMUM_FILTER)
+			fprintf(outfp,"Minimum Filter\n");
+		else if (grid_mode == MBGRID_MAXIMUM_FILTER)
+			fprintf(outfp,"Maximum Filter\n");
 		else
 			fprintf(outfp,"Gaussian Weighted Mean\n");
 		fprintf(outfp,"Grid dimensions: %d %d\n",xdim,ydim);
@@ -697,10 +723,17 @@ char **argv;
 		fprintf(outfp,"Input data bounds:\n");
 		fprintf(outfp,"  Longitude: %9.4f %9.4f\n",bounds[0],bounds[1]);
 		fprintf(outfp,"  Latitude:  %9.4f %9.4f\n",bounds[2],bounds[3]);
-		fprintf(outfp,"Longitude interval: %f degrees or %f km\n",
-			dx,dx*deglontokm);
-		fprintf(outfp,"Latitude interval:  %f degrees or %f km\n",
-			dy,dy*deglattokm);
+		fprintf(outfp,"Longitude interval: %f degrees or %f m\n",
+			dx,1000*dx*deglontokm);
+		fprintf(outfp,"Latitude interval:  %f degrees or %f m\n",
+			dy,1000*dy*deglattokm);
+		if (set_spacing == MB_YES)
+			{
+			fprintf(outfp,"Specified Longitude interval: %f %s\n",
+				dx_set, units);
+			fprintf(outfp,"Specified Latitude interval:  %f %s\n",
+				dy_set, units);
+			}
 		if (grid_mode != MBGRID_MEDIAN_FILTER)
 			fprintf(outfp,"Gaussian filter 1/e length: %f km\n",
 				sqrt((1.0/factor)));
@@ -1235,7 +1268,7 @@ char **argv;
 	}
 
 	/***** else do median filtering gridding *****/
-	else if (grid_mode == MBGRID_MEDIAN_FILTER)
+	else if (grid_mode != MBGRID_WEIGHTED_MEAN)
 	{
 
 	/* allocate memory for additional arrays */
@@ -1819,7 +1852,18 @@ char **argv;
 				value = data[kgrid];
 				qsort((char *)value,cnt[kgrid],sizeof(double),
 					double_compare);
-				grid[kgrid] = value[cnt[kgrid]/2];
+				if (grid_mode == MBGRID_MEDIAN_FILTER)
+					{
+					grid[kgrid] = value[cnt[kgrid]/2];
+					}
+				else if (grid_mode == MBGRID_MINIMUM_FILTER)
+					{
+					grid[kgrid] = value[0];
+					}
+				else if (grid_mode == MBGRID_MAXIMUM_FILTER)
+					{
+					grid[kgrid] = value[cnt[kgrid]-1];
+					}
 				sigma[kgrid] = 0.0;
 				for (k=0;k<cnt[kgrid];k++)
 					sigma[kgrid] += 
@@ -2045,7 +2089,7 @@ char **argv;
 		strcpy(xlabel,"Longitude");
 		strcpy(ylabel,"Latitude");
 		strcpy(zlabel,"Depth (m)");
-		strcpy(nlabel,"Number of Data Points");
+		strcpy(nlabel,"Number of Depth Data Points");
 		strcpy(sdlabel,"Depth Standard Deviation (m)");
 		strcpy(title,"Bathymetry Grid");
 		}
@@ -2054,7 +2098,7 @@ char **argv;
 		strcpy(xlabel,"Longitude");
 		strcpy(ylabel,"Latitude");
 		strcpy(zlabel,"Topography (m)");
-		strcpy(nlabel,"Number of Data Points");
+		strcpy(nlabel,"Number of Topography Data Points");
 		strcpy(sdlabel,"Topography Standard Deviation (m)");
 		strcpy(title,"Topography Grid");
 		}
@@ -2063,7 +2107,7 @@ char **argv;
 		strcpy(xlabel,"Longitude");
 		strcpy(ylabel,"Latitude");
 		strcpy(zlabel,"Amplitude");
-		strcpy(nlabel,"Number of Data Points");
+		strcpy(nlabel,"Number of Amplitude Data Points");
 		strcpy(sdlabel,"Amplitude Standard Deviation (m)");
 		strcpy(title,"Amplitude Grid");
 		}
@@ -2072,7 +2116,7 @@ char **argv;
 		strcpy(xlabel,"Longitude");
 		strcpy(ylabel,"Latitude");
 		strcpy(zlabel,"Sidescan");
-		strcpy(nlabel,"Number of Data Points");
+		strcpy(nlabel,"Number of Sidescan Data Points");
 		strcpy(sdlabel,"Sidescan Standard Deviation (m)");
 		strcpy(title,"Sidescan Grid");
 		}
@@ -2112,7 +2156,17 @@ char **argv;
 		status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
 			gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 			zmin,zmax,dx,dy,
-			xlabel,ylabel,zlabel,title,&error);
+			xlabel,ylabel,zlabel,title,
+			argc,argv,&error);
+
+		/* execute mbm_grdplot */
+		sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -C -V -L\"File grd_%s - %s:%s\"", 
+			fileroot, fileroot, title, zlabel);
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+			}
 		}
 	if (status != MB_SUCCESS)
 		{
@@ -2135,6 +2189,9 @@ char **argv;
 				output[kout] = (float) cnt[kgrid];
 				if (output[kout] < 0.0)
 					output[kout] = 0.0;
+				if (gridkind != MBGRID_ASCII
+					&& cnt[kgrid] <= 0)
+					output[kout] = outclipvalue;
 				}
 		if (gridkind == MBGRID_ASCII)
 			{
@@ -2162,7 +2219,17 @@ char **argv;
 			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				zmin,zmax,dx,dy,
-				xlabel,ylabel,nlabel,title,&error);
+				xlabel,ylabel,nlabel,title,
+				argc,argv,&error);
+
+			/* execute mbm_grdplot */
+			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s_num -G1 -W1/2 -V -L\"File grd_%s - %s:%s\"", 
+				fileroot, fileroot, title, nlabel);
+			plot_status = system(plot_cmd);
+			if (plot_status == -1)
+				{
+				fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+				}
 			}
 		if (status != MB_SUCCESS)
 			{
@@ -2183,6 +2250,9 @@ char **argv;
 				output[kout] = (float) sigma[kgrid];
 				if (output[kout] < 0.0)
 					output[kout] = 0.0;
+				if (gridkind != MBGRID_ASCII
+					&& cnt[kgrid] <= 0)
+					output[kout] = outclipvalue;
 				}
 		if (gridkind == MBGRID_ASCII)
 			{
@@ -2210,7 +2280,17 @@ char **argv;
 			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				zmin,zmax,dx,dy,
-				xlabel,ylabel,sdlabel,title,&error);
+				xlabel,ylabel,sdlabel,title,
+				argc,argv,&error);
+
+			/* execute mbm_grdplot */
+			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s_sd -G1 -W1/2 -V -L\"File grd_%s - %s:%s\"", 
+				fileroot, fileroot, title, sdlabel);
+			plot_status = system(plot_cmd);
+			if (plot_status == -1)
+				{
+				fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+				}
 			}
 		if (status != MB_SUCCESS)
 			{
@@ -2221,334 +2301,6 @@ char **argv;
 				program_name);
 			exit(error);
 			}
-		}
-
-	/* write command file */
-	if (gridkind == MBGRID_ASCII)
-		{
-		strcpy(cfile,"asc_");
-		strcat(cfile,fileroot);
-		strcat(cfile,".cmd");
-		if ((fp = fopen(cfile,"w")) == NULL)
-			{
-			fprintf(outfp,"\nError opening output file: %s\n",
-				cfile);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			error = MB_ERROR_OPEN_FAIL;
-			exit(error);
-			}
-		fprintf(fp,"#\nshade $1 <<eot\n");
-		fprintf(fp,"clear -1\n");
-		fprintf(fp,"Color 0\n");
-		fprintf(fp,"size $2\n\n");
-		fprintf(fp,"xlab %s\nylab %s\ntitle %s\n",xlabel,ylabel,title);
-		fprintf(fp,"cbar\nbarlabel %s\n",zlabel);
-		fprintf(fp,"letter 0.1 0.1 0.1 0.1 0.1 0.1\n");
-		fprintf(fp,"scolors 0 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0\n");
-		fprintf(fp,"axes %f %f %f %f 4 2\n",gbnd[0],gbnd[1],gbnd[2],gbnd[3]);
-		fprintf(fp,"null 0 11000\n");
-		strcpy(ofile,"asc_");
-		strcat(ofile,fileroot);
-		fprintf(fp,"file %s\nskip 4\nread %d %d\nskip 0\n",ofile,xdim,ydim);
-		fprintf(fp,"plot 0\nwait\n");
-		fprintf(fp,"output ras_%s\n",ofile);
-		fprintf(fp,"stop\neot\n\n");
-
-		if (more == MB_YES)
-			{
-			fprintf(fp,"#\nshade $1 <<eot\n");
-			fprintf(fp,"clear -1\n");
-			fprintf(fp,"Color 0\n");
-			fprintf(fp,"size $2\n\n");
-			fprintf(fp,"xlab %s\nylab %s\ntitle %s\n",
-				xlabel,ylabel,title);
-			fprintf(fp,"cbar\nbarlabel %s\n",nlabel);
-			fprintf(fp,"letter 0.1 0.1 0.1 0.1 0.1 0.1\n");
-			fprintf(fp,"axes %f %f %f %f 4 2\n",
-				gbnd[0],gbnd[1],gbnd[2],gbnd[3]);
-			fprintf(fp,"null 0 9999999\n");
-			strcpy(ofile,"asc_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_num");
-			fprintf(fp,"file %s\nskip 4\nread %d %d\nskip 0\n",
-					ofile,xdim,ydim);
-			fprintf(fp,"plot 0\nwait\n");
-			fprintf(fp,"output ras_%s\n",ofile);
-			fprintf(fp,"stop\neot\n\n");
-
-			fprintf(fp,"#\nshade $1 <<eot\n");
-			fprintf(fp,"clear -1\n");
-			fprintf(fp,"Color 0\n");
-			fprintf(fp,"size $2\n\n");
-			fprintf(fp,"xlab %s\nylab %s\ntitle %s\n",
-				xlabel,ylabel,title);
-			fprintf(fp,"cbar\nbarlabel %s\n",sdlabel);
-			fprintf(fp,"letter 0.1 0.1 0.1 0.1 0.1 0.1\n");
-			fprintf(fp,"axes %f %f %f %f 4 2\n",
-				gbnd[0],gbnd[1],gbnd[2],gbnd[3]);
-			fprintf(fp,"null 0 999999\n");
-			strcpy(ofile,"asc_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_sd");
-			fprintf(fp,"file %s\nskip 4\nread %d %d\nskip 0\n",
-					ofile,xdim,ydim);
-			fprintf(fp,"plot 0\nwait\n");
-			fprintf(fp,"output ras_%s\n",ofile);
-			fprintf(fp,"stop\neot\n\n");
-			}
-		close(fp);
-		chmod(cfile,filemod);
-		}
-	else if (gridkind == MBGRID_OLDGRD || gridkind == MBGRID_CDFGRD)
-		{
-		/* open command file */
-		strcpy(cfile,"grd_");
-		strcat(cfile,fileroot);
-		strcat(cfile,".cmd");
-		if ((fp = fopen(cfile,"w")) == NULL)
-			{
-			fprintf(outfp,"\nError opening output file: %s\n",
-				cfile);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			error = MB_ERROR_OPEN_FAIL;
-			exit(error);
-			}
-
-		/* put info header on shellscript */
-		fprintf(fp,"#\n# Shellscript to create Postscript color image of gridded data using GMT version 2 utilities\n");
-		strncpy(date,"\0",24);
-		right_now = time((long *)0);
-		strncpy(date,ctime(&right_now),24);
-		strcpy(user,getenv("USER"));
-		gethostname(host,128);
-		fprintf(fp,"# Created by program %s\n# Version %s\n# MB-system Version %s\n# Run by user <%s> on cpu <%s> at <%s>\n",
-		program_name,rcs_id,MB_VERSION,user,host,date);
-
-		/* put in conversion of version 1 grd to version 2 grd */
-		if (gridkind == MBGRID_OLDGRD)
-			{ 
-			fprintf(fp,"#\n# Convert version 1 GRD file to version 2\n");
-			fprintf(fp,"echo Converting version 1 GRD file to version 2...\n");
-			fprintf(fp,"v1tov2 grd1_%s grd_%s\n",fileroot,fileroot);
-			}
-
-		/* put meat in shellscript */
-		dlon = (gbnd[1] - gbnd[0]);
-		plotscale = 6.0/dlon;
-		tick = dlon/5;
-		if ((zmax - zmin) > 1000.0)
-			contour = 100.0;
-		else
-			contour = 25.0;
-		strcpy(ofile,"grd_");
-		strcat(ofile,fileroot);
-		fprintf(fp,"#\n# Make data map\n");
-		fprintf(fp,"echo Making data map...\n");
-		fprintf(fp,"#\n# Remove .gmtcommands file...\n");
-		fprintf(fp,"rm -f .gmtcommands\n");
-		fprintf(fp,"#\n# Make color image\n");
-		fprintf(fp,"echo Running grdimage...\n");
-		fprintf(fp,"grdimage %s -Jm%1f -C%s.cpt -X1 -Y3 -P -K -V > %s.ps\n",ofile,plotscale,ofile,ofile);
-		if (datatype == MBGRID_DATA_TOPOGRAPHY
-			|| datatype == MBGRID_DATA_BATHYMETRY)
-			{
-			fprintf(fp,"#\n# Make contour map\n");
-			fprintf(fp,"echo Running grdcontour...\n");
-			fprintf(fp,"grdcontour %s -Jm%1f -C%f -L%f/%f -P -O -K -V >> %s.ps\n",
-				ofile,plotscale,contour,zmin,zmax,ofile);
-			}
-		fprintf(fp,"#\n# Make base map\n");
-		fprintf(fp,"echo Running psbasemap...\n");
-		fprintf(fp,"psbasemap -Jm%1f -R%1f/%1f/%1f/%1f -B%1f/%1f -P -O -K -U -V >> %s.ps\n",plotscale,gbnd[0],gbnd[1],gbnd[2],gbnd[3],tick,tick,ofile);
-		fprintf(fp,"#\n# Make color scale\n");
-		fprintf(fp,"echo Running psscale...\n");
-		fprintf(fp,"psscale -C%s.cpt -D3/-0.5/5/0.15h -B\":.%s:\" -P -O -V >> %s.ps\n",ofile,zlabel,ofile);
-		fprintf(fp,"#\n# Show the plot on the screen\n");
-		fprintf(fp,"echo Starting %s...\n", psviewer);
-		fprintf(fp,"%s %s.ps &\n",psviewer, ofile);
-		if (more == MB_YES)
-			{
-			/* put in conversion of version 1 grd to version 2 grd */
-			if (gridkind == MBGRID_OLDGRD)
-				{ 
-				fprintf(fp,"#\n# Convert version 1 GRD files to version 2\n");
-				fprintf(fp,"echo Converting version 1 GRD files to version 2...\n");
-				fprintf(fp,"v1tov2 grd1_%s_num grd_%s_num\n",fileroot,fileroot);
-				fprintf(fp,"v1tov2 grd1_%s_sd grd_%s_sd\n",fileroot,fileroot);
-				}
-
-			strcpy(ofile,"grd_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_num");
-			fprintf(fp,"#\n# Make data distribution map\n");
-			fprintf(fp,"echo Making data distribution map...\n");
-			fprintf(fp,"#\n# Remove .gmtcommands file...\n");
-			fprintf(fp,"rm -f .gmtcommands\n");
-			fprintf(fp,"#\n# Make color image\n");
-			fprintf(fp,"echo Running grdimage...\n");
-			fprintf(fp,"grdimage %s -Jm%1f -C%s.cpt -X1 -Y3 -P -K -V > %s.ps\n",
-				ofile,plotscale,ofile,ofile);
-			fprintf(fp,"#\n# Make basemap\n");
-			fprintf(fp,"echo Running psbasemap...\n");
-			fprintf(fp,"psbasemap -Jm%1f -R%1f/%1f/%1f/%1f -B%1f/%1f -P -O -K -U -V >> %s.ps\n",
-				plotscale,gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-				tick,tick,ofile);
-			fprintf(fp,"#\n# Make color scale\n");
-			fprintf(fp,"echo Running psscale...\n");
-			fprintf(fp,"psscale -C%s.cpt -D3/-0.5/5/0.15h -B\":.%s:\" -P -O -V >> %s.ps\n",
-				ofile,nlabel,ofile);
-			fprintf(fp,"#\n# Show the plot on the screen\n");
-			fprintf(fp,"echo Starting %s...\n", psviewer);
-			fprintf(fp,"%s %s.ps &\n",psviewer, ofile);
-
-			strcpy(ofile,"grd_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_sd");
-			fprintf(fp,"#\n# Make standard deviation map\n");
-			fprintf(fp,"echo Making standard deviation map...\n");
-			fprintf(fp,"#\n# Remove .gmtcommands file...\n");
-			fprintf(fp,"rm -f .gmtcommands\n");
-			fprintf(fp,"#\n# Make color image\n");
-			fprintf(fp,"echo Running grdimage...\n");
-			fprintf(fp,"grdimage %s -Jm%1f -C%s.cpt -P -X1 -Y3 -K -V > %s.ps\n",
-				ofile,plotscale,ofile,ofile);
-			fprintf(fp,"#\n# Make basemap\n");
-			fprintf(fp,"echo Running psbasemap...\n");
-			fprintf(fp,"psbasemap -Jm%1f -R%1f/%1f/%1f/%1f -B%1f/%1f -P -O -K -U -V >> %s.ps\n",
-				plotscale,gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-				tick,tick,ofile);
-			fprintf(fp,"#\n# Make color scale\n");
-			fprintf(fp,"echo Running psscale...\n");
-			fprintf(fp,"psscale -C%s.cpt -D3/-0.5/5/0.15h -B\":.%s:\" -L -P -O -V >> %s.ps\n",
-				ofile,sdlabel,ofile);
-			fprintf(fp,"#\n# Show the plot on the screen\n");
-			fprintf(fp,"echo Starting %s...\n", psviewer);
-			fprintf(fp,"%s %s.ps &\n",psviewer, ofile);
-			}
-		fprintf(fp,"#\n# All done\n");
-		fprintf(fp,"echo All done...\n");
-
-		close(fp);
-		chmod(cfile,filemod);
-
-		/* write out color tables */
-		strcpy(cfile,"grd_");
-		strcat(cfile,fileroot);
-		strcat(cfile,".cpt");
-		if ((fp = fopen(cfile,"w")) == NULL)
-			{
-			fprintf(outfp,"\nError opening output file: %s\n",
-				cfile);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			error = MB_ERROR_OPEN_FAIL;
-			exit(error);
-			}
-		if (datatype == MBGRID_DATA_TOPOGRAPHY)
-			{
-			dd = 1.1*(zmax - zmin)/(ncptb-1);
-			for (i=0;i<ncptb-1;i++)
-				{
-				j = ncptb - 1 - i;
-				d1 = zmin - 0.05*(zmax - zmin) + i*dd;
-				d2 = zmin - 0.05*(zmax - zmin) + (i+1)*dd;
-				fprintf(fp,"%5.0f %d %d %d %5.0f %d %d %d\n",
-					d1,cptbr[j],cptbg[j],cptbb[j],
-					d2,cptbr[j-1],cptbg[j-1],cptbb[j-1]);
-				}
-			}
-		else if (datatype == MBGRID_DATA_AMPLITUDE
-			|| datatype == MBGRID_DATA_SIDESCAN)
-			{
-			dd = 1.1*(zmax - zmin)/(ncptg-1);
-			for (i=0;i<ncptg-1;i++)
-				{
-				d1 = zmin - 0.05*(zmax - zmin) + i*dd;
-				d2 = zmin - 0.05*(zmax - zmin) + (i+1)*dd;
-				fprintf(fp,"%5.0f %d %d %d %5.0f %d %d %d\n",
-					d1,cptg[i],cptg[i],cptg[i],
-					d2,cptg[i+1],cptg[i+1],cptg[i+1]);
-				}
-			}
-		else
-			{
-			dd = 1.1*(zmax - zmin)/(ncptb-1);
-			for (i=0;i<ncptb-1;i++)
-				{
-				d1 = zmin - 0.05*(zmax - zmin) + i*dd;
-				d2 = zmin - 0.05*(zmax - zmin) + (i+1)*dd;
-				fprintf(fp,"%5.0f %d %d %d %5.0f %d %d %d\n",
-					d1,cptbr[i],cptbg[i],cptbb[i],
-					d2,cptbr[i+1],cptbg[i+1],cptbb[i+1]);
-				}
-			}
-		close(fp);
-
-		if (more == MB_YES)
-			{
-			/* write out color table for data distribution map */
-			strcpy(cfile,"grd_");
-			strcat(cfile,fileroot);
-			strcat(cfile,"_num");
-			strcat(cfile,".cpt");
-			if ((fp = fopen(cfile,"w")) == NULL)
-				{
-				fprintf(outfp,"\nError opening output file: %s\n",
-					cfile);
-				fprintf(outfp,"\nProgram <%s> Terminated\n",
-					program_name);
-				error = MB_ERROR_OPEN_FAIL;
-				exit(error);
-				}
-			dd = ((double)(max(nmax,ncpto-1)))/(ncpto-1);
-			for (i=0;i<ncpto-1;i++)
-				{
-				d1 = nmin + i*dd;
-				d2 = nmin + (i+1)*dd;
-				fprintf(fp,"%5.0f %d %d %d %5.0f %d %d %d\n",
-					d1,cptor[i],cptog[i],cptob[i],
-					d2,cptor[i+1],cptog[i+1],cptob[i+1]);
-				}
-			close(fp);
-
-			/* write out color table for standard deviation map */
-			strcpy(cfile,"grd_");
-			strcat(cfile,fileroot);
-			strcat(cfile,"_sd");
-			strcat(cfile,".cpt");
-			if ((fp = fopen(cfile,"w")) == NULL)
-				{
-				fprintf(outfp,"\nError opening output file: %s\n",
-					cfile);
-				fprintf(outfp,"\nProgram <%s> Terminated\n",
-					program_name);
-				error = MB_ERROR_OPEN_FAIL;
-				exit(error);
-				}
-			for (i=0;i<ncpto-2;i++)
-				{
-				fprintf(fp,"%5.0f %d %d %d %5.0f %d %d %d\n",
-					cptsd[i],cptor[i],cptog[i],cptob[i],
-					cptsd[i+1],cptor[i+1],cptog[i+1],
-					cptob[i+1]);
-				}
-			if (cptsd[ncpto] > smax)
-				fprintf(fp,"%5.0f %d %d %d %5.0f %d %d %d\n",
-					cptsd[ncpto-2],cptor[ncpto-2],
-					cptog[ncpto-2],cptob[ncpto-2],
-					cptsd[ncpto-1],cptor[ncpto-1],
-					cptog[ncpto-1],cptob[ncpto-1]);
-			else
-				fprintf(fp,"%5.0f %d %d %d %5.0f %d %d %d\n",
-					cptsd[ncpto-2],cptor[ncpto-2],
-					cptog[ncpto-2],cptob[ncpto-2],
-					smax+1.0,cptor[ncpto-1],
-					cptog[ncpto-1],cptob[ncpto-1]);
-			close(fp);
-			}
-
 		}
 
 	/* deallocate arrays */
@@ -2744,18 +2496,23 @@ int	*error;
  */
 int write_cdfgrd(verbose,outfile,grid,nx,ny,
 			xmin,xmax,ymin,ymax,zmin,zmax,dx,dy,
-			xlab,ylab,zlab,titl,error)
+			xlab,ylab,zlab,titl,argc,argv,error)
 int	verbose;
 char	*outfile;
 float	*grid;
 int	nx, ny;
 double	xmin, xmax, ymin, ymax, zmin, zmax, dx, dy;
 char	*xlab, *ylab, *zlab, *titl;
+int	argc;
+char	**argv; 
 int	*error;
 {
 	char	*function_name = "write_cdfgrd";
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
+	double	w, e, s, n;
+	int	pad[4];
+	int	complex;
 	float	*a;
 	long int	right_now;
 	char	date[128], user[128], host[128];
@@ -2786,7 +2543,13 @@ int	*error;
 		fprintf(stderr,"dbg2       ylab:       %s\n",ylab);
 		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
 		fprintf(stderr,"dbg2       titl:       %s\n",titl);
+		fprintf(stderr,"dbg2       argc:       %d\n",argc);
+		fprintf(stderr,"dbg2       *argv:      %d\n",*argv);
 		}
+
+	/* inititialize grd header */
+	grdio_init();
+	grd_init (&grd, argc, argv, MB_NO);
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -2816,6 +2579,15 @@ int	*error;
 	sprintf(grd.remark,"This grid created by program %s\nMB-system Version %s\nRun by user <%s> on cpu <%s> at <%s>",
 		program_name,MB_VERSION,user,host,date);
 
+	/* set extract wesn,pad and complex */
+	w = 0.0;
+	e = 0.0;
+	s = 0.0;
+	n = 0.0;
+	for (i=0;i<4;i++)
+		pad[i] = 0;
+	complex = 0;
+
 	/* allocate memory for output array */
 	status = mb_malloc(verbose,grd.nx*grd.ny*sizeof(float),&a,error);
 
@@ -2832,7 +2604,7 @@ int	*error;
 				}
 
 		/* write the GMT netCDF grd file */
-		write_grd(outfile,&grd,a);
+		write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
 
 		/* free memory for output array */
 		mb_free(verbose, &a, error);

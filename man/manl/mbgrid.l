@@ -10,18 +10,20 @@ Version 4.2
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
-\fB-E\fIdx/dy\fP \fB-F\fP \fB-G\fIgridkind\fP 
+\fB-E\fIdx/dy/units\fP \fB-F\fImode\fP \fB-G\fIgridkind\fP 
 \fB-L\fIlonflip\fP \fB-M -N \fB-P\fIpings\fP 
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fItime\fP 
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
 
 .SH DESCRIPTION
 \fBmbgrid\fP is an utility used to grid bathymetry, amplitude, or sidescan 
-data contained in a set of multibeam data files. This program can use
-either a gaussian weighted average scheme or a median filter scheme
-to grid regions covered by multibeam 
+data contained in a set of multibeam data files. This program uses 
+one of four algorithms to grid regions covered by multibeam 
 swaths and then can fill in gaps between the swaths (to the degree 
 specified by the user) using a thin plate spline interpolation.
+The gridding algorithms include gaussian weighted average,
+median filter, minimum filter (use minimum value in grid bin), and
+maximum filter (use maximum value in grid bin).
 
 The user must specify the bounds of the region to be gridded (\fB-R\fP), 
 the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid, 
@@ -64,14 +66,14 @@ the weights adds to a value of 1.  Normally, the distance a is set to be
 half the average grid point spacing, but this can be varied using the \fB-W\fP
 option. 
 
-If the \fB-F\fP option is used, the gridding is performed with a
+If the \fB-F\fP\fI2\fP option is used, the gridding is performed with a
 median filter scheme instead of a Gaussian weighted average. In this
 approach, all of the values for each bin are held in memory until
 all of the data has been read. Then, the median value for each bin
 is assigned as the gridded value for that bin.  The advantage of a
 median filter approach is that it is relatively insensitive to 
 isolated artifacts in the data, provided that several samples
-exist for each bin.  This disadvantages to the median filter is
+exist for each bin.  The disadvantage to the median filter is
 that in the absence of artifacts, the weighted average scheme
 does a better job of representing the gridded field, particularly
 if the spectral characteristics of the gridded field are important.
@@ -80,6 +82,15 @@ a weighted average. In general, edited bathymetry should be gridded
 using the Gaussian weighted average, while unedited bathymetry,
 beam amplitude, and sidescan data should be gridded using the
 median filter.
+
+The minimum filter (\fB-F\fP\fI3\fP) and maximum filter
+(\fB-F\fP\fI4\fP) gridding schemes work like the median filter,
+except that the minimum or maximum bin values are reported
+instead of the median. These algorithms can be useful for 
+producing grids which strongly reflect outliers in the
+data. Hydrographers often prefer to grid bathymetry using a minimum
+depth scheme because they are most interested in the
+shallowest (most dangerous) soundings in their data.
 
 Normally, all of the data which falls into the region of interest
 is used to construct the gridded data set. This means that the
@@ -116,14 +127,20 @@ value used is NaN, or not-a-number.
 The names of the output files are based on the root character string
 specified using the \fB-O\fP option.  If the grid is output as a GMT 
 version 2 GRD format file (netCDF) or a GMT version 1 GRD format file  
-(binary), then its filename is "grd_root"; a shellscript
+(binary), then its filename is "grd_root".   If the
+\fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
+output grid filename will be "asc_root". If the output grid is
+in the GMT version 2 GRD format, a shellscript
 which will allow the contents of the grid to viewed using GMT programs
-is also output with the filename "grd_root.cmd".  If the
-\fB-A\fP option is used to specify an ascii format grid, then the
-output grid and shellscript filenames will be "asc_root" and "asc_root.cmd";
-the shellscript will make use of a graphics program called \fBSHADE\fP
-(this is for backwards compatibility - \fBSHADE\fP is obsolete and the
-use of ascii grids is now uncommon).
+is also output with the filename "grd_root.cmd".
+
+The \fB-M\fP option causes \fBmbgrid\fP to output two additional
+grids, the first ("grd_root_num") being the number of data 
+points located within each bin, and the second ("grd_root_sd") 
+being the standard deviation of the
+data points located within each bin. Plotting shellscripts
+called "grd_root_num.cmd" and "grd_root_sd.cmd" are also output
+if the grids are in the GMT version 2 GRD format.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -162,19 +179,26 @@ Sets the dimensions of the output grid.  This option is superceded
 if the user specifies the grid spacing with the \fB-E\fP option.
 Default:  \fIxdim\fP = \fIydim\fP = 101.
 .TP
-.B \fB-E\fIdx/dy\fP
-Sets the grid spacing in longitude (\fIdx\fP) and latitude (\fIdy\fP
-of the output grid. By default, the grid spacing is calculated from 
-the grid bounds and the grid dimensions. If the user
-uses the \fB-E\fP option to set the grid spacing, then the dimensions
-will be calculated from the grid bounds and spacing. In these
-circumstances rounding errors will usually require that the eastern
-and northern bounds be adjusted to fit exactly with the 
-grid dimensions and spacing.
+.B \fB-E\fIdx/dy/units\fP
+Sets the grid cell spacing to \fIdx\fP in longitude and \fIdy\fP
+in latitude. If \fIunits\fP is not specified, the \fIdx\fP 
+and \fIdy\fP values are assumed to be in meters. Valid values
+for \fIunits\fP include "km", "meters", and "degrees".
+By default, the grid spacing is calculated from 
+the grid bounds and the grid dimensions. When the user
+uses the \fB-E\fP option to set the grid spacing, the
+grid dimensions are calculated using the grid bounds and
+grid cell spacings. However, slight adjustments to the
+grid cell spacing values are usually required to keep
+the grid bounds as specified.
 .TP
-.B \fB-F\fP
-Sets the use of a median filter gridding scheme rather than the
-default Gaussian weighted filter scheme.
+.B \fB-F\fImode\fP
+Sets the gridding algorithm to be used.
+ 	\fImode\fP = 1:         Gaussian Weighted Mean
+ 	\fImode\fP = 2:         Median Filter
+ 	\fImode\fP = 3:         Minimum Filter
+ 	\fImode\fP = 4:         Maximum Filter
+The default is \fImode\fP = 1 (Gaussian Weighted Mean).
 .TP
 .B \fB-G\fIgridkind\fP
 Sets the format of the output grid file.
@@ -182,14 +206,10 @@ Sets the format of the output grid file.
  	\fIgridkind\fP = 2:	binary file (GMT version 1 GRD file)
  	\fIgridkind\fP = 3:	netCDF file (GMT version 2 GRD file)
 .br
-\fBmbgrid\fP also outputs shellscripts which run graphics programs,
-thus providing a preliminary view of the gridded data.  If 
-\fIgridkind\fP = 1 then the shellscript will run the program
-\fBSHADE\fP (this will probably vanish soon since \fBSHADE\fP is
-obsolete and no longer supported).  If \fIgridkind\fP = 2 or 3 then the
-shellscript will run GMT version 2 programs and then put the image
-on the screen using \fBPAGEVIEW\fP.  In either case, the image will
-consist of a color fill plot overlaid with contours.
+If \fIgridkind\fP = 3, \fBmbgrid\fP also outputs shellscripts 
+which run GMT version 3 programs to provide preliminary color
+fill maps of the gridded data. These shellscripts are 
+generated using the \fBmbm_grdplot\fP macro.
 Default: \fIgridkind\fP = 3.
 .TP
 .B \fB-H\fP
@@ -316,7 +336,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.6 1995-04-25 19:47:57 caress Exp $
+ Version $Id: mbgrid.l,v 4.7 1995-08-09 13:27:57 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -393,7 +413,7 @@ standard deviation values. The following will suffice:
 The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.6 1995-04-25 19:47:57 caress Exp $
+ Version $Id: mbgrid.l,v 4.7 1995-08-09 13:27:57 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -466,4 +486,4 @@ The output looks like:
 \fBmbsystem\fP(l)
 
 .SH BUGS
-You tell me.
+Please let us know.
