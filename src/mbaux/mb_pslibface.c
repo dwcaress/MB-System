@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.1 1994-05-25 15:08:49 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.2 1994-07-29 19:04:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/25  15:08:49  caress
+ * Fixed plot_exit.
+ *
  * Revision 4.0  1994/05/16  22:14:24  caress
  * First cut at new contouring scheme.
  *
@@ -57,7 +60,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.1 1994-05-25 15:08:49 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.2 1994-07-29 19:04:31 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -79,7 +82,7 @@ int	*error;
 		fprintf(stderr,"dbg2       bounds[1]:        %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:        %f\n",bounds[2]);
 		fprintf(stderr,"dbg2       bounds[3]:        %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       scale:            %f\n",scale);
+		fprintf(stderr,"dbg2       scale:            %f\n",*scale);
 		}
 
 	/* deal with gmt options */
@@ -163,6 +166,9 @@ int	*error;
 	*inch2lon = xx2 - xx1;
 	inchtolon = *inch2lon;
 
+	/* set line width */
+	ps_setline(0);
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -173,7 +179,7 @@ int	*error;
 		fprintf(stderr,"dbg2       bounds[1]:  %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:  %f\n",bounds[2]);
 		fprintf(stderr,"dbg2       bounds[3]:  %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       scale:      %f\n",scale);
+		fprintf(stderr,"dbg2       scale:      %f\n",*scale);
 		fprintf(stderr,"dbg2       inchtolon:  %d\n",*inch2lon);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -188,7 +194,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.1 1994-05-25 15:08:49 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.2 1994-07-29 19:04:31 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -262,6 +268,13 @@ int ipen;
 	geo_to_xy(x,y,&xx,&yy);
 	ps_plot(xx,yy,ipen);
 	return;
+}
+/*--------------------------------------------------------------------*/
+void setline(linewidth)
+int linewidth;
+{
+        ps_setline(linewidth);
+        return;
 }
 /*--------------------------------------------------------------------*/
 void newpen(ipen)

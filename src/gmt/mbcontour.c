@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.3 1994-06-13 19:01:13 caress Exp $
+ *    $Id: mbcontour.c,v 4.4 1994-07-29 19:04:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/06/13  19:01:13  caress
+ * Fixed typos in info messages.
+ *
  * Revision 4.2  1994/06/13  18:39:15  caress
  * Made it possible to read data from stdin.
  *
@@ -77,8 +80,11 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_contour.h"
 
-/* local define */
-#define DTR (M_PI/180.)
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
 
 /*--------------------------------------------------------------------*/
 
@@ -86,11 +92,11 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.3 1994-06-13 19:01:13 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.4 1994-07-29 19:04:31 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O \n\t-P -ppings -U -Xx-shift -Yy-shift -#copies -V -H]";
+	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O \n\t-P -ppings -Q -Ttimegap -U -Xx-shift -Yy-shift -#copies -V -H]";
 #else
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -199,6 +205,8 @@ char **argv;
 	int	setcolors;
         int     use_stdin;
 	int	read_data;
+	double	navlon_old;
+	double	navlat_old;
 	int	i;
 
 	/* get current mb default values */
@@ -214,7 +222,7 @@ char **argv;
 	bounds[2] = 0.0;
 	bounds[3] = 0.0;
 	scale = 0.0;
-	nplot = 20;
+	nplot = 5;
 	cont_int = 25.;
 	col_int = 100.;
 	tick_int = 100.;
@@ -430,13 +438,13 @@ char **argv;
 		fprintf(stderr,"dbg2       tick length:      %f\n",tick_len);
 		fprintf(stderr,"dbg2       label height:     %f\n",label_hgt);
 		fprintf(stderr,"dbg2       number contoured: %d\n",nplot);
-		fprintf(stderr,"time tick interval:          %f\n",
+		fprintf(stderr,"dbg2       time tick int:    %f\n",
 			time_tick_int);
-		fprintf(stderr,"time interval:               %f\n",
+		fprintf(stderr,"dbg2       time interval:    %f\n",
 			time_annot_int);
-		fprintf(stderr,"date interval:               %f\n",
+		fprintf(stderr,"dbg2       date interval:    %f\n",
 			date_annot_int);
-		fprintf(stderr,"time tick length:            %f\n\n",
+		fprintf(stderr,"dbg2       time tick length: %f\n\n",
 			time_tick_len);
 		}
 
@@ -670,6 +678,7 @@ char **argv;
 			bath,amp,bathlon,bathlat,
 			ss,sslon,sslat,
 			comment,&error);
+		swath_plot->beams_bath = beams_bath;
 
 		/* print debug statements */
 		if (verbose >= 2)
@@ -693,8 +702,15 @@ char **argv;
 		/* update bookkeeping */
 		if (error == MB_ERROR_NO_ERROR)
 			{
-			nping_read += pings_read;
-			(*npings)++;
+			if (*npings == 0 || (*npings > 0 
+				&& *navlon != navlon_old 
+				&& *navlat != navlat_old))
+				{
+				nping_read += pings_read;
+				(*npings)++;
+				navlon_old = *navlon;
+				navlat_old = *navlat;
+				}
 			}
 
 		/* decide whether to plot, whether to 
@@ -742,11 +758,13 @@ char **argv;
 				}
 
 			/* plot data */
-			mb_contour(verbose,swath_plot,&error);
+			if (plot_contours == MB_YES
+				|| plot_triangles == MB_YES)
+				mb_contour(verbose,swath_plot,&error);
 
 			/* plot shiptrack */
-			if (plot_track)
-			mb_track(verbose,swath_plot,&error);
+			if (plot_track == MB_YES)
+				mb_track(verbose,swath_plot,&error);
 
 			/* reorganize data */
 			if (flush == MB_YES && save_new == MB_YES)
@@ -793,7 +811,8 @@ char **argv;
 
 	/* end loop over files in list */
 	}
-	fclose (fp);
+	if (use_stdin == MB_NO)
+		fclose (fp);
 
 	/* end plot */
 	plot_end(verbose,&error);

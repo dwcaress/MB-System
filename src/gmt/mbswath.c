@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.1 1994-06-13 18:39:15 caress Exp $
+ *    $Id: mbswath.c,v 4.2 1994-07-29 19:04:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/06/13  18:39:15  caress
+ * Made it possible to read data from stdin.
+ *
  * Revision 4.0  1994/03/05  23:46:48  caress
  * First cut at version 4.0
  *
@@ -79,11 +82,14 @@
 #define	MBSWATH_AMP		4
 #define	MBSWATH_SS		5
 
-/* local define */
-#define DTR (M_PI/180.)
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
 
 /* global structure definitions */
-#define MAXPINGS 100
+#define MAXPINGS 50
 struct	footprint
 	{
 	double	x[4];
@@ -148,7 +154,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.1 1994-06-13 18:39:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.2 1994-07-29 19:04:31 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -644,7 +650,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
