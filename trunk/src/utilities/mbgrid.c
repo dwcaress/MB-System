@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.9 2002-09-20 22:30:45 caress Exp $
+ *    $Id: mbgrid.c,v 5.10 2002-09-25 20:12:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/09/20 22:30:45  caress
+ * Made interpolation only fill in data gaps.
+ *
  * Revision 5.8  2002/09/19 00:28:12  caress
  * Release 5.0.beta23
  *
@@ -321,7 +324,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.9 2002-09-20 22:30:45 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.10 2002-09-25 20:12:30 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1060,10 +1063,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	/* get data input bounds in lon lat */
 	if (use_projection == MB_NO)
 		{
-		bounds[0] = wbnd[0] - (wbnd[1] - wbnd[0]);
-		bounds[1] = wbnd[1] + (wbnd[1] - wbnd[0]);
-		bounds[2] = wbnd[2] - (wbnd[3] - wbnd[2]);
-		bounds[3] = wbnd[3] + (wbnd[3] - wbnd[2]);
+		bounds[0] = wbnd[0];
+		bounds[1] = wbnd[1];
+		bounds[2] = wbnd[2];
+		bounds[3] = wbnd[3];
 		}
 	/* get min max of lon lat for data input from projected bounds */
 	else
@@ -1116,6 +1119,14 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		bounds[2] = MIN(bounds[2], ylat);
 		bounds[3] = MAX(bounds[3], ylat);
 		}
+		
+	/* extend the bounds slightly to be sure no data gets missed */
+	xx = MIN(0.05*(bounds[1] - bounds[0]), 0.1);
+	yy = MIN(0.05*(bounds[3] - bounds[2]), 0.1);
+	bounds[0] = bounds[0] - xx;
+	bounds[1] = bounds[1] + xx;
+	bounds[2] = bounds[2] - yy;
+	bounds[3] = bounds[3] + yy;
 
 	/* output info */
 	if (verbose >= 0)
@@ -1338,11 +1349,11 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		if (file_in_bounds == MB_YES)
 		    {
 		    /* check for "fast bathymetry" or "fbt" file */
-		    /*if (datatype == MBGRID_DATA_TOPOGRAPHY
+		    if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
 			{
 			mb_get_fbt(verbose, file, &format, &error);
-			}*/
+			}
 		
 		    /* call mb_read_init() */
 		    if ((status = mb_read_init(
