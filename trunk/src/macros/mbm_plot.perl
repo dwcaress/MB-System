@@ -33,10 +33,13 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 3.6 1993-11-27 18:24:07 caress Exp $
+#   $Id: mbm_plot.perl,v 3.7 1993-11-27 18:31:54 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.6  1993/11/27  18:24:07  caress
+# Made choice of tick interval more rational.
+#
 # Revision 3.5  1993/08/17  16:58:36  caress
 # Set location of perl to /usr/local/bin/perl
 #
@@ -273,35 +276,35 @@ if ($base_tick < 0.01667)
 	{
 	$base_tick = 0.01667;
 	}
-else if ($base_tick < 0.03333)
+elsif ($base_tick < 0.03333)
 	{
 	$base_tick = 0.03333;
 	}
-else if ($base_tick < 0.08333)
+elsif ($base_tick < 0.08333)
 	{
 	$base_tick = 0.08333;
 	}
-else if ($base_tick < 0.16667)
+elsif ($base_tick < 0.16667)
 	{
 	$base_tick = 0.16667;
 	}
-else if ($base_tick < 0.25)
+elsif ($base_tick < 0.25)
 	{
 	$base_tick = 0.25;
 	}
-else if ($base_tick < 0.5)
+elsif ($base_tick < 0.5)
 	{
 	$base_tick = 0.5;
 	}
-else if ($base_tick < 1.0)
+elsif ($base_tick < 1.0)
 	{
 	$base_tick = 1.0;
 	}
-else if ($base_tick < 2.0)
+elsif ($base_tick < 2.0)
 	{
 	$base_tick = 2.0;
 	}
-else if ($base_tick < 5.0)
+elsif ($base_tick < 5.0)
 	{
 	$base_tick = 5.0;
 	}
