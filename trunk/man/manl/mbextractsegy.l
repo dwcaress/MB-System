@@ -1,4 +1,4 @@
-.TH mbextractsegy l "16 September 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbextractsegy l "23 September 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbextractsegy\fP - extracts subbottom profiler, center beam reflection,
 or seismic reflection data from swath data supported by MB-System and
@@ -25,7 +25,9 @@ or seismic reflection data, and outputting that selected data
 as a SEGY file. Parameters such as sonar depth, seafloor depth, and
 position are embedded into the SEGY data. The SEGY files are
 output in a form used by the seismic reflection processing package
-\fBSIOSEIS\fP.
+\fBSIOSEIS\fP. A "sinf" file containing statistics about the content
+of the SEGY file is created automatically by \fBMBextractsegy\fP; this
+file is named by adding a ".sinf" suffix to the SEGY filename.
 
 At present, the only swath data format from which subbottom data
 can be extracted is format 88 (Reson 7k format).
@@ -188,6 +190,50 @@ which yields the following output:
  	file:20040722_152111.s7k record:2510 shot:2565  2004/204 15:44:05.893 samples:8330 interval:64 usec  minmax: 0.000000 17616.189453
  	file:20040722_152111.s7k record:2520 shot:2575  2004/204 15:44:11.507 samples:8330 interval:64 usec  minmax: 0.000000 31888.093750
  	2527 records output to segy file 20040722_152111.s7k.segy
+.br
+\fBMBextractsegy\fP also generates a "sinf" file containing statistics about the data in the segy
+file 20040722_152111.s7k.segy. The contents of the sinf file 20040722_152111.s7k.segy.sinf are:
+ 	SEGY Data File:      20040722_152111.s7k.segy
+ 	
+ 	File Header Info:
+ 	  Channels:                          1
+ 	  Auxilliary Channels:               0
+ 	  Sample Interval (usec):           64
+ 	  Number of Samples in Trace:     8330
+ 	  Trace length (sec):         0.533120
+ 	  Data Format:                IEEE 32 bit integer
+ 	  CDP Fold:                          0
+ 	
+ 	Data Totals:
+ 	  Number of Traces:               2527
+ 	  Min Max Delta:
+ 	    Shot number:                    56     2582     2527
+ 	    Shot trace:                      1        1        1
+ 	    RP number:                      56     2582     2527
+ 	    RP trace:                        1        1        1
+ 	    Delay (sec):              0.000000 0.000000 0.000000
+ 	    Range (m):                0.000000 0.000000 0.000000
+ 	    Receiver Elevation (m):   -224.030000 -2.860000 -221.170000
+ 	    Source Elevation (m):     -224.030000 -2.860000 -221.170000
+ 	    Source Depth (m):         2.860000 224.030000 -221.170000
+ 	    Receiver Water Depth (m): 51.510000 487.670000 -436.160000
+ 	    Source Water Depth (m):   51.510000 487.670000 -436.160000
+ 	
+ 	Navigation Totals:
+ 	
+ 	  Start of Data:
+ 	    Time:  07 22 2004 15:20:37.029000  JD204
+ 	    Lon: -121.8573     Lat:   36.7755
+ 	
+ 	  End of Data:
+ 	    Time:  07 22 2004 15:44:15.438000  JD204
+ 	    Lon: -121.8572     Lat:   36.7952 
+ 	
+ 	Limits:
+ 	  Minimum Longitude:    -121.8574   Maximum Longitude:    -121.8572
+ 	  Minimum Latitude:       36.7755   Maximum Latitude:       36.7952
+
+
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbsegyinfo\fP(l), \fBmbsegylist\fP(l), \fBmbsegygrid\fP(l),
