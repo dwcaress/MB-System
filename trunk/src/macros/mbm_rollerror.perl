@@ -1,4 +1,19 @@
 #! /home/hs/bin/perl 
+#--------------------------------------------------------------------
+#    The MB-system:	mbm_rollover.perl	3.00	6/18/93
+#    $Id: mbm_rollerror.perl,v 3.2 1993-08-17 01:52:17 caress Exp $
+#
+#    Copyright (c) 1993 by 
+#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#    Lamont-Doherty Earth Observatory
+#    Palisades, NY  10964
+#
+#    See README file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Command:
+#   mbm_rollover
 #
 # Purpose:
 #   Perl shellscript to read a multibeam bathymetry file, calculate the
@@ -6,12 +21,21 @@
 #   a file containing roll corrections which can be applied to the
 #   data.
 #
+# Usage:
+#   mbm_rollover -Fformat -Ifile
+#
 # Author:
 #   David W. Caress
 #   Lamont-Doherty Earth Observatory
 #   Palisades, NY  10964
 #   June 13, 1993
-
+#
+# Version:
+#   $Id: mbm_rollerror.perl,v 3.2 1993-08-17 01:52:17 caress Exp $
+#
+# Revisions:
+#   $Log: not supported by cvs2svn $
+#
 # Deal with command line arguments
 &Getopts('I:i:F:f:');
 $file = ($opt_I || $opt_i);

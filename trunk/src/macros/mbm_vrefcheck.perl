@@ -1,16 +1,40 @@
 #! /home/hs/bin/perl 
+#--------------------------------------------------------------------
+#    The MB-system:	mbm_vrefcheck.perl	3.00	6/18/93
+#    $Id  $
+#
+#    Copyright (c) 1993 by 
+#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#    Lamont-Doherty Earth Observatory
+#    Palisades, NY  10964
+#
+#    See README file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Command:
+#   mbm_vrefcheck
 #
 # Purpose:
 #   Perl shellscript to generate plot of crosstrack seafloor slope
 #   from a multibeam file.  The noise in this time series largely
 #   reflects noise in the vertical reference used by the sonar.
 #
+# Usage:
+#   mbm_vrefcheck -Fformat -Ifile [-Axmin -Bxmax -Sxscale -Xxaxis]
+#
 # Author:
 #   David W. Caress
 #   Lamont-Doherty Earth Observatory
 #   Palisades, NY  10964
 #   June 13, 1993
-
+#
+# Version:
+#   $Id: mbm_vrefcheck.perl,v 3.2 1993-08-17 01:52:17 caress Exp $
+#
+# Revisions:
+#   $Log: not supported by cvs2svn $
+#
 # Deal with command line arguments
 &Getopts('I:i:F:f:S:s:X:x:A:a:B:b:');
 $file = ($opt_I || $opt_i);
