@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.h	10/4/94
- *	$Id: mbsys_sb2000.h,v 5.4 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_sb2000.h,v 5.5 2002-02-26 07:50:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.3  2001/04/06  22:05:59  caress
  * Consolidated xse formats into one format.
  *
@@ -110,8 +113,8 @@ struct mbsys_sb2000_struct
 	short	speed;		/* fore-aft speed in 0.1 knots */
 	short	speed_ps;	/* port-starboard speed in 0.1 knots */
 	short	quality;	/* quality value, 0 good, bigger bad */
-	short	sensor_size;	/* size of sensor specific record in bytes */
-	short	data_size;	/* size of data record in bytes */
+	unsigned short	sensor_size;	/* size of sensor specific record in bytes */
+	unsigned short	data_size;	/* size of data record in bytes */
 	char	speed_ref[2];	/* speed reference */
 	char	sensor_type[2];	/* sensor type */
 	char	data_type[2];	/* type of data recorded */

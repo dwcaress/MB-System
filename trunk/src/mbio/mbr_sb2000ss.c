@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 5.6 2002-02-22 09:03:43 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 5.7 2002-02-26 07:50:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/02/22 09:03:43  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.5  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -146,10 +149,11 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+static char res_id[]="$Id: mbr_sb2000ss.c,v 5.7 2002-02-26 07:50:41 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.6 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_register_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -160,6 +164,7 @@ int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
 
@@ -279,7 +284,6 @@ int mbr_info_sb2000ss(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.6 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_info_sb2000ss";
 	int	status = MB_SUCCESS;
 
@@ -289,6 +293,7 @@ int mbr_info_sb2000ss(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
 
@@ -348,7 +353,6 @@ int mbr_info_sb2000ss(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2000ss(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sb2000ss.c,v 5.6 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -359,6 +363,7 @@ int mbr_alm_sb2000ss(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
@@ -400,6 +405,7 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
@@ -432,11 +438,11 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	int	read_status;
-	char	dummy[2];
 	char	buffer[2*MBSYS_SB2000_PIXELS+4];
 	unsigned short *short_ptr;
-	int 	skip;
-	int	i, j, k;
+	short	test_sensor_size, test_data_size;
+	int 	done, skip;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -444,6 +450,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -473,14 +480,8 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* if not a good header search through file to find one */
-	while (status == MB_SUCCESS && 
-		(strncmp(&buffer[34],"SR",2) != 0
-		&& strncmp(&buffer[34],"RS",2) != 0
-		&& strncmp(&buffer[34],"SP",2) != 0
-		&& strncmp(&buffer[34],"TR",2) != 0
-		&& strncmp(&buffer[34],"IR",2) != 0
-		&& strncmp(&buffer[34],"AT",2) != 0
-		&& strncmp(&buffer[34],"SC",2) != 0))
+	done = MB_NO;
+	while (status == MB_SUCCESS && done == MB_NO)
 		{
 		/* shift bytes by one */
 		for (i=0;i<MBSYS_SB2000_HEADER_SIZE-1;i++)
@@ -489,20 +490,40 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		skip++;
 
 		/* read next byte */
-		if ((status = fread(&buffer[MBSYS_SB2000_HEADER_SIZE-1],
+		if ((read_status = fread(&buffer[MBSYS_SB2000_HEADER_SIZE-1],
 			1,1,mb_io_ptr->mbfp)) == 1) 
 			{
-			mb_io_ptr->file_bytes += status;
+			mb_io_ptr->file_bytes += read_status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
+			
+			if (strncmp(&buffer[34],"SR",2) == 0
+			    || strncmp(&buffer[34],"RS",2) == 0
+			    || strncmp(&buffer[34],"SP",2) == 0
+			    || strncmp(&buffer[34],"TR",2) == 0
+			    || strncmp(&buffer[34],"IR",2) == 0
+			    || strncmp(&buffer[34],"AT",2) == 0
+			    || strncmp(&buffer[34],"SC",2) == 0)
+			    {
+			    mb_get_binary_short(MB_NO, &buffer[26], &test_sensor_size);
+			    mb_get_binary_short(MB_NO, &buffer[28], &test_data_size);
+			    if (test_sensor_size <= 32 && test_data_size <= 2*MBSYS_SB2000_PIXELS+4)
+				done = MB_YES;
+			    }
+
 			}
 		else
 			{
+			done = MB_YES;
 			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
 		}
+		
+	/* report data skips */
+	if (skip > 0 && verbose >= 2) 
+	    fprintf(stderr, "\ndgb2           DATA SKIPPED: %d bytes\n", skip);
 
 	/* get header values */
 	mb_get_binary_short(MB_NO, &buffer[0], &store->year);
@@ -516,8 +537,8 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_get_binary_short(MB_NO, &buffer[20], &store->speed);
 	mb_get_binary_short(MB_NO, &buffer[22], &store->speed_ps);
 	mb_get_binary_short(MB_NO, &buffer[24], &store->quality);
-	mb_get_binary_short(MB_NO, &buffer[26], &store->sensor_size);
-	mb_get_binary_short(MB_NO, &buffer[28], &store->data_size);
+	mb_get_binary_short(MB_NO, &buffer[26], (short *)&store->sensor_size);
+	mb_get_binary_short(MB_NO, &buffer[28], (short *)&store->data_size);
 	store->speed_ref[0] = buffer[30];
 	store->speed_ref[1] = buffer[31];
 	store->sensor_type[0] = buffer[32];
@@ -533,25 +554,32 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			&& strncmp(store->data_type,"TR",2) != 0
 			&& strncmp(store->data_type,"SP",2) != 0)
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-			store->kind = MB_DATA_NONE;
-
 			/* read rest of record */
-			if ((read_status = fread(buffer,1,store->sensor_size,
-				mb_io_ptr->mbfp)) !=store->sensor_size) 
+			for (i=0;
+			    (i < store->sensor_size + store->data_size)
+				&& status == MB_SUCCESS;
+			    i++)
+			    {
+			    if ((read_status = fread(buffer,1,1,
+				mb_io_ptr->mbfp)) != 1) 
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
+				store->kind = MB_DATA_NONE;
 				}
-			mb_io_ptr->file_bytes += read_status;
-			if ((read_status = fread(buffer,1,store->data_size,
-				mb_io_ptr->mbfp)) != store->data_size) 
+			    else
 				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
+				mb_io_ptr->file_bytes += read_status;
 				}
-			mb_io_ptr->file_bytes += read_status;
+			    }
+			    
+			/* if eof not reached set unintelligible error */
+			if (status == MB_SUCCESS)
+			    {
+			    status = MB_FAILURE;
+			    *error = MB_ERROR_UNINTELLIGIBLE;
+			    store->kind = MB_DATA_NONE;
+			    }
 			}
 		else if (strncmp(store->data_type,"SC",2) == 0)
 			{
@@ -866,7 +894,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_sb2000_struct *store;
 	char	buffer[2*MBSYS_SB2000_PIXELS+4];
 	unsigned short *short_ptr;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -874,6 +902,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
