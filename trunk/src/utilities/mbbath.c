@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.16 1995-09-22 18:40:21 caress Exp $
+ *    $Id: mbbath.c,v 4.17 1995-10-23 19:26:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1995/09/22  18:40:21  caress
+ * Added SB2100 specific fix for bad range scale.
+ *
  * Revision 4.15  1995/08/21  17:25:25  caress
  * Changed handling of draught, since that value is
  * now provided automatically with the travel times.
@@ -136,7 +139,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.16 1995-09-22 18:40:21 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.17 1995-10-23 19:26:45 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -1118,7 +1121,7 @@ and stdout.";
 			    angles[i] = angles[i] + angle_correction;
 			    
 			    /* raytrace */
-			    status = mb_rt(verbose, rt_svp, depth_offset, 
+			    status = mb_rt(verbose, rt_svp, 0.0, 
 				    angles[i], 0.5*ttimes[i],
 				    0, NULL, NULL, NULL, 
 				    &xx, &zz, 
@@ -1146,7 +1149,7 @@ and stdout.";
 				xx = -xx;
 			    bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
 			    bathalongtrack[i] = xx*sin(DTR*angles_forward[i]);
-			    bath[i] = zz;
+			    bath[i] = zz + depth_offset;
 			    
 			    /* apply static correction */
 			    if (nbath_corr == beams_bath)
