@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.5 1995-05-12 17:29:16 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.6 1995-09-18 22:42:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/05/12  17:29:16  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.4  1995/03/15  14:12:23  caress
  * Added macro for zeroing data and made it possible to
  * hold down keyboard flagging keys.
@@ -124,7 +128,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.5 1995-05-12 17:29:16 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.6 1995-09-18 22:42:44 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -2794,16 +2798,18 @@ int	*nplt;
 	jbeam_cen = beams_bath/2;    
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\n%d data records set for plotting (%d desired)\n",
+		fprintf(stderr,"\ndbg2       %d data records set for plotting (%d desired)\n",
 			nplot,plot_size);
 		for (i=0;i<nplot;i++)
-			fprintf(stderr,"%4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %10.3f\n",
+			{
+			fprintf(stderr,"dbg2       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %10.3f\n",
 				i,ping[i].id,ping[i].record,
 				ping[i].time_i[1],ping[i].time_i[2],
 				ping[i].time_i[0],ping[i].time_i[3],
 				ping[i].time_i[4],ping[i].time_i[5],
 				ping[i].time_i[6],
 				ping[i].bath[jbeam_cen]);
+			}
 		}
 
 	/* clear screen */
@@ -2987,7 +2993,6 @@ int	jbeam;
 				ping[iping].bath_x[jbeam]-2, 
 				ping[iping].bath_y[jbeam]-2, 4, 4, 
 				pixel_values[RED],XG_SOLIDLINE);
-
 		}
 
 	/* print output debug statements */
