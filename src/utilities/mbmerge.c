@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.2 1994-04-29 18:00:51 caress Exp $
+ *    $Id: mbmerge.c,v 4.3 1994-05-02 03:35:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/29  18:00:51  caress
+ * Added ability to read navigation in five different formats.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -59,7 +62,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.2 1994-04-29 18:00:51 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.3 1994-05-02 03:35:14 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -678,7 +681,8 @@ char **argv;
 			}
 
 		/* write some data */
-		if (error == MB_ERROR_NO_ERROR
+		if ((error == MB_ERROR_NO_ERROR 
+			&& (time_d >= ntime[0] && time_d <= ntime[nnav-1]))
 			|| kind == MB_DATA_COMMENT)
 			{
 			status = mb_put_all(verbose,ombio_ptr,
