@@ -23,7 +23,6 @@
 
 
 extern SurfDataInfo*      sapiToSurfData;
-extern SdaInfo*           sapiToSdaInfo;
 extern SurfSoundingData*  sapiToSdaBlock;
 extern Boolean            loadIntoMemory;
 
@@ -51,7 +50,7 @@ static SurfDescriptor defaultDescriptor =
  {FREEBEAMDESCR,                    0},
  {SIXATTDATA,                       0},
  {VENDORTEXT,                       0},
-#endif 
+#endif
  SDA_M,
  {SOUNDING,                         1},
  {CENTERPOSITION,                   1},
@@ -82,7 +81,7 @@ static SurfDescriptor defaultDescriptor =
  {NROF_RX_TVG_SETS,                 0},
  {NROF_TX_TVG_SETS,                 0},
  EOD_M
-};  
+};
 
 
 static SurfGlobalData defaultGlobalData =
@@ -138,6 +137,7 @@ static SurfMultiBeamAngleTable defaultAngleTable =
 
 static long createSDAs(void)
 {
+ SdaInfo*          sapiToSdaInfo;
  SurfSoundingData* toSdaBlock;
  size_t         sizeOfSdaBlock;
  u_long  nrSoundings,nrBeams;
@@ -153,7 +153,7 @@ static long createSDAs(void)
   free_SdaMemory(sapiToSurfData);
   return(-1);
  }
- sapiToSurfData->toSdaThread = 
+ sapiToSurfData->toSdaThread =
            (SurfSdaThread*)calloc((u_int)nrSoundings,sizeof(SurfSdaThread));
  if (sapiToSurfData->toSdaThread == NULL)
  {
@@ -213,28 +213,28 @@ long SAPI_createSurfBody(long nrSoundings,
   defaultDescriptor.sidescanData.nr = 1;
   defaultDescriptor.maxNrOfSidescanData.nr = maxNrSidescanSamplesPerSounding;
  }
-  
+
  sapiToSurfData = (SurfDataInfo*)calloc(1,sizeof(SurfDataInfo));
  if (sapiToSurfData == NULL)
  {
   if(errorprint != 0)
     fprintf(stderr,"SAPI-Error: Can't allocate sufficient memory' !\n");
   return((long)-1);
- } 
+ }
 
- sapiToSurfData->toDescriptor = 
+ sapiToSurfData->toDescriptor =
         (SurfDescriptor*)calloc(1,sizeof(SurfDescriptor));
- sapiToSurfData->toGlobalData = 
+ sapiToSurfData->toGlobalData =
         (SurfGlobalData*)calloc(1,sizeof(SurfGlobalData));
- sapiToSurfData->toStatistics = 
+ sapiToSurfData->toStatistics =
         (SurfStatistics*)calloc(1,sizeof(SurfStatistics));
- sapiToSurfData->toPosiSensors = 
+ sapiToSurfData->toPosiSensors =
         (SurfPositionSensorArray*)calloc(1,sizeof(SurfPositionSensorArray));
  sapiToSurfData->toTransducers =
         (SurfTransducerParameterTable*)calloc(1,sizeof(SurfTransducerParameterTable));
- sapiToSurfData->toFreeText = 
+ sapiToSurfData->toFreeText =
         (SurfFreeText*)calloc(1,SIZE_OF_FREE_TEXT_ARRAY(20));
- if(  (sapiToSurfData->toDescriptor == NULL) 
+ if(  (sapiToSurfData->toDescriptor == NULL)
    || (sapiToSurfData->toGlobalData == NULL)
    || (sapiToSurfData->toStatistics == NULL)
    || (sapiToSurfData->toPosiSensors == NULL)
@@ -243,44 +243,44 @@ long SAPI_createSurfBody(long nrSoundings,
  {
   if(errorprint != 0)
     fprintf(stderr,"SAPI-Error: Can't allocate sufficient memory' !\n");
-  freeSixBlocks(sapiToSurfData,0);  
+  freeSixBlocks(sapiToSurfData,0);
   return((long)-1);
  }
-       
+
  if(nrBeams != 0)
  {
-  sapiToSurfData->toAngleTables = 
+  sapiToSurfData->toAngleTables =
         (SurfMultiBeamAngleTable*)calloc(1,(size_t)SIZE_OF_SURF_MULTIBEAM_ANGLE_TAB((u_int)nrBeams));
   if(sapiToSurfData->toAngleTables == NULL)
   {
    if(errorprint != 0)
     fprintf(stderr,"SAPI-Error: Can't allocate sufficient memory' !\n");
-   freeSixBlocks(sapiToSurfData,0);  
+   freeSixBlocks(sapiToSurfData,0);
    return((long)-1);
   }
-  *(sapiToSurfData->toAngleTables) = defaultAngleTable;      
- } 
+  *(sapiToSurfData->toAngleTables) = defaultAngleTable;
+ }
 
  *(sapiToSurfData->toDescriptor) = defaultDescriptor;
  *(sapiToSurfData->toGlobalData) = defaultGlobalData;
  *(sapiToSurfData->toStatistics) = defaultStatistics;
  *(sapiToSurfData->toPosiSensors)= defaultPositionSensorArray;
  *(sapiToSurfData->toTransducers)= defaultTransducerTable;
- 
+
  checkAndLoadSurfDescriptor(sapiToSurfData->toDescriptor,sapiToSurfData);
 
  if(createSDAs()<0)
  {
   if(errorprint != 0)
     fprintf(stderr,"SAPI-Error: Can't allocate sufficient memory' !\n");
-  freeSixBlocks(sapiToSurfData,0);  
+  freeSixBlocks(sapiToSurfData,0);
   return((long)-1);
  }
 
  surf_moveInSdaThread(sapiToSurfData,TO_START,0);
 
  loadIntoMemory = True;
- 
+
  return((long)0);
 }
 

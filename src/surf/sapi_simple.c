@@ -24,7 +24,6 @@
 
 
 extern SurfDataInfo*      sapiToSurfData;
-extern SdaInfo*           sapiToSdaInfo;
 extern SurfSoundingData*  sapiToSdaBlock;
 
 
@@ -36,7 +35,9 @@ long SAPI_getXYZfromMultibeamSounding(long beam,long depthOverChartZero,
  double posX,posY,heading,posAhead,posAstar,refPosX,refPosY;
  double myDepth,dynChartZero,chartZero;
  double cosHeading,sinHeading,xM,yM;
+ SdaInfo* sapiToSdaInfo = NULL;
 
+ if(sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
  if(sapiToSdaInfo == NULL) return(-1);
  if(sapiToSdaInfo->toMultiBeamDepth == NULL) return(-1);
  if((beam >= 0) && (beam<SAPI_getNrBeams()))
@@ -45,27 +46,27 @@ long SAPI_getXYZfromMultibeamSounding(long beam,long depthOverChartZero,
   if((soundingFlag & SF_DELETED) != 0) return(-1);
   beamFlag = (u_short)sapiToSdaInfo->toMultiBeamDepth[beam].depthFlag;
   if((beamFlag & (SB_DELETED+SB_DEPTH_SUPPRESSED+SB_REDUCED_FAN)) != 0) return(-1);
-  
+
   myDepth = (double)sapiToSdaInfo->toMultiBeamDepth[beam].depth;
-  posAhead = (double)sapiToSdaInfo->toMultiBeamDepth[beam].beamPositionAhead; 
+  posAhead = (double)sapiToSdaInfo->toMultiBeamDepth[beam].beamPositionAhead;
   posAstar = (double)sapiToSdaInfo->toMultiBeamDepth[beam].beamPositionStar;
   if(depthOverChartZero != 0)
   {
    chartZero = (double)sapiToSurfData->toGlobalData->chartZero;
    dynChartZero = (double)sapiToSdaInfo->toSoundings->dynChartZero;
-   myDepth = myDepth + chartZero + dynChartZero; 
-  }         
+   myDepth = myDepth + chartZero + dynChartZero;
+  }
   heading = (double)sapiToSdaInfo->toSoundings->headingWhileTransmitting;
   refPosX = sapiToSurfData->toGlobalData->referenceOfPositionX;
   refPosY = sapiToSurfData->toGlobalData->referenceOfPositionY;
-       
-  posX = (double)sapiToSdaInfo->toCenterPositions[0].centerPositionX + refPosX;     
-  posY = (double)sapiToSdaInfo->toCenterPositions[0].centerPositionY + refPosY; 
-            
-  cosHeading = cos(heading); 
-  sinHeading = sin(heading); 
+
+  posX = (double)sapiToSdaInfo->toCenterPositions[0].centerPositionX + refPosX;
+  posY = (double)sapiToSdaInfo->toCenterPositions[0].centerPositionY + refPosY;
+
+  cosHeading = cos(heading);
+  sinHeading = sin(heading);
   xM = (posAhead*sinHeading) + (posAstar * cosHeading);
-  yM = (posAhead*cosHeading) - (posAstar * sinHeading); 
+  yM = (posAhead*cosHeading) - (posAstar * sinHeading);
   if(SAPI_posPresentationIsRad() != 0) /* rad-Presentation */
   {
    yM = M_TO_RAD_Y(yM);
@@ -76,7 +77,7 @@ long SAPI_getXYZfromMultibeamSounding(long beam,long depthOverChartZero,
   *depth  = myDepth;
   return(0);
  }
- return(-1); 
+ return(-1);
 }
 
 
@@ -88,7 +89,9 @@ static long SAPI_getXYZfromSinglebeamSounding(char layer,long depthOverChartZero
  u_short soundingFlag,beamFlag;
  double posX,posY,refPosX,refPosY;
  double myDepth,dynChartZero,chartZero;
+ SdaInfo* sapiToSdaInfo = NULL;
 
+ if(sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
  if(sapiToSdaInfo == NULL) return(-1);
  if(sapiToSdaInfo->toSingleBeamDepth == NULL) return(-1);
 
@@ -110,20 +113,20 @@ static long SAPI_getXYZfromSinglebeamSounding(char layer,long depthOverChartZero
         break;
   default:
         myDepth = 0.0;
-        break;      
- } 
+        break;
+ }
  if(depthOverChartZero != 0)
  {
   chartZero = (double)sapiToSurfData->toGlobalData->chartZero;
   dynChartZero = (double)sapiToSdaInfo->toSoundings->dynChartZero;
-  myDepth = myDepth + chartZero + dynChartZero; 
- }         
+  myDepth = myDepth + chartZero + dynChartZero;
+ }
  refPosX = sapiToSurfData->toGlobalData->referenceOfPositionX;
  refPosY = sapiToSurfData->toGlobalData->referenceOfPositionY;
-      
- posX = (double)sapiToSdaInfo->toCenterPositions[0].centerPositionX + refPosX;     
- posY = (double)sapiToSdaInfo->toCenterPositions[0].centerPositionY + refPosY; 
-           
+
+ posX = (double)sapiToSdaInfo->toCenterPositions[0].centerPositionX + refPosX;
+ posY = (double)sapiToSdaInfo->toCenterPositions[0].centerPositionY + refPosY;
+
  *east  = posX;
  *north  = posY;
  *depth  = myDepth;
@@ -134,6 +137,9 @@ static long SAPI_getXYZfromSinglebeamSounding(char layer,long depthOverChartZero
 long SAPI_getXYZfromSinglebeamSoundingHF(long depthOverChartZero,
                                          double* north,double* east,double* depth)
 {
+ SdaInfo* sapiToSdaInfo = NULL;
+
+ if(sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
  if(sapiToSdaInfo == NULL) return(-1);
  if(SAPI_dataHaveHighFrequencyLayer()==0) return(-1);
  return(SAPI_getXYZfromSinglebeamSounding('H',depthOverChartZero,north,east,depth));
@@ -143,6 +149,9 @@ long SAPI_getXYZfromSinglebeamSoundingHF(long depthOverChartZero,
 long SAPI_getXYZfromSinglebeamSoundingMF(long depthOverChartZero,
                                          double* north,double* east,double* depth)
 {
+ SdaInfo* sapiToSdaInfo = NULL;
+
+ if(sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
  if(sapiToSdaInfo == NULL) return(-1);
  if(SAPI_dataHaveMediumFrequencyLayer()==0) return(-1);
  return(SAPI_getXYZfromSinglebeamSounding('M',depthOverChartZero,north,east,depth));
@@ -152,6 +161,9 @@ long SAPI_getXYZfromSinglebeamSoundingMF(long depthOverChartZero,
 long SAPI_getXYZfromSinglebeamSoundingLF(long depthOverChartZero,
                                          double* north,double* east,double* depth)
 {
+ SdaInfo* sapiToSdaInfo = NULL;
+
+ if(sapiToSurfData != NULL) sapiToSdaInfo = sapiToSurfData->toSdaInfo;
  if(sapiToSdaInfo == NULL) return(-1);
  if(SAPI_dataHaveLowFrequencyLayer()==0) return(-1);
  return(SAPI_getXYZfromSinglebeamSounding('L',depthOverChartZero,north,east,depth));

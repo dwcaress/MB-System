@@ -2,7 +2,7 @@
 / H E A D E R K O P F
 / ------------------------------------------------------------------------
 / ------------------------------------------------------------------------
-/  DATEINAME        : sapi.h 
+/  DATEINAME        : sapi.h
 /  ERSTELLUNGSDATUM : 21.05.96
 / ----------------------------------------------------------------------*/
 /*!
@@ -59,21 +59,21 @@
    That means scalings are METER,SECONDS,RAD
    or derivates ..[m/sec],[1/sec]=[Hz]...
 
-   -Relative Times are related to the profile starttime   
+   -Relative Times are related to the profile starttime
    -Relative Ways are related to the profile startposition
    -All Positions are relative to the positionreference
    -Positions are scaled either in [m] or [rad] according to
-    the presentationOfPosition-dataentry   
+    the presentationOfPosition-dataentry
    -Centerpositions are given for a virtual Shipreferencepoint
     (should be the "ship's turning point")
    -Positions in the Shipcoordinatesystem (ahead,astar) are
     also related to this point and scaled in [m]
-    
+
    time/date-sets are presented in ASCII-Characters
       DDMMYYHHMMSS.NN<0x0>
 
-   name-strings and Label-strings are presented in 
-   c-string-annotation    ABCDEFG<0x0> 
+   name-strings and Label-strings are presented in
+   c-string-annotation    ABCDEFG<0x0>
 
 */
 
@@ -94,7 +94,7 @@
 /* SURF-dataset "Globaldata" */
 
   /* Values of 'typeOfSounder' */
-  
+
 #define MANUAL_DATA              'M'
 #define DIGITIZED_DATA           'D'
 #define VERTICAL_SOUNDER         'V'
@@ -102,7 +102,7 @@
 #define FAN_TYPE_SOUNDER         'F'
 
   /* Values of 'presentationOfPosition' */
-  
+
 #define EASTING_NORTHING         'E' /* Values are scaled in [rad] */
 #define X_Y                      'X' /* Values are scaled in [m]   */
 
@@ -130,7 +130,7 @@ typedef struct
               char    numberOfProfile           [STRING_SIZE];
               float   chartZero                              ;  /* rel. NN*/
               float   tideZero                               ;  /* rel. NN*/
-              u_long  numberOfMeasuredSoundings              ;  
+              u_long  numberOfMeasuredSoundings              ;
               u_long  actualNumberOfSoundingSets             ;
               char    timeDateOfTideModification  [TIME_SIZE];
               char    timeDateOfDepthModification [TIME_SIZE];
@@ -206,7 +206,7 @@ typedef struct
               float   maxBeamPositionAhead           ;
               float   minDepth                       ;
               float   maxDepth                       ;
-            } SurfStatistics;  
+            } SurfStatistics;
 
 
 
@@ -223,7 +223,7 @@ typedef struct
               char    positionSensorName         [STRING_SIZE];
               char    sensorUnion                 [UNION_SIZE];
             } SurfPositionSensorArray;
-              
+
 
     /*  Now special Sensors */
 
@@ -257,7 +257,7 @@ typedef struct
               float   polarfixAntennaPositionStar             ;
               float   polarfixAntennaPositionHeight           ;
             } SurfPositionPolarfix;
-              
+
     /*  other overlayed Sets */
 
 #define UNKNOWNPOSSENS   "UNKNOWN"
@@ -292,7 +292,7 @@ typedef struct
               float   sensorAntennaPositionStar               ;
               float   sensorAntennaPositionHeight             ;
             } SurfPositionAnySensor;
-              
+
 
 
 
@@ -325,7 +325,7 @@ typedef struct
               float   transducerTwoThetaMFreq        ;
               float   transducerTwoThetaLFreq        ;
             } SurfTransducerParameterTable;
-              
+
 
 
 
@@ -338,9 +338,9 @@ typedef struct
 typedef struct
             {
                float  depth                          ;
-               float  cValue                         ; 
+               float  cValue                         ;
             } CProfileValues;
-              
+
 
 typedef struct
             {
@@ -353,7 +353,7 @@ typedef struct
 
 
 
-/* SURF-dataset "Polygon" */          
+/* SURF-dataset "Polygon" */
 
 #define SURF_POLYGONS_LABEL "POLYGON"
 
@@ -369,12 +369,12 @@ typedef struct
               SurfPolygonValues values            [1]; /*numberOfPolygons times*/
             } SurfPolygons;
 
-              
 
 
 
 
-/* SURF-dataset "Events " */          
+
+/* SURF-dataset "Events " */
 
 #define SURF_EVENT_LABEL "EVENTS"
 #define EVENT_SIZE 84
@@ -391,13 +391,13 @@ typedef struct
             {
               char              label    [LABEL_SIZE];
               SurfEventValues   values            [1];
-            } SurfEvents;   
+            } SurfEvents;
 
 
 
 
 
-/* SURF-dataset "Free Text " */          
+/* SURF-dataset "Free Text " */
 
 #define SURF_FREE_TEXT_LABEL "FREETEXT"
 #define FREE_TEXT_BLOCK_SIZE        4
@@ -411,7 +411,7 @@ typedef struct
             {
               char              label    [LABEL_SIZE];
               SurfFreeTextBlocks blocks[1]; /* nrFreeTextBlocks times*/
-            } SurfFreeText;   
+            } SurfFreeText;
 
 
 
@@ -422,14 +422,14 @@ typedef struct
 /* SURF-elements describing SDA-files  */
 /*                                     */
 /***************************************/
-              
+
 
 
 
 /* SURF-dataset "Sounding-Data" */
 
   /* soundingFlag */
-  
+
 #define SF_DELETED                 1
 #define SF_COURSE_MANIPULATED      2
 #define SF_HEAVE_MANIPULATED       4
@@ -442,7 +442,7 @@ typedef struct
 #define SF_FAN_PAT_3            1024 /* 0 = norm.fan; 1 = ahead fan */
 
 
-  
+
 typedef struct
             {
               u_short soundingFlag                   ;
@@ -459,14 +459,14 @@ typedef struct
               float   cKeel                          ;
               float   cMean                          ;
               float   dynChartZero                   ;
-            } SurfSoundingData;  
+            } SurfSoundingData;
 
-             
-  /* positionFlag 
-  
+
+  /* positionFlag
+
      no entries yet*/
-  
-  
+
+
 
 
 /* SURF-dataset "Center-Position" */
@@ -478,7 +478,7 @@ typedef struct
               float   centerPositionY                ;
               float   speed                          ;
             } SurfCenterPosition;
-              
+
 
 
 
@@ -508,7 +508,7 @@ typedef struct
               float   depthMFreq                     ;
               float   depthLFreq                     ;
             } SurfSingleBeamDepth;
-              
+
 
 
 
@@ -521,7 +521,7 @@ typedef struct
               float   beamPositionAhead              ;
               float   beamPositionStar               ;
             } SurfMultiBeamDepth;
-              
+
 
 
 
@@ -531,7 +531,7 @@ typedef struct
             {
               float   travelTimeOfRay                ;
             } SurfMultiBeamTT;
-              
+
 
 
 
@@ -542,21 +542,21 @@ typedef struct
               float   headingWhileReceiving          ;
               float   heaveWhileReceiving            ;
             } SurfMultiBeamReceive;
-              
 
 
 
-/* SURF-dataset "Beam-Amplitudes" */ 
+
+/* SURF-dataset "Beam-Amplitudes" */
 
 typedef struct
-            { 
+            {
               u_short beamAmplitude                  ;
             } SurfAmplitudes;
-              
 
 
 
-/* SURF-dataset "Extended-Beam-Amplitudes" */   
+
+/* SURF-dataset "Extended-Beam-Amplitudes" */
 
 typedef struct
             {
@@ -564,11 +564,11 @@ typedef struct
               u_short nis                            ;
               u_short beamAmplitude                  ;
             } SurfExtendedAmplitudes;
-              
 
 
 
-/* SURF-dataset "RxSignalparameter" */   
+
+/* SURF-dataset "RxSignalparameter" */
 
 typedef struct
             {
@@ -577,7 +577,7 @@ typedef struct
             }TvgRxSets;
 
 typedef struct
-            { 
+            {
              u_short bscatClass                     ;/* neu V2.2 */
              u_short nrActualGainSets               ;
              float   rxGup                          ;
@@ -589,7 +589,7 @@ typedef struct
 
 
 
-/* SURF-dataset "TxSignalparameter" */   
+/* SURF-dataset "TxSignalparameter" */
 
 typedef struct
             {
@@ -600,7 +600,7 @@ typedef struct
             }TxSets;
 
 typedef struct
-            { 
+            {
              TxSets  txSets[1]                      ;
             } SurfTxParameter;
 
@@ -622,7 +622,7 @@ typedef struct
                                                          first Port then Stb */
             } SurfSidescanData;
 
-              
+
 #endif /* ifndef __SAPI__ */
 
 
@@ -688,7 +688,7 @@ extern SurfMultiBeamReceive*         SAPI_getMultiBeamReceiveParams(long beam);
 SurfAmplitudes*                      SAPI_getMultibeamBeamAmplitudes(long beam);
 SurfExtendedAmplitudes*              SAPI_getMultibeamExtendedBeamAmplitudes(long beam);
 SurfSignalParameter*                 SAPI_getMultibeamSignalParameters(void);
-SurfTxParameter*                     SAPI_getMultibeamTransmitterParameters(void);
+SurfTxParameter*                     SAPI_getMultibeamTransmitterParameters(int *nTxParams);
 SurfSidescanData*                    SAPI_getSidescanData(void);
 
 
@@ -703,14 +703,14 @@ extern long SAPI_getXYZfromMultibeamSounding(long nrBeam,long depthOverChartZero
 
   /* different Frequencylayers may be stored in one profile of vertical sounders */
                     /* LF < 15kHz < MF < 70 kHz < HF */
-                    
+
 extern long SAPI_getXYZfromSinglebeamSoundingHF(long depthOverChartZero,
                                              double* north,double* east,double* depth);
 extern long SAPI_getXYZfromSinglebeamSoundingMF(long depthOverChartZero,
                                              double* north,double* east,double* depth);
 extern long SAPI_getXYZfromSinglebeamSoundingLF(long depthOverChartZero,
                                              double* north,double* east,double* depth);
-                                                                               
+
 
 #endif /* ifndef _SAPI */
 

@@ -795,7 +795,7 @@ XdrSurf mem_ReadSixStructure(char* filename,
 
 static size_t align64(size_t size)
 {
- return( (size_t) (((size/8)+1)*8) );
+ return( (size_t) ( ((int) ((size+7)/8))*8 ) );
 }
 
 /* calculate the sizes within a SDA-Block */
