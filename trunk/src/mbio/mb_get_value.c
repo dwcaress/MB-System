@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	3.00	2/15/93
- *    $Id: mb_get_value.c,v 3.0 1993-04-23 16:00:04 dale Exp $
+ *    $Id: mb_get_value.c,v 3.1 1993-05-14 22:27:02 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  16:00:04  dale
+ * Inital version
+ *
  */
 
 /* standard include files */
@@ -37,7 +40,7 @@ double *value;
 char *str;
 int nchar;
 {
-  char rcs_id[]="$Id";
+  static char rcs_id[]="$Id: mb_get_value.c,v 3.1 1993-05-14 22:27:02 sohara Exp $";
 	char	tmp[MB_GET_VALUE_MAXLINE];
 	strncpy(tmp,"\0",sizeof(tmp));
 	*value = 0.0;
@@ -52,7 +55,7 @@ int *value;
 char *str;
 int nchar;
 {
-  char rcs_id[]="$Id: mb_get_value.c,v 3.0 1993-04-23 16:00:04 dale Exp $";
+  char rcs_id[]="$Id: mb_get_value.c,v 3.1 1993-05-14 22:27:02 sohara Exp $";
 	char	tmp[MB_GET_VALUE_MAXLINE];
 	strncpy(tmp,"\0",sizeof(tmp));
 	*value = atoi(strncpy(tmp,str,nchar));

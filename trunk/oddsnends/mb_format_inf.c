@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format_inf.c	3.00	1/21/93
- *    $Id: mb_format_inf.c,v 3.0 1993-04-23 15:52:35 dale Exp $
+ *    $Id: mb_format_inf.c,v 3.1 1993-05-14 22:34:46 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  15:52:35  dale
+ * Initial version
+ *
  */
 
 /* standard include files */
@@ -35,7 +38,7 @@ int	verbose;
 int	format;
 char	**message;
 {
-  char rcs_id[]="$Id: mb_format_inf.c,v 3.0 1993-04-23 15:52:35 dale Exp $";
+  static char rcs_id[]="$Id: mb_format_inf.c,v 3.1 1993-05-14 22:34:46 sohara Exp $";
 	char	*function_name = "mb_format_inf";
 	int	status;
 

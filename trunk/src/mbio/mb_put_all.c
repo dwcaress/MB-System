@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	3.00	2/4/93
- *    $Id: mb_put_all.c,v 3.0 1993-04-23 18:21:17 dale Exp $
+ *    $Id: mb_put_all.c,v 3.1 1993-05-14 22:37:56 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  18:21:17  dale
+ * Initial version
+ *
  *
  */
 
@@ -60,7 +63,7 @@ int	*backdist;
 char	*comment;
 int	*error;
 {
-  char rcs_id[]="$Id: mb_put_all.c,v 3.0 1993-04-23 18:21:17 dale Exp $";
+  static char rcs_id[]="$Id: mb_put_all.c,v 3.1 1993-05-14 22:37:56 sohara Exp $";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

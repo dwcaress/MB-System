@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	3.00	1/21/93
- *    $Id: mb_defaults.c,v 3.0 1993-04-23 15:46:59 dale Exp $
+ *    $Id: mb_defaults.c,v 3.1 1993-05-14 22:33:05 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  15:46:59  dale
+ * Initial version
+ *
  */
 
 /* standard include files */
@@ -43,7 +46,7 @@ int *etime_i;
 double *speedmin;
 double *timegap;
 {
-  char rcs_id[]="$Id: mb_defaults.c,v 3.0 1993-04-23 15:46:59 dale Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 3.1 1993-05-14 22:33:05 sohara Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;

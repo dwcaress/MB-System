@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	3.00	2/2/93
- *    $Id: mb_error.c,v 3.0 1993-04-23 15:48:29 dale Exp $
+ *    $Id: mb_error.c,v 3.1 1993-05-14 22:33:34 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	February 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  15:48:29  dale
+ * Initial version
+ *
  */
 
 /* standard include files */
@@ -34,7 +37,7 @@ int	verbose;
 int	error;
 char	**message;
 {
-  char rcs_id[]="$Id: mb_error.c,v 3.0 1993-04-23 15:48:29 dale Exp $";
+  static char rcs_id[]="$Id: mb_error.c,v 3.1 1993-05-14 22:33:34 sohara Exp $";
 	char	*function_name = "mb_error";
 	int	status;
 
