@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.11 2002-10-04 21:22:02 caress Exp $
+ *    $Id: mbmosaic.c,v 5.12 2002-11-04 21:26:55 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/10/04 21:22:02  caress
+ * Now resets lonflip to specified bounds. Release 5.0.beta24.
+ *
  * Revision 5.10  2002/10/02 23:56:06  caress
  * Release 5.0.beta24
  *
@@ -147,7 +150,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.11 2002-10-04 21:22:02 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.12 2002-11-04 21:26:55 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -2338,6 +2341,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		mb_free(verbose,&priority_angle_angle,&error); 
 		mb_free(verbose,&priority_angle_priority,&error); 
 		}
+
+	/* deallocate projection */
+	if (use_projection == MB_YES)
+		proj_status = mb_proj_free(verbose, &(pjptr), &error);
 		
 	/* run mbm_grdplot */
 	if (gridkind == MBMOSAIC_CDFGRD)
