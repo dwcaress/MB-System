@@ -74,10 +74,10 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /* global mbview variables */
 Widget mainWindow;
 
-static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.3 2005-02-08 22:37:40 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.4 2005-02-10 02:50:00 caress Exp $";
 static char program_name[] = "MBgrdviz";
-static char help_message[] =  "MBgrdviz is a simple vizualization demo for GMT grd files.";
-static char usage_message[] = "mbgrdviz [-Igrdfile -V -H]";
+static char help_message[] =  "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
+static char usage_message[] = "mbgrdviz [-Igrdfile -T -V -H]";
 char	ifile[MB_PATH_MAXLINE];
 
 /* parsing variables */
@@ -194,6 +194,14 @@ int main( int argc, char **argv)
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
 		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
+		}
+
+	/* print starting message */
+	if (help)
+		{
+		fprintf(stderr,"\n%s\n\nUsage: %s\n", help_message, usage_message);
+		error = MB_ERROR_NO_ERROR;
+		exit(error);
 		}
     
     /* End user code block <declarations> */
