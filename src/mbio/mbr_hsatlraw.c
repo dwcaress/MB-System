@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.4 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.5 1995-03-08 13:31:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.3  1995/02/22  21:55:10  caress
  * Fixed reading of amplitude data from existing data.
  *
@@ -77,7 +80,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.4 1995-03-06 19:38:54 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.5 1995-03-08 13:31:09 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -492,6 +495,8 @@ int	*error;
 				= data->depth_scale*data->distance[i];
 			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 			}
+		mb_io_ptr->new_bath[29] = data->depth_center;
+		mb_io_ptr->new_bath_acrosstrack[29] = 0.0;
 
 		/* process beam amplitudes */
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
@@ -852,12 +857,14 @@ int	*error;
 			data->distance[i] 
 				= scalefactor*mb_io_ptr->new_bath_acrosstrack[i];
 			}
+		data->depth_center = mb_io_ptr->new_bath[29];
 
 		/* add some plausible amounts for some of the 
 			variables in the HSATLRAW record */
 		data->speed_reference[0] = 'B';	/* assume speed over ground */
 		data->depth_center = data->depth[mb_io_ptr->beams_bath/2];
-		data->depth_scale = 1.0;	/* this is a unit scale factor */
+		if (data->depth_scale <= 0.0)
+			data->depth_scale = 1.0;	/* this is a unit scale factor */
 		data->spare = 1;
 		}
 
@@ -1566,8 +1573,14 @@ int	*error;
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->distance[i+30]),line+i*4+2+shift,4);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from second data record */
@@ -1575,8 +1588,14 @@ int	*error;
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->depth[i+30]),line+i*4+2+shift,4);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from third data record */
@@ -1584,10 +1603,16 @@ int	*error;
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			{
 			mb_get_int(&(data->distance[28-i]),line+i*4+2+shift,4);
 			data->distance[28-i] = -data->distance[28-i];
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 		}
 
@@ -1596,8 +1621,14 @@ int	*error;
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->depth[28-i]),line+i*4+2+shift,4);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* print debug statements */
@@ -1713,42 +1744,75 @@ int	*error;
 		}
 
 	/* read and parse data from first data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
-		== MB_SUCCESS)
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
+		shift+7,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->distance[i+30]),line+i*4+2+shift,4);
+		if (numvals == 29)
+			for (i=0;i<numvals;i++)
+				mb_get_int(&(data->distance[i+30]),
+					line+i*4+2+shift,4);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from second data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
-		== MB_SUCCESS)
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
+		shift+7,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->depth[i+30]),line+i*4+2+shift,4);
+		if (numvals == 29)
+			for (i=0;i<numvals;i++)
+				{
+				mb_get_int(&(data->depth[i+30]),
+					line+i*4+2+shift,4);
+				}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from third data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
-		== MB_SUCCESS)
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
+		shift+7,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
-		for (i=0;i<numvals;i++)
+		if (numvals == 29)
+			for (i=0;i<numvals;i++)
+				{
+				mb_get_int(&(data->distance[28-i]),
+					line+i*4+2+shift,4);
+				data->distance[28-i] = 
+					-data->distance[28-i];
+				}
+		else
 			{
-			mb_get_int(&(data->distance[28-i]),line+i*4+2+shift,4);
-			data->distance[28-i] = -data->distance[28-i];
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 		}
 
 	/* read and parse data from fourth data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
-		== MB_SUCCESS)
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
+		shift+7,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->depth[28-i]),line+i*4+2+shift,4);
+		if (numvals == 29)
+			for (i=0;i<numvals;i++)
+				{
+				mb_get_int(&(data->depth[28-i]),
+					line+i*4+2+shift,4);
+				}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* print debug statements */
@@ -1865,8 +1929,14 @@ int	*error;
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->time[i+30]),line+i*4+2+shift,4);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from second data record */
@@ -1874,8 +1944,14 @@ int	*error;
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->time[28-i]),line+i*4+2+shift,4);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from third data record */
@@ -2122,9 +2198,15 @@ int	*error;
 		for (i=0;i<8;i++)
 			mb_get_int(&(data->gain[i+8]),line+i+shift,1);
 		mb_get_int(&numvals,line+8+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->amplitude[i+30]),
 				line+i*3+10+shift,3);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from second data record */
@@ -2134,9 +2216,15 @@ int	*error;
 		for (i=0;i<8;i++)
 			mb_get_int(&(data->gain[i]),line+i+shift,1);
 		mb_get_int(&numvals,line+8+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->amplitude[28-i]),
 				line+i*3+10+shift,3);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from third data record */
@@ -2146,9 +2234,15 @@ int	*error;
 		for (i=0;i<8;i++)
 			mb_get_int(&(data->echo_scale[i+8]),line+1+shift,1);
 		mb_get_int(&numvals,line+8+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->echo_duration[i+30]),
 				line+i*3+10+shift,3);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read and parse data from fourth data record */
@@ -2158,9 +2252,15 @@ int	*error;
 		for (i=0;i<8;i++)
 			mb_get_int(&(data->echo_scale[i]),line+1+shift,1);
 		mb_get_int(&numvals,line+8+shift,2);
+		if (numvals == 29)
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->echo_duration[28-i]),
 				line+i*3+10+shift,3);
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* print debug statements */
