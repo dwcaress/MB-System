@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.14 2001-11-04 00:14:41 caress Exp $
+ *    $Id: mb_process.c,v 5.15 2001-11-16 01:30:02 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2001/11/04  00:14:41  caress
+ * Fixed handling of angle_mode
+ *
  * Revision 5.13  2001/10/19 19:41:09  caress
  * Now uses relative paths.
  *
@@ -92,7 +95,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.14 2001-11-04 00:14:41 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.15 2001-11-16 01:30:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -106,8 +109,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	int	format;
 	FILE	*fp;
 	int	stat_status;
-	struct stat statbuf;
+	struct	stat statbuf;
 	int	status = MB_SUCCESS;
+	int	len;
 	int	explicit;
 	int	i;
 
@@ -776,15 +780,37 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    
 	    }
 	    
-	/* reset input file */
-	strcpy(process->mbp_ifile, file);
+	/* Now make input file global if local */
 	process->mbp_ifile_specified = MB_YES;
+	if (file[0] != '/')
+	    {
+	    getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
+	    strcat(process->mbp_ifile, "/");
+	    strcat(process->mbp_ifile, file);
+	    }
+	else
+	    strcpy(process->mbp_ifile, file);
+	mb_get_shortest_path(verbose, process->mbp_ifile, error);
 	    
 	/* figure out data format or output filename if required */
 	if (process->mbp_format_specified == MB_NO
 	    || process->mbp_ofile_specified == MB_NO)
 	    {
 	    mb_pr_default_output(verbose, process, error);
+	    }
+	    
+	/* Make output file global if local */
+	if (process->mbp_ofile[0] != '/')
+	    {
+	    lastslash = strrchr(process->mbp_ifile, '/');
+	    if (lastslash != NULL)
+		{
+		strcpy(dummy, process->mbp_ofile);
+		strcpy(process->mbp_ofile, process->mbp_ifile);
+		process->mbp_ofile[strlen(process->mbp_ifile) - strlen(lastslash)] = '\0';
+		strcat(process->mbp_ofile, "/");
+		strcat(process->mbp_ofile, dummy);
+		}
 	    }
 	    
 	/* update bathymetry recalculation mode */
@@ -841,7 +867,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    {
 	    /* reset output file */
 	    process->mbp_ofile_specified = MB_NO;
-	    mb_pr_default_output(5, process, error);
+	    mb_pr_default_output(verbose, process, error);
 
 	    /* reset navadj file */
 	    if ((lastslash = strrchr(process->mbp_navadjfile, '/')) != NULL
@@ -867,6 +893,61 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		strcpy(process->mbp_editfile, dummy);
 		}
 	    }
+	    
+	/* Now make filenames global if local */
+	lastslash = strrchr(process->mbp_ifile, '/');
+	len = lastslash - process->mbp_ifile + 1;
+
+	/* reset navadj file */
+	if (len > 1
+	    && strlen(process->mbp_navadjfile) > 1
+	    && process->mbp_navadjfile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_navadjfile);
+	    strncpy(process->mbp_navadjfile, process->mbp_ifile, len);
+	    process->mbp_navadjfile[len] = '\0';
+	    strcat(process->mbp_navadjfile, dummy);
+	    }
+
+	/* reset nav file */
+	if (len > 1
+	    && strlen(process->mbp_navfile) > 1
+	    && process->mbp_navfile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_navfile);
+	    strncpy(process->mbp_navfile, process->mbp_ifile, len);
+	    process->mbp_navfile[len] = '\0';
+	    strcat(process->mbp_navfile, dummy);
+	    }
+
+	/* reset svp file */
+	if (len > 1
+	    && strlen(process->mbp_svpfile) > 1
+	    && process->mbp_svpfile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_svpfile);
+	    strncpy(process->mbp_svpfile, process->mbp_ifile, len);
+	    process->mbp_svpfile[len] = '\0';
+	    strcat(process->mbp_svpfile, dummy);
+	    }
+
+	/* reset edit file */
+	if (len > 1
+	    && strlen(process->mbp_editfile) > 1
+	    && process->mbp_editfile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_editfile);
+	    strncpy(process->mbp_editfile, process->mbp_ifile, len);
+	    process->mbp_editfile[len] = '\0';
+	    strcat(process->mbp_editfile, dummy);
+	    }
+	    
+	/* make sure all global paths are as short as possible */
+	mb_get_shortest_path(verbose, process->mbp_navadjfile, error);
+	mb_get_shortest_path(verbose, process->mbp_navfile, error);
+	mb_get_shortest_path(verbose, process->mbp_svpfile, error);
+	mb_get_shortest_path(verbose, process->mbp_editfile, error);
+
 	    
 	/* check for error */
 	if (process->mbp_ifile_specified == MB_NO
@@ -1000,6 +1081,7 @@ int mb_pr_writepar(int verbose, char *file,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
+		fprintf(stderr,"dbg2       file:      %s\n",file);
 		fprintf(stderr,"dbg2       process:   %d\n",process);
 		fprintf(stderr,"dbg2       mbp_ifile_specified:    %d\n",process->mbp_ifile_specified);
 		fprintf(stderr,"dbg2       mbp_ifile:              %s\n",process->mbp_ifile);
@@ -1092,15 +1174,26 @@ int mb_pr_writepar(int verbose, char *file,
 		}
 		
 	/* try to avoid absolute pathnames - get pwd */
-	if (file[0] != '/')
-	    {
-	    getcwd(pwd, MB_PATH_MAXLINE);
-	    }
-	else if ((lastslash = strrchr(file, '/')) != NULL)
+	lastslash = strrchr(file, '/');
+	if (file[0] == '/')
 	    {
 	    strcpy(pwd, file);
 	    pwd[strlen(file) - strlen(lastslash)] = '\0';
+	    strcpy(process->mbp_ifile, &lastslash[1]);
 	    }
+	else
+	    {
+	    getcwd(pwd, MB_PATH_MAXLINE);
+	    if (lastslash != NULL)
+		{
+		strcpy(process->mbp_ifile, &lastslash[1]);
+		strcat(pwd, "/");
+		strcat(pwd, file);
+		lastslash = strrchr(pwd, '/');
+		pwd[strlen(pwd) - strlen(lastslash)] = '\0';
+		}
+	    }
+	mb_get_shortest_path(verbose, pwd, error);
 	
 	/* try to make all pathnames relative */
 	status = mb_get_relative_path(verbose, process->mbp_ifile, pwd, error);
@@ -1377,6 +1470,10 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
 		fprintf(stderr,"dbg2       process:   %d\n",process);
+		fprintf(stderr,"dbg2       mbp_ifile_specified: %d\n",process->mbp_ifile_specified);
+		fprintf(stderr,"dbg2       mbp_ifile:           %s\n",process->mbp_ifile);
+		fprintf(stderr,"dbg2       mbp_format_specified:%d\n",process->mbp_format_specified);
+		fprintf(stderr,"dbg2       mbp_format:          %d\n",process->mbp_format);
 		}
    
 	/* figure out data format and fileroot if possible */
@@ -1424,6 +1521,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       mbp_ofile_specified: %d\n",process->mbp_ofile_specified);
 		fprintf(stderr,"dbg2       mbp_ofile:           %s\n",process->mbp_ofile);
+		fprintf(stderr,"dbg2       mbp_format_specified:%d\n",process->mbp_format_specified);
 		fprintf(stderr,"dbg2       mbp_format:          %d\n",process->mbp_format);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
