@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
- *	$Id: mbsys_hsds.c,v 4.6 1995-07-13 19:13:36 caress Exp $
+ *	$Id: mbsys_hsds.c,v 4.7 1995-07-26 14:45:39 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,11 +27,9 @@
  *   mbsys_hsds_insert	- insert basic data into mbsys_hsds_struct structure
  *   mbsys_hsds_ttimes  - extract travel time and beam angle data from
  *                        mbsys_hsds_struct structure
- *   mbsys_hsds_nav_get - extract navigation and attitude 
- *			    sensor data from
+ *   mbsys_hsds_extract_nav - extract navigation data from
  *                          mbsys_hsds_struct structure
- *   mbsys_hsds_nav_put - insert navigation and attitude 
- *			    sensor data into
+ *   mbsys_hsds_insert_nav - insert navigation data into
  *                          mbsys_hsds_struct structure
  *   mbsys_hsds_copy	- copy data in one mbsys_hsds_struct structure
  *   				into another mbsys_hsds_struct structure
@@ -39,6 +37,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/07/13  19:13:36  caress
+ * Intermediate check-in during major bug-fixing flail.
+ *
  * Revision 4.5  1995/03/08  13:31:09  caress
  * Fixed bug related to handling of shallow water data and the depth scale.
  *
@@ -93,7 +94,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_hsds.c,v 4.6 1995-07-13 19:13:36 caress Exp $";
+ static char res_id[]="$Id: mbsys_hsds.c,v 4.7 1995-07-26 14:45:39 caress Exp $";
 	char	*function_name = "mbsys_hsds_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -267,8 +268,8 @@ int	*error;
 		/* get heading */
 		*heading = store->course_true;
 
-		/* set speed to zero */
-		*speed = store->speed;
+		/* get speed (convert m/s to km/hr) */
+		*speed = 3.6*store->speed;
 
 		/* read distance and depth values into storage arrays */
 		*nbath = mb_io_ptr->beams_bath;
@@ -511,6 +512,9 @@ int	*error;
 		/* get heading (360 degrees = 65536) */
 		store->course_true = heading;
 
+		/* get speed (convert km/hr to m/s) */
+		store->speed = 0.2777777778*speed;
+
 		/* put distance and depth values 
 			into data structure */
 		if (store->depth_scale > 0.0)
@@ -663,9 +667,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsds_nav_get(verbose,mbio_ptr,store_ptr,kind,
+int mbsys_hsds_extract_nav(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
-		roll,pitch,heave,error)
+		error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -676,12 +680,9 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
-double	*roll;
-double	*pitch;
-double	*heave;
 int	*error;
 {
-	char	*function_name = "mbsys_hsds_nav_get";
+	char	*function_name = "mbsys_hsds_extract_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsds_struct *store;
@@ -748,13 +749,8 @@ int	*error;
 		/* get heading */
 		*heading = store->course_true;
 
-		/* set speed to zero */
-		*speed = store->speed;
-
-		/* get roll pitch and heave */
-		*roll = store->roll;
-		*pitch = store->pitch;
-		*heave = store->heave;
+		/* get speed (convert m/s to km/hr) */
+		*speed = 3.6*store->speed;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -790,12 +786,6 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
-			fprintf(stderr,"dbg4       roll:       %f\n",
-				*roll);
-			fprintf(stderr,"dbg4       pitch:      %f\n",
-				*pitch);
-			fprintf(stderr,"dbg4       heave:      %f\n",
-				*heave);
 			}
 
 		/* done translating values */
@@ -841,9 +831,6 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
-		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
-		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
-		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
 		}
 	if (verbose >= 2)
 		{
@@ -856,9 +843,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsds_nav_put(verbose,mbio_ptr,store_ptr,
+int mbsys_hsds_insert_nav(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
-		roll,pitch,heave,error)
+		error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -868,12 +855,9 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
-double	roll;
-double	pitch;
-double	heave;
 int	*error;
 {
-	char	*function_name = "mbsys_hsds_nav_put";
+	char	*function_name = "mbsys_hsds_insert_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsds_struct *store;
@@ -902,9 +886,6 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
-		fprintf(stderr,"dbg2       roll:       %f\n",roll);
-		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
-		fprintf(stderr,"dbg2       heave:      %f\n",heave);
 		}
 
 	/* get mbio descriptor */
@@ -932,10 +913,8 @@ int	*error;
 		/* get heading (360 degrees = 65536) */
 		store->course_true = heading;
 
-		/* get roll pitch and heave */
-		store->roll = roll;
-		store->pitch = pitch;
-		store->heave = heave;
+		/* get speed (convert km/hr to m/s) */
+		store->speed = 0.2777777778*speed;
 		}
 
 	/* print output debug statements */
