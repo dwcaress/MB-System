@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.5 2001-07-20 00:31:11 caress Exp $
+ *    $Id: mb_read_init.c,v 5.6 2001-10-12 21:08:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/07/20 00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.4  2001/06/29 22:48:04  caress
  * Added support for HSDS2RAW
  *
@@ -175,7 +178,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.5 2001-07-20 00:31:11 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.6 2001-10-12 21:08:37 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -648,13 +651,21 @@ int mb_read_init(int verbose, char *file,
 		}
 	mb_io_ptr->need_new_ping = MB_YES;
 
-	/* initialize variables for extrapolating navigation */
+	/* initialize variables for interpolating asynchronous data */
 	mb_io_ptr->nfix = 0;
-	for (i=0;i<5;i++)
+	mb_io_ptr->nattitude = 0;
+	mb_io_ptr->nheading = 0;
+	for (i=0;i<MB_ASYNCH_SAVE_MAX;i++)
 		{
 		mb_io_ptr->fix_time_d[i] = 0.0;
 		mb_io_ptr->fix_lon[i] = 0.0;
 		mb_io_ptr->fix_lat[i] = 0.0;
+		mb_io_ptr->attitude_time_d[i] = 0.0;
+		mb_io_ptr->attitude_heave[i] = 0.0;
+		mb_io_ptr->attitude_roll[i] = 0.0;
+		mb_io_ptr->attitude_pitch[i] = 0.0;
+		mb_io_ptr->heading_time_d[i] = 0.0;
+		mb_io_ptr->heading_heading[i] = 0.0;
 		}
 
 	/* set error and status (if you got here you succeeded */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.6 2001-07-20 00:32:54 caress Exp $
+ *    $Id: mb_io.h,v 5.7 2001-10-12 21:10:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.5  2001/06/30  17:40:14  caress
  * Release 5.0.beta02
  *
@@ -271,9 +274,25 @@ struct mb_io_struct
 		for formats containing nav as asynchronous
 		position records separate from ping data */
 	int nfix;
-	double fix_time_d[MB_NAV_SAVE_MAX];
-	double fix_lon[MB_NAV_SAVE_MAX];
-	double fix_lat[MB_NAV_SAVE_MAX];
+	double fix_time_d[MB_ASYNCH_SAVE_MAX];
+	double fix_lon[MB_ASYNCH_SAVE_MAX];
+	double fix_lat[MB_ASYNCH_SAVE_MAX];
+
+	/* variables for interpolating/extrapolating attitude
+		for formats containing attitude as asynchronous
+		data records separate from ping data */
+	int nattitude;
+	double attitude_time_d[MB_ASYNCH_SAVE_MAX];
+	double attitude_heave[MB_ASYNCH_SAVE_MAX];
+	double attitude_roll[MB_ASYNCH_SAVE_MAX];
+	double attitude_pitch[MB_ASYNCH_SAVE_MAX];
+
+	/* variables for interpolating/extrapolating heading
+		for formats containing heading as asynchronous
+		data records separate from ping data */
+	int nheading;
+	double heading_time_d[MB_ASYNCH_SAVE_MAX];
+	double heading_heading[MB_ASYNCH_SAVE_MAX];
 	
 	/* variables for saving information */
 	char	save_label[12];
