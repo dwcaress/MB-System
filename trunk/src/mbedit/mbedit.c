@@ -807,22 +807,6 @@ static void display_menu(w, tag, list)
 }
 
 /********************************************************************/
-/* File selector routine called by scandir().                       */
-/* Return TRUE if filename is not "." or "..".                      */
-/********************************************************************/
-
- int open_files_select(entry)
-	struct direct	*entry;
-{
-	char		*ptr;
-	if ((strcmp(entry->d_name, ".") == 0) ||
-	    (strcmp(entry->d_name, "..") == 0))
-		return (FALSE);
-	else
-		return(TRUE);
-}
-
-/********************************************************************/
 /* Notify callback function for `slider_number_pings'.              */
 /********************************************************************/
 
