@@ -15,12 +15,28 @@ So many users have been clamoring for support of these
 data formats that we felt a new version and release
 was justified.
 
+The programs mbgrid, mbswath, and mbcontour also have a
+new feature which should increase the efficiency of gridding
+and plotting of swath data. These programs now check for
+".inf" files associated with each of the input data files,
+where the ".inf" files are assumed to contain the mbinfo
+output for the associated data files. If a ".inf" file exists,
+it is checked for the longitude and latitude bounds of
+the data; if the data file does not contain data within
+the bounds of gridding or plotting interest, the file is
+skipped. This feature allows users to maintain single
+master datalists without causing gridding and plotting
+to spend inordinate amounts of time reading data files
+with no data in the area of interest. We recommend that
+users maintain ".inf" files parallel to all of the data
+files used for gridding or plotting.
+
 Of course, a number of bug fixes are also incorporated
 in the new release.
 
 RELEASE DATE:
 ------------
-August 27, 1996
+September 5, 1996
 
 Authors:
 --------
@@ -293,10 +309,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.10 1996-08-26 15:38:28 caress Exp $
+RCS ID: $Id: README,v 4.11 1996-09-05 12:57:11 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.10  1996/08/26  15:38:28  caress
+# Release 4.4 revision.
+#
 # Revision 4.9  1996/01/26  21:32:53  caress
 # Revision for real version 4.3 release.
 #
