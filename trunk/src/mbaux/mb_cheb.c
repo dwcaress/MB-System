@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
- *    $Id: mb_cheb.c,v 4.0 2000-09-08 17:19:14 caress Exp $
+ *    $Id: mb_cheb.c,v 4.1 2000-09-30 06:54:58 caress Exp $
  *
  *    Copyright (c) 2000 by
- *    D. W. Caress (caress@mbari.org)
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -31,6 +31,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/09/08  17:19:14  caress
+ * Initial version.
+ *
  *
  *
  */

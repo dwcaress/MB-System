@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 4.6 2000-08-28 22:45:11 caress Exp $
+ *    $Id: mbnavedit.h,v 4.7 2000-09-30 07:02:34 caress Exp $
  *
- *    Copyright (c) 1995 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+ *    Copyright (c) 1995, 2000 by 
+ *    D. W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY  10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -18,8 +20,12 @@
  *
  * Author:	D. W. Caress
  * Date:	June 24,  1995
+ * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/08/28  22:45:11  caress
+ * About to kick off new version.
+ *
  * Revision 4.5  1999/04/09 22:34:08  caress
  * Added time interval plot.
  *
@@ -81,6 +87,9 @@ EXTERNAL int	plot_smg;
 EXTERNAL int	plot_heading;
 EXTERNAL int	plot_heading_org;
 EXTERNAL int	plot_cmg;
+EXTERNAL int	plot_draft;
+EXTERNAL int	plot_draft_org;
+EXTERNAL int	plot_draft_dr;
 EXTERNAL int	plot_roll;
 EXTERNAL int	plot_pitch;
 EXTERNAL int	plot_heave;
@@ -89,10 +98,13 @@ EXTERNAL int	drift_lat;
 EXTERNAL int	time_fix;
 EXTERNAL int	use_ping_data;
 EXTERNAL int	format;
-EXTERNAL char	ifile[128];
-EXTERNAL char	ofile[128];
-EXTERNAL char	nfile[128];
-EXTERNAL int	ofile_defined;
+EXTERNAL char	ifile[MB_PATH_MAXLINE];
+EXTERNAL char	nfile[MB_PATH_MAXLINE];
+EXTERNAL int	nfile_defined;
+EXTERNAL int	model_mode;
+EXTERNAL double	weight_speed;
+EXTERNAL double	weight_acceleration;
+EXTERNAL int	scrollcount;
 
 /* mbnavedit plot size parameters */
 EXTERNAL int	plot_width;
@@ -106,14 +118,17 @@ EXTERNAL int	number_plots;
 #define	PICK_MODE_SELECTALL	3
 #define	PICK_MODE_DESELECTALL	4
 #define	OUTPUT_MODE_OUTPUT	0
-#define	OUTPUT_MODE_NAV		1
-#define	OUTPUT_MODE_BROWSE	2
+#define	OUTPUT_MODE_BROWSE	1
 #define	PLOT_TINT	0
 #define	PLOT_LONGITUDE	1
 #define	PLOT_LATITUDE	2
 #define	PLOT_SPEED	3
 #define	PLOT_HEADING	4
-#define	PLOT_ROLL	5
-#define	PLOT_PITCH	6
-#define	PLOT_HEAVE	7
+#define	PLOT_DRAFT	5
+#define	PLOT_ROLL	6
+#define	PLOT_PITCH	7
+#define	PLOT_HEAVE	8
+#define	MODEL_MODE_OFF		0
+#define	MODEL_MODE_DR		1
+#define	MODEL_MODE_INVERT	2
 /*--------------------------------------------------------------------*/

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.11 2000-08-28 22:45:11 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.12 2000-09-30 07:02:34 caress Exp $
  *
- *    Copyright (c) 1995 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+ *    Copyright (c) 1995, 2000 by 
+ *    D. W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY  10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -17,8 +19,12 @@
  *
  * Author:	D. W. Caress
  * Date:	June 24,  1995
+ * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/08/28  22:45:11  caress
+ * About to kick off new version.
+ *
  * Revision 4.10  1999/09/15 21:01:04  caress
  * Version label now set from mb_format.h
  *
@@ -66,11 +72,15 @@
 #include <stdio.h>
 #include <Xm/Xm.h>
 #include <X11/cursorfont.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #define MBNAVEDIT_DECLARE_GLOBALS
+#include "mb_status.h"
+#include "mb_define.h"
+#include "mb_io.h"
 #include "mbnavedit_extrawidgets.h"
 #include "mbnavedit.h"
-#include "mb_status.h"
 
 #include "mbnavedit_creation.h"
 
@@ -137,13 +147,8 @@ Cursor myCursor;
 XColor closest[2];
 XColor exact[2];
 
-int key_z_down = 0;
-int key_s_down = 0;
-int key_a_down = 0;
-int key_d_down = 0;
-
 /* Set the colors used for this program here. */
-#define NCOLORS 6
+#define NCOLORS 7
 XColor colors[NCOLORS];
 unsigned int mpixel_values[NCOLORS];
 XColor db_color;
@@ -172,6 +177,7 @@ void	mbnavedit_deselectallcursor();
 void	mbnavedit_setintervalcursor();
 void	do_filebutton_on();
 void	do_filebutton_off();
+void	do_open_file(int);
 
 /*--------------------------------------------------------------------*/
 /*      Function Name:	BxExitCB
@@ -622,6 +628,15 @@ do_mbnavedit_init(argc, argv)
 	    fprintf(stderr,"Failure to allocate color: coral\n");
 	    exit(-1);
 	    }
+    status = XLookupColor(display,colormap,
+	    "lightgrey",&db_color,&colors[6]);
+    if(status != 0)
+	    status = XAllocColor(display,colormap,&colors[6]);
+    if (status == 0)
+	    {
+	    fprintf(stderr,"Failure to allocate color: lightgrey\n");
+	    exit(-1);
+	    }
     for (i=0;i<NCOLORS;i++)
 	    {
 	    mpixel_values[i] = colors[i].pixel;
@@ -673,13 +688,6 @@ void do_set_controls()
 	    XtManageChild(label_filename);
 	    XtManageChild(textField_output_file);
 	    }
-	else if (output_mode == OUTPUT_MODE_NAV)
-	    {
-	    XmToggleButtonSetState(toggleButton_output_nav,
-			TRUE, TRUE);
-	    XtUnmanageChild(label_filename);
-	    XtUnmanageChild(textField_output_file);
-	    }
 	else
 	    {
 	    XmToggleButtonSetState(toggleButton_output_off,
@@ -711,16 +719,6 @@ void do_set_controls()
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, string, (strlen(string) + 1), 
 			NULL);	
-			
-	/* set values of dr lon drift */
-	XtVaSetValues(scale_driftlon, 
-			XmNvalue, drift_lon, 
-			NULL);
-			
-	/* set values of dr lat drift */
-	XtVaSetValues(scale_driftlat, 
-			XmNvalue, drift_lat, 
-			NULL);
 
 	/* set the pick mode */
 	if (mode_pick == PICK_MODE_PICK)
@@ -768,6 +766,10 @@ void do_set_controls()
 			plot_heading_org, TRUE);
 	XmToggleButtonSetState(toggleButton_show_cmg, 
 			plot_cmg, TRUE);
+	XmToggleButtonSetState(toggleButton_sonardepth, 
+			plot_draft, TRUE);
+	XmToggleButtonSetState(toggleButton_org_sonardepth, 
+			plot_draft_org, TRUE);
 
 	/* hide or display items according to toggle states */
 	if (plot_tint == MB_YES)
@@ -777,7 +779,20 @@ void do_set_controls()
 	if (plot_lon == MB_YES)
 		{
 		XtManageChild(toggleButton_org_lon);
-		XtManageChild(toggleButton_dr_lon);
+		if (model_mode == MODEL_MODE_OFF)
+		    {
+		    XtUnmanageChild(toggleButton_dr_lon);
+		    }
+		else if (model_mode == MODEL_MODE_DR)
+		    {
+		    set_label_string(toggleButton_dr_lon, "Show Dead Reckoning");
+		    XtManageChild(toggleButton_dr_lon);		    
+		    }
+		else if (model_mode == MODEL_MODE_INVERT)
+		    {
+		    set_label_string(toggleButton_dr_lon, "Show Smooth Inversion");
+		    XtManageChild(toggleButton_dr_lon);		    
+		    }
 		}
 	else
 		{
@@ -787,7 +802,20 @@ void do_set_controls()
 	if (plot_lat == MB_YES)
 		{
 		XtManageChild(toggleButton_org_lat);
-		XtManageChild(toggleButton_dr_lat);
+		if (model_mode == MODEL_MODE_OFF)
+		    {
+		    XtUnmanageChild(toggleButton_dr_lat);
+		    }
+		else if (model_mode == MODEL_MODE_DR)
+		    {
+		    set_label_string(toggleButton_dr_lat, "Show Dead Reckoning");
+		    XtManageChild(toggleButton_dr_lat);		    
+		    }
+		else if (model_mode == MODEL_MODE_INVERT)
+		    {
+		    set_label_string(toggleButton_dr_lat, "Show Smooth Inversion");
+		    XtManageChild(toggleButton_dr_lat);		    
+		    }
 		}
 	else
 		{
@@ -818,6 +846,14 @@ void do_set_controls()
 		XtUnmanageChild(toggleButton_show_cmg);
 		XtUnmanageChild(pushButton_heading_cmg);
 		}
+	if (plot_draft == MB_YES)
+		{
+		XtManageChild(toggleButton_org_sonardepth);
+		}
+	else
+		{
+		XtUnmanageChild(toggleButton_org_sonardepth);
+		}
 
 	/* get and set size of canvas */
 	number_plots = 0;
@@ -831,6 +867,8 @@ void do_set_controls()
 		number_plots++;
 	if (plot_heading == MB_YES)
 		number_plots++;
+	if (plot_draft == MB_YES)
+		number_plots++;
 	if (plot_roll == MB_YES)
 		number_plots++;
 	if (plot_pitch == MB_YES)
@@ -841,6 +879,37 @@ void do_set_controls()
 			XmNwidth, plot_width, 
 			XmNheight, number_plots*plot_height, 
 			NULL);	
+			
+	/* set modeling controls */
+	if (model_mode == MODEL_MODE_OFF)
+		{
+		XmToggleButtonSetState(toggleButton_modeling_off, 
+			TRUE, FALSE);
+		}
+	else if (model_mode == MODEL_MODE_DR)
+		{
+		XmToggleButtonSetState(toggleButton_modeling_dr, 
+			TRUE, FALSE);
+		}
+	if (model_mode == MODEL_MODE_INVERT)
+		{
+		XmToggleButtonSetState(toggleButton_modeling_inversion, 
+			TRUE, FALSE);
+		}
+	XtVaSetValues(scale_driftlon, 
+			XmNvalue, drift_lon, 
+			NULL);
+	XtVaSetValues(scale_driftlat, 
+			XmNvalue, drift_lat, 
+			NULL);
+	sprintf(value_text,"%.0f",weight_speed);
+	XmTextFieldSetString(
+	    textField_modeling_speed, 
+	    value_text);
+	sprintf(value_text,"%.0f",weight_acceleration);
+	XmTextFieldSetString(
+	    textField_modeling_acceleration, 
+	    value_text);
 }
 
 
@@ -1268,6 +1337,18 @@ XtPointer call;
 				NULL);
 			sprintf(string, "%d", data_show_max);
 			set_label_string(label_timespan_2, string);
+
+			/* set values of number of data to step slider */
+			XtVaSetValues(scale_timestep, 
+					XmNminimum, 1, 
+					XmNmaximum, data_step_max, 
+					XmNvalue, data_step_size, 
+					NULL);
+			sprintf(string, "%d", data_step_max);
+			XtVaSetValues(label_timestep_2, 
+					XtVaTypedArg, XmNlabelString, 
+					    XmRString, string, (strlen(string) + 1), 
+					NULL);	
 			}
 
 		    /* scroll forward */
@@ -1327,6 +1408,8 @@ XtPointer call;
 		number_plots++;
 	if (plot_heading == MB_YES)
 		number_plots++;
+	if (plot_draft == MB_YES)
+		number_plots++;
 	if (plot_roll == MB_YES)
 		number_plots++;
 	if (plot_pitch == MB_YES)
@@ -1382,6 +1465,8 @@ XtPointer call;
 		number_plots++;
 	if (plot_heading == MB_YES)
 		number_plots++;
+	if (plot_draft == MB_YES)
+		number_plots++;
 	if (plot_roll == MB_YES)
 		number_plots++;
 	if (plot_pitch == MB_YES)
@@ -1436,6 +1521,8 @@ XtPointer call;
 	if (plot_speed == MB_YES)
 		number_plots++;
 	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_draft == MB_YES)
 		number_plots++;
 	if (plot_roll == MB_YES)
 		number_plots++;
@@ -1494,6 +1581,8 @@ XtPointer call;
 		number_plots++;
 	if (plot_heading == MB_YES)
 		number_plots++;
+	if (plot_draft == MB_YES)
+		number_plots++;
 	if (plot_roll == MB_YES)
 		number_plots++;
 	if (plot_pitch == MB_YES)
@@ -1551,6 +1640,61 @@ XtPointer call;
 	if (plot_speed == MB_YES)
 		number_plots++;
 	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_draft == MB_YES)
+		number_plots++;
+	if (plot_roll == MB_YES)
+		number_plots++;
+	if (plot_pitch == MB_YES)
+		number_plots++;
+	if (plot_heave == MB_YES)
+		number_plots++;
+	screen_height = number_plots*plot_height;
+	if (screen_height <= 0)
+		screen_height = plot_height;
+	XtVaSetValues(drawingArea, 
+			XmNwidth, plot_width, 
+			XmNheight, screen_height, 
+			NULL);	
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+
+/*--------------------------------------------------------------------*/
+/* ARGSUSED */
+void
+do_toggle_sonardepth( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	int	screen_height;
+
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	plot_draft = XmToggleButtonGetState(toggleButton_sonardepth);
+	if (plot_draft == MB_YES)
+		{
+		XtManageChild(toggleButton_org_sonardepth);
+		}
+	else
+		{
+		XtUnmanageChild(toggleButton_org_sonardepth);
+		mbnavedit_action_deselect_all(PLOT_DRAFT);
+		}
+
+	/* get and set size of canvas */
+	number_plots = 0;
+	number_plots = 0;
+	if (plot_tint == MB_YES)
+		number_plots++;
+	if (plot_lon == MB_YES)
+		number_plots++;
+	if (plot_lat == MB_YES)
+		number_plots++;
+	if (plot_speed == MB_YES)
+		number_plots++;
+	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_draft == MB_YES)
 		number_plots++;
 	if (plot_roll == MB_YES)
 		number_plots++;
@@ -1661,6 +1805,56 @@ do_toggle_dr_lon( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_modeling_apply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    double  dvalue;
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	get_text_string(textField_modeling_speed, string);
+	if (sscanf(string, "%lf", &dvalue) == 1)
+		weight_speed = dvalue;
+
+	get_text_string(textField_modeling_acceleration, string);
+	if (sscanf(string, "%lf", &dvalue) == 1)
+		weight_acceleration = dvalue;
+	
+	do_set_controls();
+	
+	/* recalculate dr */
+	mbnavedit_get_dr();
+
+	/* replot */
+	mbnavedit_plot_all();
+
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_model_mode( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	if (XmToggleButtonGetState(toggleButton_modeling_off))
+	    model_mode = MODEL_MODE_OFF;
+	else if (XmToggleButtonGetState(toggleButton_modeling_dr))
+	    model_mode = MODEL_MODE_DR;
+	else
+	    model_mode = MODEL_MODE_INVERT;
+	
+	do_set_controls();
+	
+	/* recalculate dr */
+	mbnavedit_get_dr();
+
+	/* replot */
+	mbnavedit_plot_all();
+
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_driftlon( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
@@ -1720,6 +1914,18 @@ XtPointer call;
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	plot_heading_org = XmToggleButtonGetState(toggleButton_org_heading);
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+/*--------------------------------------------------------------------*/
+/* ARGSUSED */
+void
+do_toggle_org_sonardepth( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	plot_draft_org = XmToggleButtonGetState(toggleButton_org_sonardepth);
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -1804,12 +2010,6 @@ XtPointer call;
 		XtManageChild(textField_output_file);
 		XtManageChild(label_filename);
 		}
-	else if (XmToggleButtonGetState(toggleButton_output_nav))
-		{
-		output_mode = OUTPUT_MODE_NAV;
-		XtUnmanageChild(textField_output_file);
-		XtUnmanageChild(label_filename);
-		}
 	else
 		{
 		output_mode = OUTPUT_MODE_BROWSE;
@@ -1818,32 +2018,6 @@ XtPointer call;
 		}
 }
 
-/*--------------------------------------------------------------------*/
-
-void
-do_toggle_output_nav( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-
-	if (XmToggleButtonGetState(toggleButton_output_on))
-		{
-		output_mode = OUTPUT_MODE_OUTPUT;
-		XtManageChild(textField_output_file);
-		XtManageChild(label_filename);
-		}
-	else if (XmToggleButtonGetState(toggleButton_output_nav))
-		{
-		output_mode = OUTPUT_MODE_NAV;
-		XtUnmanageChild(textField_output_file);
-		XtUnmanageChild(label_filename);
-		}
-	else
-		{
-		output_mode = OUTPUT_MODE_BROWSE;
-		XtUnmanageChild(textField_output_file);
-		XtUnmanageChild(label_filename);
-		}
-}
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
@@ -1860,12 +2034,6 @@ XtPointer call;
 		output_mode = OUTPUT_MODE_OUTPUT;
 		XtManageChild(textField_output_file);
 		XtManageChild(label_filename);
-		}
-	else if (XmToggleButtonGetState(toggleButton_output_nav))
-		{
-		output_mode = OUTPUT_MODE_NAV;
-		XtUnmanageChild(textField_output_file);
-		XtUnmanageChild(label_filename);
 		}
 	else
 		{
@@ -1917,6 +2085,8 @@ XtPointer call;
 	char	*suffix;
 	int	len;
 	int	form;
+	struct stat file_status;
+	int	fstat;
 	int	status;
 
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
@@ -1925,19 +2095,58 @@ XtPointer call;
 	get_text_string(fileSelectionBox_text, ifile);
 
 	/* get output filename */
-	get_text_string(textField_output_file, ofile);
-	ofile_defined = MB_YES;
+	get_text_string(textField_output_file, nfile);
+	nfile_defined = MB_YES;
 
 	/* get the file format */
 	get_text_string(textField_format, string);
 	if (sscanf(string, "%d", &form) == 1)
 		format = form;
+		
+	/* check if output file exists */
+	fstat = stat(nfile, &file_status);
+	if (fstat != 0 
+	    || (file_status.st_mode & S_IFMT) == S_IFDIR)
+	    {
+	    do_open_file(MB_NO);
+	    }
+	else
+	    {
+	     XtManageChild(bulletinBoard_useprevious);
+	    }
+}
+
+/*--------------------------------------------------------------------*/
+void
+do_useprevious_yes( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    do_open_file(MB_YES);
+}
+
+/*--------------------------------------------------------------------*/
+void
+do_useprevious_no( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    do_open_file(MB_NO);
+}
+
+/*--------------------------------------------------------------------*/
+/* ARGSUSED */
+void
+do_open_file(useprevious)
+int useprevious;
+{
+	int	status;
 	    
 	/* turn off expose plots */
 	expose_plot_ok = False;
 
 	/* open the file */
-	status = mbnavedit_action_open();
+	status = mbnavedit_action_open(useprevious);
 	
 	if (status == MB_FAILURE) 
 		mbnavedit_bell(100);
@@ -1964,6 +2173,7 @@ XtPointer call;
 	expose_plot_ok = True;
 }
 
+
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
@@ -1984,11 +2194,8 @@ Widget w;
 XtPointer client;
 XtPointer call;
 {
-	char	*mb_suffix;
-	char	*sb_suffix;
-	char	*file_root;
-	int	mb_len;
-	int	sb_len;
+	char	fileroot[128];
+	int	format_status, format_error;
 	int	form;
 	char	value_text[10];
 
@@ -2000,78 +2207,27 @@ XtPointer call;
 	/* get output file */
 	if((int)strlen(string) > 0)
 		{
-		/* look for MB suffix convention */
-		if ((mb_suffix = strstr(string,".mb")) != NULL)
-			mb_len = strlen(mb_suffix);
-
-		/* look for SeaBeam suffix convention */
-		if ((sb_suffix = strstr(string,".rec")) != NULL)
-			sb_len = strlen(sb_suffix);
-
-		/* if MB suffix convention used keep it */
-		if (mb_len >= 4 && mb_len <= 6)
-			{
-			/* get the output filename */
-			strncpy(ofile,"\0",128);
-			strncpy(ofile,string,
-				strlen(string)-mb_len);
-			file_root = strrchr(ofile, '/');
-			if (file_root != NULL)
-			    {
-			    if (strstr(file_root, "_") != NULL)
-				    strcat(ofile, "n");
-			    else
-				    strcat(ofile,"_n");
-			    }
-			else
-			    {
-			    if (strstr(ofile, "_") != NULL)
-				    strcat(ofile, "n");
-			    else
-				    strcat(ofile,"_n");
-			    }
-			strcat(ofile,mb_suffix);
-
-			/* get the file format and set the widget */
-			if (sscanf(&mb_suffix[3], "%d", &form) == 1)
-				{
-				format = form;
-				sprintf(value_text,"%d",format);
-				XmTextFieldSetString(
-				    textField_format, 
-				    value_text);
-				}
-			}
-			
-		/* else look for ".rec" format 41 file */
-		else if (sb_len == 4)
-			{
-			/* get the output filename */
-			strncpy(ofile,"\0",128);
-			strncpy(ofile,string,
-				strlen(string)-sb_len);
-			strcat(ofile,"_n.mb41");
-
-			/* get the file format and set the widget */
-			format = 41;
-			sprintf(value_text,"%d",format);
-			XmTextFieldSetString(
-				textField_format, 
-				value_text);
-			}
-
-		/* else just at ".ned" to file name */
-		else
-			{
-			strcpy(ofile,string);
-			strcat(ofile,".ned");
-			}
+		/* get the file format and set the widget */
+		if (mb_get_format(0, string, fileroot, 
+				    &form, &format_error) 
+			== MB_SUCCESS)
+		    {
+		    format = form;
+		    sprintf(value_text,"%d",format);
+		    XmTextFieldSetString(
+			textField_format, 
+			value_text);
+		    }
+    
+		/* get the output filename */
+		strcpy(nfile,string);
+		strcat(nfile,".nve");
 
 		/* now set the output filename text widget */
 		XmTextFieldSetString(textField_output_file, 
-			ofile);
+			nfile);
 		XmTextFieldSetCursorPosition(textField_output_file, 
-			strlen(ofile));
+			strlen(nfile));
 	}
 }
 
@@ -2196,9 +2352,6 @@ XtPointer call;
 {
 
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
-
-	/* replot */
-	mbnavedit_plot_all();
 }
 
 /*--------------------------------------------------------------------*/
@@ -2307,6 +2460,8 @@ do_toggle_vru(w, client_data, call_data)
 	if (plot_speed == MB_YES)
 		number_plots++;
 	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_draft == MB_YES)
 		number_plots++;
 	if (plot_roll == MB_YES)
 		number_plots++;

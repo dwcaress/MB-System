@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 4.0 2000-03-06 21:59:34 caress Exp $
+ *    $Id: mbgrdtiff.c,v 4.1 2000-09-30 06:52:17 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,14 +22,6 @@
  *    as a geographically located coverage. The image is 8 bits
  *    per pixel if the color map is a grayscale, and 24 bits
  *    per pixel otherwise.
- *
- *    Copyright (c) 1999 by  
- *    D. W. Caress (caress@mbari.org)
- *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
  *
  *
  * The geotiff file variant produced by mbgrdtiff
@@ -163,6 +155,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/03/06  21:59:34  caress
+ * Initial version.
+ *
  *
  *
  */
@@ -267,7 +262,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 4.0 2000-03-06 21:59:34 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 4.1 2000-09-30 06:52:17 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";

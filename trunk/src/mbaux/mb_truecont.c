@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $
+ *    $Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -73,7 +75,7 @@ double	date_annot_int;
 double	time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -332,7 +334,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -468,7 +470,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1155,7 +1157,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.9 2000-09-30 06:54:58 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;

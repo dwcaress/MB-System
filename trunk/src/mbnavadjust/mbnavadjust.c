@@ -38,7 +38,7 @@
 /*
  * Common constant and pixmap declarations.
  */
-#include "mbnavedit_creation.h"
+#include "mbnavadjust_creation.h"
 
 /*
  * Convenience functions from utilities file.
@@ -62,7 +62,7 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /*
  * Change this line via the Output Application Names Dialog.
  */
-#define BX_APP_CLASS "mbnavedit"
+#define BX_APP_CLASS "mbnavadjust"
 
 int main( int argc, char **argv)
 {
@@ -114,12 +114,12 @@ int main( int argc, char **argv)
     /* End user code block <create_topLevelShell> */
     
     ac = 0;
-    XtSetArg(args[ac], XmNtitle, "MBnavedit"); ac++;
-    XtSetArg(args[ac], XmNiconName, "MBnavedit"); ac++;
-    XtSetArg(args[ac], XmNx, -10); ac++;
-    XtSetArg(args[ac], XmNy, 28); ac++;
-    XtSetArg(args[ac], XmNwidth, 1020); ac++;
-    XtSetArg(args[ac], XmNheight, 680); ac++;
+    XtSetArg(args[ac], XmNtitle, "MBnavadjust"); ac++;
+    XtSetArg(args[ac], XmNiconName, "MBnavadjust"); ac++;
+    XtSetArg(args[ac], XmNx, 55); ac++;
+    XtSetArg(args[ac], XmNy, 26); ac++;
+    XtSetArg(args[ac], XmNwidth, 960); ac++;
+    XtSetArg(args[ac], XmNheight, 412); ac++;
     topLevelShell = XtCreatePopupShell("topLevelShell",
         topLevelShellWidgetClass,
         parent,
@@ -131,13 +131,13 @@ int main( int argc, char **argv)
     XtPopup(XtParent(mainWindow), XtGrabNone);
     
     /* Begin user code block <app_procedures> */
-    
+
     /* initialize app value and wait until view realized */
     do_wait_until_viewed(app);
-    
+
     /* initialize everything */
-    do_mbnavedit_init(argc,argv);
-    
+    do_mbnavadjust_init(argc,argv);
+
     /* End user code block <app_procedures> */
     
     /* Begin user code block <main_loop> */
