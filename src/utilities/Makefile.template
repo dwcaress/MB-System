@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.21 2000-12-10 20:30:44 caress Exp $
+#	$Id: Makefile.template,v 5.0 2001-01-22 08:07:07 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.21  2000/12/10  20:30:44  caress
+# Version 5.0.alpha02
+#
 # Revision 4.20  2000/09/30  07:22:17  caress
 # Snapshot for Dale.
 #
@@ -122,6 +125,7 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mblist $(MANDIR)/mblist.l \
 	$(BINDIR)/mbmerge $(MANDIR)/mbmerge.l \
 	$(BINDIR)/mbclean $(MANDIR)/mbclean.l \
+	$(BINDIR)/mbcleanold $(MANDIR)/mbcleanold.l \
 	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.l \
 	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.l \
 	$(BINDIR)/mbmosaic $(MANDIR)/mbmosaic.l \
@@ -141,6 +145,8 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbtide $(MANDIR)/mbtide.l \
 	$(BINDIR)/mbsimradmakess $(MANDIR)/mbsimradmakess.l \
 	$(BINDIR)/mbnavlist $(MANDIR)/mbnavlist.l \
+	$(BINDIR)/mbsvplist $(MANDIR)/mbsvplist.l \
+	$(BINDIR)/mbset $(MANDIR)/mbset.l \
 	$(BINDIR)/mbprocess $(MANDIR)/mbprocess.l
 
 ### make clean removes the object files
@@ -169,6 +175,9 @@ $(BINDIR)/mbmerge:	mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/li
 $(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mbclean
+$(BINDIR)/mbcleanold:	mbcleanold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
+	$(CC) $(CFLAGS) mbcleanold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
+		-o $(BINDIR)/mbcleanold
 $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mbunclean
@@ -229,6 +238,12 @@ $(BINDIR)/mbsimradmakess:	mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.
 $(BINDIR)/mbnavlist:	mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbnavlist
+$(BINDIR)/mbsvplist:	mbsvplist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
+	$(CC) $(CFLAGS) mbsvplist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
+		$(LFLAGS) -o $(BINDIR)/mbsvplist
+$(BINDIR)/mbset:	mbset.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbset.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a \
+		$(LFLAGS) -o $(BINDIR)/mbset
 $(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbprocess
@@ -248,6 +263,8 @@ mbmerge.o:	mbmerge.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_d
 	$(CC) -c $(CFLAGS) mbmerge.c
 mbclean.o:	mbclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbclean.c
+mbcleanold.o:	mbcleanold.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbcleanold.c
 mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbunclean.c
 mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -287,6 +304,10 @@ mbsimradmakess.o:	mbsimradmakess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h 
 	$(CC) -c $(CFLAGS) mbsimradmakess.c
 mbnavlist.o:	mbnavlist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbnavlist.c
+mbsvplist.o:	mbsvplist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbsvplist.c
+mbset.o:	mbset.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbset.c
 mbprocess.o:	mbprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbprocess.c
 
@@ -315,6 +336,9 @@ $(MANDIR)/mbmerge.l:	mbmerge.manl
 $(MANDIR)/mbclean.l:	mbclean.manl
 	cp mbclean.manl $(MANDIR)/mbclean.l
 	chmod 664 $(MANDIR)/mbclean.l
+$(MANDIR)/mbcleanold.l:	mbcleanold.manl
+	cp mbcleanold.manl $(MANDIR)/mbcleanold.l
+	chmod 664 $(MANDIR)/mbcleanold.l
 $(MANDIR)/mbunclean.l:	mbunclean.manl
 	cp mbunclean.manl $(MANDIR)/mbunclean.l
 	chmod 664 $(MANDIR)/mbunclean.l
@@ -372,6 +396,12 @@ $(MANDIR)/mbsimradmakess.l:	mbsimradmakess.manl
 $(MANDIR)/mbnavlist.l:	mbnavlist.manl
 	cp mbnavlist.manl $(MANDIR)/mbnavlist.l
 	chmod 664 $(MANDIR)/mbnavlist.l
+$(MANDIR)/mbsvplist.l:	mbsvplist.manl
+	cp mbsvplist.manl $(MANDIR)/mbsvplist.l
+	chmod 664 $(MANDIR)/mbsvplist.l
+$(MANDIR)/mbset.l:	mbset.manl
+	cp mbset.manl $(MANDIR)/mbset.l
+	chmod 664 $(MANDIR)/mbset.l
 $(MANDIR)/mbprocess.l:	mbprocess.manl
 	cp mbprocess.manl $(MANDIR)/mbprocess.l
 	chmod 664 $(MANDIR)/mbprocess.l
