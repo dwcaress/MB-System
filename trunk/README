@@ -1,4 +1,4 @@
-MB-SYSTEM VERSION 5.0.BETA20 README FILE:
+MB-SYSTEM VERSION 5.0.BETA22 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-Version 5.0.beta22     August 20, 2002
+Version 5.0.beta22     August 27, 2002
 Version 5.0.beta21     July 25, 2002
 Version 5.0.beta20     July 20, 2002
 Version 5.0.beta18     May 31, 2002
@@ -914,10 +914,14 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.22 2002-08-21 01:10:37 caress Exp $
+RCS ID: $Id: README,v 5.23 2002-08-28 01:43:27 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.22  2002/08/21 01:10:37  caress
+Release 5.0.beta22
+./
+
 Revision 5.21  2002/07/25 19:11:35  caress
 Release 5.0.beta21
 
