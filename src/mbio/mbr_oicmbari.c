@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
- *	$Id: mbr_oicmbari.c,v 4.0 1999-03-31 18:29:20 caress Exp $
+ *	$Id: mbr_oicmbari.c,v 4.1 1999-04-07 20:38:24 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,12 @@
  * Date:	February 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/04/03 07:36:16  caress
+ * Fix bugs in byteswapped code.
+ *
+ * Revision 4.0  1999/03/31 18:29:20  caress
+ * MB-System 4.6beta7
+ *
  * Revision 1.1  1999/03/31  18:11:35  caress
  * Initial revision
  *
@@ -56,7 +62,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_oicmbari.c,v 4.0 1999-03-31 18:29:20 caress Exp $";
+ static char res_id[]="$Id: mbr_oicmbari.c,v 4.1 1999-04-07 20:38:24 caress Exp $";
 	char	*function_name = "mbr_alm_oicmbari";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -921,21 +927,21 @@ int	*error;
 	    {
 	    for (j=0;j<header->beams_bath;j++)
 		{
-		data->bath[j] = mb_swap_float(bath[j]);
-		data->bathacrosstrack[j] = mb_swap_float(bathacrosstrack[j]);
-		data->bathalongtrack[j] = mb_swap_float(bathalongtrack[j]);
-		data->tt[j] = mb_swap_float(tt[j]);
-		data->angle[j] = mb_swap_float(angle[j]);
+		data->bath[j] = mb_swap_float(data->bath[j]);
+		data->bathacrosstrack[j] = mb_swap_float(data->bathacrosstrack[j]);
+		data->bathalongtrack[j] = mb_swap_float(data->bathalongtrack[j]);
+		data->tt[j] = mb_swap_float(data->tt[j]);
+		data->angle[j] = mb_swap_float(data->angle[j]);
 		}
 	    for (j=0;j<header->beams_amp;j++)
 		{
-		data->amp[j] = mb_swap_float(amp[j]);
+		data->amp[j] = mb_swap_float(data->amp[j]);
 		}
 	    for (j=0;j<header->pixels_ss;j++)
 		{
-		data->ssacrosstrack[j] = mb_swap_float(ssacrosstrack[j]);
-		data->ssalongtrack[j] = mb_swap_float(ssalongtrack[j]);
-		data->ss[j] = mb_swap_float(ss[j]);
+		data->ssacrosstrack[j] = mb_swap_float(data->ssacrosstrack[j]);
+		data->ssalongtrack[j] = mb_swap_float(data->ssalongtrack[j]);
+		data->ss[j] = mb_swap_float(data->ss[j]);
 		}
 	    }
 #endif
@@ -2139,21 +2145,21 @@ int	*error;
 	    {
 	    for (j=0;j<header->beams_bath;j++)
 		{
-		data->bath[j] = mb_swap_float(bath[j]);
-		data->bathacrosstrack[j] = mb_swap_float(bathacrosstrack[j]);
-		data->bathalongtrack[j] = mb_swap_float(bathalongtrack[j]);
-		data->tt[j] = mb_swap_float(tt[j]);
-		data->angle[j] = mb_swap_float(angle[j]);
+		data->bath[j] = mb_swap_float(data->bath[j]);
+		data->bathacrosstrack[j] = mb_swap_float(data->bathacrosstrack[j]);
+		data->bathalongtrack[j] = mb_swap_float(data->bathalongtrack[j]);
+		data->tt[j] = mb_swap_float(data->tt[j]);
+		data->angle[j] = mb_swap_float(data->angle[j]);
 		}
 	    for (j=0;j<header->beams_amp;j++)
 		{
-		data->amp[j] = mb_swap_float(amp[j]);
+		data->amp[j] = mb_swap_float(data->amp[j]);
 		}
 	    for (j=0;j<header->pixels_ss;j++)
 		{
-		data->ssacrosstrack[j] = mb_swap_float(ssacrosstrack[j]);
-		data->ssalongtrack[j] = mb_swap_float(ssalongtrack[j]);
-		data->ss[j] = mb_swap_float(ss[j]);
+		data->ssacrosstrack[j] = mb_swap_float(data->ssacrosstrack[j]);
+		data->ssalongtrack[j] = mb_swap_float(data->ssalongtrack[j]);
+		data->ss[j] = mb_swap_float(data->ss[j]);
 		}
 	    }
 #endif
