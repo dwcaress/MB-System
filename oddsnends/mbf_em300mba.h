@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em300mba.h	10/16/98
- *	$Id: mbf_em300mba.h,v 4.1 1999-02-04 23:52:54 caress Exp $
+ *	$Id: mbf_em300mba.h,v 4.2 2000-07-17 23:36:24 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/02/04  23:52:54  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.0  1998/12/17  22:59:14  caress
  * MB-System version 4.6beta4
  *
@@ -45,6 +48,11 @@
  *                   beams of bathymetry and a variable number of sidescan
  *                   samples per bathymetry beam.
  *         EM-300:   Single array 30 kHz mid water system with up to 135
+ *                   beams of bathymetry and a variable number of sidescan
+ *                   samples per bathymetry beam. This system is notable
+ *                   for applying pitch and yaw compensation to achieve
+ *                   more uniform coverage of the seafloor.
+ *         EM-120:   Single array 12 kHz full ocean system with up to 191
  *                   beams of bathymetry and a variable number of sidescan
  *                   samples per bathymetry beam. This system is notable
  *                   for applying pitch and yaw compensation to achieve
