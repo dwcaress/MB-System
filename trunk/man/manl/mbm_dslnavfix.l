@@ -1,4 +1,4 @@
-.TH mbm_dslnavfix l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_dslnavfix l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_dslnavfix\fP - Translate WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
@@ -61,13 +61,13 @@ processing WHOI DSL AMS-120 data with MB-System:
  			-M2 -Ncruise.mrg2 -V
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

@@ -1,4 +1,4 @@
-.TH mbtide l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbtide l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbtide\fP - MBTIDE corrects swath sonar bathymetry data for tides.
 
@@ -21,13 +21,13 @@ bathymetry values correspond to the "chart datum" reference.
 The default input and output streams are stdin and stdout.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP
@@ -140,11 +140,14 @@ suffice:
  		-Iref2001.mb81 -Oref2001_t.mb81
 
 .SH BUGS
+The wide variety of data formats makes the application of
+tides in a uniform manner problematic.
 Bathymetry data collected in intertidal zones can end up
 negative (above zero tide or chart datum) after correction
-for tides. This conflicts with the MB-System convention of
-flagging bad data with negative depth values. There is no
-graceful way to handle this problem at present (other than
-to introduce a static shift in the tide values, which is
-hardly graceful).
+for tides. Many formats support flagging of bad bathymetry
+only with negative depth values. Others actually have 
+separate tidal correction values have to be applied to
+the bathymetry as the data is read. We have yet to
+develop a completely satisfactory scheme, and it is
+likely that the functionality of the program will change.
 Please let us know if you find any other problems.

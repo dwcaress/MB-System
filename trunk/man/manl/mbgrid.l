@@ -1,4 +1,4 @@
-.TH mbgrid l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbgrid l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -164,13 +164,13 @@ option is ignored when the minimum or maximum filter gridding
 algorithms are used.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP
@@ -413,7 +413,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 4.17 1998-10-05 22:20:21 caress Exp $
+ Version $Id: mbgrid.l,v 4.18 1998-12-17 22:50:20 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.12 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.13 1998-12-17 22:50:20 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.11  1997/07/25  14:28:10  caress
  * Version 4.5beta2
  *
@@ -146,7 +149,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.12 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.13 1998-12-17 22:50:20 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -379,7 +382,7 @@ The default input and output streams are stdin and stdout.\n";
 		case 'l':
 			sscanf (optarg,"%d", &n_buffer_max);
 			if (n_buffer_max > MB_BUFFER_MAX
-			    || n_buffer_max < 50)
+			    || n_buffer_max <= 50)
 			    n_buffer_max = MBANGLECORRECT_BUFFER_DEFAULT;
 			flag++;
 			break;
@@ -786,45 +789,60 @@ The default input and output streams are stdin and stdout.\n";
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	if (ampkind == MBANGLECORRECT_AMP)
+	if (ampkind == MBANGLECORRECT_AMP
+		&& subtract_mode == MB_YES)
 		{
-		sprintf(comment,"Beam amplitude values corrected by dividing");
+		sprintf(comment,"Beam amplitude values corrected by subtracting");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	else if (ampkind == MBANGLECORRECT_AMP
+		&& subtract_mode == MB_NO)
+		{
+		sprintf(comment,"Beam amplitude values corrected by dividing by");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	else if (ampkind == MBANGLECORRECT_SS
+		&& subtract_mode == MB_YES)
+		{
+		sprintf(comment,"Sidescan values corrected by subtracting");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else
 		{
-		sprintf(comment,"Sidescan values corrected by dividing");
+		sprintf(comment,"Sidescan values corrected by dividing by");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	if (use_global_statics == MB_NO)
 		{
-		sprintf(comment,"  by a locally defined function of grazing angle.");
+		sprintf(comment,"  a locally defined function of grazing angle.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else
 		{
-		sprintf(comment,"  by a user supplied function of grazing angle.");
+		sprintf(comment,"  a user supplied function of grazing angle.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	sprintf(comment,"Control Parameters:");
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	sprintf(comment,"  MBIO data format:   %d",format);
+	sprintf(comment,"  MBIO data format:    %d",format);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	sprintf(comment,"  Input file:         %s",ifile);
+	sprintf(comment,"  Input file:          %s",ifile);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	sprintf(comment,"  Output file:        %s",ofile);
+	sprintf(comment,"  Output file:         %s",ofile);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	sprintf(comment,"  Longitude flip:     %d",lonflip);
+	sprintf(comment,"  Longitude flip:      %d",lonflip);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	sprintf(comment,"  Data kind:         %d",ampkind);
+	sprintf(comment,"  Data kind:           %d",ampkind);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	sprintf(comment,"  Default depth:      %f",depth_default);
+	sprintf(comment,"  Default depth:       %f",depth_default);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	sprintf(comment,"  Scaling factor:      %f",scale);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Smoothing dimension: %d",nsmooth);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	sprintf(comment,"  Length mode:        %d",length_mode);
+	sprintf(comment,"  Length mode:         %d",length_mode);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	sprintf(comment,"  Length max:         %f",length_max);
+	sprintf(comment,"  Length max:          %f",length_max);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (use_global_statics == MB_YES)
 		{
@@ -915,7 +933,7 @@ The default input and output streams are stdin and stdout.\n";
 				&& status == MB_SUCCESS 
 				&& ping[ndata].beams_bath > 0)
 				{
-				check_ss_for_bath(verbose, 
+				check_ss_for_bath(verbose-5, 
 					ping[ndata].beams_bath,
 					ping[ndata].beamflag,					
 					ping[ndata].bath,
@@ -930,7 +948,7 @@ The default input and output streams are stdin and stdout.\n";
 			if (status == MB_SUCCESS 
 				&& ping[ndata].beams_bath > 0)
 				{
-				set_bathyslope(verbose, 
+				set_bathyslope(verbose-5, 
 					nsmooth, 
 					ping[ndata].beams_bath,
 					ping[ndata].beamflag,
@@ -950,7 +968,7 @@ The default input and output streams are stdin and stdout.\n";
 				{
 				first_distance = MB_NO;
 				ping[ndata].distance = 0.0;
-				mb_coor_scale(verbose,ping[ndata].navlat,
+				mb_coor_scale(verbose-5,ping[ndata].navlat,
 					&mtodeglon,&mtodeglat);
 				}
 			else if (status == MB_SUCCESS)
@@ -996,6 +1014,7 @@ The default input and output streams are stdin and stdout.\n";
 			}
 		if (first == MB_YES && nbathdata > 0)
 			first = MB_NO;
+			
 
 		/* loop over all of the pings and beams */
 		for (j=jbeg;j<=jend;j++)
@@ -1059,7 +1078,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    if (ping[jj].ndepths > 1)
 				{
-				status = get_bathyslope(verbose,
+				status = get_bathyslope(verbose-5,
 				    ping[jj].ndepths,
 				    ping[jj].depths,
 				    ping[jj].depthacrosstrack,
@@ -1106,7 +1125,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    if (ping[jj].ndepths > 1)
 				{
-				status = get_bathyslope(verbose,
+				status = get_bathyslope(verbose-5,
 				    ping[jj].ndepths,
 				    ping[jj].depths,
 				    ping[jj].depthacrosstrack,
@@ -1221,7 +1240,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    if (ping[j].ndepths > 0)
 				{
-				status = get_bathyslope(verbose,
+				status = get_bathyslope(verbose-5,
 				    ping[j].ndepths,
 				    ping[j].depths,
 				    ping[j].depthacrosstrack,
@@ -1252,7 +1271,7 @@ The default input and output streams are stdin and stdout.\n";
 				    /bathy);
 				slopeangle = RTD*atan(slope);
 				angle = rawangle + slopeangle;
-				status = get_anglecorr(verbose, 
+				status = get_anglecorr(verbose-5, 
 					    nangles, angles, mean, 
 					    angle, &correction, &error);
 				if (subtract_mode == MB_YES)
@@ -1276,7 +1295,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    if (ping[j].ndepths > 1)
 				{
-				status = get_bathyslope(verbose,
+				status = get_bathyslope(verbose-5,
 				    ping[j].ndepths,
 				    ping[j].depths,
 				    ping[j].depthacrosstrack,
@@ -1300,6 +1319,7 @@ The default input and output streams are stdin and stdout.\n";
 				}
 			    if (use_slope == MB_NO)
 				slope = 0.0;
+				
 			    if (bathy > 0.0)
 				{
 				rawangle = RTD*
@@ -1307,7 +1327,7 @@ The default input and output streams are stdin and stdout.\n";
 				    /bathy);
 				slopeangle = RTD*atan(slope);
 				angle = rawangle + slopeangle;
-				status = get_anglecorr(verbose, 
+				status = get_anglecorr(verbose-5, 
 					nangles, angles, mean, 
 					angle, &correction, &error);
 				if (subtract_mode == MB_YES)
@@ -1834,43 +1854,62 @@ int	*error;
 	found_depth = MB_NO;
 	found_slope = MB_NO;
 	if (ndepths > 1)
-	if (acrosstrack >= depthacrosstrack[0]
-		&& acrosstrack <= depthacrosstrack[ndepths-1])
 	    {
-
-	    /* look for depth */
-	    idepth = -1;
-	    while (found_depth == MB_NO && idepth < ndepths - 2)
+	    
+	    if (acrosstrack < depthacrosstrack[0])
 		{
-		idepth++;
-		if (acrosstrack >= depthacrosstrack[idepth]
-		    && acrosstrack <= depthacrosstrack[idepth+1])
-		    {
-		    *depth = depths[idepth] 
-			    + (acrosstrack - depthacrosstrack[idepth])
-			    /(depthacrosstrack[idepth+1] 
-			    - depthacrosstrack[idepth])
-			    *(depths[idepth+1] - depths[idepth]);
-		    found_depth = MB_YES;
-		    *error = MB_ERROR_NO_ERROR;
-		    }
+		*depth = depths[0];
+		*slope = 0.0;
+		found_depth = MB_YES;
+		found_slope = MB_YES;
 		}
 
-	    /* look for slope */
-	    islope = -1;
-	    while (found_slope == MB_NO && islope < nslopes - 2)
+	    else if (acrosstrack > depthacrosstrack[ndepths-1])
 		{
-		islope++;
-		if (acrosstrack >= slopeacrosstrack[islope]
-		    && acrosstrack <= slopeacrosstrack[islope+1])
+		*depth = depths[ndepths-1];
+		*slope = 0.0;
+		found_depth = MB_YES;
+		found_slope = MB_YES;
+		}
+    
+	    else if (acrosstrack >= depthacrosstrack[0]
+		    && acrosstrack <= depthacrosstrack[ndepths-1])
+		{
+    
+		/* look for depth */
+		idepth = -1;
+		while (found_depth == MB_NO && idepth < ndepths - 2)
 		    {
-		    *slope = slopes[islope] 
-			    + (acrosstrack - slopeacrosstrack[islope])
-			    /(slopeacrosstrack[islope+1] 
-			    - slopeacrosstrack[islope])
-			    *(slopes[islope+1] - slopes[islope]);
-		    found_slope = MB_YES;
-		    *error = MB_ERROR_NO_ERROR;
+		    idepth++;
+		    if (acrosstrack >= depthacrosstrack[idepth]
+			&& acrosstrack <= depthacrosstrack[idepth+1])
+			{
+			*depth = depths[idepth] 
+				+ (acrosstrack - depthacrosstrack[idepth])
+				/(depthacrosstrack[idepth+1] 
+				- depthacrosstrack[idepth])
+				*(depths[idepth+1] - depths[idepth]);
+			found_depth = MB_YES;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		    }
+    
+		/* look for slope */
+		islope = -1;
+		while (found_slope == MB_NO && islope < nslopes - 2)
+		    {
+		    islope++;
+		    if (acrosstrack >= slopeacrosstrack[islope]
+			&& acrosstrack <= slopeacrosstrack[islope+1])
+			{
+			*slope = slopes[islope] 
+				+ (acrosstrack - slopeacrosstrack[islope])
+				/(slopeacrosstrack[islope+1] 
+				- slopeacrosstrack[islope])
+				*(slopes[islope+1] - slopes[islope]);
+			found_slope = MB_YES;
+			*error = MB_ERROR_NO_ERROR;
+			}
 		    }
 		}
 	    }

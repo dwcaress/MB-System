@@ -1,4 +1,4 @@
-.TH mbio l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbio l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
 
@@ -15,13 +15,13 @@ programs which are independent of particular data formats and to provide
 a standard approach to swath mapping sonar data i/o.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldgo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldgo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY  10964
+  Lamont-Doherty Earth Observatory
 
 .SH OVERVIEW
 \fBMBIO\fP handles three types of swath mapping data:  beam bathymetry,
@@ -299,6 +299,24 @@ The following swath mapping sonar data formats are supported in this version of
                           121 beams, variable pixels, 
                           ascii + binary, Simrad.
 
+    MBIO Data Format ID:  56
+    Format name:          MBF_EM300RAW
+    Informal Description: Simrad EM300/EM3000 multibeam 
+                          vendor format
+    Attributes:           Simrad EM300/EM3000, bathymetry, 
+                          amplitude, and sidescan,
+                          up to 254 beams, variable pixels, 
+                          ascii + binary, Simrad.
+
+    MBIO Data Format ID:  57
+    Format name:          MBF_EM300MBA
+    Informal Description: Simrad EM300/EM3000 multibeam 
+                          processing format
+    Attributes:           Simrad EM300/EM3000, bathymetry, 
+                          amplitude, and sidescan,
+                          up to 254 beams, variable pixels, 
+                          ascii + binary, MBARI.
+
     MBIO Data Format ID:  61
     Format name:          MBF_MR1PRHIG
     Informal Description: SOEST MR1 post processed format
@@ -373,9 +391,24 @@ The following swath mapping sonar data formats are supported in this version of
                           sidescan, binary, single files,
                           WHOI DSL.
 
+    MBIO Data Format ID:  121
+    Format name:          MBF_GSFGENMB
+    Informal Description: SAIC Generic Sensor Format (GSF)
+    Attributes:           variable beams,  bathymetry and 
+                          amplitude, binary, single files, 
+                          SAIC. 
+
+    MBIO Data Format ID:  131
+    Format name:          MBF_MSTIFFSS
+    Informal Description: MSTIFF sidescan format
+    Attributes:           variable pixels,  sidescan,
+                          binary TIFF variant, single files, 
+                          Sea Scan. 
+
 
 The institutional acronyms used above have the following meanings:
  	L-DEO	Lamont-Doherty Earth Observatory
+ 	MBARI	Monterey Bay Aquarium Research Institute
  	SIO	Scripps Institution of Oceanography
  	WHOI	Woods Hole Oceanographic Institution
  	URI	University of Rhode Island

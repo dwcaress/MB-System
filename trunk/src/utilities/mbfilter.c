@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.10 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbfilter.c,v 4.11 1998-12-17 22:50:20 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.9  1997/10/03  18:59:04  caress
  * Fixed problem with sort call.
  *
@@ -125,13 +128,16 @@ struct mbfilter_ping_struct
 	double	*dataprocess;
 	};
 
+/* compare function for qsort */
+int mb_double_compare();
+
 /*--------------------------------------------------------------------*/
 
 main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.10 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.11 1998-12-17 22:50:20 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -1557,7 +1563,7 @@ int	*error;
 	/* sort values and get median value */
 	if (n > 0)
 		{
-		sort(n, val-1);
+		qsort((char *)val,n,sizeof(double),mb_double_compare);
 		*hipass = val[0] - val[n/2] + off;
 		}
 
@@ -1747,7 +1753,7 @@ int	*error;
 	/* sort values and get median value */
 	if (n > 0)
 		{
-		sort(n, val-1);
+		qsort((char *)val,n,sizeof(double),mb_double_compare);
 		*smooth = val[n/2];
 		}
 
@@ -1994,46 +2000,6 @@ int	*error;
 		}
 
 	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-/* 	function sort sorts the data.  
- *	Uses the shell method from Numerical Recipes.
- */
-#define ALN2I 1.442695022
-#define TINY 1.0e-5
-int sort(n,r)
-int	n;
-double *r;
-{
-	int	status = MB_SUCCESS;
-	int	nn, m, j, i, lognb2;
-	double	tr;
-
-	if (n <= 0) 
-		{
-		status = MB_FAILURE;
-		return(status);
-		}
-
-	lognb2 = (log((double) n)*ALN2I + TINY);
-	m = n;
-	for (nn=1;nn<=lognb2;nn++)
-		{
-		m >>= 1;
-		for (j=m+1;j<=n;j++)
-			{
-			i = j - m;
-			tr = r[j];
-			while (i >= 1 && r[i] > tr)
-				{
-				r[i+m] = r[i];
-				i -= m;
-				}
-			r[i+m] = tr;
-			}
-		}
-		
 	return(status);
 }
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.11 1998-10-20 05:00:37 caress Exp $
+ *    $Id: mb_status.h,v 4.12 1998-12-17 23:01:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1998/10/20 05:00:37  caress
+ * Added some new data record types.
+ *
  * Revision 4.10  1998/10/07  22:48:34  caress
  * Fixed typo.
  *
@@ -73,6 +76,10 @@
  *
  *
  */
+
+/* include this code only once */
+#ifndef MB_STATUS_DEF
+#define MB_STATUS_DEF
 
 /* MB-system version id */
 #define	MB_VERSION	"4.6"
@@ -288,3 +295,6 @@ static char *unknown_error_msg[] =
 #define mb_beam_set_select_contact(F)		(F | 0x22)
 #define mb_beam_set_select_spare_1(F)		(F | 0x42)
 #define mb_beam_set_select_spare_2(F)		(F | 0x82)
+
+/* end conditional include */
+#endif

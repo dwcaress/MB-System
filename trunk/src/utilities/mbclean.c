@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.18 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbclean.c,v 4.19 1998-12-17 22:50:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.17  1997/10/03  18:44:36  caress
  * Fixed problem with sort call.
  *
@@ -159,13 +162,16 @@ struct bad_struct
 	double	bath;
 	};
 
+/* compare function for qsort */
+int mb_double_compare();
+
 /*--------------------------------------------------------------------*/
 
 main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.18 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.19 1998-12-17 22:50:20 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -923,7 +929,7 @@ char **argv;
 				    }
 				}
 			}
-			sort(nlist,list-1);
+			qsort((char *)list,nlist,sizeof(double),mb_double_compare);
 			median = list[nlist/2];
 			if (verbose >= 2)
 				{
@@ -1498,45 +1504,5 @@ char **argv;
 
 	/* end it all */
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-/* 	function sort sorts the data.  
- *	Uses the shell method from Numerical Recipes.
- */
-#define ALN2I 1.442695022
-#define TINY 1.0e-5
-int sort(n,r)
-int	n;
-double *r;
-{
-	int	status = MB_SUCCESS;
-	int	nn, m, j, i, lognb2;
-	double	tr;
-
-	if (n <= 0) 
-		{
-		status = MB_FAILURE;
-		return(status);
-		}
-
-	lognb2 = (log((double) n)*ALN2I + TINY);
-	m = n;
-	for (nn=1;nn<=lognb2;nn++)
-		{
-		m >>= 1;
-		for (j=m+1;j<=n;j++)
-			{
-			i = j - m;
-			tr = r[j];
-			while (i >= 1 && r[i] > tr)
-				{
-				r[i+m] = r[i];
-				i -= m;
-				}
-			r[i+m] = tr;
-			}
-		}
-
-	return(status);
 }
 /*--------------------------------------------------------------------*/

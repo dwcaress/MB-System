@@ -1,4 +1,4 @@
-.TH mbformat l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbformat l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbformat\fP -  List information about swath sonar data formats
 supported by the \fBMBIO\fP library.
@@ -16,13 +16,13 @@ associated with \fBmbio\fP format id's.  If no format id is specified,
 By default, the listing includes a brief description of each format.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

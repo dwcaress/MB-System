@@ -1,4 +1,4 @@
-.TH mbrollbias l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbrollbias l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbrollbias\fP - Assess roll bias of swath sonar sonar systems.
 
@@ -30,13 +30,13 @@ giving rise to shallow bathymetry to port and deep bathymetry
 to starboard.  Results are written to stdout.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP
@@ -106,7 +106,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 4.11 1998-10-05 22:20:21 caress Exp $
+ Version $Id: mbrollbias.l,v 4.12 1998-12-17 22:50:20 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:

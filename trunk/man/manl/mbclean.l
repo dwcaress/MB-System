@@ -1,4 +1,4 @@
-.TH mbclean l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbclean l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbclean\fP - Identifies and flags bad beams in swath sonar bathymetry data.
 
@@ -49,15 +49,17 @@ The default input and output streams
 are stdin and stdout.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Alberto Malinverno (now at Schlumberger)
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Lamont-Doherty Earth Observatory
+  Lamont-Doherty Earth Observatory
 .br
-Palisades, NY 10964
+Alberto Malinverno
+.br
+  Schlumberger-Doll
 
 .SH OPTIONS
 .TP
@@ -249,7 +251,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.14 1998-10-05 22:20:21 caress Exp $
+ 	Version $Id: mbclean.l,v 4.15 1998-12-17 22:50:20 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

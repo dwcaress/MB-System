@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 4.10 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbmask.c,v 4.11 1998-12-17 22:50:20 caress Exp $
  *
  *    Copyright (c) 1993,1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,6 +25,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1998/10/05 19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.9  1997/09/15  19:11:06  caress
  * Real Version 4.5
  *
@@ -94,7 +97,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 4.10 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 4.11 1998-12-17 22:50:20 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -577,17 +580,20 @@ char **argv;
 					if (mask_version == 1
 					    && beamflag[j] == MB_FLAG_NULL)
 					    {
-					    beamflag[j] = MB_FLAG_NULL;
+					    bath_mask[j] = MB_FLAG_NULL;
+					    data_use = MB_YES;
 					    }
 					else if (mb_beam_ok(beamflag[j])
 					    && !mb_beam_ok(bath_mask[j]))
 					    {
 					    flagged++;
+					    data_use = MB_YES;
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && mb_beam_ok(bath_mask[j]))
 					    {
 					    unflagged++;
+					    data_use = MB_YES;
 					    }
 					beamflag[j] = bath_mask[j];
 					}
@@ -740,7 +746,7 @@ int	*error;
 	    full flagging and selecting of beams */
 	else
 	    {
-	    if ((status = fread(time_i,sizeof(int),7,fp)) 
+	    if ((status = fread(time_i,1,7*sizeof(int),fp)) 
 		    == 7 * sizeof(int))
 		    {
 		    mb_get_time(verbose,time_i,time_d,error);

@@ -1,4 +1,4 @@
-.TH mbm_vrefcheck l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_vrefcheck l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_vrefcheck\fP - Macro to generate plot of crosstrack seafloor slope
 from a swath sonar file.  The noise in this time series largely reflects
@@ -29,15 +29,17 @@ The plot is automatically rasterized and sent to a Novajet plotter
 (assuming one is on the R/V Ewing).
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Suzanne H. O'Hara (sohara@lamont.ldeo.columbia.edu)
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Lamont-Doherty Earth Observatory
+  Lamont-Doherty Earth Observatory
 .br
-Palisades, NY 10964
+Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

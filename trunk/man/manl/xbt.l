@@ -1,4 +1,4 @@
-.TH xbt l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH xbt l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBxbt\fP - Overview of \fBxbt\fP proceedures on the R/V Ewing.
 
@@ -50,14 +50,11 @@ been moved to the logging computer it is converted to sound velocity
 with \fImbm_xbt\fP and then merged with historical data from the
 Levitus database produced with \fImblevitus\fP and entered into
 Hydrosweep as sound velocity profile.
+
 .SH AUTHORSHIP
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu) 
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Lamont-Doherty Earth Observatory
-.br
-Palisades, NY 10964
-.br
-wrote the man page.
+  Lamont-Doherty Earth Observatory
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbm_xbt\fP(l), 

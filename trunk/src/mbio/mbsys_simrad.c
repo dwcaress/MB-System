@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.15 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.16 1998-12-17 23:01:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -44,6 +44,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.14  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *
@@ -970,7 +973,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.15 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.16 1998-12-17 23:01:15 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1104,7 +1107,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.15 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.16 1998-12-17 23:01:15 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2640,7 +2643,8 @@ int	*error;
 	copy = (struct mbsys_simrad_struct *) copy_ptr;
 	
 	/* check if survey data needs to be copied */
-	if (store->ping != NULL)
+	if (store->kind == MB_DATA_DATA 
+		&& store->ping != NULL)
 		{
 		/* make sure a survey data structure exists to
 			be copied into */
@@ -2654,18 +2658,24 @@ int	*error;
 		/* save pointer value */
 		ping_save = (char *)copy->ping;
 		}
+	else
+		ping_save = NULL;
 
 	/* copy the main structure */
 	*copy = *store;
 	
 	/* if needed copy the survey data structure */
-	if (store->ping != NULL && status == MB_SUCCESS)
+	if (store->kind == MB_DATA_DATA 
+		&& store->ping != NULL 
+		&& status == MB_SUCCESS)
 		{
 		copy->ping = (struct mbsys_simrad_survey_struct *) ping_save;
 		ping_store = (struct mbsys_simrad_survey_struct *) store->ping;
 		ping_copy = (struct mbsys_simrad_survey_struct *) copy->ping;
 		*ping_copy = *ping_store;
 		}
+	else
+		copy->ping = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -1,4 +1,4 @@
-.TH mbm_rollerror l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_rollerror l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_rollerror\fP - Macro to read a swath sonar bathymetry file, calculate the noise in the vertical reference used by the sonar, and generate a file containing roll corrections which can be applied to the data.
 
@@ -26,15 +26,18 @@ The corrections can be applied to Hydrosweep data during the calculation
 of bathymetry from travel times using \fBmbbath\fP.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Suzanne H. O'Hara (sohara@lamont.ldeo.columbia.edu)
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Lamont-Doherty Earth Observatory
+  Lamont-Doherty Earth Observatory
 .br
-Palisades, NY 10964
+Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

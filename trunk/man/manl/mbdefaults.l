@@ -1,4 +1,4 @@
-.TH mbdefaults l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbdefaults l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbdefaults\fP - Set or list default mbio parameters for reading and writing swath sonar data
 
@@ -24,13 +24,13 @@ is given, then \fBmbdefaults\fP will list the current default values
 (set by \fBmbio\fP if no .mbio_defaults file exists).
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

@@ -1,4 +1,4 @@
-.TH mbnavedit l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbnavedit l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
@@ -28,13 +28,13 @@ The edited data is usually output to a file, but the program
 can be operated in a "browse" mode where no data is output.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .B \-B

@@ -1,4 +1,4 @@
-.TH mbmask l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbmask l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbmask\fP, \fBmbgetmask\fP - Extract multibeam data flags from one
 file and apply to another.
@@ -36,13 +36,13 @@ The mask is keyed to the times of the individual pings; only exactly
 corresponding pings will be affected by the mask.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH MBGETMASK OPTIONS
 .TP

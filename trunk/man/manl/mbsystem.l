@@ -1,4 +1,4 @@
-.TH mbsystem l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbsystem l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
@@ -48,13 +48,13 @@ operating system, and PC's running under the public domain
 LINUX operatings system.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH LIST OF MB-SYSTEM PROGRAMS AND MACROS
 See the individual manual pages for detailed information about 
@@ -118,6 +118,9 @@ These are the current MB-system programs:
  		swath sonar system using two pieces 
  		of coincident bathymetry data 
  		collected with opposing ship headings.
+ \fBmbsimradmakess\fP:  Regenerate sidescan imagery 
+ 		from the raw amplitude samples contained 
+ 		in data from Simrad EM300 and EM3000 sonars. 
  \fBmbswath\fP:  Generate GMT compatible Postscript 
  		color and color shaded relief swath plots.
  \fBmbtide\fP:  Corrects swath sonar bathymetry

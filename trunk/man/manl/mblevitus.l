@@ -1,4 +1,4 @@
-.TH mblevitus l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mblevitus l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmblevitus\fP - Create a water velocity profile which is representative
 of the mean annual water column for a specified 1 degree by 1 degree
@@ -38,13 +38,13 @@ If the specified location is
 subaerial, then no water velocity profile is calculated.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

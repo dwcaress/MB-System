@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 4.2 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_define.h,v 4.3 1998-12-17 23:01:15 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1998/10/05 17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.1  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *
@@ -26,6 +29,10 @@
  *
  *
  */
+ 
+/* include this code only once */
+#ifndef MB_DEFINE_DEF
+#define MB_DEFINE_DEF
  
 /* type definitions of signed and unsigned char */
 typedef unsigned char	mb_u_char;
@@ -68,3 +75,6 @@ typedef signed char	mb_s_char;
 /* min max define */
 #define	MIN(A, B)	((A) < (B) ? (A) : (B))
 #define	MAX(A, B)	((A) > (B) ? (A) : (B))
+
+/* end conditional include */
+#endif
