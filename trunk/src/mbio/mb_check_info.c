@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.5 2002-04-08 20:59:38 caress Exp $
+ *    $Id: mb_check_info.c,v 5.6 2002-05-02 03:55:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/04/08 20:59:38  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.4  2002/04/06 02:43:39  caress
  * Release 5.0.beta16
  *
@@ -78,12 +81,12 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.5 2002-04-08 20:59:38 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.6 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
 	char	line[128];
-	int	nrecords;
+	int	nrecords, nrecords_read;
 	double	lon_min, lon_max;
 	double	lat_min, lat_max;
 	int	mask_nx, mask_ny;
@@ -93,6 +96,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 	char	*startptr, *endptr;
 	FILE	*fp;
 	char	*stdin_string = "stdin";
+	int	nscan;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -133,7 +137,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		if ((fp = fopen(file_inf,"r")) != NULL)
 		    {
 		    /* initialize the parameters */
-		    nrecords = 0;
+		    nrecords = -1;
 		    lon_min = 0.0;
 		    lon_max = 0.0;
 		    lat_min = 0.0;
@@ -145,8 +149,12 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    while (fgets(line, 128, fp) != NULL)
 			{
 			if (strncmp(line, "Number of Records:", 18) == 0)
-			    sscanf(line, "Number of Records: %d", 
-				    &nrecords);
+			    {
+			    nscan = sscanf(line, "Number of Records: %d", 
+					    &nrecords_read);
+			    if (nscan == 1)
+				nrecords = nrecords_read;
+			    }
 			else if (strncmp(line, "Minimum Longitude:", 18) == 0)
 			    sscanf(line, "Minimum Longitude: %lf Maximum Longitude: %lf", 
 				    &lon_min, &lon_max);
@@ -248,6 +256,17 @@ int mb_check_info(int verbose, char *file, int lonflip,
                             fprintf(stderr,"dbg4      lat_min: %f\n", lat_min);
                             fprintf(stderr,"dbg4      lat_max: %f\n", lat_max);
 			    }
+			}
+			
+		    /* else if no data records in inf file 
+			treat file as out of bounds */
+		    else if (nrecords == 0)
+			{
+			*file_in_bounds = MB_NO;
+      
+             		/*print debug statements */
+                    	if (verbose >= 4)
+                        	fprintf(stderr,"dbg4  The inf file shows zero records so out of bounds...\n");
 			}
 			
 		    /* else if no data assume inf file is botched so

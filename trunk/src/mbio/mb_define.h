@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.15 2002-04-08 20:59:38 caress Exp $
+ *    $Id: mb_define.h,v 5.16 2002-05-02 04:00:41 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2002/04/08 20:59:38  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.14  2002/04/06 02:43:39  caress
  * Release 5.0.beta16
  *
@@ -105,6 +108,10 @@
 
 /* maximum size of SVP profiles */
 #define MB_SVP_MAX 1024
+
+/* file mode (read or write) */
+#define	MB_FILEMODE_READ	0
+#define	MB_FILEMODE_WRITE	1
 
 /* types of  files used by swath sonar data formats */
 #define	MB_FILETYPE_NORMAL	1

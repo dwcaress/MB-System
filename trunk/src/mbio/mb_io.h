@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.7 2001-10-12 21:10:41 caress Exp $
+ *    $Id: mb_io.h,v 5.8 2002-05-02 04:00:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/10/12 21:10:41  caress
+ * Added interpolation of attitude data.
+ *
  * Revision 5.6  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -143,6 +146,7 @@ struct mb_io_struct
 	char	format_description[MB_DESCRIPTION_LENGTH];
 	int	numfile;	/* the number of parallel files required for i/o */
 	int	filetype;	/* type of files used (normal, xdr, or gsf) */
+	int	filemode;	/* file mode (read or write) */
 	int	variable_beams; /* if true then number of beams variable */
 	int	traveltime;	/* if true then traveltime and angle data supported */
 	int	beam_flagging;	/* if true then beam flagging supported */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.9 2001-11-16 01:25:20 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.10 2002-05-02 03:53:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001/11/16 01:25:20  caress
+ * Added info mode.
+ *
  * Revision 5.8  2001/09/17  17:00:48  caress
  * Added local median filter, angle filter, time display toggle.
  *
@@ -276,7 +279,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.9 2001-11-16 01:25:20 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.10 2002-05-02 03:53:45 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -460,7 +463,6 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 	char	*function_name = "mbedit_init";
 	int	status = MB_SUCCESS;
 	int	fileflag = 0;
-	int	form;
 	int	i;
 
 	/* parsing variables */
@@ -750,7 +752,6 @@ int mbedit_set_filters(int f_m, int f_m_t,
 	/* local variables */
 	char	*function_name = "mbedit_set_filters";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1021,7 +1022,6 @@ int mbedit_get_startup(
 	/* local variables */
 	char	*function_name = "mbedit_get_startup";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1434,8 +1434,6 @@ int mbedit_action_done(
 	/* local variables */
 	char	*function_name = "mbedit_action_done";
 	int	status = MB_SUCCESS;
-	int	save_nloaded = 0;
-	int	save_ndumped = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1501,8 +1499,6 @@ int mbedit_action_quit(
 	/* local variables */
 	char	*function_name = "mbedit_action_quit";
 	int	status = MB_SUCCESS;
-	int	save_nloaded = 0;
-	int	save_ndumped = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1665,7 +1661,6 @@ int mbedit_action_plot(
 	/* local variables */
 	char	*function_name = "mbedit_action_plot";
 	int	status = MB_SUCCESS;
-	int	new_id;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2490,9 +2485,7 @@ int mbedit_action_mouse_info(
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_info";
 	int	status = MB_SUCCESS;
-	int	zap_box, zap_ping;
 	int	ix, iy, range, range_min;
-	int	found;
 	int	iping, jbeam;
 	int	i, j;
 
@@ -2770,7 +2763,7 @@ int mbedit_action_bad_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_bad_ping";
 	int	status = MB_SUCCESS;
-	int	i, j;
+	int	j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2874,7 +2867,7 @@ int mbedit_action_good_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_good_ping";
 	int	status = MB_SUCCESS;
-	int	i, j;
+	int	j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2980,7 +2973,7 @@ int mbedit_action_left_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_left_ping";
 	int	status = MB_SUCCESS;
-	int	i, j;
+	int	j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3084,7 +3077,7 @@ int mbedit_action_right_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_right_ping";
 	int	status = MB_SUCCESS;
-	int	i, j;
+	int	j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3188,7 +3181,7 @@ int mbedit_action_zero_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_zero_ping";
 	int	status = MB_SUCCESS;
-	int	i, j;
+	int	j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3292,7 +3285,6 @@ int mbedit_action_unflag_view(
 	/* local variables */
 	char	*function_name = "mbedit_action_unflag_view";
 	int	status = MB_SUCCESS;
-	int	found;
 	int	i, j;
 
 	/* print input debug statements */
@@ -3319,14 +3311,11 @@ int mbedit_action_unflag_view(
 		/* unflag all flagged beams */
 		for (i=current_id;i<current_id+nplot;i++)
 			{
-			found = MB_NO;
 			for (j=0;j<ping[i].beams_bath;j++)
 			    {
 			    if (!mb_beam_ok(ping[i].beamflag[j])
 				&& ping[i].beamflag[j] != MB_FLAG_NULL)
 				    {
-				    found = MB_YES;
-
 				    /* write edit to save file */
 				    if (sofile_open == MB_YES)
 					mbedit_save_edit(
@@ -3411,7 +3400,6 @@ int mbedit_action_unflag_all(
 	/* local variables */
 	char	*function_name = "mbedit_action_unflag_all";
 	int	status = MB_SUCCESS;
-	int	found;
 	int	i, j;
 
 	/* print input debug statements */
@@ -3438,14 +3426,11 @@ int mbedit_action_unflag_all(
 		/* unflag all flagged beams from current point in buffer */
 		for (i=current_id;i<nbuff;i++)
 		    {
-		    found = MB_NO;
 		    for (j=0;j<ping[i].beams_bath;j++)
 			{
 			if (!mb_beam_ok(ping[i].beamflag[j])
 			    && ping[i].beamflag[j] != MB_FLAG_NULL)
 			    {
-			    found = MB_YES;
-
 			    /* write edit to save file */
 			    if (sofile_open == MB_YES)
 				mbedit_save_edit(
@@ -3528,8 +3513,7 @@ int mbedit_action_filter_all(
 	/* local variables */
 	char	*function_name = "mbedit_action_filter_all";
 	int	status = MB_SUCCESS;
-	int	found;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3612,9 +3596,8 @@ int mbedit_filter_ping(int iping)
 	/* local variables */
 	char	*function_name = "mbedit_filter_ping";
 	int	status = MB_SUCCESS;
-	int	found;
 	int	nbathsum, nbathlist;
-	double	bathsum, bathmean, bathmedian;
+	double	bathsum, bathmedian;
 	int	start, end;
 	double	angle;
 	int	istart, iend, jstart, jend, jbeam;
@@ -3640,13 +3623,10 @@ int mbedit_filter_ping(int iping)
 		if (status == MB_SUCCESS)
 		    {
 		    /* clear previous filter flags */
-		    found = MB_NO;
 		    for (j=0;j<ping[iping].beams_bath;j++)
 		    	{
 		    	if (mb_beam_check_flag_filter2(ping[iping].beamflag[j]))
 		    		{
-			    	found = MB_YES;
-
 			    	/* write edit to save file */
 			    	if (sofile_open == MB_YES)
 				    mbedit_save_edit(
@@ -3676,7 +3656,6 @@ int mbedit_filter_ping(int iping)
 		    		nbathlist = 0;
 		    		nbathsum = 0;
 		    		bathsum = 0.0;
-		    		bathmean = 0.0;
 		    		bathmedian = 0.0;
 				istart = MAX(iping - filter_medianspike_ltrack / 2, 0);
 				iend = MIN(iping + filter_medianspike_ltrack / 2, nbuff - 1);
@@ -3695,8 +3674,6 @@ int mbedit_filter_ping(int iping)
 					    }
 					}
 				    }
-				if (nbathsum > 0)
-				    bathmean = bathsum / nbathsum;
 				if (nbathlist > 0)
 				    {
 				    qsort((char *)bathlist,nbathlist,sizeof(double),mb_double_compare);
@@ -3705,8 +3682,6 @@ int mbedit_filter_ping(int iping)
 			    	if (100 * fabs(ping[iping].bath[jbeam] - bathmedian) / ping[iping].altitude
 			    	        > filter_medianspike_threshold)
 				    {
-			    	    found = MB_YES;
-
 			    	    /* write edit to save file */
 			    	    if (sofile_open == MB_YES)
 					mbedit_save_edit(
@@ -3737,8 +3712,6 @@ int mbedit_filter_ping(int iping)
 		 	    if (mb_beam_ok(ping[iping].beamflag[j])
 		 	    	&& ping[iping].bathacrosstrack[j] > 0.0)
 		 	    	{
-			        found = MB_YES;
-
 			   	/* write edit to save file */
 			        if (sofile_open == MB_YES)
 					mbedit_save_edit(
@@ -3762,8 +3735,6 @@ int mbedit_filter_ping(int iping)
 		 	    if (mb_beam_ok(ping[iping].beamflag[j])
 		 	    	&& ping[iping].bathacrosstrack[j] < 0.0)
 		 	    	{
-			        found = MB_YES;
-
 			   	/* write edit to save file */
 			        if (sofile_open == MB_YES)
 					mbedit_save_edit(
@@ -3794,8 +3765,6 @@ int mbedit_filter_ping(int iping)
 			    	{
 			    	if (mb_beam_ok(ping[iping].beamflag[j]))
 				    {
-			    	    found = MB_YES;
-
 			    	    /* write edit to save file */
 			    	    if (sofile_open == MB_YES)
 					mbedit_save_edit(
@@ -3822,8 +3791,6 @@ int mbedit_filter_ping(int iping)
 			    	if ((j <= filter_cutbeam_end || j >= filter_cutbeam_begin)
 				    && mb_beam_ok(ping[iping].beamflag[j]))
 				    {
-			    	    found = MB_YES;
-
 			    	    /* write edit to save file */
 			    	    if (sofile_open == MB_YES)
 					mbedit_save_edit(
@@ -3859,8 +3826,6 @@ int mbedit_filter_ping(int iping)
 				    if (angle >= filter_cutangle_begin
 				    	&& angle <= filter_cutangle_end)
 				    	{
-			    	    	found = MB_YES;
-
 			    	    	/* write edit to save file */
 			    	    	if (sofile_open == MB_YES)
 						mbedit_save_edit(
@@ -3893,8 +3858,6 @@ int mbedit_filter_ping(int iping)
 				    if (angle >= filter_cutangle_begin
 					|| angle <= filter_cutangle_end)
 				    	{
-			    	    	found = MB_YES;
-
 			    	    	/* write edit to save file */
 			    	    	if (sofile_open == MB_YES)
 						mbedit_save_edit(
@@ -3940,7 +3903,6 @@ int mbedit_get_format(char *file, int *form)
 	int	status = MB_SUCCESS;
 	char	tmp[MB_PATH_MAXLINE];
 	int	tform;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3989,10 +3951,6 @@ int mbedit_open_file(char *file, int form, int savemode)
 	int	sbeam;
 	int	saction;
 	int	i, j, insert;
-
-	/* time, user, host variables */
-	time_t	right_now;
-	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4464,9 +4422,9 @@ int mbedit_load_data(int buffer_size,
 	/* local variables */
 	char	*function_name = "mbedit_load_data";
 	int	status = MB_SUCCESS;
-	int	found, apply;
+	int	apply;
 	int	firstedit, lastedit;
-	int	nbath, namp, nss;
+	int	namp, nss;
 	char	string[50];
 	int	i, j, k;
 
@@ -4613,8 +4571,6 @@ int mbedit_load_data(int buffer_size,
 		firstedit = 0;
 		for (i = 0; i < nbuff; i++)
 		    {
-		    found = MB_NO;
-			    
 		    /* find first and last edits for this ping */
 		    lastedit = firstedit - 1;
 		    for (j = firstedit; j < neditsave && ping[i].time_d >= editsave_time_d[j]; j++)
@@ -4666,8 +4622,6 @@ int mbedit_load_data(int buffer_size,
 				ping[i].beamflag[k] = MB_FLAG_NULL;
 				apply = MB_YES;
 				}
-			    if (apply == MB_YES)
-				found = MB_YES;
 				
 			    /* write saved edit to current edit save file */
 			    if (apply == MB_YES && sofile_open == MB_YES)
@@ -4776,9 +4730,9 @@ int mbedit_plot_all(
 	/* local variables */
 	char	*function_name = "mbedit_plot_all";
 	int	status = MB_SUCCESS;
-	int	i, j, k, ii;
+	int	i, j;
 	int	nbathsum,  nbathlist;
-	double	bathsum, bathmean, bathmedian;
+	double	bathsum, bathmedian;
 	double	xtrack_max;
 	int	ndec, maxx;
 	double	dxscale, dyscale;
@@ -4788,7 +4742,7 @@ int mbedit_plot_all(
 	int	xx, vx, yy, vy;
 	int	swidth, sascent, sdescent;
 	int	xcen;
-	int	y, dy, first, xold, yold;
+	int	y, dy;
 	char	string[MB_PATH_MAXLINE];
 	char	*string_ptr;
 	int	fpx, fpdx, fpy, fpdy;
@@ -4870,8 +4824,6 @@ int mbedit_plot_all(
 				}
 			}
 		}
-	if (nbathsum > 0)
-		bathmean = bathsum/nbathsum;
 	if (nbathlist > 0)
 		{
 		qsort((char *)bathlist,nbathlist,sizeof(double),mb_double_compare);
@@ -5098,7 +5050,6 @@ int mbedit_plot_beam(int iping, int jbeam)
 	/* local variables */
 	char	*function_name = "mbedit_plot_beam";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5392,7 +5343,6 @@ int mbedit_plot_info()
 	char	string[MB_PATH_MAXLINE];
 	int	sascent, sdescent, swidth;
 	int	xcen;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5458,7 +5408,6 @@ int mbedit_unplot_beam(int iping, int jbeam)
 	/* local variables */
 	char	*function_name = "mbedit_unplot_beam";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5569,7 +5518,6 @@ int mbedit_unplot_info()
 	char	string[MB_PATH_MAXLINE];
 	int	sascent, sdescent, swidth;
 	int	xcen;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5653,7 +5601,7 @@ int mbedit_action_goto(
 	int	status = MB_SUCCESS;
 	double	ttime_d;
 	int	found;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 5.2 2001-07-20 00:31:11 caress Exp $
+ *    $Id: mb_read.c,v 5.3 2002-05-02 03:55:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/03/22 20:45:56  caress
  * Trying to make 5.0.beta0...
  *
@@ -142,9 +145,9 @@ int mb_read(int verbose, void *mbio_ptr,
 		char *comment, int *error)
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 5.2 2001-07-20 00:31:11 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 5.3 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_read";
-	int	status;
+	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	char	*store_ptr;
 	int	i;
