@@ -2,45 +2,98 @@ April 16, 1993
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 3.1  1993/04/22  16:09:21  dale
+# Update and clarify the text, add third reason
+#
 # Revision 3.0  1993/04/22  16:04:29  dale
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 3.1 1993-04-22 16:09:21 dale Exp $
+RCS ID: $Id: README,v 3.2 1993-08-25 14:41:41 dale Exp $
 
-MBSYSTEM 3.00 PRELIMINARY (ALPHA--) RELEASE
+MBSYSTEM 3.20 RELEASE Notes:
+----------------------------
 
-This directory structure contains a preliminary release
-of the MBSYSTEM software package for processing and display
-of multibeam data.  There are undoubtably numerous bugs
-in this software - the user should beware (and let us
-know about it!).
+This directory structure contains a release of the MBSYSTEM software
+package for processing and display of multibeam data.  There are
+undoubtably numerous bugs in this software - the user should beware
+(and let us know about it!).
 
-This software is being distributed (as an ALPHA release) at this time
-for three purposes:
-	1. So that future Hydrosweep users on the
-	   R/V Ewing can become familiar with the
-	   software they will use on the ship.
+"Bugs": 
+------- 
+The program mbedit should not be made from scratch
+unless the user has access to the development tool Devguide (sold by
+Sun Microsystems or SunSoft?) - an executable (for Sun Sparc) has been
+left in the src/mbedit directory. See further discussion below.
 
-	2. So that users desperately needing to process
-           existing Hydrosweep data will be able
-	   to use the new functionality of the
-	   MBSYSTEM version 3.
+Mbedit displays cross profiles with port-most beams to the right.
 
-	3. So that we can get early feed-back from users to make 
-	   sure that problems are caught early and to open a dialog
-	   with real users.
+The program mblevitus depends on a 16 MByte data file that is not
+included in the MB-System tarfile.  It is in the 'annual.Z' file which
+is available by anonymous ftp from lamont.ldgo.columbia.edu in the
+swath_data subdirectory.
 
-The program mbedit should not be made from scratch unless the user has
-access to the development tool Devguide (sold by Sun Microsystems or
-SunSoft?) - an executable (for Sun Sparc) has been left in the
-src/mbedit directory.
 
-The program mblevitus depends on a 16 MByte data file that
-is not included in this tarfile.  If users really need to
-have a starting water velocity profile, they should contact
-us for a copy of this file (or let us run mblevitus for you
-and send you the profile).
+"Supported" Platforms:
+----------------------
+        We are currently running MB-System 3.2 on Sun 10/30s on the
+Ewing (as well as IPX, SS-I and SS-II) under SunOS 4.1X and at Lamont.
+We have yet not attempted to port to Solaris yet, but probably will
+after it is thought to be stable. Since Lamont has a huge collection
+of (mostly SPARC) Suns, its a fair bet that we will be using Suns in
+the forseeable future.
+
+Other required software:
+------------------------
+        You will need some other readily available code to use
+MB-System fully.  MB-System uses the GMT-2 system for lots of its
+graphics and GMT-2 requires NetCDF. Some of the MB-System utilities
+(macros) are written in in perl. If you don't have perl the trival way
+to get it is buy a copy of the O'Rielly "Unix Power Tools" book and
+install it from the CD-ROM. Alternatively, it is freely available via
+anonymous ftp from most archive sites, and it is easy to build and
+install.
+
+Xview/Motif/COSE maddness:
+--------------------------
+        You should be aware that the interactive MB-System graphics
+applications (hsvelocitytool and mbedit) are based on the Xview
+toolkit and written with Sun's DevGuide (rip) GUI building tool.  We
+suggest that you not buy DevGuide since Sun has announced that (as
+part of the COSE response to NT) it is switching to some Motif-like
+thing that COSE will proably call by some other name. Its not clear
+exactly what Sun is going to do, but we assume that they are going to
+re-market some commercial tool.
+        We (back at Lamont, not out here in our spare time ;-) ) are
+presently evaluating Motif GUI builders with the intent of getting
+something soon and would be intersted in any suggestions based on
+experience at your organizaion. 
+        For the short term, we suggest that you run the binaries
+provided in the 3.2 distribution on Suns (if you can) while the GUI
+builder issue settles out.
+
+
+PORTING:
+--------
+	We have not made any particular effort to insure that this
+version of MB-System is portable across vaious varients of Unix-based
+operating systems. (NSF elected to provide only about 1/2 of the funds
+we ask for in the first year so portability and enhanced documentation
+in the form of cookbooks haven't happened yet.) Earlier versions were
+compiled and run with minimal effort on SGI 4D/20 under IRIX.
+	Other than the graphial tools, MB-System is not tightly
+coupled to any particular OS. We hope to make future releases portable
+and would be quite pleased to get feedback from porting efforts so
+that we can fold that back into the package. Eventually, we expect
+that the code will be POSIX compliant and we will be able to stay in
+the mainstream of the evolution of GUIs and WIMPS.
+ 
+Contributions:
+--------------
+	We are actively soliciting contributions for inclusion in the
+MB-System . In particular support for additional data formats in the
+mbio.a library such as EM-12, HS-MD, MR-1, etc would helpful. More,
+cleaverer ideas for 'mbclean', etc.
 
 Good Luck!!
 
