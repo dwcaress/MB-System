@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.13 1999-01-01 23:41:06 caress Exp $
+ *    $Id: mb_status.h,v 4.14 1999-05-06 23:45:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1999/01/01  23:41:06  caress
+ * MB-System version 4.6beta6
+ *
  * Revision 4.12  1998/12/17  23:01:15  caress
  * MB-System version 4.6beta4
  *
@@ -281,7 +284,7 @@ static char *unknown_error_msg[] =
 #define mb_beam_set_flag_null(F)		(MB_FLAG_NULL)
 #define mb_beam_set_flag_manual(F)		(F | 0x05)
 #define mb_beam_set_flag_filter(F)		(F | 0x09)
-#define mb_beam_set_flag_gt_1x_iho(F)		(F | 0x10)
+#define mb_beam_set_flag_gt_1x_iho(F)		(F | 0x11)
 #define mb_beam_set_flag_gt_2x_iho(F)		(F | 0x21)
 #define mb_beam_set_flag_footprint(F)		(F | 0x41)
 #define mb_beam_check_select(F)			((int)(F & MB_SELECT_SELECT))
