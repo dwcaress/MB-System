@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c,v 4.5 1998-10-05 19:19:24 caress Exp $
+ *	$Id: mbdefaults.c,v 4.6 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -19,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.4  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -69,7 +74,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 4.5 1998-10-05 19:19:24 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 4.6 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
 	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";

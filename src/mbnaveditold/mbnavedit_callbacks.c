@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.12 2000-09-30 07:04:05 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.13 2000-09-30 07:04:44 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -8,6 +8,9 @@
  *      Moss Landing, CA 95039
  *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
+ *    David W. Caress (caress@mbari.org)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
@@ -21,6 +24,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/09/30  07:04:05  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.11  2000/08/28  22:45:11  caress
  * About to kick off new version.
  *

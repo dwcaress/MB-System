@@ -1,13 +1,15 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.25 1999-12-29 00:35:11 caress Exp $
+ *    $Id: mbmerge.c,v 4.26 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -21,6 +23,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.25  1999/12/29  00:35:11  caress
+ * Release 4.6.8
+ *
  * Revision 4.24  1999/10/21  22:42:10  caress
  * Added new nav format.
  *
@@ -142,7 +147,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.25 1999-12-29 00:35:11 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.26 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 4.11 1999-08-08 04:17:40 caress Exp $
+ *    $Id: mbgetmask.c,v 4.12 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -23,6 +25,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1999/08/08  04:17:40  caress
+ * Unknown changes.
+ *
  * Revision 4.10  1999/03/31  18:33:06  caress
  * MB-System 4.6beta7
  *
@@ -92,7 +97,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 4.11 1999-08-08 04:17:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetmask.c,v 4.12 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBGETMASK";
 	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
 	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";

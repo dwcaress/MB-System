@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.19 1998-12-17 22:50:20 caress Exp $
+ *    $Id: mbclean.c,v 4.20 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -26,6 +28,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1998/12/17  22:50:20  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.18  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -171,7 +176,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.19 1998-12-17 22:50:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.20 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";

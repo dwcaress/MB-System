@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.16 2000-06-06 20:32:46 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.17 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1995 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1995, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -45,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  2000/06/06  20:32:46  caress
+ * Now handles amplitude flagging using beamflags.
+ *
  * Revision 4.15  1999/12/29  00:35:11  caress
  * Release 4.6.8
  *
@@ -158,7 +163,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.16 2000-06-06 20:32:46 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.17 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\

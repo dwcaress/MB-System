@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.48 2000-09-11 20:10:02 caress Exp $
+ *    $Id: mbgrid.c,v 4.49 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 1995, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -38,6 +40,10 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.48  2000/09/11  20:10:02  caress
+ * Linked to new datalist parsing functions. Now supports recursive datalists
+ * and comments in datalists.
+ *
  * Revision 4.47  2000/06/20  21:00:19  caress
  * Moved execution of mbm_grdplot to after deallocation of array memory.
  *
@@ -286,7 +292,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.48 2000-09-11 20:10:02 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.49 2000-09-30 07:06:28 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \

@@ -1,13 +1,15 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.9 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbcut.c,v 4.10 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 1995, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -21,6 +23,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.8  1997/09/15  19:11:06  caress
  * Real Version 4.5
  *
@@ -82,7 +87,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.9 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.10 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
