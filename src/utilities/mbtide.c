@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtide.c	8/24/93
  *
- *    $Id: mbtide.c,v 4.0 1995-07-13 20:15:56 caress Exp $
+ *    $Id: mbtide.c,v 4.1 1995-11-02 19:19:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	August 24, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/07/13  20:15:56  caress
+ * Program to correct bathymetry for tides.
+ *
  * Revision 1.1  1995/07/13  20:14:38  caress
  * Initial revision
  *
@@ -42,7 +45,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbtide.c,v 4.0 1995-07-13 20:15:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbtide.c,v 4.1 1995-11-02 19:19:56 caress Exp $";
 	static char program_name[] = "MBTIDE";
 	static char help_message[] =  "MBTIDE corrects multibeam bathymetry data for tides. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbtide [-Fformat -V -H  -Iinfile -Mtide_format -Ooutfile -Ttidefile]";
@@ -286,7 +289,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -434,7 +437,7 @@ char **argv;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
