@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 4.17 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_reson.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.16  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -119,7 +122,7 @@
 int mbsys_reson_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_reson.c,v 4.17 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -642,7 +645,7 @@ int mbsys_reson_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -655,8 +658,6 @@ int mbsys_reson_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson_struct *store;
-	int	kind;
-	int	time_j[5];
 	double	depthscale, dacrscale,daloscale,reflscale;
 	int	i, j;
 
@@ -669,6 +670,10 @@ int mbsys_reson_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -681,6 +686,9 @@ int mbsys_reson_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
@@ -693,12 +701,20 @@ int mbsys_reson_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
+		}
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson_struct *) store_ptr;
+
+	/* set data kind */
+	store->kind = kind;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -813,6 +829,7 @@ int mbsys_reson_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	double	ttscale, angscale;
 	double	heave_use;
 	double	angle, pitch;
+	int	icenter, anglemin;
 	int	i;
 
 	/* print input debug statements */
@@ -845,20 +862,42 @@ int mbsys_reson_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get nbeams */
-		*nbeams = mb_io_ptr->beams_bath;
+		*nbeams = store->beams_bath;
 
 		/* get depth offset (heave + transducer_depth) */
 		heave_use = 0.001 * store->heave;
 		*draft = 0.001 * store->transducer_depth;
 		*ssv = 0.1 * store->sound_vel;
+		
+		/* get first starboard angle */
+		icenter = 0;
+		anglemin = 32000;
+		for (i=0;i<*nbeams;i++)
+			{
+			if (store->angle[i] != 0 
+			    && store->angle[i] < anglemin)
+			    {
+			    anglemin = store->angle[i];
+			    icenter = i;
+			    }
+			}
+		if (icenter > 0 
+		    && icenter < *nbeams - 1)
+		    {
+		    if (store->angle[icenter+1] < store->angle[icenter-1])
+			icenter++;
+		    }
 
 		/* get travel times, angles */
 		ttscale = 0.00001;
 		angscale = 0.005;
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
+		for (i=0;i<*nbeams;i++)
 			{
 			ttimes[i] = ttscale * store->tt[i];
-			angle = 90.0 - angscale * store->angle[i];
+			if (i < icenter)
+			    angle = 90.0 + angscale * store->angle[i];
+			else
+			    angle = 90.0 - angscale * store->angle[i];
 			pitch = angscale * store->pitch;
 			mb_rollpitch_to_takeoff(
 				verbose, pitch, angle, 
@@ -1333,7 +1372,6 @@ int mbsys_reson_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson_struct *store;
 	int	kind;
-	int	time_j[5];
 	double	depthscale, dacrscale,daloscale,reflscale;
 	int	i, j;
 

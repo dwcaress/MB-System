@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 4.4 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -42,6 +42,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.3  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -73,7 +76,7 @@
 int mbsys_simrad2_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.4 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -388,7 +391,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.4 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -614,7 +617,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.4 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -702,7 +705,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.4 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -959,6 +962,7 @@ int mbsys_simrad2_extract(int verbose, char *mbio_ptr, char *store_ptr,
 				amp[j] = 0;
 			*nbath = MAX(j + 1, *nbath);
 			}
+		*namp = *nbath;
 		*nss = MBSYS_SIMRAD2_MAXPIXELS;
 		pixel_size = 0.01 * ping->png_pixel_size;
 		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
@@ -968,10 +972,6 @@ int mbsys_simrad2_extract(int verbose, char *mbio_ptr, char *store_ptr,
 					* (i - MBSYS_SIMRAD2_MAXPIXELS / 2);
 			ssalongtrack[i] = daloscale * ping->png_ssalongtrack[i];
 			}
-		mb_io_ptr->beams_bath = *nbath;
-		*namp = *nbath;
-		mb_io_ptr->beams_amp = *nbath;
-		mb_io_ptr->pixels_ss = *nss;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1021,6 +1021,97 @@ int mbsys_simrad2_extract(int verbose, char *mbio_ptr, char *store_ptr,
 			for (i=0;i<*nss;i++)
 			  fprintf(stderr,"dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract data from structure */
+	else if (*kind == MB_DATA_NAV)
+		{
+		/* get time */
+		time_i[0] = store->pos_date / 10000;
+		time_i[1] = (store->pos_date % 10000) / 100;
+		time_i[2] = store->pos_date % 100;
+		time_i[3] = store->pos_msec / 3600000;
+		time_i[4] = (store->pos_msec % 3600000) / 60000;
+		time_i[5] = (store->pos_msec % 60000) / 1000;
+		time_i[6] = (store->pos_msec % 1000) * 1000;
+		mb_get_time(verbose,time_i,time_d);
+
+		/* get navigation */
+		*navlon = 0.0000001 * store->pos_longitude;
+		*navlat = 0.00000005 * store->pos_latitude;
+		if (mb_io_ptr->lonflip < 0)
+			{
+			if (*navlon > 0.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -360.)
+				*navlon = *navlon + 360.;
+			}
+		else if (mb_io_ptr->lonflip == 0)
+			{
+			if (*navlon > 180.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -180.)
+				*navlon = *navlon + 360.;
+			}
+		else
+			{
+			if (*navlon > 360.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < 0.)
+				*navlon = *navlon + 360.;
+			}
+
+		/* get heading */
+		*heading = 0.01 * store->pos_heading;
+
+		/* get speed  */
+		if (store->pos_speed != EM2_INVALID_SHORT)
+			*speed = 0.036 * store->pos_speed;
+		else
+			*speed = 0.0;
+
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
 			}
 
 		/* done translating values */
@@ -1109,7 +1200,7 @@ int mbsys_simrad2_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -1123,8 +1214,6 @@ int mbsys_simrad2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
-	int	kind;
-	int	time_j[5];
 	double	depthscale, dacrscale,daloscale,ttscale,reflscale;
 	double	depthoffset;
 	int	i, j;
@@ -1138,6 +1227,10 @@ int mbsys_simrad2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -1150,6 +1243,9 @@ int mbsys_simrad2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
@@ -1166,7 +1262,11 @@ int mbsys_simrad2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
-		fprintf(stderr,"dbg2       comment:    %s\n",comment);
+		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
 		}
 
 	/* get mbio descriptor */
@@ -1174,6 +1274,9 @@ int mbsys_simrad2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* set data kind */
+	store->kind = kind;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -1563,12 +1666,12 @@ int mbsys_simrad2_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		depthscale = 0.01 * ping->png_depth_res;
 		dacrscale  = 0.01 * ping->png_distance_res;
 		bath_best = 0.0;
-		if (ping->png_depth[mb_io_ptr->beams_bath/2] > 0)
-		    bath_best = depthscale * ping->png_depth[mb_io_ptr->beams_bath/2];
+		if (ping->png_depth[ping->png_nbeams/2] > 0)
+		    bath_best = depthscale * ping->png_depth[ping->png_nbeams/2];
 		else
 		    {
 		    xtrack_min = 99999999.9;
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    for (i=0;i<ping->png_nbeams;i++)
 			{
 			if (ping->png_quality[i] > 10
 			    && fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min)
@@ -1581,7 +1684,7 @@ int mbsys_simrad2_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		if (bath_best <= 0.0)
 		    {
 		    xtrack_min = 99999999.9;
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    for (i=0;i<ping->png_nbeams;i++)
 			{
 			if (ping->png_quality[i] > 0
 			    && fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min)
@@ -1962,7 +2065,6 @@ int mbsys_simrad2_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	int	kind;
-	int	time_j[5];
 	double	depthscale, dacrscale,daloscale,ttscale,reflscale;
 	int	i, j;
 

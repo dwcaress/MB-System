@@ -1,9 +1,9 @@
-.TH mbio l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbio l "1 December 2000" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH DESCRIPTION
 \fBMBIO\fP (\fBM\fPulti\fBB\fPeam \fBI\fPnput/\fBO\fPutput) is a library
@@ -23,7 +23,7 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
   Lamont-Doherty Earth Observatory
 
-.SH OVERVIEW
+.SH DATA TERMINOLOGY
 \fBMBIO\fP handles three types of swath mapping data:  beam bathymetry,
 beam amplitude, and sidescan.  Both amplitude and sidescan represent
 measures of backscatter strength. Beam amplitudes are backscatter
@@ -41,6 +41,17 @@ of "beamflags" is carried by \fBMBIO\fP functions which allows
 the bathymetry (and by extension the amplitude) data to be flagged
 as bad. The details of the beamflagging scheme are presented below.
 
+.SH VERSION 5 CHANGES
+This document describes version 5 releases of \fBMBIO\fP. 
+The source code structure used in version 4 \fBMBIO\fP had grown
+complex and difficult to support. In particular, the addition
+of new i/o modules had become excessively time consuming.
+Consequently, we have restructured and rewritten much of the library.
+Most of the changes are internal, but two  function calls have
+disappeared (\fBmb_put()\fP and \fBmb_write()\fP), and a 
+number of new functions have been added.
+
+.SH OVERVIEW
 \fBMBIO\fP opens and initializes sonar data files for reading
 and writing using the functions \fBmb_read_init\fP and \fBmb_write_init\fP,
 respectively.  These functions return a pointer to a data structure
@@ -53,77 +64,114 @@ on the number of files which may be opened for reading or writing
 at any given time in a program.  Data files are closed using the
 function \fBmb_close\fP.
 
-\fBMBIO\fP has three levels of i/o functionality:
- 	1	Simple reading and writing with the positions of
- 		individual beams and pixels given in longitude 
- 		and latitude (\fBmb_read\fP and \fBmb_write\fP) 
- 		or acrosstrack distances (\fBmb_get\fP and 
- 		\fBmb_put\fP). Only a limited set of navigation 
- 		information is passed. These functions can be 
- 		used without any special include files or any 
- 		knowledge of the actual data structures used
- 		by the data formats or \fBMBIO\fP. A function 
-		for writing comments (\fBmb_put_comment\fP)
-		is also included. The primary 
+When it comes to actually reading and writing swath mapping
+sonar data, \fBMBIO\fP has three levels of i/o functionality:
+ 	1:	Simple reading of swath data files. The positions 
+ 		of individual beams and pixels are returned in 
+ 		longitude and latitude  (\fBmb_read\fP) or 
+ 		acrosstrack and alongtrack distances (\fBmb_get\fP). 
+ 		Only a limited set of navigation information is
+ 		returned. Comments are also returned. These functions 
+ 		can be used without any special include files or 
+ 		any knowledge of the actual data structures used
+ 		by the data formats or \fBMBIO\fP. The primary 
  		functions are:
  			\fBmb_read\fP
- 			\fBmb_write\fP
- 			\fBmb_get\fP
- 			\fBmb_put\fP
- 			\fBmb_put_comment\fP
- 	2	Complete reading and writing of data structures 
- 		containing all of the available information.   
- 		Two special functions exist to extract
- 		information for processing bathymetry and
- 		sidescan data; otherwise special 
- 		include files are required to make 
- 		sense of the data structures passed by
- 		these functions. The primary functions are:
- 			\fBmb_get_all\fP
- 			\fBmb_put_all\fP
- 		The secondary functions are:
- 			\fBmb_ttimes\fP
- 			\fBmb_altitude\fP
- 	3	Buffered reading and writing of data structures 
+			\fBmb_get\fP
+ 	2:	Complete reading and writing of data structures 
+ 		containing all of the available information.  
+ 		Data records may be read or written without
+ 		extracting any of the information, or the 
+ 		swath data may be passed with the data structure. 
+ 		Several functions exist to extract information
+ 		from or insert information into the data 
+ 		structures; otherwise, special include files
+ 		are required to make sense of the sonar-specific
+ 		data structures passed by level 2 i/o functions. 
+ 		The basic read and write functions that only pass
+ 		pointers to internal data structures are:
+ 			\fBmb_read_ping()\fP
+ 			\fBmb_write_ping()\fP
+ 		The read and write routines which also extract
+ 		or insert information are:
+ 			\fBmb_get_all()\fP
+ 			\fBmb_put_all()\fP
+ 			\fBmb_put_comment()\fP
+ 		The information extraction and insertion 
+ 		functions are:
+ 			\fBmb_insert()\fP
+ 			\fBmb_extract()\fP
+ 			\fBmb_extract_nav()\fP
+ 			\fBmb_insert_nav()\fP
+ 			\fBmb_altitude()\fP
+ 			\fBmb_insert_altitude()\fP
+ 			\fBmb_ttimes()\fP
+ 			\fBmb_copyrecord()\fP
+ 	3:	Buffered reading and writing of data structures 
  		containing all of the available information. 
- 		Special include files are required to make 
- 		sense of the data structures passed by 
- 		these functions. The primary functions are:
- 			\fBmb_buffer_init\fP
- 			\fBmb_buffer_close\fP
- 			\fBmb_buffer_load\fP
- 			\fBmb_buffer_dump\fP
- 			\fBmb_buffer_info\fP
- 			\fBmb_buffer_get_next_data\fP
- 			\fBmb_buffer_extract\fP
- 			\fBmb_buffer_insert\fP
- 			\fBmb_buffer_get_next_nav\fP
- 			\fBmb_buffer_extract_nav\fP
- 			\fBmb_buffer_insert_nav\fP
+ 		This capability is useful for applications 
+ 		The primary functions are:
+ 			\fBmb_buffer_init()\fP
+ 			\fBmb_buffer_close()\fP
+ 			\fBmb_buffer_load()\fP
+ 			\fBmb_buffer_dump()\fP
+ 			\fBmb_buffer_info()\fP
+ 			\fBmb_buffer_get_next_data()\fP
+ 			\fBmb_buffer_extract()\fP
+ 			\fBmb_buffer_insert()\fP
+ 			\fBmb_buffer_get_next_nav()\fP
+ 			\fBmb_buffer_extract_nav()\fP
+ 			\fBmb_buffer_insert_nav()\fP
 
 The level 1 \fBMBIO\fP functions allow users to read 
-and write sonar data independent of format, with the limitation that 
+sonar data independent of format, with the limitation that 
 only a limited set of navigation information is passed.  Thus, some of the
 information contained in certain data formats (e.g. the "heave" value
-in Hydrosweep DS data) is not passed by \fBmb_read\fP or \fBmb_get\fP.  
+in Hydrosweep DS data) is not passed by \fBmb_read()\fP or \fBmb_get()\fP.  
 In general, the level 1 functions are useful for applications 
 such as graphics which require only the navigation and the depth 
-and/or backscatter values. The level 2 functions (\fBmb_get_all\fP and
-\fBmb_put_all\fP) read and write the 
+and/or backscatter values. 
+
+The level 2 functions (\fBmb_get_all()\fP and
+\fBmb_put_all()\fP) read and write the 
 complete data structures, translate the data to internal data structures
 associated with each of the supported sonar systems, and 
-pass pointers to these internal data structures.  The level 3 functions
-provide buffered reading and writing which is useful for applications
-which need access to multiple pings at a time.  In addition to reading
-(\fBmb_buffer_load\fP) and writing (\fBmb_buffer_dump\fP), functions
-exist for extracting information from the buffer (\fBmb_buffer_extract\fP)
-and inserting information into the buffer (\fBmb_buffer_insert\fP).
-The level 2 and 3 functions require 
-include files for the data structures used but allow access to the complete
-data structures; these functions are useful for applications which require
-special parameters peculiar to some particular data format (e.g. processing
-Hydrosweep DS amplitudes by applying system gain settings to the measured
-values). A number of other \fBMBIO\fP functions dealing with default values for
+pass pointers to these internal data structures. Additional
+functions allow a variety of information to be 
+extracted from or inserted into
+the data structures (e.g. mb_extract() and mb_insert()). Additional
+information may be accessed using special include files to 
+decode the data structures. The great majority of processing
+programs use level 2 functions.
+
+The level 3 functions provide buffered reading and 
+writing which is useful for applications which generate
+output files and need access to multiple pings 
+at a time.  In addition to reading
+(\fBmb_buffer_load()\fP) and writing (\fBmb_buffer_dump()\fP), functions
+exist for extracting information from the buffer (\fBmb_buffer_extract()\fP)
+and inserting information into the buffer (\fBmb_buffer_insert()\fP).
+
+\fBMBIO\fP supports swath data in a number of different formats,
+each specified by a unique id number. The function \fBmb_format()\fP
+determines if a format id is valid. A set of similar functions
+returns information about the specified format
+(e.g. \fBmb_format_description()\fP, \fBmb_format_system()\fP,
+\fBmb_format_description()\fP, \fBmb_format_dimensions()\fP,
+\fBmb_format_flags()\fP, \fBmb_format_source()\fP, 
+\fBmb_format_beamwidth()\fP, \fBmb_datalist_open()\fP, 
+\fBmb_datalist_read()\fP, \fBmb_datalist_close()\fP).
+
+Some \fBMB-System\fP programs can process multiple data
+files specified in "datalist" files. Each line of a datalist
+file contains a file path and the corresponding \fBMBIO\fP
+format id. Datalist files can be recursive and can contain
+comments. The functions used to extract input swath data
+file paths from datalist files 
+includes \fBmb_datalist_open()\fP, \fBmb_datalist_read()\fP, 
+and \fBmb_datalist_close()\fP.
+
+A number of other \fBMBIO\fP functions dealing with default values for
 important parameters, error messages, memory management, and time conversions
 also exist and are discussed below.
 
@@ -140,17 +188,27 @@ At present, formats associated with the following sonars are
 supported:
  	SeaBeam "classic" 16 beam multibeam sonar 
  	Hydrosweep DS 59 beam multibeam sonar 
- 	Hydrosweep MD 40 beam mid-depth multibeam sonar 
+ 	Hydrosweep MD 40 beam mid-depth multibeam 
+ 		sonar 
  	SeaBeam 2000 multibeam sonar 
- 	SeaBeam 2100 series multibeam sonars
-	SeaBeam 1050/1180 multibeam sonars
- 	Simrad EM12, EM121, EM950, and EM1000 multibeam sonars
- 	Simrad EM300 and EM3000 multibeam sonars
- 	Hawaii MR-1 shallow tow interferometric sonar
- 	ELAC Bottomchart shallow water multibeam sonar
+ 	SeaBeam 2112, 2120, and 2130 multibeam 
+ 		sonars
+ 	Simrad EM12, EM121, EM950, and EM1000 
+ 		multibeam sonars
+ 	Simrad EM120, EM300, EM1002, and EM3000 
+ 		multibeam sonars
+ 	Hawaii MR-1 shallow tow interferometric 
+ 		sonar
+ 	ELAC Bottomchart 1180 and 1050 multibeam 
+ 		sonars
+ 	ELAC/SeaBeam Bottomchart Mk2 1180 and 
+ 		1050 multibeam sonars
  	Reson Seabat 9001/9002 multibeam sonars
  	Reson Seabat 8101 multibeam sonars
- 	WHOI DSL AMS-120 deep tow interferometric sonar
+	Simrad/Mesotech SM2000 multibeam sonars
+ 	WHOI DSL AMS-120 deep tow interferometric 
+ 		sonar
+	AMS-60 interferometric sonar
 	
 .SH SUPPORTED FORMATS
 With the introduction of \fBMB-System\fP version 4.00, the data format
@@ -533,6 +591,7 @@ full suite of possible error values and the associated error messages are:
   	error = 13:	"Invalid buffer id",
   	error = 14:	"Invalid system id - this should 
  			not happen!"
+  	error = 15:	"This data file is not in the specified format!"
 .br
 In general, programs should treat negative error values as non-fatal
 (reading and writing can continue) and positive error values as fatal (the data
@@ -893,105 +952,6 @@ argument \fIerror\fP passes more detailed information about
 read failures. 
 .RE
 .IP
-int \fBmb_write\fP(\fIverbose\fP, \fImbio_ptr\fP, 
-\fIkind\fP, \fItime_i\fP, \fItime_d\fP, 
-\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
-\fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
-\fIss\fP, \fIsslon\fP, \fIsslat\fP, 
-\fIcomment\fP, \fIerror\fP)
-.br
-int \fIverbose\fP
-.br
-char *\fImbio_ptr\fP;
-.br
-int \fIkind\fP
-.br
-int \fItime_i\fP[7];
-.br
-double \fItime_d\fP;
-.br
-double \fInavlon\fP;
-.br
-double \fInavlat\fP;
-.br
-double \fIspeed\fP;
-.br
-double \fIheading\fP;
-.br
-int \fInbath\fP;
-.br
-int \fInamp\fP;
-.br
-int \fInss\fP;
-.br
-char *\fIbeamflag\fP;
-.br
-double *\fIbath\fP;
-.br
-double *\fIamp\fP;
-.br
-double *\fIbathlon\fP;
-.br
-double *\fIbathlat\fP;
-.br
-double *\fIss\fP;
-.br
-double *\fIsslon\fP;
-.br
-double *\fIsslat\fP;
-.br
-char \fIcomment\fP[256];
-.br
-int \fIerror\fP;
-.RS 10
-The function \fBmb_write\fP writes sonar data to the file listed
-in the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
-The \fIverbose\fP
-value controls the standard error output verbosity of the function.
-The data is in the form of bathymetry and backscatter values combined
-with the longitude and latitude locations of the bathymetry and 
-backscatter measurements.
-The values to be output are:
- 	\fIkind\fP:		kind of data record written
- 					1	survey data
- 					2	comment
- 	\fItime_i\fP:		time of current ping (used if \fItime_i\fP[0] != 0)
- 			\fItime_i\fP[0]: year
- 			\fItime_i\fP[1]: month
- 			\fItime_i\fP[2]: day
- 			\fItime_i\fP[3]: hour
- 			\fItime_i\fP[4]: minute
- 			\fItime_i\fP[5]: second
- 			\fItime_i\fP[6]: microsecond
- 	\fItime_d\fP:		time of current ping in seconds since 
- 			1/1/70 00:00:00 (used if \fItime_i\fP[0] = 0)
- 	\fInavlon\fP:		longitude
- 	\fInavlat\fP:		latitude
- 	\fIspeed\fP:		ship speed in km/s
- 	\fIheading\fP:		ship heading in degrees
- 	\fInbath\fP:		number of bathymetry values
- 	\fInamp\fP:		number of amplitude values
- 	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
- 	\fIbath\fP:		array of bathymetry values in meters
- 	\fIamp\fP:		array of amplitude values in unknown units
- 	\fIbathlon\fP:		array of of longitude values corresponding 
- 			to bathymetry
- 	\fIbathlat\fP:		array of of latitude values corresponding 
- 			to bathymetry
- 	\fIss\fP:		array of sidescan values in unknown units
- 	\fIsslon\fP:		array of of longitude values corresponding 
- 			to sidescan
- 	\fIsslat\fP:		array of of latitude values corresponding 
- 			to sidescan
- 	\fIcomment\fP:		comment string
-.br
-A status value indicating success or failure is returned; the error value
-argument \fIerror\fP passes more detailed information about 
-write failures. 
-.RE
-.IP
 int \fBmb_get\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP, \fIpings\fP, 
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdistance\fP, 
@@ -1098,136 +1058,6 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about 
 read failures. 
-.RE
-.IP
-int \fBmb_put\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP, 
-\fItime_i\fP, \fItime_d\fP, 
-\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP,  
-\fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbeamflag\fP, \fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
-\fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
-\fIcomment\fP, \fIerror\fP)
-.br
-int \fIverbose\fP;
-.br
-char *\fImbio_ptr\fP;
-.br
-int \fIkind\fP
-.br
-int \fItime_i\fP[7];
-.br
-double \fItime_d\fP;
-.br
-double \fInavlon\fP;
-.br
-double \fInavlat\fP;
-.br
-double \fIspeed\fP;
-.br
-double \fIheading\fP;
-.br
-int \fInbath\fP;
-.br
-int \fInamp\fP;
-.br
-int \fInss\fP;
-.br
-char *\fIbeamflag\fP;
-.br
-double *\fIbath\fP;
-.br
-double *\fIamp\fP;
-.br
-double *\fIbathacrosstrack\fP;
-.br
-double *\fIbathalongtrack\fP;
-.br
-double *\fIss\fP;
-.br
-double *\fIssacrosstrack\fP;
-.br
-double *\fIssalongtrack\fP;
-.br
-char \fIcomment\fP[256];
-.br
-int *\fIerror\fP;
-.RS 10
-The function \fBmb_put\fP writes sonar data to the file listed
-in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
-The \fIverbose\fP
-value controls the standard error output verbosity of the function.
-The data is in the form of bathymetry, amplitude, and sidescan values combined
-with the acrosstrack and alongtrack distances relative to the navigation
-of the bathymetry and sidescan 
-measurements (amplitudes are coincident with the bathymetry values).
-The values to be output are:
- 	\fIkind\fP:		kind of data record to be written
- 					1	survey data
- 					2	comment
- 	\fItime_i\fP:		time of current ping (used if \fItime_i\fP[0] != 0)
- 			\fItime_i\fP[0]: year
- 			\fItime_i\fP[1]: month
- 			\fItime_i\fP[2]: day
- 			\fItime_i\fP[3]: hour
- 			\fItime_i\fP[4]: minute
- 			\fItime_i\fP[5]: second
- 			\fItime_i\fP[6]: microsecond
- 	\fItime_d\fP:		time of current ping in seconds since 
- 			1/1/70 00:00:00 (used if \fItime_i\fP[0] = 0)
- 	\fInavlon\fP:		longitude
- 	\fInavlat\fP:		latitude
- 	\fIspeed\fP:		ship speed in km/s
- 	\fIheading\fP:		ship heading in degrees
- 	\fIdistance\fP:		distance along shiptrack since last ping in km
- 	\fInbath\fP:		number of bathymetry values
- 	\fInamp\fP:		number of amplitude values
- 	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
- 	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbath\fP:		array of amplitude values in unknown units
- 	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
- 			corresponding to bathymetry
- 	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
- 			corresponding to bathymetry
- 	\fIss\fP:		array of sidescan values in unknown units
- 	\fIssacrosstrack\fP:	array of of acrosstrack distances in meters
- 			corresponding to sidescan
- 	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
- 			corresponding to sidescan
- 	\fIcomment\fP:		comment string
- 	\fIerror\fP:		error value
-.br
-A status value indicating success or failure is returned; the error value
-argument \fIerror\fP passes more detailed information about 
-write failures. 
-.RE
-.IP
-int \fBmb_put_comment\fP(\fIverbose\fP, \fImbio_ptr\fP, 
-\fIcomment\fP, \fIerror\fP)
-.br
-int \fIverbose\fP;
-.br
-char *\fImbio_ptr\fP;
-.br
-char \fIcomment\fP[256];
-.br
-int *\fIerror\fP;
-.RS 10
-The function \fBmb_put_comment\fP writes a comment to the file listed
-in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
-The \fIverbose\fP
-value controls the standard error output verbosity of the function.
-The data is in the form of a null terminated string. The maximum
-length of comments varies with different data formats. In
-general individual comments should be less than 80 characters
-long to insure compatibility with all formats.
-The values to be output are:
- 	\fIcomment\fP:		comment string
- 	\fIerror\fP:		error value
-.br
-A status value indicating success or failure is returned; the error value
-argument \fIerror\fP passes more detailed information about 
-write failures. 
 .SH LEVEL 2 FUNCTIONS
 .RE
 .IP
@@ -1472,6 +1302,99 @@ The values to be output are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about 
 write failures. 
+.RE
+.IP
+int \fBmb_put_comment\fP(\fIverbose\fP, \fImbio_ptr\fP, 
+\fIcomment\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+char \fIcomment\fP[256];
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_put_comment\fP writes a comment to the file listed
+in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+The data is in the form of a null terminated string. The maximum
+length of comments varies with different data formats. In
+general individual comments should be less than 80 characters
+long to insure compatibility with all formats.
+The values to be output are:
+ 	\fIcomment\fP:		comment string
+ 	\fIerror\fP:		error value
+.br
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+write failures. 
+
+.RE
+.IP
+int \fBmb_insert\fP(\fIverbose\fP, \fIchar *mbio_ptr\fP, \fI char *store_ptr\fP, \fI 
+		int kind\fP, \fI int time_i[7]\fP, \fI double time_d\fP, \fI
+		double navlon\fP, \fI double navlat\fP, \fI
+		double speed\fP, \fI double heading\fP, \fI
+		int nbath\fP, \fI int namp\fP, \fI int nss\fP, \fI
+		char *beamflag\fP, \fI double *bath\fP, \fI double *amp\fP, \fI 
+		double *bathacrosstrack\fP, \fI double *bathalongtrack\fP, \fI
+		double *ss\fP, \fI double *ssacrosstrack\fP, \fI double *ssalongtrack\fP, \fI
+		char *comment\fP, \fI int *error);
+.RE
+.IP
+int \fBmb_extract\fP(\fIverbose\fP, \fIchar *mbio_ptr\fP, \fI char *store_ptr\fP, \fI 
+		int *kind\fP, \fI int time_i[7]\fP, \fI double *time_d\fP, \fI
+		double *navlon\fP, \fI double *navlat\fP, \fI
+		double *speed\fP, \fI double *heading\fP, \fI
+		int *nbath\fP, \fI int *namp\fP, \fI int *nss\fP, \fI
+		char *beamflag\fP, \fI double *bath\fP, \fI double *amp\fP, \fI 
+		double *bathacrosstrack\fP, \fI double *bathalongtrack\fP, \fI
+		double *ss\fP, \fI double *ssacrosstrack\fP, \fI double *ssalongtrack\fP, \fI
+		char *comment\fP, \fI int *error);
+.RE
+.IP
+int \fBmb_extract_nav\fP(\fIverbose\fP, \fIchar *mbio_ptr\fP, \fI char *store_ptr\fP, \fI int *kind\fP, \fI
+		int time_i[7]\fP, \fI double *time_d\fP, \fI 
+		double *navlon\fP, \fI double *navlat\fP, \fI
+		double *speed\fP, \fI double *heading\fP, \fI double *draft\fP, \fI\fP, \fI 
+		double *roll\fP, \fI double *pitch\fP, \fI double *heave\fP, \fI 
+		int *error);
+.RE
+.IP
+int \fBmb_insert_nav\fP(\fIverbose\fP, \fIchar *mbio_ptr\fP, \fI\fP, \fI char *store_ptr\fP, \fI
+		int time_i[7]\fP, \fI double time_d\fP, \fI 
+		double navlon\fP, \fI double navlat\fP, \fI
+		double speed\fP, \fI\fP, \fI double heading\fP, \fI double draft\fP, \fI 
+		double roll\fP, \fI double pitch\fP, \fI\fP, \fI double heave\fP, \fI 
+		int *error);
+.RE
+.IP
+int \fBmb_altitude\fP(\fIverbose\fP, \fIchar *mbio_ptr\fP, \fI char *store_ptr\fP, \fI\fP, \fI
+		int *kind\fP, \fI
+		double *transducer_depth\fP, \fI\fP, \fI double *altitude\fP, \fI
+		int *error);
+.RE
+.IP
+int \fBmb_insert_altitude\fP(\fIverbose\fP, \fIchar *mbio_ptr\fP, \fI char *store_ptr\fP, \fI
+		double transducer_depth\fP, \fI double altitude,
+		int *error);
+.RE
+.IP
+int \fBmb_ttimes\fP(\fIverbose\fP, \fIchar *mbio_ptr\fP, \fI char *store_ptr\fP, \fI
+		int *kind\fP, \fI int *nbeams\fP, \fI\fP, \fI
+		double *ttimes\fP, \fI double	*angles\fP, \fI 
+		double *angles_forward\fP, \fI double *angles_null\fP, \fI\fP, \fI
+		double *heave\fP, \fI double *alongtrack_offset\fP, \fI 
+		double *draft\fP, \fI double *ssv\fP, \fI\fP, \fI int *error);
+.RE
+.IP
+int \fBmb_copyrecord\fP(\fIverbose\fP, \fIchar *mbio_ptr\fP, \fI
+		char *store_ptr\fP, \fI char *copy_ptr\fP, \fI int *error);
+
+
+
 .RE
 .IP
 int \fBmb_ttimes\fP(\fIverbose\fP, \fImbio_ptr\fP, 
@@ -2594,6 +2517,6 @@ Selection modes:
 \fBmbsystem\fP(l), \fBmbformat\fP(l)
 
 .SH BUGS
-What could go wrong in a mere 90,000 lines of code?
+What could go wrong in a mere 166,000 lines of code?
 .br
 Let us know...

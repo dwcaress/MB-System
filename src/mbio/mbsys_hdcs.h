@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.h	3/16/99
- *	$Id: mbsys_hdcs.h,v 4.1 2000-09-30 06:31:19 caress Exp $
+ *	$Id: mbsys_hdcs.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:31:19  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  1999/03/31  18:29:20  caress
  * MB-System 4.6beta7
  *
@@ -228,3 +231,55 @@ struct mbsys_hdcs_struct
 					in mm */
 	char	comment[MBSYS_HDCS_MAX_COMMENT];
 	};
+	
+/* system specific function prototypes */
+int mbsys_hdcs_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_hdcs_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_hdcs_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading,
+			int *nbath, int *namp, int *nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_hdcs_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+			int kind, int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading,
+			int nbath, int namp, int nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_hdcs_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int *nbeams,
+			double *ttimes, double *angles, 
+			double *angles_forward, double *angles_null,
+			double *heave, double *alongtrack_offset, 
+			double *draft, double *ssv, int *error);
+int mbsys_hdcs_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, double *transducer_depth, double *altitude, 
+			int *error);
+int mbsys_hdcs_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+			double transducer_depth, double altitude, 
+			int *error);
+int mbsys_hdcs_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
+			int *error);
+int mbsys_hdcs_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading, double draft, 
+			double roll, double pitch, double heave,
+			int *error);
+int mbsys_hdcs_copy(int verbose, char *mbio_ptr, 
+			char *store_ptr, char *copy_ptr,
+			int *error);
+

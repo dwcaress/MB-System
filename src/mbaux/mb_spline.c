@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_spline.c	10/11/00
- *    $Id: mb_spline.c,v 4.0 2000-10-11 21:49:27 caress Exp $
+ *    $Id: mb_spline.c,v 5.0 2000-12-01 22:53:59 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,10 @@
  * Date:	October 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/10/11  21:49:27  caress
+ * Initial revision - code derived from functions previously
+ * found in mbmerge.c, mbtide.c, and mbprocess.c.
+ *
  *
  */
 
@@ -43,7 +47,7 @@
 int mb_spline_init(int verbose, double *x, double *y, 
 	int n, double yp1, double ypn, double *y2, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 4.0 2000-10-11 21:49:27 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_spline_init";
 	int	status = MB_SUCCESS;
 	int	i, k;
@@ -117,7 +121,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 	int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 4.0 2000-10-11 21:49:27 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_spline_interp";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
@@ -174,7 +178,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 int mb_linear_interp(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 4.0 2000-10-11 21:49:27 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_linear_interp";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;

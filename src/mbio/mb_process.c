@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 4.2 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_process.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.1  2000/10/03  21:46:59  caress
  * Snapshot for Dale.
  *
@@ -42,9 +45,10 @@
 /* mbio include files */
 #include "../../include/mb_io.h"
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 4.2 2000-10-11 01:02:30 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -93,8 +97,12 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_pitchbias = 0.0;
 	process->mbp_draft_mode = MBP_DRAFT_OFF;
 	process->mbp_draft = 0.0;
-	process->mbp_draft_mult = 0.0;
-	process->mbp_dfile[0] = '\0';
+	process->mbp_draft_mult = 1.0;
+	process->mbp_heave_mode = MBP_HEAVE_OFF;
+	process->mbp_heave = 0.0;
+	process->mbp_heave_mult = 1.0;
+	process->mbp_tt_mode = MBP_TT_OFF;
+	process->mbp_tt_mult = 1.0;
 	process->mbp_ssv_mode = MBP_SSV_OFF;
 	process->mbp_ssv = 0.0;
 	process->mbp_svp_mode = MBP_SVP_OFF;
@@ -164,6 +172,27 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_draft);
 			process->mbp_draft_mode = MBP_DRAFT_SET;
 			}
+		    else if (strncmp(buffer, "HEAVEOFFSET", 11) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_heave);
+			if (process->mbp_heave_mode == MBP_HEAVE_OFF)
+				process->mbp_heave_mode = MBP_HEAVE_OFFSET;
+			else if (process->mbp_heave_mode == MBP_HEAVE_MULTIPLY)
+				process->mbp_heave_mode = MBP_HEAVE_MULTIPLYOFFSET;
+			}
+		    else if (strncmp(buffer, "HEAVEMULTIPLY", 13) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_heave_mult);
+			if (process->mbp_heave_mode == MBP_HEAVE_OFF)
+				process->mbp_heave_mode = MBP_HEAVE_MULTIPLY;
+			else if (process->mbp_heave_mode == MBP_HEAVE_OFFSET)
+				process->mbp_heave_mode = MBP_HEAVE_MULTIPLYOFFSET;
+			}
+		    else if (strncmp(buffer, "TTMULTIPLY", 10) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_tt_mult);
+			process->mbp_tt_mode = MBP_TT_MULTIPLY;
+			}
 		    else if (strncmp(buffer, "ROLLBIASPORT", 12) == 0
 			&& (process->mbp_rollbias_mode == MBP_ROLLBIAS_OFF
 			    || process->mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE))
@@ -229,11 +258,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "HEADINGOFFSET", 13) == 0)
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_headingbias);
-			process->mbp_heading_mode = MBP_HEADING_OFFSET;
+			if (process->mbp_heading_mode == MBP_HEADING_CALC)
+			    process->mbp_heading_mode = MBP_HEADING_CALCOFFSET;
+			else
+			    process->mbp_heading_mode = MBP_HEADING_OFFSET;
 			}
 		    else if (strncmp(buffer, "HEADING", 7) == 0)
 			{
-			process->mbp_heading_mode = MBP_HEADING_CALC;
+			if (process->mbp_heading_mode == MBP_HEADING_OFFSET)
+			    process->mbp_heading_mode = MBP_HEADING_CALCOFFSET;
+			else
+			    process->mbp_heading_mode = MBP_HEADING_CALC;
 			}
 		    else if (strncmp(buffer, "SSVOFFSET", 11) == 0
 			&& process->mbp_ssv_mode == MBP_SSV_OFF)
@@ -392,7 +427,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_draft_mode:         %d\n",process->mbp_draft_mode);
 		fprintf(stderr,"dbg2       mbp_draft:              %f\n",process->mbp_draft);
 		fprintf(stderr,"dbg2       mbp_draft_mult:         %f\n",process->mbp_draft_mult);
-		fprintf(stderr,"dbg2       mbp_dfile:              %s\n",process->mbp_dfile);
+		fprintf(stderr,"dbg2       mbp_heave_mode:         %d\n",process->mbp_heave_mode);
+		fprintf(stderr,"dbg2       mbp_heave:              %f\n",process->mbp_heave);
+		fprintf(stderr,"dbg2       mbp_heave_mult:         %f\n",process->mbp_heave_mult);
 		fprintf(stderr,"dbg2       mbp_ssv_mode:           %d\n",process->mbp_ssv_mode);
 		fprintf(stderr,"dbg2       mbp_ssv:                %f\n",process->mbp_ssv);
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
@@ -459,7 +496,11 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_draft_mode:         %d\n",process->mbp_draft_mode);
 		fprintf(stderr,"dbg2       mbp_draft:              %f\n",process->mbp_draft);
 		fprintf(stderr,"dbg2       mbp_draft_mult:         %f\n",process->mbp_draft_mult);
-		fprintf(stderr,"dbg2       mbp_dfile:              %s\n",process->mbp_dfile);
+		fprintf(stderr,"dbg2       mbp_heave_mode:         %d\n",process->mbp_heave_mode);
+		fprintf(stderr,"dbg2       mbp_heave:              %f\n",process->mbp_heave);
+		fprintf(stderr,"dbg2       mbp_heave_mult:         %f\n",process->mbp_heave_mult);
+		fprintf(stderr,"dbg2       mbp_tt_mode:            %d\n",process->mbp_tt_mode);
+		fprintf(stderr,"dbg2       mbp_tt_mult:            %f\n",process->mbp_tt_mult);
 		fprintf(stderr,"dbg2       mbp_ssv_mode:           %d\n",process->mbp_ssv_mode);
 		fprintf(stderr,"dbg2       mbp_ssv:                %f\n",process->mbp_ssv);
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
@@ -495,6 +536,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp,"## MB-system Version %s\n",MB_VERSION);
 	    right_now = time((time_t *)0);
 	    strncpy(date,ctime(&right_now),24);
+	    date[24] = 0;
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
@@ -560,6 +602,35 @@ int mb_pr_writepar(int verbose, char *file,
 	    else
 		{
 		fprintf(fp, "## DRAFTMULTIPLY multiplier\n");
+		}
+
+	    if (process->mbp_heave_mode == MBP_HEAVE_OFFSET
+		|| process->mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET)
+		{
+		fprintf(fp, "HEAVEOFFSET %f\n", process->mbp_heave);
+		}
+	    else
+		{
+		fprintf(fp, "## HEAVEOFFSET offset\n");
+		}
+
+	    if (process->mbp_heave_mode == MBP_HEAVE_MULTIPLY
+		|| process->mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET)
+		{
+		fprintf(fp, "HEAVEMULTIPLY %f\n", process->mbp_heave_mult);
+		}
+	    else
+		{
+		fprintf(fp, "## HEAVEMULTIPLY multiplier\n");
+		}
+
+	    if (process->mbp_tt_mode == MBP_TT_MULTIPLY)
+		{
+		fprintf(fp, "TTMULTIPLY %f\n", process->mbp_tt_mult);
+		}
+	    else
+		{
+		fprintf(fp, "## TTMULTIPLY multiplier\n");
 		}
 
 	    if (process->mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
@@ -656,7 +727,8 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(fp, "## NAVSPLINE\n");
 		}
 
-	    if (process->mbp_heading_mode == MBP_HEADING_CALC)
+	    if (process->mbp_heading_mode == MBP_HEADING_CALC
+		|| process->mbp_heading_mode == MBP_HEADING_CALCOFFSET)
 		{
 		fprintf(fp, "HEADING\n");
 		}
@@ -665,7 +737,8 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(fp, "## HEADING\n");
 		}
 
-	    if (process->mbp_heading_mode == MBP_HEADING_OFFSET)
+	    if (process->mbp_heading_mode == MBP_HEADING_OFFSET
+		|| process->mbp_heading_mode == MBP_HEADING_CALCOFFSET)
 		{
 		fprintf(fp, "HEADINGOFFSET %f\n", process->mbp_headingbias);
 		}
@@ -1003,7 +1076,6 @@ int mb_pr_update_draft(int verbose, char *file,
 			int	mbp_draft_mode, 
 			double	mbp_draft, 
 			double	mbp_draft_mult, 
-			char	*mbp_dfile, 
 			int *error)
 {
 	char	*function_name = "mb_pr_update_draft";
@@ -1021,7 +1093,6 @@ int mb_pr_update_draft(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_draft_mode:    %d\n",mbp_draft_mode);
 		fprintf(stderr,"dbg2       mbp_draft:         %f\n",mbp_draft);
 		fprintf(stderr,"dbg2       mbp_draft_mult:    %f\n",mbp_draft_mult);
-		fprintf(stderr,"dbg2       mbp_dfile:         %s\n",mbp_dfile);
 		}
 
 	/* get known process parameters */
@@ -1031,8 +1102,107 @@ int mb_pr_update_draft(int verbose, char *file,
 	process.mbp_draft_mode = mbp_draft_mode;
 	process.mbp_draft = mbp_draft;
 	process.mbp_draft_mult = mbp_draft_mult;
-	if (mbp_dfile != NULL)
-	    strcpy(process.mbp_dfile, mbp_dfile);
+	    
+	/* update bathymetry recalculation mode */
+	mb_pr_bathmode(verbose, &process, error);
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_update_heave(int verbose, char *file, 
+			int	mbp_heave_mode, 
+			double	mbp_heave, 
+			double	mbp_heave_mult, 
+			int *error)
+{
+	char	*function_name = "mb_pr_update_heave";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       mbp_heave_mode:    %d\n",mbp_heave_mode);
+		fprintf(stderr,"dbg2       mbp_heave:         %f\n",mbp_heave);
+		fprintf(stderr,"dbg2       mbp_heave_mult:    %f\n",mbp_heave_mult);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set heave values */
+	process.mbp_heave_mode = mbp_heave_mode;
+	process.mbp_heave = mbp_heave;
+	process.mbp_heave_mult = mbp_heave_mult;
+	    
+	/* update bathymetry recalculation mode */
+	mb_pr_bathmode(verbose, &process, error);
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_update_tt(int verbose, char *file, 
+			int	mbp_tt_mode, 
+			double	mbp_tt_mult, 
+			int *error)
+{
+	char	*function_name = "mb_pr_update_tt";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       mbp_tt_mode:       %d\n",mbp_tt_mode);
+		fprintf(stderr,"dbg2       mbp_tt_mult:       %f\n",mbp_tt_mult);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set tt values */
+	process.mbp_tt_mode = mbp_tt_mode;
+	process.mbp_tt_mult = mbp_tt_mult;
 	    
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
@@ -1079,7 +1249,7 @@ int mb_pr_update_ssv(int verbose, char *file,
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set draft values */
+	/* set ssv values */
 	process.mbp_ssv_mode = mbp_ssv_mode;
 	process.mbp_ssv = mbp_ssv;
 	    
@@ -1130,7 +1300,7 @@ int mb_pr_update_svp(int verbose, char *file,
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set draft values */
+	/* set svp values */
 	process.mbp_svp_mode = mbp_svp_mode;
 	if (mbp_svpfile != NULL)
 	    strcpy(process.mbp_svpfile, mbp_svpfile);
@@ -1183,7 +1353,7 @@ int mb_pr_update_navadj(int verbose, char *file,
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set draft values */
+	/* set navadj values */
 	process.mbp_navadj_mode = mbp_navadj_mode;
 	if (mbp_navadjfile != NULL)
 	    strcpy(process.mbp_navadjfile, mbp_navadjfile);
@@ -1241,7 +1411,7 @@ int mb_pr_update_nav(int verbose, char *file,
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set draft values */
+	/* set nav values */
 	process.mbp_nav_mode = mbp_nav_mode;
 	if (mbp_navfile != NULL)
 	    strcpy(process.mbp_navfile, mbp_navfile);
@@ -1293,7 +1463,7 @@ int mb_pr_update_heading(int verbose, char *file,
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set draft values */
+	/* set heading values */
 	process.mbp_heading_mode = mbp_heading_mode;
 	process.mbp_headingbias = mbp_headingbias;
 
@@ -1320,7 +1490,7 @@ int mb_pr_update_edit(int verbose, char *file,
 			char	*mbp_editfile, 
 			int *error)
 {
-	char	*function_name = "mb_pr_update_nav";
+	char	*function_name = "mb_pr_update_edit";
 	struct mb_process_struct process;
 	int	status = MB_SUCCESS;
 
@@ -1339,7 +1509,7 @@ int mb_pr_update_edit(int verbose, char *file,
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set draft values */
+	/* set edit values */
 	process.mbp_edit_mode = mbp_edit_mode;
 	if (mbp_editfile != NULL)
 	    strcpy(process.mbp_editfile, mbp_editfile);
@@ -1367,7 +1537,7 @@ int mb_pr_update_mask(int verbose, char *file,
 			char	*mbp_maskfile, 
 			int *error)
 {
-	char	*function_name = "mb_pr_update_nav";
+	char	*function_name = "mb_pr_update_mask";
 	struct mb_process_struct process;
 	int	status = MB_SUCCESS;
 
@@ -1386,7 +1556,7 @@ int mb_pr_update_mask(int verbose, char *file,
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set draft values */
+	/* set mask values */
 	process.mbp_mask_mode = mbp_mask_mode;
 	if (mbp_maskfile != NULL)
 	    strcpy(process.mbp_maskfile, mbp_maskfile);
@@ -1400,6 +1570,660 @@ int mb_pr_update_mask(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_ofile(int verbose, char *file, 
+			int	*mbp_ofile_specified, 
+			char	*mbp_ofile, 
+			int	*error)
+{
+	char	*function_name = "mb_pr_get_ofile";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
+		fprintf(stderr,"dbg2       file:                %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set ofile value */
+	if (mbp_ofile != NULL)
+	    {
+	    strcpy(mbp_ofile, process.mbp_ofile);
+	    *mbp_ofile_specified = process.mbp_ofile_specified;
+	    }
+	else
+	    {
+	    mbp_ofile[0] = '\0';
+	    *mbp_ofile_specified = MB_NO;
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_ofile_specified: %s\n",*mbp_ofile_specified);
+		fprintf(stderr,"dbg2       ofile:               %s\n",mbp_ofile);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_format(int verbose, char *file, 
+			int *mbp_format_specified, 
+			int *mbp_format, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_format";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
+		fprintf(stderr,"dbg2       file:                 %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set format value */
+	*mbp_format_specified = process.mbp_format_specified;
+	*mbp_format = process.mbp_format;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_format_specified: %d\n",*mbp_format_specified);
+		fprintf(stderr,"dbg2       mbp_format:           %d\n",*mbp_format);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_rollbias(int verbose, char *file, 
+			int	*mbp_rollbias_mode, 
+			double	*mbp_rollbias, 
+			double	*mbp_rollbias_port, 
+			double	*mbp_rollbias_stbd, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_rollbias";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set rollbias values */
+	*mbp_rollbias_mode = process.mbp_rollbias_mode;
+	*mbp_rollbias = process.mbp_rollbias;
+	*mbp_rollbias_port = process.mbp_rollbias_port;
+	*mbp_rollbias_stbd = process.mbp_rollbias_stbd;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_rollbias_mode: %d\n",*mbp_rollbias_mode);
+		fprintf(stderr,"dbg2       mbp_rollbias:      %f\n",*mbp_rollbias);
+		fprintf(stderr,"dbg2       mbp_rollbias_port: %f\n",*mbp_rollbias_port);
+		fprintf(stderr,"dbg2       mbp_rollbias_stbd: %f\n",*mbp_rollbias_stbd);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_pitchbias(int verbose, char *file, 
+			int	*mbp_pitchbias_mode, 
+			double	*mbp_pitchbias, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_pitchbias";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set pitchbias values */
+	*mbp_pitchbias_mode = process.mbp_pitchbias_mode;
+	*mbp_pitchbias = process.mbp_pitchbias;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_pitchbias_mode: %d\n",*mbp_pitchbias_mode);
+		fprintf(stderr,"dbg2       mbp_pitchbias:      %f\n",*mbp_pitchbias);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_draft(int verbose, char *file, 
+			int	*mbp_draft_mode, 
+			double	*mbp_draft, 
+			double	*mbp_draft_mult, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_draft";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set draft values */
+	*mbp_draft_mode = process.mbp_draft_mode;
+	*mbp_draft = process.mbp_draft;
+	*mbp_draft_mult = process.mbp_draft_mult;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_draft_mode:    %d\n",*mbp_draft_mode);
+		fprintf(stderr,"dbg2       mbp_draft:         %f\n",*mbp_draft);
+		fprintf(stderr,"dbg2       mbp_draft_mult:    %f\n",*mbp_draft_mult);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_heave(int verbose, char *file, 
+			int	*mbp_heave_mode, 
+			double	*mbp_heave, 
+			double	*mbp_heave_mult, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_heave";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set heave values */
+	*mbp_heave_mode = process.mbp_heave_mode;
+	*mbp_heave = process.mbp_heave;
+	*mbp_heave_mult = process.mbp_heave_mult;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_heave_mode:    %d\n",*mbp_heave_mode);
+		fprintf(stderr,"dbg2       mbp_heave:         %f\n",*mbp_heave);
+		fprintf(stderr,"dbg2       mbp_heave_mult:    %f\n",*mbp_heave_mult);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_tt(int verbose, char *file, 
+			int	*mbp_tt_mode, 
+			double	*mbp_tt_mult, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_tt";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set tt values */
+	*mbp_tt_mode = process.mbp_tt_mode;
+	*mbp_tt_mult = process.mbp_tt_mult;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_tt_mode:       %d\n",*mbp_tt_mode);
+		fprintf(stderr,"dbg2       mbp_tt_mult:       %f\n",*mbp_tt_mult);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_ssv(int verbose, char *file, 
+			int	*mbp_ssv_mode, 
+			double	*mbp_ssv, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_ssv";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set ssv values */
+	*mbp_ssv_mode = process.mbp_ssv_mode;
+	*mbp_ssv = process.mbp_ssv;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_ssv_mode:      %d\n",*mbp_ssv_mode);
+		fprintf(stderr,"dbg2       mbp_ssv:           %f\n",*mbp_ssv);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_svp(int verbose, char *file, 
+			int	*mbp_svp_mode, 
+			char	*mbp_svpfile, 
+			int	*mbp_uncorrected, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_svp";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set svp values */
+	*mbp_svp_mode = process.mbp_svp_mode;
+	if (mbp_svpfile != NULL)
+	    strcpy(mbp_svpfile, process.mbp_svpfile);
+	*mbp_uncorrected = process.mbp_uncorrected;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_svp_mode:      %d\n",*mbp_svp_mode);
+		fprintf(stderr,"dbg2       mbp_svpfile:       %s\n",mbp_svpfile);
+		fprintf(stderr,"dbg2       mbp_uncorrected:   %d\n",*mbp_uncorrected);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_navadj(int verbose, char *file, 
+			int	*mbp_navadj_mode, 
+			char	*mbp_navadjfile, 
+			int	*mbp_navadj_algorithm, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_navadj";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
+		fprintf(stderr,"dbg2       file:                 %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set navadj values */
+	*mbp_navadj_mode = process.mbp_navadj_mode;
+	if (mbp_navadjfile != NULL)
+	    strcpy(mbp_navadjfile, process.mbp_navadjfile);
+	*mbp_navadj_algorithm = process.mbp_navadj_algorithm;
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_navadj_mode:      %d\n",*mbp_navadj_mode);
+		fprintf(stderr,"dbg2       mbp_navadjfile:       %s\n",mbp_navadjfile);
+		fprintf(stderr,"dbg2       mbp_navadj_algorithm: %d\n",*mbp_navadj_algorithm);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_nav(int verbose, char *file, 
+			int	*mbp_nav_mode, 
+			char	*mbp_navfile, 
+			int	*mbp_nav_format, 
+			int	*mbp_nav_heading, 
+			int	*mbp_nav_speed, 
+			int	*mbp_nav_draft, 
+			int	*mbp_nav_algorithm, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_nav";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set nav values */
+	*mbp_nav_mode = process.mbp_nav_mode;
+	if (mbp_navfile != NULL)
+	    strcpy(mbp_navfile, process.mbp_navfile);
+	*mbp_nav_format = process.mbp_nav_format;
+	*mbp_nav_heading = process.mbp_nav_heading;
+	*mbp_nav_speed = process.mbp_nav_speed;
+	*mbp_nav_draft = process.mbp_nav_draft;
+	*mbp_nav_algorithm = process.mbp_nav_algorithm;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_nav_mode:      %d\n",*mbp_nav_mode);
+		fprintf(stderr,"dbg2       mbp_navfile:       %s\n",mbp_navfile);
+		fprintf(stderr,"dbg2       mbp_nav_format:    %d\n",*mbp_nav_format);
+		fprintf(stderr,"dbg2       mbp_nav_heading:   %d\n",*mbp_nav_heading);
+		fprintf(stderr,"dbg2       mbp_nav_speed:     %d\n",*mbp_nav_speed);
+		fprintf(stderr,"dbg2       mbp_nav_draft:     %d\n",*mbp_nav_draft);
+		fprintf(stderr,"dbg2       mbp_nav_algorithm: %d\n",*mbp_nav_algorithm);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_heading(int verbose, char *file, 
+			int	*mbp_heading_mode, 
+			double	*mbp_headingbias, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_heading";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set heading values */
+	*mbp_heading_mode = process.mbp_heading_mode;
+	*mbp_headingbias = process.mbp_headingbias;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_heading_mode:  %d\n",*mbp_heading_mode);
+		fprintf(stderr,"dbg2       mbp_headingbias:   %f\n",*mbp_headingbias);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_edit(int verbose, char *file, 
+			int	*mbp_edit_mode, 
+			char	*mbp_editfile, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_edit";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set edit values */
+	*mbp_edit_mode = process.mbp_edit_mode;
+	if (mbp_editfile != NULL)
+	    strcpy(mbp_editfile, process.mbp_editfile);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_edit_mode:     %d\n",*mbp_edit_mode);
+		fprintf(stderr,"dbg2       mbp_editfile:      %s\n",mbp_editfile);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_mask(int verbose, char *file, 
+			int	*mbp_mask_mode, 
+			char	*mbp_maskfile, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_mask";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set mask values */
+	*mbp_mask_mode = process.mbp_mask_mode;
+	if (mbp_maskfile != NULL)
+	    strcpy(mbp_maskfile, process.mbp_maskfile);
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_mask_mode:     %d\n",*mbp_mask_mode);
+		fprintf(stderr,"dbg2       mbp_maskfile:      %s\n",mbp_maskfile);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.14 2000-10-11 01:02:30 caress Exp $
+ *	$Id: mbr_em12darw.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.13  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -97,10 +100,182 @@
 #include "../../include/mb_swap.h"
 #endif
 
+/* essential function prototypes */
+int mbr_info_em12darw(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error);
+int mbr_alm_em12darw(int verbose, char *mbio_ptr, int *error);
+int mbr_dem_em12darw(int verbose, char *mbio_ptr, int *error);
+int mbr_rt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_wt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+
+/*--------------------------------------------------------------------*/
+int mbr_info_em12darw(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error)
+{
+	static char res_id[]="$Id: mbr_em12darw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	char	*function_name = "mbr_info_em12darw";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* set format info parameters */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*system = MB_SYS_SIMRAD;
+	*beams_bath_max = 81;
+	*beams_amp_max = 81;
+	*pixels_ss_max = 0;
+	strncpy(format_name, "EM12DARW", MB_NAME_LENGTH);
+	strncpy(system_name, "SIMRAD", MB_NAME_LENGTH);
+	strncpy(format_description, "Format name:          MBF_EM12DARW\nInformal Description: Simrad EM12S RRS Darwin processed format\nAttributes:           Simrad EM12S, bathymetry and amplitude,\n                      81 beams, binary, Oxford University.\n", MB_DESCRIPTION_LENGTH);
+	*numfile = 1;
+	*filetype = MB_FILETYPE_NORMAL;
+	*variable_beams = MB_NO;
+	*traveltime = MB_YES;
+	*beam_flagging = MB_YES;
+	*nav_source = MB_DATA_DATA;
+	*heading_source = MB_DATA_DATA;
+	*vru_source = MB_DATA_DATA;
+	*beamwidth_xtrack = 2.0;
+	*beamwidth_ltrack = 2.0;
+
+	/* set format and system specific function pointers */
+	*format_alloc = &mbr_alm_em12darw;
+	*format_free = &mbr_dem_em12darw; 
+	*store_alloc = &mbsys_simrad_alloc; 
+	*store_free = &mbsys_simrad_deall; 
+	*read_ping = &mbr_rt_em12darw; 
+	*write_ping = &mbr_wt_em12darw; 
+	*extract = &mbsys_simrad_extract; 
+	*insert = &mbsys_simrad_insert; 
+	*extract_nav = &mbsys_simrad_extract_nav; 
+	*insert_nav = &mbsys_simrad_insert_nav; 
+	*altitude = &mbsys_simrad_altitude; 
+	*insert_altitude = NULL;
+	*ttimes = &mbsys_simrad_ttimes; 
+	*copyrecord = &mbsys_simrad_copy; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",*system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",*pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",*numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",*filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
+		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12darw(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.14 2000-10-11 01:02:30 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -391,172 +566,6 @@ int mbr_rt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	mb_io_ptr->new_kind = data_kind;
 	mb_io_ptr->new_error = *error;
 
-	/* translate values to current ping variables 
-		in mbio descriptor structure */
-	if (status == MB_SUCCESS 
-		&& data_kind == MB_DATA_DATA)
-		{
-		/* get time */
-		mb_fix_y2k(verbose, (int)data->year, 
-				&time_j[0]);
-		time_j[1] = data->jday;
-		time_j[2] = data->minute;
-		time_j[3] = data->secs/100;
-		time_j[4] = 0.0001*(100*time_j[3] - data->secs);
-		mb_get_itime(verbose,time_j,mb_io_ptr->new_time_i);
-		mb_get_time(verbose,mb_io_ptr->new_time_i,
-			&(mb_io_ptr->new_time_d));
-
-		/* get navigation */ 
-		mb_io_ptr->new_lon = data->longitude;
-		mb_io_ptr->new_lat = data->latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (mb_io_ptr->new_lon > 0.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -360.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (mb_io_ptr->new_lon > 180.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -180.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else
-			{
-			if (mb_io_ptr->new_lon > 360.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < 0.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-
-		/* get heading */
-		mb_io_ptr->new_heading = data->gyro;
-
-		/* get speed (convert nm/hr to km/hr) */
-		mb_io_ptr->new_speed = 1.8333333*data->speed;
-
-		/* read beam values into storage arrays */
-		/* DO NOT switch order of data as it is read 
-			into the global arrays */
-		if (data->mode == 1)
-			{
-			depthscale = 0.1;
-			dacrscale  = 0.2;
-			daloscale  = 0.2;
-			rangescale = 0.2;
-			reflscale  = 0.5;
-			}
-		else if (data->mode == 2)
-			{
-			depthscale = 0.2;
-			dacrscale  = 0.5;
-			daloscale  = 0.5;
-			rangescale = 0.8;
-			reflscale  = 0.5;
-			}
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			if (data->depth[i] < 0)
-			    {
-			    mb_io_ptr->new_beamflag[i] 
-				    = MB_FLAG_MANUAL + MB_FLAG_FLAG;
-			    mb_io_ptr->new_bath[i] 
-				    = -depthscale*data->depth[i];
-			    }
-			else if (data->depth[i] > 0)
-			    {
-			    mb_io_ptr->new_beamflag[i] 
-				    = MB_FLAG_NONE;
-			    mb_io_ptr->new_bath[i] 
-				    = depthscale*data->depth[i];
-			    }
-			else
-			    {
-			    mb_io_ptr->new_beamflag[i] 
-				    = MB_FLAG_NULL;
-			    mb_io_ptr->new_bath[i] 
-				    = depthscale*data->depth[i];
-			    }
-			mb_io_ptr->new_bath_acrosstrack[i] 
-				= dacrscale*data->distacr[i];
-			mb_io_ptr->new_bath_alongtrack[i] 
-				= daloscale*data->distalo[i];
-			}
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			mb_io_ptr->new_amp[i] = reflscale * data->refl[i] + 64;
-			}
-
-		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  New ping values:\n");
-			fprintf(stderr,"dbg4       error:      %d\n",
-				mb_io_ptr->new_error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				mb_io_ptr->new_time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				mb_io_ptr->new_time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				mb_io_ptr->new_time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				mb_io_ptr->new_time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				mb_io_ptr->new_time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				mb_io_ptr->new_time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				mb_io_ptr->new_time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				mb_io_ptr->new_time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				mb_io_ptr->new_lon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				mb_io_ptr->new_lat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				mb_io_ptr->new_speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				mb_io_ptr->new_heading);
-			fprintf(stderr,"dbg4       beams_bath: %d\n",
-				mb_io_ptr->beams_bath);
-			fprintf(stderr,"dbg4       beams_amp:  %d\n",
-				mb_io_ptr->beams_amp);
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_beamflag[i],
-				mb_io_ptr->new_bath[i],
-				mb_io_ptr->new_amp[i],
-				mb_io_ptr->new_bath_acrosstrack[i],
-				mb_io_ptr->new_bath_alongtrack[i]);
-			}
-
-		/* done translating values */
-
-		}
-	else if (status == MB_SUCCESS 
-		&& data_kind == MB_DATA_COMMENT)
-		{
-		/* copy comment */
-		strncpy(mb_io_ptr->new_comment,datacomment,256);
-
-		/* print debug statements */
-		if (verbose >= 4)
-			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  New ping values:\n");
-			fprintf(stderr,"dbg4       error:      %d\n",
-				mb_io_ptr->new_error);
-			fprintf(stderr,"dbg4       comment:    %s\n",
-				mb_io_ptr->new_comment);
-			}
-		}
-
 	/* translate values to em12 data storage structure */
 	if (status == MB_SUCCESS
 		&& store != NULL)
@@ -591,15 +600,15 @@ int mbr_rt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		/* navigation */
 		if (data->corflag == 0)
 			{
-			store->latitude = data->latitude;
-			store->longitude = data->longitude;
+			store->pos_latitude = data->latitude;
+			store->pos_longitude = data->longitude;
 			store->utm_northing = 0.0;
 			store->utm_easting = 0.0;
 			}
 		else
 			{
-			store->latitude = 0.0;
-			store->longitude = 0.0;
+			store->pos_latitude = 0.0;
+			store->pos_longitude = 0.0;
 			store->utm_northing = data->latitude;
 			store->utm_easting = data->longitude;
 			}
@@ -630,6 +639,8 @@ int mbr_rt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 				store->ping;
 
 			/* copy data */
+			ping->longitude = data->longitude;
+			ping->latitude = data->latitude;
 			ping->ping_number = data->pingno;
 			ping->beams_bath = MBF_EM12DARW_BEAMS;
 			ping->bath_mode = 0;
@@ -760,8 +771,8 @@ int mbr_wt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			data->speed = store->speed;
 			if (data->corflag == 0)
 				{
-				data->latitude = store->latitude;
-				data->longitude = store->longitude;
+				data->latitude = store->pos_latitude;
+				data->longitude = store->pos_longitude;
 				}
 			else
 				{
@@ -779,6 +790,8 @@ int mbr_wt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 					store->ping;
 
 				/* copy survey data */
+				data->latitude = ping->latitude;
+				data->longitude = ping->longitude;
 				data->pingno = ping->ping_number;
 				data->mode = ping->bath_res;
 				data->depthl = ping->keel_depth;
@@ -813,93 +826,6 @@ int mbr_wt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 				MBSYS_SIMRAD_COMMENT_LENGTH);
 			}
 		}
-
-	/* check for comment */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_COMMENT)
-		{
-		data->func=100;
-		strncpy(datacomment,mb_io_ptr->new_comment,
-			MBSYS_SIMRAD_COMMENT_LENGTH);
-		}
-
-	/* else translate current ping data to em12darw data structure */
-	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_DATA)
-		{
-		/* record type */
-		data->func=150;
-		if (store == NULL)
-			data->mode = 2;	/* DEEP mode (see scaling
-						 factors below) */
-
-		/* get time */
-		mb_get_jtime(verbose,mb_io_ptr->new_time_i,time_j);
-		mb_unfix_y2k(verbose, time_j[0], &year);
-		data->year = (short)year;
-		data->jday = time_j[1];
-		data->minute = time_j[2];
-		data->secs = 100*time_j[3] + 0.0001*time_j[4];
-
-		/* get navigation */
-		if (mb_io_ptr->new_lon < -180.0)
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.0;
-		if (mb_io_ptr->new_lon > 180.0)
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.0;
-		data->longitude = mb_io_ptr->new_lon;
-		data->latitude = mb_io_ptr->new_lat;
-		data->corflag = 0;		/* lat/lon co-ords */
-		data->utm_merd = 0.0;
-		data->utm_zone = 0;
-
-		/* get heading */
-		data->gyro = mb_io_ptr->new_heading;
-
-		/* get speed (convert km/hr to nm/hr) */
-		data->speed = 0.545454*mb_io_ptr->new_speed;
-		data->depthl = mb_io_ptr->new_bath[mb_io_ptr->beams_bath/2];
-
-		/* put beam values 
-			into em12darw data structure */
-		if (data->mode == 1)
-			{
-			depthscale = 0.1;
-			dacrscale  = 0.2;
-			daloscale  = 0.2;
-			rangescale = 0.2;
-			reflscale  = 0.5;
-			}
-		else
-			{
-			data->mode = 2;
-			depthscale = 0.2;
-			dacrscale  = 0.5;
-			daloscale  = 0.5;
-			rangescale = 0.8;
-			reflscale  = 0.5;
-			}
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
-			    data->depth[i] = -(int)(mb_io_ptr->new_bath[i]
-						/ depthscale);
-			else
-			    data->depth[i] = (int)(mb_io_ptr->new_bath[i]
-						/ depthscale);
-			data->distacr[i] = 
-				(int) (mb_io_ptr->new_bath_acrosstrack[i]
-				/dacrscale);
-			data->distalo[i] = 
-				(int) (mb_io_ptr->new_bath_alongtrack[i]
-				/daloscale);
-			}
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			data->refl[i] = (mb_s_char)((mb_io_ptr->new_amp[i] - 64)
-				/ reflscale);
-			}
-
-		} /* end if on mb_io_ptr->new_kind */
 
 	/* print debug statements */
 	if (verbose >= 5)

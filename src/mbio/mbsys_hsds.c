@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
- *	$Id: mbsys_hsds.c,v 4.17 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_hsds.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -39,6 +39,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.16  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -128,7 +131,7 @@
 int mbsys_hsds_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hsds.c,v 4.17 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_hsds.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_hsds_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -284,8 +287,8 @@ int mbsys_hsds_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		*speed = 3.6*store->speed;
 
 		/* read distance and depth values into storage arrays */
-		*nbath = mb_io_ptr->beams_bath;
-		*namp = mb_io_ptr->beams_amp;
+		*nbath = mb_io_ptr->beams_bath_max;
+		*namp = mb_io_ptr->beams_amp_max;
 		*nss = 0;
 		for (i=0;i<*nbath;i++)
 			{
@@ -445,7 +448,7 @@ int mbsys_hsds_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -458,7 +461,6 @@ int mbsys_hsds_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsds_struct *store;
-	int	kind;
 	double	scalefactor;
 	int	i;
 
@@ -471,6 +473,10 @@ int mbsys_hsds_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -483,6 +489,9 @@ int mbsys_hsds_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
@@ -499,7 +508,11 @@ int mbsys_hsds_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
-		fprintf(stderr,"dbg2       comment:    %s\n",comment);
+		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
 		}
 
 	/* get mbio descriptor */
@@ -507,6 +520,9 @@ int mbsys_hsds_insert(int verbose, char *mbio_ptr, char *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_hsds_struct *) store_ptr;
+
+	/* set data kind */
+	store->kind = kind;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -622,10 +638,10 @@ int mbsys_hsds_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 		|| *kind == MB_DATA_CALIBRATE)
 		{
 		/* get nbeams */
-		*nbeams = mb_io_ptr->beams_bath;
+		*nbeams = mb_io_ptr->beams_bath_max;
 
 		/* get travel times, angles */
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
+		for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			{
 			ttimes[i] = store->time_scale*store->time[i];
 			angles[i] = (i-MBSYS_HSDS_BEAMS/2)
@@ -739,12 +755,12 @@ int mbsys_hsds_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		|| *kind == MB_DATA_CALIBRATE)
 		{
 		bath_best = 0.0;
-		if (store->depth[mb_io_ptr->beams_bath/2] > 0.0)
-		    bath_best = store->depth_scale*store->depth[mb_io_ptr->beams_bath/2];
+		if (store->depth[mb_io_ptr->beams_bath_max/2] > 0.0)
+		    bath_best = store->depth_scale*store->depth[mb_io_ptr->beams_bath_max/2];
 		else
 		    {
 		    xtrack_min = 99999999.9;
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			{
 			if (store->depth_scale*store->depth[i] > 0.0
 			    && fabs(store->depth_scale*store->distance[i]) < xtrack_min)
@@ -757,7 +773,7 @@ int mbsys_hsds_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		if (bath_best <= 0.0)
 		    {
 		    xtrack_min = 99999999.9;
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			{
 			if (store->depth_scale*store->depth[i] < 0.0
 			    && fabs(store->depth_scale*store->distance[i]) < xtrack_min)

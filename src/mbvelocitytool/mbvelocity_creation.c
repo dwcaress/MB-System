@@ -78,6 +78,7 @@ extern void do_io_mode_open_svp_edit(Widget, XtPointer, XtPointer);
 extern void do_new_profile(Widget, XtPointer, XtPointer);
 extern void do_io_mode_save_svp(Widget, XtPointer, XtPointer);
 extern void do_io_mode_mb(Widget, XtPointer, XtPointer);
+extern void do_save_swath_svp(Widget, XtPointer, XtPointer);
 
 /*
  * Create the window_mbvelocity hierarchy of widgets.
@@ -251,10 +252,10 @@ Createwindow_mbvelocity(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNx, 13); ac++;
+    XtSetArg(args[ac], XmNy, 61); ac++;
     XtSetArg(args[ac], XmNwidth, 172); ac++;
-    XtSetArg(args[ac], XmNheight, 126); ac++;
+    XtSetArg(args[ac], XmNheight, 150); ac++;
     pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
         "pulldownMenu_file",
         args, 
@@ -402,6 +403,31 @@ Createwindow_mbvelocity(Widget parent)
     XtAddCallback(pushButton_open_mb, XmNactivateCallback, BxManageCB, (XtPointer)"label_mbformat");
     XtAddCallback(pushButton_open_mb, XmNactivateCallback, BxManageCB, (XtPointer)"textField_mbformat");
     XtAddCallback(pushButton_open_mb, XmNactivateCallback, BxSetValuesCB, (XtPointer)"xmDialogShell_fileselect.title=Open Swath Sonar Data");
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, "Save swath svp file", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNsensitive, False); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_file, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_save_svpfile = XmCreatePushButton(pulldownMenu_file,
+            "pushButton_save_svpfile",
+            args, 
+            ac);
+        XtManageChild(pushButton_save_svpfile);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_save_svpfile, XmNactivateCallback, do_save_swath_svp, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_file); ac++;
@@ -603,7 +629,7 @@ Createwindow_mbvelocity(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
     XtSetArg(args[ac], XmNx, 266); ac++;
-    XtSetArg(args[ac], XmNy, 143); ac++;
+    XtSetArg(args[ac], XmNy, 135); ac++;
     XtSetArg(args[ac], XmNwidth, 481); ac++;
     XtSetArg(args[ac], XmNheight, 449); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(xmDialogShell_about,
@@ -1247,7 +1273,7 @@ Createwindow_mbvelocity(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 241); ac++;
+    XtSetArg(args[ac], XmNx, 8); ac++;
     XtSetArg(args[ac], XmNy, 278); ac++;
     XtSetArg(args[ac], XmNwidth, 532); ac++;
     XtSetArg(args[ac], XmNheight, 164); ac++;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mstiffss.c	4/7/98
- *	$Id: mbr_mstiffss.c,v 4.3 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbr_mstiffss.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 7, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.2  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -63,10 +66,182 @@
 #include "../../include/mb_swap.h"
 #endif
 
+/* essential function prototypes */
+int mbr_info_mstiffss(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error);
+int mbr_alm_mstiffss(int verbose, char *mbio_ptr, int *error);
+int mbr_dem_mstiffss(int verbose, char *mbio_ptr, int *error);
+int mbr_rt_mstiffss(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_wt_mstiffss(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+
+/*--------------------------------------------------------------------*/
+int mbr_info_mstiffss(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error)
+{
+	static char res_id[]="$Id: mbr_mstiffss.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	char	*function_name = "mbr_info_mstiffss";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* set format info parameters */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*system = MB_SYS_MSTIFF;
+	*beams_bath_max = 0;
+	*beams_amp_max = 0;
+	*pixels_ss_max = 1024;
+	strncpy(format_name, "MSTIFFSS", MB_NAME_LENGTH);
+	strncpy(system_name, "MSTIFF", MB_NAME_LENGTH);
+	strncpy(format_description, "Format name:          MBF_MSTIFFSS\nInformal Description: MSTIFF sidescan format\nAttributes:           variable pixels,  sidescan,\n                      binary TIFF variant, single files, Sea Scan. \n", MB_DESCRIPTION_LENGTH);
+	*numfile = 1;
+	*filetype = MB_FILETYPE_NORMAL;
+	*variable_beams = MB_NO;
+	*traveltime = MB_NO;
+	*beam_flagging = MB_NO;
+	*nav_source = MB_DATA_DATA;
+	*heading_source = MB_DATA_DATA;
+	*vru_source = MB_DATA_DATA;
+	*beamwidth_xtrack = 0.0;
+	*beamwidth_ltrack = 0.0;
+
+	/* set format and system specific function pointers */
+	*format_alloc = &mbr_alm_mstiffss;
+	*format_free = &mbr_dem_mstiffss; 
+	*store_alloc = &mbsys_mstiff_alloc; 
+	*store_free = &mbsys_mstiff_deall; 
+	*read_ping = &mbr_rt_mstiffss; 
+	*write_ping = &mbr_wt_mstiffss; 
+	*extract = &mbsys_mstiff_extract; 
+	*insert = &mbsys_mstiff_insert; 
+	*extract_nav = &mbsys_mstiff_extract_nav; 
+	*insert_nav = &mbsys_mstiff_insert_nav; 
+	*altitude = &mbsys_mstiff_altitude; 
+	*insert_altitude = NULL; 
+	*ttimes = &mbsys_mstiff_ttimes; 
+	*copyrecord = &mbsys_mstiff_copy; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",*system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",*pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",*numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",*filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
+		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_mstiffss(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mstiffss.c,v 4.3 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbr_mstiffss.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbr_alm_mstiffss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -720,102 +895,7 @@ int mbr_rt_mstiffss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	mb_io_ptr->new_kind = MB_DATA_DATA;
 	mb_io_ptr->new_error = *error;
 
-	/* translate values to current ping variables 
-		in mbio descriptor structure */
-	if (status == MB_SUCCESS)
-		{
-		/* get time */
-		mb_io_ptr->new_time_d = data->time_d;
-		mb_get_date(verbose, mb_io_ptr->new_time_d, mb_io_ptr->new_time_i);
-
-		/* get navigation */
-		mb_io_ptr->new_lon = data->lon;
-		mb_io_ptr->new_lat = data->lat;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (mb_io_ptr->new_lon > 0.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -360.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (mb_io_ptr->new_lon > 180.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -180.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else
-			{
-			if (mb_io_ptr->new_lon > 360.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < 0.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-
-		/* get heading */
-		mb_io_ptr->new_heading = data->heading;
-
-		/* get speed */
-		mb_io_ptr->new_speed = data->speed;
-
-		/* set no bathymetry */
-		mb_io_ptr->beams_bath = 0;
-		mb_io_ptr->beams_amp = 0;
-		mb_io_ptr->pixels_ss = data->pixels_ss;
-		for (i=0;i<data->pixels_ss;i++)
-		    {
-		    mb_io_ptr->new_ss[i] = data->ss[i];
-		    mb_io_ptr->new_ss_acrosstrack[i] = 
-			    data->ssacrosstrack[i];
-		    mb_io_ptr->new_ss_alongtrack[i] = 0.0;
-		    }
-
-		/* print debug statements */
-		if (verbose >= 5)
-		    {
-		    fprintf(stderr,"\ndbg5  New ping read by MBIO function <%s>\n",
-			    function_name);
-		    fprintf(stderr,"dbg5  New ping values:\n");
-		    fprintf(stderr,"dbg5       error:      %d\n",
-			    mb_io_ptr->new_error);
-		    fprintf(stderr,"dbg5       time_i[0]:  %d\n",
-			    mb_io_ptr->new_time_i[0]);
-		    fprintf(stderr,"dbg5       time_i[1]:  %d\n",
-			    mb_io_ptr->new_time_i[1]);
-		    fprintf(stderr,"dbg5       time_i[2]:  %d\n",
-			    mb_io_ptr->new_time_i[2]);
-		    fprintf(stderr,"dbg5       time_i[3]:  %d\n",
-			    mb_io_ptr->new_time_i[3]);
-		    fprintf(stderr,"dbg5       time_i[4]:  %d\n",
-			    mb_io_ptr->new_time_i[4]);
-		    fprintf(stderr,"dbg5       time_i[5]:  %d\n",
-			    mb_io_ptr->new_time_i[5]);
-		    fprintf(stderr,"dbg5       time_i[6]:  %d\n",
-			    mb_io_ptr->new_time_i[6]);
-		    fprintf(stderr,"dbg5       time_d:     %f\n",
-			    mb_io_ptr->new_time_d);
-		    fprintf(stderr,"dbg5       longitude:  %f\n",
-			    mb_io_ptr->new_lon);
-		    fprintf(stderr,"dbg5       latitude:   %f\n",
-			    mb_io_ptr->new_lat);
-		    fprintf(stderr,"dbg5       speed:      %f\n",
-			    mb_io_ptr->new_speed);
-		    fprintf(stderr,"dbg5       heading:    %f\n",
-			    mb_io_ptr->new_heading);
-		    fprintf(stderr,"dbg5       pixels_ss:  %d\n",
-			    mb_io_ptr->pixels_ss);
-		    for (i=0;i<mb_io_ptr->pixels_ss;i++)
-		      fprintf(stderr,"dbg5       ss[%d]: %f  ssdist[%d]: %f\n",
-			    i,mb_io_ptr->new_ss[i],
-			    i,mb_io_ptr->new_ss_acrosstrack[i]);
-		    }
-
-		/* done translating values */
-
-		}
-
-	/* translate values to seabeam data storage structure */
+	/* translate values to mstiff data storage structure */
 	if (status == MB_SUCCESS
 		&& store != NULL)
 		{

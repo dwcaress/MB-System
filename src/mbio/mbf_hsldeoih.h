@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsldeoih.h	3/11/93
- *	$Id: mbf_hsldeoih.h,v 4.4 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbf_hsldeoih.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	March 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.3  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -85,12 +88,12 @@
  *        kind = 1 : data from a survey ping 
  *                   (ERGNMESS + ERGNSLZT + ERGNAMPL)
  *        kind = 2 : comment (LDEOCOMM)
- *        kind = 3 : data from a calibrate ping 
+ *        kind = 4 : data from a calibrate ping 
  *                   (ERGNEICH + ERGNSLZT + ERGNAMPL)
- *        kind = 4 : mean and keel velocity (ERGNHYDI)
- *        kind = 5 : water velocity profile (ERGNCTDS)
- *        kind = 6 : standby navigation (ERGNPARA)
- *        kind = 7 : navigation source (ERGNPOSI)
+ *        kind = 5 : mean and keel velocity (ERGNHYDI)
+ *        kind = 6 : water velocity profile (ERGNCTDS)
+ *        kind = 7 : standby navigation (ERGNPARA)
+ *        kind = 8 : navigation source (ERGNPOSI)
  *   6. The data structure defined below includes all of the values
  *      which are passed in Hydrosweep records.
  *   7. The data structure defined below also includes backscatter values
@@ -103,6 +106,19 @@
  *      with the different data records are defined below.
  *   10. This format is envisioned as the L-DEO in-house archive format 
  *      for processed Hydrosweep DS data.
+ *   11. The kind values have changed. In older versions the definitions
+ *      where:
+ *        kind = 1 : data from a survey ping 
+ *                   (ERGNMESS + ERGNSLZT + ERGNAMPL)
+ *        kind = 2 : comment (LDEOCOMM)
+ *        kind = 3 : data from a calibrate ping 
+ *                   (ERGNEICH + ERGNSLZT + ERGNAMPL)
+ *        kind = 4 : mean and keel velocity (ERGNHYDI)
+ *        kind = 5 : water velocity profile (ERGNCTDS)
+ *        kind = 6 : standby navigation (ERGNPARA)
+ *        kind = 7 : navigation source (ERGNPOSI)
+ *      The code checks for and fixes older data files on read, 
+ *      using the record size values to check for bad kind values.
  */
 
 /* maximum number of depth-velocity pairs */
@@ -116,6 +132,20 @@
 
 /* record label value (integer equivalent to "data" */
 #define MBF_HSLDEOIH_LABEL 1684108385
+
+/* data record kind values */
+#define MBF_HSLDEOIH_KIND_DATA			1
+#define MBF_HSLDEOIH_KIND_COMMENT		2
+#define MBF_HSLDEOIH_KIND_CALIBRATE		4
+#define MBF_HSLDEOIH_KIND_MEAN_VELOCITY		5
+#define MBF_HSLDEOIH_KIND_VELOCITY_PROFILE	6
+#define MBF_HSLDEOIH_KIND_STANDBY		7
+#define MBF_HSLDEOIH_KIND_NAV_SOURCE		8
+#define MBF_HSLDEOIH_OLDKIND_CALIBRATE		3
+#define MBF_HSLDEOIH_OLDKIND_MEAN_VELOCITY	4
+#define MBF_HSLDEOIH_OLDKIND_VELOCITY_PROFILE	5
+#define MBF_HSLDEOIH_OLDKIND_STANDBY		6
+#define MBF_HSLDEOIH_OLDKIND_NAV_SOURCE		7
 
 /* complete data structure containing everything */
 struct mbf_hsldeoih_struct

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.12 2000-09-30 06:29:44 caress Exp $
+ *    $Id: mb_io.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/09/30  06:29:44  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.11  2000/04/19  21:06:32  caress
  * Added MB_PATH_MAX define
  *
@@ -99,22 +102,50 @@
 /* include this code only once */
 #ifndef MB_IO_DEF
 #define MB_IO_DEF
- 
-/* declare buffer maximum */
-#define	MB_BUFFER_MAX	5000
 
-/* maximum path length in characters */
-#define MB_PATH_MAXLINE 256
-
-/* maximum comment length in characters */
-#define MB_COMMENT_MAXLINE 1944
-
-/* maximum number of navigation points saved */
-#define MB_NAV_SAVE_MAX 20
+#ifndef MB_DEFINE_DEF
+#include "mb_define.h"
+#endif
 
 /* MBIO input/output control structure */
 struct mb_io_struct
 	{
+	/* format parameters */
+	int	format;		/* data format id */
+	int	system;		/* sonar system id */
+	int	beams_bath_max;	/* maximum number of bathymetry beams */
+	int	beams_amp_max;	/* maximum number of amplitude beams
+					- either 0 or = beams_bath */
+	int	pixels_ss_max;	/* maximum number of sidescan pixels */
+	char	format_name[MB_NAME_LENGTH];
+	char	system_name[MB_NAME_LENGTH];
+	char	format_description[MB_DESCRIPTION_LENGTH];
+	int	numfile;	/* the number of parallel files required for i/o */
+	int	filetype;	/* type of files used (normal, xdr, or gsf) */
+	int	variable_beams; /* if true then number of beams variable */
+	int	traveltime;	/* if true then traveltime and angle data supported */
+	int	beam_flagging;	/* if true then beam flagging supported */
+	int	nav_source;	/* data record types containing the primary navigation */
+	int	heading_source;	/* data record types containing the primary heading */
+	int	vru_source;	/* data record types containing the primary vru */
+	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
+	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
+
+	/* control parameters - see mbio manual pages for explanation */
+	int	pings;		/* controls ping averaging */
+	int	lonflip;	/* controls longitude range */
+	double	bounds[4];	/* locations bounds of acceptable data */
+	int	btime_i[7];	/* beginning time of acceptable data */
+	int	etime_i[7];	/* ending time of acceptable data */
+	double	btime_d;	/* beginning time of acceptable data 
+					in "_d" format (unix seconds) */
+	double	etime_d;	/* ending time of acceptable data 
+					in "_d" format (unix seconds) */
+	double	speedmin;	/* minimum ship speed of acceptable data
+					in km/hr */
+	double	timegap;	/* maximum time between pings without
+					a data gap */
+
 	/* file descriptor, file name, and usage flag */
 	FILE	*mbfp;		/* file descriptor */
 	char	file[256];	/* file name */
@@ -156,27 +187,6 @@ struct mb_io_struct
 	int	header_structure_size;
 	char	*raw_data;
 	char	*store_data;
-
-	/* control parameters - see mbio manual pages for explanation */
-	int	format;		/* data format id */
-	int	format_num;	/* data format array id */
-	int	beams_bath;	/* maximum number of bathymetry beams */
-	int	beams_amp;	/* maximum number of amplitude beams
-					- either 0 or = beams_bath */
-	int	pixels_ss;	/* maximum number of sidescan pixels */
-	int	pings;		/* controls ping averaging */
-	int	lonflip;	/* controls longitude range */
-	double	bounds[4];	/* locations bounds of acceptable data */
-	int	btime_i[7];	/* beginning time of acceptable data */
-	int	etime_i[7];	/* ending time of acceptable data */
-	double	btime_d;	/* beginning time of acceptable data 
-					in "_d" format (unix seconds) */
-	double	etime_d;	/* ending time of acceptable data 
-					in "_d" format (unix seconds) */
-	double	speedmin;	/* minimum ship speed of acceptable data
-					in km/hr */
-	double	timegap;	/* maximum time between pings without
-					a data gap */
 
 	/* working variables */
 	int	ping_count;	/* number of pings read or written so far */
@@ -221,6 +231,10 @@ struct mb_io_struct
 	double	new_lat;
 	double	new_speed;
 	double	new_heading;
+	int	new_beams_bath;	/* number of bathymetry beams */
+	int	new_beams_amp;	/* number of amplitude beams
+					- either 0 or = beams_bath */
+	int	new_pixels_ss;	/* number of sidescan pixels */
 	char	*new_beamflag;
 	double	*new_bath;
 	double	*new_amp;
@@ -254,6 +268,69 @@ struct mb_io_struct
 	int	save10;
 	int	save11;
 	double	saved1;
+
+	/* function pointers for allocating and deallocating format
+		specific structures */
+	int (*mb_io_format_alloc)(int verbose, char *mbio_ptr, int *error);
+	int (*mb_io_format_free)(int verbose, char *mbio_ptr, int *error);
+	int (*mb_io_store_alloc)(int verbose, char *mbio_ptr,
+		char **store_ptr, int *error);
+	int (*mb_io_store_free)(int verbose, char *mbio_ptr,
+		char **store_ptr, int *error);
+	
+	/* function pointers for reading and writing records */
+	int (*mb_io_read_ping)(int verbose, void *mbio_ptr, 
+		void *store_ptr, int *error);
+	int (*mb_io_write_ping)(int verbose, void *mbio_ptr, 
+		void *store_ptr, int *error);
+		
+	/* function pointers for extracting and inserting data */
+	int (*mb_io_extract)(int verbose, char *mbio_ptr, char *store_ptr, 
+		int *kind, int time_i[7], double *time_d,
+		double *navlon, double *navlat,
+		double *speed, double *heading,
+		int *nbath, int *namp, int *nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, int *error);
+	int (*mb_io_insert)(int verbose, char *mbio_ptr, char *store_ptr, 
+		int kind, int time_i[7], double time_d,
+		double navlon, double navlat,
+		double speed, double heading,
+		int nbath, int namp, int nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, int *error);
+	int (*mb_io_extract_nav)(int verbose, char *mbio_ptr, char *store_ptr, int *kind,
+		int time_i[7], double *time_d, 
+		double *navlon, double *navlat,
+		double *speed, double *heading, double *draft, 
+		double *roll, double *pitch, double *heave, 
+		int *error);
+	int (*mb_io_insert_nav)(int verbose, char *mbio_ptr, char *store_ptr,
+		int time_i[7], double time_d, 
+		double navlon, double navlat,
+		double speed, double heading, double draft, 
+		double roll, double pitch, double heave, 
+		int *error);
+	int (*mb_io_altitude)(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind,
+		double *transducer_depth, double *altitude,
+		int *error);
+	int (*mb_io_insert_altitude)(int verbose, char *mbio_ptr, char *store_ptr,
+		double transducer_depth, double altitude,
+		int *error);
+	int (*mb_io_ttimes)(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind, int *nbeams,
+		double *ttimes, double	*angles, 
+		double *angles_forward, double *angles_null,
+		double *heave, double *alongtrack_offset, 
+		double *draft, double *ssv, int *error);
+	int (*mb_io_copyrecord)(int verbose, char *mbio_ptr,
+		char *store_ptr, char *copy_ptr, int *error);
+
 	};
 
 /* MBIO buffer control structure */

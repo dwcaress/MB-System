@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 4.0 2000-09-30 07:00:06 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.0 2000-12-01 22:55:48 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/09/30  07:00:06  caress
+ * Snapshot for Dale.
+ *
  *
  */
 /*--------------------------------------------------------------------*/
@@ -753,9 +756,15 @@ int do_update_status()
 				{
 				file = &(project.files[i]);
 				if (file->status == MBNA_FILE_FIXED)
-				    sprintf(string,"%4d %4d fixed %s",file->id,file->num_sections,file->file);
+				    sprintf(string,"%4d %4d fixed %4.1f %4.1f %s",
+					    file->id,file->num_sections,
+					    file->heading_bias,file->roll_bias,
+					    file->file);
 				else
-				    sprintf(string,"%4d %4d       %s",file->id,file->num_sections,file->file);
+				    sprintf(string,"%4d %4d       %4.1f %4.1f %s",
+					    file->id,file->num_sections,
+					    file->heading_bias,file->roll_bias,
+					    file->file);
     				xstr[i] = XmStringCreateLocalized(string);
  				}
     			XmListAddItems(list_data,xstr,project.num_files,0);
@@ -1821,6 +1830,245 @@ do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
+
+void
+do_biases_apply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    	struct mbna_file *file1;
+    	struct mbna_file *file2;
+	int	ivalue;
+	
+	/* get file structures */
+	file1 = &(project.files[mbna_file_id_1]);
+	file2 = &(project.files[mbna_file_id_2]);
+
+	XtVaGetValues(scale_biases_heading1, 
+			XmNvalue, &ivalue, 
+			NULL);
+	file1->heading_bias = 0.1 * ivalue;
+
+	XtVaGetValues(scale_biases_roll1, 
+			XmNvalue, &ivalue, 
+			NULL);
+	file1->roll_bias = 0.1 * ivalue;
+
+	XtVaGetValues(scale_biases_heading2, 
+			XmNvalue, &ivalue, 
+			NULL);
+	file2->heading_bias = 0.1 * ivalue;
+
+	XtVaGetValues(scale_biases_roll2, 
+			XmNvalue, &ivalue, 
+			NULL);
+	file2->roll_bias = 0.1 * ivalue;
+
+	mbnavadjust_crossing_replot();
+	mbnavadjust_get_misfit();
+	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_biases_init( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    	struct mbna_file *file1;
+    	struct mbna_file *file2;
+	char	value_text[128];
+	
+	/* get file structures */
+	file1 = &(project.files[mbna_file_id_1]);
+	file2 = &(project.files[mbna_file_id_2]);
+
+	/* set biases label */
+	sprintf(value_text, ":::t\"Section ID\'s (file:section):\":t\"  Section 1: %4.4d:%4.4d\"\"  Section 2: %4.4d:%4.4d\"",
+		mbna_file_id_1, mbna_section_1, 
+		mbna_file_id_2, mbna_section_2);
+	set_label_multiline_string(label_biases_files, value_text);
+	
+	/* set biases radiobox */
+	if (file1->heading_bias == file2->heading_bias
+	    && file1->roll_bias == file2->roll_bias)
+	    {
+	    mbna_bias_mode = MBNA_BIAS_SAME;
+	    XmToggleButtonSetState(toggleButton_biases_together, 
+			TRUE, TRUE);
+	    }
+	else
+	    {
+	    mbna_bias_mode = MBNA_BIAS_DIFFERENT;
+	    XmToggleButtonSetState(toggleButton_biases_separate, 
+			TRUE, TRUE);
+	    }
+
+	/* set values of bias sliders */
+	XtVaSetValues(scale_biases_heading1, 
+			XmNvalue, (int) (10 * file1->heading_bias), 
+			NULL);
+	XtVaSetValues(scale_biases_roll1, 
+			XmNvalue, (int) (10 * file1->roll_bias), 
+			NULL);
+	if (mbna_bias_mode == MBNA_BIAS_DIFFERENT)
+		{
+		XtVaSetValues(scale_biases_heading2, 
+			XmNvalue, (int) (10 * file2->heading_bias), 
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(scale_biases_roll2, 
+			XmNvalue, (int) (10 * file2->roll_bias), 
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_biases_applyall, 
+			XmNsensitive, False,
+			NULL);
+		}
+	else
+		{
+		XtVaSetValues(scale_biases_heading2, 
+			XmNvalue, (int) (10 * file2->heading_bias), 
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(scale_biases_roll2, 
+			XmNvalue, (int) (10 * file2->roll_bias), 
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_biases_applyall, 
+			XmNsensitive, True,
+			NULL);
+		}
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	double	heading_bias;
+	double	roll_bias;
+    	struct mbna_file *file;
+	int	ivalue;
+	int	ifile;
+	
+
+	/* get bias values */
+	XtVaGetValues(scale_biases_heading1, 
+			XmNvalue, &ivalue, 
+			NULL);
+	heading_bias = 0.1 * ivalue;
+	XtVaGetValues(scale_biases_roll1, 
+			XmNvalue, &ivalue, 
+			NULL);
+	roll_bias = 0.1 * ivalue;
+
+	/* loop over files */
+	for (ifile=0;ifile<project.num_files;ifile++)
+		{
+		file = &(project.files[ifile]);
+		file->heading_bias = heading_bias;
+		file->roll_bias = roll_bias;
+		}
+
+	mbnavadjust_crossing_replot();
+	mbnavadjust_get_misfit();
+	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_biases_toggle( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	ivalue;
+
+	if (XmToggleButtonGetState(toggleButton_biases_together))
+	    {
+	    if (mbna_bias_mode == MBNA_BIAS_DIFFERENT)
+		{
+		mbna_bias_mode = MBNA_BIAS_SAME;
+		XtVaGetValues(scale_biases_heading1, 
+				XmNvalue, &ivalue, 
+				NULL);
+		XtVaSetValues(scale_biases_heading2, 
+				XmNvalue, ivalue, 
+				XmNsensitive, False,
+				NULL);
+		XtVaGetValues(scale_biases_roll1, 
+				XmNvalue, &ivalue, 
+				NULL);
+		XtVaSetValues(scale_biases_roll2, 
+				XmNvalue, ivalue, 
+				XmNsensitive, False,
+				NULL);
+		XtVaSetValues(pushButton_biases_applyall, 
+				XmNsensitive, True,
+				NULL);
+		}
+	    }
+	else
+	    {
+	    if (mbna_bias_mode == MBNA_BIAS_SAME)
+		{
+		mbna_bias_mode = MBNA_BIAS_DIFFERENT;
+		XtVaSetValues(scale_biases_heading2, 
+				XmNsensitive, True,
+				NULL);
+		XtVaSetValues(scale_biases_roll2, 
+				XmNsensitive, True,
+				NULL);
+		XtVaSetValues(pushButton_biases_applyall, 
+				XmNsensitive, False,
+				NULL);
+		}
+	    }
+
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_biases_heading( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	ivalue;
+
+	if (mbna_bias_mode == MBNA_BIAS_SAME)
+	    {
+	    XtVaGetValues(scale_biases_heading1, 
+			    XmNvalue, &ivalue, 
+			    NULL);
+	    XtVaSetValues(scale_biases_heading2, 
+			    XmNvalue, ivalue, 
+			    XmNsensitive, False,
+			    NULL);
+	    }
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_biases_roll( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	ivalue;
+
+	if (mbna_bias_mode == MBNA_BIAS_SAME)
+	    {
+	    XtVaGetValues(scale_biases_roll1, 
+			    XmNvalue, &ivalue, 
+			    NULL);
+	    XtVaSetValues(scale_biases_roll2, 
+			    XmNvalue, ivalue, 
+			    XmNsensitive, False,
+			    NULL);
+	    }
+}
+
+/*--------------------------------------------------------------------*/
+
 void
 do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2482,4 +2730,5 @@ void get_text_string(Widget w, String str)
     strcpy(str, str_tmp);
     XtFree(str_tmp);
 }
+
 /*--------------------------------------------------------------------*/

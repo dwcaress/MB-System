@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 4.3 2000-10-03 21:42:17 caress Exp $
+#    $Id: mbm_grid.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
 #
 #    Copyright (c) 1999, 2000 by
 #    D. W. Caress (caress@mbari.org)
@@ -53,10 +53,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 4.3 2000-10-03 21:42:17 caress Exp $
+#   $Id: mbm_grid.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  2000/10/03  21:42:17  caress
+# Snapshot for Dale.
+#
 # Revision 4.2  2000/09/11  21:54:49  caress
 # Added support for recursive and commented datalists.
 #

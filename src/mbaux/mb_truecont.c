@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $
+ *    $Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -67,7 +67,7 @@ int mb_contour_init(
 		double	time_tick_len,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -326,7 +326,7 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -462,7 +462,7 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1143,7 +1143,7 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.10 2000-10-11 00:54:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;

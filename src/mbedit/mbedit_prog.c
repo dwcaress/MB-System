@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.32 2000-10-11 01:01:50 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.0 2000-12-01 22:54:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.32  2000/10/11  01:01:50  caress
+ * Convert to ANSI C
+ *
  * Revision 4.31  2000/10/03  21:49:04  caress
  * Fixed handling of buffer.
  *
@@ -245,7 +248,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.32 2000-10-11 01:01:50 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.0 2000-12-01 22:54:35 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -309,7 +312,7 @@ int	idata = 0;
 int	icomment = 0;
 int	odata = 0;
 int	ocomment = 0;
-char	comment[256];
+char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
 #define	MBEDIT_BUFFER_SIZE	25000
@@ -433,7 +436,7 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:S:s:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:Ss")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -1511,7 +1514,6 @@ int mbedit_action_mouse_toggle(
 	int	ix, iy, range, range_min;
 	int	found;
 	int	iping, jbeam;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -1705,7 +1707,6 @@ int mbedit_action_mouse_pick(
 	int	ix, iy, range, range_min;
 	int	found;
 	int	iping, jbeam;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -1889,7 +1890,6 @@ int mbedit_action_mouse_erase(
 	int	ix, iy, range;
 	int	found;
 	int	replot_label;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2060,7 +2060,6 @@ int mbedit_action_mouse_restore(
 	int	ix, iy, range;
 	int	found;
 	int	replot_label;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2229,7 +2228,6 @@ int mbedit_action_zap_outbounds(
 	char	*function_name = "mbedit_action_zap_outbounds";
 	int	status = MB_SUCCESS;
 	int	found;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2353,7 +2351,6 @@ int mbedit_action_bad_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_bad_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2453,7 +2450,6 @@ int mbedit_action_good_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_good_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2555,7 +2551,6 @@ int mbedit_action_left_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_left_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2655,7 +2650,6 @@ int mbedit_action_right_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_right_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2755,7 +2749,6 @@ int mbedit_action_zero_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_zero_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2856,7 +2849,6 @@ int mbedit_action_unflag_view(
 	char	*function_name = "mbedit_action_unflag_view";
 	int	status = MB_SUCCESS;
 	int	found;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2971,7 +2963,6 @@ int mbedit_action_unflag_all(
 	char	*function_name = "mbedit_action_unflag_all";
 	int	status = MB_SUCCESS;
 	int	found;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -3084,7 +3075,6 @@ int mbedit_action_filter_all(
 	char	*function_name = "mbedit_action_filter_all";
 	int	status = MB_SUCCESS;
 	int	found;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -3170,7 +3160,7 @@ int mbedit_filter_ping(int iping)
 	int	i, j;
 
 	/* print input debug statements */
-	if (verbose >= 1)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -3662,6 +3652,9 @@ int mbedit_close_file()
 			function_name);
 		}
 
+	/* reset message */
+	do_message_on("MBedit is closing a data file...");	
+
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
 	if (neditsave > 0)
@@ -3701,12 +3694,19 @@ int mbedit_close_file()
 		if (ping[i].allocated > 0)
 		    {
 		    ping[i].allocated = 0;
-		    mb_free(verbose,&ping[i].beamflag,&error);
-		    mb_free(verbose,&ping[i].bath,&error);
-		    mb_free(verbose,&ping[i].bathacrosstrack,&error);
-		    mb_free(verbose,&ping[i].bathalongtrack,&error);
-		    mb_free(verbose,&ping[i].bath_x,&error);
-		    mb_free(verbose,&ping[i].bath_y,&error);
+		    free(ping[i].beamflag);
+		    free(ping[i].bath);
+		    free(ping[i].bathacrosstrack);
+		    free(ping[i].bathalongtrack);
+		    free(ping[i].bath_x);
+		    free(ping[i].bath_y);
+
+		    /* reset message */
+		    if (i%250 == 0)
+			{
+			sprintf(notice, "MBedit: %d pings deallocated...", i);
+			do_message_on(notice);	
+			}
 		    }
 		}
 	mb_free(verbose, &bathlist, &error);
@@ -3729,6 +3729,9 @@ int mbedit_close_file()
 	
 	/* turn file button on */
 	do_filebutton_on();
+	
+	/* turn off message */
+	do_message_off();
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -3768,6 +3771,21 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 		/* turn message on */
 		do_message_on("MBedit is clearing data...");
 
+		/* deallocate pings to be dumped */
+		for (iping=0;iping<nbuff-hold_size;iping++)
+			{
+			if (ping[iping].allocated > 0)
+			    {
+			    ping[iping].allocated = 0;
+			    free(ping[iping].beamflag);
+			    free(ping[iping].bath);
+			    free(ping[iping].bathacrosstrack);
+			    free(ping[iping].bathalongtrack);
+			    free(ping[iping].bath_x);
+			    free(ping[iping].bath_y);
+			    }
+			}
+
 		/* copy data to be held */
 		for (iping=0;iping<hold_size;iping++)
 			{
@@ -3792,7 +3810,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 	*nbuffer = nbuff;
 
 	/* print out information */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\n%d data records dumped from buffer\n",
 				*ndumped);
@@ -3879,12 +3897,12 @@ int mbedit_load_data(int buffer_size,
 			&& ping[nbuff].allocated < ping[nbuff].beams_bath)
 			{
 			ping[nbuff].allocated = 0;
-			mb_free(verbose, &ping[nbuff].beamflag, &error);
-			mb_free(verbose, &ping[nbuff].bath, &error);
-			mb_free(verbose, &ping[nbuff].bathacrosstrack, &error);
-			mb_free(verbose, &ping[nbuff].bathalongtrack, &error);
-			mb_free(verbose, &ping[nbuff].bath_x, &error);
-			mb_free(verbose, &ping[nbuff].bath_y, &error);
+			free(ping[nbuff].beamflag);
+			free(ping[nbuff].bath);
+			free(ping[nbuff].bathacrosstrack);
+			free(ping[nbuff].bathalongtrack);
+			free(ping[nbuff].bath_x);
+			free(ping[nbuff].bath_y);
 			}
 		if (status == MB_SUCCESS
 			&& ping[nbuff].allocated < ping[nbuff].beams_bath)
@@ -3895,18 +3913,12 @@ int mbedit_load_data(int buffer_size,
 			ping[nbuff].bathalongtrack = NULL;
 			ping[nbuff].bath_x = NULL;
 			ping[nbuff].bath_y = NULL;
-			status = mb_malloc(verbose,ping[nbuff].beams_bath*sizeof(char),
-				&ping[nbuff].beamflag,&error);
-			status = mb_malloc(verbose,ping[nbuff].beams_bath*sizeof(double),
-				&ping[nbuff].bath,&error);
-			status = mb_malloc(verbose,ping[nbuff].beams_bath*sizeof(double),
-				&ping[nbuff].bathacrosstrack,&error);
-			status = mb_malloc(verbose,ping[nbuff].beams_bath*sizeof(double),
-				&ping[nbuff].bathalongtrack,&error);
-			status = mb_malloc(verbose,ping[nbuff].beams_bath*sizeof(int),
-				&ping[nbuff].bath_x,&error);
-			status = mb_malloc(verbose,ping[nbuff].beams_bath*sizeof(int),
-				&ping[nbuff].bath_y,&error);
+			ping[nbuff].beamflag = (char *) malloc(ping[nbuff].beams_bath*sizeof(char));
+			ping[nbuff].bath = (double *) malloc(ping[nbuff].beams_bath*sizeof(double));
+			ping[nbuff].bathacrosstrack = (double *) malloc(ping[nbuff].beams_bath*sizeof(double));
+			ping[nbuff].bathalongtrack = (double *) malloc(ping[nbuff].beams_bath*sizeof(double));
+			ping[nbuff].bath_x = (int *) malloc(ping[nbuff].beams_bath*sizeof(int));
+			ping[nbuff].bath_y = (int *) malloc(ping[nbuff].beams_bath*sizeof(int));
 			ping[nbuff].allocated = ping[nbuff].beams_bath;
 			}
 		if (status == MB_SUCCESS
@@ -4053,7 +4065,7 @@ int mbedit_load_data(int buffer_size,
 	do_message_off();
 
 	/* print out information */
-	if (verbose > 0)
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\n%d data records loaded from input file <%s>\n",
 			*nloaded,ifile);
@@ -4145,7 +4157,6 @@ int mbedit_plot_all(
 	int	y, dy, first, xold, yold;
 	char	string[128];
 	char	*string_ptr;
-	int	format_num, frequency;
 	int	fpx, fpdx, fpy, fpdy;
 
 	/* print input debug statements */
@@ -4234,14 +4245,7 @@ int mbedit_plot_all(
 	/* reset xtrack_max if required */
 	if (autoscale && xtrack_max < 0.5)
 		{
-		status = mb_format(verbose,&format,&format_num,&error);
-		frequency = frequency_table[mb_system_table[format_num]];
-		if (frequency < 20)
-			xtrack_max = 1000.0;
-		else if (frequency < 60)
-			xtrack_max = 100.0;
-		else
-			xtrack_max = 10.0;
+		xtrack_max = 1000.0;
 		}
 		
 	/* if autoscale on reset plot width */
@@ -4261,6 +4265,10 @@ int mbedit_plot_all(
 		{
 		fprintf(stderr,"\ndbg2       %d data records set for plotting (%d desired)\n",
 			nplot,plot_size);
+		fprintf(stderr,"dbg2       xtrack_max:  %f\n",xtrack_max);
+		fprintf(stderr,"dbg2       bathmedian:  %f\n",bathmedian);
+		fprintf(stderr,"dbg2       nbathlist:   %d\n",nbathlist);
+		fprintf(stderr,"dbg2       nbathsum:    %d\n",nbathsum);
 		for (i=current_id;i<current_id+nplot;i++)
 			{
 			fprintf(stderr,"dbg2       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %10.3f\n",
@@ -4640,6 +4648,7 @@ int mbedit_plot_ping_label(int iping, int save)
 		}
 
 	/* set info string */
+	if (ping[iping].beams_bath > 0)
 	sprintf(string,"%5d %2d/%2d/%4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
 		ping[iping].record,
 		ping[iping].time_i[1],ping[iping].time_i[2],
@@ -4647,6 +4656,14 @@ int mbedit_plot_ping_label(int iping, int save)
 		ping[iping].time_i[4],ping[iping].time_i[5],
 		(int)(0.001 * ping[iping].time_i[6]),
 		ping[iping].bath[ping[iping].beams_bath/2]);
+	else
+	sprintf(string,"%5d %2d/%2d/%4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
+		ping[iping].record,
+		ping[iping].time_i[1],ping[iping].time_i[2],
+		ping[iping].time_i[0],ping[iping].time_i[3],
+		ping[iping].time_i[4],ping[iping].time_i[5],
+		(int)(0.001 * ping[iping].time_i[6]),
+		0.0);
 	xg_justify(mbedit_xgid,string,&swidth,&sascent,&sdescent);
 
 	/* save string to show last ping seen at end of program */
@@ -4948,7 +4965,7 @@ int mbedit_action_goto(
 		}
 
 	/* let the world know... */
-	if (verbose >= 0 && found == MB_YES)
+	if (verbose >= 2 && found == MB_YES)
 		{
 		fprintf(stderr,"\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n",
 			ttime_i[0],ttime_i[1],ttime_i[2],
@@ -4963,7 +4980,7 @@ int mbedit_action_goto(
 		fprintf(stderr,"Current global data record: %d\n",
 			current_id + ndump_total);
 		}
-	else if (verbose >= 0)
+	else if (verbose >= 2)
 		{
 		fprintf(stderr,"\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n",
 			ttime_i[0],ttime_i[1],ttime_i[2],

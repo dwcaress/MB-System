@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 4.2 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_angle.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -175,6 +175,9 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.1  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *

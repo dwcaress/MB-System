@@ -43,6 +43,7 @@ EXTERNAL Widget   fileSelectionBox;
 EXTERNAL Widget   bulletinBoard_message;
 EXTERNAL Widget   label_message;
 EXTERNAL Widget   label_about_version;
+EXTERNAL Widget   pushButton_save_svpfile;
 EXTERNAL Widget   drawingArea;
 EXTERNAL Widget   label_status_display;
 EXTERNAL Widget   label_status_edit;

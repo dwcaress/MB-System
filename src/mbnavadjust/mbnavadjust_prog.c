@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 4.1 2000-10-03 21:49:28 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.0 2000-12-01 22:55:48 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/10/03  21:49:28  caress
+ * Fixed handling count of nav points while importing data.
+ *
  * Revision 4.0  2000/09/30  07:00:06  caress
  * Snapshot for Dale.
  *
@@ -52,8 +55,32 @@
 /* define global control parameters */
 #include "mbnavadjust.h"
 
+/* swath bathymetry raw data structures */
+struct	pingraw
+	{
+	int	time_i[7];
+	double	time_d;
+	double	navlon;
+	double	navlat;
+	double	heading;
+	double	draft;
+	char	*beamflag;
+	double	*bath;
+	double	*bathacrosstrack;
+	double	*bathalongtrack;
+	};
+struct swathraw
+	{
+	/* raw swath data */
+	int	file_id;
+	int	npings;
+	int	npings_max;
+	int	beams_bath;
+	struct pingraw *pingraws;
+	};
+
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 4.1 2000-10-03 21:49:28 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.0 2000-12-01 22:55:48 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -137,6 +164,8 @@ static int corr_borders[4];
 static int cont_borders[4];
 
 /* mb_contour parameters */
+struct swathraw *swathraw1 = NULL;
+struct swathraw *swathraw2 = NULL;
 struct swath *swath1 = NULL;
 struct swath *swath2 = NULL;
 struct ping *ping = NULL;
@@ -213,6 +242,7 @@ int mbnavadjust_init_globals()
 	mbna_smoothweight = 100.0;
 	mbna_offsetweight = 1.0;
 	mbna_misfit_center = MBNA_MISFIT_AUTOCENTER;
+	mbna_bias_mode = MBNA_BIAS_SAME;
 
 	/* set mbio default values */
 	status = mb_defaults(mbna_verbose,&format,&pings,&lonflip,bounds,
@@ -856,11 +886,15 @@ int mbnavadjust_write_project()
 			{
 			/* write out basic file info */
 			file = &project.files[i];
-			fprintf(hfp,"FILE %4d %4d %4d %4d %4d %4d %s\n",
+			fprintf(hfp,"FILE %4d %4d %4d %4d %4.1f %4.1f %4.1f %4.1f %4d %4d %s\n",
 				i,
 				file->status,
 				file->id,
 				file->format,
+				file->heading_bias_import,
+				file->roll_bias_import,
+				file->heading_bias,
+				file->roll_bias,
 				file->num_sections,
 				file->output_id,
 				file->file);
@@ -1117,14 +1151,18 @@ int mbnavadjust_read_project()
 			file->sections = NULL;
 			if (status == MB_SUCCESS
 				&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-					|| (nscan = sscanf(buffer,"FILE %d %d %d %d %d %d %s",
+					|| (nscan = sscanf(buffer,"FILE %d %d %d %d %lf %lf %lf %lf %d %d %s",
 					&idummy,
 					&(file->status),
 					&(file->id),
 					&(file->format),
+					&(file->heading_bias_import),
+					&(file->roll_bias_import),
+					&(file->heading_bias),
+					&(file->roll_bias),
 					&(file->num_sections),
 					&(file->output_id),
-					file->file)) != 7))
+					file->file)) != 11))
 				status = MB_FAILURE;
 			
 			/* read section info */
@@ -1456,7 +1494,7 @@ int mbnavadjust_import_file(char *path, int format)
 	char	opath[STRING_MAX];
 	int	output_id, found;
 	int	obeams_bath,obeams_amp,opixels_ss;
-	int	format_num, iform;
+	int	iform;
 	double	good_depth;
 	int	nread, first;
 	int	output_open = MB_NO;
@@ -1478,6 +1516,13 @@ int mbnavadjust_import_file(char *path, int format)
 	double	dx1, dy1, dx2, dy2;
 	double	lon1min, lon1max, lat1min, lat1max;
 	double	lon2min, lon2max, lat2min, lat2max;
+	int	mbp_heading_mode;
+	double	mbp_headingbias;
+	int	mbp_rollbias_mode;
+	double	mbp_rollbias;
+	double	mbp_rollbias_port;
+	double	mbp_rollbias_stbd;
+	double	depthmax, distmax, depthscale, distscale;
  	int	i, j, k;
 	int	ii1, jj1, kk1, ii2, jj2, kk2;
 	
@@ -1563,10 +1608,6 @@ int mbnavadjust_import_file(char *path, int format)
 	
 	if (status = MB_SUCCESS)
 		{
-	
- 		/* check format */
-		status = mb_format(mbna_verbose,&format,&format_num,&error);
-
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(
 			mbna_verbose,ipath,format,pings,lonflip,bounds,
@@ -1681,12 +1722,48 @@ int mbnavadjust_import_file(char *path, int format)
 				file->output_id = output_id;
 				strcpy(file->file,path);
 				file->format = format;
+				file->heading_bias = 0.0;
+				file->roll_bias = 0.0;
 				file->num_sections = 0;
 				file->num_sections_alloc = 0;
 				file->sections = NULL;
 				project.num_files++;
 				new_segment = MB_YES;
 				first = MB_NO;
+				
+				/* get bias values */
+				mb_pr_get_heading(mbna_verbose, file->file, 
+						    &mbp_heading_mode, 
+						    &mbp_headingbias, 
+						    error);
+				mb_pr_get_rollbias(mbna_verbose, file->file, 
+						    &mbp_rollbias_mode, 
+						    &mbp_rollbias, 
+						    &mbp_rollbias_port, 
+						    &mbp_rollbias_stbd, 
+						    error);
+				if (mbp_heading_mode == MBP_HEADING_OFFSET
+				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+				    {
+				    file->heading_bias_import = mbp_headingbias;
+				    }
+				else
+				    {
+				    file->heading_bias_import = 0.0;
+				    }
+				if (mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+				    {
+				    file->roll_bias_import = mbp_rollbias;
+				    }
+				else if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+				    {
+				    file->roll_bias_import = 0.5 * (mbp_rollbias_port 
+								    + mbp_rollbias_stbd);
+				    }
+				else
+				    {
+				    file->roll_bias_import = 0.0;
+				    }
 				}
 			
 			/* check if new segment needed */
@@ -1947,8 +2024,28 @@ file->num_sections,
 time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
 navlon,navlat,speed,heading,distance,section->distance,
 beams_bath,beams_amp,pixels_ss);*/
-					ostore->depth_scale = 0;
-					ostore->distance_scale = 0;
+
+					/* get depth and distance scaling */
+					depthmax = 0.0;
+					distmax = 0.0;
+					for (i=0;i<beams_bath;i++)
+					    {
+					    depthmax = MAX(depthmax, 
+							fabs(bath[i]));
+					    distmax = MAX(distmax, 
+							fabs(bathacrosstrack[i]));
+					    distmax = MAX(distmax, 
+							fabs(bathalongtrack[i]));
+					    }
+					depthscale = MAX(0.001, depthmax / 32000);
+					distscale = MAX(0.001, distmax / 32000);
+					ostore->depth_scale = 1000 * depthscale + 1;
+					depthscale = 0.001 * ostore->depth_scale;
+					ostore->distance_scale = 1000 * distscale + 1;
+					distscale = 0.001 * ostore->distance_scale;
+					ostore->transducer_depth = draft / depthscale;
+					
+					/* write out data */
 					status = mb_put_all(mbna_verbose,ombio_ptr,ostore_ptr,
 							MB_YES,MB_DATA_DATA,
 							time_i,time_d,
@@ -3356,7 +3453,6 @@ int mbnavadjust_crossing_load()
 	struct mbna_file *file1, *file2;
 	struct mbna_section *section1, *section2;
 	char	path1[STRING_MAX], path2[STRING_MAX];
-	int	format_num;
 	int	done, pings_read;
 	char	*error_message;
    	int	i;
@@ -3436,9 +3532,13 @@ int mbnavadjust_crossing_load()
 		mb_coor_scale(mbna_verbose,0.5 * (mbna_lat_min + mbna_lat_max),
 				&mbna_mtodeglon,&mbna_mtodeglat);
 			
-		/* load section 1 */
-		status = mbnavadjust_section_load(path1, &swath1, section1->num_pings);
-		status = mbnavadjust_section_load(path2, &swath2, section2->num_pings);
+		/* load sections */
+		status = mbnavadjust_section_load(path1, &swathraw1, &swath1, section1->num_pings);
+		status = mbnavadjust_section_load(path2, &swathraw2, &swath2, section2->num_pings);
+			
+		/* get lon lat positions for soundings */
+		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1);
+		status = mbnavadjust_section_translate(mbna_file_id_2, swathraw2, swath2);
 	
 		/* generate contour data */
 		status = mbnavadjust_section_contour(swath1,&mbna_contour1);
@@ -3490,6 +3590,7 @@ int mbnavadjust_crossing_unload()
 	/* local variables */
 	char	*function_name = "mbnavadjust_crossing_unload";
 	int	status = MB_SUCCESS;
+	struct pingraw *pingraw;
    	int	i;
 
  	/* print input debug statements */
@@ -3501,7 +3602,37 @@ int mbnavadjust_crossing_unload()
 		
 	/* unload loaded crossing */
 	if (mbna_naverr_load == MB_YES)
-		{		    
+		{
+		/* free raw swath data */
+		if (swathraw1 != NULL && swathraw1->pingraws != NULL)
+		    {
+		    for (i=0;i<swathraw1->npings_max;i++)
+			{
+			pingraw = &swathraw1->pingraws[i];
+			status = mb_free(mbna_verbose,&pingraw->beamflag, &error);
+			status = mb_free(mbna_verbose,&pingraw->bath, &error);
+			status = mb_free(mbna_verbose,&pingraw->bathacrosstrack, &error);
+			status = mb_free(mbna_verbose,&pingraw->bathalongtrack, &error);
+			}
+		    status = mb_free(mbna_verbose,&swathraw1->pingraws, &error);
+		    }
+		if (swathraw2 != NULL && swathraw2->pingraws != NULL)
+		    {
+		    for (i=0;i<swathraw2->npings_max;i++)
+			{
+			pingraw = &swathraw2->pingraws[i];
+			status = mb_free(mbna_verbose,&pingraw->beamflag, &error);
+			status = mb_free(mbna_verbose,&pingraw->bath, &error);
+			status = mb_free(mbna_verbose,&pingraw->bathacrosstrack, &error);
+			status = mb_free(mbna_verbose,&pingraw->bathalongtrack, &error);
+			}
+		    status = mb_free(mbna_verbose,&swathraw2->pingraws, &error);
+		    }
+		if (swathraw1 != NULL)
+		    status = mb_free(mbna_verbose,&swathraw1, &error);
+		if (swathraw2 != NULL)
+		    status = mb_free(mbna_verbose,&swathraw2, &error);
+
 		/* free contours */
 		status = mb_contour_deall(mbna_verbose,swath1,&error);
 		status = mb_contour_deall(mbna_verbose,swath2,&error);
@@ -3583,7 +3714,6 @@ int mbnavadjust_crossing_replot()
 	struct mbna_file *file1, *file2;
 	struct mbna_section *section1, *section2;
 	char	path1[STRING_MAX], path2[STRING_MAX];
-	int	format_num;
 	int	done, pings_read;
 	char	*error_message;
    	int	i;
@@ -3605,7 +3735,11 @@ int mbnavadjust_crossing_replot()
 		swath2->contour_int = project.cont_int;
 		swath2->color_int = project.col_int;
 		swath2->tick_int = project.tick_int;
-
+			
+		/* get lon lat positions for soundings */
+		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1);
+		status = mbnavadjust_section_translate(mbna_file_id_2, swathraw2, swath2);
+	
 		/* generate contour data */
 		status = mbnavadjust_section_contour(swath1,&mbna_contour1);
 		status = mbnavadjust_section_contour(swath2,&mbna_contour2);
@@ -3625,15 +3759,18 @@ int mbnavadjust_crossing_replot()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_section_load(char *path, void **swath_ptr, int num_pings)
+int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, int num_pings)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_section_load";
 	int	status = MB_SUCCESS;
+	struct mb_io_struct *imb_io_ptr;
+	struct swathraw *swathraw;
+	struct pingraw *pingraw;
 	struct swath *swath;
 	double	tick_len_map, label_hgt_map;
-	int	format_num;
 	int	done, pings_read;
+	double	mtodeglon, mtodeglat, headingx, headingy;
 	char	*error_message;
    	int	i;
 
@@ -3653,14 +3790,11 @@ int mbnavadjust_section_load(char *path, void **swath_ptr, int num_pings)
 		&& project.open == MB_YES
     		&& project.num_crossings > 0
     		&& mbna_current_crossing >= 0)
-    		{
-		/* get swath pointer */
-		
+    		{		
 		/* set section format */
 		format = 71;
-		status = mb_format(mbna_verbose,&format,&format_num,&error);
 
-		/* initialize first section for reading */
+		/* initialize section for reading */
 		if ((status = mb_read_init(
 			mbna_verbose,path,format,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
@@ -3674,7 +3808,36 @@ int mbnavadjust_section_load(char *path, void **swath_ptr, int num_pings)
 	
 		/* allocate memory for data arrays */
 		if (status == MB_SUCCESS)
-			{	
+			{
+			/* get mb_io_ptr */			
+			imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
+			
+			/* initialize data storage */
+			status = mb_malloc(mbna_verbose, sizeof(struct swathraw), 
+						swathraw_ptr, &error);
+			swathraw = (struct swathraw *) *swathraw_ptr;
+			swathraw->beams_bath = beams_bath;
+			swathraw->npings_max = num_pings;
+			swathraw->npings = 0;
+			status = mb_malloc(mbna_verbose, num_pings * sizeof(struct pingraw), 
+						&swathraw->pingraws, &error);
+			for (i=0;i<swathraw->npings_max;i++)
+				{
+				pingraw = &swathraw->pingraws[i];
+				pingraw->beamflag = NULL;
+				pingraw->bath = NULL;
+				pingraw->bathacrosstrack = NULL;
+				pingraw->bathalongtrack = NULL;
+				status = mb_malloc(mbna_verbose, beams_bath * sizeof(char), 
+							&pingraw->beamflag, &error);
+				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
+							&pingraw->bath, &error);
+				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
+							&pingraw->bathacrosstrack, &error);
+				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
+							&pingraw->bathalongtrack, &error);
+				}
+
 			/* initialize contour controls */
 			tick_len_map = MAX(mbna_lon_max - mbna_lon_min,
 						mbna_lat_max - mbna_lat_min) / 500;
@@ -3713,26 +3876,73 @@ int mbnavadjust_section_load(char *path, void **swath_ptr, int num_pings)
 			while (done == MB_NO)
 			    {
 			    /* read the next ping */
+			    pingraw = &swathraw->pingraws[swathraw->npings];
 			    ping = &swath->pings[swath->npings];
-			    status = mb_read(mbna_verbose,imbio_ptr, &kind,
-				    &pings_read, ping->time_i, &ping->time_d,
-				    &ping->navlon, &ping->navlat, &speed,
-				    &ping->heading, &distance,
+			    status = mb_get_all(mbna_verbose,imbio_ptr,
+				    &istore_ptr,&kind,
+				    pingraw->time_i, &pingraw->time_d,
+				    &pingraw->navlon, &pingraw->navlat, &speed,
+				    &pingraw->heading, &distance,
 				    &beams_bath, &beams_amp, &pixels_ss,
-				    ping->beamflag, ping->bath, NULL,
-				    ping->bathlon, ping->bathlat,
-				    NULL, NULL, NULL,
+				    pingraw->beamflag, pingraw->bath, 
+				    imb_io_ptr->amp,
+				    pingraw->bathacrosstrack, pingraw->bathalongtrack,
+				    imb_io_ptr->ss, 
+				    imb_io_ptr->ss_acrosstrack, 
+				    imb_io_ptr->ss_alongtrack,
 				    comment, &error);
 	
 			    /* handle successful read */
-			    if (status == MB_SUCCESS)
+			    if (status == MB_SUCCESS
+				&& kind == MB_DATA_DATA)
 			    	{
 			    	/* update bookkeeping */
 			    	if (error == MB_ERROR_NO_ERROR)
+				    {
+				    swathraw->npings++;
 				    swath->npings++;
-			    	
+				    }
+
+				/* extract all nav values */
+				status = mb_extract_nav(mbna_verbose,imbio_ptr,
+					istore_ptr,&kind,
+					pingraw->time_i, &pingraw->time_d,
+					&pingraw->navlon, &pingraw->navlat, &speed,
+					&pingraw->heading, &pingraw->draft,
+					&roll, &pitch, &heave, 
+					&error);
+
+				/* copy data from swathraw to swath */
+				for (i=0;i<7;i++)
+				    ping->time_i[i] = pingraw->time_i[i];
+				ping->time_d = pingraw->time_d;
+				ping->navlon = pingraw->navlon;
+				ping->navlat = pingraw->navlat;
+				ping->heading = pingraw->heading;
+				mb_coor_scale(mbna_verbose, pingraw->navlat, 
+						&mtodeglon, &mtodeglat);
+				headingx = sin(pingraw->heading * DTR);
+				headingy = cos(pingraw->heading * DTR);
+			    	for (i=0;i<beams_bath;i++)
+				    {
+				    ping->beamflag[i] = pingraw->beamflag[i];
+				    ping->bath[i] = pingraw->bath[i];
+				    ping->bathlon[i] = pingraw->navlon 
+							+ headingy*mtodeglon
+							    *pingraw->bathacrosstrack[i]
+							+ headingx*mtodeglon
+							    *pingraw->bathalongtrack[i];
+				    ping->bathlat[i] = pingraw->navlat 
+							- headingx*mtodeglat
+							    *pingraw->bathacrosstrack[i]
+							+ headingy*mtodeglat
+							    *pingraw->bathalongtrack[i];
+				    }
+
 			    	/* null out any unused beams for formats with
 					variable numbers of beams */
+			    	for (i=beams_bath;i<swathraw->beams_bath;i++)
+				    pingraw->beamflag[i] = MB_FLAG_NULL;
 			    	for (i=beams_bath;i<swath->beams_bath;i++)
 				    ping->beamflag[i] = MB_FLAG_NULL;
 /*fprintf(stderr, "%d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %11.6f %11.6f %d:%d\n",
@@ -3750,12 +3960,12 @@ ping->navlon, ping->navlat, beams_bath, swath->beams_bath);*/
 				    fprintf(stderr,"dbg2       kind:           %d\n",
 					    kind);
 				    fprintf(stderr,"dbg2       npings:         %d\n",
-					    swath->npings);
+					    swathraw->npings);
 				    fprintf(stderr,"dbg2       time:           %4d %2d %2d %2d %2d %2d %6.6d\n",
-					    ping->time_i[0],ping->time_i[1],ping->time_i[2],
-					    ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6]);
+					    pingraw->time_i[0],pingraw->time_i[1],pingraw->time_i[2],
+					    pingraw->time_i[3],pingraw->time_i[4],pingraw->time_i[5],pingraw->time_i[6]);
 				    fprintf(stderr,"dbg2       navigation:     %f  %f\n",
-					    ping->navlon, ping->navlat);
+					    pingraw->navlon, pingraw->navlat);
 				    fprintf(stderr,"dbg2       beams_bath:     %d\n",
 					    beams_bath);
 				    fprintf(stderr,"dbg2       beams_amp:      %d\n",
@@ -3768,7 +3978,7 @@ ping->navlon, ping->navlat, beams_bath, swath->beams_bath);*/
 					    status);
 				    }
 				}
-			    else
+			    else if (error > MB_ERROR_NO_ERROR)
 			    	{
 			    	status = MB_SUCCESS;
 			    	error = MB_ERROR_NO_ERROR;
@@ -3780,6 +3990,117 @@ ping->navlon, ping->navlat, beams_bath, swath->beams_bath);*/
 		/* close the input data file */
 		status = mb_close(mbna_verbose,&imbio_ptr,&error);
    		}
+			
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_ptr)
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_section_translate";
+	int	status = MB_SUCCESS;
+	struct swathraw *swathraw;
+	struct pingraw *pingraw;
+	struct swath *swath;
+	double	mtodeglon, mtodeglat, headingx, headingy;
+	double	depth, depthacrosstrack, depthalongtrack;
+	double	alpha, beta, range;
+   	int	i, iping;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       file_id:      %d\n",file_id);
+		fprintf(stderr,"dbg2       swathraw_ptr: %d\n",swathraw_ptr);
+		}
+		
+     	/* translate sounding positions for loaded section */
+    	if (mbna_status == MBNA_STATUS_NAVERR
+		&& project.open == MB_YES
+    		&& project.num_crossings > 0
+    		&& mbna_current_crossing >= 0)
+    		{
+		swathraw = (struct swathraw *) swathraw_ptr;
+		swath = (struct swath *) swath_ptr;
+		
+		/* relocate soundings based on heading bias */
+		swath->npings = swathraw->npings;
+		for (iping=0;iping<swathraw->npings;iping++)
+		    {
+		    pingraw = &swathraw->pingraws[iping];
+		    ping = &swath->pings[iping];
+		    for (i=0;i<7;i++)
+			ping->time_i[i] = pingraw->time_i[i];
+		    ping->time_d = pingraw->time_d;
+		    ping->navlon = pingraw->navlon;
+		    ping->navlat = pingraw->navlat;
+		    ping->heading = pingraw->heading 
+				    + project.files[file_id].heading_bias;
+		    mb_coor_scale(mbna_verbose, pingraw->navlat, 
+				    &mtodeglon, &mtodeglat);
+		    headingx = sin(ping->heading * DTR);
+		    headingy = cos(ping->heading * DTR);
+		    for (i=0;i<swathraw->beams_bath;i++)
+			{
+			if (mb_beam_ok(pingraw->beamflag[i]))
+			    {
+			    /* strip off transducer depth */
+			    depth = pingraw->bath[i] - pingraw->draft;
+			    
+			    /* get range and angles in 
+				roll-pitch frame */
+			    range = sqrt(depth * depth 
+					+ pingraw->bathacrosstrack[i] 
+					    * pingraw->bathacrosstrack[i]
+					+ pingraw->bathalongtrack[i] 
+					    * pingraw->bathalongtrack[i]);
+			    alpha = asin(pingraw->bathalongtrack[i] 
+				    / range);
+			    beta = acos(pingraw->bathacrosstrack[i] 
+				    / range / cos(alpha));
+
+			    /* apply roll correction */
+			    beta +=  DTR * project.files[file_id].roll_bias;
+			    
+			    /* recalculate bathymetry */
+			    depth = range * cos(alpha) * sin(beta);
+			    depthalongtrack = range * sin(alpha);
+			    depthacrosstrack = range * cos(alpha) * cos(beta);	
+				    
+			    /* add heave and draft back in */	    
+			    depth += pingraw->draft;
+
+			    /* get bathymetry in lon lat */
+			    ping->beamflag[i] = pingraw->beamflag[i];
+			    ping->bath[i] = depth;
+			    ping->bathlon[i] = pingraw->navlon 
+					    + headingy*mtodeglon
+						*depthacrosstrack
+					    + headingx*mtodeglon
+						*depthalongtrack;
+			    ping->bathlat[i] = pingraw->navlat 
+					    - headingx*mtodeglat
+						*depthacrosstrack
+					    + headingy*mtodeglat
+						*depthalongtrack;
+			    }
+			}
+		    }
+		}
 			
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -4676,6 +4997,12 @@ mbnavadjust_invertnav()
 	char	buffer[BUFFER_MAX];
 	int	done, nscan;
 	double	factor;
+	int	mbp_heading_mode;
+	double	mbp_headingbias;
+	int	mbp_rollbias_mode;
+	double	mbp_rollbias;
+	double	mbp_rollbias_port;
+	double	mbp_rollbias_stbd;
 	int	i, j, k;
 
  	/* print input debug statements */
@@ -5397,11 +5724,80 @@ navlon, navlat, heading, speed);*/
 		    	if (ofp != NULL) 
 			    {
 			    fclose(ofp);
+			    
+			    /* get bias values */
+			    mb_pr_get_heading(mbna_verbose, file->file, 
+						&mbp_heading_mode, 
+						&mbp_headingbias, 
+						error);
+			    mb_pr_get_rollbias(mbna_verbose, file->file, 
+						&mbp_rollbias_mode, 
+						&mbp_rollbias, 
+						&mbp_rollbias_port, 
+						&mbp_rollbias_stbd, 
+						error);
 	    
-			    /* update mbprocess parameter file */
+			    /* update output file in mbprocess parameter file */
 			    status = mb_pr_update_navadj(mbna_verbose, file->file, 
 					MBP_NAV_ON, opath, 
 					MBP_NAV_LINEAR, 
+					&error);
+
+			    /* update heading bias in mbprocess parameter file */
+			    mbp_headingbias = file->heading_bias + file->heading_bias_import;
+			    if (mbp_headingbias == 0.0)
+				{
+				if (mbp_heading_mode == MBP_HEADING_OFF
+				    || mbp_heading_mode == MBP_HEADING_OFFSET)
+				    mbp_heading_mode = MBP_HEADING_OFF;
+				else if (mbp_heading_mode == MBP_HEADING_CALC
+				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+				    mbp_heading_mode = MBP_HEADING_CALC;
+				}
+			    else
+				{
+				if (mbp_heading_mode == MBP_HEADING_OFF
+				    || mbp_heading_mode == MBP_HEADING_OFFSET)
+				    mbp_heading_mode = MBP_HEADING_OFFSET;
+				else if (mbp_heading_mode == MBP_HEADING_CALC
+				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+				    mbp_heading_mode = MBP_HEADING_CALCOFFSET;
+				}
+			    status = mb_pr_update_heading(mbna_verbose, file->file, 
+					mbp_heading_mode, mbp_headingbias, 
+					&error);
+
+			    /* update roll bias in mbprocess parameter file */
+			    mbp_rollbias = file->roll_bias + file->roll_bias_import;
+			    if (mbp_rollbias == 0.0)
+				{
+				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+				    {
+				    mbp_rollbias_port = mbp_rollbias 
+					    + mbp_rollbias_port - file->roll_bias_import;
+				    mbp_rollbias_stbd = mbp_rollbias 
+					    + mbp_rollbias_stbd - file->roll_bias_import;
+				    }
+				else
+				    mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
+				}
+			    else
+				{
+				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+				    {
+				    mbp_rollbias_port = mbp_rollbias 
+					    + mbp_rollbias_port - file->roll_bias_import;
+				    mbp_rollbias_stbd = mbp_rollbias 
+					    + mbp_rollbias_stbd - file->roll_bias_import;
+				    }
+				else
+				    {
+				    mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
+				    }
+				}
+			    status = mb_pr_update_rollbias(mbna_verbose, file->file, 
+					mbp_rollbias_mode, mbp_rollbias, 
+					mbp_rollbias_port, mbp_rollbias_stbd, 
 					&error);
 			    }
 			}

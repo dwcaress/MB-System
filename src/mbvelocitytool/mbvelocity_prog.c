@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 4.23 2000-10-11 01:06:03 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.0 2000-12-01 22:56:47 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.23  2000/10/11  01:06:03  caress
+ * Convert to ANSI C
+ *
  * Revision 4.22  2000/09/30  07:05:18  caress
  * Snapshot for Dale.
  *
@@ -146,6 +149,7 @@
 struct profile
 	{
 	int	n;
+	int	nalloc;
 	char	name[128];
 	double	*depth;
 	double	*velocity;
@@ -154,8 +158,33 @@ struct profile
 #define	MB_SSV_CORRECT	    1
 #define	MB_SSV_INCORRECT    2
 
+/* ping structure definition */
+struct mbvt_ping_struct 
+	{
+	int	allocated;
+	int	time_i[7];
+	double	time_d;
+	double	navlon;
+	double	navlat;
+	double	speed;
+	double	heading;
+	double	draft;
+	double	ssv;
+	int	beams_bath;
+	char	*beamflag;
+	double	*bath;
+	double	*bathacrosstrack;
+	double	*bathalongtrack;
+	double	*ttimes;
+	double	*angles;
+	double	*angles_forward;
+	double	*angles_null;
+	double	*heave;
+	double	*alongtrack_offset;
+	};
+
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.23 2000-10-11 01:06:03 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.0 2000-12-01 22:56:47 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -195,30 +224,11 @@ double	xpscale, ypscale;
 int	active = -1;
 
 /* default edit profile */
-int	numedit = 15;
-int	depthedit[15] = {   0,100, 300, 500, 
-			  750, 1000, 
-			 1500,2000,
-			 2500, 3000,
-			 4000, 5000, 
-			 7000,9000, 
-			 12000};
-int	veledit[30] = { 1500, 1500, 1500, 1500, 1500,
-			1500, 1500, 1500, 1500, 1500,
-			1500, 1500, 1500, 1500, 1500 };
-/*int	depthedit[30] = {   0, 50, 100, 200, 300, 400, 500, 
-#			  600, 700, 800, 900, 1000, 
-#			 1250, 1500, 1750, 2000,
-#			 2250, 2500, 2750, 3000,
-#			 3500, 4000, 4500, 5000, 
-#			 6000, 7000, 8000, 9000, 
-#			 10000, 12000};
-#int	veledit[30] = { 1500, 1500, 1500, 1500, 1500,
-#			1500, 1500, 1500, 1500, 1500,
-#			1500, 1500, 1500, 1500, 1500,
-#			1500, 1500, 1500, 1500, 1500,
-#			1500, 1500, 1500, 1500, 1500,
-#			1500, 1500, 1500, 1500, 1500 };*/
+#define	NUM_EDIT_START	6
+int	depthedit[NUM_EDIT_START] 
+		    = { 0, 300, 1000,  3000, 7000, 12000 };
+int	veledit[NUM_EDIT_START] 
+		    = { 1500, 1500, 1500, 1500, 1500, 1500 };
 
 /* MBIO control parameters */
 int	format;
@@ -234,6 +244,7 @@ double	timegap;
 int	beams_bath;
 int	beams_amp;
 int	pixels_ss;
+char	swathfile[256];
 char	*mbio_ptr;
 
 /* mbio read and write values */
@@ -243,8 +254,7 @@ int	id;
 int	nbeams;
 
 /* buffer control variables */
-#define	MBVT_BUFFER_SIZE	1000
-char	*buff_ptr = NULL;
+#define	MBVT_BUFFER_SIZE	25000
 int	buffer_size = MBVT_BUFFER_SIZE;
 int	nbuffer;
 int	nload;
@@ -263,7 +273,7 @@ double	*bathalongtrack = NULL;
 double	*ss = NULL;
 double	*ssacrosstrack = NULL;
 double	*ssalongtrack = NULL;
-char	*comment = NULL;
+char	comment[MB_COMMENT_MAXLINE];
 double	*ttimes = NULL;
 double	*angles = NULL;
 double	*angles_forward = NULL;
@@ -278,6 +288,7 @@ double	**raypathx;
 double	**raypathy;
 double	*depth = NULL;
 double	*acrosstrack = NULL;
+struct mbvt_ping_struct	ping[MBVT_BUFFER_SIZE];
 
 /* depth range variables */
 double	bath_min = 0.0;
@@ -324,7 +335,7 @@ int mbvt_init(int argc, char **argv)
 	char	*function_name = "mbvt_init";
 	int	status = MB_SUCCESS;
 	char	ifile[256], sfile[256], wfile[256];
-	int	i;
+	int	i, n;
 
 	/* parsing variables */
 	extern char *optarg;
@@ -478,7 +489,7 @@ int mbvt_init(int argc, char **argv)
 		}
 	if (strlen(ifile) > 0)
 		{
-		status = mbvt_open_swath_file(ifile,format);
+		status = mbvt_open_swath_file(ifile,format, &n);
 		}
 
 	/* print output debug statements */
@@ -521,39 +532,7 @@ int mbvt_quit()
 		}
 
 	/* deallocate previously loaded data, if any */
-	if (nbuffer > 0)
-		{
-		mb_buffer_close(verbose,&buff_ptr,mbio_ptr,&error);
-		mb_close(verbose,&mbio_ptr,&error);
-		mb_free(verbose,&beamflag,&error);
-		mb_free(verbose,&bath,&error);
-		mb_free(verbose,&amp,&error);
-		mb_free(verbose,&bathacrosstrack,&error);
-		mb_free(verbose,&bathalongtrack,&error);
-		mb_free(verbose,&ss,&error);
-		mb_free(verbose,&ssacrosstrack,&error);
-		mb_free(verbose,&ssalongtrack,&error);
-		mb_free(verbose,&ttimes,&error);
-		mb_free(verbose,&angles,&error);
-		mb_free(verbose,&angles_forward,&error);
-		mb_free(verbose,&angles_null,&error);
-		mb_free(verbose,&heave,&error);
-		mb_free(verbose,&alongtrack_offset,&error);
-		mb_free(verbose,&nraypath,&error);
-		for (i=0;i<beams_bath;i++)
-			{
-			mb_free(verbose,&raypathx[i],&error);
-			mb_free(verbose,&raypathy[i],&error);
-			}
-		mb_free(verbose,&raypathx,&error);
-		mb_free(verbose,&raypathy,&error);
-		mb_free(verbose,&depth,&error);
-		mb_free(verbose,&acrosstrack,&error);
-		mb_free(verbose,&angle,&error);
-		mb_free(verbose,&residual,&error);
-		mb_free(verbose,&res_sd,&error);
-		mb_free(verbose,&nresidual,&error);
-		}
+	mbvt_deallocate_swath();
 
 	/* check allocated memory */
 	status = mb_memory_list(verbose,&error);
@@ -794,10 +773,11 @@ int mbvt_open_edit_profile(char *file)
 	fclose(fp);
 
 	/* allocate space for the velocity profile and raytracing tables */
-	size = profile->n*sizeof(int);
+	profile->nalloc = MAX(10 * profile->n, 60);
+	size = profile->nalloc * sizeof(int);
 	status = mb_malloc(verbose,size,&edit_x,&error);
 	status = mb_malloc(verbose,size,&edit_y,&error);
-	size = profile->n*sizeof(double);
+	size = profile->nalloc * sizeof(double);
 	status = mb_malloc(verbose,size,&(profile->depth),&error);
 	status = mb_malloc(verbose,size,&(profile->velocity),&error);
 
@@ -907,11 +887,11 @@ int mbvt_new_edit_profile()
 		}
 
 	/* allocate space for the velocity profile and raytracing tables */
-	profile->n = numedit;
-	size = profile->n*sizeof(int);
+	profile->nalloc = 10 * NUM_EDIT_START;
+	size = profile->nalloc * sizeof(int);
 	status = mb_malloc(verbose,size,&edit_x,&error);
 	status = mb_malloc(verbose,size,&edit_y,&error);
-	size = profile->n*sizeof(double);
+	size = profile->nalloc * sizeof(double);
 	profile->depth = NULL;
 	profile->velocity = NULL;
 	status = mb_malloc(verbose,size,&(profile->depth),&error);
@@ -931,6 +911,7 @@ int mbvt_new_edit_profile()
 	strcpy(profile->name,"new");
 	if (bath_max > bath_min && bath_max < 2000)
 		{
+		profile->n = NUM_EDIT_START;
 		dz = 1.25 * bath_max / (profile->n - 2);
 		for (i=0;i<profile->n-1;i++)
 			{
@@ -944,6 +925,7 @@ int mbvt_new_edit_profile()
 		}
 	else
 		{
+		profile->n = NUM_EDIT_START;
 		for (i=0;i<profile->n;i++)
 			{
 			profile->depth[i] = depthedit[i];
@@ -1054,6 +1036,104 @@ int mbvt_save_edit_profile(char *file)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function saves the editable profile and sets up               */
+/*                  its use by mbprocess                              */
+/* Called by:                                                         */
+/*                  controls_save_file in mbvelocity_callbacks.c. It is   */
+/*                    called when the user selects "OK" from the      */
+/*                    save editable file widget.                      */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
+int mbvt_save_swath_profile(char *file)
+{
+	/* local variables */
+	char	*function_name = "mbvt_save_swath_profile";
+	int	status = MB_SUCCESS;
+	struct profile *profile;
+	FILE	*fp;
+	int	i;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[25], user[128], *user_ptr, host[128];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input values:\n");
+		fprintf(stderr,"dbg2       file:        %s\n",file);
+		}
+
+	/* get profile pointer */
+	profile = &profile_edit;
+	
+	/* do this if edit profile exists and swath data read */
+	if (profile->n > 2 && nbuffer > 0)
+	    {
+
+	    /* open the file if possible */
+	    sprintf(file, "%s.svp", swathfile);
+	    if ((fp = fopen(file, "w")) == NULL) 
+		{
+		status = MB_FAILURE;
+		fprintf(stderr,"\nUnable to Open Output Velocity Profile File <%s> for writing\n",file);
+		do_error_dialog("Unable to open output file.", 
+				"You may not have write", 
+				"permission in this directory!");
+		return(status);
+		}
+
+	    /* write comments */
+	    fprintf(fp,"# Water velocity profile created by program %s\n",
+		    program_name);
+	    fprintf(fp,"# Version %s\n",rcs_id);
+	    strncpy(date,"\0",25);
+	    right_now = time((time_t *)0);
+	    strncpy(date,ctime(&right_now),24);
+	    if ((user_ptr = getenv("USER")) == NULL)
+		    user_ptr = getenv("LOGNAME");
+	    if (user_ptr != NULL)
+		    strcpy(user,user_ptr);
+	    else
+		    strcpy(user, "unknown");
+	    gethostname(host,128);
+	    fprintf(fp,"# Run by user <%s> on cpu <%s> at <%s>\n",
+		    user,host,date);
+    
+	    /* write the profile */
+	    for (i=0;i<profile->n;i++)
+		    fprintf(fp,"%f %f\n",profile->depth[i],
+			    profile->velocity[i]);
+    
+	    /* close the file */
+	    fclose(fp);
+	    
+	    /* set par file for use with mbprocess */
+	    status = mb_pr_update_svp(verbose, swathfile, 
+			MB_YES, file, MB_NO, error);
+    
+	    /* check success */
+	    if (status == MB_SUCCESS)
+		edit = MB_YES;
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 /* This function reads the data in the requested display file.        */
 /* Called by:                                                         */
 /*                  open_file_ok in mbvelocity_callbacks.c                */
@@ -1114,9 +1194,10 @@ int mbvt_open_display_profile(char *file)
 	/* allocate space for the velocity profile and raytracing tables */
 	profile->depth = NULL;
 	profile->velocity = NULL;
-	status = mb_malloc(verbose,profile->n*sizeof(double),
+	profile->nalloc = profile->n;
+	status = mb_malloc(verbose,profile->nalloc * sizeof(double),
 		&(profile->depth),&error);
-	status = mb_malloc(verbose,profile->n*sizeof(double),
+	status = mb_malloc(verbose,profile->nalloc * sizeof(double),
 		&(profile->velocity),&error);
 
 	/* if error initializing memory then quit */
@@ -1259,6 +1340,7 @@ int mbvt_delete_display_profile(int select)
 		/* remove selected profile */
 		profile = &profile_display[select];
 		profile->n = 0;
+		profile->nalloc = 0;
 		strcpy(profile->name,"\0");
 		mb_free(verbose,&profile->depth,&error);
 		mb_free(verbose,&profile->velocity,&error);
@@ -1466,6 +1548,8 @@ int mbvt_plot()
 		{
 		xx = xmin + (profile_display[i].velocity[j] - xminimum)*xscale;
 		yy = ymin + (profile_display[i].depth[j] - yminimum)*yscale;
+		xx = MIN(xx, 32000);
+		yy = MIN(yy, 32000);
 /*		xg_drawrectangle(mbvt_xgid, xx-2, yy-2, 4, 4,
 			pixel_values[color],XG_SOLIDLINE);*/
 		if (j > 0)
@@ -1483,6 +1567,8 @@ int mbvt_plot()
 		{
 		xx = xmin + (profile_edit.velocity[j] - xminimum)*xscale;
 		yy = ymin + (profile_edit.depth[j] - yminimum)*yscale;
+		xx = MIN(xx, 32000);
+		yy = MIN(yy, 32000);
 		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4, 
 			pixel_values[BLACK],XG_SOLIDLINE);
 		if (j > 0)
@@ -1619,6 +1705,8 @@ int mbvt_plot()
 		{
 		xx = xrmin + (i - xrminimum)*xrscale;
 		yy = yrmin + (residual[i] - yrminimum) * yrscale;
+		xx = MIN(xx, 32000);
+		yy = MIN(yy, 32000);
 		yyl = yrmin + (residual[i] - res_sd[i] - yrminimum) 
 				* yrscale;
 		yyu = yrmin + (residual[i] + res_sd[i] - yrminimum) 
@@ -1744,6 +1832,8 @@ int mbvt_plot()
 			{
 			xx = xpmin + (raypathx[i][j] - xpminimum)*xpscale;
 			yy = ypmin + (raypathy[i][j] - ypminimum)*ypscale;
+			xx = MIN(xx, 32000);
+			yy = MIN(yy, 32000);
 			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,
 				pixel_values[BLACK],XG_SOLIDLINE);
 			xxo = xx;
@@ -1779,10 +1869,10 @@ int mbvt_plot()
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_action_mouse_down(int x, int y)
+int mbvt_action_select_node(int x, int y)
 {
 	/* local variables */
-	char	*function_name = "mbvt_action_mouse_down";
+	char	*function_name = "mbvt_action_select_node";
 	int	status = MB_SUCCESS;
 	double	distance, distance_min;
 	int	i;
@@ -1882,10 +1972,10 @@ int mbvt_action_mouse_up(int x, int y)
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_action_mouse_drag(int x, int y)
+int mbvt_action_drag_node(int x, int y)
 {
 	/* local variables */
-	char	*function_name = "mbvt_action_mouse_drag";
+	char	*function_name = "mbvt_action_drag_node";
 	int	status = MB_SUCCESS;
 	int	ylim_min, ylim_max;
 	int     xh, yh, xp, yp, yh2, yp2, x_prev, y_prev;
@@ -1993,6 +2083,172 @@ int mbvt_action_mouse_drag(int x, int y)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function is called when the middle mouse button is pressed    */
+/*   when it is in the canvas area. It finds the mouse location so    */
+/*   the program knows where to add a new svp node .                  */
+/* Called by:                                                         */
+/*                  action_canvas_event                               */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
+int mbvt_action_add_node(int x, int y)
+{
+	/* local variables */
+	char	*function_name = "mbvt_action_add_node";
+	int	status = MB_SUCCESS;
+	int	add_i, add_x, add_y;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input values:\n");
+		fprintf(stderr,"dbg2       x:            %d\n",x);
+		fprintf(stderr,"dbg2       y:            %d\n",y);
+		}
+
+	/* select node if possible */
+	status = MB_FAILURE;
+	if (x >= xmin && x <= xmax && y >= ymin && y <= ymax)
+		{
+
+		/* find the vertical place of new node */
+		add_i = -1;
+		for (i = 1; i < profile_edit.n && add_i == -1; i++)
+			{
+			if (y > edit_y[i-1]
+				&& y < edit_y[i])
+			    {
+			    add_i = i;
+			    add_x = x;
+			    add_y = y;
+			    }
+			else if (y == edit_y[i])
+			    {
+			    add_i = i;
+			    add_x = x;
+			    add_y = y - 1;			    
+			    }
+			}
+			
+		/* add in the node */
+		if (add_i > -1 
+			&& profile_edit.n < profile_edit.nalloc)
+			{
+			for (i=profile_edit.n-1;i>=add_i;i--)
+			    {
+			    profile_edit.depth[i+1] = profile_edit.depth[i];
+			    profile_edit.velocity[i+1] = profile_edit.velocity[i];
+			    edit_x[i+1] = edit_x[i];
+			    edit_y[i+1] = edit_y[i];
+			    }
+			profile_edit.n++;
+			edit_x[add_i] = add_x;
+			edit_y[add_i] = add_y;
+			profile_edit.velocity[add_i] = (add_x - xmin)/xscale + xminimum;
+			profile_edit.depth[add_i] = (add_y - ymin)/yscale + yminimum;
+
+			status = MB_SUCCESS;
+			
+			mbvt_plot();
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* This function is called when the right mouse button is pressed    */
+/*   when it is in the canvas area. It finds the mouse location so    */
+/*   the program knows where to add a new svp node .                  */
+/* Called by:                                                         */
+/*                  action_canvas_event                               */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
+int mbvt_action_delete_node(int x, int y)
+{
+	/* local variables */
+	char	*function_name = "mbvt_action_delete_node";
+	int	status = MB_SUCCESS;
+	double	distance, distance_min;
+	int	delete;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input values:\n");
+		fprintf(stderr,"dbg2       x:            %d\n",x);
+		fprintf(stderr,"dbg2       y:            %d\n",y);
+		}
+
+	/* select node if possible */
+	status = MB_FAILURE;
+	if (x >= xmin && x <= xmax && y >= ymin && y <= ymax)
+		{
+
+		/* find the closest node */
+		distance_min = 10.0;
+		delete = -1;
+		for (i=0;i<profile_edit.n;i++)
+			{
+			distance = (edit_x[i] - x)*(edit_x[i] - x) 
+				+ (edit_y[i] - y)*(edit_y[i] - y);
+			if (distance < distance_min)
+				{
+				distance_min = distance;
+				delete = i;
+				}
+			}
+			
+		/* delete the node */
+		if (delete > -1 
+			&& profile_edit.n > 2)
+			{
+			for (i=delete;i<profile_edit.n;i++)
+			    {
+			    profile_edit.depth[i] = profile_edit.depth[i+1];
+			    profile_edit.velocity[i] = profile_edit.velocity[i+1];
+			    edit_x[i] = edit_x[i+1];
+			    edit_y[i] = edit_y[i+1];
+			    }
+			profile_edit.n--;
+
+			status = MB_SUCCESS;
+
+			mbvt_plot();
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 /* This function reads the data from the multibeam file and makes    */
 /*   the calls to display it.                                         */
 /* Called by:                                                         */
@@ -2014,17 +2270,19 @@ int mbvt_action_mouse_drag(int x, int y)
 /* Function returns:                                                  */
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
-int mbvt_open_swath_file(char *file, int form)
+int mbvt_open_swath_file(char *file, int form, int *numload)
 {
 	/* local variables */
 	char	*function_name = "mbvt_open_swath_file";
 	int	status = MB_SUCCESS;
-	int	format_num;
-	struct mb_buffer_struct *buff;
 	int	kind;
 	double	navlon_levitus, navlat_levitus;
-	double	ssv;
+	double	distance;
+	int	variable_beams;
+	int	traveltime;
+	int	beam_flagging; 
 	char	command[64];
+	char	string[50];
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -2039,8 +2297,20 @@ int mbvt_open_swath_file(char *file, int form)
 
 	/* check for format with travel time data */
 	format = form;
-	status = mb_format(verbose,&format,&format_num,&error);
-	if (mb_traveltime_table[format_num] != MB_YES)
+	status = mb_format_flags(verbose, &format, 
+			&variable_beams, &traveltime, &beam_flagging, 
+			&error);
+	if (status == MB_FAILURE)
+		{
+		fprintf(stderr,"\nFormat id %d does not correspond to a supported format.\n",format);
+		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for reading\n",file);
+		status = MB_FAILURE;
+		do_error_dialog("Data loading aborted.", 
+				"The specified swath data", 
+				"format is incorrect!");
+		return(status);
+		}
+	if (traveltime == MB_NO)
 		{
 		fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
 		fprintf(stderr,"Format %d is unacceptable because it does not include travel time data.\n",format);
@@ -2053,53 +2323,22 @@ int mbvt_open_swath_file(char *file, int form)
 		}
 
 	/* deallocate previously loaded data, if any */
-	if (nbuffer > 0)
-		{
-		mb_buffer_close(verbose,&buff_ptr,mbio_ptr,&error);
-		mb_close(verbose,&mbio_ptr,&error);
-		mb_free(verbose,&beamflag,&error);
-		mb_free(verbose,&bath,&error);
-		mb_free(verbose,&amp,&error);
-		mb_free(verbose,&bathacrosstrack,&error);
-		mb_free(verbose,&bathalongtrack,&error);
-		mb_free(verbose,&ss,&error);
-		mb_free(verbose,&ssacrosstrack,&error);
-		mb_free(verbose,&ssalongtrack,&error);
-		mb_free(verbose,&ttimes,&error);
-		mb_free(verbose,&angles,&error);
-		mb_free(verbose,&angles_forward,&error);
-		mb_free(verbose,&angles_null,&error);
-		mb_free(verbose,&heave,&error);
-		mb_free(verbose,&alongtrack_offset,&error);
-		mb_free(verbose,&nraypath,&error);
-		for (i=0;i<beams_bath;i++)
-			{
-			mb_free(verbose,&raypathx[i],&error);
-			mb_free(verbose,&raypathy[i],&error);
-			}
-		mb_free(verbose,&raypathx,&error);
-		mb_free(verbose,&raypathy,&error);
-		mb_free(verbose,&depth,&error);
-		mb_free(verbose,&acrosstrack,&error);
-		mb_free(verbose,&angle,&error);
-		mb_free(verbose,&residual,&error);
-		mb_free(verbose,&res_sd,&error);
-		mb_free(verbose,&nresidual,&error);
-		}
+	mbvt_deallocate_swath();
 
 	/* initialize reading the input multibeam file */
 	format = form;
+	strcpy(swathfile, file);
 	if ((status = mb_read_init(
-		verbose,file,format,pings,lonflip,bounds,
+		verbose,swathfile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for reading\n",file);
+		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for reading\n",swathfile);
 		status = MB_FAILURE;
-		do_error_dialog("Unable to open input file.", 
+		do_error_dialog("Unable to open input swath file.", 
 				"File may not exist or you may not have", 
 				"read permission in this directory!");
 		return(status);
@@ -2145,69 +2384,130 @@ int mbvt_open_swath_file(char *file, int form)
 		}
 
 	/* initialize the buffer */
-	status = mb_buffer_init(verbose,&buff_ptr,&error);
 	nbuffer = 0;
-
-	/* load data into buffer */
-	status = mb_buffer_load(verbose,buff_ptr,mbio_ptr,buffer_size,
-			&nload,&nbuffer,&error);
-
-	/* get buffer structure */
-	buff = (struct mb_buffer_struct *) buff_ptr;
-	
-	/* set error message */
-	if (nbuffer <= 0)
-		do_error_dialog("No data were read from the input", 
-				"file. You may have specified an", 
-				"incorrect MB-System format id!");
-
-	/* loop over the data records to find the first surface velocity */
 	ssv_start = 0.0;
 	bath_min = 10000.0;
 	bath_max = 0.0;
 	navlon_levitus = 0.0;
 	navlat_levitus = 0.0;
-	for (k=0;k<nbuffer;k++)
+		
+	/* turn message on */
+	nload = 0;
+	sprintf(string, "MBvelocitytool: %d records loaded so far...", nload);
+	do_message_on(string);
+
+	/* load data */
+	do
 		{
-		if (buff->buffer_kind[k] == MB_DATA_DATA)
-			{
-			/* extract bathymetry - just to get flags */
-			mb_buffer_extract(verbose,buff_ptr,mbio_ptr,
-				k, &kind,
-				time_i,&time_d,&navlon,&navlat,
-				&speed,&heading,
-				&nbath,&namp,&nss,
-				beamflag,bath,amp,
+		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
+				ping[nbuffer].time_i,
+				&ping[nbuffer].time_d,
+				&ping[nbuffer].navlon,
+				&ping[nbuffer].navlat,
+				&ping[nbuffer].speed,
+				&ping[nbuffer].heading,
+				&distance,
+				&ping[nbuffer].beams_bath,&namp,&nss,
+				beamflag,bath,amp, 
 				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
-			
-			/* extract travel times */
+		if (error <= MB_ERROR_NO_ERROR
+		    && (kind == MB_DATA_DATA)
+		    && (error == MB_ERROR_NO_ERROR
+			    || error == MB_ERROR_TIME_GAP
+			    || error == MB_ERROR_OUT_BOUNDS
+			    || error == MB_ERROR_OUT_TIME
+			    || error == MB_ERROR_SPEED_TOO_SMALL))
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+		else if (error <= MB_ERROR_NO_ERROR)
+			{
+			status = MB_FAILURE;
+			error = MB_ERROR_OTHER;
+			}
+		if (status == MB_SUCCESS
+			&& ping[nbuffer].allocated > 0
+			&& ping[nbuffer].allocated < ping[nbuffer].beams_bath)
+			{
+			ping[nbuffer].allocated = 0;
+			free(ping[nbuffer].beamflag);
+			free(ping[nbuffer].bath);
+			free(ping[nbuffer].bathacrosstrack);
+			free(ping[nbuffer].bathalongtrack);
+			free(ping[nbuffer].ttimes);
+			free(ping[nbuffer].angles);
+			free(ping[nbuffer].angles_forward);
+			free(ping[nbuffer].angles_null);
+			free(ping[nbuffer].heave);
+			free(ping[nbuffer].alongtrack_offset);
+			}
+		if (status == MB_SUCCESS
+			&& ping[nbuffer].allocated < ping[nbuffer].beams_bath)
+			{
+			ping[nbuffer].beamflag = NULL;
+			ping[nbuffer].bath = NULL;
+			ping[nbuffer].bathacrosstrack = NULL;
+			ping[nbuffer].bathalongtrack = NULL;
+			ping[nbuffer].ttimes = NULL;
+			ping[nbuffer].angles = NULL;
+			ping[nbuffer].angles_forward = NULL;
+			ping[nbuffer].angles_null = NULL;
+			ping[nbuffer].heave = NULL;
+			ping[nbuffer].alongtrack_offset = NULL;
+			ping[nbuffer].beamflag = (char *) malloc(ping[nbuffer].beams_bath*sizeof(char));
+			ping[nbuffer].bath = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].bathacrosstrack = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].bathalongtrack = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].ttimes = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].angles = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].angles_forward = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].angles_null = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].heave = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].alongtrack_offset = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
+			ping[nbuffer].allocated = ping[nbuffer].beams_bath;
+			}
+		if (status == MB_SUCCESS
+			&& ping[nbuffer].allocated > 0)
+			{
+			for (i=0;i<ping[nbuffer].beams_bath;i++)
+			    {
+			    ping[nbuffer].beamflag[i] = beamflag[i];
+			    ping[nbuffer].bath[i] = bath[i];
+			    ping[nbuffer].bathacrosstrack[i] = bathacrosstrack[i];
+			    ping[nbuffer].bathalongtrack[i] = bathalongtrack[i];
+			    }
 			status = mb_ttimes(verbose,mbio_ptr,
-				buff->buffer[k],&kind,&nbeams,
-				ttimes,angles,
-				angles_forward,angles_null,
-				heave,alongtrack_offset,
-				&draft,&ssv,&error);
-			
+					    store_ptr,&kind,&nbeams,
+					    ping[nbuffer].ttimes,
+					    ping[nbuffer].angles,
+					    ping[nbuffer].angles_forward,
+					    ping[nbuffer].angles_null,
+					    ping[nbuffer].heave,
+					    ping[nbuffer].alongtrack_offset,
+					    &ping[nbuffer].draft,
+					    &ping[nbuffer].ssv,&error);
+			    
 			/* get first nav */
 			if (navlon_levitus == 0.0 
 			    && navlat_levitus == 0.0)
 			    {
-			    navlon_levitus = navlon;
-			    navlat_levitus = navlat;
+			    navlon_levitus = ping[nbuffer].navlon;
+			    navlat_levitus = ping[nbuffer].navlat;
 			    }
 			
 			/* check for first nonzero ssv */
-			if (ssv > 0.0 && ssv_start == 0.0)
-				ssv_start = ssv;
-				
+			if (ping[nbuffer].ssv > 0.0 && ssv_start == 0.0)
+				ssv_start = ping[nbuffer].ssv;
+			    
 			/* get approximate min max depths */
-			for (i=0;i<nbeams;i++)
-			    if (mb_beam_ok(beamflag[i]))
+			for (i=0;i<ping[nbuffer].beams_bath;i++)
+			    if (mb_beam_ok(ping[nbuffer].beamflag[i]))
 				{
-				depth[i] = 750 * ttimes[i] 
-					* cos(DTR * angles[i]);
+				depth[i] = 750 * ping[nbuffer].ttimes[i] 
+					* cos(DTR * ping[nbuffer].angles[i]);
 
 				/* get min max depths */
 				if (depth[i] < bath_min)
@@ -2216,9 +2516,38 @@ int mbvt_open_swath_file(char *file, int form)
 				    bath_max = depth[i];
 				}
 			}
+		if (status == MB_SUCCESS)
+			{
+			nbuffer++;
+			nload++;
+			
+			/* update message every 250 records */
+			if (nload % 250 == 0)
+			    {
+			    sprintf(string, "MBvelocitytool: %d records loaded so far...", nload);
+			    do_message_on(string);
+			    }
+			}
 		}
+	while (error <= MB_ERROR_NO_ERROR);
+
+	/* define success */
+	if (nbuffer > 0)
+		{
+		status = MB_SUCCESS;
+		error = MB_ERROR_NO_ERROR;
+		}
+	
+	/* set error message */
+	if (nbuffer <= 0)
+		do_error_dialog("No data were read from the input", 
+				"swath file. You may have specified an", 
+				"incorrect MB-System format id!");
+
 	if (ssv_start <= 0.0)
 		ssv_start = 1500.0;
+		
+	*numload = nload;
 		
 	/* set maxdepth and apply */
 	if (bath_max > 0.0 && bath_max < 13000.0)
@@ -2236,9 +2565,9 @@ int mbvt_open_swath_file(char *file, int form)
 	if (verbose >= 0)
 		{
 		if (status == MB_SUCCESS)
-			fprintf(stderr,"\nSwath Sonar File <%s> read\n",file);
+			fprintf(stderr,"\nSwath Sonar File <%s> read\n",swathfile);
 		else
-			fprintf(stderr,"\nSwath Sonar File <%s> not read\n",file);
+			fprintf(stderr,"\nSwath Sonar File <%s> not read\n",swathfile);
 		fprintf(stderr,"Swath Sonar Data Format ID:   %d\n",format);
 		fprintf(stderr,"Records loaded into buffer: %d\n",nload);
 		fprintf(stderr,"Records in buffer:          %d\n",nbuffer);
@@ -2300,6 +2629,97 @@ int mbvt_open_swath_file(char *file, int form)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       numload:    %d\n",*numload);
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* This function deallocates swath data.                              */
+/* Called by:                                                         */
+/*                  mbvt_open_swath_file                              */
+/*                  mbvt_quit                                         */
+/* Functions called:                                                  */
+/*                  mb_free                                           */
+/*                  free                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
+int mbvt_deallocate_swath()
+{
+	/* local variables */
+	char	*function_name = "mbvt_deallocate_swath";
+	int	status = MB_SUCCESS;
+	int	i, j, k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* deallocate previously loaded data, if any */
+	if (nbuffer > 0)
+		{
+		mb_free(verbose,&beamflag,&error);
+		mb_free(verbose,&bath,&error);
+		mb_free(verbose,&amp,&error);
+		mb_free(verbose,&bathacrosstrack,&error);
+		mb_free(verbose,&bathalongtrack,&error);
+		mb_free(verbose,&ss,&error);
+		mb_free(verbose,&ssacrosstrack,&error);
+		mb_free(verbose,&ssalongtrack,&error);
+		mb_free(verbose,&ttimes,&error);
+		mb_free(verbose,&angles,&error);
+		mb_free(verbose,&angles_forward,&error);
+		mb_free(verbose,&angles_null,&error);
+		mb_free(verbose,&heave,&error);
+		mb_free(verbose,&alongtrack_offset,&error);
+		mb_free(verbose,&nraypath,&error);
+		for (i=0;i<beams_bath;i++)
+			{
+			mb_free(verbose,&raypathx[i],&error);
+			mb_free(verbose,&raypathy[i],&error);
+			}
+		mb_free(verbose,&raypathx,&error);
+		mb_free(verbose,&raypathy,&error);
+		mb_free(verbose,&depth,&error);
+		mb_free(verbose,&acrosstrack,&error);
+		mb_free(verbose,&angle,&error);
+		mb_free(verbose,&residual,&error);
+		mb_free(verbose,&res_sd,&error);
+		mb_free(verbose,&nresidual,&error);
+		for (i=0;i<MBVT_BUFFER_SIZE;i++)
+			{
+			if (ping[i].allocated > 0)
+			    {
+			    ping[i].allocated = 0;
+			    free(ping[i].beamflag);
+			    free(ping[i].bath);
+			    free(ping[i].bathacrosstrack);
+			    free(ping[i].bathalongtrack);
+			    free(ping[i].ttimes);
+			    free(ping[i].angles);
+			    free(ping[i].angles_forward);
+			    free(ping[i].angles_null);
+			    free(ping[i].heave);
+			    free(ping[i].alongtrack_offset);
+			    }
+			}
+		nbuffer = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -2323,7 +2743,6 @@ int mbvt_process_multibeam()
 	/* local variables */
 	char	*function_name = "mbvt_process_multibeam";
 	int	status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
 	double	*dep;
 	double	*vel;
 	int	nvel;
@@ -2380,15 +2799,13 @@ int mbvt_process_multibeam()
 	bath_min = 10000.0;
 	bath_max = 0.0;
 
-	/* get buffer structure */
-	buff = (struct mb_buffer_struct *) buff_ptr;
-
 	/* set up raytracing */
 	nvel = profile_edit.n;
 	vel = profile_edit.velocity;
 	dep = profile_edit.depth;
 	status = mb_rt_init(verbose, nvel, dep, vel, &rt_svp, &error);
 	first = MB_YES;
+	nbeams = 0;
 
 	/* loop over the data records */
 	for (k=0;k<nbuffer;k++)
@@ -2402,53 +2819,24 @@ int mbvt_process_multibeam()
 		depth_predict = 0.0;
 		res = 0.0;
 
-		/* output some debug values */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg5  Data record used in program <%s>:\n",program_name);
-			fprintf(stderr,"dbg5       record %d  kind: %d\n",
-				k,buff->buffer_kind[k]);
-			}
-
-		/* extract travel times */
-		if (buff->buffer_kind[k] == MB_DATA_DATA)
-			{
-			
-			/* extract bathymetry - just to get flags */
-			mb_buffer_extract(verbose,buff_ptr,mbio_ptr,
-				k, &kind,
-				time_i,&time_d,&navlon,&navlat,
-				&speed,&heading,
-				&nbath,&namp,&nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,&error);
-
-			status = mb_ttimes(verbose,mbio_ptr,
-				buff->buffer[k],&kind,&nbeams,
-				ttimes,angles,
-				angles_forward,angles_null,
-				heave,alongtrack_offset,
-				&draft,&ssv,&error);
-			
-			/* set surface sound speed to default if needed */
-			if (ssv <= 0.0)
-				ssv = ssv_start;
-			else
-				ssv_start = ssv;
-			}
+		/* set surface sound speed to default if needed */
+		if (ping[k].ssv <= 0.0)
+			ping[k].ssv = ssv_start;
+		else
+			ssv_start = ping[k].ssv;
 
 		/* loop over the beams */
-		if (buff->buffer_kind[k] == MB_DATA_DATA)
-		  for (i=0;i<nbeams;i++)
+		for (i=0;i<ping[k].beams_bath;i++)
 		    {
 		    /* trace the ray */
-		    if (mb_beam_ok(beamflag[i]))
+		    if (mb_beam_ok(ping[k].beamflag[i]))
 			{
+			/* get max beam id */
+			nbeams = MAX(nbeams, i);
+			
 			/* get factor relating lateral distance to
 			    acrosstrack distance */
-			factor = cos(DTR*angles_forward[i]);
+			factor = cos(DTR*ping[k].angles_forward[i]);
 
 			/* trace rays */
 			if (first == MB_NO)
@@ -2457,8 +2845,8 @@ int mbvt_process_multibeam()
 				plotting list */
 			    status = mb_rt(verbose, 
 				    rt_svp, 0.0, 
-				    angles[i], 0.5*ttimes[i],
-				    ssv_mode, ssv, angles_null[i], 
+				    ping[k].angles[i], 0.5*ping[k].ttimes[i],
+				    ssv_mode, ping[k].ssv, ping[k].angles_null[i], 
 				    0, NULL, NULL, NULL, 
 				    &acrosstrack[i], &depth[i], 
 				    &ttime, &ray_stat, &error);
@@ -2469,8 +2857,8 @@ int mbvt_process_multibeam()
 				plotting list */
 			    status = mb_rt(verbose, 
 				    rt_svp, 0.0, 
-				    angles[i], 0.5*ttimes[i],
-				    ssv_mode, ssv, angles_null[i], 
+				    ping[k].angles[i], 0.5*ping[k].ttimes[i],
+				    ssv_mode, ping[k].ssv, ping[k].angles_null[i], 
 				    nraypathmax, &nraypath[i], 
 				    raypathx[i], raypathy[i], 
 				    &acrosstrack[i], &depth[i], 
@@ -2496,7 +2884,7 @@ int mbvt_process_multibeam()
 			/* output some debug values */
 			if (verbose >= 5)
 			    fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %8.2f %8.2f\n",
-				k, i, 0.5*ttimes[i], angles[i], acrosstrack[i],depth[i]);
+				k, i, 0.5*ping[k].ttimes[i], ping[k].angles[i], acrosstrack[i],depth[i]);
 
 			/* get sums for linear fit */
 			sx += acrosstrack[i];
@@ -2508,8 +2896,7 @@ int mbvt_process_multibeam()
 		    }
 
 		/* reset first flag */
-		if (buff->buffer_kind[k] == MB_DATA_DATA)
-		    first = MB_NO;
+		first = MB_NO;
 
 		/* get linear fit to ping */
 		if (ns > 0)
@@ -2527,12 +2914,12 @@ int mbvt_process_multibeam()
 			fprintf(stderr,"dbg5       beam   xtrack   depth     fit    residual\n");
 
 		  /* loop over all beams */
-		  for (i=0;i<nbeams;i++)
-		    if (mb_beam_ok(beamflag[i]))
+		  for (i=0;i<ping[k].beams_bath;i++)
+		    if (mb_beam_ok(ping[k].beamflag[i]))
 			{
 			depth_predict = a + b*acrosstrack[i];
 			res = depth[i] - depth_predict;
-			angle[i] += angles[i];
+			angle[i] += ping[k].angles[i];
 			residual[i] += res;
 			res_sd[i] += res * res;
 			nresidual[i]++;

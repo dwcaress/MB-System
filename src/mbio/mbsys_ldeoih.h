@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.h	3/2/93
- *	$Id: mbsys_ldeoih.h,v 4.5 2000-09-30 06:31:19 caress Exp $
+ *	$Id: mbsys_ldeoih.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  2000/09/30  06:31:19  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.4  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -101,6 +104,9 @@ struct mbsys_ldeoih_struct
 	short	beams_bath;	/* number of depth values */
 	short	beams_amp;	/* number of amplitude values */
 	short	pixels_ss;	/* number of sidescan pixels */
+	short	beams_bath_alloc;	/* number of depth values allocated */
+	short	beams_amp_alloc;	/* number of amplitude values allocated */
+	short	pixels_ss_alloc;	/* number of sidescan pixels allocated */
 	short	depth_scale;	/* 1000 X scale where depth = bath X scale */
 	short	distance_scale;	/* 1000 X scale where distance = dist X scale */
 	short	transducer_depth; /* scaled by depth_scale */
@@ -119,3 +125,55 @@ struct mbsys_ldeoih_struct
 	/* comment */
 	char	comment[MBSYS_LDEOIH_MAXLINE];
 	};
+	
+/* system specific function prototypes */
+int mbsys_ldeoih_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_ldeoih_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_ldeoih_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading,
+			int *nbath, int *namp, int *nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+			int kind, int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading,
+			int nbath, int namp, int nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_ldeoih_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int *nbeams,
+			double *ttimes, double *angles, 
+			double *angles_forward, double *angles_null,
+			double *heave, double *alongtrack_offset, 
+			double *draft, double *ssv, int *error);
+int mbsys_ldeoih_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, double *transducer_depth, double *altitude, 
+			int *error);
+int mbsys_ldeoih_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+			double transducer_depth, double altitude, 
+			int *error);
+int mbsys_ldeoih_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
+			int *error);
+int mbsys_ldeoih_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading, double draft, 
+			double roll, double pitch, double heave,
+			int *error);
+int mbsys_ldeoih_copy(int verbose, char *mbio_ptr, 
+			char *store_ptr, char *copy_ptr,
+			int *error);
+

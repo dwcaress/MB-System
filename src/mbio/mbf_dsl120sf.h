@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_dsl120sf.h	8/9/96
- *	$Id: mbf_dsl120sf.h,v 4.3 2000-09-30 06:29:44 caress Exp $
+ *	$Id: mbf_dsl120sf.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Author:	D. W. Caress
  * Date:	August 9, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/09/30  06:29:44  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.2  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *

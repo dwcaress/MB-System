@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.22 2000-10-11 01:05:17 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.0 2000-12-01 22:56:08 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  2000/10/11  01:05:17  caress
+ * Convert to ANSI C
+ *
  * Revision 4.21  2000/09/30  07:03:14  caress
  * Snapshot for Dale.
  *
@@ -189,7 +192,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.22 2000-10-11 01:05:17 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.0 2000-12-01 22:56:08 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -200,7 +203,9 @@ int	verbose = 0;
 char	*message = NULL;
 
 /* MBIO control parameters */
-int	format_num;
+int	nav_source;
+int	heading_source;
+int	vru_source;
 int	pings;
 int	lonflip;
 double	bounds[4];
@@ -731,7 +736,9 @@ int mbnavedit_open_file(int useprevious)
 	    }
 
 	/* initialize reading the input multibeam file */
-	status = mb_format(verbose,&format,&format_num,&error);
+	status = mb_format_source(verbose, &format, 
+			&nav_source, &heading_source, &vru_source, 
+			&error);
 	if ((status = mb_read_init(
 		verbose,ifile_use,format_use,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -1056,7 +1063,7 @@ int mbnavedit_load_data()
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 		if (error <= MB_ERROR_NO_ERROR
-		    && (kind == mb_nav_source[format_num]
+		    && (kind == nav_source
 			|| (kind == MB_DATA_DATA
 			    && use_ping_data == MB_YES))
 		    && (error == MB_ERROR_NO_ERROR
@@ -1074,7 +1081,7 @@ int mbnavedit_load_data()
 			error = MB_ERROR_OTHER;
 			}
 		if (error == MB_ERROR_NO_ERROR
-		    && (kind == mb_nav_source[format_num]
+		    && (kind == nav_source
 			|| (kind == MB_DATA_DATA
 			    && use_ping_data == MB_YES)))
 			{

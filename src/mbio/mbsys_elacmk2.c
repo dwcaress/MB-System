@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elacmk2.c,v 4.5 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_elacmk2.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -39,6 +39,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.4  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -117,7 +120,7 @@
 int mbsys_elacmk2_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_elacmk2.c,v 4.5 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_elacmk2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_elacmk2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -557,7 +560,7 @@ int mbsys_elacmk2_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -570,7 +573,6 @@ int mbsys_elacmk2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_elacmk2_struct *store;
-	int	kind;
 	double	depthscale, dacrscale,daloscale,reflscale;
 	int	i, j;
 
@@ -583,6 +585,10 @@ int mbsys_elacmk2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -595,6 +601,9 @@ int mbsys_elacmk2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
@@ -607,12 +616,20 @@ int mbsys_elacmk2_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
+		}
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_elacmk2_struct *) store_ptr;
+
+	/* set data kind */
+	store->kind = kind;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -707,6 +724,7 @@ int mbsys_elacmk2_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_elacmk2_struct *store;
+	double	angle, pitch;
 	double	daloscale, ttscale, angscale;
 	int	i, j;
 
@@ -753,22 +771,24 @@ int mbsys_elacmk2_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 		daloscale  = 0.01;
 		ttscale = 0.0001;
 		angscale = 0.005;
-		for (i=0;i<store->beams_bath;i++)
+		for (i=0;i<*nbeams;i++)
 			{
 			j = store->beams_bath - i - 1;
 			ttimes[i] = ttscale * store->beams[j].tt;
-			angles[i] = angscale * store->beams[j].angle;
-			if (angles[i] < 0.0)
+			angle = 90.0 + angscale * store->beams[j].angle;
+			pitch = angscale * store->beams[j].pitch;
+			mb_rollpitch_to_takeoff(
+				verbose, pitch, angle, 
+				&angles[i], 
+				&angles_forward[i], error);
+			if (store->beams[j].angle < 0)
 				{
-				angles[i] = -angles[i];
-				angles_forward[i] = 0.0;
 				angles_null[i] = 37.5 
 					+ angscale 
 					* store->transducer_port_error;
 				}
 			else
 				{
-				angles_forward[i] = 180.0;
 				angles_null[i] = 37.5 
 					+ angscale 
 					* store->transducer_starboard_error;

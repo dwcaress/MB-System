@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.31 2000-10-11 01:02:07 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.0 2000-12-01 22:54:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.31  2000/10/11  01:02:07  caress
+ * Convert to ANSI C
+ *
  * Revision 4.30  2000/09/30  06:58:28  caress
  * Snapshot for Dale.
  *
@@ -245,7 +248,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.31 2000-10-11 01:02:07 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.0 2000-12-01 22:54:58 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -311,7 +314,7 @@ int	idata = 0;
 int	icomment = 0;
 int	odata = 0;
 int	ocomment = 0;
-char	comment[256];
+char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
 #define	MBEDIT_BUFFER_SIZE	MB_BUFFER_MAX
@@ -919,8 +922,6 @@ int mbedit_action_open(
 	/* check buffer size */
 	if (status == MB_SUCCESS)
 		{
-		mbedit_check_buffer_size(form,
-			buffer_size,buffer_size_max);
 		if (*hold_size > *buffer_size)
 			*hold_size = *buffer_size / 2;
 		buff_size = *buffer_size;
@@ -1551,7 +1552,6 @@ int mbedit_action_mouse_toggle(
 	int	ix, iy, range, range_min;
 	int	found;
 	int	iping, jbeam;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -1765,7 +1765,6 @@ int mbedit_action_mouse_pick(
 	int	ix, iy, range, range_min;
 	int	found;
 	int	iping, jbeam;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -1969,7 +1968,6 @@ int mbedit_action_mouse_erase(
 	int	ix, iy, range;
 	int	found;
 	int	replot_label;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2160,7 +2158,6 @@ int mbedit_action_mouse_restore(
 	int	ix, iy, range;
 	int	found;
 	int	replot_label;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2349,7 +2346,6 @@ int mbedit_action_zap_outbounds(
 	char	*function_name = "mbedit_action_zap_outbounds";
 	int	status = MB_SUCCESS;
 	int	found;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2493,7 +2489,6 @@ int mbedit_action_bad_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_bad_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2612,7 +2607,6 @@ int mbedit_action_good_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_good_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2733,7 +2727,6 @@ int mbedit_action_left_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_left_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2852,7 +2845,6 @@ int mbedit_action_right_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_right_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2971,7 +2963,6 @@ int mbedit_action_zero_ping(
 	/* local variables */
 	char	*function_name = "mbedit_action_zero_ping";
 	int	status = MB_SUCCESS;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -3091,7 +3082,6 @@ int mbedit_action_unflag_view(
 	char	*function_name = "mbedit_action_unflag_view";
 	int	status = MB_SUCCESS;
 	int	found;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -3231,7 +3221,6 @@ int mbedit_action_unflag_all(
 	char	*function_name = "mbedit_action_unflag_all";
 	int	status = MB_SUCCESS;
 	int	found;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -3379,7 +3368,6 @@ int mbedit_action_filter_all(
 	char	*function_name = "mbedit_action_filter_all";
 	int	status = MB_SUCCESS;
 	int	found;
-	char	comment[128];
 	int	i, j;
 
 	/* print input debug statements */
@@ -4620,7 +4608,6 @@ int mbedit_plot_all(
 	int	y, dy, first, xold, yold;
 	char	string[128];
 	char	*string_ptr;
-	int	format_num, frequency;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4725,14 +4712,7 @@ int mbedit_plot_all(
 	/* reset xtrack_max if required */
 	if (autoscale && xtrack_max < 0.5)
 		{
-		status = mb_format(verbose,&format,&format_num,&error);
-		frequency = frequency_table[mb_system_table[format_num]];
-		if (frequency < 20)
-			xtrack_max = 1000.0;
-		else if (frequency < 60)
-			xtrack_max = 100.0;
-		else
-			xtrack_max = 10.0;
+		xtrack_max = 1000.0;
 		}
 		
 	/* if autoscale on reset plot width */
@@ -5095,6 +5075,7 @@ int mbedit_plot_ping_label(int iping, int save)
 		}
 
 	/* set info string */
+	if (ping[iping].beams_bath > 0)
 	sprintf(string,"%5d %2d/%2d/%4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
 		ping[iping].record,
 		ping[iping].time_i[1],ping[iping].time_i[2],
@@ -5102,6 +5083,14 @@ int mbedit_plot_ping_label(int iping, int save)
 		ping[iping].time_i[4],ping[iping].time_i[5],
 		(int)(0.001 * ping[iping].time_i[6]),
 		ping[iping].bath[ping[iping].beams_bath/2]);
+	else
+	sprintf(string,"%5d %2d/%2d/%4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
+		ping[iping].record,
+		ping[iping].time_i[1],ping[iping].time_i[2],
+		ping[iping].time_i[0],ping[iping].time_i[3],
+		ping[iping].time_i[4],ping[iping].time_i[5],
+		(int)(0.001 * ping[iping].time_i[6]),
+		0.0);
 	xg_justify(mbedit_xgid,string,&swidth,&sascent,&sdescent);
 
 	/* save string to show last ping seen at end of program */
@@ -5464,50 +5453,6 @@ int mbedit_action_goto(
 		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
 		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
 		fprintf(stderr,"dbg2       nplot:        %d\n",*nplt);
-		fprintf(stderr,"dbg2       error:       %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mbedit_check_buffer_size(int form, int *buffer_size, int *buffer_size_max)
-{
-	/* local variables */
-	char	*function_name = "mbedit_check_buffer_size";
-	int	status = MB_SUCCESS;
-	int	format_num;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       form:            %d\n",form);
-		fprintf(stderr,"dbg2       buffer_size:     %d\n",*buffer_size);
-		fprintf(stderr,"dbg2       buffer_size_max: %d\n",*buffer_size_max);
-		}
-		
-	/* get format_num */
-	status = mb_format(verbose,&form,&format_num,&error);
-	
-	/* set buffer size lower if format supports sidescan */
-/*	if (pixels_ss_table[format_num] > 0)
-		*buffer_size_max = MBEDIT_BUFFER_SIZE / 2;
-	if (*buffer_size > *buffer_size_max)
-		*buffer_size = *buffer_size_max;*/
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       buffer_size:     %d\n",*buffer_size);
-		fprintf(stderr,"dbg2       buffer_size_max: %d\n",*buffer_size_max);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id: mb_zgrid.c,v 4.5 2000-10-11 21:48:43 caress Exp $
+ *    $Id: mb_zgrid.c,v 5.0 2000-12-01 22:53:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -53,6 +53,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  2000/10/11  21:48:43  caress
+ * Moved file to mbaux directory and renamed to mb_zgrid.c
+ *
  * Revision 4.4  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *

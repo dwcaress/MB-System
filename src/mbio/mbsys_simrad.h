@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.11 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_simrad.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.10  2000/09/30  06:31:19  caress
  * Snapshot for Dale.
  *
@@ -194,6 +197,9 @@ struct mbsys_simrad_survey_struct
 	int	swath_id;	/* EM_SWATH_CENTER:	0
 				   EM_SWATH_PORT:	-1  (EM12D only)
 				   EM_SWATH_STARBOARD:	1   (EM12D only) */
+	/* interpolated nav */
+	double	longitude;
+	double	latitude;
 	
 	/* bathymetry */
 	int	ping_number;
@@ -345,8 +351,8 @@ struct mbsys_simrad_struct
 	int	pos_minute;
 	int	pos_second;
 	int	pos_centisecond;
-	double	latitude;
-	double	longitude;
+	double	pos_latitude;
+	double	pos_longitude;
 	double	utm_northing;
 	double	utm_easting;
 	int	utm_zone;
@@ -380,3 +386,52 @@ struct mbsys_simrad_struct
 	/* pointer to survey data structure */
 	struct mbsys_simrad_survey_struct *ping;
 	};
+	
+/* system specific function prototypes */
+int mbsys_simrad_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_simrad_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_simrad_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading,
+			int *nbath, int *namp, int *nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_simrad_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+			int kind, int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading,
+			int nbath, int namp, int nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_simrad_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int *nbeams,
+			double *ttimes, double *angles, 
+			double *angles_forward, double *angles_null,
+			double *heave, double *alongtrack_offset, 
+			double *draft, double *ssv, int *error);
+int mbsys_simrad_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, double *transducer_depth, double *altitude, 
+			int *error);
+int mbsys_simrad_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
+			int *error);
+int mbsys_simrad_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading, double draft, 
+			double roll, double pitch, double heave,
+			int *error);
+int mbsys_simrad_copy(int verbose, char *mbio_ptr, 
+			char *store_ptr, char *copy_ptr,
+			int *error);
+

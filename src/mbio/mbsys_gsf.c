@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 4.6 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_gsf.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -39,6 +39,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.5  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -84,7 +87,7 @@
 int mbsys_gsf_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 4.6 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -350,12 +353,12 @@ int mbsys_gsf_extract(int verbose, char *mbio_ptr, char *store_ptr,
 	else if (*kind == MB_DATA_COMMENT)
 		{
 		/* copy comment */
-		strncpy(comment, records->comment.comment, MB_COMMENT_MAXLINE);
+		strcpy(comment, records->comment.comment);
 
 		/* print debug statements */
 		if (verbose >= 4)
 			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
+			fprintf(stderr,"\ndbg4  Comment extracted by MBIO function <%s>\n",
 				function_name);
 			fprintf(stderr,"dbg4  New ping values:\n");
 			fprintf(stderr,"dbg4       error:      %d\n",
@@ -424,7 +427,7 @@ int mbsys_gsf_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -451,6 +454,10 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -463,6 +470,9 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
@@ -475,6 +485,11 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
+		}
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -484,6 +499,9 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	records = &(store->records);
 	dataID = &(store->dataID);
 	mb_ping = &(records->mb_ping);
+
+	/* set data kind */
+	store->kind = kind;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -571,8 +589,10 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		if (mb_ping->ping_flags != 0)
 		    {
 		    for (i=0;i<nbath;i++)
+			{
 			if (mb_beam_ok(beamflag[i]))
 			    mb_ping->ping_flags = 0;
+			}
 		    }
 
 		/* read depth and beam location values into storage arrays */
@@ -606,7 +626,7 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		    if ((records->comment.comment 
 				= (char *) 
 				    realloc(records->comment.comment,
-					strlen(comment+1)))
+					strlen(comment)+1))
 					    == NULL) 
 			{
 			status = MB_FAILURE;
@@ -617,7 +637,7 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		if (status = MB_SUCCESS && records->comment.comment != NULL)
 		    {
 		    strcpy(records->comment.comment, comment);
-		    records->comment.comment_length = strlen(comment);
+		    records->comment.comment_length = strlen(comment)+1;
 		    records->comment.comment_time.tv_sec = (int) time_d;
 		    records->comment.comment_time.tv_nsec 
 			    = (int) (1000000000 

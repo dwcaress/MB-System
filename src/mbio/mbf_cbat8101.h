@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_cbat8101.h	8/21/94
- *	$Id: mbf_cbat8101.h,v 4.1 2000-09-30 06:29:44 caress Exp $
+ *	$Id: mbf_cbat8101.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:29:44  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  1999/01/01  23:38:01  caress
  * MB-System version 4.6beta6
  *

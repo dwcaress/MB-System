@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	1/26/93
- *    $Id: mb_get.c,v 4.11 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_get.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.10  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *
@@ -112,7 +115,7 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get.c,v 4.11 2000-10-11 01:02:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_get.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_get";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -150,7 +153,7 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 	mb_io_ptr->heading = 0.0;
 	headingx = 0.0;
 	headingy = 0.0;
-	for (i=0;i<mb_io_ptr->beams_bath;i++)
+	for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 		{
 		mb_io_ptr->beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->bath[i] = 0.0;
@@ -158,12 +161,12 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 		mb_io_ptr->bath_alongtrack[i] = 0.0;
 		mb_io_ptr->bath_num[i] = 0;
 		}
-	for (i=0;i<mb_io_ptr->beams_amp;i++)
+	for (i=0;i<mb_io_ptr->beams_amp_max;i++)
 		{
 		mb_io_ptr->amp[i] = 0.0;
 		mb_io_ptr->amp_num[i] = 0;
 		}
-	for (i=0;i<mb_io_ptr->pixels_ss;i++)
+	for (i=0;i<mb_io_ptr->pixels_ss_max;i++)
 		{
 		mb_io_ptr->ss[i] = 0.0;
 		mb_io_ptr->ss_acrosstrack[i] = 0.0;
@@ -194,7 +197,37 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 		/* get next ping */
 		if (mb_io_ptr->need_new_ping)
 			{
-			status = mb_read_ping(verbose,mbio_ptr,store_ptr,error);
+			status = mb_read_ping(verbose,mbio_ptr,store_ptr,
+						&mb_io_ptr->new_kind,error);
+			
+			/* if survey data read into storage array */
+			if (status == MB_SUCCESS
+				&& (mb_io_ptr->new_kind == MB_DATA_DATA
+				    || mb_io_ptr->new_kind == MB_DATA_COMMENT))
+				{
+				status = mb_extract(verbose, 
+					mbio_ptr, store_ptr, 
+					&mb_io_ptr->new_kind,
+					mb_io_ptr->new_time_i, 
+					&mb_io_ptr->new_time_d,
+					&mb_io_ptr->new_lon, 
+					&mb_io_ptr->new_lat,
+					&mb_io_ptr->new_speed, 
+					&mb_io_ptr->new_heading,
+					&mb_io_ptr->new_beams_bath, 
+					&mb_io_ptr->new_beams_amp, 
+					&mb_io_ptr->new_pixels_ss, 
+					mb_io_ptr->new_beamflag, 
+					mb_io_ptr->new_bath, 
+					mb_io_ptr->new_amp, 
+					mb_io_ptr->new_bath_acrosstrack, 
+					mb_io_ptr->new_bath_alongtrack, 
+					mb_io_ptr->new_ss, 
+					mb_io_ptr->new_ss_acrosstrack, 
+					mb_io_ptr->new_ss_alongtrack, 
+					mb_io_ptr->new_comment, 
+					error);
+				}
 
 			/* set errors if not survey data */
 			if (status == MB_SUCCESS)
@@ -350,11 +383,11 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 			fprintf(stderr,"dbg4       heading:       %f\n",
 				mb_io_ptr->new_heading);
 			fprintf(stderr,"dbg4       beams_bath:    %d\n",
-				mb_io_ptr->beams_bath);
-			if (mb_io_ptr->beams_bath > 0)
+				mb_io_ptr->new_beams_bath);
+			if (mb_io_ptr->new_beams_bath > 0)
 			  {
 			  fprintf(stderr,"dbg4       beam   flag   bath  crosstrack alongtrack\n");
-			  for (i=0;i<mb_io_ptr->beams_bath;i++)
+			  for (i=0;i<mb_io_ptr->new_beams_bath;i++)
 			    fprintf(stderr,"dbg4       %4d   %3d    %f    %f     %f\n",
 				i,mb_io_ptr->new_beamflag[i],
 				mb_io_ptr->new_bath[i],
@@ -362,22 +395,22 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 				mb_io_ptr->new_bath_alongtrack[i]);
 			  }
 			fprintf(stderr,"dbg4       beams_amp:     %d\n",
-				mb_io_ptr->beams_amp);
-			if (mb_io_ptr->beams_amp > 0)
+				mb_io_ptr->new_beams_amp);
+			if (mb_io_ptr->new_beams_amp > 0)
 			  {
 			  fprintf(stderr,"dbg4       beam    amp  crosstrack alongtrack\n");
-			  for (i=0;i<mb_io_ptr->beams_bath;i++)
+			  for (i=0;i<mb_io_ptr->new_beams_bath;i++)
 			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 				i,mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
 			  }
 			fprintf(stderr,"dbg4       pixels_ss:     %d\n",
-				mb_io_ptr->pixels_ss);
-			if (mb_io_ptr->pixels_ss > 0)
+				mb_io_ptr->new_pixels_ss);
+			if (mb_io_ptr->new_pixels_ss > 0)
 			  {
 			  fprintf(stderr,"dbg4       pixel sidescan crosstrack alongtrack\n");
-			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			  for (i=0;i<mb_io_ptr->new_pixels_ss;i++)
 			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 				i,mb_io_ptr->new_ss[i],
 				mb_io_ptr->new_ss_acrosstrack[i],mb_io_ptr->new_ss_alongtrack[i]);
@@ -414,7 +447,7 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 			headingy = headingy + cos(DTR*mb_io_ptr->new_heading);
 		        if (mb_io_ptr->pings == 1)
 			  {
-			  for (i=0;i<mb_io_ptr->beams_bath;i++)
+			  for (i=0;i<mb_io_ptr->new_beams_bath;i++)
 			    {
 			    mb_io_ptr->beamflag[i] = mb_io_ptr->new_beamflag[i];
 			    mb_io_ptr->bath[i] = mb_io_ptr->new_bath[i];
@@ -422,12 +455,12 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 			    mb_io_ptr->bath_alongtrack[i] = mb_io_ptr->new_bath_alongtrack[i];
 			    mb_io_ptr->bath_num[i] = 1;
 			    }
-			  for (i=0;i<mb_io_ptr->beams_amp;i++)
+			  for (i=0;i<mb_io_ptr->new_beams_amp;i++)
 			    {
 			    mb_io_ptr->amp[i] = mb_io_ptr->new_amp[i];
 			    mb_io_ptr->amp_num[i] = 1;
 			    }
-			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			  for (i=0;i<mb_io_ptr->new_pixels_ss;i++)
 			    {
 			    mb_io_ptr->ss[i] = mb_io_ptr->new_ss[i];
 			    mb_io_ptr->ss_acrosstrack[i] = mb_io_ptr->new_ss_acrosstrack[i];
@@ -437,7 +470,7 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 			  }
 			else
 			  {
-			  for (i=0;i<mb_io_ptr->beams_bath;i++)
+			  for (i=0;i<mb_io_ptr->new_beams_bath;i++)
 			    {
 			    if (!mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
 			      {
@@ -451,21 +484,27 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 			      mb_io_ptr->bath_num[i]++;
 			      }
 			    }
-			  for (i=0;i<mb_io_ptr->beams_amp;i++)
+			  for (i=0;i<mb_io_ptr->new_beams_amp;i++)
 			    {
-			    mb_io_ptr->amp[i] = mb_io_ptr->amp[i] 
+			    if (!mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			      {
+			      mb_io_ptr->amp[i] = mb_io_ptr->amp[i] 
 						 + mb_io_ptr->new_amp[i];
-			    mb_io_ptr->amp_num[i]++;
+			      mb_io_ptr->amp_num[i]++;
+			      }
 			    }
-			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			  for (i=0;i<mb_io_ptr->new_pixels_ss;i++)
 			    {
-			    mb_io_ptr->ss[i] = mb_io_ptr->ss[i] 
+			    if (mb_io_ptr->new_ss[i] != 0.0)
+			      {
+			      mb_io_ptr->ss[i] = mb_io_ptr->ss[i] 
 			                         + mb_io_ptr->new_ss[i];
-			    mb_io_ptr->ss_acrosstrack[i] = mb_io_ptr->ss_acrosstrack[i] 
+			      mb_io_ptr->ss_acrosstrack[i] = mb_io_ptr->ss_acrosstrack[i] 
 			                         + mb_io_ptr->new_ss_acrosstrack[i];
-			    mb_io_ptr->ss_alongtrack[i] = mb_io_ptr->ss_alongtrack[i] 
+			      mb_io_ptr->ss_alongtrack[i] = mb_io_ptr->ss_alongtrack[i] 
 			                         + mb_io_ptr->new_ss_alongtrack[i];
-			    mb_io_ptr->ss_num[i]++;
+			      mb_io_ptr->ss_num[i]++;
+			      }
 			    }
 			  }
 			}
@@ -494,33 +533,33 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 			fprintf(stderr,"dbg4       heading:      %f\n",
 				mb_io_ptr->heading);
 			fprintf(stderr,"dbg4       beams_bath:    %d\n",
-				mb_io_ptr->beams_bath);
-			if (mb_io_ptr->beams_bath > 0)
+				mb_io_ptr->beams_bath_max);
+			if (mb_io_ptr->beams_bath_max > 0)
 			  {
 			  fprintf(stderr,"dbg4       beam   nbath bath  crosstrack alongtrack\n");
-			  for (i=0;i<mb_io_ptr->beams_bath;i++)
+			  for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			    fprintf(stderr,"dbg4       %4d   %4d  %f    %f     %f\n",
 				i,mb_io_ptr->bath_num[i],mb_io_ptr->bath[i],
 				mb_io_ptr->bath_acrosstrack[i],
 				mb_io_ptr->bath_alongtrack[i]);
 			  }
 			fprintf(stderr,"dbg4       beams_amp:    %d\n",
-				mb_io_ptr->beams_amp);
-			if (mb_io_ptr->beams_amp > 0)
+				mb_io_ptr->beams_amp_max);
+			if (mb_io_ptr->beams_amp_max > 0)
 			  {
 			  fprintf(stderr,"dbg4       beam    namp  amp  crosstrack alongtrack\n");
-			  for (i=0;i<mb_io_ptr->beams_amp;i++)
+			  for (i=0;i<mb_io_ptr->beams_amp_max;i++)
 			    fprintf(stderr,"dbg4       %4d   %4d  %f    %f     %f\n",
 				i,mb_io_ptr->amp_num[i],mb_io_ptr->amp[i],
 				mb_io_ptr->bath_acrosstrack[i],
 				mb_io_ptr->bath_alongtrack[i]);
 			  }
 			fprintf(stderr,"dbg4       pixels_ss:     %d\n",
-				mb_io_ptr->pixels_ss);
-			if (mb_io_ptr->pixels_ss > 0)
+				mb_io_ptr->pixels_ss_max);
+			if (mb_io_ptr->pixels_ss_max > 0)
 			  {
 			  fprintf(stderr,"dbg4       pixel nss  sidescan crosstrack alongtrack\n");
-			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			  for (i=0;i<mb_io_ptr->pixels_ss_max;i++)
 			    fprintf(stderr,"dbg4       %4d   %4d   %f    %f     %f\n",
 				i,mb_io_ptr->ss_num[i],mb_io_ptr->ss[i],
 				mb_io_ptr->ss_acrosstrack[i],
@@ -754,10 +793,10 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 			}
 
 		/* get swath data */
-		*nbath = mb_io_ptr->beams_bath;
-		*namp = mb_io_ptr->beams_amp;
-		*nss = mb_io_ptr->pixels_ss;
-		for (i=0;i<*nbath;i++)
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			{
 			beamflag[i] = mb_io_ptr->beamflag[i];
 			if (mb_io_ptr->bath_num[i] > 0)
@@ -768,17 +807,30 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 					/(mb_io_ptr->bath_num[i]);
 				bathalongtrack[i] = (mb_io_ptr->bath_alongtrack[i])
 					/(mb_io_ptr->bath_num[i]);
+				*nbath = i;
+				}
+			else
+				{
+				beamflag[i] = MB_FLAG_NULL;
+				bath[i] = 0.0;
+				bathacrosstrack[i] = 0.0;
+				bathalongtrack[i] = 0.0;
 				}
 			}
-		for (i=0;i<*namp;i++)
+		for (i=0;i<mb_io_ptr->beams_amp_max;i++)
 			{
 			if (mb_io_ptr->amp_num[i] > 0)
 				{
 				amp[i] = (mb_io_ptr->amp[i])
 					/(mb_io_ptr->amp_num[i]);
+				*namp = i;
+				}
+			else
+				{
+				amp[i] = 0.0;
 				}
 			}
-		for (i=0;i<*nss;i++)
+		for (i=0;i<mb_io_ptr->pixels_ss_max;i++)
 			{
 			if (mb_io_ptr->ss_num[i] > 0)
 				{
@@ -788,7 +840,20 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 					/mb_io_ptr->ss_num[i];
 				ssalongtrack[i] = mb_io_ptr->ss_alongtrack[i]
 					/mb_io_ptr->ss_num[i];
+				*nss = i;
 				}
+			else
+				{
+				ss[i] = 0.0;
+				ssacrosstrack[i] = 0.0;
+				ssalongtrack[i] = 0.0;
+				}
+			}
+		if (mb_io_ptr->variable_beams == MB_NO)
+			{
+			*nbath = mb_io_ptr->beams_bath_max;
+			*namp = mb_io_ptr->beams_amp_max;
+			*nss = mb_io_ptr->pixels_ss_max;
 			}
 		}
 
@@ -840,28 +905,28 @@ int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings,
 		fprintf(stderr,"dbg2       heading:    %f\n",*heading);
 		fprintf(stderr,"dbg2       distance:   %f\n",*distance);
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
-		if (verbose >= 3 && mb_io_ptr->beams_bath > 0)
+		if (verbose >= 3 && *nbath > 0)
 		  {
 		  fprintf(stderr,"dbg3       beam   nbath flag bath  crosstrack alongtrack\n");
-		  for (i=0;i<mb_io_ptr->beams_bath;i++)
+		  for (i=0;i<*nbath;i++)
 		    fprintf(stderr,"dbg3       %4d   %4d  %3d  %f    %f     %f\n",
 			i,mb_io_ptr->bath_num[i],beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg2       namp:       %d\n",*namp);
-		if (verbose >= 3 && mb_io_ptr->beams_amp > 0)
+		if (verbose >= 3 && *namp > 0)
 		  {
 		  fprintf(stderr,"dbg3       beam    namp  amp  crosstrack alongtrack\n");
-		  for (i=0;i<mb_io_ptr->beams_amp;i++)
+		  for (i=0;i<*namp;i++)
 		    fprintf(stderr,"dbg3       %4d   %4d  %f    %f     %f\n",
 			i,mb_io_ptr->amp_num[i],amp[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg2       nss:      %d\n",*nss);
-		if (verbose >= 3 && mb_io_ptr->pixels_ss > 0)
+		if (verbose >= 3 && *nss > 0)
 		  {
 		  fprintf(stderr,"dbg3       pixel nss  sidescan crosstrack alongtrack\n");
-		  for (i=0;i<mb_io_ptr->pixels_ss;i++)
+		  for (i=0;i<*nss;i++)
 		    fprintf(stderr,"dbg3       %4d   %4d   %f    %f     %f\n",
 			i,mb_io_ptr->ss_num[i],ss[i],
 			ssacrosstrack[i],ssalongtrack[i]);

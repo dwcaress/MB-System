@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsldedmb.h	1/20/93
- *	$Id: mbf_hsldedmb.h,v 4.6 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbf_hsldedmb.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.5  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *

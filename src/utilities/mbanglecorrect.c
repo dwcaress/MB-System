@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.18 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbanglecorrect.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -47,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.17  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -118,7 +121,6 @@ The default input and output streams are stdin and stdout.\n";
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
 
 /* mode defines */
 #define	MBANGLECORRECT_AMP		1
@@ -164,7 +166,7 @@ struct mbanglecorrect_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.18 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -199,7 +201,6 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* MBIO read control parameters */
 	int	format;
-	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -523,9 +524,10 @@ The default input and output streams are stdin and stdout.\n";
 		}
 
 	/* check for format with amplitude or sidescan data */
-	status = mb_format(verbose,&format,&format_num,&error);
+	status = mb_format_dimensions(verbose,&format,
+			&beams_bath,&beams_amp,&pixels_ss,&error);
 	if (ampkind == MBANGLECORRECT_SS 
-		&& pixels_ss_table[format_num] <= 0)
+		&& pixels_ss <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> requires sidescan data.\n",program_name);
 		fprintf(stderr,"Format %d is unacceptable because it does not inlude sidescan data.\n",format);
@@ -534,7 +536,7 @@ The default input and output streams are stdin and stdout.\n";
 		exit(MB_ERROR_BAD_FORMAT);
 		}
 	if (ampkind == MBANGLECORRECT_AMP 
-		&& beams_amp_table[format_num] <= 0)
+		&& beams_amp <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> requires amplitude data.\n",program_name);
 		fprintf(stderr,"Format %d is unacceptable because it does not inlude amplitude data.\n",format);

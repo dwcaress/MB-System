@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 4.12 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbhistogram.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.11  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -83,7 +86,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 4.12 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -103,10 +106,9 @@ main (int argc, char **argv)
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	struct mb_datalist_struct *datalist;
+	char	*datalist;
 	double	file_weight;
 	int	format;
-	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -435,7 +437,7 @@ main (int argc, char **argv)
 
 	/* obtain format array location - format id will 
 		be aliased to current id if old format id given */
-	status = mb_format(verbose,&format,&format_num,&error);
+	status = mb_format(verbose,&format,&error);
 
 	/* initialize reading the swath sonar data file */
 	if ((status = mb_read_init(

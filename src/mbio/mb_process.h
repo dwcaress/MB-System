@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 4.0 2000-09-30 06:28:42 caress Exp $
+ *    $Id: mb_process.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -34,6 +34,9 @@
  *   DRAFT draft                    # sets draft value (m)
  *   DRAFTOFFSET offset             # sets value added to draft (m)
  *   DRAFTMULTIPLY multiplier       # sets value multiplied by draft
+ *   HEAVEOFFSET offset             # sets value added to heave (m) 
+ *   HEAVEMULTIPLY multiplier       # sets value multiplied by heave
+ *   TTMULTIPLY multiplier          # sets value multiplied by travel times
  *   ROLLBIAS                       # sets roll bias (degrees)
  *   ROLLBIASPORT                   # sets port roll bias (degrees)
  *   ROLLBIASSTBD                   # sets starboard roll bias (degrees)
@@ -50,7 +53,7 @@
  *   NAVDRAFT                       # sets draft to be merged from nav file
  *   NAVSPLINE                      # sets spline navigation interpolation
  *   HEADING                        # sets heading to course made good
- *   HEADINGOFFSET offset           # sets value added to heading (degree)
+ *   HEADINGOFFSET offset           # sets value added to heading (degrees)
  *   SVPFILE file                   # sets svp file path
  *   SSV                            # sets ssv value (m/s)
  *   SSVOFFSET                      # sets value added to ssv (m/s)
@@ -78,6 +81,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/09/30  06:28:42  caress
+ * Snapshot for Dale.
+ *
  *
  */
 
@@ -102,6 +108,12 @@
 #define MBP_DRAFT_MULTIPLY	2
 #define MBP_DRAFT_MULTIPLYOFFSET	3
 #define MBP_DRAFT_SET		4
+#define MBP_HEAVE_OFF		0
+#define MBP_HEAVE_OFFSET	1
+#define MBP_HEAVE_MULTIPLY	2
+#define MBP_HEAVE_MULTIPLYOFFSET	3
+#define MBP_TT_OFF		0
+#define MBP_TT_MULTIPLY		1
 #define MBP_NAV_OFF		0
 #define MBP_NAV_ON		1
 #define MBP_NAV_LINEAR		0
@@ -109,6 +121,7 @@
 #define MBP_HEADING_OFF         0
 #define MBP_HEADING_CALC        1
 #define MBP_HEADING_OFFSET      2
+#define MBP_HEADING_CALCOFFSET  3
 #define MBP_SSV_OFF		0
 #define MBP_SSV_OFFSET		1
 #define MBP_SSV_SET		2
@@ -143,12 +156,16 @@ struct mb_process_struct
 	int	mbp_draft_mode;
 	double	mbp_draft;
 	double	mbp_draft_mult;
-	char	mbp_dfile[MBP_FILENAMESIZE];
 	int	mbp_ssv_mode;
 	double	mbp_ssv;
 	int	mbp_svp_mode;
 	char	mbp_svpfile[MBP_FILENAMESIZE];
 	int	mbp_uncorrected;
+	int	mbp_heave_mode;
+	double	mbp_heave;
+	double	mbp_heave_mult;
+	int	mbp_tt_mode;
+	double	mbp_tt_mult;
 	int	mbp_navadj_mode;
 	char	mbp_navadjfile[MBP_FILENAMESIZE];
 	int	mbp_navadj_algorithm;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 4.6 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_swap.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.5  2000/09/30  06:32:11  caress
  * Snapshot for Dale.
  *
@@ -62,6 +65,7 @@
 /* include for byte swapping on little-endian machines */
 #include "../../include/mb_status.h"
 #include "../../include/mb_swap.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_float swaps the bytes of an 4 byte float value */

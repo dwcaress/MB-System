@@ -30,6 +30,14 @@
 /*
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   pushButton_biases_applyall;
+EXTERNAL Widget   scale_biases_heading2;
+EXTERNAL Widget   scale_biases_roll2;
+EXTERNAL Widget   scale_biases_roll1;
+EXTERNAL Widget   scale_biases_heading1;
+EXTERNAL Widget   label_biases_files;
+EXTERNAL Widget   toggleButton_biases_together;
+EXTERNAL Widget   toggleButton_biases_separate;
 EXTERNAL Widget   scale_controls_decimation;
 EXTERNAL Widget   scale_controls_contourinterval;
 EXTERNAL Widget   scale_controls_colorinterval;

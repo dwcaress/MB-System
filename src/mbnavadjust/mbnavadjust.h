@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 4.0 2000-09-30 07:00:06 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.0 2000-12-01 22:55:48 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/09/30  07:00:06  caress
+ * Snapshot for Dale.
+ *
  *
  *
  */
@@ -72,6 +75,8 @@
 #define MBNA_MASK_DIM			25
 #define MBNA_MISFIT_ZEROCENTER		0
 #define MBNA_MISFIT_AUTOCENTER		1
+#define MBNA_BIAS_SAME			0
+#define MBNA_BIAS_DIFFERENT		1
 
 /* mbnavadjust project and file structures */
 struct mbna_section {
@@ -105,6 +110,10 @@ struct mbna_file {
 	int	output_id;
 	char 	file[STRING_MAX];
 	int	format;
+	double	heading_bias_import;
+	double	roll_bias_import;
+	double	heading_bias;
+	double	roll_bias;
 	int	num_sections;
 	int	num_sections_alloc;
 	struct mbna_section *sections;
@@ -234,6 +243,7 @@ EXTERNAL int	mbna_zoom_x2;
 EXTERNAL int	mbna_zoom_y2;
 EXTERNAL double mbna_smoothweight;
 EXTERNAL double mbna_offsetweight;
+EXTERNAL int	mbna_bias_mode;
 
 /* plot vector data */
 EXTERNAL struct mbna_contour_vector *mbna_contour;
@@ -279,7 +289,8 @@ int	mbnavadjust_naverr_resettie();
 int	mbnavadjust_naverr_skip();
 int	mbnavadjust_crossing_load();
 int	mbnavadjust_crossing_unload();
-int	mbnavadjust_section_load(char *fpath, void **swath_ptr, int num_pings);
+int	mbnavadjust_section_load(char *fpath, void **swathraw_ptr, void **swath_ptr, int num_pings);
+int	mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_ptr);
 void 	plot(double x,double y,int ipen);
 void 	newpen(int ipen);
 void 	justify_string(double height,char *string, double *s);

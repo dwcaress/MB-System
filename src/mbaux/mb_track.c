@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 4.8 2000-10-11 00:54:20 caress Exp $
+ *    $Id: mb_track.c,v 5.0 2000-12-01 22:53:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/10/11  00:54:20  caress
+ * Converted to ANSI C
+ *
  * Revision 4.7  2000/09/30  06:52:17  caress
  * Snapshot for Dale.
  *
@@ -78,7 +81,7 @@
 /* 	function mb_track plots the shiptrack of multibeam data. */
 void mb_track(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 4.8 2000-10-11 00:54:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;

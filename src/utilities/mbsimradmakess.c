@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsimradmakess.c	11/29/98
  *
- *    $Id: mbsimradmakess.c,v 4.5 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbsimradmakess.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -58,6 +58,9 @@
  * Date:	November 29, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.4  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -93,7 +96,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.5 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbsimradmakess.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBSIMRADMAKESS";
 	static char help_message[] =  "MBSIMRADMAKESS is an utility for regenerating sidescan imagery from the raw amplitude samples contained in data from  Simrad \nEM300 and EM3000 multibeam sonars. This program ignores amplitude \ndata associated with flagged (bad) bathymetry data, thus removing \none important source of noise in the sidescan data. The default \ninput and output streams are stdin and stdout.";
 	static char usage_message[] = "mbsimradmakess [-Fformat -V -H  -Iinfile -Ooutfile -Ppixel_size -Sswath_width -Tpixel_int]";
@@ -829,80 +832,5 @@ main (int argc, char **argv)
 
 	/* end it all */
 	exit(status);
-}
-/*--------------------------------------------------------------------*/
-/* From Numerical Recipies */
-int spline(double *x, double *y,
-		int n, double yp1, double ypn, double *y2)
-{
-	int i,k;
-	double p,qn,sig,un,*u,*vector();
-	void free_vector();
-
-	u=vector(1,n-1);
-	if (yp1 > 0.99e30)
-		y2[1]=u[1]=0.0;
-	else {
-		y2[1] = -0.5;
-		u[1]=(3.0/(x[2]-x[1]))*((y[2]-y[1])/(x[2]-x[1])-yp1);
-	}
-	for (i=2;i<=n-1;i++) {
-		sig=(x[i]-x[i-1])/(x[i+1]-x[i-1]);
-		p=sig*y2[i-1]+2.0;
-		y2[i]=(sig-1.0)/p;
-		u[i]=(y[i+1]-y[i])/(x[i+1]-x[i]) - (y[i]-y[i-1])/(x[i]-x[i-1]);
-		u[i]=(6.0*u[i]/(x[i+1]-x[i-1])-sig*u[i-1])/p;
-	}
-	if (ypn > 0.99e30)
-		qn=un=0.0;
-	else {
-		qn=0.5;
-		un=(3.0/(x[n]-x[n-1]))*(ypn-(y[n]-y[n-1])/(x[n]-x[n-1]));
-	}
-	y2[n]=(un-qn*u[n-1])/(qn*y2[n-1]+1.0);
-	for (k=n-1;k>=1;k--)
-		y2[k]=y2[k]*y2[k+1]+u[k];
-	free_vector(u,1,n-1);
-	return(0);
-}
-/*--------------------------------------------------------------------*/
-/* From Numerical Recipies */
-int splint(double *xa, double *ya, double *y2a,
-		int n, double x, double *y)
-{
-	int klo,khi,k;
-	double h,b,a;
-
-	klo=1;
-	khi=n;
-	while (khi-klo > 1) {
-		k=(khi+klo) >> 1;
-		if (xa[k] > x) khi=k;
-		else klo=k;
-	}
-	h=xa[khi]-xa[klo];
-	if (h == 0.0) 
-		{
-		fprintf(stderr,"ERROR: interpolation time out of tide bounds\n");
-		return(-1);
-		}
-	a=(xa[khi]-x)/h;
-	b=(x-xa[klo])/h;
-	*y=a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2a[klo]
-		+(b*b*b-b)*y2a[khi])*(h*h)/6.0;
-	return(0);
-}
-/*--------------------------------------------------------------------*/
-double *vector(int nl, int nh)
-{
-	double *v;
-	v = (double *) malloc ((unsigned) (nh-nl+1)*sizeof(double));
-	if (!v) fprintf(stderr,"allocation failure in vector()");
-	return v-nl;
-}
-/*--------------------------------------------------------------------*/
-void free_vector(double *v, int nl, int nh)
-{
-	free((char*) (v+nl));
 }
 /*--------------------------------------------------------------------*/

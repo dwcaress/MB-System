@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_ping.c	2/3/93
- *	$Id: mb_write_ping.c,v 4.22 2000-10-11 01:02:30 caress Exp $
+ *	$Id: mb_write_ping.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	Febrary 3, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.21  2000/09/30  06:32:11  caress
  * Snapshot for Dale.
  *
@@ -124,7 +127,7 @@
 /*--------------------------------------------------------------------*/
 int mb_write_ping(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
- static char res_id[]="$Id: mb_write_ping.c,v 4.22 2000-10-11 01:02:30 caress Exp $";
+ static char res_id[]="$Id: mb_write_ping.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_write_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -144,193 +147,9 @@ int mb_write_ping(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* call the appropriate mbr_ write and translate routine */
-	if (mb_io_ptr->format == MBF_SBSIOMRG)
+	if (mb_io_ptr->mb_io_write_ping != NULL)
 		{
-		status = mbr_wt_sbsiomrg(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SBSIOCEN)
-		{
-		status = mbr_wt_sbsiocen(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SBSIOLSI)
-		{
-		status = mbr_wt_sbsiolsi(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SBURICEN)
-		{
-		status = mbr_wt_sburicen(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SBURIVAX)
-		{
-		status = mbr_wt_sburivax(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SBSIOSWB)
-		{
-		status = mbr_wt_sbsioswb(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SBIFREMR)
-		{
-		status = mbr_wt_sbifremr(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_HSLDEDMB)
-		{
-		status = mbr_wt_hsldedmb(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_HSURICEN)
-		{
-		status = mbr_wt_hsuricen(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_HSATLRAW)
-		{
-		status = mbr_wt_hsatlraw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_HSLDEOIH)
-		{
-		status = mbr_wt_hsldeoih(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_HSURIVAX)
-		{
-		status = mbr_wt_hsurivax(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SB2000SB)
-		{
-		status = mbr_wt_sb2000sb(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SB2000SS)
-		{
-		status = mbr_wt_sb2000ss(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SB2100RW)
-		{
-		status = mbr_wt_sb2100rw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SB2100B1)
-		{
-		status = mbr_wt_sb2100b1(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_SB2100B2)
-		{
-		status = mbr_wt_sb2100b2(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_EM1000RW)
-		{
-		status = mbr_wt_em1000rw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_EM12SRAW)
-		{
-		status = mbr_wt_em12sraw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_EM12DRAW)
-		{
-		status = mbr_wt_em12draw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_EM12DARW)
-		{
-		status = mbr_wt_em12darw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_EM121RAW)
-		{
-		status = mbr_wt_em121raw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_EM300RAW)
-		{
-		status = mbr_wt_em300raw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_EM300MBA)
-		{
-		status = mbr_wt_em300mba(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_MR1PRHIG)
-		{
-		status = mbr_wt_mr1prhig(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_MR1ALDEO)
-		{
-		status = mbr_wt_mr1aldeo(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_MR1BLDEO)
-		{
-		status = mbr_wt_mr1bldeo(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_MBLDEOIH)
-		{
-		status = mbr_wt_mbldeoih(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_CBAT9001)
-		{
-		status = mbr_wt_cbat9001(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_CBAT8101)
-		{
-		status = mbr_wt_cbat8101(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_HYPC8101)
-		{
-		status = mbr_wt_hypc8101(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_BCHRTUNB)
-		{
-		status = mbr_wt_bchrtunb(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_ELMK2UNB)
-		{
-		status = mbr_wt_elmk2unb(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_BCHRXUNB)
-		{
-		status = mbr_wt_bchrxunb(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_HSMDARAW)
-		{
-		status = mbr_wt_hsmdaraw(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_HSMDLDIH)
-		{
-		status = mbr_wt_hsmdldih(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_DSL120PF)
-		{
-		status = mbr_wt_dsl120pf(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_DSL120SF)
-		{
-		status = mbr_wt_dsl120sf(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_GSFGENMB)
-		{
-		status = mbr_wt_gsfgenmb(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_MSTIFFSS)
-		{
-		status = mbr_wt_mstiffss(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_OICGEODA)
-		{
-		status = mbr_wt_oicgeoda(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_OICMBARI)
-		{
-		status = mbr_wt_oicmbari(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_OMGHDCSJ)
-		{
-		status = mbr_wt_omghdcsj(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_MGD77DAT)
-		{
-		status = mbr_wt_mgd77dat(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_MBARIROV)
-		{
-		status = mbr_wt_mbarirov(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_MBPRONAV)
-		{
-		status = mbr_wt_mbpronav(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (mb_io_ptr->format == MBF_ELMK2XSE)
-		{
-		status = mbr_wt_elmk2xse(verbose,mbio_ptr,store_ptr,error);
+		status = (*mb_io_ptr->mb_io_write_ping)(verbose,mbio_ptr,store_ptr,error);
 		}
 	else
 		{

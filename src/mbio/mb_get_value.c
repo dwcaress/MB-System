@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 4.8 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_get_value.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.7  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *
@@ -83,11 +86,12 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_swap.h"
+#include "../../include/mb_define.h"
 
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 4.8 2000-10-11 01:02:30 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/

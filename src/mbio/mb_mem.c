@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 4.9 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_mem.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.8  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *
@@ -84,6 +87,7 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 
 /* memory allocation list variables */
 #define	MB_MEMORY_HEAP_MAX	10000
@@ -94,7 +98,7 @@ static int	mb_alloc_size[MB_MEMORY_HEAP_MAX];
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, int size, char **ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 4.9 2000-10-11 01:02:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
 	int	iptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 4.4 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbr_gsfgenmb.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.3  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -59,10 +62,182 @@
 /* GSF error value */
 extern int gsfError;
 
+/* essential function prototypes */
+int mbr_info_gsfgenmb(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error);
+int mbr_alm_gsfgenmb(int verbose, char *mbio_ptr, int *error);
+int mbr_dem_gsfgenmb(int verbose, char *mbio_ptr, int *error);
+int mbr_rt_gsfgenmb(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_wt_gsfgenmb(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+
+/*--------------------------------------------------------------------*/
+int mbr_info_gsfgenmb(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error)
+{
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	char	*function_name = "mbr_info_gsfgenmb";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* set format info parameters */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*system = MB_SYS_GSF;
+	*beams_bath_max = 151;
+	*beams_amp_max = 151;
+	*pixels_ss_max = 0;
+	strncpy(format_name, "GSFGENMB", MB_NAME_LENGTH);
+	strncpy(system_name, "GSF", MB_NAME_LENGTH);
+	strncpy(format_description, "Format name:          MBF_GSFGENMB\nInformal Description: SAIC Generic Sensor Format (GSF)\nAttributes:           variable beams,  bathymetry and amplitude,\n                      binary, single files, SAIC. \n", MB_DESCRIPTION_LENGTH);
+	*numfile = 1;
+	*filetype = MB_FILETYPE_GSF;
+	*variable_beams = MB_YES;
+	*traveltime = MB_YES;
+	*beam_flagging = MB_YES;
+	*nav_source = MB_DATA_DATA;
+	*heading_source = MB_DATA_DATA;
+	*vru_source = MB_DATA_DATA;
+	*beamwidth_xtrack = 0.0;
+	*beamwidth_ltrack = 0.0;
+
+	/* set format and system specific function pointers */
+	*format_alloc = &mbr_alm_gsfgenmb;
+	*format_free = &mbr_dem_gsfgenmb; 
+	*store_alloc = &mbsys_gsf_alloc; 
+	*store_free = &mbsys_gsf_deall; 
+	*read_ping = &mbr_rt_gsfgenmb; 
+	*write_ping = &mbr_wt_gsfgenmb; 
+	*extract = &mbsys_gsf_extract; 
+	*insert = &mbsys_gsf_insert; 
+	*extract_nav = &mbsys_gsf_extract_nav; 
+	*insert_nav = &mbsys_gsf_insert_nav; 
+	*altitude = &mbsys_gsf_altitude; 
+	*insert_altitude = &mbsys_gsf_insert_altitude; 
+	*ttimes = &mbsys_gsf_ttimes; 
+	*copyrecord = &mbsys_gsf_copy; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",*system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",*pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",*numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",*filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
+		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_gsfgenmb(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_gsfgenmb.c,v 4.4 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbr_alm_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -184,6 +359,7 @@ int mbr_rt_gsfgenmb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	/* get pointers to GSF structures */
 	dataID = &(data->dataID);
 	records = &(data->records);
+	mb_ping = &(records->mb_ping);
 	
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -257,8 +433,6 @@ int mbr_rt_gsfgenmb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		data->kind = MB_DATA_COMMENT;
 		if (records->comment.comment != NULL)
 		    {
-		    strncpy(mb_io_ptr->new_comment,
-			    records->comment.comment,MB_COMMENT_MAXLINE);
 		    status = MB_SUCCESS;
 		    *error = MB_ERROR_NO_ERROR;
 		    }
@@ -274,93 +448,6 @@ int mbr_rt_gsfgenmb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		data->kind = MB_DATA_DATA;
-		mb_ping = &(records->mb_ping);
-
-		/* get time */
-		mb_io_ptr->new_time_d = mb_ping->ping_time.tv_sec 
-				+ 0.000000001 * mb_ping->ping_time.tv_nsec;
-		mb_get_date(verbose,mb_io_ptr->new_time_d,mb_io_ptr->new_time_i);
-
-		/* get navigation */
-		mb_io_ptr->new_lon = mb_ping->longitude;
-		mb_io_ptr->new_lat = mb_ping->latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (mb_io_ptr->new_lon > 0.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -360.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (mb_io_ptr->new_lon > 180.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -180.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else
-			{
-			if (mb_io_ptr->new_lon > 360.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < 0.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-
-		/* get heading */
-		mb_io_ptr->new_heading = mb_ping->heading;
-
-		/* get speed */
-		mb_io_ptr->new_speed = 1.852 * mb_ping->speed;
-
-		/* get numbers of beams and pixels */
-		if (mb_ping->depth != NULL)
-		    mb_io_ptr->beams_bath = mb_ping->number_beams;
-		else
-		    mb_io_ptr->beams_bath = 0;
-		if (mb_ping->mc_amplitude != NULL
-		    || mb_ping->mr_amplitude != NULL)
-		    mb_io_ptr->beams_amp = mb_ping->number_beams;
-		else
-		    mb_io_ptr->beams_amp = 0;
-		mb_io_ptr->pixels_ss = 0;
-
-		/* read depth and beam location values into storage arrays */
-/*fprintf(stderr, "%15f   heave:%15f draft:%15f\n", 
-mb_io_ptr->new_time_d, mb_ping->heave, mb_ping->depth_corrector);*/
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			/* set null beam flag if required */
-			if (mb_ping->depth[i] == 0.0
-			    && mb_ping->across_track[i] == 0.0
-			    && mb_ping->beam_flags[i] != MB_FLAG_NULL)
-			    mb_ping->beam_flags[i] = MB_FLAG_NULL;
-
-			mb_io_ptr->new_beamflag[i] = mb_ping->beam_flags[i];
-			mb_io_ptr->new_bath[i] = mb_ping->depth[i];
-			mb_io_ptr->new_bath_acrosstrack[i] = mb_ping->across_track[i];
-			mb_io_ptr->new_bath_alongtrack[i] = mb_ping->along_track[i];		
-			}
-
-		/* set beamflags if ping flag set */
-		if (mb_ping->ping_flags != 0)
-		    {
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
-			if (mb_beam_ok(mb_io_ptr->new_beamflag[i]))
-			    mb_io_ptr->new_beamflag[i] 
-				= mb_beam_set_flag_manual(mb_io_ptr->new_beamflag[i]);
-		    }
-
-		/* read amplitude values into storage arrays */
-		if (mb_ping->mc_amplitude != NULL)
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			mb_io_ptr->new_amp[i] = mb_ping->mc_amplitude[i];
-			}
-		else if (mb_ping->mr_amplitude != NULL)
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			mb_io_ptr->new_amp[i] = mb_ping->mr_amplitude[i];
-			}
 		}
 		
 	    else
@@ -369,12 +456,10 @@ mb_io_ptr->new_time_d, mb_ping->heave, mb_ping->depth_corrector);*/
 		*error = MB_ERROR_UNINTELLIGIBLE;
 		}	
 	    }
-	    
-	/* set kind in mb_io_ptr */
-	mb_io_ptr->new_kind = data->kind;
 
-	/* set error in mb_io_ptr */
+	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
 	
 	/* output debug info */
 	if (verbose >= 4)
@@ -387,73 +472,61 @@ mb_io_ptr->new_time_d, mb_ping->heave, mb_ping->depth_corrector);*/
 		fprintf(stderr,"dbg4       kind:       %d\n",
 			mb_io_ptr->new_kind);
 		}
-	if (verbose >= 4 && mb_io_ptr->new_kind == MB_DATA_COMMENT)
+	if (verbose >= 4 && data->kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"\ndbg4  New comment read by MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg4  New comment values:\n");
-		fprintf(stderr,"dbg4       error:      %d\n",
-			mb_io_ptr->new_error);
-		fprintf(stderr,"dbg4       kind:       %d\n",
-			mb_io_ptr->new_kind);
-		fprintf(stderr,"dbg4       comment:    %s\n",
-			mb_io_ptr->new_comment);
+		fprintf(stderr,"dbg4       kind:              %d\n",
+			data->kind);
+		fprintf(stderr,"dbg4       comment time sec:  %d\n",
+			records->comment.comment_time.tv_sec);
+		fprintf(stderr,"dbg4       comment time nsec: %d\n",
+			records->comment.comment_time.tv_nsec);
+		fprintf(stderr,"dbg4       comment length:    %d\n",
+			records->comment.comment_length);
+		fprintf(stderr,"dbg4       comment:           %s\n",
+			records->comment.comment);
 		}
-	if (verbose >= 4 && mb_io_ptr->new_kind == MB_DATA_DATA)
+	if (verbose >= 4 && data->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
+		fprintf(stderr,"\ndbg4  New ping to be written by MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg4  New ping values:\n");
-		fprintf(stderr,"dbg4       error:      %d\n",
-			mb_io_ptr->new_error);
 		fprintf(stderr,"dbg4       kind:       %d\n",
-			mb_io_ptr->new_kind);
-		fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-			mb_io_ptr->new_time_i[0]);
-		fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-			mb_io_ptr->new_time_i[1]);
-		fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-			mb_io_ptr->new_time_i[2]);
-		fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-			mb_io_ptr->new_time_i[3]);
-		fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-			mb_io_ptr->new_time_i[4]);
-		fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-			mb_io_ptr->new_time_i[5]);
-		fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-			mb_io_ptr->new_time_i[6]);
-		fprintf(stderr,"dbg4       time_d:     %f\n",
-			mb_io_ptr->new_time_d);
+			data->kind);
+		fprintf(stderr,"dbg4       time sec:   %d\n",
+			mb_ping->ping_time.tv_sec);
+		fprintf(stderr,"dbg4       time nsec:  %d\n",
+			mb_ping->ping_time.tv_nsec);
 		fprintf(stderr,"dbg4       longitude:  %f\n",
-			mb_io_ptr->new_lon);
+			mb_ping->longitude);
 		fprintf(stderr,"dbg4       latitude:   %f\n",
-			mb_io_ptr->new_lat);
+			mb_ping->latitude);
 		fprintf(stderr,"dbg4       speed:      %f\n",
-			mb_io_ptr->new_speed);
+			mb_ping->speed);
 		fprintf(stderr,"dbg4       heading:    %f\n",
-			mb_io_ptr->new_heading);
-		fprintf(stderr,"dbg4       beams_bath: %d\n",
-			mb_io_ptr->beams_bath);
-		fprintf(stderr,"dbg4       beams_amp:  %d\n",
-			mb_io_ptr->beams_amp);
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
+			mb_ping->heading);
+		fprintf(stderr,"dbg4       beams:      %d\n",
+			mb_ping->number_beams);
+		for (i=0;i<mb_ping->number_beams;i++)
 		  fprintf(stderr,"dbg4       beam:%d  flag:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,mb_io_ptr->new_beamflag[i],
-			mb_io_ptr->new_bath[i],
-			mb_io_ptr->new_bath_acrosstrack[i],
-			mb_io_ptr->new_bath_alongtrack[i]);
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
+			i,mb_ping->beam_flags[i],
+			mb_ping->depth[i],
+			mb_ping->across_track[i],
+			mb_ping->along_track[i]);
+		if (mb_ping->mc_amplitude != NULL)
+		for (i=0;i<mb_ping->number_beams;i++)
 		  fprintf(stderr,"dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,mb_io_ptr->new_amp[i],
-			mb_io_ptr->new_bath_acrosstrack[i],
-			mb_io_ptr->new_bath_alongtrack[i]);
-		fprintf(stderr,"dbg4       pixels_ss:  %d\n",
-			mb_io_ptr->pixels_ss);
-		for (i=0;i<mb_io_ptr->pixels_ss;i++)
-		  fprintf(stderr,"dbg4       pixel:%d  ss:%f acrosstrack:%f  alongtrack:%f\n",
-			i,mb_io_ptr->new_ss[i],
-			mb_io_ptr->new_ss_acrosstrack[i],
-			mb_io_ptr->new_ss_alongtrack[i]);
+			i,mb_ping->mc_amplitude[i],
+			mb_ping->across_track[i],
+			mb_ping->along_track[i]);
+		if (mb_ping->mr_amplitude != NULL)
+		for (i=0;i<mb_ping->number_beams;i++)
+		  fprintf(stderr,"dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,mb_ping->mr_amplitude[i],
+			mb_ping->across_track[i],
+			mb_ping->along_track[i]);
 		}
 
 	/* translate values to data storage structure */
@@ -525,155 +598,6 @@ int mbr_wt_gsfgenmb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		gsfCopyRecords(records, &(store->records));
 		*dataID = store->dataID;
 		data->kind = store->kind;
-		}
-
-	/* set kind from current ping */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR)
-		data->kind = mb_io_ptr->new_kind;
-
-	/* check for comment */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_COMMENT)
-		{
-		/* copy comment */
-		data->kind = MB_DATA_COMMENT;
-		dataID->recordID = GSF_RECORD_COMMENT;
-		if (records->comment.comment_length < strlen(mb_io_ptr->new_comment) + 1)
-		    {
-		    if ((records->comment.comment 
-			= (char *) realloc(records->comment.comment,
-					strlen(mb_io_ptr->new_comment)+1))
-					    == NULL) 
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_MEMORY_FAIL;
-			records->comment.comment_length = 0;
-			}
-		    }
-		if (status = MB_SUCCESS && records->comment.comment != NULL)
-		    {
-		    strcpy(records->comment.comment, mb_io_ptr->new_comment);
-		    records->comment.comment_length = strlen(mb_io_ptr->new_comment);
-		    records->comment.comment_time.tv_sec = (int) mb_io_ptr->new_time_d;
-		    records->comment.comment_time.tv_nsec 
-			    = (int) (1000000000 
-				* (mb_io_ptr->new_time_d 
-					- records->comment.comment_time.tv_sec));
-		    }
-		}
-
-	/* else translate current ping data to gsfgenmb data structure */
-	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_DATA)
-		{
-		data->kind = MB_DATA_DATA;
-		dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
-
-		/* get time */
-		mb_ping->ping_time.tv_sec = (int) mb_io_ptr->new_time_d;
-		mb_ping->ping_time.tv_nsec 
-			= (int) (1000000000 
-			    * (mb_io_ptr->new_time_d 
-				    - mb_ping->ping_time.tv_sec));
-
-		/* get navigation */
-		mb_ping->longitude = mb_io_ptr->new_lon;
-		mb_ping->latitude = mb_io_ptr->new_lat;
-
-		/* get heading */
-		mb_ping->heading = mb_io_ptr->new_heading;
-
-		/* get speed */
-		mb_ping->speed = mb_io_ptr->new_speed / 1.852;
-
-		/* get numbers of beams */
-		mb_ping->number_beams = MAX(mb_io_ptr->beams_bath, 
-					    mb_io_ptr->beams_amp);
-		
-		/* allocate memory in arrays if required */
-		if (mb_io_ptr->beams_bath > 0)
-		    {
-		    mb_ping->beam_flags 
-			= (unsigned char *) 
-			    realloc(mb_ping->beam_flags,
-					mb_io_ptr->beams_bath * sizeof(char));
-		    mb_ping->depth 
-			= (double *) 
-			    realloc(mb_ping->depth,
-					mb_io_ptr->beams_bath * sizeof(double));
-		    mb_ping->across_track 
-			= (double *) 
-			    realloc(mb_ping->across_track,
-					mb_io_ptr->beams_bath * sizeof(double));
-		    mb_ping->along_track 
-			= (double *) 
-			    realloc(mb_ping->along_track,
-					mb_io_ptr->beams_bath * sizeof(double));
-		    if (mb_ping->beam_flags == NULL
-			|| mb_ping->depth == NULL
-			|| mb_ping->across_track == NULL
-			|| mb_ping->along_track == NULL)
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_MEMORY_FAIL;
-			}
-		    }
-		if (mb_io_ptr->beams_amp > 0
-		    && mb_ping->mc_amplitude != NULL)
-		    {
-		    mb_ping->mc_amplitude 
-			= (double *) 
-			    realloc(mb_ping->mc_amplitude,
-					mb_io_ptr->beams_amp * sizeof(double));
-		    if (mb_ping->mc_amplitude == NULL)
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_MEMORY_FAIL;
-			}
-		    }
-		else if (mb_io_ptr->beams_amp > 0)
-		    {
-		    mb_ping->mr_amplitude 
-			= (double *) 
-			    realloc(mb_ping->mr_amplitude,
-					mb_io_ptr->beams_amp * sizeof(double));
-		    if (mb_ping->mr_amplitude == NULL)
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_MEMORY_FAIL;
-			}
-		    }
-
-		/* if ping flag set check for any unset
-		    beam flags - unset ping flag if any
-		    good beams found */
-		if (mb_ping->ping_flags != 0)
-		    {
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
-			if (mb_beam_ok(mb_io_ptr->new_beamflag[i]))
-			    mb_ping->ping_flags = 0;
-		    }
-
-		/* read depth and beam location values into storage arrays */
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			mb_ping->beam_flags[i] = mb_io_ptr->new_beamflag[i];
-			mb_ping->depth[i] = mb_io_ptr->new_bath[i];
-			mb_ping->across_track[i] = mb_io_ptr->new_bath_acrosstrack[i];
-			mb_ping->along_track[i] = mb_io_ptr->new_bath_alongtrack[i];
-			}
-
-		/* read amplitude values into storage arrays */
-		if (mb_ping->mc_amplitude != NULL)
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			mb_ping->mc_amplitude[i] = mb_io_ptr->new_amp[i];
-			}
-		else if (mb_ping->mr_amplitude != NULL)
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			mb_ping->mr_amplitude[i] = mb_io_ptr->new_amp[i];
-			}
 		}
 	
 	/* output debug info */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1b.h	7/19/94
- *	$Id: mbsys_mr1b.h,v 4.2 2000-09-30 06:31:19 caress Exp $
+ *	$Id: mbsys_mr1b.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	July 19, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/09/30  06:31:19  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.1  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -138,4 +141,53 @@ struct mbsys_mr1b_struct
 	/* comment */
 	char	comment[MBSYS_MR1B_MAXLINE];
 };
+
+	
+/* system specific function prototypes */
+int mbsys_mr1b_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_mr1b_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_mr1b_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading,
+			int *nbath, int *namp, int *nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_mr1b_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+			int kind, int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading,
+			int nbath, int namp, int nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_mr1b_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int *nbeams,
+			double *ttimes, double *angles, 
+			double *angles_forward, double *angles_null,
+			double *heave, double *alongtrack_offset, 
+			double *draft, double *ssv, int *error);
+int mbsys_mr1b_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, double *transducer_depth, double *altitude, 
+			int *error);
+int mbsys_mr1b_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
+			int *error);
+int mbsys_mr1b_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading, double draft, 
+			double roll, double pitch, double heave,
+			int *error);
+int mbsys_mr1b_copy(int verbose, char *mbio_ptr, 
+			char *store_ptr, char *copy_ptr,
+			int *error);
 

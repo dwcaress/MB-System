@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 4.3 2000-09-30 06:54:58 caress Exp $
+ *    $Id: mb_contour.h,v 5.0 2000-12-01 22:53:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/09/30  06:54:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.2  1998/10/04  04:18:07  caress
  * MB-System version 4.6beta
  *
