@@ -1,0 +1,40 @@
+April 16, 1993
+
+Revision History:
+$Log: not supported by cvs2svn $
+
+RCS ID: $Id: README,v 3.0 1993-04-22 16:04:29 dale Exp $
+
+MBSYSTEM 3.00 PRELIMINARY (ALPHA--) RELEASE
+
+This directory structure contains a preliminary release
+of the MBSYSTEM software package for processing and display
+of multibeam data.  There are undoubtably numerous bugs
+in this software - the user should beware (and let us
+know about it!).
+
+This software is being distributed for two purposes:
+	1. So that future Hydrosweep users on the
+		R/V Ewing can become familiar with the
+		software they will use on the ship.
+	2. So that users desperately needing to process
+		existing Hydrosweep data will be able
+		to use the new functionality of the
+		MBSYSTEM version 3.
+
+The program mbedit should not be made from scratch unless
+the user has access to the development tool Devguide
+(sold by Sun Microsystems) - an executable has been left
+in the src/mbedit directory.
+
+The program mblevitus depends on a 16 MByte data file that
+is not included in this tarfile.  If users really need to
+have a starting water velocity profile, they should contact
+us for a copy of this file (or let us run mblevitus for you
+and send you the profile).
+
+Good Luck!!
+
+Dave Caress
+caress@lamont.ldeo.columbia.edu
+
