@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.2 2003-07-27 21:58:57 caress Exp $
+ *    $Id: mb_esf.c,v 5.3 2003-07-30 16:19:20 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/07/27 21:58:57  caress
+ * Added mb_mergesort function for 5.0.0
+ *
  * Revision 5.1  2003/07/26 17:59:32  caress
  * Changed beamflag handling code.
  *
@@ -43,7 +46,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.2 2003-07-27 21:58:57 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.3 2003-07-30 16:19:20 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -500,11 +503,10 @@ j, time_d, i, beamflag[i], esf->edit[j].action);*/
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       nedit:  %d\n",esf->nedit);
-		for (i=0;i<esf->nedit;i++)
-			fprintf(stderr,"dbg2       edit event: %d %.6f %5d %3d %3d\n",
-				i,esf->edit[i].time_d,esf->edit[i].beam,
-				esf->edit[i].action,esf->edit[i].use);
+		fprintf(stderr,"dbg2       time_d:      %f\n",time_d);
+		fprintf(stderr,"dbg2       nbath:       %d\n",nbath);
+		for (i=0;i<nbath;i++)
+			fprintf(stderr,"dbg2       beamflag:    %d %d\n",i,beamflag[i]);
 		fprintf(stderr,"dbg2       error:  %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
