@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.0 1994-05-24 02:33:48 caress Exp $
+#	$Id: Makefile.template,v 4.1 1994-05-24 02:47:50 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/05/24  02:33:48  caress
+# First cut.
+#
 #
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
@@ -54,7 +57,7 @@ $(BINDIR)/mbcontourfilter: ../gmt/mbcontour.o ../gmt/mb_truecont.o ../../include
 	$(CC) $(CFLAGS) ../gmt/mbcontour.o ../gmt/mb_truecont.o ../gmt/mb_delaun.o ../gmt/mb_track.o label.o mb_penface.o letter.o blocka.o ../../lib/libmbio.a $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbcontourfilter
 
 $(BINDIR)/mbplotfilter:	mbplotfilter.o
-	$(CC) mbplotfilter.o -g $(LFLAGS) $(GRAPHLIBDIR)/libgraphics.a -o $(BINDIR)/mbplotfilter
+	$(CC) mbplotfilter.o $(LFLAGS) $(GRAPHICSDIR)/libgraphics.a -o $(BINDIR)/mbplotfilter
 
 $(BINDIR)/mbm_calcomp_plot: mbm_calcomp_plot.perl
 	cp mbm_calcomp_plot.perl $(BINDIR)/mbm_calcomp_plot
@@ -74,11 +77,11 @@ mbplotfilter.o:	mbplotfilter.c
 mb_penface.o:	mb_penface.c
 	$(CC) -c $(CFLAGS) mb_penface.c
 label.o: label.f
-	$(FC) -c label.f -o label.o
+	$(FC) -c $(FFLAGS) label.f -o label.o
 letter.o: letter.f
-	$(FC) -c letter.f -o letter.o
+	$(FC) -c $(FFLAGS) letter.f -o letter.o
 blocka.o: blocka.f
-	$(FC) -c blocka.f -o blocka.o
+	$(FC) -c $(FFLAGS) blocka.f -o blocka.o
 
 # copy the man pages to the man page directory
 $(MANDIR)/mbcontourfilter.1:	mbcontourfilter.1
