@@ -196,7 +196,7 @@ is available as follows:
 
 	MB-System v 4.6
 	- available from L-DEO via anonymous ftp to
-	  lamont.ldeo.columbia.edu
+	  ftp.ldeo.columbia.edu
 	- compressed tar file MB-System4.6.10.tar.Z
 	  in directory pub/swath_data
 
@@ -222,7 +222,7 @@ We generally only announce major releases, such as 4.2, 4.3,
 4.4, etc. However, incremental bug fixes and code changes
 often occur between the major releases, and these may be
 reflected in the source code archives available via
-anonymous ftp at lamont.ldeo.columbia.edu. When changes are
+anonymous ftp at ftp.ldeo.columbia.edu. When changes are
 made to the distributed source code, this is reflected in
 the names of the compressed tar files in the ftp archive.
 For example, the initial MB-System 4.7 distribution will be
@@ -423,10 +423,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.21 2000-03-08 01:19:08 caress Exp $
+RCS ID: $Id: README,v 4.22 2000-09-26 20:32:27 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.21  2000/03/08  01:19:08  caress
+# Release 4.6.10
+#
 # Revision 4.20  1999/09/16  23:09:54  caress
 # Real version 4.6.6 release notes
 #
