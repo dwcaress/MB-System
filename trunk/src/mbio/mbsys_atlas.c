@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_atlas.c,v 5.7 2001-12-18 04:27:45 caress Exp $
+ *    The MB-system:	mbsys_atlas.c	3.00	6/25/01
+ *	$Id: mbsys_atlas.c,v 5.8 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -13,22 +13,25 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_surf.c contains the MBIO functions for handling data from 
+ * mbsys_atlas.c contains the MBIO functions for handling data from 
  * STN Atlas Marine Electronics multibeam sonars.
  * The relevant sonars include Hydrosweep DS2 and Fansweep sonars.
  * The older  Hydrosweep DS and MD sonars produce data in different 
  * formats (e.g. 21-24 and 101-102).
  * The data formats associated with (newer) STN Atlas sonars
  * include:
- *    MBSYS_SURF formats (code in mbsys_surf.c and mbsys_surf.h):
- *      MBF_ATLSSURF : MBIO ID 181 - Vendor processing format
- *      MBF_HSDS1RAW : MBIO ID 182 - Vendor raw HSDS2 and Fansweep format
+ *    MBSYS_ATLAS formats (code in mbsys_atlas.c and mbsys_atlas.h):
+ *      MBF_HSDS2RAW : MBIO ID 182 - Vendor raw HSDS2 and Fansweep format
+ *      MBF_HSDS2LAM : MBIO ID 183 - L-DEO HSDS2 and Fansweep processing format
  *
  * Author:	D. W. Caress
  * Author:	D. N. Chayes
  * Date:	June 25, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/12/18 04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.6  2001/08/25 00:54:13  caress
  * Adding beamwidth values to extract functions.
  *
@@ -64,18 +67,18 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
-#define MBSYS_SURF_C
-#include "../../include/mbsys_surf.h"
+#define MBSYS_ATLAS_C
+#include "../../include/mbsys_atlas.h"
 
 /*--------------------------------------------------------------------*/
-int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_atlas.c,v 5.7 2001-12-18 04:27:45 caress Exp $";
-	char	*function_name = "mbsys_surf_alloc";
+ static char res_id[]="$Id: mbsys_atlas.c,v 5.8 2002-07-20 20:42:40 caress Exp $";
+	char	*function_name = "mbsys_atlas_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	int	i;
 
 	/* print input debug statements */
@@ -92,11 +95,11 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_surf_struct),
+	status = mb_malloc(verbose,sizeof(struct mbsys_atlas_struct),
 				store_ptr,error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) *store_ptr;
+	store = (struct mbsys_atlas_struct *) *store_ptr;
 
 	/* initialize everything */
 	store->kind = MB_DATA_NONE;
@@ -215,7 +218,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->tt_double2 = 0.0;		/* FS10: data age */
 	store->tt_sensdraught = 0.0;		/* sens/inst draft */
 	store->tt_draught = 0.0;		/* system draft (m) */
-	for (i=0;i<MBSYS_SURF_MAXBEAMS;i++)
+	for (i=0;i<MBSYS_ATLAS_MAXBEAMS;i++)
 	    {
 	    store->tt_lruntime[i] = 0.0;	/* array of beam traveltimes with   */
 						/* each entry related to the beam   */
@@ -240,7 +243,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->pr_navlon = 0.0;			/* longitude (degrees) */
 	store->pr_navlat = 0.0;			/* latitude (degrees) */
 	store->pr_speed = 0.0;			/* speed made good (m/s) */
-	for (i=0;i<MBSYS_SURF_MAXBEAMS;i++)
+	for (i=0;i<MBSYS_ATLAS_MAXBEAMS;i++)
 	    {
 	    store->pr_bath[i] = 0.0;			/* bathymetry (m) */
 	    store->pr_bathacrosstrack[i] = 0.0;		/* acrosstrack distance (m) */
@@ -255,7 +258,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->ss_timespacing = 0.0;		/* time spacing between sidescan values (s) */
 	store->ss_max_side_bb_cnt = 0;	/* total number of values to port */
 	store->ss_max_side_sb_cnt = 0;	/* total number of values to starboard */
-	for (i=0;i<MBSYS_SURF_MAXPIXELS;i++)
+	for (i=0;i<MBSYS_ATLAS_MAXPIXELS;i++)
 	    store->ss_sidescan[i] = 0;
 
 	/* tracking windows telegram */
@@ -265,7 +268,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->tr_no_of_win_groups = 0;	/* number of window groups  */
 						/* DS2 & MD => 8	    */
 						/* Fansweep => 20	    */
-	for (i=0;i<MBSYS_SURF_MAXWINDOWS;i++)
+	for (i=0;i<MBSYS_ATLAS_MAXWINDOWS;i++)
 	    {
 	    store->tr_repeat_count[i] = 0;	/* this window repeats n times  */
 						/* DS2 => 6,8,8,8,8,8,8,5	    */
@@ -282,13 +285,13 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 					/* MD: -185.0 dB relative to 1 V/uPa */
 	store->bs_rxGain = 0.0;		/* scale : dB */
 	store->bs_ar = 0.0;		/* scale : dB/m */
-	for (i=0;i<MBSYS_SURF_HSDS2_RX_PAR;i++)
+	for (i=0;i<MBSYS_ATLAS_HSDS2_RX_PAR;i++)
 	    {
 	    store->bs_TvgRx_time[i] = 0.0;	/* two way time (s) */
 	    store->bs_TvgRx_gain[i] = 0.0;	/* receiver gain (dB) */
 	    }
 	store->bs_nrTxSets = 0;			/* number of transmit sets (1, 3, 5) */
-	for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
+	for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 	    {
 	    store->bs_txBeamIndex[i] = 0;	/* code of external beamshape table */
 	    store->bs_txLevel[i] = 0.0;		/* transmit level: dB relative to 1 uPa */
@@ -296,7 +299,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->bs_pulseLength[i] = 0.0;	/* transmit pulse length (s) */
 	    }
 	store->bs_nrBsSets = 0;			/* number of backscatter sets */
-	for (i=0;i<MBSYS_SURF_HSDS2_PFB_NUM;i++)
+	for (i=0;i<MBSYS_ATLAS_HSDS2_PFB_NUM;i++)
 	    {
 	    store->bs_m_tau[i] = 0.0;		/* echo duration (s) */
 	    store->bs_eff_ampli[i] = 0;		/* effective amplitude */
@@ -304,7 +307,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    }
 	    
 	/* comment */
-	for (i=0;i<MBSYS_SURF_COMMENT_LENGTH;i++)
+	for (i=0;i<MBSYS_ATLAS_COMMENT_LENGTH;i++)
 	    {
 	    store->comment[i] = '\0';
 	    }
@@ -325,13 +328,13 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
-	char	*function_name = "mbsys_surf_deall";
+	char	*function_name = "mbsys_atlas_deall";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -345,7 +348,7 @@ int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		}
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) *store_ptr;
+	store = (struct mbsys_atlas_struct *) *store_ptr;
 
 	/* deallocate memory for data structure */
 	status = mb_free(verbose,store_ptr,error);
@@ -365,7 +368,7 @@ int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
@@ -375,10 +378,10 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-	char	*function_name = "mbsys_surf_extract";
+	char	*function_name = "mbsys_atlas_extract";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	double	pixel_size;
 	double	range, tt, ttmin, ssdepth;
 	int	i, j;
@@ -398,7 +401,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -447,7 +450,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* read distance and depth values into storage arrays */
 		*nbath = store->tt_beam_cnt;
-		for (i=0;i<MBSYS_SURF_MAXBEAMS;i++)
+		for (i=0;i<MBSYS_ATLAS_MAXBEAMS;i++)
 			{
 			bath[i] = 0.0;
 			beamflag[i] = MB_FLAG_NULL;
@@ -563,7 +566,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* copy comment */
 		strncpy(comment,store->comment,
-			MBSYS_SURF_COMMENT_LENGTH);
+			MBSYS_ATLAS_COMMENT_LENGTH);
 
 		/* print debug statements */
 		if (verbose >= 4)
@@ -639,7 +642,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
@@ -649,10 +652,10 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-	char	*function_name = "mbsys_surf_insert";
+	char	*function_name = "mbsys_atlas_insert";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	double	xtrackmin;
 	int	centerpixel;
 	int	i, j;
@@ -709,7 +712,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -777,7 +780,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	else if (store->kind == MB_DATA_COMMENT)
 		{
 		strncpy(store->comment,comment,
-			MBSYS_SURF_COMMENT_LENGTH);
+			MBSYS_ATLAS_COMMENT_LENGTH);
 		}
 
 	/* print output debug statements */
@@ -795,17 +798,17 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
 	double *ttimes, double *angles, 
 	double *angles_forward, double *angles_null,
 	double *heave, double *alongtrack_offset, 
 	double *draft, double *ssv, int *error)
 {
-	char	*function_name = "mbsys_surf_ttimes";
+	char	*function_name = "mbsys_atlas_ttimes";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	double	heave_use;
 	double	*angle_table;
 	int	i, j;
@@ -831,7 +834,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -935,14 +938,109 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nbeams,
+	int *detects, int *error)
+{
+	char	*function_name = "mbsys_atlas_detects";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_atlas_struct *store;
+	int	detect;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       detects:    %d\n",detects);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_atlas_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get sonar type */
+		if (store->start_opmode[14] <= 1)
+			detect = MB_DETECT_PHASE;
+		else
+			detect = MB_DETECT_AMPLITUDE;
+			
+		/* get travel times */
+		*nbeams = store->tt_beam_cnt;
+		for (i=0;i<store->tt_beam_cnt;i++)
+			{
+			detects[i] = detect;
+			}
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
+		for (i=0;i<*nbeams;i++)
+			fprintf(stderr,"dbg2       beam %d: detects:%d\n",
+				i,detects[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_surf_extract_altitude";
+	char	*function_name = "mbsys_atlas_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	double	bath_best;
 	double	xtrack_min;
 	int	found;
@@ -963,7 +1061,7 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1047,17 +1145,17 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft, 
 		double *roll, double *pitch, double *heave, 
 		int *error)
 {
-	char	*function_name = "mbsys_surf_extract_nav";
+	char	*function_name = "mbsys_atlas_extract_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	int	i, j;
 
 	/* print input debug statements */
@@ -1075,7 +1173,7 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1229,17 +1327,17 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading, double draft, 
 		double roll, double pitch, double heave,
 		int *error)
 {
-	char	*function_name = "mbsys_surf_insert_nav";
+	char	*function_name = "mbsys_atlas_insert_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	int	kind;
 	int	i, j;
 
@@ -1274,7 +1372,7 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -1316,15 +1414,15 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_copy(int verbose, void *mbio_ptr, 
+int mbsys_atlas_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
-	char	*function_name = "mbsys_surf_copy";
+	char	*function_name = "mbsys_atlas_copy";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
-	struct mbsys_surf_struct *copy;
+	struct mbsys_atlas_struct *store;
+	struct mbsys_atlas_struct *copy;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1342,8 +1440,8 @@ int mbsys_surf_copy(int verbose, void *mbio_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_surf_struct *) store_ptr;
-	copy = (struct mbsys_surf_struct *) copy_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
+	copy = (struct mbsys_atlas_struct *) copy_ptr;
 
 	/* copy the main structure */
 	*copy = *store;
@@ -1363,14 +1461,14 @@ int mbsys_surf_copy(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_ttcorr(int verbose, void *mbio_ptr, 
+int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, 
 			void *store_ptr,
 			int *error)
 {
-	char	*function_name = "mbsys_surf_ttcorr";
+	char	*function_name = "mbsys_atlas_ttcorr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	int	i;
 
 	/* print input debug statements */
@@ -1388,7 +1486,7 @@ int mbsys_surf_ttcorr(int verbose, void *mbio_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* check for correct kind of data - hsd2 */
 	if (store->start_opmode[14] == 6

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.9 2002-05-02 04:00:41 caress Exp $
+#	$Id: Makefile.template,v 5.10 2002-07-20 20:45:35 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.9  2002/05/02 04:00:41  caress
+# Release 5.0.beta17
+#
 # Revision 5.8  2002/02/22 09:03:43  caress
 # Release 5.0.beta13
 #
@@ -147,8 +150,10 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbsys_gsf.h $(INCDIR)/mbsys_mstiff.h \
 	$(INCDIR)/mbsys_oic.h $(INCDIR)/mbsys_hdcs.h \
 	$(INCDIR)/mbsys_singlebeam.h $(INCDIR)/mbsys_xse.h \
-	$(INCDIR)/mbsys_hs10.h $(INCDIR)/mbsys_surf.h \
-	$(INCDIR)/mbsys_reson8k.h $(INCDIR)/mbsys_netcdf.h \
+	$(INCDIR)/mbsys_hs10.h \
+	$(INCDIR)/mbsys_atlas.h $(INCDIR)/mbsys_surf.h \
+	$(INCDIR)/mbsys_reson8k.h \
+	$(INCDIR)/mbsys_netcdf.h $(INCDIR)/mbsys_navnetcdf.h \
 	$(INCDIR)/mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiocen.h \
 	$(INCDIR)/mbf_sbsiolsi.h $(INCDIR)/mbf_sburicen.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
@@ -183,7 +188,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
 		mb_mem.o \
 		mb_coor_scale.o mb_check_info.o \
-		mb_time.o mb_angle.o \
+		mb_time.o mb_angle.o mb_proj.o \
 		mb_get_value.o mb_defaults.o \
 		mb_process.o \
 		mb_get.o mb_get_all.o mb_read.o \
@@ -201,8 +206,10 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_gsf.o mbsys_mstiff.o \
 		mbsys_oic.o mbsys_hdcs.o \
 		mbsys_singlebeam.o mbsys_xse.o \
-		mbsys_hs10.o mbsys_surf.o \
-		mbsys_reson8k.o mbsys_netcdf.o \
+		mbsys_hs10.o \
+		mbsys_atlas.o mbsys_surf.o \
+		mbsys_reson8k.o \
+		mbsys_netcdf.o mbsys_navnetcdf.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -226,18 +233,20 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_dsl120pf.o mbr_dsl120sf.o \
 		mbr_gsfgenmb.o mbr_mstiffss.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
-		mbr_omghdcsj.o \
-		mbr_mgd77dat.o mbr_mbarirov.o \
+		mbr_omghdcsj.o mbr_mgd77dat.o \
+		mbr_asciixyz.o mbr_mbarirov.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
 		mbr_hsds2raw.o mbr_hsds2lam.o \
- 		mbr_xtfr8101.o mbr_mbnetcdf.o
+ 		mbr_xtfr8101.o \
+		mbr_mbnetcdf.o mbr_nvnetcdf.o \
+		mbr_samesurf.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
 		mb_mem.o \
 		mb_coor_scale.o mb_check_info.o\
-		mb_time.o mb_angle.o \
+		mb_time.o mb_angle.o mb_proj.o \
 		mb_get_value.o mb_defaults.o \
 		mb_process.o \
 		mb_get.o mb_get_all.o mb_read.o \
@@ -255,8 +264,10 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_gsf.o mbsys_mstiff.o \
 		mbsys_oic.o mbsys_hdcs.o \
 		mbsys_singlebeam.o mbsys_xse.o \
-		mbsys_hs10.o mbsys_surf.o \
-		mbsys_reson8k.o mbsys_netcdf.o \
+		mbsys_hs10.o \
+		mbsys_atlas.o mbsys_surf.o \
+		mbsys_reson8k.o \
+		mbsys_netcdf.o mbsys_navnetcdf.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -280,11 +291,13 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_dsl120pf.o mbr_dsl120sf.o \
 		mbr_gsfgenmb.o mbr_mstiffss.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
-		mbr_omghdcsj.o \
-		mbr_mgd77dat.o mbr_mbarirov.o \
+		mbr_omghdcsj.o mbr_mgd77dat.o \
+		mbr_asciixyz.o mbr_mbarirov.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
 		mbr_hsds2raw.o mbr_hsds2lam.o \
- 		mbr_xtfr8101.o mbr_mbnetcdf.o
+ 		mbr_xtfr8101.o \
+		mbr_mbnetcdf.o mbr_nvnetcdf.o \
+		mbr_samesurf.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -314,6 +327,8 @@ mb_time.o:	mb_time.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_time.c
 mb_angle.o:	mb_angle.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_angle.c
+mb_proj.o:	mb_proj.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/proj_api.h
+	$(CC) -c $(CFLAGS) mb_proj.c
 mb_get_value.o:	mb_get_value.c $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_get_value.c
 mb_defaults.o:	mb_defaults.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -380,12 +395,16 @@ mbsys_xse.o:	mbsys_xse.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/m
 	$(CC) -c $(CFLAGS) mbsys_xse.c
 mbsys_hs10.o:	mbsys_hs10.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hs10.h
 	$(CC) -c $(CFLAGS) mbsys_hs10.c
+mbsys_atlas.o:	mbsys_atlas.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_atlas.h
+	$(CC) -c $(CFLAGS) mbsys_atlas.c
 mbsys_surf.o:	mbsys_surf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_surf.h
 	$(CC) -c $(CFLAGS) mbsys_surf.c
 mbsys_reson8k.o:	mbsys_reson8k.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson8k.h
 	$(CC) -c $(CFLAGS) mbsys_reson8k.c
 mbsys_netcdf.o:	mbsys_netcdf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_netcdf.h
 	$(CC) -c $(CFLAGS) mbsys_netcdf.c
+mbsys_navnetcdf.o:	mbsys_navnetcdf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_navnetcdf.h
+	$(CC) -c $(CFLAGS) mbsys_navnetcdf.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -472,20 +491,26 @@ mbr_omghdcsj.o: mbr_omghdcsj.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_omghdcsj.c
 mbr_mgd77dat.o: mbr_mgd77dat.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mgd77dat.h $(INCDIR)/mbsys_singlebeam.h
 	$(CC) -c $(CFLAGS) mbr_mgd77dat.c
+mbr_asciixyz.o: mbr_asciixyz.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_singlebeam.h
+	$(CC) -c $(CFLAGS) mbr_asciixyz.c
 mbr_mbarirov.o: mbr_mbarirov.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbarirov.h $(INCDIR)/mbsys_singlebeam.h
 	$(CC) -c $(CFLAGS) mbr_mbarirov.c
 mbr_mbpronav.o: mbr_mbpronav.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbpronav.h $(INCDIR)/mbsys_singlebeam.h
 	$(CC) -c $(CFLAGS) mbr_mbpronav.c
 mbr_hs10jams.o: mbr_hs10jams.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_hs10.h
 	$(CC) -c $(CFLAGS) mbr_hs10jams.c
-mbr_hsds2raw.o: mbr_hsds2raw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_surf.h
+mbr_hsds2raw.o: mbr_hsds2raw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_atlas.h
 	$(CC) -c $(CFLAGS) mbr_hsds2raw.c
-mbr_hsds2lam.o: mbr_hsds2lam.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_surf.h
+mbr_hsds2lam.o: mbr_hsds2lam.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_atlas.h
 	$(CC) -c $(CFLAGS) mbr_hsds2lam.c
 mbr_xtfr8101.o: mbr_xtfr8101.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_xtfr8101.h $(INCDIR)/mbsys_reson.h
 	$(CC) -c $(CFLAGS) mbr_xtfr8101.c
 mbr_mbnetcdf.o: mbr_mbnetcdf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_netcdf.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_mbnetcdf.c
+mbr_nvnetcdf.o: mbr_nvnetcdf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_navnetcdf.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_nvnetcdf.c
+mbr_samesurf.o: mbr_samesurf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_surf.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_samesurf.c
 
 ### copy the man page to the man page directory
 $(MANDIR)/mbio.l:	mbio.manl
@@ -580,6 +605,12 @@ $(INCDIR)/mbsys_reson8k.h:	mbsys_reson8k.h
 $(INCDIR)/mbsys_netcdf.h:	mbsys_netcdf.h
 	cp mbsys_netcdf.h $(INCDIR)/mbsys_netcdf.h
 	chmod 664 $(INCDIR)/mbsys_netcdf.h
+$(INCDIR)/mbsys_navnetcdf.h:	mbsys_navnetcdf.h
+	cp mbsys_navnetcdf.h $(INCDIR)/mbsys_navnetcdf.h
+	chmod 664 $(INCDIR)/mbsys_navnetcdf.h
+$(INCDIR)/mbsys_atlas.h:	mbsys_atlas.h
+	cp mbsys_atlas.h $(INCDIR)/mbsys_atlas.h
+	chmod 664 $(INCDIR)/mbsys_atlas.h
 $(INCDIR)/mbsys_surf.h:	mbsys_surf.h
 	cp mbsys_surf.h $(INCDIR)/mbsys_surf.h
 	chmod 664 $(INCDIR)/mbsys_surf.h

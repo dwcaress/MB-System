@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.c	4/11/2002
- *	$Id: mbsys_netcdf.c,v 5.1 2002-05-29 23:40:48 caress Exp $
+ *	$Id: mbsys_netcdf.c,v 5.2 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	April 11, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/05/29 23:40:48  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.0  2002/05/02 03:56:34  caress
  * Release 5.0.beta17
  *
@@ -41,7 +44,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_netcdf.h"
 
-static char res_id[]="$Id: mbsys_netcdf.c,v 5.1 2002-05-29 23:40:48 caress Exp $";
+static char res_id[]="$Id: mbsys_netcdf.c,v 5.2 2002-07-20 20:42:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1798,7 +1801,7 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get transducer depth */
-		if (store->mbDynamicDraught > 0)
+		if (store->mbDynamicDraught[0] > 0)
 		    {
 		    *transducer_depth = store->mbDynamicDraught[0] * store->mbDynamicDraught_scale_factor;
 		    }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.11 2002-04-06 02:43:39 caress Exp $
+ *    $Id: mb_process.h,v 5.12 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -346,16 +346,16 @@
  *   METADRAFT constant             # sets mbinfo metadata constant for vessel draft (m)
  *
  * PROCESSING KLUGES:
- *   KLUGE001                       # processing kluge 001 (not yet defined)
+ *   KLUGE001                       # processing kluge 001
  *                                  # - Apply corrections to travel time data in Hydrosweep DS2
  *                                  #   data collected on the R/V Maurice Ewing in 2001/2002
- *   KLUGE002                       # processing kluge 002 (not yet defined)
- *                                  # - occasionaly odd processing problems will occur that
- *                                  #   are specific to a particular survey or sonar version
- *                                  # - mbprocess will allow one-time fixes to be defined
- *                                  #   as "kluges" that can be turned on throught the parameter
- *                                  #   files.
+ *   KLUGE002                       # processing kluge 002
+ *                                  # - Apply corrections to travel time data in Hydrosweep DS2
+ *                                  #   data collected on the R/V Maurice Ewing in 2001/2002
  *   KLUGE003                       # processing kluge 003 (not yet defined)
+ *                                  # - Add heave obtained from mb_extract_nav() to draft.
+ *                                  # - Fixes Simrad EM1002 data where draft value does not
+ *				    #   include heave. 
  *   KLUGE004                       # processing kluge 004 (not yet defined)
  *   KLUGE005                       # processing kluge 005 (not yet defined)
  *
@@ -379,6 +379,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.10  2001/12/18 04:27:45  caress
  * Release 5.0.beta11.
  *

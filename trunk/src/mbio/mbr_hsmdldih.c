@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.5 2001-08-10 22:41:19 dcaress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.6 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/08/10 22:41:19  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.4  2001-07-19 17:32:54-07  caress
  * Release 5.0.beta03
  *
@@ -132,7 +135,7 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.5 2001-08-10 22:41:19 dcaress Exp $";
+	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.6 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbr_register_hsmdldih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -262,7 +265,7 @@ int mbr_info_hsmdldih(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.5 2001-08-10 22:41:19 dcaress Exp $";
+	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.6 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbr_info_hsmdldih";
 	int	status = MB_SUCCESS;
 
@@ -331,7 +334,7 @@ int mbr_info_hsmdldih(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.5 2001-08-10 22:41:19 dcaress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.6 2002-07-20 20:42:40 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdldih";
 	int	 status = MB_SUCCESS;
 	int	 i;
@@ -727,7 +730,9 @@ int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->evtext[i] = data->evtext[i];
 
 		store->num_vel = data->num_vel;
-		for (i=0;i<data->num_vel;i++)
+		if (store->num_vel > MBF_HSMDLDIH_MAXVEL)
+		    store->num_vel = 0;
+		for (i=0;i<store->num_vel;i++)
 			{
 			store->vdepth[i] = data->vdepth[i];
 			store->velocity[i] = data->velocity[i];
@@ -860,7 +865,9 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->evtext[i] = store->evtext[i];
 
 		data->num_vel = store->num_vel;
-		for (i=0;i<store->num_vel;i++)
+		if (data->num_vel > MBF_HSMDLDIH_MAXVEL)
+		    data->num_vel = 0;
+		for (i=0;i<data->num_vel;i++)
 			{
 			data->vdepth[i] = store->vdepth[i];
 			data->velocity[i] = store->velocity[i];
@@ -1639,7 +1646,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 				*Svp_count++;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 				
-				data->num_vel = 20;
+				data->num_vel = MBF_HSMDLDIH_MAXVEL;
 				for (i=0;i<data->num_vel;i++)
 					{
 					status = xdr_double(xdrs, &data->vdepth[i]);
@@ -2082,7 +2089,7 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			case (MBF_HSMDLDIH_SVP): /* 5, Sound Velocity Profile */
 	    			{
 				
-				data->num_vel = 20;
+				data->num_vel = MBF_HSMDLDIH_MAXVEL;
 				for (i=0;i<data->num_vel;i++)
 					{
 					status = xdr_double(xdrs, &data->vdepth[i]);

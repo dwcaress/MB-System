@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.6 2001-11-16 01:25:20 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.7 2002-07-20 20:45:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/11/16 01:25:20  caress
+ * Added info mode.
+ *
  * Revision 5.5  2001/09/17  17:00:48  caress
  * Added local median filter, angle filter, time display toggle.
  *
@@ -203,6 +206,7 @@ int	mplot_width;
 int	mx_interval;
 int	my_interval;
 int	mode_pick = MODE_TOGGLE;
+int	mshow_detects = MB_NO;
 int	mshow_flagged = MB_NO;
 int	mshow_time = MB_YES;
 int	mode_output = OUTPUT_MODE_EDIT;
@@ -553,7 +557,7 @@ int do_setup_data()
 
 	/* get some default values from mbedit */
 	status = mbedit_get_defaults(&plot_size_max,
-			&mplot_size,&mshow_flagged,&mshow_time,
+			&mplot_size,&mshow_detects,&mshow_flagged,&mshow_time,
 			&buffer_size_max,&buffer_size,
 			&hold_size,&mformat,
 			&mplot_width,&mexager,
@@ -789,7 +793,7 @@ do_file_selection_cancel( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time,
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time,
 	    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -804,7 +808,7 @@ do_expose( Widget w, XtPointer client_data, XtPointer call_data)
     if (expose_plot_ok == True)
 	    status = mbedit_action_plot(mplot_width, mexager,
 		    mx_interval, my_interval, 
-		    mplot_size, mshow_flagged, mshow_time, 
+		    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 		    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -924,7 +928,7 @@ do_scale_y( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 	
@@ -997,7 +1001,7 @@ do_scale_x( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 	
@@ -1096,7 +1100,7 @@ do_x_interval( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 }
@@ -1137,7 +1141,7 @@ do_y_interval( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 }
@@ -1165,7 +1169,7 @@ do_load(int save_mode)
 		    save_mode, 
 		    mode_output,
 		    mplot_width, mexager, mx_interval,
-		    my_interval, mplot_size, mshow_flagged, mshow_time, 
+		    my_interval, mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 		    &buffer_size, &buffer_size_max, 
 		    &hold_size,
 		    &ndumped, &nloaded, &nbuffer,
@@ -1175,7 +1179,7 @@ do_load(int save_mode)
     /* display data from chosen file */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 
@@ -1332,7 +1336,7 @@ do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 
     status = mbedit_action_step(step,mplot_width,mexager,mx_interval,
 				my_interval,mplot_size,
-				mshow_flagged,mshow_time,
+				mshow_detects, mshow_flagged,mshow_time,
 				&nbuffer,&ngood,&icurrent,&mnplot);
     if (status == 0) XBell(theDisplay,100);
 
@@ -1379,7 +1383,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    startup_file = 0;
 	    status = mbedit_action_plot(mplot_width, mexager,
 		    mx_interval, my_interval, 
-		    mplot_size, mshow_flagged, mshow_time, 
+		    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 		    &nbuffer, &ngood, &icurrent, &mnplot);
 	    if (status == 0) XBell(theDisplay,100);
 	    } /* end startup file */
@@ -1404,7 +1408,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_bad_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    key_z_down = 1;
 		    key_s_down = 0;
@@ -1418,7 +1422,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_good_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    key_z_down = 0;
 		    key_s_down = 1;
@@ -1432,7 +1436,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_left_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    key_z_down = 0;
 		    key_s_down = 0;
@@ -1446,7 +1450,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_right_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    key_z_down = 0;
 		    key_s_down = 0;
@@ -1457,7 +1461,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_zero_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    break;
 	    case 'U':
@@ -1555,6 +1559,24 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    XDefineCursor(theDisplay,can_xid,myCursor);
 			    }
 		    break;
+	    case '1':
+			    {
+			    mshow_detects = MB_NO;
+	    		    status = mbedit_action_plot(mplot_width, mexager,
+		    		mx_interval, my_interval, 
+		    		mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+		    		&nbuffer, &ngood, &icurrent, &mnplot);
+			    }
+		    break;
+	    case '2':
+			    {
+			    mshow_detects = MB_YES;
+	    		    status = mbedit_action_plot(mplot_width, mexager,
+		    		mx_interval, my_interval, 
+		    		mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+		    		&nbuffer, &ngood, &icurrent, &mnplot);
+			    }
+		    break;
 	    default:
 		    break;
 	  } /* end of key switch */
@@ -1619,35 +1641,35 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if(mode_pick == MODE_PICK)
 		    status = mbedit_action_mouse_pick(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_ERASE) 
 		    status = mbedit_action_mouse_erase(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_RESTORE) 
 		    status = mbedit_action_mouse_restore(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_INFO) 
 		    status = mbedit_action_mouse_info(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		if (status == 0) 
 			XBell(theDisplay,100);
@@ -1656,7 +1678,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_bad_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    }
 		else if (key_s_down)
@@ -1664,7 +1686,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_good_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    }
 		else if (key_a_down)
@@ -1672,7 +1694,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_left_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    }
 		else if (key_d_down)
@@ -1680,7 +1702,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_right_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,mshow_time,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    }
 
@@ -1708,7 +1730,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    {
 		    status = mbedit_action_step(-step,mplot_width,mexager,
 				    mx_interval,my_interval,
-				    mplot_size,mshow_flagged,mshow_time,
+				    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 				    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == 0) XBell(theDisplay,100);
 	    } /* end of middle button events */
@@ -1718,7 +1740,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    {
 		    status = mbedit_action_step(step,mplot_width,mexager,
 				    mx_interval,my_interval,
-				    mplot_size,mshow_flagged,mshow_time,
+				    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 				    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == 0) XBell(theDisplay,100);
 	    } /* end of right button events */	
@@ -1736,7 +1758,7 @@ do_unflag_view( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_unflag_view(
 	    mplot_width,mexager,
 	    mx_interval,my_interval,
-	    mplot_size,mshow_flagged,mshow_time,
+	    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 	    &nbuffer,&ngood,&icurrent,&mnplot);
 }
 
@@ -1750,7 +1772,7 @@ do_unflag_all( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_unflag_all(
 	    mplot_width,mexager,
 	    mx_interval,my_interval,
-	    mplot_size,mshow_flagged,mshow_time,
+	    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 	    &nbuffer,&ngood,&icurrent,&mnplot);
 }
 
@@ -1770,7 +1792,7 @@ do_next_buffer( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_next_buffer(hold_size,buffer_size,
 		    mplot_width,mexager,
 		    mx_interval,my_interval,
-		    mplot_size,mshow_flagged,mshow_time,
+		    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 		    &ndumped,&nloaded,&nbuffer,
 		    &ngood,&icurrent,&mnplot,&quit);
     if (status == 0) XBell(theDisplay,100);
@@ -1833,7 +1855,7 @@ do_show_flagged( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -1852,7 +1874,7 @@ do_show_time( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -1908,7 +1930,7 @@ do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
     status = mbedit_action_step(-step,mplot_width,mexager,
-	    mx_interval,my_interval,mplot_size,mshow_flagged,&nbuffer,
+	    mx_interval,my_interval,mplot_size,mshow_detects, mshow_flagged,&nbuffer,
 	    &ngood,&icurrent,&mnplot);
     if (status == 0) XBell(theDisplay,100);
 
@@ -1953,7 +1975,7 @@ do_number_pings( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 }
@@ -1993,7 +2015,7 @@ do_goto_apply( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_goto(ttime_i,hold_size,buffer_size,
 		    mplot_width,mexager,
 		    mx_interval,my_interval,
-		    mplot_size,mshow_flagged,mshow_time,
+		    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 		    &ndumped,&nloaded,&nbuffer,
 		    &ngood,&icurrent,&mnplot);
     if (status == 0) XBell(theDisplay,100);
@@ -2075,7 +2097,7 @@ do_set_filters( Widget w, XtPointer client_data, XtPointer call_data)
     	status = mbedit_action_filter_all(
 	     	mplot_width,mexager,
 	    	mx_interval,my_interval,
-	    	mplot_size,mshow_flagged,mshow_time,
+	    	mplot_size,mshow_detects, mshow_flagged,mshow_time,
 	    	&nbuffer,&ngood,&icurrent,&mnplot);
 }
 

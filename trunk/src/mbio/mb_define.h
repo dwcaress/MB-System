@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.17 2002-05-29 23:40:48 caress Exp $
+ *    $Id: mb_define.h,v 5.18 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2002/05/29 23:40:48  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.16  2002/05/02 04:00:41  caress
  * Release 5.0.beta17
  *
@@ -107,7 +110,7 @@
 #define MB_DESCRIPTION_LENGTH	2048
 
 /* maximum number of asynchronous data saved */
-#define MB_ASYNCH_SAVE_MAX 40
+#define MB_ASYNCH_SAVE_MAX 500
 
 /* maximum size of SVP profiles */
 #define MB_SVP_MAX 1024
@@ -121,6 +124,7 @@
 #define	MB_FILETYPE_XDR		2
 #define	MB_FILETYPE_GSF		3
 #define	MB_FILETYPE_NETCDF	4
+#define MB_FILETYPE_SURF	5
 
 /* settings for recursive datalist reading functions */
 #define MB_DATALIST_LOOK_UNSET		0

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.9 2002-05-29 23:40:48 caress Exp $
+ *    $Id: mb_format.h,v 5.10 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/05/29 23:40:48  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.8  2002/05/02 04:00:41  caress
  * Release 5.0.beta17
  *
@@ -190,7 +193,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2002-05-29 23:40:48 $ $Revision: 5.9 $";
+static char mb_format_updatedate[] = "$Date: 2002-07-20 20:42:40 $ $Revision: 5.10 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -216,8 +219,9 @@ static char mb_format_updatedate[] = "$Date: 2002-05-29 23:40:48 $ $Revision: 5.
 #define MB_SYS_XSE		20
 #define MB_SYS_HS10		21
 #define	MB_SYS_NETCDF		22
-#define	MB_SYS_SURF		23
+#define	MB_SYS_ATLAS		23
 #define	MB_SYS_NAVNETCDF	24
+#define	MB_SYS_SURF		25
 
 /* Number of supported MBIO data formats */
 #define	MB_FORMATS	52
@@ -389,7 +393,7 @@ static char mb_format_updatedate[] = "$Date: 2002-05-29 23:40:48 $ $Revision: 5.
 #define MBF_NVNETCDF    167     /* CARAIBES CDF navigation, netCDF, IFREMER */ 
 #define MBF_HS10JAMS    171     /* Furuno HS10 multibeam format, 45 beams, 
 					bathymetry and amplitude, ascii, JAMSTEC */ 
-#define MBF_ATLSSURF    181     /* STN Atlas processing multibeam format, 
+#define MBF_SAMESURF    181     /* STN Atlas processing multibeam format, 
 					Hydrosweep DS2, Hydrosweep MD, 
 					Fansweep 10, Fansweep 20, 
 					bathymetry, amplitude, and sidescan,

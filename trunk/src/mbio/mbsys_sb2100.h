@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 5.3 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -260,6 +263,8 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
+int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

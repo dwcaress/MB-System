@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.24 2002-05-31 20:00:24 caress Exp $
+ *    $Id: mb_status.h,v 5.25 2002-07-20 20:42:40 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2002/05/31 20:00:24  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.23  2002/05/29 23:40:48  caress
  * Release 5.0.beta18
  *
@@ -183,8 +186,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.0.beta18"
-#define	MB_BUILD_DATE	"May 31, 2002"
+#define	MB_VERSION	"5.0.beta20"
+#define	MB_BUILD_DATE	"July 20, 2002"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
@@ -231,7 +234,7 @@
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-15
+#define	MB_ERROR_MIN			-16
 #define	MB_ERROR_MAX			15
 
 /* MBIO function fatal error values */
@@ -268,6 +271,7 @@
 #define	MB_ERROR_NO_DATA_DUMPED		-13
 #define	MB_ERROR_NO_MORE_DATA		-14
 #define	MB_ERROR_DATA_NOT_INSERTED	-15
+#define	MB_ERROR_BAD_PROJECTION		-16
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
@@ -315,7 +319,8 @@ static char *nonfatal_error_msg[] =
 	"Data buffer is empty",
 	"No data was dumped from the buffer",
 	"No more survey data records in buffer", 
-	"Data inconsistencies prevented inserting data into storage structure"
+	"Data inconsistencies prevented inserting data into storage structure",
+	"UTM projection initialization failed"
 	};
 static char *unknown_error_msg[] =
 	{
@@ -491,6 +496,16 @@ static char *unknown_notice_msg[] =
 #define mb_beam_set_select_contact(F)		(F | 0x22)
 #define mb_beam_set_select_spare_1(F)		(F | 0x42)
 #define mb_beam_set_select_spare_2(F)		(F | 0x82)
+
+/* Bottom detect flags */
+#define MB_DETECT_UNKNOWN	0
+#define MB_DETECT_AMPLITUDE	1
+#define MB_DETECT_PHASE		2
+static char *detect_name[] = 
+	{	"Unknown",
+		"Amplitude",
+		"Phase"
+	};
 
 /* end conditional include */
 #endif

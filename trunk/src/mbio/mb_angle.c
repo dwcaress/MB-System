@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.1 2002-04-06 02:43:39 caress Exp $
+ *    $Id: mb_angle.c,v 5.2 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -159,7 +159,7 @@
  * All angle values passed by MB-System functions are in
  * degrees rather than radians.
  * 
- * The programs mbbath and mbvelocitytool use angles in
+ * The programs mbprocess and mbvelocitytool use angles in
  * take-off angle coordinates to do the raytracing. If roll
  * and/or pitch corrections are to be made, the angles are
  * converted to roll-pitch coordinates, corrected, and then
@@ -175,6 +175,9 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.0  2000/12/01 22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -212,7 +215,7 @@ int mb_takeoff_to_rollpitch(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
@@ -238,7 +241,7 @@ int mb_takeoff_to_rollpitch(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       alpha:           %f\n",*alpha);
@@ -265,7 +268,7 @@ int mb_rollpitch_to_takeoff(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
@@ -302,7 +305,7 @@ int mb_rollpitch_to_takeoff(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       theta:           %f\n",*theta);
@@ -329,7 +332,7 @@ int mb_xyz_to_takeoff(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
@@ -368,7 +371,7 @@ int mb_xyz_to_takeoff(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       theta:           %f\n",*theta);

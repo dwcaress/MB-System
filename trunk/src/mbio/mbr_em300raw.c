@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.11 2002-05-29 23:38:53 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.12 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/05/29 23:38:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.10  2001/08/10 22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -187,6 +190,9 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp,
 int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
 		short sonar, int *error);
+int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, 
+		struct mbsys_simrad2_struct *store, 
+		short sonar, int *error);
 int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
 		short sonar, int length, int *match, int *error);
@@ -219,10 +225,12 @@ int mbr_em300raw_wr_bath(int verbose, FILE *mbfp,
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
+int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, 
+		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.11 2002-05-29 23:38:53 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.12 2002-07-20 20:42:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -237,6 +245,7 @@ int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
 
@@ -280,6 +289,7 @@ int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = &mbsys_simrad2_extract_svp; 
 	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad2_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_simrad2_ttimes; 
+	mb_io_ptr->mb_io_detects = &mbsys_simrad2_detects; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad2_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -323,6 +333,7 @@ int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %d\n",mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
@@ -365,6 +376,7 @@ int mbr_info_em300raw(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
 
@@ -437,6 +449,7 @@ int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
@@ -489,6 +502,7 @@ int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
@@ -528,10 +542,10 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_simrad2_tilt_struct *tilt;
 	struct mbsys_simrad2_ping_struct *ping;
 	int	time_i[7];
-	double	ntime_d, ptime_d;
+	double	ntime_d, ptime_d, atime_d;
 	double	bath_time_d, ss_time_d;
 	double	rawspeed, pheading;
-	double	plon, plat, pspeed;
+	double	plon, plat, pspeed, roll, pitch, heave;
 	double	*pixel_size, *swath_width;
 	int	i;
 
@@ -541,6 +555,7 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -584,6 +599,32 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				(double)(0.0000001 * store->pos_longitude), 
 				(double)(0.00000005 * store->pos_latitude), 
 				error);
+		}
+
+	/* save attitude if attitude data */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_ATTITUDE)
+		{
+		/* get attitude time */
+		time_i[0] = attitude->att_date / 10000;
+		time_i[1] = (attitude->att_date % 10000) / 100;
+		time_i[2] = attitude->att_date % 100;
+		time_i[3] = attitude->att_msec / 3600000;
+		time_i[4] = (attitude->att_msec % 3600000) / 60000;
+		time_i[5] = (attitude->att_msec % 60000) / 1000;
+		time_i[6] = (attitude->att_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &atime_d);
+		
+		/* add latest attitude samples */
+		for (i=0;i<attitude->att_ndata;i++)
+			{
+			mb_attint_add(verbose, mbio_ptr,
+				(double)(atime_d + 0.001 * attitude->att_time[i]),
+				(double)(0.01 * attitude->att_heave[i]),
+				(double)(0.01 * attitude->att_roll[i]),
+				(double)(0.01 * attitude->att_pitch[i]),
+				error);
+			}
 		}
 	
 	/* if no sidescan read then zero sidescan data */
@@ -735,6 +776,13 @@ ping->png_bso);*/
 		    }
 		ping->png_speed = (int) rint(pspeed / 0.036);
 
+		/* interpolate from saved attitude */
+		mb_attint_interp(verbose, mbio_ptr, ptime_d,  
+				    &roll, &pitch, &heave, error);
+		ping->png_roll = (int) rint(roll / 0.01);
+		ping->png_pitch = (int) rint(pitch / 0.01);
+		ping->png_heave = (int) rint(heave / 0.01);
+
 		/* generate processed sidescan */
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
@@ -744,6 +792,30 @@ ping->png_bso);*/
 				MB_NO, swath_width, 
 				0, 
 				error);
+		}
+
+	if (status == MB_SUCCESS
+		&& (store->kind == MB_DATA_NAV
+			|| store->kind == MB_DATA_NAV1
+			|| store->kind == MB_DATA_NAV2
+			|| store->kind == MB_DATA_NAV3))
+		{
+		/* get nav time */
+		time_i[0] = store->pos_date / 10000;
+		time_i[1] = (store->pos_date % 10000) / 100;
+		time_i[2] = store->pos_date % 100;
+		time_i[3] = store->pos_msec / 3600000;
+		time_i[4] = (store->pos_msec % 3600000) / 60000;
+		time_i[5] = (store->pos_msec % 60000) / 1000;
+		time_i[6] = (store->pos_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &ntime_d);
+
+		/* interpolate from saved attitude */
+		mb_attint_interp(verbose, mbio_ptr, ntime_d,  
+				    &roll, &pitch, &heave, error);
+		store->pos_roll = (int) rint(roll / 0.01);
+		store->pos_pitch = (int) rint(pitch / 0.01);
+		store->pos_heave = (int) rint(heave / 0.01);
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -778,6 +850,7 @@ int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -843,6 +916,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -882,9 +956,10 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		first_type = EM2_NONE;
 		if (ping != NULL)
 		    {
-		    ping->png_raw_read = MB_NO;
+		    ping->png_raw1_read = MB_NO;
+		    ping->png_raw2_read = MB_NO;
 		    ping->png_ss_read = MB_NO;
-		    ping->png_nrawbeams = 0;
+		    ping->png_raw_nbeams = 0;
 		    ping->png_nbeams_ss = 0;
 		    }
 		}
@@ -1038,6 +1113,7 @@ Have a nice day...\n");
 		if (status == MB_SUCCESS && 
 			(*type == EM2_BATH
 			|| *type == EM2_RAWBEAM
+			|| *type == EM2_RAWBEAM2
 			|| *type == EM2_SS))
 			{
 			if (store->ping == NULL)
@@ -1082,6 +1158,7 @@ Have a nice day...\n");
 			&& *type != EM2_SVP
 			&& *type != EM2_BATH
 			&& *type != EM2_RAWBEAM
+			&& *type != EM2_RAWBEAM2
 			&& *type != EM2_SS)
 			{
 #ifdef MBR_EM300RAW_DEBUG
@@ -1096,7 +1173,7 @@ Have a nice day...\n");
 			    || *type == EM2_ON) 
 			&& expect != EM2_NONE)
 			{
-#ifdef MBR_EM300MBA_DEBUG
+#ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
 #endif
 			done = MB_YES;
@@ -1392,7 +1469,23 @@ Have a nice day...\n");
 			status = mbr_em300raw_rd_rawbeam(
 				verbose,mbfp,store,*sonar,error);
 			if (status == MB_SUCCESS)
-				ping->png_raw_read = MB_YES;
+				ping->png_raw1_read = MB_YES;
+			if (expect == EM2_SS
+				&& ping->png_nbeams == 0)
+				{
+				done = MB_YES;
+				expect = EM2_NONE;
+				}
+			}
+		else if (*type == EM2_RAWBEAM2)
+			{
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr,"call mbr_em300raw_rd_rawbeam2 type %x\n",*type);
+#endif
+			status = mbr_em300raw_rd_rawbeam2(
+				verbose,mbfp,store,*sonar,error);
+			if (status == MB_SUCCESS)
+				ping->png_raw2_read = MB_YES;
 			if (expect == EM2_SS
 				&& ping->png_nbeams == 0)
 				{
@@ -1489,7 +1582,6 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 	struct mb_io_struct *mb_io_ptr;
 	char	startid;
 	short	*sonar_save;
-	int	error;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1497,6 +1589,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       type:       %d\n",type);
@@ -1543,6 +1636,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 		&& type != EM2_SVP2
 		&& type != EM2_BATH
 		&& type != EM2_RAWBEAM
+		&& type != EM2_RAWBEAM2
 		&& type != EM2_SS)
 		{
 		status = MB_FAILURE;
@@ -1626,6 +1720,7 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -2035,6 +2130,7 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -2166,6 +2262,7 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -2257,6 +2354,7 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -2349,6 +2447,7 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -2385,6 +2484,7 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp,
 		store->hgt_type = (mb_u_char) line[16];
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[EM2_HEIGHT_SIZE-9])), 
 		*((int *)&(line[EM2_HEIGHT_SIZE-9])));
 #endif
 		}
@@ -2439,6 +2539,7 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -2580,6 +2681,7 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -2719,6 +2821,7 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -2858,6 +2961,7 @@ int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -3002,7 +3106,6 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp,
 	int	read_len;
 	int	done;
 	int	navchannel;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3010,6 +3113,7 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -3208,6 +3312,7 @@ int mbr_em300raw_rd_svp(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -3349,6 +3454,7 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -3489,6 +3595,7 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -3723,6 +3830,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -3745,29 +3853,29 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &ping->png_date); 
-		    store->date = ping->png_date;
-		mb_get_binary_int(MB_NO, &line[4], &ping->png_msec); 
-		    store->msec = ping->png_msec;
+		mb_get_binary_int(MB_NO, &line[0], &ping->png_raw_date); 
+		    store->date = ping->png_raw_date;
+		mb_get_binary_int(MB_NO, &line[4], &ping->png_raw_msec); 
+		    store->msec = ping->png_raw_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
-		    ping->png_count = (int) ((unsigned short) short_val);
+		    ping->png_raw_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
-		    ping->png_serial = (int) ((unsigned short) short_val);
-		ping->png_nbeams_max = (mb_u_char) line[12];
-		ping->png_nrawbeams = (mb_u_char) line[13];
+		    ping->png_raw_serial = (int) ((unsigned short) short_val);
+		ping->png_raw_nbeams_max = (mb_u_char) line[12];
+		ping->png_raw_nbeams = (mb_u_char) line[13];
 		mb_get_binary_short(MB_NO, &line[14], &short_val); 
-		    ping->png_ssv = (int) ((unsigned short) short_val);
+		    ping->png_raw_ssv = (int) ((unsigned short) short_val);
 		}
 		
 	/* check for some indicators of a broken record 
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
-		if (ping->png_nrawbeams > ping->png_nbeams_max
-			|| ping->png_nrawbeams < 0
-			|| ping->png_nbeams_max < 0
-			|| ping->png_nrawbeams > MBSYS_SIMRAD2_MAXBEAMS
-			|| ping->png_nbeams_max > MBSYS_SIMRAD2_MAXBEAMS)
+		if (ping->png_raw_nbeams > ping->png_nbeams_max
+			|| ping->png_raw_nbeams < 0
+			|| ping->png_raw_nbeams_max < 0
+			|| ping->png_raw_nbeams > MBSYS_SIMRAD2_MAXBEAMS
+			|| ping->png_raw_nbeams_max > MBSYS_SIMRAD2_MAXBEAMS)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
@@ -3777,7 +3885,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 	/* read binary beam values */
 	if (status == MB_SUCCESS)
 	    {
-	    for (i=0;i<ping->png_nrawbeams && status == MB_SUCCESS;i++)
+	    for (i=0;i<ping->png_raw_nbeams && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM2_RAWBEAM_BEAM_SIZE,mbfp);
 		if (read_len == EM2_RAWBEAM_BEAM_SIZE 
@@ -3785,13 +3893,13 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 			{
 			status = MB_SUCCESS;
 			mb_get_binary_short(MB_NO, &line[0], &short_val); 
-			    ping->png_rawpointangle[i] = (int) short_val;
+			    ping->png_raw_rxpointangle[i] = (int) short_val;
 			mb_get_binary_short(MB_NO, &line[2], &short_val); 
-			    ping->png_rawtiltangle[i] = (int) ((unsigned short) short_val);
+			    ping->png_raw_rxtiltangle[i] = (int) short_val;
 			mb_get_binary_short(MB_NO, &line[4], &short_val); 
-			    ping->png_rawrange[i] = (int) ((unsigned short) short_val);
-			ping->png_rawamp[i] = (mb_s_char) line[6];
-			ping->png_rawbeam_num[i] = (mb_u_char) line[7];
+			    ping->png_raw_rxrange[i] = (int) ((unsigned short) short_val);
+			ping->png_raw_rxamp[i] = (mb_s_char) line[6];
+			ping->png_raw_rxbeam_num[i] = (mb_u_char) line[7];
 			}
 		else
 			{
@@ -3824,16 +3932,16 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
-		if (ping->png_nbeams > 0
-		    && ping->png_rawbeam_num[0] > ping->png_nbeams_max)
+		if (ping->png_raw_nbeams > 0
+		    && ping->png_raw_rxbeam_num[0] > ping->png_raw_nbeams_max)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
-		for (i=1;i<ping->png_nrawbeams;i++)
+		for (i=1;i<ping->png_raw_nbeams;i++)
 			{
-			if (ping->png_rawbeam_num[i] < ping->png_rawbeam_num[i-1]
-				|| ping->png_rawbeam_num[i] > ping->png_nbeams_max)
+			if (ping->png_raw_rxbeam_num[i] < ping->png_raw_rxbeam_num[i-1]
+				|| ping->png_raw_rxbeam_num[i] > ping->png_raw_nbeams_max)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
@@ -3850,20 +3958,289 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:            %d\n",store->date);
 		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
-		fprintf(stderr,"dbg5       png_date:        %d\n",ping->png_date);
-		fprintf(stderr,"dbg5       png_msec:        %d\n",ping->png_msec);
-		fprintf(stderr,"dbg5       png_count:       %d\n",ping->png_count);
-		fprintf(stderr,"dbg5       png_serial:      %d\n",ping->png_serial);
-		fprintf(stderr,"dbg5       png_nbeams_max:  %d\n",ping->png_nbeams_max);
-		fprintf(stderr,"dbg5       png_nrawbeams:   %d\n",ping->png_nrawbeams);
-		fprintf(stderr,"dbg5       png_ssv:         %d\n",ping->png_ssv);
+		fprintf(stderr,"dbg5       png_raw_date:        %d\n",ping->png_raw_date);
+		fprintf(stderr,"dbg5       png_raw_msec:        %d\n",ping->png_raw_msec);
+		fprintf(stderr,"dbg5       png_raw_count:       %d\n",ping->png_raw_count);
+		fprintf(stderr,"dbg5       png_raw_serial:      %d\n",ping->png_raw_serial);
+		fprintf(stderr,"dbg5       png_raw_nbeams_max:  %d\n",ping->png_raw_nbeams_max);
+		fprintf(stderr,"dbg5       png_raw_nbeams:      %d\n",ping->png_raw_nbeams);
+		fprintf(stderr,"dbg5       png_raw_ssv:         %d\n",ping->png_raw_ssv);
 		fprintf(stderr,"dbg5       cnt  point   tilt   rng  amp num\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
-		for (i=0;i<ping->png_nrawbeams;i++)
+		for (i=0;i<ping->png_raw_nbeams;i++)
 			fprintf(stderr,"dbg5       %3d %5d %5d %5d %3d %3d\n",
-				i, ping->png_rawpointangle[i], ping->png_rawtiltangle[i], 
-				ping->png_rawrange[i], ping->png_rawamp[i], 
-				ping->png_rawbeam_num[i]);
+				i, ping->png_raw_rxpointangle[i], ping->png_raw_rxtiltangle[i], 
+				ping->png_raw_rxrange[i], ping->png_raw_rxamp[i], 
+				ping->png_raw_rxbeam_num[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, 
+		struct mbsys_simrad2_struct *store, 
+		short sonar, int *error)
+{
+	char	*function_name = "mbr_em300raw_rd_rawbeam2";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_ping_struct *ping;
+	char	line[EM2_BATH_MBA_HEADER_SIZE];
+	short	short_val;
+	int	read_len;
+	int	spare;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		}
+		
+	/* get  storage structure */
+	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+		
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM2_RAWBEAM2_HEADER_SIZE,mbfp);
+	if (read_len == EM2_RAWBEAM2_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_get_binary_int(MB_NO, &line[0], &ping->png_raw_date); 
+		    store->date = ping->png_raw_date;
+		mb_get_binary_int(MB_NO, &line[4], &ping->png_raw_msec); 
+		    store->msec = ping->png_raw_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    ping->png_raw_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    ping->png_raw_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[12], &short_val); 
+		    ping->png_raw_heading = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[14], &short_val); 
+		    ping->png_raw_ssv = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[16], &short_val); 
+		    ping->png_raw_xducer_depth = (int) ((unsigned short) short_val);
+		ping->png_raw_nbeams_max = (mb_u_char) line[18];
+		ping->png_raw_nbeams = (mb_u_char) line[19];
+		ping->png_raw_depth_res = (mb_u_char) line[20];
+		ping->png_raw_distance_res = (mb_u_char) line[21];
+		mb_get_binary_short(MB_NO, &line[22], &short_val); 
+		    ping->png_raw_sample_rate = (int) ((unsigned short) short_val);
+		mb_get_binary_int(MB_NO, &line[24], &ping->png_raw_status); 
+		mb_get_binary_short(MB_NO, &line[28], &short_val); 
+		    ping->png_raw_rangenormal = (int) ((unsigned short) short_val);
+		ping->png_raw_normalbackscatter = (mb_s_char) line[30];
+		ping->png_raw_obliquebackscatter = (mb_s_char) line[31];
+		ping->png_raw_fixedgain = (mb_u_char) line[32];
+		ping->png_raw_txpower = (mb_s_char) line[33];
+		ping->png_raw_mode = (mb_u_char) line[34];
+		ping->png_raw_coverage = (mb_u_char) line[35];
+		mb_get_binary_short(MB_NO, &line[36], &short_val); 
+		    ping->png_raw_yawstabheading = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[38], &short_val); 
+		    ping->png_raw_ntx = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[40], &short_val); 
+		    spare = (int) ((unsigned short) short_val);
+		}
+		
+	/* check for some indicators of a broken record 
+	    - these do happen!!!! */
+	if (status == MB_SUCCESS)
+		{
+		if (ping->png_raw_nbeams > ping->png_raw_nbeams_max
+			|| ping->png_raw_nbeams < 0
+			|| ping->png_raw_nbeams_max < 0
+			|| ping->png_raw_nbeams > MBSYS_SIMRAD2_MAXBEAMS
+			|| ping->png_raw_nbeams_max > MBSYS_SIMRAD2_MAXBEAMS
+			|| ping->png_raw_ntx > MBSYS_SIMRAD2_MAXTX)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		}
+
+	/* read binary tx values */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<ping->png_raw_ntx && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM2_RAWBEAM2_TX_SIZE,mbfp);
+		if (read_len == EM2_RAWBEAM2_TX_SIZE 
+			&& i < MBSYS_SIMRAD2_MAXTX)
+			{
+			status = MB_SUCCESS;
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    ping->png_raw_txlastbeam[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    ping->png_raw_txtiltangle[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[4], &short_val); 
+			    ping->png_raw_txheading[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[6], &short_val); 
+			    ping->png_raw_txroll[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[8], &short_val); 
+			    ping->png_raw_txpitch[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[10], &short_val); 
+			    ping->png_raw_txheave[i] = (int) short_val;
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+	    }
+
+	/* read binary beam values */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<ping->png_raw_nbeams && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM2_RAWBEAM2_BEAM_SIZE,mbfp);
+		if (read_len == EM2_RAWBEAM2_BEAM_SIZE 
+			&& i < MBSYS_SIMRAD2_MAXBEAMS)
+			{
+			status = MB_SUCCESS;
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    ping->png_raw_rxrange[i] = (int) ((unsigned short) short_val);
+			ping->png_raw_rxquality[i] = (mb_u_char) line[2];
+			ping->png_raw_rxwindow[i] = (mb_u_char) line[3];
+			ping->png_raw_rxamp[i] = (mb_s_char) line[4];
+			ping->png_raw_rxbeam_num[i] = (mb_u_char) line[5];
+			mb_get_binary_short(MB_NO, &line[6], &short_val); 
+			    ping->png_raw_rxpointangle[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[8], &short_val); 
+			    ping->png_raw_rxheading[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[10], &short_val); 
+			    ping->png_raw_rxroll[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[12], &short_val); 
+			    ping->png_raw_rxpitch[i] = (int) short_val;
+			mb_get_binary_short(MB_NO, &line[14], &short_val); 
+			    ping->png_raw_rxheave[i] = (int) short_val;
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+	    }
+		
+	/* now get last bytes of record */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread(&line[0],1,4,mbfp);
+		if (read_len == 4)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])), *((int *)&(line[0])));
+#endif
+		}
+		
+	/* check for some other indicators of a broken record 
+	    - these do happen!!!! */
+	if (status == MB_SUCCESS)
+		{
+		if (ping->png_raw_nbeams > 0
+		    && ping->png_raw_rxbeam_num[0] > ping->png_raw_nbeams_max)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		for (i=1;i<ping->png_raw_nbeams;i++)
+			{
+			if (ping->png_raw_rxbeam_num[i] < ping->png_raw_rxbeam_num[i-1]
+				|| ping->png_raw_rxbeam_num[i] > ping->png_raw_nbeams_max)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				}
+			}
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       png_raw_date:                %d\n",ping->png_raw_date);
+		fprintf(stderr,"dbg5       png_raw_msec:                %d\n",ping->png_raw_msec);
+		fprintf(stderr,"dbg5       png_raw_count:               %d\n",ping->png_raw_count);
+		fprintf(stderr,"dbg5       png_raw_serial:              %d\n",ping->png_raw_serial);
+		fprintf(stderr,"dbg5       png_raw_heading:             %d\n",ping->png_raw_heading);
+		fprintf(stderr,"dbg5       png_raw_ssv:                 %d\n",ping->png_raw_ssv);
+		fprintf(stderr,"dbg5       png_raw_xducer_depth:        %d\n",ping->png_raw_xducer_depth);
+		fprintf(stderr,"dbg5       png_raw_nbeams_max:          %d\n",ping->png_raw_nbeams_max);
+		fprintf(stderr,"dbg5       png_raw_nbeams:              %d\n",ping->png_raw_nbeams);
+		fprintf(stderr,"dbg5       png_raw_depth_res:           %d\n",ping->png_raw_depth_res);
+		fprintf(stderr,"dbg5       png_raw_distance_res:        %d\n",ping->png_raw_distance_res);
+		fprintf(stderr,"dbg5       png_raw_sample_rate:         %d\n",ping->png_raw_sample_rate);
+		fprintf(stderr,"dbg5       png_raw_status:              %d\n",ping->png_raw_status);
+		fprintf(stderr,"dbg5       png_raw_rangenormal:         %d\n",ping->png_raw_rangenormal);
+		fprintf(stderr,"dbg5       png_raw_normalbackscatter:   %d\n",ping->png_raw_normalbackscatter);
+		fprintf(stderr,"dbg5       png_raw_obliquebackscatter:  %d\n",ping->png_raw_obliquebackscatter);
+		fprintf(stderr,"dbg5       png_raw_fixedgain:           %d\n",ping->png_raw_fixedgain);
+		fprintf(stderr,"dbg5       png_raw_txpower:             %d\n",ping->png_raw_txpower);
+		fprintf(stderr,"dbg5       png_raw_mode:                %d\n",ping->png_raw_mode);
+		fprintf(stderr,"dbg5       png_raw_coverage:            %d\n",ping->png_raw_coverage);
+		fprintf(stderr,"dbg5       png_raw_yawstabheading:      %d\n",ping->png_raw_yawstabheading);
+		fprintf(stderr,"dbg5       png_raw_ntx:                 %d\n",ping->png_raw_ntx);
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		fprintf(stderr,"dbg5       transmit pulse values:\n");
+		fprintf(stderr,"dbg5       cnt lastbeam tiltangle heading roll pitch heave\n");
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		for (i=0;i<ping->png_raw_ntx;i++)
+			fprintf(stderr,"dbg5       %3d %3d %4d %5d %4d %4d %4d\n",
+				i, ping->png_raw_txlastbeam[i], ping->png_raw_txtiltangle[i], 
+				ping->png_raw_txheading[i], ping->png_raw_txroll[i], 
+				ping->png_raw_txpitch[i], ping->png_raw_txheave[i]);
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		fprintf(stderr,"dbg5       beam values:\n");
+		fprintf(stderr,"dbg5       cnt range quality window amp beam angle heading roll pitch heave\n");
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		for (i=0;i<ping->png_raw_nbeams;i++)
+			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %5d %4d %4d %4d\n",
+				i, ping->png_raw_rxrange[i], ping->png_raw_rxquality[i], 
+				ping->png_raw_rxwindow[i], ping->png_raw_rxamp[i], 
+				ping->png_raw_rxbeam_num[i], ping->png_raw_rxpointangle[i],
+				ping->png_raw_rxheading[i], ping->png_raw_rxroll[i], 
+				ping->png_raw_rxpitch[i], ping->png_raw_rxheave[i]);
 		}
 
 	/* print output debug statements */
@@ -3901,6 +4278,7 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -3934,9 +4312,9 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp,
 		mb_get_binary_int(MB_NO, &line[4], & ping->png_ss_msec); 
 		    store->msec = ping->png_ss_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
-		    ping->png_count = (int) ((unsigned short) short_val);
+		    ping->png_ss_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
-		    ping->png_serial = (int) ((unsigned short) short_val);
+		    ping->png_ss_serial = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[12], &short_val); 
 		    ping->png_max_range = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[14], &short_val); 
@@ -4139,8 +4517,8 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       png_msec:        %d\n",ping->png_msec);
 		fprintf(stderr,"dbg5       png_ss_date:     %d\n",ping->png_ss_date);
 		fprintf(stderr,"dbg5       png_ss_msec:     %d\n",ping->png_ss_msec);
-		fprintf(stderr,"dbg5       png_count:       %d\n",ping->png_count);
-		fprintf(stderr,"dbg5       png_serial:      %d\n",ping->png_serial);
+		fprintf(stderr,"dbg5       png_ss_count:    %d\n",ping->png_ss_count);
+		fprintf(stderr,"dbg5       png_ss_serial:   %d\n",ping->png_ss_serial);
 
 		fprintf(stderr,"dbg5       png_heading:     %d\n",ping->png_heading);
 		fprintf(stderr,"dbg5       png_ssv:         %d\n",ping->png_ssv);
@@ -4216,6 +4594,7 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -4325,15 +4704,23 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr,"call mbr_em300raw_wr_bath kind:%d type %x\n",store->kind,store->type);
 #endif
 		status = mbr_em300raw_wr_bath(verbose,mbfp,store,error);
-		if (ping->png_raw_read == MB_YES)
+		if (ping->png_raw1_read == MB_YES)
 		    {
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"call mbr_em300raw_wr_rawbeam kind:%d type %x\n",store->kind,store->type);
 #endif
 		    status = mbr_em300raw_wr_rawbeam(verbose,mbfp,store,error);
 		    }
+		if (ping->png_raw2_read == MB_YES)
+		    {
 #ifdef MBR_EM300RAW_DEBUG
-	else fprintf(stderr,"NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300raw_wr_rawbeam2 kind:%d type %x\n",store->kind,store->type);
+#endif
+		    status = mbr_em300raw_wr_rawbeam2(verbose,mbfp,store,error);
+		    }
+#ifdef MBR_EM300RAW_DEBUG
+	if (ping->png_raw1_read == MB_NO && ping->png_raw2_read == MB_NO) 
+	fprintf(stderr,"NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n",store->kind,store->type);
 #endif
 		if (ping->png_ss_read == MB_YES)
 		    {
@@ -4402,6 +4789,7 @@ int mbr_em300raw_wr_start(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -4753,6 +5141,7 @@ int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -4929,6 +5318,7 @@ int mbr_em300raw_wr_clock(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -5071,6 +5461,7 @@ int mbr_em300raw_wr_tide(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -5214,6 +5605,7 @@ int mbr_em300raw_wr_height(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -5355,6 +5747,7 @@ int mbr_em300raw_wr_heading(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -5553,6 +5946,7 @@ int mbr_em300raw_wr_ssv(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -5750,6 +6144,7 @@ int mbr_em300raw_wr_tilt(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -5947,6 +6342,7 @@ int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -6150,6 +6546,7 @@ int mbr_em300raw_wr_pos(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -6348,6 +6745,7 @@ int mbr_em300raw_wr_svp(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -6547,6 +6945,7 @@ int mbr_em300raw_wr_svp2(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -6747,6 +7146,7 @@ int mbr_em300raw_wr_bath(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -6975,6 +7375,7 @@ int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -6992,20 +7393,20 @@ int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:            %d\n",store->date);
 		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
-		fprintf(stderr,"dbg5       png_date:        %d\n",ping->png_date);
-		fprintf(stderr,"dbg5       png_msec:        %d\n",ping->png_msec);
-		fprintf(stderr,"dbg5       png_count:       %d\n",ping->png_count);
-		fprintf(stderr,"dbg5       png_serial:      %d\n",ping->png_serial);
-		fprintf(stderr,"dbg5       png_nbeams_max:  %d\n",ping->png_nbeams_max);
-		fprintf(stderr,"dbg5       png_nrawbeams:   %d\n",ping->png_nrawbeams);
-		fprintf(stderr,"dbg5       png_ssv:         %d\n",ping->png_ssv);
+		fprintf(stderr,"dbg5       png_raw_date:        %d\n",ping->png_raw_date);
+		fprintf(stderr,"dbg5       png_raw_msec:        %d\n",ping->png_raw_msec);
+		fprintf(stderr,"dbg5       png_raw_count:       %d\n",ping->png_raw_count);
+		fprintf(stderr,"dbg5       png_raw_serial:      %d\n",ping->png_raw_serial);
+		fprintf(stderr,"dbg5       png_raw_nbeams_max:  %d\n",ping->png_raw_nbeams_max);
+		fprintf(stderr,"dbg5       png_raw_nbeams:      %d\n",ping->png_raw_nbeams);
+		fprintf(stderr,"dbg5       png_raw_ssv:         %d\n",ping->png_raw_ssv);
 		fprintf(stderr,"dbg5       cnt  point   tilt   rng  amp num\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
-		for (i=0;i<ping->png_nrawbeams;i++)
+		for (i=0;i<ping->png_raw_nbeams;i++)
 			fprintf(stderr,"dbg5       %3d %5d %5d %5d %3d %3d\n",
-				i, ping->png_rawpointangle[i], ping->png_rawtiltangle[i], 
-				ping->png_rawrange[i], ping->png_rawamp[i], 
-				ping->png_rawbeam_num[i]);
+				i, ping->png_raw_rxpointangle[i], ping->png_raw_rxtiltangle[i], 
+				ping->png_raw_rxrange[i], ping->png_raw_rxamp[i], 
+				ping->png_raw_rxbeam_num[i]);
 		}
 		
 	/* zero checksum */
@@ -7013,7 +7414,7 @@ int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp,
 
 	/* write the record size */
 	mb_put_binary_int(MB_NO, (int) (EM2_RAWBEAM_HEADER_SIZE 
-			+ EM2_RAWBEAM_BEAM_SIZE * ping->png_nrawbeams + 8), (void *) &write_size); 
+			+ EM2_RAWBEAM_BEAM_SIZE * ping->png_raw_nbeams + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -7063,13 +7464,13 @@ int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(MB_NO, (int) ping->png_date, (void *) &line[0]); 
-		mb_put_binary_int(MB_NO, (int) ping->png_msec, (void *) &line[4]); 
-		mb_put_binary_short(MB_NO, (unsigned short) ping->png_count, (void *) &line[8]);
-		mb_put_binary_short(MB_NO, (unsigned short) ping->png_serial, (void *) &line[10]);
-		line[12] = (mb_u_char) ping->png_nbeams_max;
-		line[13] = (mb_u_char) ping->png_nrawbeams;
-		mb_put_binary_short(MB_NO, (unsigned short) ping->png_ssv, (void *) &line[14]);
+		mb_put_binary_int(MB_NO, (int) ping->png_raw_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) ping->png_raw_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_serial, (void *) &line[10]);
+		line[12] = (mb_u_char) ping->png_raw_nbeams_max;
+		line[13] = (mb_u_char) ping->png_raw_nbeams;
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_ssv, (void *) &line[14]);
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -7092,13 +7493,13 @@ int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp,
 
 	/* output binary beam data */
 	if (status == MB_SUCCESS)
-	    for (i=0;i<ping->png_nrawbeams;i++)
+	    for (i=0;i<ping->png_raw_nbeams;i++)
 		{
-		mb_put_binary_short(MB_NO, (short) ping->png_rawpointangle[i], (void *) &line[0]);
-		mb_put_binary_short(MB_NO, (unsigned short) ping->png_rawtiltangle[i], (void *) &line[2]);
-		mb_put_binary_short(MB_NO, (unsigned short) ping->png_rawrange[i], (void *) &line[4]);
-		line[6] = (mb_s_char) ping->png_rawamp[i];
-		line[7] = (mb_u_char) ping->png_rawbeam_num[i];
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_rxpointangle[i], (void *) &line[0]);
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_rxtiltangle[i], (void *) &line[2]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_rxrange[i], (void *) &line[4]);
+		line[6] = (mb_s_char) ping->png_raw_rxamp[i];
+		line[7] = (mb_u_char) ping->png_raw_rxbeam_num[i];
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
@@ -7108,6 +7509,292 @@ int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp,
 		/* write out data */
 		write_len = fwrite(line,1,EM2_RAWBEAM_BEAM_SIZE,mbfp);
 		if (write_len != EM2_RAWBEAM_BEAM_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output end of record */
+	if (status == MB_SUCCESS)
+		{
+		line[0] = 0;
+		line[1] = 0x03;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		checksum += uchar_ptr[0];
+	    
+		/* set checksum */
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
+
+		/* write out data */
+		write_len = fwrite(line,1,4,mbfp);
+		if (write_len != 4)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, 
+		struct mbsys_simrad2_struct *store, int *error)
+{
+	char	*function_name = "mbr_em300raw_wr_rawbeam2";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_ping_struct *ping;
+	char	line[EM2_BATH_MBA_HEADER_SIZE];
+	short	label;
+	int	write_len;
+	int	write_size;
+	unsigned short checksum;
+	mb_u_char   *uchar_ptr;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		}
+		
+	/* get storage structure */
+	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       png_raw_date:                %d\n",ping->png_raw_date);
+		fprintf(stderr,"dbg5       png_raw_msec:                %d\n",ping->png_raw_msec);
+		fprintf(stderr,"dbg5       png_raw_count:               %d\n",ping->png_raw_count);
+		fprintf(stderr,"dbg5       png_raw_serial:              %d\n",ping->png_raw_serial);
+		fprintf(stderr,"dbg5       png_raw_heading:             %d\n",ping->png_raw_heading);
+		fprintf(stderr,"dbg5       png_raw_ssv:                 %d\n",ping->png_raw_ssv);
+		fprintf(stderr,"dbg5       png_raw_xducer_depth:        %d\n",ping->png_raw_xducer_depth);
+		fprintf(stderr,"dbg5       png_raw_nbeams_max:          %d\n",ping->png_raw_nbeams_max);
+		fprintf(stderr,"dbg5       png_raw_nbeams:              %d\n",ping->png_raw_nbeams);
+		fprintf(stderr,"dbg5       png_raw_depth_res:           %d\n",ping->png_raw_depth_res);
+		fprintf(stderr,"dbg5       png_raw_distance_res:        %d\n",ping->png_raw_distance_res);
+		fprintf(stderr,"dbg5       png_raw_sample_rate:         %d\n",ping->png_raw_sample_rate);
+		fprintf(stderr,"dbg5       png_raw_status:              %d\n",ping->png_raw_status);
+		fprintf(stderr,"dbg5       png_raw_rangenormal:         %d\n",ping->png_raw_rangenormal);
+		fprintf(stderr,"dbg5       png_raw_normalbackscatter:   %d\n",ping->png_raw_normalbackscatter);
+		fprintf(stderr,"dbg5       png_raw_obliquebackscatter:  %d\n",ping->png_raw_obliquebackscatter);
+		fprintf(stderr,"dbg5       png_raw_fixedgain:           %d\n",ping->png_raw_fixedgain);
+		fprintf(stderr,"dbg5       png_raw_txpower:             %d\n",ping->png_raw_txpower);
+		fprintf(stderr,"dbg5       png_raw_mode:                %d\n",ping->png_raw_mode);
+		fprintf(stderr,"dbg5       png_raw_coverage:            %d\n",ping->png_raw_coverage);
+		fprintf(stderr,"dbg5       png_raw_yawstabheading:      %d\n",ping->png_raw_yawstabheading);
+		fprintf(stderr,"dbg5       png_raw_ntx:                 %d\n",ping->png_raw_ntx);
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		fprintf(stderr,"dbg5       transmit pulse values:\n");
+		fprintf(stderr,"dbg5       cnt lastbeam tiltangle heading roll pitch heave\n");
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		for (i=0;i<ping->png_raw_ntx;i++)
+			fprintf(stderr,"dbg5       %3d %3d %4d %5d %4d %4d %4d\n",
+				i, ping->png_raw_txlastbeam[i], ping->png_raw_txtiltangle[i], 
+				ping->png_raw_txheading[i], ping->png_raw_txroll[i], 
+				ping->png_raw_txpitch[i], ping->png_raw_txheave[i]);
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		fprintf(stderr,"dbg5       beam values:\n");
+		fprintf(stderr,"dbg5       cnt range quality window amp beam angle heading roll pitch heave\n");
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		for (i=0;i<ping->png_raw_nbeams;i++)
+			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %5d %4d %4d %4d\n",
+				i, ping->png_raw_rxrange[i], ping->png_raw_rxquality[i], 
+				ping->png_raw_rxwindow[i], ping->png_raw_rxamp[i], 
+				ping->png_raw_rxbeam_num[i], ping->png_raw_rxpointangle[i],
+				ping->png_raw_rxheading[i], ping->png_raw_rxroll[i], 
+				ping->png_raw_rxpitch[i], ping->png_raw_rxheave[i]);
+		}
+		
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	mb_put_binary_int(MB_NO, (int) (EM2_RAWBEAM2_HEADER_SIZE 
+			+ EM2_RAWBEAM2_TX_SIZE * ping->png_raw_ntx
+			+ EM2_RAWBEAM2_BEAM_SIZE * ping->png_raw_nbeams + 8), (void *) &write_size); 
+	write_len = fwrite(&write_size,1,4,mbfp);
+	if (write_len != 4)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write the record label */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(MB_NO, (short) (EM2_RAWBEAM2), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[1];
+		}
+
+	/* write the sonar id */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+		}
+
+	/* output binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_int(MB_NO, (int) ping->png_raw_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) ping->png_raw_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_serial, (void *) &line[10]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_heading, (void *) &line[12]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_ssv, (void *) &line[14]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_xducer_depth, (void *) &line[16]);
+		line[18] = (mb_u_char) ping->png_raw_nbeams_max;
+		line[19] = (mb_u_char) ping->png_raw_nbeams;
+		line[20] = (mb_u_char) ping->png_raw_depth_res;
+		line[21] = (mb_u_char) ping->png_raw_distance_res;
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_sample_rate, (void *) &line[22]);
+		mb_put_binary_int(MB_NO, (int) ping->png_raw_status, (void *) &line[24]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_rangenormal, (void *) &line[28]);
+		line[30] = (mb_s_char) ping->png_raw_normalbackscatter;
+		line[31] = (mb_s_char) ping->png_raw_obliquebackscatter;
+		line[32] = (mb_u_char) ping->png_raw_fixedgain;
+		line[33] = (mb_s_char) ping->png_raw_txpower;
+		line[34] = (mb_u_char) ping->png_raw_mode;
+		line[35] = (mb_u_char) ping->png_raw_coverage;
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_yawstabheading, (void *) &line[36]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_ntx, (void *) &line[38]);
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_RAWBEAM2_HEADER_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_RAWBEAM2_HEADER_SIZE,mbfp);
+		if (write_len != EM2_RAWBEAM2_HEADER_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary tx data */
+	if (status == MB_SUCCESS)
+	    for (i=0;i<ping->png_raw_ntx;i++)
+		{
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_txlastbeam[i], (void *) &line[0]);
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_txtiltangle[i], (void *) &line[2]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_txheading[i], (void *) &line[4]);
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_txroll[i], (void *) &line[6]);
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_txpitch[i], (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_txheave[i], (void *) &line[10]);
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_RAWBEAM2_TX_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_RAWBEAM2_TX_SIZE,mbfp);
+		if (write_len != EM2_RAWBEAM2_TX_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary beam data */
+	if (status == MB_SUCCESS)
+	    for (i=0;i<ping->png_raw_nbeams;i++)
+		{
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_rxrange[i], (void *) &line[0]);
+		line[2] = (mb_u_char) ping->png_raw_rxquality[i];
+		line[3] = (mb_u_char) ping->png_raw_rxwindow[i];
+		line[4] = (mb_s_char) ping->png_raw_rxamp[i];
+		line[5] = (mb_u_char) ping->png_raw_rxbeam_num[i];
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_rxpointangle[i], (void *) &line[6]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_raw_rxheading[i], (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_rxroll[i], (void *) &line[10]);
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_rxpitch[i], (void *) &line[12]);
+		mb_put_binary_short(MB_NO, (short) ping->png_raw_rxheave[i], (void *) &line[14]);
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_RAWBEAM2_BEAM_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_RAWBEAM2_BEAM_SIZE,mbfp);
+		if (write_len != EM2_RAWBEAM2_BEAM_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -7181,6 +7868,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
@@ -7200,8 +7888,8 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
 		fprintf(stderr,"dbg5       png_ss_date:     %d\n",ping->png_ss_date);
 		fprintf(stderr,"dbg5       png_ss_msec:     %d\n",ping->png_ss_msec);
-		fprintf(stderr,"dbg5       png_count:       %d\n",ping->png_count);
-		fprintf(stderr,"dbg5       png_serial:      %d\n",ping->png_serial);
+		fprintf(stderr,"dbg5       png_ss_count:    %d\n",ping->png_ss_count);
+		fprintf(stderr,"dbg5       png_ss_serial    %d\n",ping->png_ss_serial);
 		fprintf(stderr,"dbg5       png_max_range:   %d\n",ping->png_max_range);
 		fprintf(stderr,"dbg5       png_r_zero:      %d\n",ping->png_r_zero);
 		fprintf(stderr,"dbg5       png_r_zero_corr: %d\n",ping->png_r_zero_corr);
@@ -7284,8 +7972,8 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp,
 		{
 		mb_put_binary_int(MB_NO, (int) ping->png_ss_date, (void *) &line[0]); 
 		mb_put_binary_int(MB_NO, (int) ping->png_ss_msec, (void *) &line[4]); 
-		mb_put_binary_short(MB_NO, (unsigned short) ping->png_count, (void *) &line[8]);
-		mb_put_binary_short(MB_NO, (unsigned short) ping->png_serial, (void *) &line[10]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_ss_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) ping->png_ss_serial, (void *) &line[10]);
 		mb_put_binary_short(MB_NO, (unsigned short) ping->png_max_range, (void *) &line[12]);
 		mb_put_binary_short(MB_NO, (unsigned short) ping->png_r_zero, (void *) &line[14]);
 		mb_put_binary_short(MB_NO, (unsigned short) ping->png_r_zero_corr, (void *) &line[16]);
