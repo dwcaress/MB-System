@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.14 2004-09-16 19:11:48 caress Exp $
+#    $Id: mbm_plot.perl,v 5.15 2004-09-16 22:43:32 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.14 2004-09-16 19:11:48 caress Exp $
+#   $Id: mbm_plot.perl,v 5.15 2004-09-16 22:43:32 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.14  2004/09/16 19:11:48  caress
+#   Supports postscript viewer ggv.
+#
 #   Revision 5.13  2003/04/22 21:10:12  caress
 #   Made datalist.mb-1 default input file.
 #
@@ -1117,9 +1120,10 @@ foreach $file_mb (@files_data)
 			}
 		if ($mb_etime)
 			{
-			$time_info = $time_info . "-E$mb_etime";
+			$time_info = $time_info . " -E$mb_etime";
 			}
-		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G`;		}
+		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G`;
+		}
 
 	# now parse the mbinfo input 
 	$nrec_f = 0;
