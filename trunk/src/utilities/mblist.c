@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	3.00	2/1/93
- *    $Id: mblist.c,v 3.5 1993-06-13 07:47:20 caress Exp $
+ *    $Id: mblist.c,v 3.6 1993-09-11 15:44:30 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,18 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.5  1993/06/13  07:47:20  caress
+ * Added new time output options "m" and "u" and changed
+ * old options "U" to "M" and "u" to "U
+ * Now time options are:
+ *   T  for a time string (yyyy/mm/dd/hh/mm/ss)
+ *   t  for a time string (yyyy mm dd hh mm ss)
+ *   J  for a time string (yyyy jd hh mm ss)
+ *   M  for mbio time in minutes since 1/1/81 00:00:00
+ *   m  for time in minutes since first record
+ *   U  for unix time in seconds since 1/1/70 00:00:00
+ *   u  for time in seconds since first record
+ *
  * Revision 3.4  1993/06/13  03:02:18  caress
  * Added new output option "A", which outputs the apparent
  * crosstrack seafloor slope in degrees from vertical. This
@@ -72,7 +84,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 3.5 1993-06-13 07:47:20 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 3.6 1993-09-11 15:44:30 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Mbath_beam -Nback_beam -Ooptions -Ddumpmode]";
@@ -116,6 +128,8 @@ char **argv;
 	int	nread;
 	int	beam_status = MB_SUCCESS;
 	int	time_j[4];
+	int	bathcheck = 0;
+	int	backcheck = 0;
 
 	/* MBIO read values */
 	char	*mbio_ptr;
@@ -344,6 +358,15 @@ char **argv;
 		exit(error);
 		}
 
+	/* check if depth or backscatter needs to be checked */
+	for (i=0; i<n_list; i++) 
+		{
+		if (list[i] == 'Z' || list[i] == 'z')
+			bathcheck = 1;
+		if (list[i] == 'B' || list[i] == 'b')
+			backcheck = 1;
+		}
+
 	/* set the beam to be output (default = centerbeam) */
 	if (ibeam_list_bath < 0 && beams_bath > 0)
 		beam_list_bath = beams_bath/2;
@@ -484,14 +507,15 @@ char **argv;
 			&& variable_beams_table[format] == MB_YES)
 			beam_list_back = beams_back/2;
 
-		/* zero pings are no good */
+		/* zero pings are no good if bathymetry or backscatter
+			is being output */
 		beam_status = status;
-		if (beams_bath > 0 && beam_list_bath >= 0)
+		if (bathcheck && beams_bath > 0 && beam_list_bath >= 0)
 			{
 			if (bath[beam_list_bath] <= 0)
 				beam_status = MB_FAILURE;
 			}
-		if (beams_back > 0 && beam_list_back >= 0)
+		if (backcheck && beams_back > 0 && beam_list_back >= 0)
 			{
 			if (back[beam_list_back] <= 0)
 				beam_status = MB_FAILURE;
