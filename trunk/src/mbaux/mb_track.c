@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 5.0 2000-12-01 22:53:59 caress Exp $
+ *    $Id: mb_track.c,v 5.1 2004-12-18 01:32:50 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:53:59  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.8  2000/10/11  00:54:20  caress
  * Converted to ANSI C
  *
@@ -81,7 +84,7 @@
 /* 	function mb_track plots the shiptrack of multibeam data. */
 void mb_track(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 5.1 2004-12-18 01:32:50 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;
@@ -238,6 +241,52 @@ void mb_track(int verbose, struct swath *data, int *error)
 
 	/* reset line width */
 	setline(0);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	return;
+}
+
+/*--------------------------------------------------------------------------*/
+/* 	function mb_trackname plots the filename on the shiptrack. 
+	 - contributed by Gordon Keith, CSIRO, December 2004 */
+void mb_trackname(int verbose, struct swath *data, char *file, int *error)
+{
+  	static char rcs_id[]="$Id: mb_track.c,v 5.1 2004-12-18 01:32:50 caress Exp $";
+	char	*function_name = "mb_trackname";
+	int	status = MB_SUCCESS;
+	double	x, y, x1, y1, x2, y2, x3, y3, x4, y4;
+	double	dx, dy;
+	double	angle;
+	char	label[MB_PATH_MAXLINE];
+	int	i, j, k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
+		fprintf(stderr,"dbg2       swath:              %d\n",data);
+		fprintf(stderr,"dbg2       file:               %s\n",file);
+		}
+
+	strncpy(label,file,MB_PATH_MAXLINE);
+	mb_get_basename(verbose,label,error);
+	plot_string(data->pings[0].navlon,data->pings[0].navlat,
+		    data->name_hgt,
+		    data->pings[0].heading,
+		    label);
 
 	/* print output debug statements */
 	if (verbose >= 2)

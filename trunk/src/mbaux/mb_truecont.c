@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $
+ *    $Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -50,6 +50,7 @@ int mb_contour_init(
 		int	plot_contours,
 		int	plot_triangles,
 		int	plot_track,
+		int	plot_name,
 		double	contour_int,
 		double	color_int,
 		double	tick_int,
@@ -66,9 +67,10 @@ int mb_contour_init(
 		double	time_annot_int,
 		double	date_annot_int,
 		double	time_tick_len,
+		double	name_hgt,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -86,14 +88,11 @@ int mb_contour_init(
 		fprintf(stderr,"dbg2       data:             %d\n",data);
 		fprintf(stderr,"dbg2       npings_max:       %d\n",npings_max);
 		fprintf(stderr,"dbg2       beams_bath:       %d\n",beams_bath);
-		fprintf(stderr,"dbg2       contour algorithm:%d\n",
-			contour_algorithm);
-		fprintf(stderr,"dbg2       plot contours:    %d\n",
-			plot_contours);
-		fprintf(stderr,"dbg2       plot triangles:   %d\n",
-			plot_triangles);
-		fprintf(stderr,"dbg2       plot track:       %d\n",
-			plot_track);
+		fprintf(stderr,"dbg2       contour algorithm:%d\n",contour_algorithm);
+		fprintf(stderr,"dbg2       plot contours:    %d\n",plot_contours);
+		fprintf(stderr,"dbg2       plot triangles:   %d\n",plot_triangles);
+		fprintf(stderr,"dbg2       plot track:       %d\n",plot_track);
+		fprintf(stderr,"dbg2       plot name:        %d\n",plot_name);
 		fprintf(stderr,"dbg2       contour interval: %f\n",contour_int);
 		fprintf(stderr,"dbg2       color interval:   %f\n",color_int);
 		fprintf(stderr,"dbg2       tick interval:    %f\n",tick_int);
@@ -106,14 +105,11 @@ int mb_contour_init(
 		for (i=0;i<nlevel;i++)
 			fprintf(stderr,"dbg2       level %d: %f %d %d\n",
 				i,level_list[i],label_list[i],tick_list[i]);
-		fprintf(stderr,"dbg2       time tick int:    %f\n",
-			time_tick_int);
-		fprintf(stderr,"dbg2       time interval:    %f\n",
-			time_annot_int);
-		fprintf(stderr,"dbg2       date interval:    %f\n",
-			date_annot_int);
-		fprintf(stderr,"dbg2       time tick length: %f\n\n",
-			time_tick_len);
+		fprintf(stderr,"dbg2       time tick int:    %f\n",time_tick_int);
+		fprintf(stderr,"dbg2       time interval:    %f\n",time_annot_int);
+		fprintf(stderr,"dbg2       date interval:    %f\n",date_annot_int);
+		fprintf(stderr,"dbg2       time tick length: %f\n",time_tick_len);
+		fprintf(stderr,"dbg2       name height:      %f\n\n",name_hgt);
 		}
 
 	/* allocate memory for swath structure */
@@ -162,6 +158,7 @@ int mb_contour_init(
 	dataptr->plot_contours = plot_contours;
 	dataptr->plot_triangles = plot_triangles;
 	dataptr->plot_track = plot_track;
+	dataptr->plot_name = plot_name;
 
 	/* set variables and allocate memory for contour controls */
 	dataptr->contour_int = contour_int;
@@ -206,6 +203,7 @@ int mb_contour_init(
 	dataptr->time_annot_int = time_annot_int;
 	dataptr->date_annot_int = date_annot_int;
 	dataptr->time_tick_len = time_tick_len;
+	dataptr->name_hgt = name_hgt;
 
 	/* set variables and allocate memory for triangle network */
 	dataptr->npts = 0;
@@ -333,7 +331,7 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -469,7 +467,7 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -501,16 +499,17 @@ int mb_tcontour(
 		fprintf(stderr,"dbg2       data->plot_contours:     %d\n",data->plot_contours);
 		fprintf(stderr,"dbg2       data->plot_triangles:    %d\n",data->plot_triangles);
 		fprintf(stderr,"dbg2       data->plot_track:        %d\n",data->plot_track);
-		fprintf(stderr,"dbg2       data->contour_int:      %f\n",data->contour_int);
-		fprintf(stderr,"dbg2       data->color_int:        %f\n",data->color_int);
-		fprintf(stderr,"dbg2       data->tick_int:         %f\n",data->tick_int);
-		fprintf(stderr,"dbg2       data->label_int:        %f\n",data->label_int);
-		fprintf(stderr,"dbg2       data->tick_len:         %f\n",data->tick_len);
-		fprintf(stderr,"dbg2       data->label_hgt:        %f\n",data->label_hgt);
-		fprintf(stderr,"dbg2       data->label_spacing:    %f\n",data->label_spacing);
-		fprintf(stderr,"dbg2       data->ncolor:           %d\n",data->ncolor);
-		fprintf(stderr,"dbg2       data->nlevel:           %d\n",data->nlevel);
-		fprintf(stderr,"dbg2       data->nlevelset:        %d\n",data->nlevelset);
+		fprintf(stderr,"dbg2       data->plot_name:         %d\n",data->plot_name);
+		fprintf(stderr,"dbg2       data->contour_int:       %f\n",data->contour_int);
+		fprintf(stderr,"dbg2       data->color_int:         %f\n",data->color_int);
+		fprintf(stderr,"dbg2       data->tick_int:          %f\n",data->tick_int);
+		fprintf(stderr,"dbg2       data->label_int:         %f\n",data->label_int);
+		fprintf(stderr,"dbg2       data->tick_len:          %f\n",data->tick_len);
+		fprintf(stderr,"dbg2       data->label_hgt:         %f\n",data->label_hgt);
+		fprintf(stderr,"dbg2       data->label_spacing:     %f\n",data->label_spacing);
+		fprintf(stderr,"dbg2       data->ncolor:            %d\n",data->ncolor);
+		fprintf(stderr,"dbg2       data->nlevel:            %d\n",data->nlevel);
+		fprintf(stderr,"dbg2       data->nlevelset:         %d\n",data->nlevelset);
 		if (data->nlevelset == MB_YES)
 		for (i=0;i<data->nlevel;i++)
 			{
@@ -1187,7 +1186,7 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.2 2004-12-02 06:29:26 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1223,16 +1222,17 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 		fprintf(stderr,"dbg2       data->plot_contours:     %d\n",data->plot_contours);
 		fprintf(stderr,"dbg2       data->plot_triangles:    %d\n",data->plot_triangles);
 		fprintf(stderr,"dbg2       data->plot_track:        %d\n",data->plot_track);
-		fprintf(stderr,"dbg2       data->contour_int:      %f\n",data->contour_int);
-		fprintf(stderr,"dbg2       data->color_int:        %f\n",data->color_int);
-		fprintf(stderr,"dbg2       data->tick_int:         %f\n",data->tick_int);
-		fprintf(stderr,"dbg2       data->label_int:        %f\n",data->label_int);
-		fprintf(stderr,"dbg2       data->tick_len:         %f\n",data->tick_len);
-		fprintf(stderr,"dbg2       data->label_hgt:        %f\n",data->label_hgt);
-		fprintf(stderr,"dbg2       data->label_spacing:    %f\n",data->label_spacing);
-		fprintf(stderr,"dbg2       data->ncolor:           %d\n",data->ncolor);
-		fprintf(stderr,"dbg2       data->nlevel:           %d\n",data->nlevel);
-		fprintf(stderr,"dbg2       data->nlevelset:        %d\n",data->nlevelset);
+		fprintf(stderr,"dbg2       data->plot_name:         %d\n",data->plot_name);
+		fprintf(stderr,"dbg2       data->contour_int:       %f\n",data->contour_int);
+		fprintf(stderr,"dbg2       data->color_int:         %f\n",data->color_int);
+		fprintf(stderr,"dbg2       data->tick_int:          %f\n",data->tick_int);
+		fprintf(stderr,"dbg2       data->label_int:         %f\n",data->label_int);
+		fprintf(stderr,"dbg2       data->tick_len:          %f\n",data->tick_len);
+		fprintf(stderr,"dbg2       data->label_hgt:         %f\n",data->label_hgt);
+		fprintf(stderr,"dbg2       data->label_spacing:     %f\n",data->label_spacing);
+		fprintf(stderr,"dbg2       data->ncolor:            %d\n",data->ncolor);
+		fprintf(stderr,"dbg2       data->nlevel:            %d\n",data->nlevel);
+		fprintf(stderr,"dbg2       data->nlevelset:         %d\n",data->nlevelset);
 		if (data->nlevelset == MB_YES)
 		for (i=0;i<data->nlevel;i++)
 			{
