@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_stat.perl	8/14/93
-#    $Id: mbm_stat.perl,v 4.0 1994-10-21 11:47:31 caress Exp $
+#    $Id: mbm_stat.perl,v 4.1 1995-05-12 17:43:23 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 14, 1993
 #
 # Version:
-#   $Id: mbm_stat.perl,v 4.0 1994-10-21 11:47:31 caress Exp $
+#   $Id: mbm_stat.perl,v 4.1 1995-05-12 17:43:23 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1994/10/21  11:47:31  caress
+# Release V4.0
+#
 # Revision 1.1  1993/08/19  16:39:20  dale
 # Initial revision
 #
@@ -53,7 +56,7 @@ if ($help)
 	print "\n$program_name:\n";
 	print "\nPerl shellscript to extract beam statistics from the ouput of mbinfo.\n";
 	print "\nUsage: $program_name -Ifile [-V -H]\n";
-	die "\n";
+	exit 0;
 	}
 
 # check for defined parameters
@@ -129,9 +132,8 @@ while (<F1>)
 close(F1);
 
 # Announce success whether it is deserved or not.
-
-
-
+print "\nAll done\n";
+exit 0;
 
 #-----------------------------------------------------------------------
 # This should be loaded from the library but the shipboard installation

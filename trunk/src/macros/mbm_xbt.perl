@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id: mbm_xbt.perl,v 4.1 1995-02-14 19:50:31 caress Exp $
+#    $Id: mbm_xbt.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   David Brock of ASA added the Sippican MK12 header parsing code and switch
 #
 # Version:
-# $Id: mbm_xbt.perl,v 4.1 1995-02-14 19:50:31 caress Exp $
+# $Id: mbm_xbt.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1995/02/14  19:50:31  caress
+# Version 4.2
+#
 # Revision 4.3  1995/01/23  10:20:14  dale
 #    Move the latitude calculation out of the loop, we only need to
 # do it once. Its now in the if/else test for the existance of a user
@@ -162,7 +165,7 @@ if ($help) {
     print "   --------------------------\n";
     print "    Sparton           1\n";
     print "    MK12              2\n\n";
-    die "\n";
+    exit 0;
 }                   # 
                     # 
 
@@ -306,7 +309,8 @@ close(F);
 close(O);
 
 # End it all
-die "\nAll done!\n";
+print "\nAll done!\n";
+exit 0;
 
 #-----------------------------------------------------------------------
 # This should be loaded from the library but its safer to
