@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_mem.c,v 4.1 1994-03-23 22:19:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -57,7 +60,7 @@ int	size;
 char	**ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem.c,v 4.1 1994-03-23 22:19:33 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -73,13 +76,22 @@ int	*error;
 		}
 
 	/* allocate memory */
-	if ((*ptr = (char *) malloc(size)) == NULL)
+	if (size > 0)
 		{
-		*error = MB_ERROR_MEMORY_FAIL;
-		status = MB_FAILURE;
+		if ((*ptr = (char *) malloc(size)) == NULL)
+			{
+			*error = MB_ERROR_MEMORY_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
 		}
 	else
 		{
+		*ptr = NULL;
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		}
