@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.3 2001-07-20 00:30:32 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.4 2001-07-31 00:40:17 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20  00:30:32  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/06/30  17:39:31  caress
  * Release 5.0.beta02
  *
@@ -198,10 +201,18 @@ int	mode_pick = MODE_TOGGLE;
 int	mshow_flagged = SHOW_FLAGGED_OFF;
 int	mode_output = OUTPUT_MODE_EDIT;
 int	ttime_i[7];
+int	f_beams_max;
+double	f_distance_max;
 int	f_medianspike;
 int	f_medianspike_threshold;
 int	f_wrongside;
 int	f_wrongside_threshold;
+int	f_cutbeam;
+int	f_cutbeam_begin;
+int	f_cutbeam_end;
+int	f_cutdistance;
+double	f_cutdistance_begin;
+double	f_cutdistance_end;
 int	status;
 
 /* file opening parameters */
@@ -239,6 +250,7 @@ void set_label_string(Widget, String);
 void set_label_multiline_string(Widget, String);
 void get_text_string(Widget, String);
 void do_checkuseprevious();
+void do_get_filters();
 /*--------------------------------------------------------------------*/
 
 /*      Function Name: 	BxUnmanageCB
@@ -661,11 +673,28 @@ int do_setup_data()
 	    XmToggleButtonSetState(toggleButton_show_flagged_off, 1, FALSE);
 	    }
 
+	/* get filter values and set widgets */
+	do_get_filters();
+	
+	return(1);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_get_filters()
+{
+
 	/* get some default values from mbedit */
-	status = mbedit_get_filters(&f_medianspike,
+	status = mbedit_get_filters(&f_beams_max, &f_distance_max, 
+			&f_medianspike,
 			&f_medianspike_threshold,
 			&f_wrongside,
-			&f_wrongside_threshold);	
+			&f_wrongside_threshold, 
+			&f_cutbeam,
+			&f_cutbeam_begin, &f_cutbeam_end, 
+			&f_cutdistance,
+			&f_cutdistance_begin, &f_cutdistance_end);	
 
 	/* set values of median spike filter widgets */
  	XmToggleButtonSetState(toggleButton_filters_medianspike,
@@ -676,16 +705,42 @@ int do_setup_data()
 			XmNvalue, f_medianspike_threshold,
 			NULL);
 	
-	/* set values of median spike filter widgets */
+	/* set values of wrong side filter widgets */
  	XmToggleButtonSetState(toggleButton_filters_wrongside,
  					f_wrongside, FALSE);
 	XtVaSetValues(scale_filters_wrongside,
 			XmNminimum, 0,
-			XmNmaximum, 200,
+			XmNmaximum, f_beams_max,
 			XmNvalue, f_wrongside_threshold,
 			NULL);
 	
-	return(1);
+	/* set values of cut by beam number filter widgets */
+ 	XmToggleButtonSetState(toggleButton_filters_cutbeam,
+ 					f_cutbeam, FALSE);
+	XtVaSetValues(scale_filters_cutbeamstart,
+			XmNminimum, 0,
+			XmNmaximum, f_beams_max,
+			XmNvalue, f_cutbeam_begin,
+			NULL);
+	XtVaSetValues(scale_filters_cutbeamend,
+			XmNminimum, 0,
+			XmNmaximum, f_beams_max,
+			XmNvalue, f_cutbeam_end,
+			NULL);
+	
+	/* set values of cut by distance filter widgets */
+ 	XmToggleButtonSetState(toggleButton_filters_cutdistance,
+ 					f_cutdistance, FALSE);
+	XtVaSetValues(scale_filters_cutdistancestart,
+			XmNminimum, (int)(-100 * f_distance_max - 0.5),
+			XmNmaximum, (int)(100 * f_distance_max + 0.5),
+			XmNvalue, (int)(100 * f_cutdistance_begin + 0.5),
+			NULL);
+	XtVaSetValues(scale_filters_cutdistanceend,
+			XmNminimum, (int)(-100 * f_distance_max - 0.5),
+			XmNmaximum, (int)(100 * f_distance_max + 0.5),
+			XmNvalue, (int)(100 * f_cutdistance_end + 0.5),
+			NULL);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1865,6 +1920,7 @@ void
 do_set_filters( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	ival;
 
 	/* get values of median spike filter widgets */
  	f_medianspike = XmToggleButtonGetState(toggleButton_filters_medianspike);
@@ -1872,17 +1928,41 @@ do_set_filters( Widget w, XtPointer client_data, XtPointer call_data)
 		XmNvalue, &f_medianspike_threshold,
 		NULL);
 	
-	/* get values of median spike filter widgets */
+	/* get values of wrong side filter widgets */
  	f_wrongside = XmToggleButtonGetState(toggleButton_filters_wrongside);
 	XtVaGetValues(scale_filters_wrongside,
 		XmNvalue, &f_wrongside_threshold,
 		NULL);
+	
+	/* get values of cut by beam number filter widgets */
+ 	f_cutbeam = XmToggleButtonGetState(toggleButton_filters_cutbeam);
+	XtVaGetValues(scale_filters_cutbeamstart,
+		XmNvalue, &f_cutbeam_begin,
+		NULL);
+	XtVaGetValues(scale_filters_cutbeamend,
+		XmNvalue, &f_cutbeam_end,
+		NULL);
+	
+	/* get values of cut by distance filter widgets */
+ 	f_cutdistance = XmToggleButtonGetState(toggleButton_filters_cutdistance);
+	XtVaGetValues(scale_filters_cutdistancestart,
+		XmNvalue, &ival,
+		NULL);
+	f_cutdistance_begin = 0.01 * ival;
+	XtVaGetValues(scale_filters_cutdistanceend,
+		XmNvalue, &ival,
+		NULL);
+	f_cutdistance_end = 0.01 * ival;
 
 	/* set some values in mbedit */
 	status = mbedit_set_filters(f_medianspike,
 			f_medianspike_threshold,
 			f_wrongside,
-			f_wrongside_threshold);			
+			f_wrongside_threshold, 
+			f_cutbeam, 
+			f_cutbeam_begin, f_cutbeam_end, 
+			f_cutdistance, 
+			f_cutdistance_begin, f_cutdistance_end);
 	
     	status = mbedit_action_filter_all(
 	     	mplot_width,mexager,
@@ -1898,29 +1978,8 @@ do_reset_filters( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
-	/* get some default values from mbedit */
-	status = mbedit_get_filters(&f_medianspike,
-			&f_medianspike_threshold,
-			&f_wrongside,
-			&f_wrongside_threshold);	
-
-	/* set values of median spike filter widgets */
- 	XmToggleButtonSetState(toggleButton_filters_medianspike,
- 					f_medianspike, FALSE);
-	XtVaSetValues(scale_filters_medianspike,
-			XmNminimum, 1,
-			XmNmaximum, 100,
-			XmNvalue, f_medianspike_threshold,
-			NULL);
-	
-	/* set values of median spike filter widgets */
- 	XmToggleButtonSetState(toggleButton_filters_wrongside,
- 					f_wrongside, FALSE);
-	XtVaSetValues(scale_filters_wrongside,
-			XmNminimum, 0,
-			XmNmaximum, 200,
-			XmNvalue, f_wrongside_threshold,
-			NULL);
+	/* get filter values and set widgets */
+	do_get_filters();
 }
 
 /*--------------------------------------------------------------------*/

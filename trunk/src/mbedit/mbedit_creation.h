@@ -27,6 +27,12 @@
  * Start Global Widget Declarations.
  */
 EXTERNAL Widget   window_mbedit;
+EXTERNAL Widget   scale_filters_cutdistanceend;
+EXTERNAL Widget   scale_filters_cutdistancestart;
+EXTERNAL Widget   toggleButton_filters_cutdistance;
+EXTERNAL Widget   scale_filters_cutbeamend;
+EXTERNAL Widget   scale_filters_cutbeamstart;
+EXTERNAL Widget   toggleButton_filters_cutbeam;
 EXTERNAL Widget   scale_filters_medianspike;
 EXTERNAL Widget   scale_filters_wrongside;
 EXTERNAL Widget   toggleButton_filters_medianspike;
