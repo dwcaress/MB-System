@@ -1,10 +1,10 @@
-.TH mbm_fmtvel l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbm_fmtvel l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbm_fmtvel\fP - Extract sound velocity info from Hydrosweep data
 files and create output in tabular format.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbm_fmtvel\fP [\fB-F\fIformat \fB-I\fIinfilename \fP]

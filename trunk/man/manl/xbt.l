@@ -1,9 +1,9 @@
-.TH xbt l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH xbt l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBxbt\fP - Overview of \fBxbt\fP proceedures on the R/V Ewing.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH DESCRIPTION
 On the R/V Ewing, \fIxbt\fP (eXpendable BathyThermograph) probes are used
