@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
-#    $Id: mbm_dslnavfix.perl,v 4.1 1997-04-21 16:54:41 caress Exp $
+#    $Id: mbm_dslnavfix.perl,v 4.2 1997-07-25 13:50:21 caress Exp $
 #
 #    Copyright (c) 1996 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1996
 #
 # Version:
-#   $Id: mbm_dslnavfix.perl,v 4.1 1997-04-21 16:54:41 caress Exp $
+#   $Id: mbm_dslnavfix.perl,v 4.2 1997-07-25 13:50:21 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1997/04/21  16:54:41  caress
+# MB-System 4.5 Beta Release.
+#
 # Revision 4.1  1997/03/26  15:27:16  caress
 # Fixed handling of UTM zone as per Del Bohnenstiehl.
 #
@@ -50,7 +53,8 @@ $program_name = "mbm_dslnavfix";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('HhI:i:J:j:O:o:Vv');
+&MBGetopts('E:e:HhI:i:J:j:O:o:Vv');
+$ellipsoid_use = 	($opt_E || $opt_e || "Clarke-1866");
 $help =    		($opt_H || $opt_h);
 $infile =    		($opt_I || $opt_i);
 $map_scale =    	($opt_J || $opt_j);
@@ -148,8 +152,8 @@ $bounds = "$org_lon" . "/" . "$org_lat"
 
 # set gmt defaults
 ($d_format) = `gmtdefaults -L | grep D_FORMAT` =~ /\S+\s+\S+\s+(\S+)/;
-($ellipsoid) = `gmtdefaults -L | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
-`gmtset D_FORMAT %.10lg ELLIPSOID Clarke-1866`;
+($ellipsoid_save) = `gmtdefaults -L | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
+`gmtset D_FORMAT %.10lg ELLIPSOID $ellipsoid_use`;
 
 # print out info
 if ($verbose)
@@ -253,7 +257,7 @@ if ($verbose)
 	}
 
 # reset the gmt defaults
-`gmtset D_FORMAT $d_format ELLIPSOID $ellipsoid`;
+`gmtset D_FORMAT $d_format ELLIPSOID $ellipsoid_save`;
 	
 # now open the unprojected navigation data
 if (!open(INP,"<$tmp_geo_navfile"))
