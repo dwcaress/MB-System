@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.9 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.10 2003-02-27 04:33:33 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -13,10 +13,10 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_surf.c contains the MBIO functions for handling data in 
+ * mbsys_surf.c contains the MBIO functions for handling data in
  * the SURF format from STN Atlas Marine Electronics.
  * The relevant sonars include all SAM Electronics swath mapping
- * sonars: Hydrosweep DS, Hydrosweep DS2, Hydrosweep MD, 
+ * sonars: Hydrosweep DS, Hydrosweep DS2, Hydrosweep MD,
  * Hydrosweep MD2, Fansweep 10, Fansweep 20.
  * The data format associated with SURF data is:
  *    MBSYS_SURF format (code in mbsys_surf.c and mbsys_surf.h):
@@ -27,6 +27,9 @@
  * Date:	June 20, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.8  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -47,10 +50,10 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_surf.h"
 
-static char res_id[]="$Id: mbsys_surf.c,v 5.9 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbsys_surf.c,v 5.10 2003-02-27 04:33:33 caress Exp $";
 
 /*--------------------------------------------------------------------*/
-int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_surf_alloc";
@@ -75,14 +78,17 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	/* allocate memory for data structure */
 	status = mb_malloc(verbose,sizeof(struct mbsys_surf_struct),
 				store_ptr,error);
+	if (status == MB_SUCCESS)
+		{
+		/* initialize everything */
+		memset(*store_ptr, 0, sizeof(struct mbsys_surf_struct));
 
-	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) *store_ptr;
+		/* get data structure pointer */
+		store = (struct mbsys_surf_struct *) *store_ptr;
 
-	/* initialize everything */
-
-	/* MBIO data record kind */
-	store->kind = MB_DATA_NONE;
+		/* MBIO data record kind */
+		store->kind = MB_DATA_NONE;
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -100,7 +106,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_surf_deall";
@@ -120,9 +126,6 @@ int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
 		}
 
-	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *) *store_ptr;
-
 	/* deallocate memory for data structure */
 	status = mb_free(verbose,store_ptr,error);
 
@@ -141,12 +144,12 @@ int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -181,24 +184,24 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
-		{		
+		{
 		/* get time */
 		*time_d = store->AbsoluteStartTimeOfProfile
 			    + (double) store->SoundingData.relTime;
 		mb_get_date(verbose, *time_d, time_i);
 
 		/* get navigation */
-		*navlon = RTD * ((double) store->CenterPosition.centerPositionX
+		*navlon = RTD * ((double) store->CenterPosition[0].centerPositionX
 					+ store->GlobalData.referenceOfPositionX);
-		*navlat = RTD * ((double) store->CenterPosition.centerPositionY
+		*navlat = RTD * ((double) store->CenterPosition[0].centerPositionY
 					+ store->GlobalData.referenceOfPositionY);
 
 		/* get heading */
 		*heading = RTD * store->SoundingData.headingWhileTransmitting;
 
 		/* get speed  */
-		*speed = 3.6 * store->CenterPosition.speed;
-			
+		*speed = 3.6 * store->CenterPosition[0].speed;
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 2.3;
 		mb_io_ptr->beamwidth_xtrack = 2.3;
@@ -215,10 +218,10 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		for (i=0;i<store->NrBeams;i++)
 			{
-			bath[i] = (double) store->MultiBeamDepth[i].depth;			
+			bath[i] = (double) store->MultiBeamDepth[i].depth;
 			if ((int)(store->MultiBeamDepth[i].depthFlag & SB_DELETED) != 0)
 			    beamflag[i] = MB_FLAG_NULL;
-			else if ((int)(store->MultiBeamDepth[i].depthFlag 
+			else if ((int)(store->MultiBeamDepth[i].depthFlag
 				& (SB_DEPTH_SUPPRESSED + SB_REDUCED_FAN)) != 0)
 			    beamflag[i] = MB_FLAG_FLAG;
 			else
@@ -228,7 +231,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			amp[i] = (double) store->MultibeamBeamAmplitudes[i].beamAmplitude;
 			}
 		*namp = *nbath;
-		
+
 		/* get single beam if not multibeam file */
 		if (store->NrBeams == 0
 			&& store->GlobalData.typeOfSounder == 'V')
@@ -264,16 +267,16 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				if ((int)(store->SingleBeamDepth.depthFlag & SB_DELETED) != 0)
 				    beamflag[0] = MB_FLAG_NULL;
-				else if ((int)(store->SingleBeamDepth.depthFlag 
+				else if ((int)(store->SingleBeamDepth.depthFlag
 					& (SB_DEPTH_SUPPRESSED + SB_REDUCED_FAN)) != 0)
 				    beamflag[0] = MB_FLAG_FLAG;
 				else
 				    beamflag[0] = MB_FLAG_NONE;
 				}
 			}
-		
+
 		/* get sidescan */
-		*nss = store->SidescanData.actualNrOfSsDataPort 
+		*nss = store->SidescanData.actualNrOfSsDataPort
 				+ store->SidescanData.actualNrOfSsDataStb;
 		for (i=0;i<*nss;i++)
 			{
@@ -283,16 +286,16 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		if (store->SidescanData.actualNrOfSsDataPort > 1)
 		    {
-		    ssdepth = store->SoundingData.cMean 
+		    ssdepth = store->SoundingData.cMean
 				* store->SidescanData.minSsTimePort / 2.0;
-		    timeslice = (store->SidescanData.maxSsTimePort 
-				- store->SidescanData.minSsTimePort) 
-				/ (*nss - 2);
+		    timeslice = (store->SidescanData.maxSsTimePort
+				- store->SidescanData.minSsTimePort)
+				/ store->SidescanData.actualNrOfSsDataPort;
 		    }
 		for (i=0;i<store->SidescanData.actualNrOfSsDataPort;i++)
 			{
 			j = store->SidescanData.actualNrOfSsDataPort - i - 1;
-			tt = store->SidescanData.minSsTimePort + timeslice * i - 1;
+			tt = store->SidescanData.minSsTimePort + timeslice * i;
 			ss[j] = store->SidescanData.ssData[i];
 			range = store->SoundingData.cMean * tt / 2.0;
 			ssacrosstrack[j] = -sqrt(range * range - ssdepth * ssdepth);
@@ -300,16 +303,16 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		if (store->SidescanData.actualNrOfSsDataStb > 1)
 		    {
-		    ssdepth = store->SoundingData.cMean 
+		    ssdepth = store->SoundingData.cMean
 				* store->SidescanData.minSsTimeStb / 2.0;
-		    timeslice = (store->SidescanData.maxSsTimeStb 
-				- store->SidescanData.minSsTimeStb) 
-				/ (*nss - 2);
+		    timeslice = (store->SidescanData.maxSsTimeStb
+				- store->SidescanData.minSsTimeStb)
+				/ store->SidescanData.actualNrOfSsDataStb;
 		    }
 		for (i=0;i<store->SidescanData.actualNrOfSsDataStb;i++)
 			{
 			j = store->SidescanData.actualNrOfSsDataPort + i;
-			tt = store->SidescanData.minSsTimeStb + timeslice * i - 1;
+			tt = store->SidescanData.minSsTimeStb + timeslice * i;
 			ss[j] = store->SidescanData.ssData[i];
 			range = store->SoundingData.cMean * tt / 2.0;
 			ssacrosstrack[j] = sqrt(range * range - ssdepth * ssdepth);
@@ -400,13 +403,13 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -422,7 +425,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -453,12 +456,12 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -496,18 +499,18 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -529,22 +532,22 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
-		{		
+		{
 		/* get time */
 		store->SoundingData.relTime = (float) (time_d
 		    - store->AbsoluteStartTimeOfProfile);
 
 		/* get navigation */
-		store->CenterPosition.centerPositionX = (float) 
+		store->CenterPosition[0].centerPositionX = (float)
 			(DTR * navlon - store->GlobalData.referenceOfPositionX);
-		store->CenterPosition.centerPositionY = (float) 
+		store->CenterPosition[0].centerPositionY = (float)
 			(DTR * navlat - store->GlobalData.referenceOfPositionY);
 
 		/* get heading */
 		store->SoundingData.headingWhileTransmitting = (float) (DTR * heading);
 
 		/* get speed  */
-		store->CenterPosition.speed = (float) (speed / 3.6);
+		store->CenterPosition[0].speed = (float) (speed / 3.6);
 
 		/* read distance and depth values into storage arrays */
 		if (store->GlobalData.typeOfSounder == 'B'
@@ -555,15 +558,15 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				store->MultiBeamDepth[i].depth = bath[i];
 				if (beamflag[i] == MB_FLAG_NULL)
-			    		store->MultiBeamDepth[i].depthFlag 
+			    		store->MultiBeamDepth[i].depthFlag
 						= store->MultiBeamDepth[i].depthFlag | SB_DELETED;
 				else if (!mb_beam_check_flag(beamflag[i]))
-			    		store->MultiBeamDepth[i].depthFlag 
-						= store->MultiBeamDepth[i].depthFlag 
+			    		store->MultiBeamDepth[i].depthFlag
+						= store->MultiBeamDepth[i].depthFlag
 							& 2046;
 				else
-			    		store->MultiBeamDepth[i].depthFlag 
-						= store->MultiBeamDepth[i].depthFlag 
+			    		store->MultiBeamDepth[i].depthFlag
+						= store->MultiBeamDepth[i].depthFlag
 							| SB_DEPTH_SUPPRESSED;
 				store->MultiBeamDepth[i].beamPositionStar = (float) bathacrosstrack[i];
 				store->MultiBeamDepth[i].beamPositionAhead = (float) bathalongtrack[i];
@@ -579,13 +582,13 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			if (store->SingleBeamDepth.depthLFreq > 0.0)
 				store->SingleBeamDepth.depthHFreq = bath[0];
 			if (beamflag[i] == MB_FLAG_NULL)
-			   	store->SingleBeamDepth.depthFlag 
+			   	store->SingleBeamDepth.depthFlag
 					= store->SingleBeamDepth.depthFlag | SB_DELETED;
 			else if (!mb_beam_check_flag(beamflag[i]))
-			    	store->SingleBeamDepth.depthFlag 
+			    	store->SingleBeamDepth.depthFlag
 					= store->SingleBeamDepth.depthFlag & 2046;
 			else
-			    	store->SingleBeamDepth.depthFlag 
+			    	store->SingleBeamDepth.depthFlag
 					= store->SingleBeamDepth.depthFlag | SB_DEPTH_SUPPRESSED;
 			}
 		for (i=0;i<store->SidescanData.actualNrOfSsDataPort;i++)
@@ -622,9 +625,9 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_surf_ttimes";
@@ -872,7 +875,7 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_surf_extract_altitude";
@@ -909,14 +912,14 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get transducer depth and altitude */
-		*transducer_depth = store->ActualTransducerTable.transducerDepth 
+		*transducer_depth = store->ActualTransducerTable.transducerDepth
 					+ store->SoundingData.heaveWhileTransmitting;
 		found = MB_NO;
 		bath_best = 0.0;
 		xtrack_min = 99999999.9;
 		for (i=0;i<store->NrBeams;i++)
 		    {
-		    if ((int)(store->MultiBeamDepth[i].depthFlag 
+		    if ((int)(store->MultiBeamDepth[i].depthFlag
 		    		& (SB_DEPTH_SUPPRESSED + SB_REDUCED_FAN + SB_DELETED)) == 0
 			&& fabs((double)store->MultiBeamDepth[i].beamPositionStar) < xtrack_min)
 			{
@@ -937,7 +940,7 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    bath_best = (double) store->MultiBeamDepth[i].depth;
 			    found = MB_YES;
 			    }
-			}		
+			}
 		    }
 		if (found == MB_YES)
 		    *altitude = bath_best - *transducer_depth;
@@ -989,8 +992,8 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_surf_extract_nav";
@@ -1028,16 +1031,16 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_date(verbose, *time_d, time_i);
 
 		/* get navigation */
-		*navlon = RTD * ((double) store->CenterPosition.centerPositionX
+		*navlon = RTD * ((double) store->CenterPosition[0].centerPositionX
 					+ store->GlobalData.referenceOfPositionX);
-		*navlat = RTD * ((double) store->CenterPosition.centerPositionY
+		*navlat = RTD * ((double) store->CenterPosition[0].centerPositionY
 					+ store->GlobalData.referenceOfPositionY);
 
 		/* get heading */
 		*heading = RTD * store->SoundingData.headingWhileTransmitting;
 
 		/* get speed  */
-		*speed = 3.6 * store->CenterPosition.speed;
+		*speed = 3.6 * store->CenterPosition[0].speed;
 
 		/* get roll pitch and heave */
 		*roll = RTD * store->SoundingData.rollWhileTransmitting;
@@ -1116,7 +1119,7 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1150,7 +1153,7 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1195,22 +1198,22 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
-		{		
+		{
 		/* get time */
 		store->SoundingData.relTime = (float) (time_d
 		    - store->AbsoluteStartTimeOfProfile);
 
 		/* get navigation */
-		store->CenterPosition.centerPositionX = (float) 
+		store->CenterPosition[0].centerPositionX = (float)
 			(DTR * navlon - store->GlobalData.referenceOfPositionX);
-		store->CenterPosition.centerPositionY = (float) 
+		store->CenterPosition[0].centerPositionY = (float)
 			(DTR * navlat - store->GlobalData.referenceOfPositionY);
 
 		/* get heading */
 		store->SoundingData.headingWhileTransmitting = (float) (DTR * heading);
 
 		/* get speed  */
-		store->CenterPosition.speed = (float) (speed / 3.6);
+		store->CenterPosition[0].speed = (float) (speed / 3.6);
 
 		/* get draft  */
 		store->ActualTransducerTable.transducerDepth = draft;
@@ -1236,7 +1239,7 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_copy(int verbose, void *mbio_ptr, 
+int mbsys_surf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {

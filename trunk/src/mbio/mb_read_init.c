@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.12 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_read_init.c,v 5.13 2003-02-27 04:33:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.11  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -202,7 +205,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.12 2002-09-18 23:32:59 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.13 2003-02-27 04:33:33 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -629,7 +632,11 @@ int mb_read_init(int verbose, char *file,
 	    	{
 		if (strcmp(&name[strlen(name)-4],".sda") == 0)
 			name[strlen(name)-4] = '\0';
+		else if (strcmp(&name[strlen(name)-4],".SDA") == 0)
+			name[strlen(name)-4] = '\0';
 		else if (strcmp(&name[strlen(name)-4],".six") == 0)
+			name[strlen(name)-4] = '\0';
+		else if (strcmp(&name[strlen(name)-4],".SIX") == 0)
 			name[strlen(name)-4] = '\0';
 	    	sapi_status = SAPI_open(path,name,verbose);
 	    	if (sapi_status == 0)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2raw.c,v 5.7 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_hsds2raw.c,v 5.8 2003-02-27 04:33:33 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.6  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -94,7 +97,7 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hsds2raw.c,v 5.7 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbr_hsds2raw.c,v 5.8 2003-02-27 04:33:33 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)
@@ -488,7 +491,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	read_status;
 	int	nskip;
 	int	done;
-	int	strlen;
+	int	length;
 	int	telegram_id;
 	int	telegram_cnt;
 	char	telegram_send[16];
@@ -603,11 +606,11 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 	    }
@@ -651,7 +654,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (xdr_status == MB_YES) 
 	    xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_transmit_time_d);
 	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	if (xdr_status == MB_YES) 
 	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->start_opmode, 32);
 	if (xdr_status == MB_YES) 
@@ -721,11 +724,11 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    if (xdr_status == MB_YES) 
 			xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
 		    if (xdr_status == MB_YES) 
-			xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 		    if (xdr_status == MB_YES) 
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
 		    if (xdr_status == MB_YES) 
-			xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 		    if (xdr_status == MB_YES) 
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 		    }
@@ -805,12 +808,12 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			xdr_status = xdr_float(mb_io_ptr->xdrs, &(store->tt_lruntime[i]));
 		    }
 		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		    xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->tt_lamplitude, 
 						MBSYS_ATLAS_MAXBEAMTELEGRAM);
 		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		    xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->tt_lstatus, 
 						MBSYS_ATLAS_MAXBEAMTELEGRAM);
@@ -882,11 +885,11 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    if (xdr_status == MB_YES) 
 			xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
 		    if (xdr_status == MB_YES) 
-			xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 		    if (xdr_status == MB_YES) 
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
 		    if (xdr_status == MB_YES) 
-			xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 		    if (xdr_status == MB_YES) 
 			xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 		    }
@@ -948,7 +951,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_long(mb_io_ptr->xdrs, &ss_act_side_cnt);
 		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		    xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 		if (xdr_status == MB_YES) 
 			{
 			if (telegram_act_no * MBSYS_ATLAS_MAXPIXELTELEGRAM <= MBSYS_ATLAS_MAXPIXELS)
@@ -1017,11 +1020,11 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 	    }
@@ -1123,11 +1126,11 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 	    }
@@ -1210,11 +1213,11 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_m_tau[i]);
 	    }
 	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	if (xdr_status == MB_YES) 
 	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->bs_eff_ampli, MBSYS_ATLAS_HSDS2_PFB_NUM);
 	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    xdr_status = xdr_long(mb_io_ptr->xdrs, &length);
 	if (xdr_status == MB_YES) 
 	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->bs_nis, MBSYS_ATLAS_HSDS2_PFB_NUM);
 
@@ -1372,11 +1375,11 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			    if (xdr_status == MB_YES) 
 				xdr_status = xdr_long(mb_io_ptr->xdrs2, &telegram_cnt);
 			    if (xdr_status == MB_YES) 
-				xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+				xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			    if (xdr_status == MB_YES) 
 				xdr_status = xdr_opaque(mb_io_ptr->xdrs2, telegram_send, 16);
 			    if (xdr_status == MB_YES) 
-				xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+				xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			    if (xdr_status == MB_YES) 
 				xdr_status = xdr_opaque(mb_io_ptr->xdrs2, telegram_recv, 16);
 			    }
@@ -1416,27 +1419,27 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &telegram_block_cnt);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, carrier_name, 8);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, task_name, 16);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, operator_name, 32);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, gauge_name, 32);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, comment, 32);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, profile_name, 32);
 			if (xdr_status == MB_YES) 
@@ -1476,7 +1479,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_pos_lon);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_pos_sensor, 8);
 			if (xdr_status == MB_YES) 
@@ -1492,7 +1495,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_height);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_height_sensor, 8);
 			if (xdr_status == MB_YES) 
@@ -1506,7 +1509,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_speed_wcross);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_tw_sensor, 8);
 			if (xdr_status == MB_YES) 
@@ -1518,7 +1521,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_cog);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_cog_sensor, 8);
 			if (xdr_status == MB_YES) 
@@ -1530,7 +1533,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_sog);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_sog_sensor, 8);
 			if (xdr_status == MB_YES) 
@@ -1544,7 +1547,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_drift);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_set_drift_sensor, 8);
 			if (xdr_status == MB_YES) 
@@ -1556,7 +1559,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_heading);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_heading_sensor, 8);
 			if (xdr_status == MB_YES) 
@@ -1568,7 +1571,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_depth);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_depth_sensor, 8);
 			if (xdr_status == MB_YES) 
@@ -1584,7 +1587,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &sys_wdir_abs);
 			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &length);
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, sys_wind_sensor, 8);
 			if (xdr_status == MB_YES) 

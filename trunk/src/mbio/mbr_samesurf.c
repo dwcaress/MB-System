@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_samesurf.c	6/13/2002
- *	$Id: mbr_samesurf.c,v 5.3 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_samesurf.c,v 5.4 2003-02-27 04:33:33 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_samesurf.c contains the functions for reading and writing
- * multibeam data in the SAMESURF format.  
+ * multibeam data in the SAMESURF format.
  * These functions include:
  *   mbr_alm_samesurf	- allocate read/write memory
  *   mbr_dem_samesurf	- deallocate read/write memory
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	June 13, 2002
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.2  2002/08/02 01:01:10  caress
  * 5.0.beta22
  *
@@ -51,26 +54,26 @@
 #include "../../include/mbsys_surf.h"
 
 /* essential function prototypes */
-int mbr_register_samesurf(int verbose, void *mbio_ptr, 
+int mbr_register_samesurf(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_samesurf(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_samesurf(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_samesurf(int verbose, void *mbio_ptr, int *error);
@@ -80,7 +83,7 @@ int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.4 2003-02-27 04:33:33 caress Exp $";
 	char	*function_name = "mbr_register_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -98,53 +101,53 @@ int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_samesurf(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_samesurf(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_samesurf;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_samesurf; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_surf_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_surf_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_samesurf; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_samesurf; 
-	mb_io_ptr->mb_io_extract = &mbsys_surf_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_surf_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_surf_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_surf_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_surf_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_surf_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_surf_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_surf_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_samesurf;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_surf_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_surf_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_samesurf;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_samesurf;
+	mb_io_ptr->mb_io_extract = &mbsys_surf_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_surf_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_surf_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_surf_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_surf_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_surf_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_surf_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_surf_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -191,27 +194,27 @@ int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_samesurf(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_samesurf(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.4 2003-02-27 04:33:33 caress Exp $";
 	char	*function_name = "mbr_info_samesurf";
 	int	status = MB_SUCCESS;
 
@@ -250,7 +253,7 @@ int mbr_info_samesurf(int verbose,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -280,7 +283,7 @@ int mbr_info_samesurf(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_samesurf.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbr_samesurf.c,v 5.4 2003-02-27 04:33:33 caress Exp $";
 	char	*function_name = "mbr_alm_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -402,13 +405,13 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	store = (struct mbsys_surf_struct *) store_ptr;
 	refeasting = &(mb_io_ptr->saved1);
 	refnorthing = &(mb_io_ptr->saved2);
-	
+
 	/* set sapi verbosity */
 	if (verbose > 1)
 	    sapi_verbose = verbose;
 	else
 	    sapi_verbose = 0;
-	
+
 	/* read global info if the structure is blank (usually first time through) */
 	if (store->initialized == MB_NO)
 		{
@@ -422,13 +425,16 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->NrEvents = SAPI_getNrEvents();
 		store->NrPolygonElements = SAPI_getNrPolygonElements();
 		store->AbsoluteStartTimeOfProfile = SAPI_getAbsoluteStartTimeOfProfile();
-		store->NrBeams = SAPI_getNrBeams();
 
 		store->GlobalData = *(SAPI_getGlobalData());
 		store->Statistics = *(SAPI_getStatistics());
-		if (store->NrPositionsensors > 0)
-			store->PositionSensor = *(SAPI_getPositionSensor(0));
-		
+
+		for (i=0; i<MIN(MBSYS_SURF_MAXCPOS,
+				store->NrPositionsensors); i++)
+			{
+			store->PositionSensor[i] = *(SAPI_getPositionSensor(i));
+			}
+
 		/* initialize UTM projection if required */
 		if (store->GlobalData.presentationOfPosition == 'X'
 			&& mb_io_ptr->projection_initialized == MB_NO)
@@ -440,11 +446,11 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
 			store->GlobalData.presentationOfPosition = 'E';
 			mb_io_ptr->projection_initialized = MB_YES;
-			
+
 			/* Set reference longitude and latitude */
 			easting = store->GlobalData.referenceOfPositionX;
 			northing = store->GlobalData.referenceOfPositionY;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, 
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr,
 							easting, northing,
 							&lon, &lat,
 							error);
@@ -453,10 +459,10 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			*refeasting = easting;
 			*refnorthing = northing;
 			}
-			
-		store->initialized = MB_YES;		
+
+		store->initialized = MB_YES;
 		}
-	
+
 	/* else get access to next sounding */
 	else
 		{
@@ -467,59 +473,80 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = MB_FAILURE;
 			}
 		}
-		
+
 	/* extract data for current sounding */
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
 		store->kind = MB_DATA_DATA;
-		
+
 		/* extract data */
 		SoundingDataPtr = SAPI_getSoundingData();
 		if (SoundingDataPtr != NULL)
 			store->SoundingData = *SoundingDataPtr;
-			
+
 		ActualTransducerTablePtr = SAPI_getActualTransducerTable();
 		if (ActualTransducerTablePtr != NULL)
 			store->ActualTransducerTable = *ActualTransducerTablePtr;
-			
+
 		ActualAngleTablePtr = SAPI_getActualAngleTable();
 		if (ActualAngleTablePtr != NULL)
-			store->ActualAngleTable = *ActualAngleTablePtr;
-			
-		ActualCProfileTablePtr = SAPI_getActualCProfileTable();
-		if (ActualCProfileTablePtr != NULL)
-			store->ActualCProfileTable = *ActualCProfileTablePtr;
-			
-		CenterPositionPtr = SAPI_getCenterPosition(0);
-		if (CenterPositionPtr != NULL)
 			{
-			store->CenterPosition = *CenterPositionPtr;
-			
-			/* convert position from UTM easting and northing 
-				to lon lat if necessary */
-			if (mb_io_ptr->projection_initialized == MB_YES)
+			store->ActualAngleTable = *ActualAngleTablePtr;
+			for (i=1; i<MIN(MBSYS_SURF_MAXBEAMS,
+					ActualAngleTablePtr->actualNumberOfBeams); i++)
 				{
-				easting = store->CenterPosition.centerPositionX
-						+ *refeasting;
-				northing = store->CenterPosition.centerPositionY
-						+ *refnorthing;
-				mb_proj_inverse(verbose, mb_io_ptr->pjptr, 
-							easting, northing,
-							&lon, &lat,
-							error);
-				store->CenterPosition.centerPositionX = (float)
-					(DTR * lon - store->GlobalData.referenceOfPositionX);
-				store->CenterPosition.centerPositionY = (float)
-					(DTR * lat - store->GlobalData.referenceOfPositionY);
+				store->ActualAngleTable.beamAngle[i]
+					= ActualAngleTablePtr->beamAngle[i];
 				}
 			}
-			
+
+		ActualCProfileTablePtr = SAPI_getActualCProfileTable();
+		if (ActualCProfileTablePtr != NULL)
+			{
+			store->ActualCProfileTable = *ActualCProfileTablePtr;
+			for (i=1; i<MIN(MBSYS_SURF_MAXCVALUES,
+					ActualCProfileTablePtr->numberOfActualValues); i++)
+				{
+				store->ActualCProfileTable.values[i]
+					= ActualCProfileTablePtr->values[i];
+				}
+			}
+
+		for (i=0; i<MIN(MBSYS_SURF_MAXCPOS,
+				store->NrPositionsensors); i++)
+			{
+			CenterPositionPtr = SAPI_getCenterPosition(i);
+			if (CenterPositionPtr != NULL)
+				{
+				store->CenterPosition[i] = *CenterPositionPtr;
+
+				/* convert position from UTM easting and northing
+					to lon lat if necessary */
+				if (mb_io_ptr->projection_initialized == MB_YES)
+					{
+					easting = store->CenterPosition[i].centerPositionX
+							+ *refeasting;
+					northing = store->CenterPosition[i].centerPositionY
+							+ *refnorthing;
+					mb_proj_inverse(verbose, mb_io_ptr->pjptr,
+								easting, northing,
+								&lon, &lat,
+								error);
+					store->CenterPosition[i].centerPositionX = (float)
+						(DTR * lon - store->GlobalData.referenceOfPositionX);
+					store->CenterPosition[i].centerPositionY = (float)
+						(DTR * lat - store->GlobalData.referenceOfPositionY);
+					}
+				}
+			}
+
 		SingleBeamDepthPtr = SAPI_getSingleBeamDepth();
 		if (SingleBeamDepthPtr != NULL)
 			store->SingleBeamDepth = *SingleBeamDepthPtr;
-			
-		for (i=0;i<store->NrBeams;i++)
+
+		for (i=0; i<MIN(MBSYS_SURF_MAXBEAMS,
+				store->NrBeams); i++)
 			{
 			MultiBeamDepthPtr = SAPI_getMultiBeamDepth(i);
 			if (MultiBeamDepthPtr != NULL)
@@ -540,27 +567,42 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		MultibeamSignalParametersPtr = SAPI_getMultibeamSignalParameters();
 		if (MultibeamSignalParametersPtr != NULL)
+			{
 			store->MultibeamSignalParameters = *MultibeamSignalParametersPtr;
-			
+			for (i=1; i<MIN(MBSYS_SURF_MAXRXSETS,
+					MultibeamSignalParametersPtr->nrActualGainSets);
+					i++)
+				{
+				store->MultibeamSignalParameters.rxSets[i]
+					= MultibeamSignalParametersPtr->rxSets[i];
+				}
+			}
+
 		MultibeamTransmitterParametersPtr = SAPI_getMultibeamTransmitterParameters();
 		if (MultibeamTransmitterParametersPtr != NULL)
+			{
 			store->MultibeamTransmitterParameters = *MultibeamTransmitterParametersPtr;
-			
+/* there's no indication of how many sets there are anywhwere ...
+			for (i=1; i<MIN(MBSYS_SURF_MAXTXSETS,
+					MultibeamTransmitterParametersPtr->????);
+					i++)
+				{
+				store->MultibeamTransmitterParameters.txSets[i]
+					= MultibeamTransmitterParametersPtr->txSets[i];
+				}
+ */
+			}
+
 		SidescanDataPtr = SAPI_getSidescanData();
 		if (SidescanDataPtr != NULL)
 			{
-			store->SidescanData.sidescanFlag = SidescanDataPtr->sidescanFlag;
-			store->SidescanData.actualNrOfSsDataPort = SidescanDataPtr->actualNrOfSsDataPort;
-			store->SidescanData.actualNrOfSsDataStb = SidescanDataPtr->actualNrOfSsDataStb;
-			store->SidescanData.minSsTimePort = SidescanDataPtr->minSsTimePort;
-			store->SidescanData.minSsTimeStb = SidescanDataPtr->minSsTimeStb;
-			store->SidescanData.maxSsTimePort = SidescanDataPtr->maxSsTimePort;
-			store->SidescanData.maxSsTimeStb = SidescanDataPtr->maxSsTimeStb;
-			for (i=0;i<(SidescanDataPtr->actualNrOfSsDataPort
+			store->SidescanData = *SidescanDataPtr;
+			for (i=1; i<MIN(MBSYS_SURF_MAXPIXELS,
+					SidescanDataPtr->actualNrOfSsDataPort
 					+ SidescanDataPtr->actualNrOfSsDataStb);
 					i++)
 				{
-				store->SidescanData.ssData[i] 
+				store->SidescanData.ssData[i]
 					= SidescanDataPtr->ssData[i];
 				}
 			}
@@ -569,7 +611,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = store->kind;
-	
+
 	/* output debug info */
 	if (verbose >= 4)
 		{
@@ -651,7 +693,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg4       GlobalData.modifiedTrackStopX:          %f\n", store->GlobalData.modifiedTrackStopX);
 		fprintf(stderr,"dbg4       GlobalData.modifiedTrackStopY:          %f\n", store->GlobalData.modifiedTrackStopY);
 		fprintf(stderr,"dbg4       GlobalData.modifiedStartStopDistance:   %f\n", store->GlobalData.modifiedStartStopDistance);
- 
+
 		fprintf(stderr,"dbg4       Statistics.label:                       %s\n", store->Statistics.label);
 		fprintf(stderr,"dbg4       Statistics.minNorthing:                 %f\n", store->Statistics.minNorthing);
 		fprintf(stderr,"dbg4       Statistics.maxNorthing:                 %f\n", store->Statistics.maxNorthing);
@@ -672,28 +714,32 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg4       Statistics.minDepth:                    %f\n", store->Statistics.minDepth);
 		fprintf(stderr,"dbg4       Statistics.maxDepth:                    %f\n", store->Statistics.maxDepth);
 
-		fprintf(stderr,"dbg4       PositionSensor.label:                   %s\n", store->PositionSensor.label);
-		fprintf(stderr,"dbg4       PositionSensor.positionSensorName:      %s\n", store->PositionSensor.positionSensorName);
-		fprintf(stderr,"dbg4       PositionSensor.none1:                   %f\n", store->PositionSensor.none1);
-		fprintf(stderr,"dbg4       PositionSensor.none2:                   %f\n", store->PositionSensor.none2);
-		fprintf(stderr,"dbg4       PositionSensor.none3:                   %f\n", store->PositionSensor.none3);
-		fprintf(stderr,"dbg4       PositionSensor.none4:                   %f\n", store->PositionSensor.none4);
-		fprintf(stderr,"dbg4       PositionSensor.none5:                   %f\n", store->PositionSensor.none5);
-		fprintf(stderr,"dbg4       PositionSensor.none6:                   %f\n", store->PositionSensor.none6);
-		fprintf(stderr,"dbg4       PositionSensor.none7:                   %f\n", store->PositionSensor.none7);
-		fprintf(stderr,"dbg4       PositionSensor.none8:                   %f\n", store->PositionSensor.none8);
-		fprintf(stderr,"dbg4       PositionSensor.time9:                   %s\n", store->PositionSensor.time9);
-		fprintf(stderr,"dbg4       PositionSensor.none10:                  %f\n", store->PositionSensor.none10);
-		fprintf(stderr,"dbg4       PositionSensor.none11:                  %f\n", store->PositionSensor.none11);
-		fprintf(stderr,"dbg4       PositionSensor.none12:                  %f\n", store->PositionSensor.none12);
-		fprintf(stderr,"dbg4       PositionSensor.none13:                  %f\n", store->PositionSensor.none13);
-		fprintf(stderr,"dbg4       PositionSensor.none14:                  %f\n", store->PositionSensor.none14);
-		fprintf(stderr,"dbg4       PositionSensor.none15:                  %f\n", store->PositionSensor.none15);
-		fprintf(stderr,"dbg4       PositionSensor.none16:                  %f\n", store->PositionSensor.none16);
-		fprintf(stderr,"dbg4       PositionSensor.none17:                  %f\n", store->PositionSensor.none17);
-		fprintf(stderr,"dbg4       PositionSensor.sensorAntennaPositionAhead:  %f\n", store->PositionSensor.sensorAntennaPositionAhead);
-		fprintf(stderr,"dbg4       PositionSensor.sensorAntennaPositionStar:   %f\n", store->PositionSensor.sensorAntennaPositionStar);
-		fprintf(stderr,"dbg4       PositionSensor.sensorAntennaPositionHeight: %f\n", store->PositionSensor.sensorAntennaPositionHeight);
+		for (i=0; i<MIN(MBSYS_SURF_MAXCPOS,
+				store->NrPositionsensors); i++)
+		{
+		fprintf(stderr,"dbg4       PositionSensor[%2d].label:                   %s\n", i, store->PositionSensor[i].label);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].positionSensorName:      %s\n", i, store->PositionSensor[i].positionSensorName);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none1:                   %f\n", i, store->PositionSensor[i].none1);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none2:                   %f\n", i, store->PositionSensor[i].none2);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none3:                   %f\n", i, store->PositionSensor[i].none3);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none4:                   %f\n", i, store->PositionSensor[i].none4);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none5:                   %f\n", i, store->PositionSensor[i].none5);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none6:                   %f\n", i, store->PositionSensor[i].none6);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none7:                   %f\n", i, store->PositionSensor[i].none7);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none8:                   %f\n", i, store->PositionSensor[i].none8);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].time9:                   %s\n", i, store->PositionSensor[i].time9);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none10:                  %f\n", i, store->PositionSensor[i].none10);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none11:                  %f\n", i, store->PositionSensor[i].none11);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none12:                  %f\n", i, store->PositionSensor[i].none12);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none13:                  %f\n", i, store->PositionSensor[i].none13);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none14:                  %f\n", i, store->PositionSensor[i].none14);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none15:                  %f\n", i, store->PositionSensor[i].none15);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none16:                  %f\n", i, store->PositionSensor[i].none16);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].none17:                  %f\n", i, store->PositionSensor[i].none17);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].sensorAntennaPositionAhead:  %f\n", store->PositionSensor[i].sensorAntennaPositionAhead);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].sensorAntennaPositionStar:   %f\n", store->PositionSensor[i].sensorAntennaPositionStar);
+		fprintf(stderr,"dbg4       PositionSensor[%2d].sensorAntennaPositionHeight: %f\n", store->PositionSensor[i].sensorAntennaPositionHeight);
+		}
 
 		fprintf(stderr,"dbg4       SoundingData.soundingFlag:              %d\n", store->SoundingData.soundingFlag);
 		fprintf(stderr,"dbg4       SoundingData.indexToAngle:              %d\n", store->SoundingData.indexToAngle);
@@ -709,7 +755,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg4       SoundingData.cKeel:                     %f\n", store->SoundingData.cKeel);
 		fprintf(stderr,"dbg4       SoundingData.cMean:                     %f\n", store->SoundingData.cMean);
 		fprintf(stderr,"dbg4       SoundingData.dynChartZero:              %f\n", store->SoundingData.dynChartZero);
- 
+
 		fprintf(stderr,"dbg4       ActualTransducerTable.label:                   %s\n", store->ActualTransducerTable.label);
 		fprintf(stderr,"dbg4       ActualTransducerTable.transducerDepth:         %f\n", store->ActualTransducerTable.transducerDepth);
 		fprintf(stderr,"dbg4       ActualTransducerTable.transducerPositionAhead: %f\n", store->ActualTransducerTable.transducerPositionAhead);
@@ -720,28 +766,35 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		fprintf(stderr,"dbg4       ActualAngleTable.label:                 %s\n", store->ActualAngleTable.label);
 		fprintf(stderr,"dbg4       ActualAngleTable.actualNumberOfBeams:   %d\n", store->ActualAngleTable.actualNumberOfBeams);
-		for (i=0;i<store->ActualAngleTable.actualNumberOfBeams;i++)
+		for (i=0; i<MIN(MBSYS_SURF_MAXBEAMS,
+				store->ActualAngleTable.actualNumberOfBeams); i++)
 		fprintf(stderr,"dbg4       ActualAngleTable.beamAngle[%3d]:        %f\n", i, store->ActualAngleTable.beamAngle[i]);
 
 		fprintf(stderr,"dbg4       ActualCProfileTable.label:                     %s\n", store->ActualCProfileTable.label);
 		fprintf(stderr,"dbg4       ActualCProfileTable.relTime:                   %f\n", store->ActualCProfileTable.relTime);
 		fprintf(stderr,"dbg4       ActualCProfileTable.numberOfActualValues:      %d\n", store->ActualCProfileTable.numberOfActualValues);
-		for (i=0;i<store->ActualCProfileTable.numberOfActualValues;i++)
-		fprintf(stderr,"dbg4       ActualCProfileTable.values[%3d]:               %f %f\n", 
+		for (i=0; i<MIN(MBSYS_SURF_MAXCVALUES,
+				store->ActualCProfileTable.numberOfActualValues); i++)
+		fprintf(stderr,"dbg4       ActualCProfileTable.values[%3d]:               %f %f\n",
 			i, store->ActualCProfileTable.values[i].depth, store->ActualCProfileTable.values[i].cValue);
 
-		fprintf(stderr,"dbg4       CenterPosition.positionFlag:            %d\n", store->CenterPosition.positionFlag);
-		fprintf(stderr,"dbg4       CenterPosition.centerPositionX:         %f\n", store->CenterPosition.centerPositionX);
-		fprintf(stderr,"dbg4       CenterPosition.centerPositionY:         %f\n", store->CenterPosition.centerPositionY);
-		fprintf(stderr,"dbg4       CenterPosition.speed:                   %f\n", store->CenterPosition.speed);
+		for (i=0; i<MIN(MBSYS_SURF_MAXCPOS,
+				store->NrPositionsensors); i++)
+		{
+		fprintf(stderr,"dbg4       CenterPosition[%2d].positionFlag:            %d\n", i, store->CenterPosition[i].positionFlag);
+		fprintf(stderr,"dbg4       CenterPosition[%2d].centerPositionX:         %f\n", i, store->CenterPosition[i].centerPositionX);
+		fprintf(stderr,"dbg4       CenterPosition[%2d].centerPositionY:         %f\n", i, store->CenterPosition[i].centerPositionY);
+		fprintf(stderr,"dbg4       CenterPosition[%2d].speed:                   %f\n", i, store->CenterPosition[i].speed);
+		}
 
 		fprintf(stderr,"dbg4       SingleBeamDepth.depthFlag:              %d\n", store->SingleBeamDepth.depthFlag);
 		fprintf(stderr,"dbg4       SingleBeamDepth.travelTimeOfRay:        %f\n", store->SingleBeamDepth.travelTimeOfRay);
 		fprintf(stderr,"dbg4       SingleBeamDepth.depthHFreq:             %f\n", store->SingleBeamDepth.depthHFreq);
 		fprintf(stderr,"dbg4       SingleBeamDepth.depthMFreq:             %f\n", store->SingleBeamDepth.depthMFreq);
 		fprintf(stderr,"dbg4       SingleBeamDepth.depthLFreq:             %f\n", store->SingleBeamDepth.depthLFreq);
-		
-		for (i=0;i<store->NrBeams;i++)
+
+		for (i=0; i<MIN(MBSYS_SURF_MAXBEAMS,
+				store->NrBeams); i++)
 		{
 		fprintf(stderr,"\ndbg4       MultiBeamDepth[%3d].depthFlag:                     %d\n", i, store->MultiBeamDepth[i].depthFlag);
 		fprintf(stderr,"dbg4       MultiBeamDepth[%3d].depth:                         %f\n", i, store->MultiBeamDepth[i].depth);
@@ -758,8 +811,9 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg4       MultibeamSignalParameters.rxGup:               %f\n", store->MultibeamSignalParameters.rxGup);
 		fprintf(stderr,"dbg4       MultibeamSignalParameters.rxGain:              %f\n", store->MultibeamSignalParameters.rxGain);
 		fprintf(stderr,"dbg4       MultibeamSignalParameters.ar:                  %f\n", store->MultibeamSignalParameters.ar);
-		for (i=0;i<store->MultibeamSignalParameters.nrActualGainSets;i++)
-		fprintf(stderr,"dbg4       MultibeamSignalParameters.rxSets[%3d]:               %f %f\n", 
+		for (i=0; i<MIN(MBSYS_SURF_MAXRXSETS,
+				store->MultibeamSignalParameters.nrActualGainSets); i++)
+		fprintf(stderr,"dbg4       MultibeamSignalParameters.rxSets[%3d]:               %f %f\n",
 			i, store->MultibeamSignalParameters.rxSets[i].time, store->MultibeamSignalParameters.rxSets[i].gain);
 
 		fprintf(stderr,"dbg4       MultibeamTransmitterParameters.txSets[0].txBeamIndex: %d\n", store->MultibeamTransmitterParameters.txSets[0].txBeamIndex);
@@ -774,8 +828,9 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg4       SidescanData.minSsTimeStb:              %f\n", store->SidescanData.minSsTimeStb);
 		fprintf(stderr,"dbg4       SidescanData.maxSsTimePort:             %f\n", store->SidescanData.maxSsTimePort);
 		fprintf(stderr,"dbg4       SidescanData.maxSsTimeStb:              %f\n", store->SidescanData.maxSsTimeStb);
-		for (i=0;i<store->SidescanData.actualNrOfSsDataPort
-				+ store->SidescanData.actualNrOfSsDataPort;
+		for (i=0; i<MIN(MBSYS_SURF_MAXPIXELS,
+				store->SidescanData.actualNrOfSsDataPort
+				+ store->SidescanData.actualNrOfSsDataPort);
 				i++)
 		fprintf(stderr,"dbg4       SidescanData.ssData[%d]:        %d\n", i, store->SidescanData.ssData[i]);
 		}
