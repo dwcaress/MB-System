@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.13 2001-11-15 22:58:02 caress Exp $
+ *    $Id: mbset.c,v 5.14 2001-12-18 04:29:57 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2001/11/15  22:58:02  caress
+ * Added datalist parsing to mbset, fixed file path handling.
+ *
  * Revision 5.12  2001/11/04  00:27:11  caress
  * Fixed handling of angle modes.
  *
@@ -96,7 +99,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.13 2001-11-15 22:58:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.14 2001-12-18 04:29:57 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -852,6 +855,28 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			sscanf(pargv[i], "METADRAFT:%lf", &(process.mbp_meta_draft));
 			}
+   
+		/* processing kluges */
+		else if (strncmp(pargv[i], "KLUGE001:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE001:%d", &(process.mbp_kluge001));
+			}
+		else if (strncmp(pargv[i], "KLUGE002:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE002:%d", &(process.mbp_kluge002));
+			}
+		else if (strncmp(pargv[i], "KLUGE003:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE003:%d", &(process.mbp_kluge003));
+			}
+		else if (strncmp(pargv[i], "KLUGE004:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE004:%d", &(process.mbp_kluge004));
+			}
+		else if (strncmp(pargv[i], "KLUGE005:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE005:%d", &(process.mbp_kluge005));
+			}
 
 		/* unrecognized command */
 		else
@@ -1115,6 +1140,13 @@ the manual pages for mbprocess and mbset. \n\n";
 	    fprintf(stderr,"  Metadata pitchbias:            %f\n",process.mbp_meta_pitchbias);
 	    fprintf(stderr,"  Metadata headingbias:          %f\n",process.mbp_meta_headingbias);
 	    fprintf(stderr,"  Metadata draft:                %f\n",process.mbp_meta_draft);
+
+	    fprintf(stderr,"\nProcessing Kluges:\n");
+	    fprintf(stderr,"  Kluge001:                      %d\n",process.mbp_kluge001);
+	    fprintf(stderr,"  Kluge002:                      %d\n",process.mbp_kluge002);
+	    fprintf(stderr,"  Kluge003:                      %d\n",process.mbp_kluge003);
+	    fprintf(stderr,"  Kluge004:                      %d\n",process.mbp_kluge004);
+	    fprintf(stderr,"  Kluge005:                      %d\n",process.mbp_kluge005);
 	    }
 
 	/* write parameters */

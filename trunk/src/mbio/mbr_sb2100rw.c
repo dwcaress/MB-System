@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 5.5 2001-07-27 19:07:16 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 5.6 2001-12-18 04:27:45 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/07/27  19:07:16  caress
+ * Added data cutting.
+ *
  * Revision 5.4  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -199,7 +202,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.5 2001-07-27 19:07:16 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.6 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mbr_register_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -329,7 +332,7 @@ int mbr_info_sb2100rw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.5 2001-07-27 19:07:16 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.6 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mbr_info_sb2100rw";
 	int	status = MB_SUCCESS;
 
@@ -398,7 +401,7 @@ int mbr_info_sb2100rw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.5 2001-07-27 19:07:16 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.6 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1782,6 +1785,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
 		/* now get other stuff */
 		mb_get_int(&(data->ss_data_length),        line+42,  4);
 		data->num_pixels = (data->ss_data_length)/4;
+
 		data->svp_corr_beams = line[46];
 		data->frequency[0] = line[47];
 		data->frequency[1] = line[48];

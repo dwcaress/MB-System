@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.15 2001-11-20 02:00:19 caress Exp $
+ *    $Id: mbprocess.c,v 5.16 2001-12-18 04:29:57 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2001/11/20  02:00:19  caress
+ * Now inserts metadata tags before comments.
+ *
  * Revision 5.14  2001/11/15  22:58:02  caress
  * Added datalist parsing to mbset, fixed file path handling.
  *
@@ -117,7 +120,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.15 2001-11-20 02:00:19 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.16 2001-12-18 04:29:57 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -1001,6 +1004,13 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"  Metadata pitchbias:            %f\n",process.mbp_meta_pitchbias);
 	    fprintf(stderr,"  Metadata headingbias:          %f\n",process.mbp_meta_headingbias);
 	    fprintf(stderr,"  Metadata draft:                %f\n",process.mbp_meta_draft);
+
+	    fprintf(stderr,"\nProcessing Kluges:\n");
+	    fprintf(stderr,"  Kluge001:                      %d\n",process.mbp_kluge001);
+	    fprintf(stderr,"  Kluge002:                      %d\n",process.mbp_kluge002);
+	    fprintf(stderr,"  Kluge003:                      %d\n",process.mbp_kluge003);
+	    fprintf(stderr,"  Kluge004:                      %d\n",process.mbp_kluge004);
+	    fprintf(stderr,"  Kluge005:                      %d\n",process.mbp_kluge005);
 	    }
 
 	/*--------------------------------------------
@@ -2224,25 +2234,25 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		if (process.mbp_meta_rollbias != 0.0)
+		if (process.mbp_meta_rollbias < MBP_METANOVALUE)
 			{
 			sprintf(comment,"METAROLLBIAS:%f", process.mbp_meta_rollbias);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		if (process.mbp_meta_pitchbias != 0.0)
+		if (process.mbp_meta_pitchbias < MBP_METANOVALUE)
 			{
 			sprintf(comment,"METAPITCHBIAS:%f", process.mbp_meta_pitchbias);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		if (process.mbp_meta_headingbias != 0.0)
+		if (process.mbp_meta_headingbias < MBP_METANOVALUE)
 			{
 			sprintf(comment,"METAHEADINGBIAS:%f", process.mbp_meta_headingbias);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		if (process.mbp_meta_draft != 0.0)
+		if (process.mbp_meta_draft < MBP_METANOVALUE)
 			{
 			sprintf(comment,"METADRAFT:%f", process.mbp_meta_draft);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -2805,6 +2815,42 @@ and mbedit edit save files.\n";
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
 	
+		if (process.mbp_kluge001 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge001 applied (travel time correction to HSDS2 data)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge002 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge002 applied (undefined)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge003 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge003 applied (undefined)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge004 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge004 applied (undefined)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge005 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge005 applied (undefined)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+	
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment," ");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -2922,6 +2968,12 @@ and mbedit edit save files.\n";
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5]);
 			}
+
+		/* apply kluge001 */
+		if (process.mbp_kluge001 == MB_YES
+			&& kind == MB_DATA_DATA
+			&& (format == 182 || format == 183))
+			status = mbsys_surf_ttcorr(verbose,imbio_ptr,store_ptr,&error);
 
 		/* extract the navigation if available */
 		if (error == MB_ERROR_NO_ERROR

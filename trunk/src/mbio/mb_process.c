@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.15 2001-11-16 01:30:02 caress Exp $
+ *    $Id: mb_process.c,v 5.16 2001-12-18 04:27:45 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2001/11/16  01:30:02  caress
+ * Fixed handling of paths.
+ *
  * Revision 5.14  2001/11/04  00:14:41  caress
  * Fixed handling of angle_mode
  *
@@ -95,7 +98,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.15 2001-11-16 01:30:02 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.16 2001-12-18 04:27:45 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -245,11 +248,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_meta_tidecorrected = MBP_CORRECTION_UNKNOWN;
 	process->mbp_meta_batheditmanual = MBP_CORRECTION_UNKNOWN;
 	process->mbp_meta_batheditauto = MBP_CORRECTION_UNKNOWN;
-	process->mbp_meta_rollbias = 0.0;
-	process->mbp_meta_pitchbias = 0.0;
-	process->mbp_meta_headingbias = 0.0;
-	process->mbp_meta_draft = 0.0;
+	process->mbp_meta_rollbias = MBP_METANOVALUE + 1.;
+	process->mbp_meta_pitchbias = MBP_METANOVALUE + 1.;
+	process->mbp_meta_headingbias = MBP_METANOVALUE + 1.;
+	process->mbp_meta_draft = MBP_METANOVALUE + 1.;
 
+	/* processing kluges */
+	process->mbp_kluge001 = MB_NO;
+	process->mbp_kluge002 = MB_NO;
+	process->mbp_kluge003 = MB_NO;
+	process->mbp_kluge004 = MB_NO;
+	process->mbp_kluge005 = MB_NO;
 
 	/* open and read parameter file */
 	if ((fp = fopen(parfile, "r")) != NULL) 
@@ -770,8 +779,24 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    /* processing kluges */
 		    else if (strncmp(buffer, "KLUGE001", 8) == 0)
 			{
+			process->mbp_kluge001 = MB_YES;
 			}
-			
+		    else if (strncmp(buffer, "KLUGE002", 8) == 0)
+			{
+			process->mbp_kluge002 = MB_YES;
+			}
+		    else if (strncmp(buffer, "KLUGE003", 8) == 0)
+			{
+			process->mbp_kluge003 = MB_YES;
+			}
+		    else if (strncmp(buffer, "KLUGE004", 8) == 0)
+			{
+			process->mbp_kluge004 = MB_YES;
+			}
+		    else if (strncmp(buffer, "KLUGE005", 8) == 0)
+			{
+			process->mbp_kluge005 = MB_YES;
+			}			
 		    }
 		}
 		
@@ -1052,6 +1077,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_meta_pitchbias:     %f\n",process->mbp_meta_pitchbias);
 		fprintf(stderr,"dbg2       mbp_meta_headingbias:   %f\n",process->mbp_meta_headingbias);
 		fprintf(stderr,"dbg2       mbp_meta_draft:         %f\n",process->mbp_meta_draft);
+		fprintf(stderr,"dbg2       mbp_kluge001:           %d\n",process->mbp_kluge001);
+		fprintf(stderr,"dbg2       mbp_kluge002:           %d\n",process->mbp_kluge002);
+		fprintf(stderr,"dbg2       mbp_kluge003:           %d\n",process->mbp_kluge003);
+		fprintf(stderr,"dbg2       mbp_kluge004:           %d\n",process->mbp_kluge004);
+		fprintf(stderr,"dbg2       mbp_kluge005:           %d\n",process->mbp_kluge005);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
@@ -1171,6 +1201,11 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_meta_pitchbias:     %f\n",process->mbp_meta_pitchbias);
 		fprintf(stderr,"dbg2       mbp_meta_headingbias:   %f\n",process->mbp_meta_headingbias);
 		fprintf(stderr,"dbg2       mbp_meta_draft:         %f\n",process->mbp_meta_draft);
+		fprintf(stderr,"dbg2       mbp_kluge001:           %d\n",process->mbp_kluge001);
+		fprintf(stderr,"dbg2       mbp_kluge002:           %d\n",process->mbp_kluge002);
+		fprintf(stderr,"dbg2       mbp_kluge003:           %d\n",process->mbp_kluge003);
+		fprintf(stderr,"dbg2       mbp_kluge004:           %d\n",process->mbp_kluge004);
+		fprintf(stderr,"dbg2       mbp_kluge005:           %d\n",process->mbp_kluge005);
 		}
 		
 	/* try to avoid absolute pathnames - get pwd */
@@ -1380,6 +1415,19 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "METAPITCHBIAS %f\n", process->mbp_meta_pitchbias);
 	    fprintf(fp, "METAHEADINGBIAS %f\n", process->mbp_meta_headingbias);
 	    fprintf(fp, "METADRAFT %f\n", process->mbp_meta_draft);
+	    
+	    /* processing kluges */
+	    fprintf(fp, "##\n## Processing Kluges:\n");
+	    if (process->mbp_kluge001 == MB_YES)
+	    	fprintf(fp, "KLUGE001\n");
+	    if (process->mbp_kluge002 == MB_YES)
+	    	fprintf(fp, "KLUGE002\n");
+	    if (process->mbp_kluge003 == MB_YES)
+	    	fprintf(fp, "KLUGE003\n");
+	    if (process->mbp_kluge004 == MB_YES)
+	    	fprintf(fp, "KLUGE004\n");
+	    if (process->mbp_kluge005 == MB_YES)
+	    	fprintf(fp, "KLUGE005\n");
   	
 	    /* close file */
 	    fclose(fp);
@@ -2582,6 +2630,61 @@ int mb_pr_update_metadata(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_update_kluges(int verbose, char *file, 
+			int	mbp_kluge001,
+			int	mbp_kluge002,
+			int	mbp_kluge003,
+			int	mbp_kluge004,
+			int	mbp_kluge005,
+			int *error)
+{
+	char	*function_name = "mb_pr_update_kluges";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                  %d\n",verbose);
+		fprintf(stderr,"dbg2       file:                     %s\n",file);
+		fprintf(stderr,"dbg2       mbp_kluge001:             %d\n",process.mbp_kluge001);
+		fprintf(stderr,"dbg2       mbp_kluge002:             %d\n",process.mbp_kluge002);
+		fprintf(stderr,"dbg2       mbp_kluge003:             %d\n",process.mbp_kluge003);
+		fprintf(stderr,"dbg2       mbp_kluge004:             %d\n",process.mbp_kluge004);
+		fprintf(stderr,"dbg2       mbp_kluge005:             %d\n",process.mbp_kluge005);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set metadata values */
+        process.mbp_kluge001 = mbp_kluge001;
+        process.mbp_kluge002 = mbp_kluge002;
+        process.mbp_kluge003 = mbp_kluge003;
+        process.mbp_kluge004 = mbp_kluge004;
+        process.mbp_kluge005 = mbp_kluge005;
+ 
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_get_ofile(int verbose, char *file, 
 			int	*mbp_ofile_specified, 
 			char	*mbp_ofile, 
@@ -2616,6 +2719,8 @@ int mb_pr_get_ofile(int verbose, char *file,
 
 	/* open and read parameter file */
 	*mbp_ofile_specified = MB_NO;
+	if (mbp_ofile != NULL)
+	    mbp_ofile[0] = '\0';
 	if ((fp = fopen(parfile, "r")) != NULL) 
 	    {
 	    while ((result = fgets(buffer,MBP_FILENAMESIZE,fp)) == buffer
@@ -3558,6 +3663,59 @@ int mb_pr_get_metadata(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_meta_pitchbias:       %f\n",*mbp_meta_pitchbias);
 		fprintf(stderr,"dbg2       mbp_meta_headingbias:     %f\n",*mbp_meta_headingbias);
 		fprintf(stderr,"dbg2       mbp_meta_draft:           %f\n",*mbp_meta_draft);
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_kluges(int verbose, char *file, 
+			int	*mbp_kluge001,
+			int	*mbp_kluge002,
+			int	*mbp_kluge003,
+			int	*mbp_kluge004,
+			int	*mbp_kluge005,
+			int *error)
+{
+	char	*function_name = "mb_pr_get_kluges";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set metadata values */
+        *mbp_kluge001 = process.mbp_kluge001;
+        *mbp_kluge002 = process.mbp_kluge002;
+        *mbp_kluge003 = process.mbp_kluge003;
+        *mbp_kluge004 = process.mbp_kluge004;
+        *mbp_kluge005 = process.mbp_kluge005;
+ 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_kluge001:             %d\n",mbp_kluge001);
+		fprintf(stderr,"dbg2       mbp_kluge002:             %d\n",mbp_kluge002);
+		fprintf(stderr,"dbg2       mbp_kluge003:             %d\n",mbp_kluge003);
+		fprintf(stderr,"dbg2       mbp_kluge004:             %d\n",mbp_kluge004);
+		fprintf(stderr,"dbg2       mbp_kluge005:             %d\n",mbp_kluge005);
 		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                   %d\n",status);
