@@ -177,7 +177,7 @@ object mb_file_select_box : XmFileSelectionBox widget
         XmNmarginHeight = 2;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 10;
-        XmNy = 60;
+        XmNy = 10;
         XmNwidth = 570;
         XmNheight = 470;
     };
@@ -202,7 +202,7 @@ object textfield_format_label : XmLabel widget
     arguments
     {
         XmNx = 15;
-        XmNy = 22;
+        XmNy = 507;
         XmNfontList = k_menu_bar_font;
         XmNlabelString = compound_string("MBIO Format ID:");
     };
@@ -213,7 +213,7 @@ object textfield_format : XmTextField widget
     arguments
     {
         XmNx = 140;
-        XmNy = 15;
+        XmNy = 500;
         XmNvalue = '21';
         XmNcolumns = 2;
         XmNmaxLength = 2;
@@ -432,8 +432,8 @@ object button_quit : XmCascadeButton widget
 };
 
 /*********************************************************/
-/* THIS DISPLAYS THE TOP SECTION WHERE YOU CAN INPUT DATA*/
-/* AND THE BOTTOM CANVAS WHERE YOU CAN DISPLAY THE 
+/* THIS DISPLAYS THE TOP SECTION WHERE YOU CAN SET       */
+/* WIDGETS AND THE BOTTOM CANVAS WHERE DATA IS DISPLAYED */ 
 /*********************************************************/
 object main_input_board : XmBulletinBoard widget 
 {
@@ -471,7 +471,7 @@ object input_screen : XmBulletinBoard widget
         XmNx = 0;
         XmNy = 10;
         XmNwidth = 1095;
-        XmNheight = 126;
+        XmNheight = 175;
     };
     controls 
     {
@@ -816,10 +816,10 @@ object message_status_hydrosweep : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("No MultiBeam data loaded");
+        XmNlabelString = compound_string("No MultiBeam Data Loaded");
 	XmNfontList = k_menu_font;
-        XmNx = 8;
-        XmNy = 100;
+        XmNx = 10;
+        XmNy = 155;
     };
     callbacks 
     {
@@ -833,10 +833,10 @@ object message_status_edit : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("No editable water velocity profile loaded");
+        XmNlabelString = compound_string("No Editable Sound Velocity Profile Loaded");
 	XmNfontList = k_menu_font;
-        XmNx = 8;
-        XmNy = 60;
+        XmNx = 10;
+        XmNy = 135;
     };
     callbacks 
     {
@@ -850,10 +850,10 @@ object message_status_display : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("No display water velocity profiles loaded");
+        XmNlabelString = compound_string("No Display Sound Velocity Profiles Loaded");
 	XmNfontList = k_menu_font;
-        XmNx = 8;
-        XmNy = 20;
+        XmNx = 10;
+        XmNy = 115;
     };
     callbacks 
     {
@@ -867,10 +867,10 @@ object slider_maxdepth_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("Maximum Depth: 250");
+        XmNlabelString = compound_string("Maximum Depth (m):   250");
 	XmNfontList = k_menu_font;
-        XmNx = 755;
-        XmNy = 20;
+        XmNx = 10;
+        XmNy = 15;
     };
 };
 
@@ -882,15 +882,15 @@ object slider_maxdepth : XmScale widget
     {
         XmNmaximum = 13000;
         XmNminimum = 250;
-	XmNscaleMultiple = 5;
+	XmNscaleMultiple = 1;
         XmNorientation = XmHORIZONTAL;
 	XmNvalue = 3000;
         XmNshowValue = true;
         XmNscaleHeight = 15;
         XmNhighlightThickness = 1;
-        XmNx = 890;
-        XmNy = 5;
-        XmNwidth = 102;
+        XmNx = 180;
+        XmNy = 0;
+        XmNwidth = 820;
         XmNheight = 31;
     };
     controls 
@@ -899,6 +899,7 @@ object slider_maxdepth : XmScale widget
     callbacks 
     {
         XmNvalueChangedCallback = procedure action_maxdepth(k_max_depth);
+        MrmNcreateCallback = procedure create_proc (k_max_depth);
     };
 };
 
@@ -911,8 +912,8 @@ object max_depth_max_label : XmLabel widget
         XmNlabelString = compound_string("13000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 990;
-        XmNy = 20;
+        XmNx = 1000;
+        XmNy = 15;
         XmNwidth = 50;
         XmNheight = 10;
     };
@@ -924,10 +925,10 @@ object slider_velrange_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("Velocity Range: 25");
+        XmNlabelString = compound_string("Velocity Range (m/s): 25");
 	XmNfontList = k_menu_font;
-        XmNx = 755;
-        XmNy = 60;
+        XmNx = 10;
+        XmNy = 50;
     };
 };
 
@@ -939,15 +940,15 @@ object slider_velrange : XmScale widget
     {
         XmNmaximum = 1000;
         XmNminimum = 25;
-	XmNscaleMultiple = 5;
+	XmNscaleMultiple = 1;
         XmNorientation = XmHORIZONTAL;
 	XmNvalue = 500;
         XmNshowValue = true;
         XmNscaleHeight = 15;
         XmNhighlightThickness = 1;
-        XmNx = 890;
-        XmNy = 45;
-        XmNwidth = 102;
+        XmNx = 180;
+        XmNy = 35;
+        XmNwidth = 820;
         XmNheight = 31;
     };
     controls 
@@ -956,6 +957,7 @@ object slider_velrange : XmScale widget
     callbacks 
     {
         XmNvalueChangedCallback = procedure action_velrange(k_action_vel);
+        MrmNcreateCallback = procedure create_proc (k_action_vel);
     };
 };
 
@@ -968,8 +970,8 @@ object vel_range_max_label : XmLabel widget
         XmNlabelString = compound_string("1000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 995;
-        XmNy = 60;
+        XmNx = 1000;
+        XmNy = 50;
         XmNwidth = 40;
         XmNheight = 10;
     };
@@ -981,10 +983,10 @@ object slider_residual_range_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("Residual Range:  1");
+        XmNlabelString = compound_string("Residual Range (m):    1");
 	XmNfontList = k_menu_font;
-        XmNx = 755;
-        XmNy = 100;
+        XmNx = 10;
+        XmNy = 85;
     };
 };
 
@@ -996,15 +998,15 @@ object slider_residual_range : XmScale widget
     {
         XmNmaximum = 200;
         XmNminimum = 1;
-	XmNscaleMultiple = 5;
+	XmNscaleMultiple = 1;
         XmNorientation = XmHORIZONTAL;
 	XmNvalue = 10;
         XmNshowValue = true;
         XmNscaleHeight = 15;
         XmNhighlightThickness = 1;
-        XmNx = 890;
-        XmNy = 85;
-        XmNwidth = 102;
+        XmNx = 180;
+        XmNy = 70;
+        XmNwidth = 820;
         XmNheight = 31;
     };
     controls 
@@ -1013,6 +1015,7 @@ object slider_residual_range : XmScale widget
     callbacks 
     {
         XmNvalueChangedCallback = procedure action_residual_range(k_action_res);
+        MrmNcreateCallback = procedure create_proc (k_action_res);
     };
 };
 
@@ -1025,8 +1028,8 @@ object res_range_max_label : XmLabel widget
         XmNlabelString = compound_string("200");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 995;
-        XmNy = 100;
+        XmNx = 1000;
+        XmNy = 85;
         XmNwidth = 30;
         XmNheight = 10;
     };
@@ -1040,9 +1043,9 @@ object canvas_base : XmDrawingArea widget
     {
         XmNborderWidth = 1;
         XmNx = 2;
-        XmNy = 150;
+        XmNy = 185;
         XmNwidth = 1099;
-        XmNheight = 685;
+        XmNheight = 650;
 	XmNbackground = white;
     };
     controls 

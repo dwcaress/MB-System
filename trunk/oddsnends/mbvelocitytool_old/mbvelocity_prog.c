@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.3 1994-11-24 01:54:08 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.4 1995-02-14 18:26:46 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/11/24  01:54:08  caress
+ * Some fixes related to gradient raytracing version.
+ *
  * Revision 4.2  1994/11/18  18:58:19  caress
  * First gradient raytracing version.
  *
@@ -85,7 +88,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.3 1994-11-24 01:54:08 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.4 1995-02-14 18:26:46 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -109,7 +112,7 @@ int	mbvt_xgid;
 int	borders[4];
 int	maxdepth = 3000;
 int	velrange = 500;
-int	resrange = 10;
+int	resrange = 200;
 
 /* plotting variables */
 int	xmin, xmax, ymin, ymax;
@@ -469,18 +472,17 @@ int	*pixels;
 /* Function returns:                                                  */
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
-int mbvt_get_defaults(s_edit,s_ndisplay,s_maxdepth,
-	s_velrange,s_resrange,s_format,s_nbuffer)
+int mbvt_get_values(s_edit,s_ndisplay,s_maxdepth,
+	s_velrange,s_resrange,s_format)
 int	*s_edit;
 int	*s_ndisplay;
 int	*s_maxdepth;
 int	*s_velrange;
 int	*s_resrange;
 int	*s_format;
-int	*s_nbuffer;
 {
 	/* local variables */
-	char	*function_name = "mbvt_get_defaults";
+	char	*function_name = "mbvt_get_values";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
@@ -497,7 +499,6 @@ int	*s_nbuffer;
 	*s_velrange = velrange;
 	*s_resrange = resrange;
 	*s_format = format;
-	*s_nbuffer = nbuffer ;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -511,7 +512,6 @@ int	*s_nbuffer;
 		fprintf(stderr,"dbg2       s_velrange:  %d\n",*s_velrange);
 		fprintf(stderr,"dbg2       s_resrange:  %d\n",*s_resrange);
 		fprintf(stderr,"dbg2       s_format:    %d\n",*s_format);
-		fprintf(stderr,"dbg2       s_nbuffer:   %d\n",*s_nbuffer);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
 		}
@@ -1388,7 +1388,7 @@ int mbvt_plot()
 			&sascent,&sdescent);
 		xg_drawstring(mbvt_xgid,
 			borders[1]/2-swidth/2,
-			yrmin-4*sascent+12,string,
+			yrmin-4*sascent+14,string,
 			pixel_values[BLACK],XG_SOLIDLINE);
 		}
 	strcpy(string,"Multibeam Bathymetry Beam Residuals");
@@ -2019,7 +2019,7 @@ int mbvt_process_multibeam()
 		}
 
 	/* initialize residuals and raypaths */
-	for (i=0;i<nbeams;i++)
+	for (i=0;i<beams_bath;i++)
 		{
 		residual[i] = 0.0;
 		nresidual[i] = 0;

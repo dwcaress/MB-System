@@ -56,6 +56,8 @@ value
 	k_main_window			:29;
 	k_mb_file_sel_board		:30;
 	k_cancel_mb_file_sel_box	:31;
+	k_filelist_list			:32;
+	k_selection_text		:33;
 
 
 /*******************************************************/
