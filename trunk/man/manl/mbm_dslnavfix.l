@@ -1,10 +1,10 @@
-.TH mbm_dslnavfix l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbm_dslnavfix l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_dslnavfix\fP - Translate WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbm_dslnavfix\fP \fB-I\fP\fIinfile\fP \fB-J\fP\fIutm_zone\fP 

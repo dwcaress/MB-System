@@ -1,10 +1,10 @@
-.TH mbm_grdplot l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbm_grdplot l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
 a GMT map of gridded data in a GMT grd file.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbm_grdplot\fP \fB-I\fP\fIfile\fP 

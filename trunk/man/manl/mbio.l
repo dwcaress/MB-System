@@ -1,9 +1,9 @@
-.TH mbio l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbio l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH DESCRIPTION
 \fBMBIO\fP (\fBM\fPulti\fBB\fPeam \fBI\fPnput/\fBO\fPutput) is a library
@@ -241,11 +241,26 @@ The following swath mapping sonar data formats are supported in this version of
 
     MBIO Data Format ID:  41
     Format name:          MBF_SB2100RW
-    Informal Description: SeaBeam 2100/1000 vender format
-    Attributes:           SeaBeam 2100/1000, bathymetry, 
-                          amplitude and sidescan, 151 beams
-                          and 2000 pixels, ascii with binary
-                          sidescan, SeaBeam Instruments.
+    Informal Description: SeaBeam 2100 series vender format
+    Attributes:           SeaBeam 2100, bathymetry, amplitude 
+                          and sidescan, 151 beams and 2000 pixels, ascii 
+                          with binary sidescan, SeaBeam Instruments.
+
+    MBIO Data Format ID:  42
+    Format name:          MBF_SB2100B1
+    Informal Description: SeaBeam 2100 series vender format
+    Attributes:           SeaBeam 2100, bathymetry, amplitude 
+                          and sidescan, 151 beams bathymetry,
+                          2000 pixels sidescan, binary,
+                          SeaBeam Instruments and L-DEO.
+
+    MBIO Data Format ID:  43
+    Format name:          MBF_SB2100B2
+    Informal Description: SeaBeam 2100 series vender format
+    Attributes:           SeaBeam 2100, bathymetry and amplitude,  
+                          151 beams bathymetry,
+                          binary,
+                          SeaBeam Instruments and L-DEO.
 
     MBIO Data Format ID:  51
     Format name:          MBF_EM1000RW

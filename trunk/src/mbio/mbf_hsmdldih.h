@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsmdldih.h	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdldih.h,v 4.0 1995-09-28 18:14:11 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdldih.h,v 4.1 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,12 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/09/28  18:14:11  caress
+ * First cut.
+ *
+ * Revision 4.0  1995/09/28  18:14:11  caress
+ * First cut.
+ *
  * Revision 1.1  1995/09/28  18:10:48  caress
  * Initial revision
  *

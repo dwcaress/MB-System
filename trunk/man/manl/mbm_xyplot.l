@@ -1,10 +1,10 @@
-.TH mbm_xyplot l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbm_xyplot l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_xyplot\fP - Create an executable shellscript which will generate
 a GMT plot of xy data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbm_grdplot\fP \fB-I\fP\fI[filepars:]file\fP 
@@ -456,11 +456,11 @@ then exits.  This option will cause the shellscript to be executed
 in the background before \fBmbm_xyplot\fP exits.
 
 .SH EXAMPLES
-Suppose we have obtained a multibeam data file called
+Suppose we have obtained a swath sonar data file called
 sb2112_example.mb41 collected using a SeaBeam 2112 sonar.
 In order to obtain an xy plot of the center beam depth
 versus time, we first extract the time-depth xy doubles
-from the multibeam file using \fBmblist\fP:
+from the swath sonar file using \fBmblist\fP:
  
  	mblist -F41 -Isb2112_example.mb41 -OmZ > mz.dat
  
@@ -481,7 +481,7 @@ Suppose we also have a sparse set of depth estimates
 in a file called sr.dat obtained
 by picking the seafloor on a seismic reflection record, and
 we wish to compare the two sets of depths. We can plot the
-multibeam derived depths as a black line and the seismic
+swath sonar derived depths as a black line and the seismic
 derived depths as red stars as follows:
  
  	mbm_xyplot -Omz_sr -Imz.dat \\

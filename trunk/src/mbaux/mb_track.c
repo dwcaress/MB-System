@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 4.4 1996-04-22 13:18:44 caress Exp $
+ *    $Id: mb_track.c,v 4.5 1997-04-21 16:53:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1996/04/22  13:18:44  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
+ * Revision 4.4  1996/04/22  13:18:44  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.3  1995/03/06  19:39:52  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -64,7 +70,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 4.4 1996-04-22 13:18:44 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 4.5 1997-04-21 16:53:56 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;

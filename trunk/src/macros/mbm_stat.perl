@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_stat.perl	8/14/93
-#    $Id: mbm_stat.perl,v 4.1 1995-05-12 17:43:23 caress Exp $
+#    $Id: mbm_stat.perl,v 4.2 1997-04-21 16:54:41 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,18 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 14, 1993
 #
 # Version:
-#   $Id: mbm_stat.perl,v 4.1 1995-05-12 17:43:23 caress Exp $
+#   $Id: mbm_stat.perl,v 4.2 1997-04-21 16:54:41 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1995/05/12  17:43:23  caress
+# Made exit status values consistent with Unix convention.
+# 0: ok  nonzero: error
+#
+# Revision 4.1  1995/05/12  17:43:23  caress
+# Made exit status values consistent with Unix convention.
+# 0: ok  nonzero: error
+#
 # Revision 4.0  1994/10/21  11:47:31  caress
 # Release V4.0
 #

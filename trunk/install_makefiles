@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.12 1996-09-09 15:17:50 caress Exp $
+#    $Id: install_makefiles,v 4.13 1997-04-21 16:51:19 caress Exp $
 #
-#    Copyright (c) 1993, 1994 by 
+#    Copyright (c) 1993, 1994, 1995, 1996, 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -41,10 +41,20 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.12 1996-09-09 15:17:50 caress Exp $
+#   $Id: install_makefiles,v 4.13 1997-04-21 16:51:19 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.14  1997/04/17  19:31:15  caress
+# Removed Fortran related parameters from user edit area
+# and added LINUX to list of supported operating systems.
+#
+# Revision 4.13  1997/04/17  15:18:34  caress
+# MB-System 4.5 Beta Release
+#
+# Revision 4.12  1996/09/09  15:17:50  caress
+# Turning GRAPHICAL off now turns mbnavedit off.
+#
 # Revision 4.11  1995/08/17  16:39:53  caress
 # Revision for release 4.3.
 #
@@ -89,7 +99,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # The important parameters to be set are:
 #	MBSYSTEM_HOME	Absolute path to the directory containing
 #				this file.
-#	OS		Operating system (SUN, IRIX, LYNX, 
+#	OS		Operating system (SUN, IRIX, LINUX, LYNX, 
 #				SOLARIS, HPUX, or OTHER).
 #	BYTESWAPPED	If set to "YES" will enable byte swapping
 #				of input and output binary data.
@@ -98,139 +108,114 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #				when installing on "little endian"
 #				machines such as PCs or VAXs.
 #	CC		C compiler to be used (optional).
-#	FC		Fortran compiler to be used (optional).
 #	CFLAGS		Compile flags for C source files.
-#	FFLAGS		Compile flags for F77 source files.
 #	LFLAGS		Load flags for all object files.
-#	FWITHCFLAGS	Load flags for C and F77 object files together.
 #	GRAPHICAL	If set to "YES" will enable the installation
-#			of the Motif based graphical utilities mbedit
-#			and mbvelocitytool. If Motif is not available
-#			but the nongraphical utilities are desired then
-#			disable with "NO" (optional, default is "YES").
+#			of the Motif based graphical utilities mbedit,
+#			mbnavedit, and mbvelocitytool. If Motif 
+#                       is not available but the nongraphical utilities 
+#                       are desired then disable with "NO". 
+#			(optional, default is "YES")
 #       MOTIFINCDIR	Location of Motif include files.
 #       MOTIFLIBS	X and Motif libraries required for graphical tools.
-#       UIL		Location of Motif tool used to compile
-#				interface definition files.
 #	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
 #	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
 #				and pslib.h
 #	NETCDFLIBDIR	Location of NetCDF library libnetcdf.a
 #	NETCDFINCDIR	Location of NetCDF include file netcdf.h
 #	LEVITUS		Path for Levitus data file annual.
-#	REALTIME	If set to 1, enables installation of realtime
-#			pen plotting programs (0 disables installation).
-#	GRPHLIBDIR	Location of L-DEO shipboard graphics 
-#				library libgraphics.a
-#	GRPHINCDIR	Location of L-DEO shipboard graphics 
-#				include file graphics.h
 #
-# Example for installing on L-DEO Sun workstations:
+# Example for installing on L-DEO Sun workstations running SunOs 4.1.x:
 #	$MBSYSTEM_HOME = "/home/hs/caress/dev/mbsystem";
 #	$OS = "SUN";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
-#	$FFLAGS = "-O2";
 #	$LFLAGS = "-lm";
-#	$FWITHCFLAGS = "-lF77";
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
-#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
-#	$UIL = "/usr/bin/X11/uil";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
 #	$GMTLIBDIR = "/ocean/mgg/gmt2/sun4/lib";
 #	$GMTINCDIR = "/ocean/mgg/gmt2/src";
 #	$NETCDFLIBDIR = "/ocean/mgg/netcdf/sun4/lib";
 #	$NETCDFINCDIR = "/ocean/mgg/netcdf/include";
 #	$LEVITUS = "/ocean/mgg/levitus/annual";
-#	$REALTIME = 1;
-#	$GRPHLIBDIR = "/otter/home/graphics/lib";
-#	$GRPHINCDIR = "/otter/home/graphics/lib";
 #
 # Example for installing on R/V Ewing Sun workstations:
 #	$MBSYSTEM_HOME = "/net/heezen/packages/mbsystem";
 #	$OS = "SUN";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
-#	$FFLAGS = "-O2";
 #	$LFLAGS = "-lm";
-#	$FWITHCFLAGS = "-lF77";
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
-#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
-#	$UIL = "/usr/bin/X11/uil";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
 #	$GMTLIBDIR = "/net/heezen/packages/gmt2/bin";
 #	$GMTINCDIR = "/net/heezen/packages/gmt2/src";
 #	$NETCDFLIBDIR = "/net/heezen/packages/netcdf/lib";
 #	$NETCDFINCDIR = "/net/heezen/packages/netcdf/include";
 #	$LEVITUS = "/net/heezen/packages/levitus/annual";
-#	$REALTIME = 1;
-#	$GRPHLIBDIR = "/otter/home/graphics/lib";
-#	$GRPHINCDIR = "/otter/home/graphics/lib";
 #
 # Example for installing on Sun workstations running Solaris 2.4:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "SOLARIS";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O -I/usr/openwin/include -I/usr/ucbinclude";
-#	$FFLAGS = "-O";
 #	$LFLAGS = "-lnsl -lm";
-#	$FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam";
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/dt/include";
-#	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11 -lMrm";
-#	$UIL = "/usr/dt/bin/uil";
+#	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
 #	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
 #	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
-#	$REALTIME = 0;
-#	$GRPHLIBDIR = "";
-#	$GRPHINCDIR = "";
 #
 # Example for installing on SeaBeam Instruments SGI IRIX workstations:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "IRIX";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
-#	$FFLAGS = "-O2";
 #	$LFLAGS = "-lm -lsun";
-#	$FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam -lfgl";
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
-#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
-#	$UIL = "/usr/bin/X11/uil";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
 #	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
 #	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
-#	$REALTIME = 1;
-#	$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
-#	$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
 #
 # Example for installing on SeaBeam Instruments Lynx PC:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "LYNX";
 #	$BYTESWAPPED = "YES";
 #	$CC = "cc";
-#	$FC = "epcf77";
 #	$CFLAGS = "-k";
-#	$FFLAGS = "-k";
 #	$LFLAGS = "-lm -lbsd -X";
-#	$FWITHCFLAGS = "-lMEPC -lVEPC -lCEPC";
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
-#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
-#	$UIL = "/usr/bin/X11/uil";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
 #	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
 #	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
-#	$REALTIME = 1;
-#	$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
-#	$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
+##
+# Example for installing on PC running LINUX:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "LINUX";
+#	$BYTESWAPPED = "YES";
+#	$CC = "cc";
+#	$CFLAGS = "?";
+#	$LFLAGS = "?";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "?";
+#	$MOTIFLIBS = "?";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
 #
 # Example for installing on Hewlett Packard workstations
 # running HPUX version 9.0X or later:
@@ -238,21 +223,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$OS = "HPUX";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-Ae +O3 -I/usr/include/X11R5 -I/usr/include/Motif1.2";
-#	$FFLAGS = "+O3";
 #	$LFLAGS = "-lm ";
-#	$FWITHCFLAGS = "-lF77 -lU77";
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/lib/Motif1.2/Xm";
-#	$MOTIFLIBS = "-Wl,-L/usr/lib/Motif1.2 -Wl,-lMrm -Wl,-lXm -Wl,-L/usr/lib/X11R5 -Wl,-lX11 -Wl,-lXt";
-#	$UIL = "/usr/bin/X11/uil";
+#	$MOTIFLIBS = "-Wl,-L/usr/lib/Motif1.2 -Wl, -Wl,-lXm -Wl,-L/usr/lib/X11R5 -Wl,-lX11 -Wl,-lXt";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
 #	$NETCDFLIBDIR = "/usr/local/gmt/lib";
 #	$NETCDFINCDIR = "/usr/local/gmt/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
-#	$REALTIME = 0;
-#	$GRPHLIBDIR = "";
-#	$GRPHINCDIR = "";
 #
 # **** EDIT THE PARAMETERS HERE ****
 # Set the environment parameters:
@@ -260,13 +239,10 @@ $MBSYSTEM_HOME = "/SB3/caress/dev/mbsystem";
 $OS = "IRIX";
 $BYTESWAPPED = "NO";
 $CFLAGS = "-g";
-$FFLAGS = "-g";
-$LFLAGS = " -lmalloc -lm -lsun -g";
-$FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam -lfgl";
+$LFLAGS = "-lm -g";
 $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
-$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
-$UIL = "/usr/bin/X11/uil";
+$MOTIFLIBS = "-lXm -lXt -lX11";
 $GMTLIBDIR = "/usr/local/gmt/src";
 $GMTINCDIR = "/usr/local/gmt/src";
 $NETCDFLIBDIR = "/usr/local/netcdf/lib";
@@ -278,10 +254,18 @@ $LEVITUS = "/usr/local/levitus/annual";
 # ****    PEN PLOTTING ON A SHIP    ****
 # ****    AND HAVE INSTALLED THE    ****
 # ****      REQUIRED SOFTWARE       ****
+# ****                              ****
+# **** IF YOU DON'T KNOW WHAT THESE ****
+# ****    ARE FOR THEN LEAVE THEM   ****
+# ****             ALONE!           ****
+# ****                              ****
 #
 $REALTIME = 0;
 $GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
 $GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
+$FC = "f77";
+$FFLAGS = "-O2";
+$FWITHCFLAGS = "-lF77";
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
 
@@ -346,7 +330,6 @@ if ($FC)
 print "C Compile Flags:           $CFLAGS\n";
 print "F77 Compile Flags:         $FFLAGS\n";
 print "Load Flags:                $LFLAGS\n";
-print "F77 with C Load Flags:     $FWITHCFLAGS\n";
 print "Library Archiver:          $ARCHIVE\n";
 if ($GRAPHICAL eq "YES")
 	{
@@ -358,7 +341,6 @@ else
 	}
 print "Motif Include Location:    $MOTIFINCDIR\n";
 print "Motif Libraries:           $MOTIFLIBS\n";
-print "UIL compiler:              $UIL\n";
 print "GMT Library Location:      $GMTLIBDIR\n";
 print "GMT Include Location:      $GMTINCDIR\n";
 print "NetCDF Library Location:   $NETCDFLIBDIR\n";
@@ -435,13 +417,13 @@ while (@files)
 			{
 			print MAK "FFLAGS = $FFLAGS\n";
 			}
-		elsif (index($_,"LFLAGS",0) == 0)
-			{
-			print MAK "LFLAGS = $LFLAGS\n";
-			}
 		elsif (index($_,"FWITHCFLAGS",0) == 0)
 			{
 			print MAK "FWITHCFLAGS = $FWITHCFLAGS\n";
+			}
+		elsif (index($_,"LFLAGS",0) == 0)
+			{
+			print MAK "LFLAGS = $LFLAGS\n";
 			}
 		elsif (index($_,"MOTIFINCDIR",0) == 0)
 			{
@@ -450,10 +432,6 @@ while (@files)
 		elsif (index($_,"MOTIFLIBS",0) == 0)
 			{
 			print MAK "MOTIFLIBS = $MOTIFLIBS\n";
-			}
-		elsif (index($_,"UIL",0) == 0)
-			{
-			print MAK "UIL = $UIL\n";
 			}
 		elsif (index($_,"GMTLIBDIR",0) == 0)
 			{
@@ -506,7 +484,7 @@ while (@files)
 		elsif (index($_,"cd mbnavedit",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
-		elsif (index($_,"cd realtime",0) >= 0 && $REALTIME == 0)
+		elsif (index($_,"cd realtime",0) >= 0 && $REALTIME != 1)
 			{
 			}
 		else

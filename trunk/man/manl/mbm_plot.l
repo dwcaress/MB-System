@@ -1,10 +1,10 @@
-.TH mbm_plot l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbm_plot l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
-a GMT plot of multibeam swath data.
+a GMT plot of swath sonar swath data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbm_plot\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP 
@@ -47,7 +47,7 @@ Miscellaneous Options:
 .SH DESCRIPTION
 \fBmbm_plot\fP is a macro to generate a shellscript of MB-System and GMT commands 
 which, when executed, will generate a Postscript plot of the 
-specified multibeam data. The plot may include bathymetry color 
+specified swath sonar data. The plot may include bathymetry color 
 fill (\fB-G\fP\fI1\fP), bathymetry color shaded relief (\fB-G\fP\fI2\fP), bathymetry 
 shaded with amplitudes (\fB-G\fP\fI3\fP), greyshade fill amplitude (\fB-G\fP\fI4\fP), 
 greyshade fill sidescan (\fB-G\fP\fI5\fP), contoured bathymetry (\fB-C\fP),
@@ -125,10 +125,10 @@ but leave the default color convention.
 .B \fB-F\fIformat\fP
 Sets the data format for the input data. 
 If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input multibeam
+with the \fB-I\fP option will actually contain a list of input swath sonar
 data files. This program uses the \fBMBIO\fP library 
-and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
 .TP
@@ -146,10 +146,10 @@ of its operation and then exit immediately.
 .TP
 .B \fB-I\fIfilename\fP
 Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-f\fP option) then the multibeam data contained in \fIinfile\fP 
+\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0 (the default), 
 then \fIinfile\fP
-is assumed to be an ascii file containing a list of the input multibeam
+is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read 
 the data in each one of these files.
 In the \fIinfile\fP file, each
@@ -157,8 +157,8 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
@@ -301,10 +301,10 @@ but leave the default color convention.
 .B \fB-F\fIformat\fP
 Sets the data format for the input data. 
 If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input multibeam
+with the \fB-I\fP option will actually contain a list of input swath sonar
 data files. This program uses the \fBMBIO\fP library 
-and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
 .TP
@@ -322,10 +322,10 @@ of its operation and then exit immediately.
 .TP
 .B \fB-I\fIfilename\fP
 Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-f\fP option) then the multibeam data contained in \fIinfile\fP 
+\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0 (the default), 
 then \fIinfile\fP
-is assumed to be an ascii file containing a list of the input multibeam
+is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read 
 the data in each one of these files.
 In the \fIinfile\fP file, each
@@ -333,8 +333,8 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
@@ -543,7 +543,7 @@ Default: \fInplot\fP = 50 unless \fB-Z\fP\fI1\fP is specified,
 in which case the default is \fInplot\fP = 5.
 .TP
 .B \fB-MMP\fP\fIpings \fP
-Sets the ping averaging of the input multibeam data. If \fIpings\fP = 1, then
+Sets the ping averaging of the input swath sonar data. If \fIpings\fP = 1, then
 no ping averaging is performed. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
 ping.  If \fIpings\fP = 0, then the ping averaging will automatically
@@ -764,7 +764,7 @@ the default value can be overridden by setting the environment
 variable $MB_PS_VIEWER. 
 .TP
 .B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds within which multibeam 
+Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Normally the bounds are automatically chosen
 to include all of the input data. 
 .TP
@@ -891,7 +891,7 @@ contour interval if those parameters are not specified
 by the user.
 
 .SH EXAMPLES
-Suppose we have obtained a multibeam data file called
+Suppose we have obtained a swath sonar data file called
 sb2112_example.mb41 collected using a SeaBeam 2112 sonar.
 This file contains bathymetry, beam amplitude, and
 sidescan data. In order to obtain initial views of the
@@ -959,7 +959,7 @@ As an example, the contents of the plotting shellscript
 "bathtest.cmd" are:
  
  #
- # Shellscript to create Postscript plot of multibeam data
+ # Shellscript to create Postscript plot of swath sonar data
  # Created by macro mbm_plot
  #
  # This shellscript created by following command line:

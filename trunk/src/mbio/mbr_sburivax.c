@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburivax.c	2/2/93
- *	$Id: mbr_sburivax.c,v 4.4 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_sburivax.c,v 4.5 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,12 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
+ * Revision 4.4  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.3  1995/03/22  18:58:09  caress
  * Added handling of extra 2 bytes which occurs every 5 records in
  * data derived from VAX VMS.
@@ -69,7 +75,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sburivax.c,v 4.4 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbr_sburivax.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_sburivax";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em121raw.h	8/8/94
- *	$Id: mbf_em121raw.h,v 4.3 1996-08-26 19:03:38 caress Exp $
+ *	$Id: mbf_em121raw.h,v 4.4 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1996/08/26  19:03:38  caress
+ * REALLY changed "signed char" to "char".
+ *
+ * Revision 4.3  1996/08/26  19:03:38  caress
+ * REALLY changed "signed char" to "char".
+ *
  * Revision 4.2  1996/08/26  18:33:50  caress
  * Changed "signed char" to "char" for SunOs 4.1 compiler compatibility.
  *

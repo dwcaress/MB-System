@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsldedmb.h	1/20/93
- *	$Id: mbf_hsldedmb.h,v 4.2 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbf_hsldedmb.h,v 4.3 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
+ * Revision 4.2  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).

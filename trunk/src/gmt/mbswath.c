@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.23 1996-09-05 13:58:27 caress Exp $
+ *    $Id: mbswath.c,v 4.24 1997-04-21 16:53:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,12 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.24  1997/04/17  15:05:49  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.23  1996/09/05  13:58:27  caress
+ * Added feature to check data bounds in ".inf" files.
+ *
  * Revision 4.22  1996/08/26  17:31:55  caress
  * Release 4.4 revision.
  *
@@ -229,7 +235,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.23 1996-09-05 13:58:27 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.24 1997-04-21 16:53:56 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -323,7 +329,7 @@ char **argv;
 	/* other variables */
 	int	r1, g1, b1, r2, g2, b2;
 	int	count;
-	int	i, j;
+	int	i, j, jmax;
 	char	line[128];
 
 	/* get current mb default values */
@@ -960,7 +966,7 @@ char **argv;
 			    bath,amp,bathlon,bathlat,
 			    ss,sslon,sslat,
 			    pingcur->comment,&error);
-    
+
 		    /* print debug statements */
 		    if (verbose >= 2)
 			    {
@@ -1116,7 +1122,8 @@ char **argv;
 			    status = get_footprints(verbose,mode,
 				    footprint_mode,factor,default_depth_use, 
 				    swath_plot,mtodeglon,mtodeglat,&error);
-    
+
+
 			    /* get shading */
 			    if (mode == MBSWATH_BATH_RELIEF 
 				    || mode == MBSWATH_BATH_AMP
@@ -1127,6 +1134,7 @@ char **argv;
 					    nshadelevel, shadelevel, 
 					    shadelevelgray,
 					    &error);
+
     
 			    /* plot data */
 			    if (start == MB_YES)
@@ -1140,6 +1148,7 @@ char **argv;
 				    nplot = *npings - first;
 			    else
 				    nplot = *npings - first - 1;
+
 			    if (footprint_mode == MBSWATH_FOOTPRINT_POINT)
 				    status = plot_data_point(verbose,
 					    mode,swath_plot,
@@ -1148,7 +1157,8 @@ char **argv;
 				    status = plot_data_footprint(verbose,
 					    mode,swath_plot,
 					    first,nplot,&error);
-    
+
+
 			    /* reorganize data */
 			    if (flush == MB_YES && save_new == MB_YES)
 				    {
@@ -1610,10 +1620,10 @@ int	*error;
 			}
 
 		/* do bathymetry */
-		if (dobath == MB_YES)
+		if (dobath == MB_YES && pingcur->beams_bath > 2)
 		  {
 		  j = 0;
-		  if (pingcur->bath[j] > 0.0 && pingcur->bath[j+1] > 0)
+		  if (pingcur->bath[j] > 0.0 && pingcur->bath[j+1] > 0.0)
 			{
 			x = pingcur->bathlon[j];
 			y = pingcur->bathlat[j];
@@ -1657,7 +1667,7 @@ int	*error;
 			}
 
 		  j = pingcur->beams_bath-1;
-		  if (pingcur->bath[j] > 0.0 && pingcur->bath[j-1] > 0)
+		  if (pingcur->bath[j] > 0.0 && pingcur->bath[j-1] > 0.0)
 			{
 			x = pingcur->bathlon[j];
 			y = pingcur->bathlat[j];
@@ -1702,10 +1712,10 @@ int	*error;
 		  }
 
 		/* do sidescan */
-		if (doss == MB_YES)
+		if (doss == MB_YES && pingcur->pixels_ss > 2)
 		  {
 		  j = 0;
-		  if (pingcur->ss[j] > 0.0 && pingcur->ss[j+1] > 0)
+		  if (pingcur->ss[j] > 0.0 && pingcur->ss[j+1] > 0.0)
 			{
 			x = pingcur->sslon[j];
 			y = pingcur->sslat[j];
@@ -1747,8 +1757,9 @@ int	*error;
 			print->x[3] = x + dlon1 + pingcur->lonfor;
 			print->y[3] = y + dlat1 + pingcur->latfor;
 			}
+
 		  j = pingcur->pixels_ss-1;
-		  if (pingcur->ss[j] > 0.0 && pingcur->ss[j-1] > 0)
+		  if (pingcur->ss[j] > 0.0 && pingcur->ss[j-1] > 0.0)
 			{
 			x = pingcur->sslon[j];
 			y = pingcur->sslat[j];

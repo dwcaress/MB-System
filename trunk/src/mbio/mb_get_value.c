@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 4.2 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_get_value.c,v 4.3 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,15 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.3  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.2  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.1  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -47,13 +56,15 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 4.2 1995-03-06 19:38:54 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 4.3 1997-04-21 17:02:07 caress Exp $";
+char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/
 /*	function mb_get_double reads a double value from a string.
@@ -63,8 +74,7 @@ double *value;
 char *str;
 int nchar;
 {
-	char	tmp[MB_GET_VALUE_MAXLINE];
-	strncpy(tmp,"\0",sizeof(tmp));
+	memset(tmp, 0, MB_GET_VALUE_MAXLINE);
 	*value = 0.0;
 	*value = atof(strncpy(tmp,str,nchar));
 	return(0);
@@ -77,8 +87,7 @@ int *value;
 char *str;
 int nchar;
 {
-	char	tmp[MB_GET_VALUE_MAXLINE];
-	strncpy(tmp,"\0",sizeof(tmp));
+	memset(tmp, 0, MB_GET_VALUE_MAXLINE);
 	*value = atoi(strncpy(tmp,str,nchar));
 	return(0);
 }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12sraw.c	7/8/96
- *	$Id: mbr_em12sraw.c,v 4.3 1996-09-19 20:22:47 caress Exp $
+ *	$Id: mbr_em12sraw.c,v 4.4 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,13 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.3  1996/09/19  20:22:47  caress
+ * Enabled the writing of new position records with mb_put_all
+ * calls.
+ *
  * Revision 4.2  1996/08/26  18:33:50  caress
  * Changed "signed char" to "char" for SunOs 4.1 compiler compatibility.
  *
@@ -56,7 +63,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em12sraw.c,v 4.3 1996-09-19 20:22:47 caress Exp $";
+	static char res_id[]="$Id: mbr_em12sraw.c,v 4.4 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_em12sraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -661,7 +668,7 @@ int	*error;
 		mb_io_ptr->pixels_ss = 0;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data_ss = &data->ss[data->beam_start_sample[i]];
+			data_ss = (char *) &data->ss[data->beam_start_sample[i]];
 			for (j=0;j<data->beam_samples[i];j++)
 				{
 				mb_io_ptr->new_ss[mb_io_ptr->pixels_ss] 
@@ -892,8 +899,8 @@ int	*error;
 					= data->beam_start_sample[i];
 				if (ping->beam_samples[i] > 0)
 					{
-					store_ss = &ping->ss[data->beam_start_sample[i]];
-					data_ss = &data->ss[data->beam_start_sample[i]];
+					store_ss = (char *) &ping->ss[data->beam_start_sample[i]];
+					data_ss = (char *) &data->ss[data->beam_start_sample[i]];
 					store_ssp = &ping->ssp[data->beam_start_sample[i]];
 					data_ssp = &data->ssp[data->beam_start_sample[i]];
 					for (j=0;j<ping->beam_samples[i];j++)
@@ -1080,8 +1087,8 @@ int	*error;
 					= ping->beam_start_sample[i];
 				if (data->beam_samples[i] > 0)
 					{
-					data_ss = &data->ss[data->beam_start_sample[i]];
-					store_ss = &ping->ss[ping->beam_start_sample[i]];
+					data_ss = (char *) &data->ss[data->beam_start_sample[i]];
+					store_ss = (char *) &ping->ss[ping->beam_start_sample[i]];
 					data_ssp = &data->ssp[data->beam_start_sample[i]];
 					store_ssp = &ping->ssp[ping->beam_start_sample[i]];
 					for (j=0;j<data->beam_samples[i];j++)
@@ -2302,6 +2309,7 @@ int	*error;
 	char	*beam_ss;
 	short int *beam_ssp;
 	int	ioffset;
+	int	npixelsum;
 	int	i, j;
 
 	/* print input debug statements */
@@ -2359,6 +2367,7 @@ int	*error;
 		char_ptr = &line[19]; num_datagrams = (int) *char_ptr;
 		char_ptr = &line[20]; datagram = (int) *char_ptr;
 		char_ptr = &line[21]; num_beams = (int) *char_ptr;
+		npixelsum = 0;
 		for (i=0;i<num_beams;i++)
 			{
 			char_ptr = &line[22+6*i]; 
@@ -2369,7 +2378,18 @@ int	*error;
 				data->beam_samples[beamlist[i]] = *short_ptr;
 			short_ptr = (short int *) &line[26+6*i]; 
 				data->beam_center_sample[beamlist[i]] = *short_ptr;
+			npixelsum += data->beam_samples[beamlist[i]];
 			}
+			
+		/* check for bad numbers of pixels indicating a broken
+		    record */
+		if (npixelsum > 523)
+		    for (i=0;i<num_beams;i++)
+			{
+			data->beam_samples[beamlist[i]] = 0;
+			}
+		    
+		/* load up the sidescan for each beam */
 		ioffset = 22+6*num_beams;
 		for (i=0;i<num_beams;i++)
 			{
@@ -2382,7 +2402,7 @@ int	*error;
 			data->beam_start_sample[beamlist[i]] = data->pixels_ss;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{
-				data->ss[data->pixels_ss] = line[ioffset]);
+				data->ss[data->pixels_ss] = line[ioffset];
 				ioffset++;
 				char_ptr1 = (char *) &data->ssp[data->pixels_ss];
 				char_ptr2 = char_ptr1 + 1;
@@ -2406,6 +2426,7 @@ int	*error;
 		datagram = (int) *char_ptr;
 		char_ptr = &line[21]; 
 		num_beams = (int) *char_ptr;
+		npixelsum = 0;
 		for (i=0;i<num_beams;i++)
 			{
 			char_ptr = &line[22+6*i]; 
@@ -2419,7 +2440,18 @@ int	*error;
 			short_ptr = (short int *) &line[26+6*i]; 
 			data->beam_center_sample[beamlist[i]] = 
 				(short int) mb_swap_short(*short_ptr);
+			npixelsum += data->beam_samples[beamlist[i]];
 			}
+			
+		/* check for bad numbers of pixels indicating a broken
+		    record */
+		if (npixelsum > 523)
+		    for (i=0;i<num_beams;i++)
+			{
+			data->beam_samples[beamlist[i]] = 0;
+			}
+		    
+		/* load up the sidescan for each beam */
 		ioffset = 22+6*num_beams;
 		for (i=0;i<num_beams;i++)
 			{
@@ -3717,7 +3749,7 @@ int	*error;
 		for (i=datagram_start[datagram];i<=datagram_end[datagram];i++)
 			{
 			beam_ss = &data->ss[data->beam_start_sample[i]];
-			beam_ssp = &data->ss[data->beam_start_sample[i]];
+			beam_ssp = &data->ssp[data->beam_start_sample[i]];
 			for (j=0;j<data->beam_samples[i];j++)
 				{
 				char_ptr = &line[ioffset];

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1bldeo.c	10/24/95
- *	$Id: mbr_mr1bldeo.c,v 1.3 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_mr1bldeo.c,v 1.4 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Author:	D. W. Caress
  * Date:	October 24, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
+ * Revision 1.3  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 1.2  1996/04/22  11:16:30  caress
  * DTR define now in mb_io.h
  *
@@ -54,7 +60,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1bldeo.c,v 1.3 1996-04-22 13:21:19 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1bldeo.c,v 1.4 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_mr1bldeo";
 	int	status = MB_SUCCESS;
 	int	i;

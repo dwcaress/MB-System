@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 4.9 1996-08-05 15:21:58 caress Exp $
+ *	$Id: mbsys_reson.c,v 4.10 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,12 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
+ * Revision 4.9  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.8  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -91,7 +97,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_reson.c,v 4.9 1996-08-05 15:21:58 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 4.10 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

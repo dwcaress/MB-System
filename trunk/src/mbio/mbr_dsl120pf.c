@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_dsl120pf.c	8/6/96
- *	$Id: mbr_dsl120pf.c,v 4.0 1996-08-26 17:29:56 caress Exp $
+ *	$Id: mbr_dsl120pf.c,v 4.1 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Author:	D. W. Caress
  * Date:	August 6, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.0  1996/08/26  17:29:56  caress
+ * Release 4.4 revision.
+ *
  * Revision 1.1  1996/08/26  17:24:56  caress
  * Initial revision
  *
@@ -51,7 +57,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_dsl120pf.c,v 4.0 1996-08-26 17:29:56 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120pf.c,v 4.1 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_dsl120pf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -265,6 +271,8 @@ int	*error;
 			data->amp_port[i] = 0.0;
 			data->amp_stbd[i] = 0.0;
 			}
+		for (i=0;i<MBF_DSL120PF_COMMENT_LENGTH;i++)
+			data->comment[i] = '\0';
 		}
 
 	/* assume success */
@@ -574,6 +582,8 @@ int	*error;
 			store->amp_port[i] = data->amp_port[i];
 			store->amp_stbd[i] = data->amp_stbd[i];
 			}
+		strncpy(store->comment, data->comment, 
+			MBSYS_DSL_COMMENT_LENGTH - 1);
 		}
 
 	/* print output debug statements */
@@ -687,6 +697,8 @@ int	*error;
 			data->amp_port[i] = store->amp_port[i];
 			data->amp_stbd[i] = store->amp_stbd[i];
 			}
+		strncpy(data->comment, store->comment, 
+			MBF_DSL120PF_COMMENT_LENGTH - 1);
 		}
 
 	/* set kind from current ping */
@@ -1074,11 +1086,11 @@ int	*error;
 			data->tv_sec = (int) mb_swap_long(*int_ptr);
 		int_ptr = (int *) &buffer[108]; 
 			data->tv_usec = (int) mb_swap_long(*int_ptr);
-		short_ptr = (int *) &buffer[112]; 
+		short_ptr = (short int *) &buffer[112]; 
 			data->interface = (short int) mb_swap_short(*short_ptr);
 		for (i=0;i<5;i++)
 			{
-			short_ptr = (int *) &buffer[114+2*i]; 
+			short_ptr = (short int *) &buffer[114+2*i]; 
 				data->reserved[i] = (short int) mb_swap_short(*short_ptr);
 			}
 
@@ -1438,7 +1450,7 @@ int	*error;
 	data_ptr = (char *) data;
 	
 	/* read amp record */
-	read_bytes = data->bat_len - 12;
+	read_bytes = data->amp_len - 12;
 	status = fread(buffer, 1, read_bytes, mbfp);
 	if (status == read_bytes)
 		{
@@ -1494,7 +1506,7 @@ int	*error;
 			int_ptr = (int *) &buffer[20 + i * 4]; 
 			data->amp_future[i] = (int) *int_ptr;
 			}
-		for (i=0;i<data->bat_num_bins;i++)
+		for (i=0;i<data->amp_num_samp;i++)
 			{
 			j = 52 + i * 8;
 			float_ptr = (float *) &buffer[j]; 
@@ -1571,7 +1583,7 @@ int	*error;
 	data = (struct mbf_dsl120pf_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
 	
-	/* read bath record */
+	/* read comment record */
 	read_bytes = 80;
 	status = fread(buffer, 1, read_bytes, mbfp);
 	if (status == read_bytes)
@@ -1829,11 +1841,11 @@ int	*error;
 		*int_ptr = (int) mb_swap_long(data->tv_sec);
 	int_ptr = (int *) &buffer[112]; 
 		*int_ptr = (int) mb_swap_long(data->tv_usec);
-	short_ptr = (int *) &buffer[116]; 
+	short_ptr = (short int *) &buffer[116]; 
 		*short_ptr = data->interface;
 	for (i=0;i<5;i++)
 		{
-		short_ptr = (int *) &buffer[118+2*i]; 
+		short_ptr = (short int *) &buffer[118+2*i]; 
 			*short_ptr = data->reserved[i];
 		}
 		
@@ -2122,11 +2134,11 @@ int	*error;
 		*int_ptr = (int) mb_swap_long(data->tv_sec);
 	int_ptr = (int *) &buffer[112]; 
 		*int_ptr = (int) mb_swap_long(data->tv_usec);
-	short_ptr = (int *) &buffer[116]; 
+	short_ptr = (short int *) &buffer[116]; 
 		*short_ptr = data->interface;
 	for (i=0;i<5;i++)
 		{
-		short_ptr = (int *) &buffer[118+2*i]; 
+		short_ptr = (short int *) &buffer[118+2*i]; 
 			*short_ptr = data->reserved[i];
 		}
 		
@@ -2244,7 +2256,7 @@ int	*error;
 			*int_ptr = data->amp_future[i];
 		}
 	offset += 64;
-	for (i=0;i<data->bat_num_bins;i++)
+	for (i=0;i<data->amp_num_samp;i++)
 		{
 		j = offset + i * 8;
 		float_ptr = (float *) &buffer[j]; 
@@ -2378,11 +2390,11 @@ int	*error;
 		*int_ptr = (int) mb_swap_long(data->tv_sec);
 	int_ptr = (int *) &buffer[110]; 
 		*int_ptr = (int) mb_swap_long(data->tv_usec);
-	short_ptr = (int *) &buffer[114]; 
+	short_ptr = (short int *) &buffer[114]; 
 		*short_ptr = data->interface;
 	for (i=0;i<5;i++)
 		{
-		short_ptr = (int *) &buffer[116+2*i]; 
+		short_ptr = (short int *) &buffer[116+2*i]; 
 			*short_ptr = data->reserved[i];
 		}
 		

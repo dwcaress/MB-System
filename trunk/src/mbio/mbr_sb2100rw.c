@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.23 1996-06-05 21:06:27 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.24 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,14 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.24  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.23  1996/06/05  21:06:27  caress
+ * Fixed problem handling gain of sidescan and amplitude data.
+ * Previously transmit attenuation was treated as a gain value
+ * (positive) rather than an attenuation value.
+ *
  * Revision 4.22  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -130,10 +138,11 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.23 1996-06-05 21:06:27 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.24 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_sb2100_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -158,6 +167,12 @@ int	*error;
 				&mb_io_ptr->raw_data,error);
 	status = mb_malloc(verbose,sizeof(struct mbsys_sb2100_struct),
 				&mb_io_ptr->store_data,error);
+
+	/* get store structure pointer */
+	store = (struct mbsys_sb2100_struct *) mb_io_ptr->store_data;
+				
+	/* set comment pointer */
+	store->comment = (char *) &(store->roll_bias_port);
 
 	/* initialize everything to zeros */
 	mbr_zero_sb2100rw(verbose,mb_io_ptr->raw_data,error);
@@ -532,6 +547,7 @@ int	*error;
 			pixel_size = data->pixel_size_12khz;
 			gain_db = data->ping_gain_12khz 
 				- data->transmitter_attenuation_12khz
+				+ 10.0 * log10( data->ping_pulse_width_12khz / 5.0)
 				- 30.0;
 			}
 		else
@@ -539,17 +555,18 @@ int	*error;
 			pixel_size = data->pixel_size_36khz;
 			gain_db = data->ping_gain_36khz 
 				- data->transmitter_attenuation_36khz
+				+ 10.0 * log10( data->ping_pulse_width_36khz / 5.0)
 				- 30.0;
 			}
 		gain_factor = pow(10.0, (-gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			mb_io_ptr->new_bath[i] 
-				= scale*data->depth[i];
+				= scale * data->depth[i];
 			mb_io_ptr->new_bath_acrosstrack[i] 
-				= scale*data->acrosstrack_beam[i];
+				= scale * data->acrosstrack_beam[i];
 			mb_io_ptr->new_bath_alongtrack[i] 
-				= scale*data->alongtrack_beam[i];
+				= scale * data->alongtrack_beam[i];
 			}
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
@@ -561,10 +578,10 @@ int	*error;
 			mb_io_ptr->new_ss[i] 
 				= gain_factor * data->amplitude_ss[i];
 			mb_io_ptr->new_ss_acrosstrack[i] 
-				= pixel_scale*pixel_size*
+				= pixel_scale * pixel_size*
 					(i - MBF_SB2100RW_CENTER_PIXEL);
 			mb_io_ptr->new_ss_alongtrack[i] 
-				= scale*data->alongtrack_ss[i];
+				= scale * data->alongtrack_ss[i];
 			}
 
 		/* print debug statements */
@@ -626,100 +643,123 @@ int	*error;
 		/* type of data record */
 		store->kind = data->kind;
 
-		/* time stamp (all records ) */
-		store->year = data->year;
-		store->jday = data->jday;
-		store->hour = data->hour;
-		store->minute = data->minute;
-		store->msec = data->msec;
-
 		/* sonar parameters (PR) */
-		store->roll_bias_port = data->roll_bias_port;
-		store->roll_bias_starboard = data->roll_bias_starboard;
-		store->pitch_bias = data->pitch_bias;
-		store->ship_draft = data->ship_draft;
-		store->num_svp = data->num_svp;
-		for (i=0;i<MBF_SB2100RW_MAXVEL;i++)
+		if (data->kind == MB_DATA_PARAMETER)
+		    {
+		    store->year = data->year;
+		    store->jday = data->jday;
+		    store->hour = data->hour;
+		    store->minute = data->minute;
+		    store->sec = 0.001 * data->msec;
+		    store->msec = data->msec - 1000 * time_j[3];
+		    store->roll_bias_port = 0.01 * data->roll_bias_port;
+		    store->roll_bias_starboard = 0.01 * data->roll_bias_starboard;
+		    store->pitch_bias = 0.01 * data->pitch_bias;
+		    store->ship_draft = 0.01 * data->ship_draft;
+		    store->offset_x = 0.0;
+		    store->offset_y = 0.0;
+		    store->offset_z = 0.0;
+		    store->num_svp = data->num_svp;
+		    for (i=0;i<MBF_SB2100RW_MAXVEL;i++)
+			    {
+			    store->svp[i].depth = 0.01 * data->vdepth[i];
+			    store->svp[i].velocity = 0.01 * data->velocity[i];
+			    }
+		    }
+		    
+		/* ping data */
+		else if (data->kind == MB_DATA_DATA)
+		    {
+		    /* time stamp */
+		    store->year = data->year;
+		    store->jday = data->jday;
+		    store->hour = data->hour;
+		    store->minute = data->minute;
+		    store->sec = 0.001 * data->msec;
+		    store->msec = data->msec - 1000 * time_j[3];
+
+		    /* DR and SS header info */
+		    store->longitude = data->longitude;
+		    store->latitude = data->latitude;
+		    store->speed = 0.01 * data->speed;
+		    store->heave = 0.001 * data->heave;
+		    store->range_scale = data->range_scale;
+		    store->ssv = 0.01 * data->surface_sound_velocity;
+		    store->ssv_source = data->ssv_source;
+		    store->depth_gate_mode = data->depth_gate_mode;
+    
+		    /* DR header info */
+		    store->nbeams = data->num_beams;
+		    store->svp_correction = data->svp_corr_beams;
+		    for (i=0;i<2;i++)
+			    store->spare_dr[i] = data->spare_dr[i];
+		    store->num_algorithms = data->num_algorithms;
+		    for (i=0;i<4;i++)
+			    store->algorithm_order[i] = data->algorithm_order[i];
+     
+		    /* transmit parameters and navigation (DR and SS) */
+		    store->frequency = data->frequency[0];
+		    if (data->frequency[0] == 'L')
 			{
-			store->vdepth[i] = data->vdepth[i];
-			store->velocity[i] = data->velocity[i];
+			store->ping_gain = data->ping_gain_12khz;
+			store->ping_pulse_width = data->ping_pulse_width_12khz;
+			store->transmitter_attenuation 
+				= data->transmitter_attenuation_12khz;
+			store->pitch = 0.001 * data->pitch_12khz;
+			store->roll = 0.001 * data->roll_12khz;
+			store->heading = 0.001 * data->heading_12khz;
 			}
-
-		/* DR and SS header info */
-		store->longitude = data->longitude;
-		store->latitude = data->latitude;
-		store->speed = data->speed;
-		store->heave = data->heave;
-		store->range_scale = data->range_scale;
-		store->surface_sound_velocity = data->surface_sound_velocity;
-		store->ssv_source = data->ssv_source;
-		store->depth_gate_mode = data->depth_gate_mode;
-
-		/* DR header info */
-		store->num_beams = data->num_beams;
-		store->svp_corr_beams = data->svp_corr_beams;
-		for (i=0;i<2;i++)
-			store->spare_dr[i] = data->spare_dr[i];
-		store->num_algorithms = data->num_algorithms;
-		for (i=0;i<4;i++)
-			store->algorithm_order[i] = data->algorithm_order[i];
-
-		/* SS header info */
-		store->ss_data_length = data->ss_data_length;
-		store->num_pixels = data->num_pixels;
-		store->pixel_algorithm = data->pixel_algorithm;
-		store->pixel_size_scale = data->pixel_size_scale;
-		store->svp_corr_ss = data->svp_corr_ss;
-		store->num_pixels_12khz = data->num_pixels_12khz;
-		store->pixel_size_12khz = data->pixel_size_12khz;
-		store->num_pixels_36khz = data->num_pixels_36khz;
-		store->pixel_size_36khz = data->pixel_size_36khz;
-		store->spare_ss = data->spare_ss;
-
-		/* transmit parameters and navigation (DR and SS) */
-		store->frequency[0] = data->frequency[0];
-		store->frequency[1] = data->frequency[1];
-		store->ping_gain_12khz = data->ping_gain_12khz;
-		store->ping_pulse_width_12khz = data->ping_pulse_width_12khz;
-		store->transmitter_attenuation_12khz 
-			= data->transmitter_attenuation_12khz;
-		store->pitch_12khz = data->pitch_12khz;
-		store->roll_12khz = data->roll_12khz;
-		store->heading_12khz = data->heading_12khz;
-		store->ping_gain_36khz = data->ping_gain_36khz;
-		store->ping_pulse_width_36khz = data->ping_pulse_width_36khz;
-		store->transmitter_attenuation_36khz 
-			= data->transmitter_attenuation_36khz;
-		store->pitch_36khz = data->pitch_36khz;
-		store->roll_36khz = data->roll_36khz;
-		store->heading_36khz = data->heading_36khz;
-
-		/* formed beam data (DR) */
-		for (i=0;i<MBF_SB2100RW_BEAMS;i++)
+		    else
 			{
-			store->source[i] = data->source[i];
-			store->travel_time[i] = data->travel_time[i];
-			store->angle_across[i] = data->angle_across[i];
-			store->angle_forward[i] = data->angle_forward[i];
-			store->depth[i] = data->depth[i];
-			store->acrosstrack_beam[i] = data->acrosstrack_beam[i];
-			store->alongtrack_beam[i] = data->alongtrack_beam[i];
-			store->amplitude_beam[i] = data->amplitude_beam[i];
-			store->signal_to_noise[i] = data->signal_to_noise[i];
-			store->echo_length[i] = data->echo_length[i];
-			store->quality[i] = data->quality[i];
+			store->ping_gain = data->ping_gain_36khz;
+			store->ping_pulse_width = data->ping_pulse_width_36khz;
+			store->transmitter_attenuation 
+				= data->transmitter_attenuation_36khz;
+			store->pitch = 0.001 * data->pitch_36khz;
+			store->roll = 0.001 * data->roll_36khz;
+			store->heading = 0.001 * data->heading_36khz;
 			}
-
-		/* sidescan data (SS) */
-		for (i=0;i<MBF_SB2100RW_PIXELS;i++)
-			{
-			store->amplitude_ss[i] = data->amplitude_ss[i];
-			store->alongtrack_ss[i] = data->alongtrack_ss[i];
-			}
+    
+		    /* formed beam data (DR) */
+		    for (i=0;i<MBF_SB2100RW_BEAMS;i++)
+			    {
+			    store->beams[i].depth = scale * data->depth[i];
+			    store->beams[i].acrosstrack = scale * data->acrosstrack_beam[i];
+			    store->beams[i].alongtrack = scale * data->alongtrack_beam[i];
+			    store->beams[i].range = 0.001 * data->travel_time[i];
+			    store->beams[i].angle_across = 0.001 * data->angle_across[i];
+			    store->beams[i].angle_forward = 0.01 * data->angle_forward[i];
+			    store->beams[i].amplitude = data->amplitude_beam[i];
+			    store->beams[i].signal_to_noise = data->signal_to_noise[i];
+			    store->beams[i].echo_length = data->echo_length[i];
+			    store->beams[i].quality = data->quality[i];
+			    store->beams[i].source = data->source[i];
+			    }
+   
+		    /* SS header info */
+		    store->ss_data_length = data->ss_data_length;
+		    store->npixels = data->num_pixels;
+		    store->pixel_algorithm = data->pixel_algorithm;
+		    store->pixel_size_scale = data->pixel_size_scale;
+		    store->svp_corr_ss = data->svp_corr_ss;
+		    if (data->frequency[0] == 'L')
+			store->pixel_size = data->pixel_size_12khz;
+		    else
+			store->pixel_size = data->pixel_size_36khz;
+		    store->spare_ss = data->spare_ss;
+    
+		    /* sidescan data (SS) */
+		    for (i=0;i<MBF_SB2100RW_PIXELS;i++)
+			    {
+			    store->pixels[i].amplitude = data->amplitude_ss[i];
+			    store->pixels[i].alongtrack = scale * data->alongtrack_ss[i];
+			    }
+		    }
 
 		/* comment (TR) */
-		strncpy(store->comment,data->comment,MBF_SB2100RW_MAXLINE);
-
+		else if (data->kind == MB_DATA_COMMENT)
+		    strncpy(store->comment,data->comment,
+			    MBF_SB2100RW_MAXLINE);
 		}
 
 	/* print output debug statements */
@@ -749,12 +789,12 @@ int	*error;
 	struct mbf_sb2100rw_struct *data;
 	char	*data_ptr;
 	struct mbsys_sb2100_struct *store;
-	double	scalefactor;
 	int	time_j[5];
 	double	scale, pixel_size;
 	int	set_pixel_size;
 	double	gain_db;
 	double	gain_factor;
+	double	depth_max, across_max, along_max;
 	int	i;
 
 	/* print input debug statements */
@@ -782,100 +822,181 @@ int	*error;
 		/* type of data record */
 		data->kind = store->kind;
 
-		/* time stamp (all records ) */
-		data->year = store->year;
-		data->jday = store->jday;
-		data->hour = store->hour;
-		data->minute = store->minute;
-		data->msec = store->msec;
-
 		/* sonar parameters (PR) */
-		data->roll_bias_port = store->roll_bias_port;
-		data->roll_bias_starboard = store->roll_bias_starboard;
-		data->pitch_bias = store->pitch_bias;
-		data->ship_draft = store->ship_draft;
-		data->num_svp = store->num_svp;
-		for (i=0;i<MBF_SB2100RW_MAXVEL;i++)
+		if (data->kind == MB_DATA_PARAMETER)
+		    {
+		    data->year = store->year;
+		    data->jday = store->jday;
+		    data->hour = store->hour;
+		    data->minute = store->minute;
+		    data->msec = 1000 * store->sec + store->msec;
+		    data->roll_bias_port = 100 * store->roll_bias_port;
+		    data->roll_bias_starboard = 100 * store->roll_bias_starboard;
+		    data->pitch_bias = 100 * store->pitch_bias;
+		    data->ship_draft = 100 * store->ship_draft;
+		    data->num_svp = store->num_svp;
+		    for (i=0;i<MBF_SB2100RW_MAXVEL;i++)
+			    {
+			    data->vdepth[i] = 100 * store->svp[i].depth;
+			    data->velocity[i] = 100 * store->svp[i].velocity;
+			    }
+		    }
+		    
+		/* ping data */
+		else if (data->kind == MB_DATA_DATA)
+		    {
+		    /* time stamp */
+		    data->year = store->year;
+		    data->jday = store->jday;
+		    data->hour = store->hour;
+		    data->minute = store->minute;
+		    data->msec = 1000 * store->sec + store->msec;
+
+		    /* DR and SS header info */
+		    data->longitude = store->longitude;
+		    data->latitude = store->latitude;
+		    data->speed = 100 * store->speed;
+		    data->heave = 1000 * store->heave;
+		    data->range_scale = store->range_scale;
+		    data->surface_sound_velocity = 100 * store->ssv;
+		    data->ssv_source = store->ssv_source;
+		    data->depth_gate_mode = store->depth_gate_mode;
+    
+		    /* DR header info */
+		    data->num_beams = store->nbeams;
+		    data->svp_corr_beams = store->svp_correction;
+		    for (i=0;i<2;i++)
+			    data->spare_dr[i] = store->spare_dr[i];
+		    data->num_algorithms = store->num_algorithms;
+		    for (i=0;i<4;i++)
+			    data->algorithm_order[i] = store->algorithm_order[i];
+     
+		    /* transmit parameters and navigation (DR and SS) */
+		    data->frequency[0] = store->frequency;
+		    data->frequency[1] = store->frequency;
+		    if (data->frequency[0] == 'L')
 			{
-			data->vdepth[i] = store->vdepth[i];
-			data->velocity[i] = store->velocity[i];
+			data->ping_gain_12khz = store->ping_gain;
+			data->ping_pulse_width_12khz 
+				= store->ping_pulse_width;
+			data->transmitter_attenuation_12khz 
+				= store->transmitter_attenuation;
+			data->pitch_12khz = 1000 * store->pitch;
+			data->roll_12khz = 1000 * store->roll;
+			data->heading_12khz = 1000 * store->heading;
+			data->ping_gain_36khz = 0;
+			data->ping_pulse_width_36khz = 0;
+			data->transmitter_attenuation_36khz = 0;
+			data->pitch_36khz = 0;
+			data->roll_36khz = 0;
+			data->heading_36khz = 0;
 			}
-
-		/* DR and SS header info */
-		data->longitude = store->longitude;
-		data->latitude = store->latitude;
-		data->speed = store->speed;
-		data->heave = store->heave;
-		data->range_scale = store->range_scale;
-		data->surface_sound_velocity = store->surface_sound_velocity;
-		data->ssv_source = store->ssv_source;
-		data->depth_gate_mode = store->depth_gate_mode;
-
-		/* DR header info */
-		data->num_beams = store->num_beams;
-		data->svp_corr_beams = store->svp_corr_beams;
-		for (i=0;i<2;i++)
-			data->spare_dr[i] = store->spare_dr[i];
-		data->num_algorithms = store->num_algorithms;
-		for (i=0;i<4;i++)
-			data->algorithm_order[i] = store->algorithm_order[i];
-
-		/* SS header info */
-		data->ss_data_length = store->ss_data_length;
-		data->num_pixels = store->num_pixels;
-		data->pixel_algorithm = store->pixel_algorithm;
-		data->pixel_size_scale = store->pixel_size_scale;
-		data->svp_corr_ss = store->svp_corr_ss;
-		data->num_pixels_12khz = store->num_pixels_12khz;
-		data->pixel_size_12khz = store->pixel_size_12khz;
-		data->num_pixels_36khz = store->num_pixels_36khz;
-		data->pixel_size_36khz = store->pixel_size_36khz;
-		data->spare_ss = store->spare_ss;
-
-		/* transmit parameters and navigation (DR and SS) */
-		data->frequency[0] = store->frequency[0];
-		data->frequency[1] = store->frequency[1];
-		data->ping_gain_12khz = store->ping_gain_12khz;
-		data->ping_pulse_width_12khz = store->ping_pulse_width_12khz;
-		data->transmitter_attenuation_12khz 
-			= store->transmitter_attenuation_12khz;
-		data->pitch_12khz = store->pitch_12khz;
-		data->roll_12khz = store->roll_12khz;
-		data->heading_12khz = store->heading_12khz;
-		data->ping_gain_36khz = store->ping_gain_36khz;
-		data->ping_pulse_width_36khz = store->ping_pulse_width_36khz;
-		data->transmitter_attenuation_36khz 
-			= store->transmitter_attenuation_36khz;
-		data->pitch_36khz = store->pitch_36khz;
-		data->roll_36khz = store->roll_36khz;
-		data->heading_36khz = store->heading_36khz;
-
-		/* formed beam data (DR) */
-		for (i=0;i<MBF_SB2100RW_BEAMS;i++)
+		    else
 			{
-			data->source[i] = store->source[i];
-			data->travel_time[i] = store->travel_time[i];
-			data->angle_across[i] = store->angle_across[i];
-			data->angle_forward[i] = store->angle_forward[i];
-			data->depth[i] = store->depth[i];
-			data->acrosstrack_beam[i] = store->acrosstrack_beam[i];
-			data->alongtrack_beam[i] = store->alongtrack_beam[i];
-			data->amplitude_beam[i] = store->amplitude_beam[i];
-			data->signal_to_noise[i] = store->signal_to_noise[i];
-			data->echo_length[i] = store->echo_length[i];
-			data->quality[i] = store->quality[i];
+			data->ping_gain_12khz = 0;
+			data->ping_pulse_width_12khz = 0;
+			data->transmitter_attenuation_12khz = 0;
+			data->pitch_12khz = 0;
+			data->roll_12khz = 0;
+			data->heading_12khz = 0;
+			data->ping_gain_36khz = store->ping_gain;
+			data->ping_pulse_width_36khz 
+				= store->ping_pulse_width;
+			data->transmitter_attenuation_36khz 
+				= store->transmitter_attenuation;
+			data->pitch_36khz = 1000 * store->pitch;
+			data->roll_36khz = 1000 * store->roll;
+			data->heading_36khz = 1000 * store->heading;
 			}
-
-		/* sidescan data (SS) */
-		for (i=0;i<MBF_SB2100RW_PIXELS;i++)
+    
+		    /* formed beam data (DR) */
+		    if (data->range_scale == 'S')
+			    scale = 0.01;
+		    else if (data->range_scale == 'I')
+			    scale = 0.1;
+		    else if (data->range_scale == 'D')
+			    scale = 1.0;
+		    else
+			    {
+			    /* find best scale for data */
+			    depth_max = 0.0;
+			    across_max = 0.0;
+			    along_max = 0.0;
+			    for (i=0;i<MBF_SB2100RW_BEAMS;i++)
+				{
+				if (store->beams[i].depth != 0.0 
+					&& store->beams[i].quality == ' ')
+				    {
+				    depth_max = MAX(depth_max, fabs(store->beams[i].depth));
+				    across_max = MAX(across_max, fabs(store->beams[i].acrosstrack));
+				    along_max = MAX(along_max, fabs(store->beams[i].alongtrack));
+				    }
+				}
+			    if (depth_max > 9999.9
+				|| across_max > 9999.9
+				|| along_max > 9999.9)
+				{			    
+				scale = 1.0;
+				data->range_scale = 'D';
+				}
+			    else if (depth_max > 999.9
+				|| across_max > 999.9
+				|| along_max > 999.9)
+				{			    
+				scale = 0.1;
+				data->range_scale = 'I';
+				}
+			    else
+				{			    
+				scale = 0.01;
+				data->range_scale = 'S';
+				}
+			    }
+		    for (i=0;i<MBF_SB2100RW_BEAMS;i++)
+			    {
+			    data->depth[i] = store->beams[i].depth / scale;
+			    data->acrosstrack_beam[i] = store->beams[i].acrosstrack / scale;
+			    data->alongtrack_beam[i] = store->beams[i].alongtrack / scale;
+			    data->travel_time[i] = 1000 * store->beams[i].range;
+			    data->angle_across[i] = 1000 * store->beams[i].angle_across;
+			    data->angle_forward[i] = 100 * store->beams[i].angle_forward;
+			    data->amplitude_beam[i] = store->beams[i].amplitude;
+			    data->signal_to_noise[i] = store->beams[i].signal_to_noise;
+			    data->echo_length[i] = store->beams[i].echo_length;
+			    data->quality[i] = store->beams[i].quality;
+			    data->source[i] = store->beams[i].source;
+			    }
+   
+		    /* SS header info */
+		    data->ss_data_length = store->ss_data_length;
+		    data->num_pixels = store->npixels;
+		    data->pixel_algorithm = store->pixel_algorithm;
+		    data->pixel_size_scale = 'D';
+		    data->svp_corr_ss = store->svp_corr_ss;
+		    if (data->frequency[0] == 'L')
 			{
-			data->amplitude_ss[i] = store->amplitude_ss[i];
-			data->alongtrack_ss[i] = store->alongtrack_ss[i];
+			data->pixel_size_12khz = store->pixel_size;
+			data->pixel_size_36khz = 0.0;
 			}
+		    else
+			{
+			data->pixel_size_12khz = 0.0;
+			data->pixel_size_36khz = store->pixel_size;
+			}
+		    store->spare_ss = data->spare_ss;
+    
+		    /* sidescan data (SS) */
+		    for (i=0;i<MBF_SB2100RW_PIXELS;i++)
+			    {
+			    data->amplitude_ss[i] = store->pixels[i].amplitude;
+			    data->alongtrack_ss[i] = store->pixels[i].alongtrack / scale;
+			    }
+		    }
 
 		/* comment (TR) */
-		strncpy(data->comment,store->comment,MBF_SB2100RW_MAXLINE);
-
+		else if (data->kind == MB_DATA_COMMENT)
+		    strncpy(data->comment,store->comment,
+			    MBF_SB2100RW_MAXLINE);
 		}
 
 	/* set kind from current ping */
@@ -930,9 +1051,9 @@ int	*error;
 
 		/* read beam and pixel values into storage arrays */
 		if (data->range_scale == 'S')
-			scale = 100.0;
+			scale = 0.01;
 		else if (data->range_scale == 'I')
-			scale = 10.0;
+			scale = 0.1;
 		else
 			{
 			scale = 1.0;
@@ -941,20 +1062,22 @@ int	*error;
 		if (data->frequency[0] == 'L')
 			gain_db = data->ping_gain_12khz 
 				- data->transmitter_attenuation_12khz
+				+ 10.0 * log10( data->ping_pulse_width_12khz / 5.0)
 				- 30.0;
 		else
 			gain_db = data->ping_gain_36khz 
 				- data->transmitter_attenuation_36khz
+				+ 10.0 * log10( data->ping_pulse_width_36khz / 5.0)
 				- 30.0;
 		gain_factor = pow(10.0, (gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			 data->depth[i]
-				= scale*mb_io_ptr->new_bath[i];
+				= mb_io_ptr->new_bath[i] / scale;
 			 data->acrosstrack_beam[i]
-				= scale*mb_io_ptr->new_bath_acrosstrack[i];
+				= mb_io_ptr->new_bath_acrosstrack[i] / scale;
 			 data->alongtrack_beam[i]
-				= scale*mb_io_ptr->new_bath_alongtrack[i];
+				= mb_io_ptr->new_bath_alongtrack[i] / scale;
 			}
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
@@ -974,7 +1097,7 @@ int	*error;
 				= (int) (gain_factor 
 					* mb_io_ptr->new_ss[i]);
 			data->alongtrack_ss[i]
-				= scale*mb_io_ptr->new_ss_alongtrack[i];
+				= mb_io_ptr->new_ss_alongtrack[i] / scale;
 			if (set_pixel_size == MB_YES
 				&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
 				{
@@ -982,9 +1105,9 @@ int	*error;
 					mb_io_ptr->new_ss_acrosstrack[i]/
 					(i - MBF_SB2100RW_CENTER_PIXEL);
 				if (data->pixel_size_scale == 'S')
-					pixel_size = 100*pixel_size;
+					pixel_size = 100 * pixel_size;
 				else if (data->pixel_size_scale == 'I')
-					pixel_size = 10*pixel_size;
+					pixel_size = 10 * pixel_size;
 				else 
 					data->pixel_size_scale = 'D';
 				if (data->frequency[0] == 'H')

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sbsiolsi.h	1/20/93
- *	$Id: mbf_sbsiolsi.h,v 4.1 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbf_sbsiolsi.h,v 4.2 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
+ * Revision 4.1  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *

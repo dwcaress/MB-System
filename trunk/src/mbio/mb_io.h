@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.5 1996-08-05 15:25:43 caress Exp $
+ *    $Id: mb_io.h,v 4.6 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,15 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.6  1997/03/14  16:07:24  caress
+ * Made save_label string 8 bytes.
+ *
+ * Revision 4.5  1996/08/05  15:25:43  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.4  1996/04/22  10:59:25  caress
  * Put DTR defines in this include file.
  *
@@ -191,7 +200,7 @@ struct mb_io_struct
 	double fix_lat[MB_NAV_SAVE_MAX];
 	
 	/* variables for saving information */
-	char	save_label[4];
+	char	save_label[12];
 	int	save_label_flag;
 	int	save_flag;
 	int	save1;

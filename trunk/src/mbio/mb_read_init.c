@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 4.10 1996-08-26 17:24:56 caress Exp $
+ *    $Id: mb_read_init.c,v 4.11 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,12 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1997/04/17  18:48:52  caress
+ * Added LINUX ifdef.
+ *
+ * Revision 4.10  1996/08/26  17:24:56  caress
+ * Release 4.4 revision.
+ *
  * Revision 4.9  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -98,6 +104,9 @@
 #ifdef SOLARIS
 #include <rpc/rpc.h>
 #endif
+#ifdef LINUX
+#include <rpc/rpc.h>
+#endif
 #ifdef LYNX
 #include <rpc/rpc.h>
 #endif
@@ -140,7 +149,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 4.10 1996-08-26 17:24:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 4.11 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	int	format_num;

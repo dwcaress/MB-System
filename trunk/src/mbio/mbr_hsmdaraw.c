@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdaraw.c	2/11/93
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.4 1996-07-16 22:07:12 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.5 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,14 @@
  * Date:	August 11, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1996/07/16  22:07:12  caress
+ * Fixed port/starboard mixup and made null angles for raytracing 40 degrees to
+ * reflect 40 degree tranducer array mounting.
+ *
+ * Revision 4.4  1996/07/16  22:07:12  caress
+ * Fixed port/starboard mixup and made null angles for raytracing 40 degrees to
+ * reflect 40 degree tranducer array mounting.
+ *
  * Revision 4.3  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -82,7 +90,7 @@ int    verbose;
 char   *mbio_ptr;
 int    *error;
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.4 1996-07-16 22:07:12 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdaraw";
 	int	 status = MB_SUCCESS;
 	int	 i;

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.14 1997-01-28 18:34:03 caress Exp $
+#    $Id: mbm_plot.perl,v 4.15 1997-04-21 16:54:41 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,7 +20,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Purpose:
 #   Macro to generate a shellscript of MB-System and GMT commands 
 #   which, when executed, will generate a Postscript plot of the 
-#   specified multibeam data. The plot may include bathymetry color 
+#   specified swath sonar data. The plot may include bathymetry color 
 #   fill (-G1), bathymetry color shaded relief (-G2), bathymetry 
 #   shaded with amplitudes (-G3), greyshade fill amplitude (-G4), 
 #   greyshade fill sidescan (-G5), contoured bathymetry (-C),
@@ -68,10 +68,20 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.14 1997-01-28 18:34:03 caress Exp $
+#   $Id: mbm_plot.perl,v 4.15 1997-04-21 16:54:41 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.16  1997/04/17  15:06:49  caress
+# MB-System 4.5 Beta Release
+#
+# Revision 4.15  1997/03/26  15:37:14  caress
+# Comment changes.
+#
+# Revision 4.14  1997/01/28  18:34:03  caress
+# Added printout of actual data lon lat bounds in addition
+# to stretched bounds for plot.
+#
 # Revision 4.13  1996/03/12  17:28:19  caress
 # Check-in after flail with format 63.
 #
@@ -315,7 +325,7 @@ if ($help)
 	print "\n$program_name:\n";
 	print "\nMacro to generate a shellscript of MB-System and GMT commands \n";
 	print "which, when executed, will generate a Postscript plot of the \n";
-	print "specified multibeam data. The plot may include bathymetry color \n";
+	print "specified swath sonar data. The plot may include bathymetry color \n";
 	print "fill (-G1), bathymetry color shaded relief (-G2), bathymetry \n";
 	print "shaded with amplitudes (-G3), greyshade fill amplitude (-G4), \n";
 	print "greyshade fill sidescan (-G5), contoured bathymetry (-C),\n";
@@ -372,6 +382,9 @@ if ($verbose)
 	{
 	print "\nRunning $program_name...\n";
 	}
+
+# set ping averaging
+$mb_pings = 1;
 
 # parse misc commands
 if ($misc)
@@ -448,19 +461,19 @@ if ($misc)
 			($swath_footprint) = $cmd =~ /^[Mm][Aa](.+)/;
 			}
 
-		# set begin time for acceptable multibeam data
+		# set begin time for acceptable swath sonar data
 		if ($cmd =~ /^[Mm][Bb]./)
 			{
 			($mb_btime) = $cmd =~ /^[Mm][Bb](.+)/;
 			}
 
-		# set multibeam data scaling parameters
+		# set swath sonar data scaling parameters
 		if ($cmd =~ /^[Mm][Dd]./)
 			{
 			($swath_scale) = $cmd =~ /^[Mm][Dd](.+)/;
 			}
 
-		# set end time for acceptable multibeam data
+		# set end time for acceptable swath sonar data
 		if ($cmd =~ /^[Mm][Ee]./)
 			{
 			($mb_etime) = $cmd =~ /^[Mm][Ee](.+)/;
@@ -1485,6 +1498,8 @@ $middle = "-K -O -V >> $psfile";
 $end = "-O -V >> $psfile";
 
 # set macro gmt default settings
+$gmt_def = "MEASURE_UNIT/inch";
+push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "ANOT_FONT/Helvetica";
@@ -1605,7 +1620,7 @@ if (!open(FCMD,">$cmdfile"))
 	}
 
 # write the shellscript header
-print FCMD "#\n# Shellscript to create Postscript plot of multibeam data\n";
+print FCMD "#\n# Shellscript to create Postscript plot of swath sonar data\n";
 print FCMD "# Created by macro $program_name\n";
 print FCMD "#\n# This shellscript created by following command line:\n";
 print FCMD "# $program_name $command_line\n";
@@ -1857,7 +1872,7 @@ if ($color_mode)
 	printf FCMD "-J$projection$projection_pars \\\n\t";
 	printf FCMD "-R$bounds_plot \\\n\t";
 	printf FCMD "-C$cptfile \\\n\t";
-	print FCMD "-p1 -Z$color_mode \\\n\t";
+	print FCMD "-Z$color_mode \\\n\t";
 	if ($swath_footprint)
 		{
 		printf FCMD "-A$swath_footprint \\\n\t";
@@ -1886,14 +1901,7 @@ if ($color_mode)
 		{
 		printf FCMD "-E$mb_etime \\\n\t";
 		}
-	if ($mb_pings)
-		{
-		printf FCMD "-p$mb_pings \\\n\t";
-		}
-	else
-		{
-		printf FCMD "-p1 \\\n\t";
-		}
+	printf FCMD "-p$mb_pings \\\n\t";
 	if ($mb_speedmin)
 		{
 		printf FCMD "-S$mb_speedmin \\\n\t";
@@ -1955,14 +1963,7 @@ if ($contour_mode || $navigation_mode)
 		{
 		printf FCMD "-E$mb_etime \\\n\t";
 		}
-	if ($mb_pings)
-		{
-		printf FCMD "-p$mb_pings \\\n\t";
-		}
-	else
-		{
-		printf FCMD "-p1 \\\n\t";
-		}
+	printf FCMD "-p$mb_pings \\\n\t";
 	if ($mb_speedmin)
 		{
 		printf FCMD "-S$mb_speedmin \\\n\t";
@@ -2313,7 +2314,7 @@ if ($verbose)
 		printf "    Histogram stretch applied to amplitude shading\n";
 		}
 	if ($mb_btime || $mb_etime 
-		|| $mb_pings || $mb_speedmin
+		|| $mb_pings != 1 || $mb_speedmin
 		|| $mb_timegap)
 		{
 		print "\n  General MB-System Controls:\n";
@@ -2326,13 +2327,13 @@ if ($verbose)
 		{
 		print "    End time:                 $mb_etime\n";
 		}
-	if ($mb_pings)
+	if ($mb_pings != 1)
 		{
 		print "    Ping averaging:           $mb_pings\n";
 		}
 	if ($mb_speedmin)
 		{
-		print "    Minimum speed:            $mb_pings\n";
+		print "    Minimum speed:            $mb_speedmin\n";
 		}
 	if ($mb_timegap)
 		{

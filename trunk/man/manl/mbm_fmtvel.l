@@ -1,16 +1,16 @@
-.TH mbm_fmtvel l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbm_fmtvel l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_fmtvel\fP - Extract sound velocity info from Hydrosweep data
 files and create output in tabular format.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbm_fmtvel\fP [\fB-F\fIformat \fB-I\fIinfilename \fP]
 
 .SH DESCRIPTION
-\fBmbm_fmtvel\fP is a macro that scans a Hydrosweep multibeam data file
+\fBmbm_fmtvel\fP is a macro that scans a Hydrosweep swath sonar data file
 using the program \fBhsdump\fP and generates a list in columnar
 format with time, date, latitude, longitude, C-mean, and C-keel
 entrys. Comment records (lines) at the top of the output begin with '#'.
@@ -31,7 +31,7 @@ Palisades, NY 10964
 .SH OPTIONS
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input multibeam data using
+Sets the format for the input swath sonar data using
 \fBMBIO\fP integer format identifiers. The only allowed 
 formats are 21 (raw 
 Hydrosweep data) and 24 (L-DEO in-house binary Hydrosweep data).

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.11 1996-08-26 18:33:50 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.12 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -42,6 +42,12 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1997/04/17  15:07:36  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.11  1996/08/26  18:33:50  caress
+ * Changed "signed char" to "char" for SunOs 4.1 compiler compatibility.
+ *
  * Revision 4.10  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -102,7 +108,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.11 1996-08-26 18:33:50 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.12 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -236,7 +242,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.11 1996-08-26 18:33:50 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.12 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -418,7 +424,7 @@ int	*error;
 	struct mbsys_simrad_survey_struct *ping;
 	int	ntime_i[7];
 	double	ntime_d;
-	char	*beam_ss;
+	signed char	*beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;
@@ -575,7 +581,7 @@ int	*error;
 			}
 		for (i=0;i<*namp;i++)
 			{
-			if (ping->bath[i] != 0)
+			if (ping->bath[i] != 0 && ping->amp[i] != 0)
 				amp[i] = reflscale*ping->amp[i] + 64;
 			else
 				amp[i] = 0;
@@ -584,13 +590,23 @@ int	*error;
 		for (i=0;i<*nbath;i++)
 			{
 			beam_ss = &ping->ss[ping->beam_start_sample[i]];
-			for (j=0;j<ping->beam_samples[i];j++)
+			if (bath[i] != 0)
+			    for (j=0;j<ping->beam_samples[i];j++)
 				{
-				ss[*nss] = reflscale*beam_ss[j] + 64;
-				ssacrosstrack[*nss] = dacrscale*bathacrosstrack[i] 
-					+ ss_spacing*
-					(j - ping->beam_center_sample[i]);
-				ssalongtrack[*nss] = daloscale*bathalongtrack[i];
+				if (beam_ss[j] != 0)
+					{
+					ss[*nss] = reflscale*beam_ss[j] + 64;
+					ssacrosstrack[*nss] = bathacrosstrack[i] 
+						+ ss_spacing*
+						(j - ping->beam_center_sample[i]);
+					ssalongtrack[*nss] = bathalongtrack[i];
+					}
+				else
+					{
+					ss[*nss] = 0.0;
+					ssacrosstrack[*nss] = 0.0;
+					ssalongtrack[*nss] = 0.0;
+					}
 				(*nss)++;
 				}
 			}
@@ -927,7 +943,8 @@ int	*error;
 				}
 			for (i=0;i<namp;i++)
 				{
-				if (ping->bath[i] != 0)
+				if (ping->bath[i] != 0
+				    && amp[i] != 0.0)
 					ping->amp[i] = (amp[i] - 64) 
 						/ reflscale;
 				else
@@ -938,7 +955,10 @@ int	*error;
 			{
 			for (i=0;i<ping->pixels_ss;i++)
 				{
-				ping->ss[i] = (ss[i] - 64) / reflscale;
+				if (ss[i] != 0.0)
+					ping->ss[i] = (ss[i] - 64) / reflscale;
+				else
+					ping->ss[i] = 0;
 				}
 			}
 		}
@@ -1137,7 +1157,7 @@ int	*error;
 	struct mbsys_simrad_survey_struct *ping;
 	int	ntime_i[7];
 	double	ntime_d;
-	char	*beam_ss;
+	signed char	*beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;

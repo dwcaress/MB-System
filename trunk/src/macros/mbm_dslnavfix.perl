@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
-#    $Id: mbm_dslnavfix.perl,v 4.0 1996-08-12 21:14:19 caress Exp $
+#    $Id: mbm_dslnavfix.perl,v 4.1 1997-04-21 16:54:41 caress Exp $
 #
 #    Copyright (c) 1996 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,10 +34,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1996
 #
 # Version:
-#   $Id: mbm_dslnavfix.perl,v 4.0 1996-08-12 21:14:19 caress Exp $
+#   $Id: mbm_dslnavfix.perl,v 4.1 1997-04-21 16:54:41 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1997/03/26  15:27:16  caress
+# Fixed handling of UTM zone as per Del Bohnenstiehl.
+#
+# Revision 4.0  1996/08/12  21:14:19  caress
+# Initial revision.
+#
 #
 #
 $program_name = "mbm_dslnavfix";
@@ -110,11 +116,11 @@ $units_meters = 1;
 # now set the other projection parameters 
 if ($map_scale > 0)
 	{
-	$org_lon_n = -182 + 6 * $map_scale;
+	$org_lon_n = -183 + 6 * $map_scale;
 	}
 else
 	{
-	$org_lon_n = -182 - 6 * $map_scale;
+	$org_lon_n = -183 - 6 * $map_scale;
 	}
 $org_lon = "$org_lon_n:0";
 $org_lat = "0:0";

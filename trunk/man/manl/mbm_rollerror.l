@@ -1,16 +1,16 @@
-.TH mbm_rollerror l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbm_rollerror l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbm_rollerror\fP - Macro to read a multibeam bathymetry file, calculate the noise in the vertical reference used by the sonar, and generate a file containing roll corrections which can be applied to the data.
+\fBmbm_rollerror\fP - Macro to read a swath sonar bathymetry file, calculate the noise in the vertical reference used by the sonar, and generate a file containing roll corrections which can be applied to the data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbm_rollerror\fP \fB-F\fIformat \fB-I\fIfile \fP[\fB-W\fIfilterwidth\fP]
 
 .SH DESCRIPTION
 \fBmbm_rollerror\fP is a macro which generates crosstrack slope
-corrections from the apparent vertical reference noise of multibeam
+corrections from the apparent vertical reference noise of swath sonar
 data.  The crosstrack slopes are obtained by running
 \fBmblist\fP. The resulting time series is filtered using the \fBGMT\fP
 utility \fBfilter1d\fP, which uses a time domain median filter with
@@ -39,10 +39,10 @@ Palisades, NY 10964
 .SH OPTIONS
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input multibeam data using 
+Sets the format for the input swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This macro uses the \fBMBIO\fP library and will read any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This macro uses the \fBMBIO\fP library and will read any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 24.
@@ -54,7 +54,7 @@ Data file from which the input data will be read.
 Sets filter width in seconds. Default: \fIfilterwidth\fP = 60.
 
 .SH EXAMPLES
-Suppose one has obtained a Hydrosweep DS multibeam data file 
+Suppose one has obtained a Hydrosweep DS swath sonar data file 
 called hs_ew9302_157_bcen.mb24 in the
 L-DEO binary in-house format (format id 24). In order to generate a 
 slope correction file:

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiomrg.c	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 4.7 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_sbsiomrg.c,v 4.8 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
+ * Revision 4.7  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.6  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -86,7 +92,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.7 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.8 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiomrg";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

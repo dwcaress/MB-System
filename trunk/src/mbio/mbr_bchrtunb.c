@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 4.5 1996-08-05 15:21:58 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 4.6 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
+ * Revision 4.5  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.4  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -66,7 +72,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.5 1996-08-05 15:21:58 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.6 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

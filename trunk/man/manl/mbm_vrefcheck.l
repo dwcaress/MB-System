@@ -1,11 +1,11 @@
-.TH mbm_vrefcheck l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbm_vrefcheck l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_vrefcheck\fP - Macro to generate plot of crosstrack seafloor slope
-from a multibeam file.  The noise in this time series largely reflects
+from a swath sonar file.  The noise in this time series largely reflects
 noise in the vertical reference used by the sonar.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbm_vrefcheck\fP \fB-F\fIformat \fB-I\fIfile \fP[\fB-S\fIscale \fB-X\fIxaxis \fB-A\fIxmin \fB-B\fIxmax\fP]
@@ -52,10 +52,10 @@ input file. If not specified, the end of the input file
 will be used as \fIxmax\fP.
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input multibeam data using 
+Sets the format for the input swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This macro uses the \fBMBIO\fP library and will read any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This macro uses the \fBMBIO\fP library and will read any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 24.
@@ -71,7 +71,7 @@ Default: \fIxscale\fP = 1.2.
 Sets the length of the x-axis in inches.  
 
 .SH EXAMPLES
-Suppose one has obtained a Hydrosweep DS multibeam data file 
+Suppose one has obtained a Hydrosweep DS swath sonar data file 
 called hs_ew9302_157_bcen.mb24 in the
 L-DEO binary in-house format (format id 24). In order to generate a 
 vertical reference noise plot:

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 4.2 1996-03-12 17:28:19 caress Exp $
+#    $Id: mbm_xyplot.perl,v 4.3 1997-04-21 16:54:41 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -54,10 +54,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 4.2 1996-03-12 17:28:19 caress Exp $
+#   $Id: mbm_xyplot.perl,v 4.3 1997-04-21 16:54:41 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1997/04/17  15:06:49  caress
+# MB-System 4.5 Beta Release
+#
+# Revision 4.2  1996/03/12  17:28:19  caress
+# Check-in after flail with format 63.
+#
 # Revision 4.1  1995/09/28  18:05:43  caress
 # Various bug fixes working toward release 4.3.
 #
@@ -828,6 +834,8 @@ $middle = "-K -O -V >> $psfile";
 $end = "-O -V >> $psfile";
 
 # set macro gmt default settings
+$gmt_def = "MEASURE_UNIT/inch";
+push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "ANOT_FONT/Helvetica";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 4.4 1995-03-22 19:14:25 caress Exp $
+ *    $Id: mb_defaults.c,v 4.5 1997-04-21 17:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/17  18:53:33  caress
+ * Added LINUX ifdef.
+ *
+ * Revision 4.4  1995/03/22  19:14:25  caress
+ * Added #ifdef's for HPUX.
+ *
  * Revision 4.3  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -76,7 +82,7 @@ int *etime_i;
 double *speedmin;
 double *timegap;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.4 1995-03-22 19:14:25 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -199,7 +205,7 @@ int verbose;
 char *psdisplay;
 char *mbproject;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.4 1995-03-22 19:14:25 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
@@ -226,6 +232,9 @@ char *mbproject;
 	strcpy(psdisplay, "pageview");
 #endif
 #ifdef LYNX
+	strcpy(psdisplay, "ghostview");
+#endif
+#ifdef LINUX
 	strcpy(psdisplay, "ghostview");
 #endif
 #ifdef SUN
