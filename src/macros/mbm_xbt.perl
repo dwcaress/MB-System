@@ -6,7 +6,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id: mbm_xbt.perl,v 5.3 2004-09-17 19:47:44 dale Exp $
+#    $Id: mbm_xbt.perl,v 5.4 2004-09-17 22:01:08 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -22,7 +22,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Command:
 #   mbm_xbt
 #
-# Purpose: 
+# Purpose:      
 #   Perl code to translate Sparton XBT data or Sippican (MK12 or MK21)
 #   XBT data from depth and temperature into depth and sound speed.
 #   Sound Velocity is computed according to DelGrosso's equations.
@@ -83,10 +83,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      
 #
 # Version:
-# $Id: mbm_xbt.perl,v 5.3 2004-09-17 19:47:44 dale Exp $
+# $Id: mbm_xbt.perl,v 5.4 2004-09-17 22:01:08 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.3  2004/09/17 19:47:44  dale
+#   This is a major revision to mbm_xbt. It adds new functionality for Sippican MK21 file format, addresses sub-zero temperatures better and is significantly cleaned up. See the comments.
+#
 #   Revision 1.1.1.1  2003/07/27 17:17:35  dale
 #   mb import from 5b31
 #
