@@ -1,7 +1,7 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_calcomp_plot.perl	8/21/93
-#    $Id: mbm_calcomp_plot.perl,v 4.0 1994-03-06 00:09:08 caress Exp $
+#    $Id: mbm_calcomp_plot.perl,v 4.1 1994-05-17 14:07:45 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -51,7 +51,7 @@
 #   in Perl (this script).
 #
 # Version:
-#   $Id: mbm_calcomp_plot.perl,v 4.0 1994-03-06 00:09:08 caress Exp $
+#   $Id: mbm_calcomp_plot.perl,v 4.1 1994-05-17 14:07:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
@@ -330,7 +330,7 @@ if (!$restart)
 
 # Now, finally, plot the contours...
 print "\nDrawing contours...\n";
-$command = sprintf("%s %s | mbcontourfilter -L0 -F%s -R%s -B%s -E%s -V -J%s -C%s -A%s | mbplotfilter -R%s -V -W%s | ccgr -d %s",
+$command = sprintf("%s %s | mbcontourfilter -L0 -F%s -R%s -B%s -E%s -V -Jm%s -C%s -A%s | mbplotfilter -R%s -V -W%s | ccgr -d %s",
 	$source, $file, $format, $bounds, $begin_time, $end_time,
 	$scale, $contour, $annotate, $bounds, $width, $port);
 	print "$command\n";
