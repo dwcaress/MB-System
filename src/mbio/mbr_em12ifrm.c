@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.12 2003-12-04 23:10:22 caress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.13 2004-10-18 04:15:46 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2003/12/04 23:10:22  caress
+ * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
+ *
  * Revision 5.11  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -119,7 +122,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.12 2003-12-04 23:10:22 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.13 2004-10-18 04:15:46 caress Exp $";
 	char	*function_name = "mbr_register_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -252,7 +255,7 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.12 2003-12-04 23:10:22 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.13 2004-10-18 04:15:46 caress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -274,7 +277,7 @@ int mbr_info_em12ifrm(int verbose,
 	*pixels_ss_max = MBF_EM12IFRM_MAXPIXELS;
 	strncpy(format_name, "EM12IFRM", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_EM12IFRM\nInformal Description: IFREMER TRISMUS format for Simrad EM12\nAttributes:           Simrad EM12S and EM12D,\n                      bathymetry, amplitude, and sidescan\n                      81 beams, variable pixels, binary, IFREMER.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_EM12IFRM\nInformal Description: IFREMER TRISMUS format for Simrad EM12\nAttributes:           Simrad EM12S and EM12D,\n                     bathymetry, amplitude, and sidescan\n                      81 beams, variable pixels, binary,\n                      read-only, IFREMER.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = -3;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_NO;
@@ -322,7 +325,7 @@ int mbr_info_em12ifrm(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.12 2003-12-04 23:10:22 caress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.13 2004-10-18 04:15:46 caress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
