@@ -29,11 +29,11 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
 .TP
-.B \fB-H\fP
+\fB-H\fP
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-E\fP\fIellipsoid\fP
+\fB-E\fP\fIellipsoid\fP
 Sets the ellipsoid to be used. The default
 is to use the WGS-84 ellipsoid, in accordance with
 the NAD-83 datum. If ellipsoid = "Clarke-1866",
@@ -44,11 +44,11 @@ shift between NAD-27 and NAD-83 because the 1986
 transition to NAD-83 also involved additional
 adjustments to positions. 
 .TP
-.B \fB-F\fP
+\fB-F\fP
 Causes \fBmbm_utm\fP to use or generate eastings and northings
 in feet rather than meters. 
 .TP
-.B \fB-I\fP\fIinfile\fP
+\fB-I\fP\fIinfile\fP
 Sets the name of the data file to be processed.
 The first two columns of the ASCII input
 data stream must be either longitude and
@@ -57,7 +57,7 @@ transformation) or easting and northing values
 (for projected to geographic transformation). 
 Any additional columns of data are passed unaltered to the output.
 .TP
-.B \fB-O\fP\fIoutfile\fP
+\fB-O\fP\fIoutfile\fP
 Sets the name of the output data file to be generated.
 The first two columns of the ASCII output
 data stream will be either easting and northing 
@@ -66,14 +66,14 @@ transformation) or longitude and latitude values
 (for projected to geographic transformation). 
 Any additional columns of data are passed unaltered to the output.
 .TP
-.B \fB-Q\fP
+\fB-Q\fP
 This option causes the transformation to be from
 projected coordinates (eastings and northings) to
 geographic coordinates (longitude and latitude).
 The default is to transform from geographic to
 projected coordinates.
 .TP
-.B \fB-Z\fP\fIzone\fP
+\fB-Z\fP\fIzone\fP
 Sets the UTM zone.
 
 .SH EXAMPLES
