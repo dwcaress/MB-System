@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.2 1996-04-22 13:21:19 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.3 1996-07-16 22:07:12 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,6 +39,9 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.1  1996/01/26  21:23:30  caress
  * Version 4.3 distribution
  *
@@ -84,7 +87,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbsys_hsmd.c,v 4.2 1996-04-22 13:21:19 caress Exp $";
+	static char res_id[]="$Id: mbsys_hsmd.c,v 4.3 1996-07-16 22:07:12 caress Exp $";
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -279,7 +282,7 @@ int	*error;
 		/* get bathymetry */
 
 		/* deal with a ping to port */
-		if (store->Port == 1 ) 
+		if (store->Port == -1) 
 			{
 			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
 				{
@@ -307,7 +310,7 @@ int	*error;
 		/* Deal with the sidescan */
 
 		/* deal with a ping to port */
-		if (store->Port == 1 ) 
+		if (store->Port == -1) 
 			{
 			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++) 
 				{
@@ -565,14 +568,14 @@ int	*error;
 				first = i;
 			}
 		if (first >= MBSYS_HSMD_BEAMS_PING - 1)
-			store->Port = -1;
-		else
 			store->Port = 1;
+		else
+			store->Port = -1;
 
 		/* get bathymetry */
 
 		/* deal with a ping to port */
-		if (store->Port == 1 ) 
+		if (store->Port == -1) 
 			{
 			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
 				{
@@ -598,7 +601,7 @@ int	*error;
 		/* Deal with the sidescan */
 
 		/* deal with a ping to port */
-		if (store->Port == 1 ) 
+		if (store->Port == -1) 
 			{
 			store->ss_range = fabs(ssacrosstrack[0]);
 			for (i=0;i<MBSYS_HSMD_PIXELS_PING;i++) 
@@ -703,7 +706,7 @@ int	*error;
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
-			angles_null[i] = 0.0;
+			angles_null[i] = 40.0;
 			flags[i] = MB_NO;
 			}
 
@@ -714,13 +717,24 @@ int	*error;
 			scale = 0.000015;
 
 		/* deal with a ping to port */
-		if (store->Port == 1 ) 
+		if (store->Port == -1) 
 			{
 			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
 				{
 				j = MBSYS_HSMD_BEAMS_PING - i - 1;
 				ttimes[j] = fabs(scale * store->spfb[i]);
-				angles[j] = -store->angle[i];
+				/* angle convention in raw data
+				   is positive to port */
+				if (store->angle[i] < 0.0)
+					{
+					angles[j] = -store->angle[i];
+					angles_forward[j] = 0.0;
+					}
+				else
+					{
+					angles[j] = store->angle[i];
+					angles_forward[j] = 180.0;
+					}
 				if (store->spfb[i] < 0.0)
 					flags[j] = MB_YES;
      	 			}

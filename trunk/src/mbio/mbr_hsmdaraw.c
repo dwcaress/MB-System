@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdaraw.c	2/11/93
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.3 1996-04-22 13:21:19 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.4 1996-07-16 22:07:12 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	August 11, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.2  1996/04/22  10:57:09  caress
  * DTR define now in mb_io.h
  *
@@ -79,7 +82,7 @@ int    verbose;
 char   *mbio_ptr;
 int    *error;
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.3 1996-04-22 13:21:19 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.4 1996-07-16 22:07:12 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdaraw";
 	int	 status = MB_SUCCESS;
 	int	 i;
@@ -486,7 +489,7 @@ int    *error;
 		/* get bathymetry */
 
 		/* deal with a ping to port */
-		if (data->Port == 1 ) 
+		if (data->Port == -1) 
 			{
 			for (i=0;i<MBF_HSMDARAW_BEAMS_PING;i++) 
 				{
@@ -512,7 +515,7 @@ int    *error;
 		/* Deal with the sidescan */
 
 		/* deal with a ping to port */
-		if (data->Port == 1 ) 
+		if (data->Port == -1) 
 			{
 			for (i=0;i<MBF_HSMDARAW_PIXELS_PING;i++) 
 				{
@@ -813,15 +816,15 @@ int    *error;
 				first = i;
 			}
 		if (first >= MBF_HSMDARAW_BEAMS_PING - 1)
-			data->Port = -1;
-		else
 			data->Port = 1;
+		else
+			data->Port = -1;
 
 		/* put distance and depth values 
 			into hsmdaraw data structure */
 
 		/* deal with a ping to port */
-		if (data->Port == 1 ) 
+		if (data->Port == -1) 
 			{
 			for (i=0;i<MBF_HSMDARAW_BEAMS_PING;i++) 
 				{
@@ -845,7 +848,7 @@ int    *error;
 		/* put sidescan values into hsmdaraw data structure */
 
 		/* deal with a ping to port */
-		if (data->Port == 1 ) 
+		if (data->Port == -1) 
 			{
 			if (data->ss_range <= 0.0)
 				data->ss_range = 
@@ -1056,7 +1059,7 @@ int    *error;
 	  				if (data->spfb[i] < 0.0)
 	   					data->depth[i] = 
 							-data->depth[i];
-					if (data->Port == 1)
+					if (data->Port == -1)
 						data->distance[i] = 
 							-data->distance[i];
 					}
