@@ -23,7 +23,7 @@ clear variability in the observed crosstrack slope, even when
 surveying essentially flat seafloor.  This suggests that the filtered
 signal is probably dominated by vertical reference noise on the Ewing.
 The corrections can be applied to Hydrosweep data during the calculation
-of bathymetry from travel times using \fBhsbath\fP.
+of bathymetry from travel times using \fBmbbath\fP.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -59,6 +59,9 @@ slope correction file:
 	mbm_rollerror -F24 -Ihs_ew9302_157_bcen.mb24 
 .br
 The output will be in a file called hs_ew9302_157_bcen.mb24.cor
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmblist\fP(l), \fBmbbath\fP(l)
 
 .SH BUGS
 So far it is pretty rare for this utility 

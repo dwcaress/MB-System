@@ -78,6 +78,9 @@ vertical reference noise plot:
 .br
 	mbm_vrefcheck -F24 -Ihs_ew9302_157_bcen.mb24
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmblist\fP(l)
+
 .SH BUGS
 This script is hard wired for the R/V Ewing installation. This will
 have to be fixed for it to be useful elsewhere.

@@ -58,6 +58,11 @@ Lamont-Doherty Earth Observatory
 Palisades, NY 10964
 .br
 wrote the man page.
+
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbm_xbt\fP(l), 
+\fBmbvelocitytool\fP(l), \fBmblevitus\fP(l)
+
 .SH BUGS
 This documentation is virtually guaranteed to be out of date, and/or
 just plain wrong, but at least we are trying. Suggestions are welcome.

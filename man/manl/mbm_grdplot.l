@@ -175,8 +175,8 @@ As an example, the contents of the shellscript "shadedrelief.cmd" are:
  echo All done!
 
 .SH SEE ALSO
-\fBmbm_plot\fP(l), \fBmbgrid\fP(l), \fBmbcontour\fP(l), 
-\fBmbswath\fP(l), \fBmbdefaults\fP(l)
+\fBmbsystem\fP(l), \fBmbgrid\fP(l), \fBmbcontour\fP(l), 
+\fBmbswath\fP(l), \fBmbdefaults\fP(l), \fBmbm_plot\fP(l)
 
 .SH BUGS
 Uses only the standard mercator projection and is thus useless for

@@ -39,6 +39,9 @@ Hydrosweep data) and 24 (L-DEO in-house binary Hydrosweep data).
 .B \fB-I\fIinfilename\fP
 Data file from which the input data will be read. 
 
+.SH SEE ALSO
+\fBmbsystem\fP(l)
+
 .SH BUGS
 Only one output format is currently supported.
 
