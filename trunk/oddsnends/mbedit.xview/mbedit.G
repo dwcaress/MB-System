@@ -45,7 +45,7 @@
 	:height                 764
 	:background-color       ""
 	:foreground-color       ""
-	:label                  "MBEDIT Version $Id: mbedit.G,v 4.0 1994-03-05 23:54:35 caress Exp $"
+	:label                  "MBEDIT Version $Id: mbedit.G,v 4.1 1994-10-21 12:00:33 caress Exp $"
 	:label-type             :string
 	:initial-state          :open
 	:show-footer            t

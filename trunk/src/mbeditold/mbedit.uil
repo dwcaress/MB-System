@@ -1,0 +1,1297 @@
+/*********************************************************
+*                                                        *
+* $Id: mbedit.uil,v 4.0 1994-10-21 11:55:41 caress Exp $                                                   *
+*                                                        *
+* WRITTEN FOR ANTARCTIC SUPPORT ASSOCIATES BY Rod McCabe *
+*                                                        *
+* April 21, 1994                                         *
+*                                                        *
+* MBEDIT.UIL                                             *
+*                                                        *
+**********************************************************
+*                                                        *
+* Language: MOTIL UIL (User Interface Language)          *
+*                                                        *
+* Operating system : UNIX                                *
+*                                                        *
+* $Log: not supported by cvs2svn $
+# Revision 1.1  1994/07/14  21:15:08  brockda
+# Initial revision
+#                                                  *
+*                                                        *
+**********************************************************
+*                                                        *
+**********************************************************/
+
+
+module mbedit
+version = 'V1.0'
+names = case_sensitive
+
+/**********************************************************/
+/* LIST ALL "C" FUNCTIONS USED IN THIS PROGRAM            */
+/**********************************************************/
+
+procedure
+	create_proc		(integer);
+	mbedit_plot_all		(integer);
+        display_menu		(integer);
+        do_load_ok		(integer);
+        cancel_file_sel		(integer);
+        do_next_buffer		(integer);
+        do_buffer_size		(integer);
+        do_buffer_hold		(integer);
+        do_done			(integer);
+        do_forward		(integer);
+        do_reverse		(integer);
+        do_quit			(integer);
+        set_number_pings	(integer);
+        set_number_step		(integer);
+        set_scale_x		(integer);
+        set_scale_y		(integer);
+        set_mode_pick		(integer);
+        set_mode_erase		(integer);
+        set_mode_restore	(integer);
+        apply_goto_button	(integer);
+        cancel_goto_button	(integer);
+	do_x_interval		(integer);
+	do_y_interval		(integer);
+	do_event		(integer);
+	grab_file		(integer);
+
+/***************************************************************/
+/* INCLUDE FILES                                               */
+/***************************************************************/
+
+include file 'mbedit_define.uil';
+include file 'mbedit_init.uil';
+
+
+/***************************************************************/
+/* THIS IS THE MAIN WINDOW. EVERYTHING GOES IN HERE.           */
+/***************************************************************/
+object window_mbedit : XmMainWindow 
+{
+    arguments 
+    {
+        XmNx = 34;
+        XmNy = 0;
+        XmNwidth = 1105;
+        XmNheight = 865;
+    };
+    controls 
+    {
+       	XmMenuBar		mbedit_menu_bar;
+    };
+};
+
+/***************************************************************/
+/* THIS VERSION OF MBEDIT USES A MENU BAR TO CONFORM WITH THE  */
+/* MOTIF STYLE.                                                */
+/***************************************************************/
+object mbedit_menu_bar : XmMenuBar 
+{
+    arguments 
+    {
+        XmNorientation = XmHORIZONTAL;
+        XmNspacing = 60;
+    };
+    controls 
+    {
+       XmCascadeButton	mbedit_file_entry;
+       XmCascadeButton	mbedit_next_buffer_entry;
+       XmCascadeButton	mbedit_goto_entry;
+       XmCascadeButton	mbedit_done_entry;
+       XmCascadeButton	mbedit_forward_entry;
+       XmCascadeButton	mbedit_reverse_entry;
+       XmCascadeButton	mbedit_quit_entry;
+       XmCascadeButton	mbedit_help_entry;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_run_bar);
+    };
+};
+
+/***************************************************************/
+/* ALLOWS YOU TO PICK WHAT FILE YOU WANT TO EDIT. YOU CAN      */
+/* CHOOSE FROM FILES IN ANY DIRECTORY.                         */
+/***************************************************************/
+object mbedit_file_entry : XmCascadeButton 
+{
+    arguments 
+    {
+        XmNlabelString = "FILE";
+	XmNfontList = k_menu_bar_font;
+    };
+    callbacks 
+    {
+        XmNactivateCallback = procedure display_menu(k_file_menu);
+!	MrmNcreateCallback = procedure create_proc (k_file_menu);
+    };
+};
+
+/***************************************************************/
+/* LOADS NEXT BUFFERS DATA.                                    */
+/***************************************************************/
+object mbedit_next_buffer_entry : XmCascadeButton 
+{
+    arguments 
+    {
+        XmNlabelString = "NEXT_BUFFER";
+	XmNfontList = k_menu_bar_font;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_next_buff);
+        XmNactivateCallback = procedure do_next_buffer(k_next_buff);
+    };
+};
+
+/***************************************************************/
+/* LOADS NEXT BUFFERS DATA.                                    */
+/***************************************************************/
+object mbedit_goto_entry : XmCascadeButton 
+{
+    arguments 
+    {
+        XmNlabelString = "GO_TO";
+	XmNfontList = k_menu_bar_font;
+    };
+    callbacks 
+    {
+        XmNactivateCallback = procedure display_menu(k_display_goto_menu);
+	MrmNcreateCallback = procedure create_proc (k_display_goto_menu);
+    };
+};
+
+/***************************************************************/
+/* DEALS WITH DONE EVENT.                                      */
+/***************************************************************/
+object mbedit_done_entry : XmCascadeButton 
+{
+    arguments 
+    {
+        XmNlabelString = "DONE";
+	XmNfontList = k_menu_bar_font;
+    };
+    callbacks 
+    {
+        XmNactivateCallback = procedure do_done(k_do_done);
+	MrmNcreateCallback = procedure create_proc (k_do_done);
+    };
+};
+
+/***************************************************************/
+/* ALLOWS YOU TO SCROLL THROUGH THE DATA IN A FORWARD          */
+/* DIRECTION.                                                  */
+/***************************************************************/
+object mbedit_forward_entry : XmCascadeButton 
+{
+    arguments 
+    {
+        XmNlabelString = "FORWARD";
+	XmNfontList = k_menu_bar_font;
+    };
+    callbacks 
+    {
+        XmNactivateCallback = procedure do_forward(k_do_forward);
+	MrmNcreateCallback = procedure create_proc (k_do_forward);
+    };
+};
+
+/***************************************************************/
+/* ALLOWS YOU TO SCROLL THROUGHT THE DATA IN A REVERSE         */
+/* DIRECTION.                                                  */
+/***************************************************************/
+object mbedit_reverse_entry : XmCascadeButton 
+{
+    arguments 
+    {
+        XmNlabelString = "REVERSE";
+	XmNfontList = k_menu_bar_font;
+    };
+    callbacks 
+    {
+        XmNactivateCallback = procedure do_reverse(k_do_reverse);
+	MrmNcreateCallback = procedure create_proc (k_do_reverse);
+    };
+};
+
+/***************************************************************/
+/* STOPS THIS PROGRAM AND RETURNS YOU TO A UNIX PROMPT.        */
+/***************************************************************/
+object mbedit_quit_entry : XmCascadeButton 
+{
+    arguments 
+    {
+        XmNlabelString = "QUIT";
+	XmNfontList = k_menu_bar_font;
+    };
+    callbacks 
+    {
+        XmNactivateCallback = procedure do_quit(k_do_quit);
+	MrmNcreateCallback = procedure create_proc (k_do_quit);
+    };
+};
+
+/***************************************************************/
+/* DISPLAYS THE HELP MENU - NOT YET IMPLEMENTED                */
+/***************************************************************/
+object mbedit_help_entry : XmCascadeButton 
+{
+    arguments 
+    {
+        XmNlabelString = "   ";
+	XmNfontList = k_menu_bar_font;
+    };
+    callbacks 
+    {
+!	MrmNactivateCallback = procedure ?????? (k_run_bar);
+    };
+};
+
+/***************************************************************/
+/* SETUP THE INPUT SECTION ON THE TOP OF THIS SCREEN AND THE   */
+/* DISPLAY AT THE BOTTOM OF THE SCREEN.                        */
+/* THIS IS CALLED FROM "mbedit.c".                             */
+/***************************************************************/
+
+object mbedit_bboard : XmBulletinBoard widget 
+{
+    arguments 
+    {
+        XmNmarginWidth = 0;
+        XmNmarginHeight = 0;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNwidth = 1105;
+        XmNheight = 848;
+        XmNx = 0;
+        XmNy = 30;
+    };
+    controls 
+    {
+        XmBulletinBoard	 controls_mbedit;
+        XmDrawingArea canvas_mbedit;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_mb_main);
+    };
+};
+
+/***************************************************************/
+/* THIS SECTION DISPLAYS ALL THE INPUTS AND LABELS ON THE MAIN */
+/* SCREEN.                                                     */
+/***************************************************************/
+object controls_mbedit : XmBulletinBoard widget 
+{
+    arguments 
+    {
+        XmNmarginWidth = 0;
+        XmNmarginHeight = 0;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 0;
+        XmNy = 10;
+        XmNwidth = 1100;
+        XmNheight = 195;
+    };
+    controls 
+    {
+       XmLabel 		slider_scale_x_label;
+       XmScale 		slider_scale_x;
+       XmLabel 		slider_scale_x_max_label;
+       XmLabel 		slider_scale_y_label;
+       XmScale 		slider_scale_y;
+       XmLabel 		slider_scale_y_max_label;
+       XmLabel 		slider_number_pings_label;
+       XmScale 		slider_number_pings;
+       XmLabel 		slider_num_pings_max_label;
+       XmLabel 		slider_number_step_label;
+       XmScale	 	slider_number_step;
+       XmLabel 		nu_pings_max_step_label;
+       XmLabel 		slider_x_interval_label;
+       XmScale		slider_x_interval;
+       XmLabel 		slider_x_max_interval_label;
+       XmLabel 		slider_y_interval_label;
+       XmScale	 	slider_y_interval;
+       XmLabel 		slider_y_max_interval_label;
+       XmLabel 		slider_buffer_size_label;
+       XmScale 		slider_buffer_size;
+       XmLabel 		slider_buffer_size_max_label;
+       XmLabel 		slider_buffer_hold_label;
+       XmScale 		slider_buffer_hold;
+       XmLabel 		slider_buffer_hold_max_label;
+       XmLabel 		setting_mode_label;
+       XmRowColumn 	setting_mode;
+    };
+    callbacks 
+    {
+    };
+};
+
+/***************************************************************/
+/* THIS WIDGET CHANGES THE HORIZONTAL SCALE WITH A SLIDER BAR. */
+/***************************************************************/
+
+object slider_scale_x_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("X Scale (m/100 pixels):  1");
+	XmNfontList = k_menu_font;
+        XmNx = 5;
+        XmNy = 15;
+    };
+};
+
+object slider_scale_x : XmScale widget 
+{
+    arguments 
+    {
+        XmNmaximum = 4200;
+        XmNminimum = 1;
+        XmNorientation = XmHORIZONTAL;
+        XmNshowValue = true;
+        XmNscaleHeight = 15;
+        XmNx = 200;
+        XmNy = 0;
+        XmNwidth = 200;
+        XmNheight = 31;
+        XmNvalue = 1000;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_x_scale);
+        XmNvalueChangedCallback = procedure set_scale_x(k_x_scale);
+    };
+};
+
+object slider_scale_x_max_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("4200");
+	XmNfontList = k_menu_font;
+        XmNrecomputeSize = false;
+        XmNx = 390;
+        XmNy = 15;
+        XmNwidth = 65;
+        XmNheight = 15;
+    };
+};
+
+/***************************************************************/
+/* THIS WIDGET MODIFIES THE VERTICAL SCALE WITH A SLIDER BAR.  */
+/***************************************************************/
+
+object slider_scale_y_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Vert. Exag. (X 0.01):    1");
+	XmNfontList = k_menu_font;
+        XmNx = 5;
+        XmNy = 50;
+    };
+};
+
+object slider_scale_y : XmScale widget 
+{
+    arguments 
+    {
+        XmNmaximum = 5000;
+        XmNminimum = 1;
+        XmNorientation = XmHORIZONTAL;
+        XmNshowValue = true;
+        XmNscaleHeight = 15;
+        XmNx = 200;
+        XmNy = 35;
+        XmNwidth = 200;
+        XmNheight = 31;
+        XmNvalue = 100;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_vert_exag);
+        XmNvalueChangedCallback = procedure set_scale_y(k_vert_exag);
+    };
+};
+
+object slider_scale_y_max_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("5000");
+        XmNrecomputeSize = false;
+	XmNfontList = k_menu_font;
+        XmNx = 390;
+        XmNy = 50;
+        XmNwidth = 65;
+        XmNheight = 15;
+    };
+};
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO MODIFY THE NUMBER OF PINGS        */
+/* DISPLAYED USING A SLIDER BAR.                               */
+/***************************************************************/
+
+object slider_number_pings_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Number of pings shown:   1");
+	XmNfontList = k_menu_font;
+        XmNx = 5;
+        XmNy = 85;
+    };
+};
+
+object slider_number_pings : XmScale widget 
+{
+    arguments 
+    {
+        XmNmaximum = 20;
+        XmNminimum = 1;
+        XmNorientation = XmHORIZONTAL;
+        XmNshowValue = true;
+        XmNscaleHeight = 15;
+        XmNx = 200;
+        XmNy = 70;
+        XmNwidth = 200;
+        XmNheight = 31;
+        XmNvalue = 10;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_num_pings);
+        XmNvalueChangedCallback = procedure set_number_pings(k_num_pings);
+    };
+};
+
+
+object slider_num_pings_max_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("20");
+        XmNrecomputeSize = false;
+	XmNfontList = k_menu_font;
+        XmNx = 390;
+        XmNy = 85;
+        XmNwidth = 65;
+        XmNheight = 15;
+    };
+};
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO SCROLL THROUGH THE PINGS FASTER   */
+/* THEN ONE PING AT A TIME. FROM 2 TO 20 AT A TIME USING THE   */
+/* FORWARD AND REVERSE BUTTONS.                                */
+/***************************************************************/
+
+object slider_number_step_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Number of pings to step: 2");
+	XmNfontList = k_menu_font;
+        XmNx = 5;
+        XmNy = 120;
+    };
+};
+
+object slider_number_step : XmScale widget 
+{
+    arguments 
+    {
+        XmNmaximum = 20;
+        XmNminimum = 1;
+        XmNorientation = XmHORIZONTAL;
+        XmNshowValue = true;
+        XmNscaleHeight = 15;
+        XmNx = 200;
+        XmNy = 105;
+        XmNwidth = 200;
+        XmNheight = 31;
+        XmNvalue = 5;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_pings_to_step);
+	XmNvalueChangedCallback = procedure set_number_step (k_pings_to_step);
+    };
+};
+
+object nu_pings_max_step_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("20");
+	XmNfontList = k_menu_font;
+        XmNx = 390;
+        XmNy = 120;
+        XmNwidth = 65;
+        XmNheight = 15;
+    };
+};
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO CHANGE THE X TICK                 */
+/* INTERVAL USING A TEXT INPUT.                                */
+/***************************************************************/
+
+object slider_x_interval_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("X Axis Tick Interval (m): 1");
+	XmNfontList = k_menu_font;
+        XmNx = 500;
+        XmNy = 15;
+    };
+};
+
+
+object slider_x_interval : XmScale widget 
+{
+    arguments 
+    {
+        XmNmaximum = 10000;
+        XmNminimum = 1;
+        XmNorientation = XmHORIZONTAL;
+        XmNshowValue = true;
+        XmNscaleHeight = 15;
+        XmNx = 700;
+        XmNy = 0;
+        XmNwidth = 200;
+        XmNheight = 31;
+        XmNvalue = 1000;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_x_tick_marks);
+	XmNvalueChangedCallback = procedure do_x_interval (k_x_tick_marks);
+    };
+};
+
+object slider_x_max_interval_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("10000");
+	XmNfontList = k_menu_font;
+        XmNx = 890;
+        XmNy = 15;
+        XmNwidth = 65;
+        XmNheight = 15;
+    };
+};
+
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO ADJUST THE Y TICK INTERVAL        */
+/* USING A TEXT INPUT.                                         */
+/***************************************************************/
+
+object slider_y_interval_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Y Axis Tick Interval (m): 1");
+	XmNfontList = k_menu_font;
+        XmNx = 500;
+        XmNy = 50;
+    };
+};
+
+
+object slider_y_interval : XmScale widget 
+{
+    arguments 
+    {
+        XmNmaximum = 1000;
+        XmNminimum = 1;
+        XmNorientation = XmHORIZONTAL;
+        XmNshowValue = true;
+        XmNscaleHeight = 15;
+        XmNx = 700;
+        XmNy = 35;
+        XmNwidth = 200;
+        XmNheight = 31;
+        XmNvalue = 250;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_y_tick_marks);
+	XmNvalueChangedCallback = procedure do_y_interval (k_y_tick_marks);
+    };
+};
+
+object slider_y_max_interval_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("1000");
+	XmNfontList = k_menu_font;
+        XmNx = 890;
+        XmNy = 50;
+        XmNwidth = 65;
+        XmNheight = 15;
+    };
+};
+
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO MODIFY THE BUFFER SIZE USING A    */
+/* SLIDER BAR.                                                 */
+/***************************************************************/
+object slider_buffer_size_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Data Buffer Size:         0");
+	XmNfontList = k_menu_font;
+        XmNx = 500;
+        XmNy = 85;
+    };
+};
+
+object slider_buffer_size : XmScale widget 
+{
+    arguments 
+    {
+        XmNmaximum = 5000;
+        XmNminimum = 0;
+        XmNvalue = 5000;
+        XmNorientation = XmHORIZONTAL;
+        XmNshowValue = true;
+        XmNscaleHeight = 15;
+        XmNx = 700;
+        XmNy = 70;
+        XmNwidth = 200;
+        XmNheight = 31;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_buff_size);
+        XmNvalueChangedCallback = procedure do_buffer_size(k_buff_size);
+    };
+};
+
+
+object slider_buffer_size_max_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("5000");
+	XmNfontList = k_menu_font;
+        XmNx = 890;
+        XmNy = 85;
+        XmNwidth = 65;
+        XmNheight = 15;
+    };
+};
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO MODIFY THE BUFFER HOLDING SIZE    */
+/* USING A SLIDER BAR.                                         */
+/***************************************************************/
+object slider_buffer_hold_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Buffer Retain Size:       0");
+	XmNfontList = k_menu_font;
+        XmNx = 500;
+        XmNy = 120;
+    };
+};
+
+object slider_buffer_hold : XmScale widget 
+{
+    arguments 
+    {
+        XmNmaximum = 5000;
+        XmNminimum = 0;
+        XmNvalue = 100;
+        XmNorientation = XmHORIZONTAL;
+        XmNshowValue = true;
+        XmNscaleHeight = 15;
+        XmNx = 700;
+        XmNy = 105;
+        XmNwidth = 200;
+        XmNheight = 31;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_buff_retain_size);
+        XmNvalueChangedCallback = procedure do_buffer_hold(k_buff_retain_size);
+    };
+};
+
+object slider_buffer_hold_max_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("5000");
+	XmNfontList = k_menu_font;
+        XmNx = 890;
+        XmNy = 120;
+        XmNwidth = 65;
+        XmNheight = 15;
+    };
+};
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO EDIT THE DATA BY "PICK", "ERASE", */
+/* OR "RESTORE" SELECTIONS. YOU CAN REMOVE INDIVIDUAL RETURNS  */
+/* OR RESTORE THEM AS YOU SEE FIT.                             */
+/***************************************************************/
+
+object setting_mode : XmRowColumn widget 
+{
+    arguments 
+    {
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 70;
+        XmNy = 159;
+        XmNspacing = 0;
+        XmNpacking = XmPACK_COLUMN;
+        XmNnumColumns = 1;
+        XmNradioBehavior = true;
+        XmNwidth = 207;
+        XmNheight = 31;
+    };
+    controls 
+    {
+       XmToggleButton setting_mode_toggle_pick;
+       XmToggleButton setting_mode_toggle_erase;
+       XmToggleButton setting_mode_toggle_restore;
+    };
+};
+
+
+object setting_mode_toggle_pick : XmToggleButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Pick");
+    };
+    controls 
+    {
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_pick_button);
+	XmNvalueChangedCallback = procedure set_mode_pick(k_pick_button);
+    };
+};
+
+object setting_mode_toggle_erase : XmToggleButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Erase");
+    };
+    controls 
+    {
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_erase_button);
+	XmNvalueChangedCallback = procedure set_mode_erase(k_erase_button);
+    };
+};
+
+object setting_mode_toggle_restore : XmToggleButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Restore");
+    };
+    controls 
+    {
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_restore_button);
+	XmNvalueChangedCallback = procedure set_mode_restore(k_restore_button);
+    };
+};
+
+object setting_mode_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNmarginWidth = 0;
+        XmNlabelString = compound_string("Mode:");
+	XmNfontList = k_menu_bar_font;
+        XmNx = 18;
+        XmNy = 167;
+    };
+};
+
+
+/***************************************************************/
+/* THIS SECTION ALLOWS YOU TO MOVE TO ANY TIME IN THE FILE YOU */
+/* WANT WITHOUT HAVING TO SCROLL THROUGH THE WHOLE FILE.       */
+/* ITS CALLED "GREAT LEAP FORWARD"                               */
+/***************************************************************/
+object goto_menu : XmBulletinBoardDialog widget 
+{
+    arguments 
+    {
+        XmNmarginWidth = 0;
+        XmNmarginHeight = 0;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 370;
+        XmNy = 288;
+        XmNwidth = 179;
+        XmNheight = 306;
+    };
+    controls 
+    {
+       XmLabel 		textfield_year_label;
+       XmTextField 	textfield_year;
+       XmLabel 		textfield_month_label;
+       XmTextField 	textfield_month;
+       XmLabel 		textfield_day_label;
+       XmTextField 	textfield_day;
+       XmLabel 		textfield_hour_label;
+       XmTextField 	textfield_hour;
+       XmLabel 		textfield_minute_label;
+       XmTextField 	textfield_minute;
+       XmLabel 		textfield_second_label;
+       XmTextField 	textfield_second;
+       XmPushButton 	button_goto_apply;
+       XmPushButton 	button_goto_cancel;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_goto_menu);
+    };
+};
+
+/***************************************************************/
+/* INPUT THE YEAR OF THE RECORD YOU WANT HERE.                 */
+/***************************************************************/
+object textfield_year : XmTextField widget 
+{
+    arguments 
+    {
+        XmNvalue = '1994';
+        XmNcolumns = 4;
+        XmNx = 120;
+        XmNy = 10;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_glf_year);
+    };
+};
+
+object textfield_year_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Year:");
+        XmNx = 24;
+        XmNy = 15;
+    };
+};
+
+
+/***************************************************************/
+/* INPUT THE MONTH OF THE RECORD YOU WANT HERE.                */
+/***************************************************************/
+object textfield_month : XmTextField widget 
+{
+    arguments 
+    {
+        XmNvalue = '1';
+        XmNcolumns = 2;
+        XmNx = 120;
+        XmNy = 50;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_glf_month);
+    };
+};
+
+object textfield_month_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Month:");
+        XmNx = 24;
+        XmNy = 55;
+    };
+};
+
+
+/***************************************************************/
+/* INPUT THE DAY OF THE RECORD YOU WANT HERE.                  */
+/***************************************************************/
+object textfield_day : XmTextField widget 
+{
+    arguments 
+    {
+        XmNvalue = '1';
+        XmNcolumns = 2;
+        XmNx = 120;
+        XmNy = 90;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_glf_day);
+    };
+};
+
+object textfield_day_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Day:");
+        XmNx = 24;
+        XmNy = 95;
+    };
+};
+
+
+/***************************************************************/
+/* INPUT THE HOUR OF THE RECORD YOU WANT HERE.                 */
+/***************************************************************/
+object textfield_hour : XmTextField widget 
+{
+    arguments 
+    {
+        XmNvalue = '1';
+        XmNcolumns = 2;
+        XmNx = 120;
+        XmNy = 130;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_glf_hour);
+    };
+};
+
+object textfield_hour_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Hour:");
+        XmNx = 24;
+        XmNy = 135;
+    };
+};
+
+
+
+/***************************************************************/
+/* INPUT THE MINUTE OF THE RECORD YOU WANT HERE.               */
+/***************************************************************/
+object textfield_minute : XmTextField widget 
+{
+    arguments 
+    {
+        XmNvalue = '1';
+        XmNcolumns = 2;
+        XmNx = 120;
+        XmNy = 170;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_glf_min);
+    };
+};
+
+object textfield_minute_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Minute:");
+        XmNx = 24;
+        XmNy = 175;
+    };
+};
+
+/***************************************************************/
+/* INPUT THE SECOND OF THE RECORD YOU WANT HERE.               */
+/***************************************************************/
+object textfield_second : XmTextField widget 
+{
+    arguments 
+    {
+        XmNvalue = '0';
+        XmNcolumns = 2;
+        XmNx = 120;
+        XmNy = 210;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_glf_sec);
+    };
+};
+
+object textfield_second_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Second:");
+        XmNx = 24;
+        XmNy = 215;
+    };
+};
+
+
+/***************************************************************/
+/* YOU SELECT THIS PUSH BUTTON WHEN YOUR DONE.                 */
+/***************************************************************/
+object button_goto_apply : XmPushButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Apply");
+        XmNx = 10;
+        XmNy = 270;
+        XmNwidth = 75;
+        XmNheight = 25;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_apply_button);
+        XmNactivateCallback = procedure apply_goto_button(k_apply_button);
+    };
+};
+
+
+/***************************************************************/
+/* YOU SELECT THIS PUSH BUTTON IF YOU CHANGED YOUR MIND AND    */
+/* DON'T WANT TO DO A GREAT LEAP FORWARD.                      */
+/***************************************************************/
+object button_goto_cancel : XmPushButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Cancel");
+        XmNx = 100;
+        XmNy = 270;
+        XmNwidth = 75;
+        XmNheight = 25;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_goto_cancel_button);
+        XmNactivateCallback = procedure cancel_goto_button(k_goto_cancel_button);
+    };
+};
+
+
+
+/***************************************************************/
+/* THIS WIDGET SETS UP THE DRAWING AREA FOR THE BEAM DISPLAYS  */
+/* AND EDITING.                                                */
+/***************************************************************/
+   
+object canvas_mbedit : XmDrawingArea widget 
+{
+    arguments 
+    {
+        XmNborderWidth = 1;
+        XmNx = 1;
+        XmNy = 210;
+        XmNwidth = 1097;
+        XmNheight = 630;
+	XmNbackground = white;
+    };
+    controls 
+    {
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_main_graph);
+	XmNinputCallback = procedure do_event(k_main_graph);
+	XmNexposeCallback = procedure do_event(k_main_graph);
+    };
+};
+
+
+
+/***************************************************************/
+/* DISPLAY THE FILE SELECTION MENU.                            */
+/* THIS MENU ALLOWS YOU TO SELECT A FILE FROM ANY DIRECTORY.   */
+/***************************************************************/
+
+object controls_load : XmBulletinBoardDialog widget 
+{
+    arguments 
+    {
+        XmNmarginWidth = 0;
+        XmNmarginHeight = 0;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 361;
+        XmNy = 244;
+        XmNwidth = 550;
+        XmNheight = 500;
+    };
+    controls 
+    {
+       XmFileSelectionBox 	file_load;
+       XmLabel 			textfield_format_label;
+       XmTextField 		textfield_format;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_file_bb_box);
+    };
+};
+
+
+/***************************************************************/
+/* THIS IS A CONVENIENCE WIDGET THAT SETS UP A FILE SELECTION    */
+/* WIDGET BOX IN MOTIF STANDARD. IT ALSO LETS YOU SELECT FILES */
+/* FROM ANY DIRECTORY.                                         */
+/***************************************************************/
+object file_load : XmFileSelectionBox widget 
+{
+    arguments 
+    {
+        XmNmarginWidth = 0;
+        XmNmarginHeight = 0;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 500;
+        XmNheight = 400;
+    };
+    controls 
+    {
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_file_sel_box);
+	XmNokCallback = procedure do_load_ok (k_file_sel_box);
+	XmNcancelCallback = procedure cancel_file_sel (k_file_sel_box);
+    };
+};
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO SELECT THE FORMAT THAT THE FILE   */
+/* YOU ARE SELECTING IS IN.                                    */
+/***************************************************************/
+object output_file_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNx = 16;
+        XmNy = 412;
+	XmNfontList = k_menu_bar_font;
+        XmNlabelString = compound_string("Output file name:");
+    };
+};
+
+object output_file_text : XmTextField widget 
+{
+    arguments 
+    {
+        XmNx = 16;
+        XmNy = 435;
+        XmNcolumns = 40;
+        XmNmaxLength = 130;
+	XmNvalue = "./testeee.mb21";
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_output_file);
+    };
+};
+
+/***************************************************************/
+/* YOU SELECT THIS PUSH BUTTON TO CHANGE THE OUTPUT NAME TO    */
+/* THE NAME IN THE SELECTION BOX ABOVE PLUS AN "e" BEFORE THE  */
+/* ".".                                                        */
+/***************************************************************/
+object ok_file_sel_button : XmPushButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string(" OK ");
+	XmNfontList = k_menu_bar_font;
+        XmNx = 16;
+        XmNy = 485;
+	XmNwidth = 50;
+	XmNheight = 40;
+	XmNborderWidth = 1;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_grab_file_button);
+        XmNactivateCallback = procedure grab_file (k_grab_file_button);
+    };
+};
+
+
+/***************************************************************/
+/* YOU SELECT THIS PUSH BUTTON TO CHANGE THE OUTPUT NAME TO    */
+/* THE NAME IN THE SELECTION BOX ABOVE PLUS AN "e" BEFORE THE  */
+/* ".".                                                        */
+/***************************************************************/
+object cancel_file_sel_button : XmPushButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string(" CANCEL ");
+	XmNfontList = k_menu_bar_font;
+        XmNx = 50;
+        XmNy = 485;
+	XmNwidth = 50;
+	XmNheight = 40;
+	XmNborderWidth = 1;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_grab_file_button);
+        XmNactivateCallback = procedure grab_file (k_grab_file_button);
+    };
+};
+
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO SELECT THE FORMAT THAT THE FILE   */
+/* YOU ARE SELECTING IS IN.                                    */
+/***************************************************************/
+object textfield_format_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNx = 16;
+        XmNy = 435;
+	XmNfontList = k_menu_bar_font;
+        XmNlabelString = compound_string("MBIO Format ID:");
+    };
+};
+
+object textfield_format : XmTextField widget 
+{
+    arguments 
+    {
+        XmNx = 140;
+        XmNy = 430;
+        XmNvalue = '21';
+        XmNcolumns = 2;
+        XmNmaxLength = 2;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_mbio_format);
+    };
+};
+
+/***************************************************************/
+/* END OF "mbedit.uil" MODULE.                                 */
+/***************************************************************/
+end module;

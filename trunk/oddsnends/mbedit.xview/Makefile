@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile  5/25/93
-#	$Id: Makefile,v 4.0 1994-03-05 23:54:35 caress Exp $
+#	$Id: Makefile,v 4.1 1994-10-21 12:01:43 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/05  23:54:35  caress
+# First cut at version 4.0
+#
 # Revision 4.0  1994/03/05  22:47:41  caress
 # First cut at new version.
 #
@@ -83,7 +86,7 @@ OBJECTS = \
 CFLAGS += -g 
 CPPFLAGS += -I$(GUIDEHOME)/include -I$(OPENWINHOME)/include -DMAIN
 LDFLAGS += -L$(GUIDEHOME)/lib -L$(OPENWINHOME)/lib -L../../lib
-LDLIBS += -lguidexv -lguide -lxview -lolgx -lX11 -lmbio
+LDLIBS += -lguidexv -lguide -lxview -lolgx -lX11 -lmbio -lm
 
 # Standard targets.
 
@@ -101,7 +104,7 @@ $(MANPAGE): $(PROGRAM).1
 	chmod 664 $(MANPAGE)
 
 $(PROGRAM): $(SOURCES.c) $(TARGETS.c) $(TARGETS.h) $(OBJECTS)
-	$(LINK.c) -o $@ $(OBJECTS) $(LDLIBS)
+	$(LINK.c) -Bstatic -o $@ $(OBJECTS) $(LDLIBS)
 
 # Targets to be used by Saber-C.
 
