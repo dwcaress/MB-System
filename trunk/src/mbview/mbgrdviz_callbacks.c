@@ -91,7 +91,7 @@ int	survey_color = MBV_COLOR_BLACK;
 char	survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.10 2005-02-08 22:37:39 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.11 2005-02-17 07:35:07 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -838,6 +838,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 	int	mbv_height;
 	int	mbv_lorez_dimension;
 	int	mbv_hirez_dimension;
+	int	mbv_lorez_navdecimate;
+	int	mbv_hirez_navdecimate;
 	int	mbv_display_mode;
 	int	mbv_mouse_mode;
 	int	mbv_grid_mode;
@@ -932,6 +934,8 @@ fprintf(stderr, "using internal test grid...\n");
 		mbv_height = 500;
 		mbv_lorez_dimension = 100;
 		mbv_hirez_dimension = 500;
+		mbv_lorez_navdecimate = 5;
+		mbv_hirez_navdecimate = 1;
 
 		/* set basic mbview window parameters */
 		status = mbview_setwindowparms(verbose, instance,
@@ -943,6 +947,8 @@ fprintf(stderr, "using internal test grid...\n");
 					mbv_height,
 					mbv_lorez_dimension,
 					mbv_hirez_dimension,
+					mbv_lorez_navdecimate,
+					mbv_hirez_navdecimate,
 					&error);
 		
 		/* read in the grd file */
@@ -1994,7 +2000,9 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 						swathfile,&format,&weight,&error)
 						== MB_SUCCESS
 					&& format != MBF_ASCIIXYZ
-					&& format != MBF_ASCIIYXZ)
+					&& format != MBF_ASCIIYXZ
+					&& format != MBF_ASCIIXYT
+					&& format != MBF_ASCIIYXT)
 					{
 					/* check for available nav file if that is
 					   all that is needed */
@@ -2779,6 +2787,8 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 	int	mbv_height;
 	int	mbv_lorez_dimension;
 	int	mbv_hirez_dimension;
+	int	mbv_lorez_navdecimate;
+	int	mbv_hirez_navdecimate;
 	int	mbv_primary_nxy;
 	int	mbv_primary_nx;
 	int	mbv_primary_ny;
@@ -2841,6 +2851,8 @@ fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);
 		mbv_height = 500;
 		mbv_lorez_dimension = data_source->lorez_dimension;
 		mbv_hirez_dimension = data_source->hirez_dimension;
+		mbv_lorez_navdecimate = data_source->lorez_navdecimate;
+		mbv_hirez_navdecimate = data_source->hirez_navdecimate;
 
 		/* set basic mbview window parameters */
 		status = mbview_setwindowparms(verbose, instance,
@@ -2852,6 +2864,8 @@ fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);
 					mbv_height,
 					mbv_lorez_dimension,
 					mbv_hirez_dimension,
+					mbv_lorez_navdecimate,
+					mbv_hirez_navdecimate,
 					&error);
 					
 		/* extract the grid from the source */

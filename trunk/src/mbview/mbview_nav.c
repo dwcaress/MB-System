@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.5 2005-02-08 22:37:41 caress Exp $
+ *    $Id: mbview_nav.c,v 5.6 2005-02-17 07:35:08 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/02/08 22:37:41  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.3  2004/12/02 06:36:31  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -83,7 +86,7 @@ Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.5 2005-02-08 22:37:41 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.6 2005-02-17 07:35:08 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -1376,8 +1379,8 @@ int mbview_navpicksize(int instance)
 		}
 	if (shared.shareddata.navpick_type == MBV_PICK_TWOPOINT)
 		{
-		headingx = sin(shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].heading * DTR);
-		headingy = cos(shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].heading * DTR);
+		headingx = sin(shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].heading * DTR);
+		headingy = cos(shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].heading * DTR);
 
 		/* set navpick location V marker */
 		shared.shareddata.navpick.xpoints[4].xdisplay[instance] = shared.shareddata.navpick.endpoints[1].xdisplay[instance] 
@@ -1541,7 +1544,7 @@ int mbview_drawnavpick(int instance)
 			inav = shared.shareddata.nav_selected[0];
 			jpt = shared.shareddata.nav_point_selected[0];
 			zdisplay = shared.shareddata.navs[inav].navpts[jpt].point.zdisplay[instance];
-			glColor3f(0.0, 0.0, 1.0);
+			glColor3f(1.0, 0.0, 0.0);
 			glBegin(GL_LINES);
 			for (i=0;i<4;i++)
 				{
@@ -1550,7 +1553,6 @@ int mbview_drawnavpick(int instance)
 					zdisplay);
 				}
 			glEnd();
-			glColor3f(1.0, 0.0, 0.0);
 			}
 		
 		if (shared.shareddata.navpick_type == MBV_PICK_TWOPOINT)
@@ -1677,6 +1679,14 @@ int mbview_drawnav(int instance, int rez)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+	
+	/* set decimation */
+	if (rez == MBV_REZ_FULL)
+	    stride = 1;
+	else if (rez == MBV_REZ_HIGH)
+	    stride = data->hirez_navdecimate;
+	else
+	    stride = data->lorez_navdecimate;
 		
 	/* draw navigation */
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF
@@ -1689,7 +1699,7 @@ int mbview_drawnav(int instance, int rez)
 			icolor = shared.shareddata.navs[inav].color;
 			glLineWidth((float)(shared.shareddata.navs[inav].size));
 			glBegin(GL_LINE_STRIP);
-			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints;jpoint++)
+			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints;jpoint+=stride)
 				{
 				/* set size and color */
 				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES
@@ -1715,7 +1725,7 @@ int mbview_drawnav(int instance, int rez)
 			}
 		}
 		
-	/* draw navigation */
+	/* draw draped navigation */
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF
 		&& data->navdrape_view_mode == MBV_VIEW_ON
 		&& shared.shareddata.nnav > 0)
@@ -1726,11 +1736,11 @@ int mbview_drawnav(int instance, int rez)
 			icolor = shared.shareddata.navs[inav].color;
 			glLineWidth((float)(shared.shareddata.navs[inav].size));
 			glBegin(GL_LINE_STRIP);
-			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints-1;jpoint++)
+			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints-stride;jpoint+=stride)
 				{
 				/* set size and color */
 				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES
-					|| shared.shareddata.navs[inav].navpts[jpoint+1].selected == MB_YES)
+					|| shared.shareddata.navs[inav].navpts[jpoint+stride].selected == MB_YES)
 					{
 					glColor3f(colortable_object_red[MBV_COLOR_RED], 
 						colortable_object_green[MBV_COLOR_RED], 
@@ -1743,8 +1753,10 @@ int mbview_drawnav(int instance, int rez)
 						colortable_object_blue[icolor]);
 					}
 					
-				/* draw draped segment */
-/*fprintf(stderr,"inav:%d jpoint:%d nls:%d\n", inav, jpoint, shared.shareddata.navs[inav].segments[jpoint].nls);*/
+/*fprintf(stderr,"inav:%d npoints:%d jpoint:%d nls:%d\n", 
+inav, shared.shareddata.navs[inav].npoints, jpoint, shared.shareddata.navs[inav].segments[jpoint].nls);*/
+				/* draw draped segment if stride == 1 */
+				if (stride == 1)
 				for (k=0;k<shared.shareddata.navs[inav].segments[jpoint].nls;k++)
 					{
 					/* draw points */
@@ -1756,6 +1768,15 @@ inav,jpoint,k,
 shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdata,
 shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 
+					}
+					
+				/* else draw decimated draped nav */
+				else if (shared.shareddata.navs[inav].segments[jpoint].nls > 0)
+					{
+					/* draw points */
+					glVertex3f((float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].xdisplay[instance]), 
+							(float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].ydisplay[instance]), 
+							(float)(shared.shareddata.navs[inav].segments[jpoint].lspoints[0].zdisplay[instance]));
 					}
 				}
 			glEnd();
@@ -1796,7 +1817,7 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 						swathbounds_on = MB_YES;
 						glBegin(GL_LINE_STRIP);
 						
-						if (data->display_mode == MBV_DISPLAY_3D)
+						if (data->display_mode == MBV_DISPLAY_3D && stride == 1)
 							{
 							/* drape segment on the fly */
 							segment.endpoints[0] = &(shared.shareddata.navs[inav].navpts[jpoint].pointcntr);
@@ -1836,7 +1857,7 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 									- shared.shareddata.navs[inav].navpts[jpoint-1].time_d)
 									> timegapuse)))
 						{						
-						if (data->display_mode == MBV_DISPLAY_3D)
+						if (data->display_mode == MBV_DISPLAY_3D && stride == 1)
 							{
 							/* drape segment on the fly */
 							segment.endpoints[0] = &(shared.shareddata.navs[inav].navpts[jpoint].pointport);
@@ -1874,7 +1895,7 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 						swathbounds_on = MB_YES;
 						glBegin(GL_LINE_STRIP);
 						
-						if (data->display_mode == MBV_DISPLAY_3D)
+						if (data->display_mode == MBV_DISPLAY_3D && stride == 1)
 							{
 							/* drape segment on the fly */
 							segment.endpoints[0] = &(shared.shareddata.navs[inav].navpts[jpoint].pointcntr);
@@ -1914,7 +1935,7 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 									- shared.shareddata.navs[inav].navpts[jpoint-1].time_d)
 									> timegapuse)))
 						{						
-						if (data->display_mode == MBV_DISPLAY_3D)
+						if (data->display_mode == MBV_DISPLAY_3D && stride == 1)
 							{
 							/* drape segment on the fly */
 							segment.endpoints[0] = &(shared.shareddata.navs[inav].navpts[jpoint].pointstbd);

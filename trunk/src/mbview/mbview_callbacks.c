@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.6 2005-02-08 22:37:40 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.7 2005-02-17 07:35:08 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/02/08 22:37:40  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.4  2004/09/16 21:44:39  caress
  * Many changes over the summer.
  *
@@ -108,7 +111,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.6 2005-02-08 22:37:40 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.7 2005-02-17 07:35:08 caress Exp $";
 
 /* function prototypes */
 
@@ -574,6 +577,8 @@ int mbview_reset(int instance)
 		data->height = 500;
 		data->lorez_dimension = 100;
 		data->hirez_dimension = 500;
+		data->lorez_navdecimate = 5;
+		data->hirez_navdecimate = 1;
 
 		/* mode controls */
 		data->display_mode = MBV_DISPLAY_2D;
@@ -977,6 +982,8 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		fprintf(stderr,"dbg2       height:                    %d\n", data->height);
 		fprintf(stderr,"dbg2       lorez_dimension:           %d\n", data->lorez_dimension);
 		fprintf(stderr,"dbg2       hirez_dimension:           %d\n", data->hirez_dimension);
+		fprintf(stderr,"dbg2       lorez_navdecimate:         %d\n", data->lorez_navdecimate);
+		fprintf(stderr,"dbg2       hirez_navdecimate:         %d\n", data->hirez_navdecimate);
 
 		/* mode controls */
 		fprintf(stderr,"dbg2       display_mode:              %d\n", data->display_mode);
@@ -1185,6 +1192,8 @@ int mbview_setwindowparms(int verbose, int instance,
 			int	height,
 			int	lorez_dimension,
 			int	hirez_dimension,
+			int	lorez_navdecimate,
+			int	hirez_navdecimate,
 			int	*error)
 
 {
@@ -1214,6 +1223,8 @@ fprintf(stderr,"Called mbview_setwindowparms:%d\n",instance);
 		fprintf(stderr,"dbg2       height:                    %d\n", height);
 		fprintf(stderr,"dbg2       lorez_dimension:           %d\n", lorez_dimension);
 		fprintf(stderr,"dbg2       hirez_dimension:           %d\n", hirez_dimension);
+		fprintf(stderr,"dbg2       lorez_navdecimate:         %d\n", lorez_navdecimate);
+		fprintf(stderr,"dbg2       hirez_navdecimate:         %d\n", hirez_navdecimate);
 		}
 
 	/* get view */
@@ -1229,6 +1240,8 @@ fprintf(stderr,"Called mbview_setwindowparms:%d\n",instance);
 	data->height = height;
 	data->lorez_dimension = lorez_dimension;
 	data->hirez_dimension = hirez_dimension;
+	data->lorez_navdecimate = lorez_navdecimate;
+	data->hirez_navdecimate = hirez_navdecimate;
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1423,6 +1436,8 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		fprintf(stderr,"dbg2       height:                    %d\n", data->height);
 		fprintf(stderr,"dbg2       lorez_dimension:           %d\n", data->lorez_dimension);
 		fprintf(stderr,"dbg2       hirez_dimension:           %d\n", data->hirez_dimension);
+		fprintf(stderr,"dbg2       lorez_navdecimate:         %d\n", data->lorez_navdecimate);
+		fprintf(stderr,"dbg2       hirez_navdecimate:         %d\n", data->hirez_navdecimate);
 
 		/* mode controls */
 		fprintf(stderr,"dbg2       display_mode:              %d\n", data->display_mode);
@@ -7142,6 +7157,12 @@ fprintf(stderr,"do_mbview_resolutionpopup: instance:%d\n", instance);
 	XtVaSetValues(view->mb3dview.mbview_scale_mediumresolution, 
 			XmNvalue, data->hirez_dimension, 
 			NULL);
+/*	XtVaSetValues(view->mb3dview.mbview_scale_lowresolutionnav, 
+			XmNvalue, data->lorez_navdecimate, 
+			NULL);
+	XtVaSetValues(view->mb3dview.mbview_scale_mediumresolutionnav, 
+			XmNvalue, data->hirez_navdecimate, 
+			NULL);*/
     
 }
 /*------------------------------------------------------------------------------*/
@@ -7178,7 +7199,8 @@ do_mbview_resolutionchange( Widget w, XtPointer client_data, XtPointer call_data
 	struct mbview_struct *data;
 	int lorez_dimension;
 	int hirez_dimension;
-
+	int lorez_navdecimate;
+	int hirez_navdecimate;
 
 	/* get instance */
 	ac = 0;
@@ -7199,13 +7221,18 @@ fprintf(stderr,"do_mbview_resolutionchange: instance:%d\n", instance);
 	XtVaGetValues(view->mb3dview.mbview_scale_mediumresolution,
 		XmNvalue, &hirez_dimension,
 		NULL);
+/*	XtVaGetValues(view->mb3dview.mbview_scale_lowresolutionnav,
+		XmNvalue, &lorez_navdecimate,
+		NULL);
+	XtVaGetValues(view->mb3dview.mbview_scale_mediumresolutionnav,
+		XmNvalue, &hirez_navdecimate,
+		NULL);*/
 		
 	/* make dimensions even multiples of 10 */
 	if (lorez_dimension > hirez_dimension)
 	    hirez_dimension = lorez_dimension;
 	data->lorez_dimension = 25 * ((int)((lorez_dimension + 12.5) / 25));
 	data->hirez_dimension = 25 * ((int)((hirez_dimension + 12.5) / 25));
-	
 	
 	/* set values of resolution sliders */
 	XtVaSetValues(view->mb3dview.mbview_scale_lowresolution, 
@@ -7225,8 +7252,9 @@ fprintf(stderr,"do_mbview_resolutionchange: instance:%d\n", instance);
     view->contourfullrez = MB_NO;
     
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_resolutionchange instance:%d resolutions: %d %d\n", 
-instance, data->lorez_dimension, data->hirez_dimension);
+fprintf(stderr,"do_mbview_resolutionchange instance:%d resolutions: %d %d decimations: % %d\n", 
+instance, data->lorez_dimension, data->hirez_dimension,
+instance, data->lorez_navdecimate, data->hirez_navdecimate);
     
     /* draw */
 if (mbv_verbose >= 2)
@@ -7905,7 +7933,7 @@ fprintf(stderr,"do_mbview_clearpicks\n");
 		/* loop over the navs resetting selected points */
 		for (inav=0;inav<shared.shareddata.nnav;inav++)
 			{
-			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints-1;jpoint++)
+			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints;jpoint++)
 				{
 				/* set size and color */
 				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES)

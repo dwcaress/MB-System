@@ -82,7 +82,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2004 by
+MB-System Copyright (C) 1993-2005 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -186,6 +186,9 @@ EM3000 data with the current format 56 i/o module.
 
 Added release version of simple grid visualization demo 
 mbgrdviz.
+
+Improved the ability of mbgrid to embed background
+datasets.
 
 MB-SYSTEM VERSION 5.0.5 RELEASE NOTES:
 ------------------------------------------
@@ -936,10 +939,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.55 2005-02-08 22:37:37 caress Exp $
+RCS ID: $Id: README,v 5.56 2005-02-17 07:33:26 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.55  2005/02/08 22:37:37  caress
+Heading towards 5.0.6 release.
+
 Revision 5.54  2005/01/04 18:36:59  caress
 Working towards release 5.0.6
 
