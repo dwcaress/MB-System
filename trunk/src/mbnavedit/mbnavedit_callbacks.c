@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.8 2004-05-21 23:33:03 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.9 2005-03-25 04:35:56 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2004/05/21 23:33:03  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.7  2003/04/17 21:09:06  caress
  * Release 5.0.beta30
  *
@@ -225,7 +228,7 @@ XtEventHandler do_resize( Widget w, XtPointer client_data, XEvent *event, Boolea
  *			XtPointer	call:	the call data (unused).
  */
 
-/* ARGSUSED */
+
 void
 BxExitCB ARGLIST((w, client, call))
 UARG( Widget, w)
@@ -258,7 +261,7 @@ GRAU( XtPointer, call)
  *		       	shell from which all other widgets are descended.
  */
 
-/* ARGSUSED */
+
 void
 BxManageCB ARGLIST((w, client, call))
 ARG( Widget, w)
@@ -299,7 +302,7 @@ GRAU( XtPointer, call)
  *		       	shell from which all other widgets are descended.
  */
 
-/* ARGSUSED */
+
 void
 BxUnmanageCB ARGLIST((w, client, call))
 ARG( Widget, w)
@@ -350,7 +353,7 @@ GRAU( XtPointer, call)
  */
 #include <X11/StringDefs.h>
 
-/* ARGSUSED */
+
 void
 BxSetValuesCB ARGLIST((w, client, call))
 ARG( Widget, w)
@@ -949,7 +952,7 @@ void do_set_controls()
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_nextbuffer( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -975,7 +978,7 @@ do_nextbuffer( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_done( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1001,7 +1004,7 @@ do_done( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1016,7 +1019,7 @@ do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1031,7 +1034,7 @@ do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_timespan( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1066,7 +1069,7 @@ do_timespan( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_timestep( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1098,7 +1101,7 @@ do_timestep( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1110,7 +1113,7 @@ do_expose( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_event( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1351,7 +1354,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 XtEventHandler
 do_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 {
@@ -1377,7 +1380,7 @@ do_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_time( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1427,7 +1430,7 @@ do_toggle_time( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_lon( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1481,7 +1484,7 @@ do_toggle_lon( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_lat( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1535,7 +1538,7 @@ do_toggle_lat( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_heading( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1591,7 +1594,7 @@ do_toggle_heading( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_speed( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1648,7 +1651,7 @@ do_toggle_speed( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_sonardepth( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1701,7 +1704,7 @@ do_toggle_sonardepth( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_org_time( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1714,7 +1717,7 @@ do_toggle_org_time( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_org_lon( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1727,7 +1730,7 @@ do_toggle_org_lon( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_org_lat( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1740,7 +1743,7 @@ do_toggle_org_lat( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_org_speed( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1942,7 +1945,7 @@ do_driftlat( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_show_smg( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1955,7 +1958,7 @@ do_toggle_show_smg( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_org_heading( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1967,7 +1970,7 @@ do_toggle_org_heading( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavedit_plot_all();
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_org_sonardepth( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1980,7 +1983,7 @@ do_toggle_org_sonardepth( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_show_cmg( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1993,7 +1996,7 @@ do_toggle_show_cmg( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_button_use_dr( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2007,7 +2010,7 @@ do_button_use_dr( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_button_use_smg( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2021,7 +2024,7 @@ do_button_use_smg( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_button_use_cmg( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2034,7 +2037,7 @@ do_button_use_cmg( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavedit_plot_all();
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_output_on( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2056,7 +2059,7 @@ do_toggle_output_on( Widget w, XtPointer client_data, XtPointer call_data)
 
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_output_off( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2077,7 +2080,7 @@ do_toggle_output_off( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2085,7 +2088,7 @@ do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_filebutton_on()
 {
@@ -2095,7 +2098,7 @@ do_filebutton_on()
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_filebutton_off()
 {
@@ -2105,7 +2108,7 @@ do_filebutton_off()
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2169,7 +2172,7 @@ do_useprevious_no( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_open_file(int useprevious)
 {
@@ -2208,7 +2211,7 @@ do_open_file(int useprevious)
 
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_fileselection_filter( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2217,7 +2220,7 @@ do_fileselection_filter( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2259,7 +2262,7 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_fileselection_nomatch( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2267,7 +2270,7 @@ do_fileselection_nomatch( Widget w, XtPointer client_data, XtPointer call_data)
 
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_pick( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2278,7 +2281,7 @@ do_toggle_pick( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavedit_pickcursor();
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_select( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2289,7 +2292,7 @@ do_toggle_select( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavedit_selectcursor();
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_deselect( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2300,7 +2303,7 @@ do_toggle_deselect( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavedit_deselectcursor();
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_selectall( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2311,7 +2314,7 @@ do_toggle_selectall( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavedit_selectallcursor();
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_toggle_deselectall( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2323,7 +2326,7 @@ do_toggle_deselectall( Widget w, XtPointer client_data, XtPointer call_data)
 }
 /*--------------------------------------------------------------------*/
 
-/* ARGSUSED */
+
 void
 do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2332,7 +2335,7 @@ do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 	(void) BxExitCB(w, client_data, call_data);
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_interpolation( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2345,8 +2348,23 @@ do_interpolation( Widget w, XtPointer client_data, XtPointer call_data)
 	/* replot */
 	mbnavedit_plot_all();
 }
+
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
+void
+do_interpolationrepeats( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	/* Interpolate any current selected data */
+	mbnavedit_action_interpolaterepeats();
+	do_unset_interval();
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+/*--------------------------------------------------------------------*/
+
 void
 do_scroll( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2356,7 +2374,7 @@ do_scroll( Widget w, XtPointer client_data, XtPointer call_data)
 
 /*--------------------------------------------------------------------*/
 
-/* ARGSUSED */
+
 void
 do_revert( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2370,7 +2388,7 @@ do_revert( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavedit_plot_all();
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_showall( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -2390,7 +2408,7 @@ do_showall( Widget w, XtPointer client_data, XtPointer call_data)
 	set_label_string(label_timespan_2, string);
 }
 /*--------------------------------------------------------------------*/
-/* ARGSUSED */
+
 void
 do_set_interval( Widget w, XtPointer client_data, XtPointer call_data)
 {
