@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.25 1995-11-22 22:21:36 caress Exp $
+ *    $Id: mbgrid.c,v 4.26 1995-11-28 21:03:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Rerewrite:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.25  1995/11/22  22:21:36  caress
+ * Now handles bathymetry in feet with -Q option.
+ *
  * Revision 4.24  1995/08/17  15:04:52  caress
  * Revision for release 4.3.
  *
@@ -197,7 +200,7 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.25 1995-11-22 22:21:36 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.26 1995-11-28 21:03:36 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -699,7 +702,7 @@ char **argv;
 	else
 		topofactor = 1.0;
 	if (bathy_in_feet == MB_YES)
-		topofactor = 0.3048 * topofactor;
+		topofactor = topofactor / 0.3048;
 
 	/* output info */
 	if (verbose >= 0)

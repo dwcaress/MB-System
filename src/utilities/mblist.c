@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.19 1995-11-22 22:21:36 caress Exp $
+ *    $Id: mblist.c,v 4.20 1995-11-28 21:03:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1995/11/22  22:21:36  caress
+ * Now handles bathymetry in feet with -W option.
+ *
  * Revision 4.18  1995/09/19  14:56:59  caress
  * Added output for ping interval.
  *
@@ -164,7 +167,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.19 1995-11-22 22:21:36 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.20 1995-11-28 21:03:36 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V -W]";
@@ -474,7 +477,7 @@ char **argv;
 
 	/* set bathymetry scaling */
 	if (bathy_in_feet == MB_YES)
-		bathy_scale = 0.3048;
+		bathy_scale = 1.0 / 0.3048;
 	else
 		bathy_scale = 1.0;
 

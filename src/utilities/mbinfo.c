@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.13 1995-11-22 22:21:36 caress Exp $
+ *    $Id: mbinfo.c,v 4.14 1995-11-28 21:03:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1995/11/22  22:21:36  caress
+ * Now handles bathymetry in feet with -W option.
+ *
  * Revision 4.12  1995/07/18  17:14:55  caress
  * Added -G option to try to exclude bad nav from min max results.
  *
@@ -125,7 +128,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.13 1995-11-22 22:21:36 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.14 1995-11-28 21:03:36 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -447,7 +450,7 @@ char **argv;
 
 	/* set bathymetry scaling */
 	if (bathy_in_feet == MB_YES)
-		bathy_scale = 0.3048;
+		bathy_scale = 1.0 / 0.3048;
 	else
 		bathy_scale = 1.0;
 
