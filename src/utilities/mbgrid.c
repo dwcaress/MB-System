@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.26 2004-12-02 06:38:50 caress Exp $
+ *    $Id: mbgrid.c,v 5.27 2005-02-17 07:37:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2004/12/02 06:38:50  caress
+ * Fix suggested by Gordon Keith
+ *
  * Revision 5.25  2004/05/24 22:37:02  caress
  * Augmented the -Kbackground option by making it possible to obtain background data from GMT grids using grd2xyz as well as from raster datasets using grdraster.
  *
@@ -383,7 +386,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.26 2004-12-02 06:38:50 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.27 2005-02-17 07:37:10 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -455,7 +458,7 @@ main (int argc, char **argv)
 	double	scale = 1.0;
 	double	border = 0.0;
 	double	extend = 0.0;
-	double	tension = 0.0;
+	double	tension = 0.35;
 	int	check_time = MB_NO;
 	int	first_in_stays = MB_YES;
 	double	timediff = 300.0;
@@ -465,10 +468,12 @@ main (int argc, char **argv)
 	char	ofile[MB_PATH_MAXLINE];
 	char	dfile[MB_PATH_MAXLINE];
 	char	plot_cmd[MB_COMMENT_MAXLINE];
+	char	plot_stdout[MB_COMMENT_MAXLINE];
 	int	plot_status;
 	
 	int	grdrasterid = 0;
 	char	backgroundfile[MB_PATH_MAXLINE];
+	char	backgroundfileuse[MB_PATH_MAXLINE];
 	double	glonmin, glonmax;
 
 	/* mbio read values */
@@ -507,17 +512,18 @@ main (int argc, char **argv)
 	double	*norm = NULL;
 	double	*sigma = NULL;
 	double	*firsttime = NULL;
-	float	*bdata = NULL;
-	float	*sdata = NULL;
+	float	*bxdata = NULL;
+	float	*bydata = NULL;
+	float	*bzdata = NULL;
+	float	*sxdata = NULL;
+	float	*sydata = NULL;
+	float	*szdata = NULL;
 	float	*output = NULL;
 	float	*sgrid = NULL;
 	int	*num = NULL;
 	int	*cnt = NULL;
-	double	sxmin, symin;
+	double	sxmin, symin, sxmax, symax;
 	float	xmin, ymin, ddx, ddy, zflag, cay;
-	float	*work1 = NULL;
-	float	*work2 = NULL;
-	float	*work3 = NULL;
 	double	**data;
 	double	*value = NULL;
 	int	ndata, ndatafile, nbackground;
@@ -565,6 +571,7 @@ main (int argc, char **argv)
 	int	ix1, ix2, iy1, iy2;
 	int	nscan;
 	int	system_status;
+	int	pid;
 	
 	double	foot_dx, foot_dy, foot_dxn, foot_dyn;
 	double	foot_lateral, foot_range, foot_theta;
@@ -599,6 +606,7 @@ main (int argc, char **argv)
 	GMT_make_dnan (GMT_d_NaN);
 	GMT_grd_in_nan_value = GMT_grd_out_nan_value = GMT_d_NaN;
 #endif
+	pid = getpid();
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
@@ -1253,151 +1261,6 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		&& clip > xdim && clip > ydim)
 		clipmode = MBGRID_INTERP_ALL;
 
-	/* if grdrasterid set extract background data using grdraster
-		and interpolate it later onto internal grid */
-	if (grdrasterid > 0)
-		{
-		/* get data vector */
-		glonmin = bounds[0];
-		glonmax = bounds[1];
-		if (bounds[0] < 0.0)
-			{
-			glonmin += 360.0;
-			glonmax += 360.0;
-			}
-		sprintf(plot_cmd, "grdraster %d -R%f/%f/%f/%f | grep -v NaN",
-			grdrasterid,glonmin,glonmax,bounds[2],bounds[3]);
-		nbackground = 0;
-		if ((rfp = popen(plot_cmd,"r")) != NULL)
-			{
-			/* loop over reading */
-			while (fscanf(rfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
-				{
-				nbackground++;
-				}
-			pclose(rfp);
-			}
-		if (nbackground > 0 && (rfp = popen(plot_cmd,"r")) != NULL)
-			{
-			/* allocate and initialize sgrid */
-			status = mb_malloc(verbose,3*nbackground*sizeof(float),&bdata,&error);
-			if (error != MB_ERROR_NO_ERROR)
-				{
-				mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
-				fprintf(outfp,"\nMBIO Error allocating background data array:\n%s\n",
-					message);
-				fprintf(outfp,"\nProgram <%s> Terminated\n",
-					program_name);
-				mb_memory_clear(verbose, &error);
-				exit(error);
-				}
-			memset((char *)bdata,0,3*nbackground*sizeof(float));
-
-			/* loop over reading */
-			nbackground = 0;
-			while (fscanf(rfp,"%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF)
-				{
-				if (lonflip == -1 && tlon > 0.0)
-					tlon -= 360.0;
-				else if (lonflip == 0 && tlon < -180.0)
-					tlon += 360.0;
-				else if (lonflip == 0 && tlon > 180.0)
-					tlon -= 360.0;
-				else if (lonflip == 1 && tlon < 0.0)
-					tlon += 360.0;
-				if (use_projection == MB_YES)
-					mb_proj_forward(verbose, pjptr, tlon, tlat,
-					&tlon, &tlat, &error);
-				bdata[nbackground*3] = (float) tlon;
-				bdata[nbackground*3+1] = (float) tlat;
-				bdata[nbackground*3+2] = (float) tvalue;
-				nbackground++;
-				}
-			pclose(rfp);
-			}
-		else
-			{
-			fprintf(outfp,"\nBackground data not extracted as per -K option\n");
-			fprintf(outfp,"The program grdraster may not have been found\n");
-			fprintf(outfp,"or the specified background dataset %d may not exist.\n",
-				grdrasterid);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			error = MB_ERROR_BAD_PARAMETER;
-			mb_memory_clear(verbose, &error);
-			exit(error);
-			}
-		}
-
-	/* if backgroundfile set extract background data using grd2xyz
-		and interpolate it later onto internal grid */
-	else if (grdrasterid < 0)
-		{
-		/* get data vector */
-		sprintf(plot_cmd, "grd2xyz %s -R%f/%f/%f/%f -S",
-			backgroundfile,bounds[0],bounds[1],bounds[2],bounds[3]);
-		nbackground = 0;
-		if ((rfp = popen(plot_cmd,"r")) != NULL)
-			{
-			/* loop over reading */
-			while (fscanf(rfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
-				{
-				nbackground++;
-				}
-			pclose(rfp);
-			}
-		if (nbackground > 0 && (rfp = popen(plot_cmd,"r")) != NULL)
-			{
-			/* allocate and initialize sgrid */
-			status = mb_malloc(verbose,3*nbackground*sizeof(float),&bdata,&error);
-			if (error != MB_ERROR_NO_ERROR)
-				{
-				mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
-				fprintf(outfp,"\nMBIO Error allocating background data array:\n%s\n",
-					message);
-				fprintf(outfp,"\nProgram <%s> Terminated\n",
-					program_name);
-				mb_memory_clear(verbose, &error);
-				exit(error);
-				}
-			memset((char *)bdata,0,3*nbackground*sizeof(float));
-
-			/* loop over reading */
-			nbackground = 0;
-			while (fscanf(rfp,"%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF)
-				{
-				if (lonflip == -1 && tlon > 0.0)
-					tlon -= 360.0;
-				else if (lonflip == 0 && tlon < -180.0)
-					tlon += 360.0;
-				else if (lonflip == 0 && tlon > 180.0)
-					tlon -= 360.0;
-				else if (lonflip == 1 && tlon < 0.0)
-					tlon += 360.0;
-				if (use_projection == MB_YES)
-					mb_proj_forward(verbose, pjptr, tlon, tlat,
-					&tlon, &tlat, &error);
-				bdata[nbackground*3] = (float) tlon;
-				bdata[nbackground*3+1] = (float) tlat;
-				bdata[nbackground*3+2] = (float) tvalue;
-				nbackground++;
-				}
-			pclose(rfp);
-			}
-		else
-			{
-			fprintf(outfp,"\nBackground data not extracted as per -K option\n");
-			fprintf(outfp,"The program grd2xyz may not have been found\n");
-			fprintf(outfp,"or the specified background dataset %s may not exist.\n",
-				backgroundfile);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			error = MB_ERROR_BAD_PARAMETER;
-			mb_memory_clear(verbose, &error);
-			exit(error);
-			}
-		}
-
 	/* output info */
 	if (verbose >= 0)
 		{
@@ -1616,7 +1479,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;
+			kgrid = i * gydim + j;
 			grid[kgrid] = 0.0;
 			norm[kgrid] = 0.0;
 			sigma[kgrid] = 0.0;
@@ -2022,7 +1885,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;
+			kgrid = i * gydim + j;
 			if (num[kgrid] > 0)
 				{
 				grid[kgrid] = grid[kgrid]/norm[kgrid];
@@ -2069,7 +1932,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;
+			kgrid = i * gydim + j;
 			grid[kgrid] = 0.0;
 			norm[kgrid] = 0.0;
 			sigma[kgrid] = 0.0;
@@ -2733,7 +2596,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;
+			kgrid = i * gydim + j;
 			if (cnt[kgrid] > 0)
 				{
 				grid[kgrid] = grid[kgrid]/norm[kgrid];
@@ -2779,7 +2642,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;
+			kgrid = i * gydim + j;
 			grid[kgrid] = 0.0;
 			sigma[kgrid] = 0.0;
 			firsttime[kgrid] = 0.0;
@@ -3316,7 +3179,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;
+			kgrid = i * gydim + j;
 			if (cnt[kgrid] > 0)
 				{
 				value = data[kgrid];
@@ -3358,7 +3221,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;
+			kgrid = i * gydim + j;
 			if (cnt[kgrid] > 0)
 				free(data[kgrid]);
 			}
@@ -3380,20 +3243,18 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		for (i=0;i<gxdim;i++)
 			for (j=0;j<gydim;j++)
 				{
-				kgrid = i*gydim + j;
+				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue) ndata++;
 				}
 
 		/* allocate and initialize sgrid */
-		status = mb_malloc(verbose,3*ndata*sizeof(float),&sdata,&error);
+		status = mb_malloc(verbose,ndata*sizeof(float),&sxdata,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,ndata*sizeof(float),&sydata,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,ndata*sizeof(float),&szdata,&error);
 		if (status == MB_SUCCESS)
 			status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
-		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(float),&work1,&error);
-		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(int),&work2,&error);
-		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,(gxdim+gydim)*sizeof(int),&work3,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -3405,24 +3266,26 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			exit(error);
 			}
 		memset((char *)sgrid,0,gxdim*gydim*sizeof(float));
-		memset((char *)sdata,0,3*ndata*sizeof(float));
-		memset((char *)work1,0,ndata*sizeof(float));
-		memset((char *)work2,0,ndata*sizeof(int));
-		memset((char *)work3,0,(gxdim+gydim)*sizeof(int));
+		memset((char *)sxdata,0,ndata*sizeof(float));
+		memset((char *)sydata,0,ndata*sizeof(float));
+		memset((char *)szdata,0,ndata*sizeof(float));
 
 		/* get points from grid */
-		sxmin = gbnd[0] - offx*dx;
-		symin = gbnd[2] - offy*dy;
+		sxmin = gbnd[0];
+		sxmax = gbnd[1];
+		symin = gbnd[2];
+		symax = gbnd[3];
 		ndata = 0;
 		for (i=0;i<gxdim;i++)
 			for (j=0;j<gydim;j++)
 				{
-				kgrid = i*gydim + j;
+				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = grid[kgrid];
+					sxdata[ndata] = sxmin + dx*i;
+					sydata[ndata] = symin + dy*j;
+					szdata[ndata] = grid[kgrid];
+					ndata++;
 					}
 				}
 		/* if desired set border */
@@ -3431,46 +3294,53 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			for (i=0;i<gxdim;i++)
 				{
 				j = 0;
-				kgrid = i*gydim + j;
+				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = border;
+					sxdata[ndata] = sxmin + dx*i;
+					sydata[ndata] = symin + dy*j;
+					szdata[ndata] = border;
+					ndata++;
 					}
 				j = gydim - 1;
-				kgrid = i*gydim + j;
+				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = border;
+					sxdata[ndata] = sxmin + dx*i;
+					sydata[ndata] = symin + dy*j;
+					szdata[ndata] = border;
+					ndata++;
 					}
 				}
 			for (j=1;j<gydim-1;j++)
 				{
 				i = 0;
-				kgrid = i*gydim + j;
+				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = border;
+					sxdata[ndata] = sxmin + dx*i;
+					sydata[ndata] = symin + dy*j;
+					szdata[ndata] = border;
+					ndata++;
 					}
 				i = gxdim - 1;
-				kgrid = i*gydim + j;
+				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue)
 					{
-					sdata[ndata++] = sxmin + dx*i;
-					sdata[ndata++] = symin + dy*j;
-					sdata[ndata++] = border;
+					sxdata[ndata] = sxmin + dx*i;
+					sydata[ndata] = symin + dy*j;
+					szdata[ndata] = border;
+					ndata++;
 					}
 				}
 			}
-		ndata = ndata/3;
 
 		/* do the interpolation */
 		fprintf(outfp,"\nDoing spline interpolation with %d data points...\n",ndata);
+		mb_surface(verbose,ndata,sxdata,sydata,szdata,
+			sxmin,sxmax,symin,symax,dx,dy,
+			tension,sgrid);
+		/*
 		cay = tension;
 		xmin = sxmin;
 		ymin = symin;
@@ -3478,7 +3348,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		ddy = dy;
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
-			work1,work2,work3,&cay,&clip);
+			work1,work2,work3,&cay,&clip);*/
 		if (clipmode == MBGRID_INTERP_GAP)
 		    fprintf(outfp,"Applying spline interpolation to fill gaps of %d cells or less...\n",clip);
 		else if (clipmode == MBGRID_INTERP_NEAR)
@@ -3494,8 +3364,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
-				kgrid = i*gydim + j;
-				kint = i + j*gxdim;
+				kgrid = i * gydim + j;
+				kint = i + (gydim -j - 1) * gxdim;
 				num[kgrid] = MB_NO;
 				if (grid[kgrid] >= clipvalue 
 				    && sgrid[kint] < zflag)
@@ -3590,8 +3460,83 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
-				kgrid = i*gydim + j;
-				kint = i + j*gxdim;
+				kgrid = i * gydim + j;
+				kint = i + (gydim -j - 1) * gxdim;
+				if (num[kgrid] == MB_YES)
+					{
+					grid[kgrid] = sgrid[kint];
+					nbinspline++;
+					}
+				}
+			}
+
+		/* translate the interpolation into the grid array 
+		    filling only data gaps */
+		else if (clipmode == MBGRID_INTERP_NEAR)
+			{
+			zflag = 5.0e34;
+			for (i=0;i<gxdim;i++)
+			    for (j=0;j<gydim;j++)
+				{
+				kgrid = i * gydim + j;
+				kint = i + (gydim -j - 1) * gxdim;
+
+				num[kgrid] = MB_NO;
+				if (grid[kgrid] >= clipvalue 
+				    && sgrid[kint] < zflag)
+				    {
+				    /* loop over rings around point, starting close */
+				    for (ir=0; ir <= clip && num[kgrid] == MB_NO; ir++)
+				      {
+				      /* set bounds of search */
+				      i1 = MAX(0, i - ir);
+				      i2 = MIN(gxdim - 1, i + ir);
+				      j1 = MAX(0, j - ir);
+				      j2 = MIN(gydim - 1, j + ir);
+				      
+				      jj = j1;
+				      for (ii=i1;ii<=i2 && num[kgrid] == MB_NO;ii++)
+				        {
+					if (grid[ii*gydim+jj] < clipvalue)
+					    {
+					    num[kgrid] = MB_YES;
+					    }
+					}
+				      
+				      jj = j2;
+				      for (ii=i1;ii<=i2 && num[kgrid] == MB_NO;ii++)
+				        {
+					if (grid[ii*gydim+jj] < clipvalue)
+					    {
+					    num[kgrid] = MB_YES;
+					    }
+					}
+				      
+				      ii = i1;
+				      for (jj=j1;jj<=j2 && num[kgrid] == MB_NO;jj++)
+				        {
+					if (grid[ii*gydim+jj] < clipvalue)
+					    {
+					    num[kgrid] = MB_YES;
+					    }
+					}
+				      
+				      ii = i2;
+				      for (jj=j1;jj<=j2 && num[kgrid] == MB_NO;jj++)
+				        {
+					if (grid[ii*gydim+jj] < clipvalue)
+					    {
+					    num[kgrid] = MB_YES;
+					    }
+					}
+				      }
+				    }
+				}
+			for (i=0;i<gxdim;i++)
+			    for (j=0;j<gydim;j++)
+				{
+				kgrid = i * gydim + j;
+				kint = i + (gydim -j - 1) * gxdim;
 				if (num[kgrid] == MB_YES)
 					{
 					grid[kgrid] = sgrid[kint];
@@ -3607,8 +3552,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
-				kgrid = i*gydim + j;
-				kint = i + j*gxdim;
+				kgrid = i * gydim + j;
+				kint = i + (gydim -j - 1) * gxdim;
 				if (grid[kgrid] >= clipvalue 
 				    && sgrid[kint] < zflag)
 					{
@@ -3619,11 +3564,178 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 			
 		/* deallocate the interpolation arrays */
-		mb_free(verbose,&sdata,&error);
+		mb_free(verbose,&sxdata,&error);
+		mb_free(verbose,&sydata,&error);
+		mb_free(verbose,&szdata,&error);
 		mb_free(verbose,&sgrid,&error);
-		mb_free(verbose,&work1,&error);
-		mb_free(verbose,&work2,&error);
-		mb_free(verbose,&work3,&error);
+		}
+
+	/* if grdrasterid set extract background data 
+		and interpolate it later onto internal grid */
+	if (grdrasterid != 0)
+		{
+		if (grdrasterid > 0)
+			fprintf(outfp,"\nExtracting background from grdraster dataset %d...\n",grdrasterid);
+		else
+			fprintf(outfp,"\nExtracting background from grid file %s...\n",backgroundfile);
+		if (use_projection == MB_YES)
+			nbackground = 16 * gxdim * gydim;
+		else
+			nbackground = gxdim * gydim;
+
+		/* allocate and initialize background data arrays */
+		status = mb_malloc(verbose,nbackground*sizeof(float),&bxdata,&error);
+		if (status == MB_SUCCESS) 
+		status = mb_malloc(verbose,nbackground*sizeof(float),&bydata,&error);
+		if (status == MB_SUCCESS) 
+		status = mb_malloc(verbose,nbackground*sizeof(float),&bzdata,&error);
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+			fprintf(outfp,"\nMBIO Error allocating background data array:\n%s\n",
+				message);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+		memset((char *)bxdata,0,nbackground*sizeof(float));
+		memset((char *)bydata,0,nbackground*sizeof(float));
+		memset((char *)bzdata,0,nbackground*sizeof(float));
+
+		/* get initial grid using grdraster */
+		if (grdrasterid > 0)
+			{
+			sprintf(backgroundfile,"tmpgrdraster%d.grd", pid);
+			glonmin = bounds[0];
+			glonmax = bounds[1];
+			if (bounds[0] < 0.0)
+				{
+				glonmin += 360.0;
+				glonmax += 360.0;
+				}
+			sprintf(plot_cmd, "grdraster %d -R%f/%f/%f/%f -G%s",
+				grdrasterid,glonmin,glonmax,bounds[2],bounds[3],backgroundfile);
+			if (verbose > 0)
+				fprintf(stderr, "Executing: %s\n", plot_cmd);
+			system(plot_cmd);
+			}
+
+		/* if needed translate grid to normal registration */
+		sprintf(plot_cmd, "grdinfo %s", backgroundfile);
+		strcpy(backgroundfileuse, backgroundfile);
+		if ((rfp = popen(plot_cmd,"r")) != NULL)
+			{
+			/* parse the grdinfo results */
+			fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			pclose(rfp);
+			if (strncmp(plot_stdout,"Pixel node registration used", 28) == 0)
+				{
+				sprintf(backgroundfileuse, "tmpgrdsampleT%d.grd", pid);
+				sprintf(plot_cmd, "grdsample %s -G%s -T",
+					backgroundfile, backgroundfileuse);
+				if (verbose > 0)
+					fprintf(stderr, "Executing: %s\n", plot_cmd);
+				system(plot_cmd);
+				}
+			}
+		else
+			{
+			fprintf(outfp,"\nBackground data not extracted as per -K option\n");
+			if (grdrasterid > 0)
+				{
+				fprintf(outfp,"The program grdraster may not have been found\n");
+				fprintf(outfp,"or the specified background dataset %d may not exist.\n",
+					grdrasterid);
+				}
+			else
+				{
+				fprintf(outfp,"The specified background dataset %s may not exist.\n",
+					backgroundfile);
+				}
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			error = MB_ERROR_BAD_PARAMETER;
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+		
+		/* resample grid */
+		if (use_projection == MB_YES)
+			{
+			sprintf(plot_cmd, "grdsample %s -Gtmpgrdsample%d.grd -R%f/%f/%f/%f -I%f/%f",
+				backgroundfileuse, pid,glonmin,glonmax,bounds[2],bounds[3], 
+				0.25 * (glonmax - glonmin) / (gxdim - 1),
+				0.25 * (bounds[3] - bounds[2]) / (gydim - 1));
+			}
+		else
+			{
+			sprintf(plot_cmd, "grdsample %s -Gtmpgrdsample%d.grd -R%f/%f/%f/%f -I%f/%f",
+				backgroundfileuse, pid, gbnd[0], gbnd[1], gbnd[2], gbnd[3], 
+				dx, dy);
+			}
+		if (verbose > 0)
+			fprintf(stderr, "Executing: %s\n", plot_cmd);
+		system(plot_cmd);
+		
+		/* extract points with preprocessing if that will help */
+		if (use_projection == MB_NO)
+			{
+			sprintf(plot_cmd, "grd2xyz tmpgrdsample%d.grd -S -bo | blockmean -bi -bo -C -R%f/%f/%f/%f -I%f/%f",
+				pid, gbnd[0], gbnd[1], gbnd[2], gbnd[3], dx, dy);
+			}
+		else
+			{
+			sprintf(plot_cmd, "grd2xyz tmpgrdsample%d.grd -S -bo",
+				pid);
+			}
+		if ((rfp = popen(plot_cmd,"r")) != NULL)
+			{
+			/* loop over reading */
+			nbackground = 0;
+			while (fread(&tlon, sizeof(double), 1, rfp) == 1)
+				{
+				fread(&tlat, sizeof(double), 1, rfp);
+				fread(&tvalue, sizeof(double), 1, rfp);
+				if (lonflip == -1 && tlon > 0.0)
+					tlon -= 360.0;
+				else if (lonflip == 0 && tlon < -180.0)
+					tlon += 360.0;
+				else if (lonflip == 0 && tlon > 180.0)
+					tlon -= 360.0;
+				else if (lonflip == 1 && tlon < 0.0)
+					tlon += 360.0;
+				if (use_projection == MB_YES)
+					mb_proj_forward(verbose, pjptr, tlon, tlat,
+					&tlon, &tlat, &error);
+				bxdata[nbackground] = (float) tlon;
+				bydata[nbackground] = (float) tlat;
+				bzdata[nbackground] = (float) tvalue;
+				nbackground++;
+				}
+			pclose(rfp);
+			}
+		else
+			{
+			fprintf(outfp,"\nBackground data not extracted as per -K option\n");
+			fprintf(outfp,"The program grdraster may not have been found\n");
+			fprintf(outfp,"or the specified background dataset %d may not exist.\n",
+				grdrasterid);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			error = MB_ERROR_BAD_PARAMETER;
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+
+		/* delete any temporary files */
+		sprintf(plot_cmd, "rm tmpgrd*%d.grd", pid);
+		if (verbose > 0)
+			fprintf(stderr, "Executing: %s\n", plot_cmd);
+		system(plot_cmd);
 		}
 
 	/* if grdrasterid set read background data extracted using grdraster
@@ -3632,12 +3744,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		{		
 		/* allocate and initialize sgrid */
 		status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
-		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,nbackground*sizeof(float),&work1,&error);
-		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,nbackground*sizeof(int),&work2,&error);
-		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,(gxdim+gydim)*sizeof(int),&work3,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -3649,12 +3755,17 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			exit(error);
 			}
 		memset((char *)sgrid,0,gxdim*gydim*sizeof(float));
-		memset((char *)work1,0,nbackground*sizeof(float));
-		memset((char *)work2,0,nbackground*sizeof(int));
-		memset((char *)work3,0,(gxdim+gydim)*sizeof(int));
 
 		/* do the interpolation */
 		fprintf(outfp,"\nDoing spline interpolation with %d data points from background...\n",nbackground);
+		sxmin = gbnd[0];
+		sxmax = gbnd[1];
+		symin = gbnd[2];
+		symax = gbnd[3];
+		mb_surface(verbose,nbackground,bxdata,bydata,bzdata,
+			sxmin,sxmax,symin,symax,dx,dy,
+			tension,sgrid);
+		/*
 		cay = tension;
 		xmin = sxmin;
 		ymin = symin;
@@ -3663,7 +3774,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		clip = MAX(gxdim,gydim);
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,bdata,&nbackground,
-			work1,work2,work3,&cay,&clip);
+			work1,work2,work3,&cay,&clip);*/
 
 		/* translate the interpolation into the grid array 
 		    - interpolate only to fill a data gap */
@@ -3671,8 +3782,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		for (i=0;i<gxdim;i++)
 		    for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;
-			kint = i + j*gxdim;
+			kgrid = i * gydim + j;
+			kint = i + (gydim -j - 1) * gxdim;
 			if (grid[kgrid] >= clipvalue 
 			    && sgrid[kint] < zflag)
 				{
@@ -3680,11 +3791,10 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				nbinbackground++;
 				}
 			}
-		mb_free(verbose,&bdata,&error);
+		mb_free(verbose,&bxdata,&error);
+		mb_free(verbose,&bydata,&error);
+		mb_free(verbose,&bzdata,&error);
 		mb_free(verbose,&sgrid,&error);
-		mb_free(verbose,&work1,&error);
-		mb_free(verbose,&work2,&error);
-		mb_free(verbose,&work3,&error);
 		}
 
 	/* get min max of data */
@@ -3694,7 +3804,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;;
+			kgrid = i * gydim + j;
 			if (zmin == zclip 
 				&& grid[kgrid] < zclip)
 				zmin = grid[kgrid];
@@ -3716,7 +3826,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;;
+			kgrid = i * gydim + j;
 			if (cnt[kgrid] > nmax)
 				nmax = cnt[kgrid];
 			}
@@ -3727,7 +3837,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
-			kgrid = i*gydim + j;;
+			kgrid = i * gydim + j;
 			if (smin == 0.0 
 				&& cnt[kgrid] > 0)
 				smin = sigma[kgrid];
