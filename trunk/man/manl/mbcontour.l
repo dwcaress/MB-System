@@ -1,13 +1,23 @@
-.TH mbcontour l "5 January 1995"
+.TH mbcontour l "26 January 1995"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
-\fBmbcontour\fP \fB-J\fIparameters\fP \fB-R\fIwest/east/south/north \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt\fP \fB-B\fItickinfo\fP \fB-b\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcontourfile\fP \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIred/green/blue\fP \fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP \fB-N\fInplot\fP \fB-O\fP \fB-P\fP \fB-p\fIpings\fP \fB-Q\fP \fB-T\fItimegap\fP \fB-U\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fIalgorithm\fP \fB-#\fIcopies\fP \fB-V -H\fP]
+\fBmbcontour\fP \fB-J\fIparameters\fP \fB-R\fIwest/east/south/north 
+\fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt\fP 
+\fB-B\fItickinfo\fP \fB-b\fIyr/mo/da/hr/mn/sc\fP 
+\fB-C\fIcontourfile\fP 
+\fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP 
+\fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIred/green/blue\fP 
+\fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP 
+\fB-N\fInplot\fP \fB-N\fImode/min/max \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
+\fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-X\fIx-shift\fP 
+\fB-Y\fIy-shift\fP \fB-Z\fIalgorithm\fP 
+\fB-#\fIcopies\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbcontour\fP is an utility for swath contouring of multibeam bathymetry 
@@ -218,6 +228,11 @@ Sets the longitude and latitude bounds within which multibeam
 data will be read and plotted. Only the data which lies within 
 these bounds will be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
+.TP
+.B \fB-S\fIspeed\fP
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+the input data; pings associated with a smaller ship speed will not be
+processed. Default: \fIspeed\fP = 0.
 .TP
 .B \fB-T\fItimegap\fP
 Sets the maximum time gap in minutes between adjacent pings allowed before

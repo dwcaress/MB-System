@@ -1,13 +1,21 @@
-.TH mbswath l "5 January 1995"
+.TH mbswath l "26 January 1995"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
-\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor/mode/depth \fB-B\fItickinfo \fB-b\fIyr/mo/da/hr/mn/sc \fB-D\fImode/scale/min/max \fB-E\fIyr/mo/da/hr/mn/sc \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
+\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters 
+\fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor/mode/depth 
+\fB-B\fItickinfo \fB-b\fIyr/mo/da/hr/mn/sc 
+\fB-D\fImode/scale/min/max \fB-E\fIyr/mo/da/hr/mn/sc 
+\fB-f\fIformat \fB-F\fIred/green/blue 
+\fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI 
+\fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-S\fIspeed 
+\fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode 
+\fB-#\fIcopies \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbswath\fP is an utility for plotting multibeam swath data in color fill
@@ -213,6 +221,11 @@ data will be read and plotted. Only the data which lies within
 these bounds will be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
+.B \fB-S\fIspeed\fP
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+the input data; pings associated with a smaller ship speed will not be
+processed. Default: \fIspeed\fP = 0.
+.TP
 .B \fB-T\fItimegap\fP
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
@@ -220,6 +233,9 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .B \-U
 Draw Unix System time stamp on plot.  Optionally, append a label, or 'c' which will plot
 the command string.
+.TP
+.B \-V
+Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
 .TP
 .B \-X \-Y
 Shift origin of plot by (\fIx-shift,y-shift\fP) inches  [Default is (1,1) for new plots, (0,0) for overlays].
@@ -249,9 +265,6 @@ Create the image by plotting individually colored tiles.
 .TP
 .B \-3
 Create the image by color separation using three calls to image for later
-.TP
-.B \-V
-Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
 .SH EXAMPLES
 Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (\fBMBIO\fP format id 24) called hs_ew9302_157_mn.mb24
