@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.6 2001-07-20 00:32:54 caress Exp $
+#	$Id: Makefile.template,v 5.7 2001-09-17 23:25:13 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.6  2001/07/20 00:32:54  caress
+# Release 5.0.beta03
+#
 # Revision 5.5  2001/06/29  22:50:04  caress
 # Atlas Hydrosweep DS2 raw data and SURF data formats.
 #
@@ -136,6 +139,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbsys_oic.h $(INCDIR)/mbsys_hdcs.h \
 	$(INCDIR)/mbsys_singlebeam.h $(INCDIR)/mbsys_xse.h \
 	$(INCDIR)/mbsys_hs10.h $(INCDIR)/mbsys_surf.h \
+	$(INCDIR)/mbsys_reson8k.h \
 	$(INCDIR)/mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiocen.h \
 	$(INCDIR)/mbf_sbsiolsi.h $(INCDIR)/mbf_sburicen.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
@@ -157,7 +161,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbf_oicgeoda.h $(INCDIR)/mbf_oicmbari.h \
 	$(INCDIR)/mbf_omghdcsj.h \
 	$(INCDIR)/mbf_mgd77dat.h $(INCDIR)/mbf_mbarirov.h \
-	$(INCDIR)/mbf_mbpronav.h \
+	$(INCDIR)/mbf_mbpronav.h $(INCDIR)/mbf_xtfr8101.h \
 	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l
 
 ### make clean removes the object files
@@ -189,6 +193,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_oic.o mbsys_hdcs.o \
 		mbsys_singlebeam.o mbsys_xse.o \
 		mbsys_hs10.o mbsys_surf.o \
+		mbsys_reson8k.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -215,7 +220,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_omghdcsj.o \
 		mbr_mgd77dat.o mbr_mbarirov.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
-		mbr_hsds2raw.o mbr_hsds2lam.o
+		mbr_hsds2raw.o mbr_hsds2lam.o \
+ 		mbr_xtfr8101.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -241,6 +247,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_oic.o mbsys_hdcs.o \
 		mbsys_singlebeam.o mbsys_xse.o \
 		mbsys_hs10.o mbsys_surf.o \
+		mbsys_reson8k.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -267,7 +274,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_omghdcsj.o \
 		mbr_mgd77dat.o mbr_mbarirov.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
-		mbr_hsds2raw.o mbr_hsds2lam.o
+		mbr_hsds2raw.o mbr_hsds2lam.o \
+ 		mbr_xtfr8101.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -365,6 +373,8 @@ mbsys_hs10.o:	mbsys_hs10.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)
 	$(CC) -c $(CFLAGS) mbsys_hs10.c
 mbsys_surf.o:	mbsys_surf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_surf.h
 	$(CC) -c $(CFLAGS) mbsys_surf.c
+mbsys_reson8k.o:	mbsys_reson8k.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson8k.h
+	$(CC) -c $(CFLAGS) mbsys_reson8k.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -461,6 +471,8 @@ mbr_hsds2raw.o: mbr_hsds2raw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_hsds2raw.c
 mbr_hsds2lam.o: mbr_hsds2lam.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_surf.h
 	$(CC) -c $(CFLAGS) mbr_hsds2lam.c
+mbr_xtfr8101.o: mbr_xtfr8101.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_xtfr8101.h $(INCDIR)/mbsys_reson.h
+	$(CC) -c $(CFLAGS) mbr_xtfr8101.c
 
 ### copy the man page to the man page directory
 $(MANDIR)/mbio.l:	mbio.manl
@@ -549,6 +561,9 @@ $(INCDIR)/mbsys_xse.h:	mbsys_xse.h
 $(INCDIR)/mbsys_hs10.h:	mbsys_hs10.h
 	cp mbsys_hs10.h $(INCDIR)/mbsys_hs10.h
 	chmod 664 $(INCDIR)/mbsys_hs10.h
+$(INCDIR)/mbsys_reson8k.h:	mbsys_reson8k.h
+	cp mbsys_reson8k.h $(INCDIR)/mbsys_reson8k.h
+	chmod 664 $(INCDIR)/mbsys_reson8k.h
 $(INCDIR)/mbsys_surf.h:	mbsys_surf.h
 	cp mbsys_surf.h $(INCDIR)/mbsys_surf.h
 	chmod 664 $(INCDIR)/mbsys_surf.h
@@ -663,4 +678,7 @@ $(INCDIR)/mbf_mbarirov.h:	mbf_mbarirov.h
 $(INCDIR)/mbf_mbpronav.h:	mbf_mbpronav.h
 	cp mbf_mbpronav.h $(INCDIR)/mbf_mbpronav.h
 	chmod 664 $(INCDIR)/mbf_mbpronav.h
+$(INCDIR)/mbf_xtfr8101.h:	mbf_xtfr8101.h
+	cp mbf_xtfr8101.h $(INCDIR)/mbf_xtfr8101.h
+	chmod 664 $(INCDIR)/mbf_xtfr8101.h
 
