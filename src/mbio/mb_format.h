@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.5 1994-12-21 20:21:09 caress Exp $
+ *    $Id: mb_format.h,v 4.6 1995-01-10 17:34:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,10 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/12/21  20:21:09  caress
+ * Changes to support high resolution SeaBeam 2000 sidescan files
+ * from R/V Melville data.
+ *
  * Revision 4.4  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -582,6 +586,37 @@ static int mb_ss_flag_table[] =
 	0,	/* MBF_MBLDEOIH */
 	0,	/* MBF_CBAT9001 */
 	0,	/* MBF_BCHRTUNB */
+	};
+
+/* Table of the fore-aft beamwidths */
+static float mb_foreaft_beamwidth_table[] = 
+	{
+	0.00,	/* NULL */
+	2.67,	/* MBF_SBSIOMRG */
+	2.67,	/* MBF_SBSIOCEN */
+	2.67,	/* MBF_SBSIOLSI */
+	2.67,	/* MBF_SBURICEN */
+	2.67,	/* MBF_SBURIVAX */
+	2.67,	/* MBF_SBSIOSWB */
+	2.00,	/* MBF_HSATLRAW */
+	2.00,	/* MBF_HSLDEDMB */
+	2.00,	/* MBF_HSURICEN */
+	2.00,	/* MBF_HSLDEOIH */
+	2.00,	/* MBF_HSURIVAX */
+	2.00,	/* MBF_HSSIOSWB */
+	2.00,	/* MBF_SB2000RW */
+	2.00,	/* MBF_SB2000SB */
+	2.00,	/* MBF_SB2000SS */
+	2.00,	/* MBF_SB2100RW */
+	2.00,	/* MBF_SB2100IH */
+	2.00,	/* MBF_EM1000RW */
+	2.00,	/* MBF_EM12SRAW */
+	2.00,	/* MBF_EM12DRAW */
+	2.00,	/* MBF_EM12DARW */
+	2.00,	/* MBF_MR1PRHIG */
+	2.00,	/* MBF_MBLDEOIH */
+	2.00,	/* MBF_CBAT9001 */
+	2.00,	/* MBF_BCHRTUNB */
 	};
 
 /* names of formats for use in button or label names */
