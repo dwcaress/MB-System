@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 4.8 1998-10-05 22:13:31 caress Exp $
+#	$Id: Makefile.template,v 4.9 1999-12-11 04:36:44 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.8  1998/10/05  22:13:31  caress
+# MB-System version 4.6beta
+#
 # Revision 4.7  1997/09/18  13:27:32  caress
 # Removed references to realtime code.
 #
@@ -52,20 +55,22 @@ all:
 	cd mbio; make all
 	cd mbrt; make all
 	cd utilities; make all
+	cd gmt; make all
+	cd macros; make all
+	cd xgraphics; make all
 	cd mbedit; make all
 	cd mbvelocitytool; make all
 	cd mbnavedit; make all
-	cd gmt; make all
-	cd macros; make all
 
 clean:
 	- cd gsf; make clean
 	- cd mbio; make clean
 	- cd mbrt; make clean
 	- cd utilities; make clean
+	- cd gmt; make clean
+	- cd macros; make clean
+	- cd xgraphics; make clean
 	- cd mbedit; make clean
 	- cd mbnavedit; make clean
 	- cd mbvelocitytool; make clean
-	- cd gmt; make clean
-	- cd macros; make clean
 
