@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.7 2001-07-20 00:31:11 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.8 2001-08-04 01:00:02 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/07/20  00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.6  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -171,7 +174,7 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 		short sonar, int *error);
 int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *match, int *error);
+ 		short sonar, int length, int *match, int *error);
 int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_em300mba_wr_start(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
@@ -203,7 +206,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbr_register_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -333,7 +336,7 @@ int mbr_info_em300mba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbr_info_em300mba";
 	int	status = MB_SUCCESS;
 
@@ -402,7 +405,7 @@ int mbr_info_em300mba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300mba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -696,6 +699,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	short	*first_type_save;
 	short	*typelast;
 	int	*nbadrec;
+	int     *length;
 	int	match;
 	int	read_len;
 	int	skip = 0;
@@ -733,6 +737,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	first_type_save = (short *) &mb_io_ptr->save2;
 	typelast = (short *) &mb_io_ptr->save6;
 	nbadrec = (int *) &mb_io_ptr->save7;
+	length = (int *) &mb_io_ptr->save8;
 	if (*expect_save_flag == MB_YES)
 		{
 		expect = *expect_save;
@@ -777,6 +782,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 				
 			/* look for label */
+			*length = 0;
 			if ((read_len = fread(label,
 				1,4,mb_io_ptr->mbfp)) != 4)
 				{
@@ -792,6 +798,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					mbio_ptr, *type, *sonar) != MB_SUCCESS)
 			    {
 			    /* get next byte */
+			    *length = ((*length & 0x00ffffff) << 8) | (0x000000ff &label[0]);
 			    for (i=0;i<3;i++)
 				label[i] = label[i+1];
 			    if ((read_len = fread(&label[3],
@@ -938,6 +945,22 @@ Have a nice day...\n");
 	fprintf(stderr,"call nothing, try again\n");
 #endif
 			done = MB_NO;
+			}
+		else if ((*type == EM2_START
+			    || *type == EM2_STOP
+			    || *type == EM2_STOP2
+			    || *type == EM2_OFF
+			    || *type == EM2_ON) 
+			&& expect != EM2_NONE)
+			{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
+#endif
+			done = MB_YES;
+			expect = EM2_NONE;
+			*type = first_type;
+			*label_save_flag = MB_YES;
+			store->kind = MB_DATA_DATA;
 			}
 		else if (*type == EM2_START
 			|| *type == EM2_STOP
@@ -1233,23 +1256,35 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300mba_rd_ss type %x\n",*type);
 #endif
 			status = mbr_em300mba_rd_ss(
-				verbose,mbfp,store,*sonar,&match,error);
+				verbose,mbfp,store,*sonar,*length,&match,error);
 			if (status == MB_SUCCESS)
+			    {
+			    ping->png_ss_read = MB_YES;
+			    if (first_type == EM2_NONE
+				|| match == MB_NO)
 				{
-				ping->png_ss_read = MB_YES;
-				if (first_type == EM2_NONE
-					|| match == MB_NO)
-					{
-					done = MB_NO;
-					first_type = EM2_SS_MBA;
-					expect = EM2_BATH_MBA;
-					}
-				else
-					{
-					done = MB_YES;
-					expect = EM2_NONE;
-					}
+				done = MB_NO;
+				first_type = EM2_SS_MBA;
+				expect = EM2_BATH_MBA;
 				}
+			    else
+				{
+				done = MB_YES;
+				expect = EM2_NONE;
+				}
+			    }
+
+                        /* salvage bath even if sidescan is corrupt */
+			else
+			    {
+			    if (first_type == EM2_BATH_MBA 
+				&& match == MB_YES)
+				{
+				status = MB_SUCCESS;
+				done = MB_YES;
+				expect = EM2_NONE;
+				}
+			    }
 			}
 
 		/* bail out if there is an error */
@@ -1289,7 +1324,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 	char	*function_name = "mbr_em300mba_chk_label";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	char	*startid;
+	char	startid;
 	short	*sonar_save;
 
 	/* print input debug statements */
@@ -1307,6 +1342,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	sonar_save = (short *) (&mb_io_ptr->save4);
+	startid = *((char*) &type);
 
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "Check label: %4.4hX %4.4hX | %d %d\n", type, sonar, type, sonar);
@@ -1345,8 +1381,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 		&& type != EM2_SS_MBA)
 		{
 		status = MB_FAILURE;
-		startid = (char *) &type;
-		if ((verbose >= 1 && *startid == 2)
+		if ((verbose >= 1 && startid == 2)
 		    && (sonar == MBSYS_SIMRAD2_EM120
 			|| sonar == MBSYS_SIMRAD2_EM300
 			|| sonar == MBSYS_SIMRAD2_EM1002
@@ -2204,6 +2239,7 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp,
 		store->hgt_type = (mb_u_char) line[16];
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[EM2_HEIGHT_SIZE-9])), 
 		*((int *)&(line[EM2_HEIGHT_SIZE-9])));
 #endif
 		}
@@ -2342,7 +2378,7 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -2484,7 +2520,7 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -2634,7 +2670,7 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -2942,7 +2978,7 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -3083,7 +3119,7 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 
@@ -3272,7 +3308,7 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 		
@@ -3473,7 +3509,7 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 			}
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])));
+		*((int *)&(line[0])), *((int *)&(line[0])));
 #endif
 		}
 		
@@ -3540,7 +3576,7 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *match, int *error)
+		short sonar, int length, int *match, int *error)
 {
 	char	*function_name = "mbr_em300mba_rd_ss";
 	int	status = MB_SUCCESS;
@@ -3565,6 +3601,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		fprintf(stderr,"dbg2       length:     %d\n",length);
 		}
 		
 	/* get  storage structure */
@@ -3664,10 +3701,21 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 				ping->png_beam_samples[i] = 0;
 			}
 		}
+
+	    /* check for no pixel data - frequently occurs with EM1002 */
+	    if (length == EM2_SS_MBA_HEADER_SIZE + ping->png_nbeams_ss * EM2_SS_MBA_BEAM_SIZE + 8)
+		{
+		if (verbose > 0)
+		    fprintf(stderr, "WARNING: No Simrad multibeam sidescan pixels in data record!\n");
+		junk_bytes = 0;
+		ping->png_npixels = 0;
+		}
+
+	    /* check for too much pixel data */
 	    if (ping->png_npixels > MBSYS_SIMRAD2_MAXRAWPIXELS)
 		{
 		if (verbose > 0)
-		    fprintf(stderr, "WARNING: EM300/3000 sidescan pixels %d exceed maximum %d!\n", 
+		    fprintf(stderr, "WARNING: Simrad multibeam sidescan pixels %d exceed maximum %d!\n", 
 			    ping->png_npixels, MBSYS_SIMRAD2_MAXRAWPIXELS);
 		junk_bytes = ping->png_npixels - MBSYS_SIMRAD2_MAXRAWPIXELS;
 		ping->png_npixels = MBSYS_SIMRAD2_MAXRAWPIXELS;
