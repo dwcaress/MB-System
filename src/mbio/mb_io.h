@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.3 1995-03-22 18:59:33 caress Exp $
+ *    $Id: mb_io.h,v 4.4 1996-04-22 10:59:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/22  18:59:33  caress
+ * Added record counting ints for use with sburivax format.
+ *
  * Revision 4.2  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -59,9 +62,20 @@
  * Initial version
  *
  */
+ 
+/* declare degrees/radians conversions */
 
 /* declare buffer maximum */
 #define	MB_BUFFER_MAX	5000
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	0.01745329251994329500
+#define RTD	57.2957795130823230000
+
+/* min max define */
+#define	MIN(A, B)	((A) < (B) ? (A) : (B))
+#define	MAX(A, B)	((A) > (B) ? (A) : (B))
 
 /* maximum comment length in characters */
 #define MB_COMMENT_MAXLINE 1944
