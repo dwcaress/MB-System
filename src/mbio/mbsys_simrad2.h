@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.11 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.12 2003-11-24 19:04:21 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.10  2002/08/21 00:55:46  caress
  * Release 5.0.beta22
  *
@@ -314,27 +317,32 @@
 /* datagram types */
 #define	EM2_END			0x03
 #define	EM2_NONE		0
-#define	EM2_START		0x0249
-#define	EM2_STOP		0x0269
 #define	EM2_STOP2		0x0230
 #define	EM2_OFF			0x0231
 #define	EM2_ON			0x0232
-#define	EM2_RUN_PARAMETER	0x0252
-#define	EM2_CLOCK		0x0243
-#define	EM2_TILT		0x024A
-#define	EM2_TIDE		0x0254
-#define	EM2_HEIGHT		0x0268
-#define	EM2_HEADING		0x0248
-#define	EM2_SSV			0x0247
 #define	EM2_ATTITUDE		0x0241
-#define	EM2_POS			0x0250
-#define	EM2_SVP			0x0256
-#define	EM2_SVP2		0x0255
+#define	EM2_CLOCK		0x0243
 #define	EM2_BATH		0x0244
-#define	EM2_BATH_MBA		0x02E1
+#define	EM2_SBDEPTH		0x0245
 #define	EM2_RAWBEAM		0x0246
-#define	EM2_RAWBEAM2		0x0265
+#define	EM2_SSV			0x0247
+#define	EM2_HEADING		0x0248
+#define	EM2_START		0x0249
+#define	EM2_TILT		0x024A
+#define	EM2_CBECHO		0x024B
+#define	EM2_POS			0x0250
+#define	EM2_RUN_PARAMETER	0x0252
 #define	EM2_SS			0x0253
+#define	EM2_TIDE		0x0254
+#define	EM2_SVP2		0x0255
+#define	EM2_SVP			0x0256
+#define	EM2_SSPINPUT		0x0257
+#define	EM2_RAWBEAM2		0x0265
+#define	EM2_HEIGHT		0x0268
+#define	EM2_STOP		0x0269
+#define	EM2_REMOTE		0x0270
+#define	EM2_SSP			0x0273
+#define	EM2_BATH_MBA		0x02E1
 #define	EM2_SS_MBA		0x02E2
 
 /* datagram sizes where constant */
