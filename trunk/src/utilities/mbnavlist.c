@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbnavlist.c,v 5.1 2000-12-10 20:30:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -64,7 +67,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.1 2000-12-10 20:30:44 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -349,9 +352,9 @@ main (int argc, char **argv)
 	while (read_data == MB_YES)
 	{		
 	/* check format and get data sources */
-	status = mb_format_source(verbose, &format, 
+	if ((status = mb_format_source(verbose, &format, 
 			&nav_source, &heading_source, &vru_source, 
-			&error);
+			&error)) == MB_FAILURE)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_format_source>:\n%s\n",message);

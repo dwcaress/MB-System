@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -46,6 +46,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.21  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -495,7 +498,7 @@ double angles_EM1000_SHALLOW[60] = {
 		-60.0000, -62.5000, -65.0000, -67.5000,
 		-70.0000, -72.5000
 };
-double angles_EM12D_114[162] = {
+double angles_EM12DP_114[81] = {
 		57.0000, 56.6875, 56.3125, 56.0000,
 		55.6250, 55.2500, 54.8750, 54.5000,
 		54.1250, 53.7500, 53.3750, 52.9375,
@@ -516,7 +519,9 @@ double angles_EM12D_114[162] = {
 		12.1250, 11.0000, 09.9375, 08.8750,
 		07.7500, 06.6875, 05.5625, 04.4375,
 		03.3750, 02.2500, 01.1250, 00.0000,
-		-1.1250,
+		-1.1250
+};
+double angles_EM12DS_114[81] = {
 		1.1250, -0.0000, -1.1250, -2.2500,
 		-3.3750, -4.4375, -5.5625, -6.6875,
 		-7.7500, -8.8750, -9.9375, -11.0000,
@@ -539,7 +544,7 @@ double angles_EM12D_114[162] = {
 		-55.6250, -56.0000, -56.3125, -56.6875,
 		-57.0000
 };
-double angles_EM12D_128[162] = {
+double angles_EM12DP_128[81] = {
 		64.0000, 63.6875, 63.4375, 63.1250,
 		62.8125, 62.5000, 62.1875, 61.8750,
 		61.5000, 61.1875, 60.8125, 60.4375,
@@ -560,7 +565,9 @@ double angles_EM12D_128[162] = {
 		15.9375, 14.5625, 13.1250, 11.7500,
 		10.3125, 08.8750, 07.3750, 05.9375,
 		04.4375, 03.0000, 01.5000, 00.0000,
-		-1.5000,
+		-1.5000
+};
+double angles_EM12DS_128[81] = {
 		1.5000, -0.0000, -1.5000, -3.0000,
 		-4.4375, -5.9375, -7.3750, -8.8750,
 		-10.3125, -11.7500, -13.1250, -14.5625,
@@ -583,7 +590,7 @@ double angles_EM12D_128[162] = {
 		-62.8125, -63.1250, -63.4375, -63.6875,
 		-64.0000
 };
-double angles_EM12D_140[162] = {
+double angles_EM12DP_140[81] = {
 		70.000000, 69.750000, 69.500000, 69.250000,
 		69.000000, 68.750000, 68.500000, 68.250000,
 		67.937500, 67.687500, 67.375000, 67.062500,
@@ -604,7 +611,9 @@ double angles_EM12D_140[162] = {
 		20.937500, 19.187500, 17.375000, 15.562500,
 		13.687500, 11.812500, 09.875000, 07.937500,
 		05.937500, 04.000000, 02.000000, 00.000000,
-		-2.0000000,
+		-2.0000000
+};
+double angles_EM12DS_140[81] = {
 		2.0000, -0.0000, -2.0000, -4.0000,
 		-5.9375, -7.9375, -9.8750, -11.8125,
 		-13.6875, -15.5625, -17.3750, -19.1875,
@@ -627,7 +636,7 @@ double angles_EM12D_140[162] = {
 		-69.0000, -69.2500, -69.5000, -69.7500,
 		-70.0000
 };
-double angles_EM12D_150[162] = {
+double angles_EM12DP_150[81] = {
 		75.000000, 74.812500, 74.625000, 74.437500,
 		74.250000, 74.062500, 73.812500, 73.625000,
 		73.375000, 73.187500, 72.937500, 72.687500,
@@ -648,7 +657,9 @@ double angles_EM12D_150[162] = {
 		27.437500, 25.312500, 23.063499, 20.687500,
 		18.312500, 15.812500, 13.312500, 10.687500,
 		08.0625000, 05.3750000, 02.6875000, 00.000000,
-		-2.6875000,
+		-2.6875000
+};
+double angles_EM12DS_150[81] = {
 		2.6875, -0.0000, -2.6875, -5.3750,
 		-8.0625, -10.6875, -13.3125, -15.8125,
 		-18.3125, -20.6875, -23.0635, -25.3125,
@@ -671,7 +682,7 @@ double angles_EM12D_150[162] = {
 		-74.2500, -74.4375, -74.6250, -74.8125,
 		-75.0000
 };
-double angles_EM12D_98[162] = {
+double angles_EM12DP_98[81] = {
 		49.0000, 48.6250, 48.2500, 47.8750,
 		47.5000, 47.1250, 46.7500, 46.3750,
 		45.9375, 45.5625, 45.1250, 44.6875,
@@ -692,7 +703,9 @@ double angles_EM12D_98[162] = {
 		09.1250, 08.3125, 07.4375, 06.6250,
 		05.8125, 05.0000, 04.1875, 03.3125,
 		02.5000, 01.6875, 00.8125, 00.0000,
-		-0.8125,
+		-0.8125
+};
+double angles_EM12DS_98[81] = {
 		0.8125, -0.0000, -0.8125, -1.6875,
 		-2.5000, -3.3125, -4.1875, -5.0000,
 		-5.8125, -6.6250, -7.4375, -8.3125,
@@ -715,7 +728,7 @@ double angles_EM12D_98[162] = {
 		-47.5000, -47.8750, -48.2500, -48.6250,
 		-49.0000
 };
-double angles_EM12D_ISO_ANG_DEEP[162] = {
+double angles_EM12DP_ISO_ANG_DEEP[81] = {
 		75.0000, 74.0000, 73.0000, 72.0000,
 		71.0000, 70.0000, 69.0000, 68.0000,
 		67.0000, 66.0000, 65.0000, 64.0000,
@@ -736,7 +749,10 @@ double angles_EM12D_ISO_ANG_DEEP[162] = {
 		07.0000, 06.0000, 05.0000, 04.0000,
 		03.0000, 02.0000, 01.0000, 00.0000,
 		-1.0000, -2.0000, -3.0000, -4.0000,
-		-5.0000, 05.0000,
+		-5.0000
+};
+double angles_EM12DS_ISO_ANG_DEEP[81] = {
+		05.0000,
 		 04.0000,  03.0000,  02.0000,  01.0000,
 		 00.0000, -01.0000, -02.0000, -03.0000,
 		-04.0000, -05.0000, -06.0000, -07.0000,
@@ -758,7 +774,7 @@ double angles_EM12D_ISO_ANG_DEEP[162] = {
 		-68.0000, -69.0000, -70.0000, -71.0000,
 		-72.0000, -73.0000, -74.0000, -75.0000
 };
-double angles_EM12D_ISO_ANG_SHALLOW[162] = {
+double angles_EM12DP_ISO_ANG_SHALLOW[81] = {
 		75.0000, 74.0000, 73.0000, 72.0000,
 		71.0000, 70.0000, 69.0000, 68.0000,
 		67.0000, 66.0000, 65.0000, 64.0000,
@@ -779,7 +795,9 @@ double angles_EM12D_ISO_ANG_SHALLOW[162] = {
 		07.0000, 06.0000, 05.0000, 04.0000,
 		03.0000, 02.0000, 01.0000, 00.0000,
 		-1.0000, -2.0000, -3.0000, -4.0000,
-		-5.0000,
+		-5.000
+};
+double angles_EM12DS_ISO_ANG_SHALLOW[81] = {
 		5.0000, 4.0000, 3.0000, 2.0000,
 		1.0000, -0.0000, -1.0000, -2.0000,
 		-3.0000, -4.0000, -5.0000, -6.0000,
@@ -802,7 +820,7 @@ double angles_EM12D_ISO_ANG_SHALLOW[162] = {
 		-71.0000, -72.0000, -73.0000, -74.0000,
 		-75.0000
 };
-double angles_EM12D_SHALLOW[162] = {
+double angles_EM12DP_SHALLOW[81] = {
 		75.00000, 74.81250, 74.62500, 74.43750, 
 		74.25000, 74.06250, 73.81250, 73.62500,
 		73.37500, 73.18750, 72.93750, 72.68750,
@@ -823,7 +841,10 @@ double angles_EM12D_SHALLOW[162] = {
 		27.43750, 25.31250, 23.06250, 20.68750,
 		18.31250, 15.81250, 13.31250, 10.68750, 
 		08.06250, 05.37500, 02.68750, 00.00000,
-		-02.6875, 02.68750,
+		-02.6875
+};
+double angles_EM12DS_SHALLOW[81] = {
+		02.68750,
 		-00.0000, -02.6875, -05.3750, -08.0625,
 		-10.6875, -13.3125, -15.8125, -18.3125,
 		-20.6875, -23.0625, -25.3125, -27.4375,
@@ -990,7 +1011,7 @@ double angles_EM12S_SHALLOW[81] = {
 int mbsys_simrad_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1122,7 +1143,7 @@ int mbsys_simrad_survey_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1844,12 +1865,6 @@ int mbsys_simrad_insert(int verbose, char *mbio_ptr, char *store_ptr,
 				ping->bath_mode = 0;
 				ping->bath_res = 2;
 				}
-			else if (nbath <= 162)
-				{
-				store->sonar = MBSYS_SIMRAD_EM12D;
-				ping->bath_mode = 0;
-				ping->bath_res = 2;
-				}
 			else
 				{
 				*error = MB_ERROR_DATA_NOT_INSERTED;
@@ -2081,24 +2096,45 @@ int mbsys_simrad_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			else if (ping->bath_mode == 6)
 			    angles_simrad = angles_EM12S_90;			
 			}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D)
+		else if (store->sonar == MBSYS_SIMRAD_EM12D
+			&& ping->swath_id == EM_SWATH_PORT)
 			{
 			if (ping->bath_mode == 1)
-			    angles_simrad = angles_EM12D_ISO_ANG_SHALLOW;
+			    angles_simrad = angles_EM12DP_ISO_ANG_SHALLOW;
 			else if (ping->bath_mode == 2)
-			    angles_simrad = angles_EM12D_ISO_ANG_DEEP;
+			    angles_simrad = angles_EM12DP_ISO_ANG_DEEP;
 			else if (ping->bath_mode == 3)
-			    angles_simrad = angles_EM12D_SHALLOW;
+			    angles_simrad = angles_EM12DP_SHALLOW;
 			else if (ping->bath_mode == 4)
-			    angles_simrad = angles_EM12D_150;
+			    angles_simrad = angles_EM12DP_150;
 			else if (ping->bath_mode == 5)
-			    angles_simrad = angles_EM12D_140;
+			    angles_simrad = angles_EM12DP_140;
 			else if (ping->bath_mode == 6)
-			    angles_simrad = angles_EM12D_128;			
+			    angles_simrad = angles_EM12DP_128;			
 			else if (ping->bath_mode == 7)
-			    angles_simrad = angles_EM12D_114;			
+			    angles_simrad = angles_EM12DP_114;			
 			else if (ping->bath_mode == 8)
-			    angles_simrad = angles_EM12D_98;			
+			    angles_simrad = angles_EM12DP_98;			
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12D
+			&& ping->swath_id == EM_SWATH_STARBOARD)
+			{
+			if (ping->bath_mode == 1)
+			    angles_simrad = angles_EM12DS_ISO_ANG_SHALLOW;
+			else if (ping->bath_mode == 2)
+			    angles_simrad = angles_EM12DS_ISO_ANG_DEEP;
+			else if (ping->bath_mode == 3)
+			    angles_simrad = angles_EM12DS_SHALLOW;
+			else if (ping->bath_mode == 4)
+			    angles_simrad = angles_EM12DS_150;
+			else if (ping->bath_mode == 5)
+			    angles_simrad = angles_EM12DS_140;
+			else if (ping->bath_mode == 6)
+			    angles_simrad = angles_EM12DS_128;			
+			else if (ping->bath_mode == 7)
+			    angles_simrad = angles_EM12DS_114;			
+			else if (ping->bath_mode == 8)
+			    angles_simrad = angles_EM12DS_98;			
 			}
 		if (store->sonar == MBSYS_SIMRAD_EM1000)
 			{
@@ -2119,10 +2155,14 @@ int mbsys_simrad_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 		for (i=0;i<*nbeams;i++)
 			{
 			ttimes[i] = ttscale * ping->tt[i];
-			angles[i] = -angles_simrad[i];
+			angles[i] = fabs(angles_simrad[i]);
 			angles_forward[i] = 0.0;
+			if (angles_simrad[i] < 0.0)
+				{
+				angles_forward[i] = 180.0;
+				}
 			if (store->sonar == MBSYS_SIMRAD_EM1000)
-			    angles_null[i] = fabs(angles[i]);
+			    angles_null[i] = angles[i];
 			else if (store->sonar == MBSYS_SIMRAD_EM12S)
 			    angles_null[i] = 0.0;
 			else if (store->sonar == MBSYS_SIMRAD_EM12D)

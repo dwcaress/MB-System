@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbmerge.c,v 5.1 2000-12-10 20:30:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.27  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -151,7 +154,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 5.1 2000-12-10 20:30:44 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -424,9 +427,9 @@ main (int argc, char **argv)
 		}
 		
 	/* check format and get data sources */
-	status = mb_format_source(verbose, &format, 
+	if ((status = mb_format_source(verbose, &format, 
 			&nav_source, &heading_source, &vru_source, 
-			&error);
+			&error)) == MB_FAILURE)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_format_source>:\n%s\n",message);

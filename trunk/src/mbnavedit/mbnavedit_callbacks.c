@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.0 2000-12-01 22:56:08 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.1 2000-12-10 20:30:08 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:56:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.14  2000/10/11  01:05:17  caress
  * Convert to ANSI C
  *
@@ -1767,8 +1770,8 @@ do_modeling_apply( Widget w, XtPointer client_data, XtPointer call_data)
 	
 	do_set_controls();
 	
-	/* recalculate dr */
-	mbnavedit_get_dr();
+	/* recalculate model */
+	mbnavedit_get_model();
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -1791,8 +1794,8 @@ do_model_mode( Widget w, XtPointer client_data, XtPointer call_data)
 	
 	do_set_controls();
 	
-	/* recalculate dr */
-	mbnavedit_get_dr();
+	/* recalculate model */
+	mbnavedit_get_model();
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -1810,8 +1813,8 @@ do_driftlon( Widget w, XtPointer client_data, XtPointer call_data)
 			XmNvalue, &drift_lon, 
 			NULL);
 	
-	/* recalculate dr */
-	mbnavedit_get_dr();
+	/* recalculate model */
+	mbnavedit_get_model();
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -1827,8 +1830,8 @@ do_driftlat( Widget w, XtPointer client_data, XtPointer call_data)
 			XmNvalue, &drift_lat, 
 			NULL);
 	
-	/* recalculate dr */
-	mbnavedit_get_dr();
+	/* recalculate model */
+	mbnavedit_get_model();
 	
 	/* replot */
 	mbnavedit_plot_all();

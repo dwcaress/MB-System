@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.20 2000-09-30 07:22:17 caress Exp $
+#	$Id: Makefile.template,v 4.21 2000-12-10 20:30:44 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.20  2000/09/30  07:22:17  caress
+# Snapshot for Dale.
+#
 # Revision 4.19  2000/03/08  00:06:36  caress
 # Release 4.6.10
 #
@@ -160,8 +163,8 @@ $(BINDIR)/mbcopy:	mbcopy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mblist:	mblist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mblist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mblist
-$(BINDIR)/mbmerge:	mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
-	$(CC) $(CFLAGS) mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
+$(BINDIR)/mbmerge:	mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbmerge
 $(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
@@ -169,12 +172,12 @@ $(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mbunclean
-$(BINDIR)/mbgrid:	mbgrid.o zgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
-	$(CC) $(CFLAGS) mbgrid.o zgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
+$(BINDIR)/mbgrid:	mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbgrid
-$(BINDIR)/mbmosaic:	mbmosaic.o zgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
-	$(CC) $(CFLAGS) mbmosaic.o zgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
+$(BINDIR)/mbmosaic:	mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbmosaic
 $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
@@ -217,8 +220,8 @@ $(BINDIR)/mbfilter:	mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mbcut:	mbcut.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbcut.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbcut
-$(BINDIR)/mbtide:	mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
-	$(CC) $(CFLAGS) mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
+$(BINDIR)/mbtide:	mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbtide
 $(BINDIR)/mbsimradmakess:	mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
@@ -254,8 +257,6 @@ mbmosaic.o:	mbmosaic.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb
 mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h Makefile
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
-zgrid.o:	zgrid.c
-	$(CC) -c $(CFLAGS) zgrid.c
 mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbbath.c
 hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hsds.h

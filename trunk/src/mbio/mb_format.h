@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_format.h,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.29  2000/09/30  06:29:44  caress
  * Snapshot for Dale.
  *
@@ -185,6 +188,7 @@
 #define MB_SYS_SINGLEBEAM	19
 #define MB_SYS_XSE		20
 #define MB_SYS_HS10		21
+#define	MB_SYS_SB2120		22
 
 /* Number of supported MBIO data formats */
 #define	MB_FORMATS	52
@@ -242,6 +246,11 @@
 					151 beam bathymetry and amplitude,
 					binary, centered,
 					SeaBeam Instruments and L-DEO */ 
+#define	MBF_SB2120XS	44	/* SeaBeam 2120 series vendor format, 
+					151 beam bathymetry and amplitude,
+					2000 pixel sidescan, centered, 
+					20 KHZ, binary XSE Format
+					SeaBeam Instruments and ELAC */ 
 #define	MBF_EM1000RW	51	/* Simrad EM1000 series vendor format, 
 					60 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
@@ -250,10 +259,10 @@
 					81 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
 					ascii + binary, Simrad */ 
-#define	MBF_EM12DRAW	53	/* Simrad EM12D series vendor format, 
-					162 beam bathymetry and 
-					amplitude, variable pixel sidescan, 
-					ascii + binary, Simrad */ 
+#define	MBF_EM12IFRM	53	/* Simrad EM12S/EM12D multibeam archive format, 
+					81 beam bathymetry and 
+					amplitude, 
+					binary, IFREMER */ 
 #define	MBF_EM12DARW	54	/* Simrad EM12 RRS Darwin processed format, 
 					81 beam, bathymetry and amplitude,
 					binary, centered, Oxford University */ 
@@ -269,10 +278,6 @@
 					up to 254 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
 					ascii + binary, MBARI */ 
-#define	MBF_EM12DIFR	58	/* Simrad EM12D multibeam archive format, 
-					162 beam bathymetry and 
-					amplitude, 
-					binary, IFREMER */ 
 #define	MBF_MR1PRHIG	61	/* MR1 post processed format, 
 					variable beam bathymetry, variable
 					pixel sidescan, xdr binary, SOEST */ 
@@ -340,7 +345,8 @@
 					ascii, NOAA NGDC */ 
 #define MBF_MBARIROV    165     /* MBARI ROV navigation format, ascii, MBARI */ 
 #define MBF_MBPRONAV    166     /* MB-System simple navigation format, ascii, MBARI */ 
-#define MBF_FRNOHS10    181     /* Furuno HS10 multibeam format, 45 beams, bathymetry and amplitude, Hexadecimal, JAMSTEC */ 
+#define MBF_HS10JAMS    171     /* Furuno HS10 multibeam format, 45 beams, 
+					bathymetry and amplitude, ascii, JAMSTEC */ 
 
 /* Alias table for old (pre-version 4.0) format id's */
 static int format_alias_table[] = 

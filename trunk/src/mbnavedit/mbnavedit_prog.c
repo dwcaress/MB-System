@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.0 2000-12-01 22:56:08 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.1 2000-12-10 20:30:08 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:56:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.22  2000/10/11  01:05:17  caress
  * Convert to ANSI C
  *
@@ -192,10 +195,10 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.0 2000-12-01 22:56:08 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.1 2000-12-10 20:30:08 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
-static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
+static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -305,6 +308,7 @@ int mbnavedit_init_globals()
 
 	/* set default global control parameters */
 	output_mode = OUTPUT_MODE_OUTPUT;
+	run_mbprocess = MB_NO;
 	gui_mode = MB_NO;
 	data_show_max = 2000;
 	data_show_size = 1000;
@@ -412,7 +416,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file)
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:PpTt")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:PpTtXx")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -468,6 +472,11 @@ int mbnavedit_init(int argc, char **argv, int *startup_file)
 		case 'T':
 		case 't':
 			time_fix = MB_YES;
+			flag++;
+			break;
+		case 'X':
+		case 'x':
+			run_mbprocess = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -851,6 +860,7 @@ int mbnavedit_close_file()
 	/* local variables */
 	char	*function_name = "mbnavedit_close_file";
 	int	status = MB_SUCCESS;
+	char	command[MB_PATH_MAXLINE];
 	int	i;
 
 	/* print input debug statements */
@@ -859,6 +869,20 @@ int mbnavedit_close_file()
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		}
+
+	/* deallocate memory for data arrays */
+	mb_free(verbose,&beamflag,&error);
+	mb_free(verbose,&bath,&error);
+	mb_free(verbose,&amp,&error);
+	mb_free(verbose,&bathacrosstrack,&error);
+	mb_free(verbose,&bathalongtrack,&error);
+	mb_free(verbose,&ss,&error);
+	mb_free(verbose,&ssacrosstrack,&error);
+	mb_free(verbose,&ssalongtrack,&error);
+
+	/* check memory */
+	if (verbose >= 4)
+		status = mb_memory_list(verbose,&error);
 
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
@@ -877,21 +901,21 @@ int mbnavedit_close_file()
 			MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON, 
 			MBP_NAV_LINEAR, 
 			&error);
+			
+	    /* run mbprocess if desired */
+	    if (run_mbprocess == MB_YES)
+		    {
+		    /* turn message on */
+		    do_message_on("Navigation edits being applied using mbprocess...");
+		    
+		    /* run mbprocess */
+		    sprintf(command, "mbprocess -I %s\n",ifile);
+		    system(command);
+
+		    /* turn message off */
+		    do_message_off();
+		    }
 	    }
-
-	/* deallocate memory for data arrays */
-	mb_free(verbose,&beamflag,&error);
-	mb_free(verbose,&bath,&error);
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&bathacrosstrack,&error);
-	mb_free(verbose,&bathalongtrack,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
-
-	/* check memory */
-	if (verbose >= 4)
-		status = mb_memory_list(verbose,&error);
 
 	/* if we got here we must have succeeded */
 	if (verbose >= 1)
@@ -3446,11 +3470,15 @@ int mbnavedit_get_model()
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
 
-	/* call correct modeling function */
-	if (model_mode == MODEL_MODE_DR)
-	    mbnavedit_get_dr();
-	else if (model_mode == MODEL_MODE_INVERT)
-	    mbnavedit_get_inversion();
+	/* only model if data available */
+	if (nbuff > 0)
+	    {
+	    /* call correct modeling function */
+	    if (model_mode == MODEL_MODE_DR)
+		mbnavedit_get_dr();
+	    else if (model_mode == MODEL_MODE_INVERT)
+		mbnavedit_get_inversion();
+	    }
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -3534,10 +3562,29 @@ int mbnavedit_get_inversion()
 	/* local variables */
 	char	*function_name = "mbnavedit_get_inversion";
 	int	status = MB_SUCCESS;
+	int	nnz;
+	int	nrows;
+	int	ncols;
+	double	*a;
+	int	*ia;
+	int	*nia;
+	int	*nx;
+	double	*x;
+	double	*dx;
+	double	*d;
+	double	*sigma;
+	double	*work;
+	int	ncyc, nsig;
+	double	smax, sup, err, supt, slo, errlsq, s;
+	int	ncycle;
+	double	bandwidth;
+	int	nr, nc;
+	double	lon_start;
+	double	lat_start;
 	double	mtodeglon, mtodeglat;
-	double	del_time, dx, dy;
-	double	driftlon, driftlat;
-	int	i;
+	double	dtime_d, dtime_d_sq;
+	char	string[50];
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3547,33 +3594,329 @@ int mbnavedit_get_inversion()
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
 
-	/* calculate dead reckoning */
-	driftlon = 0.00001 * drift_lon;
-	driftlat = 0.00001 * drift_lat;
-	for (i=0;i<nbuff;i++)
+	/* set maximum dimensions of the inverse problem */
+	nrows = nbuff + (nbuff - 1) + (nbuff - 2);
+	ncols = nbuff;
+	nnz = 3;
+	ncycle = 512;
+	bandwidth = 10000.0;
+	lon_start = ping[0].lon;
+	lat_start = ping[0].lat;
+	mb_coor_scale(verbose, lat_start,
+			&mtodeglon, &mtodeglat);
+
+	/* allocate space for the inverse problem */
+	status = mb_malloc(verbose, nnz * nrows * sizeof(double), &a,&error);
+	status = mb_malloc(verbose, nnz * nrows * sizeof(int), &ia,&error);
+	status = mb_malloc(verbose, nrows * sizeof(int), &nia,&error);
+	status = mb_malloc(verbose, nrows * sizeof(double), &d,&error);
+	status = mb_malloc(verbose, ncols * sizeof(double), &x,&error);
+	status = mb_malloc(verbose, ncols * sizeof(int), &nx,&error);
+	status = mb_malloc(verbose, ncols * sizeof(double), &dx,&error);
+	status = mb_malloc(verbose, ncycle * sizeof(double), &sigma,&error);
+	status = mb_malloc(verbose, ncycle * sizeof(double), &work,&error);
+		
+	/* do inversion */
+	if (error == MB_ERROR_NO_ERROR)
+	    {
+	    /* set message */
+	    sprintf(string,"Setting up inversion of %d longitude points",
+		    nbuff);
+	    do_message_on(string);
+		    
+	    /* initialize arrays */
+	    for (i=0;i<nrows;i++)
 		{
-		if (i == 0)
+		nia[i] = 0;
+		d[i] = 0.0;
+		for (j=0;j<nnz;j++)
+		    {
+		    k = nnz * i + j;
+		    ia[k] = 0;
+		    a[k] = 0.0;
+		    }
+		}
+	    for (i=0;i<ncols;i++)
+		{
+		nx[i] = 0;
+		x[i] = 0;
+		dx[i] = 0.0;
+		}
+	    for (i=0;i<ncycle;i++)
+		{
+		sigma[i] = 0;
+		work[i] = 0.0;
+		}
+	    
+	    /* loop over all nav points - add constraints for 
+	       original lon values, speed, acceleration */
+	    nr = 0;
+	    nc = nbuff;
+	    for (i=0;i<nbuff;i++)
+		    {
+		    /* constrain lon unless flagged by user */
+		    if (ping[i].lon == ping[i].lon_org)
 			{
-			ping[i].lon_dr = ping[i].lon;
-			ping[i].lat_dr = ping[i].lat;
+			k = nnz * nr;
+			d[nr] = (ping[i].lon_org - lon_start) / mtodeglon;
+			nia[nr] = 1;
+			ia[k] = i;
+			a[k] = 1.0;
+			nr++;
 			}
-		else
+    
+		    /* constrain speed */
+		    if (weight_speed > 0.0
+			&& i > 0 && ping[i].time_d > ping[i-1].time_d)
 			{
-			del_time = ping[i].time_d - ping[i-1].time_d;
-			if (del_time < 300.0)
-			    {
-			    mb_coor_scale(verbose,ping[i].lat,&mtodeglon,&mtodeglat);
-			    dx = sin(DTR * ping[i].heading) * ping[i].speed * del_time / 3.6;
-			    dy = cos(DTR * ping[i].heading) * ping[i].speed * del_time / 3.6;
-			    ping[i].lon_dr = ping[i-1].lon_dr + dx * mtodeglon + del_time * driftlon / 3600.0;
-			    ping[i].lat_dr = ping[i-1].lat_dr + dy * mtodeglat + del_time * driftlat / 3600.0;
-			    }
-			else
-			    {
-			    ping[i].lon_dr = ping[i].lon;
-			    ping[i].lat_dr = ping[i].lat;
-			    }
+			/* get time difference */
+			dtime_d = ping[i].time_d - ping[i-1].time_d;
+    
+			/* constrain lon speed */
+			k = nnz * nr;
+			d[nr] = 0.0;
+			nia[nr] = 2;
+			ia[k] = i - 1;
+			a[k] = -weight_speed / dtime_d;
+			ia[k+1] = i;
+			a[k+1] = weight_speed / dtime_d;
+			nr++;
 			}
+    
+		    /* constrain acceleration */
+		    if (weight_acceleration > 0.0
+			&& i > 0 && i < nbuff - 1 
+			&& ping[i+1].time_d > ping[i-1].time_d)
+			{
+			/* get time difference */
+			dtime_d = ping[i].time_d - ping[i-1].time_d;
+			dtime_d_sq = dtime_d * dtime_d;
+    
+			/* constrain lon acceleration */
+			k = nnz * nr;
+			d[nr] = 0.0;
+			nia[nr] = 3;
+			ia[k] = i - 1;
+			a[k] = weight_acceleration / dtime_d_sq;
+			ia[k+1] = i;
+			a[k+1] = -2.0 * weight_acceleration / dtime_d_sq;
+			ia[k+2] = i + 1;
+			a[k+2] = weight_acceleration / dtime_d_sq;
+			nr++;
+			}
+		    }
+    
+	    /* set message */
+	    sprintf(string,"Inverting %dX%d for smooth longitude...",
+		    ncols, nr);
+	    do_message_on(string);
+		    
+	    /* compute upper bound on maximum eigenvalue */
+	    ncyc = 0;
+	    nsig = 0;
+	    lspeig(a, ia, nia, nnz, nc, nr, ncyc,
+		    &nsig, x, dx, sigma, work, &smax, &err, &sup);
+	    supt = smax + err;
+	    if (sup > supt)
+		supt = sup;
+	    if (verbose > 1)
+	    fprintf(stderr, "Initial lspeig: %g %g %g %g\n",
+		sup, smax, err, supt);
+	    ncyc = 16;
+	    for (i=0;i<4;i++)
+		{
+		lspeig(a, ia, nia, nnz, nc, nr, ncyc,
+			&nsig, x, dx, sigma, work, &smax, &err, &sup);
+		supt = smax + err;
+		if (sup > supt)
+		    supt = sup;
+		if (verbose > 1)
+		fprintf(stderr, "lspeig[%d]: %g %g %g %g\n",
+		    i, sup, smax, err, supt);
+		}
+		
+	    /* calculate chebyshev factors (errlsq is the theoretical error) */
+	    slo = supt / bandwidth;
+	    chebyu(sigma, ncycle, supt, slo, work);
+	    errlsq = errlim(sigma, ncycle, supt, slo);
+	    if (verbose > 1)
+	    fprintf(stderr, "Theoretical error: %f\n", errlsq);
+	    if (verbose > 1)
+	    for (i=0;i<ncycle;i++)
+		fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
+		
+	    /* solve the problem */
+	    for (i=0;i<nc;i++)
+		x[i] = 0.0;
+	    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
+    
+	    /* generate solution */
+	    for (i=0;i<nbuff;i++)
+		{
+		ping[i].lon_dr = lon_start + mtodeglon * x[i];
+		}
+
+	    /* set message */
+	    sprintf(string,"Setting up inversion of %d latitude points",
+		    nbuff);
+	    do_message_on(string);
+		    
+	    /* initialize arrays */
+	    for (i=0;i<nrows;i++)
+		{
+		nia[i] = 0;
+		d[i] = 0.0;
+		for (j=0;j<nnz;j++)
+		    {
+		    k = nnz * i + j;
+		    ia[k] = 0;
+		    a[k] = 0.0;
+		    }
+		}
+	    for (i=0;i<ncols;i++)
+		{
+		nx[i] = 0;
+		x[i] = 0;
+		dx[i] = 0.0;
+		}
+	    for (i=0;i<ncycle;i++)
+		{
+		sigma[i] = 0;
+		work[i] = 0.0;
+		}
+	    
+	    /* loop over all nav points - add constraints for 
+	       original lat values, speed, acceleration */
+	    nr = 0;
+	    nc = nbuff;
+	    for (i=0;i<nbuff;i++)
+		    {
+		    /* constrain lat unless flagged by user */
+		    if (ping[i].lat == ping[i].lat_org)
+			{
+			k = nnz * nr;
+			d[nr] = (ping[i].lat_org - lat_start) / mtodeglat;
+			nia[nr] = 1;
+			ia[k] = i;
+			a[k] = 1.0;
+			nr++;
+			}
+    
+		    /* constrain speed */
+		    if (weight_speed > 0.0
+			&& i > 0 && ping[i].time_d > ping[i-1].time_d)
+			{
+			/* get time difference */
+			dtime_d = ping[i].time_d - ping[i-1].time_d;
+    
+			/* constrain lat speed */
+			k = nnz * nr;
+			d[nr] = 0.0;
+			nia[nr] = 2;
+			ia[k] = i - 1;
+			a[k] = -weight_speed / dtime_d;
+			ia[k+1] = i;
+			a[k+1] = weight_speed / dtime_d;
+			nr++;
+			}
+    
+		    /* constrain acceleration */
+		    if (weight_acceleration > 0.0
+			&& i > 0 && i < nbuff - 1 
+			&& ping[i+1].time_d > ping[i-1].time_d)
+			{
+			/* get time difference */
+			dtime_d = ping[i].time_d - ping[i-1].time_d;
+			dtime_d_sq = dtime_d * dtime_d;
+    
+			/* constrain lat acceleration */
+			k = nnz * nr;
+			d[nr] = 0.0;
+			nia[nr] = 3;
+			ia[k] = i - 1;
+			a[k] = weight_acceleration / dtime_d_sq;
+			ia[k+1] = i;
+			a[k+1] = -2.0 * weight_acceleration / dtime_d_sq;
+			ia[k+2] = i + 1;
+			a[k+2] = weight_acceleration / dtime_d_sq;
+			nr++;
+			}
+		    }
+    
+	    /* set message */
+	    sprintf(string,"Inverting %dX%d for smooth latitude...",
+		    ncols, nr);
+	    do_message_on(string);
+		    
+	    /* compute upper bound on maximum eigenvalue */
+	    ncyc = 0;
+	    nsig = 0;
+	    lspeig(a, ia, nia, nnz, nc, nr, ncyc,
+		    &nsig, x, dx, sigma, work, &smax, &err, &sup);
+	    supt = smax + err;
+	    if (sup > supt)
+		supt = sup;
+	    if (verbose > 1)
+	    fprintf(stderr, "Initial lspeig: %g %g %g %g\n",
+		sup, smax, err, supt);
+	    ncyc = 16;
+	    for (i=0;i<4;i++)
+		{
+		lspeig(a, ia, nia, nnz, nc, nr, ncyc,
+			&nsig, x, dx, sigma, work, &smax, &err, &sup);
+		supt = smax + err;
+		if (sup > supt)
+		    supt = sup;
+		if (verbose > 1)
+		fprintf(stderr, "lspeig[%d]: %g %g %g %g\n",
+		    i, sup, smax, err, supt);
+		}
+		
+	    /* calculate chebyshev factors (errlsq is the theoretical error) */
+	    slo = supt / bandwidth;
+	    chebyu(sigma, ncycle, supt, slo, work);
+	    errlsq = errlim(sigma, ncycle, supt, slo);
+	    if (verbose > 1)
+	    fprintf(stderr, "Theoretical error: %f\n", errlsq);
+	    if (verbose > 1)
+	    for (i=0;i<ncycle;i++)
+		fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
+		
+	    /* solve the problem */
+	    for (i=0;i<nc;i++)
+		x[i] = 0.0;
+	    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
+    
+	    /* generate solution */
+	    for (i=0;i<nbuff;i++)
+		{
+		ping[i].lat_dr = lat_start + mtodeglat * x[i];
+		}
+    
+	    /* deallocate arrays */
+	    status = mb_free(verbose, &a,&error);
+	    status = mb_free(verbose, &ia,&error);
+	    status = mb_free(verbose, &nia,&error);
+	    status = mb_free(verbose, &d,&error);
+	    status = mb_free(verbose, &x,&error);
+	    status = mb_free(verbose, &nx,&error);
+	    status = mb_free(verbose, &dx,&error);
+	    status = mb_free(verbose, &sigma,&error);
+	    status = mb_free(verbose, &work,&error);
+	
+	    /* turn message off */
+	    do_message_off();
+	    }
+
+	/* if error initializing memory then don't invert */
+	else if (error != MB_ERROR_NO_ERROR)
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+			message);
+		do_error_dialog("Unable to invert for smooth", 
+				"navigation due to a memory", 
+				"allocation error!");
 		}
 
 	/* print output debug statements */

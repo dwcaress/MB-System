@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarirov.c	5/20/99
- *	$Id: mbr_mbarirov.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_mbarirov.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 20, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -130,7 +133,7 @@ int mbr_info_mbarirov(int verbose,
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbarirov.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_mbarirov.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_info_mbarirov";
 	int	status = MB_SUCCESS;
 
@@ -231,7 +234,7 @@ int mbr_info_mbarirov(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbarirov(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbarirov.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbr_mbarirov.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_alm_mbarirov";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -635,8 +638,7 @@ int mbr_mbarirov_rd_data(int verbose, char *mbio_ptr, int *error)
 				/ (1.0052405
 				    * ( 1 + 5.28E-3
 				    	* sin(DTR * data->latitude)
-                    		    	* sin(DTR * data->latitude)));
-	    	
+                    		    	* sin(DTR * data->latitude)));	    	
 
 		/* print output debug statements */
 		if (verbose >= 4)
@@ -722,6 +724,13 @@ int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 	    }
 	else if (data->kind == MB_DATA_DATA)
 	    {
+	    /* get pressure */
+	    data->rov_pressure = data->rov_depth 
+				    * (1.0052405
+					* ( 1 + 5.28E-3
+					    * sin(DTR * data->latitude)
+					    * sin(DTR * data->latitude)));	    	
+
 	    /* print output debug statements */
 	    if (verbose >= 4)
 		    {

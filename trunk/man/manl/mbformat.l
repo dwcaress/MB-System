@@ -7,7 +7,7 @@ supported by the \fBMBIO\fP library.
 Version 4.6
 
 .SH SYNOPSIS
-\fBmbformat\fP [\fB -A -F\fIformat \fB -L -V -H\fP]
+\fBmbformat\fP [\fB -F\fIformat \fB -L -V -H\fP]
 
 .SH DESCRIPTION
 \fBmbformat\fP is an utility which identifies the swath sonar data formats
@@ -25,11 +25,6 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
-.TP
-.B \-A
-Causes formats which are expected to be supported
-in the future to be
-listed in addition to the formats which are fully supported.
 .TP
 .B \-F
 \fIformat\fP

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
- *	$Id: mbsys_hsds.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_hsds.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -16,7 +16,7 @@
  * mbsys_hsds.c contains the functions for handling the data structure
  * used by MBIO functions to store data from the 59-beam Hydrosweep DS 
  * multibeam sonar systems.
- * The data formats which are commonly used to store Sea Beam
+ * The data formats which are commonly used to store Hydrosweep DS
  * data in files include
  *      MBF_HSATLRAW : MBIO ID 21
  *      MBF_HSLDEDMB : MBIO ID 22
@@ -39,6 +39,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.17  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -131,7 +134,7 @@
 int mbsys_hsds_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hsds.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_hsds.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbsys_hsds_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

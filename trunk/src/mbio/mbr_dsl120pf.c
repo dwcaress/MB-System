@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_dsl120pf.c	8/6/96
- *	$Id: mbr_dsl120pf.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_dsl120pf.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 6, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.5  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -139,7 +142,7 @@ int mbr_info_dsl120pf(int verbose,
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_info_dsl120pf";
 	int	status = MB_SUCCESS;
 
@@ -162,7 +165,7 @@ int mbr_info_dsl120pf(int verbose,
 	strncpy(format_name, "DSL120SF", MB_NAME_LENGTH);
 	strncpy(system_name, "DSL", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_DSL120SF\nInformal Description: WHOI DSL AMS-120 processed format\nAttributes:           2048 beam bathymetry, 8192 pixel sidescan,\n                      binary, single files, WHOI DSL.\n", MB_DESCRIPTION_LENGTH);
-	*numfile = 1;
+	*numfile = 2;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_NO;
 	*traveltime = MB_NO;
@@ -240,13 +243,12 @@ int mbr_info_dsl120pf(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_dsl120pf(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_alm_dsl120pf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_dsl120pf_struct *data;	
 	char	*tag_ptr;
-	char	batfile[256], ampfile[256];
 
 	/* print input debug statements */
 	if (verbose >= 2)
