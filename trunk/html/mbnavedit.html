@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavedit</H1>
-Section: MB-System 5.0 (l)<BR>Updated: 16 March 2001<BR><A HREF="#index">Index</A>
+Section: MB-System 5.0 (l)<BR>Updated: 6 March 2004<BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -76,23 +76,6 @@ from &quot;course-made-good&quot; or &quot;speed-made-good&quot;, respectively.
 Data can only be selected and altered in a single 
 plot at a time (this avoids confusion and prevents mistakes).
 <P>
-Two algorithms for obtaining and using smooth navigation models are
-available. Replacing the original navigation with a smoothed
-version can be advantageous in some cases of very noisy 
-navigation (typically from sonars on towed platforms or 
-submerged vehicles). The first approach is simple dead reckoning 
-from the initial position using the current (possibly edited)
-heading and speed values. The dead reckoning navigation can also
-incorporate user-specified longitude and latitude drift rates.
-The second algorithm is an inversion for a smooth 
-navigation that minimizes
-speed and acceleration while fitting the original navigation
-in a least squares sense. The inversion weighting against 
-speed and acceleration are user specified, and only unaltered
-navigation values are used in the inversion (this means that
-longitude and latitude values that have previously been selected and
-interpolated are not used to generate the smooth model).
-<P>
 The nature of the navigation data being edited depends upon the
 data format. Some data formats include the navigation in the
 same data records as the ping or survey data. This synchronous
@@ -110,9 +93,54 @@ records. For data formats with only asynchronous navigation,
 navigation records. The <B>MBIO</B> manual page includes a listing
 of which type of navigation is used by the supported data formats.
 <P>
+For some data formats, the user can also 
+inspect plots of roll, pitch, and heaved
+data to determine if the ship's vertical reference sensors
+were working properly.
+<P>
+The edited data is usually output to a file, but the program
+can be operated in a &quot;browse&quot; mode where no data is output.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>SMOOTHING NAVIGATION</H2>
+
+<P>
+Two algorithms for obtaining and using smooth navigation models are
+available. Replacing the original navigation with a smoothed
+version can be advantageous in some cases of very noisy 
+navigation (typically from sonars on towed platforms or 
+submerged vehicles). The first approach is simple dead reckoning 
+from the initial position using the current (possibly edited)
+heading and speed values. The dead reckoning navigation can also
+incorporate user-specified longitude and latitude drift rates.
+The second algorithm is an inversion for a smooth 
+navigation that minimizes
+speed and acceleration while fitting the original navigation
+in a least squares sense. The inversion weighting against 
+speed and acceleration are user specified, and only unaltered
+navigation values are used in the inversion (this means that
+longitude and latitude values that have previously been selected and
+interpolated are not used to generate the smooth model).
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>HANDLING BAD TIME STAMPS</H2>
+
+<P>
 The time interval plot allows
 users to spot problems with time stamps and to change the
-time stamps, if necessary. If the navigation is 
+time stamps, if necessary. The most obvious time stamp errors
+are multiple pings with the same time stamps (producing a zero
+time interval value), or 
+sequential pings with decreasing time stamps (resulting in
+negative time interval values). <B>MBnavedit</B>
+provides two tools for dealing with zero or negative time intervals: 
+time stamp interpolation or deletion of the affected pings. Control
+dialogs allow users to apply either to the entire buffer at once.
+Time stamp interpolation may also be accomplished by selecting
+the relevant values in the time interval display, and then
+selecting interpolation.
+<P>
+If the navigation is 
 asynchronous, that generally means the time interval should be
 constant since navigation systems are set to output values at
 a uniform rate. A problem with the time stamps of asynchronous
@@ -122,39 +150,16 @@ the offending point in the time interval plot and interpolating
 to reset the time stamp.
 <P>
 If the navigation is synchronous with the sonar
-pings, then the time interval will vary because the ping
-rate for many sonars varies with the sonars altitude above the
+pings, then the time interval will likely vary because the ping
+rate for most sonars varies with the sonars altitude above the
 seafloor. In this case, time stamp problems will 
 not produce spikes in the speed-made-good plot 
 because the navigation has been interpolated
 using the existing time stamps. Time interval spikes may also
 reflect problems with the sonar (e.g. occasional failure to ping
 at the appropriate time) rather than erroneous time stamps. 
-However, one can reasonably infer a time stamp problem when
-two or more pings have the same time stamp, and the facility
-to select and interpolate the time interval values can be 
-used to fix this problem.
 <P>
-For some data formats, the user can also 
-inspect plots of roll, pitch, and heaved
-data to determine if the ship's vertical reference sensors
-were working properly.
-<P>
-One special case which has been encountered is a problem with
-the time stamps of survey records in data using a format with
-asynchronous navigation. In order to use <B>MBnavedit</B> to
-fix the time stamps of the survey data, one may invoke 
-the <B>-P</B> option at the command line. This forces 
-<B>MBnavedit</B> to work with interpolated synchronous navigation
-rather than the asynchronous navigation records.
-In this case, any changes made to the navigation values  will be
-lost, but changes made to the time stamps will be applied to
-the survey data records.
-<P>
-The edited data is usually output to a file, but the program
-can be operated in a &quot;browse&quot; mode where no data is output.
-<P>
-<A NAME="lbAF">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>AUTHORSHIP</H2>
 
 David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
@@ -168,7 +173,7 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 
 <BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
 <P>
-<A NAME="lbAG">&nbsp;</A>
+<A NAME="lbAI">&nbsp;</A>
 <H2>OPTIONS</H2>
 
 <B>-B</B>
@@ -281,7 +286,7 @@ The program <B>mbprocess</B> will not be invoked if the
 editing session is in the browse mode.
 <P>
 </DL>
-<A NAME="lbAH">&nbsp;</A>
+<A NAME="lbAJ">&nbsp;</A>
 <H2>INTERACTIVE CONTROLS</H2>
 
 <DL COMPACT>
@@ -314,8 +319,9 @@ plots are displayed.
 <DT><B>Controls</B>
 
 <DD>
-This button activates a pulldown menu with three buttons:
-<B>Time Stepping</B>, <B>Nav Modeling</B>, and <B>Time Interpolation</B>. Each
+This button activates a pulldown menu with four buttons:
+<B>Time Stepping</B>, <B>Nav Modeling</B>, <B>Time Interpolation</B>, 
+and <B>Delete Bad Times</B>. Each
 of these buttons brings up a dialog window containing widgets
 that set parameters or perform actions.
 <DT><B>Controls-&gt;Time Stepping-&gt;Time Span Shown</B>
@@ -406,6 +412,32 @@ displayed in the longitude and latitude plots.
 
 <DD>
 This button causes the <B>Navigation Modeling</B> dialog
+to disappear.
+<DT><B>Controls-&gt;Time Interpolation-&gt;Apply</B>
+
+<DD>
+This button causes the time stamps of all data in
+the current buffer associated
+with negative or zero time intervals to be interpolated so
+that the time intervals are positive. The <B>Time Interpolation</B>
+dialog disappears after this action is taken.
+<DT><B>Controls-&gt;Time Interpolation-&gt;Dismiss</B>
+
+<DD>
+This button causes the <B>Time Interpolation</B> dialog
+to disappear.
+<DT><B>Controls-&gt;Delete Bad Times-&gt;Apply</B>
+
+<DD>
+This button causes all data in
+the current buffer associated
+with negative or zero time intervals to be deleted. 
+The <B>Delete Bad Times</B>
+dialog disappears after this action is taken.
+<DT><B>Controls-&gt;Delete Bad Times-&gt;Dismiss</B>
+
+<DD>
+This button causes the <B>Delete Bad Times</B> dialog
 to disappear.
 <DT><B>Next Buffer</B>
 
@@ -644,7 +676,7 @@ data was collected (note: many swath data formats do not contain roll,
 pitch, and heave data).
 <P>
 </DL>
-<A NAME="lbAI">&nbsp;</A>
+<A NAME="lbAK">&nbsp;</A>
 <H2>MOUSE ACTIONS</H2>
 
 <DL COMPACT>
@@ -675,13 +707,13 @@ The control button <B>Forward</B> causes
 the same action.
 <P>
 </DL>
-<A NAME="lbAJ">&nbsp;</A>
+<A NAME="lbAL">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
 <B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbio.html">mbio</A></B>(l), <B><A HREF="mbmerge.html">mbmerge</A></B>(l), 
 <B><A HREF="mbedit.html">mbedit</A></B>(l), <B><A HREF="mbinfo.html">mbinfo</A></B>(l)
 <P>
-<A NAME="lbAK">&nbsp;</A>
+<A NAME="lbAM">&nbsp;</A>
 <H2>BUGS</H2>
 
 This program doesn't handle the roll, pitch, and
@@ -697,18 +729,20 @@ smaller than 1024 X 768 pixels.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
-<DT><A HREF="#lbAG">OPTIONS</A><DD>
-<DT><A HREF="#lbAH">INTERACTIVE CONTROLS</A><DD>
-<DT><A HREF="#lbAI">MOUSE ACTIONS</A><DD>
-<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
-<DT><A HREF="#lbAK">BUGS</A><DD>
+<DT><A HREF="#lbAF">SMOOTHING NAVIGATION</A><DD>
+<DT><A HREF="#lbAG">HANDLING BAD TIME STAMPS</A><DD>
+<DT><A HREF="#lbAH">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAI">OPTIONS</A><DD>
+<DT><A HREF="#lbAJ">INTERACTIVE CONTROLS</A><DD>
+<DT><A HREF="#lbAK">MOUSE ACTIONS</A><DD>
+<DT><A HREF="#lbAL">SEE ALSO</A><DD>
+<DT><A HREF="#lbAM">BUGS</A><DD>
 </DL>
 <HR>
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 16 March 2001</P></CENTER>
+Last Updated: 6 March 2004</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
