@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	1/21/93
- *    $Id: mb_coor_scale.c,v 4.3 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_coor_scale.c,v 4.4 1996-04-22 10:57:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -54,6 +57,7 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_io.h"
 
 /* ellipsoid coefficients from World Geodetic System Ellipsoid of 1972 
  * - see Bowditch (H.O. 9 -- American Practical Navigator). */
@@ -65,12 +69,6 @@
 #define C6 1.175
 #define C7 0.0023
 
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
-
 /*--------------------------------------------------------------------*/
 int mb_coor_scale(verbose,latitude,mtodeglon,mtodeglat)
 int	verbose;
@@ -78,7 +76,7 @@ double	latitude;
 double	*mtodeglon;
 double	*mtodeglat;
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.4 1996-04-22 10:57:09 caress Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;

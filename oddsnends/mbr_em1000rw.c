@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em1000rw.c	8/8/94
- *	$Id: mbr_em1000rw.c,v 4.1 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_em1000rw.c,v 4.2 1996-04-22 10:57:09 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.0  1994/10/21  12:34:55  caress
  * Release V4.0
  *
@@ -44,12 +47,6 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbf_em1000rw.h"
 
-/* degrees to radians define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
-
 /* include for byte swapping */
 #include "../../include/mb_swap.h"
 
@@ -59,7 +56,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em1000rw.c,v 4.1 1995-03-06 19:38:54 caress Exp $";
+	static char res_id[]="$Id: mbr_em1000rw.c,v 4.2 1996-04-22 10:57:09 caress Exp $";
 	char	*function_name = "mbr_alm_em1000rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
