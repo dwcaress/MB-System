@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.11 2002-05-29 23:36:28 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.12 2002-05-30 21:33:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/05/29 23:36:28  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.10  2002/05/02 03:53:45  caress
  * Release 5.0.beta17
  *
@@ -283,7 +286,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.11 2002-05-29 23:36:28 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.12 2002-05-30 21:33:02 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -505,10 +508,8 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-fprintf(stderr, "argc:%d argv[0]:%s argv[1]:%s\n", argc, argv[0], argv[1]);
 	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:SsXx")) != -1)
 	  {
-fprintf(stderr, "c:%c\n", c);
 	  switch (c) 
 		{
 		case 'H':
