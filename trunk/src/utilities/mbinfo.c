@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.3 1994-10-21 13:02:31 caress Exp $
+ *    $Id: mbinfo.c,v 4.4 1994-11-03 13:28:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/04/28  01:32:57  caress
  * Changed mb_get to mb_read so that min/max of longitude can
  * be calculated using both navigation and beam data.
@@ -92,7 +95,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.3 1994-10-21 13:02:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.4 1994-11-03 13:28:44 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -191,6 +194,15 @@ char **argv;
 	int	ngsbeams = 0;
 	int	nzsbeams = 0;
 	int	nfsbeams = 0;
+	double	ngd_percent;
+	double	nzd_percent;
+	double	nfd_percent;
+	double	nga_percent;
+	double	nza_percent;
+	double	nfa_percent;
+	double	ngs_percent;
+	double	nzs_percent;
+	double	nfs_percent;
 	int	beginbath = 0;
 	int	beginamp = 0;
 	int	beginss = 0;
@@ -865,6 +877,44 @@ char **argv;
 				}
 		}
 
+	/* calculate percentages of data */
+	if (beams_bath*irec > 0)
+		{
+		ngd_percent = 100.0*ngdbeams/(beams_bath*irec);
+		nzd_percent = 100.0*nzdbeams/(beams_bath*irec);
+		nfd_percent = 100.0*nfdbeams/(beams_bath*irec);
+		}
+	else
+		{
+		ngd_percent = 0.0;
+		nzd_percent = 0.0;
+		nfd_percent = 0.0;
+		}
+	if (beams_amp*irec > 0)
+		{
+		nga_percent = 100.0*ngabeams/(beams_amp*irec);
+		nza_percent = 100.0*nzabeams/(beams_amp*irec);
+		nfa_percent = 100.0*nfabeams/(beams_amp*irec);
+		}
+	else
+		{
+		nga_percent = 0.0;
+		nza_percent = 0.0;
+		nfa_percent = 0.0;
+		}
+	if (pixels_ss*irec > 0)
+		{
+		ngs_percent = 100.0*ngsbeams/(pixels_ss*irec);
+		nzs_percent = 100.0*nzsbeams/(pixels_ss*irec);
+		nfs_percent = 100.0*nfsbeams/(pixels_ss*irec);
+		}
+	else
+		{
+		ngs_percent = 0.0;
+		nzs_percent = 0.0;
+		nfs_percent = 0.0;
+		}
+
 	/* now print out the results */
 	timtot = (timend - timbeg)/3600.0;
 	if (distot > 0.0)
@@ -874,20 +924,32 @@ char **argv;
 	fprintf(output,"\nData Totals:\n");
 	fprintf(output,"Number of Records:         %8d\n",irec);
 	fprintf(output,"Bathymetry Data (%d beams):\n",beams_bath);
-	fprintf(output,"  Number of Beams:         %8d\n",(irec*beams_bath));
-	fprintf(output,"  Number of Good Beams:    %8d\n",ngdbeams);
-	fprintf(output,"  Number of Zero Beams:    %8d\n",nzdbeams);
-	fprintf(output,"  Number of Flagged Beams: %8d\n",nfdbeams);
+	fprintf(output,"  Number of Beams:         %8d\n",
+	    (irec*beams_bath));
+	fprintf(output,"  Number of Good Beams:    %8d     %5.2f%%\n",
+		ngdbeams, ngd_percent);
+	fprintf(output,"  Number of Zero Beams:    %8d     %5.2f%%\n",
+		nzdbeams, nzd_percent);
+	fprintf(output,"  Number of Flagged Beams: %8d     %5.2f%%\n",
+		nfdbeams, nfd_percent);
 	fprintf(output,"Amplitude Data (%d beams):\n",beams_amp);
-	fprintf(output,"  Number of Beams:         %8d\n",(irec*beams_amp));
-	fprintf(output,"  Number of Good Beams:    %8d\n",ngabeams);
-	fprintf(output,"  Number of Zero Beams:    %8d\n",nzabeams);
-	fprintf(output,"  Number of Flagged Beams: %8d\n",nfabeams);
+	fprintf(output,"  Number of Beams:         %8d\n",
+		(irec*beams_amp));
+	fprintf(output,"  Number of Good Beams:    %8d     %5.2f%%\n",
+		ngabeams, nga_percent);
+	fprintf(output,"  Number of Zero Beams:    %8d     %5.2f%%\n",
+		nzabeams, nza_percent);
+	fprintf(output,"  Number of Flagged Beams: %8d     %5.2f%%\n",
+		nfabeams, nfa_percent);
 	fprintf(output,"Sidescan Data (%d pixels):\n",pixels_ss);
-	fprintf(output,"  Number of Pixels:        %8d\n",(irec*pixels_ss));
-	fprintf(output,"  Number of Good Pixels:   %8d\n",ngsbeams);
-	fprintf(output,"  Number of Zero Pixels:   %8d\n",nzsbeams);
-	fprintf(output,"  Number of Flagged Pixels:%8d\n",nfsbeams);
+	fprintf(output,"  Number of Pixels:        %8d\n",
+		(irec*pixels_ss));
+	fprintf(output,"  Number of Good Pixels:   %8d     %5.2f%%\n",
+		ngsbeams, ngs_percent);
+	fprintf(output,"  Number of Zero Pixels:   %8d     %5.2f%%\n",
+		nzsbeams, nzs_percent);
+	fprintf(output,"  Number of Flagged Pixels:%8d     %5.2f%%\n",
+		nfsbeams, nfs_percent);
 	fprintf(output,"\nNavigation Totals:\n");
 	fprintf(output,"Total Time:         %10.4f hours\n",timtot);
 	fprintf(output,"Total Track Length: %10.4f km\n",distot);
