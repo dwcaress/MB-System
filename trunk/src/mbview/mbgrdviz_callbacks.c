@@ -66,7 +66,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 1.3 2003-11-25 02:47:23 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 1.4 2003-12-01 20:42:40 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -2105,7 +2105,7 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				navtime_d[npoint] = time_d;
 				navlon[npoint] = lon;
 				navlat[npoint] = lat;
-				navz[npoint] = sonardepth;
+				navz[npoint] = -sonardepth;
 				navheading[npoint] = heading;
 				navspeed[npoint] = speed;
 
