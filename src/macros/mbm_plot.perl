@@ -1,4 +1,4 @@
-#! /home/hs/bin/perl 
+#! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	3.00	6/18/93
 #    $Id  $
@@ -33,10 +33,14 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 3.4 1993-08-16 23:03:59 caress Exp $
+#   $Id: mbm_plot.perl,v 3.5 1993-08-17 16:58:36 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.4  1993/08/16  23:03:59  caress
+# I'm not sure what the changes are - I'm just checking in the
+# current version.
+#
 # Revision 3.3  1993/07/03  02:08:27  caress
 # Changed /usr/local/bin/perl to /usr/lib/perl for L-DEO installation.
 #

@@ -1,7 +1,7 @@
-#! /home/hs/bin/perl 
+#! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	3.00	6/18/93
-#    $Id: mbm_rollerror.perl,v 3.2 1993-08-17 01:52:17 caress Exp $
+#    $Id: mbm_rollerror.perl,v 3.3 1993-08-17 16:58:36 caress Exp $
 #
 #    Copyright (c) 1993 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,10 +31,13 @@
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_rollerror.perl,v 3.2 1993-08-17 01:52:17 caress Exp $
+#   $Id: mbm_rollerror.perl,v 3.3 1993-08-17 16:58:36 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.2  1993/08/17  01:52:17  caress
+# Added MB-system header.
+#
 #
 # Deal with command line arguments
 &Getopts('I:i:F:f:');
