@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.9 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_navint.c,v 5.10 2004-07-15 19:25:04 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.8  2003/01/15 20:51:48  caress
  * Release 5.0.beta28
  *
@@ -65,9 +68,11 @@
     #define MB_NAVINT_DEBUG 1
     #define MB_ATTINT_DEBUG 1
     #define MB_HEDINT_DEBUG 1
-*/
+    #define MB_DEPINT_DEBUG 1
+    #define MB_ALTINT_DEBUG 1*/
 
-static char rcs_id[]="$Id: mb_navint.c,v 5.9 2003-04-17 21:05:23 caress Exp $";
+
+static char rcs_id[]="$Id: mb_navint.c,v 5.10 2004-07-15 19:25:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
@@ -586,7 +591,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 		/* print debug statements */
 		if (verbose >= 4)
 			{
-			fprintf(stderr,"\ndbg4  Attitude fix added to list by MBIO function <%s>\n",
+			fprintf(stderr,"\ndbg4  Heading fix added to list by MBIO function <%s>\n",
 				function_name);
 			fprintf(stderr,"dbg4  New fix values:\n");
 			fprintf(stderr,"dbg4       nheading:       %d\n",
@@ -627,6 +632,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	double	factor;
 	int	ifix;
+	double	heading1, heading2;
 	int	i;
 
 	/* print input debug statements */
@@ -651,7 +657,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		&& (mb_io_ptr->heading_time_d[0] 
 			<= time_d))
 		{
-		/* get interpolated position */
+		/* get interpolated heading */
 		ifix = -1;
 		for (i=1;i<mb_io_ptr->nheading;i++)
 		    {
@@ -661,11 +667,20 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		    }
 		factor = (time_d - mb_io_ptr->heading_time_d[ifix-1])
 			/(mb_io_ptr->heading_time_d[ifix] - mb_io_ptr->heading_time_d[ifix-1]);
-		*heading = mb_io_ptr->heading_heading[ifix-1] 
-			+ factor*(mb_io_ptr->heading_heading[ifix] - mb_io_ptr->heading_heading[ifix-1]);
+		heading1 = mb_io_ptr->heading_heading[ifix-1];
+		heading2 = mb_io_ptr->heading_heading[ifix];
+		if (heading2 - heading1 > 180.0)
+			heading2 -= 360.0;
+		else if (heading2 - heading1 < -180.0)
+			heading2 += 360.0;
+		*heading = heading1 + factor*(heading2 - heading1);
+		if (*heading < 0.0)
+			*heading += 360.0;
+		else if (*heading > 360.0)
+			*heading -= 360.0;
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading interpolated at fix %d of %d with factor:%f\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading interpolated at value %d of %d with factor:%f\n", 
 		ifix, mb_io_ptr->nheading, factor);
 #endif
 		}
@@ -675,11 +690,11 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		&& (mb_io_ptr->heading_time_d[mb_io_ptr->nheading-1] 
 			< time_d))
 		{		
-		/* extrapolated position using average speed */
+		/* extrapolated heading using average speed */
 		*heading = mb_io_ptr->heading_heading[mb_io_ptr->nheading-1];
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading extrapolated from last fix of %d\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading taken from last value of %d\n", 
 		mb_io_ptr->nheading);
 #endif
 		}
@@ -690,7 +705,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		*heading = mb_io_ptr->heading_heading[0];
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading extrapolated from first fix of %d\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading taken from first value of %d\n", 
 		mb_io_ptr->nheading);
 #endif
 		}
@@ -712,6 +727,380 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       heading:      %f\n",*heading);
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_depint_add adds a sonar depth fix to the internal
+		list used for interpolation/extrapolation. */
+int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth, int *error)
+{
+	char	*function_name = "mb_depint_add";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		fprintf(stderr,"dbg2       sonardepth: %f\n",sonardepth);
+		}
+
+	/* get pointers to mbio descriptor and data structures */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	/* add another fix only if time stamp has changed */
+	if (mb_io_ptr->nsonardepth == 0
+		|| (time_d > mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1]))
+		{	
+		/* if list if full make room for another sonardepth fix */
+		if (mb_io_ptr->nsonardepth >= MB_ASYNCH_SAVE_MAX)
+			{
+			mb_io_ptr->nsonardepth = MB_ASYNCH_SAVE_MAX - 1;
+			for (i=0;i<mb_io_ptr->nsonardepth;i++)
+				{
+				mb_io_ptr->sonardepth_time_d[i] 
+					= mb_io_ptr->sonardepth_time_d[i+1];
+				mb_io_ptr->sonardepth_sonardepth[i] = mb_io_ptr->sonardepth_sonardepth[i+1];
+				}
+			}
+			
+		/* add new fix to list */
+		mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth] = time_d;
+		mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth] = sonardepth;
+		mb_io_ptr->nsonardepth++;
+#ifdef MB_DEPINT_DEBUG
+	fprintf(stderr, "mb_depint_add:    sonardepth fix %d added\n", mb_io_ptr->nsonardepth);
+#endif
+
+		/* print debug statements */
+		if (verbose >= 4)
+			{
+			fprintf(stderr,"\ndbg4  Sonar depth fix added to list by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  New fix values:\n");
+			fprintf(stderr,"dbg4       nsonardepth:       %d\n",
+				mb_io_ptr->nsonardepth);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1]);
+			fprintf(stderr,"dbg4       sonardepth_sonardepth:  %f\n",
+				mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1]);
+			}
+		}
+
+	/* assume success */
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_depint_interp interpolates or extrapolates a
+		sonar depth fix from the internal list. */
+int mb_depint_interp(int verbose, void *mbio_ptr, 
+		double time_d, double *sonardepth, 
+		int *error)
+{
+	char	*function_name = "mb_depint_interp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	double	factor;
+	int	ifix;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		}
+
+	/* get pointers to mbio descriptor and data structures */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	/* interpolate if possible */
+	if (mb_io_ptr->nsonardepth > 1
+		&& (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1] 
+			>= time_d)
+		&& (mb_io_ptr->sonardepth_time_d[0] 
+			<= time_d))
+		{
+		/* get interpolated position */
+		ifix = -1;
+		for (i=1;i<mb_io_ptr->nsonardepth;i++)
+		    {
+		    if (ifix == -1 && 
+			mb_io_ptr->sonardepth_time_d[i] >= time_d)
+			ifix = i;
+		    }
+		factor = (time_d - mb_io_ptr->sonardepth_time_d[ifix-1])
+			/(mb_io_ptr->sonardepth_time_d[ifix] - mb_io_ptr->sonardepth_time_d[ifix-1]);
+		*sonardepth = mb_io_ptr->sonardepth_sonardepth[ifix-1] 
+			+ factor*(mb_io_ptr->sonardepth_sonardepth[ifix] - mb_io_ptr->sonardepth_sonardepth[ifix-1]);
+		status = MB_SUCCESS;
+#ifdef MB_DEPINT_DEBUG
+	fprintf(stderr, "mb_depint_interp: sonardepth interpolated at fix %d of %d with factor:%f\n", 
+		ifix, mb_io_ptr->nsonardepth, factor);
+#endif
+		}
+		
+	/* extrapolate from last fix */
+	else if (mb_io_ptr->nsonardepth > 1
+		&& (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1] 
+			< time_d))
+		{		
+		/* extrapolated position using average speed */
+		*sonardepth = mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1];
+		status = MB_SUCCESS;
+#ifdef MB_DEPINT_DEBUG
+	fprintf(stderr, "mb_depint_interp: sonardepth extrapolated from last fix of %d\n", 
+		mb_io_ptr->nsonardepth);
+#endif
+		}
+		
+	/* extrapolate from first fix */
+	else if (mb_io_ptr->nsonardepth >= 1)
+		{		
+		*sonardepth = mb_io_ptr->sonardepth_sonardepth[0];
+		status = MB_SUCCESS;
+#ifdef MB_DEPINT_DEBUG
+	fprintf(stderr, "mb_depint_interp: sonardepth extrapolated from first fix of %d\n", 
+		mb_io_ptr->nsonardepth);
+#endif
+		}
+
+	/* else no fix */
+	else
+		{
+		*sonardepth = 0.0;
+		status = MB_FAILURE;
+#ifdef MB_DEPINT_DEBUG
+	fprintf(stderr, "mb_depint_interp: sonardepth zeroed\n");
+#endif
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       sonardepth:   %f\n",*sonardepth);
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_altint_add adds a heading fix to the internal
+		list used for interpolation/extrapolation. */
+int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, int *error)
+{
+	char	*function_name = "mb_altint_add";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		fprintf(stderr,"dbg2       altitude:   %f\n",altitude);
+		}
+
+	/* get pointers to mbio descriptor and data structures */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	/* add another fix only if time stamp has changed */
+	if (mb_io_ptr->naltitude == 0
+		|| (time_d > mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1]))
+		{	
+		/* if list if full make room for another altitude fix */
+		if (mb_io_ptr->naltitude >= MB_ASYNCH_SAVE_MAX)
+			{
+			mb_io_ptr->naltitude = MB_ASYNCH_SAVE_MAX - 1;
+			for (i=0;i<mb_io_ptr->naltitude;i++)
+				{
+				mb_io_ptr->altitude_time_d[i] 
+					= mb_io_ptr->altitude_time_d[i+1];
+				mb_io_ptr->altitude_altitude[i] = mb_io_ptr->altitude_altitude[i+1];
+				}
+			}
+			
+		/* add new fix to list */
+		mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude] = time_d;
+		mb_io_ptr->altitude_altitude[mb_io_ptr->naltitude] = altitude;
+		mb_io_ptr->naltitude++;
+#ifdef MB_ALTINT_DEBUG
+	fprintf(stderr, "mb_altint_add:    altitude fix %d added\n", mb_io_ptr->naltitude);
+#endif
+
+		/* print debug statements */
+		if (verbose >= 4)
+			{
+			fprintf(stderr,"\ndbg4  Altitude fix added to list by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  New fix values:\n");
+			fprintf(stderr,"dbg4       naltitude:       %d\n",
+				mb_io_ptr->naltitude);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1]);
+			fprintf(stderr,"dbg4       altitude_altitude:  %f\n",
+				mb_io_ptr->altitude_altitude[mb_io_ptr->naltitude-1]);
+			}
+		}
+
+	/* assume success */
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_altint_interp interpolates or extrapolates a
+		altitude fix from the internal list. */
+int mb_altint_interp(int verbose, void *mbio_ptr, 
+		double time_d, double *altitude, 
+		int *error)
+{
+	char	*function_name = "mb_altint_interp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	double	factor;
+	int	ifix;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		}
+
+	/* get pointers to mbio descriptor and data structures */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	/* interpolate if possible */
+	if (mb_io_ptr->naltitude > 1
+		&& (mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1] 
+			>= time_d)
+		&& (mb_io_ptr->altitude_time_d[0] 
+			<= time_d))
+		{
+		/* get interpolated position */
+		ifix = -1;
+		for (i=1;i<mb_io_ptr->naltitude;i++)
+		    {
+		    if (ifix == -1 && 
+			mb_io_ptr->altitude_time_d[i] >= time_d)
+			ifix = i;
+		    }
+		factor = (time_d - mb_io_ptr->altitude_time_d[ifix-1])
+			/(mb_io_ptr->altitude_time_d[ifix] - mb_io_ptr->altitude_time_d[ifix-1]);
+		*altitude = mb_io_ptr->altitude_altitude[ifix-1] 
+			+ factor*(mb_io_ptr->altitude_altitude[ifix] - mb_io_ptr->altitude_altitude[ifix-1]);
+		status = MB_SUCCESS;
+#ifdef MB_ALTINT_DEBUG
+	fprintf(stderr, "mb_altint_interp: altitude interpolated at fix %d of %d with factor:%f\n", 
+		ifix, mb_io_ptr->naltitude, factor);
+#endif
+		}
+		
+	/* extrapolate from last fix */
+	else if (mb_io_ptr->naltitude > 1
+		&& (mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude-1] 
+			< time_d))
+		{		
+		/* extrapolated position using average speed */
+		*altitude = mb_io_ptr->altitude_altitude[mb_io_ptr->naltitude-1];
+		status = MB_SUCCESS;
+#ifdef MB_ALTINT_DEBUG
+	fprintf(stderr, "mb_altint_interp: altitude extrapolated from last fix of %d\n", 
+		mb_io_ptr->naltitude);
+#endif
+		}
+		
+	/* extrapolate from first fix */
+	else if (mb_io_ptr->naltitude >= 1)
+		{		
+		*altitude = mb_io_ptr->altitude_altitude[0];
+		status = MB_SUCCESS;
+#ifdef MB_ALTINT_DEBUG
+	fprintf(stderr, "mb_altint_interp: altitude extrapolated from first fix of %d\n", 
+		mb_io_ptr->naltitude);
+#endif
+		}
+
+	/* else no fix */
+	else
+		{
+		*altitude = 0.0;
+		status = MB_FAILURE;
+#ifdef MB_ALTINT_DEBUG
+	fprintf(stderr, "mb_altint_interp: altitude zeroed\n");
+#endif
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       altitude:     %f\n",*altitude);
 		fprintf(stderr,"dbg2       error:        %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
