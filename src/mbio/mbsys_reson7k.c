@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.0 2004-04-27 01:50:15 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.1 2004-05-21 23:44:49 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/04/27 01:50:15  caress
+ * Adding support for Reson 7k sonar data, including segy extensions.
+ *
  *
  *
  */
@@ -46,7 +49,7 @@
 /* turn on debug statements here */
 /*#define MSYS_RESON7KR_DEBUG 1*/
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.0 2004-04-27 01:50:15 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.1 2004-05-21 23:44:49 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -128,7 +131,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_svp	*svp;
 	s7kr_ctd	*ctd;
 	s7kr_geodesy	*geodesy;
-	s7kr_survey		*survey;
+	s7kr_survey	*survey;
 	s7kr_fsdwss	*fsdwsslo;
 	s7kr_fsdwss	*fsdwsshi;
 	s7kr_fsdwsb	*fsdwsb;
@@ -344,6 +347,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	survey->longitude = 0.0;
 	survey->latitude = 0.0;
 	survey->sonar_depth = 0.0;
+	survey->sonar_altitude = 0.0;
 	survey->heading = 0.0;
 	survey->speed = 0.0;
 	survey->beamwidthx = 0.0;
@@ -1636,6 +1640,7 @@ int mbsys_reson7k_print_survey(int verbose,
 	fprintf(stderr,"%s     longitude:                  %f\n",first,survey->longitude);
 	fprintf(stderr,"%s     latitude:                   %f\n",first,survey->latitude);
 	fprintf(stderr,"%s     sonar_depth:                %f\n",first,survey->sonar_depth);
+	fprintf(stderr,"%s     sonar_altitude:             %f\n",first,survey->sonar_altitude);
 	fprintf(stderr,"%s     heading:                    %f\n",first,survey->heading);
 	fprintf(stderr,"%s     speed:                      %f\n",first,survey->speed);
 	fprintf(stderr,"%s     beamwidthx:                 %f\n",first,survey->beamwidthx);
@@ -1999,9 +2004,10 @@ int mbsys_reson7k_print_fsdwss(int verbose,
 	fprintf(stderr,"%s     total_bytes:                %d\n",first,fsdwss->total_bytes);
 	fprintf(stderr,"%s     data_format:                %d\n",first,fsdwss->data_format);
 	for (i=0;i<fsdwss->number_channels;i++)
+		{
 		mbsys_reson7k_print_fsdwchannel(verbose, &fsdwss->channel[i], error);
-	for (i=0;i<fsdwss->number_channels;i++)
 		mbsys_reson7k_print_fsdwssheader(verbose, &fsdwss->ssheader[i], error);
+		}
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4273,7 +4279,8 @@ int mbsys_reson7k_extract_segyheader(int verbose, void *mbio_ptr, void *store_pt
 		fprintf(stderr,"dbg2       emute_mils:        %d\n",mb_segyheader_ptr->emute_mils);
 		fprintf(stderr,"dbg2       nsamps:            %d\n",mb_segyheader_ptr->nsamps);
 		fprintf(stderr,"dbg2       si_micros:         %d\n",mb_segyheader_ptr->si_micros);
-		fprintf(stderr,"dbg2       other_1[19]:       %d\n",mb_segyheader_ptr->other_1[19]);
+		for (i=0;i<19;i++)
+		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segyheader_ptr->other_1[i]);
 		fprintf(stderr,"dbg2       year:              %d\n",mb_segyheader_ptr->year);
 		fprintf(stderr,"dbg2       day_of_yr:         %d\n",mb_segyheader_ptr->day_of_yr);
 		fprintf(stderr,"dbg2       hour:              %d\n",mb_segyheader_ptr->hour);
@@ -4281,7 +4288,8 @@ int mbsys_reson7k_extract_segyheader(int verbose, void *mbio_ptr, void *store_pt
 		fprintf(stderr,"dbg2       sec:               %d\n",mb_segyheader_ptr->sec);
 		fprintf(stderr,"dbg2       mils:              %d\n",mb_segyheader_ptr->mils);
 		fprintf(stderr,"dbg2       tr_weight:         %d\n",mb_segyheader_ptr->tr_weight);
-		fprintf(stderr,"dbg2       other_2[5]:        %d\n",mb_segyheader_ptr->other_2[5]);
+		for (i=0;i<5;i++)
+		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segyheader_ptr->other_2[i]);
 		fprintf(stderr,"dbg2       delay:             %d\n",mb_segyheader_ptr->delay);
 		fprintf(stderr,"dbg2       smute_sec:         %d\n",mb_segyheader_ptr->smute_sec);
 		fprintf(stderr,"dbg2       emute_sec:         %d\n",mb_segyheader_ptr->emute_sec);
@@ -4412,27 +4420,71 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
+		fprintf(stderr,"dbg2       seq_num:           %d\n",mb_segyheader_ptr->seq_num);
+		fprintf(stderr,"dbg2       seq_reel:          %d\n",mb_segyheader_ptr->seq_reel);
 		fprintf(stderr,"dbg2       shot_num:          %d\n",mb_segyheader_ptr->shot_num);
+		fprintf(stderr,"dbg2       shot_tr:           %d\n",mb_segyheader_ptr->shot_tr);
+		fprintf(stderr,"dbg2       espn:              %d\n",mb_segyheader_ptr->espn);
+		fprintf(stderr,"dbg2       rp_num:            %d\n",mb_segyheader_ptr->rp_num);
+		fprintf(stderr,"dbg2       rp_tr:             %d\n",mb_segyheader_ptr->rp_tr);
+		fprintf(stderr,"dbg2       trc_id:            %d\n",mb_segyheader_ptr->trc_id);
+		fprintf(stderr,"dbg2       num_vstk:          %d\n",mb_segyheader_ptr->num_vstk);
+		fprintf(stderr,"dbg2       cdp_fold:          %d\n",mb_segyheader_ptr->cdp_fold);
+		fprintf(stderr,"dbg2       use:               %d\n",mb_segyheader_ptr->use);
+		fprintf(stderr,"dbg2       range:             %d\n",mb_segyheader_ptr->range);
+		fprintf(stderr,"dbg2       grp_elev:          %d\n",mb_segyheader_ptr->grp_elev);
 		fprintf(stderr,"dbg2       src_elev:          %d\n",mb_segyheader_ptr->src_elev);
+		fprintf(stderr,"dbg2       src_depth:         %d\n",mb_segyheader_ptr->src_depth);
+		fprintf(stderr,"dbg2       grp_datum:         %d\n",mb_segyheader_ptr->grp_datum);
+		fprintf(stderr,"dbg2       src_datum:         %d\n",mb_segyheader_ptr->src_datum);
 		fprintf(stderr,"dbg2       src_wbd:           %d\n",mb_segyheader_ptr->src_wbd);
+		fprintf(stderr,"dbg2       grp_wbd:           %d\n",mb_segyheader_ptr->grp_wbd);
 		fprintf(stderr,"dbg2       elev_scalar:       %d\n",mb_segyheader_ptr->elev_scalar);
 		fprintf(stderr,"dbg2       coord_scalar:      %d\n",mb_segyheader_ptr->coord_scalar);
 		fprintf(stderr,"dbg2       src_long:          %d\n",mb_segyheader_ptr->src_long);
 		fprintf(stderr,"dbg2       src_lat:           %d\n",mb_segyheader_ptr->src_lat);
+		fprintf(stderr,"dbg2       grp_long:          %d\n",mb_segyheader_ptr->grp_long);
+		fprintf(stderr,"dbg2       grp_lat:           %d\n",mb_segyheader_ptr->grp_lat);
 		fprintf(stderr,"dbg2       coord_units:       %d\n",mb_segyheader_ptr->coord_units);
 		fprintf(stderr,"dbg2       wvel:              %d\n",mb_segyheader_ptr->wvel);
+		fprintf(stderr,"dbg2       sbvel:             %d\n",mb_segyheader_ptr->sbvel);
+		fprintf(stderr,"dbg2       src_up_vel:        %d\n",mb_segyheader_ptr->src_up_vel);
+		fprintf(stderr,"dbg2       grp_up_vel:        %d\n",mb_segyheader_ptr->grp_up_vel);
+		fprintf(stderr,"dbg2       src_static:        %d\n",mb_segyheader_ptr->src_static);
+		fprintf(stderr,"dbg2       grp_static:        %d\n",mb_segyheader_ptr->grp_static);
+		fprintf(stderr,"dbg2       tot_static:        %d\n",mb_segyheader_ptr->tot_static);
+		fprintf(stderr,"dbg2       laga:              %d\n",mb_segyheader_ptr->laga);
 		fprintf(stderr,"dbg2       delay_mils:        %d\n",mb_segyheader_ptr->delay_mils);
+		fprintf(stderr,"dbg2       smute_mils:        %d\n",mb_segyheader_ptr->smute_mils);
+		fprintf(stderr,"dbg2       emute_mils:        %d\n",mb_segyheader_ptr->emute_mils);
 		fprintf(stderr,"dbg2       nsamps:            %d\n",mb_segyheader_ptr->nsamps);
 		fprintf(stderr,"dbg2       si_micros:         %d\n",mb_segyheader_ptr->si_micros);
+		for (i=0;i<19;i++)
+		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segyheader_ptr->other_1[i]);
 		fprintf(stderr,"dbg2       year:              %d\n",mb_segyheader_ptr->year);
 		fprintf(stderr,"dbg2       day_of_yr:         %d\n",mb_segyheader_ptr->day_of_yr);
 		fprintf(stderr,"dbg2       hour:              %d\n",mb_segyheader_ptr->hour);
 		fprintf(stderr,"dbg2       min:               %d\n",mb_segyheader_ptr->min);
 		fprintf(stderr,"dbg2       sec:               %d\n",mb_segyheader_ptr->sec);
 		fprintf(stderr,"dbg2       mils:              %d\n",mb_segyheader_ptr->mils);
+		fprintf(stderr,"dbg2       tr_weight:         %d\n",mb_segyheader_ptr->tr_weight);
+		for (i=0;i<5;i++)
+		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segyheader_ptr->other_2[i]);
 		fprintf(stderr,"dbg2       delay:             %d\n",mb_segyheader_ptr->delay);
+		fprintf(stderr,"dbg2       smute_sec:         %d\n",mb_segyheader_ptr->smute_sec);
+		fprintf(stderr,"dbg2       emute_sec:         %d\n",mb_segyheader_ptr->emute_sec);
 		fprintf(stderr,"dbg2       si_secs:           %d\n",mb_segyheader_ptr->si_secs);
 		fprintf(stderr,"dbg2       wbt_secs:          %d\n",mb_segyheader_ptr->wbt_secs);
+		fprintf(stderr,"dbg2       end_of_rp:         %d\n",mb_segyheader_ptr->end_of_rp);
+		fprintf(stderr,"dbg2       dummy1:            %d\n",mb_segyheader_ptr->dummy1);
+		fprintf(stderr,"dbg2       dummy2:            %d\n",mb_segyheader_ptr->dummy2);
+		fprintf(stderr,"dbg2       dummy3:            %d\n",mb_segyheader_ptr->dummy3);
+		fprintf(stderr,"dbg2       dummy4:            %d\n",mb_segyheader_ptr->dummy4);
+		fprintf(stderr,"dbg2       dummy5:            %d\n",mb_segyheader_ptr->dummy5);
+		fprintf(stderr,"dbg2       dummy6:            %d\n",mb_segyheader_ptr->dummy6);
+		fprintf(stderr,"dbg2       dummy7:            %d\n",mb_segyheader_ptr->dummy7);
+		fprintf(stderr,"dbg2       dummy8:            %d\n",mb_segyheader_ptr->dummy8);
+		fprintf(stderr,"dbg2       dummy9:            %d\n",mb_segyheader_ptr->dummy9);
 		for (i=0;i<mb_segyheader_ptr->nsamps;i++)
 			fprintf(stderr,"dbg2       segydata[%d]:      %f\n",i,segydata[i]);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
@@ -4698,7 +4750,8 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       emute_mils:        %d\n",mb_segyheader_ptr->emute_mils);
 		fprintf(stderr,"dbg2       nsamps:            %d\n",mb_segyheader_ptr->nsamps);
 		fprintf(stderr,"dbg2       si_micros:         %d\n",mb_segyheader_ptr->si_micros);
-		fprintf(stderr,"dbg2       other_1[19]:       %d\n",mb_segyheader_ptr->other_1[19]);
+		for (i=0;i<19;i++)
+		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segyheader_ptr->other_1[i]);
 		fprintf(stderr,"dbg2       year:              %d\n",mb_segyheader_ptr->year);
 		fprintf(stderr,"dbg2       day_of_yr:         %d\n",mb_segyheader_ptr->day_of_yr);
 		fprintf(stderr,"dbg2       hour:              %d\n",mb_segyheader_ptr->hour);
@@ -4706,7 +4759,8 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       sec:               %d\n",mb_segyheader_ptr->sec);
 		fprintf(stderr,"dbg2       mils:              %d\n",mb_segyheader_ptr->mils);
 		fprintf(stderr,"dbg2       tr_weight:         %d\n",mb_segyheader_ptr->tr_weight);
-		fprintf(stderr,"dbg2       other_2[5]:        %d\n",mb_segyheader_ptr->other_2[5]);
+		for (i=0;i<5;i++)
+		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segyheader_ptr->other_2[i]);
 		fprintf(stderr,"dbg2       delay:             %d\n",mb_segyheader_ptr->delay);
 		fprintf(stderr,"dbg2       smute_sec:         %d\n",mb_segyheader_ptr->smute_sec);
 		fprintf(stderr,"dbg2       emute_sec:         %d\n",mb_segyheader_ptr->emute_sec);

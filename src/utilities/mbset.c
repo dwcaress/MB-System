@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.22 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbset.c,v 5.23 2004-05-21 23:51:19 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.21  2003/01/15 20:52:13  caress
  * Release 5.0.beta28
  *
@@ -123,7 +126,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.22 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.23 2004-05-21 23:51:19 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -552,18 +555,6 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "SSV:%lf", &process.mbp_ssv);
 		    }
-		else if (strncmp(pargv[i], "TTMULTIPLY", 10) == 0)
-		    {
-		    sscanf(pargv[i], "TTMULTIPLY:%lf", &process.mbp_tt_mult);
-		    }
-		else if (strncmp(pargv[i], "CORRECTED", 9) == 0)
-		    {
-		    sscanf(pargv[i], "CORRECTED:%d", &process.mbp_corrected);
-		    }
-		else if (strncmp(pargv[i], "SOUNDSPEEDREF", 13) == 0)
-		    {
-		    sscanf(pargv[i], "SOUNDSPEEDREF:%d", &process.mbp_corrected);
-		    }
 		else if (strncmp(pargv[i], "TTMODE", 6) == 0)
 		    {
 		    sscanf(pargv[i], "TTMODE:%d", &process.mbp_tt_mode);
@@ -572,9 +563,17 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "TTMULTIPLY:%lf", &process.mbp_tt_mult);
 		    }
+		else if (strncmp(pargv[i], "CORRECTED", 9) == 0)
+		    {
+		    sscanf(pargv[i], "CORRECTED:%d", &process.mbp_corrected);
+		    }
 		else if (strncmp(pargv[i], "ANGLEMODE", 9) == 0)
 		    {
 		    sscanf(pargv[i], "ANGLEMODE:%d", &process.mbp_angle_mode);
+		    }
+		else if (strncmp(pargv[i], "SOUNDSPEEDREF", 13) == 0)
+		    {
+		    sscanf(pargv[i], "SOUNDSPEEDREF:%d", &process.mbp_corrected);
 		    }
 		    
 		/* static beam bathymetry correction */

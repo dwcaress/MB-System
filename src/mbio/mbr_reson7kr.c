@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.0 2004-04-27 01:50:16 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.1 2004-05-21 23:44:49 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/04/27 01:50:16  caress
+ * Adding support for Reson 7k sonar data, including segy extensions.
+ *
  *
  *
  */
@@ -134,7 +137,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, char *buffer, void *store_ptr, int 
 int mbr_reson7kr_wr_systemevent(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_wr_fileheader(int verbose, char *buffer, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.0 2004-04-27 01:50:16 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.1 2004-05-21 23:44:49 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -502,8 +505,10 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
-	s7kr_position *position;
-	s7kr_attitude *attitude;
+	s7kr_position 	*position;
+	s7kr_attitude 	*attitude;
+	s7kr_survey	*survey;
+	double		speed;
 	int	i;
 
 	/* print input debug statements */
@@ -526,6 +531,9 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointers to data structures */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
+	position = &store->position;
+	attitude = &store->attitude;
+	survey = &store->survey;
 
 	/* save fix if nav data */
 	if (status == MB_SUCCESS
@@ -561,6 +569,18 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				(double)(attitude->heading[i]),
 				error);
 			}
+		}
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, status, *error);
+#endif
+
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA)
+		{
+		speed = survey->speed;
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, survey->heading, speed, 
+				    &survey->longitude, &survey->latitude, &speed, error);
+		survey->speed = speed;
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -648,6 +668,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	*nbadrec;
 	int	read_len;
 	int	skip;
+double klugelon, klugelat;
 	int	i;
 
 	/* print input debug statements */
@@ -789,8 +810,11 @@ Have a nice day...\n");
 
 #ifdef MBR_RESON7KR_DEBUG
 	fprintf(stderr,"\nready to parse RESON7KR record:\n");
-	fprintf(stderr,"skip:%d recordid:%x %d size:%d done:%d\n",
-		skip, *recordid, *recordid, *size, done);
+	fprintf(stderr,"skip:%d recordid:%x %d deviceid:%x %d subsystemid:%x %d size:%d done:%d\n",
+		skip, *recordid, *recordid, 
+		*deviceid, *deviceid, 
+		*subsystemid, *subsystemid, 
+		*size, done);
 #endif
 
 		/* set done if read failure */
@@ -809,6 +833,22 @@ Have a nice day...\n");
 				{
 				status = mbr_reson7kr_rd_fileheader(verbose, buffer, store_ptr, error);
 				done = MB_YES;
+
+/* kluge to set bogus background navigation */
+klugelon = -121.0;
+klugelat = 36.0;		
+mb_navint_add(verbose, mbio_ptr, 
+		store->time_d, 
+		klugelon, 
+		klugelat, 
+		error);
+klugelon = -121.0;
+klugelat = 37.168;
+mb_navint_add(verbose, mbio_ptr, 
+		store->time_d + 86400.0, 
+		klugelon, 
+		klugelat, 
+		error);
 				}
 			else if (*recordid == R7KRECID_ReferencePoint)
 				{
@@ -875,8 +915,8 @@ Have a nice day...\n");
 				&& *subsystemid == 20)
 				{
 				status = mbr_reson7kr_rd_fsdwsslo(verbose, buffer, store_ptr, error);
-				if (*current_ping >= 0
-					&& store->fsdwsslo.ping_number == *current_ping)
+				/*if (*current_ping >= 0
+					&& store->fsdwsslo.ping_number == *current_ping)*/
 				done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
@@ -963,8 +1003,12 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	mb_get_binary_int(MB_YES, &buffer[4], &sync); 
 	mb_get_binary_int(MB_YES, &buffer[8], size); 
 	mb_get_binary_int(MB_YES, &buffer[32], recordid); 
+	mb_get_binary_int(MB_YES, &buffer[36], deviceid); 
+	mb_get_binary_int(MB_YES, &buffer[40], subsystemid); 
 #ifdef MBR_RESON7KR_DEBUG
-	fprintf(stderr, "Record id: %4.4hX | %d\n", *recordid, *recordid);
+	fprintf(stderr, "Record id:    %4.4hX | %d\n", *recordid, *recordid);
+	fprintf(stderr, "Device id:    %4.4hX | %d\n", *deviceid, *deviceid);
+	fprintf(stderr, "Subsystem id: %4.4hX | %d\n", *subsystemid, *subsystemid);
 	fprintf(stderr, "Size: %d\n", *size);
 	fprintf(stderr, "Sync:  %4.4hX | %d\n", sync, sync);
 #endif
@@ -2424,7 +2468,6 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 	
 	/* extract the Edgetech sidescan header */
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->subsystem)); *index += 2;
-	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->subsystem)); *index += 2;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->channelNum)); *index += 2;
 	mb_get_binary_int(MB_YES, &buffer[*index], &(fsdwssheader->pingNum)); *index += 4;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->packetNum)); *index += 2;
@@ -2615,9 +2658,20 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 	s7kr_fsdwss *fsdwsslo;
 	s7k_fsdwchannel *fsdwchannel;
 	s7k_fsdwssheader *fsdwssheader;
+	s7kr_survey *survey;
+	double	bin[MBSYS_RESON7K_MAX_PIXELS];
+	int	nbin[MBSYS_RESON7K_MAX_PIXELS];
 	int	index;
 	int	time_j[5];
-	int	i;
+	int 	bottompick;
+	double	range, sign;
+	double	xtrack;
+	double	pixelsize;
+	double	pickvalue, value;
+	short	*shortptr;
+	int	*intptr;
+	int	jstart, jend;
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2635,6 +2689,7 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	fsdwsslo = &(store->fsdwsslo);
 	header = &(fsdwsslo->header);
+	survey = &(store->survey);
 	
 	/* extract the header */
 	index = 0;
@@ -2652,7 +2707,9 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 		fsdwchannel = &(fsdwsslo->channel[i]);
 		mbr_reson7kr_rd_fsdwchannel(verbose, buffer, &index, fsdwchannel, error);
 		}
-	index = header->OffsetToOptionalData;
+/*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsslo: index:%d OffsetToOptionalData:%d\n", 
+index, header->OffsetToOptionalData);
+	index = header->OffsetToOptionalData;*/
 	for (i=0;i<2;i++)
 		{
 		fsdwssheader = &(fsdwsslo->ssheader[i]);
@@ -2685,7 +2742,102 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_fsdwss(verbose, fsdwsslo, error);
+#ifdef MBR_RESON7KR_DEBUG
+for (i=0;i<fsdwsslo->number_channels;i++)
+{
+fsdwchannel = &(fsdwsslo->channel[i]);
+fsdwssheader = &(fsdwsslo->ssheader[i]);
+fprintf(stderr,"SSLO: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d %d chan:%d %d sampint:%d %d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+fsdwssheader->year,fsdwssheader->day,fsdwssheader->hour,fsdwssheader->minute,fsdwssheader->second,
+fsdwssheader->millisecondsToday - 1000 * (int)(0.001 * fsdwssheader->millisecondsToday),
+fsdwsslo->ping_number,fsdwssheader->pingNum,
+fsdwchannel->number,fsdwssheader->channelNum,
+fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
+}
+#endif
 
+	/* get first arrival and treat as altitude */
+	bottompick = fsdwchannel->number_samples;
+	for (i=0;i<2;i++)
+		{
+		fsdwchannel = &(fsdwsslo->channel[i]);
+		shortptr = (short *) fsdwchannel->data;
+		intptr = (int *) fsdwchannel->data;
+		if (fsdwchannel->bytespersample == 1)
+			pickvalue = fabs((double) fsdwchannel->data[0]);
+		else if (fsdwchannel->bytespersample == 2)
+			pickvalue = fabs((double) shortptr[0]);
+		else if (fsdwchannel->bytespersample == 4)
+			pickvalue = fabs((double) intptr[0]);
+		pickvalue = MAX(4 * pickvalue, 40.0);
+		for (j=0;j<fsdwchannel->number_samples;j++)
+			{
+			if (fsdwchannel->bytespersample == 1)
+				value = (double) fsdwchannel->data[j];
+			else if (fsdwchannel->bytespersample == 2)
+				value = (double) shortptr[j];
+			else if (fsdwchannel->bytespersample == 4)
+				value = (double) intptr[j];
+			if (bottompick > j && fabs(value) > pickvalue)
+				{
+				bottompick = j;
+				survey->sonar_altitude = 750.00 * bottompick * 0.000001 * fsdwchannel->sample_interval;
+				}
+			}
+		}
+
+	/* insert sslo data into survey structure */
+	pixelsize = (fsdwsslo->channel[0].range + fsdwsslo->channel[1].range) / 1024;
+	for (j=0;j<1024;j++)
+		{
+		bin[j] = 0.0;
+		nbin[j] = 0;
+		}
+/*fprintf(stderr,"bottompick:%d altitude:%f pixelsize:%f\n",bottompick,survey->sonar_altitude,pixelsize);*/
+	for (i=0;i<2;i++)
+		{
+		fsdwchannel = &(fsdwsslo->channel[i]);
+		survey->number_sslow_pixels = 1024;
+		for (j=bottompick;j<fsdwchannel->number_samples;j++)
+			{
+			if (i == 0)
+				{
+				sign = -1.0;
+				k = fsdwchannel->number_samples - (j - bottompick);
+				}
+			else
+				{
+				sign = 1.0;
+				k = fsdwchannel->number_samples + (j - bottompick);
+				}
+			if (fsdwchannel->bytespersample == 1)
+				value = (double) fsdwchannel->data[j];
+			else if (fsdwchannel->bytespersample == 2)
+				value = (double) shortptr[j];
+			else if (fsdwchannel->bytespersample == 4)
+				value = (double) intptr[j];
+			range = 750.00 * j * 0.000001 * fsdwchannel->sample_interval;
+			xtrack = sign * sqrt(fabs(range * range 
+						- survey->sonar_altitude * survey->sonar_altitude));
+			k = (xtrack / pixelsize) + 512;
+			if (k < 0) k = 0;
+			if (k > 1023) k = 1023;
+			bin[k] += value * value;
+			nbin[k]++;
+			}
+		}
+	for (j=0;j<1024;j++)
+		{
+		if (nbin[j] > 0)
+			survey->sslow[j] = sqrt(bin[j]) / nbin[j];
+		else
+			survey->sslow[j] = 0.0;
+		survey->sslow_acrosstrack[j] = pixelsize * (j - 512);;
+		survey->sslow_alongtrack[j] = 0.0;
+		}
+	
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -2747,7 +2899,9 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 		fsdwchannel = &(fsdwsshi->channel[i]);
 		mbr_reson7kr_rd_fsdwchannel(verbose, buffer, &index, fsdwchannel, error);
 		}
-	index = header->OffsetToOptionalData;
+/*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsshi: index:%d OffsetToOptionalData:%d\n", 
+index, header->OffsetToOptionalData);
+	index = header->OffsetToOptionalData;*/
 	for (i=0;i<2;i++)
 		{
 		fsdwssheader = &(fsdwsshi->ssheader[i]);
@@ -2758,7 +2912,7 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
-		store->kind = MB_DATA_DATA;
+		store->kind = MB_DATA_SIDESCAN2;
 		store->type = R7KRECID_FSDWsidescan;
 		
 		/* get the time */
@@ -2780,6 +2934,21 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_fsdwss(verbose, fsdwsshi, error);
+#ifdef MBR_RESON7KR_DEBUG
+for (i=0;i<fsdwsshi->number_channels;i++)
+{
+fsdwchannel = &(fsdwsshi->channel[i]);
+fsdwssheader = &(fsdwsshi->ssheader[i]);
+fprintf(stderr,"SSHI: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d %d chan:%d %d sampint:%d %d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+fsdwssheader->year,fsdwssheader->day,fsdwssheader->hour,fsdwssheader->minute,fsdwssheader->second,
+fsdwssheader->millisecondsToday - 1000 * (int)(0.001 * fsdwssheader->millisecondsToday),
+fsdwsshi->ping_number,fsdwssheader->pingNum,
+fsdwchannel->number,fsdwssheader->channelNum,
+fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
+}
+#endif
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2869,6 +3038,21 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_fsdwsb(verbose, fsdwsb, error);
+#ifdef MBR_RESON7KR_DEBUG
+for (i=0;i<fsdwsb->number_channels;i++)
+{
+fsdwchannel = &(fsdwsb->channel);
+fsdwsegyheader = &(fsdwsb->segyheader);
+fprintf(stderr,"SBP:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d %d chan:%d %d sampint:%d %d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+fsdwsegyheader->year,fsdwsegyheader->day,fsdwsegyheader->hour,fsdwsegyheader->minute,fsdwsegyheader->second,
+fsdwsegyheader->millisecondsToday - 1000 * (int)(0.001 * fsdwsegyheader->millisecondsToday),
+fsdwsb->ping_number,fsdwsegyheader->pingNum,
+fsdwchannel->number,fsdwsegyheader->channelNum,
+fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
+}
+#endif
 
 	/* print output debug statements */
 	if (verbose >= 2)

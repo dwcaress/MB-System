@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.4 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbps.c,v 5.5 2004-05-21 23:51:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.3  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -153,7 +156,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.4 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.5 2004-05-21 23:51:19 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
@@ -796,7 +799,17 @@ main (int argc, char **argv)
 		
 	/* initialize the Postscript plotting */
 	ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
-		gmtdefs.paper_width, gmtdefs.page_rgb, NULL);
+		gmtdefs.paper_width, gmtdefs.page_rgb, 
+#ifdef GMT3_0
+		gmt_epsinfo (argv[0]));
+	echo_command (argc, argv);
+#else
+#ifdef GMT4_0
+		gmtdefs.encoding.name, 
+#endif
+		GMT_epsinfo (argv[0]));
+	GMT_echo_command (argc, argv);
+#endif
 		
 	/* now loop over the data in the appropriate order
 	    laying down white filled boxes with black outlines

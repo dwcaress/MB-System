@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.18 2003-07-26 17:59:32 caress Exp $
+ *    $Id: mb_process.h,v 5.19 2004-05-21 23:46:22 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -168,7 +168,11 @@
  *   EDITSAVEFILE filename          # sets edit save file path (from mbedit) [none]
  *
  * BATHYMETRY RECALCULATION:
- *   RAYTRACE boolean               # sets bathymetry recalculation by raytracing [0]
+ *   SVPMODE mode                   # sets bathymetry recalculation by raytracing [0]
+ *                                  #  0: raytracing off
+ *                                  #  1: raytracing on
+ *                                  #  2: translate to/from corrected bathymetry according to CORRECTED
+ *   RAYTRACE boolean               # sets bathymetry recalculation by raytracing (obsolete) [0]
  *                                  #  0: raytracing off
  *                                  #  1: raytracing on
  *   SVPFILE filename               # sets svp file path [no default]
@@ -187,7 +191,7 @@
  *                                  #     ignoring sonar array geometry
  *                                  #  2: adjust beams angles by Snell's law
  *                                  #     using array geometry
- *   CORRECTED boolean              # sets raytraced bathymetry to "corrected" values [1]
+ *   SOUNDSPEEDREF boolean          # sets raytraced bathymetry to "corrected" values [1]
  *
  * STATIC BEAM BATHYMETRY OFFSETS:
  *   STATICMODE mode                # sets offsetting of bathymetry by per-beam statics [0]
@@ -406,6 +410,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2003/07/26 17:59:32  caress
+ * Changed beamflag handling code.
+ *
  * Revision 5.17  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
