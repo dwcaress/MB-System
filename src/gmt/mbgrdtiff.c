@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.0 2000-12-01 22:52:16 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.1 2001-01-22 05:03:25 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -155,6 +155,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:52:16  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.2  2000/10/11  00:53:45  caress
  * Converted to ANSI C
  *
@@ -266,7 +269,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.0 2000-12-01 22:52:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.1 2001-01-22 05:03:25 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -324,9 +327,15 @@ main (int argc, char **argv)
 	bounds[3] = 0.0;
 	intensity = MB_NO;
 	
+#ifdef GMT3_0
+	argc = gmt_begin (argc, argv);
+	grd_init (&header, argc, argv, FALSE);
+	grd_init (&iheader, argc, argv, FALSE);
+#else
 	argc = GMT_begin (argc, argv);
 	GMT_grd_init (&header, argc, argv, FALSE);
 	GMT_grd_init (&iheader, argc, argv, FALSE);
+#endif
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:O:o:R:r:")) != -1)
