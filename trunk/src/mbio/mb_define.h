@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.9 2001-10-19 00:54:37 caress Exp $
+ *    $Id: mb_define.h,v 5.10 2001-11-15 22:36:43 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001/10/19  00:54:37  caress
+ * Now tries to use relative paths.
+ *
  * Revision 5.8  2001/10/12  21:10:41  caress
  * Added interpolation of attitude data.
  *
@@ -190,6 +193,9 @@ int mb_datalist_close(int verbose,
 int mb_get_relative_path(int verbose,
 		char *path,
 		char *pwd,
+		int *error);
+int mb_get_shortest_path(int verbose,
+		char *path,
 		int *error);
 int mb_read_init(int verbose, char *file, 
 		int format, int pings, int lonflip, double bounds[4],
