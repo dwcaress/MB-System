@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	3.00	2/25/93
- *    $Id: mb_buffer.c,v 3.0 1993-04-23 15:40:29 dale Exp $
+ *    $Id: mb_buffer.c,v 3.1 1993-05-14 22:04:16 dale Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -32,6 +32,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  15:40:29  dale
+ * Initial version
+ *
  */
 
 /* standard include files */
@@ -50,7 +53,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  char rcs_id[]="$Id";
+  static char rcs_id[]="$Id: mb_buffer.c,v 3.1 1993-05-14 22:04:16 dale Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
