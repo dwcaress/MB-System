@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.18 2000-03-06 21:57:03 caress Exp $
+ *    $Id: mb_status.h,v 4.19 2000-07-19 03:54:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  2000/03/06  21:57:03  caress
+ * Set version to 4.6.10
+ *
  * Revision 4.17  2000/01/20  00:09:04  caress
  * Updated version and build date tags.
  *
@@ -271,6 +274,7 @@ static char *unknown_error_msg[] =
 #define MB_FLAG_NULL			0x01
 #define MB_FLAG_MANUAL			0x04
 #define MB_FLAG_FILTER			0x08
+#define MB_FLAG_FILTER2			0x10
 #define MB_FLAG_GT_1X_IHO		0x10
 #define MB_FLAG_GT_2X_IHO		0x20
 #define MB_FLAG_FOOTPRINT       	0x40
@@ -291,6 +295,7 @@ static char *unknown_error_msg[] =
 #define mb_beam_check_flag_null(F)		((int)(F == MB_FLAG_NULL))
 #define mb_beam_check_flag_manual(F)		((int)((F & MB_FLAG_MANUAL   ) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_filter(F)		((int)((F & MB_FLAG_FILTER   ) && (F & MB_FLAG_FLAG)))
+#define mb_beam_check_flag_filter2(F)		((int)((F & MB_FLAG_FILTER2   ) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_gt_1x_iho(F)		((int)((F & MB_FLAG_GT_1X_IHO) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_gt_2x_iho(F)		((int)((F & MB_FLAG_GT_2X_IHO) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_footprint(F)		((int)((F & MB_FLAG_FOOTPRINT) && (F & MB_FLAG_FLAG)))
@@ -298,6 +303,7 @@ static char *unknown_error_msg[] =
 #define mb_beam_set_flag_null(F)		(MB_FLAG_NULL)
 #define mb_beam_set_flag_manual(F)		(F | 0x05)
 #define mb_beam_set_flag_filter(F)		(F | 0x09)
+#define mb_beam_set_flag_filter2(F)		(F | 0x11)
 #define mb_beam_set_flag_gt_1x_iho(F)		(F | 0x11)
 #define mb_beam_set_flag_gt_2x_iho(F)		(F | 0x21)
 #define mb_beam_set_flag_footprint(F)		(F | 0x41)
