@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.12 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbmerge.c,v 4.13 1995-07-13 21:42:47 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.11  1995/04/19  18:45:57  caress
  * Made handling of NMEA nav data more robust.
  *
@@ -99,7 +103,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.12 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.13 1995-07-13 21:42:47 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -180,6 +184,7 @@ char **argv;
 	int	nav_ok;
 	int	make_heading = MB_NO;
 	int	make_heading_now;
+	double	heading_old;
 	int	time_set;
 	int	nget;
 	int	time_j[5], hr;
@@ -718,6 +723,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	right_now = time((long *)0);
@@ -881,9 +889,7 @@ char **argv;
 
 		/* figure out if heading should be recalculated */
 		if (error == MB_ERROR_NO_ERROR 
-			&& make_heading == MB_YES
-			&& navlon == 0.0 && navlat == 0.0 
-			&& heading == 0.0)
+			&& make_heading == MB_YES)
 			make_heading_now = MB_YES;
 		else
 			make_heading_now = MB_NO;
@@ -911,7 +917,13 @@ char **argv;
 				speed = 3.6*dist/del_time;
 			else
 				speed = 0.0;
-			heading = RTD*atan2(dx/dist,dy/dist);
+			if (dist > 0.0)
+				{
+				heading = RTD*atan2(dx/dist,dy/dist);
+				heading_old = heading;
+				}
+			else
+				heading = heading_old;
 			}
 
 		/* give error message */
