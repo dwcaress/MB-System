@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.7 2001-08-02 01:48:30 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.8 2001-08-04 01:02:24 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/08/02  01:48:30  caress
+ * Fixed call to mb_pr_get_heading() and mb_pr_get_rollbias().
+ *
  * Revision 5.6  2001/07/20  00:33:43  caress
  * Release 5.0.beta03
  *
@@ -101,7 +104,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.7 2001-08-02 01:48:30 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.8 2001-08-04 01:02:24 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -1457,12 +1460,12 @@ int mbnavadjust_import_data(char *path, int iformat)
 	done = MB_NO;
 	while (done == MB_NO)
 		{
-		if (form > 0)
+		if (iformat > 0)
 			{
 			status = mbnavadjust_import_file(path,iformat);
 			done = MB_YES;
 			}
-		else if (form == -1)
+		else if (iformat == -1)
 			{
 			if (status = mb_datalist_open(mbna_verbose,&datalist,
 							path,MB_DATALIST_LOOK_NO,&error) == MB_SUCCESS)
