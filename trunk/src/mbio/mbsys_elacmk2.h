@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elacmk2.h	6/10/97
- *	$Id: mbsys_elacmk2.h,v 4.0 1997-07-25 14:25:40 caress Exp $
+ *	$Id: mbsys_elacmk2.h,v 4.1 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/07/25  14:25:40  caress
+ * Version 4.5beta2.
+ *
  * Revision 1.1  1997/07/25  14:19:53  caress
  * Initial revision
  *
@@ -154,8 +157,8 @@ struct mbsys_elacmk2_struct
 	int	pos_thousandth_sec;
 	int	pos_latitude;		/* 180 deg = 2e9 */
 	int	pos_longitude;		/* 180 deg = 2e9 */
-	unsigned long	utm_northing;
-	unsigned long	utm_easting;
+	unsigned int	utm_northing;
+	unsigned int	utm_easting;
 	int	utm_zone_lon;		/* 180 deg = 2e9 */
 	char	utm_zone;
 	char	hemisphere;

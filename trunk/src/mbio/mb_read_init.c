@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 4.12 1997-07-25 14:19:53 caress Exp $
+ *    $Id: mb_read_init.c,v 4.13 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,10 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.11  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -104,6 +108,9 @@
 #ifdef IRIX
 #include <rpc/rpc.h>
 #endif
+#ifdef IRIX64
+#include <rpc/rpc.h>
+#endif
 #ifdef SOLARIS
 #include <rpc/rpc.h>
 #endif
@@ -128,6 +135,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
+#include "../../include/gsf.h"
 
 /*--------------------------------------------------------------------*/
 int mb_read_init(verbose,file,format,pings,lonflip,bounds,
@@ -152,7 +160,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 4.12 1997-07-25 14:19:53 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 4.13 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	int	format_num;
@@ -215,6 +223,7 @@ int	*error;
 			}
 		return(status);
 		}
+	memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));
 	mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
 
 	/* initialize file access for the mbio descriptor */
@@ -275,6 +284,7 @@ int	*error;
 	/* initialize pointers */
 	mb_io_ptr->raw_data = NULL;
 	mb_io_ptr->store_data = NULL;
+	mb_io_ptr->beamflag = NULL;
 	mb_io_ptr->bath = NULL;
 	mb_io_ptr->amp = NULL;
 	mb_io_ptr->bath_acrosstrack = NULL;
@@ -285,6 +295,7 @@ int	*error;
 	mb_io_ptr->ss_acrosstrack = NULL;
 	mb_io_ptr->ss_alongtrack = NULL;
 	mb_io_ptr->ss_num = NULL;
+	mb_io_ptr->new_beamflag = NULL;
 	mb_io_ptr->new_bath = NULL;
 	mb_io_ptr->new_amp = NULL;
 	mb_io_ptr->new_bath_acrosstrack = NULL;
@@ -299,6 +310,9 @@ int	*error;
 	mb_io_ptr->save_label_flag = MB_NO;
 
 	/* allocate arrays */
+	if (status == MB_SUCCESS)
+		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(char),
+				&mb_io_ptr->beamflag,error);
 	if (status == MB_SUCCESS)
 		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(double),
 				&mb_io_ptr->bath,error);
@@ -330,6 +344,9 @@ int	*error;
 		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
 				&mb_io_ptr->ss_num,error);
 	if (status == MB_SUCCESS)
+		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(char),
+				&mb_io_ptr->new_beamflag,error);
+	if (status == MB_SUCCESS)
 		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(double),
 				&mb_io_ptr->new_bath,error);
 	if (status == MB_SUCCESS)
@@ -358,6 +375,7 @@ int	*error;
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE)
 		{
+		status = mb_free(verbose,&mb_io_ptr->beamflag,error);
 		status = mb_free(verbose,&mb_io_ptr->bath,error);
 		status = mb_free(verbose,&mb_io_ptr->amp,error);
 		status = mb_free(verbose,&mb_io_ptr->bath_acrosstrack,error);
@@ -368,6 +386,7 @@ int	*error;
 		status = mb_free(verbose,&mb_io_ptr->ss_acrosstrack,error);
 		status = mb_free(verbose,&mb_io_ptr->ss_alongtrack,error);
 		status = mb_free(verbose,&mb_io_ptr->ss_num,error);
+		status = mb_free(verbose,&mb_io_ptr->beamflag,error);
 		status = mb_free(verbose,&mb_io_ptr->new_bath,error);
 		status = mb_free(verbose,&mb_io_ptr->new_amp,error);
 		status = mb_free(verbose,&mb_io_ptr->new_bath_acrosstrack,error);
@@ -390,50 +409,75 @@ int	*error;
 		return(status);
 		}
 
-	/* open the first file */
-	if (strncmp(file,stdin_string,5) == 0)
+	/* handle normal or xdr files to be opened 
+	   directly with fopen */
+	if (mb_filetype_table[format_num] == MB_FILETYPE_NORMAL
+	    || mb_filetype_table[format_num] == MB_FILETYPE_XDR)
+	    {
+	    /* open the first file */
+	    if (strncmp(file,stdin_string,5) == 0)
 		mb_io_ptr->mbfp = stdin;
-	else
+	    else
 		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "r")) == NULL) 
-			{
-			*error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
-			}
-
-	/* open the second file if required */
-	if (status == MB_SUCCESS 
+		    {
+		    *error = MB_ERROR_OPEN_FAIL;
+		    status = MB_FAILURE;
+		    }
+    
+	    /* open the second file if required */
+	    if (status == MB_SUCCESS 
 		&& mb_numfile_table[format_num] >= 2)
 		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r")) == NULL) 
-			{
-			*error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
-			}
-
-	/* open the third file if required */
-	if (status == MB_SUCCESS 
+		    {
+		    *error = MB_ERROR_OPEN_FAIL;
+		    status = MB_FAILURE;
+		    }
+    
+	    /* open the third file if required */
+	    if (status == MB_SUCCESS 
 		&& mb_numfile_table[format_num] >= 3)
 		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r")) == NULL) 
-			{
-			*error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
-			}
+		    {
+		    *error = MB_ERROR_OPEN_FAIL;
+		    status = MB_FAILURE;
+		    }
 
-	/* if needed, initialize XDR stream */
-	if (status == MB_SUCCESS && mb_xdr_table[format_num] == MB_YES)
+	    /* if needed, initialize XDR stream */
+	    if (status == MB_SUCCESS 
+		&& mb_filetype_table[format_num] == MB_FILETYPE_XDR)
 		{
 		status = mb_malloc(verbose,sizeof(XDR),
 				&mb_io_ptr->xdrs,error);
 		if (status == MB_SUCCESS)
-			{
-			xdrstdio_create((XDR *)mb_io_ptr->xdrs, 
-				mb_io_ptr->mbfp, XDR_DECODE);
-			}
+		    {
+		    xdrstdio_create((XDR *)mb_io_ptr->xdrs, 
+			    mb_io_ptr->mbfp, XDR_DECODE);
+		    }
 		else
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_MEMORY_FAIL;
-			}
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_MEMORY_FAIL;
+		    }
 		}
+	    }
+	    
+	/* else handle gsf files to be opened with gsflib */
+	else if (mb_filetype_table[format_num] == MB_FILETYPE_GSF)
+	    {
+	    status = gsfOpen(mb_io_ptr->file, 
+				GSF_READONLY, 
+				(int *) &(mb_io_ptr->mbfp));
+	    if (status == 0)
+		{
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		}
+	    else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OPEN_FAIL;
+		}
+	    }
 
 	/* if error terminate */
 	if (status == MB_FAILURE)
@@ -443,8 +487,9 @@ int	*error;
 		error_save = *error;
 
 		/* free allocated memory */
-		if (mb_xdr_table[format_num] == MB_YES)
+		if (mb_filetype_table[format_num] == MB_FILETYPE_XDR)
 			status = mb_free(verbose,&mb_io_ptr->xdrs,error);
+		status = mb_free(verbose,&mb_io_ptr->beamflag,error);
 		status = mb_free(verbose,&mb_io_ptr->bath,error);
 		status = mb_free(verbose,&mb_io_ptr->amp,error);
 		status = mb_free(verbose,&mb_io_ptr->bath_acrosstrack,error);
@@ -455,6 +500,7 @@ int	*error;
 		status = mb_free(verbose,&mb_io_ptr->ss_acrosstrack,error);
 		status = mb_free(verbose,&mb_io_ptr->ss_alongtrack,error);
 		status = mb_free(verbose,&mb_io_ptr->ss_num,error);
+		status = mb_free(verbose,&mb_io_ptr->beamflag,error);
 		status = mb_free(verbose,&mb_io_ptr->new_bath,error);
 		status = mb_free(verbose,&mb_io_ptr->new_amp,error);
 		status = mb_free(verbose,&mb_io_ptr->new_bath_acrosstrack,error);
@@ -508,6 +554,7 @@ int	*error;
 	mb_io_ptr->heading = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->bath[i] = 0.0;
 		mb_io_ptr->bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->bath_alongtrack[i] = 0.0;

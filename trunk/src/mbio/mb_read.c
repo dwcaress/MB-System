@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 4.8 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_read.c,v 4.9 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.7  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -106,7 +109,7 @@
 int mb_read(verbose,mbio_ptr,kind,pings,time_i,time_d,
 		navlon,navlat,speed,heading,distance,
 		nbath,namp,nss,
-		bath,amp,bathlon,bathlat,
+		beamflag,bath,amp,bathlon,bathlat,
 		ss,sslon,sslat,
 		comment,error)
 int	verbose;
@@ -123,6 +126,7 @@ double	*distance;
 int	*nbath;
 int	*namp;
 int	*nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathlon;
@@ -134,7 +138,7 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 4.8 1997-04-21 17:02:07 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 4.9 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -172,6 +176,7 @@ int	*error;
 	headingy = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->bath[i] = 0;
 		mb_io_ptr->bath_acrosstrack[i] = 0;
 		mb_io_ptr->bath_alongtrack[i] = 0;
@@ -374,8 +379,9 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_bath;i++)
-			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
-				i,mb_io_ptr->new_bath[i],
+			    fprintf(stderr,"dbg4       %4d   %3d    %f    %f     %f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
 			  }
@@ -430,34 +436,52 @@ int	*error;
 				+ mb_io_ptr->new_heading;
 			headingx = headingx + sin(DTR*mb_io_ptr->new_heading);
 			headingy = headingy + cos(DTR*mb_io_ptr->new_heading);
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
+		        if (mb_io_ptr->pings == 1)
 			  {
-			  if (mb_io_ptr->new_bath[i] > 0 
-			      || mb_io_ptr->pings == 1)
+			  for (i=0;i<mb_io_ptr->beams_bath;i++)
 			    {
-			    mb_io_ptr->bath[i] = mb_io_ptr->bath[i] 
-			                         + mb_io_ptr->new_bath[i];
-			    mb_io_ptr->bath_acrosstrack[i] = mb_io_ptr->bath_acrosstrack[i] 
-			                         + mb_io_ptr->new_bath_acrosstrack[i];
-			    mb_io_ptr->bath_alongtrack[i] = mb_io_ptr->bath_alongtrack[i] 
-			                         + mb_io_ptr->new_bath_alongtrack[i];
-			    mb_io_ptr->bath_num[i]++;
+			    mb_io_ptr->beamflag[i] = mb_io_ptr->new_beamflag[i];
+			    mb_io_ptr->bath[i] = mb_io_ptr->new_bath[i];
+			    mb_io_ptr->bath_acrosstrack[i] = mb_io_ptr->new_bath_acrosstrack[i];
+			    mb_io_ptr->bath_alongtrack[i] = mb_io_ptr->new_bath_alongtrack[i];
+			    mb_io_ptr->bath_num[i] = 1;
+			    }
+			  for (i=0;i<mb_io_ptr->beams_amp;i++)
+			    {
+			    mb_io_ptr->amp[i] = mb_io_ptr->new_amp[i];
+			    mb_io_ptr->amp_num[i] = 1;
+			    }
+			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			    {
+			    mb_io_ptr->ss[i] = mb_io_ptr->new_ss[i];
+			    mb_io_ptr->ss_acrosstrack[i] = mb_io_ptr->new_ss_acrosstrack[i];
+			    mb_io_ptr->ss_alongtrack[i] = mb_io_ptr->new_ss_alongtrack[i];
+			    mb_io_ptr->ss_num[i] = 1;
 			    }
 			  }
-			for (i=0;i<mb_io_ptr->beams_amp;i++)
+			else
 			  {
-			  if (mb_io_ptr->new_amp[i] > 0 
-			      || mb_io_ptr->pings == 1)
+			  for (i=0;i<mb_io_ptr->beams_bath;i++)
+			    {
+			    if (!mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			      {
+			      mb_io_ptr->beamflag[i] = MB_FLAG_NONE;
+			      mb_io_ptr->bath[i] = mb_io_ptr->bath[i] 
+			                         + mb_io_ptr->new_bath[i];
+			      mb_io_ptr->bath_acrosstrack[i] = mb_io_ptr->bath_acrosstrack[i] 
+			                         + mb_io_ptr->new_bath_acrosstrack[i];
+			      mb_io_ptr->bath_alongtrack[i] = mb_io_ptr->bath_alongtrack[i] 
+			                         + mb_io_ptr->new_bath_alongtrack[i];
+			      mb_io_ptr->bath_num[i]++;
+			      }
+			    }
+			  for (i=0;i<mb_io_ptr->beams_amp;i++)
 			    {
 			    mb_io_ptr->amp[i] = mb_io_ptr->amp[i] 
-			                         + mb_io_ptr->new_amp[i];
+						 + mb_io_ptr->new_amp[i];
 			    mb_io_ptr->amp_num[i]++;
 			    }
-			  }
-			for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			  {
-			  if (mb_io_ptr->new_ss[i] > 0 
-			      || mb_io_ptr->pings == 1)
+			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
 			    {
 			    mb_io_ptr->ss[i] = mb_io_ptr->ss[i] 
 			                         + mb_io_ptr->new_ss[i];
@@ -760,6 +784,7 @@ int	*error;
 		*nss = mb_io_ptr->pixels_ss;
 		for (i=0;i<*nbath;i++)
 			{
+			beamflag[i] = mb_io_ptr->beamflag[i];
 			if (mb_io_ptr->bath_num[i] > 0)
 				{
 				bath[i] = (mb_io_ptr->bath[i])
@@ -872,10 +897,10 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
 		if (verbose >= 3 && mb_io_ptr->beams_bath > 0)
 		  {
-		  fprintf(stderr,"dbg3       beam   nbath bath  lon lat\n");
+		  fprintf(stderr,"dbg3       beam   nbath flag bath  crosstrack alongtrack\n");
 		  for (i=0;i<mb_io_ptr->beams_bath;i++)
-		    fprintf(stderr,"dbg3       %4d   %4d  %f    %f     %f\n",
-			i,mb_io_ptr->bath_num[i],bath[i],
+		    fprintf(stderr,"dbg3       %4d   %4d  %3d  %f    %f     %f\n",
+			i,mb_io_ptr->bath_num[i],beamflag[i],bath[i],
 			bathlon[i],bathlat[i]);
 		  }
 		fprintf(stderr,"dbg2       namp:       %d\n",*namp);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.14 1997-07-28 15:10:28 caress Exp $
+ *    $Id: mb_buffer.c,v 4.15 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1997/07/28  15:10:28  caress
+ * Fixed typos.
+ *
  * Revision 4.13  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -136,7 +139,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.14 1997-07-28 15:10:28 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.15 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -211,7 +214,7 @@ int	*error;
 			for (i=0;i<buff->nbuffer;i++);
 				fprintf(stderr,"dbg4       Record[%d] pointer: %d\n",i,buff->buffer[i]);
 			}
-		for (i=0;i<buff->nbuffer;i++);
+		for (i=0;i<buff->nbuffer;i++)
 			status = mb_buffer_deall(verbose,*buff_ptr,mbio_ptr,
 				&buff->buffer[i],error);
 		}
@@ -262,6 +265,7 @@ int	*error;
 	int	nbath;
 	int	namp;
 	int	nss;
+	char	*beamflag;
 	double	*bath;
 	double	*amp;
 	double	*bathacrosstrack;
@@ -294,6 +298,7 @@ int	*error;
 	/* coopt binning arrays in mb_io_ptr structure to use
 		for dummy reading arrays - there's no binning
 		when using buffer */
+	beamflag = mb_io_ptr->beamflag;
 	bath = mb_io_ptr->bath;
 	amp = mb_io_ptr->amp;
 	bathacrosstrack = mb_io_ptr->bath_acrosstrack;
@@ -328,7 +333,8 @@ int	*error;
 			time_i,&time_d,&navlon,&navlat,&speed,
 			&heading,&distance,
 			&nbath,&namp,&nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 
@@ -466,6 +472,7 @@ int	*error;
 	int	nbath;
 	int	namp;
 	int	nss;
+	char	*beamflag;
 	double	*bath;
 	double	*amp;
 	double	*bathacrosstrack;
@@ -552,7 +559,8 @@ int	*error;
 				time_i,time_d,
 				navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 
@@ -683,26 +691,6 @@ int	*error;
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
 
-	/* mbio dummy write values */
-	int	time_i[7];
-	double	time_d;
-	double	navlon;
-	double	navlat;
-	double	speed;
-	double	heading;
-	double	distance;
-	int	nbath;
-	int	namp;
-	int	nss;
-	double	*bath;
-	double	*amp;
-	double	*bathacrosstrack;
-	double	*bathalongtrack;
-	double	*ss;
-	double	*ssacrosstrack;
-	double	*ssalongtrack;
-	char	comment[256];
-
 	int	i;
 
 	/* print input debug statements */
@@ -750,11 +738,6 @@ int	*error;
 			i,buff->buffer_kind[i],buff->buffer[i]);
 			}
 		}
-
-	/* set beam and pixel numbers */
-	nbath = mb_io_ptr->beams_bath;
-	namp = mb_io_ptr->beams_amp;
-	nss = mb_io_ptr->pixels_ss;
 
 	/* dump records from buffer */
 	if (status == MB_SUCCESS)
@@ -941,7 +924,8 @@ int	*error;
 int mb_buffer_get_next_data(verbose,buff_ptr,mbio_ptr,start,id,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
-		bath,amp,bathacrosstrack,bathalongtrack,
+		beamflag,bath,amp,
+		bathacrosstrack,bathalongtrack,
 		ss,ssacrosstrack,ssalongtrack,error)
 int	verbose;
 char	*buff_ptr;
@@ -957,6 +941,7 @@ double	*heading;
 int	*nbath;
 int	*namp;
 int	*nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -1018,7 +1003,8 @@ int	*error;
 		status = mb_buffer_extract(verbose,buff_ptr,mbio_ptr,*id,&kind,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 
@@ -1047,10 +1033,10 @@ int	*error;
 		fprintf(stderr,"dbg4       nbath:         %d\n",*nbath);
 		if (*nbath > 0)
 		  {
-		  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
+		  fprintf(stderr,"dbg4       beam   flag   bath  crosstrack alongtrack\n");
 		  for (i=0;i<*nbath;i++)
-		    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
-			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		    fprintf(stderr,"dbg4       %4d   %3d   %f    %f     %f\n",
+			i,beamflag[i],bath[i],bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg4       namp:          %d\n",*namp);
 		if (*namp > 0)
@@ -1099,7 +1085,7 @@ double	*pitch;
 double	*heave;
 int	*error;
 {
-	char	*function_name = "mb_buffer_get_next_data";
+	char	*function_name = "mb_buffer_get_next_nav";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
@@ -1193,7 +1179,7 @@ int	*error;
 int mb_buffer_extract(verbose,buff_ptr,mbio_ptr,id,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
-		bath,amp,bathacrosstrack,bathalongtrack,
+		beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
@@ -1210,6 +1196,7 @@ double	*heading;
 int	*nbath;
 int	*namp;
 int	*nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -1273,7 +1260,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1283,7 +1271,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1293,7 +1282,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1303,7 +1293,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1313,7 +1304,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1323,7 +1315,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1333,7 +1326,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1343,7 +1337,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1353,7 +1348,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1363,7 +1359,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1373,7 +1370,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1383,7 +1381,8 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1393,7 +1392,30 @@ int	*error;
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
+		else if (system == MB_SYS_GSF)
+			{
+			status = mbsys_gsf_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
+		else if (system == MB_SYS_MSTIFF)
+			{
+			status = mbsys_mstiff_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
@@ -1440,17 +1462,18 @@ int	*error;
 		fprintf(stderr,"dbg4       nbath:         %d\n",*nbath);
 		if (*nbath > 0)
 		  {
-		  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
+		  fprintf(stderr,"dbg4       beam    flag   bath  crosstrack alongtrack\n");
 		  for (i=0;i<*nbath;i++)
-		    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
-			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		    fprintf(stderr,"dbg4       %4d   %3d   %f    %f     %f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg4       namp:          %d\n",*namp);
 		if (*namp > 0)
 		  {
 		  fprintf(stderr,"dbg4       beam    amp  crosstrack alongtrack\n");
 		  for (i=0;i<*nbath;i++)
-		    fprintf(stderr,"dbg4       %f   %f    %f     %f\n",
+		    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg4       nss:           %d\n",*nss);
@@ -1644,6 +1667,22 @@ int	*error;
 				roll,pitch,heave, 
 				error);
 			}
+		else if (system == MB_SYS_GSF)
+			{
+			status = mbsys_gsf_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_MSTIFF)
+			{
+			status = mbsys_mstiff_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
 		else
 			{
 			status = MB_FAILURE;
@@ -1692,7 +1731,8 @@ int	*error;
 int mb_buffer_insert(verbose,buff_ptr,mbio_ptr,id,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
-		bath,amp,bathacrosstrack,bathalongtrack,
+		beamflag,bath,amp,
+		bathacrosstrack,bathalongtrack,
 		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
@@ -1708,6 +1748,7 @@ double	heading;
 int	nbath;
 int	namp;
 int	nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -1750,10 +1791,11 @@ int	*error;
 		fprintf(stderr,"dbg4       nbath:      %d\n",nbath);
 		if (nbath > 0)
 		  {
-		  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
+		  fprintf(stderr,"dbg4       beam   flag   bath  crosstrack alongtrack\n");
 		  for (i=0;i<nbath;i++)
-		    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
-			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		    fprintf(stderr,"dbg4       %4d   %3d   %f    %f     %f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg4       namp:          %d\n",namp);
 		if (namp > 0)
@@ -1800,7 +1842,8 @@ int	*error;
 		status = mbsys_sb_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1809,7 +1852,8 @@ int	*error;
 		status = mbsys_hsds_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1818,7 +1862,8 @@ int	*error;
 		status = mbsys_sb2000_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1827,7 +1872,8 @@ int	*error;
 		status = mbsys_sb2100_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1836,7 +1882,8 @@ int	*error;
 		status = mbsys_simrad_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1845,7 +1892,8 @@ int	*error;
 		status = mbsys_mr1_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1854,7 +1902,8 @@ int	*error;
 		status = mbsys_mr1b_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1863,7 +1912,8 @@ int	*error;
 		status = mbsys_ldeoih_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1872,7 +1922,8 @@ int	*error;
 		status = mbsys_reson_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1881,7 +1932,8 @@ int	*error;
 		status = mbsys_elac_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1890,7 +1942,8 @@ int	*error;
 		status = mbsys_elacmk2_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1899,7 +1952,8 @@ int	*error;
 		status = mbsys_hsmd_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -1908,7 +1962,28 @@ int	*error;
 		status = mbsys_dsl_insert(verbose,mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			nbath,namp,nss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
+		}
+	else if (system == MB_SYS_GSF)
+		{
+		status = mbsys_gsf_insert(verbose,mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
+		}
+	else if (system == MB_SYS_MSTIFF)
+		{
+		status = mbsys_mstiff_insert(verbose,mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
@@ -2111,6 +2186,22 @@ int	*error;
 			roll,pitch,heave, 
 			error);
 		}
+	else if (system == MB_SYS_GSF)
+		{
+		status = mbsys_gsf_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_MSTIFF)
+		{
+		status = mbsys_mstiff_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -2126,6 +2217,64 @@ int	*error;
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_buffer_get_ptr(verbose,buff_ptr,mbio_ptr,id,store_ptr,error)
+int	verbose;
+char	*buff_ptr;
+char	*mbio_ptr;
+int	id;
+char	**store_ptr;
+int	*error;
+{
+	char	*function_name = "mb_buffer_get_ptr";
+	int	status = MB_SUCCESS;
+	struct mb_buffer_struct *buff;
+	struct mb_io_struct *mb_io_ptr;
+	int	system;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       id:         %d\n",id);
+		}
+
+	/* get buffer structure */
+	buff = (struct mb_buffer_struct *) buff_ptr;
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get store_ptr for specified record */
+	if (id < 0 || id >= buff->nbuffer)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_BUFFER_ID;
+		}
+	else
+		{
+		*store_ptr = buff->buffer[id];
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */
@@ -2216,6 +2365,14 @@ int	*error;
 	else if (system == MB_SYS_DSL)
 		{
 		status = mbsys_dsl_alloc(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_GSF)
+		{
+		status = mbsys_gsf_alloc(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_MSTIFF)
+		{
+		status = mbsys_mstiff_alloc(verbose,mbio_ptr,store_ptr,error);
 		}
 	else
 		{
@@ -2324,6 +2481,14 @@ int	*error;
 	else if (system == MB_SYS_DSL)
 		{
 		status = mbsys_dsl_deall(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_GSF)
+		{
+		status = mbsys_gsf_deall(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_MSTIFF)
+		{
+		status = mbsys_mstiff_deall(verbose,mbio_ptr,store_ptr,error);
 		}
 	else
 		{
@@ -2445,6 +2610,16 @@ int	*error;
 	else if (system == MB_SYS_DSL)
 		{
 		status = mbsys_dsl_copy(verbose,mbio_ptr,
+			store_ptr,copy_ptr,error);
+		}
+	else if (system == MB_SYS_GSF)
+		{
+		status = mbsys_gsf_copy(verbose,mbio_ptr,
+			store_ptr,copy_ptr,error);
+		}
+	else if (system == MB_SYS_MSTIFF)
+		{
+		status = mbsys_mstiff_copy(verbose,mbio_ptr,
 			store_ptr,copy_ptr,error);
 		}
 	else

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 4.7 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 4.8 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.6  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -80,7 +84,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 4.7 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 4.8 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -234,8 +238,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -289,8 +293,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -326,8 +330,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -585,6 +589,23 @@ int	*error;
 		/* read distance and depth values into storage arrays */
 		for (i=0;i<MB_BEAMS_SBSIOSWB;i++)
 			{
+			if (data->bath_struct[i].bath > 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[i] = data->bath_struct[i].bath;
+			    }
+			else if (data->bath_struct[i].bath < 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = 
+				MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[i] = -data->bath_struct[i].bath;
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[i] = data->bath_struct[i].bath;
+			    }
+
 			mb_io_ptr->new_bath[i] = data->bath_struct[i].bath;
 			mb_io_ptr->new_bath_acrosstrack[i] = 
 				data->bath_struct[i].bath_acrosstrack;
@@ -626,8 +647,8 @@ int	*error;
 			fprintf(stderr,"dbg5       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg5       bath[%d]: %f  bathdist[%d]: %f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       flag[%d]:%4d  bath: %f  bathdist[%d]: %f\n",
+				i,mb_io_ptr->new_beamflag[i],mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
@@ -663,12 +684,12 @@ int	*error;
 		/* position */
 		lon = 0.0000001*data->lon;
 		if (lon < 0.0) lon = lon + 360.0;
-		store->lon2u = (short int) 60.0*lon;
-		store->lon2b = (short int) round(600000.0*
+		store->lon2u = (short) 60.0*lon;
+		store->lon2b = (short) round(600000.0*
 			(lon - store->lon2u/60.0));
 		lat = 0.0000001*data->lat + 90.0;
-		store->lat2u = (short int) 60.0*lat;
-		store->lat2b = (short int) round(600000.0*
+		store->lat2u = (short) 60.0*lat;
+		store->lat2b = (short) round(600000.0*
 			(lat - store->lat2u/60.0));
 
 		/* time stamp */
@@ -679,8 +700,8 @@ int	*error;
 		
 		/* heading */
 		store->sbhdg = (data->heading < (short) 0) 
-		    ? (unsigned short int) round(((int)data->heading + 3600)*18.204444444)
-		    : (unsigned short int) round(data->heading*18.204444444);
+		    ? (unsigned short) round(((int)data->heading + 3600)*18.204444444)
+		    : (unsigned short) round(data->heading*18.204444444);
 
 		/* depths and distances */
 		id = data->beams_bath - 1;
@@ -841,7 +862,7 @@ int	*error;
 
 		/* heading */
 		data->heading =  
-		    (short int) round(((int)store->sbhdg)*0.054931641625);
+		    (short) round(((int)store->sbhdg)*0.054931641625);
 
 		/* additional values */
 		data->eclipse_time = store->sbtim;
@@ -911,7 +932,10 @@ int	*error;
 		/* initialize depth and distance in output structure */
 		for (i=0;i<MB_BEAMS_SBSIOSWB;i++)
 			{
-			data->bath_struct[i].bath = mb_io_ptr->new_bath[i];;
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			    data->bath_struct[i].bath = -mb_io_ptr->new_bath[i];
+			else
+			    data->bath_struct[i].bath = mb_io_ptr->new_bath[i];
 			data->bath_struct[i].bath_acrosstrack = 
 				mb_io_ptr->new_bath_acrosstrack[i];;
 			}
@@ -925,8 +949,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);

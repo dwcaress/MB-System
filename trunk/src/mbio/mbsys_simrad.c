@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.14 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.15 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,8 @@
  *   mbsys_simrad_insert  - insert basic data into mbsys_simrad_struct structure
  *   mbsys_simrad_ttimes  - extract travel time data from
  *				mbsys_simrad_struct structure
+ *   mbsys_simrad_altitude  - extract transducer depth and altitude from
+ *				mbsys_simrad_struct structure
  *   mbsys_simrad_extract_nav - extract navigation data from
  *                          mbsys_simrad_struct structure
  *   mbsys_simrad_insert_nav - insert navigation data into
@@ -42,6 +44,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.13  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -965,7 +970,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.14 1997-09-15 19:06:40 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.15 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1099,7 +1104,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.14 1997-09-15 19:06:40 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.15 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1248,7 +1253,7 @@ int	*error;
 int mbsys_simrad_extract(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
-		bath,amp,bathacrosstrack,bathalongtrack,
+		beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
@@ -1264,6 +1269,7 @@ double	*heading;
 int	*nbath;
 int	*namp;
 int	*nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -1402,6 +1408,24 @@ int	*error;
 			ttscale    = 0.8;
 			reflscale  = 0.5;
 			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12D 
+			&& ping->bath_res == 1)
+			{
+			depthscale = 0.1;
+			dacrscale  = 0.2;
+			daloscale  = 0.2;
+			ttscale    = 0.2;
+			reflscale  = 0.5;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12D 
+			&& ping->bath_res == 2)
+			{
+			depthscale = 0.2;
+			dacrscale  = 0.5;
+			daloscale  = 0.5;
+			ttscale    = 0.8;
+			reflscale  = 0.5;
+			}
 		else if (store->sonar == MBSYS_SIMRAD_EM121)
 			{
 			depthscale = 0.01 * ping->depth_res;
@@ -1430,7 +1454,21 @@ int	*error;
 			ss_spacing = 0.15;
 		for (i=0;i<*nbath;i++)
 			{
-			bath[i] = depthscale*ping->bath[i];
+			if (ping->bath[i] < 0)
+			    {
+			    beamflag[i] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    bath[i] = -depthscale*ping->bath[i];
+			    }
+			else if (ping->bath[i] > 0)
+			    {
+			    beamflag[i] = MB_FLAG_NONE;
+			    bath[i] = depthscale*ping->bath[i];
+			    }
+			else
+			    {
+			    beamflag[i] = MB_FLAG_NULL;
+			    bath[i] = depthscale*ping->bath[i];
+			    }
 			bathacrosstrack[i] 
 				= dacrscale*ping->bath_acrosstrack[i];
 			bathalongtrack[i] 
@@ -1505,8 +1543,9 @@ int	*error;
 			fprintf(stderr,"dbg4       nbath:      %d\n",
 				*nbath);
 			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,beamflag[i],bath[i],
+				bathacrosstrack[i],bathalongtrack[i]);
 			fprintf(stderr,"dbg4        namp:     %d\n",
 				*namp);
 			for (i=0;i<*namp;i++)
@@ -1576,8 +1615,9 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",
 			*nbath);
 		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		  fprintf(stderr,"dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        namp:     %d\n",
 			*namp);
 		for (i=0;i<*namp;i++)
@@ -1603,7 +1643,8 @@ int	*error;
 int mbsys_simrad_insert(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
-		bath,amp,bathacrosstrack,bathalongtrack,
+		beamflag,bath,amp,
+		bathacrosstrack,bathalongtrack,
 		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
@@ -1618,6 +1659,7 @@ double	heading;
 int	nbath;
 int	namp;
 int	nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -1662,8 +1704,9 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
 		if (verbose >= 3) 
 		 for (i=0;i<namp;i++)
@@ -1775,6 +1818,24 @@ int	*error;
 			ttscale    = 0.8;
 			reflscale  = 0.5;
 			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12D 
+			&& ping->bath_res == 1)
+			{
+			depthscale = 0.1;
+			dacrscale  = 0.2;
+			daloscale  = 0.2;
+			ttscale    = 0.2;
+			reflscale  = 0.5;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12D 
+			&& ping->bath_res == 2)
+			{
+			depthscale = 0.2;
+			dacrscale  = 0.5;
+			daloscale  = 0.5;
+			ttscale    = 0.8;
+			reflscale  = 0.5;
+			}
 		else if (store->sonar == MBSYS_SIMRAD_EM121)
 			{
 			depthscale = 0.01 * ping->depth_res;
@@ -1792,7 +1853,10 @@ int	*error;
 			{
 			for (i=0;i<nbath;i++)
 				{
-				ping->bath[i] = bath[i]/depthscale;
+				if (mb_beam_check_flag(beamflag[i]))
+				    ping->bath[i] = -bath[i]/depthscale;
+				else
+				    ping->bath[i] = bath[i]/depthscale;
 				ping->bath_acrosstrack[i]
 					= bathacrosstrack[i]/dacrscale;
 				ping->bath_alongtrack[i] 
@@ -1843,7 +1907,7 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
 	ttimes,angles,angles_forward,angles_null,
-	depth_offset,alongtrack_offset,flags,ssv,error)
+	heave,alongtrack_offset,draft,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -1853,9 +1917,9 @@ double	*ttimes;
 double	*angles;
 double	*angles_forward;
 double	*angles_null;
-double	*depth_offset;
+double	*heave;
 double	*alongtrack_offset;
-int	*flags;
+double	*draft;
 double	*ssv;
 int	*error;
 {
@@ -1865,7 +1929,7 @@ int	*error;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	double	ttscale;
-	double	depthadd;
+	double	heave_use;
 	double	*angles_simrad;
 	int	i, j;
 
@@ -1882,9 +1946,8 @@ int	*error;
 		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
 		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
 		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
-		fprintf(stderr,"dbg2       depth_off:  %d\n",depth_offset);
+		fprintf(stderr,"dbg2       heave:      %d\n",heave);
 		fprintf(stderr,"dbg2       ltrk_off:   %d\n",alongtrack_offset);
-		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
 	/* get mbio descriptor */
@@ -1906,17 +1969,18 @@ int	*error;
 		*nbeams = mb_io_ptr->beams_bath;
 
 		/* get depth offset (heave + heave offset) */
-		if (store->sonar == MBSYS_SIMRAD_EM12S)
-			depthadd = 0.01*ping->ping_heave + store->em12_td;
-		else if (store->sonar == MBSYS_SIMRAD_EM12D)
-			depthadd = 0.01*ping->ping_heave + store->em12_td;
-		else if (store->sonar == MBSYS_SIMRAD_EM100)
-			depthadd = 0.01*ping->ping_heave + store->em100_td;
-		else if (store->sonar == MBSYS_SIMRAD_EM1000)
-			depthadd = 0.01*ping->ping_heave + store->em1000_td;
+		heave_use =  0.01 * ping->ping_heave;
 		*ssv = 0.1 * ping->sound_vel;
+		if (store->sonar == MBSYS_SIMRAD_EM12S)
+			*draft = store->em12_td;
+		else if (store->sonar == MBSYS_SIMRAD_EM12D)
+			*draft = store->em12_td;
+		else if (store->sonar == MBSYS_SIMRAD_EM100)
+			*draft = store->em100_td;
+		else if (store->sonar == MBSYS_SIMRAD_EM1000)
+			*draft = store->em1000_td;
 
-		/* get travel times, angles, and flags */
+		/* get travel times, angles */
 		if (store->sonar == MBSYS_SIMRAD_EM1000)
 			{
 			if (ping->bath_mode == 1)
@@ -1987,12 +2051,8 @@ int	*error;
 			    angles_null[i] = 0.0;
 			else if (store->sonar == MBSYS_SIMRAD_EM12D)
 			    angles_null[i] = 0.0; /* wrong for sure */
-			depth_offset[i] = depthadd;
+			heave[i] = heave_use;
 			alongtrack_offset[i] = 0.0;
-			if (ping->bath[i] < 0)
-				flags[i] = MB_YES;
-			else
-				flags[i] = MB_NO;
 			}
 
 		/* set status */
@@ -2029,20 +2089,191 @@ int	*error;
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
+		fprintf(stderr,"dbg2       draft:      %f\n",*draft);
 		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f  flag:%d\n",
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 				i,ttimes[i],angles[i],
 				angles_forward[i],angles_null[i],
-				depth_offset[i],alongtrack_offset[i],
-				flags[i]);
+				heave[i],alongtrack_offset[i]);
 		}
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad_altitude(verbose,mbio_ptr,store_ptr,
+	kind,transducer_depth,altitude,error)
+int	verbose;
+char	*mbio_ptr;
+char	*store_ptr;
+int	*kind;
+double	*transducer_depth;
+double	*altitude;
+int	*error;
+{
+	char	*function_name = "mbsys_simrad_altitude";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
+	double	depthscale, dacrscale;
+	double	bath_best;
+	double	xtrack_min;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+
+		/* get transducer depth and altitude */
+		if (store->sonar == MBSYS_SIMRAD_EM12S)
+			*transducer_depth = 0.01*ping->ping_heave + store->em12_td;
+		else if (store->sonar == MBSYS_SIMRAD_EM12D)
+			*transducer_depth = 0.01*ping->ping_heave + store->em12_td;
+		else if (store->sonar == MBSYS_SIMRAD_EM100)
+			*transducer_depth = 0.01*ping->ping_heave + store->em100_td;
+		else if (store->sonar == MBSYS_SIMRAD_EM1000)
+			*transducer_depth = 0.01*ping->ping_heave + store->em1000_td;
+		else if (store->sonar == MBSYS_SIMRAD_EM121)
+			*transducer_depth = 0.01*ping->ping_heave + store->em12_td;
+		else
+			*transducer_depth = 0.0;
+		if (store->sonar == MBSYS_SIMRAD_EM1000)
+			{
+			depthscale = 0.02;
+			dacrscale  = 0.1;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12S 
+			&& ping->bath_res == 1)
+			{
+			depthscale = 0.1;
+			dacrscale  = 0.2;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12S 
+			&& ping->bath_res == 2)
+			{
+			depthscale = 0.2;
+			dacrscale  = 0.5;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12D 
+			&& ping->bath_res == 1)
+			{
+			depthscale = 0.1;
+			dacrscale  = 0.2;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM12D 
+			&& ping->bath_res == 2)
+			{
+			depthscale = 0.2;
+			dacrscale  = 0.5;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM121)
+			{
+			depthscale = 0.01 * ping->depth_res;
+			dacrscale  = 0.01 * ping->across_res;
+			}
+		else
+			{
+			depthscale = 0.1;
+			dacrscale  = 0.1;
+			}
+		bath_best = 0.0;
+		if (ping->bath[mb_io_ptr->beams_bath/2] > 0)
+		    bath_best = depthscale * ping->bath[mb_io_ptr->beams_bath/2];
+		else
+		    {
+		    xtrack_min = 99999999.9;
+		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			if (ping->bath[i] > 0.0
+			    && fabs(dacrscale * ping->bath_acrosstrack[i]) < xtrack_min)
+			    {
+			    xtrack_min = fabs(dacrscale * ping->bath_acrosstrack[i]);
+			    bath_best = depthscale * ping->bath[i];
+			    }
+			}		
+		    }
+		if (bath_best <= 0.0)
+		    {
+		    xtrack_min = 99999999.9;
+		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			if (ping->bath[i] < 0.0
+			    && fabs(dacrscale * ping->bath_acrosstrack[i]) < xtrack_min)
+			    {
+			    xtrack_min = fabs(dacrscale * ping->bath_acrosstrack[i]);
+			    bath_best = -depthscale * ping->bath[i];
+			    }
+			}		
+		    }
+		*altitude = bath_best - *transducer_depth;
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
+		fprintf(stderr,"dbg2       transducer_depth:  %f\n",*transducer_depth);
+		fprintf(stderr,"dbg2       altitude:          %f\n",*altitude);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
 		}
 
 	/* return status */

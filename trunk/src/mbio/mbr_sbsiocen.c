@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiocen.c	2/2/93
- *	$Id: mbr_sbsiocen.c,v 4.7 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_sbsiocen.c,v 4.8 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.6  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -84,7 +88,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiocen.c,v 4.7 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsiocen.c,v 4.8 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiocen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -325,7 +329,23 @@ int	*error;
 		id = mb_io_ptr->beams_bath - 1;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			mb_io_ptr->new_bath[id-i] = data->deph[i];
+			if (data->deph[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[id-i] = data->deph[i];
+			    }
+			else if (data->deph[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = 
+				MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[id-i] = -data->deph[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[id-i] = data->deph[i];
+			    }
+
 			mb_io_ptr->new_bath_acrosstrack[id-i] = data->dist[i];
 			mb_io_ptr->new_bath_alongtrack[id-i] = 0.0;
 			}
@@ -365,8 +385,8 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       flag[%d]:%4d  bath: %f  bathdist[%d]: %f\n",
+				i,mb_io_ptr->new_beamflag[i],mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
@@ -574,7 +594,10 @@ int	*error;
 		id = mb_io_ptr->beams_bath - 1;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data->deph[i] = mb_io_ptr->new_bath[id-i];
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[id-i]))
+			    data->deph[i] = -mb_io_ptr->new_bath[id-i];
+			else
+			    data->deph[i] = mb_io_ptr->new_bath[id-i];
 			data->dist[i] = mb_io_ptr->new_bath_acrosstrack[id-i];
 			}
 		}

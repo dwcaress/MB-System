@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.10 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbr_em12darw.c,v 4.11 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.9  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -89,7 +92,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.10 1997-09-15 19:06:40 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.11 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -346,7 +349,7 @@ int	*error;
 		mb_swap_float(&data->utm_merd);
 		data->utm_zone = mb_swap_short(data->utm_zone);
 		data->posq = mb_swap_short(data->posq);
-		data->pingno = mb_swap_long(data->pingno);
+		data->pingno = mb_swap_int(data->pingno);
 		data->mode = mb_swap_short(data->mode);
 		mb_swap_float(&data->depthl);
 		mb_swap_float(&data->speed);
@@ -457,12 +460,31 @@ int	*error;
 			}
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			mb_io_ptr->new_bath[i] 
-				= (int)(depthscale*data->depth[i]);
+			if (data->depth[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[i] 
+				    = -depthscale*data->depth[i];
+			    }
+			else if (data->depth[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[i] 
+				    = depthscale*data->depth[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[i] 
+				    = depthscale*data->depth[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[i] 
-				= (int)(dacrscale*data->distacr[i]);
+				= dacrscale*data->distacr[i];
 			mb_io_ptr->new_bath_alongtrack[i] 
-				= (int)(daloscale*data->distalo[i]);
+				= daloscale*data->distalo[i];
 			}
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
@@ -506,8 +528,9 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -858,8 +881,12 @@ int	*error;
 			}
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data->depth[i] = (int)(mb_io_ptr->new_bath[i]
-					/depthscale);
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			    data->depth[i] = -(int)(mb_io_ptr->new_bath[i]
+						/ depthscale);
+			else
+			    data->depth[i] = (int)(mb_io_ptr->new_bath[i]
+						/ depthscale);
 			data->distacr[i] = 
 				(int) (mb_io_ptr->new_bath_acrosstrack[i]
 				/dacrscale);
@@ -904,7 +931,7 @@ int	*error;
 		mb_swap_float(&data->utm_merd);
 		data->utm_zone = mb_swap_short(data->utm_zone);
 		data->posq = mb_swap_short(data->posq);
-		data->pingno = mb_swap_long(data->pingno);
+		data->pingno = mb_swap_int(data->pingno);
 		data->mode = mb_swap_short(data->mode);
 		mb_swap_float(&data->depthl);
 		mb_swap_float(&data->speed);

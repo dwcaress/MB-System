@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbldeoih.h	1/20/93
- *	$Id: mbf_mbldeoih.h,v 4.2 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbf_mbldeoih.h,v 4.3 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.1  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -74,6 +77,7 @@
 
 /* define maximum number of beams */
 #define	MBF_MBLDEOIH_MAX_BEAMS	200
+#define	MBF_MBLDEOIH_MAX_PIXELS	10000
 
 struct mbf_mbldeoih_header_struct
 	{
@@ -82,6 +86,7 @@ struct mbf_mbldeoih_header_struct
 	short	day;		/* julian day (1-366) */
 	short	min;		/* minutes from beginning of day (0-1439) */
 	short	sec;		/* seconds from beginning of minute (0-59) */
+	short	msec;		/* milliseconds */
 	unsigned short	lon2u;	/* minutes east of prime meridian */
 	unsigned short	lon2b;	/* fraction of minute times 10000 */
 	unsigned short	lat2u;	/* number of minutes north of 90S */
@@ -96,20 +101,22 @@ struct mbf_mbldeoih_header_struct
 	short	beams_bath;	/* number of depth values */
 	short	beams_amp;	/* number of amplitude values */
 	short	pixels_ss;	/* number of sidescan pixels */
-	short	bath_scale;	/* 1000Xscale where depth=bathXscale */
-	short	amp_scale;	/* 1000Xscale where amplitude=ampXscale */
-	short	ss_scale;	/* 1000Xscale where sidescan=ssXscale */
+	short	depth_scale;	/* 1000 X scale where depth = bath X scale */
+	short	distance_scale;	/* 1000 X scale where distance = dist X scale */
+	short	transducer_depth; /* scaled by depth_scale */
+	short	altitude;	/* scaled by depth_scale */
 	};
 
 struct mbf_mbldeoih_data_struct
 	{
+	unsigned char	beamflag[MBF_MBLDEOIH_MAX_BEAMS];
 	short	bath[MBF_MBLDEOIH_MAX_BEAMS];
 	short	bath_acrosstrack[MBF_MBLDEOIH_MAX_BEAMS];
 	short	bath_alongtrack[MBF_MBLDEOIH_MAX_BEAMS];
 	short	amp[MBF_MBLDEOIH_MAX_BEAMS];
-	short	ss[MBF_MBLDEOIH_MAX_BEAMS];
-	short	ss_acrosstrack[MBF_MBLDEOIH_MAX_BEAMS];
-	short	ss_alongtrack[MBF_MBLDEOIH_MAX_BEAMS];
+	short	ss[MBF_MBLDEOIH_MAX_PIXELS];
+	short	ss_acrosstrack[MBF_MBLDEOIH_MAX_PIXELS];
+	short	ss_alongtrack[MBF_MBLDEOIH_MAX_PIXELS];
 	};
 
 struct mbf_mbldeoih_struct

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.h	3/2/93
- *	$Id: mbsys_ldeoih.h,v 4.2 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbsys_ldeoih.h,v 4.3 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.1  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -74,6 +77,7 @@ struct mbsys_ldeoih_struct
 	short	day;		/* julian day (1-366) */
 	short	min;		/* minutes from beginning of day (0-1439) */
 	short	sec;		/* seconds from beginning of minute (0-59) */
+	short	msec;		/* milliseconds from beginning of minute (0-59) */
 
 	/* heading and speed */
 	unsigned short	heading;/* heading:
@@ -88,11 +92,13 @@ struct mbsys_ldeoih_struct
 	short	beams_bath;	/* number of depth values */
 	short	beams_amp;	/* number of amplitude values */
 	short	pixels_ss;	/* number of sidescan pixels */
-	short	bath_scale;	/* 1000Xscale where depth=bathXscale */
-	short	amp_scale;	/* 1000Xscale where amplitude=ampXscale */
-	short	ss_scale;	/* 1000Xscale where sidescan=ssXscale */
+	short	depth_scale;	/* 1000 X scale where depth = bath X scale */
+	short	distance_scale;	/* 1000 X scale where distance = dist X scale */
+	short	transducer_depth; /* scaled by depth_scale */
+	short	altitude;	/* scaled by depth_scale */
 
 	/* pointers to arrays */
+	unsigned char *beamflag;
 	short	*bath;
 	short	*amp;
 	short	*bath_acrosstrack;

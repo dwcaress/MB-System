@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 4.1 1997-09-15 19:06:40 caress Exp $
+ *    $Id: mb_define.h,v 4.2 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.0  1996/08/05  15:24:55  caress
  * Initial revision.
  *
@@ -27,6 +30,9 @@
 /* type definitions of signed and unsigned char */
 typedef unsigned char	mb_u_char;
 #ifdef IRIX
+typedef signed char	mb_s_char;
+#endif
+#ifdef IRIX64
 typedef signed char	mb_s_char;
 #endif
 #ifdef SOLARIS

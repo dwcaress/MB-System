@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldedmb.c	2/2/93
- *	$Id: mbr_hsldedmb.c,v 4.7 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_hsldedmb.c,v 4.8 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.6  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -88,7 +92,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldedmb.c,v 4.7 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldedmb.c,v 4.8 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_hsldedmb";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -233,12 +237,12 @@ int	*error;
 #ifdef BYTESWAPPED
 	if (status == MB_SUCCESS && data->seconds != 2054847098)
 		{
-		data->seconds = mb_swap_long(data->seconds);
-		data->microseconds = mb_swap_long(data->microseconds);
-		data->alt_seconds = mb_swap_long(data->alt_seconds);
-		data->alt_microseconds = mb_swap_long(data->alt_microseconds);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->seconds = mb_swap_int(data->seconds);
+		data->microseconds = mb_swap_int(data->microseconds);
+		data->alt_seconds = mb_swap_int(data->alt_seconds);
+		data->alt_microseconds = mb_swap_int(data->alt_microseconds);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -250,7 +254,7 @@ int	*error;
 			data->range[i] = mb_swap_short(data->range[i]);
 			}
 		for (i=0;i<4;i++)
-			data->flag[i] = mb_swap_long(data->flag[i]);
+			data->flag[i] = mb_swap_int(data->flag[i]);
 
 		}
 #endif
@@ -323,7 +327,22 @@ int	*error;
 		/* read distance and depth values into storage arrays */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			mb_io_ptr->new_bath[i] = data->depth[i];
+			if (data->depth[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[i] = data->depth[i];
+			    }
+			else if (data->depth[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = 
+				    MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[i] = -data->depth[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[i] =  MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[i] = -data->depth[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[i] = data->range[i];
 			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 			}
@@ -365,9 +384,9 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp: %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
-				i,mb_io_ptr->new_bath[i],
-				i,mb_io_ptr->new_bath_acrosstrack[i]);
+			  fprintf(stderr,"dbg4       %d  flag:%d  bath:%f  bathdist:%f\n",
+				i,mb_io_ptr->new_beamflag[i],mb_io_ptr->new_bath[i],
+				mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
 		/* done translating values */
@@ -426,7 +445,8 @@ int	*error;
 		store->track = 0;
 		store->depth_center 
 			= mb_io_ptr->new_bath[mb_io_ptr->beams_bath/2];
-		store->depth_scale = 0.01*data->scale;
+		/*store->depth_scale = 0.01*data->scale;*/
+		store->depth_scale = 1.0;
 		store->spare = 1;
 		id = MBSYS_HSDS_BEAMS - 1;
 		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
@@ -656,8 +676,8 @@ int	*error;
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.0;
 		if (mb_io_ptr->new_lon > 180.0)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.0;
-		data->lon = (long int)(0.5 + 10000000.0*mb_io_ptr->new_lon);
-		data->lat = (long int)(0.5 + 10000000.0*mb_io_ptr->new_lat);
+		data->lon = (int)(0.5 + 10000000.0*mb_io_ptr->new_lon);
+		data->lat = (int)(0.5 + 10000000.0*mb_io_ptr->new_lat);
 
 		/* get heading */
 		data->heading = (int)(0.5 + 10.*mb_io_ptr->new_heading);
@@ -669,7 +689,10 @@ int	*error;
 			into hsldedmb data structure */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data->depth[i] = mb_io_ptr->new_bath[i];
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			    data->depth[i] = -mb_io_ptr->new_bath[i];
+			else
+			    data->depth[i] = mb_io_ptr->new_bath[i];
 			data->range[i] = mb_io_ptr->new_bath_acrosstrack[i];
 			}
 		}
@@ -678,12 +701,12 @@ int	*error;
 #ifdef BYTESWAPPED
 	if (dataplus->kind == MB_DATA_DATA)
 		{
-		data->seconds = mb_swap_long(data->seconds);
-		data->microseconds = mb_swap_long(data->microseconds);
-		data->alt_seconds = mb_swap_long(data->alt_seconds);
-		data->alt_microseconds = mb_swap_long(data->alt_microseconds);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->seconds = mb_swap_int(data->seconds);
+		data->microseconds = mb_swap_int(data->microseconds);
+		data->alt_seconds = mb_swap_int(data->alt_seconds);
+		data->alt_microseconds = mb_swap_int(data->alt_microseconds);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -695,7 +718,7 @@ int	*error;
 			data->range[i] = mb_swap_short(data->range[i]);
 			}
 		for (i=0;i<4;i++)
-			data->flag[i] = mb_swap_long(data->flag[i]);
+			data->flag[i] = mb_swap_int(data->flag[i]);
 
 		}
 #endif

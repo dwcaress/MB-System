@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100b2.c	3/3/94
- *	$Id: mbr_sb2100b2.c,v 4.1 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbr_sb2100b2.c,v 4.2 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.0  1997/04/21  17:01:19  caress
  * MB-System 4.5 Beta Release.
  *
@@ -59,7 +62,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100b2.c,v 4.1 1997-09-15 19:06:40 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b2.c,v 4.2 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100b2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -332,6 +335,7 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
@@ -459,6 +463,19 @@ int	*error;
 		gain_factor = pow(10.0, (-gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
+			if (data->beams[i].quality == ' ')
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
+			else if (data->beams[i].quality == '0')
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
+			else if (data->beams[i].quality == 'Q')
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_SONAR + MB_FLAG_FLAG;
+			else if (data->beams[i].quality == 'E')
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			else if (data->beams[i].quality == 'F')
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_FILTER + MB_FLAG_FLAG;
 			mb_io_ptr->new_bath[i] 
 				= data->beams[i].depth;
 			mb_io_ptr->new_bath_acrosstrack[i] 
@@ -489,8 +506,9 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       beam:%d  flag:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -829,6 +847,19 @@ int	*error;
 		gain_factor = pow(10.0, (gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			    {
+			    if (mb_beam_check_flag_null(mb_io_ptr->new_beamflag[i]))
+				data->beams[i].quality = '0';
+			    else if (mb_beam_check_flag_manual(mb_io_ptr->new_beamflag[i]))
+				data->beams[i].quality = 'E';
+			    else if (mb_beam_check_flag_filter(mb_io_ptr->new_beamflag[i]))
+				data->beams[i].quality = 'F';
+			    else if (mb_beam_check_flag_sonar(mb_io_ptr->new_beamflag[i]))
+				data->beams[i].quality = 'Q';
+			    }
+			else 
+			    data->beams[i].quality = ' ';
 			 data->beams[i].depth
 				= mb_io_ptr->new_bath[i];
 			 data->beams[i].acrosstrack
@@ -1237,7 +1268,7 @@ int	*error;
 			}
 		checksum_read = (unsigned int *) &eor_read[0];
 #ifdef BYTESWAPPED
-		*checksum_read = (unsigned int) mb_swap_long(*checksum_read);
+		*checksum_read = (unsigned int) mb_swap_int(*checksum_read);
 #endif
 
 		/* do checksum */
@@ -1271,7 +1302,7 @@ int	*error;
 		mb_swap_float(&(data->offset_x));
 		mb_swap_float(&(data->offset_y));
 		mb_swap_float(&(data->offset_z));
-		data->num_svp =	    (int) mb_swap_long(data->num_svp);
+		data->num_svp =	    (int) mb_swap_int(data->num_svp);
 		for (i=0;i<data->num_svp;i++)
 			{
 			mb_swap_float(&(data->svp[i].depth));
@@ -1376,7 +1407,7 @@ int	*error;
 			}
 		checksum_read = (unsigned int *) &eor_read[0];
 #ifdef BYTESWAPPED
-		*checksum_read = (unsigned int) mb_swap_long(*checksum_read);
+		*checksum_read = (unsigned int) mb_swap_int(*checksum_read);
 #endif
 
 		/* do checksum */
@@ -1476,7 +1507,7 @@ int	*error;
 			}
 		checksum_read = (unsigned int *) &eor_read[0];
 #ifdef BYTESWAPPED
-		*checksum_read = (unsigned int) mb_swap_long(*checksum_read);
+		*checksum_read = (unsigned int) mb_swap_int(*checksum_read);
 #endif
 
 		/* do checksum */
@@ -1512,8 +1543,8 @@ int	*error;
 		mb_swap_float(&(data->heave));
 		mb_swap_float(&(data->ssv));
 		mb_swap_float(&(data->pixel_size));
-		data->nbeams =	    (int) mb_swap_long(data->nbeams);
-		data->npixels =	    (int) mb_swap_long(data->npixels);
+		data->nbeams =	    (int) mb_swap_int(data->nbeams);
+		data->npixels =	    (int) mb_swap_int(data->npixels);
 		data->spare1 =	    (int) mb_swap_short(data->spare1);
 		data->spare2 =	    (int) mb_swap_short(data->spare2);
 		data->spare3 =	    (int) mb_swap_short(data->spare3);
@@ -1633,7 +1664,7 @@ int	*error;
 			}
 		checksum_read = (unsigned int *) &eor_read[0];
 #ifdef BYTESWAPPED
-		*checksum_read = (unsigned int) mb_swap_long(*checksum_read);
+		*checksum_read = (unsigned int) mb_swap_int(*checksum_read);
 #endif
 
 		/* do checksum */
@@ -1694,26 +1725,6 @@ int	*error;
 			data->beams[i].source,
 			data->beams[i].quality);
 		  }
-		}
-
-	/* apply quality flags */
-	if (status == MB_SUCCESS)
-		{
-		for (i=0;i<data->nbeams;i++)
-			{
-			if (data->beams[i].quality != ' '
-			    && data->beams[i].depth > 0.0)
-			    {
-			    data->beams[i].depth = -data->beams[i].depth;
-			    data->beams[i].amplitude = -data->beams[i].amplitude;
-			    }
-			else if (data->beams[i].quality == ' '
-			    && data->beams[i].depth < 0.0)
-			    {
-			    data->beams[i].depth = -data->beams[i].depth;
-			    data->beams[i].amplitude = -data->beams[i].amplitude;
-			    }
-			}
 		}
 
 	/* print output debug statements */
@@ -1789,7 +1800,7 @@ int	*error;
 			}
 		checksum_read = (unsigned int *) &eor_read[0];
 #ifdef BYTESWAPPED
-		*checksum_read = (unsigned int) mb_swap_long(*checksum_read);
+		*checksum_read = (unsigned int) mb_swap_int(*checksum_read);
 #endif
 
 		/* do checksum */
@@ -2122,7 +2133,7 @@ int	*error;
 		mb_swap_float(&(data->offset_x));
 		mb_swap_float(&(data->offset_y));
 		mb_swap_float(&(data->offset_z));
-		data->num_svp =	    (int) mb_swap_long(data->num_svp);
+		data->num_svp =	    (int) mb_swap_int(data->num_svp);
 		for (i=0;i<data->num_svp;i++)
 			{
 			mb_swap_float(&(data->svp[i].depth));
@@ -2137,7 +2148,7 @@ int	*error;
 		for (i=0;i<write_length;i++)
 			checksum += (unsigned int) checksum_ptr[i];
 #ifdef BYTESWAPPED
-		checksum = (unsigned int) mb_swap_long(checksum);
+		checksum = (unsigned int) mb_swap_int(checksum);
 #endif
 		
 		/* write the data */
@@ -2280,7 +2291,7 @@ int	*error;
 		for (i=0;i<write_length;i++)
 			checksum += (unsigned int) checksum_ptr[i];
 #ifdef BYTESWAPPED
-		checksum = (unsigned int) mb_swap_long(checksum);
+		checksum = (unsigned int) mb_swap_int(checksum);
 #endif
 
 		/* write the data */
@@ -2456,8 +2467,8 @@ int	*error;
 		mb_swap_float(&(data->heave));
 		mb_swap_float(&(data->ssv));
 		mb_swap_float(&(data->pixel_size));
-		data->nbeams =	    (int) mb_swap_long(data->nbeams);
-		data->npixels =	    (int) mb_swap_long(data->npixels);
+		data->nbeams =	    (int) mb_swap_int(data->nbeams);
+		data->npixels =	    (int) mb_swap_int(data->npixels);
 		data->spare1 =	    (int) mb_swap_short(data->spare1);
 		data->spare2 =	    (int) mb_swap_short(data->spare2);
 		data->spare3 =	    (int) mb_swap_short(data->spare3);
@@ -2473,7 +2484,7 @@ int	*error;
 		for (i=0;i<write_length;i++)
 			checksum += (unsigned int) checksum_ptr[i];
 #ifdef BYTESWAPPED
-		checksum = (unsigned int) mb_swap_long(checksum);
+		checksum = (unsigned int) mb_swap_int(checksum);
 #endif
 		
 		/* write the data */
@@ -2557,33 +2568,6 @@ int	*error;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_sb2100b2_struct *) data_ptr;
-
-	/* set quality flags */
-	for (i=0;i<data->nbeams;i++)
-		{
-		if (data->beams[i].depth < 0.0
-		    && data->beams[i].quality == ' ')
-		    {
-		    data->beams[i].quality = 'F';
-		    data->beams[i].depth = -data->beams[i].depth;
-		    }
-		else if (data->beams[i].depth < 0.0)
-		    {
-		    data->beams[i].depth = -data->beams[i].depth;
-		    }
-		else if (data->beams[i].depth == 0.0)
-		    {
-		    data->beams[i].quality = '0';
-		    }
-		else if (data->beams[i].depth > 0.0)
-		    {
-		    data->beams[i].quality = ' ';
-		    }
-		if (data->beams[i].amplitude < 0.0)
-		    {
-		    data->beams[i].amplitude = -data->beams[i].amplitude;
-		    }
-		}		
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2671,7 +2655,7 @@ int	*error;
 		for (i=0;i<write_length;i++)
 			checksum += (unsigned int) checksum_ptr[i];
 #ifdef BYTESWAPPED
-		checksum = (unsigned int) mb_swap_long(checksum);
+		checksum = (unsigned int) mb_swap_int(checksum);
 #endif
 		
 		/* write the data */
@@ -2796,7 +2780,7 @@ int	*error;
 		/* do checksum */
 		checksum = 0;
 #ifdef BYTESWAPPED
-		checksum = (unsigned int) mb_swap_long(checksum);
+		checksum = (unsigned int) mb_swap_int(checksum);
 #endif
 		
 		/* write the checksum */

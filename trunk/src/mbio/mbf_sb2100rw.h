@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 4.8 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbf_sb2100rw.h,v 4.9 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.7  1995/06/07  20:41:47  caress
  * Fixed some typos.
  *
@@ -127,7 +130,7 @@ struct mbf_sb2100rw_struct
 	int	jday;
 	int	hour;
 	int	minute;
-	long int	msec;			/* msec */
+	int	msec;			/* msec */
 
 	/* sonar parameters (PR) */
 	int	roll_bias_port;			/* 0.01 deg */

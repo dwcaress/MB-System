@@ -690,7 +690,7 @@ int \fBmb_read\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP,
 \fIpings\fP, \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdistance\fP, 
 \fInbath\fP, \fInamp\fP, \fInss\fP, 
-\fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
+\fIbeamflags\fP, \fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
 \fIss\fP, \fIsslon\fP, \fIsslat\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
@@ -721,6 +721,8 @@ int *\fInbath\fP;
 int *\fInamp\fP;
 .br
 int *\fInss\fP;
+.br
+char *\fIbeamflags\fP;
 .br
 double *\fIbath\fP;
 .br
@@ -771,6 +773,7 @@ The return values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
+	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathlon\fP:		array of of longitude values corresponding 

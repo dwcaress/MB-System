@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 4.6 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_get_all.c,v 4.7 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -80,7 +83,7 @@
 int mb_get_all(verbose,mbio_ptr,store_ptr,kind,time_i,time_d,
 		navlon,navlat,speed,heading,distance,
 		nbath,namp,nss,
-		bath,amp,bathacrosstrack,bathalongtrack,
+		beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
@@ -97,6 +100,7 @@ double	*distance;
 int	*nbath;
 int	*namp;
 int	*nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -107,7 +111,7 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 4.6 1997-04-21 17:02:07 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 4.7 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -145,6 +149,7 @@ int	*error;
 	*nss = 0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->bath[i] = 0.0;
 		mb_io_ptr->bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->bath_alongtrack[i] = 0.0;
@@ -233,6 +238,7 @@ int	*error;
 		*nbath = mb_io_ptr->beams_bath;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
+			beamflag[i] = mb_io_ptr->new_beamflag[i];
 			bath[i] = mb_io_ptr->new_bath[i];
 			bathacrosstrack[i] = mb_io_ptr->new_bath_acrosstrack[i];
 			bathalongtrack[i] = mb_io_ptr->new_bath_alongtrack[i];
@@ -435,10 +441,10 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
 		if (verbose >= 3 && mb_io_ptr->beams_bath > 0)
 		  {
-		  fprintf(stderr,"dbg3       beam   bath  crosstrack alongtrack\n");
+		  fprintf(stderr,"dbg3       beam   flag  bath  crosstrack alongtrack\n");
 		  for (i=0;i<mb_io_ptr->beams_bath;i++)
-		    fprintf(stderr,"dbg3       %4d   %f    %f     %f\n",
-			i,bath[i],
+		    fprintf(stderr,"dbg3       %4d   %3d   %f    %f     %f\n",
+			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg2       namp:      %d\n",*namp);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 4.6 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 4.7 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.5  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -74,7 +78,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sb2000ss.c,v 4.6 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000ss.c,v 4.7 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -229,8 +233,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -284,8 +288,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -321,8 +325,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -464,7 +468,7 @@ int	*error;
 #ifdef BYTESWAPPED
 	if (status == MB_SUCCESS)
 		{
-		data->ping_number = mb_swap_long(data->ping_number);
+		data->ping_number = mb_swap_int(data->ping_number);
 		data->ping_length = mb_swap_short(data->ping_length);
 		data->pixel_size = mb_swap_short(data->pixel_size);
 		data->ss_min = mb_swap_short(data->ss_min);
@@ -1246,8 +1250,8 @@ int	*error;
 	data->day = mb_swap_short(data->day);
 	data->min = mb_swap_short(data->min);
 	data->sec = mb_swap_short(data->sec);
-	data->lat = mb_swap_long(data->lat);
-	data->lon = mb_swap_long(data->lon);
+	data->lat = mb_swap_int(data->lat);
+	data->lon = mb_swap_int(data->lon);
 	data->heading = mb_swap_short(data->heading);
 	data->course = mb_swap_short(data->course);
 	data->speed = mb_swap_short(data->speed);
@@ -1265,7 +1269,7 @@ int	*error;
 				*short_ptr = (unsigned short) mb_swap_short(*short_ptr);
 				}
 			}
-		data->ping_number = mb_swap_long(data->ping_number);
+		data->ping_number = mb_swap_int(data->ping_number);
 		data->ping_length = mb_swap_short(data->ping_length);
 		data->pixel_size = mb_swap_short(data->pixel_size);
 		data->ss_min = mb_swap_short(data->ss_min);

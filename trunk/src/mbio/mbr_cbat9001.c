@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat9001.c	8/8/94
- *	$Id: mbr_cbat9001.c,v 4.7 1997-07-28 14:58:19 caress Exp $
+ *	$Id: mbr_cbat9001.c,v 4.8 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/07/28  14:58:19  caress
+ * Fixed typos.
+ *
  * Revision 4.6  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -76,7 +79,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_cbat9001.c,v 4.7 1997-07-28 14:58:19 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat9001.c,v 4.8 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_cbat9001";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -367,6 +370,7 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
@@ -545,7 +549,26 @@ int	*error;
 		reflscale  = 1.0;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			mb_io_ptr->new_bath[i] = depthscale*data->bath[i];
+			if (data->quality[i] == 0
+			    || data->bath[i] == 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[i] 
+				= depthscale*data->bath[i];
+			    }
+			else if (data->quality[i] == 3)
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[i] 
+				= depthscale*data->bath[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[i] 
+				= MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[i] 
+				= depthscale*data->bath[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[i] 
 				= dacrscale*data->bath_acrosstrack[i];
 			mb_io_ptr->new_bath_alongtrack[i] 
@@ -572,8 +595,9 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -970,7 +994,22 @@ int	*error;
 			{
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
 				{
-				data->bath[i] = mb_io_ptr->new_bath[i]/depthscale;
+				if (mb_io_ptr->new_beamflag[i] 
+				    == MB_FLAG_NULL)
+				    {
+				    data->bath[i] = mb_io_ptr->new_bath[i]/depthscale;
+				    data->quality[i] = 0;
+				    }
+				else if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+				    {
+				    data->bath[i] = mb_io_ptr->new_bath[i]/depthscale;
+				    data->quality[i] = 1;
+				    }
+				else
+				    {
+				    data->bath[i] = mb_io_ptr->new_bath[i]/depthscale;
+				    data->quality[i] = 3;
+				    }
 				data->bath_acrosstrack[i]
 					= mb_io_ptr->new_bath_acrosstrack[i]/dacrscale;
 				data->bath_alongtrack[i] 
@@ -1504,15 +1543,15 @@ int	*error;
 		data->other_quality = (int) *short_ptr;
 #else
 		int_ptr = (int *) &line[8];
-		data->pos_latitude = (int) mb_swap_long(*int_ptr);
+		data->pos_latitude = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[12];
-		data->pos_longitude = (int) mb_swap_long(*int_ptr);
+		data->pos_longitude = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[16];
-		data->utm_northing = (int) mb_swap_long(*int_ptr);
+		data->utm_northing = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[20];
-		data->utm_easting = (int) mb_swap_long(*int_ptr);
+		data->utm_easting = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[24];
-		data->utm_zone_lon = (int) mb_swap_long(*int_ptr);
+		data->utm_zone_lon = (int) mb_swap_int(*int_ptr);
 		data->utm_zone = line[28];
 		data->hemisphere = line[29];
 		data->ellipsoid = line[30];
@@ -1619,9 +1658,9 @@ int	*error;
 		data->svp_longitude = *int_ptr;
 #else
 		int_ptr = (int *) &line[8];
-		data->svp_latitude = (int) mb_swap_long(*int_ptr);
+		data->svp_latitude = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[12];
-		data->svp_latitude = (int) mb_swap_long(*int_ptr);
+		data->svp_latitude = (int) mb_swap_int(*int_ptr);
 #endif
 		data->svp_num = 0;
 		for (i=0;i<500;i++)
@@ -1656,7 +1695,7 @@ int	*error;
 		fprintf(stderr,"dbg5       svp_longitude:    %d\n",data->svp_longitude);
 		fprintf(stderr,"dbg5       svp_num:          %d\n",data->svp_num);
 		for (i=0;i<data->svp_num;i++)
-			fprintf(stderr,"dbg5       depth: %f     vel: %f\n",
+			fprintf(stderr,"dbg5       depth: %d     vel: %d\n",
 				data->svp_depth[i],data->svp_vel[i]);
 		}
 
@@ -1729,9 +1768,9 @@ int	*error;
 		data->svp_longitude = *int_ptr;
 #else
 		int_ptr = (int *) &line[8];
-		data->svp_latitude = (int) mb_swap_long(*int_ptr);
+		data->svp_latitude = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[12];
-		data->svp_latitude = (int) mb_swap_long(*int_ptr);
+		data->svp_latitude = (int) mb_swap_int(*int_ptr);
 #endif
 		data->svp_num = 0;
 		for (i=0;i<200;i++)
@@ -1766,7 +1805,7 @@ int	*error;
 		fprintf(stderr,"dbg5       svp_longitude:    %d\n",data->svp_longitude);
 		fprintf(stderr,"dbg5       svp_num:          %d\n",data->svp_num);
 		for (i=0;i<data->svp_num;i++)
-			fprintf(stderr,"dbg5       depth: %f     vel: %f\n",
+			fprintf(stderr,"dbg5       depth: %d     vel: %d\n",
 				data->svp_depth[i],data->svp_vel[i]);
 		}
 
@@ -1852,9 +1891,9 @@ int	*error;
 		data->sound_vel = (int) *short_ptr;
 #else
 		int_ptr = (int *) &line[8];
-		data->latitude = (int) mb_swap_long(*int_ptr);
+		data->latitude = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[12];
-		data->latitude = (int) mb_swap_long(*int_ptr);
+		data->latitude = (int) mb_swap_int(*int_ptr);
 		short_ptr = (short int *) &line[16];
 		data->roll = (int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[18];
@@ -2437,15 +2476,15 @@ int	*error;
 		*short_ptr = (short int) data->other_quality;
 #else
 		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_long(data->pos_latitude);
+		*int_ptr = (int) mb_swap_int(data->pos_latitude);
 		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_long(data->pos_longitude);
+		*int_ptr = (int) mb_swap_int(data->pos_longitude);
 		int_ptr = (int *) &line[16];
-		*int_ptr = (int) mb_swap_long(data->utm_northing);
+		*int_ptr = (int) mb_swap_int(data->utm_northing);
 		int_ptr = (int *) &line[20];
-		*int_ptr = (int) mb_swap_long(data->utm_easting);
+		*int_ptr = (int) mb_swap_int(data->utm_easting);
 		int_ptr = (int *) &line[24];
-		*int_ptr = (int) mb_swap_long(data->utm_zone_lon);
+		*int_ptr = (int) mb_swap_int(data->utm_zone_lon);
 		line[28] = data->utm_zone;
 		line[29] = data->hemisphere;
 		line[30] = data->ellipsoid;
@@ -2537,7 +2576,7 @@ int	*error;
 		fprintf(stderr,"dbg5       svp_longitude:    %d\n",data->svp_longitude);
 		fprintf(stderr,"dbg5       svp_num:          %d\n",data->svp_num);
 		for (i=0;i<data->svp_num;i++)
-			fprintf(stderr,"dbg5       depth: %f     vel: %f\n",
+			fprintf(stderr,"dbg5       depth: %d     vel: %d\n",
 				data->svp_depth[i],data->svp_vel[i]);
 		}
 
@@ -2587,9 +2626,9 @@ int	*error;
 		*int_ptr = data->svp_longitude;
 #else
 		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_long(data->svp_latitude);
+		*int_ptr = (int) mb_swap_int(data->svp_latitude);
 		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_long(data->svp_longitude);
+		*int_ptr = (int) mb_swap_int(data->svp_longitude);
 #endif
 		for (i=0;i<data->svp_num;i++)
 			{
@@ -2755,9 +2794,9 @@ int	*error;
 		*short_ptr = (short int) data->sound_vel;
 #else
 		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_long(data->latitude);
+		*int_ptr = (int) mb_swap_int(data->latitude);
 		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_long(data->longitude);
+		*int_ptr = (int) mb_swap_int(data->longitude);
 		short_ptr = (short int *) &line[16];
 		*short_ptr = (int) mb_swap_short(data->roll);
 		short_ptr = (short int *) &line[18];

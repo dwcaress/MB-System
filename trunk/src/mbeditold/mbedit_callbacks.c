@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.2 1997-09-15 19:06:10 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.3 1998-10-05 17:45:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/09/15  19:06:10  caress
+ * Real Version 4.5
+ *
  * Revision 4.1  1997/04/22  19:26:36  caress
  * Fixed startup mode.
  *
@@ -176,7 +179,7 @@ int key_d_down = 0;
 /* Set the colors used for this program here. */
 #define NCOLORS 6
 XColor colors[NCOLORS];
-unsigned long mpixel_values[NCOLORS];
+unsigned int mpixel_values[NCOLORS];
 XColor db_color;
 
 /* Set these to the dimensions of your canvas drawing */
@@ -1615,7 +1618,9 @@ do_buffer_hold(w, client_data, call_data)
  XtPointer client_data;
  XtPointer call_data;
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
+
+    hold_size = acs->value;	
 }
 
 /*--------------------------------------------------------------------*/
@@ -1628,7 +1633,7 @@ do_buffer_size(w, client_data, call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
-    hold_size = acs->value;	
+    buffer_size = acs->value;	
 	
 }
 

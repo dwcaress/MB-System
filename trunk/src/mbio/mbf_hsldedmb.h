@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsldedmb.h	1/20/93
- *	$Id: mbf_hsldedmb.h,v 4.4 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbf_hsldedmb.h,v 4.5 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.3  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -74,12 +77,12 @@
 
 struct mbf_hsldedmb_data_struct
 	{ 
-	unsigned long	seconds;	/* seconds since 1/1/70 00:00:00 */
-	unsigned long	microseconds;	/* microseconds */
-	unsigned long	alt_seconds;	/* seconds since last survey header */
-	unsigned long	alt_microseconds;	/* microseconds */
-	long	lat;		/* latitude in degrees times 10000000 */
-	long	lon;		/* latitude in degrees times 10000000 */
+	unsigned int	seconds;	/* seconds since 1/1/70 00:00:00 */
+	unsigned int	microseconds;	/* microseconds */
+	unsigned int	alt_seconds;	/* seconds since last survey header */
+	unsigned int	alt_microseconds;	/* microseconds */
+	int	lat;		/* latitude in degrees times 10000000 */
+	int	lon;		/* latitude in degrees times 10000000 */
 	short	heading;	/* heading in degrees times 10 */
 	short	course;		/* course in degrees times 10 */
 	short	speed;		/* speed in m/s times 10 */
@@ -92,7 +95,7 @@ struct mbf_hsldedmb_data_struct
 	mb_u_char	speed_ref;	/* speed reference 
 					("B": bottom track) */
 	mb_u_char	quality;	/* quality flag */
-	unsigned long	flag[4];
+	unsigned int	flag[4];
 	};
 
 struct mbf_hsldedmb_struct
