@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.0 1997-04-21 16:57:14 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.1 1997-04-22 19:26:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/04/21  16:57:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.0  1997/04/16  21:31:04  caress
  * Complete rewrite without uid file.
  *
@@ -125,7 +128,7 @@ XGCValues xgcv;
 XFontStruct *fontStruct;
 
 /* Global mbedit definitions */
-int	expose_plot_ok = True;
+int	expose_plot_ok = False;
 int	plot_size_max;
 int	mplot_size;
 int	buffer_size_max;
@@ -272,12 +275,14 @@ GRAU( XtPointer, call)
 /*--------------------------------------------------------------------*/
 
 void
-do_mbedit_init(app, argc, argv)
- XtAppContext	app;
+do_mbedit_init(argc, argv)
  int argc;
  char **argv;
 {
     int	    i;
+    
+    /* make sure expose plots are off */
+    expose_plot_ok = False;
     
     /* get additional widgets */
     fileSelectionList = (Widget) 
@@ -296,7 +301,6 @@ do_mbedit_init(app, argc, argv)
 				    XmDIALOG_HELP_BUTTON));
 
     /* Setup the entire screen. */
-    app_context = app;
     display = XtDisplay(window_mbedit);
     colormap = DefaultColormap(display, XDefaultScreen(display));
     
@@ -396,7 +400,15 @@ do_mbedit_init(app, argc, argv)
     /* initialize mbedit proper */
     status = mbedit_init(argc,argv,&startup_file);
     
+    /* set up the widgets */
     do_setup_data();
+    
+    /* if a startup file has been specified open it */
+    if (startup_file)
+	    mbedit_startup_file();
+    
+    /* finally allow expose plots */
+    expose_plot_ok = False;
 }
 
 /*--------------------------------------------------------------------*/
@@ -1469,6 +1481,8 @@ do_next_buffer(w, client_data, call_data)
  XtPointer call_data;
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    
+    int	    quit;
 	    
     /* turn off expose plots */
     expose_plot_ok = False;
@@ -1479,7 +1493,7 @@ do_next_buffer(w, client_data, call_data)
 		    mx_interval,my_interval,
 		    mplot_size,mshow_flagged,
 		    &ndumped,&nloaded,&nbuffer,
-		    &ngood,&icurrent,&mnplot);
+		    &ngood,&icurrent,&mnplot,&quit);
     if (status == 0) XBell(theDisplay,100);
 
     /* set widget values */
@@ -1487,6 +1501,10 @@ do_next_buffer(w, client_data, call_data)
 	    
     /* turn on expose plots */
     expose_plot_ok = True;
+    
+    /* quit if in GUI mode */
+    if (quit)
+	    exit(0);
 
 }
 
@@ -1762,6 +1780,45 @@ do_goto_apply(w, client_data, call_data)
 	    
     /* turn on expose plots */
     expose_plot_ok = True;
+}
+
+/*--------------------------------------------------------------------*/
+
+int
+do_wait_until_viewed(app)
+XtAppContext app;
+{
+    Widget  topshell;
+    Window  topwindow;
+    XWindowAttributes	xwa;
+    XEvent  event;
+    
+    /* set app_context */
+    app_context = app;
+    
+    /* find the top level shell */
+    for (topshell = window_mbedit; 
+	    !XtIsTopLevelShell(topshell);
+	    topshell = XtParent(topshell))
+	;
+	
+    /* keep processing events until it is viewed */
+    if (XtIsRealized(topshell))
+	{
+	topwindow = XtWindow(topshell);
+	
+	/* wait for the window to be mapped */
+	while (XGetWindowAttributes(
+			XtDisplay(window_mbedit), 
+			topwindow, &xwa)
+		&& xwa.map_state != IsViewable)
+	    {
+	    XtAppNextEvent(app_context, &event);
+	    XtDispatchEvent(&event);
+	    }
+	}
+	
+    XmUpdateDisplay(topshell);
 }
 
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.4 1997-04-21 17:07:38 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.5 1997-04-22 19:25:57 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/04/21  17:07:38  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.4  1997/04/16  21:40:29  caress
  * Version for MB-System 4.5.
  *
@@ -476,8 +479,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 /*--------------------------------------------------------------------*/
 
 void
-do_mbnavedit_init(app, argc, argv)
- XtAppContext	app;
+do_mbnavedit_init(argc, argv)
  int argc;
  char **argv;
 {
@@ -525,7 +527,6 @@ do_mbnavedit_init(app, argc, argv)
 		do_scroll, NULL);
 
     /* Setup the entire screen. */
-    app_context = app;
     display = XtDisplay(drawingArea);
     colormap = DefaultColormap(display,XDefaultScreen(display));
     
@@ -799,6 +800,7 @@ XtPointer client;
 XtPointer call;
 {
 	int	status;
+	int	quit;
 	
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 	    
@@ -806,12 +808,16 @@ XtPointer call;
 	expose_plot_ok = False;
 
 	/* get next buffer */
-	status = mbnavedit_action_next_buffer();
+	status = mbnavedit_action_next_buffer(&quit);
 	if (status == 0) mbnavedit_bell(100);
 	do_unset_interval();
 	    
 	/* turn on expose plots */
 	expose_plot_ok = True;
+    
+	/* quit if in GUI mode */
+	if (quit)
+		exit(0);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2102,6 +2108,45 @@ mbnavedit_setintervalcursor()
 	XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
 	XDefineCursor(display,can_xid,myCursor);
 }
+/*--------------------------------------------------------------------*/
+
+int
+do_wait_until_viewed(app)
+XtAppContext app;
+{
+    Widget  topshell;
+    Window  topwindow;
+    XWindowAttributes	xwa;
+    XEvent  event;
+    
+    /* set app_context */
+    app_context = app;
+    
+    /* find the top level shell */
+    for (topshell = drawingArea; 
+	    !XtIsTopLevelShell(topshell);
+	    topshell = XtParent(topshell))
+	;
+	
+    /* keep processing events until it is viewed */
+    if (XtIsRealized(topshell))
+	{
+	topwindow = XtWindow(topshell);
+	
+	/* wait for the window to be mapped */
+	while (XGetWindowAttributes(
+			XtDisplay(drawingArea), 
+			topwindow, &xwa)
+		&& xwa.map_state != IsViewable)
+	    {
+	    XtAppNextEvent(app_context, &event);
+	    XtDispatchEvent(&event);
+	    }
+	}
+	
+    XmUpdateDisplay(topshell);
+}
+
 /*--------------------------------------------------------------------*/
 
 int
