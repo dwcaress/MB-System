@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 5.6 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 5.7 2002-09-25 20:41:04 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.5  2002/02/26 07:50:41  caress
  * Release 5.0.beta14
  *
@@ -141,7 +144,7 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sbsioswb.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbr_sbsioswb.c,v 5.7 2002-09-25 20:41:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
@@ -633,31 +636,13 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			data->kind = MB_DATA_NONE;
-
-			/* read rest of record into dummy */
-			for (i=0;i<data->sensor_size;i++)
-				{
-				if ((read_status = fread(dummy,1,1,
-					mb_io_ptr->mbfp)) != 1) 
-					{
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-					}
-				mb_io_ptr->file_bytes 
-						+= read_status;
-				}
-			for (i=0;i<data->data_size;i++)
-				{
-				if ((read_status = fread(dummy,1,1,
-					mb_io_ptr->mbfp)) != 1) 
-					{
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-					}
-				mb_io_ptr->file_bytes 
-						+= read_status;
-				}
-
+			}
+		else if (strncmp(data->data_type,"SR",2) == 0
+			&& data->year == 0)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			data->kind = MB_DATA_NONE;
 			}
 		else if (strncmp(data->data_type,"SR",2) == 0)
 			{
@@ -666,6 +651,35 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		else
 			{
 			data->kind = MB_DATA_COMMENT;
+			}
+		}
+		
+	/* deal with unintelligible record */
+	if (status == MB_FAILURE
+	    && *error == MB_ERROR_UNINTELLIGIBLE)
+		{
+		/* read rest of record into dummy */
+		for (i=0;i<data->sensor_size;i++)
+			{
+			if ((read_status = fread(dummy,1,1,
+				mb_io_ptr->mbfp)) != 1) 
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				}
+			mb_io_ptr->file_bytes 
+					+= read_status;
+			}
+		for (i=0;i<data->data_size;i++)
+			{
+			if ((read_status = fread(dummy,1,1,
+				mb_io_ptr->mbfp)) != 1) 
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				}
+			mb_io_ptr->file_bytes 
+					+= read_status;
 			}
 		}
 
