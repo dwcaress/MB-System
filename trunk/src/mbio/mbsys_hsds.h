@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.h	3.00	2/16/93
- *	$Id: mbsys_hsds.h,v 3.0 1993-05-14 22:59:28 sohara Exp $
+ *	$Id: mbsys_hsds.h,v 3.1 1993-06-09 08:21:11 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	February 16, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/05/14  22:59:28  sohara
+ * initial version
+ *
  */
 /*
  * Notes on the MBSYS_HSDS data structure:
@@ -77,6 +80,11 @@
 
 /* number of beams for hydrosweep */
 #define MBSYS_HSDS_BEAMS 59
+
+/* angular beam spacing for Hydrosweep DS 
+	- this is supposed to be 1.525 degrees but seems
+	to really be 1.510 degrees */
+#define MBSYS_HSDS_BEAM_SPACING 1.510
 
 struct mbsys_hsds_struct
 	{
