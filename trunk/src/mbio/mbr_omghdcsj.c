@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 4.1 1999-04-20 06:43:57 caress Exp $
+ *	$Id: mbr_omghdcsj.c,v 4.2 1999-04-21 05:45:32 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 10, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/04/20  06:43:57  caress
+ * Fixed bug in sidescan handling.
+ *
  * Revision 4.0  1999/03/31  18:29:20  caress
  * MB-System 4.6beta7
  *
@@ -62,7 +65,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 4.1 1999-04-20 06:43:57 caress Exp $";
+ static char res_id[]="$Id: mbr_omghdcsj.c,v 4.2 1999-04-21 05:45:32 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -333,7 +336,7 @@ int	*error;
 	mb_u_char   scaling_factor;
 	int	ScaleFactor;
 	int	MaxVal;
-	int	offset, offset_start;
+	int	offset, offset_start, sample_count;
 	int	nrawpixels, ssrawoffset, firstgoodbeam;
 	double	bathsort[MBF_OMGHDCSJ_MAX_BEAMS];
 	int	nbathsort;
@@ -1686,6 +1689,7 @@ int	*error;
 		/* loop over raw sidescan, putting each raw pixel into
 			the binning arrays */
 		offset_start = -1;
+		sample_count = 0;
 		mb_io_ptr->pixels_ss = MBF_OMGHDCSJ_MAX_PIXELS;
 		for (i=0;i<profile->numDepths;i++)
 		    {
@@ -1695,6 +1699,16 @@ int	*error;
 			if (offset_start == -1
 				&& beam->no_samples > 0)
 			    offset_start = beam->offset;
+			else if ((beam->offset - offset_start)
+			    > sample_count)
+			    offset_start = beam->offset - sample_count;
+			else if (beam->offset <= 0 && offset_start > 0)
+			    beam->offset = offset_start + sample_count;
+			sample_count += beam->no_samples;
+/*fprintf(stderr, "i:%d flag:%d samples:%d sample_cnt:%d offset:%d offset_start:%d\n", 
+i, mb_io_ptr->new_beamflag[i], beam->no_samples, 
+sample_count, beam->offset, offset_start);
+*/
 			for (j=0;j<beam->no_samples;j++)
 			    {
 			    jj = j + beam->offset - offset_start;
