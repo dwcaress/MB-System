@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.30 2000-09-30 06:56:36 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.31 2000-10-03 21:49:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,10 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.30  2000/09/30  06:56:36  caress
+ * Snapshot for Dale.
+ * New version integrated with mbprocess.
+ *
  * Revision 4.29  2000/09/08  00:29:20  caress
  * Revision of 7 September 2000.
  *
@@ -238,7 +242,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.30 2000-09-30 06:56:36 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.31 2000-10-03 21:49:04 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -3506,9 +3510,9 @@ int	savemode;
 	status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ssalongtrack,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&editcount,&error);
-	for (i=0;i<MBEDIT_MAX_PINGS;i++)
+	for (i=0;i<MBEDIT_BUFFER_SIZE;i++)
 		{
-		ping[i].allocated = MB_NO;
+		ping[i].allocated = 0;
 		ping[i].beamflag = NULL;
 		ping[i].bath = NULL;
 		ping[i].bathacrosstrack = NULL;
@@ -3650,19 +3654,6 @@ int	savemode;
 			    editsave_time_d[insert] = stime_d;
 			    editsave_beam[insert] = sbeam;
 			    editsave_action[insert] = saction;
-
-			    /* insert into sorted array */
-/*			    insert = i;
-			    for (j = i - 1; j >= 0 && stime_d < editsave_time_d[j]; j--)
-				{
-				editsave_time_d[j+1] = editsave_time_d[j];
-				editsave_beam[j+1] = editsave_beam[j];
-				editsave_action[j+1] = editsave_action[j];
-				insert--;
-				}
-			    editsave_time_d[insert] = stime_d;
-			    editsave_beam[insert] = sbeam;
-			    editsave_action[insert] = saction;*/
 			    }
 	    		fclose(sifp);
 			}
@@ -3762,11 +3753,11 @@ int mbedit_close_file()
 	mb_free(verbose,&ssacrosstrack,&error);
 	mb_free(verbose,&ssalongtrack,&error);
 	mb_free(verbose,&editcount,&error);
-	for (i=0;i<MBEDIT_MAX_PINGS;i++)
+	for (i=0;i<MBEDIT_BUFFER_SIZE;i++)
 		{
-		if (ping[i].allocated == MB_YES)
+		if (ping[i].allocated > 0)
 		    {
-		    ping[i].allocated = MB_NO;
+		    ping[i].allocated = 0;
 		    mb_free(verbose,&ping[i].beamflag,&error);
 		    mb_free(verbose,&ping[i].bath,&error);
 		    mb_free(verbose,&ping[i].bathacrosstrack,&error);
@@ -3860,9 +3851,6 @@ int	*nbuffer;
 		current_id = nbuff - 1;
 	*nbuffer = nbuff;
 
-	/* flag lack of indexing */
-	nbuff = 0;
-
 	/* print out information */
 	if (verbose >= 0)
 		{
@@ -3951,7 +3939,19 @@ int	*icurrent;
 			error = MB_ERROR_OTHER;
 			}
 		if (status == MB_SUCCESS
-			&& ping[nbuff].allocated == MB_NO)
+			&& ping[nbuff].allocated > 0
+			&& ping[nbuff].allocated < ping[nbuff].beams_bath)
+			{
+			ping[nbuff].allocated = 0;
+			mb_free(verbose, &ping[nbuff].beamflag, &error);
+			mb_free(verbose, &ping[nbuff].bath, &error);
+			mb_free(verbose, &ping[nbuff].bathacrosstrack, &error);
+			mb_free(verbose, &ping[nbuff].bathalongtrack, &error);
+			mb_free(verbose, &ping[nbuff].bath_x, &error);
+			mb_free(verbose, &ping[nbuff].bath_y, &error);
+			}
+		if (status == MB_SUCCESS
+			&& ping[nbuff].allocated < ping[nbuff].beams_bath)
 			{
 			ping[nbuff].beamflag = NULL;
 			ping[nbuff].bath = NULL;
@@ -3971,10 +3971,10 @@ int	*icurrent;
 				&ping[nbuff].bath_x,&error);
 			status = mb_malloc(verbose,ping[nbuff].beams_bath*sizeof(int),
 				&ping[nbuff].bath_y,&error);
-			ping[nbuff].allocated = MB_YES;
+			ping[nbuff].allocated = ping[nbuff].beams_bath;
 			}
 		if (status == MB_SUCCESS
-			&& ping[nbuff].allocated == MB_YES)
+			&& ping[nbuff].allocated > 0)
 			{
 			for (i=0;i<ping[nbuff].beams_bath;i++)
 			    {
@@ -4117,14 +4117,12 @@ int	*icurrent;
 	do_message_off();
 
 	/* print out information */
-	if (verbose >= 2)
+	if (verbose > 0)
 		{
 		fprintf(stderr,"\n%d data records loaded from input file <%s>\n",
 			*nloaded,ifile);
 		fprintf(stderr,"%d data records now in buffer\n",*nbuffer);
 		fprintf(stderr,"%d editable survey data records now in buffer\n",*ngood);
-		fprintf(stderr,"Current data record index:  %d\n",
-			current_id);
 		fprintf(stderr,"Current data record:        %d\n",
 			current_id);
 		fprintf(stderr,"Current global data record: %d\n",
