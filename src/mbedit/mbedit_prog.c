@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.21 2003-07-26 17:58:52 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.22 2003-07-30 16:39:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,12 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2003/07/28 05:19:34  caress
+ * Fixed label_message.
+ *
+ * Revision 5.21  2003/07/26 17:58:52  caress
+ * Changed beamflag code.
+ *
  * Revision 5.20  2003/04/17 20:50:01  caress
  * Release 5.0.beta30
  *
@@ -328,7 +334,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.21 2003-07-26 17:58:52 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.22 2003-07-30 16:39:32 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -3298,10 +3304,12 @@ int mbedit_action_zero_ping(
 		if (esffile_open == MB_YES)
 		    {
 		    for (j=0;j<ping[iping_save].beams_bath;j++)
+		    	{
 			if (ping[iping_save].beamflag[j] != MB_FLAG_NULL)
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
 				j, MBP_EDIT_ZERO, &error);
+			}
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3309,13 +3317,13 @@ int mbedit_action_zero_ping(
 		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_unplot_beam(iping_save,j);
 
-		/* zero beams in bad ping */
+		/* null beams in bad ping */
 		for (j=0;j<ping[iping_save].beams_bath;j++)
 			{
 			ping[iping_save].beamflag[j] = MB_FLAG_NULL;
 			}
 		if (verbose >= 1)
-			fprintf(stderr,"\nbeams in ping: %d zeroed\n",
+			fprintf(stderr,"\nbeams in ping: %d nulled\n",
 				iping_save);
 
 		/* set some return values */
@@ -3607,6 +3615,7 @@ int mbedit_action_filter_all(
 	/* local variables */
 	char	*function_name = "mbedit_action_filter_all";
 	int	status = MB_SUCCESS;
+	char	string[50];
 	int	i;
 
 	/* print input debug statements */
@@ -3639,6 +3648,14 @@ function_name);
 		for (i=current_id;i<nbuff;i++)
 		    {
 		    mbedit_filter_ping(i);
+			
+		    /* update message every 250 records */
+		    if (i % 250 == 0)
+			{
+			sprintf(string, "MBedit: filters applied to %d of %d records so far...", 
+				i, nbuff - current_id - 1);
+			do_message_on(string);
+			}
 		    }
 
 		/* set some return values */
@@ -4557,6 +4574,7 @@ int mbedit_load_data(int buffer_size,
 						&kind,&nbeams,detect,&detect_error);
 			if (detect_status != MB_SUCCESS)
 				{
+				status = MB_SUCCESS;
 				for (i=0;i<ping[nbuff].beams_bath;i++)
 					{
 					detect[i] = MB_DETECT_UNKNOWN;
@@ -4686,6 +4704,14 @@ int mbedit_load_data(int buffer_size,
 		    status = mb_esf_apply(verbose, &esf, 
 		    		ping[i].time_d, ping[i].beams_bath, 
 				ping[i].beamflag, &error);
+			
+		    /* update message every 250 records */
+		    if (i % 250 == 0)
+			{
+			sprintf(string, "MBedit: saved edits applied to %d of %d records so far...", 
+				i, nbuff - 1);
+			do_message_on(string);
+			}
 		    }
 		}
 	
@@ -4703,6 +4729,14 @@ int mbedit_load_data(int buffer_size,
 		for (i = 0; i < nbuff; i++)
 		    {		
 		    mbedit_filter_ping(i);
+			
+		    /* update message every 250 records */
+		    if (i % 250 == 0)
+			{
+			sprintf(string, "MBedit: filters applied to %d of %d records so far...", 
+				i, nbuff - 1);
+			do_message_on(string);
+			}
  		    }
 		}
 		
@@ -5269,7 +5303,8 @@ int mbedit_plot_beam(int iping, int jbeam)
 				ping[iping].bath_y[jbeam]-4, 8, 8, 
 				pixel_values[BLUE],XG_SOLIDLINE);
 		}
-	else if (jbeam >= 0 && jbeam < ping[iping].beams_bath)
+	else if (jbeam >= 0 && jbeam < ping[iping].beams_bath
+		&& ping[iping].beamflag[jbeam] != MB_FLAG_NULL)
 		{
 		if (show_detects == MB_YES)
 			{
