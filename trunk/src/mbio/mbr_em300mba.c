@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 4.0 1998-12-17 22:59:14 caress Exp $
+ *	$Id: mbr_em300mba.c,v 4.1 1999-02-04 23:52:54 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/12/17  22:59:14  caress
+ * MB-System version 4.6beta4
+ *
  *
  *
  */
@@ -50,7 +53,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 4.0 1998-12-17 22:59:14 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 4.1 1999-02-04 23:52:54 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -908,7 +911,9 @@ int	*error;
 			    for (i=0;i<data->png_nbeams;i++)
 				{
 				if (data->png_beam_num[i] != 
-				    data->png_beam_index[i] + 1)
+					data->png_beam_index[i] + 1
+				    && data->png_beam_num[i] != 
+					data->png_beam_index[i] - 1)
 				    {
 				    *error = MB_ERROR_UNINTELLIGIBLE;
 				    status = MB_FAILURE;
@@ -2539,7 +2544,7 @@ int	*error;
 	fprintf(stderr,"call mbr_em300mba_rd_heading type %x\n",*type);
 #endif
 			status = mbr_em300mba_rd_heading(
-				5,mbfp,data,*sonar,error);
+				verbose,mbfp,data,*sonar,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -2895,6 +2900,14 @@ int	*error;
 			}
 			
 		if (status == MB_SUCCESS 
+			&& (line[len-1] < 32
+			    || line[len-1] > 127)
+			&& line[len-1] != '\r'
+			&& line[len-1] != '\n')
+			{
+			done = MB_YES;
+			}
+		else if (status == MB_SUCCESS 
 			&& line[len-1] == ','
 			&& len > 5)
 			{
@@ -3044,15 +3057,9 @@ int	*error;
 			}
 		else if (status == MB_SUCCESS 
 			&& line[len-1] == ','
-			&& len == 5)
+			&& len <= 5)
 			{
 			len = 0;
-			}
-		else if (status == MB_SUCCESS 
-			&& line[len-1] == ','
-			&& len < 5)
-			{
-			done = MB_YES;
 			}
 		}
 		
@@ -3073,35 +3080,16 @@ int	*error;
 		    data->kind = MB_DATA_START;
 		}
 		
-	/* now loop over reading individual characters to 
-	    get last bytes of record */
+	/* read last two check sum bytes */
 	if (status == MB_SUCCESS)
 	    {
-	    done = MB_NO;
-	    while (done == MB_NO)
-		{
-		read_len = fread(&line[0],1,1,mbfp);
-		if (read_len == 1 && line[0] == EM2_END)
-			{
-			done = MB_YES;
-			status = MB_SUCCESS;
-			/* get last two check sum bytes */
-			read_len = fread(&line[0],2,1,mbfp);
-			}
-		else if (read_len == 1)
-			{
-			status = MB_SUCCESS;
-			}
-		else
-			{
-			done = MB_YES;
-			/* return success here because all of the
-			    important information in this record has
-			    already been read - next attempt to read
-			    file will return error */
-			status = MB_SUCCESS;
-			}
-		}
+	    read_len = fread(&line[0],2,1,mbfp);
+	    /* don't check success of read
+	        - return success here even if read fails
+	        because all of the
+		important information in this record has
+		already been read - next attempt to read
+		file will return error */
 	    }
 
 	/* print debug statements */

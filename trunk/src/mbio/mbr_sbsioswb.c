@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 4.8 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 4.9 1999-02-04 23:52:54 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.7  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -84,7 +87,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 4.8 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 4.9 1999-02-04 23:52:54 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -471,13 +474,32 @@ int	*error;
 			*error = MB_ERROR_EOF;
 			}
 		}
-
+		
 	/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
 		{
 		data->beams_bath = mb_swap_short(data->beams_bath);
 		data->scale_factor = mb_swap_short(data->scale_factor);
+		}
+#endif
+
+	/* check for unintelligible records */
+	if (status == MB_SUCCESS)
+		{
+		if (data->beams_bath < 0
+			|| data->beams_bath > MB_BEAMS_SBSIOSWB)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			data->kind = MB_DATA_NONE;
+			}
+		}
+		
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
+		{
 		for (i=0;i<data->beams_bath;i++)
 			{
 			data->bath_struct[i].bath = 

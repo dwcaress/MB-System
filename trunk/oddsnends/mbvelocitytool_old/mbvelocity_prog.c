@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 4.20 1998-10-09 18:46:59 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 4.21 1999-02-04 23:54:54 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu) 
@@ -23,6 +23,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.20  1998/10/09  18:46:59  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.19  1997/09/16  21:44:24  caress
  * Removed draft option as it is no longer needed.
  *
@@ -144,7 +147,7 @@ struct profile
 #define	MB_SSV_INCORRECT    2
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.20 1998-10-09 18:46:59 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.21 1999-02-04 23:54:54 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -2352,6 +2355,7 @@ int mbvt_process_multibeam()
 	int	ray_stat;
 	int	ssv_mode = MB_SSV_CORRECT;
 	double	ssv;
+	double	factor;
 	double	sx, sy, sxx, sxy;
 	double	delta, a, b;
 	int	ns;
@@ -2464,6 +2468,10 @@ int mbvt_process_multibeam()
 		    /* trace the ray */
 		    if (mb_beam_ok(beamflag[i]))
 			{
+			/* get factor relating lateral distance to
+			    acrosstrack distance */
+			factor = cos(DTR*angles_forward[i]);
+
 			/* trace rays */
 			if (first == MB_NO)
 			    {
@@ -2476,10 +2484,6 @@ int mbvt_process_multibeam()
 				    0, NULL, NULL, NULL, 
 				    &acrosstrack[i], &depth[i], 
 				    &ttime, &ray_stat, &error);
-
-			    /* reset acrosstrack distances */
-			    if (angles_forward[i] > 90.0)
-				acrosstrack[i] = -acrosstrack[i];
 			    }
 			else
 			    {
@@ -2495,13 +2499,12 @@ int mbvt_process_multibeam()
 				    &ttime, &ray_stat, &error);
 
 			    /* reset acrosstrack distances */
-			    if (angles_forward[i] > 90.0)
-				{
-				acrosstrack[i] = -acrosstrack[i];
-				for (j=0;j<nraypath[i];j++)
-				    raypathx[i][j] = -raypathx[i][j];
-				}
+			    for (j=0;j<nraypath[i];j++)
+				raypathx[i][j] = factor * raypathx[i][j];
 			    }
+				    
+			/* get acrosstrack distance */
+			acrosstrack[i] = factor * acrosstrack[i];
 
 			/* add to depth if needed */
 			depth[i] = depth[i] + heave[i] + draft;
@@ -2540,6 +2543,12 @@ int mbvt_process_multibeam()
 
 		/* get residuals */
 		if (ns > 0)
+		  {
+		  /* output some debug values */
+		  if (verbose >= 5)
+			fprintf(stderr,"dbg5       beam   xtrack   depth     fit    residual\n");
+
+		  /* loop over all beams */
 		  for (i=0;i<nbeams;i++)
 		    if (mb_beam_ok(beamflag[i]))
 			{
@@ -2552,10 +2561,11 @@ int mbvt_process_multibeam()
 
 			/* output some debug values */
 			if (verbose >= 5)
-		    		fprintf(stderr,"dbg5       %d %5.0f %5.0f %f %f\n",
+		    		fprintf(stderr,"dbg5       %4d %10f %10f %10f %10f\n",
 					i,acrosstrack[i],depth[i],
 					depth_predict,res);
 			}
+		  }
 		}
 
 	/* end raytracing */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.13 1998-12-17 22:50:20 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.14 1999-02-04 23:55:08 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1998/12/17  22:50:20  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.12  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -149,7 +152,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.13 1998-12-17 22:50:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.14 1999-02-04 23:55:08 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -221,15 +224,14 @@ The default input and output streams are stdin and stdout.\n";
 	int	nbuff = 0;
 	int	nload;
 	int	ndump;
+	int	ndumptot = 0;
 	int	nexpect;
 	struct mbanglecorrect_ping_struct ping[MB_BUFFER_MAX];
-	int	nping = 0;
-	int	nping_start;
-	int	nping_end;
 	int	first = MB_YES;
 	int	start, done;
 	int	first_distance;
 	double	save_time_d = 0.0;
+	int	save_id = 0;
 
 	/* time, user, host variables */
 	time_t	right_now;
@@ -381,9 +383,6 @@ The default input and output streams are stdin and stdout.\n";
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &n_buffer_max);
-			if (n_buffer_max > MB_BUFFER_MAX
-			    || n_buffer_max <= 50)
-			    n_buffer_max = MBANGLECORRECT_BUFFER_DEFAULT;
 			flag++;
 			break;
 		case 'M':
@@ -450,6 +449,13 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr,"Version %s\n",rcs_id);
 		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
 		}
+		
+	/* check buffer size */
+	if (n_buffer_max > MB_BUFFER_MAX)
+		n_buffer_max = MBANGLECORRECT_BUFFER_DEFAULT;
+	if (length_mode == MBANGLECORRECT_LENGTH_NUMBER
+		&& n_buffer_max < 3 * length_num + 1)
+		n_buffer_max = MIN(3 * length_num + 1, MB_BUFFER_MAX);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -982,7 +988,7 @@ The default input and output streams are stdin and stdout.\n";
 				}
 			if (status == MB_SUCCESS && first != MB_YES)
 				{
-				if (save_time_d == ping[ndata].time_d)
+				if (save_id == ping[ndata].id + ndumptot)
 				    jbeg = ndata + 1;
 				}
 			if (status == MB_SUCCESS)
@@ -999,11 +1005,13 @@ The default input and output streams are stdin and stdout.\n";
 			{
 			jend = ndata - 1 - nhold_ping;
 			save_time_d = ping[jend].time_d;
+			save_id = ping[jend].id + ndumptot;
 			}
 		else
 			{
 			jend = ndata - 1;
 			save_time_d = ping[jend].time_d;
+			save_id = ping[jend].id + ndumptot;
 			}
 		if (ndata > 0)
 		    nbathdata += (jend - jbeg + 1);
@@ -1014,7 +1022,6 @@ The default input and output streams are stdin and stdout.\n";
 			}
 		if (first == MB_YES && nbathdata > 0)
 			first = MB_NO;
-			
 
 		/* loop over all of the pings and beams */
 		for (j=jbeg;j<=jend;j++)
@@ -1396,9 +1403,25 @@ The default input and output streams are stdin and stdout.\n";
 
 		  }
 
-		/* reset pings in buffer */
+		/* find number of pings to hold */
+		if (done == MB_YES)
+			nhold = 0;
+		else if (nhold_ping == 0 || jend <= jbeg)
+			nhold = 0;
+		else if (nhold_ping < jend)
+			nhold = nbuff - ping[jend+1-nhold_ping].id;
+		else if (ndata > 0)
+			{
+			nhold = nbuff - ping[0].id + 1;
+			if (nhold > nbuff / 2)
+				nhold = nbuff / 2;
+			}
+		else
+			nhold = 0;
+
+		/* reset pings to be dumped */
 		if (ndata > 0)
-		for (j=jbeg;j<=jend;j++)
+		for (j=0;j<ndata-nhold;j++)
 		  {
 		  if (ampkind == MBANGLECORRECT_SS)
 			for (i=0;i<ping[j].pixels_ss;i++)
@@ -1427,22 +1450,20 @@ The default input and output streams are stdin and stdout.\n";
 				comment,&error);
 		  }
 
-
-		/* find number of pings to hold */
-		if (done == MB_YES)
-			nhold = 0;
-		else if (nhold_ping == 0 || jend <= jbeg)
-			nhold = 0;
-		else if (nhold_ping < jend)
-			nhold = nbuff - ping[jend+1-nhold_ping].id;
-		else if (ndata > 0)
-			{
-			nhold = nbuff - ping[0].id + 1;
-			if (nhold > nbuff / 2)
-				nhold = nbuff / 2;
-			}
-		else
-			nhold = 0;
+		/* save processed data held in buffer */
+		if (ndata > 0)
+		for (j=0;j<=jend-(ndata-nhold);j++)
+		  {
+		  jj = ndata - nhold + j;
+		  if (ampkind == MBANGLECORRECT_SS)
+			for (i=0;i<ping[jj].pixels_ss;i++)
+				{
+				ping[j].dataprocess[i] = ping[jj].dataprocess[i];
+				}
+		  else if (ampkind == MBANGLECORRECT_AMP)
+			for (i=0;i<ping[jj].beams_amp;i++)
+				ping[j].dataprocess[i] = ping[jj].dataprocess[i];
+		  }
 
 		/* dump data from the buffer */
 		ndump = 0;
@@ -1450,6 +1471,7 @@ The default input and output streams are stdin and stdout.\n";
 			{
 			status = mb_buffer_dump(verbose,buff_ptr,ombio_ptr,
 				nhold,&ndump,&nbuff,&error);
+			ndumptot += ndump;
 			}
 
 		/* give the statistics */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.11 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbps.c,v 4.12 1999-02-04 23:55:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.10  1997/09/15  19:11:06  caress
  * Real Version 4.5
  *
@@ -116,13 +119,16 @@ struct ping
 	double	*ssacrosstrack;
 	double	*ssalongtrack;
 	};
+	
+int rgb_black[] = {0, 0, 0};
+int rgb_white[] = {255, 255, 255};
 
 main (argc, argv)
 int argc;
 char **argv; 
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 4.11 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.12 1999-02-04 23:55:08 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
@@ -800,7 +806,11 @@ char **argv;
 		yl[1]=yl[2]= min_yp*scaling-1.;
 		yl[0]=yl[3]= yl[1]+0.1;
 	
+#ifdef GMT_OLD
 		ps_line(xl,yl,4,3,0);
+#else
+		ps_line(xl,yl,4,3,0,0);
+#endif
 		sprintf(label,"%.0f km",xscale/1000.0);
 		ps_text(xl[0]+.5,yl[0]+.05,15,label,0.,6,0);
 
@@ -819,7 +829,11 @@ char **argv;
 		yl[0]=yl[1]= min_yp*scaling-1.;
 		yl[2]=yl[3]= yl[0]+zscale_inch;
 
-		ps_line(xl,yl,4,3,0); 
+#ifdef GMT_OLD
+		ps_line(xl,yl,4,3,0);
+#else
+		ps_line(xl,yl,4,3,0,0);
+#endif
 		sprintf(label,"%.0f m",zscale);
 		ps_text(xl[0]+0.3,yl[0]+zscale_inch/2.0,15,label,0.,6,0);
 
@@ -838,7 +852,14 @@ char **argv;
 		yl[1]=((yl[1]-yl[0])/distot/2)+min_yp*scaling-1.;
 		xl[0]=0.+.6; 
 		yl[0]=0.+min_yp*scaling-0.85;
-		ps_vector(xl[0],yl[0],xl[1],yl[1],0.01,0.25,0.1,1.0,0,0,0,0);
+#ifdef GMT_OLD
+		ps_vector(xl[0],yl[0],xl[1],yl[1],
+		    0.01,0.25,0.1,1.0,
+		    0,0,0,0);
+#else
+		ps_vector(xl[0],yl[0],xl[1],yl[1],
+		    0.01,0.25,0.1,1.0,0,0);
+#endif
 		ps_text(xl[0]-1.7,yl[0]+.2,15,"ship heading",0.,1,0);
 		ps_text(xl[0]-1.7,yl[0],15,"direction",0.,1,0);
 
@@ -884,7 +905,13 @@ char **argv;
 			xl[1]=xl[0]+xl[1];
 			yl[1]=yl[0]+yl[1];
 
-			ps_vector(xl[0],yl[0],xl[1],yl[1],0.01,0.25,0.1,1.0,0,0,0,0);
+#ifdef GMT_OLD
+			ps_vector(xl[0],yl[0],xl[1],yl[1],
+				0.01,0.25,0.1,1.0,0,0,0,0);
+#else
+			ps_vector(xl[0],yl[0],xl[1],yl[1],
+				0.01,0.25,0.1,1.0,0,0);
+#endif
 
 			if (i==0&&rotate==0)
 				ps_text(xl[1],yl[1]+.15,15,"x",0.,6,0);
@@ -1036,7 +1063,11 @@ double scaling;
 		a++;
 	}
 
+#ifdef GMT_OLD
   ps_polygon(xl,yl,*cnt,0,0,0,1);
+#else
+  ps_polygon(xl,yl,*cnt,rgb_black,1);
+#endif
 
   }  /* for loop */
 		
@@ -1058,7 +1089,11 @@ double scaling;
 	xl[1]=xp[i-1][jb-1]*scaling;		yl[1]=yp[i-1][jb-1]*scaling;
 	xl[2]=xp[i][jb-1]*scaling;		yl[2]=yp[i][jb-1]*scaling;
 	if ((i-1)>=0&&(jb-1)>=0&&xp[i][jb]!=BAD&&xp[i-1][jb-1]!=BAD&&xp[i][jb-1]!=BAD) {
+#ifdef GMT_OLD
 		ps_polygon(xl,yl,3,255,255,255,1);
+#else
+		ps_polygon(xl,yl,3,rgb_white,1);
+#endif
 	} 
 
 /* Polygon 2 */
@@ -1066,7 +1101,11 @@ double scaling;
 	xl[1]=xp[i-1][jb]*scaling;		yl[1]=yp[i-1][jb]*scaling;
 	xl[2]=xp[i-1][jb-1]*scaling;		yl[2]=yp[i-1][jb-1]*scaling;
 	if ((i-1)>=0&&(jb-1)>=0&&xp[i][jb]!=BAD&&xp[i-1][jb]!=BAD&&xp[i-1][jb-1]!=BAD) {
+#ifdef GMT_OLD
 		ps_polygon(xl,yl,3,255,255,255,1);
+#else
+		ps_polygon(xl,yl,3,rgb_white,1);
+#endif
 	} 
 
 /* Polygon 3 */
@@ -1074,7 +1113,11 @@ double scaling;
 	xl[1]=xp[i-1][jb+1]*scaling;		yl[1]=yp[i-1][jb+1]*scaling;
 	xl[2]=xp[i-1][jb]*scaling;		yl[2]=yp[i-1][jb]*scaling;
 	if ((i-1)>=0&&(jb+1)<beams_bath&&xp[i][jb]!=BAD&&xp[i-1][jb+1]!=BAD&&xp[i-1][jb]!=BAD) {
+#ifdef GMT_OLD
 		ps_polygon(xl,yl,3,255,255,255,1);
+#else
+		ps_polygon(xl,yl,3,rgb_white,1);
+#endif
 	} 
 
 /* Polygon 4 */
@@ -1082,7 +1125,11 @@ double scaling;
 	xl[1]=xp[i][jb+1]*scaling;		yl[1]=yp[i][jb+1]*scaling;
 	xl[2]=xp[i-1][jb+1]*scaling;		yl[2]=yp[i-1][jb+1]*scaling;
 	if ((i-1)>=0&&(jb+1)<beams_bath&&xp[i][jb]!=BAD&&xp[i][jb+1]!=BAD&&xp[i-1][jb+1]!=BAD) {
+#ifdef GMT_OLD
 		ps_polygon(xl,yl,3,255,255,255,1);
+#else
+		ps_polygon(xl,yl,3,rgb_white,1);
+#endif
 	}
 
 /* Polygon 5 */
@@ -1090,7 +1137,11 @@ double scaling;
 	xl[1]=xp[i+1][jb+1]*scaling;		yl[1]=yp[i+1][jb+1]*scaling;
 	xl[2]=xp[i][jb+1]*scaling;		yl[2]=yp[i][jb+1]*scaling;
 	if ((i+1)<irec&&(jb+1)<beams_bath&&xp[i][jb]!=BAD&&xp[i+1][jb+1]!=BAD&&xp[i][jb+1]!=BAD) {
+#ifdef GMT_OLD
 		ps_polygon(xl,yl,3,255,255,255,1);
+#else
+		ps_polygon(xl,yl,3,rgb_white,1);
+#endif
 	} 
 
 /* Polygon 6 */
@@ -1098,7 +1149,11 @@ double scaling;
 	xl[1]=xp[i+1][jb]*scaling;		yl[1]=yp[i+1][jb]*scaling;
 	xl[2]=xp[i+1][jb+1]*scaling;		yl[2]=yp[i+1][jb+1]*scaling;
 	if ((i+1)<irec&&(jb+1)<beams_bath&&xp[i][jb]!=BAD&&xp[i+1][jb]!=BAD&&xp[i+1][jb+1]!=BAD) {
+#ifdef GMT_OLD
 		ps_polygon(xl,yl,3,255,255,255,1);
+#else
+		ps_polygon(xl,yl,3,rgb_white,1);
+#endif
 	}
 
 /* Polygon 7 */
@@ -1106,7 +1161,11 @@ double scaling;
 	xl[1]=xp[i+1][jb-1]*scaling;		yl[1]=yp[i+1][jb-1]*scaling;
 	xl[2]=xp[i+1][jb]*scaling;		yl[2]=yp[i+1][jb]*scaling;
 	if ((i+1)<irec&&(jb-1)>=0&&xp[i][jb]!=BAD&&xp[i+1][jb-1]!=BAD&&xp[i+1][jb]!=BAD) {
+#ifdef GMT_OLD
 		ps_polygon(xl,yl,3,255,255,255,1);
+#else
+		ps_polygon(xl,yl,3,rgb_white,1);
+#endif
 	} 
 
 /* Polygon 8 */
@@ -1114,7 +1173,11 @@ double scaling;
 	xl[1]=xp[i][jb-1]*scaling;		yl[1]=yp[i][jb-1]*scaling;
 	xl[2]=xp[i+1][jb-1]*scaling;		yl[2]=yp[i+1][jb-1]*scaling;
 	if ((i+1)<irec&&(jb-1)>=0&&xp[i][jb]!=BAD&&xp[i][jb-1]!=BAD&&xp[i+1][jb-1]!=BAD) {
+#ifdef GMT_OLD
 		ps_polygon(xl,yl,3,255,255,255,1);
+#else
+		ps_polygon(xl,yl,3,rgb_white,1);
+#endif
 	} 
  
 }	/* Good_Polygon */

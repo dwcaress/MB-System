@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsimradmakess.c	11/29/98
  *
- *    $Id: mbsimradmakess.c,v 4.0 1998-12-17 22:47:17 caress Exp $
+ *    $Id: mbsimradmakess.c,v 4.1 1999-02-04 23:55:08 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -56,6 +56,9 @@
  * Date:	November 29, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/12/17  22:47:17  caress
+ * Initial revision.
+ *
  *  *
  */
 
@@ -78,7 +81,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.0 1998-12-17 22:47:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.1 1999-02-04 23:55:08 caress Exp $";
 	static char program_name[] = "MBSIMRADMAKESS";
 	static char help_message[] =  "MBSIMRADMAKESS is an utility for regenerating sidescan imagery from the raw amplitude samples contained in data from  Simrad \nEM300 and EM3000 multibeam sonars. This program ignores amplitude \ndata associated with flagged (bad) bathymetry data, thus removing \none important source of noise in the sidescan data. The default \ninput and output streams are stdin and stdout.";
 	static char usage_message[] = "mbsimradmakess [-Fformat -V -H  -Iinfile -Ooutfile -Ppixel_size -Sswath_width -Tpixel_int]";
@@ -554,7 +557,7 @@ char **argv;
 			    }
 			if (pixel_size_set == MB_NO)
 			    {
-			    pixel_size_calc = 2 * sin(DTR * swath_width) * bathsort[nbathsort/2] 
+			    pixel_size_calc = 2 * tan(DTR * swath_width) * bathsort[nbathsort/2] 
 						/ MBSYS_SIMRAD2_MAXPIXELS;
 			    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
 			    if (pixel_size <= 0.0)

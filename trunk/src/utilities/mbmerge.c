@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.20 1998-12-17 22:50:20 caress Exp $
+ *    $Id: mbmerge.c,v 4.21 1999-02-04 23:55:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.20  1998/12/17  22:50:20  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.19  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -127,7 +130,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.20 1998-12-17 22:50:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.21 1999-02-04 23:55:08 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -236,6 +239,12 @@ char **argv;
 	char	*ctime();
 	char	*getenv();
 
+double xxx,xxxx;
+xxx = 5.0;
+xxxx = rint(xxx);
+fprintf(stderr, "rint check: x:%f rint(x):%f\n", xxx, xxxx);
+
+
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
@@ -269,7 +278,7 @@ char **argv;
 	strcpy (nfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:F:f:L:l:I:i:O:o:M:m:N:n:Zz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:BbF:f:L:l:I:i:O:o:M:m:N:n:Zz")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -942,10 +951,10 @@ char **argv;
 			    || kind == MB_DATA_NAV)
 			&& make_heading_now == MB_YES)
 			{
-			mb_coor_scale(verbose,nlat[itime],&mtodeglon,&mtodeglat);
-			del_time = ntime[itime+1] - ntime[itime];
-			dx = (nlon[itime+1] - nlon[itime])/mtodeglon;
-			dy = (nlat[itime+1] - nlat[itime])/mtodeglat;
+			mb_coor_scale(verbose,nlat[itime-1],&mtodeglon,&mtodeglat);
+			del_time = ntime[itime] - ntime[itime-1];
+			dx = (nlon[itime] - nlon[itime-1])/mtodeglon;
+			dy = (nlat[itime] - nlat[itime-1])/mtodeglat;
 			dist = sqrt(dx*dx + dy*dy);
 			if (del_time > 0.0)
 				speed = 3.6*dist/del_time;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.22 1998-12-17 22:56:00 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.23 1999-02-04 23:52:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1998/12/17  22:56:00  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.21  1998/10/28  21:31:56  caress
  * Fixed handling of data with variable numbers of beams.
  *
@@ -212,7 +215,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.22 1998-12-17 22:56:00 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.23 1999-02-04 23:52:20 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -4441,10 +4444,10 @@ int	*buffer_size_max;
 	status = mb_format(verbose,&form,&format_num,&error);
 	
 	/* set buffer size lower if format supports sidescan */
-	if (pixels_ss_table[format_num] > 0)
+/*	if (pixels_ss_table[format_num] > 0)
 		*buffer_size_max = MBEDIT_BUFFER_SIZE / 2;
 	if (*buffer_size > *buffer_size_max)
-		*buffer_size = *buffer_size_max;
+		*buffer_size = *buffer_size_max;*/
 
 	/* print output debug statements */
 	if (verbose >= 2)

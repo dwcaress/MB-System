@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 4.1 1999-01-01 23:41:06 caress Exp $
+ *	$Id: mbr_em300raw.c,v 4.2 1999-02-04 23:52:54 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/01/01  23:41:06  caress
+ * MB-System version 4.6beta6
+ *
  * Revision 4.0  1998/12/17  22:59:14  caress
  * MB-System version 4.6beta4
  *
@@ -56,7 +59,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 4.1 1999-01-01 23:41:06 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 4.2 1999-02-04 23:52:54 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -888,7 +891,9 @@ int	*error;
 			    for (i=0;i<data->png_nbeams;i++)
 				{
 				if (data->png_beam_num[i] != 
-				    data->png_beam_index[i] + 1)
+					data->png_beam_index[i] + 1
+				    && data->png_beam_num[i] != 
+					data->png_beam_index[i] - 1)
 				    {
 				    *error = MB_ERROR_UNINTELLIGIBLE;
 				    status = MB_FAILURE;
@@ -1240,7 +1245,7 @@ int	*error;
 		qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
 		swathwidth = 2.5 + MAX(90.0 - 0.01 * data->png_depression[0], 
 				    90.0 - 0.01 * data->png_depression[data->png_nbeams-1]);
-		pixel_size_calc = 2 * sin(DTR * swathwidth) * bathsort[nbathsort/2] 
+		pixel_size_calc = 2 * tan(DTR * swathwidth) * bathsort[nbathsort/2] 
 				    / MBSYS_SIMRAD2_MAXPIXELS;
 		pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
 		if (*pixel_size <= 0.0)
@@ -2363,6 +2368,7 @@ int	*error;
 	short	expect;
 	short	*type;
 	short	*sonar;
+	int	*version;
 	short	first_type;
 	short	*expect_save;
 	int	*expect_save_flag;
@@ -2395,6 +2401,7 @@ int	*error;
 	label = (char *) mb_io_ptr->save_label;
 	type = (short *) mb_io_ptr->save_label;
 	sonar = (short *) (&mb_io_ptr->save_label[2]);
+	version = (int *) (&mb_io_ptr->save3);
 	label_save_flag = (int *) &mb_io_ptr->save_label_flag;
 	expect_save_flag = (int *) &mb_io_ptr->save_flag;
 	expect_save = (short *) &mb_io_ptr->save1;
@@ -2441,7 +2448,7 @@ int	*error;
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
-				}				
+				}
 			    }
 			}
 		
@@ -2512,7 +2519,7 @@ int	*error;
 	fprintf(stderr,"call mbr_em300raw_rd_start type %x\n",*type);
 #endif
 			status = mbr_em300raw_rd_start(
-				verbose,mbfp,data,*type,*sonar,error);
+				verbose,mbfp,data,*type,*sonar,version,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -2704,7 +2711,7 @@ int	*error;
 	fprintf(stderr,"call mbr_em300raw_rd_bath type %x\n",*type);
 #endif
 			status = mbr_em300raw_rd_bath(
-				verbose,mbfp,data,&match,*sonar,error);
+				verbose,mbfp,data,&match,*sonar,*version,error);
 			if (status == MB_SUCCESS)
 				{
 				if (first_type == EM2_NONE
@@ -2844,6 +2851,12 @@ short	sonar;
 		{
 		status = MB_FAILURE;
 		}
+		
+	/* allow exception found in some EM3000 data */
+	if (type == EM2_SVP && sonar == 0)
+		{
+		status = MB_SUCCESS;
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2858,12 +2871,13 @@ short	sonar;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_start(verbose,mbfp,data,type,sonar,error)
+int mbr_em300raw_rd_start(verbose,mbfp,data,type,sonar,version,error)
 int	verbose;
 FILE	*mbfp;
 struct mbf_em300raw_struct *data;
 short	type;
 short	sonar;
+int	*version;
 int	*error;
 {
 	char	*function_name = "mbr_em300raw_rd_start";
@@ -2874,7 +2888,7 @@ int	*error;
 	int	read_len, len;
 	int	done;
 	char	*comma_ptr;
-	int	i;
+	int	i1, i2, i3;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2956,8 +2970,16 @@ int	*error;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-			
+
 		if (status == MB_SUCCESS 
+			&& (line[len-1] < 32
+			    || line[len-1] > 127)
+			&& line[len-1] != '\r'
+			&& line[len-1] != '\n')
+			{
+			done = MB_YES;
+			}
+		else if (status == MB_SUCCESS 
 			&& line[len-1] == ','
 			&& len > 5)
 			{
@@ -3005,7 +3027,14 @@ int	*error;
 			else if (strncmp("BSV=", line, 4) == 0)
 			    strncpy(data->par_bsv, &line[4], MIN(len-5, 15));
 			else if (strncmp("PSV=", line, 4) == 0)
+			    {
+			    /* save the processor software version to use
+			       in tracking changes to the data format */
 			    strncpy(data->par_psv, &line[4], MIN(len-5, 15));
+			    if (sscanf(data->par_psv, "%d.%d.%d", &i1, &i2, &i3) 
+				== 3)
+				*version = i3 + 100 * i2 + 10000 * i1;
+			    }
 			else if (strncmp("OSV=", line, 4) == 0)
 			    strncpy(data->par_osv, &line[4], MIN(len-5, 15));
 			else if (strncmp("DSD=", line, 4) == 0)
@@ -3107,15 +3136,9 @@ int	*error;
 			}
 		else if (status == MB_SUCCESS 
 			&& line[len-1] == ','
-			&& len == 5)
+			&& len <= 5)
 			{
 			len = 0;
-			}
-		else if (status == MB_SUCCESS 
-			&& line[len-1] == ','
-			&& len < 5)
-			{
-			done = MB_YES;
 			}
 		}
 		
@@ -3136,35 +3159,16 @@ int	*error;
 		    data->kind = MB_DATA_START;
 		}
 		
-	/* now loop over reading individual characters to 
-	    get last bytes of record */
+	/* read last two check sum bytes */
 	if (status == MB_SUCCESS)
 	    {
-	    done = MB_NO;
-	    while (done == MB_NO)
-		{
-		read_len = fread(&line[0],1,1,mbfp);
-		if (read_len == 1 && line[0] == EM2_END)
-			{
-			done = MB_YES;
-			status = MB_SUCCESS;
-			/* get last two check sum bytes */
-			read_len = fread(&line[0],2,1,mbfp);
-			}
-		else if (read_len == 1)
-			{
-			status = MB_SUCCESS;
-			}
-		else
-			{
-			done = MB_YES;
-			/* return success here because all of the
-			    important information in this record has
-			    already been read - next attempt to read
-			    file will return error */
-			status = MB_SUCCESS;
-			}
-		}
+	    read_len = fread(&line[0],2,1,mbfp);
+	    /* don't check success of read
+	        - return success here even if read fails
+	        because all of the
+		important information in this record has
+		already been read - next attempt to read
+		file will return error */
 	    }
 
 	/* print debug statements */
@@ -3254,6 +3258,7 @@ int	*error;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       version:    %d\n",*version);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -4478,12 +4483,13 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_bath(verbose,mbfp,data,match,sonar,error)
+int mbr_em300raw_rd_bath(verbose,mbfp,data,match,sonar,version,error)
 int	verbose;
 FILE	*mbfp;
 struct mbf_em300raw_struct *data;
 int	*match;
 short	sonar;
+int	version;
 int	*error;
 {
 	char	*function_name = "mbr_em300raw_rd_bath";
@@ -4505,6 +4511,7 @@ int	*error;
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		fprintf(stderr,"dbg2       version:    %d\n",version);
 		}
 		
 	/* set kind and type values */
@@ -4663,6 +4670,15 @@ int	*error;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+		}
+		
+	/* check sonar version and adjust data as necessary */
+	if (status == MB_SUCCESS 
+		&& sonar >= MBSYS_SIMRAD2_EM3000
+		&& version != 0
+		&& version < 20000 )
+		{
+		data->png_offset_multiplier = 0;
 		}
 		
 	/* check for some other indicators of a broken record 

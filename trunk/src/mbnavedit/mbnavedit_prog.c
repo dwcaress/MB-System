@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.12 1998-12-18 01:40:25 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.13 1999-02-04 23:54:13 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1998/12/18  01:40:25  caress
+ * MB-System version 4.6beta5
+ *
  * Revision 4.11  1998/10/09  18:43:08  caress
  * MB-System version 4.6beta.
  *
@@ -140,7 +143,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.12 1998-12-18 01:40:25 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.13 1999-02-04 23:54:13 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -2607,9 +2610,25 @@ int mbnavedit_action_interpolate()
 			/(ping[iafter].time_d - ping[ibefore].time_d);
 		    lonlat_change = MB_YES;
 		    }
+		else if (ibefore < iping && ibefore > 0)
+		    {
+		    ping[iping].lon = ping[ibefore].lon 
+			+ (ping[ibefore].lon - ping[ibefore-1].lon)
+			*(ping[iping].time_d - ping[ibefore].time_d)
+			/(ping[ibefore].time_d - ping[ibefore-1].time_d);
+		    lonlat_change = MB_YES;
+		    }
 		else if (ibefore < iping)
 		    {
 		    ping[iping].lon = ping[ibefore].lon;
+		    lonlat_change = MB_YES;
+		    }
+		else if (iafter > iping && iafter < nlist - 1)
+		    {
+		    ping[iping].lon = ping[iafter].lon 
+			+ (ping[iafter+1].lon - ping[iafter].lon)
+			*(ping[iping].time_d - ping[iafter].time_d)
+			/(ping[iafter+1].time_d - ping[iafter].time_d);
 		    lonlat_change = MB_YES;
 		    }
 		else if (iafter > iping)
@@ -2643,9 +2662,25 @@ int mbnavedit_action_interpolate()
 			/(ping[iafter].time_d - ping[ibefore].time_d);
 		    lonlat_change = MB_YES;
 		    }
+		else if (ibefore < iping && ibefore > 0)
+		    {
+		    ping[iping].lat = ping[ibefore].lat 
+			+ (ping[ibefore].lat - ping[ibefore-1].lat)
+			*(ping[iping].time_d - ping[ibefore].time_d)
+			/(ping[ibefore].time_d - ping[ibefore-1].time_d);
+		    lonlat_change = MB_YES;
+		    }
 		else if (ibefore < iping)
 		    {
 		    ping[iping].lat = ping[ibefore].lat;
+		    lonlat_change = MB_YES;
+		    }
+		else if (iafter > iping && iafter < nlist - 1)
+		    {
+		    ping[iping].lat = ping[iafter].lat 
+			+ (ping[iafter+1].lat - ping[iafter].lat)
+			*(ping[iping].time_d - ping[iafter].time_d)
+			/(ping[iafter+1].time_d - ping[iafter].time_d);
 		    lonlat_change = MB_YES;
 		    }
 		else if (iafter > iping)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em300mba.h	10/16/98
- *	$Id: mbf_em300mba.h,v 4.0 1998-12-17 22:59:14 caress Exp $
+ *	$Id: mbf_em300mba.h,v 4.1 1999-02-04 23:52:54 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/12/17  22:59:14  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.6  1998/10/05  18:32:27  caress
  *
  *
@@ -561,13 +564,13 @@ struct mbf_em300mba_struct
 				/* start sample number */
 	int	png_center_sample[MBF_EM300MBA_MAXBEAMS];	
 				/* center sample number */
-	mb_s_char png_ssraw[MBF_EM300MBA_MAXPIXELS];
+	mb_s_char png_ssraw[MBF_EM300MBA_MAXRAWPIXELS];
 				/* the raw sidescan ordered port to starboard */
 	int	png_pixel_size;	/* processed sidescan pixel size in cm */
 	int	png_pixels_ss;	/* number of processed sidescan pixels stored */
-	short	png_ss[MBSYS_SIMRAD2_MAXRAWPIXELS];
+	short	png_ss[MBF_EM300MBA_MAXPIXELS];
 				/* the processed sidescan ordered port to starboard */
-	short	png_ssalongtrack[MBSYS_SIMRAD2_MAXRAWPIXELS];
+	short	png_ssalongtrack[MBF_EM300MBA_MAXPIXELS];
 				/* the processed sidescan alongtrack distances 
 					in distance resolution units */
 

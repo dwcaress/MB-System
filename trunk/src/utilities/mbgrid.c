@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.39 1999-01-01 23:34:40 caress Exp $
+ *    $Id: mbgrid.c,v 4.40 1999-02-04 23:55:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.39  1999/01/01  23:34:40  caress
+ * MB-System version 4.6beta6
+ *
  * Revision 4.38  1998/12/17  22:50:20  caress
  * MB-System version 4.6beta4
  *
@@ -248,7 +251,7 @@
 int mb_double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.39 1999-01-01 23:34:40 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.40 1999-02-04 23:55:08 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -596,7 +599,11 @@ char **argv;
 			i = 0;
 			while (result)
 			    {
+#ifdef GMT_OLD
 			    gbnd[i] = ddmmss_to_degree (result);
+#else
+			    gbnd[i] = GMT_ddmmss_to_degree (result);
+#endif
 			    i++;
 			    result = strtok (NULL, "/");
 			    }
@@ -763,7 +770,11 @@ char **argv;
 		use_projection = MB_YES;
 
 		/* get ellipsoid */
+#ifdef GMT_OLD
 		gmtdefs.ellipsoid = get_ellipse (ellipsoid);
+#else
+		gmtdefs.ellipsoid = GMT_get_ellipse (ellipsoid);
+#endif
 
 		/* set up projection using GMT calls */
 		gmterror = 0;
@@ -771,13 +782,25 @@ char **argv;
 			p_lon_o, p_lon_o + 1.0, 
 			p_lat_o, p_lat_o + 1.0);
 		strcat(gmt_arg, projection_pars);
+#ifdef GMT_OLD
 		gmterror += get_common_args (gmt_arg, 
 			&p_lon_1, &p_lon_2, 
 			&p_lat_1, &p_lat_2);
+#else
+		gmterror += GMT_get_common_args (gmt_arg, 
+			&p_lon_1, &p_lon_2, 
+			&p_lat_1, &p_lat_2);
+#endif
 		sprintf(gmt_arg, "-J%s", projection_pars);
+#ifdef GMT_OLD
 		gmterror += get_common_args (gmt_arg, 
 			&p_lon_1, &p_lon_2, 
 			&p_lat_1, &p_lat_2);
+#else
+		gmterror += GMT_get_common_args (gmt_arg, 
+			&p_lon_1, &p_lon_2, 
+			&p_lat_1, &p_lat_2);
+#endif
 
 		/* check for error */
 		if (gmterror > 0)
@@ -884,7 +907,11 @@ char **argv;
 		/* do first point */
 		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
+#ifdef GMT_OLD
 		xy_to_geo(xx, yy, &xlon, &ylat);
+#else
+		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
+#endif
 		bounds[0] = xlon;
 		bounds[1] = xlon;
 		bounds[2] = ylat;
@@ -893,7 +920,11 @@ char **argv;
 		/* do second point */
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
+#ifdef GMT_OLD
 		xy_to_geo(xx, yy, &xlon, &ylat);
+#else
+		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
+#endif
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -902,7 +933,11 @@ char **argv;
 		/* do third point */
 		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
+#ifdef GMT_OLD
 		xy_to_geo(xx, yy, &xlon, &ylat);
+#else
+		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
+#endif
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -911,7 +946,11 @@ char **argv;
 		/* do fourth point */
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
+#ifdef GMT_OLD
 		xy_to_geo(xx, yy, &xlon, &ylat);
+#else
+		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
+#endif
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -2996,8 +3035,13 @@ int	*error;
 		}
 
 	/* inititialize grd header */
+#ifdef GMT_OLD
 	grdio_init();
 	grd_init (&grd, argc, argv, MB_NO);
+#else
+	GMT_grdio_init();
+	GMT_grd_init (&grd, argc, argv, MB_NO);
+#endif
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -3056,7 +3100,11 @@ int	*error;
 				}
 
 		/* write the GMT netCDF grd file */
+#ifdef GMT_OLD
 		write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
+#else
+		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
+#endif
 
 		/* free memory for output array */
 		mb_free(verbose, &a, error);
@@ -3104,7 +3152,11 @@ int	*error;
 		}
 
 	/* deal with projection to eastings and northings */
+#ifdef GMT_OLD
 	geo_to_xy(lon, lat, x, y);
+#else
+	GMT_geo_to_xy(lon, lat, x, y);
+#endif
 
 	/* print output debug statements */
 	if (verbose >= 2)
