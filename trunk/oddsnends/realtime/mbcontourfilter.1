@@ -1,4 +1,4 @@
-.TH MBCONTOUR 1 "17 May 1994"
+.TH MBCONTOURFILTER 1 "13 September 1994"
 .SH NAME
 \fBmbcontourfilter\fP - Read multibeam bathymetry data and generate
 a contoured swath plot using generic ascii plot calls which
@@ -8,15 +8,25 @@ can be interpreted by other programs.
 Version 4.00
 
 .SH SYNOPSIS
-\fBmbcontour\fP \fB-I\fIdatalist \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP \fB-L\fIlonflip \fB-p\fIpings\fP \fB-V -H\fP]
+\fBmbcontourfilter\fP \fB-I\fIdatalist \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt \fB-b\fIyr/mo/da/hr/mn/sc \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP \fB-E\fIyr/mo/da/hr/mn/sc \fB-L\fIlonflip \fB-N\fInplot \fB-p\fIpings\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbcontourfilter\fP reads multibeam bathymetry data from stdin and
-outputs annotated contours and shiptracks in ascii plot call format to stdout.
-This program uses the mbio multibeam bathymetry i/o library
-for reading and the mb_truecont library for contouring.
-The data input may be averaged or windowed in time and space
-before it is contoured.  The primary purpose of \fBmbcontourfilter\fP
+\fBmbcontourfilter\fP is an utility for swath contouring of multibeam 
+bathymetry data using an ascii plot call format directed to stdout.
+Two contouring
+algorithms are available. The first draws contours between successive
+pings; this algorithm is simple and therefore fast but produces poor
+looking contours when beams from one ping lie "behind" beams from a
+previous ping (this happens for sonars that ping at nonnull pitch
+angles or for the "inside" beams when ships make sharp turns). The
+second algorithm constructs a triangular network from the available
+soundings and contours the network; this approach is complicated
+and therefore slow but produces good looking contours under most
+conditions. The contour levels 
+and colors can be controlled directly or set implicitly using contour 
+and color change intervals. Contours can also be set to have ticks 
+pointing downhill.
+The primary purpose of \fBmbcontourfilter\fP
 is to serve as part of a real-time plotting system. Real-time data
 is piped into \fBmbcontourfilter\fP, which in turn pipes contours
 in the form of ascii plot calls to a plotting filter specific to the
@@ -49,6 +59,11 @@ Defaults: \fIcont_int\fP = 25; \fIcol_int\fP = 100;
 \fItic_int\fP = 100; \fIlab_int\fP = 100; \fItic_int\fP = 0.1; 
 \fIlab_hgt\fP = 0.05.
 .TP
+.B \fB-b\fIyr/mo/da/hr/mn/sc\fP
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
+.TP
 .B \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP
 Sets the parameters governing the annotation of the shiptrack.  
 Time marks are made with "X" marks along the shiptrack; annotated
@@ -63,19 +78,33 @@ annotated date ticks are given in hours by
 Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; 
 \fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1.
 .TP
+.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
+.TP
+.B \fB-f\fIformat\fP
+Sets the data format used if the input is read from stdin
+(the default, which can be overridden with the \fB-I\fP option).
+This program uses the \fBMBIO\fP library and will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+.TP
 .B \fB-H\fP
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
 .B \fB-I\fIdatalist\fP
 Sets the filename of the file containing a list of the input multibeam
-data files and their formats. By default, \fBmbcontourfilter\fP 
-reads data from stdin. In the \fIdatalist\fP file, each
+data files and their formats.  The program will read and plot the
+data in each one of these files instead of the default, which is
+to read and plot a single data stream from stdin.
+In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-
 This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
@@ -97,6 +126,13 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
+.B \fB-N\fInplot\fP
+Sets the number of pings to be read in before each contouring
+episode. See the description of the \fB-Z\fIalgorithm\fP option
+for advice on reasonable values
+Default: \fInplot\fP = 50 unless \fB-Z\fI1\fP is specified,
+in which case the default is \fInplot\fP = 5.
+.TP
 .B \fB-p\fIpings\fP
 Sets the ping averaging of the input data. If \fIpings\fP = 1, then
 no ping averaging is performed. If \fIpings\fP > 0, then
@@ -105,6 +141,11 @@ ping.  If \fIpings\fP = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
+.TP
+.B \fB-Q\fP
+Causes the program to plot the triangles constructed as part of the
+contouring if the "triangle algorithm" is specified using the
+\fB-Z\fI0\fP option. This allows the data distribution to be directly viewed.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
 Sets the longitude and latitude bounds within which multibeam 
@@ -118,6 +159,25 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
 .B \-V
 Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
+.TP
+.B \fB-Z\fIalgorithm\fP
+Sets the contouring algorithm to be used. If \fIalgorithm\fP=0,
+a simple ping to ping contouring approach is used; this algorithm
+is fast but produces poor looking contours when used with data
+where beams from one ping may lie "behind" beams from previous
+pings (this happens for sonars that ping at nonnull pitch
+angles or for the "inside" beams when ships make sharp turns).
+If \fIalgorithm\fP=1 then a triangular network is constructed from
+the available soundings and this network is in turn contoured;
+this algorithm is slow but produces good looking contours in
+most cases. It is important to note that the time required for
+"triangle" algorithm increases with the square of the number
+of beams to be contoured; thus it is sensible to keep the number
+of pings contoured at a time small (e.g. use \fB-N\fI5\fP).
+The time required for the "ping to ping" algorithm varies linearly
+with the number of pings contoured; thus larger numbers of pings
+may be reasonably contoured at a time (e.g. use \fB-N\fI50\fP). 
+Default: \fIalgorithm\fP = 0.
 .TP
 .B \-#
 Specifies the number of plot copies. [Default is 1]

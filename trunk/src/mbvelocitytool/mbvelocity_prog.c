@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocitytool.c,v 4.3 1994-10-21 12:47:11 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.0 1994-10-21 12:43:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -56,30 +56,15 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <string.h>
+#include <strings.h>
 
 /* MBIO include files */
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
 #include "../../include/mb_io.h"
 
-/* xgraphics defines */
-#define	CLEAR_ALL	0
-#define	BLACK_ALL	1
-#define	OVERLAY1_CLEAR	64
-#define OVERLAY1_DRAW	65
-#define OVERLAY1_DASH	66
-#define OVERLAY2_CLEAR	128
-#define OVERLAY2_DRAW	129
-#define OVERLAY2_DASH	130
-#define	WHITE	
-#define	BLACK	
-
 /* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
+#define DTR (M_PI/180.)
 
 /* velocity profile structure definition */
 struct profile
@@ -92,7 +77,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocitytool.c,v 4.3 1994-10-21 12:47:11 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.0 1994-10-21 12:43:44 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -100,16 +85,16 @@ static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
 int	verbose = 0;
-char	*message;
+char	*message = NULL;
 
 /* mbvelocitytool control variables */
 #define	MAX_PROFILES	10
 #define	PICK_DISTANCE	50
 struct profile	profile_display[MAX_PROFILES];
 struct profile	profile_edit;
-int	*edit_x;
-int	*edit_y;
-int	*edit_xl;
+int	*edit_x = NULL;
+int	*edit_y = NULL;
+int	*edit_xl = NULL;
 char	editfile[128];
 int	edit = 0;
 int	ndisplay = 0;
@@ -141,8 +126,8 @@ int	format;
 int	pings;
 int	lonflip;
 double	bounds[4];
-int	btime_i[7];
-int	etime_i[7];
+int	btime_i[6];
+int	etime_i[6];
 double	btime_d;
 double	etime_d;
 double	speedmin;
@@ -153,27 +138,27 @@ int	pixels_ss;
 char	*mbio_ptr;
 
 /* mbio read and write values */
-char	*store_ptr;
+char	*store_ptr = NULL;
 int	kind;
 int	id;
 int	nbeams;
 
 /* buffer control variables */
 #define	MBVT_BUFFER_SIZE	1000
-char	*buff_ptr;
+char	*buff_ptr = NULL;
 int	buffer_size = MBVT_BUFFER_SIZE;
 int	nbuffer;
 int	nload;
 
 /* survey ping raytracing arrays */
-double	*ttimes;
-double	*angles;
-int	*flags;
-double	*p;
+double	*ttimes = NULL;
+double	*angles = NULL;
+int	*flags = NULL;
+double	*p = NULL;
 double	**ttime_tab;
 double	**dist_tab;
-double	*depth;
-double	*acrosstrack;
+double	*depth = NULL;
+double	*acrosstrack = NULL;
 double	dangle = 0.0;
 
 /* depth range variables */
@@ -184,6 +169,30 @@ double	bath_max;
 double	*residual;
 int	*nresidual;
 
+/* color control values */
+#define	WHITE	0	
+#define	BLACK	1	
+#define RED	2
+#define GREEN	3
+#define BLUE	4
+#define CORAL	5
+#define	XG_SOLIDLINE	0
+#define	XG_DASHLINE	1
+int	ncolors;
+int	pixel_values[256];
+
+/* system function declarations */
+char	*ctime();
+char	*getenv();
+
+/*--------------------------------------------------------------------*/
+/* Initialize the 'mbio' struct                                       */
+/* Called by:                                                         */
+/*                  main                                              */
+/* Functions called:                                                  */
+/*                  mb_defaults                                       */
+/* Function returns:                                                  */
+/*                  int status                                        */
 /*--------------------------------------------------------------------*/
 int mbvt_init(argc,argv)
 int	argc;
@@ -192,7 +201,6 @@ char	**argv;
 	/* local variables */
 	char	*function_name = "mbvt_init";
 	int	status = MB_SUCCESS;
-	int	fileflag = 0;
 	int	i;
 
 	/* parsing variables */
@@ -202,9 +210,6 @@ char	**argv;
 	int	c;
 	int	help = 0;
 	int	flag = 0;
-
-	char	*ctime();
-	char	*getenv();
 
 	/* set default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -221,16 +226,15 @@ char	**argv;
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
-	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
-	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
+	nbeams = 59;
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:VvHh")) != -1)
@@ -315,6 +319,16 @@ char	**argv;
 	/* return */
 	return(status);
 }
+
+/*--------------------------------------------------------------------*/
+/* exits the program - from "QUIT" on menu bar.                       */
+/* Called by:                                                         */
+/*                  mbvelocity_stubs.c                                */
+/* Functions called:                                                  */
+/*                  mb_free                                           */
+/*                  mb_memory_list                                    */
+/* Function returns:                                                  */
+/*                  int status                                        */
 /*--------------------------------------------------------------------*/
 int mbvt_quit()
 {
@@ -333,8 +347,8 @@ int mbvt_quit()
 	/* deallocate previously loaded data, if any */
 	if (nbuffer > 0)
 		{
-		mb_buffer_close(verbose,&buff_ptr,mbio_ptr,&error);
-		mb_close(verbose,&mbio_ptr,&error);
+		mb_buffer_close(verbose,buff_ptr,mbio_ptr,&error);
+		mb_close(verbose,mbio_ptr,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles,&error);
@@ -371,9 +385,20 @@ int mbvt_quit()
 }
 
 /*--------------------------------------------------------------------*/
-int mbvt_set_graphics(xgid,brdr)
+/* mbvt_set_graphics - sets mbvt_xgrid to a pointer to the display    */
+/*                     and sets borders.                              */
+/* Called by:                                                         */
+/*                  main                                              */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  int status                                        */
+/*--------------------------------------------------------------------*/
+int mbvt_set_graphics(xgid,brdr,ncol,pixels)
 int	xgid;
 int	*brdr;
+int	ncol;
+int	*pixels;
 {
 	/* local variables */
 	char	*function_name = "mbvt_set_graphics";
@@ -390,6 +415,10 @@ int	*brdr;
 		for (i=0;i<4;i++)
 			fprintf(stderr,"dbg2       borders[%d]:   %d\n",
 				i,brdr[i]);
+		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
+		for (i=0;i<ncol;i++)
+			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
+				pixels[i]);
 		}
 
 	/* set graphics id */
@@ -398,6 +427,11 @@ int	*brdr;
 	/* set graphics bounds */
 	for (i=0;i<4;i++)
 		borders[i] = brdr[i];
+
+	/* set colors */
+	ncolors = ncol;
+	for (i=0;i<ncolors;i++)
+		pixel_values[i] = pixels[i];
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -413,6 +447,14 @@ int	*brdr;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* Sets some of the mbio variables                                    */
+/* Called by:                                                         */
+/*                  main                                              */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  int status                                        */
+/*--------------------------------------------------------------------*/
 int mbvt_get_defaults(s_edit,s_ndisplay,s_maxdepth,
 	s_velrange,s_resrange,s_format,s_nbuffer)
 int	*s_edit;
@@ -426,7 +468,6 @@ int	*s_nbuffer;
 	/* local variables */
 	char	*function_name = "mbvt_get_defaults";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -463,6 +504,17 @@ int	*s_nbuffer;
 
 	return(status);
 }
+
+/*--------------------------------------------------------------------*/
+/* Sets some of the mbio variables.                                   */
+/* Called by:                                                         */
+/*                  action_maxdepth - mbvelocity_stubs - slider       */
+/*                  action_velrange - mbvelocity_stubs - slider       */
+/*                  action_residual_range - mbvelocity_stubs - slider */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_set_values(s_edit,s_ndisplay,s_maxdepth,s_velrange,s_resrange)
 int	s_edit;
@@ -474,7 +526,6 @@ int	s_resrange;
 	/* local variables */
 	char	*function_name = "mbvt_set_values";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -508,6 +559,17 @@ int	s_resrange;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function attempts to open a file as editable.                 */
+/* Called by:                                                         */
+/*                 open_file_ok in mbvelocity_stubs.c. This is called */
+/*		     by selecting the "OK" button in the file         */
+/*		     selection widget for an editable file.           */
+/* Functions called:                                                  */
+/*                  mb_free                                           */
+/*                  mb_malloc                                         */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
 int mbvt_open_edit_profile(file)
 char	*file;
 {
@@ -519,7 +581,6 @@ char	*file;
 	char	*result;
 	struct profile *profile;
 	FILE	*fp;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -630,6 +691,17 @@ char	*file;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function displays a new editable profile.                     */
+/* Called by:                                                         */
+/*                  action_new_profile in mbvelocity_stubs.c which    */
+/*		      is called by selecting the "NEW EDITABLE        */
+/*                    PROFILE" from the "FILE" pulldown menu.         */
+/* Functions called:                                                  */
+/*                  mb_free                                           */
+/*		    mb_malloc                                         */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
 int mbvt_new_edit_profile()
 {
 	/* local variables */
@@ -670,6 +742,9 @@ int mbvt_new_edit_profile()
 	status = mb_malloc(verbose,size,&edit_y,&error);
 	status = mb_malloc(verbose,size,&edit_xl,&error);
 	size = profile->n*sizeof(double);
+	profile->depth = NULL;
+	profile->velocity = NULL;
+	profile->velocity_layer = NULL;
 	status = mb_malloc(verbose,size,&(profile->depth),&error);
 	status = mb_malloc(verbose,size,&(profile->velocity),&error);
 	status = mb_malloc(verbose,size,&(profile->velocity_layer),&error);
@@ -707,6 +782,16 @@ int mbvt_new_edit_profile()
 
 	return(status);
 }
+/*--------------------------------------------------------------------*/
+/* This function saves the editable profile.                          */
+/* Called by:                                                         */
+/*                  controls_save_file in mbvelocity_stubs.c. It is   */
+/*                    called when the user selects "OK" from the      */
+/*                    save editable file widget.                      */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_save_edit_profile(file)
 char	*file;
@@ -779,6 +864,14 @@ char	*file;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function reads the data in the requested display file.        */
+/* Called by:                                                         */
+/*                  open_file_ok in mbvelocity_stubs.c                */
+/* Functions called:                                                  */
+/*                  mb_malloc                                         */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
 int mbvt_open_display_profile(file)
 char	*file;
 {
@@ -824,6 +917,8 @@ char	*file;
 	fclose(fp);
 
 	/* allocate space for the velocity profile and raytracing tables */
+	profile->depth = NULL;
+	profile->velocity = NULL;
 	status = mb_malloc(verbose,profile->n*sizeof(double),
 		&(profile->depth),&error);
 	status = mb_malloc(verbose,profile->n*sizeof(double),
@@ -889,13 +984,23 @@ char	*file;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function is used to keep track of the display profiles that   */
+/*   are being displayed so the user can remove unwanted displayed.   */
+/*   This feature is not functional at this time.                     */
+/* Called by:                                                         */
+/*                  mbvelocitytool_set_menu which is not being used   */
+/*		      at this time.                                   */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
 int mbvt_get_display_names(nlist,list)
 int	*nlist;
 char	*list[MAX_PROFILES];
 {
 	/* local variables */
 	char	*function_name = "mbvt_get_display_names";
-	char	*string;
 	int	status = MB_SUCCESS;
 	int	i;
 
@@ -928,6 +1033,15 @@ char	*list[MAX_PROFILES];
 
 	return(status);
 }
+/*--------------------------------------------------------------------*/
+/* This function is used to delete an unwanted display profile from   */
+/*   the screen. This feature is not in use at this time.             */
+/* Called by:                                                         */
+/*                  none - not in use                                 */
+/* Functions called:                                                  */
+/*                  mb_free                                           */
+/* Function returns:                                                  */
+/*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_delete_display_profile(select)
 int	select;
@@ -988,6 +1102,31 @@ int	select;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This is the main plotting function. It does all the drawing in the */
+/*   canvas part of the screen.                                       */
+/* Called by:                                                         */
+/*                  main                                              */
+/*                  display_menu                                      */
+/*                  action_new_profile                                */
+/*                  controls_save_file                                */
+/*                  open_file_ok                                      */
+/*                  action_maxdepth                                   */
+/*                  action_menu_close_profile                         */
+/*                  action_velrange                                   */
+/*                  action_canvas_event                               */
+/*                  action_residual_range                             */
+/*                  action_process_mb                                 */
+/*                  mbvt_open_multibeam_file                         */
+/* Functions called:                                                  */
+/*                  xg_setclip                                        */
+/*                  xg_fillrectangle                                  */
+/*                  xg_drawline                                       */
+/* 		    xg_justify                                        */
+/* 		    xg_drawstring                                     */
+/* 		    xg_drawrectangle                                  */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
 int mbvt_plot()
 {
 	/* local variables */
@@ -1006,26 +1145,36 @@ int mbvt_plot()
 	int	nxr_int, nyr_int;
 	int	xr_int, yr_int;
 	int	xx, vx, yy, vy;
-	int	xxo, yyo, xxl;
+	int	xxo, yyo, xxl, xxh, yyh, yyn;
 	int	swidth, sascent, sdescent;
 	char	string[128];
 	int	color;
 	int	i, j;
+
+	struct xg_graphic *graphic;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
+		fprintf(stderr," borders[0] = %d\n", borders[0]);
+		fprintf(stderr," borders[1] = %d\n", borders[1]);
+		fprintf(stderr," borders[2] = %d\n", borders[2]);
+		fprintf(stderr," borders[3] = %d\n", borders[3]);
+		fprintf(stderr," mbvt_xgid = %d\n", mbvt_xgid);
 		}
 
 	/* turn clipp mask back to whole canvas */
+        /* set clip rectangle */
+
 	xg_setclip(mbvt_xgid,borders[0],borders[2],
 		borders[1]-borders[0],borders[3]-borders[2]);
 
 	/* clear screen */
 	xg_fillrectangle(mbvt_xgid,borders[0],borders[2],
-		borders[1]-borders[0],borders[3]-borders[2],CLEAR_ALL);
+		borders[1]-borders[0],borders[3]-borders[2],
+		pixel_values[WHITE],XG_SOLIDLINE);
 
 	/* set scaling */
 	margin = (borders[1] - borders[0])/15;
@@ -1049,52 +1198,65 @@ int mbvt_plot()
 	ny_int = (ymaximum - yminimum)/deltay + 1;
 
 	/* plot grid */
-	xg_drawline(mbvt_xgid,xmin,ymin,xmin,ymax,BLACK_ALL);
-	xg_drawline(mbvt_xgid,xmax,ymin,xmax,ymax,BLACK_ALL);
+	xg_drawline(mbvt_xgid,xmin,ymin,xmin,ymax,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid,xmax,ymin,xmax,ymax,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	for (i=0;i<nx_int;i++)
 		{
 		xx = xmin + i*x_int;
 		vx = xminimum + i*deltax;
-		xg_drawline(mbvt_xgid,xx,ymin,xx,ymax,OVERLAY1_DASH);
+		xg_drawline(mbvt_xgid,xx,ymin,xx,ymax,
+			pixel_values[BLACK],XG_DASHLINE);
 		sprintf(string,"%1d",vx);
 		xg_justify(mbvt_xgid,string,&swidth,
 			&sascent,&sdescent);
 		xg_drawstring(mbvt_xgid,xx-swidth/2,
-			ymax+sascent+5,string,BLACK_ALL);
+			ymax+sascent+5,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
 		}
-	xg_drawline(mbvt_xgid,xmin,ymin,xmax,ymin,BLACK_ALL);
-	xg_drawline(mbvt_xgid,xmin,ymax,xmax,ymax,BLACK_ALL);
+	xg_drawline(mbvt_xgid,xmin,ymin,xmax,ymin,
+			pixel_values[BLACK],XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid,xmin,ymax,xmax,ymax,
+			pixel_values[BLACK],XG_SOLIDLINE);
 	for (i=0;i<ny_int;i++)
 		{
 		yy = ymin + i*y_int;
 		vy = yminimum + i*deltay;
-		xg_drawline(mbvt_xgid,xmin,yy,xmax,yy,OVERLAY1_DASH);
+		xg_drawline(mbvt_xgid,xmin,yy,xmax,yy,
+			pixel_values[BLACK],XG_DASHLINE);
 		sprintf(string,"%1d",vy);
 		xg_justify(mbvt_xgid,string,&swidth,
 			&sascent,&sdescent);
 		xg_drawstring(mbvt_xgid,xmin-swidth-5,
-			yy+sascent/2,string,BLACK_ALL);
+			yy+sascent/2,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
 		}
 	strcpy(string,"Water Velocity Profiles");
 	xg_justify(mbvt_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbvt_xgid,xcen-swidth/2,
-		ymin-2*sascent+10,string,BLACK_ALL);
+		ymin-2*sascent+10,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	strcpy(string,"Water Velocity (m/s)");
 	xg_justify(mbvt_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbvt_xgid,xcen-swidth/2,
-		ymax+2*sascent+10,string,BLACK_ALL);
+		ymax+2*sascent+10,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	strcpy(string,"Depth");
 	xg_justify(mbvt_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbvt_xgid,xmin-2*swidth-10,
-		ycen-sascent,string,BLACK_ALL);
+		ycen-sascent,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	strcpy(string,"(m)");
 	xg_drawstring(mbvt_xgid,xmin-2*swidth,
-		ycen+sascent,string,BLACK_ALL);
+		ycen+sascent,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* turn clipping on */
+
 	xg_setclip(mbvt_xgid,xmin,ymin,(xmax-xmin),(ymax-ymin));
 
 	/* plot display profiles */
@@ -1105,9 +1267,11 @@ int mbvt_plot()
 		{
 		xx = xmin + (profile_display[i].velocity[j] - xminimum)*xscale;
 		yy = ymin + (profile_display[i].depth[j] - yminimum)*yscale;
-/*		xg_drawrectangle(mbvt_xgid, xx-2, yy-2, 4, 4, color);*/
+/*		xg_drawrectangle(mbvt_xgid, xx-2, yy-2, 4, 4,
+			pixel_values[color],XG_SOLIDLINE);*/
 		if (j > 0)
-			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,color);
+			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,
+				pixel_values[color],XG_SOLIDLINE);
 		xxo = xx;
 		yyo = yy;
 		}
@@ -1127,16 +1291,21 @@ int mbvt_plot()
 		{
 		xx = xmin + (profile_edit.velocity[j] - xminimum)*xscale;
 		yy = ymin + (profile_edit.depth[j] - yminimum)*yscale;
-		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4, OVERLAY2_DRAW);
+		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4, 
+			pixel_values[BLACK],XG_SOLIDLINE);
 		if (j > 0)
 			{
-			xxl = xmin + (profile_edit.velocity_layer[j-1] - xminimum)*xscale;
-/*			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,OVERLAY2_DRAW);*/
-			xg_drawline(mbvt_xgid,xxl,yyo,xxl,yy,OVERLAY2_DRAW);
+			xxl = xmin + (profile_edit.velocity_layer[j-1] 
+				- xminimum)*xscale;
+/*			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,
+				pixel_values[BLACK],XG_SOLIDLINE);*/
+			xg_drawline(mbvt_xgid,xxl,yyo,xxl,yy,
+				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		if (j > 1)
 			{
-			xg_drawline(mbvt_xgid,edit_xl[j-2],yyo,xxl,yyo,OVERLAY2_DRAW);
+			xg_drawline(mbvt_xgid,edit_xl[j-2],yyo,xxl,yyo,
+				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		xxo = xx;
 		yyo = yy;
@@ -1147,9 +1316,10 @@ int mbvt_plot()
 		}
 	  }
 
-	/* now plot grid for Multibeam Residuals */
 
+	/* now plot grid for Multibeam Residuals */
 	/* turn clip mask back to whole canvas */
+
 	xg_setclip(mbvt_xgid,borders[0],borders[2],
 		borders[1]-borders[0],borders[3]-borders[2]);
 
@@ -1161,8 +1331,8 @@ int mbvt_plot()
 	xrcen = xrmin + (xrmax - xrmin)/2;
 	yrcen = yrmin + (yrmax - yrmin)/2;
 	xrminimum = -1.0;
-	xrmaximum = 59.0;
-	deltaxr = 0.1*(xrmaximum - xrminimum);
+	xrmaximum = nbeams;
+	deltaxr = (int) (0.1*(xrmaximum - xrminimum));
 	xrscale = (xrmax - xrmin)/(xrmaximum - xrminimum);
 	xr_int = deltaxr*xrscale;
 	nxr_int = (xrmaximum - xrminimum)/deltaxr + 1;
@@ -1174,31 +1344,39 @@ int mbvt_plot()
 	nyr_int = (yrmaximum - yrminimum)/deltayr + 1;
 
 	/* plot grid */
-	xg_drawline(mbvt_xgid,xrmin,yrmin,xrmin,yrmax,BLACK_ALL);
-	xg_drawline(mbvt_xgid,xrmax,yrmin,xrmax,yrmax,BLACK_ALL);
+	xg_drawline(mbvt_xgid,xrmin,yrmin,xrmin,yrmax,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid,xrmax,yrmin,xrmax,yrmax,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	for (i=0;i<nxr_int;i++)
 		{
 		xx = xrmin + i*xr_int;
 		vx = xrminimum + i*deltaxr;
-		xg_drawline(mbvt_xgid,xx,yrmin,xx,yrmax,OVERLAY1_DASH);
+		xg_drawline(mbvt_xgid,xx,yrmin,xx,yrmax,
+			pixel_values[BLACK],XG_DASHLINE);
 		sprintf(string,"%1d",vx);
 		xg_justify(mbvt_xgid,string,&swidth,
 			&sascent,&sdescent);
 		xg_drawstring(mbvt_xgid,xx-swidth/2,
-			yrmax+sascent+5,string,BLACK_ALL);
+			yrmax+sascent+5,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
 		}
-	xg_drawline(mbvt_xgid,xrmin,yrmin,xrmax,yrmin,BLACK_ALL);
-	xg_drawline(mbvt_xgid,xrmin,yrmax,xrmax,yrmax,BLACK_ALL);
+	xg_drawline(mbvt_xgid,xrmin,yrmin,xrmax,yrmin,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	xg_drawline(mbvt_xgid,xrmin,yrmax,xrmax,yrmax,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	for (i=0;i<nyr_int;i++)
 		{
 		yy = yrmin + i*yr_int;
 		vy = yrminimum + i*deltayr;
-		xg_drawline(mbvt_xgid,xrmin,yy,xrmax,yy,OVERLAY1_DASH);
+		xg_drawline(mbvt_xgid,xrmin,yy,xrmax,yy,
+			pixel_values[BLACK],XG_DASHLINE);
 		sprintf(string,"%1d",vy);
 		xg_justify(mbvt_xgid,string,&swidth,
 			&sascent,&sdescent);
 		xg_drawstring(mbvt_xgid,xrmin-swidth-5,
-			yy+sascent/2,string,BLACK_ALL);
+			yy+sascent/2,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
 		}
 	if (nbuffer > 0)
 		{
@@ -1207,47 +1385,55 @@ int mbvt_plot()
 		xg_justify(mbvt_xgid,string,&swidth,
 			&sascent,&sdescent);
 		xg_drawstring(mbvt_xgid,xrcen-swidth/2,
-			yrmin-4*sascent+10,string,BLACK_ALL);
+			yrmin-4*sascent+10,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
 		}
 	strcpy(string,"Multibeam Bathymetry Beam Residuals");
 	xg_justify(mbvt_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbvt_xgid,xrcen-swidth/2,
-		yrmin-2*sascent+10,string,BLACK_ALL);
+		yrmin-2*sascent+10,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	strcpy(string,"Multibeam Beam Number");
 	xg_justify(mbvt_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbvt_xgid,xrcen-swidth/2,
-		yrmax+2*sascent+10,string,BLACK_ALL);
+		yrmax+2*sascent+10,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	strcpy(string,"Residual");
 	xg_justify(mbvt_xgid,string,&swidth,
 		&sascent,&sdescent);
-	xg_drawstring(mbvt_xgid,xrmin-swidth-20,
-		yrcen-sascent,string,BLACK_ALL);
+	xg_drawstring(mbvt_xgid,xrmin-swidth-30,
+		yrcen-sascent,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 	strcpy(string,"(m)");
-	xg_drawstring(mbvt_xgid,xrmin-swidth,
-		yrcen+sascent,string,BLACK_ALL);
+	xg_drawstring(mbvt_xgid,xrmin-swidth-10,
+		yrcen+sascent,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* turn clipping on for residual plot box */
 	xg_setclip(mbvt_xgid,xrmin,yrmin,(xrmax-xrmin),(yrmax-yrmin));
 
 	/* plot residuals */
 	if (nbuffer > 0)
-	  for (i=0;i<beams_bath;i++)
+	  for (i=0;i<nbeams;i++)
 	    {
 	    if (nresidual[i] > 0)
 		{
 		xx = xrmin + (i - xrminimum)*xrscale;
 		yy = yrmin + (residual[i] - yrminimum)*yrscale;
-		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4, OVERLAY2_DRAW);
+		xg_fillrectangle(mbvt_xgid, xx-2, yy-2, 4, 4,
+			pixel_values[BLACK],XG_SOLIDLINE);
 		if (i > 0 && nresidual[i-1] > 0)
-			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,OVERLAY2_DRAW);
+			xg_drawline(mbvt_xgid,xxo,yyo,xx,yy,
+				pixel_values[BLACK],XG_SOLIDLINE);
 		xxo = xx;
 		yyo = yy;
 		}
 	     }
 
 	/* turn clipping on for velocity profile box */
+
 	xg_setclip(mbvt_xgid,xmin,ymin,(xmax-xmin),(ymax-ymin));
 
 	/* print output debug statements */
@@ -1262,6 +1448,16 @@ int mbvt_plot()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function is called when the right mouse button is pressed     */
+/*   when it is in the canvas area. It finds the mouse location so    */
+/*   the program knows which editable point to move.                  */
+/* Called by:                                                         */
+/*                  action_canvas_event                               */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
 int mbvt_action_mouse_down(x,y)
 int	x;
 int	y;
@@ -1270,7 +1466,6 @@ int	y;
 	char	*function_name = "mbvt_action_mouse_down";
 	int	status = MB_SUCCESS;
 	double	distance, distance_min;
-	int	found;
 	int	i;
 
 	/* print input debug statements */
@@ -1314,6 +1509,15 @@ int	y;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function is called when the right mouse button is released.   */
+/*   The only thing it really does is set the active flag to -1.      */
+/* Called by:                                                         */
+/*                  action_canvas_event                               */
+/* Functions called:                                                  */
+/*                  none                                              */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
 int mbvt_action_mouse_up(x,y)
 int	x;
 int	y;
@@ -1350,6 +1554,17 @@ int	y;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* This function is continuously called as long as the left mouse is  */
+/*   is depressed. It moves the selected point with elastic lines     */
+/*   untill the button is released.                                   */
+/* Called by:                                                         */
+/*                  action_canvas_event                               */
+/* Functions called:                                                  */
+/*                  xg_fillrectangle                                  */
+/*                  xg_drawline                                       */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
 int mbvt_action_mouse_drag(x,y)
 int	x;
 int	y;
@@ -1358,6 +1573,7 @@ int	y;
 	char	*function_name = "mbvt_action_mouse_drag";
 	int	status = MB_SUCCESS;
 	int	ylim_min, ylim_max;
+	int     xh, yh, xp, yp, yh2, yp2, x_prev, y_prev;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1397,46 +1613,47 @@ int	y;
 
 		/* unplot the current ping */
 		xg_fillrectangle(mbvt_xgid, edit_x[active]-2, 
-			edit_y[active]-2, 4, 4, OVERLAY2_CLEAR);
+			edit_y[active]-2, 4, 4,
+			pixel_values[WHITE],XG_SOLIDLINE);
 		if (active > 0)
 			{
 /*			xg_drawline(mbvt_xgid,
 				edit_x[active-1],edit_y[active-1],
 				edit_x[active],edit_y[active],
-				OVERLAY2_CLEAR);*/
+				pixel_values[WHITE],XG_SOLIDLINE);*/
 			xg_drawline(mbvt_xgid,
 				edit_xl[active-1],edit_y[active-1],
 				edit_xl[active-1],edit_y[active],
-				OVERLAY2_CLEAR);
+				pixel_values[WHITE],XG_SOLIDLINE);
 			xg_drawline(mbvt_xgid,
 				edit_xl[active-1],edit_y[active],
 				edit_xl[active-0],edit_y[active],
-				OVERLAY2_CLEAR);
+				pixel_values[WHITE],XG_SOLIDLINE);
 			}
 		if (active > 1)
 			{
 			xg_drawline(mbvt_xgid,
 				edit_xl[active-2],edit_y[active-1],
 				edit_xl[active-1],edit_y[active-1],
-				OVERLAY2_CLEAR);
+				pixel_values[WHITE],XG_SOLIDLINE);
 			}
 		if (active < profile_edit.n - 1)
 			{
 /*			xg_drawline(mbvt_xgid,
 				edit_x[active],edit_y[active],
 				edit_x[active+1],edit_y[active+1],
-				OVERLAY2_CLEAR);*/
+				pixel_values[WHITE],XG_SOLIDLINE);*/
 			xg_drawline(mbvt_xgid,
 				edit_xl[active],edit_y[active],
 				edit_xl[active],edit_y[active+1],
-				OVERLAY2_CLEAR);
+				pixel_values[WHITE],XG_SOLIDLINE);
 			}
 		if (active < profile_edit.n - 1 && active > 1)
 			{
 			xg_drawline(mbvt_xgid,
 				edit_xl[active],edit_y[active+1],
 				edit_xl[active+1],edit_y[active+1],
-				OVERLAY2_CLEAR);
+				pixel_values[WHITE],XG_SOLIDLINE);
 			}
 
 		/* get new location and velocity values */
@@ -1469,49 +1686,52 @@ int	y;
 /*			xg_drawline(mbvt_xgid,
 				edit_x[active-1],edit_y[active-1],
 				edit_x[active],edit_y[active],
-				OVERLAY2_DRAW);*/
+				pixel_values[BLACK],XG_SOLIDLINE);*/
 			xg_drawline(mbvt_xgid,
 				edit_xl[active-1],edit_y[active-1],
 				edit_xl[active-1],edit_y[active],
-				OVERLAY2_DRAW);
+				pixel_values[BLACK],XG_SOLIDLINE);
 			xg_drawline(mbvt_xgid,
 				edit_xl[active-1],edit_y[active],
 				edit_xl[active-0],edit_y[active],
-				OVERLAY2_DRAW);
+				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		if (active > 1)
 			{
 			xg_drawline(mbvt_xgid,
 				edit_xl[active-2],edit_y[active-1],
 				edit_xl[active-1],edit_y[active-1],
-				OVERLAY2_DRAW);
+				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		if (active < profile_edit.n - 1)
 			{
 /*			xg_drawline(mbvt_xgid,
 				edit_x[active],edit_y[active],
 				edit_x[active+1],edit_y[active+1],
-				OVERLAY2_DRAW);*/
+				pixel_values[BLACK],XG_SOLIDLINE);*/
 			xg_drawline(mbvt_xgid,
 				edit_xl[active],edit_y[active],
 				edit_xl[active],edit_y[active+1],
-				OVERLAY2_DRAW);
+				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		if (active < profile_edit.n - 1 && active > 1)
 			{
 			xg_drawline(mbvt_xgid,
 				edit_xl[active],edit_y[active+1],
 				edit_xl[active+1],edit_y[active+1],
-				OVERLAY2_DRAW);
+				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 		if (active > 0)
 			xg_fillrectangle(mbvt_xgid, edit_x[active-1]-2, 
-				edit_y[active-1]-2, 4, 4, OVERLAY2_DRAW);
+				edit_y[active-1]-2, 4, 4, 
+				pixel_values[BLACK],XG_SOLIDLINE);
 		xg_fillrectangle(mbvt_xgid, edit_x[active]-2, 
-			edit_y[active]-2, 4, 4, OVERLAY2_DRAW);
+			edit_y[active]-2, 4, 4, 
+			pixel_values[BLACK],XG_SOLIDLINE);
 		if (active < profile_edit.n - 1)
 			xg_fillrectangle(mbvt_xgid, edit_x[active+1]-2, 
-				edit_y[active+1]-2, 4, 4, OVERLAY2_DRAW);
+				edit_y[active+1]-2, 4, 4, 
+				pixel_values[BLACK],XG_SOLIDLINE);
 		}
 	else
 		status = MB_FAILURE;
@@ -1528,14 +1748,34 @@ int	y;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbvt_open_hydrosweep_file(file,form)
+/* This function reads the data from the multibeam file and makes    */
+/*   the calls to display it.                                         */
+/* Called by:                                                         */
+/*                  action_process_mb                                 */
+/*                  open_file_ok                                      */
+/* Functions called:                                                  */
+/*                  mb_malloc                                         */
+/*                  mb_format                                         */
+/*                  mb_buffer_close                                   */
+/*                  mb_close                                          */
+/*                  mb_free                                           */
+/*                  mb_read_init                                      */
+/*                  mb_error                                          */
+/*                  mb_buffer_init                                    */
+/*                  mb_buffer_load                                    */
+/*                  mbvt_setup_raytracing                             */
+/*                  mbvt_process_multibeam                           */
+/*                  mbvt_plot                                         */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
+int mbvt_open_multibeam_file(file,form)
 char	*file;
 int	form;
 {
 	/* local variables */
-	char	*function_name = "mbvt_open_hydrosweep_file";
+	char	*function_name = "mbvt_open_multibeam_file";
 	int	status = MB_SUCCESS;
-	char	*suffix;
 	int	format_num;
 	int	i;
 
@@ -1548,9 +1788,12 @@ int	form;
 		fprintf(stderr,"dbg2       file:        %s\n",file);
 		fprintf(stderr,"dbg2       format:      %d\n",form);
 		}
+	if (edit != MB_YES)
+	    return(MB_FAILURE);
 
 	/* check for format with travel time data */
 	status = mb_format(verbose,&format,&format_num,&error);
+	format = form;
 	if (mb_traveltime_table[format_num] != MB_YES)
 		{
 		fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
@@ -1563,8 +1806,8 @@ int	form;
 	/* deallocate previously loaded data, if any */
 	if (nbuffer > 0)
 		{
-		mb_buffer_close(verbose,&buff_ptr,mbio_ptr,&error);
-		mb_close(verbose,&mbio_ptr,&error);
+		mb_buffer_close(verbose,buff_ptr,mbio_ptr,&error);
+		mb_close(verbose,mbio_ptr,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles,&error);
@@ -1582,7 +1825,7 @@ int	form;
 		mb_free(verbose,&nresidual,&error);
 		}
 
-	/* initialize reading the input hydrosweep file */
+	/* initialize reading the input multibeam file */
 	format = form;
 	if ((status = mb_read_init(
 		verbose,file,format,pings,lonflip,bounds,
@@ -1642,12 +1885,12 @@ int	form;
 		}
 
 	/* set up for raytracing */
-	if (status == MB_SUCCESS)
+	if (status == MB_SUCCESS && edit == MB_YES)
 		status = mbvt_setup_raytracing();
 
 	/* process the data */
-	if (status == MB_SUCCESS)
-		status = mbvt_process_hydrosweep();
+	if (status == MB_SUCCESS && edit == MB_YES)
+		status = mbvt_process_multibeam();
 
 	/* plot everything */
 	mbvt_plot();
@@ -1666,6 +1909,17 @@ int	form;
 	/* return */
 	return(status);
 }
+/*--------------------------------------------------------------------*/
+/* This is the first function called when the "PROCESS MULTIBEAM"     */
+/*   is selected from the menu bar.                                   */
+/* Called by:                                                         */
+/*                  action_process_mb                                 */
+/* Functions called:                                                  */
+/*                  mb_free                                           */
+/*                  mb_malloc                                         */
+/*                  mb_ttimes                                         */
+/* Function returns:                                                  */
+/*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_setup_raytracing()
 {
@@ -1746,17 +2000,17 @@ int mbvt_setup_raytracing()
 	/* if angle separation specified, recalculate beam angles */
 	if (dangle > 0.0)
 		{
-		icenter = beams_bath/2;
-		for (i=0;i<beams_bath;i++)
+		icenter = nbeams/2;
+		for (i=0;i<nbeams;i++)
 			angles[i] = (i - icenter)*dangle;
 		}
 
 	/* set the beam ray parameters */
-	for (i=0;i<beams_bath;i++)
+	for (i=0;i<nbeams;i++)
 		p[i] = sin(DTR*angles[i])/vel[0];
 
 	/* set up the raytracing tables for survey pings */
-	for (i=0;i<beams_bath;i++)
+	for (i=0;i<nbeams;i++)
 		{
 		ttime = ttime_tab[i];
 		dist = dist_tab[i];
@@ -1798,10 +2052,19 @@ int mbvt_setup_raytracing()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbvt_process_hydrosweep()
+/* This function is the second one called when the "PROCESS MULTIBEAM"*/
+/*   selection is made from the menu bar.                             */
+/* Called by:                                                         */
+/*                  action_process_mb                                 */
+/* Functions called:                                                  */
+/*                  mb_ttimes                                         */
+/* Function returns:                                                  */
+/*                  status                                            */
+/*--------------------------------------------------------------------*/
+int mbvt_process_multibeam()
 {
 	/* local variables */
-	char	*function_name = "mbvt_process_hydrosweep";
+	char	*function_name = "mbvt_process_multibeam";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
 	double	*ttime;
@@ -1809,7 +2072,6 @@ int mbvt_process_hydrosweep()
 	double	*dep;
 	double	*vel;
 	int	nvel;
-	int	flagged;
 	double	factor;
 	double	sx, sy, sxx, sxy;
 	double	delta, a, b;
@@ -1839,7 +2101,7 @@ int mbvt_process_hydrosweep()
 		}
 
 	/* initialize residuals */
-	for (i=0;i<beams_bath;i++)
+	for (i=0;i<nbeams;i++)
 		{
 		residual[i] = 0.0;
 		nresidual[i] = 0;
@@ -1885,7 +2147,7 @@ int mbvt_process_hydrosweep()
 
 		/* loop over the beams */
 		if (buff->buffer_kind[k] == MB_DATA_DATA)
-		  for (i=0;i<beams_bath;i++)
+		  for (i=0;i<nbeams;i++)
 		    {
 		    ttime = ttime_tab[i];
 		    dist = dist_tab[i];
@@ -1943,7 +2205,7 @@ int mbvt_process_hydrosweep()
 
 		/* get residuals */
 		if (ns > 0)
-		  for (i=0;i<beams_bath;i++)
+		  for (i=0;i<nbeams;i++)
 		    if (depth[i] > 0.0)
 			{
 			depth_predict = a + b*acrosstrack[i];
@@ -1960,7 +2222,7 @@ int mbvt_process_hydrosweep()
 		}
 
 	/* calculate final residuals */
-	for (i=0;i<beams_bath;i++)
+	for (i=0;i<nbeams;i++)
 		if (nresidual[i] > 0)
 			residual[i] = residual[i]/nresidual[i];
 
@@ -1971,7 +2233,7 @@ int mbvt_process_hydrosweep()
 		fprintf(stderr,"\tminimum depth: %f\n",bath_min);
 		fprintf(stderr,"\tmaximum depth: %f\n",bath_max);
 		fprintf(stderr,"\nMultibeam Bathymetry Beam Residuals:\n");
-		for (i=0;i<beams_bath;i++)
+		for (i=0;i<nbeams;i++)
 			fprintf(stderr,"beam: %2d   residual: %f  calculations: %d\n",
 				i,residual[i],nresidual[i]);
 		}
@@ -1990,4 +2252,7 @@ int mbvt_process_hydrosweep()
 	/* return */
 	return(status);
 }
-/*--------------------------------------------------------------------*/
+/************************************************************/
+/* END OF FILE "mbvelocity_prog.c".                         */
+/************************************************************/
+

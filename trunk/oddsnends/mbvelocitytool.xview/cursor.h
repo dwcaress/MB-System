@@ -1,7 +1,10 @@
 /* cursor.h provided courtesy Peter Lemmond */
 
-/* $Id: cursor.h,v 1.1 1994-10-21 12:47:11 caress Exp $  */
+/* $Id: cursor.h,v 4.0 1994-10-21 12:52:20 caress Exp $  */
 /* $Log: not supported by cvs2svn $
+ * Revision 1.1  1994/10/21  12:47:11  caress
+ * Initial revision
+ *
  * Revision 4.0  1994/03/05  23:48:14  caress
  * First cut at version 4.0
  *

@@ -1,7 +1,7 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_calcomp_plot.perl	8/21/93
-#    $Id: mbm_calcomp_plot.perl,v 4.1 1994-05-17 14:07:45 caress Exp $
+#    $Id: mbm_calcomp_plot.perl,v 4.2 1994-10-21 12:56:50 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,9 +24,11 @@
 #
 # Usage:
 #   mbm_calcomp_plot -Ifile -Rwest/east/south/north -Sscale
-#                    [-Byear/month/day/hour/min/sec
-#                     -Eyear/month/day/hour/min/sec
-#                     -N -Q -Fformat -Ttitle -Pport -H]
+#         [-Acont_int/col_int/lab_int/tic_len/lab_hgt
+#         -Byr/mon/day/hour/min/sec
+#         -Dtime_tick/time_annot/date_annot/time_tick_len
+#         -Eyr/mon/day/hour/min/sec -Fformat -H -N
+#         -Pport -N -Q -Ttitle]
 #
 # Author:
 #   David W. Caress
@@ -51,10 +53,14 @@
 #   in Perl (this script).
 #
 # Version:
-#   $Id: mbm_calcomp_plot.perl,v 4.1 1994-05-17 14:07:45 caress Exp $
+#   $Id: mbm_calcomp_plot.perl,v 4.2 1994-10-21 12:56:50 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1994/05/17  14:07:45  caress
+# Changed call to mbcontourfilter so plot scale is -Jm instead
+# of -J.
+#
 # Revision 4.0  1994/03/01  20:54:10  caress
 # First cut at new version.
 #
@@ -66,10 +72,10 @@
 #
 #
 # Deal with command line arguments
-&Getopts('A:a:B:b:C:c:E:e:F:f:I:i:NnP:p:QqR:r:S:s:T:t:Hh');
-$annotate = ($opt_A || $opt_a || "0.25/1.0/4.0");
+&Getopts('A:a:B:b:D:d:E:e:F:f:I:i:NnP:p:QqR:r:S:s:T:t:Hh');
+$contour = ($opt_A || $opt_a || "50/200/200/200/.02/.07");
 $begin_time = ($opt_B || $opt_b || "1962/2/21/0/0/0");
-$contour = ($opt_C || $opt_c || "50/200/200/200/.02/.07");
+$annotate = ($opt_D || $opt_d || "0.25/1.0/4.0");
 $end_time = ($opt_E || $opt_e || "2062/2/21/0/0/0");
 $format = ($opt_F || $opt_f || 5);
 $help = ($opt_H || $opt_h);
@@ -93,8 +99,12 @@ if ($help)
 	print STDERR "  to create a primitive, if servicable,\n";
 	print STDERR "  realtime plotting capability on the Ewing.\n\n";
 	print STDERR "Usage:\n";
-	print STDERR "  mbm_calcomp_plot -Ifile -Rwest/east/south/north\n";
-	print STDERR "        -Sscale [-Fformat -Ttitle -Pport -N -Q -H]\n";
+	print STDERR "  mbm_calcomp_plot -Ifile -Rwest/east/south/north -Sscale\n";
+	print STDERR "        [-Acont_int/col_int/lab_int/tic_len/lab_hgt\n";
+	print STDERR "        -Byr/mon/day/hour/min/sec\n";
+	print STDERR "        -Dtime_tick/time_annot/date_annot/time_tick_len\n";
+	print STDERR "        -Eyr/mon/day/hour/min/sec -Fformat -H -N\n";
+	print STDERR "        -Pport -N -Q -Ttitle]\n";
 	die "\n";
 	}
 #
@@ -116,14 +126,17 @@ else
 
 # if bounds defined with decimal degrees 
 # convert to whole degrees and minutes
-if (!($westd && $westm && $eastd && $eastm 
-	&& $southd && $southm && $northd && $northm))
+if (!($westd || $westm || $eastd || $eastm 
+	|| $southd || $southm || $northd || $northm))
 	{
 	if ($west < 0)
 		{
 		$westd = int($west);
 		$westm = int($west*60. - $westd*60. - 0.5);
-		$westm = -$westm;
+		if ($westm > 0)
+			{
+			$westm = -$westm;
+			}
 		}
 	else
 		{
@@ -134,7 +147,10 @@ if (!($westd && $westm && $eastd && $eastm
 		{
 		$eastd = int($east);
 		$eastm = int($east*60. - $eastd*60. - 0.5);
-		$eastm = -$eastm;
+		if ($eastm > 0)
+			{
+			$eastm = -$eastm;
+			}
 		}
 	else
 		{
@@ -145,7 +161,10 @@ if (!($westd && $westm && $eastd && $eastm
 		{
 		$southd = int($south);
 		$southm = int($south*60. - $southd*60. - 0.5);
-		$southm = -$southm;
+		if ($southm > 0)
+			{
+			$southm = -$southm;
+			}
 		}
 	else
 		{
@@ -156,12 +175,38 @@ if (!($westd && $westm && $eastd && $eastm
 		{
 		$northd = int($north);
 		$northm = int($north*60. - $northd*60. - 0.5);
-		$northm = -$northm;
+		if ($northm > 0)
+			{
+			$northm = -$northm;
+			}
 		}
 	else
 		{
 		$northd = int($north);
 		$northm = int($north*60. - $northd*60. + 0.5);
+		}
+	}
+
+# else if bounds are specified with whole degrees and minutes
+# make sure negative degree values get handled properly 
+# - if -0:mm turn it into 0:-mm.
+else
+	{
+	if (index($westd,"-",0) >= 0 && $westd >= 0 && $westm >= 0)
+		{
+		$westm = -$westm;
+		}
+	if (index($eastd,"-",0) >= 0 && $eastd >= 0 && $eastm >= 0)
+		{
+		$eastm = -$eastm;
+		}
+	if (index($southd,"-",0) >= 0 && $southd >= 0 && $southm >= 0)
+		{
+		$southm = -$southm;
+		}
+	if (index($northd,"-",0) >= 0 && $northd >= 0 && $northm >= 0)
+		{
+		$northm = -$northm;
 		}
 	}
 
@@ -230,7 +275,7 @@ $inch_lat = $scale*($north - $south)*$km_per_deg_lat/$km_per_deg_lon
 
 print "\n";
 print "MB-System Macro MBM_CALCOMP_PLOT:\n";
-print "Real-time pen plots of Hydrosweep bathymetry on the R/V Ewing\n\n";
+print "Real-time pen plots of multibeam bathymetry\n\n";
 print "The desired plot has the following bounds:\n";
 printf "  Longitude: %10.5f to %10.5f  or  %4d:%2.2d to %4d:%2.2d\n",
 	$west, $east, $westd, $westm, $eastd, $eastm;
@@ -295,7 +340,7 @@ if (!$restart)
 	print "this script to restart plot if necessary.\n\n";
 	$restartfile = "restart_calcomp_plot.cmd";
 	open(FILE,"> $restartfile");
-	$command = sprintf("/net/heezen/packages/MB-System3/src/realtime/mbm_calcomp_plot.perl -F%s -I%s -R%s -B%s -E%s -S%s -C%s -A%s -P%s -N",
+	$command = sprintf("mbm_calcomp_plot.perl -F%s -I%s -R%s -B%s -E%s -S%s -A%s -D%s -P%s -N",
 		$format,$file,$bounds,$begin_time,$end_time,$scale,
 		$contour,$annotate,$port);
 
@@ -330,7 +375,7 @@ if (!$restart)
 
 # Now, finally, plot the contours...
 print "\nDrawing contours...\n";
-$command = sprintf("%s %s | mbcontourfilter -L0 -F%s -R%s -B%s -E%s -V -Jm%s -C%s -A%s | mbplotfilter -R%s -V -W%s | ccgr -d %s",
+$command = sprintf("%s %s | mbcontourfilter -L0 -f%s -R%s -b%s -e%s -V -Jm%s -A%s -D%s -N5 | mbplotfilter -R%s -V -W%s | ccgr -d %s",
 	$source, $file, $format, $bounds, $begin_time, $end_time,
 	$scale, $contour, $annotate, $bounds, $width, $port);
 	print "$command\n";
@@ -341,8 +386,8 @@ print "All done!\n";
 
 
 #-----------------------------------------------------------------------
-# This should be loaded from the library but the shipboard installation
-# of Perl is screwed up so....
+# This should be loaded from the library but many installations
+# of Perl are screwed up so....
 #
 ;# getopts.pl - a better getopt.pl
 
