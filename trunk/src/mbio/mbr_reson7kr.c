@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.6 2004-12-02 06:33:31 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.7 2005-03-25 04:33:30 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2004/12/02 06:33:31  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.5  2004/11/08 05:47:19  caress
  * Now gets sidescan from snippet data, maybe even properly...
  *
@@ -180,7 +183,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.6 2004-12-02 06:33:31 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.7 2005-03-25 04:33:30 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -559,6 +562,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_reson7kr";
 	int	status = MB_SUCCESS;
+	int	interp_status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
 	s7kr_position 		*position;
@@ -639,6 +643,9 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 					(double)(bluefin->nav[i].position_time), 
 					(double)(RTD * bluefin->nav[i].yaw), 
 					error);
+			if (mb_io_ptr->nsonardepth == 0
+				|| (bluefin->nav[i].depth 
+					!= mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1]))
 			mb_depint_add(verbose, mbio_ptr,
 					(double)(bluefin->nav[i].position_time), 
 					(double)(bluefin->nav[i].depth), 
@@ -704,69 +711,87 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		{
 		/* get navigation, etc */
 		speed = 0.0;
-		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 				    &heading, error);
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed, 
+		if (interp_status == MB_SUCCESS)
+		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed, 
 				    &longitude, &latitude, &speed, error);
-		mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+		if (interp_status == MB_SUCCESS)
+		interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d,  
 				    &sonar_depth, error);
-		mb_altint_interp(verbose, mbio_ptr, store->time_d,  
+		if (interp_status == MB_SUCCESS)
+		interp_status = mb_altint_interp(verbose, mbio_ptr, store->time_d,  
 				    &sonar_altitude, error);
-		mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+		if (interp_status == MB_SUCCESS)
+		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				    &heave, &roll, &pitch, error);
-		bathymetry->longitude = DTR * longitude;
-		bathymetry->latitude = DTR * latitude;
-		bathymetry->heading = DTR * heading;
-		bathymetry->height_source = 1;
-		bathymetry->tide = 0.0;
-		bathymetry->roll = DTR * roll;
-		bathymetry->pitch = DTR * pitch;
-		bathymetry->heave = heave;
-		bathymetry->vehicle_height = -sonar_depth;
-		
-		/* get bathymetry */
-		if (volatilesettings->sound_velocity > 0.0)
-			soundspeed = volatilesettings->sound_velocity;
-		else if (bluefin->environmental[0].sound_speed > 0.0)
-			soundspeed = bluefin->environmental[0].sound_speed;
-		else
-			soundspeed = 1500.0;
-		for (i=0;i<bathymetry->number_beams;i++)
+				    
+		/* if the optional data are not all available, this ping
+			is not useful, and is discarded by setting
+			*error to MB_ERROR_UNINTELLIGIBLE */
+		if (interp_status == MB_FAILURE)
 			{
-			if ((bathymetry->quality[i] & 15) > 0)
-				{
-				alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
-				beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
-				mb_rollpitch_to_takeoff(
-					verbose, 
-					alpha, beta, 
-					&theta, &phi, 
-					error);
-				rr = 0.5 * soundspeed * bathymetry->range[i];
-				xx = rr * sin(DTR * theta);
-				zz = rr * cos(DTR * theta);
-				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
-				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-				bathymetry->depth[i] = zz + sonar_depth;
-				bathymetry->pointing_angle[i] = DTR * theta;
-				bathymetry->azimuth_angle[i] = DTR * phi;
-				}
-			else
-				{
-				bathymetry->depth[i] = 0.0;
-				bathymetry->acrosstrack[i] = 0.0;
-				bathymetry->alongtrack[i] = 0.0;
-				bathymetry->pointing_angle[i] = 0.0;
-				bathymetry->azimuth_angle[i] = 0.0;
-				}
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
-		
-		/* set flag */
-		bathymetry->optionaldata = MB_YES;
-		bathymetry->header.OffsetToOptionalData 
-				= MBSYS_RESON7K_RECORDHEADER_SIZE 
-					+ R7KHDRSIZE_7kBathymetricData
-					+ bathymetry->number_beams * 9;
+			
+		/* if the optional data are available, then proceed */
+		else
+			{
+			bathymetry->longitude = DTR * longitude;
+			bathymetry->latitude = DTR * latitude;
+			bathymetry->heading = DTR * heading;
+			bathymetry->height_source = 1;
+			bathymetry->tide = 0.0;
+			bathymetry->roll = DTR * roll;
+			bathymetry->pitch = DTR * pitch;
+			bathymetry->heave = heave;
+			bathymetry->vehicle_height = -sonar_depth;
+
+			/* get bathymetry */
+			if (volatilesettings->sound_velocity > 0.0)
+				soundspeed = volatilesettings->sound_velocity;
+			else if (bluefin->environmental[0].sound_speed > 0.0)
+				soundspeed = bluefin->environmental[0].sound_speed;
+			else
+				soundspeed = 1500.0;
+			for (i=0;i<bathymetry->number_beams;i++)
+				{
+				if ((bathymetry->quality[i] & 15) > 0)
+					{
+					alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
+					beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
+					mb_rollpitch_to_takeoff(
+						verbose, 
+						alpha, beta, 
+						&theta, &phi, 
+						error);
+					rr = 0.5 * soundspeed * bathymetry->range[i];
+					xx = rr * sin(DTR * theta);
+					zz = rr * cos(DTR * theta);
+					bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+					bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+					bathymetry->depth[i] = zz + sonar_depth;
+					bathymetry->pointing_angle[i] = DTR * theta;
+					bathymetry->azimuth_angle[i] = DTR * phi;
+					}
+				else
+					{
+					bathymetry->depth[i] = 0.0;
+					bathymetry->acrosstrack[i] = 0.0;
+					bathymetry->alongtrack[i] = 0.0;
+					bathymetry->pointing_angle[i] = 0.0;
+					bathymetry->azimuth_angle[i] = 0.0;
+					}
+				}
+
+			/* set flag */
+			bathymetry->optionaldata = MB_YES;
+			bathymetry->header.OffsetToOptionalData 
+					= MBSYS_RESON7K_RECORDHEADER_SIZE 
+						+ R7KHDRSIZE_7kBathymetricData
+						+ bathymetry->number_beams * 9;
+			}
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -4204,6 +4229,11 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	s7kr_bluefin *bluefin;
 	int	index;
 	int	time_j[5];
+	int	time_i[7];
+	double	time_d;
+	int	timeproblem;
+	int	timechange;
+	double	dtime;
 	int	i, j;
 
 	/* print input debug statements */
@@ -4272,6 +4302,59 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].position_time)); index += 8;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].altitude_time)); index += 8;
 			}
+			
+		/* The Reson 6046 datalogger has been placing the same time tag in each of the frames
+			- check if this is the case, if it is kluge new time tags spread over a one second interval */
+		if (bluefin->number_frames > 1)
+			{
+			/* figure out if there is a time problem */
+			timeproblem = MB_NO;
+			for (i=1;i<bluefin->number_frames;i++)
+				{
+				if (bluefin->nav[i].position_time == bluefin->nav[i-1].position_time)
+					timeproblem = MB_YES;
+				}
+			
+			/* figure out if the time changes anywhere */
+			if (timeproblem == MB_YES)
+				{
+				timechange = 0;
+				dtime = 0.2;
+				for (i=1;i<bluefin->number_frames;i++)
+					{
+					if (bluefin->nav[i].position_time != bluefin->nav[i-1].position_time)
+						timechange = i;
+	/*fprintf(stderr,"Time: %f timechange:%d\n",bluefin->nav[i].s7kTime.Seconds,timechange);*/
+					}
+
+				/* change times assuming a 5 Hz data rate */
+				dtime = 0.2;
+				for (i=0;i<bluefin->number_frames;i++)
+					{
+					/* get the time  */
+					time_d = bluefin->nav[timechange].position_time + (i - timechange) * dtime;
+	/*fprintf(stderr,"CHANGE TIMESTAMP: %d %2.2d:%2.2d:%6.3f %12f",
+	i,bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].s7kTime.Seconds,time_d);*/
+					bluefin->nav[i].position_time = time_d;
+					bluefin->nav[i].altitude_time = time_d;
+					mb_get_date(verbose, time_d, time_i);
+					mb_get_jtime(verbose, time_i, time_j);
+					bluefin->nav[i].s7kTime.Seconds = 0.000001 * time_j[4] + time_j[3];
+					bluefin->nav[i].s7kTime.Hours = (int)(time_j[2] / 60.0);
+					bluefin->nav[i].s7kTime.Minutes = (int)(time_j[2] - 60.0 * bluefin->nav[i].s7kTime.Hours);
+					bluefin->nav[i].s7kTime.Day = time_j[1];
+					bluefin->nav[i].s7kTime.Year = time_j[0];
+	/*fprintf(stderr,"    %12f  %2.2d:%2.2d:%6.3f\n",
+	time_d, bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].s7kTime.Seconds);*/
+					}
+				}
+			}
+for (i=0;i<bluefin->number_frames;i++)
+{
+/*bluefin->nav[i].depth = 0.0;
+bluefin->nav[i].roll = 0.0;
+bluefin->nav[i].pitch = 0.0;*/
+}
 		}
 	else if (bluefin->data_format == R7KRECID_BluefinEnvironmental)
 		{
