@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.8 2001-07-31 00:42:12 caress Exp $
+ *    $Id: mbprocess.c,v 5.9 2001-08-04 01:01:07 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/07/31  00:42:12  caress
+ * Added data cutting capability.
+ *
  * Revision 5.7  2001/07/27  19:09:41  caress
  * Started adding data cutting, but not done yet.
  *
@@ -95,7 +98,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.8 2001-07-31 00:42:12 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.9 2001-08-04 01:01:07 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -219,6 +222,7 @@ and mbedit edit save files.\n";
 	int	variable_beams;
 	int	traveltime;
 	int	beam_flagging; 
+	int	calculatespeedheading = MB_NO;
 	int	mbp_ifile_specified;
 	char	mbp_ifile[MBP_FILENAMESIZE];
 	char	mbp_pfile[MBP_FILENAMESIZE];
@@ -791,6 +795,8 @@ and mbedit edit save files.\n";
 		    fprintf(stderr, "  number   ");
 		else if (process.mbp_cut_kind[i] == MBP_CUT_MODE_DISTANCE)
 		    fprintf(stderr, "  distance ");
+		else if (process.mbp_cut_kind[i] == MBP_CUT_MODE_SPEED)
+		    fprintf(stderr, "  speed    ");
 		fprintf(stderr, "  %f %f\n", process.mbp_cut_min[i], process.mbp_cut_max[i]);
 		}
 
@@ -2938,11 +2944,19 @@ dx, dy, dz, alpha, beta, lever_heave);*/
 			}
 
 		/* make up heading and speed if required */
+		calculatespeedheading = MB_NO;
+		if (process.mbp_heading_mode == MBP_HEADING_CALC
+			|| process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+			calculatespeedheading = MB_YES;
+		for (icut=0;icut<process.mbp_cut_num;icut++)
+		    {
+		    if (process.mbp_cut_mode[icut] == MBP_CUT_MODE_SPEED)
+			calculatespeedheading = MB_YES;
+		    }
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV)
-			&& (process.mbp_heading_mode == MBP_HEADING_CALC
-			    || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET))
+			&& calculatespeedheading == MB_YES)
 			{
 			if (process.mbp_nav_mode == MBP_NAV_ON)
 			    {
@@ -3031,13 +3045,13 @@ dx, dy, dz, alpha, beta, lever_heave);*/
 			    if (process.mbp_heave_mode == MBP_HEAVE_MULTIPLY
 				|| process.mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET)
 				{
-				for (i=0;i<beams_bath;i++)
+				for (i=0;i<nbath;i++)
 				    bheave[i] *= process.mbp_heave_mult;
 				}
 			    if (process.mbp_heave_mode == MBP_HEAVE_OFFSET
 				|| process.mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET)
 				{
-				for (i=0;i<beams_bath;i++)
+				for (i=0;i<nbath;i++)
 				    bheave[i] += process.mbp_heave;
 				}
 			    }
@@ -3045,7 +3059,7 @@ dx, dy, dz, alpha, beta, lever_heave);*/
 			/* if tt adjustment specified do it */
 			if (process.mbp_tt_mode == MBP_TT_MULTIPLY)
 			    {
-			    for (i=0;i<beams_bath;i++)
+			    for (i=0;i<nbath;i++)
 				ttimes[i] *= process.mbp_tt_mult;
 			    }
 				
@@ -3164,7 +3178,7 @@ idata, i, bheave[i], draft, depth_offset_use, static_shift, zz);*/
 			else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 			    {
 			    /* loop over the beams */
-			    for (i=0;i<beams_bath;i++)
+			    for (i=0;i<nbath;i++)
 			      {
 			      if (beamflag[i] != MB_FLAG_NULL)
 				{
@@ -3232,7 +3246,7 @@ idata, i, bheave[i], draft, depth_offset_use, static_shift, zz);*/
 /*fprintf(stderr, "depth offset: %f %f %f %f\n", time_d, draft, draft_org, depth_offset_change);*/
 
 			    /* loop over the beams */
-			    for (i=0;i<beams_bath;i++)
+			    for (i=0;i<nbath;i++)
 			      {
 			      if (beamflag[i] != MB_FLAG_NULL)
 				{
@@ -3269,7 +3283,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    || (process.mbp_svp_mode == MBP_SVP_ON
 				&& process.mbp_corrected == MB_NO))
 			    {
-			    for (i=0;i<beams_bath;i++)
+			    for (i=0;i<nbath;i++)
 				{
 				if (beamflag[i] != MB_FLAG_NULL)
 				    {
@@ -3312,7 +3326,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    fprintf(stderr,"\ndbg5  Depth values calculated in program <%s>:\n",program_name);
 			    fprintf(stderr,"dbg5       kind:  %d\n",kind);
 			    fprintf(stderr,"dbg5      beam    time      depth        dist\n");	
-			    for (i=0;i<beams_bath;i++)
+			    for (i=0;i<nbath;i++)
 				fprintf(stderr,"dbg5       %2d   %f   %f   %f   %f\n",
 				    i,ttimes[i],
 				    bath[i],bathacrosstrack[i],
@@ -3374,7 +3388,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER)
 			    {
 			    istart = MAX((int)process.mbp_cut_min[icut], 0);
-			    iend = MIN((int)process.mbp_cut_max[icut], beams_bath - 1);
+			    iend = MIN((int)process.mbp_cut_max[icut], nbath - 1);
 			    for (i=istart;i<=iend;i++)
 				{
 				if (mb_beam_ok(beamflag[i]))
@@ -3387,7 +3401,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_BATH
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
 			    {
-			    for (i=0;i<=beams_bath;i++)
+			    for (i=0;i<nbath;i++)
 				{
 				if (mb_beam_ok(beamflag[i]) 
 				    && bathacrosstrack[i] >= process.mbp_cut_min[icut]
@@ -3395,12 +3409,28 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				}
 			    }
+
+			/* flag data according to speed */
+			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_BATH
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_SPEED)
+			    {
+			    if (speed < process.mbp_cut_min[icut]
+				|| speed > process.mbp_cut_max[icut])
+				{
+				for (i=0;i<nbath;i++)
+				    {
+				    if (mb_beam_ok(beamflag[i]))
+					    beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				    }
+				}
+			    }
+
 			/* flag data according to beam number range */
 			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER)
 			    {
 			    istart = MAX((int)process.mbp_cut_min[icut], 0);
-			    iend = MIN((int)process.mbp_cut_max[icut], beams_amp - 1);
+			    iend = MIN((int)process.mbp_cut_max[icut], namp - 1);
 			    for (i=istart;i<=iend;i++)
 				{
 				if (mb_beam_ok(beamflag[i]))
@@ -3413,7 +3443,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
 			    {
-			    for (i=0;i<=beams_amp;i++)
+			    for (i=0;i<namp;i++)
 				{
 				if (mb_beam_ok(beamflag[i]) 
 				    && bathacrosstrack[i] >= process.mbp_cut_min[icut]
@@ -3421,12 +3451,27 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				}
 			    }
+
+			/* flag data according to speed */
+			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_SPEED)
+			    {
+			    if (speed < process.mbp_cut_min[icut]
+				|| speed > process.mbp_cut_max[icut])
+				{
+				for (i=0;i<namp;i++)
+				    {
+				    amp[i] = 0.0;
+				    }
+				}
+			    }
+
 			/* flag data according to pixel number range */
 			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER)
 			    {
 			    istart = MAX((int)process.mbp_cut_min[icut], 0);
-			    iend = MIN((int)process.mbp_cut_max[icut], pixels_ss - 1);
+			    iend = MIN((int)process.mbp_cut_max[icut], nss - 1);
 			    for (i=istart;i<=iend;i++)
 				{
 				ss[i] = 0.0;
@@ -3438,11 +3483,25 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS
 			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
 			    {
-			    for (i=0;i<=pixels_ss;i++)
+			    for (i=0;i<nss;i++)
 				{
 				if (ssacrosstrack[i] >= process.mbp_cut_min[icut]
 				    && ssacrosstrack[i] <= process.mbp_cut_max[icut])
 					ss[i]= 0.0;
+				}
+			    }
+
+			/* flag data according to speed */
+			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_SPEED)
+			    {
+			    if (speed < process.mbp_cut_min[icut]
+				|| speed > process.mbp_cut_max[icut])
+				{
+				for (i=0;i<nss;i++)
+				    {
+				    ss[i] = 0.0;
+				    }
 				}
 			    }
 			}
