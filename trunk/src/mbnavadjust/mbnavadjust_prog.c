@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.6 2001-07-20 00:33:43 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.7 2001-08-02 01:48:30 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/20  00:33:43  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.5  2001/06/03 07:05:54  caress
  * Release 5.0.beta01.
  *
@@ -98,7 +101,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.6 2001-07-20 00:33:43 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.7 2001-08-02 01:48:30 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -5702,13 +5705,13 @@ navlon, navlat, heading, speed);*/
 			    mb_pr_get_heading(mbna_verbose, file->file, 
 						&mbp_heading_mode, 
 						&mbp_headingbias, 
-						error);
+						&error);
 			    mb_pr_get_rollbias(mbna_verbose, file->file, 
 						&mbp_rollbias_mode, 
 						&mbp_rollbias, 
 						&mbp_rollbias_port, 
 						&mbp_rollbias_stbd, 
-						error);
+						&error);
 	    
 			    /* update output file in mbprocess parameter file */
 			    status = mb_pr_update_navadj(mbna_verbose, file->file, 
