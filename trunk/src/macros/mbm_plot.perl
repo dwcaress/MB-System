@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.13 1996-03-12 17:28:19 caress Exp $
+#    $Id: mbm_plot.perl,v 4.14 1997-01-28 18:34:03 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.13 1996-03-12 17:28:19 caress Exp $
+#   $Id: mbm_plot.perl,v 4.14 1997-01-28 18:34:03 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.13  1996/03/12  17:28:19  caress
+# Check-in after flail with format 63.
+#
 # Revision 4.12  1995/11/22  22:46:40  caress
 # Check in during general flail.
 #
@@ -829,29 +832,29 @@ foreach $file_mb (@files_data)
 	if (!$first_mb)
 		{
 		$first_mb = 1;
-		$xmin = $xmin_f;
-		$xmax = $xmax_f;
-		$ymin = $ymin_f;
-		$ymax = $ymax_f;
-		$zmin = $zmin_f;
-		$zmax = $zmax_f;
-		$amin = $amin_f;
-		$amax = $amax_f;
-		$smin = $smin_f;
-		$smax = $smax_f;
+		$xmin_data = $xmin_f;
+		$xmax_data = $xmax_f;
+		$ymin_data = $ymin_f;
+		$ymax_data = $ymax_f;
+		$zmin_data = $zmin_f;
+		$zmax_data = $zmax_f;
+		$amin_data = $amin_f;
+		$amax_data = $amax_f;
+		$smin_data = $smin_f;
+		$smax_data = $smax_f;
 		}
 	else
 		{
-		$xmin = &min($xmin, $xmin_f);
-		$xmax = &max($xmax, $xmax_f);
-		$ymin = &min($ymin, $ymin_f);
-		$ymax = &max($ymax, $ymax_f);
-		$zmin = &min($zmin, $zmin_f);
-		$zmax = &max($zmax, $zmax_f);
-		$amin = &min($amin, $amin_f);
-		$amax = &max($amax, $amax_f);
-		$smin = &min($smin, $smin_f);
-		$smax = &max($smax, $smax_f);
+		$xmin_data = &min($xmin_data, $xmin_f);
+		$xmax_data = &max($xmax_data, $xmax_f);
+		$ymin_data = &min($ymin_data, $ymin_f);
+		$ymax_data = &max($ymax_data, $ymax_f);
+		$zmin_data = &min($zmin_data, $zmin_f);
+		$zmax_data = &max($zmax_data, $zmax_f);
+		$amin_data = &min($amin_data, $amin_f);
+		$amax_data = &max($amax_data, $amax_f);
+		$smin_data = &min($smin_data, $smin_f);
+		$smax_data = &max($smax_data, $smax_f);
 		}
 	}
 
@@ -860,21 +863,26 @@ if ($zbounds)
 	{
 	($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
 	}
+else
+	{
+	$zmin = $zmin_data;
+	$zmax = $zmax_data;
+	}
 
 # check that there is data
-if ($xmin >= $xmax || $ymin >= $ymax)
+if ($xmin_data >= $xmax_data || $ymin_data >= $ymax_data)
 	{
 	die "Does not appear to be any data in the input!\n$program_name aborted.\n";
 	}
-if (($color == 1 || $color == 2 || $color == 3) && ($zmin >= $zmax))
+if (($color == 1 || $color == 2 || $color == 3) && ($zmin_data >= $zmax_data))
 	{
 	die "Does not appear to be any bathymetry data in the input!\n$program_name aborted.\n";
 	}
-if (($color == 3 || $color == 4) && ($amin >= $amax))
+if (($color == 3 || $color == 4) && ($amin_data >= $amax_data))
 	{
 	die "Does not appear to be any amplitude data in the input!\n$program_name aborted.\n";
 	}
-if (($color == 5) && ($smin >= $smax))
+if (($color == 5) && ($smin_data >= $smax_data))
 	{
 	die "Does not appear to be any sidescan data in the input!\n$program_name aborted.\n";
 	}
@@ -914,12 +922,12 @@ if ($bounds)
 # or expand the data limits a bit and ensure a reasonable aspect ratio
 else
 	{
-	$delx = 0.05 * ($xmax - $xmin);
-	$dely = 0.05 * ($ymax - $ymin);
-	$xmin = $xmin - $delx;
-	$xmax = $xmax + $delx;
-	$ymin = $ymin - $dely;
-	$ymax = $ymax + $dely;
+	$delx = 0.05 * ($xmax_data - $xmin_data);
+	$dely = 0.05 * ($ymax_data - $ymin_data);
+	$xmin = $xmin_data - $delx;
+	$xmax = $xmax_data + $delx;
+	$ymin = $ymin_data - $dely;
+	$ymax = $ymax_data + $dely;
 	$dx = $xmax - $xmin;
 	$dy = $ymax - $ymin;
 	if ($dy/$dx > 2.0)
@@ -1286,13 +1294,13 @@ if ($color_mode >= 1 && $color_mode <= 3)
 	}
 elsif ($color_mode == 4)
 	{
-	$dmin = $amin;
-	$dmax = $amax;
+	$dmin = $amin_data;
+	$dmax = $amax_data;
 	}
 elsif ($color_mode == 5)
 	{
-	$dmin = $smin;
-	$dmax = $smax;
+	$dmin = $smin_data;
+	$dmax = $smax_data;
 	}
 $dd = ($dmax - $dmin); 
 $color_int = 0.0;
@@ -1507,8 +1515,8 @@ push(@gmt_macro_defs, $gmt_def);
 # set shade control if not set by user
 if (!$shade_control && $color_mode == 3 && !stretch_shade)
 	{
-	$magnitude = 2.0/($amax - $amin);
-	$zero_level = $amin + 0.2 * ($amax - $amin);
+	$magnitude = 2.0/($amax_data - $amin_data);
+	$zero_level = $amin_data + 0.2 * ($amax_data - $amin_data);
 	$shade_control = sprintf("%.4g/%.4g",$magnitude,$zero_level);
 	}
 elsif (!$shade_control && $color_mode == 3)
@@ -1793,7 +1801,7 @@ if ($color_mode == 3 && $stretch_shade)
 		print "Running mbhistogram...\n";
 		}
 	$data_type = 1;
-	@mbhistogram = `mbhistogram -F$format -I$file_data -A$data_type -D$amin/$amax -M$ncpt -N1000 -G`;
+	@mbhistogram = `mbhistogram -F$format -I$file_data -A$data_type -D$amin_data/$amax_data -M$ncpt -N1000 -G`;
 
 	print FCMD "#\n# Make shading control table file\n";
 	print FCMD "echo Making shading control table file...\n";
@@ -2210,6 +2218,10 @@ if ($verbose)
 	print "    Page width:               $width\n";
 	print "    Page height:              $height\n";
 	print "    Projection:               -J$projection$projection_pars\n";
+	printf "    Longitude min max:        %9.4f  %9.4f\n", 
+		$xmin, $xmax;
+	printf "    Latitude min max:         %9.4f  %9.4f\n", 
+		$ymin, $ymax;
 	print "    Axes annotation:          $axes\n";
 	if ($portrait)
 		{
@@ -2245,21 +2257,21 @@ if ($verbose)
 			print "    Shading reversed\n";
 			}
 		}
-	print "\n  Multibeam Data Attributes:\n";
+	print "\n  Sonar Data Attributes:\n";
 	if ($data_scale)
 		{
 		print "    Data scale factor:        $data_scale\n";
 		}
 	printf "    Longitude min max:        %9.4f  %9.4f\n", 
-		$xmin, $xmax;
+		$xmin_data, $xmax_data;
 	printf "    Latitude min max:         %9.4f  %9.4f\n", 
-		$ymin, $ymax;
+		$ymin_data, $ymax_data;
 	printf "    Bathymetry min max:       %9.4g  %9.4g\n", 
-		$zmin, $zmax;
+		$zmin_data, $zmax_data;
 	printf "    Amplitude min max:        %9.4g  %9.4g\n", 
-		$amin, $amax;
+		$amin_data, $amax_data;
 	printf "    Sidescan min max:         %9.4g  %9.4g\n", 
-		$smin, $smax;
+		$smin_data, $smax_data;
 	print "\n  Primary Plotting Controls:\n";
 	if ($contour_mode)
 		{
