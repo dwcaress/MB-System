@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 5.4 2002-04-06 02:53:15 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.5 2002-08-21 00:51:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/04/06 02:53:15  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.3  2001/06/02 00:10:04  caress
  * Now use mb_get_format()
  *
@@ -562,12 +565,6 @@ do_mbvelocity_init(int argc, char **argv)
     
     status = mbvt_set_graphics(can_xgid, borders, 
 		    NCOLORS, mpixel_values);
-    
-    /* initialize mbvelocitytool proper */
-    status = mbvt_init(argc,argv);
-    
-    /* set the controls */
-    do_set_controls();
 
     /* initialize some labels */
     strcpy(message_str, "No display SVPs loaded...");
@@ -576,6 +573,12 @@ do_mbvelocity_init(int argc, char **argv)
     set_label_string(label_status_edit, message_str);
     strcpy(message_str, "No swath sonar data loaded...");
     set_label_string(label_status_mb, message_str);
+    
+    /* initialize mbvelocitytool proper */
+    status = mbvt_init(argc,argv);
+    
+    /* set the controls */
+    do_set_controls();
     
     /* finally allow expose plots */
     expose_plot_ok = True;
@@ -848,12 +851,12 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
        else if (open_type == MBVT_IO_OPEN_EDIT_SVP)
 	    {
 	    /* open file */
-	    edit_gui = 1;
 	    status = mbvt_open_edit_profile(input_file);
 
 	    /* reset status message */
 	    if (status == 1)
 	      {
+	      edit_gui = 1;
 	       sprintf(message_str, "Loaded editable SVP from: %s", input_file);
 	       set_label_string(label_status_edit, 
 			message_str);
@@ -916,7 +919,7 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_open_commandline(char *file, int format)
+do_open_commandline(char *wfile, char *sfile, char *file, int format)
 {
 	/* local definitions */
 	int	status;
@@ -924,27 +927,61 @@ do_open_commandline(char *file, int format)
 	/* turn off expose plots */
 	expose_plot_ok = False;
 
-	/* get format id value */
-	strcpy(input_file, file);
-	format_gui = format;
+       /* get selected filename id and file format id */
+       if (strlen(file) > 0)
+	    {	    
+	    /* turn off expose plots */
+	    expose_plot_ok = False;
 
-	/* open file */
-	status = mbvt_open_swath_file(input_file,format_gui, &nload);
+	    /* get format id value */
+	    strcpy(input_file, file);
+	    format_gui = format;
 
-	/* reset status message */
-	if (status == 1)
-	  {
-	  sprintf(message_str, "Read %d pings from swath file: %s", 
-			nload, input_file);
-	  set_label_string(label_status_mb, 
-		    message_str);
-	  }
-	if (status == 1 && edit_gui != 1)
-	  {
-	   sprintf(message_str, "Loaded default editable SVP");
-	   set_label_string(label_status_edit, 
-		    message_str);
-	  }
+	    /* open file */
+	    status = mbvt_open_swath_file(input_file,format_gui, &nload);
+
+	    /* reset status message */
+	    if (status == 1)
+	      {
+	      sprintf(message_str, "Read %d pings from swath file: %s", 
+			    nload, input_file);
+	      set_label_string(label_status_mb, 
+			message_str);
+	      }
+	    if (status == 1 && edit_gui != 1)
+	      {
+	       sprintf(message_str, "Loaded default editable SVP");
+	       set_label_string(label_status_edit, 
+			message_str);
+	      }
+	    }
+       if (strlen(wfile) > 0)
+	    {
+	    /* open file */
+	    edit_gui = 1;
+	    status = mbvt_open_edit_profile(wfile);
+
+	    /* reset status message */
+	    if (status == 1)
+	      {
+	       sprintf(message_str, "Loaded editable SVP from: %s", wfile);
+	       set_label_string(label_status_edit, 
+			message_str);
+	      }
+	    }
+       if (strlen(sfile) > 0)
+	    {
+	    /* open file */
+	    status = mbvt_open_display_profile(sfile);
+
+	    /* reset status message */
+	    if (status == 1)
+	      {
+	      sprintf(message_str, "Loaded display SVP from: %s", wfile);
+	      set_label_string(label_status_display, 
+			message_str);
+	      }
+	    }
 	    
 	/* turn on expose plots */
 	expose_plot_ok = True;
