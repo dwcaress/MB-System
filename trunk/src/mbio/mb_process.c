@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.2 2001-03-22 20:45:56 caress Exp $
+ *    $Id: mb_process.c,v 5.3 2001-06-01 00:14:06 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -56,7 +59,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.3 2001-06-01 00:14:06 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -109,6 +112,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_nav_speed = MBP_NAV_OFF;
 	process->mbp_nav_draft = MBP_NAV_OFF;
 	process->mbp_nav_algorithm = MBP_NAV_LINEAR;
+	process->mbp_nav_timeshift = 0.0;
+	process->mbp_nav_shift = MBP_NAV_OFF;
+	process->mbp_nav_offsetx = 0.0;
+	process->mbp_nav_offsety = 0.0;
 	
 	/* adjusted navigation merging */
 	process->mbp_navadj_mode = MBP_NAV_OFF;
@@ -141,6 +148,15 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_heave = 0.0;
 	process->mbp_heave_mult = 1.0;
 	
+	/* lever correction */
+	process->mbp_lever_mode = MBP_LEVER_OFF;
+	process->mbp_vru_offsetx = 0.0;
+	process->mbp_vru_offsety = 0.0;
+	process->mbp_vru_offsetz = 0.0;
+	process->mbp_sonar_offsetx = 0.0;
+	process->mbp_sonar_offsety = 0.0;
+	process->mbp_sonar_offsetz = 0.0;
+	
 	/* roll correction */
 	process->mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
 	process->mbp_rollbias = 0.0;
@@ -155,11 +171,24 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_heading_mode = MBP_HEADING_OFF;
 	process->mbp_headingbias = 0.0;
 	
+	/* tide correction */
+	process->mbp_tide_mode = MBP_TIDE_OFF;
+	process->mbp_tidefile[0] = '\0';
+	process->mbp_tide_format = 1;
+	
 	/* sidescan recalculation */
 	process->mbp_ssrecalc_mode = MBP_SSRECALC_OFF;
 	process->mbp_ssrecalc_pixelsize = 0.0;
 	process->mbp_ssrecalc_swathwidth = 0.0;
 	process->mbp_ssrecalc_interpolate = 0;
+
+	/* metadata insertion */
+	process->mbp_meta_operator[0] = '\0';
+	process->mbp_meta_platform[0] = '\0';
+	process->mbp_meta_sonar[0] = '\0';
+	process->mbp_meta_survey[0] = '\0';
+	process->mbp_meta_pi[0] = '\0';
+	process->mbp_meta_client[0] = '\0';
 
 	/* open and read parameter file */
 	if ((fp = fopen(parfile, "r")) != NULL) 
@@ -168,6 +197,12 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		{
 		if (buffer[0] != '#')
 		    {
+			if (strlen(buffer) > 0)
+				{
+				if (buffer[strlen(buffer)-1] == '\n')
+					buffer[strlen(buffer)-1] = '\0';
+				}
+
 		    /* general parameters */
 		    if (strncmp(buffer, "EXPLICIT", 8) == 0)
 			{
@@ -227,6 +262,26 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "NAVINTERP", 9) == 0)
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_algorithm);
+			}
+		    else if (strncmp(buffer, "NAVSHIFT", 12) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_shift);
+			}
+		    else if (strncmp(buffer, "NAVTIMESHIFT", 12) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_timeshift);
+			}
+		    else if (strncmp(buffer, "NAVOFFSETX", 10) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_offsetx);
+			}
+		    else if (strncmp(buffer, "NAVOFFSETY", 10) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_offsety);
+			}
+		    else if (strncmp(buffer, "NAVOFFSETZ", 10) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_offsetz);
 			}
 
 		    /* adjusted navigation merging */
@@ -339,6 +394,36 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_heave_mult);
 			}
 	
+		    /* lever correction */
+		    else if (strncmp(buffer, "LEVERMODE", 9) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_lever_mode);
+			}
+		    else if (strncmp(buffer, "VRUOFFSETX", 10) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_vru_offsetx);
+			}
+		    else if (strncmp(buffer, "VRUOFFSETY", 10) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_vru_offsety);
+			}
+		    else if (strncmp(buffer, "VRUOFFSETZ", 10) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_vru_offsetz);
+			}
+		    else if (strncmp(buffer, "SONAROFFSETX", 12) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_sonar_offsetx);
+			}
+		    else if (strncmp(buffer, "SONAROFFSETY", 12) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_sonar_offsety);
+			}
+		    else if (strncmp(buffer, "SONAROFFSETZ", 12) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_sonar_offsetz);
+			}
+	
 		    /* roll correction */
 		    else if (strncmp(buffer, "ROLLBIASMODE", 12) == 0)
 			{
@@ -377,6 +462,24 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_headingbias);
 			}
 	
+		    /* tide correction */
+		    else if (strncmp(buffer, "TIDEMODE", 8) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_tide_mode);
+			}
+		    else if (strncmp(buffer, "TIDEFILE", 10) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_tidefile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_tide_mode = MBP_TIDE_ON;
+			    }
+			}
+		    else if (strncmp(buffer, "TIDEFORMAT", 10) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_tide_format);
+			}
+	
 		    /* sidescan recalculation */
 		    else if (strncmp(buffer, "SSRECALCMODE", 12) == 0)
 			{
@@ -393,6 +496,32 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "SSINTERPOLATE", 11) == 0)
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_ssrecalc_interpolate);
+			}
+	
+		    /* metadata strings */
+		    else if (strncmp(buffer, "METAOPERATOR", 12) == 0)
+			{
+			strncpy(process->mbp_meta_operator, &buffer[13], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METAPLATFORM", 12) == 0)
+			{
+			strncpy(process->mbp_meta_platform, &buffer[13], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METASONAR", 9) == 0)
+			{
+			strncpy(process->mbp_meta_sonar, &buffer[10], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METASURVEY", 10) == 0)
+			{
+			strncpy(process->mbp_meta_survey, &buffer[11], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METAPI", 6) == 0)
+			{
+			strncpy(process->mbp_meta_pi, &buffer[7], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METACLIENT", 10) == 0)
+			{
+			strncpy(process->mbp_meta_client, &buffer[11], MBP_FILENAMESIZE);
 			}
 	
 		    /* processing kluges */
@@ -523,6 +652,21 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_ofile:              %s\n",process->mbp_ofile);
 		fprintf(stderr,"dbg2       mbp_format_specified:   %d\n",process->mbp_format_specified);
 		fprintf(stderr,"dbg2       mbp_format:             %d\n",process->mbp_format);
+		fprintf(stderr,"dbg2       mbp_nav_mode:           %d\n",process->mbp_nav_mode);
+		fprintf(stderr,"dbg2       mbp_navfile:            %s\n",process->mbp_navfile);
+		fprintf(stderr,"dbg2       mbp_nav_format:         %d\n",process->mbp_nav_format);
+		fprintf(stderr,"dbg2       mbp_nav_heading:        %d\n",process->mbp_nav_heading);
+		fprintf(stderr,"dbg2       mbp_nav_speed:          %d\n",process->mbp_nav_speed);
+		fprintf(stderr,"dbg2       mbp_nav_draft:          %d\n",process->mbp_nav_draft);
+		fprintf(stderr,"dbg2       mbp_nav_algorithm:      %d\n",process->mbp_nav_algorithm);
+		fprintf(stderr,"dbg2       mbp_nav_timeshift:      %f\n",process->mbp_nav_timeshift);
+		fprintf(stderr,"dbg2       mbp_nav_shift:          %d\n",process->mbp_nav_shift);
+		fprintf(stderr,"dbg2       mbp_nav_offsetx:        %f\n",process->mbp_nav_offsetx);
+		fprintf(stderr,"dbg2       mbp_nav_offsety:        %f\n",process->mbp_nav_offsety);
+		fprintf(stderr,"dbg2       mbp_nav_offsetz:        %f\n",process->mbp_nav_offsetz);
+		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_navadj_mode);
+		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
+		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
 		fprintf(stderr,"dbg2       mbp_bathrecalc_mode:    %d\n",process->mbp_bathrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias_mode:      %d\n",process->mbp_rollbias_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias:           %f\n",process->mbp_rollbias);
@@ -537,29 +681,35 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_heave_mode:         %d\n",process->mbp_heave_mode);
 		fprintf(stderr,"dbg2       mbp_heave:              %f\n",process->mbp_heave);
 		fprintf(stderr,"dbg2       mbp_heave_mult:         %f\n",process->mbp_heave_mult);
+		fprintf(stderr,"dbg2       mbp_lever_mode:         %d\n",process->mbp_heave_mode);
+		fprintf(stderr,"dbg2       mbp_vru_offsetx:        %f\n",process->mbp_vru_offsetx);
+		fprintf(stderr,"dbg2       mbp_vru_offsety:        %f\n",process->mbp_vru_offsety);
+		fprintf(stderr,"dbg2       mbp_vru_offsetz:        %f\n",process->mbp_vru_offsetz);
+		fprintf(stderr,"dbg2       mbp_sonar_offsetx:      %f\n",process->mbp_sonar_offsetx);
+		fprintf(stderr,"dbg2       mbp_sonar_offsety:      %f\n",process->mbp_sonar_offsety);
+		fprintf(stderr,"dbg2       mbp_sonar_offsetz:      %f\n",process->mbp_sonar_offsetz);
 		fprintf(stderr,"dbg2       mbp_ssv_mode:           %d\n",process->mbp_ssv_mode);
 		fprintf(stderr,"dbg2       mbp_ssv:                %f\n",process->mbp_ssv);
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:            %s\n",process->mbp_svpfile);
 		fprintf(stderr,"dbg2       mbp_corrected:          %d\n",process->mbp_corrected);
-		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_nav_mode);
-		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
-		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
-		fprintf(stderr,"dbg2       mbp_nav_mode:           %d\n",process->mbp_navadj_mode);
-		fprintf(stderr,"dbg2       mbp_navfile:            %s\n",process->mbp_navfile);
-		fprintf(stderr,"dbg2       mbp_nav_format:         %d\n",process->mbp_nav_format);
-		fprintf(stderr,"dbg2       mbp_nav_heading:        %d\n",process->mbp_nav_heading);
-		fprintf(stderr,"dbg2       mbp_nav_speed:          %d\n",process->mbp_nav_speed);
-		fprintf(stderr,"dbg2       mbp_nav_draft:          %d\n",process->mbp_nav_draft);
-		fprintf(stderr,"dbg2       mbp_nav_algorithm:      %d\n",process->mbp_nav_algorithm);
 		fprintf(stderr,"dbg2       mbp_heading_mode:       %d\n",process->mbp_heading_mode);
 		fprintf(stderr,"dbg2       mbp_headingbias:        %f\n",process->mbp_headingbias);
 		fprintf(stderr,"dbg2       mbp_edit_mode:          %d\n",process->mbp_edit_mode);
 		fprintf(stderr,"dbg2       mbp_editfile:           %s\n",process->mbp_editfile);
+		fprintf(stderr,"dbg2       mbp_tide_mode:          %d\n",process->mbp_tide_mode);
+		fprintf(stderr,"dbg2       mbp_tidefile:           %s\n",process->mbp_tidefile);
+		fprintf(stderr,"dbg2       mbp_tide_format:        %d\n",process->mbp_tide_format);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:      %d\n",process->mbp_ssrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_interp    :%d\n",process->mbp_ssrecalc_interpolate);
+		fprintf(stderr,"dbg2       mbp_meta_operator      :%s\n",process->mbp_meta_operator);
+		fprintf(stderr,"dbg2       mbp_meta_platform      :%s\n",process->mbp_meta_platform);
+		fprintf(stderr,"dbg2       mbp_meta_sonar         :%s\n",process->mbp_meta_sonar);
+		fprintf(stderr,"dbg2       mbp_meta_survey        :%s\n",process->mbp_meta_survey);
+		fprintf(stderr,"dbg2       mbp_meta_pi            :%s\n",process->mbp_meta_pi);
+		fprintf(stderr,"dbg2       mbp_meta_client        :%s\n",process->mbp_meta_client);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -595,6 +745,21 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_ofile:              %s\n",process->mbp_ofile);
 		fprintf(stderr,"dbg2       mbp_format_specified:   %d\n",process->mbp_format_specified);
 		fprintf(stderr,"dbg2       mbp_format:             %d\n",process->mbp_format);
+		fprintf(stderr,"dbg2       mbp_nav_mode:           %d\n",process->mbp_nav_mode);
+		fprintf(stderr,"dbg2       mbp_navfile:            %s\n",process->mbp_navfile);
+		fprintf(stderr,"dbg2       mbp_nav_format:         %d\n",process->mbp_nav_format);
+		fprintf(stderr,"dbg2       mbp_nav_heading:        %d\n",process->mbp_nav_heading);
+		fprintf(stderr,"dbg2       mbp_nav_speed:          %d\n",process->mbp_nav_speed);
+		fprintf(stderr,"dbg2       mbp_nav_draft:          %d\n",process->mbp_nav_draft);
+		fprintf(stderr,"dbg2       mbp_nav_algorithm:      %d\n",process->mbp_nav_algorithm);
+		fprintf(stderr,"dbg2       mbp_nav_timeshift:      %f\n",process->mbp_nav_timeshift);
+		fprintf(stderr,"dbg2       mbp_nav_shift:          %d\n",process->mbp_nav_shift);
+		fprintf(stderr,"dbg2       mbp_nav_offsetx:        %f\n",process->mbp_nav_offsetx);
+		fprintf(stderr,"dbg2       mbp_nav_offsety:        %f\n",process->mbp_nav_offsety);
+		fprintf(stderr,"dbg2       mbp_nav_offsetz:        %f\n",process->mbp_nav_offsetz);
+		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_navadj_mode);
+		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
+		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
 		fprintf(stderr,"dbg2       mbp_bathrecalc_mode:    %d\n",process->mbp_bathrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias_mode:      %d\n",process->mbp_rollbias_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias:           %f\n",process->mbp_rollbias);
@@ -609,32 +774,35 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_heave_mode:         %d\n",process->mbp_heave_mode);
 		fprintf(stderr,"dbg2       mbp_heave:              %f\n",process->mbp_heave);
 		fprintf(stderr,"dbg2       mbp_heave_mult:         %f\n",process->mbp_heave_mult);
-		fprintf(stderr,"dbg2       mbp_tt_mode:            %d\n",process->mbp_tt_mode);
-		fprintf(stderr,"dbg2       mbp_tt_mult:            %f\n",process->mbp_tt_mult);
-		fprintf(stderr,"dbg2       mbp_angle_mode:         %d\n",process->mbp_angle_mode);
+		fprintf(stderr,"dbg2       mbp_lever_mode:         %d\n",process->mbp_heave_mode);
+		fprintf(stderr,"dbg2       mbp_vru_offsetx:        %f\n",process->mbp_vru_offsetx);
+		fprintf(stderr,"dbg2       mbp_vru_offsety:        %f\n",process->mbp_vru_offsety);
+		fprintf(stderr,"dbg2       mbp_vru_offsetz:        %f\n",process->mbp_vru_offsetz);
+		fprintf(stderr,"dbg2       mbp_sonar_offsetx:      %f\n",process->mbp_sonar_offsetx);
+		fprintf(stderr,"dbg2       mbp_sonar_offsety:      %f\n",process->mbp_sonar_offsety);
+		fprintf(stderr,"dbg2       mbp_sonar_offsetz:      %f\n",process->mbp_sonar_offsetz);
 		fprintf(stderr,"dbg2       mbp_ssv_mode:           %d\n",process->mbp_ssv_mode);
 		fprintf(stderr,"dbg2       mbp_ssv:                %f\n",process->mbp_ssv);
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:            %s\n",process->mbp_svpfile);
 		fprintf(stderr,"dbg2       mbp_corrected:          %d\n",process->mbp_corrected);
-		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_nav_mode);
-		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
-		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
-		fprintf(stderr,"dbg2       mbp_nav_mode:           %d\n",process->mbp_nav_mode);
-		fprintf(stderr,"dbg2       mbp_navfile:            %s\n",process->mbp_navfile);
-		fprintf(stderr,"dbg2       mbp_nav_format:         %d\n",process->mbp_nav_format);
-		fprintf(stderr,"dbg2       mbp_nav_heading:        %d\n",process->mbp_nav_heading);
-		fprintf(stderr,"dbg2       mbp_nav_speed:          %d\n",process->mbp_nav_speed);
-		fprintf(stderr,"dbg2       mbp_nav_draft:          %d\n",process->mbp_nav_draft);
-		fprintf(stderr,"dbg2       mbp_nav_algorithm:      %d\n",process->mbp_nav_algorithm);
 		fprintf(stderr,"dbg2       mbp_heading_mode:       %d\n",process->mbp_heading_mode);
 		fprintf(stderr,"dbg2       mbp_headingbias:        %f\n",process->mbp_headingbias);
 		fprintf(stderr,"dbg2       mbp_edit_mode:          %d\n",process->mbp_edit_mode);
 		fprintf(stderr,"dbg2       mbp_editfile:           %s\n",process->mbp_editfile);
+		fprintf(stderr,"dbg2       mbp_tide_mode:          %d\n",process->mbp_tide_mode);
+		fprintf(stderr,"dbg2       mbp_tidefile:           %s\n",process->mbp_tidefile);
+		fprintf(stderr,"dbg2       mbp_tide_format:        %d\n",process->mbp_tide_format);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:      %d\n",process->mbp_ssrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_interp    :%d\n",process->mbp_ssrecalc_interpolate);
+		fprintf(stderr,"dbg2       mbp_meta_operator      :%s\n",process->mbp_meta_operator);
+		fprintf(stderr,"dbg2       mbp_meta_platform      :%s\n",process->mbp_meta_platform);
+		fprintf(stderr,"dbg2       mbp_meta_sonar         :%s\n",process->mbp_meta_sonar);
+		fprintf(stderr,"dbg2       mbp_meta_survey        :%s\n",process->mbp_meta_survey);
+		fprintf(stderr,"dbg2       mbp_meta_pi            :%s\n",process->mbp_meta_pi);
+		fprintf(stderr,"dbg2       mbp_meta_client        :%s\n",process->mbp_meta_client);
 		}
 
 	/* get expected process parameter file name */
@@ -698,6 +866,11 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "NAVSPEED %d\n", process->mbp_nav_speed);
 	    fprintf(fp, "NAVDRAFT %d\n", process->mbp_nav_draft);
 	    fprintf(fp, "NAVINTERP %d\n", process->mbp_nav_algorithm);
+	    fprintf(fp, "NAVTIMESHIFT %f\n", process->mbp_nav_timeshift);
+	    fprintf(fp, "NAVSHIFT %d\n", process->mbp_nav_shift);
+	    fprintf(fp, "NAVOFFSETX %f\n", process->mbp_nav_offsetx);
+	    fprintf(fp, "NAVOFFSETY %f\n", process->mbp_nav_offsety);
+	    fprintf(fp, "NAVOFFSETZ %f\n", process->mbp_nav_offsetz);
 	    
 	    /* adjusted navigation merging */
 	    fprintf(fp, "##\n## Adjusted Navigation Merging:\n");
@@ -734,6 +907,16 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "HEAVEOFFSET %f\n", process->mbp_heave);
 	    fprintf(fp, "HEAVEMULTIPLY %f\n", process->mbp_heave_mult);
 	    
+	    /* lever correction */
+	    fprintf(fp, "##\n## Lever Correction:\n");
+	    fprintf(fp, "LEVERMODE %d\n", process->mbp_lever_mode);
+	    fprintf(fp, "VRUOFFSETX %f\n", process->mbp_vru_offsetx);
+	    fprintf(fp, "VRUOFFSETY %f\n", process->mbp_vru_offsety);
+	    fprintf(fp, "VRUOFFSETZ %f\n", process->mbp_vru_offsetz);
+	    fprintf(fp, "SONAROFFSETX %f\n", process->mbp_sonar_offsetx);
+	    fprintf(fp, "SONAROFFSETY %f\n", process->mbp_sonar_offsety);
+	    fprintf(fp, "SONAROFFSETZ %f\n", process->mbp_sonar_offsetz);
+	    
 	    /* roll correction */
 	    fprintf(fp, "##\n## Roll Correction:\n");
 	    fprintf(fp, "ROLLBIASMODE %d\n", process->mbp_rollbias_mode);
@@ -751,13 +934,28 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "HEADINGMODE %d\n", process->mbp_heading_mode);
 	    fprintf(fp, "HEADINGOFFSET %f\n", process->mbp_headingbias);
 	    
+	    /* tide correction */
+	    fprintf(fp, "##\n## Tide Correction:\n");
+	    fprintf(fp, "TIDEMODE %d\n", process->mbp_tide_mode);
+	    fprintf(fp, "TIDEFILE %s\n", process->mbp_tidefile);
+	    fprintf(fp, "TIDEFORMAT %d\n", process->mbp_tide_format);
+	    
 	    /* sidescan recalculation */
 	    fprintf(fp, "##\n## Sidescan Recalculation:\n");
 	    fprintf(fp, "SSRECALCMODE %d\n", process->mbp_ssrecalc_mode);
 	    fprintf(fp, "SSPIXELSIZE %f\n", process->mbp_ssrecalc_pixelsize);
 	    fprintf(fp, "SSSWATHWIDTH %f\n", process->mbp_ssrecalc_swathwidth);
 	    fprintf(fp, "SSINTERPOLATE %f\n", process->mbp_ssrecalc_interpolate);
-	
+	    
+	    /* metadata insertion */
+	    fprintf(fp, "##\n## Metadata Insertion:\n");
+	    fprintf(fp, "METAOPERATOR %s\n", process->mbp_meta_operator);
+	    fprintf(fp, "METAPLATFORM %s\n", process->mbp_meta_platform);
+	    fprintf(fp, "METASONAR %s\n", process->mbp_meta_sonar);
+	    fprintf(fp, "METASURVEY %s\n", process->mbp_meta_survey);
+	    fprintf(fp, "METAPI %s\n", process->mbp_meta_pi);
+	    fprintf(fp, "METACLIENT %s\n", process->mbp_meta_client);
+  	
 	    /* close file */
 	    fclose(fp);
 	    }
@@ -811,7 +1009,8 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_ROTATE;
 	else if (process->mbp_svp_mode == MBP_SVP_OFF
 	    && process->mbp_rollbias_mode == MBP_ROLLBIAS_OFF
-		&& process->mbp_draft_mode != MBP_DRAFT_OFF)
+		&& (process->mbp_draft_mode != MBP_DRAFT_OFF
+		    || process->mbp_lever_mode != MBP_DRAFT_OFF))
 	    process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFFSET;
 
 	/* print output debug statements */
@@ -1140,6 +1339,123 @@ int mb_pr_update_heave(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_update_lever(int verbose, char *file, 
+			int	mbp_lever_mode, 
+			double	mbp_vru_offsetx, 
+			double	mbp_vru_offsety, 
+			double	mbp_vru_offsetz, 
+			double	mbp_sonar_offsetx, 
+			double	mbp_sonar_offsety, 
+			double	mbp_sonar_offsetz, 
+			int *error)
+{
+	char	*function_name = "mb_pr_update_lever";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       mbp_lever_mode:    %d\n",mbp_lever_mode);
+		fprintf(stderr,"dbg2       mbp_vru_offsetx:   %f\n",mbp_vru_offsetx);
+		fprintf(stderr,"dbg2       mbp_vru_offsety:   %f\n",mbp_vru_offsety);
+		fprintf(stderr,"dbg2       mbp_vru_offsetz:   %f\n",mbp_vru_offsetz);
+		fprintf(stderr,"dbg2       mbp_sonar_offsetx: %f\n",mbp_sonar_offsetx);
+		fprintf(stderr,"dbg2       mbp_sonar_offsety: %f\n",mbp_sonar_offsety);
+		fprintf(stderr,"dbg2       mbp_sonar_offsetz: %f\n",mbp_sonar_offsetz);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set lever values */
+	process.mbp_lever_mode = mbp_lever_mode;
+	process.mbp_vru_offsetx = mbp_vru_offsetx;
+	process.mbp_vru_offsety = mbp_vru_offsety;
+	process.mbp_vru_offsetz = mbp_vru_offsetz;
+	process.mbp_sonar_offsetx = mbp_sonar_offsetx;
+	process.mbp_sonar_offsety = mbp_sonar_offsety;
+	process.mbp_sonar_offsetz = mbp_sonar_offsetz;
+	    
+	/* update bathymetry recalculation mode */
+	mb_pr_bathmode(verbose, &process, error);
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_update_tide(int verbose, char *file, 
+			int	mbp_tide_mode, 
+			char *mbp_tidefile, 
+			int	mbp_tide_format, 
+			int *error)
+{
+	char	*function_name = "mb_pr_update_tide";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       mbp_tide_mode:     %d\n",mbp_tide_mode);
+		fprintf(stderr,"dbg2       mbp_tidefile:      %s\n",mbp_tidefile);
+		fprintf(stderr,"dbg2       mbp_tide_format:   %d\n",mbp_tide_format);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set lever values */
+	process.mbp_tide_mode = mbp_tide_mode;
+	if (mbp_tidefile != NULL)
+		strcpy(process.mbp_tidefile,mbp_tidefile);
+	process.mbp_tide_format = mbp_tide_format;
+	    
+	/* update bathymetry recalculation mode */
+	mb_pr_bathmode(verbose, &process, error);
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_update_tt(int verbose, char *file, 
 			int	mbp_tt_mode, 
 			double	mbp_tt_mult, 
@@ -1352,6 +1668,7 @@ int mb_pr_update_nav(int verbose, char *file,
 			int	mbp_nav_speed, 
 			int	mbp_nav_draft, 
 			int	mbp_nav_algorithm, 
+			double mbp_nav_timeshift,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_nav";
@@ -1373,6 +1690,7 @@ int mb_pr_update_nav(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_speed:     %d\n",mbp_nav_speed);
 		fprintf(stderr,"dbg2       mbp_nav_draft:     %d\n",mbp_nav_draft);
 		fprintf(stderr,"dbg2       mbp_nav_algorithm: %d\n",mbp_nav_algorithm);
+		fprintf(stderr,"dbg2       mbp_nav_timeshift: %d\n",mbp_nav_timeshift);
 		}
 
 	/* get known process parameters */
@@ -1387,6 +1705,59 @@ int mb_pr_update_nav(int verbose, char *file,
 	process.mbp_nav_speed = mbp_nav_speed;
 	process.mbp_nav_draft = mbp_nav_draft;
 	process.mbp_nav_algorithm = mbp_nav_algorithm;
+	process.mbp_nav_timeshift = mbp_nav_timeshift;
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_update_navshift(int verbose, char *file, 
+			int	mbp_nav_shift, 
+			double	mbp_nav_offsetx, 
+			double	mbp_nav_offsety, 
+			double	mbp_nav_offsetz, 
+			int *error)
+{
+	char	*function_name = "mb_pr_update_navshift";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       mbp_nav_shift:     %d\n",mbp_nav_shift);
+		fprintf(stderr,"dbg2       mbp_nav_offsetx:   %f\n",mbp_nav_offsetx);
+		fprintf(stderr,"dbg2       mbp_nav_offsety:   %f\n",mbp_nav_offsety);
+		fprintf(stderr,"dbg2       mbp_nav_offsetz:   %f\n",mbp_nav_offsetz);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set nav values */
+	process.mbp_nav_shift = mbp_nav_shift;
+	process.mbp_nav_offsetx = mbp_nav_offsetx;
+	process.mbp_nav_offsety = mbp_nav_offsety;
+	process.mbp_nav_offsetz = mbp_nav_offsetz;
 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
@@ -1533,6 +1904,64 @@ int mb_pr_update_ssrecalc(int verbose, char *file,
 	process.mbp_ssrecalc_swathwidth = mbp_ssrecalc_swathwidth;
 	process.mbp_ssrecalc_interpolate = mbp_ssrecalc_interpolate;
 
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_update_metadata(int verbose, char *file, 
+			char	*mbp_meta_operator,
+			char	*mbp_meta_platform,
+			char	*mbp_meta_sonar,
+			char	*mbp_meta_survey,
+			char	*mbp_meta_pi,
+			char	*mbp_meta_client,
+			int *error)
+{
+	char	*function_name = "mb_pr_update_metadata";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                  %d\n",verbose);
+		fprintf(stderr,"dbg2       file:                     %s\n",file);
+		fprintf(stderr,"dbg2       mbp_meta_operator:        %s\n",mbp_meta_operator);
+		fprintf(stderr,"dbg2       mbp_meta_platform:        %s\n",mbp_meta_platform);
+		fprintf(stderr,"dbg2       mbp_meta_sonar:           %s\n",mbp_meta_sonar);
+		fprintf(stderr,"dbg2       mbp_meta_survey:          %s\n",mbp_meta_survey);
+		fprintf(stderr,"dbg2       mbp_meta_pi:              %s\n",mbp_meta_pi);
+		fprintf(stderr,"dbg2       mbp_meta_client:          %s\n",mbp_meta_client);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set metadata values */
+	strcpy(process.mbp_meta_operator,mbp_meta_operator);
+	strcpy(process.mbp_meta_platform,mbp_meta_platform);
+	strcpy(process.mbp_meta_sonar,mbp_meta_sonar);
+	strcpy(process.mbp_meta_survey,mbp_meta_survey);
+	strcpy(process.mbp_meta_pi,mbp_meta_pi);
+	strcpy(process.mbp_meta_client,mbp_meta_client);
+ 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
@@ -1848,6 +2277,111 @@ int mb_pr_get_heave(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_get_lever(int verbose, char *file, 
+			int	*mbp_lever_mode, 
+			double	*mbp_vru_offsetx, 
+			double	*mbp_vru_offsety, 
+			double	*mbp_vru_offsetz, 
+			double	*mbp_sonar_offsetx, 
+			double	*mbp_sonar_offsety, 
+			double	*mbp_sonar_offsetz, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_lever";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set lever values */
+	*mbp_lever_mode = process.mbp_lever_mode;
+	*mbp_vru_offsetx = process.mbp_vru_offsetx;
+	*mbp_vru_offsety = process.mbp_vru_offsety;
+	*mbp_vru_offsetz = process.mbp_vru_offsetz;
+	*mbp_sonar_offsetx = process.mbp_sonar_offsetx;
+	*mbp_sonar_offsety = process.mbp_sonar_offsety;
+	*mbp_sonar_offsetz = process.mbp_sonar_offsetz;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_lever_mode:    %d\n",*mbp_lever_mode);
+		fprintf(stderr,"dbg2       mbp_vru_offsetx:   %f\n",*mbp_vru_offsetx);
+		fprintf(stderr,"dbg2       mbp_vru_offsety:   %f\n",*mbp_vru_offsety);
+		fprintf(stderr,"dbg2       mbp_vru_offsetz:   %f\n",*mbp_vru_offsetz);
+		fprintf(stderr,"dbg2       mbp_sonar_offsetx:   %f\n",*mbp_sonar_offsetx);
+		fprintf(stderr,"dbg2       mbp_sonar_offsety:   %f\n",*mbp_sonar_offsety);
+		fprintf(stderr,"dbg2       mbp_sonar_offsetz:   %f\n",*mbp_sonar_offsetz);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_tide(int verbose, char *file, 
+			int	*mbp_tide_mode, 
+			char *mbp_tidefile, 
+			int	*mbp_tide_format, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_tide";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set lever values */
+	*mbp_tide_mode = process.mbp_tide_mode;
+	if (mbp_tidefile != NULL)
+		strcpy(mbp_tidefile,process.mbp_tidefile);
+	*mbp_tide_format = process.mbp_tide_format;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_tide_mode:     %d\n",*mbp_tide_mode);
+		fprintf(stderr,"dbg2       mbp_tidefile:      %s\n",*mbp_tidefile);
+		fprintf(stderr,"dbg2       mbp_tide_format:   %d\n",*mbp_tide_format);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_get_tt(int verbose, char *file, 
 			int	*mbp_tt_mode, 
 			double	*mbp_tt_mult, 
@@ -2042,6 +2576,7 @@ int mb_pr_get_nav(int verbose, char *file,
 			int	*mbp_nav_speed, 
 			int	*mbp_nav_draft, 
 			int	*mbp_nav_algorithm, 
+			double *mbp_nav_timeshift,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_nav";
@@ -2070,6 +2605,7 @@ int mb_pr_get_nav(int verbose, char *file,
 	*mbp_nav_speed = process.mbp_nav_speed;
 	*mbp_nav_draft = process.mbp_nav_draft;
 	*mbp_nav_algorithm = process.mbp_nav_algorithm;
+	*mbp_nav_timeshift = process.mbp_nav_timeshift;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2084,6 +2620,7 @@ int mb_pr_get_nav(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_speed:     %d\n",*mbp_nav_speed);
 		fprintf(stderr,"dbg2       mbp_nav_draft:     %d\n",*mbp_nav_draft);
 		fprintf(stderr,"dbg2       mbp_nav_algorithm: %d\n",*mbp_nav_algorithm);
+		fprintf(stderr,"dbg2       mbp_nav_timeshift: %d\n",*mbp_nav_timeshift);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -2093,6 +2630,54 @@ int mb_pr_get_nav(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_get_navshift(int verbose, char *file, 
+			int	*mbp_nav_shift, 
+			double	*mbp_nav_offsetx, 
+			double	*mbp_nav_offsety, 
+			double	*mbp_nav_offsetz, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_navshift";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set nav values */
+	*mbp_nav_shift = process.mbp_nav_shift;
+	*mbp_nav_offsetx = process.mbp_nav_offsetx;
+	*mbp_nav_offsety = process.mbp_nav_offsety;
+	*mbp_nav_offsetz = process.mbp_nav_offsetz;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_nav_shift:     %d\n",*mbp_nav_shift);
+		fprintf(stderr,"dbg2       mbp_nav_offsetx:   %f\n",*mbp_nav_offsetx);
+		fprintf(stderr,"dbg2       mbp_nav_offsety:   %f\n",*mbp_nav_offsety);
+		fprintf(stderr,"dbg2       mbp_nav_offsetz:   %f\n",*mbp_nav_offsetz);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}/*--------------------------------------------------------------------*/
 int mb_pr_get_heading(int verbose, char *file, 
 			int	*mbp_heading_mode, 
 			double	*mbp_headingbias, 
@@ -2210,9 +2795,6 @@ int mb_pr_get_ssrecalc(int verbose, char *file,
 	*mbp_ssrecalc_swathwidth = process.mbp_ssrecalc_swathwidth;
 	*mbp_ssrecalc_interpolate = process.mbp_ssrecalc_interpolate;
 
-	/* write new process parameter file */
-	status = mb_pr_writepar(verbose, file, &process, error);
-
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -2223,6 +2805,61 @@ int mb_pr_get_ssrecalc(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize:   %f\n",*mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:  %f\n",*mbp_ssrecalc_swathwidth);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_interpolate: %d\n",*mbp_ssrecalc_interpolate);
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_metadata(int verbose, char *file, 
+			char	*mbp_meta_operator,
+			char	*mbp_meta_platform,
+			char	*mbp_meta_sonar,
+			char	*mbp_meta_survey,
+			char	*mbp_meta_pi,
+			char	*mbp_meta_client,
+			int *error)
+{
+	char	*function_name = "mb_pr_get_metadata";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set metadata values */
+	strcpy(mbp_meta_operator,process.mbp_meta_operator);
+	strcpy(mbp_meta_platform,process.mbp_meta_platform);
+	strcpy(mbp_meta_sonar,process.mbp_meta_sonar);
+	strcpy(mbp_meta_survey,process.mbp_meta_survey);
+	strcpy(mbp_meta_pi,process.mbp_meta_pi);
+	strcpy(mbp_meta_client,process.mbp_meta_client);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_meta_operator:        %s\n",process.mbp_meta_operator);
+		fprintf(stderr,"dbg2       mbp_meta_platform:        %s\n",process.mbp_meta_platform);
+		fprintf(stderr,"dbg2       mbp_meta_sonar:           %s\n",process.mbp_meta_sonar);
+		fprintf(stderr,"dbg2       mbp_meta_survey:          %s\n",process.mbp_meta_survey);
+		fprintf(stderr,"dbg2       mbp_meta_pi:              %s\n",process.mbp_meta_pi);
+		fprintf(stderr,"dbg2       mbp_meta_client:          %s\n",process.mbp_meta_client);
 		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                   %d\n",status);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *    $Id: mb_process.h,v 5.3 2001-06-01 00:14:06 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -63,6 +63,30 @@
  *   NAVINTERP boolean              # sets navigation interpolation algorithm [0]
  *                                  #   0: linear interpolation (recommended)
  *                                  #   1: spline interpolation
+ *   NAVTIMESHIFT constant          # sets navigation time shift (seconds) [0.0]
+ *                                  # - note: time shift added to timestamps of 
+ *                                  #   navigation fixes read in from NAVFILE 
+ *                                  #   prior to merging
+ *   NAVSHIFT boolean               # sets navigation offset [0]
+ *                                  # - note: offsets applied to navigation read
+ *                                  #   in from NAVFILE prior to merging
+ *   NAVOFFSETX constant            # sets navigation athwartship offset (meters) [0.0]
+ *                                  # - note: the effective navigation shift is
+ *                                  #   (NAVOFFSETX - SONAROFFSETX), and the 
+ *                                  #   navigation is corrected by subtracting 
+ *                                  #   this effective shift.
+ *                                  # - note: athwartship shift is positive to 
+ *                                  #   starboard.
+ *   NAVOFFSETY constant            # sets navigation fore-aft offset (meters) [0.0]
+ *                                  # - note: the effective navigation shift is
+ *                                  #   (NAVOFFSETY - SONAROFFSETY), and the 
+ *                                  #   navigation is corrected by subtracting 
+ *                                  #   this effective shift.
+ *                                  # - note: fore-aft shift is positive forward.
+ *   NAVOFFSETZ constant            # sets navigation vertical offset (meters) [0.0]
+ *                                  # - note: this value is not yet used for
+ *                                  #   anything.
+ *                                  # - note: vertical shift is positive down.
  *
  * ADJUSTED NAVIGATION MERGING:
  *   NAVADJMODE boolean             # sets navigation merging from mbnavadjust [0]
@@ -125,6 +149,50 @@
  *   HEAVEOFFSET offset             # sets value added to heave (m) 
  *   HEAVEMULTIPLY multiplier       # sets value multiplied by heave
  *
+ * LEVER CORRECTION:
+ *   LEVERMODE mode                 # sets heave correction by lever correction [0]
+ *                                  #   0: no heave correction by lever calculation
+ *                                  #   1: heave correction by lever calculation
+ *				    		# - note: lever calculation finds heave at the
+ *                                  #   sonar head location by adding motion
+ *                                  #   inferred from roll and pitch projected
+ *                                  #   from the vru location.
+ *   VRUOFFSETX constant            # sets vru athwartship offset (meters) [0.0]
+ *                                  # - note: the effective athwartship distance
+ *                                  #   between the vru and the sonar head is  
+ *                                  #   (VRUOFFSETX - SONAROFFSETX), and the 
+ *                                  #   lever calculation is made using this 
+ *                                  #   effective distance.
+ *                                  # - note: athwartship distance is positive to 
+ *                                  #   starboard.
+ *   VRUOFFSETY constant            # sets vru fore-aft offset (meters) [0.0]
+ *                                  # - note: the effective fore-aft distance
+ *                                  #   between the vru and the sonar head is  
+ *                                  #   (VRUOFFSETY - SONAROFFSETY), and the 
+ *                                  #   lever calculation is made using this 
+ *                                  #   effective distance.
+ *                                  # - note: fore-aft distance is positive forward.
+ *   VRUOFFSETZ constant            # sets vru vertical offset (meters) [0.0]
+ *                                  # - note: the effective vertical distance
+ *                                  #   between the vru and the sonar head is  
+ *                                  #   (VRUOFFSETZ - SONAROFFSETZ), and the 
+ *                                  #   lever calculation is made using this 
+ *                                  #   effective distance.
+ *                                  # - note: vertical distance is positive down.
+ *   SONAROFFSETX constant          # sets sonar athwartship offset (meters) [0.0]
+ *                                  # - note: this value is used for both 
+ *                                  #   navigation shifts and lever calculations.
+ *                                  # - note: athwartship distance is positive to 
+ *                                  #   starboard.
+ *   SONAROFFSETY constant          # sets vru fore-aft offset (meters) [0.0]
+ *                                  # - note: this value is used for both 
+ *                                  #   navigation shifts and lever calculations.
+ *                                  # - note: fore-aft distance is positive forward.
+ *   SONAROFFSETZ constant          # sets vru vertical offset (meters) [0.0]
+ *                                  # - note: this value is used for lever 
+ *                                  #   calculations.
+ *                                  # - note: vertical distance is positive down.
+ *
  * ROLL CORRECTION:
  *   ROLLBIASMODE mode              # sets roll correction [0]
  *                                  #   0: no roll correction
@@ -150,6 +218,15 @@
  *                                  #   3: heading correction using course made good and offset
  *   HEADINGOFFSET offset           # sets value added to heading (degrees)
  *
+ * TIDE CORRECTION:
+ *   TIDEMODE mode                  # sets tide correction [0]
+ *                                  # - note: tide added to bathymetry after
+ *                                  #   all other calculations and corrections
+ *                                  #   0: tide correction off
+ *                                  #   1: tide correction on
+ *   TIDEFILE filename              # sets tide file path
+ *   TIDEFORMAT constant            # sets tide file format [1]
+ *
  * SIDESCAN RECALCULATION:
  *   SSRECALCMODE  boolean          # sets recalculation of sidescan for Simrad multibeam data
  *                                  #   0: sidescan recalculation off
@@ -161,6 +238,14 @@
  *                                  # - a zero value causes the swath width to be recalculated
  *                                  #   for every data record
  *   SSINTERPOLATE  constant        # sets sidescan interpolation distance (number of pixels)
+ *
+ * METADATA INSERTION:
+ *   METAOPERATOR  string           # sets mbinfo metadata string for survey operator institution or company
+ *   METAPLATFORM  string           # sets mbinfo metadata string for platform (ship or vehicle)
+ *   METASONAR     string           # sets mbinfo metadata string for sonar model name
+ *   METASURVEY    string           # sets mbinfo metadata string for survey name
+ *   METAPI        string           # sets mbinfo metadata string for principal investigator
+ *   METACLIENT    string           # sets mbinfo metadata string for survey client institution or company
  *
  * PROCESSING KLUGES:
  *   KLUGE001                       # processing kluge 001 (not yet defined)
@@ -190,6 +275,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -242,6 +330,8 @@
 #define MBP_HEAVE_OFFSET	1
 #define MBP_HEAVE_MULTIPLY	2
 #define MBP_HEAVE_MULTIPLYOFFSET	3
+#define MBP_LEVER_OFF		0
+#define MBP_LEVER_ON		1
 #define MBP_ROLLBIAS_OFF	0
 #define MBP_ROLLBIAS_SINGLE	1
 #define MBP_ROLLBIAS_DOUBLE	2
@@ -251,6 +341,8 @@
 #define MBP_HEADING_CALC        1
 #define MBP_HEADING_OFFSET      2
 #define MBP_HEADING_CALCOFFSET  3
+#define MBP_TIDE_OFF		0
+#define MBP_TIDE_ON		1
 #define MBP_SSRECALC_OFF	0
 #define MBP_SSRECALC_ON		1
 
@@ -273,6 +365,11 @@ struct mb_process_struct
 	int	mbp_nav_speed;
 	int	mbp_nav_draft;
 	int	mbp_nav_algorithm;
+	double	mbp_nav_timeshift;
+	int	mbp_nav_shift;
+	double	mbp_nav_offsetx;
+	double	mbp_nav_offsety;
+	double	mbp_nav_offsetz;
 	
 	/* adjusted navigation merging */
 	int	mbp_navadj_mode;
@@ -305,6 +402,15 @@ struct mb_process_struct
 	double	mbp_heave;
 	double	mbp_heave_mult;
 	
+	/* lever correction */
+	int	mbp_lever_mode;
+	double	mbp_vru_offsetx;
+	double	mbp_vru_offsety;
+	double	mbp_vru_offsetz;
+	double	mbp_sonar_offsetx;
+	double	mbp_sonar_offsety;
+	double	mbp_sonar_offsetz;
+	
 	/* roll correction */
 	int	mbp_rollbias_mode;
 	double	mbp_rollbias;
@@ -319,10 +425,23 @@ struct mb_process_struct
 	int	mbp_heading_mode;
 	double	mbp_headingbias;
 	
+	/* tide correction */
+	int	mbp_tide_mode;
+	char	mbp_tidefile[MBP_FILENAMESIZE];
+	int	mbp_tide_format;
+	
 	/* sidescan recalculation */
 	int	mbp_ssrecalc_mode;
 	double	mbp_ssrecalc_pixelsize;
 	double	mbp_ssrecalc_swathwidth;
 	int	mbp_ssrecalc_interpolate;
+
+	/* metadata strings */
+	char	mbp_meta_operator[MBP_FILENAMESIZE];
+	char	mbp_meta_platform[MBP_FILENAMESIZE];
+	char	mbp_meta_sonar[MBP_FILENAMESIZE];
+	char	mbp_meta_survey[MBP_FILENAMESIZE];
+	char	mbp_meta_pi[MBP_FILENAMESIZE];
+	char	mbp_meta_client[MBP_FILENAMESIZE];
 	};
 
