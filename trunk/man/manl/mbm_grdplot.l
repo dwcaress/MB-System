@@ -1,4 +1,4 @@
-.TH mbm_grdplot l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_grdplot l "3 November 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
 a GMT map of gridded data in a GMT grd file.
@@ -14,9 +14,9 @@ Version 4.6
 \fB-G\fP\fIcolor_mode\fP \fB-H\fP 
 \fB-K\fP\fIintensity_file\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize\fP
-\fB-S\fP\fI[color/shade]\fP
+\fB-S\fP\fI[color/shade]\fP \fB-T\fP
 \fB-U\fP\fIorientation\fP \fB-V\fP 
-\fB-W\fP\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]] ]
+\fB-W\fP\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | \fIcptfile]\fP ]
 
 Additional Options:
 .br
@@ -36,6 +36,10 @@ Miscellaneous Options:
 \fB-MCA\fP\fIanot_int/\fP[\fIffont_size\fP][\fIaangle\fP][\fI/r/g/b\fP][\fIo\fP]]
 \fB-MCG\fP\fIgap/width\fP \fB-MCQ\fP\fIcut \fP
 \fB-MCT\fP[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] \fB-MCW\fP\fItype\fP[\fIpen\fP]
+\fB-MTC\fP\fIfill\fP \fB-MTD\fP\fIresolution\fP 
+\fB-MTG\fP\fIfill\fP \fB-MTI\fP\fIriver[/pen]\fP 
+\fB-MTN\fP\fIborder[/pen]\fP \fB-MTS\fP\fIfill\fP 
+\fB-MTW\fP\fIpen\fP
 \fB-MXG\fP\fIfill\fP \fB-MXI\fP\fIxy_file \fP
 \fB-MXS\fP\fIsymbol/size\fP \fB-MXW\fP\fIpen\fP]
 
@@ -45,7 +49,8 @@ shellscript of \fBGMT\fP commands which,
 when executed, will generate a Postscript plot of gridded 
 data.  Several styles of plots can be generated, including 
 color fill maps, contour maps, color fill maps overlaid with
-contours, shaded relief color maps, text labels, and xy data
+contours, shaded relief color maps, slope magnitude maps,
+coastline maps, text labels, and xy data
 in lines or symbols. Five different color schemes are included.
 The plot will be scaled to fit on the specified page size 
 or, if the scale is user defined, the page size will be 
@@ -123,6 +128,10 @@ Turns on color fill plot and sets the style of the plot.
                         an intensity file. The \fB-K\fP 
                         option must be used to specify
  			the intensity file.
+        \fIcolor_mode\fP = 4: Color/gray fill of slope 
+ 			magnitude.
+        \fIcolor_mode\fP = 5: Color/gray fill shaded by 
+                        slope magnitude.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -139,7 +148,7 @@ Alternatively, \fIgrdfile\fP may be a list of grid files
 \fIintensity_file\fP
 .br
 Sets the name of the gridded data file containing
-instensity values to be used for shading the map.  
+intensity values to be used for shading the map.  
 Alternatively, \fIgrdfile\fP may be a list of grid files
 (one filename on each line) to be used together. If a
 list of file is supplied, the intensity files must
@@ -187,6 +196,15 @@ setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
 .TP
+.B \-T
+If \fB-T\fP is given, it causes a coastline to be drawn
+on the map. The default is to draw the coastline and shade
+all dry land a uniform gray. To exercise greater control of
+the coastline plotting, use the 
+\fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP, 
+\fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options described in the
+COMPLETE DESCRIPTION OF OPTIONS section below.
+.TP
 .B \-U
 \fIorientation\fP
 .br
@@ -202,10 +220,12 @@ so that it outputs
 more information than usual.
 .TP
 .B \-W
-\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. If \fIcolor_style\fP = 1 [default], then
+fill plots. 
+
+If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
@@ -224,6 +244,10 @@ The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
+
+If the option argument is the path to an existing \fBGMT\fP 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
 
 .SH COMPLETE DESCRIPTION OF OPTIONS
 .TP
@@ -309,6 +333,10 @@ Turns on color fill plot and sets the style of the plot.
                         an intensity file. The \fB-K\fP 
                         option must be used to specify
  			the intensity file.
+        \fIcolor_mode\fP = 4: Color/gray fill of slope 
+ 			magnitude.
+        \fIcolor_mode\fP = 5: Color/gray fill shaded by 
+                        slope magnitude.
 .br
 See the \fBgrdimage\fP manual page for information on shading
 with intensity files
@@ -417,7 +445,7 @@ More details can be found in the \fBpsbasemap\fP manpages.
 \fIintensity_file\fP
 .br
 Sets the name of the gridded data file containing
-instensity values to be used for shading the map.  
+intensity values to be used for shading the map.  
 Alternatively, \fIgrdfile\fP may be a list of grid files
 (one filename on each line) to be used together. If a
 list of files is supplied, the intensity files must
@@ -467,7 +495,8 @@ of \fIscale_loc\fP are:
 .B \-MGL
 [\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIm\fP]
 .br
-Draws a simple map scale centered on \fIlon0/lat0\fP.  Use \fB\-Lx\fP to specify position in inch instead.
+Draws a simple map scale centered 
+on \fIlon0/lat0\fP.  Use \fB\-Lx\fP to specify position in inch instead.
 Scale is calculated at latitude \fIslat\fP, \fIlength\fP is in km [miles if m is appended].
 Use \fB\-Lf\fP to get a "fancy" scale [Default is plain].
 .TP
@@ -555,6 +584,89 @@ then only contours marked with upper case C or A will have tickmarks [and anotat
 \fItype\fP, if present, can be 'a' for annotated contours or 'c' for regular contours [Default].
 \fIpen\fP sets the attributes for the particular line.  Default values for annotated contours:
 width = 3, color = black, texture = solid.  Regular contours have default width = 1.
+.TP
+.B \-MTC
+\fIfill\fP 
+.br
+Coastline plotting option.
+Set the shade (0-255), color (r/g/b), or pattern
+(p|Pdpi/pattern; see \fB-MTG\fP) for lakes  [Default is the
+fill chosen for "wet" areas (-S)].
+.TP
+.B \-MTD
+\fIresolution\fP 
+.br
+Coastline plotting option.
+Selects the resolution of the coastline data set to use ((f)ull,
+(h)igh, (i)ntermediate, (l)ow, and (c)rude).  The
+resolution drops off by 80% between data sets. [Default
+is l].
+.TP
+.B \-MTG
+\fIfill\fP 
+.br
+Coastline plotting option.
+Select painting or clipping of "dry" areas.  Append a
+shade, color, pattern, or c for clipping.  Specify the
+shade (0-255) or color (r/g/b), or \fB-MTG\fP\fIpdpi/pattern\fP,
+where pattern gives the number of the built-in pattern
+(1-90) OR the name of a Sun 1-, 8-, or 24-bit raster
+file.  dpi sets the resolution of the image.  See \fBGMT\fP
+Cookbook & Technical Reference Appendix E for
+information on individual patterns.
+.TP
+.B \-MTI
+\fIriver[/pen]\fP 
+.br
+Coastline plotting option.
+Draw rivers.  Specify the type of rivers and
+[optionally] append pen attributes  [Default pen:
+width = 1, color = 0/0/0, texture = solid].  Choose
+from the list of river types below.  Repeat option -I
+as often as necessary.
+     1 = Permanent major rivers
+     2 = Additional major rivers
+     3 = Additional rivers
+     4 = Minor rivers
+     5 = Intermittent rivers - major
+     6 = Intermittent rivers - additional
+     7 = Intermittent rivers - minor
+     8 = Major canals
+     9 = Minor canals
+     10 = Irrigation canals
+     a = All rivers and canals (1-10)
+     r = All permanent rivers (1-4)
+     i = All intermittent rivers (5-7)
+     c = All canals (8-10)
+.TP
+.B \-MTN
+\fIborder[/pen]\fP 
+.br
+Coastline plotting option.
+Draw political boundaries.  Specify the type of
+boundary and [optionally] append pen attributes
+[Default pen:  width = 1, color = 0/0/0, texture =
+solid].  Choose from the list of boundaries below.
+Repeat option \fB-MTN\fP as often as necessary.
+     1 = National boundaries
+     2 = State boundaries within the Americas
+     3 = Marine boundaries
+     a = All boundaries (1-3)
+.TP
+.B \-MTS
+\fIfill\fP 
+.br
+Coastline plotting option.
+Select painting or clipping of "wet" areas.  Append the
+shade (0-255), color (r/g/b), pattern (see \fB-MTG\fP), or c
+for clipping.
+.TP
+.B \-MTW
+\fIpen\fP 
+.br
+Coastline plotting option.
+Append pen attributes  [Defaults:  width = 1, color = 0/0/0,
+texture = solid].
 .TP
 .B \-MXG
 \fIfill\fP 
@@ -767,6 +879,14 @@ setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
 .TP
+.B \-T
+If \fB-T\fP is given, it causes a coastline to be drawn
+on the map. The default is to draw the coastline and shade
+all dry land a uniform gray. To exercise greater control of
+the coastline plotting, use the 
+\fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP, 
+\fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options described in the
+.TP
 .B \-U
 \fIorientation\fP
 .br
@@ -782,10 +902,12 @@ so that it outputs
 more information than usual.
 .TP
 .B \-W
-\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. If \fIcolor_style\fP = 1 [default], then
+fill plots. 
+
+If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
@@ -854,6 +976,10 @@ The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
+
+If the option argument is the path to an existing \fBGMT\fP 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
 .TP
 .B \-X
 Normally, \fBmbm_grdplot\fP creates an executable shellscript and

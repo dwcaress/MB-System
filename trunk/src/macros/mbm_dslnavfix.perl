@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
-#    $Id: mbm_dslnavfix.perl,v 4.4 1999-10-21 20:42:32 caress Exp $
+#    $Id: mbm_dslnavfix.perl,v 4.5 1999-12-29 00:17:55 caress Exp $
 #
 #    Copyright (c) 1996 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,7 +25,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   data using mbmerge (use the -M2 option of mbmerge).
 #
 # Basic Usage: 
-#   mbm_dslnavfix -Iinfile -Ooutfile -Jutm_zone [-V -H]
+#   mbm_dslnavfix -Iinfile -Ooutfile -Jutm_zone [-Ddecimate -V -H]
 #
 # Author:
 #   David W. Caress
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1996
 #
 # Version:
-#   $Id: mbm_dslnavfix.perl,v 4.4 1999-10-21 20:42:32 caress Exp $
+#   $Id: mbm_dslnavfix.perl,v 4.5 1999-12-29 00:17:55 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.4  1999/10/21  20:42:32  caress
+# Added nav format to mbm_dslnavfix.
+#
 # Revision 4.3  1999/03/31  18:09:36  caress
 # MB-System 4.6beta7
 #
@@ -59,7 +62,8 @@ $program_name = "mbm_dslnavfix";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('E:e:F:f:HhI:i:J:j:O:o:Vv');
+&MBGetopts('D:d:E:e:F:f:HhI:i:J:j:O:o:Vv');
+$decimate = 		($opt_D || $opt_d || 1);
 $ellipsoid_use = 	($opt_E || $opt_e || "WGS-84");
 $format =    		($opt_F || $opt_f || 2);
 $help =    		($opt_H || $opt_h);
@@ -78,7 +82,7 @@ if ($help)
 	print "can be merged with the DSL AMS-120 bathymetry and sidescan \n";
 	print "data using mbmerge (use the -M2 option of mbmerge). \n";
         print "\nBasic Usage:  \n";
-        print "mbm_dslnavfix -Iinfile -Ooutfile -Jutm_zone -F1 [-V -H] \n\n";
+        print "mbm_dslnavfix -Iinfile -Ooutfile -Jutm_zone -F1 [-Ddecimate -V -H] \n\n";
 	exit 0;
 	}
 
@@ -172,6 +176,10 @@ if ($verbose)
 	print "  Output navigation file:        $outfile\n";
 	print "  Temporary projected nav file:  $tmp_proj_navfile\n";
 	print "  Temporary geographic nav file: $tmp_geo_navfile\n";
+	if ($decimate)
+		{
+		print "  Decimation factor:             $decimate\n";
+		}
 	print "\n  ------------\n\n";
 	print "  Projection:                    $projection_id\n";
 	if ($units_feet == 1)
@@ -184,6 +192,10 @@ if ($verbose)
 		}
 	print "\n  ------------\n\n";
 	}
+
+# get number of lines
+$linecountcom = "cat $infile | wc -l";
+$numberlines = `$linecountcom`;
 	
 # now open the raw DSL navigation data
 if (!open(INP,"<$infile"))
@@ -199,6 +211,8 @@ if (!open(OTMP,">$tmp_proj_navfile"))
 	
 # now read the raw DSL navigation data
 $daysec_old = -9999;
+$count = $decimate - 1;
+$lastcount = $count + $numberlines - 1;
 while ($line = <INP>)
 	{
 	if ($format == 1)
@@ -222,6 +236,13 @@ while ($line = <INP>)
 			$daysec = $second + 60 * ($minute + 60 * $hour);
 			if ($daysec != $daysec_old)
 				{
+				$count++;
+				}
+			if ($daysec != $daysec_old && 
+				($count >= $decimate || $count == $lastcount))
+				{
+				$count = 0;
+
 				push(@nyear, $year);
 				push(@nmonth, $month);
 				push(@nday, $day);
@@ -272,7 +293,13 @@ while ($line = <INP>)
 			$daysec = $second + 60 * ($minute + 60 * $hour);
 			if ($daysec != $daysec_old)
 				{
-				push(@nyear, $year);
+				$count++;
+				}
+			if ($daysec != $daysec_old && 
+				($count >= $decimate || $count == $lastcount))
+				{
+				$count = 0;
+
 				push(@nmonth, $month);
 				push(@nday, $day);
 				push(@nhour, $hour);
@@ -322,7 +349,13 @@ while ($line = <INP>)
 			$daysec = $second + 60 * ($minute + 60 * $hour);
 			if ($daysec != $daysec_old)
 				{
-				push(@nyear, $year);
+				$count++;
+				}
+			if ($daysec != $daysec_old && 
+				($count >= $decimate || $count == $lastcount))
+				{
+				$count = 0;
+
 				push(@nmonth, $month);
 				push(@nday, $day);
 				push(@nhour, $hour);
@@ -359,6 +392,13 @@ while ($line = <INP>)
 			$daysec = $second + 60 * ($minute + 60 * $hour);
 			if ($daysec != $daysec_old)
 				{
+				$count++;
+				}
+			if ($daysec != $daysec_old && 
+				($count >= $decimate || $count == $lastcount))
+				{
+				$count = 0;
+
 				push(@nyear, $year);
 				push(@nmonth, $month);
 				push(@nday, $day);

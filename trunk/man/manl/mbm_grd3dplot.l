@@ -1,4 +1,4 @@
-.TH mbm_grd3dplot l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_grd3dplot l "3 November 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_grd3dplot\fP - Create an executable shellscript which will generate
 a GMT 3D perspective plot of gridded data in a GMT grd file.
@@ -15,7 +15,7 @@ Version 4.6
 \fB-N\fP\fIdrape_file\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
 \fB-S\fP\fI[color/shade]\fP \fB-U\fP\fIorientation\fP \fB-V\fP 
-\fB-W\fP\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]] ]
+\fB-W\fP[\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]] | \fIcptfile\fP] ]
 
 Additional Options:
 .br
@@ -117,7 +117,12 @@ Turns on color fill plot and sets the style of the plot.
                         an intensity file. The \fB-K\fP 
                         option must be used to specify
  			the intensity file.
-        \fIcolor_mode\fP = 4: 3D mesh plot.
+        \fIcolor_mode\fP = 4: 3D Color/gray fill of slope 
+ 			magnitude.
+        \fIcolor_mode\fP = 5: 3D Color/gray fill shaded by 
+                        slope magnitude.
+        \fIcolor_mode\fP = 6: 3D mesh plot.
+        \fIcolor_mode\fP = 7: 3D mesh plot with contours.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -202,10 +207,12 @@ so that it outputs
 more information than usual.
 .TP
 .B \-W
-\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. If \fIcolor_style\fP = 1 [default], then
+fill plots. 
+
+If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
@@ -224,6 +231,10 @@ The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
+
+If the option argument is the path to an existing \fBGMT\fP 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
 
 .SH COMPLETE DESCRIPTION OF OPTIONS
 .TP
@@ -285,7 +296,12 @@ Turns on color fill plot and sets the style of the plot.
                         an intensity file. The \fB-K\fP 
                         option must be used to specify
  			the intensity file.
-        \fIcolor_mode\fP = 4: 3D mesh plot.
+        \fIcolor_mode\fP = 4: 3D Color/gray fill of slope 
+ 			magnitude.
+        \fIcolor_mode\fP = 5: 3D Color/gray fill shaded by 
+                        slope magnitude.
+        \fIcolor_mode\fP = 6: 3D mesh plot.
+        \fIcolor_mode\fP = 7: 3D mesh plot with contours.
 .br
 See the \fBgrdimage\fP manual page for information on shading
 with intensity files
@@ -628,10 +644,12 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
 .B \-W
-\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. If \fIcolor_style\fP = 1 [default], then
+fill plots. 
+
+If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
@@ -700,6 +718,10 @@ The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
+
+If the option argument is the path to an existing \fBGMT\fP 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
 .TP
 .B \-V
 Causes \fBmbm_grd3dplot\fP to operate in "verbose" mode 

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.14 1999-08-08 04:17:04 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.15 1999-12-29 00:17:55 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,7 +22,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   when executed, will generate a Postscript plot of gridded 
 #   data.  Several styles of plots can be generated, including 
 #   color fill maps, contour maps, color fill maps overlaid with
-#   contours, shaded relief color maps, text labels, and xy data
+#   contours, shaded relief color maps, slope magnitude maps,
+#   coastline maps, text labels, and xy data
 #   in lines or symbols. Five different color schemes are included.
 #   The plot will be scaled to fit on the specified page size 
 #   or, if the scale is user defined, the page size will be 
@@ -63,10 +64,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.14 1999-08-08 04:17:04 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.15 1999-12-29 00:17:55 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.14  1999/08/08  04:17:04  caress
+# Added coastline plots.
+#
 # Revision 4.13  1999/06/25  17:55:47  caress
 # I must have changed something!
 #
@@ -350,7 +354,7 @@ if ($file_intensity && ! -r $file_intensity)
 	print "\a";
 	die "\nSpecified intensity input file $file_intensity cannot be opened!\n$program_name aborted\n";
 	}
-if ($color_mode > 2 && !$file_intensity)
+if ($color_mode == 3 && !$file_intensity)
 	{
 	print "\a";
 	die "\nShading with intensity file set but no intensity input file specified!\n$program_name aborted\n";
@@ -617,11 +621,18 @@ if ($color_mode == 2 && !$elevation)
 	{
 	$elevation = 30.0;
 	}
+if ($color_mode >= 4 && !$magnitude)
+	{
+	$magnitude = 1.0;
+	}
 if ($color_control)
 	{
 	if (-e $color_control)
 		{
 		$file_cpt = $color_control;
+		$color_style = 1;
+		$color_pallette = 1;
+		$ncolors = $ncpt;
 		}
 	elsif ($color_control =~ /\S+\/\S+\/\S+/)
 		{
@@ -698,10 +709,6 @@ if ($stretch_control)
 elsif ($stretch_mode)
 	{
 	$stretch_color = 1;
-	}
-if ($color_mode && $file_cpt)
-	{
-	$cptfile = $file_cpt;
 	}
 
 # set page size
@@ -1366,7 +1373,14 @@ if ($coast_control
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
-$cptfile = "$root.cpt";
+if ($color_mode && $file_cpt)
+	{
+	$cptfile = $file_cpt;
+	}
+else
+	{
+	$cptfile = "$root.cpt";
+	}
 $gmtfile = "gmtdefaults\$\$";
 
 # set some gmtisms
@@ -1465,9 +1479,18 @@ if (@gmt_defs)
 # generate color pallette table file if needed
 if ($color_mode && !$file_cpt)
 	{
+	# set slope cpt
+	if ($color_mode == 4)
+		{
+		foreach $i (0 .. $ncolors - 1) {
+			$d1 = $magnitude * $i / ($ncolors - 1);
+			push(@hist, $d1);
+			}
+		}
+
 	# break data distribution up into equal size 
 	# regions using grdhisteq on first data file
-	if ($stretch_color)
+	elsif ($stretch_color)
 		{
 		if ($verbose) 
 			{
@@ -1506,7 +1529,7 @@ if ($color_mode && !$file_cpt)
 	# generate cpt file
 	print FCMD "#\n# Make color pallette table file\n";
 	print FCMD "echo Making color pallette table file...\n";
-	if ($stretch_color)
+	if ($color_mode == 4 || $stretch_color)
 		{
 		$d1 = shift @hist;
 		}
@@ -1518,7 +1541,7 @@ if ($color_mode && !$file_cpt)
 		{
 		foreach $i (0 .. $ncolors - 2)
 			{
-			if ($stretch_color)
+			if ($color_mode == 4 || $stretch_color)
 				{
 				$d2 = shift @hist;
 				}
@@ -1545,7 +1568,7 @@ if ($color_mode && !$file_cpt)
 		{
 		for ($i = $ncolors - 2; $i >= 0; $i--)
 			{
-			if ($stretch_color)
+			if ($color_mode == 4 || $stretch_color)
 				{
 				$d2 = shift @hist;
 				}
@@ -1572,7 +1595,7 @@ if ($color_mode && !$file_cpt)
 		{
 		foreach $i (0 .. $ncolors - 1)
 			{
-			if ($stretch_color)
+			if ($color_mode == 4 || $stretch_color)
 				{
 				$d2 = shift @hist;
 				}
@@ -1599,7 +1622,7 @@ if ($color_mode && !$file_cpt)
 		{
 		for ($i = $ncolors - 1; $i >= 0; $i--)
 			{
-			if ($stretch_color)
+			if ($color_mode == 4 || $stretch_color)
 				{
 				$d2 = shift @hist;
 				}
@@ -1709,7 +1732,7 @@ if ($color_mode == 2)
 	}
 
 # get equalized shading by intensity file if needed
-if ($color_mode == 3 && $file_int && $stretch_shade)
+elsif ($color_mode == 3 && $file_int && $stretch_shade)
 	{
 	printf FCMD "#\n# Get shading array\n";
 	printf FCMD "echo Getting shading array...\n";
@@ -1727,16 +1750,50 @@ elsif ($color_mode == 3 && $file_int)
 	$file_shade = "\$INTENSITY_FILE";
 	}
 
+# get color by slope magnitude if needed
+elsif ($color_mode >= 4)
+	{
+	printf FCMD "#\n# Get slope array\n";
+	printf FCMD "echo Getting slope array...\n";
+	printf FCMD "echo Running grdgradient to get x component of the gradient...\n";
+	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx -M\n";
+	printf FCMD "echo Running grdgradient to get y component of the gradient...\n";
+	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy -M\n";
+
+	printf FCMD "echo Running grdmath to get slope magnitude...\n";
+	printf FCMD "grdmath \$DATA_FILE.drvx 2.0 POW \\\n";
+	printf FCMD "\t\$DATA_FILE.drvy 2.0 POW ADD SQRT \\\n";
+	if ($color_mode == 5)
+		{
+		printf FCMD "\t$magnitude MUL \\\n";
+		}
+	printf FCMD "\t= \$DATA_FILE.slope\n";
+
+	printf FCMD "/bin/rm -f \$DATA_FILE.drvx \$DATA_FILE.drvy \n";
+	$file_slope = "\$DATA_FILE.slope";
+	}
+
 # do grdimage plot
 if ($color_mode)
 	{
 	printf FCMD "#\n# Make color image\n";
 	printf FCMD "echo Running grdimage...\n";
-	printf FCMD "grdimage $file_use -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	if ($color_mode == 4)
+		{
+		printf FCMD "grdimage $file_slope -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+		}
+	else
+		{
+		printf FCMD "grdimage $file_use -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+		}
 	printf FCMD "-R\$MAP_REGION -C\$CPT_FILE \\\n\t";
-	if ($color_mode > 1)
+	if ($color_mode == 2 || $color_mode == 3)
 		{
 		printf FCMD "-I$file_shade \\\n\t";
+		}
+	elsif ($color_mode == 5)
+		{
+		printf FCMD "-I$file_slope \\\n\t";
 		}
 	if ($dpi)
 		{
@@ -2075,6 +2132,14 @@ if ($verbose)
 		{
 		print "    Color Shaded by Unaltered Intensity File\n";
 		}
+	elsif ($color_mode == 4)
+		{
+		print "    Color Fill of Slope Magnitude\n";
+		}
+	elsif ($color_mode == 5)
+		{
+		print "    Color Shaded by Slope Magnitude\n";
+		}
 	if ($contour_mode)
 		{
 		print "    Contours\n";
@@ -2220,6 +2285,10 @@ if ($verbose)
 		printf "    Illumination Azimuth:     %f\n", $azimuth;
 		printf "    Illumination Elevation:   %f\n", $elevation;
 		printf "    Illumination Magnitude:   %f\n", $magnitude;
+		}
+	elsif ($color_mode == 4)
+		{
+		printf "    Slope Magnitude Magnitude:%f\n", $magnitude;
 		}
 	if ($coast_control)
 		{

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 4.12 1999-06-25 17:55:47 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 4.13 1999-12-29 00:17:55 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 4.12 1999-06-25 17:55:47 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.13 1999-12-29 00:17:55 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.12  1999/06/25  17:55:47  caress
+# I must have changed something!
+#
 # Revision 4.11  1999/05/06  23:46:32  caress
 # Release 4.6a
 #
@@ -517,6 +520,10 @@ if ($color_mode == 2 && !$elevation)
 	{
 	$elevation = 30.0;
 	}
+if ($color_mode >= 4 && !$magnitude)
+	{
+	$magnitude = 1.0;
+	}
 if (!$view_control)
 	{
 	$view_control = "240/30";
@@ -535,6 +542,9 @@ if ($color_control)
 	if (-e $color_control)
 		{
 		$file_cpt = $color_control;
+		$color_style = 1;
+		$color_pallette = 1;
+		$ncolors = $ncpt;
 		}
 	elsif ($color_control =~ /\S+\/\S+\/\S+/)
 		{
@@ -611,10 +621,6 @@ if ($stretch_control)
 elsif ($stretch_mode)
 	{
 	$stretch_color = 1;
-	}
-if ($color_mode && $file_cpt)
-	{
-	$cptfile = $file_cpt;
 	}
 
 # set page size
@@ -1277,7 +1283,14 @@ if (!$contour_control && $contour_mode)
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
-$cptfile = "$root.cpt";
+if ($color_mode && $file_cpt)
+	{
+	$cptfile = $file_cpt;
+	}
+else
+	{
+	$cptfile = "$root.cpt";
+	}
 $gmtfile = "gmtdefaults\$\$";
 
 # set some gmtisms
@@ -1379,6 +1392,15 @@ if (@gmt_defs)
 # generate color pallette table file if needed
 if ($color_mode && !$file_cpt)
 	{
+	# set slope cpt
+	if ($color_mode == 4)
+		{
+		foreach $i (0 .. $ncolors - 1) {
+			$d1 = $magnitude * $i / ($ncolors - 1);
+			push(@hist, $d1);
+			}
+		}
+
 	# break data distribution up into equal size 
 	# regions using grdhisteq on first data file
 	if ($stretch_color)
@@ -1420,7 +1442,7 @@ if ($color_mode && !$file_cpt)
 	# generate cpt file
 	print FCMD "#\n# Make color pallette table file\n";
 	print FCMD "echo Making color pallette table file...\n";
-	if ($stretch_color)
+	if ($color_mode == 4 || $stretch_color)
 		{
 		$d1 = shift @hist;
 		}
@@ -1432,7 +1454,7 @@ if ($color_mode && !$file_cpt)
 		{
 		foreach $i (0 .. $ncolors - 2)
 			{
-			if ($stretch_color)
+			if ($color_mode == 4 || $stretch_color)
 				{
 				$d2 = shift @hist;
 				}
@@ -1459,7 +1481,7 @@ if ($color_mode && !$file_cpt)
 		{
 		for ($i = $ncolors - 2; $i >= 0; $i--)
 			{
-			if ($stretch_color)
+			if ($color_mode == 4 || $stretch_color)
 				{
 				$d2 = shift @hist;
 				}
@@ -1486,7 +1508,7 @@ if ($color_mode && !$file_cpt)
 		{
 		foreach $i (0 .. $ncolors - 1)
 			{
-			if ($stretch_color)
+			if ($color_mode == 4 || $stretch_color)
 				{
 				$d2 = shift @hist;
 				}
@@ -1513,7 +1535,7 @@ if ($color_mode && !$file_cpt)
 		{
 		for ($i = $ncolors - 1; $i >= 0; $i--)
 			{
-			if ($stretch_color)
+			if ($color_mode == 4 || $stretch_color)
 				{
 				$d2 = shift @hist;
 				}
@@ -1627,6 +1649,29 @@ elsif ($color_mode == 3 && $file_intensity)
 	$file_shade = "\$INTENSITY_FILE";
 	}
 
+# get color by slope magnitude if needed
+elsif ($color_mode >= 4)
+	{
+	printf FCMD "#\n# Get slope array\n";
+	printf FCMD "echo Getting slope array...\n";
+	printf FCMD "echo Running grdgradient to get x component of the gradient...\n";
+	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx -M\n";
+	printf FCMD "echo Running grdgradient to get y component of the gradient...\n";
+	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy -M\n";
+
+	printf FCMD "echo Running grdmath to get slope magnitude...\n";
+	printf FCMD "grdmath \$DATA_FILE.drvx 2.0 POW \\\n";
+	printf FCMD "\t\$DATA_FILE.drvy 2.0 POW ADD SQRT \\\n";
+	if ($color_mode == 5)
+		{
+		printf FCMD "\t$magnitude MUL \\\n";
+		}
+	printf FCMD "\t= \$DATA_FILE.slope\n";
+
+	printf FCMD "/bin/rm -f \$DATA_FILE.drvx \$DATA_FILE.drvy \n";
+	$file_slope = "\$DATA_FILE.slope";
+	}
+
 # figure out labels
 $nlabels = 0;
 if ($labels)
@@ -1689,11 +1734,18 @@ if ($color_mode)
 	{
 	printf FCMD "#\n# Make 3D view\n";
 	printf FCMD "echo Running grdview...\n";
-	printf FCMD "grdview $file_use \\\n\t";
+	if ($color_mode == 4)
+		{
+		printf FCMD "grdview $file_slope \\\n\t";
+		}
+	else
+		{
+		printf FCMD "grdview $file_use \\\n\t";
+		}
 	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE -Jz\$MAP_ZSCALE \\\n\t";
 	printf FCMD "-E$view_control \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
-	if ($color_mode != 4)
+	if ($color_mode != 6)
 		{
 		printf FCMD "-C\$CPT_FILE \\\n\t";
 		}
@@ -1705,23 +1757,27 @@ if ($color_mode)
 		{
 		printf FCMD "-Z$grdview_zlevel \\\n\t";
 		}
-	if ($color_mode > 1 && $color_mode < 4)
+	if ($color_mode == 2 || $color_mode == 3)
 		{
 		printf FCMD "-I$file_shade \\\n\t";
+		}
+	elsif ($color_mode == 5)
+		{
+		printf FCMD "-I$file_slope \\\n\t";
 		}
 	if ($file_drape)
 		{
 		printf FCMD "-G$file_drape \\\n\t";
 		}
-	if ($color_mode <= 3)
+	if ($color_mode <= 5)
 		{
 		printf FCMD "-Qi$dpi \\\n\t";
 		}
-	elsif ($color_mode >= 4)
+	elsif ($color_mode >= 6)
 		{
 		printf FCMD "-Qm \\\n\t";
 		}
-	if ($color_mode == 5)
+	if ($color_mode == 7)
 		{
 		printf FCMD "-W$grdview_contour_pen \\\n\t";
 		}
@@ -1741,7 +1797,7 @@ if ($color_mode)
 	}
 
 # do psscale plot
-if ($color_mode && $color_mode < 5 && $color_pallette < 5)
+if ($color_mode && $color_mode < 7 && $color_pallette < 5)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
@@ -1890,9 +1946,17 @@ if ($verbose)
 		}
 	elsif ($color_mode == 4)
 		{
-		print "    3D Mesh\n";
+		print "    3D Color Fill of Slope Magnitude\n";
 		}
 	elsif ($color_mode == 5)
+		{
+		print "    3D Color Shaded by Slope Magnitude\n";
+		}
+	elsif ($color_mode == 6)
+		{
+		print "    3D Mesh\n";
+		}
+	elsif ($color_mode == 7)
 		{
 		print "    3D Mesh with Contours\n";
 		}
@@ -1987,7 +2051,13 @@ if ($verbose)
 		{
 		print "    Contour control:          $contour_control\n";
 		}
-	if ($color_mode)
+	if ($color_mode && $stretch_color)
+		{
+		printf "    Color start datum:        %f\n", $color_start;
+		printf "    Color end datum:          %f\n", $color_end;
+		printf "    Histogram stretch applied to color pallette\n";
+		}
+	elsif ($color_mode)
 		{
 		printf "    Color start datum:        %f\n", $color_start;
 		printf "    Color end datum:          %f\n", $color_end;
@@ -1997,7 +2067,7 @@ if ($verbose)
 		{
 		printf "    Image dots-per-inch:      $dpi\n";
 		}
-	if ($color_mode == 3)
+	if ($color_mode == 3 && !$file_intensity)
 		{
 		printf "    Shading Magnitude:        %f\n", $magnitude;
 		}
@@ -2006,6 +2076,10 @@ if ($verbose)
 		printf "    Illumination Azimuth:     %f\n", $azimuth;
 		printf "    Illumination Elevation:   %f\n", $elevation;
 		printf "    Illumination Magnitude:   %f\n", $magnitude;
+		}
+	elsif ($color_mode == 4)
+		{
+		printf "    Slope Magnitude Magnitude:%f\n", $magnitude;
 		}
 	if ($length_scale || $grdview_null
 		|| $grdview_mesh_pen || $grdview_contour_pen)

@@ -1,4 +1,4 @@
-.TH mbm_plot l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_plot l "3 November 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of swath sonar swath data.
@@ -16,7 +16,7 @@ Version 4.6
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
 \fB-S\fP\fI[color/shade]\fP
 \fB-U\fP\fIorientation\fP \fB-V\fP 
-\fB-W\fP\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]] ]
+\fB-W\fP\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | \fIcptfile]\fP ]
 
 Additional Options:
 .br
@@ -237,10 +237,12 @@ so that it outputs
 more information than usual.
 .TP
 .B \-W
-\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. If \fIcolor_style\fP = 1 [default], then
+fill plots. 
+
+If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
@@ -259,6 +261,10 @@ The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
+
+If the option argument is the path to an existing \fBGMT\fP 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
 
 .SH COMPLETE DESCRIPTION OF OPTIONS
 .TP
@@ -871,12 +877,13 @@ is selected automatically so as to maximize the plot scale.
 The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
-.TP
 .B \-W
-\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. If \fIcolor_style\fP = 1 [default], then
+fill plots. 
+
+If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
@@ -945,6 +952,10 @@ The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
+
+If the option argument is the path to an existing \fBGMT\fP 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
 .TP
 .B \-V
 Causes \fBmbm_plot\fP to operate in "verbose" mode 
