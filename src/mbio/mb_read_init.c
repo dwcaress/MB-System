@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_read_init.c,v 4.1 1994-04-21 21:02:39 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.8  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -88,7 +91,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 4.1 1994-04-21 21:02:39 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	int	format_num;
@@ -275,8 +278,6 @@ int	*error;
 	else
 		if ((mb_io_ptr->mbfp = fopen(file, "r")) == NULL) 
 			{
-			*error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
 			status = mb_free(verbose,mb_io_ptr->bath,error);
 			status = mb_free(verbose,mb_io_ptr->amp,error);
 			status = mb_free(verbose,mb_io_ptr->bath_acrosstrack,
@@ -303,6 +304,8 @@ int	*error;
 			status = mb_free(verbose,mb_io_ptr->new_ss_alongtrack,
 					error);
 			status = mb_free(verbose,mb_io_ptr,error);
+			*error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
 			if (verbose >= 2)
 				{
 				fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
