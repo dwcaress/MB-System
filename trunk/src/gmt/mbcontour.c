@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.8 2004-12-18 01:26:43 caress Exp $
+ *    $Id: mbcontour.c,v 5.9 2005-03-25 04:03:10 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003, 2004 by
+ *    Copyright (c) 1993, 1994, 2000, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2004/12/18 01:26:43  caress
+ * Added filename annotation.
+ *
  * Revision 5.7  2003/04/17 20:43:37  caress
  * Release 5.0.beta30
  *
@@ -192,7 +195,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.8 2004-12-18 01:26:43 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.9 2005-03-25 04:03:10 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -302,6 +305,7 @@ main (int argc, char **argv)
 	double	time_tick_len_map;
 	double	name_hgt;
 	double	name_hgt_map;
+	int	name_perp;
 	double	scale;
 	int	bathy_in_feet;
 
@@ -362,6 +366,7 @@ main (int argc, char **argv)
 	date_annot_int = 4.0;
 	time_tick_len = 0.1;
 	name_hgt = 0.1;
+	name_perp = MB_NO;
 	ncolor = 4;
 	nlevel = 0;
 	plot_contours = MB_NO;
@@ -462,8 +467,12 @@ main (int argc, char **argv)
                         break;
 		case 'G':
 		case 'g':
-			sscanf (optarg, "%lf", &name_hgt);
+			nscan = sscanf (optarg, "%lf/%d", &name_hgt, &name_perp);
 			plot_name = MB_YES;
+			if (nscan < 1)
+			    name_hgt = 0.1;
+			if (nscan < 2)
+			    name_perp = MB_NO;
 			if (plot_track == MB_NO)
 			    plot_track = MB_YES;
 			break;
@@ -1055,7 +1064,7 @@ main (int argc, char **argv)
     
 			    if (plot_name == MB_YES && plotted_name == MB_NO) 
 			    	    {
-				    mb_trackname(verbose,swath_plot,file,&error);
+				    mb_trackname(verbose,name_perp,swath_plot,file,&error);
 				    plotted_name = MB_YES;
 				    }
 			      
