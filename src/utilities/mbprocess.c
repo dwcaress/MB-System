@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.27 2003-02-27 04:45:15 caress Exp $
+ *    $Id: mbprocess.c,v 5.28 2003-04-05 14:56:11 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2003/02/27 04:45:15  caress
+ * Fixed handling of beam edits.
+ *
  * Revision 5.26  2003/01/15 20:52:13  caress
  * Release 5.0.beta28
  *
@@ -189,7 +192,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.27 2003-02-27 04:45:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.28 2003-04-05 14:56:11 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -1183,6 +1186,7 @@ and mbedit edit save files.\n";
 	  --------------------------------------------*/
 
 	/* if raytracing or correction/uncorrection to be done get svp */
+	nsvp = 0;
 	if (process.mbp_svp_mode != MBP_SVP_OFF)
 	    {
 	    /* count the data points in the svp file */
@@ -3417,7 +3421,8 @@ i,edit_time_d[i],edit_beam[i],edit_action[i]);*/
  		}
 
 	/* set up the raytracing */
-	status = mb_rt_init(verbose, nsvp, depth, velocity, &rt_svp, &error);
+	if (process.mbp_svp_mode != MBP_SVP_OFF)
+		status = mb_rt_init(verbose, nsvp, depth, velocity, &rt_svp, &error);
 	
 	/* set up the sidescan recalculation */
 	if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON)
