@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.1 1995-08-17 14:58:12 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.2 1995-09-18 22:40:44 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/08/17  14:58:12  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.0  1995/08/07  18:33:22  caress
  * First cut.
  *
@@ -99,7 +102,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.1 1995-08-17 14:58:12 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.2 1995-09-18 22:40:44 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -2853,7 +2856,7 @@ int mbnavedit_plot_all()
 		{
 		plot_start_time = ping[0].file_time_d;
 		plot_end_time = ping[nlist-1].file_time_d;
-		data_show_size = plot_end_time - plot_start_time;
+		data_show_size = plot_end_time - plot_start_time + 1;
 		if (data_show_max < data_show_size)
 			data_show_max = data_show_size;
 		nplot = nlist;
