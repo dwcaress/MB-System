@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.6 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.7 1994-11-07 14:04:33 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.5  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -74,7 +77,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.6 1994-10-21 12:20:01 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.7 1994-11-07 14:04:33 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -265,7 +268,7 @@ int	*error;
 			data->amplitude_beam[i] = 0;
 			data->signal_to_noise[i] = 0;
 			data->echo_length[i] = 0;
-			data->quality[i] = 'U';
+			data->quality[i] = '0';
 			}
 
 		/* sidescan data (SS) */
@@ -2372,18 +2375,42 @@ int	*error;
 				data->quality[i] = 'F';
 				data->depth[i] = -data->depth[i];
 				}
-			status = fprintf(mbfp,"%c",data->source[i]);
-			status = fprintf(mbfp,"%5.5d",data->travel_time[i]);
-			status = fprintf(mbfp,"%+06d",data->angle_across[i]);
-			status = fprintf(mbfp,"%+05d",data->angle_forward[i]);
-			status = fprintf(mbfp,"%5.5d",data->depth[i]);
-			status = fprintf(mbfp,"%+06d",data->acrosstrack_beam[i]);
-			status = fprintf(mbfp,"%+06d",data->alongtrack_beam[i]);
-			status = fprintf(mbfp,"%3.3d",data->amplitude_beam[i]);
-			status = fprintf(mbfp,"%2.2d",data->signal_to_noise[i]);
-			status = fprintf(mbfp,"%3.3d",data->echo_length[i]);
-			status = fprintf(mbfp,"%c",data->quality[i]);
-			status = fprintf(mbfp,"\r\n");
+			else if (data->depth[i] < 0)
+				{
+				data->depth[i] = -data->depth[i];
+				}
+			else if (data->depth[i] == 0)
+				{
+				data->quality[i] = '0';
+				}
+			else if (data->depth[i] > 0)
+				{
+				data->quality[i] = ' ';
+				}
+			if (data->amplitude_beam[i] < 0)
+				{
+				data->amplitude_beam[i] = 
+					-data->amplitude_beam[i];
+				}
+			if (data->quality[i] == '0')
+				{
+				status = fprintf(mbfp,"                                          0\r\n");
+				}
+			else
+				{
+			        status = fprintf(mbfp,"%c",data->source[i]);
+				status = fprintf(mbfp,"%5.5d",data->travel_time[i]);
+				status = fprintf(mbfp,"%+06d",data->angle_across[i]);
+				status = fprintf(mbfp,"%+05d",data->angle_forward[i]);
+				status = fprintf(mbfp,"%5.5d",data->depth[i]);
+				status = fprintf(mbfp,"%+06d",data->acrosstrack_beam[i]);
+				status = fprintf(mbfp,"%+06d",data->alongtrack_beam[i]);
+				status = fprintf(mbfp,"%3.3d",data->amplitude_beam[i]);
+				status = fprintf(mbfp,"%2.2d",data->signal_to_noise[i]);
+				status = fprintf(mbfp,"%3.3d",data->echo_length[i]);
+				status = fprintf(mbfp,"%c",data->quality[i]);
+				status = fprintf(mbfp,"\r\n");
+				}
 			}
 
 		/* check for an error */
