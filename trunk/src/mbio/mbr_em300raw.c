@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.15 2002-09-16 05:51:53 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.16 2002-10-02 23:55:42 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2002/09/16 05:51:53  caress
+ * Really fixed bug...
+ *
  * Revision 5.14  2002/09/16 04:50:47  caress
  * Fixed mis-dimensioned array in rd_rawbeam functions.
  *
@@ -239,7 +242,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.15 2002-09-16 05:51:53 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.16 2002-10-02 23:55:42 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -749,29 +752,6 @@ ping->png_bso);*/
 		pheading = 0.01 * ping->png_heading;
 		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, 
 				    &plon, &plat, &pspeed, error);
-
-		/* handle lon flipping */
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (plon > 0.) 
-				plon = plon - 360.;
-			else if (plon < -360.)
-				plon = plon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (plon > 180.) 
-				plon = plon - 360.;
-			else if (plon < -180.)
-				plon = plon + 360.;
-			}
-		else
-			{
-			if (plon > 360.) 
-				plon = plon - 360.;
-			else if (plon < 0.)
-				plon = plon + 360.;
-			}
 		if (plon == 0.0
 		    && plat == 0.0)
 		    {

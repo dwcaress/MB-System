@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.24 2002-09-19 00:28:12 caress Exp $
+ *    $Id: mbprocess.c,v 5.25 2002-10-02 23:56:06 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2002/09/19 00:28:12  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.23  2002/09/07 04:49:23  caress
  * Added slope mode option to mb_process.
  *
@@ -180,7 +183,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.24 2002-09-19 00:28:12 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.25 2002-10-02 23:56:06 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -375,7 +378,6 @@ and mbedit edit save files.\n";
 	double	*alongtrack_offset = NULL;
 
 	/* ssv handling variables */
-	int	angle_mode = MBP_ANGLES_OK;
 	int	ssv_prelimpass = MB_NO;
 	double	ssv_default;
 	double	ssv_start;
@@ -2889,21 +2891,21 @@ i, edit_time_d[i], edit_beam[i], edit_action[i]);
 	
 		if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 		    {
-		    if (angle_mode == MBP_ANGLES_OK)
+		    if (process.mbp_angle_mode == MBP_ANGLES_OK)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
 			sprintf(comment,"  Angle mode:         angles not altered");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		    else if (angle_mode == MBP_ANGLES_SNELL)
+		    else if (process.mbp_angle_mode == MBP_ANGLES_SNELL)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
 			sprintf(comment,"  Angle mode:         angles corrected using Snell's Law");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		    else if (angle_mode == MBP_ANGLES_SNELLNULL)
+		    else if (process.mbp_angle_mode == MBP_ANGLES_SNELLNULL)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
 			sprintf(comment,"  Angle mode:         angles corrected using Snell's Law and array geometry");
@@ -3877,7 +3879,7 @@ dx, dy, dz, alpha, beta, lever_heave);*/
 				/* raytrace */
 				status = mb_rt(verbose, rt_svp, depth_offset_use, 
 					angles[i], 0.5*ttimes[i],
-					angle_mode, ssv, angles_null[i], 
+					process.mbp_angle_mode, ssv, angles_null[i], 
 					0, NULL, NULL, NULL, 
 					&xx, &zz, 
 					&ttime, &ray_stat, &error);

@@ -1,4 +1,4 @@
-.TH mbm_dslnavfix l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_dslnavfix l "24 September 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_dslnavfix\fP - Translate WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
@@ -24,7 +24,7 @@ pings, and is reported in UTM easting and northing meters.
 The \fBmbm_dslnavfix\fP macro is used to translate the
 eastings and northings into the geographic coordinates
 (longitude and latitude) used by MB-System programs. The
-program \fBmbmerge\fP can be used to merge the translated
+program \fBmbprocess\fP can be used to merge the translated
 navigation in with the bathymetry and sidescan.
 
 The DSL AMS-120 bathymetry and sidescan are provided in
@@ -55,14 +55,18 @@ processing WHOI DSL AMS-120 data with MB-System:
  		mbcopy -F111/112 \\
  			-IDSL120.940630_1100.bat.dat \\
  			-ODSL120.940630_1100.mb112
- 	4) Merge the translated navigation with each of the 
- 	   format 112 data files. Note  that \fBmbm_dslnavfix\fP 
-           produces navigation in \fBmbmerge\fP format 2
- 	   so that the \fB-M\fP\fI2\fP option is used.
- 		mbmerge -F112 \\
- 			-IDSL120.940630_1100.mb112 \\
- 			-ODSL120.940630_1100_n.mb112 \\
- 			-M2 -Ncruise.mrg2 -V
+ 	4) Set the translated navigation to be merged with
+           each of the format 112 or 142 files using 
+           \fBmbset\fP:
+ 		mbset -I DSL120.940630_1100.mb112 \\
+ 			-P NAVFORMAT:2 \\
+ 			-P NAVFILE:cruise.mrg2 \\
+ 			-V
+ 	4) Process the data using \fBmbprocess\fP,
+           producing a processed file called 
+           DSL120.940630_1100p.mb112 with longitude and
+           latitude navigation.
+ 		mbprocess -I DSL120.940630_1100.mb112
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)

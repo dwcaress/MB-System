@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 5.4 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_defaults.c,v 5.5 2002-10-02 23:55:42 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.3  2001/11/20 21:52:13  caress
  * The .mbio_defaults file no longer controls format,
  * pings, bounds, btime_i, and etime_i.
@@ -104,7 +107,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.5 2002-10-02 23:55:42 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -112,6 +115,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 	char	home[MB_PATH_MAXLINE];
 	char	string[MB_PATH_MAXLINE];
 	char	*HOME = "HOME";
+	char	*home_ptr;
 	char	*getenv();
 
 	/* print input debug statements */
@@ -149,21 +153,26 @@ int mb_defaults(int verbose, int *format, int *pings,
 	*timegap = 1.0;
 
 	/* set the filename */
-	strcpy(file,getenv(HOME));
-	strcat(file,"/.mbio_defaults");
-
-	/* open and read values from file if possible */
-	if ((fp = fopen(file, "r")) != NULL)
+	if ((home_ptr = getenv(HOME)) != NULL)
 		{
-		status = MB_SUCCESS;
-		while (fgets(string,sizeof(string),fp) != NULL)
+		strcpy(file,home_ptr);
+		strcat(file,"/.mbio_defaults");
+
+		/* open and read values from file if possible */
+		if ((fp = fopen(file, "r")) != NULL)
 			{
-			if (strncmp(string,"lonflip:",8) == 0)
-				sscanf(string,"lonflip: %d",lonflip);
-			if (strncmp(string,"speed:",6) == 0)
-				sscanf(string,"timegap: %lf",timegap);
+			status = MB_SUCCESS;
+			while (fgets(string,sizeof(string),fp) != NULL)
+				{
+				if (strncmp(string,"lonflip:",8) == 0)
+					sscanf(string,"lonflip: %d",lonflip);
+				if (strncmp(string,"speed:",6) == 0)
+					sscanf(string,"timegap: %lf",timegap);
+				}
+ 			fclose(fp);
 			}
- 		fclose(fp);
+		else
+			status = MB_FAILURE;
 		}
 	else
 		status = MB_FAILURE;
@@ -207,7 +216,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 /*--------------------------------------------------------------------*/
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.5 2002-10-02 23:55:42 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
@@ -215,6 +224,7 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 	char	home[MB_PATH_MAXLINE];
 	char	string[MB_PATH_MAXLINE];
 	char	*HOME = "HOME";
+	char	*home_ptr;
 	char	*getenv();
 
 	/* print input debug statements */
@@ -264,23 +274,28 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 	strcpy(mbproject, "none");
 
 	/* set the filename */
-	strcpy(file,getenv(HOME));
-	strcat(file,"/.mbio_defaults");
-
-	/* open and read values from file if possible */
-	if ((fp = fopen(file, "r")) != NULL)
+	if ((home_ptr = getenv(HOME)) != NULL)
 		{
-		status = MB_SUCCESS;
-		while (fgets(string,sizeof(string),fp) != NULL)
+		strcpy(file,home_ptr);
+		strcat(file,"/.mbio_defaults");
+
+		/* open and read values from file if possible */
+		if ((fp = fopen(file, "r")) != NULL)
 			{
-			if (strncmp(string,"ps viewer:",10) == 0)
-				sscanf(string,"ps viewer: %s",psdisplay);
-			if (strncmp(string,"img viewer:",10) == 0)
-				sscanf(string,"img viewer: %s",imgdisplay);
-			if (strncmp(string,"project:",8) == 0)
-				sscanf(string,"project: %s",mbproject);
+			status = MB_SUCCESS;
+			while (fgets(string,sizeof(string),fp) != NULL)
+				{
+				if (strncmp(string,"ps viewer:",10) == 0)
+					sscanf(string,"ps viewer: %s",psdisplay);
+				if (strncmp(string,"img viewer:",10) == 0)
+					sscanf(string,"img viewer: %s",imgdisplay);
+				if (strncmp(string,"project:",8) == 0)
+					sscanf(string,"project: %s",mbproject);
+				}
+ 			fclose(fp);
 			}
-		fclose(fp);
+		else
+			status = MB_FAILURE;
 		}
 	else
 		status = MB_FAILURE;

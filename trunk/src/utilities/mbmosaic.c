@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.9 2002-09-25 20:12:30 caress Exp $
+ *    $Id: mbmosaic.c,v 5.10 2002-10-02 23:56:06 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/09/25 20:12:30  caress
+ * Not sure what I did....
+ *
  * Revision 5.8  2002/09/20 22:30:45  caress
  * Made interpolation only fill in data gaps.
  *
@@ -141,7 +144,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.9 2002-09-25 20:12:30 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.10 2002-10-02 23:56:06 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -323,9 +326,6 @@ main (int argc, char **argv)
 	int	ix1, ix2, iy1, iy2;
 	int	nscan;
 	double	norm_weight;
-
-	char	*ctime();
-	char	*getenv();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,

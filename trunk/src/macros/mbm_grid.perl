@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.5 2002-08-21 00:54:20 caress Exp $
+#    $Id: mbm_grid.perl,v 5.6 2002-10-02 23:53:13 caress Exp $
 #
 #    Copyright (c) 1999, 2002 by
 #    D. W. Caress (caress@mbari.org)
@@ -54,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.5 2002-08-21 00:54:20 caress Exp $
+#   $Id: mbm_grid.perl,v 5.6 2002-10-02 23:53:13 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.5  2002/08/21 00:54:20  caress
+#   Release 5.0.beta22
+#
 #   Revision 5.4  2001/12/18 04:26:12  caress
 #   Version 5.0.beta11.
 #
@@ -573,6 +576,15 @@ if ($extend)
 	{
 	printf FCMD "\t-X \\\n";
 	}
+# mbgrid only options
+if ($datatype <= 2)
+	{
+	# this is really gridding algorithm mode
+	if ($priority_range)
+		{
+		printf FCMD "\t-f$priority_range \\\n";
+		}
+	}
 # mbmosaic only options
 if ($datatype > 2)
 	{
@@ -648,7 +660,11 @@ if ($verbose)
 		{
 		print "  Clip:         $clip\n";
 		}
-	if ($priority_range)
+	if ($priority_range && $datatype <= 2)
+		{
+		print "  Gridding Algorithm: $priority_range\n";
+		}
+	elsif ($priority_range && $datatype > 2)
 		{
 		print "  Priority Range: $priority_range\n";
 		}

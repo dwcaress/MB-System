@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.5 2002-04-06 02:45:59 caress Exp $
+ *    $Id: mbcontour.c,v 5.6 2002-10-02 23:52:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/04/06 02:45:59  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.4  2001/08/10 22:40:02  dcaress
  * Release 5.0.beta07
  *
@@ -180,7 +183,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.5 2002-04-06 02:45:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.6 2002-10-02 23:52:37 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -217,6 +220,7 @@ main (int argc, char **argv)
 	int	format;
 	int	pings;
 	int	lonflip;
+	int	lonflip_set = MB_NO;
 	double	bounds[4];
 	double	mb_bounds[4];
 	int	btime_i[7];
@@ -458,6 +462,7 @@ main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			lonflip_set = MB_YES;
 			flag++;
 			break;
 		case 'N':
@@ -755,6 +760,19 @@ main (int argc, char **argv)
 	mb_bounds[1] = bounds[1] + 0.25*(bounds[1] - bounds[0]);
 	mb_bounds[2] = bounds[2] - 0.25*(bounds[3] - bounds[2]);
 	mb_bounds[3] = bounds[3] + 0.25*(bounds[3] - bounds[2]);
+	
+	/* set lonflip if possible */
+	if (lonflip_set == MB_NO)
+		{
+		if (mb_bounds[0] < -180.0)
+			lonflip = -1;
+		else if (mb_bounds[1] > 180.0)
+			lonflip = 1;
+		else if (lonflip == -1 && mb_bounds[1] > 0.0)
+			lonflip = 0;
+		else if (lonflip == 1 && mb_bounds[0] < 0.0)
+			lonflip = 0;
+		}
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.5 2002-08-21 00:57:11 caress Exp $
+ *    $Id: mbclean.c,v 5.6 2002-10-02 23:56:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/08/21 00:57:11  caress
+ * Release 5.0.beta22
+ *
  * Revision 5.4  2001/12/30 20:41:03  caress
  * Fixed sorting messages.
  *
@@ -225,7 +228,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.5 2002-08-21 00:57:11 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.6 2002-10-02 23:56:06 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -382,9 +385,6 @@ main (int argc, char **argv)
 	int	read_data;
 	int	start, done;
 	int	i, j, k, l, m, p, b;
-
-	char	*ctime();
-	char	*getenv();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,

@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA23 README FILE:
+MB-SYSTEM VERSION 5.0.BETA24 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta23 release of the MB-System software package for 
+5.0.beta24 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta24     October 2, 2002
 Version 5.0.beta23     September 20, 2002
 Version 5.0.beta22     August 30, 2002
 Version 5.0.beta21     July 25, 2002
@@ -105,6 +106,20 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA24 RELEASE NOTES:
+
+The version 5.0.beta24 release of MB-System includes
+some significant bug fixes:
+  - MB-System programs will now operate properly when
+    the HOME environment variable is not set.
+  - The program mbprocess now properly applies the 
+    angle mode specified in the parameter file when
+    calculating bathymetry by raytracing.
+  - The old DSL120 formats (111 and 112) work properly
+    once again.
+  - Some problems with the application of the lonflip
+    parameter have been fixed.
 
 MB-SYSTEM VERSION 5.0.BETA23 RELEASE NOTES:
 
@@ -987,10 +1002,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.27 2002-09-20 22:39:48 caress Exp $
+RCS ID: $Id: README,v 5.28 2002-10-02 23:51:50 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.27  2002/09/20 22:39:48  caress
+Real release 5.0.beta23
+
 Revision 5.26  2002/09/19 22:24:55  caress
 Release 5.0.beta23
 

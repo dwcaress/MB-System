@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.19 2002-09-19 00:28:12 caress Exp $
+ *    $Id: mbset.c,v 5.20 2002-10-02 23:56:06 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2002/09/19 00:28:12  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.18  2002/09/07 04:49:23  caress
  * Added slope mode option to mb_process.
  *
@@ -114,7 +117,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.19 2002-09-19 00:28:12 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.20 2002-10-02 23:56:06 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -161,9 +164,6 @@ the manual pages for mbprocess and mbset. \n\n";
 	int	mbp_format;
 	int	nscan;
 	int	i;
-	
-	char	*ctime();
-	char	*getenv();
 
 	/* set default input and output */
 	strcpy (mbp_ifile, "\0");
