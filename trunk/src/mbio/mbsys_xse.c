@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.5 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.6 2001-07-22 21:17:01 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.4  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -72,7 +75,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.5 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.6 2001-07-22 21:17:01 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -877,15 +880,6 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get ssv */
 		*ssv = store->svp_ssv;
 		
-		/* zero travel times */
-		for (i=0;i<mb_io_ptr->beams_bath_max;i++)
-			{
-			ttimes[i] = 0.0;
-			angles[i] = 0.0;
-			angles_forward[i] = 0.0;
-			angles_null[i] = 0.0;
-			}
-
 		/* get travel times, angles */
 		*nbeams = 0;
 		if (store->mul_frame == MB_YES)
