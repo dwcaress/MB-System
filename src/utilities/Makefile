@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  1/21/93
-#	$Id: Makefile,v 1.6 1993-06-16 23:09:17 caress Exp $
+#	$Id: Makefile,v 1.7 1993-08-16 22:21:44 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.6  1993/06/16  23:09:17  caress
+# Added hsdump and removed hsveldump.
+#
 # Revision 1.5  1993/05/25  20:13:53  caress
 # Fixed chmod commands again.
 #
@@ -38,8 +41,8 @@ BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
 MANDIR = ../../man/man1
-GMTBINDIR = /net/heezen/packages/gmt2/bin
-GMTINCDIR = /net/heezen/packages/gmt2/src
+GMTBINDIR = /ocean/mgg/gmt2/sun4
+GMTINCDIR = /ocean/mgg/gmt2/src
 
 ### make all makes the MB-system utilites and man pages
 all:	$(MANDIR)/mbsystem.1 \
@@ -56,9 +59,8 @@ all:	$(MANDIR)/mbsystem.1 \
 	$(BINDIR)/hsbath $(MANDIR)/hsbath.1 \
 	$(BINDIR)/hsdump $(MANDIR)/hsdump.1 \
 	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.1 \
-	$(BINDIR)/mbsynth \
-	$(BINDIR)/mbgetmask \
-	$(BINDIR)/mbmask
+	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.1 \
+	$(BINDIR)/mbmask $(MANDIR)/mbmask.1
 
 ### make clean removes the object files
 clean:
@@ -91,8 +93,6 @@ $(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/hsdump
 $(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbrollbias
-$(BINDIR)/mbsynth:	mbsynth.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbsynth.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbsynth
 $(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbgetmask
 $(BINDIR)/mbmask:	mbmask.o $(LIBDIR)/libmbio.a
@@ -127,8 +127,6 @@ hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_
 	$(CC) -c $(CFLAGS) hsdump.c
 mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbrollbias.c
-mbsynth.o:	mbsynth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
-	$(CC) -c $(CFLAGS) mbsynth.c
 mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbgetmask.c
 mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
@@ -177,4 +175,10 @@ $(MANDIR)/hsdump.1:	hsdump.1
 $(MANDIR)/mbrollbias.1:	mbrollbias.1
 	cp mbrollbias.1 $(MANDIR)/mbrollbias.1
 	chmod 664 $(MANDIR)/mbrollbias.1
+$(MANDIR)/mbgetmask.1:	mbmask.1
+	cp mbmask.1 $(MANDIR)/mbgetmask.1
+	chmod 664 $(MANDIR)/mbgetmask.1
+$(MANDIR)/mbmask.1:	mbmask.1
+	cp mbmask.1 $(MANDIR)/mbmask.1
+	chmod 664 $(MANDIR)/mbmask.1
 
