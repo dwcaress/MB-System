@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 4.1 1994-12-16 22:38:51 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 4.2 1994-12-21 20:21:09 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -57,7 +57,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sb2000ss.c,v 4.1 1994-12-16 22:38:51 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000ss.c,v 4.2 1994-12-21 20:21:09 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -156,6 +156,7 @@ int	*error;
 	char	*sensorssptr;
 	char	*datassptr;
 	char	*commentptr;
+	unsigned short	*short_ptr;
 	int	read_status;
 	char	dummy[2];
 	int	time_j[5];
@@ -441,24 +442,16 @@ int	*error;
 		data->ss_max = mb_swap_short(data->ss_max);
 		data->sample_rate = mb_swap_short(data->sample_rate);
 		data->start_time = mb_swap_short(data->start_time);
+		data->tot_slice = mb_swap_short(data->tot_slice);
 		data->pixels_ss = mb_swap_short(data->pixels_ss);
 		}
 #endif
 
-	/* fix incorrect sensor records */
-	if (status == MB_SUCCESS 
-		&& data->kind == MB_DATA_DATA)
-		{
-		data->pixels_ss = data->data_size - 1;
-		}
-
-	/* fix some files with incorrect header and sensor records */
+	/* fix some files with incorrect sensor records */
 	if (status == MB_SUCCESS 
 		&& data->kind == MB_DATA_DATA 
-		&& data->data_size == 1000)
+		&& data->data_size == 1001)
 		{
-		data->sensor_size = 32;
-		data->data_size = 1001;
 		data->pixels_ss = 1000;
 		}
 
@@ -482,6 +475,8 @@ int	*error;
 			data->sample_rate);
 		fprintf(stderr,"dbg5       start_time:      %d\n",
 			data->start_time);
+		fprintf(stderr,"dbg5       tot_slice:       %d\n",
+			data->tot_slice);
 		fprintf(stderr,"dbg5       pixels_ss:       %d\n",
 			data->pixels_ss);
 		fprintf(stderr,"dbg5       spare_ss:        ");
@@ -506,6 +501,32 @@ int	*error;
 			}
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
+		{
+		if (data->ss[0] == 'R');
+			{
+			for (i=1;i<=data->pixels_ss;i++)
+				{
+				short_ptr = &data->ss[4+i*2];
+				*short_ptr = mb_swap_short(*short_ptr);
+				}
+			}
+		}
+#endif
+
+	/* correct data size if needed */
+	if (status == MB_SUCCESS 
+		&& data->kind == MB_DATA_DATA 
+		&& data->data_size == 1001)
+		{
+		data->data_size = 1004;
+		data->ss[1001] = 'G';
+		data->ss[1002] = 'G';
+		data->ss[1003] = 'G';
+		}
+
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 
 		&& data->kind == MB_DATA_DATA)
@@ -515,9 +536,21 @@ int	*error;
 		fprintf(stderr,"dbg5  New data values:\n");
 		fprintf(stderr,"dbg5       sidescan_type:%c\n",
 			data->ss[0]);
-		for (i=1;i<=data->pixels_ss;i++)
-			fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
-				i,data->ss[i]);
+		if (data->ss[0] == 'G')
+			{
+			for (i=1;i<=data->pixels_ss;i++)
+				fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
+					i,data->ss[i]);
+			}
+		else if (data->ss[0] == 'R')
+			{
+			for (i=1;i<=data->pixels_ss;i++)
+				{
+				short_ptr = (unsigned short *) &data->ss[4+i*2];
+				fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
+					i,*short_ptr);
+				}
+			}
 		}
 
 	/* read comment record from file */
@@ -603,12 +636,26 @@ int	*error;
 		mb_io_ptr->beams_bath = 0;
 		mb_io_ptr->beams_amp = 0;
 		mb_io_ptr->pixels_ss = data->pixels_ss;
-		for (i=0;i<data->pixels_ss;i++)
+		if (data->ss[0] == 'G')
 			{
-			mb_io_ptr->new_ss[i] = data->ss[i+1];
-			mb_io_ptr->new_ss_acrosstrack[i] = 
-				data->pixel_size*(i-data->pixels_ss/2);
-			mb_io_ptr->new_ss_alongtrack[i] = 0.0;
+			for (i=0;i<data->pixels_ss;i++)
+				{
+				mb_io_ptr->new_ss[i] = data->ss[i+1];
+				mb_io_ptr->new_ss_acrosstrack[i] = 
+					data->pixel_size*(i-data->pixels_ss/2);
+				mb_io_ptr->new_ss_alongtrack[i] = 0.0;
+				}
+			}
+		else if (data->ss[0] == 'R')
+			{
+			for (i=0;i<data->pixels_ss;i++)
+				{
+				short_ptr = (unsigned short *) &data->ss[4+2*i];
+				mb_io_ptr->new_ss[i] = *short_ptr;
+				mb_io_ptr->new_ss_acrosstrack[i] = 
+					data->pixel_size*(i-data->pixels_ss/2);
+				mb_io_ptr->new_ss_alongtrack[i] = 0.0;
+				}
 			}
 
 		/* print debug statements */
@@ -758,12 +805,21 @@ int	*error;
 		store->ss_max = data->ss_max;
 		store->sample_rate = data->sample_rate;
 		store->start_time = data->start_time;
+		store->tot_slice = data->tot_slice;
 		store->pixels_ss = data->pixels_ss;
 		for (i=0;i<12;i++)
 			store->spare_ss[i] = data->spare_ss[i];
 		store->ss_type = data->ss[0];
-		for (i=0;i<data->pixels_ss;i++)
-			store->ss[i] = data->ss[i+1];
+		if (store->ss_type == 'R')
+			{
+			for (i=0;i<2*data->pixels_ss;i++)
+				store->ss[i] = data->ss[i+4];
+			}
+		else
+			{
+			for (i=0;i<data->pixels_ss;i++)
+				store->ss[i] = data->ss[i+1];
+			}
 
 		/* comment */
 		strncpy(store->comment,mb_io_ptr->new_comment,
@@ -800,10 +856,12 @@ int	*error;
 	char	*sensorssptr;
 	char	*datassptr;
 	char	*commentptr;
+	unsigned short *short_ptr;
 	int	time_j[5];
 	double	lon, lat;
 	int	id;
 	int	set_pixel_size;
+	int	header_size, sensor_size, data_size;
 	int	i, j;
 
 	/* print input debug statements */
@@ -868,7 +926,9 @@ int	*error;
 	data->ss_max = 0;
 	data->sample_rate = 0;
 	data->start_time = 0;
+	data->tot_slice = 0;
 	data->pixels_ss = 0;
+	data->ss[0] = 'G';
 	
 	/* second translate values from seabeam 2000 data storage structure */
 	if (store != NULL)
@@ -926,9 +986,24 @@ int	*error;
 			data->pixels_ss = store->pixels_ss;
 			for (i=0;i<12;i++)
 				data->spare_ss[i] = store->spare_ss[i];
-			data->ss[0] = store->ss_type;
-			for (i=0;i<data->pixels_ss;i++)
-				data->ss[i+1] = store->ss[i];
+			if (store->ss_type == 'R')
+				{
+				data->ss[0] = 'R';
+				data->ss[1] = 'R';
+				data->ss[2] = 'R';
+				data->ss[3] = 'R';
+				for (i=0;i<2*data->pixels_ss;i++)
+					data->ss[i+4] = store->ss[i];
+				}
+			else if (store->ss_type == 'G')
+				{
+				data->ss[0] = store->ss_type;
+				data->ss[1001] = store->ss_type;
+				data->ss[1002] = store->ss_type;
+				data->ss[1003] = store->ss_type;
+				for (i=0;i<data->pixels_ss;i++)
+					data->ss[i+1] = store->ss[i];
+				}
 			}
 
 		/* comment */
@@ -979,19 +1054,44 @@ int	*error;
 		/* put sidescan values 
 			into sb2000ss data structure */
 		if (store != NULL)
-			set_pixel_size = MB_YES;
+			set_pixel_size = MB_NO;
 		else
-			set_pixel_size = MB_YES;
-		for (i=0;i<data->pixels_ss;i++)
 			{
-			data->ss[i+1] = mb_io_ptr->new_ss[i];;
-			if (set_pixel_size == MB_YES
-				&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
+			set_pixel_size = MB_YES;
+			if (data->pixels_ss == 1000)
+				data->ss[0] = 'G';
+			else
+				data->ss[0] = 'R';
+			}
+		if (data->ss[0] == 'G')
+			{
+			for (i=0;i<data->pixels_ss;i++)
 				{
-				data->pixel_size = 
-					mb_io_ptr->new_ss_acrosstrack[i]/
-					(i - data->pixels_ss/2);
-				set_pixel_size = MB_NO;
+				data->ss[i+1] = mb_io_ptr->new_ss[i];
+				if (set_pixel_size == MB_YES
+					&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
+					{
+					data->pixel_size = 
+						mb_io_ptr->new_ss_acrosstrack[i]/
+						(i - data->pixels_ss/2);
+					set_pixel_size = MB_NO;
+					}
+				}
+			}
+		else if (data->ss[0] == 'R')
+			{
+			for (i=0;i<data->pixels_ss;i++)
+				{
+				short_ptr = (unsigned short *) &data->ss[4+2*i];
+				*short_ptr = (unsigned short) mb_io_ptr->new_ss[i];
+				if (set_pixel_size == MB_YES
+					&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
+					{
+					data->pixel_size = 
+						mb_io_ptr->new_ss_acrosstrack[i]/
+						(i - data->pixels_ss/2);
+					set_pixel_size = MB_NO;
+					}
 				}
 			}
 		}
@@ -1055,6 +1155,8 @@ int	*error;
 			data->sample_rate);
 		fprintf(stderr,"dbg5       start_time:      %d\n",
 			data->start_time);
+		fprintf(stderr,"dbg5       tot_slice:       %d\n",
+			data->tot_slice);
 		fprintf(stderr,"dbg5       pixels_ss:       %d\n",
 			data->pixels_ss);
 		fprintf(stderr,"dbg5       spare_ss:        ");
@@ -1072,9 +1174,21 @@ int	*error;
 		fprintf(stderr,"dbg5  Data values:\n");
 		fprintf(stderr,"dbg5       sidescan_type:%d\n",
 			data->ss[0]);
-		for (i=1;i<=data->pixels_ss;i++)
-			fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
-				i,data->ss[i]);
+		if (data->ss[0] == 'G')
+			{
+			for (i=1;i<=data->pixels_ss;i++)
+				fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
+					i,data->ss[i]);
+			}
+		else if (data->ss[0] == 'R');
+			{
+			for (i=1;i<=data->pixels_ss;i++)
+				{
+				short_ptr = (unsigned short *) &data->ss[4+i*2];
+				fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
+					i,*short_ptr);
+				}
+			}
 		}
 
 	/* print debug statements */
@@ -1087,6 +1201,11 @@ int	*error;
 		fprintf(stderr,"dbg5       comment:   %s\n",
 			data->comment);
 		}
+
+	/* get sizes of writes */
+	header_size = MBF_SB2000SS_HEADER_SIZE;
+	sensor_size = data->sensor_size;
+	data_size = data->data_size;
 
 	/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
@@ -1103,9 +1222,16 @@ int	*error;
 	data->quality = mb_swap_short(data->quality);
 	data->sensor_size = mb_swap_short(data->sensor_size);
 	data->data_size = mb_swap_short(data->data_size);
-
 	if (data->kind == MB_DATA_DATA)
 		{
+		if (data->ss[0] == 'R');
+			{
+			for (i=1;i<=data->pixels_ss;i++)
+				{
+				short_ptr = &data->ss[4+i*2];
+				*short_ptr = mb_swap_short(*short_ptr);
+				}
+			}
 		data->ping_number = mb_swap_long(data->ping_number);
 		data->ping_length = mb_swap_short(data->ping_length);
 		data->pixel_size = mb_swap_short(data->pixel_size);
@@ -1120,8 +1246,8 @@ int	*error;
 	/* write header record to file */
 	if (status == MB_SUCCESS)
 		{
-		if ((status = fwrite(headerptr,1,MBF_SB2000SS_HEADER_SIZE,
-			mb_io_ptr->mbfp)) == MBF_SB2000SS_HEADER_SIZE) 
+		if ((status = fwrite(headerptr,1,header_size,
+			mb_io_ptr->mbfp)) == header_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1136,8 +1262,8 @@ int	*error;
 	/* write sensor record to file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
 		{
-		if ((status = fwrite(sensorssptr,1,data->sensor_size,
-			mb_io_ptr->mbfp)) == data->sensor_size) 
+		if ((status = fwrite(sensorssptr,1,sensor_size,
+			mb_io_ptr->mbfp)) == sensor_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1152,8 +1278,8 @@ int	*error;
 	/* write data record to file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
 		{
-		if ((status = fwrite(datassptr,1,data->data_size,
-			mb_io_ptr->mbfp)) == data->data_size) 
+		if ((status = fwrite(datassptr,1,data_size,
+			mb_io_ptr->mbfp)) == data_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1168,8 +1294,8 @@ int	*error;
 	/* write comment record to file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_COMMENT)
 		{
-		if ((status = fwrite(commentptr,1,data->data_size,
-			mb_io_ptr->mbfp)) == data->data_size) 
+		if ((status = fwrite(commentptr,1,data_size,
+			mb_io_ptr->mbfp)) == data_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;

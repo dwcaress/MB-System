@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 4.1 1994-11-09 21:40:34 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 4.2 1994-12-21 20:21:09 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,10 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/11/09  21:40:34  caress
+ * Changed ttimes extraction routines to handle forward beam angles
+ * so that alongtrack distances can be calculated.
+ *
  * Revision 4.0  1994/10/21  12:35:01  caress
  * Release V4.0
  *
@@ -58,7 +62,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 4.1 1994-11-09 21:40:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 4.2 1994-12-21 20:21:09 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -169,6 +173,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
+	unsigned short *short_ptr;
 	int	time_j[5];
 	int	id;
 	int	i;
@@ -246,11 +251,27 @@ int	*error;
 			bathalongtrack[i] = 0.0;
 			}
 		*nss = store->pixels_ss;
-		for (i=0;i<*nss;i++)
+		if (store->ss_type == 'G')
 			{
-			ss[i] = store->ss[i];
-			ssacrosstrack[i] = (i-*nss/2)*store->pixel_size;
-			ssalongtrack[i] = 0.0;
+			for (i=0;i<*nss;i++)
+				{
+				ss[i] = store->ss[i];
+				ssacrosstrack[i] = 
+					(i-*nss/2)*store->pixel_size;
+				ssalongtrack[i] = 0.0;
+				}
+			}
+		else
+			{
+			for (i=0;i<*nss;i++)
+				{
+				short_ptr = (unsigned short *) 
+					&store->ss[2*i];
+				ss[i] = *short_ptr;
+				ssacrosstrack[i] = 
+					(i-*nss/2)*store->pixel_size;
+				ssalongtrack[i] = 0.0;
+				}
 			}
 
 		/* print debug statements */
@@ -402,6 +423,7 @@ int	*error;
 	int	kind;
 	int	time_j[5];
 	int	id;
+	unsigned short *short_ptr;
 	int	i;
 
 	/* print input debug statements */
@@ -481,9 +503,20 @@ int	*error;
 		/* put sidescan values 
 			into data structure */
 		store->pixels_ss = nss;
-		for (i=0;i<nss;i++)
+		if (store->ss_type == 'G')
 			{
-			store->ss[i] = ss[i];
+			for (i=0;i<nss;i++)
+				{
+				store->ss[i] = ss[i];
+				}
+			}
+		else
+			{
+			for (i=0;i<nss;i++)
+				{
+				short_ptr = (unsigned short *) &store->ss[2*i];
+				*store_ptr = (unsigned short) ss[i];
+				}
 			}
 		}
 

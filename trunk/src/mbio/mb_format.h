@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.4 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_format.h,v 4.5 1994-12-21 20:21:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.3  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -252,7 +255,7 @@ static char *format_description[] =
 	"Format name:          MBF_HSSIOSWB\nInformal Description: SIO Swath-bathy Hydrosweep DS\nAttributes:           Hydrosweep DS, 59 beams, bathymetry, binary,\n                      SIO.\n",
 	"Format name:          MBF_SB2000RW\nInformal Description: SeaBeam 2000 vender format\nAttributes:           SeaBeam 2000, bathymetry, amplitude \n                      and sidescan, 121 beams and 2000 pixels, ascii \n                      with binary sidescan, SeaBeam Instruments.\n",
 	"Format name:          MBF_SB2000SB\nInformal Description: SIO Swath-bathy SeaBeam 2000 format\nAttributes:           SeaBeam 2000, bathymetry, 121 beams, \n                      binary,  SIO.\n",
-	"Format name:          MBF_SB2000SS\nInformal Description: SIO Swath-bathy SeaBeam 2000 format\nAttributes:           SeaBeam 2000, sidescan, 1000 pixels,\n                      binary,  SIO.\n",
+	"Format name:          MBF_SB2000SS\nInformal Description: SIO Swath-bathy SeaBeam 2000 format\nAttributes:           SeaBeam 2000, sidescan, 2000 pixels,\n                      binary,  SIO.\n",
 	"Format name:          MBF_SB2100RW\nInformal Description: SeaBeam 2100/1000 series vender format\nAttributes:           SeaBeam 2100/1000, bathymetry, amplitude \n                      and sidescan, 151 beams and 2000 pixels, ascii \n                      with binary sidescan, SeaBeam Instruments.\n",
 	"Format name:          MBF_SB2100IH\nInformal Description: SeaBeam 2100/1000 series processing format\nAttributes:           SeaBeam 2100/1000, bathymetry, amplitude \n                      and sidescan, 151 beams bathymetry,\n                      2000 pixels sidescan, binary,\n                      L-DEO and SeaBeam Instruments.\n",
 	"Format name:          MBF_EM1000RW\nInformal Description: Simrad EM1000 vendor format\nAttributes:           Simrad EM1000, bathymetry, amplitude, and sidescan,\n                      60 beams, variable pixels, ascii + binary, Simrad.\n",
@@ -409,7 +412,7 @@ static int pixels_ss_table[] =
 	0,	/* MBF_HSSIOSWB */
 	2000,	/* MBF_SB2000RW */
 	0,	/* MBF_SB2000SB */
-	1000,	/* MBF_SB2000SS */
+	2000,	/* MBF_SB2000SS */
 	2000,	/* MBF_SB2100RW */
 	2000,	/* MBF_SB2100IH */
 	3000,	/* MBF_EM1000RW */
