@@ -3,7 +3,7 @@ MB-SYSTEM VERSION 5.0.BETA01 README FILE:
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta01 release of the MB-System software package for 
+5.0.beta04 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,9 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta04     July 20, 2001
+Version 5.0.beta03     July 19, 2001
+Version 5.0.beta02     June 30, 2001
 Version 5.0.beta01     June 8, 2001
 Version 5.0.beta00     April 6, 2001
 
@@ -84,6 +87,38 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA03 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.beta04 release of MB-System includes 
+one fix of a bug introduced into mbvelocitytool by
+5.0.beta03 (the number of records read reported by the
+program were incorrect). 
+
+MB-SYSTEM VERSION 5.0.BETA03 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.beta03 release of MB-System includes 
+bug fixes and incremental improvements relative to
+the 5.0.beta01 release. In particular:
+    - We now support reading of raw STN Atlas Hydrosweep DS2
+      multibeam data as format 182. We also support processing
+      of Hydrosweep DS2 data with format 183. These two
+      i/o modules provide initial support for the upgraded
+      multibeam on the R/V Maurice Ewing.
+    - The program mbprocess now works with datalists. It
+      descend through recursive datalists, processing only
+      data files found to be out of date relative to the
+      processing control files.
+    - The programs mbedit and mbnavedit now behave properly
+      when an input file is specified on the command line.
+    - Many minor problems with the code that produced compiler
+      warnings were identified and fixed.
+
+There is a known major bug in this release:
+    - The program mbvelocitytool exits with a segment fault
+      when shutting down after processing data in format 94.
 
 MB-SYSTEM VERSION 5.0.BETA01 RELEASE NOTES:
 ------------------------------------------
@@ -528,10 +563,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.3 2001-06-08 21:39:07 caress Exp $
+RCS ID: $Id: README,v 5.4 2001-07-20 16:48:26 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 5.3  2001/06/08  21:39:07  caress
+# Version 5.0.beta01
+#
 # Revision 4.22  2000/09/26  20:32:27  caress
 # Fixed reference to ftp site.
 #
