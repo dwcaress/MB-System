@@ -57,7 +57,7 @@
 
 #define charset XmSTRING_DEFAULT_CHARSET
 
-#define EV_MASK (ButtonPressMask | KeyPressMask | ExposureMask )
+#define EV_MASK (ButtonPressMask | KeyPressMask | KeyReleaseMask | ExposureMask )
 
 /* Mode value defines */
 #define	MODE_PICK	0
