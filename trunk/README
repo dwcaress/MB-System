@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.4 README FILE:
+MB-SYSTEM VERSION 5.0.5 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.4 release of the MB-System software package for 
+5.0.5 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.5          ????????????
 Version 5.0.4          May 22, 2004
 Version 5.0.3          February 27, 2004
 Version 5.0.2          December 24, 2003
@@ -121,6 +122,17 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.5 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.5 release of MB-System includes several changes
+relative to the 5.0.4 release.
+
+The program mbgrid can now obtain background data from GMT grid
+files using grd2xyz as well as through raster databases using 
+grdraster. See the -Kbackground option documentation in the
+mbgrid manual page.
 
 MB-SYSTEM VERSION 5.0.4 RELEASE NOTES:
 ------------------------------------------
@@ -788,10 +800,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.49 2004-05-22 05:58:18 caress Exp $
+RCS ID: $Id: README,v 5.50 2004-06-18 02:58:15 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.49  2004/05/22 05:58:18  caress
+Release 5.0.4
+
 Revision 5.48  2004/05/22 04:22:02  caress
 Release 5.0.4
 
