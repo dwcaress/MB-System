@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiocen.c	2/2/93
- *	$Id: mbr_sbsiocen.c,v 4.1 1994-05-11 21:23:01 caress Exp $
+ *	$Id: mbr_sbsiocen.c,v 4.2 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/11  21:23:01  caress
+ * Added initialization of bathalongtrack array.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -50,13 +53,18 @@
 #include "../../include/mbsys_sb.h"
 #include "../../include/mbf_sbsiocen.h"
 
+/* include for byte swapping on little-endian machines */
+#ifdef BYTESWAPPED
+#include "../../include/mb_swap.h"
+#endif
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_sbsiocen(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiocen.c,v 4.1 1994-05-11 21:23:01 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsiocen.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiocen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -192,6 +200,32 @@ int	*error;
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		data->year = mb_swap_short(data->year);
+		data->day = mb_swap_short(data->day);
+		data->min = mb_swap_short(data->min);
+		data->sec = mb_swap_short(data->sec);
+		data->major = mb_swap_short(data->major);
+		data->minor = mb_swap_short(data->minor);
+		data->axis = mb_swap_short(data->axis);
+		data->lat2u = mb_swap_short(data->lat2u);
+		data->lat2b = mb_swap_short(data->lat2b);
+		data->lon2u = mb_swap_short(data->lon2u);
+		data->lon2b = mb_swap_short(data->lon2b);
+		data->sbtim = mb_swap_short(data->sbtim);
+		data->sbhdg = mb_swap_short(data->sbhdg);
+		for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			data->dist[i] = mb_swap_short(data->dist[i]);
+			data->deph[i] = mb_swap_short(data->deph[i]);
+			}
+		data->spare = mb_swap_short(data->spare);
+		}
+#endif
 
 	/* check for comment or unintelligible records */
 	if (status == MB_SUCCESS)
@@ -529,6 +563,33 @@ int	*error;
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		}
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (dataplus->kind == MB_DATA_DATA
+		|| dataplus->kind == MB_DATA_COMMENT)
+		{
+		data->year = mb_swap_short(data->year);
+		data->day = mb_swap_short(data->day);
+		data->min = mb_swap_short(data->min);
+		data->sec = mb_swap_short(data->sec);
+		data->major = mb_swap_short(data->major);
+		data->minor = mb_swap_short(data->minor);
+		data->axis = mb_swap_short(data->axis);
+		data->lat2u = mb_swap_short(data->lat2u);
+		data->lat2b = mb_swap_short(data->lat2b);
+		data->lon2u = mb_swap_short(data->lon2u);
+		data->lon2b = mb_swap_short(data->lon2b);
+		data->sbtim = mb_swap_short(data->sbtim);
+		data->sbhdg = mb_swap_short(data->sbhdg);
+		for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			data->dist[i] = mb_swap_short(data->dist[i]);
+			data->deph[i] = mb_swap_short(data->deph[i]);
+			}
+		data->spare = mb_swap_short(data->spare);
+		}
+#endif
 
 	/* write next record to file */
 	if (dataplus->kind == MB_DATA_DATA

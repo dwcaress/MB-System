@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_ping.c	2/3/93
- *	$Id: mb_write_ping.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mb_write_ping.c,v 4.1 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	Febrary 3, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.3  1994/03/05  22:51:44  caress
  * Added ability to handle Simrad EM12 system and
  * format MBF_EM12DARW.
@@ -54,7 +57,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mb_write_ping.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+ static char res_id[]="$Id: mb_write_ping.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mb_write_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -90,6 +93,10 @@ int	*error;
 		{
 		status = mbr_wt_sburicen(verbose,mbio_ptr,store_ptr,error);
 		}
+	else if (mb_io_ptr->format == MBF_SBURIVAX)
+		{
+		status = mbr_wt_sburivax(verbose,mbio_ptr,store_ptr,error);
+		}
 	else if (mb_io_ptr->format == MBF_HSLDEDMB)
 		{
 		status = mbr_wt_hsldedmb(verbose,mbio_ptr,store_ptr,error);
@@ -106,6 +113,10 @@ int	*error;
 		{
 		status = mbr_wt_hsldeoih(verbose,mbio_ptr,store_ptr,error);
 		}
+	else if (mb_io_ptr->format == MBF_HSURIVAX)
+		{
+		status = mbr_wt_hsurivax(verbose,mbio_ptr,store_ptr,error);
+		}
 	else if (mb_io_ptr->format == MBF_SB2100RW)
 		{
 		status = mbr_wt_sb2100rw(verbose,mbio_ptr,store_ptr,error);
@@ -113,6 +124,10 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_EM12DARW)
 		{
 		status = mbr_wt_em12darw(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_MR1PRHIG)
+		{
+		status = mbr_wt_mr1prhig(verbose,mbio_ptr,store_ptr,error);
 		}
 	else if (mb_io_ptr->format == MBF_MBLDEOIH)
 		{

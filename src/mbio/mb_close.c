@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 4.0 1994-03-05 23:55:38 caress Exp $
+ *	$Id: mb_close.c,v 4.1 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 25, 1993
  *	$Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:55:38  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -40,6 +43,9 @@
 #include <math.h>
 #include <strings.h>
 
+/* XDR i/o include file */
+#include <rpc/xdr.h>
+
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
@@ -51,7 +57,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 4.0 1994-03-05 23:55:38 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -74,6 +80,8 @@ int	*error;
 	status = mb_mem_deall(verbose,mbio_ptr,error);
 
 	/* deallocate memory for arrays within the mbio descriptor */
+	if (mb_xdr_table[mb_io_ptr->format_num] == MB_YES)
+		status = mb_free(verbose,mb_io_ptr->xdrs,error);
 	status = mb_free(verbose,mb_io_ptr->bath,error);
 	status = mb_free(verbose,mb_io_ptr->amp,error);
 	status = mb_free(verbose,mb_io_ptr->bath_acrosstrack,error);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.1 1994-05-21 02:23:29 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 4.2 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/21  02:23:29  caress
+ * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -50,13 +53,18 @@
 #include "../../include/mbsys_hsds.h"
 #include "../../include/mbf_hsuricen.h"
 
+/* include for byte swapping on little-endian machines */
+#ifdef BYTESWAPPED
+#include "../../include/mb_swap.h"
+#endif
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsuricen(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.1 1994-05-21 02:23:29 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -193,6 +201,29 @@ int	*error;
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS && data->sec != 25443)
+		{
+		data->sec = mb_swap_short(data->sec);
+		data->min = mb_swap_short(data->min);
+		data->day = mb_swap_short(data->day);
+		data->year = mb_swap_short(data->year);
+		data->lat = mb_swap_long(data->lat);
+		data->lon = mb_swap_long(data->lon);
+		data->hdg = mb_swap_short(data->hdg);
+		data->course = mb_swap_short(data->course);
+		data->speed = mb_swap_short(data->speed);
+		data->pitch = mb_swap_short(data->pitch);
+		data->scale = mb_swap_short(data->scale);
+		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+			{
+			data->dist[i] = mb_swap_short(data->dist[i]);
+			data->deph[i] = mb_swap_short(data->deph[i]);
+			}
+		}
+#endif
 
 	/* check for comment or unintelligible records */
 	if (status == MB_SUCCESS)
@@ -521,8 +552,9 @@ int	*error;
 		{
 		fprintf(stderr,"\ndbg5  Status at beginning of MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       store->kind:    %d\n",
-			store->kind);
+		if (store != NULL)
+			fprintf(stderr,"dbg5       store->kind:    %d\n",
+				store->kind);
 		fprintf(stderr,"dbg5       new_kind:       %d\n",
 			mb_io_ptr->new_kind);
 		fprintf(stderr,"dbg5       new_error:      %d\n",
@@ -649,6 +681,29 @@ int	*error;
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		}
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (dataplus->kind == MB_DATA_DATA)
+		{
+		data->sec = mb_swap_short(data->sec);
+		data->min = mb_swap_short(data->min);
+		data->day = mb_swap_short(data->day);
+		data->year = mb_swap_short(data->year);
+		data->lat = mb_swap_long(data->lat);
+		data->lon = mb_swap_long(data->lon);
+		data->hdg = mb_swap_short(data->hdg);
+		data->course = mb_swap_short(data->course);
+		data->speed = mb_swap_short(data->speed);
+		data->pitch = mb_swap_short(data->pitch);
+		data->scale = mb_swap_short(data->scale);
+		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+			{
+			data->dist[i] = mb_swap_short(data->dist[i]);
+			data->deph[i] = mb_swap_short(data->deph[i]);
+			}
+		}
+#endif
 
 	/* write next record to file */
 	if (dataplus->kind == MB_DATA_DATA

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldedmb.c	2/2/93
- *	$Id: mbr_hsldedmb.c,v 4.1 1994-05-21 02:23:29 caress Exp $
+ *	$Id: mbr_hsldedmb.c,v 4.2 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/21  02:23:29  caress
+ * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -54,13 +57,18 @@
 #define MININYEAR 525600.0
 #define MININDAY 1440.0
 
+/* include for byte swapping on little-endian machines */
+#ifdef BYTESWAPPED
+#include "../../include/mb_swap.h"
+#endif
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldedmb(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldedmb.c,v 4.1 1994-05-21 02:23:29 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldedmb.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mbr_alm_hsldedmb";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -196,6 +204,32 @@ int	*error;
 		*error = MB_ERROR_EOF;
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS && data->seconds != 2054847098)
+		{
+		data->seconds = mb_swap_long(data->seconds);
+		data->microseconds = mb_swap_long(data->microseconds);
+		data->alt_seconds = mb_swap_long(data->alt_seconds);
+		data->alt_microseconds = mb_swap_long(data->alt_microseconds);
+		data->lat = mb_swap_long(data->lat);
+		data->lon = mb_swap_long(data->lon);
+		data->heading = mb_swap_short(data->heading);
+		data->course = mb_swap_short(data->course);
+		data->speed = mb_swap_short(data->speed);
+		data->pitch = mb_swap_short(data->pitch);
+		data->scale = mb_swap_short(data->scale);
+		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+			{
+			data->depth[i] = mb_swap_short(data->depth[i]);
+			data->range[i] = mb_swap_short(data->range[i]);
+			}
+		for (i=0;i<4;i++)
+			data->flag[i] = mb_swap_long(data->flag[i]);
+
+		}
+#endif
+
 	/* check for comment or unintelligible records */
 	if (status == MB_SUCCESS)
 		{
@@ -225,8 +259,8 @@ int	*error;
 		&& dataplus->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		mb_io_ptr->new_time_d = data->seconds/60.
-			- 11.0*MININYEAR - 2.0*MININDAY;
+		mb_io_ptr->new_time_d = data->seconds 
+			+ 0.000001*data->microseconds;
 		mb_get_date(verbose,mb_io_ptr->new_time_d,
 			mb_io_ptr->new_time_i);
 
@@ -304,9 +338,8 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp: %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  amp[%d]: %d  bathdist[%d]: %d\n",
+			  fprintf(stderr,"dbg4       bath[%d]: %d  bathdist[%d]: %d\n",
 				i,mb_io_ptr->new_bath[i],
-				i,mb_io_ptr->new_amp[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
@@ -502,8 +535,9 @@ int	*error;
 		{
 		fprintf(stderr,"\ndbg5  Status at beginning of MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       store->kind:    %d\n",
-			store->kind);
+		if (store != NULL)
+			fprintf(stderr,"dbg5       store->kind:    %d\n",
+				store->kind);
 		fprintf(stderr,"dbg5       new_kind:       %d\n",
 			mb_io_ptr->new_kind);
 		fprintf(stderr,"dbg5       new_error:      %d\n",
@@ -544,8 +578,7 @@ int	*error;
 			time_i[4] = store->minute;
 			time_i[5] = store->second;
 			mb_get_time(verbose,time_i,&time_d);
-			data->seconds = 60.0*(time_d 
-				+ 11.0*MININYEAR + 2.0*MININDAY);
+			data->seconds = (int) time_d;
 
 			/* additional navigation and depths */
 			data->heading = 10.0*store->course_true;
@@ -588,8 +621,7 @@ int	*error;
 		&& mb_io_ptr->new_kind == MB_DATA_DATA)
 		{
 		/* get time */
-		data->seconds = 60.0*(mb_io_ptr->new_time_d 
-			+ 11.0*MININYEAR + 2.0*MININDAY);
+		data->seconds = (int) mb_io_ptr->new_time_d;
 
 		/* get navigation */
 		if (mb_io_ptr->new_lon < -180.0)
@@ -613,6 +645,32 @@ int	*error;
 			data->range[i] = mb_io_ptr->new_bath_acrosstrack[i];
 			}
 		}
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (dataplus->kind == MB_DATA_DATA)
+		{
+		data->seconds = mb_swap_long(data->seconds);
+		data->microseconds = mb_swap_long(data->microseconds);
+		data->alt_seconds = mb_swap_long(data->alt_seconds);
+		data->alt_microseconds = mb_swap_long(data->alt_microseconds);
+		data->lat = mb_swap_long(data->lat);
+		data->lon = mb_swap_long(data->lon);
+		data->heading = mb_swap_short(data->heading);
+		data->course = mb_swap_short(data->course);
+		data->speed = mb_swap_short(data->speed);
+		data->pitch = mb_swap_short(data->pitch);
+		data->scale = mb_swap_short(data->scale);
+		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+			{
+			data->depth[i] = mb_swap_short(data->depth[i]);
+			data->range[i] = mb_swap_short(data->range[i]);
+			}
+		for (i=0;i<4;i++)
+			data->flag[i] = mb_swap_long(data->flag[i]);
+
+		}
+#endif
 
 	/* write next record to file */
 	if (dataplus->kind == MB_DATA_DATA

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 4.1 1994-03-23 22:19:33 caress Exp $
+ *    $Id: mb_mem.c,v 4.2 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,15 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/23  22:19:33  caress
+ * Previous versions of mb_malloc returned an error if the
+ * pointer returned by malloc() was NULL, even if the size
+ * requested was zero.  This was ok on Suns running BSD, which
+ * return pointer values even for zero sized objects, but on
+ * IBM machines malloc() returns NULL for zero sized objects.
+ * The function mb_malloc now returns a NULL pointer and no error
+ * if the requested size is zero.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -60,7 +69,7 @@ int	size;
 char	**ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 4.1 1994-03-23 22:19:33 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -96,8 +105,8 @@ int	*error;
 		status = MB_SUCCESS;
 		}
 
-	/* add to list */
-	if (n_mb_alloc < MB_MEMORY_HEAP_MAX)
+	/* add to list if size > 0 */
+	if (n_mb_alloc < MB_MEMORY_HEAP_MAX && size > 0)
 		{
 		mb_alloc_ptr[n_mb_alloc] = *ptr;
 		mb_alloc_size[n_mb_alloc] = size;
@@ -150,16 +159,17 @@ int	*error;
 		fprintf(stderr,"dbg2       ptr:        %d\n",ptr);
 		}
 
-	/* deallocate memory */
-	free(ptr);
-
-	/* remove from list */
+	/* check if pointer is in list */
 	iptr = -1;
 	for (i=0;i<n_mb_alloc;i++)
 		if (mb_alloc_ptr[i] == ptr)
 			iptr = i;
+
+	/* if pointer is in list remove it from list 
+		and deallocate the memory */
 	if (iptr > -1)
 		{
+		/* remove it from list */
 		ptrvalue = (int) mb_alloc_ptr[iptr];
 		ptrsize = mb_alloc_size[iptr];
 		for (i=iptr;i<n_mb_alloc-1;i++)
@@ -168,6 +178,9 @@ int	*error;
 			mb_alloc_size[i] = mb_alloc_size[i+1];
 			}
 		n_mb_alloc--;
+
+		/* free the memory */
+		free(ptr);
 		}
 
 	/* print debug statements */

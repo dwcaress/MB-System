@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	1/21/93
- *    $Id: mb_coor_scale.c,v 4.0 1994-03-05 23:55:38 caress Exp $
+ *    $Id: mb_coor_scale.c,v 4.1 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:55:38  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -55,8 +58,11 @@
 #define C6 1.175
 #define C7 0.0023
 
-/* degrees to radians conversion */
-#define DTR (M_PI/180.)
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
 
 /*--------------------------------------------------------------------*/
 int mb_coor_scale(verbose,latitude,mtodeglon,mtodeglat)
@@ -65,7 +71,7 @@ double	latitude;
 double	*mtodeglon;
 double	*mtodeglat;
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.0 1994-03-05 23:55:38 caress Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;
