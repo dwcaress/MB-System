@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.3 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.4 1995-02-22 21:55:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -71,7 +74,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.3 1994-10-21 12:20:01 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.4 1995-02-22 21:55:10 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -490,7 +493,7 @@ int	*error;
 			mb_io_ptr->new_bath_alongtrack[i] = 0;
 			}
 
-		/* read processded amplitude values into storage arrays */
+		/* read processed amplitude values into storage arrays */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			mb_io_ptr->new_amp[i] 
@@ -859,7 +862,7 @@ int	*error;
 			scalefactor = 1.0;
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			data->back[i] = scalefactor*mb_io_ptr->new_amp[i];
+			data->back[i] = (int) scalefactor*mb_io_ptr->new_amp[i];
 			}
 
 		/* add some plausible amounts for some of the 
@@ -1535,6 +1538,9 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mbf_hsldeoih_survey_struct read_data;
 	int	read_size;
+	int	need_back,  gain_ok;
+	int	gain_inner, gain_outer;
+	double	gain_beam, factor;
 	int	i;
 
 	/* print input debug statements */
@@ -1744,6 +1750,63 @@ int	*error;
 		data->back_scale = read_data.back_scale;
 		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
 			data->back[i] = read_data.back[i];
+		}
+
+	/* now fix some possible problems with processed 
+		beam amplitudes */
+	if (status == MB_SUCCESS)
+		{
+
+		/* see if gain values are messed up */
+		gain_ok = MB_NO;
+		i = 0;
+		while (i < 8 && gain_ok == MB_NO)
+			{
+			if (data->gain[i] != data->gain[0])
+				gain_ok = MB_YES;
+			if (data->gain[i+8] != data->gain[8])
+				gain_ok = MB_YES;
+			i++;
+			}
+
+		/* fix gain values if needed */
+		if (gain_ok == MB_NO)
+			{
+			gain_outer = data->gain[0];
+			gain_inner = data->gain[8];
+			for (i=0;i<16;i++)
+				{
+				if (i<4 || i > 11)
+					data->gain[i] = gain_outer;
+				else
+					data->gain[i] = gain_inner;
+				}
+			}
+
+		/* see if processed beam amplitude values 
+			are available */
+		need_back = MB_YES;
+		i = 0;
+		while (i < MBF_HSLDEOIH_BEAMS && need_back == MB_YES)
+			{
+			if (data->back[i] != 0)
+				need_back = MB_NO;
+			i++;
+			}
+
+		/* get beam amplitude values if needed */
+		if (need_back == MB_YES)
+			{
+			data->back_scale = 1.0;
+			for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+				{
+				gain_beam = 6*data->gain[which_gain[i]];
+				factor = 100.*pow(10.,(-0.05*gain_beam));
+				data->back[i] = factor*data->amplitude[i];
+				if (data->depth[i] < 0)
+					data->back[i] = -data->back[i];
+				}
+			}
 		}
 
 	/* print debug statements */
@@ -1891,6 +1954,9 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mbf_hsldeoih_calibrate_struct read_data;
 	int	read_size;
+	int	need_back,  gain_ok;
+	int	gain_inner, gain_outer;
+	double	gain_beam, factor;
 	int	i;
 
 	/* print input debug statements */
@@ -2100,6 +2166,63 @@ int	*error;
 		data->back_scale = read_data.back_scale;
 		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
 			data->back[i] = read_data.back[i];
+		}
+
+	/* now fix some possible problems with processed 
+		beam amplitudes */
+	if (status == MB_SUCCESS)
+		{
+
+		/* see if gain values are messed up */
+		gain_ok = MB_NO;
+		i = 0;
+		while (i < 8 && gain_ok == MB_NO)
+			{
+			if (data->gain[i] != data->gain[0])
+				gain_ok = MB_YES;
+			if (data->gain[i+8] != data->gain[8])
+				gain_ok = MB_YES;
+			i++;
+			}
+
+		/* fix gain values if needed */
+		if (gain_ok == MB_NO)
+			{
+			gain_outer = data->gain[0];
+			gain_inner = data->gain[8];
+			for (i=0;i<16;i++)
+				{
+				if (i<4 || i > 11)
+					data->gain[i] = gain_outer;
+				else
+					data->gain[i] = gain_inner;
+				}
+			}
+
+		/* see if processed beam amplitude values 
+			are available */
+		need_back = MB_YES;
+		i = 0;
+		while (i < MBF_HSLDEOIH_BEAMS && need_back == MB_YES)
+			{
+			if (data->back[i] != 0)
+				need_back = MB_NO;
+			i++;
+			}
+
+		/* get beam amplitude values if needed */
+		if (need_back == MB_YES)
+			{
+			data->back_scale = 1.0;
+			for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+				{
+				gain_beam = 6*data->gain[which_gain[i]];
+				factor = 100.*pow(10.,(-0.05*gain_beam));
+				data->back[i] = factor*data->amplitude[i];
+				if (data->depth[i] < 0)
+					data->back[i] = -data->back[i];
+				}
+			}
 		}
 
 	/* print debug statements */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.2 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.3 1995-02-22 21:55:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/05/21  02:23:29  caress
  * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
  *
@@ -65,21 +68,13 @@
 #include "../../include/mbsys_hsds.h"
 #include "../../include/mbf_hsatlraw.h"
 
-/* array matching gain values to appropriate beam */
-int which_gain[MBSYS_HSDS_BEAMS] = 
-			{ 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-			  4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 
-			  7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
-			 10,10,10,10,11,11,11,11,12,12,12,12,
-			 13,13,13,13,14,14,14,14,15 };
-
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsatlraw(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.2 1994-10-21 12:20:01 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.3 1995-02-22 21:55:10 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -332,7 +327,7 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
 	struct mbsys_hsds_struct *store;
-	double	gain_base, gain_beam, factor;
+	double	gain_beam, factor;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -496,22 +491,15 @@ int	*error;
 			}
 
 		/* process beam amplitudes */
-		gain_base = -20.0 + data->gain_start + data->filter_gain;
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			if (data->depth[i] != 0)
-				{
-				gain_beam = data->gain[which_gain[i]] 
-					+ gain_base;
-				factor = 100.*pow(10.,(-0.05*gain_beam));
-				mb_io_ptr->new_amp[i] 
+			gain_beam = 6*data->gain[which_gain[i]];
+			factor = 100.*pow(10.,(-0.05*gain_beam));
+			mb_io_ptr->new_amp[i] 
 					= factor*data->amplitude[i];
-				if (data->depth[i] < 0)
-					mb_io_ptr->new_amp[i] = 
-						-mb_io_ptr->new_amp[i];
-				}
-			else
-				mb_io_ptr->new_amp[i] = 0;
+			if (data->depth[i] < 0)
+				mb_io_ptr->new_amp[i] = 
+					-mb_io_ptr->new_amp[i];
 			}
 
 		/* print more debug statements */
@@ -868,6 +856,13 @@ int	*error;
 		data->depth_center = data->depth[mb_io_ptr->beams_bath/2];
 		data->depth_scale = 1.0;	/* this is a unit scale factor */
 		data->spare = 1;
+		}
+
+	/* check that no bathymetry values are negative */
+	for (i=0;i<mb_io_ptr->beams_bath;i++)
+		{
+		if (data->depth[i] < 0)
+			data->depth[i] = 0;
 		}
 
 	/* write next data to file */
@@ -2122,7 +2117,7 @@ int	*error;
 		== MB_SUCCESS)
 		{
 		for (i=0;i<8;i++)
-			mb_get_int(&(data->gain[i+8]),line+1+shift,1);
+			mb_get_int(&(data->gain[i+8]),line+i+shift,1);
 		mb_get_int(&numvals,line+8+shift,2);
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->amplitude[i+30]),
@@ -2134,7 +2129,7 @@ int	*error;
 		== MB_SUCCESS)
 		{
 		for (i=0;i<8;i++)
-			mb_get_int(&(data->gain[i]),line+1+shift,1);
+			mb_get_int(&(data->gain[i]),line+i+shift,1);
 		mb_get_int(&numvals,line+8+shift,2);
 		for (i=0;i<numvals;i++)
 			mb_get_int(&(data->amplitude[28-i]),
@@ -3536,7 +3531,7 @@ int	*error;
 			fprintf(stderr,"dbg5         %d  %d  %d\n",
 				i,data->amplitude[i],data->echo_duration[i]);
 		fprintf(stderr,"dbg5       gains and echo scales:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
+		for (i=0;i<16;i++)
 			fprintf(stderr,"dbg5         %d  %d  %d\n",
 				i,data->gain[i],data->echo_scale[i]);
 		}
