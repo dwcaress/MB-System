@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#    $Id: mbm_grid.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
 #
 #    Copyright (c) 1999, 2000 by
 #    D. W. Caress (caress@mbari.org)
@@ -53,10 +53,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#   $Id: mbm_grid.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.0  2000/12/01  22:58:01  caress
+# First cut at Version 5.0.
+#
 # Revision 4.3  2000/10/03  21:42:17  caress
 # Snapshot for Dale.
 #
@@ -152,8 +155,19 @@ if (!$root)
 	$root = $file_data;
 	}
 
+# get format if needed
+if (!$format) 
+	{
+	$line = `mbformat -I $file_data -L`;
+	($format) = $line =~ /(\S+)/;
+	if ($format == 0)
+		{
+		$format = -1;
+		}
+	}
+
 # get limits of file using mbinfo
-if ($format >= 0)
+if ($format > 0)
 	{
 	push(@files_data, $file_data);
 	push(@formats, $format);
@@ -194,7 +208,14 @@ foreach $file_mb (@files_data)
 			print "Running mbinfo on file $file_mb...\n";
 			}
 		$cnt++;
-		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb -R$bounds -G`;
+		if (!$bounds)
+			{
+			@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb -G`;
+			}
+		else
+			{
+			@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb -R$bounds -G`;
+			}
 		}
 
 	# now parse the mbinfo input 
@@ -210,6 +231,11 @@ foreach $file_mb (@files_data)
 			{
 			($ymin_f,$ymax_f) = 
 				$line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
+			}
+		if ($line =~ /Minimum Altitude:\s+(\S+)\s+Maximum Altitude:\s+(\S+)/)
+			{
+			($altmin_f,$altmax_f) = 
+				$line =~ /Minimum Altitude:\s+(\S+)\s+Maximum Altitude:\s+(\S+)/;
 			}
 		if ($line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
 			{
@@ -317,7 +343,11 @@ else
 # get grid interval
 if (!$xintyint && !$xdimydim)
 	{
-	if (!$zmax_data && $bathdef)
+	if (!$altmax_f && $bathdef)
+		{
+		$zmax_data = $altmax_f;
+		}
+	elsif (!$zmax_data && $bathdef)
 		{
 		$zmax_data = $bathdef;
 		}
@@ -498,12 +528,7 @@ if ($verbose)
 # print out final notes
 print "\nGrid generation shellscript <$cmdfile> created.\n";
 print "\nInstructions:\n";
-print "  Execute <$cmdfile> to generate Postscript plot <$psfile>.\n";
-if (!$no_view_ps)
-	{
-	print "  Executing <$cmdfile> also invokes $ps_viewer ";
-	print "to view the plot on the screen.\n";
-	}
+print "  Execute <$cmdfile> to generate grid file <$root.grd>.\n";
 if ($verbose)
 	{
 	print "\n--------------\n\n";
@@ -556,7 +581,7 @@ sub max {
 }
 #-----------------------------------------------------------------------
 sub MBparsedatalist {
-	local ($FILEDATA, $line, $file_tmp, $format_tmp);
+	local ($FILEDATA, $line, $file_tmp, $format_tmp, @datalists, $datalist);
 
  	if (open(FILEDATA,"<$_[0]"))
         	{
@@ -573,12 +598,19 @@ sub MBparsedatalist {
         			}
 			    elsif ($file_tmp && $format_tmp == -1)
 				{
-				MBparsedatalist($file_tmp);
+        			push(@datalists, $file_tmp);
 				}
 			    }
         		}
         	close FILEDATA;
         	}
+
+	# loop over datalists 
+	foreach $datalist (@datalists)
+		{
+		MBparsedatalist($datalist);
+		}
+
 }
 #-----------------------------------------------------------------------
 sub GetDecimalDegrees {

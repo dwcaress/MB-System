@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 1.1 2000-09-30 07:21:32 caress Exp $
+#	$Id: Makefile.template,v 5.0 2001-03-22 21:08:55 caress Exp $
 #
 #     Copyright (c) 2000 by 
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		September 7, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.1  2000/09/30  07:21:32  caress
+# Initial revision
+#
 #
 #
 #
@@ -51,7 +54,9 @@ $(BINDIR)/mbnavadjust: mbnavadjust.o \
 		mbnavadjust_prog.o \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libgsf.a \
-		$(LIBDIR)/libmbaux.a 
+		$(LIBDIR)/libmbaux.a \
+		$(LIBDIR)/libmbps.a \
+		$(LIBDIR)/libmbxgr.a
 	$(CC) $(CFLAGS) mbnavadjust.o \
 		mbnavadjust_creation.o \
 		mbnavadjust_callbacks.o \
@@ -60,6 +65,8 @@ $(BINDIR)/mbnavadjust: mbnavadjust.o \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libmbaux.a \
+		$(LIBDIR)/libmbps.a \
+		$(LIBDIR)/libmbxgr.a \
 		$(MOTIFLIBS) $(LFLAGS) \
 		-o $(BINDIR)/mbnavadjust
 

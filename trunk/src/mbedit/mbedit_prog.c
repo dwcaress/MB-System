@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.3 2001-01-23 01:17:34 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.4 2001-03-22 21:06:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/01/23  01:17:34  caress
+ * Removed some unused variable declarations.
+ *
  * Revision 5.2  2001/01/22  07:40:13  caress
  * Version 5.0.0beta01
  *
@@ -257,7 +260,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.3 2001-01-23 01:17:34 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.4 2001-03-22 21:06:55 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -306,6 +309,8 @@ double	navlat;
 double	speed;
 double	heading;
 double	distance;
+double	altitude;
+double	sonardepth;
 int	nbath;
 int	namp;
 int	nss;
@@ -3494,18 +3499,28 @@ int mbedit_open_file(char *file, int form, int savemode)
 		if (fstat == 0
 		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
 		    {
-		    /* get temporary file name */
-		    sprintf(sifile, "%s.esf.tmp", ifile);
+		    /* if outputting esf then copy old esf file */
+		    if (output_mode != MBEDIT_OUTPUT_BROWSE)
+			{
+			/* get temporary file name */
+			sprintf(sifile, "%s.esf.tmp", ifile);
 
-		    /* copy old edit save file to tmp file */
-		    sprintf(command, "cp %s %s\n", 
-			sofile, sifile);
-		    system(command);
+			/* copy old edit save file to tmp file */
+			sprintf(command, "cp %s %s\n", 
+				sofile, sifile);
+			system(command);
+			}
+			
+		    /* else just read the old esf file */
+		    else
+			{
+			strcpy(sifile, sofile);
+			}
 	
 		    /* get number of old edits */
 		    neditsave = file_status.st_size
 			         / (sizeof(double) + 2 * sizeof(int));
-	
+
 	            /* allocate arrays for old edits */
 	            if (neditsave > 0)
 			{
@@ -3548,7 +3563,6 @@ int mbedit_open_file(char *file, int form, int savemode)
 			    /* reset message */
 			    if ((i+1)%10000 == 0)
 				{
-				sprintf(notice, "MBedit has sorted %d of %d old edits...", i+1, neditsave);
 				do_message_on(notice);
 				}
 
@@ -3895,7 +3909,7 @@ int mbedit_load_data(int buffer_size,
 				&ping[nbuff].navlat,
 				&ping[nbuff].speed,
 				&ping[nbuff].heading,
-				&distance,
+				&distance,&altitude,&sonardepth,
 				&ping[nbuff].beams_bath,&namp,&nss,
 				beamflag,bath,amp, 
 				bathacrosstrack,bathalongtrack,

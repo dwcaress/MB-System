@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.0  2000/12/01  22:58:01  caress
+# First cut at Version 5.0.
+#
 # Revision 4.16  2000/10/03  21:42:17  caress
 # Snapshot for Dale.
 #
@@ -926,7 +929,8 @@ if ($zbounds)
 	}
 
 # check that there is data
-if ($xmin >= $xmax || $ymin >= $ymax || $zmin >= $zmax)
+if ((!$use_corner_points && ($xmin >= $xmax || $ymin >= $ymax)) 
+	|| $zmin >= $zmax)
 	{
 	print "\a";
 	die "Improper data limits: x: $xmin $xmax  y: $ymin $ymax  z: $zmin $zmax\n$program_name aborted.\n"

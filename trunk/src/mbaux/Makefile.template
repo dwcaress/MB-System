@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  9/8/00
-#	$Id: Makefile.template,v 5.0 2001-01-22 07:38:58 caress Exp $
+#	$Id: Makefile.template,v 5.1 2001-03-22 21:06:19 caress Exp $
 #
 #     Copyright (c) 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		September 8, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.0  2001/01/22  07:38:58  caress
+# Version 5.0.0beta01
+#
 # Revision 4.0  2000/09/08  17:19:14  caress
 # Initial version.
 #
@@ -50,34 +53,42 @@ MANDIR = ../../man/manl
 
 ### make all makes the mbaux library and associated include files
 all:	$(LIBDIR)/libmbaux.a \
+	$(LIBDIR)/libmbps.a \
+	$(LIBDIR)/libmbxgr.a \
 	$(INCDIR)/mb_contour.h
 
 ### make clean removes the object files
 clean:
 	rm -f *.o
 
-### put together the library
+### put together the libraries
 $(LIBDIR)/libmbaux.a:	\
 		mb_spline.o \
 		mb_zgrid.o \
 		mb_cheb.o \
 		mb_delaun.o \
-		mb_pslibface.o \
 		mb_rt.o \
 		mb_track.o \
-		mb_truecont.o \
-		xgraphics.o
+		mb_truecont.o
 	$(ARCHIVE) $(LIBDIR)/libmbaux.a \
 		mb_spline.o \
 		mb_zgrid.o \
 		mb_cheb.o \
 		mb_delaun.o \
-		mb_pslibface.o \
 		mb_rt.o \
 		mb_track.o \
-		mb_truecont.o \
-		xgraphics.o
+		mb_truecont.o
 	ranlib $(LIBDIR)/libmbaux.a
+$(LIBDIR)/libmbps.a:	\
+		mb_pslibface.o
+	$(ARCHIVE) $(LIBDIR)/libmbps.a \
+		mb_pslibface.o
+	ranlib $(LIBDIR)/libmbps.a
+$(LIBDIR)/libmbxgr.a:	\
+		xgraphics.o
+	$(ARCHIVE) $(LIBDIR)/libmbxgr.a \
+		xgraphics.o
+	ranlib $(LIBDIR)/libmbxgr.a
 
 ### compile the source files
 mb_spline.o:	mb_spline.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
