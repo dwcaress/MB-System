@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *    $Id: mb_process.h,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -86,12 +86,21 @@
  *                                  #  0: raytracing off
  *                                  #  1: raytracing on
  *   SVPFILE filename               # sets svp file path [no default]
- *   SSVMODE boolean                # sets ssv mode [0]
+ *   SSVMODE mode                   # sets ssv mode [0]
  *                                  #  0: use ssv from file
  *                                  #  1: offset ssv from file (set by SSV)
  *                                  #  2: use constant ssv (set by SSV)
  *   SSV constant/offset            # sets ssv value or offset (m/s) [1500.0]
+ *   TTMODE mode                    # sets handling of travel times [0]
+ *                                  #  0: do not change travel times.
+ *                                  #  1: travel time correction by multiply
  *   TTMULTIPLY multiplier          # sets value multiplied by travel times [1.0]
+ *   ANGLEMODE mode                 # sets handling of beam angles [0]
+ *                                  #  0: do not change beam angles
+ *                                  #  1: adjust beams angles by Snell's law
+ *                                  #     ignoring sonar array geometry
+ *                                  #  2: adjust beams angles by Snell's law
+ *                                  #     using array geometry
  *   CORRECTED boolean              # sets raytraced bathymetry to "corrected" values [1]
  *
  * DRAFT CORRECTION:
@@ -181,6 +190,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -218,8 +230,9 @@
 #define MBP_SSV_SET		2
 #define MBP_TT_OFF		0
 #define MBP_TT_MULTIPLY		1
-#define MBP_SSV_CORRECT		1
-#define MBP_SSV_INCORRECT	2
+#define	MBP_ANGLES_OK		0
+#define	MBP_ANGLES_SNELL	1
+#define	MBP_ANGLES_SNELLNULL	2
 #define MBP_DRAFT_OFF		0
 #define MBP_DRAFT_OFFSET	1
 #define MBP_DRAFT_MULTIPLY	2
@@ -279,6 +292,7 @@ struct mb_process_struct
 	int	mbp_corrected;
 	int	mbp_tt_mode;
 	double	mbp_tt_mult;
+	int	mbp_angle_mode;
 	
 	/* draft correction */
 	int	mbp_draft_mode;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100b2.c	3/3/94
- *	$Id: mbr_sb2100b2.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbr_sb2100b2.c,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -74,6 +77,8 @@
 #endif
 
 /* essential function prototypes */
+int mbr_register_sb2100b2(int verbose, char *mbio_ptr, 
+		int *error);
 int mbr_info_sb2100b2(int verbose, 
 			int *system, 
 			int *beams_bath_max, 
@@ -92,22 +97,6 @@ int mbr_info_sb2100b2(int verbose,
 			int *vru_source, 
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
-			int (**format_alloc)(), 
-			int (**format_free)(), 
-			int (**store_alloc)(), 
-			int (**store_free)(), 
-			int (**read_ping)(), 
-			int (**write_ping)(), 
-			int (**extract)(), 
-			int (**insert)(), 
-			int (**extract_nav)(), 
-			int (**insert_nav)(), 
-			int (**extract_altitude)(), 
-			int (**insert_altitude)(), 
-			int (**extract_svp)(), 
-			int (**insert_svp)(), 
-			int (**ttimes)(), 
-			int (**copyrecord)(), 
 			int *error);
 int mbr_alm_sb2100b2(int verbose, char *mbio_ptr, int *error);
 int mbr_dem_sb2100b2(int verbose, char *mbio_ptr, int *error);
@@ -139,6 +128,119 @@ int mbr_sb2100b2_wr_dh(int verbose, FILE *mbfp, char *data_ptr, int *error);
 int mbr_sb2100b2_wr_br(int verbose, FILE *mbfp, char *data_ptr, int *error);
 int mbr_sb2100b2_wr_sr(int verbose, FILE *mbfp, char *data_ptr, int *error);
 
+
+/*--------------------------------------------------------------------*/
+int mbr_register_sb2100b2(int verbose, char *mbio_ptr, int *error)
+{
+	static char res_id[]="$Id: mbr_sb2100b2.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	char	*function_name = "mbr_register_sb2100b2";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* get mb_io_ptr */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* set format info parameters */
+	status = mbr_info_sb2100b2(verbose, 
+			&mb_io_ptr->system, 
+			&mb_io_ptr->beams_bath_max, 
+			&mb_io_ptr->beams_amp_max, 
+			&mb_io_ptr->pixels_ss_max, 
+			&mb_io_ptr->format_name, 
+			&mb_io_ptr->system_name, 
+			&mb_io_ptr->format_description, 
+			&mb_io_ptr->numfile, 
+			&mb_io_ptr->filetype, 
+			&mb_io_ptr->variable_beams, 
+			&mb_io_ptr->traveltime, 
+			&mb_io_ptr->beam_flagging, 
+			&mb_io_ptr->nav_source, 
+			&mb_io_ptr->heading_source, 
+			&mb_io_ptr->vru_source, 
+			&mb_io_ptr->beamwidth_xtrack, 
+			&mb_io_ptr->beamwidth_ltrack, 
+			error);
+
+	/* set format and system specific function pointers */
+	mb_io_ptr->mb_io_format_alloc = &mbr_alm_sb2100b2;
+	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2100b2; 
+	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2100_alloc; 
+	mb_io_ptr->mb_io_store_free = &mbsys_sb2100_deall; 
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2100b2; 
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2100b2; 
+	mb_io_ptr->mb_io_extract = &mbsys_sb2100_extract; 
+	mb_io_ptr->mb_io_insert = &mbsys_sb2100_insert; 
+	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2100_extract_nav; 
+	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2100_insert_nav; 
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2100_extract_altitude; 
+	mb_io_ptr->mb_io_insert_altitude = NULL; 
+	mb_io_ptr->mb_io_extract_svp = &mbsys_sb2100_extract_svp; 
+	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp; 
+	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes; 
+	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy; 
+	mb_io_ptr->mb_io_extract_rawss = NULL; 
+	mb_io_ptr->mb_io_insert_rawss = NULL; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",mb_io_ptr->pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",mb_io_ptr->format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",mb_io_ptr->system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",mb_io_ptr->format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",mb_io_ptr->numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",mb_io_ptr->filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
 /*--------------------------------------------------------------------*/
 int mbr_info_sb2100b2(int verbose, 
 			int *system, 
@@ -158,25 +260,9 @@ int mbr_info_sb2100b2(int verbose,
 			int *vru_source, 
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
-			int (**format_alloc)(), 
-			int (**format_free)(), 
-			int (**store_alloc)(), 
-			int (**store_free)(), 
-			int (**read_ping)(), 
-			int (**write_ping)(), 
-			int (**extract)(), 
-			int (**insert)(), 
-			int (**extract_nav)(), 
-			int (**insert_nav)(), 
-			int (**extract_altitude)(), 
-			int (**insert_altitude)(), 
-			int (**extract_svp)(), 
-			int (**insert_svp)(), 
-			int (**ttimes)(), 
-			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100b2.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b2.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbr_info_sb2100b2";
 	int	status = MB_SUCCESS;
 
@@ -210,24 +296,6 @@ int mbr_info_sb2100b2(int verbose,
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
 
-	/* set format and system specific function pointers */
-	*format_alloc = &mbr_alm_sb2100b2;
-	*format_free = &mbr_dem_sb2100b2; 
-	*store_alloc = &mbsys_sb2100_alloc; 
-	*store_free = &mbsys_sb2100_deall; 
-	*read_ping = &mbr_rt_sb2100b2; 
-	*write_ping = &mbr_wt_sb2100b2; 
-	*extract = &mbsys_sb2100_extract; 
-	*insert = &mbsys_sb2100_insert; 
-	*extract_nav = &mbsys_sb2100_extract_nav; 
-	*insert_nav = &mbsys_sb2100_insert_nav; 
-	*extract_altitude = &mbsys_sb2100_extract_altitude; 
-	*insert_altitude = NULL; 
-	*extract_svp = &mbsys_sb2100_extract_svp; 
-	*insert_svp = &mbsys_sb2100_insert_svp; 
-	*ttimes = &mbsys_sb2100_ttimes; 
-	*copyrecord = &mbsys_sb2100_copy; 
-
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -252,22 +320,6 @@ int mbr_info_sb2100b2(int verbose,
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -276,11 +328,10 @@ int mbr_info_sb2100b2(int verbose,
 	/* return status */
 	return(status);
 }
-
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100b2(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100b2.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b2.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100b2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

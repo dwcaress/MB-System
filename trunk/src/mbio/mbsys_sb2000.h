@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.h	10/4/94
- *	$Id: mbsys_sb2000.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_sb2000.h,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -76,6 +79,9 @@
 
 /* maximum length of comments in data */
 #define	MBSYS_SB2000_COMMENT_LENGTH	250
+
+/* size in bytes of header records */
+#define	MBSYS_SB2000_HEADER_SIZE	36
 
 struct mbsys_sb2000_struct
 	{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_gsf.c,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -76,7 +79,7 @@
 int mbsys_gsf_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -432,6 +435,9 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	gsfDataID	    *dataID;
 	gsfRecords	    *records;
 	gsfSwathBathyPing   *mb_ping;
+	double	bathmax;
+	double	bathacrosstrackmax;
+	double	bathalongtrackmax;
 	int	i, j;
 
 	/* print input debug statements */
@@ -584,13 +590,72 @@ int mbsys_gsf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			}
 		    }
 
+		/* get scale factor for bathymetry */
+		bathmax = 0.0;
+		bathacrosstrackmax = 0.0;
+		bathalongtrackmax = 0.0;
+		for (i=0;i<nbath;i++)
+			{
+			if (beamflag[i] != MB_FLAG_NULL)
+			    {
+			    bathmax = MAX(bathmax, fabs(bath[i]));
+			    bathacrosstrackmax = MAX(bathacrosstrackmax, fabs(bathacrosstrack[i]));
+			    bathalongtrackmax = MAX(bathalongtrackmax, fabs(bathalongtrack[i]));
+			    }
+			}
+		if (bathmax < 10.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY-1].multiplier
+			= 1000.0;
+		else if (bathmax < 100.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY-1].multiplier
+			= 100.0;
+		else if (bathmax < 1000.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY-1].multiplier
+			= 10.0;
+		else
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY-1].multiplier
+			= 1.0;
+		if (bathacrosstrackmax < 10.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY-1].multiplier
+			= 1000.0;
+		else if (bathacrosstrackmax < 100.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY-1].multiplier
+			= 100.0;
+		else if (bathacrosstrackmax < 1000.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY-1].multiplier
+			= 10.0;
+		else
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY-1].multiplier
+			= 1.0;
+		if (bathalongtrackmax < 10.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY-1].multiplier
+			= 1000.0;
+		else if (bathalongtrackmax < 100.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY-1].multiplier
+			= 100.0;
+		else if (bathalongtrackmax < 1000.0)
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY-1].multiplier
+			= 10.0;
+		else
+		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY-1].multiplier
+			= 1.0;
+
 		/* read depth and beam location values into storage arrays */
 		for (i=0;i<nbath;i++)
 			{
 			mb_ping->beam_flags[i] = beamflag[i];
-			mb_ping->depth[i] = bath[i];
-			mb_ping->across_track[i] = bathacrosstrack[i];
-			mb_ping->along_track[i] = bathalongtrack[i];
+			if (beamflag[i] != MB_FLAG_NULL)
+			    {
+			    mb_ping->depth[i] = bath[i];
+			    mb_ping->across_track[i] = bathacrosstrack[i];
+			    mb_ping->along_track[i] = bathalongtrack[i];
+			    }
+			else
+			    {
+			    mb_ping->depth[i] = 0.0;
+			    mb_ping->across_track[i] = 0.0;
+			    mb_ping->along_track[i] = 0.0;
+			    }
 			}
 
 		/* read amplitude values into storage arrays */
