@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 4.4 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbgetmask.c,v 4.5 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.3  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -64,7 +67,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 4.4 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetmask.c,v 4.5 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "MBGETMASK";
 	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
 	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";
@@ -217,7 +220,8 @@ char **argv;
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -268,7 +272,7 @@ char **argv;
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 		}
 
 	/* initialize reading the input multibeam file */
@@ -466,6 +470,6 @@ char **argv;
 		}
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }
 /*--------------------------------------------------------------------*/

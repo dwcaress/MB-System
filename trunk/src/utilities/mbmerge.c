@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.11 1995-04-19 18:45:57 caress Exp $
+ *    $Id: mbmerge.c,v 4.12 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1995/04/19  18:45:57  caress
+ * Made handling of NMEA nav data more robust.
+ *
  * Revision 4.10  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -96,7 +99,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.11 1995-04-19 18:45:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.12 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -288,7 +291,8 @@ char **argv;
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -342,7 +346,7 @@ char **argv;
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_SUCCESS);
+		exit(error);
 		}
 
 	/* count the nav points */
@@ -353,7 +357,7 @@ char **argv;
 		fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",nfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 	while ((result = fgets(buffer,128,nfp)) == buffer)
 		nnav++;
@@ -373,7 +377,7 @@ char **argv;
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 
 	/* read in nav points */
@@ -386,7 +390,7 @@ char **argv;
 		fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",nfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 	strncpy(buffer,"\0",sizeof(buffer));
 	while ((result = fgets(buffer,128,nfp)) == buffer)
@@ -657,7 +661,7 @@ char **argv;
 		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 
 	/* initialize writing the output multibeam file */
@@ -670,7 +674,7 @@ char **argv;
 		fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 
 	/* allocate memory for data arrays */
@@ -693,7 +697,7 @@ char **argv;
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 
 	/* write comments to beginning of output file */
@@ -954,7 +958,7 @@ char **argv;
 					time_i[6]);
 				fprintf(stderr,"\nProgram <%s> Terminated\n",
 					program_name);
-				exit(MB_FAILURE);
+				exit(error);
 				}
 			}
 		}
@@ -992,7 +996,7 @@ char **argv;
 		}
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }
 /*--------------------------------------------------------------------*/
 int spline(x,y,n,yp1,ypn,y2)

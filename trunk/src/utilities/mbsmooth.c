@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.6 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbsmooth.c,v 4.7 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.5  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -129,7 +132,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.6 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.7 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \
@@ -287,7 +290,8 @@ smooth out noise in multibeam \nbathymetry data.";
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -341,7 +345,7 @@ smooth out noise in multibeam \nbathymetry data.";
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 		}
 
 	/* initialize reading the input multibeam file */
@@ -821,7 +825,7 @@ smooth out noise in multibeam \nbathymetry data.";
 		}
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }
 /*--------------------------------------------------------------------*/
 /* 	function sort sorts the data.  

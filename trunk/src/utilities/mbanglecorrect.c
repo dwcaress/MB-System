@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	1/12/95
- *    $Id: mbanglecorrect.c,v 4.3 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.4 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -100,7 +103,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.3 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.4 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -361,7 +364,8 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -419,7 +423,7 @@ The default input and output streams are stdin and stdout.\n";
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 		}
 
 	/* check for format with amplitude or sidescan data */
@@ -440,7 +444,8 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr,"Format %d is unacceptable because it does not inlude amplitude data.\n",format);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_ERROR_BAD_FORMAT);
+		error = MB_ERROR_BAD_FORMAT;
+		exit(error);
 		}
 
 	/* initialize reading the input multibeam file */
@@ -1534,7 +1539,7 @@ The default input and output streams are stdin and stdout.\n";
 		}
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }
 /*--------------------------------------------------------------------*/
 int set_bathyslope(verbose,

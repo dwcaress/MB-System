@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.6 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbps.c,v 4.7 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.5  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -107,7 +110,7 @@ int argc;
 char **argv; 
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 4.6 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.7 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
@@ -366,7 +369,8 @@ char **argv;
 		fprintf(output,"usage: %s\n", usage_message);
 		fprintf(output,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 	}
 
 	/* print starting message */
@@ -407,7 +411,7 @@ char **argv;
 	if (help) {
 		fprintf(output,"\n%s\n",help_message);
 		fprintf(output,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 	}
 
 	/* initialize reading the multibeam file */
@@ -880,10 +884,8 @@ char **argv;
 		} /* (i=0;i<3;i++) */
 	} /* if display_scales */
 
-	
+	/* end the postscript file */
 	ps_plotend(1);
-
-
 
 	/* close the multibeam file */
 	status = mb_close(verbose,&mbio_ptr,&error);
@@ -903,6 +905,22 @@ char **argv;
 		mb_free(verbose,pings*sizeof(struct ping),
 					&data[i],&error);
 	} 	 /* for i */	  
+
+	/* check memory */
+	if (verbose >= 4)
+		status = mb_memory_list(verbose,&error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Program <%s> completed\n",
+			program_name);
+		fprintf(stderr,"dbg2  Ending status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* end it all */
+	exit(error);
 
 }	/* main */
 

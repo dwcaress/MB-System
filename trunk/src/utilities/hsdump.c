@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 4.5 1995-03-06 19:37:59 caress Exp $
+ *    $Id: hsdump.c,v 4.6 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.4  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -66,7 +69,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 4.5 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 4.6 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -243,7 +246,8 @@ char **argv;
 		fprintf(output,"usage: %s\n", usage_message);
 		fprintf(output,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -308,7 +312,7 @@ char **argv;
 		{
 		fprintf(output,"\n%s\n",help_message);
 		fprintf(output,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 		}
 
 	/* if bad format specified then print it and exit */
@@ -319,7 +323,8 @@ char **argv;
 		fprintf(output,"!!Format %d is unacceptable, only formats %d and %d can be used\n",format,MBF_HSATLRAW,MBF_HSLDEOIH);
 		fprintf(output,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_ERROR_BAD_FORMAT);
+		error = MB_ERROR_BAD_FORMAT;
+		exit(error);
 		}
 
 	/* initialize reading the input multibeam file */
@@ -757,6 +762,6 @@ char **argv;
 			mb_data_nav_source_count);
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }
 /*--------------------------------------------------------------------*/

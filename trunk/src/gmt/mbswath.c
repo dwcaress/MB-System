@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.10 1995-03-06 19:40:17 caress Exp $
+ *    $Id: mbswath.c,v 4.11 1995-05-12 17:19:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1995/03/06  19:40:17  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.9  1995/01/18  22:14:49  caress
  * Fixed bug regarding the calculation of footprints for
  * sidescan data.
@@ -191,7 +194,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.10 1995-03-06 19:40:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.11 1995-05-12 17:19:02 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -363,7 +366,8 @@ char **argv;
 		fprintf(stderr,"GMT option error\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* deal with mb options */
@@ -468,7 +472,8 @@ char **argv;
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -529,7 +534,7 @@ char **argv;
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 		}
 
 	/* if borders not specified then quit */
@@ -539,7 +544,8 @@ char **argv;
 		fprintf(stderr,"\nRegion borders not properly specified:\n\t%f %f %f %f\n",borders[0],borders[1],borders[2],borders[3]);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_ERROR_BAD_PARAMETER);
+		error = MB_ERROR_BAD_PARAMETER;
+		exit(error);
 		}
 
 	/* set bounds for multibeam reading larger than
@@ -565,7 +571,8 @@ char **argv;
 		fprintf(stderr,"\nColor pallette table not properly specified:\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_ERROR_BAD_PARAMETER);
+		error = MB_ERROR_BAD_PARAMETER;
+		exit(error);
 		}
 
 	/* initialize plotting */

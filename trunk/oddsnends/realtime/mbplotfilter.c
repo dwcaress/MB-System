@@ -8,10 +8,14 @@
  *	L-DGO
  *	May 1991
  */
+/* standard include files */
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <graphics.h>
+
+/* MBIO include files */
+#include "../../include/mb_status.h"
 
 #define IUP 3
 #define IDN 2
@@ -33,6 +37,7 @@ main(argc, argv)
 int argc;
 char **argv; 
 {
+	int	error = MB_ERROR_NO_ERROR;
 	int	i;
 
 	/* set defaults */
@@ -72,7 +77,8 @@ char **argv;
 	if (xmin == xmax || ymin == ymax)
 		{
 		fprintf(stderr,"mb_plotfilter error: bounds not set or set incorrectly\n");
-		exit(-1);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* read until init call is made */
@@ -172,5 +178,5 @@ char **argv;
 		}
 
 	/* all done */
-	exit(0);
+	exit(error);
 }
