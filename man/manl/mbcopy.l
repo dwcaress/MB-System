@@ -6,7 +6,7 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbcopy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcommentfile\fP 
+\fBmbcopy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcommentfile\fP \fB-D\fP
 \fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIinformat/outformat\fP 
 \fB-H\fP \fB-I\fIinfilename\fP 
 \fB-L\fIlonflip\fP \fB-N\fP \fB-O\fIoutfilename\fP 
@@ -50,6 +50,14 @@ Text file containing comments which are inserted into the
 beginning of the output data stream.  This option is typically
 used to insert a data pedigree statement at the beginning of
 data processing.
+.TP
+.B \-D
+This option only works when the output format is MBLDEOIH (format 71).
+When \fB-D\fP is invoked, \fBmbcopy\fP only outputs swath bathymetry
+data (any amplitude and sidescan data found in the input are ignored).
+The \fBMB-System\fP program \fBmbdatalist\fP uses this option to 
+generate "fast bathymetry" or "fbt" files. See the \fBMB-System\fP
+manual page for information on the use and utility of "fbt" files.
 .TP
 .B \-E
 \fIyr/mo/da/hr/mn/sc\fP
