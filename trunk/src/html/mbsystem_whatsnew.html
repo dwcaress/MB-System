@@ -90,6 +90,46 @@ inverting for an optimally smooth navigation by penalizing speed and acceleratio
 </LI>
 </UL>
 
+<LI>Support for Projected Coordinate Systems</LI>
+
+<UL>
+<LI>MB-System now incorporates the  source  code  for  the
+PROJ.4  Cartographic  Projections  library,  providing
+support for (apparently) all  commonly  used  geodetic
+coordinate  systems.   PROJ.4  was developed by Gerald
+Evenden (then of the USGS), and was obtained from  the
+www.remotesensing.org website.</LI>
+
+<LI>A  large  number of commonly used projected coordinate
+systems (e.g. UTM)  are  defined  in  a  file  
+(mbsystem/share/projections.dat) distributed with MB-System.
+These include all of the standard UTM  zones,  all  of
+the  standard state plate coordinate systems, and most
+of the European Petroleum Survey Group (EPSG)  coordinate 
+systems (also including UTM).</LI>
+
+<LI>MB-System  can now handle swath data that is navigated
+in a supported projected coordinate system. In particular, 
+data files that are navigated with UTM eastings
+and northings instead of longitude  and  latitude  can
+now be plotted and processed with MB-System.</LI>
+
+<LI>The  programs mbgrid and mbmosaic can now output grids
+and mosaics in any of the projected coordinate systems
+specified in mbsystem/share/projections.dat.</LI>
+
+<LI>The   TIFF   images  generated  with  mbm_grdtiff  and
+mbgrdtiff now fully conform to  the  GeoTIFF  standard,
+providing that the source grids or mosaics were generated 
+using mbgrid or  mbmosaic  in  either  Geographic
+coordinates, UTM coordinates, or any of the EPSG coordinate 
+systems specified in the projections.dat  file.
+This  means,  for instance, that GeoTIFF images generated 
+with mbgrdtiff  will  be  properly  georeferenced
+when  they  are imported into ESRI ArcGIS or other GIS
+packages.</LI>
+</UL>
+
 <LI>Restructuring the code.</LI>
 
 <UL>
@@ -172,7 +212,7 @@ as format 167.</LI>
 </UL>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2002-05-30 00:05:04 $ $Revision: 5.5 $ </P></CENTER>
+Last Updated: $Date: 2003-01-15 21:22:24 $ $Revision: 5.6 $ </P></CENTER>
 
 <P>
 <HR WIDTH="67%"></P>
