@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.2 2001-03-22 22:32:47 caress Exp $
+ *    $Id: mb_status.h,v 5.3 2001-06-01 00:14:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  22:32:47  caress
+ * Setting version for release 5.0.beta00.
+ *
  * Revision 5.1  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -117,8 +120,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.0.beta00"
-#define	MB_BUILD_DATE	"March 22, 2001"
+#define	MB_VERSION	"5.0.beta01"
+#define	MB_BUILD_DATE	"May 11, 2001"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
@@ -145,14 +148,15 @@
 #define	MB_DATA_HEIGHT			16	/* Simrad */
 #define	MB_DATA_HEADING			17	/* Simrad, Hypack */
 #define	MB_DATA_ATTITUDE		18	/* Simrad, Hypack */
-#define	MB_DATA_ANGLE			19	/* HSMD */
-#define	MB_DATA_EVENT			20	/* HSMD */
-#define	MB_DATA_HISTORY			21	/* GSF */
-#define	MB_DATA_SUMMARY			22	/* GSF */
-#define	MB_DATA_PROCESSING_PARAMETERS	23	/* GSF */
-#define	MB_DATA_SENSOR_PARAMETERS	24	/* GSF */
-#define	MB_DATA_NAVIGATION_ERROR	25	/* GSF */
-#define	MB_DATA_RAW_LINE		26	/* uninterpretable line
+#define	MB_DATA_SSV			19	/* Simrad */
+#define	MB_DATA_ANGLE			20	/* HSMD */
+#define	MB_DATA_EVENT			21	/* HSMD */
+#define	MB_DATA_HISTORY			22	/* GSF */
+#define	MB_DATA_SUMMARY			23	/* GSF */
+#define	MB_DATA_PROCESSING_PARAMETERS	24	/* GSF */
+#define	MB_DATA_SENSOR_PARAMETERS	25	/* GSF */
+#define	MB_DATA_NAVIGATION_ERROR	26	/* GSF */
+#define	MB_DATA_RAW_LINE		27	/* uninterpretable line
 							for ascii formats */
 
 /* MBIO function status convention */
