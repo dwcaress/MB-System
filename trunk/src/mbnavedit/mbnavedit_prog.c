@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.3 2001-03-22 21:10:37 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.4 2001-04-06 22:16:01 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/03/22  21:10:37  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.2  2001/01/22  07:47:40  caress
  * Version 5.0.beta01
  *
@@ -202,7 +205,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.3 2001-03-22 21:10:37 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.4 2001-04-06 22:16:01 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -3878,7 +3881,7 @@ int mbnavedit_get_inversion()
 			&& ping[i+1].time_d > ping[i-1].time_d)
 			{
 			/* get time difference */
-			dtime_d = ping[i].time_d - ping[i-1].time_d;
+			dtime_d = ping[i+1].time_d - ping[i-1].time_d;
 			dtime_d_sq = dtime_d * dtime_d;
     
 			/* constrain lon acceleration */
@@ -4015,7 +4018,7 @@ int mbnavedit_get_inversion()
 			&& ping[i+1].time_d > ping[i-1].time_d)
 			{
 			/* get time difference */
-			dtime_d = ping[i].time_d - ping[i-1].time_d;
+			dtime_d = ping[i+1].time_d - ping[i-1].time_d;
 			dtime_d_sq = dtime_d * dtime_d;
     
 			/* constrain lat acceleration */
