@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
- *	$Id: mbr_elmk2unb.c,v 4.0 1997-07-25 14:25:40 caress Exp $
+ *	$Id: mbr_elmk2unb.c,v 4.1 1997-07-28 14:58:19 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/07/25  14:25:40  caress
+ * Version 4.5beta2.
+ *
  * Revision 1.1  1997/07/25  14:19:53  caress
  * Initial revision
  *
@@ -51,7 +54,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.0 1997-07-25 14:25:40 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.1 1997-07-28 14:58:19 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1183,7 +1186,7 @@ int	*error;
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
-			done == MB_YES;
+			done = MB_YES;
 
 		}
 
