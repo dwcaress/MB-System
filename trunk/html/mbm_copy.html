@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_copy</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_copy</H1>
+Section: MB-System 5.0 (l)<BR>Updated: 10 March 2003<BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_copy</B> - Apply mbcopy to all files referenced through
+a datalist, using the MB-System file suffix convention
+to name the output files
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_copy</B> <B>-F</B><I>outputformat</I> <B>-I</B><I>datalist</I> 
+[<B>-H</B> <B>-T</B> <B>-V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<P>
+<B>mbm_copy</B> is a macro used to copy large numbers of swath data files
+from one data format to another using the program <B>mbcopy</B>. 
+The input is a datalist file referencing
+all of the target swath files. The output swath file format is specified
+with the <B>-F</B> option. If the output swath file format is not specified,
+the output format will be the same as the input format.
+<P>
+The macro identifies a filename root for each input swath file. For files
+with recognized filename suffixes (e.g. &quot;.mb61&quot; for a format 61 file), the
+filename root is the part of the filename that comes before the suffix. For
+files without a recognized suffix, the filename root is the entire filename.
+So, for a format 57 data file called &quot;0007_20020425_060531.mb57&quot;, the filename root
+is &quot;0007_20020425_060531&quot;. For a format 121 file named &quot;009_1659&quot;, the filename
+root &quot;009_1659&quot;.
+<P>
+The output filenames are automatically constructed by adding the standard 
+MB-System file suffix to the filename root. This suffix is &quot;.mbXXX&quot; where
+XXX is the two or three digit format id number. In the event that the output
+filename is the same as the input filename (likely only if the <B>-F</B> option
+is not used to set the output format), a &quot;c&quot; will be placed at the beginning
+of the output file suffix, making it &quot;c.mbXXX&quot;.
+<P>
+The <B>-T</B> option causes this macro to print out the <B>mbcopy</B> commands
+it will execute without actually executing them. This test option allows 
+users to check the consequences of their command before actually running it.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SIMPLE DESCRIPTION OF BASIC OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-F</B>
+
+<DD>
+<I>outputformat</I>
+<BR>
+
+This option sets the output swath format. All of the swath data
+files referenced in the datalist specified with the <B>-I</B> option
+will be copied to format <I>outputformat</I> using <B>mbcopy</B>. If
+the <B>-F</B> option is not given, then the input files will be copied
+to their input formats.
+<DT><B>-I</B>
+
+<DD>
+<I>datalist</I>
+<BR>
+
+Sets the input datalist filename. A datalist is an ascii 
+file containing a list of the input swath sonar
+data files to be copied and their formats.  
+In the <I>datalist</I> file, each
+swath data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+As discussed in the <B>MB-System</B> manual page, datalists may reference
+other datalists, allowing users to construct recursive datalist structures.
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+<DT><B>-T</B>
+
+<DD>
+<BR>
+
+This option causes <B>mbm_copy</B> to print out the <B>mbcopy</B> commands
+it will execute without actually executing them. This test option allows 
+users to check the consequences of their command before actually running it.
+<DT><B>-V</B>
+
+<DD>
+Causes <B>mbm_copy</B> to operate in &quot;verbose&quot; mode 
+so that it outputs
+more information than usual.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one has three raw (format 56) Simrad EM300 data files:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0001_20020424_212920_raw.all<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0002_20020425_011607_raw.all<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0003_20020425_022926_raw.all<BR>
+<BR>
+
+One can generate a datalist called datalistr.mb-1 referencing these
+three swath files using a text editor or by using <B>awk</B>:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ls&nbsp;-1&nbsp;*all&nbsp;|&nbsp;awk&nbsp;'{print&nbsp;$1&quot;&nbsp;56&quot;}'&nbsp;&gt;&nbsp;datalistr.mb-1<BR>
+<BR>
+
+In order to translate all three files in the processing format for
+Simrad multibeam data (format 57), use the <B>mbm_copy</B> macro:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_copy&nbsp;-I&nbsp;datalistr.mb-1&nbsp;-F&nbsp;57&nbsp;-T&nbsp;-V<BR>
+<BR>
+
+The macro prints out the following as it translates the swath data:
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Running:&nbsp;mbcopy&nbsp;-F56/57&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-I0001_20020424_212920_raw.all&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O0001_20020424_212920.mb57<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Running:&nbsp;mbcopy&nbsp;-F56/57&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-I0002_20020425_011607_raw.all&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O0002_20020425_011607.mb57<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Running:&nbsp;mbcopy&nbsp;-F56/57&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-I0003_20020425_022926_raw.all<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O0003_20020425_022926.mb57<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbcopy.html">mbcopy</A></B>(l), 
+<B><A HREF="mbdatalist.html">mbdatalist</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Perhaps. 
+<P>
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">SIMPLE DESCRIPTION OF BASIC OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 10 March 2003</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
