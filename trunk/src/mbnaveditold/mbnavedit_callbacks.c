@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.3 1996-04-05 20:07:02 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.4 1997-04-21 17:07:38 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,14 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/04/16  21:40:29  caress
+ * Version for MB-System 4.5.
+ *
+ * Revision 4.3  1996/04/05  20:07:02  caress
+ * Added GUI mode so done means quit for real. Also changed done and
+ * quit handling in browse mode so that the program doesn't read the
+ * entire data file before closing it.
+ *
  * Revision 4.2  1995/09/28  18:01:01  caress
  * Improved handling of .mbxxx file suffix convention.
  *
@@ -38,6 +46,8 @@
 #include <Xm/Xm.h>
 #include <X11/cursorfont.h>
 #include "mbnavedit_creation.h"
+
+#define MBNAVEDIT_DECLARE_GLOBALS
 #include "mbnavedit_extrawidgets.h"
 #include "mbnavedit.h"
 
@@ -76,6 +86,68 @@
 
 Widget		BxFindTopShell PROTOTYPE((Widget));
 WidgetList	BxWidgetIdsFromNames PROTOTYPE((Widget, char*, char*));
+
+/*--------------------------------------------------------------------*/
+#define xgfont "-misc-fixed-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
+#define EV_MASK (ButtonPressMask | KeyPressMask | KeyReleaseMask | ExposureMask)
+
+/* XG variable declarations */
+XtAppContext	app_context;
+Display		*display;
+Window		can_xid, root_return, child_return;
+Colormap	colormap;
+GC		gc;
+XGCValues	xgcv;
+XFontStruct	*fontStruct;
+
+/* file opening parameters */
+int	startup_file = 0;
+
+int	expose_plot_ok = True;
+
+static char	*input_file;
+static char	output_file[128];
+int selected = 0; /* indicates an input file is selected */
+
+int	can_xgid;		/* XG graphics id */
+Cursor myCursor;
+XColor closest[2];
+XColor exact[2];
+
+int key_z_down = 0;
+int key_s_down = 0;
+int key_a_down = 0;
+int key_d_down = 0;
+
+/* Set the colors used for this program here. */
+#define NCOLORS 6
+XColor colors[NCOLORS];
+unsigned long mpixel_values[NCOLORS];
+XColor db_color;
+
+/* Set these to the dimensions of your canvas drawing */
+/* area, minus 1, located in mbedit.uil.              */
+static int mb_borders[4] =
+	{ 0, 1016, 0, 552 };
+
+int	status;
+char	string[128];
+
+void	do_fileselection_list();
+void	set_label_string(Widget, String);
+void	get_text_string(Widget, String);
+void	do_set_controls();
+void	do_scroll();
+void	mbnavedit_bell();
+void	mbnavedit_get_position();
+void	mbnavedit_pickcursor();
+void	mbnavedit_selectcursor();
+void	mbnavedit_deselectcursor();
+void	mbnavedit_selectallcursor();
+void	mbnavedit_deselectallcursor();
+void	mbnavedit_setintervalcursor();
+void	do_filebutton_on();
+void	do_filebutton_off();
 
 /*--------------------------------------------------------------------*/
 /*      Function Name:	BxExitCB
@@ -401,6 +473,298 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 #undef CHUNK
 }
 
+/*--------------------------------------------------------------------*/
+
+void
+do_mbnavedit_init(app, argc, argv)
+ XtAppContext	app;
+ int argc;
+ char **argv;
+{
+    int	    i;
+    
+    /* get additional widgets */
+    fileSelectionBox_list = (Widget) 
+	XmFileSelectionBoxGetChild(fileSelectionBox, 
+				    XmDIALOG_LIST);
+    fileSelectionBox_text = (Widget) 
+	XmFileSelectionBoxGetChild(fileSelectionBox, 
+				    XmDIALOG_TEXT);
+    XtAddCallback(fileSelectionBox_list, 
+	    XmNbrowseSelectionCallback, 
+	    do_fileselection_list, NULL);
+	    
+    XtUnmanageChild(
+	    (Widget) XmFileSelectionBoxGetChild(
+				    fileSelectionBox, 
+				    XmDIALOG_HELP_BUTTON));
+
+    XtVaGetValues(scrolledWindow, 
+			XmNhorizontalScrollBar, 
+			&scrolledWindow_hscrollbar, 
+			NULL);
+    XtVaGetValues(scrolledWindow, 
+			XmNverticalScrollBar, 
+			&scrolledWindow_vscrollbar, 
+			NULL);
+    XtVaSetValues(scrolledWindow_hscrollbar, 
+		XmCIncrement, 5, NULL);
+    XtVaSetValues(scrolledWindow_vscrollbar, 
+		XmCIncrement, 5, NULL);
+    XtAddCallback(scrolledWindow_hscrollbar, 
+		XmNvalueChangedCallback, 
+		do_scroll, NULL);
+    XtAddCallback(scrolledWindow_vscrollbar, 
+		XmNvalueChangedCallback, 
+		do_scroll, NULL);
+    XtAddCallback(scrolledWindow_hscrollbar, 
+		XmNdragCallback, 
+		do_scroll, NULL);
+    XtAddCallback(scrolledWindow_vscrollbar, 
+		XmNdragCallback, 
+		do_scroll, NULL);
+
+    /* Setup the entire screen. */
+    app_context = app;
+    display = XtDisplay(drawingArea);
+    colormap = DefaultColormap(display,XDefaultScreen(display));
+    
+    /* Setup just the "canvas" part of the screen. */
+    can_xid = XtWindow(drawingArea);
+    
+    /* Setup the "graphics Context" for just the "canvas" */
+    xgcv.background = WhitePixelOfScreen(DefaultScreenOfDisplay(display));
+    xgcv.foreground = BlackPixelOfScreen(DefaultScreenOfDisplay(display));
+    xgcv.line_width = 2;
+    gc = XCreateGC(display,can_xid,GCBackground | GCForeground 
+	     | GCLineWidth, &xgcv);
+    
+    /* Setup the font for just the "canvas" screen. */
+    fontStruct = XLoadQueryFont(display, xgfont);
+    XSetFont(display,gc,fontStruct->fid);
+    
+    XSelectInput(display, can_xid, EV_MASK );
+    
+    /* Load the colors that will be used in this program. */
+    status = XLookupColor(display,colormap,
+	    "white",&db_color,&colors[0]);
+    if(status != 0)
+	    status = XAllocColor(display,colormap,&colors[0]);
+    if (status == 0)
+	    {
+	    fprintf(stderr,"Failure to allocate color: white\n");
+	    exit(-1);
+	    }
+    status = XLookupColor(display,colormap,
+	    "black",&db_color,&colors[1]);
+    if(status != 0)
+	    status = XAllocColor(display,colormap,&colors[1]);
+    if (status == 0)
+	    {
+	    fprintf(stderr,"Failure to allocate color: black\n");
+	    exit(-1);
+	    }
+    status = XLookupColor(display,colormap,
+	    "red",&db_color,&colors[2]);
+    if(status != 0)
+	    status = XAllocColor(display,colormap,&colors[2]);
+    if (status == 0)
+	    {
+	    fprintf(stderr,"Failure to allocate color: red\n");
+	    exit(-1);
+	    }
+    status = XLookupColor(display,colormap,
+	    "green",&db_color,&colors[3]);
+    if(status != 0)
+	    status = XAllocColor(display,colormap,&colors[3]);
+    if (status == 0)
+	    {
+	    fprintf(stderr,"Failure to allocate color: green\n");
+	    exit(-1);
+	    }
+    status = XLookupColor(display,colormap,
+	    "blue",&db_color,&colors[4]);
+    if(status != 0)
+	    status = XAllocColor(display,colormap,&colors[4]);
+    if (status == 0)
+	    {
+	    fprintf(stderr,"Failure to allocate color: blue\n");
+	    exit(-1);
+	    }
+    status = XLookupColor(display,colormap,
+	    "coral",&db_color,&colors[5]);
+    if(status != 0)
+	    status = XAllocColor(display,colormap,&colors[5]);
+    if (status == 0)
+	    {
+	    fprintf(stderr,"Failure to allocate color: coral\n");
+	    exit(-1);
+	    }
+    for (i=0;i<NCOLORS;i++)
+	    {
+	    mpixel_values[i] = colors[i].pixel;
+	    }
+    
+    /* Setup initial cursor. This will be changed when changing "MODE". */
+    myCursor = XCreateFontCursor(display, XC_target);
+    XAllocNamedColor(display,colormap,"red",&closest[0],&exact[0]);
+    XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
+    XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
+    XDefineCursor(display,can_xid,myCursor);
+    
+    /* initialize graphics */
+    status = mbnavedit_init_globals();
+    mb_borders[0] = 0;
+    mb_borders[1] = plot_width;
+    mb_borders[2] = 0;
+    mb_borders[3] = number_plots*plot_height;
+    can_xgid = xg_init(display, can_xid, mb_borders, xgfont);
+    status = mbnavedit_set_graphics(can_xgid, 
+		    NCOLORS, mpixel_values);
+
+    /* initialize mbnavedit proper */
+    status = mbnavedit_init(argc,argv,&startup_file);
+    
+    do_set_controls();
+}
+
+/*--------------------------------------------------------------------*/
+
+void do_set_controls()
+{
+	/* set value of format text item */
+	sprintf(string,"%2.2d",format);
+	XmTextFieldSetString(textField_format, string);
+
+	/* set the output mode */
+	if (output_mode == OUTPUT_MODE_OUTPUT)
+	    {
+	    XmToggleButtonSetState(toggleButton_output_on, 
+			TRUE, TRUE);
+	    XtManageChild(label_filename);
+	    XtManageChild(textField_output_file);
+	    }
+	else
+	    {
+	    XmToggleButtonSetState(toggleButton_output_off,  
+			TRUE, TRUE);
+	    XtUnmanageChild(label_filename);
+	    XtUnmanageChild(textField_output_file);
+	    }
+
+	/* set values of number of data shown slider */
+	XtVaSetValues(scale_timespan, 
+			XmNminimum, 1, 
+			XmNmaximum, data_show_max, 
+			XmNvalue, data_show_size, 
+			NULL);
+	sprintf(string, "%d", data_show_max);
+	XtVaSetValues(label_timespan_2, 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, string, (strlen(string) + 1), 
+			NULL);	
+
+	/* set values of number of data to step slider */
+	XtVaSetValues(scale_timestep, 
+			XmNminimum, 1, 
+			XmNmaximum, data_step_max, 
+			XmNvalue, data_step_size, 
+			NULL);
+	sprintf(string, "%d", data_step_max);
+	XtVaSetValues(label_timestep_2, 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, string, (strlen(string) + 1), 
+			NULL);	
+
+	/* set the pick mode */
+	if (mode_pick == PICK_MODE_PICK)
+	    XmToggleButtonSetState(toggleButton_pick, 
+			TRUE, TRUE);
+	else if (mode_pick == PICK_MODE_SELECT)
+	    XmToggleButtonSetState(toggleButton_select, 
+			TRUE, TRUE);
+	else if (mode_pick == PICK_MODE_DESELECT)
+	    XmToggleButtonSetState(toggleButton_deselect, 
+			TRUE, TRUE);
+	else if (mode_pick == PICK_MODE_SELECTALL)
+	    XmToggleButtonSetState(toggleButton_selectall, 
+			TRUE, TRUE);
+	else if (mode_pick == PICK_MODE_DESELECTALL)
+	    XmToggleButtonSetState(toggleButton_deselectall, 
+			TRUE, TRUE);
+			
+	/* set the lon, lat, speed and heading plot toggles */
+	XmToggleButtonSetState(toggleButton_lon, 
+			plot_lon, TRUE);
+	XmToggleButtonSetState(toggleButton_org_lon, 
+			plot_lon_org, TRUE);
+	XmToggleButtonSetState(toggleButton_lat, 
+			plot_lat, TRUE);
+	XmToggleButtonSetState(toggleButton_org_lat, 
+			plot_lat_org, TRUE);
+	XmToggleButtonSetState(toggleButton_speed, 
+			plot_speed, TRUE);
+	XmToggleButtonSetState(toggleButton_org_speed, 
+			plot_speed_org, TRUE);
+	XmToggleButtonSetState(toggleButton_show_smg, 
+			plot_smg, TRUE);
+	XmToggleButtonSetState(toggleButton_heading, 
+			plot_heading, TRUE);
+	XmToggleButtonSetState(toggleButton_org_heading, 
+			plot_heading_org, TRUE);
+	XmToggleButtonSetState(toggleButton_show_cmg, 
+			plot_cmg, TRUE);
+
+	/* hide or display items according to toggle states */
+	if (plot_lon == MB_YES)
+		XtManageChild(toggleButton_org_lon);
+	else
+		XtUnmanageChild(toggleButton_org_lon);
+	if (plot_lat == MB_YES)
+		XtManageChild(toggleButton_org_lat);
+	else
+		XtUnmanageChild(toggleButton_org_lat);
+	if (plot_speed == MB_YES)
+		{
+		XtManageChild(toggleButton_org_speed);
+		XtManageChild(toggleButton_show_smg);
+		XtManageChild(pushButton_speed_smg);
+		}
+	else
+		{
+		XtUnmanageChild(toggleButton_org_speed);
+		XtUnmanageChild(toggleButton_show_smg);
+		XtUnmanageChild(pushButton_speed_smg);
+		}
+	if (plot_heading == MB_YES)
+		{
+		XtManageChild(toggleButton_org_heading);
+		XtManageChild(toggleButton_show_cmg);
+		XtManageChild(pushButton_heading_cmg);
+		}
+	else
+		{
+		XtUnmanageChild(toggleButton_org_heading);
+		XtUnmanageChild(toggleButton_show_cmg);
+		XtUnmanageChild(pushButton_heading_cmg);
+		}
+
+	/* get and set size of canvas */
+	number_plots = 0;
+	if (plot_lon == MB_YES)
+		number_plots++;
+	if (plot_lat == MB_YES)
+		number_plots++;
+	if (plot_speed == MB_YES)
+		number_plots++;
+	if (plot_heading == MB_YES)
+		number_plots++;
+	XtVaSetValues(drawingArea, 
+			XmNwidth, plot_width, 
+			XmNheight, number_plots*plot_height, 
+			NULL);	
+}
+
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
@@ -437,11 +801,17 @@ XtPointer call;
 	int	status;
 	
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	    
+	/* turn off expose plots */
+	expose_plot_ok = False;
 
 	/* get next buffer */
 	status = mbnavedit_action_next_buffer();
 	if (status == 0) mbnavedit_bell(100);
 	do_unset_interval();
+	    
+	/* turn on expose plots */
+	expose_plot_ok = True;
 }
 
 /*--------------------------------------------------------------------*/
@@ -456,11 +826,17 @@ XtPointer call;
 	int	status;
 	
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	    
+	/* turn off expose plots */
+	expose_plot_ok = False;
 
 	/* finish with the current file */
 	status = mbnavedit_action_done(&quit);
 	if (status == 0) mbnavedit_bell(100);
 	do_unset_interval();
+	    
+	/* turn on expose plots */
+	expose_plot_ok = True;
 	
 	/* quit if required */
 	if (quit)
@@ -511,8 +887,6 @@ Widget w;
 XtPointer client;
 XtPointer call;
 {
-	char	label[10];
-
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	/* get values */
@@ -534,11 +908,8 @@ XtPointer call;
 		XtVaSetValues(scale_timespan, 
 			XmNmaximum, data_show_max, 
 			NULL);
-		sprintf(label, "%d", data_show_max);
-		XtVaSetValues(label_timespan_2, 
-			XtVaTypedArg, XmNlabelString, 
-			    XmRString, label, (strlen(label) + 1), 
-			NULL);	
+		sprintf(string, "%d", data_show_max);
+		set_label_string(label_timespan_2, string);
 		}
 
 	/* replot */
@@ -554,8 +925,6 @@ Widget w;
 XtPointer client;
 XtPointer call;
 {
-	char	label[10];
-
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	/* get values */
@@ -577,11 +946,8 @@ XtPointer call;
 		XtVaSetValues(scale_timestep, 
 			XmNmaximum, data_step_max, 
 			NULL);
-		sprintf(label, "%d", data_step_max);
-		XtVaSetValues(label_timestep_2, 
-			XtVaTypedArg, XmNlabelString, 
-			    XmRString, label, (strlen(label) + 1), 
-			NULL);	
+		sprintf(string, "%d", data_step_max);
+		set_label_string(label_timestep_2, string);
 		}
 
 }
@@ -596,6 +962,9 @@ XtPointer call;
 {
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
+	/* replot */
+	if (expose_plot_ok == True)
+	    mbnavedit_plot_all();
 }
 
 /*--------------------------------------------------------------------*/
@@ -616,7 +985,6 @@ XtPointer call;
 	int	actual;
 	int	win_x, win_y;
 	int	repeat;
-	char	label[10];
 	int	status;
 
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
@@ -815,11 +1183,8 @@ XtPointer call;
 				XmNmaximum, data_show_max, 
 				XmNvalue, data_show_size, 
 				NULL);
-			sprintf(label, "%d", data_show_max);
-			XtVaSetValues(label_timespan_2, 
-				XtVaTypedArg, XmNlabelString, 
-				XmRString, label, (strlen(label) + 1), 
-				NULL);
+			sprintf(string, "%d", data_show_max);
+			set_label_string(label_timespan_2, string);
 			}
 
 		    /* scroll forward */
@@ -829,7 +1194,7 @@ XtPointer call;
 			if (status == 0) mbnavedit_bell(100);
 			}
 		} /* end of right button events */	
-	  } /* end of button pressed events */
+	  } /* end of button pressed events */	  
 	} /* end of inputs from window */
 	
 }
@@ -1222,37 +1587,59 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
+do_filebutton_on()
+{
+		XtVaSetValues(pushButton_file, 
+			XmNsensitive, True, 
+			NULL);
+}
+
+/*--------------------------------------------------------------------*/
+/* ARGSUSED */
+void
+do_filebutton_off()
+{
+		XtVaSetValues(pushButton_file, 
+			XmNsensitive, False, 
+			NULL);
+}
+
+/*--------------------------------------------------------------------*/
+/* ARGSUSED */
+void
 do_fileselection_ok(w, client, call)
 Widget w;
 XtPointer client;
 XtPointer call;
 {
-	static char *selection_text;
 	char	*suffix;
 	int	len;
 	int	form;
 	int	status;
-	char	label[10];
 
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	/* get input filename */
-	strncpy(ifile, 
-		(char *)XmTextGetString(fileSelectionBox_text), 128);	
+	get_text_string(fileSelectionBox_text, ifile);
 
 	/* get output filename */
-	strncpy(ofile, 
-		(char *)XmTextGetString(textField_output_file), 128);
+	get_text_string(textField_output_file, ofile);
 	ofile_defined = MB_YES;
 
 	/* get the file format */
-	if (sscanf((char *) XmTextGetString(textField_format), 
-		"%d", &form) == 1)
+	get_text_string(textField_format, string);
+	if (sscanf(string, "%d", &form) == 1)
 		format = form;
+	    
+	/* turn off expose plots */
+	expose_plot_ok = False;
 
 	/* open the file */
 	status = mbnavedit_action_open();
-	if (status == MB_FAILURE) mbnavedit_bell(100);
+	
+	if (status == MB_FAILURE) 
+		mbnavedit_bell(100);
+	
 	do_unset_interval();
 
 	/* set values of number of data shown slider */
@@ -1261,11 +1648,8 @@ XtPointer call;
 			XmNmaximum, data_show_max, 
 			XmNvalue, data_show_size, 
 			NULL);
-	sprintf(label, "%d", data_show_max);
-	XtVaSetValues(label_timespan_2, 
-			XtVaTypedArg, XmNlabelString, 
-			    XmRString, label, (strlen(label) + 1), 
-			NULL);
+	sprintf(string, "%d", data_show_max);
+	set_label_string(label_timespan_2, string);
 
 	/* unmanage fileselection window so plotting will show */
 	XtUnmanageChild(xmDialogShell_fileselection);
@@ -1273,6 +1657,9 @@ XtPointer call;
 	/* replot */
 	if (status == MB_SUCCESS)
 		mbnavedit_plot_all();
+	    
+	/* turn on expose plots */
+	expose_plot_ok = True;
 }
 
 /*--------------------------------------------------------------------*/
@@ -1295,9 +1682,9 @@ Widget w;
 XtPointer client;
 XtPointer call;
 {
-	static char *selection_text;
 	char	*mb_suffix;
 	char	*sb_suffix;
+	char	*file_root;
 	int	mb_len;
 	int	sb_len;
 	int	form;
@@ -1306,17 +1693,17 @@ XtPointer call;
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	/* get selected text */
-	selection_text = (char *) XmTextGetString(fileSelectionBox_text);
+	get_text_string(fileSelectionBox_text, string);
 
 	/* get output file */
-	if((int)strlen(selection_text) > 0)
+	if((int)strlen(string) > 0)
 		{
 		/* look for MB suffix convention */
-		if ((mb_suffix = strstr(selection_text,".mb")) != NULL)
+		if ((mb_suffix = strstr(string,".mb")) != NULL)
 			mb_len = strlen(mb_suffix);
 
 		/* look for SeaBeam suffix convention */
-		if ((sb_suffix = strstr(selection_text,".rec")) != NULL)
+		if ((sb_suffix = strstr(string,".rec")) != NULL)
 			sb_len = strlen(sb_suffix);
 
 		/* if MB suffix convention used keep it */
@@ -1324,12 +1711,23 @@ XtPointer call;
 			{
 			/* get the output filename */
 			strncpy(ofile,"\0",128);
-			strncpy(ofile,selection_text,
-				strlen(selection_text)-mb_len);
-			if (strstr(ofile, "_") != NULL)
-				strcat(ofile, "n");
+			strncpy(ofile,string,
+				strlen(string)-mb_len);
+			file_root = strrchr(ofile, '/');
+			if (file_root != NULL)
+			    {
+			    if (strstr(file_root, "_") != NULL)
+				    strcat(ofile, "n");
+			    else
+				    strcat(ofile,"_n");
+			    }
 			else
-				strcat(ofile,"_n");
+			    {
+			    if (strstr(ofile, "_") != NULL)
+				    strcat(ofile, "n");
+			    else
+				    strcat(ofile,"_n");
+			    }
 			strcat(ofile,mb_suffix);
 
 			/* get the file format and set the widget */
@@ -1348,8 +1746,8 @@ XtPointer call;
 			{
 			/* get the output filename */
 			strncpy(ofile,"\0",128);
-			strncpy(ofile,selection_text,
-				strlen(selection_text)-sb_len);
+			strncpy(ofile,string,
+				strlen(string)-sb_len);
 			strcat(ofile,"_n.mb41");
 
 			/* get the file format and set the widget */
@@ -1363,7 +1761,7 @@ XtPointer call;
 		/* else just at ".ned" to file name */
 		else
 			{
-			strcpy(ofile,selection_text);
+			strcpy(ofile,string);
 			strcat(ofile,".ned");
 			}
 
@@ -1527,8 +1925,6 @@ Widget w;
 XtPointer client;
 XtPointer call;
 {
-	char	label[10];
-
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	/* Show entire data buffer */
@@ -1541,11 +1937,8 @@ XtPointer call;
 			XmNmaximum, data_show_max, 
 			XmNvalue, data_show_size, 
 			NULL);
-	sprintf(label, "%d", data_show_max);
-	XtVaSetValues(label_timespan_2, 
-			XtVaTypedArg, XmNlabelString, 
-			    XmRString, label, (strlen(label) + 1), 
-			NULL);
+	sprintf(string, "%d", data_show_max);
+	set_label_string(label_timespan_2, string);
 }
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
@@ -1625,6 +2018,188 @@ do_toggle_vru(w, client_data, call_data)
 
 	/* replot */
 	mbnavedit_plot_all();
+}
+/*--------------------------------------------------------------------*/
+void
+mbnavedit_bell(length)
+int	length;
+{
+	XBell(display,length);
+}
+/*--------------------------------------------------------------------*/
+void
+mbnavedit_get_position(win_x, win_y, mask_return)
+int	*win_x;
+int	*win_y;
+unsigned int *mask_return;
+{
+	Window	root_return, child_return;
+	int	root_x_return, root_y_return;
+	int	status;
+
+	status = XQueryPointer(display, can_xid,
+		&root_return, &child_return,
+		&root_x_return, &root_y_return, 
+		win_x, win_y, mask_return);
+}
+/*--------------------------------------------------------------------*/
+void
+mbnavedit_pickcursor()
+{
+	myCursor = XCreateFontCursor(display, XC_target);
+	XAllocNamedColor(display,colormap,"red",&closest[0],&exact[0]);
+	XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
+	XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
+	XDefineCursor(display,can_xid,myCursor);
+}
+/*--------------------------------------------------------------------*/
+void
+mbnavedit_selectcursor()
+{
+	myCursor = XCreateFontCursor(display, XC_exchange);
+	XAllocNamedColor(display,colormap,"red",&closest[0],&exact[0]);
+	XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
+	XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
+	XDefineCursor(display,can_xid,myCursor);
+}
+/*--------------------------------------------------------------------*/
+void
+mbnavedit_deselectcursor()
+{
+	myCursor = XCreateFontCursor(display, XC_exchange);
+	XAllocNamedColor(display,colormap,"green",&closest[0],&exact[0]);
+	XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
+	XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
+	XDefineCursor(display,can_xid,myCursor);
+}
+/*--------------------------------------------------------------------*/
+void
+mbnavedit_selectallcursor()
+{
+	myCursor = XCreateFontCursor(display, XC_cross);
+	XAllocNamedColor(display,colormap,"red",&closest[0],&exact[0]);
+	XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
+	XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
+	XDefineCursor(display,can_xid,myCursor);
+}
+/*--------------------------------------------------------------------*/
+void
+mbnavedit_deselectallcursor()
+{
+	myCursor = XCreateFontCursor(display, XC_cross);
+	XAllocNamedColor(display,colormap,"green",&closest[0],&exact[0]);
+	XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
+	XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
+	XDefineCursor(display,can_xid,myCursor);
+}
+/*--------------------------------------------------------------------*/
+void
+mbnavedit_setintervalcursor()
+{
+	myCursor = XCreateFontCursor(display, XC_crosshair);
+	XAllocNamedColor(display,colormap,"red",&closest[0],&exact[0]);
+	XAllocNamedColor(display,colormap,"coral",&closest[1],&exact[1]);
+	XRecolorCursor(display,myCursor,&closest[0],&closest[1]);
+	XDefineCursor(display,can_xid,myCursor);
+}
+/*--------------------------------------------------------------------*/
+
+int
+do_message_on(message)
+char	*message;
+{
+    Widget  diashell, topshell;
+    Window  diawindow, topwindow;
+    XWindowAttributes	xwa;
+    XEvent  event;
+    
+    set_label_string(label_message, message);
+    XtManageChild(bulletinBoard_message);
+    
+    /* force the label to be visible */
+    for (diashell = label_message; 
+	    !XtIsShell(diashell); 
+	    diashell = XtParent(diashell))
+	;
+    for (topshell = diashell; 
+	    !XtIsTopLevelShell(topshell);
+	    topshell = XtParent(topshell))
+	;
+    if (XtIsRealized(diashell) && XtIsRealized(topshell))
+	{
+	diawindow = XtWindow(diashell);
+	topwindow = XtWindow(topshell);
+	
+	/* wait for the dialog to be mapped */
+	while (XGetWindowAttributes(display, diawindow, &xwa)
+		&& xwa.map_state != IsViewable)
+	    {
+	    if (XGetWindowAttributes(display, topwindow, &xwa)
+		    && xwa.map_state != IsViewable)
+		break;
+		
+	    XtAppNextEvent(app_context, &event);
+	    XtDispatchEvent(&event);
+	    }
+	}
+	
+    XmUpdateDisplay(topshell);
+}
+
+/*--------------------------------------------------------------------*/
+
+int
+do_message_off()
+{
+    XtUnmanageChild(bulletinBoard_message);
+    XSync(XtDisplay(bulletinBoard_message), 0);
+    XmUpdateDisplay(drawingArea);
+}
+
+/*--------------------------------------------------------------------*/
+
+int
+do_error_dialog(s1, s2, s3)
+char	*s1;
+char	*s2;
+char	*s3;
+{
+    set_label_string(label_error_one, s1);
+    set_label_string(label_error_two, s2);
+    set_label_string(label_error_three, s3);
+    XtManageChild(bulletinBoard_error);
+    XBell(display,100);
+}
+
+/*--------------------------------------------------------------------*/
+/* Change label string cleanly, no memory leak */
+/*--------------------------------------------------------------------*/
+
+void set_label_string(Widget w, String str)
+{
+    XmString xstr;
+    
+    xstr = XmStringCreateLocalized( str );
+    if ( xstr != NULL ) 
+	XtVaSetValues(w, 
+	    XmNlabelString, xstr, 
+	    NULL);
+    else 
+	XtWarning("Failed to update labelString");
+
+    XmStringFree( xstr );
+}
+/*--------------------------------------------------------------------*/
+/* Get text item string cleanly, no memory leak */
+/*--------------------------------------------------------------------*/
+
+void get_text_string(Widget w, String str)
+{
+    char	*str_tmp;
+    
+    str_tmp = (char *) XmTextGetString(w);
+    strcpy(str, str_tmp);
+    XtFree(str_tmp);
 }
 /*--------------------------------------------------------------------*/
 

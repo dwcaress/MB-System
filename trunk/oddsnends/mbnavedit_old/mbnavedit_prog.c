@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.7 1996-08-26 17:33:15 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.8 1997-04-21 17:07:38 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,12 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/16  21:40:29  caress
+ * Version for MB-System 4.5.
+ *
+ * Revision 4.7  1996/08/26  17:33:15  caress
+ * Release 4.4 revision.
+ *
  * Revision 4.6  1996/04/22  13:22:24  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -121,7 +127,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.7 1996-08-26 17:33:15 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.8 1997-04-21 17:07:38 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -549,10 +555,19 @@ int mbnavedit_action_open()
 		{
 		/* set time span to zero so plotting resets it */
 		data_show_size = 0;
+		
+		/* turn file button off */
+		do_filebutton_off();
 
 		/* now plot it */
 		status = mbnavedit_plot_all();
 		}
+		
+	/* if no data read show error dialog */
+	else
+		do_error_dialog("No data were read from the input", 
+				"file. You may have specified an", 
+				"incorrect MB-System format id!");
 
 	/* reset data_save */
 	data_save = MB_NO;
@@ -600,7 +615,7 @@ int mbnavedit_open_file()
 
 	/* time, user, host variables */
 	long int	right_now;
-	char	date[25], user[128], host[128];
+	char	date[25], user[128], *user_ptr, host[128];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -667,6 +682,9 @@ int mbnavedit_open_file()
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
 		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
 		status = MB_FAILURE;
+		do_error_dialog("Unable to open input file.", 
+				"You may not have read", 
+				"permission in this directory!");
 		return(status);
 		}
 
@@ -682,6 +700,9 @@ int mbnavedit_open_file()
 			fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
 			fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
 			status = MB_FAILURE;
+			do_error_dialog("Unable to open output file.", 
+					"You may not have write", 
+					"permission in this directory!");
 			return(status);
 			}
 		}
@@ -749,7 +770,12 @@ int mbnavedit_open_file()
 		strncpy(date,"\0",25);
 		right_now = time((long *)0);
 		strncpy(date,ctime(&right_now),24);
-		strcpy(user,getenv("USER"));
+		if ((user_ptr = getenv("USER")) == NULL)
+			user_ptr = getenv("LOGNAME");
+		if (user_ptr != NULL)
+			strcpy(user,user_ptr);
+		else
+			strcpy(user, "unknown");
 		gethostname(host,128);
 		strncpy(comment,"\0",256);
 		sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
@@ -886,6 +912,9 @@ int mbnavedit_close_file()
 	file_open = MB_NO;
 	nload_total = 0;
 	ndump_total = 0;
+	
+	/* turn file button on */
+	do_filebutton_on();
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -944,15 +973,28 @@ int	hold;
 	if (nbuff > 0)
 		{
 		if (output_mode == OUTPUT_MODE_OUTPUT)
+			{
+			/* turn message on */
+			do_message_on("MBnavedit is dumping data...");
+
 			status = mb_buffer_dump(verbose,
 					buff_ptr,ombio_ptr,
 					hold,&ndump,&nbuff,
 					&error);
+			}
 		else
+			{
+			/* turn message on */
+			do_message_on("MBnavedit is clearing data...");
+
 			status = mb_buffer_clear(verbose,
 					buff_ptr,imbio_ptr,
 					hold,&ndump,&nbuff,
 					&error);
+			}
+
+		/* turn message off */
+		do_message_off();
 		}
 	ndump_total += ndump;
 
@@ -1008,6 +1050,9 @@ int mbnavedit_load_data()
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		}
+		
+	/* turn message on */
+	do_message_on("MBnavedit is loading data...");
 
 	/* load data into buffer */
 	status = mb_buffer_load(verbose,buff_ptr,imbio_ptr,buffer_size,
@@ -1113,6 +1158,9 @@ int mbnavedit_load_data()
 		plot_start_time = ping[0].file_time_d;
 		plot_end_time = ping[nlist-1].file_time_d;
 		}
+		
+	/* turn message off */
+	do_message_off();
 
 	/* print out information */
 	if (verbose >= 1)
@@ -3021,6 +3069,9 @@ int mbnavedit_plot_all()
 	int	iyzero;
 	int	iplot;
 	int	center_x, center_y;
+	double	dx, x;
+	int	xtime_i[7];
+	int	ix;
 	int	swidth, sascent, sdescent;
 	char	yformat[10];
 	int	i, j, k, ii;
@@ -3253,6 +3304,9 @@ int mbnavedit_plot_all()
 	/* get plot margins */
 	margin_x = plot_width/10;
 	margin_y = plot_height/6;
+	
+	/* get date at start of file */
+	mb_get_date(verbose, file_start_time_d, xtime_i);
 
 	/* figure out how many plots to make */
 	number_plots = 0;
@@ -3260,7 +3314,7 @@ int mbnavedit_plot_all()
 		{
 		plot[number_plots].type = PLOT_LONGITUDE;
 		plot[number_plots].ixmin = 1.75*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].ixmax = plot_width - margin_x/2;
 		plot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
 		plot[number_plots].iymax = number_plots*plot_height 
@@ -3282,7 +3336,8 @@ int mbnavedit_plot_all()
 		plot[number_plots].xinterval = 100.0;
 		plot[number_plots].yinterval = 45.0;
 		sprintf(plot[number_plots].xlabel, 
-			"Time From Start of File (seconds)");
+			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
+			xtime_i[1], xtime_i[2], xtime_i[0]);
 		sprintf(plot[number_plots].ylabel1, 
 			"Longitude");
 		sprintf(plot[number_plots].ylabel2, 
@@ -3293,7 +3348,7 @@ int mbnavedit_plot_all()
 		{
 		plot[number_plots].type = PLOT_LATITUDE;
 		plot[number_plots].ixmin = 1.75*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].ixmax = plot_width - margin_x/2;
 		plot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
 		plot[number_plots].iymax = number_plots*plot_height 
@@ -3315,7 +3370,8 @@ int mbnavedit_plot_all()
 		plot[number_plots].xinterval = 100.0;
 		plot[number_plots].yinterval = 45.0;
 		sprintf(plot[number_plots].xlabel, 
-			"Time From Start of File (seconds)");
+			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
+			xtime_i[1], xtime_i[2], xtime_i[0]);
 		sprintf(plot[number_plots].ylabel1, 
 			"Latitude");
 		sprintf(plot[number_plots].ylabel2, 
@@ -3326,7 +3382,7 @@ int mbnavedit_plot_all()
 		{
 		plot[number_plots].type = PLOT_SPEED;
 		plot[number_plots].ixmin = 1.75*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].ixmax = plot_width - margin_x/2;
 		plot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
 		plot[number_plots].iymax = number_plots*plot_height 
@@ -3348,7 +3404,8 @@ int mbnavedit_plot_all()
 		plot[number_plots].xinterval = 100.0;
 		plot[number_plots].yinterval = 10;
 		sprintf(plot[number_plots].xlabel, 
-			"Time From Start of File (seconds)");
+			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
+			xtime_i[1], xtime_i[2], xtime_i[0]);
 		sprintf(plot[number_plots].ylabel1, 
 			"Speed");
 		sprintf(plot[number_plots].ylabel2, 
@@ -3359,7 +3416,7 @@ int mbnavedit_plot_all()
 		{
 		plot[number_plots].type = PLOT_HEADING;
 		plot[number_plots].ixmin = 1.75*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].ixmax = plot_width - margin_x/2;
 		plot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
 		plot[number_plots].iymax = number_plots*plot_height 
@@ -3381,7 +3438,8 @@ int mbnavedit_plot_all()
 		plot[number_plots].xinterval = 100.0;
 		plot[number_plots].yinterval = 45.0;
 		sprintf(plot[number_plots].xlabel, 
-			"Time From Start of File (seconds)");
+			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
+			xtime_i[1], xtime_i[2], xtime_i[0]);
 		sprintf(plot[number_plots].ylabel1, 
 			"Heading");
 		sprintf(plot[number_plots].ylabel2, 
@@ -3392,7 +3450,7 @@ int mbnavedit_plot_all()
 		{
 		plot[number_plots].type = PLOT_ROLL;
 		plot[number_plots].ixmin = 1.75*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].ixmax = plot_width - margin_x/2;
 		plot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
 		plot[number_plots].iymax = number_plots*plot_height 
@@ -3414,7 +3472,8 @@ int mbnavedit_plot_all()
 		plot[number_plots].xinterval = 100.0;
 		plot[number_plots].yinterval = 45.0;
 		sprintf(plot[number_plots].xlabel, 
-			"Time From Start of File (seconds)");
+			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
+			xtime_i[1], xtime_i[2], xtime_i[0]);
 		sprintf(plot[number_plots].ylabel1, 
 			"Roll");
 		sprintf(plot[number_plots].ylabel2, 
@@ -3425,7 +3484,7 @@ int mbnavedit_plot_all()
 		{
 		plot[number_plots].type = PLOT_PITCH;
 		plot[number_plots].ixmin = 1.75*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].ixmax = plot_width - margin_x/2;
 		plot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
 		plot[number_plots].iymax = number_plots*plot_height 
@@ -3447,7 +3506,8 @@ int mbnavedit_plot_all()
 		plot[number_plots].xinterval = 100.0;
 		plot[number_plots].yinterval = 45.0;
 		sprintf(plot[number_plots].xlabel, 
-			"Time From Start of File (seconds)");
+			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
+			xtime_i[1], xtime_i[2], xtime_i[0]);
 		sprintf(plot[number_plots].ylabel1, 
 			"Pitch");
 		sprintf(plot[number_plots].ylabel2, 
@@ -3458,7 +3518,7 @@ int mbnavedit_plot_all()
 		{
 		plot[number_plots].type = PLOT_HEAVE;
 		plot[number_plots].ixmin = 1.75*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/4;
+		plot[number_plots].ixmax = plot_width - margin_x/2;
 		plot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
 		plot[number_plots].iymax = number_plots*plot_height 
@@ -3480,7 +3540,8 @@ int mbnavedit_plot_all()
 		plot[number_plots].xinterval = 100.0;
 		plot[number_plots].yinterval = 45.0;
 		sprintf(plot[number_plots].xlabel, 
-			"Time From Start of File (seconds)");
+			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
+			xtime_i[1], xtime_i[2], xtime_i[0]);
 		sprintf(plot[number_plots].ylabel1, 
 			"Heave");
 		sprintf(plot[number_plots].ylabel2, 
@@ -3537,25 +3598,44 @@ int mbnavedit_plot_all()
 			plot[iplot].ylabel2,
 			pixel_values[BLACK],XG_SOLIDLINE);
 
-		/* plot min max values */
-		sprintf(string, "%d", (int)plot[iplot].xmin);
-		xg_justify(mbnavedit_xgid,
-			string,
-			&swidth,&sascent,&sdescent);
-		xg_drawstring(mbnavedit_xgid,
-			(int)(plot[iplot].ixmin - swidth/2), 
-			(int)(plot[iplot].iymin + 1.75*sascent),
-			string,
-			pixel_values[BLACK],XG_SOLIDLINE);
-		sprintf(string, "%d", (int)plot[iplot].xmax);
-		xg_justify(mbnavedit_xgid,
-			string,
-			&swidth,&sascent,&sdescent);
-		xg_drawstring(mbnavedit_xgid,
-			(int)(plot[iplot].ixmax - swidth/2), 
-			(int)(plot[iplot].iymin + 1.75*sascent),
-			string,
-			pixel_values[BLACK],XG_SOLIDLINE);
+		/* plot x axis time annotation */
+		dx = (plot_end_time - plot_start_time) / 5;
+		for (i=0;i<6;i++)
+			{
+			/* get x position */
+			x = plot_start_time + i * dx;
+			ix = plot[iplot].ixmin 
+				+ plot[iplot].xscale 
+				    * (x - plot[iplot].xmin);
+			x += file_start_time_d;
+				    
+			/* draw tickmarks */
+			xg_drawline(mbnavedit_xgid,
+				ix, 
+				plot[iplot].iymin, 
+				ix, 
+				plot[iplot].iymin + 5, 
+				pixel_values[BLACK],XG_SOLIDLINE);
+				
+			/* draw annotations */
+			mb_get_date(verbose, x, xtime_i);
+			sprintf(string, "%2.2d:%2.2d:%2.2d.%3.3d", 
+				xtime_i[3], 
+				xtime_i[4], 
+				xtime_i[5], 
+				(int)(0.001 * xtime_i[6]));
+			xg_justify(mbnavedit_xgid,
+				string,
+				&swidth,&sascent,&sdescent);
+			xg_drawstring(mbnavedit_xgid,
+				(int)(ix - swidth/2), 
+				(int)(plot[iplot].iymin 
+					+ 5 + 1.75*sascent),
+				string,
+				pixel_values[BLACK],XG_SOLIDLINE);
+			}
+			
+		/* plot y min max values */
 		if (plot[iplot].type == PLOT_LONGITUDE ||
 			plot[iplot].type == PLOT_LATITUDE)
 			strcpy(yformat, "%11.6f");

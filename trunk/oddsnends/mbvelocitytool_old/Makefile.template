@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.4 1996-04-22 13:22:47 caress Exp $
+#	$Id: Makefile.template,v 4.5 1997-04-21 17:09:54 caress Exp $
 #
-#     Copyright (c) 1993, 1994 by 
+#     Copyright (c) 1993, 1994, 1997 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #     Lamont-Doherty Earth Observatory
@@ -14,6 +14,12 @@
 # Date:		September 14, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.5  1997/04/16  21:35:31  caress
+# Complete rewrite of mbvelocitytool without uid file.
+#
+# Revision 4.4  1996/04/22  13:22:47  caress
+# Now have DTR and MIN/MAX defines in mb_define.h
+#
 # Revision 4.3  1994/11/18  18:58:19  caress
 # First gradient raytracing version.
 #
@@ -31,19 +37,16 @@
 #
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 #
-MBSYSTEM_HOME = /home/hs/caress/dev/mbsystem/
-#
 # Locations of Motif include files:
 MOTIFINCDIR = /usr/include/Xm
-MOTIFLIBS = -lXm -lXt -lX11 -lMrm
-UIL = /usr/bin/X11/uil
+MOTIFLIBS = -lXm -lXt -lX11
 #
 # Compilers 
-CC = $CC
+# C compiler left as default
 #
 # Compile and load flags:
-CFLAGS = -O2 -DSUN
-LFLAGS = -lm
+CFLAGS = -g -DIRIX
+LFLAGS =  -lmalloc -lm -lsun -g
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
@@ -54,23 +57,28 @@ INCDIR = ../../include
 MANDIR = ../../man/manl
 
 ### make all makes the executable, .uid file, and man page
-all: $(BINDIR)/mbvelocitytool $(BINDIR)/mbvelocity.uid \
+all: $(BINDIR)/mbvelocitytool \
 	$(MANDIR)/mbvelocitytool.l
 
 ### link the executable
-$(BINDIR)/mbvelocitytool: mbvelocity.o mbvelocity_uid_loc.h \
+$(BINDIR)/mbvelocitytool: mbvelocity.o mbvelocity_callbacks.o \
+		mbvelocity_creation.o mbvelocity_bxutils.o \
 		mbvelocity_prog.o xgraphics.o mb_rt.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbvelocity.o mbvelocity_prog.o xgraphics.o \
+	$(CC) $(CFLAGS) mbvelocity.o mbvelocity_callbacks.o \
+		mbvelocity_creation.o mbvelocity_bxutils.o \
+		mbvelocity_prog.o xgraphics.o \
 		mb_rt.o $(LIBDIR)/libmbio.a \
 		$(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbvelocitytool
 
 ### compile the source files
-mbvelocity_uid_loc.h: mbvelocity.c Makefile
-	echo "	char *db_filename_vec[] = "'{"$(MBSYSTEM_HOME)/bin/mbvelocity.uid"}'";" > mbvelocity_uid_loc.h
-mbvelocity.o: mbvelocity.c mbvelocity_define.c $(INCDIR)/mb_format.h \
-		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h \
-		mbvelocity_uid_loc.h
+mbvelocity.o: mbvelocity.c  mbvelocity_creation.h 
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity.c
+mbvelocity_callbacks.o: mbvelocity_callbacks.c 
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity_callbacks.c
+mbvelocity_creation.o: mbvelocity_creation.c mbvelocity_creation.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity_creation.c
+mbvelocity_bxutils.o: mbvelocity_bxutils.c
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity_bxutils.c
 mbvelocity_prog.o: mbvelocity_prog.c  $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mbvelocity_prog.c
@@ -78,11 +86,6 @@ mb_rt.o: mb_rt.c $(INCDIR)/mb_status.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mb_rt.c
 xgraphics.o: xgraphics.c
 	$(CC) $(CFLAGS) -c xgraphics.c 
-
-# compile the .uil files into a .uid file
-$(BINDIR)/mbvelocity.uid: mbvelocity.uil mbvelocity_define.uil mbvelocity_init.uil Makefile
-	$(UIL) -I/usr/include/X11/Xm  mbvelocity.uil \
-		 -o $(BINDIR)/mbvelocity.uid
 
 ### copy the man page to the man page directory
 $(MANDIR)/mbvelocitytool.l:	mbvelocitytool.manl

@@ -40,6 +40,7 @@
 #include <Xm/RowColumn.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 /*
  * Include stdlib.h and malloc.h if code is C++, ANSI, or Extended ANSI.
@@ -68,8 +69,10 @@
 
 /*
  * Define SUPPORTS_WCHARS if the system supports wide character sets
+ * Note: the following line flags the VAXC compiler and not the
+ * DECC compiler running VAXC emulation. 
  */
-#if !defined(VAX) && !defined(__CENTERLINE__)
+#if !((defined(VAXC) && !defined(__DECC)) || defined(__CENTERLINE__))
 #define SUPPORTS_WCHARS
 #endif
 
@@ -451,7 +454,7 @@ static void copyWcsToMbs
     }
 
     tmp = tbuf[lenToConvert];
-    tbuf[lenToConvert] = NULL;
+    tbuf[lenToConvert] = (wchar_t) NULL;
     numCvt = doWcstombs(mbs, tbuf, lenToConvert);
     tbuf[lenToConvert] = tmp;
     
@@ -2178,11 +2181,11 @@ GRA(BxXpmAttributes *,attributes)
      * initialize return values
      */
     if (pixmap_return) {
-        *pixmap_return = NULL;
+        *pixmap_return = (Pixmap) NULL;
         imageptr = &image;
     }
     if (shapemask_return) {
-        *shapemask_return = NULL;
+        *shapemask_return = (Pixmap) NULL;
         shapeimageptr = &shapeimage;
     }
 
@@ -3720,10 +3723,18 @@ GRA(UIAppDefault *, defs)
 
     /* Get the database */
 
+#if (XlibSpecificationRelease >= 5)
     if ((rdb = XrmGetDatabase(XtDisplay(parent))) == NULL)
     {
 	return;			/*  Can't get the database */
     }
+#else
+    Display *dpy = XtDisplay(parent);
+    if ((rdb = dpy->db) == NULL)
+    {
+	return;
+    }
+#endif
 
     /* Look for each resource in the table */
 
@@ -3739,7 +3750,26 @@ GRA(UIAppDefault *, defs)
 	}
 	else
 	{
-	    rsc[rscIdx++] = XrmStringToQuark(defs->wName);
+	    if( strchr(defs->wName, '.') == NULL )
+	    {
+		rsc[rscIdx++] = XrmStringToQuark(defs->wName);
+	    }
+	    else
+	    {
+		/*
+		 * If we found a '.' that means that this is not
+		 * a simple widget name, but a sub specification so
+		 * we need to split this into several quarks.
+		 */
+		char *copy = strdup(defs->wName), *ptr;
+
+		for( ptr = strtok(copy, "."); ptr != NULL;
+		     ptr = strtok(NULL, ".") )
+		{
+		    rsc[rscIdx++] = XrmStringToQuark(ptr);
+		}
+		free(copy);
+	    }
 	}
 
 	if (defs->cInstName && defs->cInstName[0] != '\0')
@@ -3775,7 +3805,8 @@ GRA(char*, inst_name)
    char			lineage[1000];
    char			buf[1000];
    Widget       	parent;
-
+   char*		wName;
+   
    /* Protect ourselves */
    
    if (inst_name == NULL) return;
@@ -3786,7 +3817,7 @@ GRA(char*, inst_name)
 
    /* Start the lineage with our name and then get our parents */
 
-   sprintf(lineage, "*%s", inst_name);
+   lineage[0] = '\0';
    parent = w;
 
    while (parent)
@@ -3805,11 +3836,22 @@ GRA(char*, inst_name)
 
    while (defs->wName != NULL)
    {
+       if ( !strcmp(defs->wName, "" ) ) wName = inst_name;
+       else wName = (char *)(defs->wName);
+
        /*
-        * We don't deal with the resource if it isn't found in the
-	* Xrm database at class initializtion time (in initAppDefaults).
+	* See if we need to deal with this record.
+	*  (1) If we've been passed an instance name (meaning we're
+	*      creating a nested instance of a class), then make sure
+	*      we're dealing with the proper nested instance.
+	*  (2) If we're not creating a nested instance, then
+	*      ignore resources for nested instances.
+	*  (3) We didn't find a default value in the app-defaults
 	*/
-       if (defs->value == NULL)
+
+       if ((inst_name && strcmp(inst_name, wName)) ||		/* (1) */
+	   (!inst_name && defs->cInstName) ||			/* (2) */
+	   (defs->value == NULL))				/* (3) */
        {
 	   defs++;
 	   continue;
@@ -3824,23 +3866,24 @@ GRA(char*, inst_name)
 	   if (*defs->cInstName != '\0')
 	   {
 	       sprintf(buf, "%s.%s*%s.%s: %s",
-		       lineage, defs->wName, defs->cInstName, defs->wRsc,
+		       lineage, wName, defs->cInstName, defs->wRsc,
 		       defs->value);
 	   }
 	   else
 	   {
 	       sprintf(buf, "%s.%s.%s: %s",
-		       lineage, defs->wName, defs->wRsc, defs->value);
+		       lineage, wName, defs->wRsc, defs->value);
 	   }
        }
        else if (*defs->wName != '\0')
        {
-	   sprintf(buf, "%s*%s.%s: %s",
-		   lineage, defs->wName, defs->wRsc, defs->value);
+	   sprintf(buf, "%s*%s*%s.%s: %s",
+		   lineage, inst_name, defs->wName, defs->wRsc, defs->value);
        }
        else
        {
-	   sprintf(buf, "%s.%s: %s", lineage, defs->wRsc, defs->value);
+	   sprintf(buf, "%s*%s.%s: %s", 
+		   lineage, inst_name, defs->wRsc, defs->value);
        }
 
        XrmPutLineResource( &rdb, buf );
@@ -3859,4 +3902,5 @@ GRA(char*, inst_name)
 #endif
     }
 }
+
 
