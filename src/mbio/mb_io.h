@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.2 2001-01-22 07:43:34 caress Exp $
+ *    $Id: mb_io.h,v 5.3 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2000/12/10  20:26:50  caress
  * Version 5.0.alpha02
  *
@@ -347,6 +350,18 @@ struct mb_io_struct
 		double *angles_forward, double *angles_null,
 		double *heave, double *alongtrack_offset, 
 		double *draft, double *ssv, int *error);
+	int (*mb_io_extract_rawss)(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind, int *nrawss,
+		double *rawss, 
+		double *rawssacrosstrack, 
+		double *rawssalongtrack, 
+		int *error);
+	int (*mb_io_insert_rawss)(int verbose, char *mbio_ptr, char *store_ptr,
+		int nrawss,
+		double *rawss, 
+		double *rawssacrosstrack, 
+		double *rawssalongtrack, 
+		int *error);
 	int (*mb_io_copyrecord)(int verbose, char *mbio_ptr,
 		char *store_ptr, char *copy_ptr, int *error);
 
@@ -361,10 +376,13 @@ struct mb_buffer_struct
 	};
 
 /* MBIO datalist control structure */
-#define MB_DATALIST_RECURSION_MAX 25
+#define MB_DATALIST_RECURSION_MAX 	25
 struct mb_datalist_struct {
 	int	open;
 	int	recursion;
+	int	look_processed;
+	int	weight_set;
+	double	weight;
 	FILE	*fp;
 	char	path[MB_PATH_MAXLINE];
 	struct mb_datalist_struct *datalist;

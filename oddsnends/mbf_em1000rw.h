@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em1000rw.h	8/8/94
- *	$Id: mbf_em1000rw.h,v 5.1 2000-12-10 20:26:50 caress Exp $
+ *	$Id: mbf_em1000rw.h,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:26:50  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -87,6 +90,7 @@
  *         0x029A: Position                                90 data bytes
  *         0x029A: Sound velocity profile                 416 data bytes
  *         0x0297: EM-1000 bathymetry                     692 data bytes
+ *	   0x02CA: EM-1000 sidescan (No phase)            551 data bytes
  *         0x02CD: EM-12S or EM-1000 sidescan + phase    1465 data bytes
  *   6. Multiple sidescan datagrams are recorded for each ping because 
  *      there is too much information to fit in a single datagram.
@@ -101,8 +105,9 @@
 
 /* maximum number of beams and pixels */
 #define	MBF_EM1000RW_MAXBEAMS	60
-/*#define	MBF_EM1000RW_MAXPIXELS	50*MBF_EM1000RW_MAXBEAMS*/
-#define	MBF_EM1000RW_MAXPIXELS	50*121
+/*#define	MBF_EM1000RW_MAXRAWPIXELS	50*MBF_EM1000RW_MAXBEAMS*/
+#define	MBF_EM1000RW_MAXRAWPIXELS	50*121
+#define	MBF_EM1000RW_MAXPIXELS	1024
 
 struct mbf_em1000rw_struct
 	{
@@ -242,7 +247,7 @@ struct mbf_em1000rw_struct
 	mb_s_char	heave[MBF_EM1000RW_MAXBEAMS];	    /* 0.1 meters */
 	
 	/* sidescan */
-	int	pixels_ss;	/* total number of samples for this ping */
+	int	pixels_ssraw;	/* total number of samples for this ping */
 	int	ss_mode;	/* 1 = EM-12 shallow:   0.6 m/sample
 				   2 = EM-12 deep:      2.4 m/sample
 				   3 = EM-1000 deep:    0.3 m/sample
@@ -262,7 +267,15 @@ struct mbf_em1000rw_struct
 	short int beam_start_sample[MBF_EM1000RW_MAXBEAMS];
 				/* start beam sample number among samples
 					from entire ping */
-	mb_s_char	ss[MBF_EM1000RW_MAXPIXELS];
+	mb_s_char	ssraw[MBF_EM1000RW_MAXRAWPIXELS];
+	short int 	ssp[MBF_EM1000RW_MAXRAWPIXELS];
+	int	pixel_size;	/* processed sidescan pixel size in cm */
+	int	pixels_ss;	/* number of processed sidescan pixels stored */
+	short	ss[MBF_EM1000RW_MAXPIXELS];
+				/* the processed sidescan ordered port to starboard */
+	short	ssalongtrack[MBF_EM1000RW_MAXPIXELS];
+				/* the processed sidescan alongtrack distances 
+					in distance resolution units */
 
 };
 

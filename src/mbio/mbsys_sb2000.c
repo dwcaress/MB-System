@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -100,7 +103,7 @@
 int mbsys_sb2000_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -560,6 +563,12 @@ int mbsys_sb2000_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT)
 		{
+		store->sensor_type[0] = '\0';
+		store->sensor_type[1] = '\0';
+		store->data_type[0] = 'T';
+		store->data_type[1] = 'R';
+		store->sensor_size = 0;
+		store->data_size = strlen(comment)+1;
 		strcpy(store->comment,comment);
 		}
 

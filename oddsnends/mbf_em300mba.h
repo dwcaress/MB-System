@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em300mba.h	10/16/98
- *	$Id: mbf_em300mba.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbf_em300mba.h,v 5.1 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.5  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -570,9 +573,13 @@ struct mbf_em300mba_struct
 				    Feb 26, 1995 = 19950226 */
 	int	png_ss_msec;	/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-	int	png_max_range;	/* max range of ping in number of samples */
-	int	png_r_zero;	/* range to normal incidence used in TVG
+	int	png_max_range;	/* old: max range of ping in number of samples */
+				/* current: mean absorption coefficient in 0.01 db/km */
+				/* also: used to store sidescan pixel size in range (m)
+				    for old Simrad multibeams (e.g. EM12, EM1000) */
+	int	png_r_zero;	/* old: range to normal incidence used in TVG
 				    (R0 predicted) in samples */
+				/* current: pulse length in usec */
 	int	png_r_zero_corr;/* range to normal incidence used to correct
 				    sample amplitudes in number of samples */
 	int	png_tvg_start;	/* start sample of TVG ramp if not enough 

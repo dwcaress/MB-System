@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
- *	$Id: mbsys_singlebeam.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_singlebeam.h,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -177,6 +180,13 @@ struct mbsys_singlebeam_struct
                              seismic data. */
 	int	seismic_shot;
 			    /* SEISMIC SHOT-POINT NUMBER */
+	
+	/* flags */
+	int	position_flag;
+	int	pressure_flag;
+	int	heading_flag;
+	int	altitude_flag;
+	int	attitude_flag;
  
 	/* comment */
 	char	comment[MBSYS_SINGLEBEAM_MAXLINE];

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 5.2 2001-03-15 20:29:20 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 5.3 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -67,7 +67,32 @@
  *
  *
  */
-
+/*--------------------------------------------------------------------
+ * Notes on the MBF_SB2000SS data format:
+ *   1. This data format is used to store sidescan data from 
+ *      Sea Beam 2000 sonars.
+ *      This format was created and used by the Scripps
+ *      Institution of Oceanography; most data files in this format
+ *      consist of Sea Beam data collected on the R/V George Melville.
+ *      This format is one of the "swathbathy" formats created by
+ *      Jim Charters of Scripps.
+ *   2. The data records consist of three logical records: the header
+ *      record, the sensor specific record and the data record.  
+ *   3. The header record consists of 36 bytes, including the sizes
+ *      of the following sensor specific and data records.
+ *   4. The sensor specific records are 32 bytes long.  
+ *   5. The data record lengths are variable.
+ *   6. Comments are included in text records, which are of variable
+ *      length.
+ *   7. Information on this format was obtained from the Geological
+ *      Data Center and the Shipboard Computer Group at the Scripps 
+ *      Institution of Oceanography
+ *
+ * The kind value in the mbf_sb2000ss_struct indicates whether the
+ * mbf_sb2000ss_data_struct structure holds data (kind = 1) or an
+ * ascii comment record (kind = 2).
+ */
+ 
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
@@ -79,15 +104,11 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_sb2000.h"
-#include "../../include/mbf_sb2000ss.h"
 
 /* include for byte swapping on little-endian machines */
 #ifdef BYTESWAPPED
 #include "../../include/mb_swap.h"
 #endif
-
-/* macro for rounding values to nearest integer */
-#define	round(X)	X < 0.0 ? ceil(X - 0.5) : floor(X + 0.5)
 
 /* essential function prototypes */
 int mbr_register_sb2000ss(int verbose, char *mbio_ptr, 
@@ -119,7 +140,7 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000ss(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.2 2001-03-15 20:29:20 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.3 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbr_register_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -246,10 +267,10 @@ int mbr_info_sb2000ss(int verbose,
 			int *heading_source, 
 			int *vru_source, 
 			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack,  
+			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.2 2001-03-15 20:29:20 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.3 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbr_info_sb2000ss";
 	int	status = MB_SUCCESS;
 
@@ -315,11 +336,10 @@ int mbr_info_sb2000ss(int verbose,
 	/* return status */
 	return(status);
 }
-
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2000ss(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sb2000ss.c,v 5.2 2001-03-15 20:29:20 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000ss.c,v 5.3 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -341,9 +361,6 @@ int mbr_alm_sb2000ss(int verbose, char *mbio_ptr, int *error)
 	status = MB_SUCCESS;
 
 	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_sb2000ss_struct);
-	status = mb_malloc(verbose,mb_io_ptr->structure_size,
-				&mb_io_ptr->raw_data,error);
 	status = mb_malloc(verbose,sizeof(struct mbsys_sb2000_struct),
 				&mb_io_ptr->store_data,error);
 
@@ -382,7 +399,6 @@ int mbr_dem_sb2000ss(int verbose, char *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
 	status = mb_free(verbose,&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
@@ -405,15 +421,11 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	char	*function_name = "mbr_rt_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_sb2000ss_struct *data;
 	struct mbsys_sb2000_struct *store;
-	char	*headerptr;
-	char	*sensorssptr;
-	char	*datassptr;
-	char	*commentptr;
-	unsigned short	*short_ptr;
 	int	read_status;
 	char	dummy[2];
+	char	buffer[2048];
+	unsigned short *short_ptr;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -431,19 +443,12 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2000ss_struct *) mb_io_ptr->raw_data;
 	store = (struct mbsys_sb2000_struct *) store_ptr;
-
-	/* get pointers to records */
-	headerptr = (char *) &data->year;
-	sensorssptr = (char *) &data->ping_number;
-	datassptr = (char *) &data->ss[0];
-	commentptr = (char *) &data->comment[0];
 
 	/* read next header record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	if ((status = fread(headerptr,1,MBF_SB2000SS_HEADER_SIZE,
-			mb_io_ptr->mbfp)) == MBF_SB2000SS_HEADER_SIZE) 
+	if ((status = fread(buffer,1,MBSYS_SB2000_HEADER_SIZE,
+			mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE) 
 		{
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
@@ -456,87 +461,23 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		*error = MB_ERROR_EOF;
 		}
 
-	/* byte swap the data if necessary */
-#ifdef BYTESWAPPED
-	if (status == MB_SUCCESS)
-		{
-		data->year = mb_swap_short(data->year);
-		data->day = mb_swap_short(data->day);
-		data->min = mb_swap_short(data->min);
-		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_int(data->lat);
-		data->lon = mb_swap_int(data->lon);
-		data->heading = mb_swap_short(data->heading);
-		data->course = mb_swap_short(data->course);
-		data->speed = mb_swap_short(data->speed);
-		data->speed_ps = mb_swap_short(data->speed_ps);
-		data->quality = mb_swap_short(data->quality);
-		data->sensor_size = mb_swap_short(data->sensor_size);
-		data->data_size = mb_swap_short(data->data_size);
-		}
-#endif
-
-	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  New header record read by MBIO function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg5  New header values:\n");
-		fprintf(stderr,"dbg5       year:       %d\n",data->year);
-		fprintf(stderr,"dbg5       day:        %d\n",data->day);
-		fprintf(stderr,"dbg5       min:        %d\n",data->min);
-		fprintf(stderr,"dbg5       sec:        %d\n",data->sec);
-		fprintf(stderr,"dbg5       lat:        %d\n",data->lat);
-		fprintf(stderr,"dbg5       lon:        %d\n",data->lon);
-		fprintf(stderr,"dbg5       heading:    %d\n",data->heading);
-		fprintf(stderr,"dbg5       course:     %d\n",data->course);
-		fprintf(stderr,"dbg5       speed:      %d\n",data->speed);
-		fprintf(stderr,"dbg5       speed_ps:   %d\n",data->speed_ps);
-		fprintf(stderr,"dbg5       quality:    %d\n",data->quality);
-		fprintf(stderr,"dbg5       sensor size:%d\n",data->sensor_size);
-		fprintf(stderr,"dbg5       data size:  %d\n",data->data_size);
-		fprintf(stderr,"dbg5       speed_ref:  %c%c\n",
-			data->speed_ref[0],data->speed_ref[1]);
-		fprintf(stderr,"dbg5       sensor_type:%c%c\n",
-			data->sensor_type[0],data->sensor_type[1]);
-		fprintf(stderr,"dbg5       data_type:  %c%c\n",
-			data->data_type[0],data->data_type[1]);
-		}
-
 	/* if not a good header search through file to find one */
 	while (status == MB_SUCCESS && 
-		(strncmp(data->data_type,"SR",2) != 0
-		&& strncmp(data->data_type,"RS",2) != 0
-		&& strncmp(data->data_type,"SP",2) != 0
-		&& strncmp(data->data_type,"TR",2) != 0
-		&& strncmp(data->data_type,"IR",2) != 0
-		&& strncmp(data->data_type,"AT",2) != 0
-		&& strncmp(data->data_type,"SC",2) != 0))
+		(strncmp(&buffer[34],"SR",2) != 0
+		&& strncmp(&buffer[34],"RS",2) != 0
+		&& strncmp(&buffer[34],"SP",2) != 0
+		&& strncmp(&buffer[34],"TR",2) != 0
+		&& strncmp(&buffer[34],"IR",2) != 0
+		&& strncmp(&buffer[34],"AT",2) != 0
+		&& strncmp(&buffer[34],"SC",2) != 0))
 		{
-		/* unswap data if necessary */
-#ifdef BYTESWAPPED
-		data->year = mb_swap_short(data->year);
-		data->day = mb_swap_short(data->day);
-		data->min = mb_swap_short(data->min);
-		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_int(data->lat);
-		data->lon = mb_swap_int(data->lon);
-		data->heading = mb_swap_short(data->heading);
-		data->course = mb_swap_short(data->course);
-		data->speed = mb_swap_short(data->speed);
-		data->speed_ps = mb_swap_short(data->speed_ps);
-		data->quality = mb_swap_short(data->quality);
-		data->sensor_size = mb_swap_short(data->sensor_size);
-		data->data_size = mb_swap_short(data->data_size);
-#endif
-
 		/* shift bytes by one */
-		for (i=0;i<MBF_SB2000SS_HEADER_SIZE-1;i++)
-			headerptr[i] = headerptr[i+1];
+		for (i=0;i<MBSYS_SB2000_HEADER_SIZE-1;i++)
+			buffer[i] = buffer[i+1];
 		mb_io_ptr->file_pos += 1;
 
 		/* read next byte */
-		if ((status = fread(&headerptr[MBF_SB2000SS_HEADER_SIZE-1],
+		if ((status = fread(&buffer[MBSYS_SB2000_HEADER_SIZE-1],
 			1,1,mb_io_ptr->mbfp)) == 1) 
 			{
 			mb_io_ptr->file_bytes += status;
@@ -549,139 +490,112 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-
-		/* swap data if necessary */
-#ifdef BYTESWAPPED
-		data->year = mb_swap_short(data->year);
-		data->day = mb_swap_short(data->day);
-		data->min = mb_swap_short(data->min);
-		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_int(data->lat);
-		data->lon = mb_swap_int(data->lon);
-		data->heading = mb_swap_short(data->heading);
-		data->course = mb_swap_short(data->course);
-		data->speed = mb_swap_short(data->speed);
-		data->speed_ps = mb_swap_short(data->speed_ps);
-		data->quality = mb_swap_short(data->quality);
-		data->sensor_size = mb_swap_short(data->sensor_size);
-		data->data_size = mb_swap_short(data->data_size);
-#endif
-
-		/* print debug statements */
-		if (status == MB_SUCCESS && verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg5  Header record after byte shift in MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg5  New header values:\n");
-			fprintf(stderr,"dbg5       year:       %d\n",data->year);
-			fprintf(stderr,"dbg5       day:        %d\n",data->day);
-			fprintf(stderr,"dbg5       min:        %d\n",data->min);
-			fprintf(stderr,"dbg5       sec:        %d\n",data->sec);
-			fprintf(stderr,"dbg5       lat:        %d\n",data->lat);
-			fprintf(stderr,"dbg5       lon:        %d\n",data->lon);
-			fprintf(stderr,"dbg5       heading:    %d\n",data->heading);
-			fprintf(stderr,"dbg5       course:     %d\n",data->course);
-			fprintf(stderr,"dbg5       speed:      %d\n",data->speed);
-			fprintf(stderr,"dbg5       speed_ps:   %d\n",data->speed_ps);
-			fprintf(stderr,"dbg5       quality:    %d\n",data->quality);
-			fprintf(stderr,"dbg5       sensor size:%d\n",data->sensor_size);
-			fprintf(stderr,"dbg5       data size:  %d\n",data->data_size);
-			fprintf(stderr,"dbg5       speed_ref:  %c%c\n",
-				data->speed_ref[0],data->speed_ref[1]);
-			fprintf(stderr,"dbg5       sensor_type:%c%c\n",
-				data->sensor_type[0],data->sensor_type[1]);
-			fprintf(stderr,"dbg5       data_type:  %c%c\n",
-				data->data_type[0],data->data_type[1]);
-			}
 		}
+
+	/* get header values */
+	mb_get_binary_short(MB_NO, &buffer[0], &store->year);
+	mb_get_binary_short(MB_NO, &buffer[2], &store->day);
+	mb_get_binary_short(MB_NO, &buffer[4], &store->min);
+	mb_get_binary_short(MB_NO, &buffer[6], &store->sec);
+	mb_get_binary_int(MB_NO, &buffer[8], &store->lat);
+	mb_get_binary_int(MB_NO, &buffer[12], &store->lon);
+	mb_get_binary_short(MB_NO, &buffer[16], &store->heading);
+	mb_get_binary_short(MB_NO, &buffer[18], &store->course);
+	mb_get_binary_short(MB_NO, &buffer[20], &store->speed);
+	mb_get_binary_short(MB_NO, &buffer[22], &store->speed_ps);
+	mb_get_binary_short(MB_NO, &buffer[24], &store->quality);
+	mb_get_binary_short(MB_NO, &buffer[26], &store->sensor_size);
+	mb_get_binary_short(MB_NO, &buffer[28], &store->data_size);
+	store->speed_ref[0] = buffer[30];
+	store->speed_ref[1] = buffer[31];
+	store->sensor_type[0] = buffer[32];
+	store->sensor_type[1] = buffer[33];
+	store->data_type[0] = buffer[34];
+	store->data_type[1] = buffer[35];
 
 	/* check for unintelligible records */
 	if (status == MB_SUCCESS)
 		{
-		if ((strncmp(data->sensor_type,"SS",2) != 0 || 
-			strncmp(data->data_type,"SC",2) != 0)
-			&& strncmp(data->data_type,"TR",2) != 0)
+		if ((strncmp(store->sensor_type,"SS",2) != 0 || 
+			strncmp(store->data_type,"SC",2) != 0)
+			&& strncmp(store->data_type,"TR",2) != 0
+			&& strncmp(store->data_type,"SP",2) != 0)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			data->kind = MB_DATA_NONE;
+			store->kind = MB_DATA_NONE;
 
-			/* read rest of record into dummy */
-			for (i=0;i<data->sensor_size;i++)
+			/* read rest of record */
+			if ((read_status = fread(buffer,1,store->sensor_size,
+				mb_io_ptr->mbfp)) !=store->sensor_size) 
 				{
-				if ((read_status = fread(dummy,1,1,
-					mb_io_ptr->mbfp)) != 1) 
-					{
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-					}
-				mb_io_ptr->file_bytes 
-						+= read_status;
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
 				}
-			for (i=0;i<data->data_size;i++)
+			mb_io_ptr->file_bytes += read_status;
+			if ((read_status = fread(buffer,1,store->data_size,
+				mb_io_ptr->mbfp)) != store->data_size) 
 				{
-				if ((read_status = fread(dummy,1,1,
-					mb_io_ptr->mbfp)) != 1) 
-					{
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-					}
-				mb_io_ptr->file_bytes 
-						+= read_status;
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
 				}
-
+			mb_io_ptr->file_bytes += read_status;
 			}
-		else if (strncmp(data->data_type,"SC",2) == 0)
+		else if (strncmp(store->data_type,"SC",2) == 0)
 			{
-			data->kind = MB_DATA_DATA;
+			store->kind = MB_DATA_DATA;
+			}
+		else if (strncmp(store->data_type,"SP",2) == 0)
+			{
+			store->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		else
 			{
-			data->kind = MB_DATA_COMMENT;
+			store->kind = MB_DATA_COMMENT;
 			}
 		}
 
 	/* fix incorrect header records */
 	if (status == MB_SUCCESS 
-		&& data->kind == MB_DATA_DATA 
-		&& data->data_size == 1000)
+		&& store->kind == MB_DATA_DATA 
+		&& store->data_size == 1000)
 		{
-		data->sensor_size = 32;
-		data->data_size = 1001;
+		store->sensor_size = 32;
+		store->data_size = 1001;
 		}
 
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5)
 		{
-		fprintf(stderr,"\ndbg5  New header record after correction in MBIO function <%s>\n",
+		fprintf(stderr,"\ndbg5  New header record in MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg5  New header values:\n");
-		fprintf(stderr,"dbg5       year:       %d\n",data->year);
-		fprintf(stderr,"dbg5       day:        %d\n",data->day);
-		fprintf(stderr,"dbg5       min:        %d\n",data->min);
-		fprintf(stderr,"dbg5       sec:        %d\n",data->sec);
-		fprintf(stderr,"dbg5       lat:        %d\n",data->lat);
-		fprintf(stderr,"dbg5       lon:        %d\n",data->lon);
-		fprintf(stderr,"dbg5       heading:    %d\n",data->heading);
-		fprintf(stderr,"dbg5       course:     %d\n",data->course);
-		fprintf(stderr,"dbg5       speed:      %d\n",data->speed);
-		fprintf(stderr,"dbg5       speed_ps:   %d\n",data->speed_ps);
-		fprintf(stderr,"dbg5       quality:    %d\n",data->quality);
-		fprintf(stderr,"dbg5       sensor size:%d\n",data->sensor_size);
-		fprintf(stderr,"dbg5       data size:  %d\n",data->data_size);
+		fprintf(stderr,"dbg5       year:       %d\n",store->year);
+		fprintf(stderr,"dbg5       day:        %d\n",store->day);
+		fprintf(stderr,"dbg5       min:        %d\n",store->min);
+		fprintf(stderr,"dbg5       sec:        %d\n",store->sec);
+		fprintf(stderr,"dbg5       lat:        %d\n",store->lat);
+		fprintf(stderr,"dbg5       lon:        %d\n",store->lon);
+		fprintf(stderr,"dbg5       heading:    %d\n",store->heading);
+		fprintf(stderr,"dbg5       course:     %d\n",store->course);
+		fprintf(stderr,"dbg5       speed:      %d\n",store->speed);
+		fprintf(stderr,"dbg5       speed_ps:   %d\n",store->speed_ps);
+		fprintf(stderr,"dbg5       quality:    %d\n",store->quality);
+		fprintf(stderr,"dbg5       sensor size:%d\n",store->sensor_size);
+		fprintf(stderr,"dbg5       data size:  %d\n",store->data_size);
 		fprintf(stderr,"dbg5       speed_ref:  %c%c\n",
-			data->speed_ref[0],data->speed_ref[1]);
+			store->speed_ref[0],store->speed_ref[1]);
 		fprintf(stderr,"dbg5       sensor_type:%c%c\n",
-			data->sensor_type[0],data->sensor_type[1]);
+			store->sensor_type[0],store->sensor_type[1]);
 		fprintf(stderr,"dbg5       data_type:  %c%c\n",
-			data->data_type[0],data->data_type[1]);
+			store->data_type[0],store->data_type[1]);
 		}
 
 	/* read sensor record from file */
-	if (status == MB_SUCCESS)
+	if (status == MB_SUCCESS && store->sensor_size > 0)
 		{
-		if ((status = fread(sensorssptr,1,data->sensor_size,
-			mb_io_ptr->mbfp)) == data->sensor_size) 
+		if ((status = fread(buffer,1,store->sensor_size,
+			mb_io_ptr->mbfp)) == store->sensor_size) 
 			{
 			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
@@ -695,141 +609,70 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			}
 		}
 
-	/* byte swap the data if necessary */
-#ifdef BYTESWAPPED
-	if (status == MB_SUCCESS)
+	/* extract sensor data */
+	if (status == MB_SUCCESS && store->sensor_size > 0)
 		{
-		data->ping_number = mb_swap_int(data->ping_number);
-		data->ping_length = mb_swap_short(data->ping_length);
-		data->pixel_size = mb_swap_short(data->pixel_size);
-		data->ss_min = mb_swap_short(data->ss_min);
-		data->ss_max = mb_swap_short(data->ss_max);
-		data->sample_rate = mb_swap_short(data->sample_rate);
-		data->start_time = mb_swap_short(data->start_time);
-		data->tot_slice = mb_swap_short(data->tot_slice);
-		data->pixels_ss = mb_swap_short(data->pixels_ss);
-		}
-#endif
+		/* extract the values */
+		mb_get_binary_short(MB_NO, &buffer[0], &store->ping_number);
+		mb_get_binary_short(MB_NO, &buffer[2], &store->ping_length);
+		mb_get_binary_short(MB_NO, &buffer[4], &store->pixel_size);
+		mb_get_binary_short(MB_NO, &buffer[6], &store->ss_min);
+		mb_get_binary_short(MB_NO, &buffer[8], &store->ss_max);
+		mb_get_binary_short(MB_NO, &buffer[10], &store->sample_rate);
+		mb_get_binary_short(MB_NO, &buffer[12], &store->start_time);
+		mb_get_binary_short(MB_NO, &buffer[14], &store->tot_slice);
+		mb_get_binary_short(MB_NO, &buffer[16], &store->pixels_ss);
+		for (i=0;i<store->sensor_size - 18;i++)
+			store->spare_ss[i] = buffer[18+i];
 
-	/* fix some files with incorrect sensor records */
-	if (status == MB_SUCCESS 
-		&& data->kind == MB_DATA_DATA 
-		&& data->data_size == 1001)
-		{
-		data->pixels_ss = 1000;
-		}
-
-	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  New sensor record read by MBIO function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg5  New sensor values:\n");
-		fprintf(stderr,"dbg5       ping_number:     %d\n",
-			data->ping_number);
-		fprintf(stderr,"dbg5       ping_length:     %d\n",
-			data->ping_length);
-		fprintf(stderr,"dbg5       pixel_size:      %d\n",
-			data->pixel_size);
-		fprintf(stderr,"dbg5       ss_min:          %d\n",
-			data->ss_min);
-		fprintf(stderr,"dbg5       ss_max:          %d\n",
-			data->ss_max);
-		fprintf(stderr,"dbg5       sample_rate:     %d\n",
-			data->sample_rate);
-		fprintf(stderr,"dbg5       start_time:      %d\n",
-			data->start_time);
-		fprintf(stderr,"dbg5       tot_slice:       %d\n",
-			data->tot_slice);
-		fprintf(stderr,"dbg5       pixels_ss:       %d\n",
-			data->pixels_ss);
-		fprintf(stderr,"dbg5       spare_ss:        ");
-		for (i=0;i<12;i++)
-			fprintf(stderr,"%c", data->spare_ss[i]);
-		fprintf(stderr, "\n");
+		/* fix some files with incorrect sensor records */
+		if (status == MB_SUCCESS 
+			&& store->kind == MB_DATA_DATA 
+			&& store->data_size == 1001)
+			{
+			store->pixels_ss = 1000;
+			}
+		/* print debug statements */
+		if (status == MB_SUCCESS && verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  New sensor record read by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg5  New sensor values:\n");
+			fprintf(stderr,"dbg5       ping_number:     %d\n",
+				store->ping_number);
+			fprintf(stderr,"dbg5       ping_length:     %d\n",
+				store->ping_length);
+			fprintf(stderr,"dbg5       pixel_size:      %d\n",
+				store->pixel_size);
+			fprintf(stderr,"dbg5       ss_min:          %d\n",
+				store->ss_min);
+			fprintf(stderr,"dbg5       ss_max:          %d\n",
+				store->ss_max);
+			fprintf(stderr,"dbg5       sample_rate:     %d\n",
+				store->sample_rate);
+			fprintf(stderr,"dbg5       start_time:      %d\n",
+				store->start_time);
+			fprintf(stderr,"dbg5       tot_slice:       %d\n",
+				store->tot_slice);
+			fprintf(stderr,"dbg5       pixels_ss:       %d\n",
+				store->pixels_ss);
+			fprintf(stderr,"dbg5       spare_ss:        ");
+			for (i=0;i<12;i++)
+				fprintf(stderr,"%c", store->spare_ss[i]);
+			fprintf(stderr, "\n");
+			}
 		}
 
 	/* read data record from file */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
-		{
-		if ((status = fread(datassptr,1,data->data_size,
-			mb_io_ptr->mbfp)) == data->data_size) 
-			{
-			mb_io_ptr->file_bytes += status;
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
-			}
-		else
-			{
-			mb_io_ptr->file_bytes += status;
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-			}
-		}
-
-	/* byte swap the data if necessary */
-#ifdef BYTESWAPPED
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
-		{
-		if (data->ss[0] == 'R');
-			{
-			for (i=1;i<=data->pixels_ss;i++)
-				{
-				short_ptr = (unsigned short *) &data->ss[4+i*2];
-				*short_ptr = (unsigned short) mb_swap_short(*short_ptr);
-				}
-			}
-		}
-#endif
-
-	/* correct data size if needed */
 	if (status == MB_SUCCESS 
-		&& data->kind == MB_DATA_DATA 
-		&& data->data_size == 1001)
+		&& store->data_size > 0)
 		{
-		data->data_size = 1004;
-		data->ss[1001] = 'G';
-		data->ss[1002] = 'G';
-		data->ss[1003] = 'G';
-		}
-
-	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5 
-		&& data->kind == MB_DATA_DATA)
-		{
-		fprintf(stderr,"\ndbg5  New data record read by MBIO function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg5  New data values:\n");
-		fprintf(stderr,"dbg5       sidescan_type:%c\n",
-			data->ss[0]);
-		if (data->ss[0] == 'G')
-			{
-			for (i=1;i<=data->pixels_ss;i++)
-				fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
-					i,data->ss[i]);
-			}
-		else if (data->ss[0] == 'R')
-			{
-			for (i=1;i<=data->pixels_ss;i++)
-				{
-				short_ptr = (unsigned short *) &data->ss[4+i*2];
-				fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
-					i,*short_ptr);
-				}
-			}
-		}
-
-	/* read comment record from file */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_COMMENT)
-		{
-		if ((status = fread(commentptr,1,data->data_size,
-			mb_io_ptr->mbfp)) == data->data_size) 
+		if ((status = fread(buffer,1,store->data_size,
+			mb_io_ptr->mbfp)) == store->data_size) 
 			{
 			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
-			for (i=data->data_size;i<MBF_SB2000SS_COMMENT_LENGTH;i++)
-				commentptr[i] = '\0';
 			}
 		else
 			{
@@ -839,126 +682,152 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			}
 		}
 
-	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5 
-		&& data->kind == MB_DATA_COMMENT)
+	/* extract sidescan data */
+	if (status == MB_SUCCESS 
+		&& store->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"\ndbg5  New comment record read by MBIO function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg5  New comment:\n");
-		fprintf(stderr,"dbg5       comment:   %s\n",
-			data->comment);
+		/* correct data size if needed */
+		if (store->data_size == 1001)
+		    {
+		    store->data_size = 1004;
+		    store->ss[1001] = 'G';
+		    store->ss[1002] = 'G';
+		    store->ss[1003] = 'G';
+		    }
+		    
+		/* deal with 1-byte data */
+		if (buffer[0] == 'G')
+		    {
+		    store->ss_type = 'G';
+		    for (i=0;i<store->pixels_ss;i++)
+			{
+			store->ss[i] = buffer[i+1];
+			}
+		    }
+		    
+		/* deal with 2-byte data */
+		else if (buffer[0] == 'R')
+		    {
+		    store->ss_type = 'R';
+		    for (i=0;i<store->pixels_ss;i++)
+			{
+			mb_get_binary_short(MB_NO, (short *)&(buffer[4+2*i]), 
+					    (short *)&(store->ss[2*i]));
+			}
+		    }
+	
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  New data record read by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg5  New data values:\n");
+			fprintf(stderr,"dbg5       sidescan_type:%c\n",
+				store->ss_type);
+			if (store->ss_type == 'G')
+				{
+				for (i=0;i<store->pixels_ss;i++)
+					fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
+						i,store->ss[i]);
+				}
+			else if (store->ss_type == 'R')
+				{
+				for (i=1;i<=store->pixels_ss;i++)
+					{
+					short_ptr = (unsigned short *) &store->ss[i*2];
+					fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
+						i,*short_ptr);
+					}
+				}
+			}
+		}
+
+	/* extract velocity profile record */
+	if (status == MB_SUCCESS 
+		&& store->kind == MB_DATA_VELOCITY_PROFILE)
+		{
+		/* extract the values */
+		mb_get_binary_int(MB_NO, &buffer[0], &store->svp_mean);
+		mb_get_binary_short(MB_NO, &buffer[4], &store->svp_number);
+		mb_get_binary_short(MB_NO, &buffer[6], &store->svp_spare);
+		for (i=0;i<MIN(store->svp_number, 30);i++)
+			{
+			mb_get_binary_short(MB_NO, &buffer[8+i*4], &store->svp_depth[i]);
+			mb_get_binary_short(MB_NO, &buffer[10+i*4], &store->svp_vel[i]);
+			}
+		mb_get_binary_short(MB_NO, &buffer[128], &store->vru1);
+		mb_get_binary_short(MB_NO, &buffer[130], &store->vru1_port);
+		mb_get_binary_short(MB_NO, &buffer[132], &store->vru1_forward);
+		mb_get_binary_short(MB_NO, &buffer[134], &store->vru1_vert);
+		mb_get_binary_short(MB_NO, &buffer[136], &store->vru2);
+		mb_get_binary_short(MB_NO, &buffer[138], &store->vru2_port);
+		mb_get_binary_short(MB_NO, &buffer[140], &store->vru2_forward);
+		mb_get_binary_short(MB_NO, &buffer[142], &store->vru2_vert);
+	
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  New svp record read by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg5  New svp values:\n");
+			fprintf(stderr,"dbg5       svp_mean:     %d\n",
+				store->svp_mean);
+			fprintf(stderr,"dbg5       svp_number:   %d\n",
+				store->svp_number);
+			fprintf(stderr,"dbg5       svp_spare:    %d\n",
+				store->svp_spare);
+			for (i=0;i<30;i++)
+				fprintf(stderr,"dbg5       %d  depth: %d  vel: %d\n",
+					i,store->svp_depth[i],
+					store->svp_vel[i]);
+			fprintf(stderr,"dbg5       vru1:         %d\n",
+				store->vru1);
+			fprintf(stderr,"dbg5       vru1_port:    %d\n",
+				store->vru1_port);
+			fprintf(stderr,"dbg5       vru1_forward: %d\n",
+				store->vru1_forward);
+			fprintf(stderr,"dbg5       vru1_vert:    %d\n",
+				store->vru1_vert);
+			fprintf(stderr,"dbg5       vru2:         %d\n",
+				store->vru2);
+			fprintf(stderr,"dbg5       vru2_port:    %d\n",
+				store->vru2_port);
+			fprintf(stderr,"dbg5       vru2_forward: %d\n",
+				store->vru2_forward);
+			fprintf(stderr,"dbg5       vru2_vert:    %d\n",
+				store->vru2_vert);
+			fprintf(stderr,"dbg5       pitch_bias:    %d\n",
+				store->pitch_bias);
+			fprintf(stderr,"dbg5       roll_bias:    %d\n",
+				store->roll_bias);
+			fprintf(stderr,"dbg5       vru:          %c%c%c%c%c%c%c%c\n",
+				store->vru[0],store->vru[1],store->vru[2],store->vru[3],
+				store->vru[4],store->vru[5],store->vru[6],store->vru[7]);
+			}
+		}
+
+	/* extract comment record */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_COMMENT)
+		{
+		strncpy(store->comment, buffer, 
+			MIN(store->data_size, MBSYS_SB2000_COMMENT_LENGTH-1));
+		store->comment[MIN(store->data_size, 
+			MBSYS_SB2000_COMMENT_LENGTH-1)] = '\0';
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  New comment record read by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg5  New comment:\n");
+			fprintf(stderr,"dbg5       comment:   %s\n",
+				store->comment);
+			}
 		}
 
 	/* set kind and error in mb_io_ptr */
-	mb_io_ptr->new_kind = data->kind;
+	mb_io_ptr->new_kind = store->kind;
 	mb_io_ptr->new_error = *error;
-
-	/* translate values to seabeam data storage structure */
-	if (status == MB_SUCCESS
-		&& store != NULL)
-		{
-		/* type of data record */
-		store->kind = data->kind;
-
-		/* position */
-		store->lon = data->lon;
-		store->lat = data->lat;
-
-		/* time stamp */
-		store->year = data->year;
-		store->day = data->day;
-		store->min = data->min;
-		store->sec = data->sec;
-
-		/* heading and speed */
-		store->heading = data->heading;
-		store->course = data->course;
-		store->speed = data->speed;
-		store->speed_ps = data->speed_ps;
-		store->quality = data->quality;
-		store->sensor_size = data->sensor_size;
-		store->data_size = data->data_size;
-		store->speed_ref[0] = data->speed_ref[0];
-		store->speed_ref[1] = data->speed_ref[1];
-		store->sensor_type[0] = data->sensor_type[0];
-		store->sensor_type[1] = data->sensor_type[1];
-		store->data_type[0] = data->data_type[0];
-		store->data_type[1] = data->data_type[1];
-
-		/* additional values */
-		store->pitch= 0;
-		store->roll = 0;
-		store->gain = 0;
-		store->correction = 0;
-		store->surface_vel = 0;
-		store->pulse_width = 0;
-		store->attenuation = 0;
-		store->spare1 = 0;
-		store->spare2 = 0;
-		store->mode[0] = '\0';
-		store->mode[1] = '\0';
-		store->data_correction[0] = '\0';
-		store->data_correction[1] = '\0';
-		store->ssv_source[0] = '\0';
-		store->ssv_source[1] = '\0';
-		
-		/* svp */
-		store->svp_mean = 0;
-		store->svp_number = 0;
-		store->svp_spare = 0;
-		for (i=0;i<30;i++)
-			{
-			store->svp_depth[i] = 0;
-			store->svp_vel[i] = 0;
-			}
-		store->vru1 = 0;
-		store->vru1_port = 0;
-		store->vru1_forward = 0;
-		store->vru1_vert = 0;
-		store->vru2 = 0;
-		store->vru2_port = 0;
-		store->vru2_forward = 0;
-		store->vru2_vert = 0;
-		store->pitch_bias = 0;
-		store->roll_bias = 0;
-		for (i=0;i<8;i++)
-			{
-			store->vru[i] = '\0';
-			}
-
-		/* depths and distances */
-		store->beams_bath = 0;
-		store->scale_factor = 0;
-		
-		/* sidescan */
-		store->ping_number = data->ping_number;
-		store->ping_length = data->ping_length;
-		store->pixel_size = data->pixel_size;
-		store->ss_min = data->ss_min;
-		store->ss_max = data->ss_max;
-		store->sample_rate = data->sample_rate;
-		store->start_time = data->start_time;
-		store->tot_slice = data->tot_slice;
-		store->pixels_ss = data->pixels_ss;
-		for (i=0;i<12;i++)
-			store->spare_ss[i] = data->spare_ss[i];
-		store->ss_type = data->ss[0];
-		if (store->ss_type == 'R')
-			{
-			for (i=0;i<2*data->pixels_ss;i++)
-				store->ss[i] = data->ss[i+4];
-			}
-		else
-			{
-			for (i=0;i<data->pixels_ss;i++)
-				store->ss[i] = data->ss[i+1];
-			}
-
-		/* comment */
-		strncpy(store->comment,mb_io_ptr->new_comment,
-			MBSYS_SB2000_COMMENT_LENGTH);
-		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -980,14 +849,9 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	char	*function_name = "mbr_wt_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_sb2000ss_struct *data;
 	struct mbsys_sb2000_struct *store;
-	char	*headerptr;
-	char	*sensorssptr;
-	char	*datassptr;
-	char	*commentptr;
+	char	buffer[2048];
 	unsigned short *short_ptr;
-	int	header_size, sensor_size, data_size;
 	int	i, j;
 
 	/* print input debug statements */
@@ -1005,142 +869,7 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2000ss_struct *) mb_io_ptr->raw_data;
 	store = (struct mbsys_sb2000_struct *) store_ptr;
-
-	/* get pointers to records */
-	headerptr = (char *) &data->year;
-	sensorssptr = (char *) &data->ping_number;
-	datassptr = (char *) &data->ss[0];
-	commentptr = (char *) &data->comment[0];
-
-	/* first set some plausible amounts for some of the 
-		variables in the SB2000SS record */
-	data->year = 0;
-	data->day = 0;
-	data->min = 0;
-	data->sec = 0;
-	data->lat = 0;
-	data->lon = 0;
-	data->heading = 0;
-	data->course = 0;
-	data->speed = 0;
-	data->speed_ps = 0;
-	data->quality = 0;
-	data->sensor_size = 0;
-	data->data_size = 0;
-	data->speed_ref[0] = 0;
-	data->speed_ref[1] = 0;
-	if (mb_io_ptr->new_kind == MB_DATA_DATA)
-		{
-		data->sensor_type[0] = 'S';
-		data->sensor_type[1] = 'S';
-		data->data_type[0] = 'S';
-		data->data_type[1] = 'C';
-		}
-	else
-		{
-		data->sensor_type[0] = 0;
-		data->sensor_type[1] = 0;
-		data->data_type[0] = 'T';
-		data->data_type[1] = 'R';
-		}
-	data->ping_number = 0;
-	data->ping_length = 0;
-	data->pixel_size = 0;
-	data->ss_min = 0;
-	data->ss_max = 0;
-	data->sample_rate = 0;
-	data->start_time = 0;
-	data->tot_slice = 0;
-	data->pixels_ss = 0;
-	data->ss[0] = 'G';
-	
-	/* second translate values from seabeam 2000 data storage structure */
-	if (store != NULL)
-		{
-		data->kind = store->kind;
-		if (store->kind == MB_DATA_DATA)
-			{
-			data->sensor_type[0] = 'S';
-			data->sensor_type[1] = 'S';
-			data->data_type[0] = 'S';
-			data->data_type[1] = 'C';
-			}
-		else
-			{
-			data->sensor_type[0] = 0;
-			data->sensor_type[1] = 0;
-			data->data_type[0] = 'T';
-			data->data_type[1] = 'R';
-			}
-
-		/* position */
-		data->lon = store->lon;
-		data->lat = store->lat;
-
-		/* time stamp */
-		data->year = store->year;
-		data->day = store->day;
-		data->min = store->min;
-		data->sec = store->sec;
-
-		/* heading and speed */
-		data->heading = store->heading;
-		data->course = store->course;
-		data->speed = store->speed;
-		data->speed_ps = store->speed_ps;
-		data->quality = store->quality;
-		data->sensor_size = store->sensor_size;
-		data->data_size = store->data_size;
-		data->speed_ref[0] = store->speed_ref[0];
-		data->speed_ref[1] = store->speed_ref[1];
-		data->sensor_type[0] = store->sensor_type[0];
-		data->sensor_type[1] = store->sensor_type[1];
-		data->data_type[0] = store->data_type[0];
-		data->data_type[1] = store->data_type[1];
-
-		if (store->kind == MB_DATA_DATA)
-			{
-			data->ping_number = store->ping_number;
-			data->ping_length = store->ping_length;
-			data->pixel_size = store->pixel_size;
-			data->ss_min = store->ss_min;
-			data->ss_max = store->ss_max;
-			data->sample_rate = store->sample_rate;
-			data->start_time = store->start_time;
-			data->pixels_ss = store->pixels_ss;
-			for (i=0;i<12;i++)
-				data->spare_ss[i] = store->spare_ss[i];
-			if (store->ss_type == 'R')
-				{
-				data->ss[0] = 'R';
-				data->ss[1] = 'R';
-				data->ss[2] = 'R';
-				data->ss[3] = 'R';
-				for (i=0;i<2*data->pixels_ss;i++)
-					data->ss[i+4] = store->ss[i];
-				}
-			else if (store->ss_type == 'G')
-				{
-				data->ss[0] = store->ss_type;
-				data->ss[1001] = store->ss_type;
-				data->ss[1002] = store->ss_type;
-				data->ss[1003] = store->ss_type;
-				for (i=0;i<data->pixels_ss;i++)
-					data->ss[i+1] = store->ss[i];
-				}
-			}
-
-		/* comment */
-		else if (store->kind == MB_DATA_COMMENT)
-			{
-			strncpy(commentptr,store->comment,
-				MBF_SB2000SS_COMMENT_LENGTH-1);
-			data->data_size = strlen(commentptr);
-			data->sensor_size = 0;
-			}
-		}
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -1148,7 +877,7 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		fprintf(stderr,"\ndbg5  Ready to write data in MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg5       kind:       %d\n",
-			data->kind);
+			store->kind);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		}
@@ -1159,78 +888,120 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		fprintf(stderr,"\ndbg5  Header record to be written by MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg5  Header values:\n");
-		fprintf(stderr,"dbg5       year:       %d\n",data->year);
-		fprintf(stderr,"dbg5       day:        %d\n",data->day);
-		fprintf(stderr,"dbg5       min:        %d\n",data->min);
-		fprintf(stderr,"dbg5       sec:        %d\n",data->sec);
-		fprintf(stderr,"dbg5       lat:        %d\n",data->lat);
-		fprintf(stderr,"dbg5       lon:        %d\n",data->lon);
-		fprintf(stderr,"dbg5       heading:    %d\n",data->heading);
-		fprintf(stderr,"dbg5       course:     %d\n",data->course);
-		fprintf(stderr,"dbg5       speed:      %d\n",data->speed);
-		fprintf(stderr,"dbg5       speed_ps:   %d\n",data->speed_ps);
-		fprintf(stderr,"dbg5       quality:    %d\n",data->quality);
-		fprintf(stderr,"dbg5       sensor size:%d\n",data->sensor_size);
-		fprintf(stderr,"dbg5       data size:  %d\n",data->data_size);
+		fprintf(stderr,"dbg5       year:       %d\n",store->year);
+		fprintf(stderr,"dbg5       day:        %d\n",store->day);
+		fprintf(stderr,"dbg5       min:        %d\n",store->min);
+		fprintf(stderr,"dbg5       sec:        %d\n",store->sec);
+		fprintf(stderr,"dbg5       lat:        %d\n",store->lat);
+		fprintf(stderr,"dbg5       lon:        %d\n",store->lon);
+		fprintf(stderr,"dbg5       heading:    %d\n",store->heading);
+		fprintf(stderr,"dbg5       course:     %d\n",store->course);
+		fprintf(stderr,"dbg5       speed:      %d\n",store->speed);
+		fprintf(stderr,"dbg5       speed_ps:   %d\n",store->speed_ps);
+		fprintf(stderr,"dbg5       quality:    %d\n",store->quality);
+		fprintf(stderr,"dbg5       sensor size:%d\n",store->sensor_size);
+		fprintf(stderr,"dbg5       data size:  %d\n",store->data_size);
 		fprintf(stderr,"dbg5       speed_ref:  %c%c\n",
-			data->speed_ref[0],data->speed_ref[1]);
+			store->speed_ref[0],store->speed_ref[1]);
 		fprintf(stderr,"dbg5       sensor_type:%c%c\n",
-			data->sensor_type[0],data->sensor_type[1]);
+			store->sensor_type[0],store->sensor_type[1]);
 		fprintf(stderr,"dbg5       data_type:  %c%c\n",
-			data->data_type[0],data->data_type[1]);
+			store->data_type[0],store->data_type[1]);
 		}
 
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 
-		&& data->kind == MB_DATA_DATA)
+		&& store->kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"\ndbg5  Sensor record to be written by MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg5  Sensor values:\n");
 		fprintf(stderr,"dbg5       ping_number:     %d\n",
-			data->ping_number);
+			store->ping_number);
 		fprintf(stderr,"dbg5       ping_length:     %d\n",
-			data->ping_length);
+			store->ping_length);
 		fprintf(stderr,"dbg5       pixel_size:      %d\n",
-			data->pixel_size);
+			store->pixel_size);
 		fprintf(stderr,"dbg5       ss_min:          %d\n",
-			data->ss_min);
+			store->ss_min);
 		fprintf(stderr,"dbg5       ss_max:          %d\n",
-			data->ss_max);
+			store->ss_max);
 		fprintf(stderr,"dbg5       sample_rate:     %d\n",
-			data->sample_rate);
+			store->sample_rate);
 		fprintf(stderr,"dbg5       start_time:      %d\n",
-			data->start_time);
+			store->start_time);
 		fprintf(stderr,"dbg5       tot_slice:       %d\n",
-			data->tot_slice);
+			store->tot_slice);
 		fprintf(stderr,"dbg5       pixels_ss:       %d\n",
-			data->pixels_ss);
+			store->pixels_ss);
 		fprintf(stderr,"dbg5       spare_ss:        ");
 		for (i=0;i<12;i++)
-			fprintf(stderr,"%c", data->spare_ss[i]);
+			fprintf(stderr,"%c", store->spare_ss[i]);
 		fprintf(stderr, "\n");
 		}
 
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 
-		&& data->kind == MB_DATA_DATA)
+		&& store->kind == MB_DATA_VELOCITY_PROFILE)
+		{
+		fprintf(stderr,"\ndbg5  SVP record to be written by MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5  SVP values:\n");
+		fprintf(stderr,"dbg5       svp_mean:     %d\n",
+			store->svp_mean);
+		fprintf(stderr,"dbg5       svp_number:   %d\n",
+			store->svp_number);
+		fprintf(stderr,"dbg5       svp_spare:   %d\n",
+			store->svp_spare);
+		for (i=0;i<30;i++)
+			fprintf(stderr,"dbg5       %d  depth: %d  vel: %d\n",
+				i,store->svp_depth[i],
+				store->svp_vel[i]);
+		fprintf(stderr,"dbg5       vru1:         %d\n",
+			store->vru1);
+		fprintf(stderr,"dbg5       vru1_port:    %d\n",
+			store->vru1_port);
+		fprintf(stderr,"dbg5       vru1_forward: %d\n",
+			store->vru1_forward);
+		fprintf(stderr,"dbg5       vru1_vert:    %d\n",
+			store->vru1_vert);
+		fprintf(stderr,"dbg5       vru2:         %d\n",
+			store->vru2);
+		fprintf(stderr,"dbg5       vru2_port:    %d\n",
+			store->vru2_port);
+		fprintf(stderr,"dbg5       vru2_forward: %d\n",
+			store->vru2_forward);
+		fprintf(stderr,"dbg5       vru2_vert:    %d\n",
+			store->vru2_vert);
+		fprintf(stderr,"dbg5       pitch_bias:    %d\n",
+			store->pitch_bias);
+		fprintf(stderr,"dbg5       roll_bias:    %d\n",
+			store->roll_bias);
+		fprintf(stderr,"dbg5       vru:          %c%c%c%c%c%c%c%c\n",
+			store->vru[0],store->vru[1],store->vru[2],store->vru[3],
+			store->vru[4],store->vru[5],store->vru[6],store->vru[7]);
+		}
+
+	/* print debug statements */
+	if (status == MB_SUCCESS && verbose >= 5 
+		&& store->kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"\ndbg5  Data record to be written by MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg5  Data values:\n");
-		fprintf(stderr,"dbg5       sidescan_type:%d\n",
-			data->ss[0]);
-		if (data->ss[0] == 'G')
+		fprintf(stderr,"dbg5       sidescan_type:%c\n",
+			store->ss_type);
+		if (store->ss_type == 'G')
 			{
-			for (i=1;i<=data->pixels_ss;i++)
+			for (i=0;i<store->pixels_ss;i++)
 				fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
-					i,data->ss[i]);
+					i,store->ss[i]);
 			}
-		else if (data->ss[0] == 'R');
+		else if (store->ss_type == 'R')
 			{
-			for (i=1;i<=data->pixels_ss;i++)
+			for (i=1;i<=store->pixels_ss;i++)
 				{
-				short_ptr = (unsigned short *) &data->ss[4+i*2];
+				short_ptr = (unsigned short *) &store->ss[i*2];
 				fprintf(stderr,"dbg5       pixel: %d  ss: %d\n",
 					i,*short_ptr);
 				}
@@ -1239,61 +1010,74 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 
-		&& data->kind == MB_DATA_COMMENT)
+		&& store->kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"\ndbg5  Comment record to be written by MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg5  Comment:\n");
 		fprintf(stderr,"dbg5       comment:   %s\n",
-			data->comment);
+			store->comment);
 		}
 
-	/* get sizes of writes */
-	header_size = MBF_SB2000SS_HEADER_SIZE;
-	sensor_size = data->sensor_size;
-	data_size = data->data_size;
-
-	/* byte swap the data if necessary */
-#ifdef BYTESWAPPED
-	data->year = mb_swap_short(data->year);
-	data->day = mb_swap_short(data->day);
-	data->min = mb_swap_short(data->min);
-	data->sec = mb_swap_short(data->sec);
-	data->lat = mb_swap_int(data->lat);
-	data->lon = mb_swap_int(data->lon);
-	data->heading = mb_swap_short(data->heading);
-	data->course = mb_swap_short(data->course);
-	data->speed = mb_swap_short(data->speed);
-	data->speed_ps = mb_swap_short(data->speed_ps);
-	data->quality = mb_swap_short(data->quality);
-	data->sensor_size = mb_swap_short(data->sensor_size);
-	data->data_size = mb_swap_short(data->data_size);
-	if (data->kind == MB_DATA_DATA)
-		{
-		if (data->ss[0] == 'R');
-			{
-			for (i=1;i<=data->pixels_ss;i++)
-				{
-				short_ptr = (unsigned short *) &data->ss[4+i*2];
-				*short_ptr = (unsigned short) mb_swap_short(*short_ptr);
-				}
-			}
-		data->ping_number = mb_swap_int(data->ping_number);
-		data->ping_length = mb_swap_short(data->ping_length);
-		data->pixel_size = mb_swap_short(data->pixel_size);
-		data->ss_min = mb_swap_short(data->ss_min);
-		data->ss_max = mb_swap_short(data->ss_max);
-		data->sample_rate = mb_swap_short(data->sample_rate);
-		data->start_time = mb_swap_short(data->start_time);
-		data->pixels_ss = mb_swap_short(data->pixels_ss);
-		}
-#endif
-
-	/* write header record to file */
+	/* put header values */
 	if (status == MB_SUCCESS)
 		{
-		if ((status = fwrite(headerptr,1,header_size,
-			mb_io_ptr->mbfp)) == header_size) 
+		/* put header values */
+		mb_put_binary_short(MB_NO, store->year, &buffer[0]);
+		mb_put_binary_short(MB_NO, store->day, &buffer[2]);
+		mb_put_binary_short(MB_NO, store->min, &buffer[4]);
+		mb_put_binary_short(MB_NO, store->sec, &buffer[6]);
+		mb_put_binary_int(MB_NO, store->lat, &buffer[8]);
+		mb_put_binary_int(MB_NO, store->lon, &buffer[12]);
+		mb_put_binary_short(MB_NO, store->heading, &buffer[16]);
+		mb_put_binary_short(MB_NO, store->course, &buffer[18]);
+		mb_put_binary_short(MB_NO, store->speed, &buffer[20]);
+		mb_put_binary_short(MB_NO, store->speed_ps, &buffer[22]);
+		mb_put_binary_short(MB_NO, store->quality, &buffer[24]);
+		mb_put_binary_short(MB_NO, store->sensor_size, &buffer[26]);
+		mb_put_binary_short(MB_NO, store->data_size, &buffer[28]);
+		buffer[30] = store->speed_ref[0];
+		buffer[31] = store->speed_ref[1];
+		buffer[32] = store->sensor_type[0];
+		buffer[33] = store->sensor_type[1];
+		buffer[34] = store->data_type[0];
+		buffer[35] = store->data_type[1];
+
+		/* write header record to file */
+		if ((status = fwrite(buffer,1,MBSYS_SB2000_HEADER_SIZE,
+			mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE) 
+			{
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		}
+			
+	/* put sensor data */
+	if (status == MB_SUCCESS 
+		&& store->kind == MB_DATA_DATA
+		&& store->sensor_size > 0)
+		{
+		/* put sensor values */
+		mb_put_binary_short(MB_NO, store->ping_number, &buffer[0]);
+		mb_put_binary_short(MB_NO, store->ping_length, &buffer[2]);
+		mb_put_binary_short(MB_NO, store->pixel_size, &buffer[4]);
+		mb_put_binary_short(MB_NO, store->ss_min, &buffer[6]);
+		mb_put_binary_short(MB_NO, store->ss_max, &buffer[8]);
+		mb_put_binary_short(MB_NO, store->sample_rate, &buffer[10]);
+		mb_put_binary_short(MB_NO, store->start_time, &buffer[12]);
+		mb_put_binary_short(MB_NO, store->tot_slice, &buffer[14]);
+		mb_put_binary_short(MB_NO, store->pixels_ss, &buffer[16]);
+		for (i=0;i<store->sensor_size - 18;i++)
+			buffer[18+i] = store->spare_ss[i];
+
+		/* write sensor record to file */
+		if ((status = fwrite(buffer,1,store->sensor_size,
+			mb_io_ptr->mbfp)) == store->sensor_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1305,11 +1089,31 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			}
 		}
 
-	/* write sensor record to file */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
+	if (status == MB_SUCCESS 
+		&& store->kind == MB_DATA_VELOCITY_PROFILE
+		&& store->data_size > 0)
 		{
-		if ((status = fwrite(sensorssptr,1,sensor_size,
-			mb_io_ptr->mbfp)) == sensor_size) 
+		/* extract the values */
+		mb_put_binary_int(MB_NO, store->svp_mean, &buffer[0]);
+		mb_put_binary_short(MB_NO, store->svp_number, &buffer[4]);
+		mb_put_binary_short(MB_NO, store->svp_spare, &buffer[6]);
+		for (i=0;i<MIN(store->svp_number, 30);i++)
+			{
+			mb_put_binary_short(MB_NO, store->svp_depth[i], &buffer[8+i*4]);
+			mb_put_binary_short(MB_NO, store->svp_vel[i], &buffer[10+i*4]);
+			}
+		mb_put_binary_short(MB_NO, store->vru1, &buffer[128]);
+		mb_put_binary_short(MB_NO, store->vru1_port, &buffer[130]);
+		mb_put_binary_short(MB_NO, store->vru1_forward, &buffer[132]);
+		mb_put_binary_short(MB_NO, store->vru1_vert, &buffer[134]);
+		mb_put_binary_short(MB_NO, store->vru2, &buffer[136]);
+		mb_put_binary_short(MB_NO, store->vru2_port, &buffer[138]);
+		mb_put_binary_short(MB_NO, store->vru2_forward, &buffer[140]);
+		mb_put_binary_short(MB_NO, store->vru2_vert, &buffer[142]);
+
+		/* write svp profile */
+		if ((status = fwrite(buffer,1,store->data_size,
+			mb_io_ptr->mbfp)) == store->data_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1321,11 +1125,42 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			}
 		}
 
-	/* write data record to file */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
+	if (status == MB_SUCCESS 
+		&& store->kind == MB_DATA_DATA
+		&& store->data_size > 0)
 		{
-		if ((status = fwrite(datassptr,1,data_size,
-			mb_io_ptr->mbfp)) == data_size) 
+		/* put the values */
+		    
+		/* deal with 1-byte data */
+		if (store->ss_type == 'G')
+		    {
+		    buffer[0] = 'G';
+		    for (i=0;i<store->pixels_ss;i++)
+			{
+			buffer[i+1] = store->ss[i];
+			}
+		    buffer[store->pixels_ss+1] = 'G';
+		    buffer[store->pixels_ss+2] = 'G';
+		    buffer[store->pixels_ss+3] = 'G';
+		    }
+		    
+		/* deal with 2-byte data */
+		else if (store->ss_type == 'R')
+		    {
+		    buffer[0] = 'R';
+		    buffer[1] = 'R';
+		    buffer[2] = 'R';
+		    buffer[3] = 'R';
+		    for (i=0;i<store->pixels_ss;i++)
+			{
+			mb_get_binary_short(MB_NO, (short *)&(store->ss[2*i]), 
+					    (short *)&(buffer[4+2*i]));
+			}
+		    }
+
+		/* write survey data */
+		if ((status = fwrite(buffer,1,store->data_size,
+			mb_io_ptr->mbfp)) == store->data_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1337,11 +1172,19 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			}
 		}
 
-	/* write comment record to file */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_COMMENT)
+	if (status == MB_SUCCESS 
+		&& store->kind == MB_DATA_COMMENT
+		&& store->data_size > 0)
 		{
-		if ((status = fwrite(commentptr,1,data_size,
-			mb_io_ptr->mbfp)) == data_size) 
+		/* put the comment */
+		strncpy(buffer, store->comment,
+			MIN(store->data_size, MBSYS_SB2000_COMMENT_LENGTH-1));
+		buffer[MIN(store->data_size, 
+			MBSYS_SB2000_COMMENT_LENGTH-1)] = '\0';
+
+		/* write comment */
+		if ((status = fwrite(buffer,1,store->data_size,
+			mb_io_ptr->mbfp)) == store->data_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_oic.c	3/1/99
- *	$Id: mbsys_oic.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_oic.c,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 1, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -57,7 +60,7 @@
 int mbsys_oic_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_oic.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_oic.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbsys_oic_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -664,6 +667,8 @@ int mbsys_oic_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	else if (store->kind == MB_DATA_COMMENT)
 	    {
 	    strncpy(store->client,comment,MBSYS_OIC_MAX_COMMENT);
+	    store->client_size = strlen(comment) + 1;
+	    store->type = OIC_ID_COMMENT;
 	    }
 
 	/* print output debug statements */

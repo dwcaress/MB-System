@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *    $Id: mb_define.h,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -56,7 +59,7 @@
 
 /* other string length defines */
 #define MB_NAME_LENGTH		32
-#define MB_DESCRIPTION_LENGTH	1024
+#define MB_DESCRIPTION_LENGTH	2048
 
 /* maximum number of navigation points saved */
 #define MB_NAV_SAVE_MAX 20
@@ -68,7 +71,12 @@
 #define	MB_FILETYPE_NORMAL	1
 #define	MB_FILETYPE_XDR		2
 #define	MB_FILETYPE_GSF		3
- 
+
+/* settings for recursive datalist reading functions */
+#define MB_DATALIST_LOOK_UNSET		0
+#define MB_DATALIST_LOOK_NO 		1
+#define MB_DATALIST_LOOK_YES		2
+
 /* type definitions of signed and unsigned char */
 typedef unsigned char	mb_u_char;
 #ifdef IRIX
@@ -116,6 +124,8 @@ typedef signed char	mb_s_char;
 #endif
 	
 /* MBIO core function prototypes */
+int mb_format_register(int verbose, int *format, char *mbio_ptr, 
+		int *error);
 int mb_format_info(int verbose, int *format, int *system, 
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		char *format_name, char *system_name, char *format_description, 
@@ -123,19 +133,11 @@ int mb_format_info(int verbose, int *format, int *system,
 		int *traveltime, int *beam_flagging, 
 		int *nav_source, int *heading_source, int *vru_source, 
 		double *beamwidth_xtrack, double *beamwidth_ltrack, 
-		int (**format_alloc)(), int (**format_free)(), 
-		int (**store_alloc)(),  int (**store_free)(), 
-		int (**read_ping)(), int (**write_ping)(), 
-		int (**extract)(),  int (**insert)(), 
-		int (**extract_nav)(), int (**insert_nav)(), 
-		int (**extract_altitude)(),  int (**insert_altitude)(), 
-		int (**extract_svp)(),  int (**insert_svp)(), 
-		int (**ttimes)(), int (**copyrecord)(), 
 		int *error);
 int mb_format(int verbose, int *format, int *error);
 int mb_format_system(int verbose, int *format, int *system, int *error);
 int mb_format_description(int verbose, int *format, 
-		char **description, int *error);
+		char *description, int *error);
 int mb_format_dimensions(int verbose, int *format, 
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error);
@@ -150,7 +152,9 @@ int mb_format_beamwidth(int verbose, int *format,
 		int *error);
 int mb_datalist_open(int verbose,
 		char **datalist,
-		char *path, int *error);
+		char *path, 
+		int look_processed,
+		int *error);
 int mb_datalist_read(int verbose,
 		char  *datalist,
 		char *path, int *format, double *weight,
@@ -172,8 +176,9 @@ int mb_read_ping(int verbose, char *mbio_ptr, char *store_ptr,
 		int *kind, int *error);
 int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, double *speed, 
-		double *heading, double *distance,
+		double *navlon, double *navlat, 
+		double *speed, double *heading, 
+		double *distance, double *altitude, double *sonardepth, 
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
@@ -181,8 +186,9 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		char *comment, int *error);
 int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings, 
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, double *speed, 
-		double *heading, double *distance,
+		double *navlon, double *navlat, 
+		double *speed, double *heading, 
+		double *distance, double *altitude, double *sonardepth, 
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
@@ -192,7 +198,8 @@ int mb_read(int verbose, char *mbio_ptr,
 		int *kind, int *pings, 
 		int time_i[7], double *time_d,
 		double *navlon, double *navlat, 
-		double *speed, double *heading, double *distance,
+		double *speed, double *heading, 
+		double *distance, double *altitude, double *sonardepth, 
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp, 
 		double *bathlon, double *bathlat,
@@ -268,6 +275,19 @@ int mb_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 		double *angles_forward, double *angles_null,
 		double *heave, double *alongtrack_offset, 
 		double *draft, double *ssv, int *error);
+int mb_extract_rawss(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind,
+		int *nrawss,
+		double *rawss, 
+		double *rawssacrosstrack, 
+		double *rawssalongtrack, 
+		int *error);
+int mb_insert_rawss(int verbose, char *mbio_ptr, char *store_ptr,
+		int nrawss,
+		double *rawss, 
+		double *rawssacrosstrack, 
+		double *rawssalongtrack, 
+		int *error);
 int mb_copyrecord(int verbose, char *mbio_ptr,
 		char *store_ptr, char *copy_ptr, int *error);
 
@@ -348,6 +368,8 @@ int mb_put_binary_short(int, short, void *);
 int mb_put_binary_int(int, int, void *);
 int mb_put_binary_float(int, float, void *);
 int mb_put_binary_double(int, double, void *);
+int mb_get_bounds (char *text, double *bounds);
+double mb_ddmmss_to_degree (char *text);
 int mb_takeoff_to_rollpitch(int, double, double, double *, double *, int *);
 int mb_rollpitch_to_takeoff(int, double, double, double *, double *, int *);
 int mb_double_compare(double *a, double *b);

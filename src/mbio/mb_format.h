@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.1 2000-12-10 20:26:50 caress Exp $
+ *    $Id: mb_format.h,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:26:50  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -191,9 +194,11 @@
 #define	MB_SYS_SB2120		22
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	52
+#define	MB_FORMATS	50
 
 /* Data formats supported by MBIO */
+#define MBF_DATALIST	-1
+#define MBF_NONE		0
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
  					binary, uncentered, SIO. */
 #define	MBF_SBSIOCEN	12	/* SeaBeam, 19 beam, bathymetry, 
@@ -251,14 +256,13 @@
 					2000 pixel sidescan, centered, 
 					20 KHZ, binary XSE Format
 					SeaBeam Instruments and ELAC */ 
-#define	MBF_EM1000RW	51	/* Simrad EM1000 series vendor format, 
-					60 beam bathymetry and 
-					amplitude, variable pixel sidescan, 
-					ascii + binary, Simrad */ 
-#define	MBF_EM12SRAW	52	/* Simrad EM12S series vendor format, 
-					81 beam bathymetry and 
-					amplitude, variable pixel sidescan, 
-					ascii + binary, Simrad */ 
+#define	MBF_EMOLDRAW	51	/* Old Simrad vendor multibeam format,
+					Simrad EM1000, EM12S, EM12D, 
+					EM121 multibeam sonars,
+					bathymetry, amplitude, and sidescan,
+					60 beams for EM1000, 81 beams for EM12S/D,
+					121 beams for EM121, variable pixels,
+					ascii + binary, Simrad. */ 
 #define	MBF_EM12IFRM	53	/* Simrad EM12S/EM12D multibeam archive format, 
 					81 beam bathymetry and 
 					amplitude, 
@@ -266,10 +270,6 @@
 #define	MBF_EM12DARW	54	/* Simrad EM12 RRS Darwin processed format, 
 					81 beam, bathymetry and amplitude,
 					binary, centered, Oxford University */ 
-#define	MBF_EM121RAW	55	/* Simrad EM121 series vendor format, 
-					121 beam bathymetry and 
-					amplitude, variable pixel sidescan, 
-					ascii + binary, Simrad */ 
 #define	MBF_EM300RAW	56	/* Simrad EM300/EM3000 multibeam vendor format, 
 					up to 254 beam bathymetry and 
 					amplitude, variable pixel sidescan, 

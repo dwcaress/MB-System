@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -63,7 +66,7 @@
 int mbsys_singlebeam_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_singlebeam.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_singlebeam.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
 	char	*function_name = "mbsys_singlebeam_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -128,6 +131,11 @@ int mbsys_singlebeam_alloc(int verbose, char *mbio_ptr, char **store_ptr,
 	store->free_air = 0.0;
 	store->seismic_line = 0;
 	store->seismic_shot = 0;
+	store->position_flag = 0;
+	store->pressure_flag = 0;
+	store->heading_flag = 0;
+	store->altitude_flag = 0;
+	store->attitude_flag = 0;
 	for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
 	    store->comment[i] = 0;
 
@@ -465,6 +473,12 @@ int mbsys_singlebeam_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		store->time_d = time_d;
 
 		/* get navigation */
+		if (store->longitude != navlon
+		    || store->latitude != navlat)
+		    {
+		    store->easting = 0.0;
+		    store->northing = 0.0;
+		    }
 		store->longitude = navlon;
 		store->latitude = navlat;
 
@@ -977,6 +991,12 @@ int mbsys_singlebeam_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		store->time_d = time_d;
 
 		/* get navigation */
+		if (store->longitude != navlon
+		    || store->latitude != navlat)
+		    {
+		    store->easting = 0.0;
+		    store->northing = 0.0;
+		    }
 		store->longitude = navlon;
 		store->latitude = navlat;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_simrad.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *    The MB-system:	mbsys_simrad2.h	10/9/98
+ *	$Id: mbsys_simrad2.h,v 5.2 2001-03-22 20:50:02 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -13,18 +13,28 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_simrad.h defines the data structures used by MBIO functions
- * to store data in the new (post 1997) Simrad 
- * multibeam data formats. The sonars which produce data in the new
- * formats include the EM300 and the EM3000. The associated data
- * formats include
- *      MBF_EM3000RW : MBIO ID 56
+ * mbsys_simrad2.h defines the MBIO data structures for handling data from 
+ * new (post-1997) Simrad multibeam sonars (e.g. EM120, EM300, EM3000).
+ * The data formats associated with Simrad multibeams 
+ * (both old and new) include:
+ *    MBSYS_SIMRAD formats (code in mbsys_simrad.c and mbsys_simrad.h):
+ *      MBF_EMOLDRAW : MBIO ID 51 - Vendor EM1000, EM12S, EM12D, EM121
+ *                   : MBIO ID 52 - aliased to 51
+ *      MBF_EM12IFRM : MBIO ID 53 - IFREMER EM12S and EM12D
+ *      MBF_EM12DARW : MBIO ID 54 - NERC EM12S
+ *                   : MBIO ID 55 - aliased to 51
+ *    MBSYS_SIMRAD2 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
+ *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120 
+ *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120
  *
  *
  * Author:	D. W. Caress (L-DEO)
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -246,6 +256,12 @@
 #define	MBSYS_SIMRAD2_EM3000D_7	3007
 #define	MBSYS_SIMRAD2_EM3000D_8	3008
 
+#define	MBSYS_SIMRAD2_EM12S	9901
+#define	MBSYS_SIMRAD2_EM12D	9902
+#define	MBSYS_SIMRAD2_EM121	9903
+#define	MBSYS_SIMRAD2_EM100	9904
+#define	MBSYS_SIMRAD2_EM1000	9905
+
 /* maximum number of beams and pixels */
 #define	MBSYS_SIMRAD2_MAXBEAMS		254
 #define	MBSYS_SIMRAD2_MAXPIXELS		1024
@@ -268,6 +284,12 @@
 #define	EM2_EM3000D_5		3006
 #define	EM2_EM3000D_6		3007
 #define	EM2_EM3000D_7		3008
+
+#define	EM2_EM12S		9901
+#define	EM2_EM12D		9902
+#define	EM2_EM121		9903
+#define	EM2_EM100		9904
+#define	EM2_EM1000		9905
 
 /* datagram types */
 #define	EM2_END			0x03
@@ -420,9 +442,13 @@ struct mbsys_simrad2_ping_struct
 				/* uses standard MB-System beamflags */
 	
 	/* sidescan */
-	int	png_max_range;	/* max range of ping in number of samples */
-	int	png_r_zero;	/* range to normal incidence used in TVG
+	int	png_max_range;	/* old: max range of ping in number of samples */
+				/* current: mean absorption coefficient in 0.01 db/km */
+				/* also: used to store sidescan pixel size in range (m)
+				    for old Simrad multibeams (e.g. EM12, EM1000) */
+	int	png_r_zero;	/* old: range to normal incidence used in TVG
 				    (R0 predicted) in samples */
+				/* current: pulse length in usec */
 	int	png_r_zero_corr;/* range to normal incidence used to correct
 				    sample amplitudes in number of samples */
 	int	png_tvg_start;	/* start sample of TVG ramp if not enough 
