@@ -1,4 +1,4 @@
-.TH mbgrid l "14 August 1995"
+.TH mbgrid l "22 November 1995"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from multibeam data files.
@@ -11,7 +11,7 @@ Version 4.3
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
 \fB-E\fIdx/dy/units\fP \fB-F\fImode\fP \fB-G\fIgridkind\fP 
-\fB-L\fIlonflip\fP \fB-M -N \fB-P\fIpings\fP 
+\fB-L\fIlonflip\fP \fB-M -N -P\fIpings\fP \fB-Q\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fItime\fP 
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
 
@@ -259,6 +259,11 @@ ping.  If \fIpings\fP = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing. Default: \fIpings\fP = 1.
 .TP
+.B \fB-Q\fP
+Normally, bathymetry or topography data is gridded in meters. If
+this option is used, bathymetry or topography data is gridded
+in feet.
+.TP
 .B \fB-R\fIwest/east/south/north\fP
 Sets the longitude and latitude bounds of the output grid. If the user
 uses the \fB-E\fP option to set the grid spacing, then the dimensions
@@ -336,7 +341,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.8 1995-08-17 15:06:46 caress Exp $
+ Version $Id: mbgrid.l,v 4.9 1995-11-22 22:21:36 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -413,7 +418,7 @@ standard deviation values. The following will suffice:
 The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.8 1995-08-17 15:06:46 caress Exp $
+ Version $Id: mbgrid.l,v 4.9 1995-11-22 22:21:36 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
