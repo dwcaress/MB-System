@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.13 1999-08-16 23:13:42 caress Exp $
+ *    $Id: mbcopy.c,v 4.14 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1999/08/16  23:13:42  caress
+ * Fixed pointer casting bug in elac data copying.
+ *
  * Revision 4.12  1999/08/08  04:17:40  caress
  * Added ability to copy between old and new Elac formats.
  *
@@ -117,7 +122,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.13 1999-08-16 23:13:42 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 4.14 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";

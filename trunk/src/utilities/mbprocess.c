@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 4.1 2000-09-11 20:10:02 caress Exp $
+ *    $Id: mbprocess.c,v 4.2 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 2000 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -33,6 +33,11 @@
  *   ROLLBIASPORT                   # sets port roll bias (degrees)
  *   ROLLBIASSTBD                   # sets starboard roll bias (degrees)
  *   PITCHBIAS                      # sets pitch bias
+ *   NAVADJFILE file                # sets adjusted navigation file path
+ *                                  # - this file supercedes nav file for
+ *                                  #   lon and lat only
+ *                                  # - uses mbnavadjust output
+ *   NAVADJSPLINE                   # sets spline adjusted navigation interpolation
  *   NAVFILE file                   # sets navigation file path
  *   NAVFORMAT format               # sets navigation file format
  *   NAVHEADING                     # sets heading to be merged from nav file
@@ -58,6 +63,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/11  20:10:02  caress
+ * Added suppport for merging edited sonar depth values.
+ *
  * Revision 4.0  2000/03/08  00:04:28  caress
  * Release 4.6.10
  *
@@ -76,46 +84,8 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
-
-/* mbprocess defines */
-#define MBP_FILENAMESIZE	256
-#define MBP_BATHRECALC_OFF	0
-#define MBP_BATHRECALC_RAYTRACE	1
-#define MBP_BATHRECALC_ROTATE	2
-#define MBP_BATHRECALC_OFFSET	3
-#define MBP_ROLLBIAS_OFF	0
-#define MBP_ROLLBIAS_SINGLE	1
-#define MBP_ROLLBIAS_DOUBLE	1
-#define MBP_PITCHBIAS_OFF	0
-#define MBP_PITCHBIAS_ON	1
-#define MBP_DRAFT_OFF		0
-#define MBP_DRAFT_OFFSET	1
-#define MBP_DRAFT_MULTIPLY	2
-#define MBP_DRAFT_MULTIPLYOFFSET	3
-#define MBP_DRAFT_SET		4
-#define MBP_NAV_OFF		0
-#define MBP_NAV_ON		1
-#define MBP_NAV_LINEAR		0
-#define MBP_NAV_SPLINE		1
-#define MBP_HEADING_OFF         0
-#define MBP_HEADING_CALC        1
-#define MBP_HEADING_OFFSET      2
-#define MBP_SSV_OFF		0
-#define MBP_SSV_OFFSET		1
-#define MBP_SSV_SET		2
-#define MBP_SSV_CORRECT		1
-#define MBP_SSV_INCORRECT	2
-#define MBP_SVP_OFF		0
-#define MBP_SVP_ON		1
-#define MBP_EDIT_OFF		0
-#define MBP_EDIT_ON		1
-#define	MBP_EDIT_FLAG		1
-#define	MBP_EDIT_UNFLAG		2
-#define	MBP_EDIT_ZERO		3
-#define	MBP_EDIT_FILTER		4
-#define MBP_MASK_OFF		0
-#define MBP_MASK_ON		1
 
 /*--------------------------------------------------------------------*/
 
@@ -124,7 +94,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 4.1 2000-09-11 20:10:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 4.2 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -146,6 +116,11 @@ parameter file with the following possible entries:\n\
   ROLLBIASPORT                   # sets port roll bias (degrees)\n\
   ROLLBIASSTBD                   # sets starboard roll bias (degrees)\n\
   PITCHBIAS                      # sets pitch bias\n\
+  NAVADJFILE file                # sets adjusted navigation file path\n\
+                                 # - this file supercedes nav file for\n\
+                                 #   lon and lat only\n\
+                                 # - uses mbnavadjust output\n\
+  NAVADJSPLINE                   # sets spline adjusted navigation interpolation\n\
   NAVFILE file                   # sets navigation file path\n\
   NAVFORMAT format               # sets navigation file format\n\
   NAVHEADING                     # sets heading to be merged from nav file\n\
@@ -160,13 +135,15 @@ parameter file with the following possible entries:\n\
   UNCORRECTED                    # sets raytraced bathymetry to uncorrected values\n\
   EDITSAVEFILE                   # sets edit save file path (from mbedit)\n\
   EDITMASKFILE                   # sets edit mask file path (from mbmask)\n\
-The data format and the input and output data files can be\n\
-specified using command line options. If no parameter file is \n\
-specified (using the -P option) but an input file is specified\n\
-(with the -I option), then mbprocess will look for a parameter\n\
-file with the path inputfile.par, where inputfile is the input\n\
-file path.\n";
-	static char usage_message[] = "mbprocess [-Fformat  \n\t-Iinfile -Ooutfile -Pparfile -V -H]";
+The input file \"infile\"  must be specified with the -I option. The\n\
+data format can also be specified, thought the program can\n\
+infer the format if the standard MB-System suffix convention\n\
+is used (*.mbXXX where XXX is the MB-System format id number).\n\
+The program will look for and use a parameter file with the \n\
+name \"infile.par\". If no parameter file exists, the program \n\
+will infer a reasonable processing path by looking for navigation\n\
+and mbedit edit save files.\n";
+	static char usage_message[] = "mbprocess [-Fformat  \n\t-Iinfile -Ooutfile -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -228,7 +205,9 @@ file path.\n";
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
+	int	onav = 0;
 	int	ocomment = 0;
+	int	oother = 0;
 	char	comment[MBP_FILENAMESIZE];
 
 	/* time, user, host variables */
@@ -236,51 +215,20 @@ file path.\n";
 	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 	
 	/* parameter controls */
-	int	mbp_parfile_specified = MB_NO;
-	char	mbp_parfile[MBP_FILENAMESIZE];
-	int	mbp_format_specified = MB_NO;
-	int	mbp_format = 0;
-	int	mbp_ifile_specified = MB_NO;
-	char	mbp_ifile[MBP_FILENAMESIZE];
-	int	mbp_ofile_specified = MB_NO;
-	char	mbp_ofile[MBP_FILENAMESIZE];
-	int	mbp_fileroot_specified = MB_NO;
-	char	mbp_fileroot[MBP_FILENAMESIZE];
-	int	mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
-	int	mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
-	double	mbp_rollbias = 0.0;
-	double	mbp_rollbias_port = 0.0;
-	double	mbp_rollbias_stbd = 0.0;
-	int	mbp_pitchbias_mode = MBP_PITCHBIAS_OFF;
-	double	mbp_pitchbias = 0.0;
-	int	mbp_draft_mode = MBP_DRAFT_OFF;
-	double	mbp_draft = 0.0;
-	double	mbp_draft_mult = 0.0;
-	char	mbp_dfile[MBP_FILENAMESIZE];
-	int	mbp_ssv_mode = MBP_SSV_OFF;
-	double	mbp_ssv = 0.0;
-	int	mbp_svp_mode = MBP_SVP_OFF;
-	char	mbp_svpfile[MBP_FILENAMESIZE];
-	int	mbp_uncorrected = MB_NO;
-	int	mbp_nav_mode = MBP_NAV_OFF;
-	char	mbp_navfile[MBP_FILENAMESIZE];
-	int	mbp_nav_format = 0;
-	int	mbp_nav_heading = MBP_NAV_OFF;
-	int	mbp_nav_speed = MBP_NAV_OFF;
-	int	mbp_nav_draft = MBP_NAV_OFF;
-	int	mbp_nav_algorithm = MBP_NAV_LINEAR;
-	int	mbp_heading_mode = MBP_HEADING_OFF;
-	double	mbp_headingbias = 0.0;
-	int	mbp_edit_mode = MBP_EDIT_OFF;
-	char	mbp_editfile[MBP_FILENAMESIZE];
-	int	mbp_mask_mode = MBP_MASK_OFF;
-	char	mbp_maskfile[MBP_FILENAMESIZE];
+	struct mb_process_struct process;
 	
 	/* processing variables */
+	int	mbp_ifile_specified;
+	char	mbp_ifile[MBP_FILENAMESIZE];
+	int	mbp_ofile_specified;
+	char	mbp_ofile[MBP_FILENAMESIZE];
+	int	mbp_format_specified;
+	int	mbp_format;
 	FILE	*tfp;
 	struct stat file_status;
 	int	fstat;
 	int	nnav = 0;
+	int	nanav = 0;
 	int	size, nchar, len, nget, nav_ok;
 	int	time_j[5], stime_i[7], ftime_i[7];
 	double	sec, hr;
@@ -292,8 +240,10 @@ file path.\n";
 	double	second;
 	double	splineflag;
 	double	*ntime, *nlon, *nlat, *nheading, *nspeed, *ndraft;
+	double	*natime, *nalon, *nalat;
 	double	*nlonspl, *nlatspl;
-	int	itime;
+	double	*nalonspl, *nalatspl;
+	int	itime, iatime;
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dist;
 	int	intstat;
@@ -368,12 +318,14 @@ file path.\n";
 	timegap = 1000000000.0;
 
 	/* set default input and output */
-	strcpy (mbp_parfile, "\0");
+	mbp_ifile_specified = MB_NO;
 	strcpy (mbp_ifile, "\0");
+	mbp_ofile_specified = MB_NO;
 	strcpy (mbp_ofile, "\0");
-
+	mbp_format_specified = MB_NO;
+	
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:O:o:P:p:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:O:o:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -402,12 +354,6 @@ file path.\n";
 			sscanf (optarg,"%s", mbp_ofile);
 			flag++;
 			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%s", mbp_parfile);
-			mbp_parfile_specified = MB_YES;
-			flag++;
-			break;
 		case '?':
 			errflg++;
 		}
@@ -429,235 +375,6 @@ file path.\n";
 		fprintf(stderr,"Version %s\n",rcs_id);
 		fprintf(stderr,"MB-System Version %s\n",MB_VERSION);
 		}
-		
-	/* figure out if parameter file available */
-	if (mbp_parfile_specified == MB_NO
-	    && mbp_ifile_specified == MB_YES)
-	    {
-	    strcpy(mbp_parfile, mbp_ifile);
-	    strcat(mbp_parfile, ".par");
-	    if (stat(mbp_parfile, &statbuf) == 0)
-		{
-		mbp_parfile_specified = MB_YES;
-		}
-	    }
-		
-	/* if no parameter file available then check 
-	    for bathymetry edits and nav updates */
-	if (mbp_parfile_specified == MB_NO
-	    && mbp_ifile_specified == MB_YES)
-	    {
-	    /* look for nav file */
-	    mbp_nav_mode = MBP_NAV_OFF;
-	    for (i = 9; i >= 0 && mbp_nav_mode == MBP_NAV_OFF; i--)
-	    	{
-	    	sprintf(mbp_navfile, "%s.na%d", mbp_ifile, i);
-	    	if (stat(mbp_navfile, &statbuf) == 0)
-			{
-			mbp_nav_mode = MBP_NAV_ON;
-			mbp_nav_format = 9;
-			}
-	    	}
-	    if (mbp_nav_mode == MBP_NAV_OFF)
- 		{
-		strcpy(mbp_navfile, mbp_ifile);
-		strcat(mbp_navfile, ".nve");
-		if (stat(mbp_navfile, &statbuf) == 0)
-		    {
-		    mbp_nav_mode = MBP_NAV_ON;
-		    mbp_nav_format = 9;
-		    }
-		}
-
-	    /* look for edit file */
-	    strcpy(mbp_editfile, mbp_ifile);
-	    strcat(mbp_editfile, ".esf");
-	    if (stat(mbp_editfile, &statbuf) == 0)
-		{
-		mbp_edit_mode = MBP_EDIT_ON;
-		}
-	    else
-		{
-		strcpy(mbp_editfile, mbp_ifile);
-		strcat(mbp_editfile, ".mbesf");
-		if (stat(mbp_editfile, &statbuf) == 0)
-		    {
-		    mbp_edit_mode = MBP_EDIT_ON;
-		    }
-		}
-	    }
-
-	/* quit if no knowledge of what to do */
-	if (mbp_parfile_specified == MB_NO
-	    && mbp_nav_mode == MBP_NAV_OFF
-	    && mbp_edit_mode == MBP_EDIT_OFF)
-	    {
-	    fprintf(stderr,"\nProgram <%s> requires a parameter file.\n",program_name);
-	    fprintf(stderr,"The parameter file may be specified with the -P option\n");
-	    fprintf(stderr,"or it may exist as 'infile.par', where the input file\n");
-	    fprintf(stderr,"'infile' is specified with the -I option.\n");
-	    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		    program_name);
-	    error = MB_ERROR_OPEN_FAIL;
-	    exit(error);
-	    }
-	    
-	/* parse the parameter file if available */
-	if (mbp_parfile_specified == MB_YES)
-	    {
-	    if ((tfp = fopen(mbp_parfile, "r")) == NULL) 
-		    {
-		    error = MB_ERROR_OPEN_FAIL;
-		    fprintf(stderr,"\nUnable to Open Parameter File <%s> for reading\n",mbp_parfile);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-		    exit(error);
-		    }
-	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
-		{
-		if (buffer[0] != '#')
-		    {
-		    if (strncmp(buffer, "FORMAT", 6) == 0
-			&& mbp_format_specified == MB_NO)
-			{
-			sscanf(buffer, "%s %d", dummy, &mbp_format);
-			mbp_format_specified = MB_YES;
-			}
-		    else if (strncmp(buffer, "INFILE", 6) == 0
-			&& mbp_ifile_specified == MB_NO)
-			{
-			sscanf(buffer, "%s %s", dummy, mbp_ifile);
-			mbp_ifile_specified = MB_YES;
-			}
-		    else if (strncmp(buffer, "OUTFILE", 7) == 0
-			&& mbp_ofile_specified == MB_NO)
-			{
-			sscanf(buffer, "%s %s", dummy, mbp_ofile);
-			mbp_ofile_specified = MB_YES;
-			}
-		    else if (strncmp(buffer, "DRAFTOFFSET", 11) == 0)
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_draft);
-			if (mbp_draft_mode == MBP_DRAFT_OFF)
-				mbp_draft_mode = MBP_DRAFT_OFFSET;
-			else if (mbp_draft_mode == MBP_DRAFT_MULTIPLY)
-				mbp_draft_mode = MBP_DRAFT_MULTIPLYOFFSET;
-			}
-		    else if (strncmp(buffer, "DRAFTMULTIPLY", 13) == 0)
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_draft_mult);
-			if (mbp_draft_mode == MBP_DRAFT_OFF)
-				mbp_draft_mode = MBP_DRAFT_MULTIPLY;
-			else if (mbp_draft_mode == MBP_DRAFT_OFFSET)
-				mbp_draft_mode = MBP_DRAFT_MULTIPLYOFFSET;
-			}
-		    else if (strncmp(buffer, "DRAFT", 5) == 0
-			&& mbp_draft_mode == MBP_DRAFT_OFF)
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_draft);
-			mbp_draft_mode = MBP_DRAFT_SET;
-			}
-		    else if (strncmp(buffer, "ROLLBIASPORT", 12) == 0
-			&& (mbp_rollbias_mode == MBP_ROLLBIAS_OFF
-			    || mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE))
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_rollbias_port);
-			mbp_rollbias_mode = MBP_ROLLBIAS_DOUBLE;
-			}
-		    else if (strncmp(buffer, "ROLLBIASSTBD", 12) == 0
-			&& (mbp_rollbias_mode == MBP_ROLLBIAS_OFF
-			    || mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE))
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_rollbias_stbd);
-			mbp_rollbias_mode = MBP_ROLLBIAS_DOUBLE;
-			}
-		    else if (strncmp(buffer, "ROLLBIAS", 8) == 0
-			&& mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_rollbias);
-			mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
-			}
-		    else if (strncmp(buffer, "PITCHBIAS", 9) == 0
-			&& mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_pitchbias);
-			mbp_pitchbias_mode = MBP_PITCHBIAS_ON;
-			}
-		    else if (strncmp(buffer, "NAVFILE", 7) == 0
-			&& mbp_nav_mode == MBP_NAV_OFF)
-			{
-			sscanf(buffer, "%s %s", dummy, mbp_navfile);
-			mbp_nav_mode = MBP_NAV_ON;
-			}
-		    else if (strncmp(buffer, "NAVFORMAT", 9) == 0)
-			{
-			sscanf(buffer, "%s %d", dummy, &mbp_nav_format);
-			}
-		    else if (strncmp(buffer, "NAVHEADING", 10) == 0)
-			{
-			mbp_nav_heading = MBP_NAV_ON;
-			}
-		    else if (strncmp(buffer, "NAVSPEED", 8) == 0)
-			{
-			mbp_nav_speed = MBP_NAV_ON;
-			}
-		    else if (strncmp(buffer, "NAVDRAFT", 8) == 0)
-			{
-			mbp_nav_draft = MBP_NAV_ON;
-			}
-		    else if (strncmp(buffer, "NAVSPLINE", 9) == 0)
-			{
-			mbp_nav_algorithm = MBP_NAV_SPLINE;
-			}
-		    else if (strncmp(buffer, "HEADING", 7) == 0)
-			{
-			mbp_heading_mode = MBP_HEADING_CALC;
-			}
-		    else if (strncmp(buffer, "HEADINGOFFSET", 13) == 0)
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_headingbias);
-			mbp_heading_mode = MBP_HEADING_OFFSET;
-			}
-		    else if (strncmp(buffer, "SSVOFFSET", 11) == 0
-			&& mbp_ssv_mode == MBP_SSV_OFF)
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_ssv);
-			mbp_ssv_mode = MBP_SSV_OFFSET;
-			}
-		    else if (strncmp(buffer, "SSV", 5) == 0
-			&& mbp_ssv_mode == MBP_SSV_OFF)
-			{
-			sscanf(buffer, "%s %lf", dummy, &mbp_ssv);
-			mbp_ssv_mode = MBP_SSV_SET;
-			}
-		    else if (strncmp(buffer, "SVP", 3) == 0
-			&& mbp_svp_mode == MBP_SVP_OFF)
-			{
-			sscanf(buffer, "%s %s", dummy, mbp_svpfile);
-			mbp_svp_mode = MBP_SVP_ON;
-			}
-		    else if (strncmp(buffer, "UNCORRECTED", 3) == 0
-			&& mbp_uncorrected == MB_NO)
-			{
-			mbp_uncorrected = MB_YES;
-			}
-		    else if (strncmp(buffer, "EDITSAVEFILE", 12) == 0
-			&& mbp_edit_mode == MBP_EDIT_OFF)
-			{
-			sscanf(buffer, "%s %s", dummy, mbp_editfile);
-			mbp_edit_mode = MBP_EDIT_ON;
-			}
-		    else if (strncmp(buffer, "EDITMASKFILE", 12) == 0
-			&& mbp_mask_mode == MBP_MASK_OFF)
-			{
-			sscanf(buffer, "%s %s", dummy, mbp_maskfile);
-			mbp_mask_mode = MBP_MASK_ON;
-			}
-
-		    }
-		}
-	    fclose(tfp);
-	    }
 
 	/* quit if no input file specified */
 	if (mbp_ifile_specified == MB_NO)
@@ -670,87 +387,67 @@ file path.\n";
 	    error = MB_ERROR_OPEN_FAIL;
 	    exit(error);
 	    }
-	    
-	/* figure out data format if required */
-	if (mbp_format_specified == MB_NO)
+		
+	/* load parameters */
+	status = mb_pr_readpar(verbose, mbp_ifile, MB_YES, 
+			&process, &error);
+			
+	/* reset output file and format */
+	if (mbp_ofile_specified == MB_YES)
 	    {
-	    status = mb_get_format(verbose, mbp_ifile, mbp_fileroot, &mbp_format, &error);
-	    if (status == MB_SUCCESS && mbp_format > 0)
-		{
-		mbp_format_specified = MB_YES;
-		mbp_fileroot_specified = MB_YES;
-		}
-	    else
-		{
-		fprintf(stderr,"\nProgram <%s> unable to guess input data format.\n",program_name);
-		fprintf(stderr,"The format may be specified with the -F option\n");
-		fprintf(stderr,"or it may be set in a parameter file specified with the -P option.\n");
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		error = MB_ERROR_BAD_FORMAT;
-		exit(error);
-		}
+	    strcpy(process.mbp_ofile, mbp_ofile);
 	    }
-	    
-	/* figure out output filename if required */
-	if (mbp_ofile_specified == MB_NO)
+	if (mbp_format_specified == MB_YES)
 	    {
-	    if (mbp_fileroot_specified == MB_NO)
-		status = mb_get_format(verbose, mbp_ifile, mbp_fileroot, &format, &error);
-	    if (strstr(mbp_fileroot, "_") == NULL)
-		sprintf(mbp_ofile, "%s_p.mb%d", mbp_fileroot, mbp_format);
-	    else
-		sprintf(mbp_ofile, "%sp.mb%d", mbp_fileroot, mbp_format);
-	    mbp_ofile_specified = MB_YES;
+	    process.mbp_format = mbp_format;
 	    }
-	    
-	/* figure out bathymetry recalculation mode */
-	if (mbp_svp_mode == MBP_SVP_ON)
-	    mbp_bathrecalc_mode = MBP_BATHRECALC_RAYTRACE;
-	else if (mbp_svp_mode == MBP_SVP_OFF
-	    && (mbp_rollbias_mode != MBP_ROLLBIAS_OFF
-		|| mbp_pitchbias_mode != MBP_PITCHBIAS_OFF))
-	    mbp_bathrecalc_mode = MBP_BATHRECALC_ROTATE;
-	else if (mbp_svp_mode == MBP_SVP_OFF
-	    && mbp_rollbias_mode == MBP_ROLLBIAS_OFF
-		&& mbp_draft_mode != MBP_DRAFT_OFF)
-	    mbp_bathrecalc_mode = MBP_BATHRECALC_OFFSET;
+
+	/* quit if no knowledge of what to do */
+	if (status == MB_FAILURE)
+	    {
+	    fprintf(stderr,"\nProgram <%s> requires a parameter file.\n",program_name);
+	    fprintf(stderr,"The parameter file must exist as 'infile.par', where the\n");
+	    fprintf(stderr,"input file 'infile' is specified with the -I option.\n");
+	    fprintf(stderr,"\nProgram <%s> Terminated\n",
+		    program_name);
+	    exit(error);
+	    }
 
 	/* check for nav format with heading, speed, and draft merge */
-	if (mbp_nav_mode == MBP_NAV_ON
-	    && (mbp_nav_heading == MBP_NAV_ON
-		|| mbp_nav_speed == MBP_NAV_ON
-		|| mbp_nav_draft == MBP_NAV_ON)
-	    && mbp_nav_format != 9)
+	if (process.mbp_nav_mode == MBP_NAV_ON
+	    && (process.mbp_nav_heading == MBP_NAV_ON
+		|| process.mbp_nav_speed == MBP_NAV_ON
+		|| process.mbp_nav_draft == MBP_NAV_ON)
+	    && process.mbp_nav_format != 9)
 	    {
-	    fprintf(stderr,"\nNavigation format <%d> does not include \n",mbp_nav_format);
+	    fprintf(stderr,"\nNavigation format <%d> does not include \n",process.mbp_nav_format);
 	    fprintf(stderr,"heading, speed, and draft values.\n");
-	    if (mbp_nav_heading == MBP_NAV_ON)
+	    if (process.mbp_nav_heading == MBP_NAV_ON)
 		{
 		fprintf(stderr,"Merging of heading data disabled.\n");
-		mbp_nav_heading = MBP_NAV_OFF;
+		process.mbp_nav_heading = MBP_NAV_OFF;
 		}
-	    if (mbp_nav_speed == MBP_NAV_ON)
+	    if (process.mbp_nav_speed == MBP_NAV_ON)
 		{
 		fprintf(stderr,"Merging of speed data disabled.\n");
-		mbp_nav_speed = MBP_NAV_OFF;
+		process.mbp_nav_speed = MBP_NAV_OFF;
 		}
-	    if (mbp_nav_draft == MBP_NAV_ON)
+	    if (process.mbp_nav_draft == MBP_NAV_ON)
 		{
 		fprintf(stderr,"Merging of draft data disabled.\n");
-		mbp_nav_draft = MBP_NAV_OFF;
+		process.mbp_nav_draft = MBP_NAV_OFF;
 		}
 	    }
 
 	/* check for format with travel time data */
-	if (mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
+	if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 	    {
-	    status = mb_format(verbose,&mbp_format,&format_num,&error);
+	    status = mb_format(verbose,&process.mbp_format,&format_num,&error);
 	    if (mb_traveltime_table[format_num] != MB_YES)
 		{
 		fprintf(stderr,"\nProgram <%s> requires travel time data to recalculate\n",program_name);
 		fprintf(stderr,"bathymetry from travel times and angles.\n");
-		fprintf(stderr,"Format %d is unacceptable because it does not inlude travel time data.\n",mbp_format);
+		fprintf(stderr,"Format %d is unacceptable because it does not inlude travel time data.\n",process.mbp_format);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_FORMAT;
@@ -792,115 +489,123 @@ file path.\n";
 	    fprintf(stderr,"dbg2       timegap:         %f\n",timegap);
 	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 	    fprintf(stderr,"\ndbg2  Processing Parameters:\n");
-	    if (mbp_parfile_specified == MB_YES)
-		fprintf(stderr,"dbg2       parameter file:  %s\n",mbp_parfile);
-	    if (mbp_format_specified == MB_YES)
-		fprintf(stderr,"dbg2       format:          %d\n",mbp_format);
-	    if (mbp_ifile_specified == MB_YES)
-		fprintf(stderr,"dbg2       input file:      %s\n",mbp_ifile);
-	    if (mbp_ifile_specified == MB_YES)
-		fprintf(stderr,"dbg2       output file:     %s\n",mbp_ofile);
-	    if (mbp_bathrecalc_mode == MBP_BATHRECALC_OFF)
+	    if (process.mbp_format_specified == MB_YES)
+		fprintf(stderr,"dbg2       format:          %d\n",process.mbp_format);
+	    if (process.mbp_ifile_specified == MB_YES)
+		fprintf(stderr,"dbg2       input file:      %s\n",process.mbp_ifile);
+	    if (process.mbp_ifile_specified == MB_YES)
+		fprintf(stderr,"dbg2       output file:     %s\n",process.mbp_ofile);
+	    if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFF)
 		fprintf(stderr,"dbg2       Bathymetry not recalculated.\n");
-	    else if (mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
+	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 		{
 		fprintf(stderr,"dbg2       Bathymetry recalculated by raytracing.\n");
-		if (mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
+		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
 		    fprintf(stderr,"dbg2       roll bias:       OFF\n");
-		else if (mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-		    fprintf(stderr,"dbg2       roll bias:       %f deg\n", mbp_rollbias);
-		else if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+		    fprintf(stderr,"dbg2       roll bias:       %f deg\n", process.mbp_rollbias);
+		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
 		    {
-		    fprintf(stderr,"dbg2       port roll bias:  %f deg\n", mbp_rollbias_port);
-		    fprintf(stderr,"dbg2       port roll stbd:  %f deg\n", mbp_rollbias_stbd);
+		    fprintf(stderr,"dbg2       port roll bias:  %f deg\n", process.mbp_rollbias_port);
+		    fprintf(stderr,"dbg2       port roll stbd:  %f deg\n", process.mbp_rollbias_stbd);
 		    }
-		if (mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
+		if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
 		    fprintf(stderr,"dbg2       pitch bias:      OFF\n");
-		else if (mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-		    fprintf(stderr,"dbg2       pitch bias:      %f deg\n", mbp_pitchbias);
-		else if (mbp_draft_mode == MBP_DRAFT_SET)
-		    fprintf(stderr,"dbg2       draft set:       %f m\n", mbp_draft);
-		if (mbp_ssv_mode == MBP_SSV_OFF)
+		else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+		    fprintf(stderr,"dbg2       pitch bias:      %f deg\n", process.mbp_pitchbias);
+		else if (process.mbp_draft_mode == MBP_DRAFT_SET)
+		    fprintf(stderr,"dbg2       draft set:       %f m\n", process.mbp_draft);
+		if (process.mbp_ssv_mode == MBP_SSV_OFF)
 		    fprintf(stderr,"dbg2       ssv:             OFF\n");
-		else if (mbp_ssv_mode == MBP_SSV_OFFSET)
-		    fprintf(stderr,"dbg2       offset ssv:      %f m/s\n", mbp_ssv);
-		else if (mbp_ssv_mode == MBP_SSV_SET)
-		    fprintf(stderr,"dbg2       set ssv:         %f m/s\n", mbp_ssv);
-		if (mbp_svp_mode == MBP_SVP_OFF)
+		else if (process.mbp_ssv_mode == MBP_SSV_OFFSET)
+		    fprintf(stderr,"dbg2       offset ssv:      %f m/s\n", process.mbp_ssv);
+		else if (process.mbp_ssv_mode == MBP_SSV_SET)
+		    fprintf(stderr,"dbg2       set ssv:         %f m/s\n", process.mbp_ssv);
+		if (process.mbp_svp_mode == MBP_SVP_OFF)
 		    fprintf(stderr,"dbg2       svp:             OFF\n");
-		else if (mbp_svp_mode == MBP_SVP_ON)
-		    fprintf(stderr,"dbg2       svp file:        %s\n", mbp_svpfile);
-		if (mbp_uncorrected == MB_NO)
+		else if (process.mbp_svp_mode == MBP_SVP_ON)
+		    fprintf(stderr,"dbg2       svp file:        %s\n", process.mbp_svpfile);
+		if (process.mbp_uncorrected == MB_NO)
 		    fprintf(stderr,"dbg2       bathymetry mode: CORRECTED\n");
-		else if (mbp_uncorrected == MB_YES)
+		else if (process.mbp_uncorrected == MB_YES)
 		    fprintf(stderr,"dbg2       bathymetry mode: UNCORRECTED\n");
 		}
-	    else if (mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
+	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 		{
 		fprintf(stderr,"dbg2       Bathymetry recalculated by rigid rotation.\n");
-		if (mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
+		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
 		    fprintf(stderr,"dbg2       roll bias:       OFF\n");
-		else if (mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-		    fprintf(stderr,"dbg2       roll bias:       %f deg\n", mbp_rollbias);
-		else if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+		    fprintf(stderr,"dbg2       roll bias:       %f deg\n", process.mbp_rollbias);
+		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
 		    {
-		    fprintf(stderr,"dbg2       port roll bias:  %f deg\n", mbp_rollbias_port);
-		    fprintf(stderr,"dbg2       port roll stbd:  %f deg\n", mbp_rollbias_stbd);
+		    fprintf(stderr,"dbg2       port roll bias:  %f deg\n", process.mbp_rollbias_port);
+		    fprintf(stderr,"dbg2       port roll stbd:  %f deg\n", process.mbp_rollbias_stbd);
 		    }
-		if (mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
+		if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
 		    fprintf(stderr,"dbg2       pitch bias:      OFF\n");
-		else if (mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-		    fprintf(stderr,"dbg2       pitch bias:      %f deg\n", mbp_pitchbias);
+		else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+		    fprintf(stderr,"dbg2       pitch bias:      %f deg\n", process.mbp_pitchbias);
 		}
-	    else if (mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
+	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
 		{
 		fprintf(stderr,"dbg2       Bathymetry recalculated by transducer depth shift.\n");
 		}
-	    if (mbp_nav_mode == MBP_NAV_OFF)
-		fprintf(stderr,"dbg2       merge navigation:OFF\n");
-	    else if (mbp_nav_mode == MBP_NAV_ON)
+	    if (process.mbp_navadj_mode == MBP_NAV_OFF)
+		fprintf(stderr,"dbg2       merge adjusted navigation:OFF\n");
+	    else if (process.mbp_navadj_mode == MBP_NAV_ON)
 		{
-		fprintf(stderr,"dbg2       navigation file:      %s\n", mbp_navfile);
-		fprintf(stderr,"dbg2       navigation format:    %d\n", mbp_nav_format);
-		if (mbp_nav_heading == MBP_NAV_ON)
+		fprintf(stderr,"dbg2       adjusted navigation file: %s\n", process.mbp_navadjfile);
+		if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
+		    fprintf(stderr,"dbg2       adjusted navigation algorithm: linear interpolation\n");
+		else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
+		    fprintf(stderr,"dbg2       adjusted navigation algorithm: spline interpolation\n");
+		}
+	    if (process.mbp_nav_mode == MBP_NAV_OFF)
+		fprintf(stderr,"dbg2       merge navigation:OFF\n");
+	    else if (process.mbp_nav_mode == MBP_NAV_ON)
+		{
+		fprintf(stderr,"dbg2       navigation file:      %s\n", process.mbp_navfile);
+		fprintf(stderr,"dbg2       navigation format:    %d\n", process.mbp_nav_format);
+		if (process.mbp_nav_heading == MBP_NAV_ON)
 		    fprintf(stderr,"dbg2     heading merge:    ON\n");
 		else
 		    fprintf(stderr,"dbg2     heading merge:    OFF\n");
-		if (mbp_nav_speed == MBP_NAV_ON)
+		if (process.mbp_nav_speed == MBP_NAV_ON)
 		    fprintf(stderr,"dbg2     speed merge:      ON\n");
 		else
 		    fprintf(stderr,"dbg2     speed merge:      OFF\n");
-		if (mbp_nav_draft == MBP_NAV_ON)
+		if (process.mbp_nav_draft == MBP_NAV_ON)
 		    fprintf(stderr,"dbg2     draft merge:      ON\n");
 		else
 		    fprintf(stderr,"dbg2     draft merge:      OFF\n");
 
-		if (mbp_nav_algorithm == MBP_NAV_LINEAR)
+		if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
 		    fprintf(stderr,"dbg2       navigation algorithm: linear interpolation\n");
-		else if (mbp_nav_algorithm == MBP_NAV_SPLINE)
+		else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
 		    fprintf(stderr,"dbg2       navigation algorithm: spline interpolation\n");
 		}
-	    if (mbp_draft_mode == MBP_DRAFT_OFF)
+	    if (process.mbp_draft_mode == MBP_DRAFT_OFF)
 		fprintf(stderr,"dbg2       draft modify:    OFF\n");
-	    else if (mbp_draft_mode == MBP_DRAFT_OFFSET)
-		fprintf(stderr,"dbg2       draft offset:    %f m\n", mbp_draft);
-	    else if (mbp_draft_mode == MBP_DRAFT_MULTIPLY)
-		fprintf(stderr,"dbg2       draft multiplier:%f m\n", mbp_draft_mult);
-	    else if (mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
+	    else if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
+		fprintf(stderr,"dbg2       draft offset:    %f m\n", process.mbp_draft);
+	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
+		fprintf(stderr,"dbg2       draft multiplier:%f m\n", process.mbp_draft_mult);
+	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
 		{
-		fprintf(stderr,"dbg2       draft offset:    %f m\n", mbp_draft);
-		fprintf(stderr,"dbg2       draft multiplier:%f m\n", mbp_draft_mult);
+		fprintf(stderr,"dbg2       draft offset:    %f m\n", process.mbp_draft);
+		fprintf(stderr,"dbg2       draft multiplier:%f m\n", process.mbp_draft_mult);
 		}
-	    else if (mbp_draft_mode == MBP_DRAFT_SET)
-		fprintf(stderr,"dbg2       draft set:       %f m\n", mbp_draft);
-	    if (mbp_edit_mode == MBP_EDIT_OFF)
+	    else if (process.mbp_draft_mode == MBP_DRAFT_SET)
+		fprintf(stderr,"dbg2       draft set:       %f m\n", process.mbp_draft);
+	    if (process.mbp_edit_mode == MBP_EDIT_OFF)
 		fprintf(stderr,"dbg2       merge bath edit: OFF\n");
-	    else if (mbp_edit_mode == MBP_EDIT_ON)
-		fprintf(stderr,"dbg2       bathy edit file: %s\n", mbp_editfile);
-	    if (mbp_mask_mode == MBP_MASK_OFF)
+	    else if (process.mbp_edit_mode == MBP_EDIT_ON)
+		fprintf(stderr,"dbg2       bathy edit file: %s\n", process.mbp_editfile);
+	    if (process.mbp_mask_mode == MBP_MASK_OFF)
 		fprintf(stderr,"dbg2       merge bath mask: OFF\n");
-	    else if (mbp_mask_mode == MBP_MASK_ON)
-		fprintf(stderr,"dbg2       bathy mask file: %s\n", mbp_maskfile);
+	    else if (process.mbp_mask_mode == MBP_MASK_ON)
+		fprintf(stderr,"dbg2       bathy mask file: %s\n", process.mbp_maskfile);
 	    }
 
 	/* print starting debug statements */
@@ -910,112 +615,120 @@ file path.\n";
 	    fprintf(stderr,"Version %s\n",rcs_id);
 	    fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
 	    fprintf(stderr,"\nProcessing Parameters:\n");
-	    if (mbp_parfile_specified == MB_YES)
-		fprintf(stderr,"     parameter file:  %s\n",mbp_parfile);
-	    if (mbp_format_specified == MB_YES)
-		fprintf(stderr,"     format:          %d\n",mbp_format);
-	    if (mbp_ifile_specified == MB_YES)
-		fprintf(stderr,"     input file:      %s\n",mbp_ifile);
-	    if (mbp_ifile_specified == MB_YES)
-		fprintf(stderr,"     output file:     %s\n",mbp_ofile);
-	    if (mbp_bathrecalc_mode == MBP_BATHRECALC_OFF)
+	    if (process.mbp_format_specified == MB_YES)
+		fprintf(stderr,"     format:          %d\n",process.mbp_format);
+	    if (process.mbp_ifile_specified == MB_YES)
+		fprintf(stderr,"     input file:      %s\n",process.mbp_ifile);
+	    if (process.mbp_ifile_specified == MB_YES)
+		fprintf(stderr,"     output file:     %s\n",process.mbp_ofile);
+	    if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFF)
 		fprintf(stderr,"     Bathymetry not recalculated.\n");
-	    else if (mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
+	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 		{
 		fprintf(stderr,"     Bathymetry recalculated by raytracing.\n");
-		if (mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
+		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
 		    fprintf(stderr,"     roll bias:       OFF\n");
-		else if (mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-		    fprintf(stderr,"     roll bias:       %f deg\n", mbp_rollbias);
-		else if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+		    fprintf(stderr,"     roll bias:       %f deg\n", process.mbp_rollbias);
+		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
 		    {
-		    fprintf(stderr,"     port roll bias:  %f deg\n", mbp_rollbias_port);
-		    fprintf(stderr,"     port roll stbd:  %f deg\n", mbp_rollbias_stbd);
+		    fprintf(stderr,"     port roll bias:  %f deg\n", process.mbp_rollbias_port);
+		    fprintf(stderr,"     port roll stbd:  %f deg\n", process.mbp_rollbias_stbd);
 		    }
-		if (mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
+		if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
 		    fprintf(stderr,"     pitch bias:      OFF\n");
-		else if (mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-		    fprintf(stderr,"     pitch bias:      %f deg\n", mbp_pitchbias);
-		if (mbp_ssv_mode == MBP_SSV_OFF)
+		else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+		    fprintf(stderr,"     pitch bias:      %f deg\n", process.mbp_pitchbias);
+		if (process.mbp_ssv_mode == MBP_SSV_OFF)
 		    fprintf(stderr,"     ssv:             OFF\n");
-		else if (mbp_ssv_mode == MBP_SSV_OFFSET)
-		    fprintf(stderr,"     offset ssv:      %f m/s\n", mbp_ssv);
-		else if (mbp_ssv_mode == MBP_SSV_SET)
-		    fprintf(stderr,"     set ssv:         %f m/s\n", mbp_ssv);
-		if (mbp_svp_mode == MBP_SVP_OFF)
+		else if (process.mbp_ssv_mode == MBP_SSV_OFFSET)
+		    fprintf(stderr,"     offset ssv:      %f m/s\n", process.mbp_ssv);
+		else if (process.mbp_ssv_mode == MBP_SSV_SET)
+		    fprintf(stderr,"     set ssv:         %f m/s\n", process.mbp_ssv);
+		if (process.mbp_svp_mode == MBP_SVP_OFF)
 		    fprintf(stderr,"     svp:             OFF\n");
-		else if (mbp_svp_mode == MBP_SVP_ON)
-		    fprintf(stderr,"     svp file:        %s\n", mbp_svpfile);
-		if (mbp_uncorrected == MB_NO)
+		else if (process.mbp_svp_mode == MBP_SVP_ON)
+		    fprintf(stderr,"     svp file:        %s\n", process.mbp_svpfile);
+		if (process.mbp_uncorrected == MB_NO)
 		    fprintf(stderr,"     bathymetry mode: CORRECTED\n");
-		else if (mbp_uncorrected == MB_YES)
+		else if (process.mbp_uncorrected == MB_YES)
 		    fprintf(stderr,"     bathymetry mode: UNCORRECTED\n");
 		}
-	    else if (mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
+	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 		{
 		fprintf(stderr,"     Bathymetry recalculated by rigid rotation.\n");
-		if (mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
+		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
 		    fprintf(stderr,"     roll bias:       OFF\n");
-		else if (mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-		    fprintf(stderr,"     roll bias:       %f deg\n", mbp_rollbias);
-		else if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+		    fprintf(stderr,"     roll bias:       %f deg\n", process.mbp_rollbias);
+		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
 		    {
-		    fprintf(stderr,"     port roll bias:  %f deg\n", mbp_rollbias_port);
-		    fprintf(stderr,"     port roll stbd:  %f deg\n", mbp_rollbias_stbd);
+		    fprintf(stderr,"     port roll bias:  %f deg\n", process.mbp_rollbias_port);
+		    fprintf(stderr,"     port roll stbd:  %f deg\n", process.mbp_rollbias_stbd);
 		    }
-		if (mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
+		if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
 		    fprintf(stderr,"     pitch bias:      OFF\n");
-		else if (mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-		    fprintf(stderr,"     pitch bias:      %f deg\n", mbp_pitchbias);
+		else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+		    fprintf(stderr,"     pitch bias:      %f deg\n", process.mbp_pitchbias);
 		}
-	    else if (mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
+	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
 		{
 		fprintf(stderr,"     Bathymetry recalculated by transducer depth shift.\n");
 		}
-	    if (mbp_nav_mode == MBP_NAV_OFF)
-		fprintf(stderr,"     merge navigation:     OFF\n");
-	    else if (mbp_nav_mode == MBP_NAV_ON)
+	    if (process.mbp_navadj_mode == MBP_NAV_OFF)
+		fprintf(stderr,"     merge adjusted navigation: OFF\n");
+	    else if (process.mbp_navadj_mode == MBP_NAV_ON)
 		{
-		fprintf(stderr,"     navigation file:      %s\n", mbp_navfile);
-		fprintf(stderr,"     navigation format:    %d\n", mbp_nav_format);
-		if (mbp_nav_heading == MBP_NAV_ON)
+		fprintf(stderr,"     adjusted navigation file: %s\n", process.mbp_navadjfile);
+		if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
+		    fprintf(stderr,"     adjusted navigation algorithm: linear interpolation\n");
+		else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
+		    fprintf(stderr,"     adjusted navigation algorithm: spline interpolation\n");
+		}
+	    if (process.mbp_nav_mode == MBP_NAV_OFF)
+		fprintf(stderr,"     merge navigation:     OFF\n");
+	    else if (process.mbp_nav_mode == MBP_NAV_ON)
+		{
+		fprintf(stderr,"     navigation file:      %s\n", process.mbp_navfile);
+		fprintf(stderr,"     navigation format:    %d\n", process.mbp_nav_format);
+		if (process.mbp_nav_heading == MBP_NAV_ON)
 		    fprintf(stderr,"     heading merge:    ON\n");
 		else
 		    fprintf(stderr,"     heading merge:    OFF\n");
-		if (mbp_nav_speed == MBP_NAV_ON)
+		if (process.mbp_nav_speed == MBP_NAV_ON)
 		    fprintf(stderr,"     speed merge:      ON\n");
 		else
 		    fprintf(stderr,"     speed merge:      OFF\n");
-		if (mbp_nav_draft == MBP_NAV_ON)
+		if (process.mbp_nav_draft == MBP_NAV_ON)
 		    fprintf(stderr,"     draft merge:      ON\n");
 		else
 		    fprintf(stderr,"     draft merge:      OFF\n");
-		if (mbp_nav_algorithm == MBP_NAV_LINEAR)
+		if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
 		    fprintf(stderr,"     navigation algorithm: linear interpolation\n");
-		else if (mbp_nav_algorithm == MBP_NAV_SPLINE)
+		else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
 		    fprintf(stderr,"     navigation algorithm: spline interpolation\n");
 		}
-	    if (mbp_draft_mode == MBP_DRAFT_OFF)
+	    if (process.mbp_draft_mode == MBP_DRAFT_OFF)
 		fprintf(stderr,"     draft modify:    OFF\n");
-	    else if (mbp_draft_mode == MBP_DRAFT_OFFSET)
-		fprintf(stderr,"     draft offset:         %f m\n", mbp_draft);
-	    else if (mbp_draft_mode == MBP_DRAFT_MULTIPLY)
-		fprintf(stderr,"     draft multiplier:%f m\n", mbp_draft_mult);
-	    else if (mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
+	    else if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
+		fprintf(stderr,"     draft offset:         %f m\n", process.mbp_draft);
+	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
+		fprintf(stderr,"     draft multiplier:%f m\n", process.mbp_draft_mult);
+	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
 		{
-		fprintf(stderr,"     draft multiplier:     %f m\n", mbp_draft_mult);
-		fprintf(stderr,"     draft offset:         %f m\n", mbp_draft);
+		fprintf(stderr,"     draft multiplier:     %f m\n", process.mbp_draft_mult);
+		fprintf(stderr,"     draft offset:         %f m\n", process.mbp_draft);
 		}
-	    else if (mbp_draft_mode == MBP_DRAFT_SET)
-		fprintf(stderr,"     set draft:            %f m\n", mbp_draft);
-	    if (mbp_edit_mode == MBP_EDIT_OFF)
+	    else if (process.mbp_draft_mode == MBP_DRAFT_SET)
+		fprintf(stderr,"     set draft:            %f m\n", process.mbp_draft);
+	    if (process.mbp_edit_mode == MBP_EDIT_OFF)
 		fprintf(stderr,"     merge bath edit:      OFF\n");
-	    else if (mbp_edit_mode == MBP_EDIT_ON)
-		fprintf(stderr,"     bathy edit file:      %s\n", mbp_editfile);
-	    if (mbp_mask_mode == MBP_MASK_OFF)
+	    else if (process.mbp_edit_mode == MBP_EDIT_ON)
+		fprintf(stderr,"     bathy edit file:      %s\n", process.mbp_editfile);
+	    if (process.mbp_mask_mode == MBP_MASK_OFF)
 		fprintf(stderr,"     merge bath mask:      OFF\n");
-	    else if (mbp_mask_mode == MBP_MASK_ON)
-		fprintf(stderr,"     bathy mask file:      %s\n", mbp_maskfile);
+	    else if (process.mbp_mask_mode == MBP_MASK_ON)
+		fprintf(stderr,"     bathy mask file:      %s\n", process.mbp_maskfile);
 	    }
 
 	/* if help desired then print it and exit */
@@ -1032,14 +745,14 @@ file path.\n";
 	  --------------------------------------------*/
 
 	/* if raytracing to be done get svp */
-	if (mbp_svp_mode == MBP_SVP_ON)
+	if (process.mbp_svp_mode == MBP_SVP_ON)
 	    {
 	    /* count the data points in the svp file */
 	    nsvp = 0;
-	    if ((tfp = fopen(mbp_svpfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL) 
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
-		    fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",mbp_svpfile);
+		    fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",process.mbp_svpfile);
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
@@ -1072,7 +785,7 @@ file path.\n";
 	    else
 		{
 		error = MB_ERROR_BAD_DATA;
-		fprintf(stderr,"\nUnable to read data from SVP file <%s>\n",mbp_svpfile);
+		fprintf(stderr,"\nUnable to read data from SVP file <%s>\n",process.mbp_svpfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -1080,10 +793,10 @@ file path.\n";
 		
 	    /* read the data points in the svp file */
 	    nsvp = 0;
-	    if ((tfp = fopen(mbp_svpfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",mbp_svpfile);
+		fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",process.mbp_svpfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -1132,20 +845,20 @@ file path.\n";
 	  --------------------------------------------*/
 
 	/* if nav merging to be done get nav */
-	if (mbp_nav_mode == MBP_NAV_ON)
+	if (process.mbp_nav_mode == MBP_NAV_ON)
 	    {
 	    /* set max number of characters to be read at a time */
-	    if (mbp_nav_format == 8)
+	    if (process.mbp_nav_format == 8)
 		    nchar = 96;
 	    else
 		    nchar = 128;
 
 	    /* count the data points in the nav file */
 	    nnav = 0;
-	    if ((tfp = fopen(mbp_navfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) 
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
-		    fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",mbp_navfile);
+		    fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",process.mbp_navfile);
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
@@ -1182,7 +895,7 @@ file path.\n";
 	    else
 		{
 		error = MB_ERROR_BAD_DATA;
-		fprintf(stderr,"\nUnable to read data from navigation file <%s>\n",mbp_navfile);
+		fprintf(stderr,"\nUnable to read data from navigation file <%s>\n",process.mbp_navfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -1190,10 +903,10 @@ file path.\n";
 		
 	    /* read the data points in the nav file */
 	    nnav = 0;
-	    if ((tfp = fopen(mbp_navfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to Open navigation File <%s> for reading\n",mbp_navfile);
+		fprintf(stderr,"\nUnable to Open navigation File <%s> for reading\n",process.mbp_navfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -1203,7 +916,7 @@ file path.\n";
 		nav_ok = MB_NO;
 
 		/* deal with nav in form: time_d lon lat */
-		if (mbp_nav_format == 1)
+		if (process.mbp_nav_format == 1)
 			{
 			nget = sscanf(buffer,"%lf %lf %lf",
 				&ntime[nnav],&nlon[nnav],&nlat[nnav]);
@@ -1212,7 +925,7 @@ file path.\n";
 			}
 
 		/* deal with nav in form: yr mon day hour min sec lon lat */
-		else if (mbp_nav_format == 2)
+		else if (process.mbp_nav_format == 2)
 			{
 			nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf",
 				&time_i[0],&time_i[1],&time_i[2],
@@ -1227,7 +940,7 @@ file path.\n";
 			}
 
 		/* deal with nav in form: yr jday hour min sec lon lat */
-		else if (mbp_nav_format == 3)
+		else if (process.mbp_nav_format == 3)
 			{
 			nget = sscanf(buffer,"%d %d %d %d %lf %lf %lf",
 				&time_j[0],&time_j[1],&hr,
@@ -1244,7 +957,7 @@ file path.\n";
 			}
 
 		/* deal with nav in form: yr jday daymin sec lon lat */
-		else if (mbp_nav_format == 4)
+		else if (process.mbp_nav_format == 4)
 			{
 			nget = sscanf(buffer,"%d %d %d %lf %lf %lf",
 				&time_j[0],&time_j[1],&time_j[2],
@@ -1260,7 +973,7 @@ file path.\n";
 			}
 
 		/* deal with nav in L-DEO processed nav format */
-		else if (mbp_nav_format == 5)
+		else if (process.mbp_nav_format == 5)
 			{
 			strncpy(dummy,"\0",128);
 			time_j[0] = atoi(strncpy(dummy,buffer,2));
@@ -1301,7 +1014,7 @@ file path.\n";
 			}
 
 		/* deal with nav in real and pseudo NMEA 0183 format */
-		else if (mbp_nav_format == 6 || mbp_nav_format == 7)
+		else if (process.mbp_nav_format == 6 || process.mbp_nav_format == 7)
 			{
 			/* check if real sentence */
 			len = strlen(buffer);
@@ -1351,15 +1064,15 @@ file path.\n";
 					}
 				    }
 				}
-			    else if (((mbp_nav_format == 6 && strncmp(&buffer[3],"GLL",3) == 0)
-				|| (mbp_nav_format == 7 && strncmp(&buffer[3],"GGA",3) == 0))
+			    else if (((process.mbp_nav_format == 6 && strncmp(&buffer[3],"GLL",3) == 0)
+				|| (process.mbp_nav_format == 7 && strncmp(&buffer[3],"GGA",3) == 0))
 				&& time_set == MB_YES && len > 26)
 				{
 				time_set = MB_NO;
 				/* find start of ",ddmm.mm,N,ddmm.mm,E" */
 				if ((bufftmp = strchr(buffer, ',')) != NULL)
 				    {
-				    if (mbp_nav_format == 7)
+				    if (process.mbp_nav_format == 7)
 					bufftmp = strchr(&bufftmp[1], ',');
 				    strncpy(dummy,"\0",128);
 				    degree = atoi(strncpy(dummy,bufftmp+1,2));
@@ -1388,7 +1101,7 @@ file path.\n";
 			}
 
 		/* deal with nav in Simrad 90 format */
-		else if (mbp_nav_format == 8)
+		else if (process.mbp_nav_format == 8)
 			{
 			mb_get_int(&(time_i[2]), buffer+2,  2);
 			mb_get_int(&(time_i[1]), buffer+4,  2);
@@ -1418,7 +1131,7 @@ file path.\n";
 			}
 
 		/* deal with nav in form: yr mon day hour min sec time_d lon lat heading speed draft*/
-		else if (mbp_nav_format == 9)
+		else if (process.mbp_nav_format == 9)
 			{
 			nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf",
 				&time_i[0],&time_i[1],&time_i[2],
@@ -1431,30 +1144,30 @@ file path.\n";
 				nav_ok = MB_YES;
 			if (nav_ok == MB_YES)
 			    {
-			    if (mbp_nav_heading == MBP_NAV_ON && nget < 10)
+			    if (process.mbp_nav_heading == MBP_NAV_ON && nget < 10)
 				{
 				fprintf(stderr,"\nHeading data missing from nav file.\nMerging of heading data disabled.\n");
-				mbp_nav_heading = MBP_NAV_OFF;
+				process.mbp_nav_heading = MBP_NAV_OFF;
 				}
-			    if (mbp_nav_speed == MBP_NAV_ON && nget < 11)
+			    if (process.mbp_nav_speed == MBP_NAV_ON && nget < 11)
 				{
 				fprintf(stderr,"Speed data missing from nav file.\nMerging of speed data disabled.\n");
-				mbp_nav_speed = MBP_NAV_OFF;
+				process.mbp_nav_speed = MBP_NAV_OFF;
 				}
-			    if (mbp_nav_draft == MBP_NAV_ON && nget < 12)
+			    if (process.mbp_nav_draft == MBP_NAV_ON && nget < 12)
 				{
 				fprintf(stderr,"Draft data missing from nav file.\nMerging of draft data disabled.\n");
-				mbp_nav_draft = MBP_NAV_OFF;
+				process.mbp_nav_draft = MBP_NAV_OFF;
 				}
-			    if (mbp_nav_heading == MBP_NAV_OFF)
+			    if (process.mbp_nav_heading == MBP_NAV_OFF)
 				{
 				nheading[nnav] = 0.0;
 				}
-			    if (mbp_nav_speed == MBP_NAV_OFF)
+			    if (process.mbp_nav_speed == MBP_NAV_OFF)
 				{
 				nheading[nnav] = 0.0;
 				}
-			    if (mbp_nav_draft == MBP_NAV_OFF)
+			    if (process.mbp_nav_draft == MBP_NAV_OFF)
 				{
 				nheading[nnav] = 0.0;
 				}
@@ -1515,7 +1228,7 @@ file path.\n";
 	    /* check for nav */
 	    if (nnav < 2)
 		    {
-		    fprintf(stderr,"\nNo navigation read from file <%s>\n",mbp_navfile);
+		    fprintf(stderr,"\nNo navigation read from file <%s>\n",process.mbp_navfile);
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
@@ -1544,16 +1257,175 @@ file path.\n";
 	    }
 
 	/*--------------------------------------------
+	  get adjusted nav
+	  --------------------------------------------*/
+
+	/* if adjusted nav merging to be done get adjusted nav */
+	if (process.mbp_navadj_mode == MBP_NAV_ON)
+	    {
+	    /* set max number of characters to be read at a time */
+	    nchar = 128;
+
+	    /* count the data points in the adjusted nav file */
+	    nanav = 0;
+	    if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL) 
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    fprintf(stderr,"\nUnable to Open Adjusted Navigation File <%s> for reading\n",process.mbp_navadjfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
+		    nanav++;
+	    fclose(tfp);
+	    
+	    /* allocate arrays for adjusted nav */
+	    if (nanav > 1)
+		{
+		size = (nanav+1)*sizeof(double);
+		status = mb_malloc(verbose,nanav*sizeof(double),&natime,&error);
+		status = mb_malloc(verbose,nanav*sizeof(double),&nalon,&error);
+		status = mb_malloc(verbose,nanav*sizeof(double),&nalat,&error);
+		status = mb_malloc(verbose,nanav*sizeof(double),&nalonspl,&error);
+		status = mb_malloc(verbose,nanav*sizeof(double),&nalatspl,&error);
+	
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }		    
+		}
+	
+	    /* if no adjusted nav data then quit */
+	    else
+		{
+		error = MB_ERROR_BAD_DATA;
+		fprintf(stderr,"\nUnable to read data from adjusted navigation file <%s>\n",process.mbp_navadjfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}		    
+		
+	    /* read the data points in the nav file */
+	    nanav = 0;
+	    if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to Open navigation File <%s> for reading\n",process.mbp_navadjfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
+		{
+		nav_ok = MB_NO;
+
+		/* deal with nav in form: yr mon day hour min sec time_d lon lat */
+		nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf",
+			&time_i[0],&time_i[1],&time_i[2],
+			&time_i[3],&time_i[4],&sec,
+			&natime[nanav],
+			&nalon[nanav],&nalat[nanav]);
+		if (nget >= 9)
+			nav_ok = MB_YES;
+
+		/* make sure longitude is defined according to lonflip */
+		if (nav_ok == MB_YES)
+			{
+			if (lonflip == -1 && nalon[nanav] > 0.0)
+				nalon[nanav] = nalon[nanav] - 360.0;
+			else if (lonflip == 0 && nalon[nanav] < -180.0)
+				nalon[nanav] = nalon[nanav] + 360.0;
+			else if (lonflip == 0 && nalon[nanav] > 180.0)
+				nalon[nanav] = nalon[nanav] - 360.0;
+			else if (lonflip == 1 && nalon[nanav] < 0.0)
+				nalon[nanav] = nalon[nanav] + 360.0;
+			}
+
+		/* output some debug values */
+		if (verbose >= 5 && nav_ok == MB_YES)
+			{
+			fprintf(stderr,"\ndbg5  New adjusted navigation point read in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+				nanav,natime[nanav],nalon[nanav],nalat[nanav]);
+			}
+		else if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  Error parsing line in navigation file in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       line: %s\n",buffer);
+			}
+
+		/* check for reverses or repeats in time */
+		if (nav_ok == MB_YES)
+			{
+			if (nanav == 0)
+				nanav++;
+			else if (natime[nanav] > natime[nanav-1])
+				nanav++;
+			else if (nanav > 0 && natime[nanav] <= natime[nanav-1] 
+				&& verbose >= 5)
+				{
+				fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
+				fprintf(stderr,"dbg5       adjusted nav[%d]: %f %f %f\n",
+					nanav-1,natime[nanav-1],nalon[nanav-1],
+					nalat[nanav-1]);
+				fprintf(stderr,"dbg5       adjusted nav[%d]: %f %f %f\n",
+					nanav,natime[nanav],nalon[nanav],
+					nalat[nanav]);
+				}
+			}
+		strncpy(buffer,"\0",sizeof(buffer));
+		}
+	    fclose(tfp);
+
+		
+	    /* check for adjusted nav */
+	    if (nanav < 2)
+		    {
+		    fprintf(stderr,"\nNo adjusted navigation read from file <%s>\n",process.mbp_navadjfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+    
+	    /* set up spline interpolation of adjusted nav points */
+	    splineflag = 1.0e30;
+	    spline(natime-1,nalon-1,nanav,splineflag,splineflag,nalonspl-1);
+	    spline(natime-1,nalat-1,nanav,splineflag,splineflag,nalatspl-1);
+    
+	    /* get start and finish times of nav */
+	    mb_get_date(verbose,natime[0],stime_i);
+	    mb_get_date(verbose,natime[nanav-1],ftime_i);
+    
+	    /* give the statistics */
+	    if (verbose >= 1)
+		    {
+		    fprintf(stderr,"\n%d adjusted navigation records read\n",nanav);
+		    fprintf(stderr,"Adjusted nav start time: %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+			    stime_i[0],stime_i[1],stime_i[2],stime_i[3],
+			    stime_i[4],stime_i[5],stime_i[6]);
+		    fprintf(stderr,"Adjusted nav end time:   %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+			    ftime_i[0],ftime_i[1],ftime_i[2],ftime_i[3],
+			    ftime_i[4],ftime_i[5],ftime_i[6]);
+		    }
+	    }
+
+	/*--------------------------------------------
 	  get edits
 	  --------------------------------------------*/
 
 	/* get edits */
-	if (mbp_edit_mode == MBP_EDIT_ON)
+	if (process.mbp_edit_mode == MBP_EDIT_ON)
 	    {
 	    /* count the data points in the edit file */
 	    nedit = 0;
 	    firstedit = 0;
-	    fstat = stat(mbp_editfile, &file_status);
+	    fstat = stat(process.mbp_editfile, &file_status);
 	    if (fstat == 0 
 		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
 		{
@@ -1581,14 +1453,14 @@ file path.\n";
 		}
 	    }
 		
-	if (mbp_edit_mode == MBP_EDIT_ON
+	if (process.mbp_edit_mode == MBP_EDIT_ON
 	    && nedit > 0)
 	    {
 	    /* read the data points in the edit file */
-	    if ((tfp = fopen(mbp_editfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_editfile, "r")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to Open Edit Save File <%s> for reading\n",mbp_editfile);
+		fprintf(stderr,"\nUnable to Open Edit Save File <%s> for reading\n",process.mbp_editfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -1665,14 +1537,14 @@ file path.\n";
 
 	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
-		verbose,mbp_ifile,mbp_format,pings,lonflip,bounds,
+		verbose,process.mbp_ifile,process.mbp_format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&imbio_ptr,&btime_d,&etime_d,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",mbp_ifile);
+		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",process.mbp_ifile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -1680,12 +1552,12 @@ file path.\n";
 
 	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
-		verbose,mbp_ofile,mbp_format,&ombio_ptr,
+		verbose,process.mbp_ofile,process.mbp_format,&ombio_ptr,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",mbp_ofile);
+		fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",process.mbp_ofile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -1763,14 +1635,14 @@ file path.\n";
 	    /* close and reopen the input file */
 	    status = mb_close(verbose,&imbio_ptr,&error);
 	    if ((status = mb_read_init(
-		verbose,mbp_ifile,mbp_format,pings,lonflip,bounds,
+		verbose,process.mbp_ifile,process.mbp_format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&imbio_ptr,&btime_d,&etime_d,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",mbp_ifile);
+		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",process.mbp_ifile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -1813,7 +1685,7 @@ file path.\n";
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
-	if (mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
+	if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 	    {
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
 	    sprintf(comment,"Depths and crosstrack distances recalculated from travel times");
@@ -1828,14 +1700,14 @@ file path.\n";
 	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    if (error == MB_ERROR_NO_ERROR) ocomment++;
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
-	    if (mbp_uncorrected == MB_YES)
+	    if (process.mbp_uncorrected == MB_YES)
 		    sprintf(comment,"  uncorrected meters (the depth values are adjusted to be");
 	    else
 		    sprintf(comment,"  corrected meters (the depth values obtained by");
 	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    if (error == MB_ERROR_NO_ERROR) ocomment++;
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
-	    if (mbp_uncorrected == MB_YES)
+	    if (process.mbp_uncorrected == MB_YES)
 		    sprintf(comment,"  consistent with a vertical water velocity of 1500 m/s).");
 	    else
 		    sprintf(comment,"  raytracing are not adjusted further).");
@@ -1843,7 +1715,7 @@ file path.\n";
 	    if (error == MB_ERROR_NO_ERROR) ocomment++;
 	    }
 	    
-	else if (mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
+	else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 	    {
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
 	    sprintf(comment,"Depths and crosstrack distances adjusted for roll bias, ");
@@ -1854,7 +1726,7 @@ file path.\n";
 	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    if (error == MB_ERROR_NO_ERROR) ocomment++;
 	    }
-	else if (mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
+	else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
 	    {
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
 	    sprintf(comment,"Depths and crosstrack distances adjusted for, ");
@@ -1871,19 +1743,19 @@ file path.\n";
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",MBP_FILENAMESIZE);
-	sprintf(comment,"  MBIO data format:   %d",mbp_format);
+	sprintf(comment,"  MBIO data format:   %d",process.mbp_format);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",MBP_FILENAMESIZE);
-	sprintf(comment,"  Input file:         %s",mbp_ifile);
+	sprintf(comment,"  Input file:         %s",process.mbp_ifile);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",MBP_FILENAMESIZE);
-	sprintf(comment,"  Output file:        %s",mbp_ofile);
+	sprintf(comment,"  Output file:        %s",process.mbp_ofile);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
-	if (mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
+	if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 	    {
 	    if (ssv_mode == MBP_SSV_CORRECT)
 		{
@@ -1919,7 +1791,7 @@ file path.\n";
 		}
 
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
-	    sprintf(comment,"  SVP file:               %s",mbp_svpfile);
+	    sprintf(comment,"  SVP file:               %s",process.mbp_svpfile);
 	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    if (error == MB_ERROR_NO_ERROR) ocomment++;
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -1942,78 +1814,78 @@ file path.\n";
 
 	strncpy(comment,"\0",MBP_FILENAMESIZE);
 	sprintf(comment,"  Roll bias:    %f degrees (starboard: -, port: +)",
-		mbp_rollbias);
+		process.mbp_rollbias);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",MBP_FILENAMESIZE);
 	sprintf(comment,"  Pitch bias:   %f degrees (aft: -, forward: +)",
-		mbp_pitchbias);
+		process.mbp_pitchbias);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	if (mbp_draft_mode == MBP_DRAFT_SET)
+	if (process.mbp_draft_mode == MBP_DRAFT_SET)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment,"  Draft set:    %f meters",
-			mbp_draft);
+			process.mbp_draft);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
-	else if (mbp_draft_mode == MBP_DRAFT_OFFSET)
+	else if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment,"  Draft offset: %f meters",
-			mbp_draft);
+			process.mbp_draft);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
-	else if (mbp_draft_mode == MBP_DRAFT_MULTIPLY)
+	else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment,"  Draft multiplier: %f",
-			mbp_draft_mult);
+			process.mbp_draft_mult);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
-	else if (mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
+	else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment,"  Draft offset: %f meters",
-			mbp_draft);
+			process.mbp_draft);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment,"  Draft multiplier: %f",
-			mbp_draft_mult);
+			process.mbp_draft_mult);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
-	else if (mbp_draft_mode == MBP_DRAFT_OFF)
+	else if (process.mbp_draft_mode == MBP_DRAFT_OFF)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment,"  Draft:        not modified");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
-	if (mbp_nav_mode == MBP_NAV_OFF)
+	if (process.mbp_nav_mode == MBP_NAV_OFF)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment,"  Merge navigation:     OFF");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
-	else if (mbp_nav_mode == MBP_NAV_ON)
+	else if (process.mbp_nav_mode == MBP_NAV_ON)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Navigation file:      %s\n", mbp_navfile);
+		sprintf(comment,"  Navigation file:      %s\n", process.mbp_navfile);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Navigation format:    %d\n", mbp_nav_format);
+		sprintf(comment,"  Navigation format:    %d\n", process.mbp_nav_format);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 
-		if (mbp_nav_heading == MBP_NAV_ON)
+		if (process.mbp_nav_heading == MBP_NAV_ON)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
 		    sprintf(comment,"  Heading merge:    ON\n");
@@ -2027,7 +1899,7 @@ file path.\n";
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    }
-		if (mbp_nav_speed == MBP_NAV_ON)
+		if (process.mbp_nav_speed == MBP_NAV_ON)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
 		    sprintf(comment,"  Speed merge:      ON\n");
@@ -2041,7 +1913,7 @@ file path.\n";
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    }
-		if (mbp_nav_draft == MBP_NAV_ON)
+		if (process.mbp_nav_draft == MBP_NAV_ON)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
 		    sprintf(comment,"  Draft merge:      ON\n");
@@ -2055,14 +1927,14 @@ file path.\n";
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    }
-		if (mbp_nav_algorithm == MBP_NAV_LINEAR)
+		if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
 		    sprintf(comment,"  Navigation algorithm: linear interpolation\n");
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    }
-		else if (mbp_nav_algorithm == MBP_NAV_SPLINE)
+		else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
 		    sprintf(comment,"  Navigation algorithm: spline interpolation\n");
@@ -2164,17 +2036,18 @@ file path.\n";
 			{
 			status = mb_extract_nav(verbose,imbio_ptr,store_ptr,&kind,
 					time_i,&time_d,&navlon,&navlat,
-					&speed,&heading,&draft,&roll,&pitch,&heave,&error);
+					&speed,&heading,&draft_org,&roll,&pitch,&heave,&error);
+			draft = draft_org;
 			}
 
 		/* interpolate the navigation if desired */
 		if (error == MB_ERROR_NO_ERROR
-			&& mbp_nav_mode == MBP_NAV_ON
+			&& process.mbp_nav_mode == MBP_NAV_ON
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV))
 			{			
 			/* interpolate navigation */
-			if (mbp_nav_algorithm == MBP_NAV_SPLINE
+			if (process.mbp_nav_algorithm == MBP_NAV_SPLINE
 			    && time_d >= ntime[0] 
 			    && time_d <= ntime[nnav-1])
 			    {
@@ -2192,24 +2065,49 @@ file path.\n";
 			    }
 			    
 			/* interpolate heading */
-			if (mbp_nav_heading == MBP_NAV_ON)
+			if (process.mbp_nav_heading == MBP_NAV_ON)
 			    {
 			    intstat = linint(ntime-1,nheading-1,
 				    nnav,time_d,&heading,&itime);				
 			    }
 			    
 			/* interpolate speed */
-			if (mbp_nav_speed == MBP_NAV_ON)
+			if (process.mbp_nav_speed == MBP_NAV_ON)
 			    {
 			    intstat = linint(ntime-1,nspeed-1,
 				    nnav,time_d,&speed,&itime);				
 			    }
 			    
 			/* interpolate draft */
-			if (mbp_nav_draft == MBP_NAV_ON)
+			if (process.mbp_nav_draft == MBP_NAV_ON)
 			    {
 			    intstat = linint(ntime-1,ndraft-1,
 				    nnav,time_d,&draft,&itime);				
+			    }
+			}
+
+		/* interpolate the adjusted navigation if desired */
+		if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_navadj_mode == MBP_NAV_ON
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{			
+			/* interpolate adjusted navigation */
+			if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
+			    && time_d >= natime[0] 
+			    && time_d <= natime[nanav-1])
+			    {
+			    intstat = splint(natime-1,nalon-1,nalonspl-1,
+				    nanav,time_d,&navlon,&iatime);
+			    intstat = splint(natime-1,nalat-1,nalatspl-1,
+				    nanav,time_d,&navlat,&iatime);
+			    }
+			else
+			    {
+			    intstat = linint(natime-1,nalon-1,
+				    nanav,time_d,&navlon,&iatime);
+			    intstat = linint(natime-1,nalat-1,
+				    nanav,time_d,&navlat,&iatime);
 			    }
 			}
     
@@ -2218,27 +2116,38 @@ file path.\n";
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV))
 			{		
-			if (mbp_draft_mode == MBP_DRAFT_OFFSET)
-				draft = draft + mbp_draft;
-			else if (mbp_draft_mode == MBP_DRAFT_MULTIPLY)
-				draft = draft * mbp_draft_mult;
-			else if (mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
-				draft = draft * mbp_draft_mult + mbp_draft;
-			else if (mbp_draft_mode == MBP_DRAFT_SET)
-				draft = mbp_draft;
+			if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
+				draft = draft + process.mbp_draft;
+			else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
+				draft = draft * process.mbp_draft_mult;
+			else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
+				draft = draft * process.mbp_draft_mult + process.mbp_draft;
+			else if (process.mbp_draft_mode == MBP_DRAFT_SET)
+				draft = process.mbp_draft;
 			}
 
 		/* make up heading and speed if required */
 		if (error == MB_ERROR_NO_ERROR
-			&& mbp_nav_mode == MBP_NAV_ON
+			&& (process.mbp_nav_mode == MBP_NAV_ON
+			    || process.mbp_navadj_mode == MBP_NAV_ON)
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV)
-			&& mbp_heading_mode == MBP_HEADING_CALC)
+			&& process.mbp_heading_mode == MBP_HEADING_CALC)
 			{
-			mb_coor_scale(verbose,nlat[itime-1],&mtodeglon,&mtodeglat);
-			del_time = ntime[itime] - ntime[itime-1];
-			dx = (nlon[itime] - nlon[itime-1])/mtodeglon;
-			dy = (nlat[itime] - nlat[itime-1])/mtodeglat;
+			if (process.mbp_nav_mode == MBP_NAV_ON)
+			    {
+			    mb_coor_scale(verbose,nlat[itime-1],&mtodeglon,&mtodeglat);
+			    del_time = ntime[itime] - ntime[itime-1];
+			    dx = (nlon[itime] - nlon[itime-1])/mtodeglon;
+			    dy = (nlat[itime] - nlat[itime-1])/mtodeglat;
+			    }
+			else
+			    {
+			    mb_coor_scale(verbose,nalat[iatime-1],&mtodeglon,&mtodeglat);
+			    del_time = natime[iatime] - natime[iatime-1];
+			    dx = (nalon[iatime] - nalon[iatime-1])/mtodeglon;
+			    dy = (nalat[iatime] - nalat[iatime-1])/mtodeglat;
+			    }
 			dist = sqrt(dx*dx + dy*dy);
 			if (del_time > 0.0)
 				speed = 3.6*dist/del_time;
@@ -2257,9 +2166,9 @@ file path.\n";
 		else if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV)
-			&& mbp_heading_mode == MBP_HEADING_OFFSET)
+			&& process.mbp_heading_mode == MBP_HEADING_OFFSET)
 			{
-			heading += mbp_headingbias;
+			heading += process.mbp_headingbias;
 			}
 
 		/* if survey data encountered, 
@@ -2283,7 +2192,7 @@ file path.\n";
 
 			/* if svp specified recalculate bathymetry
 			    by raytracing  */
-			if (mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
+			if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 			    {
 			    /* loop over the beams */
 			    for (i=0;i<beams_bath;i++)
@@ -2294,16 +2203,16 @@ file path.\n";
 					angle coordinates to roll-pitch 
 					coordinates, apply roll and pitch
 					corrections, and translate back */
-				if (mbp_rollbias != 0.0 
-					|| mbp_pitchbias != 0.0)
+				if (process.mbp_rollbias != 0.0 
+					|| process.mbp_pitchbias != 0.0)
 					{
 					mb_takeoff_to_rollpitch(
 						verbose,
 						angles[i], angles_forward[i], 
 						&alpha, &beta, 
 						&error);
-					alpha += mbp_pitchbias;
-					beta += mbp_rollbias;
+					alpha += process.mbp_pitchbias;
+					beta += process.mbp_rollbias;
 					mb_rollpitch_to_takeoff(
 						verbose, 
 						alpha, beta, 
@@ -2323,7 +2232,7 @@ file path.\n";
 				    fprintf(stderr, "Depth offset is sum of heave + transducer depth.\n");
 				    fprintf(stderr, "Draft from data:       %f\n", draft);
 				    fprintf(stderr, "Heave from data:       %f\n", bheave[i]);
-				    fprintf(stderr, "User specified draft:  %f\n", mbp_draft);
+				    fprintf(stderr, "User specified draft:  %f\n", process.mbp_draft);
 				    fprintf(stderr, "Depth offset used:     %f\n", depth_offset_use);
 				    fprintf(stderr, "Data Record: %d\n",odata);
 				    fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
@@ -2347,7 +2256,7 @@ file path.\n";
 				    zz += static_shift;
     
 				/* uncorrect depth if desired */
-				if (mbp_uncorrected == MB_YES)
+				if (process.mbp_uncorrected == MB_YES)
 				    {
 				    k = -1;
 				    for (j=0;j<nsvp-1;j++)
@@ -2403,12 +2312,12 @@ file path.\n";
 			    }
 
 			/* recalculate bathymetry by rigid rotations  */
-			else if (mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
+			else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 			    {
 			    /* loop over the beams */
 			    for (i=0;i<beams_bath;i++)
 			      {
-			      if (mb_beam_ok(beamflag[i]))
+			      if (beamflag[i] != MB_FLAG_NULL)
 				{
 				/* add heave and draft */
 				depth_offset_use = bheave[i] + draft;
@@ -2430,8 +2339,8 @@ file path.\n";
 					/ range / cos(alpha));
 
 				/* apply roll pitch corrections */
-				alpha += DTR * mbp_pitchbias;
-				beta +=  DTR * mbp_rollbias;
+				alpha += DTR * process.mbp_pitchbias;
+				beta +=  DTR * process.mbp_rollbias;
 				
 				/* recalculate bathymetry */
 				bath[i] 
@@ -2467,16 +2376,17 @@ file path.\n";
 			    }
 
 			/* recalculate bathymetry by changes to transducer depth  */
-			else if (mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
+			else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
 			    {
+			    /* get draft change */
+			    depth_offset_change = draft - draft_org;
+/*fprintf(stderr, "depth offset: %f %f %f %f\n", time_d, draft, draft_org, depth_offset_change);*/
+
 			    /* loop over the beams */
 			    for (i=0;i<beams_bath;i++)
 			      {
-			      if (mb_beam_ok(beamflag[i]))
+			      if (beamflag[i] != MB_FLAG_NULL)
 				{
-				/* add heave and draft */
-				depth_offset_change = draft - draft_org;
-
 				/* apply transducer depth change to depths */	    
 				bath[i] += depth_offset_change;
     
@@ -2520,7 +2430,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			}
 			
 		/* apply the saved edits */
-		if (mbp_edit_mode == MBP_EDIT_ON
+		if (process.mbp_edit_mode == MBP_EDIT_ON
 		    && nedit > 0
 		    && error == MB_ERROR_NO_ERROR
 		    && kind == MB_DATA_DATA)
@@ -2561,6 +2471,16 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			}
 		    }
 
+		/* insert the altered navigation if available */
+		if (error == MB_ERROR_NO_ERROR
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{
+			status = mb_insert_nav(verbose,imbio_ptr,store_ptr,
+					time_i,time_d,navlon,navlat,
+					speed,heading,draft,roll,pitch,heave,&error);
+			}
+
 		/* write some data */
 		if (error == MB_ERROR_NO_ERROR
 			|| kind == MB_DATA_COMMENT)
@@ -2577,14 +2497,18 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				{
 				if (kind == MB_DATA_DATA)
 					odata++;
+				else if (kind == MB_DATA_NAV)
+					onav++;
 				else if (kind == MB_DATA_COMMENT)
 					ocomment++;
+				else
+					oother++;
 				}
 			else
 				{
 				mb_error(verbose,error,&message);
 				fprintf(stderr,"\nMBIO Error returned from function <mb_put>:\n%s\n",message);
-				fprintf(stderr,"\nMultibeam Data Not Written To File <%s>\n",mbp_ofile);
+				fprintf(stderr,"\nMultibeam Data Not Written To File <%s>\n",process.mbp_ofile);
 				fprintf(stderr,"Output Record: %d\n",odata+1);
 				fprintf(stderr,"Time: %4d %2d %2d %2d:%2d:%2d.%6d\n",
 					time_i[0],time_i[1],time_i[2],
@@ -2641,7 +2565,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		fprintf(stderr,"\n%d input data records\n",idata);
 		fprintf(stderr,"%d input comment records\n",icomment);
 		fprintf(stderr,"%d output data records\n",odata);
+		fprintf(stderr,"%d output nav records\n",onav);
 		fprintf(stderr,"%d output comment records\n",ocomment);
+		fprintf(stderr,"%d output other records\n",oother);
 		}
 
 	/* end it all */

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.15 1999-12-28 00:28:40 caress Exp $
+ *    $Id: mbfilter.c,v 4.16 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1995 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1995, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -30,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1999/12/28  00:28:40  caress
+ * Fixed bug in calculating data records to hold in buffer.
+ *
  * Revision 4.14  1999/12/28  00:23:32  caress
  * Fixed bug in calculating data records to hold in buffer.
  *
@@ -154,7 +159,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.15 1999-12-28 00:28:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.16 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\

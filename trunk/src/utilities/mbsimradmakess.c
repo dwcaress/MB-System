@@ -1,13 +1,15 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsimradmakess.c	11/29/98
  *
- *    $Id: mbsimradmakess.c,v 4.3 2000-03-08 00:05:05 caress Exp $
+ *    $Id: mbsimradmakess.c,v 4.4 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -56,6 +58,9 @@
  * Date:	November 29, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/03/08  00:05:05  caress
+ * Release 4.6.10
+ *
  * Revision 4.2  1999/04/21  05:44:42  caress
  * Fixed handling of swath width and bad sidescan data.
  *
@@ -87,7 +92,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.3 2000-03-08 00:05:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbsimradmakess.c,v 4.4 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBSIMRADMAKESS";
 	static char help_message[] =  "MBSIMRADMAKESS is an utility for regenerating sidescan imagery from the raw amplitude samples contained in data from  Simrad \nEM300 and EM3000 multibeam sonars. This program ignores amplitude \ndata associated with flagged (bad) bathymetry data, thus removing \none important source of noise in the sidescan data. The default \ninput and output streams are stdin and stdout.";
 	static char usage_message[] = "mbsimradmakess [-Fformat -V -H  -Iinfile -Ooutfile -Ppixel_size -Sswath_width -Tpixel_int]";

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.14 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbsmooth.c,v 4.15 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -29,6 +31,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.13  1997/10/03  18:59:04  caress
  * Removed unused sort function.
  *
@@ -158,7 +163,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.14 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.15 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to swath \nbathymetry data in order to \

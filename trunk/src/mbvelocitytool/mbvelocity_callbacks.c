@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 4.4 1999-09-15 21:01:47 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 4.5 2000-09-30 07:05:18 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 1997 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -24,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1999/09/15  21:01:47  caress
+ * Version label now set from mb_format.h
+ *
  * Revision 4.3  1998/10/05  19:18:58  caress
  * MB-System version 4.6beta
  *

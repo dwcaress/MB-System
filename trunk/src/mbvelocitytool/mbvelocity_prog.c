@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 4.21 1999-02-04 23:54:54 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 4.22 2000-09-30 07:05:18 caress Exp $ 
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu) 
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu) 
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964 
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  * 
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -23,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  1999/02/04  23:54:54  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.20  1998/10/09  18:46:59  caress
  * MB-System version 4.6beta
  *
@@ -147,7 +152,7 @@ struct profile
 #define	MB_SSV_INCORRECT    2
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.21 1999-02-04 23:54:54 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.22 2000-09-30 07:05:18 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";

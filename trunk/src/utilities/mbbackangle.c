@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 4.10 2000-09-11 20:10:02 caress Exp $
+ *    $Id: mbbackangle.c,v 4.11 2000-09-30 07:06:28 caress Exp $
  *
- *    Copyright (c) 1995 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1995, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -23,6 +25,10 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/09/11  20:10:02  caress
+ * Linked to new datalist parsing functions. Now supports recursive datalists
+ * and comments in datalists.
+ *
  * Revision 4.9  2000/06/06  20:32:46  caress
  * Now handles amplitude flagging using beamflags.
  *
@@ -78,7 +84,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 4.10 2000-09-11 20:10:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangle.c,v 4.11 2000-09-30 07:06:28 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a swath sonar data file and generates a table\n\t\
