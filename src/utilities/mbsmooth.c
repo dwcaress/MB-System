@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	3.00	6/12/93
- *    $Id: mbsmooth.c,v 3.0 1993-11-05 18:11:43 caress Exp $
+ *    $Id: mbsmooth.c,v 3.1 1993-11-26 19:30:33 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/11/05  18:11:43  caress
+ * Initial version.
+ *
  *
  */
 
@@ -90,7 +93,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 3.0 1993-11-05 18:11:43 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 3.1 1993-11-26 19:30:33 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \
@@ -612,7 +615,6 @@ smooth out noise in multibeam \nbathymetry data.";
 		  jb = j + MBSMOOTH_NUM;
 		  if (jb >= ndata) jb = ndata - 1;
 		
-		  fprintf(stdout,"ping:%4d id:%4d   ja:%4d jb:%4d\n",j,ping[j].id,ja,jb);
 		  for (i=0;i<beams_bath;i++)
 		    {
 		    ping[j].bathsmooth[i] = ping[j].bath[i];
