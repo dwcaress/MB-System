@@ -1,4 +1,4 @@
-.TH MBIO 1 "1 March 1994"
+.TH MBIO 1 "16 September 1994"
 .SH NAME
 \fBMBIO\fP - Format independent input/output library for multibeam sonar data.
 
@@ -41,7 +41,7 @@ amplitude are referred to as "beams", and the discrete values of
 sidescan are referred to as "pixels".
 
 \fBMBIO\fP opens and initializes multibeam data files for reading
-and writing using the functions \fBmb_read_open\fP and \fBmb_write_open\fP,
+and writing using the functions \fBmb_read_init\fP and \fBmb_write_init\fP,
 respectively.  These functions return a pointer to a data structure
 including all relevent information about the opened file, the
 control parameters which determine how data is read or written,
@@ -120,20 +120,15 @@ sonar.  Consequently, it is possible to read and write the complete
 data stream when using the level 2 or 3 \fBMBIO\fP functions.
 At present, formats associated with the following multibeam systems are
 supported:
- 	Sea Beam multibeam sonar 
- 		(16 beams bathymetry)
  	Hydrosweep DS 59 beam sonar 
- 		(59 beams bathymetry and amplitude)
+ 	Sea Beam "classic" 16 beam multibeam sonar 
  	Sea Beam 2100 multibeam sonar 
- 		(59 beams bathymetry and amplitude, 151 pixels sidescan)
-.br
-We expect to support data formats for the following sonar systems in future
-versions of \fBMBIO\fP:
- 	Sea Beam 2000
- 	Simrad
- 	SeaMARC I
- 	SeaMARC II
-
+	Hawaii MR-1 shallow tow sonar
+	Simrad EM12 sonar
+	Simrad EM1000 shallow water sonar
+	ELAC Bottomchart shallow water sonar
+	Reson CBAT9001 shallow water sonar
+	
 .SH SUPPORTED FORMATS
 With the introduction of \fBMB-System\fP version 4.00, the data format
 id's used by \fBMBIO\fP have changed considerably.  The old format id's,
@@ -147,79 +142,147 @@ not guarenteed.
 The following multibeam data formats are supported in this version of 
 \fBMBIO\fP:
 
-      MBIO Data Format ID:  11
-      Format name:          MBF_SBSIOMRG
-      Informal Description: SIO merge Sea Beam
-      Attributes:           Sea Beam, bathymetry, 16 beams, binary, uncentered,
-                      SIO.
+    MBIO Data Format ID:  11
+    Format name:          MBF_SBSIOMRG
+    Informal Description: SIO merge Sea Beam
+    Attributes:           Sea Beam, bathymetry, 16 beams, 
+                          binary, uncentered, SIO.
 
-      MBIO Data Format ID:  12
-      Format name:          MBF_SBSIOCEN
-      Informal Description: SIO centered Sea Beam
-      Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered,
-                      SIO.
+    MBIO Data Format ID:  12
+    Format name:          MBF_SBSIOCEN
+    Informal Description: SIO centered Sea Beam
+    Attributes:           Sea Beam, bathymetry, 19 beams, 
+                          binary, centered, SIO.
 
-      MBIO Data Format ID:  13
-      Format name:          MBF_SBSIOLSI
-      Informal Description: SIO LSI Sea Beam
-      Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered, 
-                      obsolete, SIO.
+    MBIO Data Format ID:  13
+    Format name:          MBF_SBSIOLSI
+    Informal Description: SIO LSI Sea Beam
+    Attributes:           Sea Beam, bathymetry, 19 beams, 
+                          binary, centered, obsolete, SIO.
 
-      MBIO Data Format ID:  14
-      Format name:          MBF_SBURICEN
-      Informal Description: URI Sea Beam
-      Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered,
-                      URI.
+    MBIO Data Format ID:  14
+    Format name:          MBF_SBURICEN
+    Informal Description: URI Sea Beam
+    Attributes:           Sea Beam, bathymetry, 19 beams,
+                          binary, centered, URI.
 
-      MBIO Data Format ID:  21
-      Format name:          MBF_HSATLRAW
-      Informal Description: Raw Hydrosweep
-      Attributes:           Hydrosweep DS, bathymetry and amplitude, 59 beams,
-                      ascii, Atlas Electronik.
+    MBIO Data Format ID:  15
+    Format name:          MBF_SBURIVAX
+    Informal Description: URI Sea Beam from VAX
+    Attributes:           Sea Beam, bathymetry, 19 beams,
+                          binary, centered, VAX byte order, 
+                          URI.
 
-      MBIO Data Format ID:  22
-      Format name:          MBF_HSLDEDMB
-      Informal Description: EDMB Hydrosweep
-      Attributes:           Hydrosweep DS, bathymetry, 59 beams, binary, NRL.
+    MBIO Data Format ID:  16
+    Format name:          MBF_SBSIOSWB
+    Informal Description: SIO Swath-bathy SeaBeam
+    Attributes:           Sea Beam, bathymetry, 19 beams,
+                          binary, centered, SIO.
 
-      MBIO Data Format ID:  23
-      Format name:          MBF_HSURICEN
-      Informal Description: URI Hydrosweep
-      Attributes:           Hydrosweep DS, 59 beams, bathymetry, binary, URI.
+    MBIO Data Format ID:  21
+    Format name:          MBF_HSATLRAW
+    Informal Description: Raw Hydrosweep
+    Attributes:           Hydrosweep DS, bathymetry and
+                          amplitude, 59 beams, ascii, 
+                          Atlas Electronik.
 
-      MBIO Data Format ID:  24
-      Format name:          MBF_HSLDEOIH
-      Informal Description: L-DEO in-house binary Hydrosweep
-      Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, 
-                      binary, centered, L-DEO.
+    MBIO Data Format ID:  22
+    Format name:          MBF_HSLDEDMB
+    Informal Description: EDMB Hydrosweep
+    Attributes:           Hydrosweep DS, bathymetry, 59 
+                          beams, binary, NRL.
 
-      MBIO Data Format ID:  41
-      Format name:          MBF_SB2100RW
-      Informal Description: SeaBeam 2100/1000 series vender format
-      Attributes:           SeaBeam 2100/1000, bathymetry, amplitude 
-                      and sidescan, 151 beams and 1000 pixels, ascii 
-                      with binary sidescan, SeaBeam Instruments.
+    MBIO Data Format ID:  23
+    Format name:          MBF_HSURICEN
+    Informal Description: URI Hydrosweep
+    Attributes:           Hydrosweep DS, 59 beams,
+                          bathymetry, binary, URI.
 
-      MBIO Data Format ID:  42
-      Format name:          MBF_SB2100IH
-      Informal Description: SeaBeam 2100/1000 series processing format
-      Attributes:           SeaBeam 2100/1000, bathymetry, amplitude 
-                      and sidescan, 151 beams bathymetry,
-                      1000 pixels sidescan, binary,
-                      L-DEO and SeaBeam Instruments.
+    MBIO Data Format ID:  24
+    Format name:          MBF_HSLDEOIH
+    Informal Description: L-DEO in-house binary Hydrosweep
+    Attributes:           Hydrosweep DS, 59 beams,
+                          bathymetry and amplitude, 
+                          binary, centered, L-DEO.
 
-      MBIO Data Format ID:  61
-      Format name:          MBF_MBLDEOIH
-      Informal Description: L-DEO in-house generic multibeam
-      Attributes:           Data from all sonar systems, bathymetry, 
-                      amplitude and sidescan, variable beams and pixels, 
-                      binary, centered, L-DEO.
+    MBIO Data Format ID:  25
+    Format name:          MBF_HSURIVAX
+    Informal Description: URI Hydrosweep from VAX
+    Attributes:           Hydrosweep DS, 59 beams, 
+                          bathymetry, binary, VAX 
+                          byte order, URI.
+
+    MBIO Data Format ID:  32
+    Format name:          MBF_SB2000SB
+    Informal Description: SIO Swath-bathy SeaBeam 2000
+    Attributes:           SeaBeam 2000, bathymetry, 
+                          121 beams, binary,  SIO.
+
+    MBIO Data Format ID:  33
+    Format name:          MBF_SB2000SS
+    Informal Description: SIO Swath-bathy SeaBeam 2000
+    Attributes:           SeaBeam 2000, sidescan,
+                          1000 pixels, binary,  SIO.
+
+    MBIO Data Format ID:  41
+    Format name:          MBF_SB2100RW
+    Informal Description: SeaBeam 2100/1000 vender format
+    Attributes:           SeaBeam 2100/1000, bathymetry, 
+                          amplitude and sidescan, 151 beams
+                          and 2000 pixels, ascii with binary
+                          sidescan, SeaBeam Instruments.
+
+    MBIO Data Format ID:  51
+    Format name:          MBF_EM1000RW
+    Informal Description: Simrad EM1000 vendor format
+    Attributes:           Simrad EM1000, bathymetry,
+                          amplitude, and sidescan, 60 beams,
+                          variable pixels, ascii + binary,
+                          Simrad.
+
+    MBIO Data Format ID:  54
+    Format name:          MBF_EM12DARW
+    Informal Description: Simrad EM12S RRS Darwin format
+    Attributes:           Simrad EM12S, bathymetry and 
+                          amplitude, 81 beams, binary,
+                          Oxford University.
+
+    MBIO Data Format ID:  61
+    Format name:          MBF_MR1PRHIG
+    Informal Description: SOEST MR1 post processed format
+    Attributes:           SOEST MR1, bathymetry and 
+                          sidescan, variable beams and 
+                          pixels, xdr binary, SOEST, UH.
+
+    MBIO Data Format ID:  71
+    Format name:          MBF_MBLDEOIH
+    Informal Description: L-DEO in-house generic multibeam
+    Attributes:           Data from all sonar systems, 
+                          bathymetry, amplitude and
+                          sidescan, variable beams and 
+                          pixels, binary, centered, 
+                          L-DEO.
+
+    MBIO Data Format ID:  81
+    Format name:          MBF_CBAT9001
+    Informal Description: Reson SeaBat 9001 multibeam
+    Attributes:           60 beam bathymetry and amplitude,
+                          binary, UNB.
+
+    MBIO Data Format ID:  91
+    Format name:          MBF_BCHRTUNB
+    Informal Description: Elac BottomChart multibeam
+    Attributes:           56 beam bathymetry and amplitude,
+                          binary, UNB.
+
 
 The institutional acronyms used above have the following meanings:
  	SIO	Scripps Institution of Oceanography
  	L-DEO	Lamont-Doherty Earth Observatory
  	URI	University of Rhode Island
  	NRL	Naval Research Laboratory
+ 	UNB	University of New Brunswick
+ 	UH	University of Hawaii
 
 .SH FUNCTION STATUS AND ERROR CODES
 All of the \fBMBIO\fP functions return an integer status value with the 
