@@ -38,6 +38,7 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
+!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -512,8 +513,8 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 428;
-        XmNy = 42;
+        XmNx = 528;
+        XmNy = 119;
         XmNwidth = 158;
         XmNheight = 591;
     };
@@ -905,8 +906,8 @@ object bulletinBoard_controls : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 220;
-        XmNy = 168;
+        XmNx = 33;
+        XmNy = 190;
         XmNwidth = 573;
         XmNheight = 337;
     };
@@ -1501,8 +1502,8 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 84;
-        XmNy = 40;
+        XmNx = 21;
+        XmNy = 192;
         XmNwidth = 845;
         XmNheight = 595;
     };
@@ -1629,8 +1630,8 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 201;
-        XmNy = 72;
+        XmNx = 19;
+        XmNy = 200;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -1746,8 +1747,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 351;
-        XmNy = 257;
+        XmNx = 47;
+        XmNy = 179;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -1826,8 +1827,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 236;
-        XmNy = 294;
+        XmNx = 31;
+        XmNy = 187;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -2081,8 +2082,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 170;
-        XmNy = 102;
+        XmNx = 22;
+        XmNy = 220;
         XmNwidth = 674;
         XmNheight = 470;
     };

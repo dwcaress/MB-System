@@ -949,8 +949,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 170); ac++;
-    XtSetArg(args[ac], XmNy, 102); ac++;
+    XtSetArg(args[ac], XmNx, 22); ac++;
+    XtSetArg(args[ac], XmNy, 220); ac++;
     XtSetArg(args[ac], XmNwidth, 674); ac++;
     XtSetArg(args[ac], XmNheight, 470); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(xmDialogShell_about,
@@ -1295,8 +1295,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_ANY); ac++;
-    XtSetArg(args[ac], XmNx, 236); ac++;
-    XtSetArg(args[ac], XmNy, 294); ac++;
+    XtSetArg(args[ac], XmNx, 31); ac++;
+    XtSetArg(args[ac], XmNy, 187); ac++;
     XtSetArg(args[ac], XmNwidth, 542); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
     bulletinBoard_message = XmCreateBulletinBoard(xmDialogShell_message,
@@ -1374,8 +1374,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 351); ac++;
-    XtSetArg(args[ac], XmNy, 257); ac++;
+    XtSetArg(args[ac], XmNx, 47); ac++;
+    XtSetArg(args[ac], XmNy, 179); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 160); ac++;
     bulletinBoard_error = XmCreateBulletinBoard(xmDialogShell_error,
@@ -1508,8 +1508,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 201); ac++;
-    XtSetArg(args[ac], XmNy, 72); ac++;
+    XtSetArg(args[ac], XmNx, 19); ac++;
+    XtSetArg(args[ac], XmNy, 200); ac++;
     XtSetArg(args[ac], XmNwidth, 611); ac++;
     XtSetArg(args[ac], XmNheight, 530); ac++;
     bulletinBoard_fileselection = XmCreateBulletinBoard(xmDialogShell_fileselection,
@@ -1623,8 +1623,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNnoResize, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-        XtSetArg(args[ac], XmNx, 84); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
+        XtSetArg(args[ac], XmNx, 21); ac++;
+        XtSetArg(args[ac], XmNy, 192); ac++;
         XtSetArg(args[ac], XmNwidth, 845); ac++;
         XtSetArg(args[ac], XmNheight, 595); ac++;
         bulletinBoard_naverr = XmCreateBulletinBoard(dialogShell_naverr,
@@ -2287,8 +2287,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 220); ac++;
-    XtSetArg(args[ac], XmNy, 168); ac++;
+    XtSetArg(args[ac], XmNx, 33); ac++;
+    XtSetArg(args[ac], XmNy, 190); ac++;
     XtSetArg(args[ac], XmNwidth, 573); ac++;
     XtSetArg(args[ac], XmNheight, 337); ac++;
     bulletinBoard_controls = XmCreateBulletinBoard(xmDialogShell_controls,
@@ -2687,8 +2687,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 428); ac++;
-        XtSetArg(args[ac], XmNy, 42); ac++;
+        XtSetArg(args[ac], XmNx, 528); ac++;
+        XtSetArg(args[ac], XmNy, 119); ac++;
         XtSetArg(args[ac], XmNwidth, 158); ac++;
         XtSetArg(args[ac], XmNheight, 591); ac++;
         bulletinBoard_biases = XmCreateBulletinBoard(dialogShell_biases,
