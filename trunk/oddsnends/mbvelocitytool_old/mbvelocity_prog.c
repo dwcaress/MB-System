@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 4.16 1997-04-21 17:09:54 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 4.17 1997-07-25 14:27:30 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu) 
@@ -23,6 +23,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1997/04/21  17:09:54  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.16  1997/04/16  21:35:31  caress
  * Complete rewrite of mbvelocitytool without uid file.
  *
@@ -128,7 +131,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.16 1997-04-21 17:09:54 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.17 1997-07-25 14:27:30 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Ddraft -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -228,6 +231,8 @@ double	*ttimes = NULL;
 double	*angles = NULL;
 double	*angles_forward = NULL;
 double	*angles_null = NULL;
+double	*depth_offset = NULL;
+double	*alongtrack_offset = NULL;
 int	*flags = NULL;
 double	*p = NULL;
 int	nraypathmax;
@@ -495,6 +500,8 @@ int mbvt_quit()
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles_forward,&error);
 		mb_free(verbose,&angles_null,&error);
+		mb_free(verbose,&depth_offset,&error);
+		mb_free(verbose,&alongtrack_offset,&error);
 		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
 			{
@@ -2011,7 +2018,6 @@ int	form;
 	double	navlon, navlat;
 	double	speed, heading;
 	double	roll, pitch, heave;
-	double	depth_offset;
 	double	ssv;
 	char	command[64];
 	int	i, j, k;
@@ -2050,6 +2056,8 @@ int	form;
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles_forward,&error);
 		mb_free(verbose,&angles_null,&error);
+		mb_free(verbose,&depth_offset,&error);
+		mb_free(verbose,&alongtrack_offset,&error);
 		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
 			{
@@ -2096,6 +2104,8 @@ int	form;
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth_offset,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&alongtrack_offset,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&acrosstrack,&error);
@@ -2157,8 +2167,9 @@ int	form;
 			status = mb_ttimes(verbose,mbio_ptr,
 				buff->buffer[k],&kind,&nbeams,
 				ttimes,angles,
-				angles_forward,angles_null,flags,
-				&depth_offset,&ssv,&error);
+				angles_forward,angles_null,
+				depth_offset,alongtrack_offset,
+				flags,&ssv,&error);
 			
 			/* check for first nonzero ssv */
 			if (ssv > 0.0 && ssv_start == 0.0)
@@ -2293,8 +2304,6 @@ int mbvt_process_multibeam()
 	int	first;
 	double	ttime;
 	int	ray_stat;
-	double	depth_offset;
-	double	depth_add;
 	double	ssv;
 	double	sx, sy, sxx, sxy;
 	double	delta, a, b;
@@ -2378,26 +2387,15 @@ int mbvt_process_multibeam()
 			status = mb_ttimes(verbose,mbio_ptr,
 				buff->buffer[k],&kind,&nbeams,
 				ttimes,angles,
-				angles_forward,angles_null,flags,
-				&depth_offset,&ssv,&error);
-
-			/* add user specified ship draft */
-			depth_offset = depth_offset + draft;
+				angles_forward,angles_null,
+				depth_offset,alongtrack_offset,
+				flags,&ssv,&error);
 			
 			/* set surface sound speed to default if needed */
 			if (ssv <= 0.0)
 				ssv = ssv_start;
 			else
 				ssv_start = ssv;
-
-			/* check depth_offset */
-			if (depth_offset < 0.0)
-				{
-				depth_add = depth_offset;
-				depth_offset = 0.0;
-				}
-			else
-				depth_add = 0.0;
 			}
 
 		/* loop over the beams */
@@ -2410,12 +2408,13 @@ int mbvt_process_multibeam()
 		    /* trace the ray */
 		    if (flags[i] == 0)
 			{
+			/* trace rays */
 			if (first == MB_NO)
 			    {
 			    /* call raytracing without keeping
 				plotting list */
 			    status = mb_rt(verbose, 
-				    rt_svp, depth_offset, 
+				    rt_svp, 0.0, 
 				    angles[i], 0.5*ttimes[i],
 				    ssv, angles_null[i], 
 				    0, NULL, NULL, NULL, 
@@ -2431,7 +2430,7 @@ int mbvt_process_multibeam()
 			    /* call raytracing keeping
 				plotting list */
 			    status = mb_rt(verbose, 
-				    rt_svp, depth_offset, 
+				    rt_svp, 0.0, 
 				    angles[i], 0.5*ttimes[i],
 				    ssv, angles_null[i], 
 				    nraypathmax, &nraypath[i], 
@@ -2449,7 +2448,7 @@ int mbvt_process_multibeam()
 			    }
 
 			/* add to depth if needed */
-			depth[i] = depth[i] + depth_add;
+			depth[i] = depth[i] + depth_offset[i] + draft;
 
 			/* get min max depths */
 			if (depth[i] < bath_min)
