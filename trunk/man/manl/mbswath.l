@@ -1,4 +1,4 @@
-.TH mbswath l "3 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbswath l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
