@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.11 1996-01-26 21:25:34 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.12 1996-02-12 18:09:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1996/01/26  21:25:34  caress
+ * Version 4.3 distribution.
+ *
  * Revision 4.10  1995/10/02  22:25:20  caress
  * Added -D option.
  *
@@ -112,10 +115,10 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.11 1996-01-26 21:25:34 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.12 1996-02-12 18:09:25 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
-static char usage_message[] = "mbvelocitytool [-V -H]";
+static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Ddraft -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -265,6 +268,7 @@ char	**argv;
 	/* local variables */
 	char	*function_name = "mbvt_init";
 	int	status = MB_SUCCESS;
+	char	ifile[256], sfile[256], wfile[256];
 	int	i;
 
 	/* parsing variables */
@@ -299,9 +303,12 @@ char	**argv;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 	nbeams = 16;
+	strcpy(ifile, "\0");
+	strcpy(sfile, "\0");
+	strcpy(wfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:S:s:W:w:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -312,9 +319,45 @@ char	**argv;
 		case 'v':
 			verbose++;
 			break;
+		case 'B':
+		case 'b':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&btime_i[0],&btime_i[1],&btime_i[2],
+				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
+			flag++;
+			break;
 		case 'D':
 		case 'd':
 			sscanf (optarg,"%lf", &draft);
+			flag++;
+			break;
+		case 'E':
+		case 'e':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&etime_i[0],&etime_i[1],&etime_i[2],
+				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
+			flag++;
+			break;
+		case 'F':
+		case 'f':
+			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", ifile);
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			sscanf (optarg,"%s", sfile);
+			flag++;
+			break;
+		case 'W':
+		case 'w':
+			sscanf (optarg,"%s", wfile);
 			flag++;
 			break;
 		case '?':
@@ -349,6 +392,10 @@ char	**argv;
 		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
 		fprintf(stderr,"dbg2       help:               %d\n",help);
 		fprintf(stderr,"dbg2       draft:              %f\n",draft);
+		fprintf(stderr,"dbg2       format:             %f\n",format);
+		fprintf(stderr,"dbg2       input file:         %s\n",ifile);
+		fprintf(stderr,"dbg2       display svp file:   %s\n",sfile);
+		fprintf(stderr,"dbg2       edit svp file:      %s\n",wfile);
 		}
 
 	/* if help desired then print it and exit */
@@ -369,6 +416,20 @@ char	**argv;
 		for (i=0;i<argc;i++)
 			fprintf(stderr,"dbg2       argv[%d]:    %s\n",
 				i,argv[i]);
+		}
+
+	/* if files specified then use them at startup */
+	if (strlen(wfile) > 0)
+		{
+		status = mbvt_open_edit_profile(wfile);
+		}
+	if (strlen(sfile) > 0)
+		{
+		status = mbvt_open_display_profile(sfile);
+		}
+	if (strlen(ifile) > 0)
+		{
+		status = mbvt_open_multibeam_file(ifile,format);
 		}
 
 	/* print output debug statements */
@@ -1496,7 +1557,7 @@ int mbvt_plot()
 	xpmin = 2.25*margin;
 	xpmax = borders[1] - 0.5*margin;
 	ypmin = 0.5*(borders[3] - borders[2]) + 1.5*margin;
-	ypmax = ypmin + (xpmax - xpmin)/4.5;
+	ypmax = ypmin + (xpmax - xpmin)/5.0;
 	xpcen = xpmin + (xpmax - xpmin)/2;
 	ypcen = ypmin + (ypmax - ypmin)/2;
 	xpminimum = -2.25*maxdepth;
