@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 4.2 1994-12-21 20:21:09 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 4.3 1995-02-14 21:59:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,10 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/12/21  20:21:09  caress
+ * Changes to support high resolution SeaBeam 2000 sidescan files
+ * from R/V Melville data.
+ *
  * Revision 4.1  1994/11/09  21:40:34  caress
  * Changed ttimes extraction routines to handle forward beam angles
  * so that alongtrack distances can be calculated.
@@ -62,7 +66,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 4.2 1994-12-21 20:21:09 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 4.3 1995-02-14 21:59:53 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -176,7 +180,7 @@ int	*error;
 	unsigned short *short_ptr;
 	int	time_j[5];
 	int	id;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -267,7 +271,7 @@ int	*error;
 				{
 				short_ptr = (unsigned short *) 
 					&store->ss[2*i];
-				ss[i] = *short_ptr;
+				ss[i] = (double) (*short_ptr);
 				ssacrosstrack[i] = 
 					(i-*nss/2)*store->pixel_size;
 				ssalongtrack[i] = 0.0;
@@ -514,8 +518,9 @@ int	*error;
 			{
 			for (i=0;i<nss;i++)
 				{
-				short_ptr = (unsigned short *) &store->ss[2*i];
-				*store_ptr = (unsigned short) ss[i];
+				short_ptr = (unsigned short *) 
+					&store->ss[2*i];
+				*short_ptr = (unsigned short) ss[i];
 				}
 			}
 		}

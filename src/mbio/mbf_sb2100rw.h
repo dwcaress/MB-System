@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 4.4 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbf_sb2100rw.h,v 4.5 1995-02-14 22:01:39 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.3  1994/06/21  22:54:21  caress
  * Added #ifdef statements to handle byte swapping.
  *
@@ -77,6 +80,12 @@
 
 /* maximum number of sidescan pixels for SeaBeam 1000/2100 */
 #define MBF_SB2100RW_PIXELS 2000
+
+/* maximum value of beam amplitudes for SeaBeam 1000/2100 */
+#define MBF_SB2100RW_AMP_MAX 999
+
+/* maximum value of sidescan pixels for SeaBeam 1000/2100 */
+#define MBF_SB2100RW_SS_MAX 65535
 
 /* center beam for SeaBeam 1000/2100 */
 #define MBF_SB2100RW_CENTER_BEAM 75

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.h	10/4/94
- *	$Id: mbsys_sb2000.h,v 4.1 1994-12-21 20:21:09 caress Exp $
+ *	$Id: mbsys_sb2000.h,v 4.2 1995-02-14 22:01:39 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/12/21  20:21:09  caress
+ * Changes to support high resolution SeaBeam 2000 sidescan files
+ * from R/V Melville data.
+ *
  * Revision 4.0  1994/10/21  12:35:09  caress
  * Release V4.0
  *
@@ -128,6 +132,7 @@ struct mbsys_sb2000_struct
 	short	pixels_ss;	/* number of pixels */
 	char	spare_ss[12];	/* spare */
 	char	ss_type;	/* sidescan type: G=grayscale, R=raw sidescan */
+	char	ss_dummy;
 	char	ss[2*MBSYS_SB2000_PIXELS];
 	
 	};
