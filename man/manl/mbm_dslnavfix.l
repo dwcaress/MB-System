@@ -10,7 +10,7 @@ Version 4.6
 \fBmbm_dslnavfix\fP \fB-F\fP\fInavformat\fP 
 \fB-I\fP\fIinfile\fP \fB-J\fP\fIutm_zone\fP 
 \fB-O\fP\fIoutfile\fP 
-[\fB-E\fP\fIellipsoid\fP \fB-H\fP \fB-V\fP]
+[\fB-D\fP\fIdecimate\fP \fB-E\fP\fIellipsoid\fP \fB-H\fP \fB-V\fP]
 
 .SH DESCRIPTION
 \fBmbm_dslnavfix\fP is a macro to translate 
@@ -74,6 +74,13 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
+.TP
+.B \-D
+\fIdecimate\fP
+.br
+This option allows the user to decimate the input navigation.
+The \fIdecimate\fP value represents the decimation factor.
+The default is \fIdecimate\fP = 1, or no decimation.
 .TP
 .B \-E
 \fIellipsoid\fP
