@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 4.7 1999-01-26 19:46:58 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 4.8 1999-02-04 23:39:54 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 4.7 1999-01-26 19:46:58 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.8 1999-02-04 23:39:54 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.7  1999/01/26  19:46:58  caress
+# Fixed parsing of grdinfo output from GMT 3.1.
+#
 # Revision 4.6  1998/10/05  17:00:15  caress
 # MB-System version 4.6beta
 #
@@ -217,6 +220,17 @@ $ncpt = 11;
 # define degrees to radians conversion
 $PI = 3.1415926;
 $DTR = $PI / 180.0;
+
+# Determine the GMT version
+@grdinfo = `grdinfo 2>&1`;
+$line = shift @grdinfo;
+if ($line =~ 
+	/grdinfo\s+(\S+)\s+\S+/)
+	{
+	($gmt_version) = $line =~ 
+		/grdinfo\s+(\S+)\s+\S+/;
+	}
+print "GMT VERSION: $gmt_version\n";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
@@ -1700,7 +1714,18 @@ if ($color_mode && $color_mode < 5 && $color_pallette < 5)
 		$colorscale_offx,$colorscale_offy,
 		$colorscale_length,$colorscale_thick, 
 		$colorscale_vh;
-	print FCMD "-B\":.$slabel:\" \\\n\t";
+	if ($gmt_version eq "3.0")
+		{
+		print FCMD "-B\":.$slabel:\" \\\n\t";
+		}
+	else
+		{
+		print FCMD "-B\":$slabel:\" \\\n\t";
+		}
+	if ($stretch_color)
+		{
+		print FCMD "-L \\\n\t";
+		}
 	if ($portrait)
 		{
 		printf FCMD "-P ";
@@ -1807,6 +1832,8 @@ if ($verbose)
 	{
 	print "\nProgram Status:\n";
 	print "--------------\n";
+	print "\n  GMT Version:\n";
+	print "    Version $gmt_version\n";
 	print "\n  Plot Style:\n";
 	if ($color_mode == 1)
 		{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.28 1998-12-17 22:53:13 caress Exp $
+ *    $Id: mbswath.c,v 4.29 1999-02-04 23:41:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.28  1998/12/17  22:53:13  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.27  1998/10/28  21:32:29  caress
  * Fixed handling of data with variable numbers of beams.
  *
@@ -233,7 +236,13 @@ struct swath
 #define	MBSWATH_IMAGE_24	3
 
 /* global image variables and defines */
-#define YIQ(r,g,b)	rint(0.299*(r) + 0.587*(b) + 0.114*(b))
+#ifndef YIQ
+#ifdef GMT_OLD
+#define YIQ(r,g,b)	rint(0.299*(r) + 0.587*(g) + 0.114*(b))
+#else
+#define  YIQ(rgb)
+#endif
+#endif
 int	image = MBSWATH_IMAGE_24;
 unsigned char *bitimage;
 int	dpi = 100;
@@ -248,7 +257,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.28 1998-12-17 22:53:13 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.29 1999-02-04 23:41:29 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -341,6 +350,7 @@ char **argv;
 	double	clipx[4], clipy[4];
 
 	/* other variables */
+	int	rgb[3];
 	int	r1, g1, b1, r2, g2, b2;
 	int	count;
 	int	i, j, jmax;
@@ -364,7 +374,11 @@ char **argv;
 	borders[3] = 0.0;
 
 	/* deal with gmt options */
+#ifdef GMT_OLD
 	argc = gmt_begin (argc, argv);
+#else
+	argc = GMT_begin (argc, argv);
+#endif
 	for (i = 1; i < argc; i++) 
 		{
 		if (argv[i][0] == '-') 
@@ -387,9 +401,15 @@ char **argv;
 				case 'y':
 				case 'c':
 				case '\0':
+#ifdef GMT_OLD
 					errflg += get_common_args (argv[i], 
 						&borders[0], &borders[1], 
 						&borders[2], &borders[3]);
+#else
+					errflg += GMT_get_common_args (argv[i], 
+						&borders[0], &borders[1], 
+						&borders[2], &borders[3]);
+#endif
 					break;
 				
 				/* Supplemental parameters */
@@ -398,6 +418,7 @@ char **argv;
 					strcpy(cptfile,&argv[i][2]);
 					break;
 				case 'F':
+#ifdef GMT_OLD
 					if (gmt_getrgb (&argv[i][2], 
 						&gmtdefs.basemap_frame_rgb[0], 
 						&gmtdefs.basemap_frame_rgb[1], 
@@ -406,6 +427,14 @@ char **argv;
 						gmt_pen_syntax ('F');
 						errflg++;
 						}
+#else
+					if (GMT_getrgb (&argv[i][2], 
+						gmtdefs.basemap_frame_rgb)) 
+						{
+						GMT_pen_syntax ('F');
+						errflg++;
+						}
+#endif
 				case '0':
 					gmtdefs.color_image = 0;
 					image = MBSWATH_IMAGE_24;
@@ -662,17 +691,28 @@ char **argv;
 		+ 0.25*(borders_use[3] - borders_use[2]);
 	
 	/* set up map */
+#ifdef GMT_OLD
 	map_setup(borders[0],borders[1],borders[2],borders[3]);
+#else
+	GMT_map_setup(borders[0],borders[1],borders[2],borders[3]);
+#endif
 
 	/* get scaling from degrees to km */
 	mb_coor_scale(verbose,0.5*(borders_use[2] + borders_use[3]),
 			&mtodeglon,&mtodeglat);
 
 	/* get color palette file */
+#ifdef GMT_OLD
 	read_cpt(cptfile);
 	if (gmt_gray || gmt_b_and_w == MB_YES) 
 		image = MBSWATH_IMAGE_8;
 	if (gmt_n_colors <= 0)
+#else
+	GMT_read_cpt(cptfile);
+	if (GMT_gray || GMT_b_and_w) 
+		image = MBSWATH_IMAGE_8;
+	if (GMT_n_colors <= 0)
+#endif
 		{
 		fprintf(stderr,"\nColor pallette table not properly specified:\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
@@ -759,17 +799,32 @@ char **argv;
 		gmtdefs.x_origin, gmtdefs.y_origin,
 		gmtdefs.global_x_scale, gmtdefs.global_y_scale, 
 		gmtdefs.n_copies, gmtdefs.dpi, gmtdefs.measure_unit, 
-		gmtdefs.paper_width, gmtdefs.page_rgb, gmt_epsinfo (argv[0]));
+		gmtdefs.paper_width, gmtdefs.page_rgb, 
+#ifdef GMT_OLD
+		gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
 		timestamp (argc, argv);
-
+#else
+		GMT_epsinfo (argv[0]));
+	GMT_echo_command (argc, argv);
+	if (gmtdefs.unix_time) 
+		GMT_timestamp (argc, argv);
+#endif
 	/* set clip path */
+#ifdef GMT_OLD
 	geo_to_xy(borders_use[0],borders_use[2],&clipx[0],&clipy[0]);
 	geo_to_xy(borders_use[1],borders_use[2],&clipx[1],&clipy[1]);
 	geo_to_xy(borders_use[1],borders_use[3],&clipx[2],&clipy[2]);
 	geo_to_xy(borders_use[0],borders_use[3],&clipx[3],&clipy[3]);
 	ps_clipon(clipx,clipy,4,-1,-1,-1,3);
+#else
+	GMT_geo_to_xy(borders_use[0],borders_use[2],&clipx[0],&clipy[0]);
+	GMT_geo_to_xy(borders_use[1],borders_use[2],&clipx[1],&clipy[1]);
+	GMT_geo_to_xy(borders_use[1],borders_use[3],&clipx[2],&clipy[2]);
+	GMT_geo_to_xy(borders_use[0],borders_use[3],&clipx[3],&clipy[3]);
+	GMT_map_clip_on (GMT_no_rgb, 3);
+#endif
 
 	/* if plot is made using an image operator
 		set up the image */
@@ -791,9 +846,13 @@ char **argv;
 					&bitimage,&error);
 
 			/* set image to background color */
-			gray = YIQ (gmtdefs.page_rgb[0], 
-				gmtdefs.page_rgb[1], 
-				gmtdefs.page_rgb[2]);
+#ifdef GMT_OLD
+			gray = YIQ (gmtdefs.page_rgb[0],
+					gmtdefs.page_rgb[1],
+					gmtdefs.page_rgb[2]);
+#else
+			gray = YIQ (gmtdefs.page_rgb); 
+#endif
 			for (j=0;j<nm;j++)
 				bitimage[j] = gray;
 			}
@@ -1253,17 +1312,30 @@ char **argv;
 		}
 	else if (image == MBSWATH_IMAGE_24)
 		{
+#ifdef GMT_OLD
 		color_image (0., 0., x_inch, y_inch, bitimage, nx, ny);
+#else
+		GMT_color_image (0., 0., x_inch, y_inch, bitimage, nx, ny);
+#endif
 		}
 		
 	/* plot basemap if required */
 	if (frame_info.plot) 
 		{
+#ifdef GMT_OLD
 		ps_setpaint (gmtdefs.basemap_frame_rgb[0], 
 			gmtdefs.basemap_frame_rgb[1], 
 			gmtdefs.basemap_frame_rgb[2]);
 		map_basemap ();
 		ps_setpaint (0, 0, 0);
+#else
+		ps_setpaint (gmtdefs.basemap_frame_rgb);
+		GMT_map_basemap ();
+		rgb[0] = 0;
+		rgb[1] = 0;
+		rgb[2] = 0;
+		ps_setpaint (rgb);
+#endif
 		}
 
 	/* end the plot */
@@ -1287,7 +1359,11 @@ char **argv;
 		}
 
 	/* end it all */
+#ifdef GMT_OLD
 	gmt_end(argc, argv);
+#else
+	GMT_end(argc, argv);
+#endif
 }
 /*--------------------------------------------------------------------*/
 int get_footprints(verbose,mode,fp_mode,factor,depth_def,
@@ -2180,7 +2256,7 @@ int	*error;
 	struct footprint	*print;
 	double	*x, *y;
 	double	xx[4], yy[4];
-	int	red, green, blue;
+	int	red, green, blue, rgb[3];
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -2212,6 +2288,7 @@ int	*error;
 				print = &pingcur->bathfoot[j];
 				x = &(print->x[0]);
 				y = &(print->y[0]);
+#ifdef GMT_OLD
 				for (k=0;k<4;k++)
 					geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				get_rgb24(pingcur->bath[j],&red,&green,&blue);
@@ -2222,6 +2299,16 @@ int	*error;
 						&red,&green,&blue);
 				status = plot_box(verbose,xx,yy,
 						red,green,blue,error);
+#else
+				for (k=0;k<4;k++)
+					GMT_geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
+				GMT_get_rgb24(pingcur->bath[j],rgb);
+				if (mode == MBSWATH_BATH_RELIEF 
+					|| mode == MBSWATH_BATH_AMP
+					|| mode == MBSWATH_BATH_AMP_CPT)
+					GMT_illuminate(pingcur->bathshade[j],rgb);
+				status = plot_box(verbose,xx,yy,rgb,error);
+#endif
 				}
 			}
 		}
@@ -2237,11 +2324,18 @@ int	*error;
 				print = &pingcur->bathfoot[j];
 				x = &(print->x[0]);
 				y = &(print->y[0]);
+#ifdef GMT_OLD
 				for (k=0;k<4;k++)
 					geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				get_rgb24(pingcur->amp[j],&red,&green,&blue);
 				status = plot_box(verbose,xx,yy,
 						red,green,blue,error);
+#else
+				for (k=0;k<4;k++)
+					GMT_geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
+				GMT_get_rgb24(pingcur->amp[j],rgb);
+				status = plot_box(verbose,xx,yy,rgb,error);
+#endif					
 				}
 			}
 		}
@@ -2257,11 +2351,18 @@ int	*error;
 				print = &pingcur->ssfoot[j];
 				x = &(print->x[0]);
 				y = &(print->y[0]);
+#ifdef GMT_OLD
 				for (k=0;k<4;k++)
 					geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				get_rgb24(pingcur->ss[j],&red,&green,&blue);
 				status = plot_box(verbose,xx,yy,
 						red,green,blue,error);
+#else
+				for (k=0;k<4;k++)
+					GMT_geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
+				GMT_get_rgb24(pingcur->ss[j],rgb);
+				status = plot_box(verbose,xx,yy,rgb,error);
+#endif
 				}
 			}
 		}
@@ -2297,7 +2398,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct ping	*pingcur;
 	double	xx, yy;
-	int	red, green, blue;
+	int	red, green, blue, rgb[3];
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -2326,6 +2427,7 @@ int	*error;
 			for (j=0;j<pingcur->beams_bath;j++)
 			  if (mb_beam_ok(pingcur->beamflag[j]))
 				{
+#ifdef GMT_OLD
 				geo_to_xy(pingcur->bathlon[j], 
 					pingcur->bathlat[j], 
 					&xx, &yy);
@@ -2337,6 +2439,18 @@ int	*error;
 						&red,&green,&blue);
 				status = plot_point(verbose,xx,yy,
 						red,green,blue,error);
+#else
+				GMT_geo_to_xy(pingcur->bathlon[j], 
+					pingcur->bathlat[j], 
+					&xx, &yy);
+				GMT_get_rgb24(pingcur->bath[j],rgb);
+				if (mode == MBSWATH_BATH_RELIEF 
+					|| mode == MBSWATH_BATH_AMP
+					|| mode == MBSWATH_BATH_AMP_CPT)
+					GMT_illuminate(pingcur->bathshade[j],
+						rgb);
+				status = plot_point(verbose,xx,yy,rgb,error);
+#endif
 				}
 			}
 		}
@@ -2349,12 +2463,20 @@ int	*error;
 			for (j=0;j<pingcur->beams_amp;j++)
 			  if (mb_beam_ok(pingcur->beamflag[j]))
 				{
+#ifdef GMT_OLD
 				geo_to_xy(pingcur->bathlon[j], 
 					pingcur->bathlat[j], 
 					&xx, &yy);
 				get_rgb24(pingcur->amp[j],&red,&green,&blue);
 				status = plot_point(verbose,xx,yy,
 						red,green,blue,error);
+#else
+				GMT_geo_to_xy(pingcur->bathlon[j], 
+					pingcur->bathlat[j], 
+					&xx, &yy);
+				GMT_get_rgb24(pingcur->amp[j],rgb);
+				status = plot_point(verbose,xx,yy,rgb,error);
+#endif
 				}
 			}
 		}
@@ -2367,12 +2489,20 @@ int	*error;
 			for (j=0;j<pingcur->pixels_ss;j++)
 			  if (pingcur->ss[j] > 0.0)
 				{
+#ifdef GMT_OLD
 				geo_to_xy(pingcur->sslon[j], 
 					pingcur->sslat[j], 
 					&xx, &yy);
 				get_rgb24(pingcur->ss[j],&red,&green,&blue);
 				status = plot_point(verbose,xx,yy,
 						red,green,blue,error);
+#else
+				GMT_geo_to_xy(pingcur->sslon[j], 
+					pingcur->sslat[j], 
+					&xx, &yy);
+				GMT_get_rgb24(pingcur->ss[j],rgb);
+				status = plot_point(verbose,xx,yy,rgb,error);
+#endif
 				}
 			}
 		}
@@ -2396,6 +2526,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* version for GMT 3.0 */
+#ifdef GMT_OLD
 int plot_box(verbose,x,y,red,green,blue,error)
 int	verbose;
 double	*x;
@@ -2437,7 +2569,9 @@ int	*error;
 
 	/* if simple case just plot polygon */
 	if (image == MBSWATH_IMAGE_VECTOR)
+		{
 		ps_polygon(x,y,4,red,green,blue,0);
+		}
 
 	/* if image plot then rasterize the box */
 	else if (image == MBSWATH_IMAGE_8 || image == MBSWATH_IMAGE_24)
@@ -2591,6 +2725,206 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* version for GMT 3.1 */
+#else
+int plot_box(verbose,x,y,rgb,error)
+int	verbose;
+double	*x;
+double	*y;
+int	*rgb;
+int	*error;
+{
+	char	*function_name = "plot_box";
+	int	status = MB_SUCCESS;
+	int	ix[5], iy[5];
+	int	ixmin, ixmax, iymin, iymax;
+	int	ixx, iyy;
+	int	ixx1, ixx2;
+	double	dx, dy;
+	int	ncross, xcross[10];
+	int	i, j, k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBSWATH function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       x[0]:       %f\n",x[0]);
+		fprintf(stderr,"dbg2       y[0]:       %f\n",y[0]);
+		fprintf(stderr,"dbg2       x[1]:       %f\n",x[1]);
+		fprintf(stderr,"dbg2       y[1]:       %f\n",y[1]);
+		fprintf(stderr,"dbg2       x[2]:       %f\n",x[2]);
+		fprintf(stderr,"dbg2       y[2]:       %f\n",y[2]);
+		fprintf(stderr,"dbg2       x[3]:       %f\n",x[3]);
+		fprintf(stderr,"dbg2       y[3]:       %f\n",y[3]);
+		fprintf(stderr,"dbg2       rgb[0]:     %d\n",rgb[0]);
+		fprintf(stderr,"dbg2       rgb[1]:     %d\n",rgb[1]);
+		fprintf(stderr,"dbg2       rgb[2]:     %d\n",rgb[2]);
+		}
+
+	/* if simple case just plot polygon */
+	if (image == MBSWATH_IMAGE_VECTOR)
+		{
+		ps_polygon(x,y,4,rgb,0);
+		}
+
+	/* if image plot then rasterize the box */
+	else if (image == MBSWATH_IMAGE_8 || image == MBSWATH_IMAGE_24)
+		{
+		/* get bounds of box in pixels */
+		for (i=0;i<4;i++)
+			{
+			ix[i] = nx*x[i]/x_inch;
+			iy[i] = ny*y[i]/y_inch;
+			}
+		ix[4] = ix[0];
+		iy[4] = iy[0];
+
+		/* get min max values of bounding corners in pixels */
+		ixmin = ix[0];
+		ixmax = ix[0];
+		iymin = iy[0];
+		iymax = iy[0];
+		for (i=1;i<4;i++)
+			{
+			if (ix[i] < ixmin)
+				ixmin = ix[i];
+			if (ix[i] > ixmax)
+				ixmax = ix[i];
+			if (iy[i] < iymin)
+				iymin = iy[i];
+			if (iy[i] > iymax)
+				iymax = iy[i];
+			}
+		if (ixmin < 0) ixmin = 0;
+		if (ixmax > nx-1) ixmax = nx - 1;
+		if (iymin < 1) iymin = 1;
+		if (iymax > ny-1) iymax = ny - 1;
+
+		/* loop over all y values */
+		for (iyy=iymin;iyy<=iymax;iyy++)
+		  {
+		  /* find crossings */
+		  ncross = 0;
+		  for (i=0;i<4;i++)
+		    {
+		    if ((iy[i] <= iyy && iy[i+1] >= iyy)
+		      || (iy[i] >= iyy && iy[i+1] <= iyy))
+		      {
+		      if (iy[i] == iy[i+1])
+		        {
+		        xcross[ncross] = ix[i];
+		        ncross++;
+		        xcross[ncross] = ix[i+1];
+		        ncross++;
+		        }
+		      else
+		        {
+		        dy = iy[i+1] - iy[i];
+		        dx = ix[i+1] - ix[i];
+		        xcross[ncross] = (int) ((iyy - iy[i])*dx/dy + ix[i]);
+		        ncross++;
+		        }
+		      }
+		    }		
+
+		  /* plot lines between crossings */
+		  for (j=0;j<ncross-1;j++)
+		    {
+		    if (xcross[j] < xcross[j+1])
+		      {
+		      ixx1 = xcross[j];
+		      ixx2 = xcross[j+1];
+		      }
+		    else 
+		      {
+		      ixx1 = xcross[j+1];
+		      ixx2 = xcross[j];
+		      }
+		    if ((ixx1 < ixmin && ixx2 < ixmin) 
+		      || (ixx1 > ixmax && ixx2 > ixmax))
+		      ixx2 = ixx1 - 1; /* disable plotting */
+		    else
+		      {
+		      if (ixx1 < ixmin) ixx1 = ixmin;
+		      if (ixx2 > ixmax) ixx2 = ixmax;
+		      }
+		    for (ixx=ixx1;ixx<=ixx2;ixx++)
+		      {
+/*			fprintf(stderr,"plot %d %d\n",ixx,iyy);*/
+		      if (image == MBSWATH_IMAGE_8)
+			{
+			k = nx*(ny - iyy) + ixx;
+			bitimage[k] = (unsigned char) YIQ (rgb);
+			}
+		      else if (gmtdefs.color_image == 2)
+			{
+			k = nx*(ny - iyy) + ixx;
+			bitimage[k] = rgb[0];
+			bitimage[k+nm] = rgb[1];
+			bitimage[k+nm2] = rgb[2];
+			}
+		      else
+			{
+			k = 3*(nx*(ny - iyy) + ixx);
+			bitimage[k] = rgb[0];
+			bitimage[k+1] = rgb[1];
+			bitimage[k+2] = rgb[2];
+			}
+		      }
+		    }
+		  }
+
+		/* plot simple minded wrong box */
+/*		for (iyy=iymin;iyy<=iymax;iyy++)
+		  for (ixx=ixmin;ixx<=ixmax;ixx++)
+		    {
+		    if (image == MBSWATH_IMAGE_8)
+			{
+			k = nx*(ny - iyy) + ixx;
+			bitimage[k] = (unsigned char) YIQ (rgb);
+			}
+		    else if (gmtdefs.color_image == 2)
+			{
+			k = nx*(ny - iyy) + ixx;
+			bitimage[k] = rgb[0];
+			bitimage[k+nm] = rgb[1];
+			bitimage[k+nm2] = rgb[2];
+			}
+		    else
+			{
+			k = 3*(nx*(ny - iyy) + ixx);
+			bitimage[k] = rgb[0];
+			bitimage[k+1] = rgb[1];
+			bitimage[k+2] = rgb[2];
+			}
+		    }*/
+		}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBSWATH function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+#endif
+/*--------------------------------------------------------------------*/
+/* version for GMT 3.0 */
+#ifdef GMT_OLD
 int plot_point(verbose,x,y,red,green,blue,error)
 int	verbose;
 double	x;
@@ -2600,7 +2934,7 @@ int	green;
 int	blue;
 int	*error;
 {
-	char	*function_name = "plot_box";
+	char	*function_name = "plot_point";
 	int	status = MB_SUCCESS;
 	int	ix, iy;
 	int	i, j, k;
@@ -2673,6 +3007,90 @@ int	*error;
 	/* return status */
 	return(status);
 }
+/*--------------------------------------------------------------------*/
+/* version for GMT 3.1 */
+#else
+int plot_point(verbose,x,y,rgb,error)
+int	verbose;
+double	x;
+double	y;
+int	*rgb;
+int	*error;
+{
+	char	*function_name = "plot_point";
+	int	status = MB_SUCCESS;
+	int	ix, iy;
+	int	i, j, k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBSWATH function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       x:          %f\n",x);
+		fprintf(stderr,"dbg2       y:          %f\n",y);
+		fprintf(stderr,"dbg2       rgb[0]:     %d\n",rgb[0]);
+		fprintf(stderr,"dbg2       rgb[1]:     %d\n",rgb[1]);
+		fprintf(stderr,"dbg2       rgb[2]:     %d\n",rgb[1]);
+		}
+
+	/* if simple case just plot point */
+	if (image == MBSWATH_IMAGE_VECTOR)
+		{
+		ps_setpaint (rgb);
+		ps_cross (x, y, 0.005);
+		}
+
+	/* if image plot then plot pixel */
+	else if (image == MBSWATH_IMAGE_8 || image == MBSWATH_IMAGE_24)
+		{
+		/* get pixel */
+		ix = nx*x/x_inch;
+		iy = ny*y/y_inch;
+
+		/* plot pixel */
+		if (image == MBSWATH_IMAGE_8)
+			{
+			k = nx*(ny - iy) + ix;
+			bitimage[k] = (unsigned char ) YIQ(rgb);
+			}
+		else if (gmtdefs.color_image == 2)
+			{
+			k = nx*(ny - iy) + ix;
+			bitimage[k] = rgb[0];
+			bitimage[k+nm] = rgb[1];
+			bitimage[k+nm2] = rgb[2];
+			}
+		else
+			{
+			k = 3*(nx*(ny - iy) + ix);
+			bitimage[k] = rgb[0];
+			bitimage[k+1] = rgb[1];
+			bitimage[k+2] = rgb[2];
+			}
+		  }
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBSWATH function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+#endif
 /*--------------------------------------------------------------------*/
 int ping_copy(verbose,one,two,swath,error)
 int	verbose;

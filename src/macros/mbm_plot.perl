@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.17 1998-10-13 18:08:37 caress Exp $
+#    $Id: mbm_plot.perl,v 4.18 1999-02-04 23:39:54 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.17 1998-10-13 18:08:37 caress Exp $
+#   $Id: mbm_plot.perl,v 4.18 1999-02-04 23:39:54 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.17  1998/10/13  18:08:37  caress
+# Fixed typos.
+#
 # Revision 4.16  1998/10/05  17:00:15  caress
 # MB-System version 4.6beta
 #
@@ -291,6 +294,17 @@ $ncpt = 11;
 	@cptbr7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 	@cptbg7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 	@cptbb7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
+
+# Determine the GMT version
+@grdinfo = `grdinfo 2>&1`;
+$line = shift @grdinfo;
+if ($line =~ 
+	/grdinfo\s+(\S+)\s+\S+/)
+	{
+	($gmt_version) = $line =~ 
+		/grdinfo\s+(\S+)\s+\S+/;
+	}
+print "GMT VERSION: $gmt_version\n";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
@@ -2063,7 +2077,18 @@ if ($color_mode && $color_pallette < 5)
 		$colorscale_offx,$colorscale_offy,
 		$colorscale_length,$colorscale_thick, 
 		$colorscale_vh;
-	print FCMD "-B\":.$slabel:\" \\\n\t";
+	if ($gmt_version eq "3.0")
+		{
+		print FCMD "-B\":.$slabel:\" \\\n\t";
+		}
+	else
+		{
+		print FCMD "-B\":$slabel:\" \\\n\t";
+		}
+	if ($stretch_color)
+		{
+		print FCMD "-L \\\n\t";
+		}
 	if ($portrait)
 		{
 		printf FCMD "-P ";
@@ -2161,6 +2186,8 @@ if ($verbose)
 	{
 	print "\nProgram Status:\n";
 	print "--------------\n";
+	print "\n  GMT Version:\n";
+	print "    Version $gmt_version\n";
 	print "\n  Plot Style:\n";
 	if ($color_mode == 1)
 		{

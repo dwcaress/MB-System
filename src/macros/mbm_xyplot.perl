@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 4.4 1998-10-05 17:00:15 caress Exp $
+#    $Id: mbm_xyplot.perl,v 4.5 1999-02-04 23:39:54 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -54,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 4.4 1998-10-05 17:00:15 caress Exp $
+#   $Id: mbm_xyplot.perl,v 4.5 1999-02-04 23:39:54 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.4  1998/10/05  17:00:15  caress
+# MB-System version 4.6beta
+#
 # Revision 4.3  1997/04/21  16:54:41  caress
 # MB-System 4.5 Beta Release.
 #
@@ -139,6 +142,17 @@ $program_name = "mbm_xyplot";
 	"b10",   "4m",   "c0",   "16m",   "c1",   "12m",   "c2",    "8m",
 	"c3",    "6m",   "c4",    "4m",   "c5",    "4m",   "c6",    "4m",
 	"c7",    "4m");
+
+# Determine the GMT version
+@grdinfo = `grdinfo 2>&1`;
+$line = shift @grdinfo;
+if ($line =~ 
+	/grdinfo\s+(\S+)\s+\S+/)
+	{
+	($gmt_version) = $line =~ 
+		/grdinfo\s+(\S+)\s+\S+/;
+	}
+print "GMT VERSION: $gmt_version\n";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
@@ -1101,6 +1115,8 @@ if ($verbose)
 	{
 	print "\nProgram Status:\n";
 	print "--------------\n";
+	print "\n  GMT Version:\n";
+	print "    Version $gmt_version\n";
 	print "\n  Plot Style:\n";
 	if (@xyfiles)
 		{
