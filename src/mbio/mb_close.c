@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 4.2 1994-10-21 12:11:53 caress Exp $
+ *	$Id: mb_close.c,v 4.3 1994-11-24 01:53:22 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 25, 1993
  *	$Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -72,7 +75,7 @@ int	verbose;
 char	**mbio_ptr;
 int	*error;
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 4.3 1994-11-24 01:53:22 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -97,6 +100,8 @@ int	*error;
 	/* deallocate memory for arrays within the mbio descriptor */
 	if (mb_xdr_table[mb_io_ptr->format_num] == MB_YES)
 		status = mb_free(verbose,&mb_io_ptr->xdrs,error);
+	if (mb_io_ptr->hdr_comment != NULL)
+		status = mb_free(verbose,&mb_io_ptr->hdr_comment,error);
 	status = mb_free(verbose,&mb_io_ptr->bath,error);
 	status = mb_free(verbose,&mb_io_ptr->amp,error);
 	status = mb_free(verbose,&mb_io_ptr->bath_acrosstrack,error);
