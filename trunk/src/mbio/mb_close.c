@@ -1,5 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	3.00	1/25/93
+ *	$ID$
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -15,6 +16,7 @@
  *
  * Author:	D. W. Caress
  * Date:	January 25, 1993
+ *	$Log: not supported by cvs2svn $
  */
 
 /* standard include files */
@@ -33,6 +35,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
+	static	char	rcs_id[]"$Id: mb_close.c,v 3.1 1993-05-14 22:18:32 sohara Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
