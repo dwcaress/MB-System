@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.6 README FILE:
+MB-SYSTEM VERSION 5.0.7 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.6 release of the MB-System software package for 
+5.0.7 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.6          ????
 Version 5.0.6          February 19, 2005
 Version 5.0.5          October 6, 2004
 Version 5.0.4          May 22, 2004
@@ -123,6 +124,31 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.7 release of MB-System includes several changes
+relative to the 5.0.6 release.
+
+MBprocess and MBset now support merging sonar depth
+(or draft) from separate time series files.
+
+A bug in mbgrid has been fixed that affected the footprint
+gridding algorithm used with bathymetry from sonars on
+submerged platforms.
+
+MBedit has new view options. The default is the the
+traditional waterfall view. Users may now also view the
+soundings from an alongtrack view perspective and an
+acrosstrack view perspective without static vertical 
+offsets between pings. The view mode is controlled from
+the View menu and from keyboard macros (characters '2',
+'3', and '4').
+
+The 5.0.6 release mistakenly left the code in mbr_em300raw.c
+in debug mode, causing copious stderr output when reading
+raw Simrad data (format 56). This has been corrected.
 
 MB-SYSTEM VERSION 5.0.6 RELEASE NOTES:
 ------------------------------------------
@@ -939,10 +965,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.57 2005-02-19 07:09:22 caress Exp $
+RCS ID: $Id: README,v 5.58 2005-03-25 04:01:01 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.57  2005/02/19 07:09:22  caress
+Release 5.0.6
+
 Revision 5.56  2005/02/17 07:33:26  caress
 Moving towards 5.0.6 release.
 
