@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 4.0 1996-09-05 13:59:47 caress Exp $
+ *    $Id: mb_check_info.c,v 4.1 1996-12-08 04:14:22 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,13 +11,20 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_check_info.c opens and initializes a multibeam data file 
- * for reading with mb_read or mb_get.
+ * mb_check_info.c checks if a file has data within the specified
+ * bounds by reading the mbinfo output of that file. The mbinfo
+ * output must be in an ascii file with a name consisting of the
+ * data file name followed by a ".inf" suffix. If the ".inf" file
+ * does not exist then the file is assumed to have data within the
+ * specified bounds. 
  *
  * Author:	D. W. Caress
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1996/09/05  13:59:47  caress
+ * Initial revision.
+ *
  *
  */
 
@@ -38,7 +45,7 @@ double	bounds[4];
 int	*file_in_bounds;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 4.0 1996-09-05 13:59:47 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 4.1 1996-12-08 04:14:22 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
@@ -66,7 +73,15 @@ int	*error;
 
 	/* cannot check bounds if input is stdin */
 	if (strncmp(file,stdin_string,5) == 0)
+		{
 		*file_in_bounds = MB_YES;
+		
+		/*print debug statements */
+		if (verbose >= 4)
+			{
+			fprintf(stderr,"dbg4  Cannot check bounds if input is stdin...\n");
+			}
+		}
 		
 	/* check for inf file */
 	else
@@ -127,30 +142,6 @@ int	*error;
 			else if (lonflip == 1
 			    && lon_max < 0.0)
 			    lon_max += 360.0;
-			if (lonflip == -1 
-			    && lat_min > 0.0)
-			    lat_min -= 360.0;
-			else if (lonflip == 0
-			    && lat_min < -180.0)
-			    lat_min += 360.0;
-			else if (lonflip == 0
-			    && lat_min > 180.0)
-			    lat_min -= 360.0;
-			else if (lonflip == 1
-			    && lat_min < 0.0)
-			    lat_min += 360.0;
-			if (lonflip == -1 
-			    && lat_max > 0.0)
-			    lat_max -= 360.0;
-			else if (lonflip == 0
-			    && lat_max < -180.0)
-			    lat_max += 360.0;
-			else if (lonflip == 0
-			    && lat_max > 180.0)
-			    lat_max -= 360.0;
-			else if (lonflip == 1
-			    && lat_max < 0.0)
-			    lat_max += 360.0;
 			    
 			/* check for lonflip conflict with bounds */
 			if (lon_min >= lon_max || lat_min >= lat_max)
@@ -165,12 +156,28 @@ int	*error;
 			    else
 				*file_in_bounds = MB_NO;
 			    }
+
+                        /*print debug statements */
+                        if (verbose >= 4)
+			    {
+                            fprintf(stderr,"dbg4  Bounds from inf file:\n");
+                            fprintf(stderr,"dbg4      lon_min: %f\n", lon_min);
+                            fprintf(stderr,"dbg4      lon_max: %f\n", lon_max);
+                            fprintf(stderr,"dbg4      lat_min: %f\n", lat_min);
+                            fprintf(stderr,"dbg4      lat_max: %f\n", lat_max);
+			    }
 			}
 			
 		    /* else if no data assume inf file is botched so
 			assume file has data in bounds */
 		    else
+			{
 			*file_in_bounds = MB_YES;
+      
+             		/*print debug statements */
+                    	if (verbose >= 4)
+                        	fprintf(stderr,"dbg4  No data listed in inf fileso cannot check bounds...\n");
+			}
 		    
 		    /* close the file */
 		    fclose(fp);
@@ -180,6 +187,10 @@ int	*error;
 		else
 		    {
 		    *file_in_bounds = MB_YES;
+
+		    /*print debug statements */
+		    if (verbose >= 4)
+                        fprintf(stderr,"dbg4  Cannot open inf file so cannot check bounds...\n");
 		    }	
 		}
 
