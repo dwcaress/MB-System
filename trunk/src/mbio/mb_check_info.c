@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.11 2003-09-23 23:41:27 caress Exp $
+ *    $Id: mb_check_info.c,v 5.12 2004-09-24 20:43:47 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2003/09/23 23:41:27  caress
+ * Another change in adding formats 68 and 69.
+ *
  * Revision 5.10  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -96,11 +99,11 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.11 2003-09-23 23:41:27 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.12 2004-09-24 20:43:47 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
-	char	file_inf[128];
-	char	line[128];
+	char	file_inf[MB_PATH_MAXLINE];
+	char	line[MB_PATH_MAXLINE];
 	int	nrecords, nrecords_read;
 	double	lon_min, lon_max;
 	double	lat_min, lat_max;
@@ -161,7 +164,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    mask_ny = 0;
 		    
 		    /* read the inf file */
-		    while (fgets(line, 128, fp) != NULL)
+		    while (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
 			{
 			if (strncmp(line, "Number of Records:", 18) == 0)
 			    {
