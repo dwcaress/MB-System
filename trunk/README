@@ -3,7 +3,7 @@ MB-SYSTEM VERSION 5.0.BETA05 README FILE:
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta04 release of the MB-System software package for 
+5.0.beta06 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-Version 5.0.beta06     July 27, 2001
+Version 5.0.beta06     July 30, 2001
 Version 5.0.beta05     July 23, 2001
 Version 5.0.beta04     July 20, 2001
 Version 5.0.beta03     July 19, 2001
@@ -96,7 +96,11 @@ MB-SYSTEM VERSION 5.0.BETA06 RELEASE NOTES:
 The version 5.0.beta06 release of MB-System includes 
 fixes to problems with the support for Elac Bottomchart
 sonars in the XSE format (format 94) and SeaBeam 2100
-sonars.
+sonars. Two new automatic filters have been added to
+mbedit (flagging within specified ranges of beam numbers
+or acrosstrack distances). Data cutting capability has
+also been added to mbprocess, with parameter control
+through mbset.
 
 MB-SYSTEM VERSION 5.0.BETA04 RELEASE NOTES:
 ------------------------------------------
@@ -573,10 +577,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.5 2001-07-27 19:28:38 caress Exp $
+RCS ID: $Id: README,v 5.6 2001-07-31 00:51:15 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 5.5  2001/07/27  19:28:38  caress
+# Release 5.0.beta06.
+#
 # Revision 5.4  2001/07/20  16:48:26  caress
 # Release 5.0.beta04
 #
