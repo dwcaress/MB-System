@@ -99,6 +99,10 @@
  * bac 06-19-03   Added support for bathymetric receive beam time series intensity data (i.e., Simrad
  *                "Seabed image" and Reson "snippets").  Inlcluded RWL updates of 12-19-02 for adding
  *                sensor-specific singlebeam information to the MB sensor specific subrecords.
+ * bac 12-28-04   Added support for EM3000D, EM3002, and EM3002D in gsfGetSwathBathyBeamWidths.  Updated
+ *                gsfLoadDepthScaleFactorAutoOffset to vary the offset interval based on precision.
+ *                Updated gsfFree to free and set to NULL the quality_flags, vertical_error, horizontal_error,
+ *                and brb_inten arrays.  Added vertical_error and horizontal_error processing to gsfCopyRecords.
  *
  * Classification : Unclassified
  *
@@ -2144,6 +2148,7 @@ gsfFree (gsfRecords *rec)
         free (rec->mb_ping.receive_heave);
         rec->mb_ping.receive_heave = (double *) NULL;
     }
+
     if (rec->mb_ping.depth_error != (double *) NULL)
     {
         free (rec->mb_ping.depth_error);
@@ -2160,6 +2165,12 @@ gsfFree (gsfRecords *rec)
     {
         free (rec->mb_ping.along_track_error);
         rec->mb_ping.along_track_error = (double *) NULL;
+    }
+
+    if (rec->mb_ping.quality_flags != (unsigned char *) NULL)
+    {
+        free (rec->mb_ping.quality_flags);
+        rec->mb_ping.quality_flags = (unsigned char *) NULL;
     }
 
     if (rec->mb_ping.nominal_depth != (double *) NULL)
@@ -2186,6 +2197,18 @@ gsfFree (gsfRecords *rec)
         rec->mb_ping.beam_angle_forward = (double *) NULL;
     }
 
+    if (rec->mb_ping.vertical_error != (double *) NULL)
+    {
+        free (rec->mb_ping.vertical_error);
+        rec->mb_ping.vertical_error = (double *) NULL;
+    }
+
+    if (rec->mb_ping.horizontal_error != (double *) NULL)
+    {
+        free (rec->mb_ping.horizontal_error);
+        rec->mb_ping.horizontal_error = (double *) NULL;
+    }
+
     /* we have an array of number_beams gsfIntensitySeries structures */
     if (rec->mb_ping.brb_inten != (gsfBRBIntensity *) NULL)
     {
@@ -2202,7 +2225,7 @@ gsfFree (gsfRecords *rec)
             free (rec->mb_ping.brb_inten->time_series);
             rec->mb_ping.brb_inten->time_series = NULL;
         }
-        free (rec->mb_ping.brb_inten->time_series);
+        free (rec->mb_ping.brb_inten);
         rec->mb_ping.brb_inten = (gsfBRBIntensity *) NULL;
     }
 
@@ -3261,6 +3284,52 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
             }
         }
         memcpy (target->mb_ping.beam_angle_forward, source->mb_ping.beam_angle_forward, sizeof(double) * source->mb_ping.number_beams);
+    }
+
+    if (source->mb_ping.vertical_error != (double *) NULL)
+    {
+        if (target->mb_ping.vertical_error == (double *) NULL)
+        {
+            target->mb_ping.vertical_error = (double *) calloc (sizeof(double), source->mb_ping.number_beams);
+            if (target->mb_ping.vertical_error == (double *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        else if (target->mb_ping.number_beams < source->mb_ping.number_beams)
+        {
+            target->mb_ping.vertical_error = (double *) realloc (target->mb_ping.vertical_error, sizeof(double) * source->mb_ping.number_beams);
+            if (target->mb_ping.vertical_error == (double *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        memcpy (target->mb_ping.vertical_error, source->mb_ping.vertical_error, sizeof(double) * source->mb_ping.number_beams);
+    }
+
+    if (source->mb_ping.horizontal_error != (double *) NULL)
+    {
+        if (target->mb_ping.horizontal_error == (double *) NULL)
+        {
+            target->mb_ping.horizontal_error = (double *) calloc (sizeof(double), source->mb_ping.number_beams);
+            if (target->mb_ping.horizontal_error == (double *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        else if (target->mb_ping.number_beams < source->mb_ping.number_beams)
+        {
+            target->mb_ping.horizontal_error = (double *) realloc (target->mb_ping.horizontal_error, sizeof(double) * source->mb_ping.number_beams);
+            if (target->mb_ping.horizontal_error == (double *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        memcpy (target->mb_ping.horizontal_error, source->mb_ping.horizontal_error, sizeof(double) * source->mb_ping.number_beams);
     }
 
     if (source->mb_ping.brb_inten != (gsfBRBIntensity *) NULL)
@@ -5532,6 +5601,9 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
         case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
             *fore_aft = 1.5;
             *athwartship = 1.5;
             if (data->mb_ping.sensor_data.gsfEM3Specific.run_time[0].transmit_beam_width != 0.0)
@@ -5682,6 +5754,11 @@ gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, int subrecordID, int 
     int             percent;
     int             ret_code = 0;
 
+    if (precision < 0.01)
+    {
+        layer_interval = 10.0;
+    }
+
     /* Test for valid subrecordID, we only supported automated establishement of the DC offset for the depth subrecords */
     if ((subrecordID != GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY) && (subrecordID != GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY))
     {
@@ -5777,6 +5854,15 @@ gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, int subrecordID, int 
         {
             offset = -1.0 * (next_layer - layer_interval);
         }
+    }
+
+    /* the maximum possible tidal height is just under 11 meters, so a maximum
+     *  offset of 20 is sufficient for surveying above the tidal datum.
+     *  bac, 09-12-04
+     */
+    if (offset > 20)
+    {
+        offset = 20;
     }
 
     /* Round to the nearest whole integer */

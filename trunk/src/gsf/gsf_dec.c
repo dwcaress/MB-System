@@ -67,6 +67,11 @@
  * bac          06-19-03  Added support for bathymetric receive beam time series intensity data (i.e., Simrad
  *                        "Seabed image" and Reson "snippets").  Inlcluded RWL updates of 12-19-02 for adding
  *                        sensor-specific singlebeam information to the MB sensor specific subrecords.
+ * bac          12-28-04  Added support for Navisound singlebeam, EM3000D, EM3002, and EM3002D.  Fixed
+ *                        decoding of 1-byte BRB intensity values.  Corrected the decode of Reson
+ *                        projector angle.  Added beam_spacing to the gsfReson8100Specific subrecord.
+ *                        Updated gsfDecodeSensorParameters and gsfDecodeProcessingParameters to save
+ *                        number_parameters correctly in the GSF_FILE_TABLE structure.
  *
  * Classification : Unclassified
  *
@@ -152,6 +157,7 @@ static int      DecodeSBEchotracSpecific(t_gsfSBEchotracSpecific * sdata, unsign
 static int      DecodeSBMGD77Specific(t_gsfSBMGD77Specific * sdata, unsigned char *sptr);
 static int      DecodeSBBDBSpecific(t_gsfSBBDBSpecific * sdata, unsigned char *sptr);
 static int      DecodeSBNOSHDBSpecific(t_gsfSBNOSHDBSpecific * sdata, unsigned char *sptr);
+static int      DecodeSBNavisoundSpecific(t_gsfSBNavisoundSpecific * sdata, unsigned char *sptr);
 
 /********************************************************************
  *
@@ -1190,6 +1196,21 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC;
                 break;
 
+            case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
+                p += DecodeEM3Specific(&ping->sensor_data, p, ft);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
+                p += DecodeEM3Specific(&ping->sensor_data, p, ft);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
+                p += DecodeEM3Specific(&ping->sensor_data, p, ft);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC;
+                break;
+
             case (GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC):
             case (GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC):
             case (GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC):
@@ -1231,6 +1252,11 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
             case (GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC):
                 p += DecodeSBEchotracSpecific(&ping->sensor_data.gsfSBPDDSpecific, p);
                 ping->sensor_id = GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SB_SUBRECORD_NAVISOUND_SPECIFIC):
+                p += DecodeSBNavisoundSpecific (&ping->sensor_data.gsfSBNavisoundSpecific, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SB_SUBRECORD_NAVISOUND_SPECIFIC;
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_INTENSITY_SERIES_ARRAY):
@@ -3488,9 +3514,9 @@ DecodeReson8100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
     sdata->gsfReson8100Specific.projector_type = (int) *p;
     p += 1;
 
-    /* Next two byte integer contains the projector angle, in deg C * 100 */
+    /* Next two byte integer contains the projector angle, in deg * 100 */
     memcpy(&stemp, p, 2);
-    sdata->gsfReson8100Specific.projector_angle = (int) ntohs(stemp);
+    sdata->gsfReson8100Specific.projector_angle = (gsfsShort) ntohs(stemp);
     p += 2;
 
     /* Next two byte integer contains the range filter minimum value */
@@ -3522,14 +3548,15 @@ DecodeReson8100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
     sdata->gsfReson8100Specific.temperature = (int) ntohs(stemp);
     p += 2;
 
-    /* Next four bytes are reserved for future growth */
+    /* Next two byte integer contains the across track angular beam spacing * 10000 */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.beam_spacing = ((double) ntohs(stemp)) / 10000.0;
+    p += 2;
+
+    /* Next two bytes are reserved for future growth */
     sdata->gsfReson8100Specific.spare[0] = (char) *p;
     p += 1;
     sdata->gsfReson8100Specific.spare[1] = (char) *p;
-    p += 1;
-    sdata->gsfReson8100Specific.spare[2] = (char) *p;
-    p += 1;
-    sdata->gsfReson8100Specific.spare[3] = (char) *p;
     p += 1;
 
     return (p - sptr);
@@ -3762,6 +3789,42 @@ DecodeSBNOSHDBSpecific(t_gsfSBNOSHDBSpecific * sdata, unsigned char *sptr)
 
 /********************************************************************
  *
+ * Function Name : DecodeSBNavisoundSpecific
+ *
+ * Description :
+ *  This function decodes the Navisound fields.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes decoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeSBNavisoundSpecific(t_gsfSBNavisoundSpecific * sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+
+    /* First two byte integer contains the pulse length */
+    memcpy(&stemp, p, 2);
+    sdata->pulse_length = ((double) ntohs(stemp)) / 100.0;
+    p += 2;
+
+    /* decode the spare bytes */
+    memcpy(sdata->spare, p, 8);
+    p += 8;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
  * Function Name : DecodeEM3ImagerySpecific
  *
  * Description : This function decodes the Simrad EM3000 series sensor
@@ -3964,6 +4027,9 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
         case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
             sensor_size = DecodeEM3ImagerySpecific(&(*idata)->sensor_imagery, ptr);
             break;
 
@@ -4061,10 +4127,15 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
         {
             for (j = 0; j < (*idata)->time_series[i].sample_count; j++)
             {
-                if (bytes_per_sample == 2)
+                if (bytes_per_sample == 1)
+                {
+                    (*idata)->time_series[i].samples[j] = (unsigned long) *ptr;
+                    ptr++;
+                }
+                else if (bytes_per_sample == 2)
                 {
                     memcpy(&stemp, ptr, 2);
-                    (*idata)->time_series[i].samples[j] = (unsigned short) ntohs(stemp);
+                    (*idata)->time_series[i].samples[j] = (unsigned long) ntohs(stemp);
                     ptr += 2;
                 }
                 else if (bytes_per_sample == 4)
@@ -4277,6 +4348,11 @@ gsfDecodeProcessingParameters(gsfProcessingParameters *param, GSF_FILE_TABLE *ft
     p += 2;
     param->number_parameters = (int) ntohs(stemp);
 
+    if (ft->rec.process_parameters.number_parameters < param->number_parameters)
+    {
+        ft->rec.process_parameters.number_parameters = param->number_parameters;
+    }
+
     /* Now loop to decode these parameters */
     for (i = 0; (i < param->number_parameters) && (i < GSF_MAX_PROCESSING_PARAMETERS); i++)
     {
@@ -4362,6 +4438,11 @@ gsfDecodeSensorParameters(gsfSensorParameters *param, GSF_FILE_TABLE *ft, unsign
     memcpy(&stemp, p, 2);
     p += 2;
     param->number_parameters = (int) ntohs(stemp);
+
+    if (ft->rec.sensor_parameters.number_parameters < param->number_parameters)
+    {
+        ft->rec.sensor_parameters.number_parameters = param->number_parameters;
+    }
 
     /* Now loop to decode these parameters */
     for (i = 0; (i < param->number_parameters) && (i < GSF_MAX_SENSOR_PARAMETERS); i++)
