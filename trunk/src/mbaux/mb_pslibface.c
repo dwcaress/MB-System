@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.4 1995-08-07 17:31:39 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.5 1995-11-15 22:34:22 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/08/07  17:31:39  caress
+ * Moved to GMT V3.
+ *
  * Revision 4.3  1995/03/06  19:39:52  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -60,19 +63,20 @@ int	*blue;
 
 /*--------------------------------------------------------------------------*/
 /* 	function plot_init initializes the GMT plotting. */
-int plot_init(verbose,argc,argv,bounds,scale,inch2lon,error)
+int plot_init(verbose,argc,argv,bounds_use,scale,inch2lon,error)
 int	verbose;
 int	argc;
 char	**argv;
-double	*bounds;
+double	*bounds_use;
 double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.4 1995-08-07 17:31:39 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.5 1995-11-15 22:34:22 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
+	double	bounds[4];
 	double	x1, y1, x2, y2, xx1, yy1, xx2, yy2;
 	double	clipx[4], clipy[4];
 	int	i;
@@ -156,11 +160,27 @@ int	*error;
 		gmtdefs.paper_width, gmtdefs.page_rgb, gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 
+	/* copy bounds in correct order for use by this program */
+	if (project_info.region == MB_YES)
+		{
+		bounds_use[0] = bounds[0];
+		bounds_use[1] = bounds[1];
+		bounds_use[2] = bounds[2];
+		bounds_use[3] = bounds[3];
+		}
+	else
+		{
+		bounds_use[0] = bounds[0];
+		bounds_use[1] = bounds[2];
+		bounds_use[2] = bounds[1];
+		bounds_use[3] = bounds[3];
+		}
+
 	/* set clip path */
-	geo_to_xy(bounds[0],bounds[2],&clipx[0],&clipy[0]);
-	geo_to_xy(bounds[1],bounds[2],&clipx[1],&clipy[1]);
-	geo_to_xy(bounds[1],bounds[3],&clipx[2],&clipy[2]);
-	geo_to_xy(bounds[0],bounds[3],&clipx[3],&clipy[3]);
+	geo_to_xy(bounds_use[0],bounds_use[2],&clipx[0],&clipy[0]);
+	geo_to_xy(bounds_use[1],bounds_use[2],&clipx[1],&clipy[1]);
+	geo_to_xy(bounds_use[1],bounds_use[3],&clipx[2],&clipy[2]);
+	geo_to_xy(bounds_use[0],bounds_use[3],&clipx[3],&clipy[3]);
 	ps_clipon(clipx,clipy,4,-1,-1,-1,3);
 
 	/* get inches to longitude scale */
@@ -201,7 +221,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.4 1995-08-07 17:31:39 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.5 1995-11-15 22:34:22 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
