@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.1 2001-06-30 17:36:53 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.2 2001-10-10 23:56:01 dcaress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.1 2001-06-30 17:36:53 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.2 2001-10-10 23:56:01 dcaress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2001-06-30 10:36:53-07  caress
+#   Release 5.0.beta02
+#
 # Revision 5.0  2000/12/01  22:58:01  caress
 # First cut at Version 5.0.
 #
@@ -1129,6 +1132,14 @@ if ($ps_viewer eq "xpsview" && $portrait)
 elsif ($ps_viewer eq "xpsview" && $landscape)
 	{
 	$view_pageflag = "-ps $pagesize -or landscape -maxp $xpsview_mem{$pagesize}";
+	}
+elsif ($ps_viewer eq "pageview" && $portrait)
+	{
+	$view_pageflag = "-w $page_width_in{$pagesize} -h $page_height_in{$pagesize}";
+	}
+elsif ($ps_viewer eq "pageview" && $landscape)
+	{
+	$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
 	}
 if ($no_view_ps)
 	{

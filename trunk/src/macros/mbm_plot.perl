@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#    $Id: mbm_plot.perl,v 5.2 2001-10-10 23:56:01 dcaress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#   $Id: mbm_plot.perl,v 5.2 2001-10-10 23:56:01 dcaress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2001-03-22 13:05:45-08  caress
+#   Trying to make release 5.0.beta0
+#
 # Revision 5.0  2000/12/01  22:58:01  caress
 # First cut at Version 5.0.
 #
@@ -2337,6 +2340,14 @@ if ($ps_viewer eq "xpsview" && $portrait)
 elsif ($ps_viewer eq "xpsview" && $landscape)
 	{
 	$view_pageflag = "-ps $pagesize -or landscape -maxp $xpsview_mem{$pagesize}";
+	}
+elsif ($ps_viewer eq "pageview" && $portrait)
+	{
+	$view_pageflag = "-w $page_width_in{$pagesize} -h $page_height_in{$pagesize}";
+	}
+elsif ($ps_viewer eq "pageview" && $landscape)
+	{
+	$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
 	}
 if ($no_view_ps)
 	{
