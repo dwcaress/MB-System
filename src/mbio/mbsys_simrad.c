@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.17 1998-12-18 01:39:32 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.18 1998-12-18 20:49:54 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -44,6 +44,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1998/12/18  01:39:32  caress
+ * MB-System version 4.6beta5
+ *
  * Revision 4.16  1998/12/17  23:01:15  caress
  * MB-System version 4.6beta4
  *
@@ -976,7 +979,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.17 1998-12-18 01:39:32 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.18 1998-12-18 20:49:54 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1110,7 +1113,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.17 1998-12-18 01:39:32 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.18 1998-12-18 20:49:54 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1566,6 +1569,95 @@ int	*error;
 
 		}
 
+	/* extract data from structure */
+	else if (*kind == MB_DATA_NAV)
+		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+
+		/* get time */
+		time_i[0] = store->pos_year + 1900;
+		time_i[1] = store->pos_month;
+		time_i[2] = store->pos_day;
+		time_i[3] = store->pos_hour;
+		time_i[4] = store->pos_minute;
+		time_i[5] = store->pos_second;
+		time_i[6] = 10000*store->pos_centisecond;
+		mb_get_time(verbose,time_i,time_d);
+		*navlon = store->longitude;
+		*navlat = store->latitude;
+		if (mb_io_ptr->lonflip < 0)
+			{
+			if (*navlon > 0.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -360.)
+				*navlon = *navlon + 360.;
+			}
+		else if (mb_io_ptr->lonflip == 0)
+			{
+			if (*navlon > 180.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -180.)
+				*navlon = *navlon + 360.;
+			}
+		else
+			{
+			if (*navlon > 360.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < 0.)
+				*navlon = *navlon + 360.;
+			}
+
+		/* get heading */
+		*heading = 0.0;
+
+		/* get speed  */
+		*speed = 3.6*store->speed;
+
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
+			}
+
+		/* done translating values */
+
+		}
+
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT)
 		{
@@ -1888,6 +1980,26 @@ int	*error;
 					ping->ss[i] = 0;
 				}
 			}
+		}
+
+	/* insert nav in structure */
+	else if (store->kind == MB_DATA_NAV)
+		{
+		/* get time */
+		store->pos_year = time_i[0] - 1900;
+		store->pos_month = time_i[1];
+		store->pos_day = time_i[2];
+		store->pos_hour = time_i[3];
+		store->pos_minute = time_i[4];
+		store->pos_second = time_i[5];
+		store->pos_centisecond = time_i[6]/10000;
+		
+		/* get nav */
+		store->longitude = navlon;
+		store->latitude = navlat;
+
+		/* get speed  */
+		store->speed = speed/3.6;
 		}
 
 	/* insert comment in structure */
@@ -2453,11 +2565,8 @@ int	*error;
 		}
 
 	/* extract data from structure */
-	if (*kind == MB_DATA_NAV)
+	else if (*kind == MB_DATA_NAV)
 		{
-		/* get survey data structure */
-		ping = (struct mbsys_simrad_survey_struct *) store->ping;
-
 		/* get time */
 		time_i[0] = store->pos_year + 1900;
 		time_i[1] = store->pos_month;
@@ -2625,8 +2734,6 @@ int	*error;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	int	kind;
-	int	time_j[5];
-	double	depthscale, dacrscale,daloscale,ttscale,reflscale;
 	int	i, j;
 
 	/* print input debug statements */
@@ -2689,6 +2796,26 @@ int	*error;
 		ping->roll = roll*100.0;
 		ping->pitch = pitch*100.0;
 		ping->ping_heave = heave*100.0;
+		}
+
+	/* insert nav in structure */
+	else if (store->kind == MB_DATA_NAV)
+		{
+		/* get time */
+		store->pos_year = time_i[0] - 1900;
+		store->pos_month = time_i[1];
+		store->pos_day = time_i[2];
+		store->pos_hour = time_i[3];
+		store->pos_minute = time_i[4];
+		store->pos_second = time_i[5];
+		store->pos_centisecond = time_i[6]/10000;
+		
+		/* get nav */
+		store->longitude = navlon;
+		store->latitude = navlat;
+
+		/* get speed  */
+		store->speed = speed/3.6;
 		}
 
 	/* print output debug statements */
