@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.45 1999-10-05 22:04:18 caress Exp $
+ *    $Id: mbgrid.c,v 4.46 1999-12-29 00:35:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.45  1999/10/05  22:04:18  caress
+ * Improved the facility for outputting ArcView grids.
+ *
  * Revision 4.44  1999/09/24  23:11:07  caress
  * Altered grid interval parameter handling
  *
@@ -244,6 +247,7 @@
 #define	MBGRID_MEDIAN_FILTER	2
 #define	MBGRID_MINIMUM_FILTER	3
 #define	MBGRID_MAXIMUM_FILTER	4
+#define	MBGRID_WEIGHTED_FOOTPRINT   5
 
 /* grid format definitions */
 #define	MBGRID_ASCII	1
@@ -263,11 +267,20 @@
 /* number of data to be allocated at a time */
 #define	REALLOC_STEP_SIZE	25
 
+/* usage of footprint based weight */
+#define MBGRID_USE_NO		0
+#define MBGRID_USE_YES		1
+#define MBGRID_USE_CONDITIONAL	2
+
 /* compare function for qsort */
 int mb_double_compare();
 
+/* approximate complementary error function */
+double erfcc();
+double mbgrid_erf();
+
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.45 1999-10-05 22:04:18 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.46 1999-12-29 00:35:11 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -275,7 +288,6 @@ static char usage_message[] = "mbgrid -Ifilelist -Oroot \
           -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units[!] -F\n\
           -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n\
           -Ttension -Utime -V -Wscale -Xextend]";
-
 /*--------------------------------------------------------------------*/
 
 main (argc, argv)
@@ -492,6 +504,15 @@ char **argv;
 	int	i, j, k, ii, jj, kk, n;
 	int	kgrid, kout, kint, ib, ix, iy;
 	int	ix1, ix2, iy1, iy2;
+	
+	double	foot_dx, foot_dy, foot_dxn, foot_dyn;
+	double	foot_lateral, foot_range, foot_theta;
+	double	foot_dtheta, foot_dphi;
+	double	foot_hwidth, foot_hlength;
+	int	foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy;
+	double	xx0, yy0, bdx, bdy, xx1, xx2, yy1, yy2;
+	double	prx[5], pry[5];
+	int	use_weight;
 
 	char	*ctime();
 	char	*getenv();
@@ -772,6 +793,14 @@ char **argv;
 			program_name);
 		error = MB_ERROR_BAD_PARAMETER;
 		exit(error);
+		}
+		
+	/* footprint option only for bathymetry */
+	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT
+		&& (datatype != MBGRID_DATA_TOPOGRAPHY
+		    && datatype != MBGRID_DATA_BATHYMETRY))
+		{
+		grid_mode == MBGRID_WEIGHTED_MEAN;
 		}
 
 	/* more option not available with minimum 
@@ -1056,6 +1085,8 @@ char **argv;
 			fprintf(outfp,"Minimum Filter\n");
 		else if (grid_mode == MBGRID_MAXIMUM_FILTER)
 			fprintf(outfp,"Maximum Filter\n");
+		else if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
+			fprintf(outfp,"Footprint Weighted Mean\n");
 		else
 			fprintf(outfp,"Gaussian Weighted Mean\n");
 		fprintf(outfp,"Grid projection: %s\n", projection_id);
@@ -1122,6 +1153,9 @@ char **argv;
 		if (grid_mode == MBGRID_WEIGHTED_MEAN)
 			fprintf(outfp,"Gaussian filter 1/e length: %f grid intervals\n",
 				scale);
+		if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
+			fprintf(outfp,"Footprint 1/e distance: %f times footprint\n",
+				scale);
 		if (check_time == MB_YES && first_in_stays == MB_NO)
 			fprintf(outfp,"Swath overlap handling:       Last data used\n");
 		if (check_time == MB_YES && first_in_stays == MB_YES)
@@ -1178,8 +1212,386 @@ char **argv;
 		exit(error);
 		}
 
-	/***** do weighted mean gridding *****/
-	if (grid_mode != MBGRID_MEDIAN_FILTER)
+	/***** do footprint gridding *****/
+	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
+	{
+
+	/* allocate memory for additional arrays */
+	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&norm,&error);
+
+	/* if error initializing memory then quit */
+	if (error != MB_ERROR_NO_ERROR)
+		{
+		mb_error(verbose,error,&message);
+		fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+			message);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+
+	/* initialize arrays */
+	for (i=0;i<gxdim;i++)
+		for (j=0;j<gydim;j++)
+			{
+			kgrid = i*gydim + j;
+			grid[kgrid] = 0.0;
+			norm[kgrid] = 0.0;
+			sigma[kgrid] = 0.0;
+			firsttime[kgrid] = 0.0;
+			num[kgrid] = 0;
+			cnt[kgrid] = 0;
+			}
+
+	/* read in data */
+	ndata = 0;
+	if ((fp = fopen(filelist,"r")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(outfp,"\nUnable to open data list file: %s\n",
+			filelist);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	while (fscanf(fp,"%s %d",file,&format) != EOF)
+		{
+		ndatafile = 0;
+		
+		/* if format > 0 then input is swath sonar file */
+		if (format > 0 && file[0] != '#')
+		{
+		/* check for mbinfo file - get file bounds if possible */
+		status = mb_check_info(verbose, file, lonflip, wbnd, 
+				&file_in_bounds, &error);
+		if (status == MB_FAILURE)
+			{
+			file_in_bounds = MB_YES;
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* initialize the swath sonar file */
+		if (file_in_bounds == MB_YES)
+		    {
+		    if ((status = mb_read_init(
+			verbose,file,format,pings,lonflip,bounds,
+			btime_i,etime_i,speedmin,timegap,
+			&mbio_ptr,&btime_d,&etime_d,
+			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",file);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		    /* allocate memory for reading data arrays */
+		    status = mb_malloc(verbose,beams_bath*sizeof(char),
+				    &beamflag,&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bath,&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bathlon,&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bathlat,&error);
+		    status = mb_malloc(verbose,beams_amp*sizeof(double),
+				    &amp,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &ss,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &sslon,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &sslat,&error);
+
+		    /* if error initializing memory then quit */
+		    if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+				message);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		    /* loop over reading */
+		    while (error <= MB_ERROR_NO_ERROR)
+			{
+			status = mb_read(verbose,mbio_ptr,&kind,
+				&rpings,time_i,&time_d,
+				&navlon,&navlat,&speed,&heading,&distance,
+				&beams_bath,&beams_amp,&pixels_ss,
+				beamflag,bath,amp,bathlon,bathlat,
+				ss,sslon,sslat,
+				comment,&error);
+
+			/* time gaps are not a problem here */
+			if (error == MB_ERROR_TIME_GAP)
+				{
+				error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
+				}
+
+			/* print debug statements */
+			if (verbose >= 2)
+				{
+				fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
+				fprintf(stderr,"dbg2       kind:           %d\n",kind);
+				fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
+				fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
+				fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
+				fprintf(stderr,"dbg2       error:          %d\n",error);
+				fprintf(stderr,"dbg2       status:         %d\n",status);
+				}
+
+			if ((datatype == MBGRID_DATA_BATHYMETRY
+				|| datatype == MBGRID_DATA_TOPOGRAPHY)
+				&& error == MB_ERROR_NO_ERROR)
+			  {
+
+			  /* reproject beam positions if necessary */
+			  if (use_projection == MB_YES)
+			    {
+			    for (ib=0;ib<beams_bath;ib++)
+			      if (mb_beam_ok(beamflag[ib]))
+				mbgrid_project(verbose, bathlon[ib], bathlat[ib], 
+					&bathlon[ib], &bathlat[ib], &error);
+			    }
+
+			  /* deal with data */
+			  for (ib=0;ib<beams_bath;ib++) 
+			    if (mb_beam_ok(beamflag[ib]))
+			      {
+			      /* get position in grid */
+			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
+/*fprintf(stderr, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n", 
+ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
+
+			      /* check if within allowed time */
+			      if (check_time == MB_YES)
+			        {
+				/* if in region of interest
+				   check if time is ok */
+				if (ix >= 0 && ix < gxdim 
+				  && iy >= 0 && iy < gydim)
+				  {
+			          kgrid = ix*gydim + iy;
+				  if (firsttime[kgrid] <= 0.0)
+				    {
+				    firsttime[kgrid] = time_d;
+				    time_ok = MB_YES;
+				    }
+				  else if (fabs(time_d - firsttime[kgrid]) 
+				    > timediff)
+				    {
+				    if (first_in_stays == MB_YES)
+					time_ok = MB_NO;
+				    else
+					{
+					time_ok = MB_YES;
+					firsttime[kgrid] = time_d;
+					ndata = ndata - cnt[kgrid];
+					ndatafile = ndatafile - cnt[kgrid];
+					norm[kgrid] = 0.0;
+					grid[kgrid] = 0.0;
+					sigma[kgrid] = 0.0;
+					num[kgrid] = 0;
+					cnt[kgrid] = 0;
+					}
+				    }
+			          else
+				    time_ok = MB_YES;
+				  }
+				else
+				  time_ok = MB_YES;
+				}
+			      else
+				time_ok = MB_YES;
+
+			      /* process if in region of interest */
+			      if (ix >= -xtradim 
+				&& ix < gxdim + xtradim 
+				&& iy >= -xtradim 
+				&& iy < gydim + xtradim 
+				&& time_ok == MB_YES)
+			        {
+				/* calculate footprint - this is a kluge assuming
+				   sonar at surface - also assumes lon lat grid 
+				   - to be generalized in later version 
+				   DWC 11/16/99 */
+				foot_dx = (bathlon[ib] - navlon) / mtodeglon;
+				foot_dy = (bathlat[ib] - navlat) / mtodeglat;
+				foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
+				if (foot_lateral > 0.0)
+				    {
+				    foot_dxn = foot_dx / foot_lateral;
+				    foot_dyn = foot_dy / foot_lateral;
+				    }
+				else
+				    {
+				    foot_dxn = 1.0;
+				    foot_dyn = 0.0;
+				    }
+				foot_range = sqrt(foot_lateral * foot_lateral + bath[ib] * bath[ib]);
+				foot_theta = RTD * atan2(foot_lateral, bath[ib]);
+				if (format >= 20)
+				    {
+				    foot_dtheta = 1.0;
+				    foot_dphi = 1.0;
+				    }
+				else
+				    {
+				    foot_dtheta = 2.0;
+				    foot_dphi = 2.0;
+				    }
+/*fprintf(stderr, "dx:%f dy:%f lateral:%f range:%f theta:%f\n", 
+foot_dx, foot_dy, foot_lateral, foot_range, foot_theta);*/
+				foot_hwidth =bath[ib] * tan(DTR * (foot_theta + foot_dtheta)) 
+						    - foot_lateral;
+				foot_hlength = foot_range * tan(DTR * foot_dphi);
+/*fprintf(stderr, "dx:%f dy:%f mtodeglon:%f mtodeglat:%f\n", 
+dx, dy, mtodeglon, mtodeglat);*/
+
+				/* get range of bins around footprint to examine */
+				foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
+				foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
+				foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
+				foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
+				foot_dix = 2 * MAX(foot_wix, foot_lix);
+				foot_diy = 2 * MAX(foot_wiy, foot_liy);
+/*fprintf(stderr, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
+fprintf(stderr, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n", 
+foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
+			        ix1 = MAX(ix - foot_dix, 0);
+			        ix2 = MIN(ix + foot_dix, gxdim - 1);
+			        iy1 = MAX(iy - foot_diy, 0);
+			        iy2 = MIN(iy + foot_diy, gydim - 1);
+/*fprintf(stderr, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
+				
+				/* loop over neighborhood of bins */
+			        for (ii=ix1;ii<=ix2;ii++)
+			         for (jj=iy1;jj<=iy2;jj++)
+				   {
+				   /* find center of bin in lon lat degrees from sounding center */
+				   kgrid = ii * gydim + jj;				   
+				   xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
+				   yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
+				   
+				   /* get center and corners of bin in meters from sounding center */
+				   xx0 = xx / mtodeglon;
+				   yy0 = yy / mtodeglon;
+				   bdx = 0.5 * dx/ mtodeglon;
+				   bdy = 0.5 * dy/ mtodeglat;
+				   xx1 = xx0 - bdx;
+				   xx2 = xx0 + bdx;
+				   yy1 = yy0 - bdy;
+				   yy2 = yy0 + bdy;
+/*fprintf(stderr, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
+fprintf(stderr, "p0: %f %f   p1: %f %f   p2: %f %f\n", 
+xx0, yy0, xx1, yy1, xx2, yy2);*/
+				   
+				   /* rotate center and corners of bin to footprint coordinates */
+				   prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
+				   pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
+				   prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
+				   pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
+				   prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
+				   pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
+				   prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
+				   pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
+				   prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
+				   pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
+				   
+				   /* get weight integrated over bin */
+				   mbgrid_weight(verbose, foot_hwidth, foot_hlength, scale, 
+						prx[0], pry[0], bdx, bdy, 
+						&prx[1], &pry[1], 
+						&weight, &use_weight, &error);
+
+				   if (use_weight != MBGRID_USE_NO)
+					{
+					norm[kgrid] = norm[kgrid] + weight;
+					grid[kgrid] = grid[kgrid] 
+						+ weight*topofactor*bath[ib];
+					sigma[kgrid] = sigma[kgrid] 
+						+ weight*topofactor*topofactor
+						*bath[ib]*bath[ib];
+					if (use_weight == MBGRID_USE_YES)
+					    {
+					    num[kgrid]++;
+					    if (ii == ix && jj == iy)
+						    cnt[kgrid]++;
+					    }
+					}
+				   }
+				ndata++;
+				ndatafile++;
+				}
+			      }
+			  }
+			}
+		    status = mb_close(verbose,&mbio_ptr,&error);
+		    mb_free(verbose,&beamflag,&error); 
+		    mb_free(verbose,&bath,&error); 
+		    mb_free(verbose,&bathlon,&error); 
+		    mb_free(verbose,&bathlat,&error); 
+		    mb_free(verbose,&amp,&error); 
+		    mb_free(verbose,&ss,&error); 
+		    mb_free(verbose,&sslon,&error); 
+		    mb_free(verbose,&sslat,&error); 
+		    status = MB_SUCCESS;
+		    error = MB_ERROR_NO_ERROR;
+		    }
+		if (verbose >= 2) 
+			fprintf(outfp,"\n");
+		if (verbose > 0)
+			fprintf(outfp,"%d data points processed in %s\n",
+				ndatafile,file);
+		} /* end if (format > 0) */
+
+		}
+	fclose(fp);
+	if (verbose > 0)
+		fprintf(outfp,"\n%d total data points processed\n",ndata);
+
+	/* now loop over all points in the output grid */
+	if (verbose >= 1)
+		fprintf(outfp,"\nMaking raw grid...\n");
+	nbinset = 0;
+	nbinzero = 0;
+	nbinspline = 0;
+	for (i=0;i<gxdim;i++)
+		for (j=0;j<gydim;j++)
+			{
+			kgrid = i*gydim + j;
+			if (num[kgrid] > 0)
+				{
+				grid[kgrid] = grid[kgrid]/norm[kgrid];
+				factor = sigma[kgrid]/norm[kgrid] 
+					- grid[kgrid]*grid[kgrid];
+				sigma[kgrid] = sqrt(fabs(factor));
+				nbinset++;
+				}
+			else
+				{
+				grid[kgrid] = clipvalue;
+				sigma[kgrid] = 0.0;
+				}
+			/*fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
+				i,j,kgrid,
+				grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
+				num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
+			}
+
+	/***** end of footprint gridding *****/
+	}
+
+	/***** do weighted mean or min/max gridding *****/
+	else if (grid_mode != MBGRID_MEDIAN_FILTER)
 	{
 
 	/* allocate memory for additional arrays */
@@ -3358,5 +3770,158 @@ int	*error;
 
 	/* return status */
 	return(status);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function mbgrid_weight calculates the integrated weight over a bin
+ * given the footprint of a sounding
+ */
+int mbgrid_weight(verbose, foot_a, foot_b, scale, 
+		    pcx, pcy, dx, dy, 
+		    px, py, 
+		    weight, use, error)
+int	verbose;
+double	foot_a;
+double	foot_b;
+double	scale;
+double	pcx;
+double	pcy;
+double	dx;
+double	dy;
+double	*px;
+double	*py;
+double	*weight;
+int	*use;
+int	*error;
+{
+	char	*function_name = "mbgrid_weight";
+	int	status = MB_SUCCESS;
+	double	fa, fb;
+	double	xe, ye, ang, ratio;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       foot_a:     %f\n",foot_a);
+		fprintf(stderr,"dbg2       foot_b:     %f\n",foot_b);
+		fprintf(stderr,"dbg2       scale:      %f\n",scale);
+		fprintf(stderr,"dbg2       pcx:        %f\n",pcx);
+		fprintf(stderr,"dbg2       pcy:        %f\n",pcy);
+		fprintf(stderr,"dbg2       dx:         %f\n",dx);
+		fprintf(stderr,"dbg2       dy:         %f\n",dy);
+		fprintf(stderr,"dbg2       p1 x:       %f\n",px[0]);
+		fprintf(stderr,"dbg2       p1 y:       %f\n",py[0]);
+		fprintf(stderr,"dbg2       p2 x:       %f\n",px[1]);
+		fprintf(stderr,"dbg2       p2 y:       %f\n",py[1]);
+		fprintf(stderr,"dbg2       p3 x:       %f\n",px[2]);
+		fprintf(stderr,"dbg2       p3 y:       %f\n",py[2]);
+		fprintf(stderr,"dbg2       p4 x:       %f\n",px[3]);
+		fprintf(stderr,"dbg2       p4 y:       %f\n",py[3]);
+		}
+		
+	/* The weighting function is
+		w(x, y) = (1 / (PI * a * b)) * exp(-(x**2/a**2 + y**2/b**2))
+	    in the footprint coordinate system, where the x axis
+	    is along the horizontal projection of the beam and the
+	    y axix is perpendicular to that. The integral of the
+	    weighting function over an simple rectangle defined
+	    by corners (x1, y1), (x2, y1), (x1, y2), (x2, y2) is
+		    x2 y2
+		W = I  I { w(x, y) } dx dy
+		    x1 y1 
+		
+		  = 1 / 4 * ( erfc(x1/a) - erfc(x2/a)) * ( erfc(y1/a) - erfc(y2/a))
+	    where erfc(u) is the complementary error function.
+	    Each bin is represented as a simple integral in geographic
+	    coordinates, but is rotated in the footprint coordinate system.
+	    I can't figure out how to evaluate this integral over a
+	    rotated rectangle,  and so I am crudely and incorrectly 
+	    approximating the integrated weight value by evaluating it over
+	    the same sized rectangle centered at the same location. 
+	    Maybe someday I'll figure out how to do it correctly.
+	    DWC 11/18/99 */
+
+	/* get integrated weight */
+	fa = scale * foot_a;
+	fb = scale * foot_b;
+/*	*weight = 0.25 * ( erfcc((pcx - dx) / fa) - erfcc((pcx + dx) / fa))
+			* ( erfcc((pcy - dy) / fb) - erfcc((pcy + dy) / fb));*/
+	*weight = 0.25 * ( mbgrid_erf((pcx + dx) / fa) - mbgrid_erf((pcx - dx) / fa))
+			* ( mbgrid_erf((pcy + dy) / fb) - mbgrid_erf((pcy - dy) / fb));
+		    	    
+	/* use if weight large or any ratio <= 1 */
+	if (*weight > 0.05)
+	    {
+	    *use = MBGRID_USE_YES;
+	    }
+	/* check ratio of each corner footprint 1/e distance */
+	else
+	    {
+	    *use = MBGRID_USE_NO;
+	    for (i=0;i<4;i++)
+		{
+		ang = RTD * atan2(py[i], px[i]);
+		xe = foot_a * cos(DTR * ang);
+		ye = foot_b * sin(DTR * ang);
+		ratio = sqrt((px[i] * px[i] + py[i] * py[i])
+				/ (xe * xe + ye * ye));
+		if (ratio <= 1.0)
+		    *use = MBGRID_USE_YES;
+		else if (ratio <= 2.0)
+		    *use = MBGRID_USE_CONDITIONAL;
+		}
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2       weight:     %f\n",*weight);
+		fprintf(stderr,"dbg2       use:        %d\n",*use);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}				   
+/*--------------------------------------------------------------------*/
+double erfcc(x)
+double x;
+/* approximate complementary error function from numerical recipies */
+{
+	double t,z,ans;
+
+	z=fabs(x);
+	t=1.0/(1.0+0.5*z);
+	ans=t*exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
+		t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
+		t*(-0.82215223+t*0.17087277)))))))));
+fprintf(stderr, "x:%f ans:%f\n", x, ans);
+	return  x >= 0.0 ? ans : 2.0-ans;
+}
+/*--------------------------------------------------------------------*/
+double mbgrid_erf(x)
+double x;
+/* approximate error function altered from numerical recipies */
+{
+	double t, z, ans, erfc_d, erf_d;
+
+	z=fabs(x);
+	t=1.0/(1.0+0.5*z);
+	erfc_d=t*exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
+		t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
+		t*(-0.82215223+t*0.17087277)))))))));
+	erfc_d =  x >= 0.0 ? erfc_d : 2.0-erfc_d;
+	erf_d = 1.0 - erfc_d;
+	return  erf_d;
 }
 /*--------------------------------------------------------------------*/

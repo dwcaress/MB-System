@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.24 1999-10-21 22:42:10 caress Exp $
+ *    $Id: mbmerge.c,v 4.25 1999-12-29 00:35:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.24  1999/10/21  22:42:10  caress
+ * Added new nav format.
+ *
  * Revision 4.23  1999/04/02  19:52:50  caress
  * Fixed handling of asynchronous nav.
  *
@@ -139,7 +142,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.24 1999-10-21 22:42:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.25 1999-12-29 00:35:11 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -677,6 +680,19 @@ char **argv;
 				nlon[nnav] = -nlon[nnav];
 			nav_ok = MB_YES;
 			}
+
+		/* deal with nav in form: yr mon day hour min sec time_d lon lat */
+		else if (nformat == 9)
+			{
+			nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf",
+				&time_i[0],&time_i[1],&time_i[2],
+				&time_i[3],&time_i[4],&sec,
+				&ntime[nnav],
+				&nlon[nnav],&nlat[nnav]);
+			if (nget == 9)
+				nav_ok = MB_YES;
+			}
+
 
 		/* make sure longitude is defined according to lonflip */
 		if (nav_ok == MB_YES)

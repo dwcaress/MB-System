@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
- *	$Id: mbr_oicmbari.c,v 4.1 1999-04-07 20:38:24 caress Exp $
+ *	$Id: mbr_oicmbari.c,v 4.2 1999-12-29 00:34:06 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/04/07  20:38:24  caress
+ * Fixes related to building under Linux.
+ *
  * Revision 4.1  1999/04/03 07:36:16  caress
  * Fix bugs in byteswapped code.
  *
@@ -62,7 +65,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_oicmbari.c,v 4.1 1999-04-07 20:38:24 caress Exp $";
+ static char res_id[]="$Id: mbr_oicmbari.c,v 4.2 1999-12-29 00:34:06 caress Exp $";
 	char	*function_name = "mbr_alm_oicmbari";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -307,193 +310,106 @@ int	*error;
 	/* now parse the header */
 	if (status == MB_SUCCESS)
 	    {
-#ifdef BYTESWAPPED
 	    index = 3;
 	    header->type = buffer[index]; index += 1;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->proc_status = mb_swap_int(*int_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->data_size = mb_swap_int(*int_ptr);
-	    header->client_size = buffer[index]; index += 1;
-	    header->fish_status = buffer[index]; index += 1;
-	    header->nav_used = buffer[index]; index += 1;
-	    header->nav_type = buffer[index]; index += 1;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->utm_zone = mb_swap_int(*int_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->ship_x = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->ship_y = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->ship_course = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->ship_speed = mb_swap_float(*float_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->sec = mb_swap_int(*int_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->usec = mb_swap_int(*int_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->spare_gain = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_heading = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_depth = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_range = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_pulse_width = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->gain_c0 = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->gain_c1 = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->gain_c2 = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_pitch = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_roll = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_yaw = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_x = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_y = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_layback = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_altitude = mb_swap_float(*float_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->fish_altitude_samples = mb_swap_int(*int_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_ping_period = mb_swap_float(*float_ptr);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->sound_velocity = mb_swap_float(*float_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->num_chan = mb_swap_int(*int_ptr);
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->proc_status);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->data_size);
+	    index += 4;
+	    header->client_size = buffer[index]; 
+	    index += 1;
+	    header->fish_status = buffer[index]; 
+	    index += 1;
+	    header->nav_used = buffer[index]; 
+	    index += 1;
+	    header->nav_type = buffer[index]; 
+	    index += 1;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->utm_zone);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->ship_x);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->ship_y);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->ship_course);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->ship_speed);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->sec);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->usec);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->spare_gain);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_heading);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_depth);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_range);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_pulse_width);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->gain_c0);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->gain_c1);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->gain_c2);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_pitch);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_roll);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_yaw);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_x);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_y);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_layback);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_altitude);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->fish_altitude_samples);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->fish_ping_period);
+	    index += 4;
+ 	    mb_get_binary_float(MB_NO,&buffer[index],&header->sound_velocity);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->num_chan);
+	    index += 4;
 	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
 		{
-		int_ptr = (int *) &buffer[index]; index += 4;
-		header->channel[i].offset = mb_swap_int(*int_ptr);
+ 		mb_get_binary_int(MB_NO,&buffer[index],&header->channel[i].offset);
+		index += 4;
 		}
 	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
 		{
-		header->channel[i].type = buffer[index]; index += 1;
-		header->channel[i].side = buffer[index]; index += 1;
-		header->channel[i].size = buffer[index]; index += 1;
-		header->channel[i].empty = buffer[index]; index += 1;
-		int_ptr = (int *) &buffer[index]; index += 4;
-		header->channel[i].frequency = mb_swap_int(*int_ptr);
-		int_ptr = (int *) &buffer[index]; index += 4;
-		header->channel[i].num_samples = mb_swap_int(*int_ptr);
+		header->channel[i].type = buffer[index]; 
+		index += 1;
+		header->channel[i].side = buffer[index]; 
+		index += 1;
+		header->channel[i].size = buffer[index]; 
+		index += 1;
+		header->channel[i].empty = buffer[index]; 
+		index += 1;
+ 		mb_get_binary_int(MB_NO,&buffer[index],&header->channel[i].frequency);
+		index += 4;
+ 		mb_get_binary_int(MB_NO,&buffer[index],&header->channel[i].num_samples);
+		index += 4;
 		}
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->beams_bath = mb_swap_int(*int_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->beams_amp = mb_swap_int(*int_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->bath_chan_port = mb_swap_int(*int_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->bath_chan_stbd = mb_swap_int(*int_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->pixels_ss = mb_swap_int(*int_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->ss_chan_port = mb_swap_int(*int_ptr);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->ss_chan_stbd = mb_swap_int(*int_ptr);
-#else
-	    index = 3;
-	    header->type = buffer[index]; index += 1;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->proc_status = *int_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->data_size = *int_ptr;
-	    header->client_size = buffer[index]; index += 1;
-	    header->fish_status = buffer[index]; index += 1;
-	    header->nav_used = buffer[index]; index += 1;
-	    header->nav_type = buffer[index]; index += 1;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->utm_zone = *int_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->ship_x = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->ship_y = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->ship_course = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->ship_speed = *float_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->sec = *int_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->usec = *int_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->spare_gain = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_heading = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_depth = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_range = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_pulse_width = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->gain_c0 = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->gain_c1 = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->gain_c2 = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_pitch = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_roll = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_yaw = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_x = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_y = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_layback = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_altitude = *float_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->fish_altitude_samples = *int_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->fish_ping_period = *float_ptr;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    header->sound_velocity = *float_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->num_chan = *int_ptr;
-	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
-		{
-		int_ptr = (int *) &buffer[index]; index += 4;
-		header->channel[i].offset = *int_ptr;
-		}
-	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
-		{
-		header->channel[i].type = buffer[index]; index += 1;
-		header->channel[i].side = buffer[index]; index += 1;
-		header->channel[i].size = buffer[index]; index += 1;
-		header->channel[i].empty = buffer[index]; index += 1;
-		int_ptr = (int *) &buffer[index]; index += 4;
-		header->channel[i].frequency = *int_ptr;
-		int_ptr = (int *) &buffer[index]; index += 4;
-		header->channel[i].num_samples = *int_ptr;
-		}
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->beams_bath = *int_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->beams_amp = *int_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->bath_chan_port = *int_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->bath_chan_stbd = *int_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->pixels_ss = *int_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->ss_chan_port = *int_ptr;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    header->ss_chan_stbd = *int_ptr;
-#endif
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->beams_bath);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->beams_amp);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->bath_chan_port);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->bath_chan_stbd);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->pixels_ss);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->ss_chan_port);
+	    index += 4;
+ 	    mb_get_binary_int(MB_NO,&buffer[index],&header->ss_chan_stbd);
+	    index += 4;
 	    }
 	
 	/* read client specific data */
@@ -599,7 +515,7 @@ int	*error;
 			float_ptr = (float *) data->raw[i];
 			for (j=0;j<header->channel[i].num_samples;j++)
 			    {
-			    float_ptr[j] = mb_swap_float(float_ptr[j]);
+			    mb_swap_float(&float_ptr[j]);
 			    }
 			}
 		    else if (header->channel[i].size == OIC_SIZE_3FLOAT)
@@ -607,7 +523,7 @@ int	*error;
 			float_ptr = (float *) data->raw[i];
 			for (j=0;j<3*header->channel[i].num_samples;j++)
 			    {
-			    float_ptr[j] = mb_swap_float(float_ptr[j]);
+			    mb_swap_float(&float_ptr[j]);
 			    }
 			}
 		    }
@@ -927,21 +843,21 @@ int	*error;
 	    {
 	    for (j=0;j<header->beams_bath;j++)
 		{
-		data->bath[j] = mb_swap_float(data->bath[j]);
-		data->bathacrosstrack[j] = mb_swap_float(data->bathacrosstrack[j]);
-		data->bathalongtrack[j] = mb_swap_float(data->bathalongtrack[j]);
-		data->tt[j] = mb_swap_float(data->tt[j]);
-		data->angle[j] = mb_swap_float(data->angle[j]);
+		mb_swap_float(&data->bath[j]);
+		mb_swap_float(&data->bathacrosstrack[j]);
+		mb_swap_float(&data->bathalongtrack[j]);
+		mb_swap_float(&data->tt[j]);
+		mb_swap_float(&data->angle[j]);
 		}
 	    for (j=0;j<header->beams_amp;j++)
 		{
-		data->amp[j] = mb_swap_float(data->amp[j]);
+		mb_swap_float(&data->amp[j]);
 		}
 	    for (j=0;j<header->pixels_ss;j++)
 		{
-		data->ssacrosstrack[j] = mb_swap_float(data->ssacrosstrack[j]);
-		data->ssalongtrack[j] = mb_swap_float(data->ssalongtrack[j]);
-		data->ss[j] = mb_swap_float(data->ss[j]);
+		mb_swap_float(&data->ssacrosstrack[j]);
+		mb_swap_float(&data->ssalongtrack[j]);
+		mb_swap_float(&data->ss[j]);
 		}
 	    }
 #endif
@@ -988,37 +904,32 @@ int	*error;
 	    mb_get_date(verbose,mb_io_ptr->new_time_d,mb_io_ptr->new_time_i);
 
 	    /* get navigation */
+	    mb_io_ptr->new_lon = header->fish_x;
+	    mb_io_ptr->new_lat = header->fish_y;
 	    if (header->nav_type == OIC_NAV_LONLAT)
-		{
-		mb_io_ptr->new_lon = header->fish_x;
-		mb_io_ptr->new_lat = header->fish_y;
-		}
-	    else
-		{
-		mb_io_ptr->new_lon = 0.0;
-		mb_io_ptr->new_lat = 0.0;
-		}
-	    if (mb_io_ptr->lonflip < 0)
+	      {
+	      if (mb_io_ptr->lonflip < 0)
 		{
 		if (mb_io_ptr->new_lon > 0.) 
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
 		else if (mb_io_ptr->new_lon < -360.)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
 		}
-	    else if (mb_io_ptr->lonflip == 0)
+	      else if (mb_io_ptr->lonflip == 0)
 		{
 		if (mb_io_ptr->new_lon > 180.) 
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
 		else if (mb_io_ptr->new_lon < -180.)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
 		}
-	    else
+	      else
 		{
 		if (mb_io_ptr->new_lon > 360.) 
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
 		else if (mb_io_ptr->new_lon < 0.)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
 		}
+	      }
 
 	    /* get heading */
 	    mb_io_ptr->new_heading = header->fish_heading;
@@ -1144,8 +1055,6 @@ int	*error;
 	    store->data_size = header->data_size;
 	    store->client_size = header->client_size;
 	    store->fish_status = header->fish_status;
-	    store->type = header->type;
-	    store->type = header->type;
 
 	    /* nav */
 	    store->nav_used = header->nav_used;
@@ -1155,7 +1064,6 @@ int	*error;
 	    store->ship_y = header->ship_y;
 	    store->ship_course = header->ship_course;
 	    store->ship_speed = header->ship_speed;
-	    store->ship_x = header->ship_x;
 
 	    /* time stamp */
 	    store->sec = header->sec;
@@ -1383,8 +1291,6 @@ int	*error;
 	    header->data_size = store->data_size;
 	    header->client_size = store->client_size;
 	    header->fish_status = store->fish_status;
-	    header->type = store->type;
-	    header->type = store->type;
 
 	    /* nav */
 	    header->nav_used = store->nav_used;
@@ -1394,7 +1300,6 @@ int	*error;
 	    header->ship_y = store->ship_y;
 	    header->ship_course = store->ship_course;
 	    header->ship_speed = store->ship_speed;
-	    header->ship_x = store->ship_x;
 
 	    /* time stamp */
 	    header->sec = store->sec;
@@ -1850,76 +1755,79 @@ int	*error;
 	/* now reverse parse the header */
 	if (status == MB_SUCCESS)
 	    {
-#ifdef BYTESWAPPED
 	    index = 0;
-	    buffer[index] = 'G'; index += 1;
-	    buffer[index] = 'E'; index += 1;
-	    buffer[index] = '2'; index += 1;
-	    buffer[index] = header->type; index += 1;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->proc_status);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->data_size);
+	    buffer[index] = 'G'; 
+	    index += 1;
+	    buffer[index] = 'E'; 
+	    index += 1;
+	    buffer[index] = '2'; 
+	    index += 1;
+	    buffer[index] = header->type; 
+	    index += 1;
+ 	    mb_put_binary_int(MB_NO,header->proc_status,&buffer[index]);
+	    index += 4;
+	    mb_put_binary_int(MB_NO,header->data_size,&buffer[index]);
+	    index += 4;
 	    buffer[index] = header->client_size; index += 1;
 	    buffer[index] = header->fish_status; index += 1;
 	    buffer[index] = header->nav_used; index += 1;
 	    buffer[index] = header->nav_type; index += 1;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->utm_zone);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->ship_x);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->ship_y);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->ship_course);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->ship_speed);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->sec);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->usec);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->spare_gain);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_heading);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_depth);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_range);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_pulse_width);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->gain_c0);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->gain_c1);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->gain_c2);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_pitch);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_roll);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_yaw);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_x);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_y);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_layback);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_altitude);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->fish_altitude_samples);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->fish_ping_period);
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = mb_swap_float(header->sound_velocity);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->num_chan);
+ 	    mb_put_binary_int(MB_NO,header->utm_zone,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->ship_x,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->ship_y,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->ship_course,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->ship_speed,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->sec,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->usec,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->spare_gain,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_heading,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_depth,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_range,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_pulse_width,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->gain_c0,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->gain_c1,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->gain_c2,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_pitch,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_roll,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_yaw,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_x,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_y,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_layback,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_altitude,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->fish_altitude_samples,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->fish_ping_period,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_float(MB_NO,header->sound_velocity,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->num_chan,&buffer[index]);
+	    index += 4;
 	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
 		{
-		int_ptr = (int *) &buffer[index]; index += 4;
-		*int_ptr = mb_swap_int(header->channel[i].offset);
+ 		mb_put_binary_int(MB_NO,header->channel[i].offset,&buffer[index]);
+		index += 4;
 		}
 	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
 		{
@@ -1927,122 +1835,25 @@ int	*error;
 		buffer[index] = header->channel[i].side; index += 1;
 		buffer[index] = header->channel[i].size; index += 1;
 		buffer[index] = header->channel[i].empty; index += 1;
-		int_ptr = (int *) &buffer[index]; index += 4;
-		*int_ptr = mb_swap_int(header->channel[i].frequency);
-		int_ptr = (int *) &buffer[index]; index += 4;
-		*int_ptr = mb_swap_int(header->channel[i].num_samples);
+ 		mb_put_binary_int(MB_NO,header->channel[i].frequency,&buffer[index]);
+		index += 4;
+ 		mb_put_binary_int(MB_NO,header->channel[i].num_samples,&buffer[index]);
+		index += 4;
 		}
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->beams_bath);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->beams_amp);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->bath_chan_port);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->bath_chan_stbd);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->pixels_ss);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->ss_chan_port);
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = mb_swap_int(header->ss_chan_stbd);
-#else
-	    index = 0;
-	    buffer[index] = 'G'; index += 1;
-	    buffer[index] = 'E'; index += 1;
-	    buffer[index] = '2'; index += 1;
-	    buffer[index] = header->type; index += 1;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->proc_status;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->data_size;
-	    buffer[index] = header->client_size; index += 1;
-	    buffer[index] = header->fish_status; index += 1;
-	    buffer[index] = header->nav_used; index += 1;
-	    buffer[index] = header->nav_type; index += 1;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->utm_zone;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->ship_x;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->ship_y;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->ship_course;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->ship_speed;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->sec;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->usec;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->spare_gain;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_heading;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_depth;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_range;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_pulse_width;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->gain_c0;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->gain_c1;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->gain_c2;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_pitch;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_roll;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_yaw;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_x;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_y;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_layback;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_altitude;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->fish_altitude_samples;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->fish_ping_period;
-	    float_ptr = (float *) &buffer[index]; index += 4;
-	    *float_ptr = header->sound_velocity;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->num_chan;
-	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
-		{
-		int_ptr = (int *) &buffer[index]; index += 4;
-		*int_ptr = header->channel[i].offset;
-		}
-	    for (i=0;i<MBF_OICMBARI_MAX_CHANNELS;i++)
-		{
-		buffer[index] = header->channel[i].type; index += 1;
-		buffer[index] = header->channel[i].side; index += 1;
-		buffer[index] = header->channel[i].size; index += 1;
-		buffer[index] = header->channel[i].empty; index += 1;
-		int_ptr = (int *) &buffer[index]; index += 4;
-		*int_ptr = header->channel[i].frequency;
-		int_ptr = (int *) &buffer[index]; index += 4;
-		*int_ptr = header->channel[i].num_samples;
-		}
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->beams_bath;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->beams_amp;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->bath_chan_port;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->bath_chan_stbd;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->pixels_ss;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->ss_chan_port;
-	    int_ptr = (int *) &buffer[index]; index += 4;
-	    *int_ptr = header->ss_chan_stbd;
-#endif
+ 	    mb_put_binary_int(MB_NO,header->beams_bath,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->beams_amp,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->bath_chan_port,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->bath_chan_stbd,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->pixels_ss,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->ss_chan_port,&buffer[index]);
+	    index += 4;
+ 	    mb_put_binary_int(MB_NO,header->ss_chan_stbd,&buffer[index]);
+	    index += 4;
 	    }
 
 	/* write next header to file */
@@ -2112,7 +1923,7 @@ int	*error;
 			float_ptr = (float *) data->raw[i];
 			for (j=0;j<header->channel[i].num_samples;j++)
 			    {
-			    float_ptr[j] = mb_swap_float(float_ptr[j]);
+			    mb_swap_float(&float_ptr[j]);
 			    }
 			}
 		    else if (header->channel[i].size == OIC_SIZE_3FLOAT)
@@ -2120,7 +1931,7 @@ int	*error;
 			float_ptr = (float *) data->raw[i];
 			for (j=0;j<3*header->channel[i].num_samples;j++)
 			    {
-			    float_ptr[j] = mb_swap_float(float_ptr[j]);
+			    mb_swap_float(&float_ptr[j]);
 			    }
 			}
 		    }
@@ -2145,21 +1956,21 @@ int	*error;
 	    {
 	    for (j=0;j<header->beams_bath;j++)
 		{
-		data->bath[j] = mb_swap_float(data->bath[j]);
-		data->bathacrosstrack[j] = mb_swap_float(data->bathacrosstrack[j]);
-		data->bathalongtrack[j] = mb_swap_float(data->bathalongtrack[j]);
-		data->tt[j] = mb_swap_float(data->tt[j]);
-		data->angle[j] = mb_swap_float(data->angle[j]);
+		mb_swap_float(&data->bath[j]);
+		mb_swap_float(&data->bathacrosstrack[j]);
+		mb_swap_float(&data->bathalongtrack[j]);
+		mb_swap_float(&data->tt[j]);
+		mb_swap_float(&data->angle[j]);
 		}
 	    for (j=0;j<header->beams_amp;j++)
 		{
-		data->amp[j] = mb_swap_float(data->amp[j]);
+		mb_swap_float(&data->amp[j]);
 		}
 	    for (j=0;j<header->pixels_ss;j++)
 		{
-		data->ssacrosstrack[j] = mb_swap_float(data->ssacrosstrack[j]);
-		data->ssalongtrack[j] = mb_swap_float(data->ssalongtrack[j]);
-		data->ss[j] = mb_swap_float(data->ss[j]);
+		mb_swap_float(&data->ssacrosstrack[j]);
+		mb_swap_float(&data->ssalongtrack[j]);
+		mb_swap_float(&data->ss[j]);
 		}
 	    }
 #endif
