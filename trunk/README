@@ -135,6 +135,10 @@ Intel processors running Linux).
 We have fixed a bug that caused edit save files to be incorrectly
 read on byteswapped systems (e.g. Intel processors running Linux).
 
+We have fixed a bug in the i/o modules for binary SeaBeam 2100
+data (formats 42 and 43) that caused data to be written incorrectly
+on byteswapped systems (e.g. Intel processors running Linux).
+
 MB-SYSTEM VERSION 5.0.2 RELEASE NOTES:
 ------------------------------------------
 
@@ -749,10 +753,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.44 2004-02-26 22:41:02 caress Exp $
+RCS ID: $Id: README,v 5.45 2004-02-27 18:12:49 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.44  2004/02/26 22:41:02  caress
+Release 5.0.3
+
 Revision 5.43  2004/02/25 17:48:49  caress
 Release 5.0.3
 
