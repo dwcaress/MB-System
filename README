@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.5 README FILE:
+MB-SYSTEM VERSION 5.0.6 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.5 release of the MB-System software package for 
+5.0.6 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.6          ??????????????
 Version 5.0.5          October 6, 2004
 Version 5.0.4          May 22, 2004
 Version 5.0.3          February 27, 2004
@@ -123,6 +124,57 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
+MB-SYSTEM VERSION 5.0.6 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.6 release of MB-System includes several changes
+relative to the 5.0.5 release.
+
+The man page for mbprocess has been updated with full
+documentation of the navigation formats supported for
+merging by mbprocess.
+
+The merging of heading and attitude data from navigation files
+has been fixed.
+
+The ability to merge attitude data from a separate file
+has been added to mbprocess, and the mbprocess and mbset
+man pages have been updated.
+
+A problem producing ascii grids from mbgrid and mbmosaic
+has been identified, and a fix suggested by Gordon Keith
+adopted.
+
+A problem with the -D option of mblist has been identified,
+and a fix suggested by Gordon Keith adopted.
+
+A new program called mbneptune2esf has been contributed by
+Gordon Keith. MBneptune2esf  imports manual data flagging 
+performed using Simrad's NEPTUNE software and flags those  
+beams  in  the corresponding MB-System files.
+
+A new program called mbauvnavusbl has been added to the
+distribution. MBauvnavusbl reads a primary navigation file 
+(usually from a submerged platform swath survey) and also 
+reads secondary navigation (e.g. USBL fixes).  The program 
+calculates position offsets between the raw survey navigation
+and the secondary navigation every 3600 seconds (10 minutes), 
+and then linearly interpolates and applies this adjustment 
+vector for each primary navigation position. The adjusted 
+navigation is output.
+
+The ability to annotate tracklines on swath plots with
+the swath filenames has been added to mbm_plot and 
+mbcontour. The annotation occurs at the beginning of the
+data associated with each file. This option can be used
+most simply by specifying -NF in mbm_plot. The suggestion 
+and initial implementation were contributed by Gordon Keith.
+
+A problem with setting file paths in parameter files in
+the different directories associated with recursive
+datalists has been fixed. The nature of and fix to this
+bug were determined by Gordon Keith.
+
 MB-SYSTEM VERSION 5.0.5 RELEASE NOTES:
 ------------------------------------------
 
@@ -173,7 +225,7 @@ The program mbm_plot now works properly when start and end times
 are specified using the -MMB and -MME options.
 
 A bug involving the handling of edit save filenames by mbset and
-mbprocess has bee fixed.
+mbprocess has been fixed.
 
 Errors in handling Simrad datagrams and edit save files on 
 byteswapped  machines (e.g. Intel or AMD processors) have been 
@@ -202,6 +254,9 @@ outputs SVPs in a swath file to individual ancillary SVP
 files (as with the -O option), but also sets the first SVP
 output file to be used by mbprocess to recalculate the
 bathymetry.
+
+Problems with the MGD77 format i/o module have been fixed
+according to suggestions from Bob Covill.
 
 MB-SYSTEM VERSION 5.0.4 RELEASE NOTES:
 ------------------------------------------
@@ -869,10 +924,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.52 2004-10-06 21:30:50 caress Exp $
+RCS ID: $Id: README,v 5.53 2004-12-18 01:23:24 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.52  2004/10/06 21:30:50  caress
+Release 5.0.5
+
 Revision 5.51  2004/09/16 21:49:59  caress
 More changes leading up to 5.0.5 release.
 

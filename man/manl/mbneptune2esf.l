@@ -1,4 +1,4 @@
-.TH neptune2esf l "15 November 2004" "MB-System 5.0" "MB-System 5.0"
+.TH neptune2esf l "2 December 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBneptune2esf\fP - Tool to import beam flags from Simrad's Neptune system.
 
@@ -50,16 +50,14 @@ can be used to zero all the beams flagged during neptune processing and
 the processed files can then be used as the basis for a new survey, preserving
 the manual flagging (but losing the flagged data). 
 The zero data can then be easily flagged in neptune.
-.br
-cd $RAWDATAHOME
-.br
-ls *raw.all | while (read file) ; do echo $file 56 1 >> datalist.mb-1 ; done
-.br
-cat $PROCHOME/old_survey/binstat_*.rules | neptune2esf -m3
-.br
-mbprocess
-.br
-cat *p.mb56 | handleEmX new_survey op
+
+ 	cd $RAWDATAHOME
+ 	ls *raw.all | while (read file) ; do 
+ 			echo $file 56 1 >> datalist.mb-1 
+ 		done
+ 	cat $PROCHOME/old_survey/binstat_*.rules | neptune2esf -m3
+ 	mbprocess
+ 	cat *p.mb56 | handleEmX new_survey op
 
 This program flags beams by outputting the flags as 
 edit events to an "edit save file", like that produced
@@ -165,6 +163,31 @@ and the number of beams flagged as bad.
 
 .SH EXAMPLES
 
+The normal use of \fBneptune2esf\fP would be to apply all the manual edits
+in a Neptune survey to the coresponding MB-System survey represented by a
+datalist:
+
+	cat $PROCHOME/Broken_Reef/binstat_*.rules | \\
+ 		neptune2esf -I/data/mbproc/Broken_Reef/datalist.mb-1 
+
+Since the default input file is the datalist in the current directory,
+the following is equivalent if the Neptune environment variable PROCHOME 
+evaluates to /data/proc:
+
+ 	cd /data/mbproc/Broken_Reef
+ 	cat /data/proc/Broken_Reef/binstat_*.rules | neptune2esf
+
+To apply the manual edits from a particular block of a Neptune survey
+to only one of the related data files:
+
+ 	neptune2esf -R $PROCHOME/Broken_Reef/binstat_1.rules \\
+ 		-F57 -I0032_20000408_221201.mb57
+
+To use the manual edits from a particular block of a Neptune survey
+to zero the beams of one of the related data files:
+
+ 	neptune2esf -R $PROCHOME/Broken_Reef/binstat_2.rules
+ 		-M3  -F56 -I0002_20000408_153940_raw.all
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbclean\fP(l), \fBmbedit\fP(l), 

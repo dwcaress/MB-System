@@ -1,4 +1,4 @@
-.TH mbm_plot l "28 November 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_plot l "15 December 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of swath sonar swath data.
@@ -12,7 +12,7 @@ Version 5.0
 \fB-C\fP\fI[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\fP
 \fB-D\fP[\fIflipcolor/flipshade\fP]
 \fB-G\fP\fIcolor_mode\fP \fB-H\fP
-\fB-N\fP\fI[time_tick/time_annot/date_annot/time_tick_len]\fP
+\fB-N\fP\fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F]\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
 \fB-S\fP\fI[color/shade]\fP \fB-T\fP
 \fB-U\fP\fIorientation\fP \fB-V\fP 
@@ -56,7 +56,7 @@ specified swath sonar data. The plot may include bathymetry color
 fill (\fB-G\fP\fI1\fP), bathymetry color shaded relief (\fB-G\fP\fI2\fP), bathymetry 
 shaded with amplitudes (\fB-G\fP\fI3\fP), greyshade fill amplitude (\fB-G\fP\fI4\fP), 
 greyshade fill sidescan (\fB-G\fP\fI5\fP), contoured bathymetry (\fB-C\fP),
-or annotated navigation. The plot may also include text
+or annotated navigation. The plot may also include navigation tracks, text
 labels, xy data in lines or symbols, and coastlines. 
 Five different color 
 schemes are included. The plot will be scaled to fit on 
@@ -86,7 +86,7 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
 .TP
 .B \-A
-\fImagnitude/azimuth\fP or fImagnitude/median\fP
+\fImagnitude/azimuth\fP or \fImagnitude/median\fP
 .br
 Sets the parameters which control how \fBmbswath\fP generates
 simulated illumination of bathymetry, which can be either
@@ -854,12 +854,16 @@ GMT Technical reference for a discussion of GMT pen values.
 texture = solid]. 
 .TP
 .B \-N
-\fI[time_tick/time_annot/date_annot/time_tick_len]\fP
+\fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F]\fP
 .br
-This option causes a navigation track plot to be generated.
-The optional parameters control the annotation of the ship
-track; if the \fB-N\fP option is given alone, then the default
-parameters given below will be used.
+This option causes a navigation track plot to be generated, 
+and can also set the start of each 
+swath file to be annotated with the filename.
+If the \fB-N\fP option is given alone, then the default
+parameters given below will be used, If the \fB-N\fP\fIF\fP is
+given, then a navigation track will be generated with filename
+annotation. The optional parameters allow users to control the 
+details of the navigation track annotation. 
 Time marks are made with "X" marks along the shiptrack; annotated
 time marks show the time in HH:MM format next to the time mark
 and annotated date marks show the time and julian day in
@@ -869,8 +873,12 @@ HH:MM/DDD format.  The "X" marks are
 marks.  The interval of time ticks, annotated time ticks, and 
 annotated date ticks are given in hours by 
 \fItime_tick\fP, \fItime_annot\fP, and \fIdate_annot\fP, respectively.
+If the \fIname_hgt\fP parameter is not given when the other parameters
+are specified, then no filename annotation will be done. If given,
+\fIname_hgt\fP sets the height in inches of the filename annotation
+and turns that annotation on.
 Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; 
-\fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1.
+\fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1; \fIname_hgt\fP = 0.1.
 .TP
 .B \-O
 \fIroot\fP
