@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.3 2004-07-15 19:26:44 caress Exp $
+ *    $Id: mbview_route.c,v 5.4 2004-07-27 19:50:28 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/07/15 19:26:44  caress
+ * Improvements to survey planning.
+ *
  * Revision 5.2  2004/06/18 04:26:06  caress
  * June 17, 2004 update.
  *
@@ -79,7 +82,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.3 2004-07-15 19:26:44 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.4 2004-07-27 19:50:28 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -196,6 +199,7 @@ int mbview_allocroutearrays(int verbose,
 			double	**routelat,
 			int	**waypoint,
 			double	**routetopo,
+			double	**routebearing,
 			double	**distlateral,
 			double	**distovertopo,
 			double	**slope,
@@ -221,6 +225,8 @@ int mbview_allocroutearrays(int verbose,
 		fprintf(stderr,"dbg2       waypoint:                  %d\n", *waypoint);
 		if (routetopo != NULL)
 		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
+		if (routebearing != NULL)
+		fprintf(stderr,"dbg2       routebearing:              %d\n", *routebearing);
 		if (distlateral != NULL)
 		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
 		if (distovertopo != NULL)
@@ -237,6 +243,8 @@ int mbview_allocroutearrays(int verbose,
 		status = mb_realloc(verbose,npointtotal*sizeof(int),waypoint,error);
 	if (status == MB_SUCCESS && routetopo != NULL)
 		status = mb_realloc(verbose,npointtotal*sizeof(double),routetopo,error);
+	if (status == MB_SUCCESS && routebearing != NULL)
+		status = mb_realloc(verbose,npointtotal*sizeof(double),routebearing,error);
 	if (status == MB_SUCCESS && distlateral != NULL)
 		status = mb_realloc(verbose,npointtotal*sizeof(double),distlateral,error);
 	if (status == MB_SUCCESS && distovertopo != NULL)
@@ -256,6 +264,8 @@ int mbview_allocroutearrays(int verbose,
 		fprintf(stderr,"dbg2       waypoint:                  %d\n", *waypoint);
 		if (routetopo != NULL)
 		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
+		if (routebearing != NULL)
+		fprintf(stderr,"dbg2       routebearing:              %d\n", *routebearing);
 		if (distlateral != NULL)
 		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
 		if (distovertopo != NULL)
@@ -278,6 +288,7 @@ int mbview_freeroutearrays(int verbose,
 			double	**routelat,
 			int	**waypoint,
 			double	**routetopo,
+			double	**routebearing,
 			double	**distlateral,
 			double	**distovertopo,
 			double	**slope,
@@ -302,6 +313,8 @@ int mbview_freeroutearrays(int verbose,
 		fprintf(stderr,"dbg2       waypoint:                  %d\n", *waypoint);
 		if (routetopo != NULL)
 		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
+		if (routebearing != NULL)
+		fprintf(stderr,"dbg2       routebearing:              %d\n", *routebearing);
 		if (distlateral != NULL)
 		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
 		if (distovertopo != NULL)
@@ -317,6 +330,8 @@ int mbview_freeroutearrays(int verbose,
 		status = mb_free(verbose,waypoint,error);
 	if (routetopo != NULL)
 		status = mb_free(verbose,routetopo,error);
+	if (routebearing != NULL)
+		status = mb_free(verbose,routebearing,error);
 	if (distlateral != NULL)
 		status = mb_free(verbose,distlateral,error);
 	if (distovertopo != NULL)
@@ -336,6 +351,8 @@ int mbview_freeroutearrays(int verbose,
 		fprintf(stderr,"dbg2       waypoint:                  %d\n", *waypoint);
 		if (routetopo != NULL)
 		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
+		if (routebearing != NULL)
+		fprintf(stderr,"dbg2       routebearing:              %d\n", *routebearing);
 		if (distlateral != NULL)
 		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
 		if (distovertopo != NULL)
@@ -460,6 +477,7 @@ int mbview_getroute(int verbose, int instance,
 			double	*routelat,
 			int	*waypoint,
 			double	*routetopo,
+			double	*routebearing,
 			double	*distlateral,
 			double	*distovertopo,
 			double	*slope,
@@ -473,6 +491,7 @@ int mbview_getroute(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
+	double	dx, dy, range, bearing;
 	double	xx0, yy0, zz0, xx1, yy1, zz1, xx2, yy2, zz2;
 	double	dxx, dyy, dzz;
 	double	dll, doo;
@@ -494,6 +513,7 @@ int mbview_getroute(int verbose, int instance,
 		fprintf(stderr,"dbg2       routelat:                  %d\n", routelat);
 		fprintf(stderr,"dbg2       waypoint:                  %d\n", waypoint);
 		fprintf(stderr,"dbg2       routetopo:                 %d\n", routetopo);
+		fprintf(stderr,"dbg2       routebearing:              %d\n", routebearing);
 		fprintf(stderr,"dbg2       distlateral:               %d\n", distlateral);
 		fprintf(stderr,"dbg2       distovertopo:              %d\n", distovertopo);
 		fprintf(stderr,"dbg2       slope:                     %d\n", slope);
@@ -523,6 +543,28 @@ int mbview_getroute(int verbose, int instance,
 		/* loop over the route segments */
 		for (i=0;i<data->routes[route].npoints-1;i++)
 			{
+			/* get bearing of segment */
+			if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
+				{
+				dx = data->routes[route].points[i+1].xdisplay
+						- data->routes[route].points[i].xdisplay;
+				dy = data->routes[route].points[i+1].ydisplay
+						- data->routes[route].points[i].ydisplay;
+				range = sqrt(dx * dx + dy * dy) / view->scale ;
+				bearing = RTD * atan2(dx, dy);
+				}
+			else
+				{
+				mbview_greatcircle_distbearing(instance, 
+					data->routes[route].points[i].xlon, 
+					data->routes[route].points[i].ylat, 
+					data->routes[route].points[i+1].xlon, 
+					data->routes[route].points[i+1].ylat, 
+					&bearing, &range);
+				}
+			if (bearing < 0.0)
+				bearing += 360.0;
+
 			/* add first point */
 			routelon[*npointtotal] = data->routes[route].points[i].xlon;
 			if (routelon[*npointtotal] < -180.0)
@@ -532,9 +574,24 @@ int mbview_getroute(int verbose, int instance,
 			routelat[*npointtotal] = data->routes[route].points[i].ylat ;
 			waypoint[*npointtotal] = MB_YES;
 			routetopo[*npointtotal] = data->routes[route].points[i].zdata;
-			distlateral[*npointtotal] = 0.0;
-			distovertopo[*npointtotal] = 0.0;
-			slope[*npointtotal] = 0.0;
+			routebearing[*npointtotal] = bearing;
+			if (*npointtotal == 0)
+				{
+				distlateral[*npointtotal] = 0.0;
+				distovertopo[*npointtotal] = 0.0;
+				slope[*npointtotal] = 0.0;
+				}
+			else
+				{
+				mbview_projectdistance(instance,
+					routelon[*npointtotal-1], routelat[*npointtotal-1], routetopo[*npointtotal-1],
+					routelon[*npointtotal], routelat[*npointtotal], routetopo[*npointtotal],
+					&distlateral[*npointtotal],
+					&distovertopo[*npointtotal],
+					&slope[*npointtotal]);
+				distlateral[*npointtotal] += distlateral[*npointtotal-1];
+				distovertopo[*npointtotal] += distovertopo[*npointtotal-1];
+				}
 			(*npointtotal)++;
 			
 			/* loop over interior of segment */
@@ -548,6 +605,7 @@ int mbview_getroute(int verbose, int instance,
 				routelat[*npointtotal] = data->routes[route].segments[i].lspoints[j].ylat;
 				waypoint[*npointtotal] = MB_NO;
 				routetopo[*npointtotal] = data->routes[route].segments[i].lspoints[j].zdata;
+				routebearing[*npointtotal] = bearing;
 				mbview_projectdistance(instance,
 					routelon[*npointtotal-1], routelat[*npointtotal-1], routetopo[*npointtotal-1],
 					routelon[*npointtotal], routelat[*npointtotal], routetopo[*npointtotal],
@@ -570,6 +628,7 @@ int mbview_getroute(int verbose, int instance,
 		routelat[*npointtotal] = data->routes[route].points[j].ylat ;
 		waypoint[*npointtotal] = MB_YES;
 		routetopo[*npointtotal] = data->routes[route].points[j].zdata;
+		routebearing[*npointtotal] = bearing;
 		mbview_projectdistance(instance,
 			routelon[*npointtotal-1], routelat[*npointtotal-1], routetopo[*npointtotal-1],
 			routelon[*npointtotal], routelat[*npointtotal], routetopo[*npointtotal],
@@ -627,8 +686,9 @@ int mbview_getroute(int verbose, int instance,
 		fprintf(stderr,"dbg2       npointtotal:               %d\n", *npointtotal);
 		for (i=0;i<*npointtotal;i++)
 			{
-			fprintf(stderr,"dbg2       route:%d lon:%f lat:%f interp:%d topo:%f color:%d size:%d name:%s\n", 
+			fprintf(stderr,"dbg2       route:%d lon:%f lat:%f waypoint:%d topo:%f bearing:%f dist:%f distbot:%f color:%d size:%d name:%s\n", 
 					i, routelon[i], routelat[i], waypoint[i], routetopo[i], 
+					routebearing[i], distlateral[i], distovertopo[i], 
 					*routecolor, *routesize, routename);
 			}
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.3 2004-05-21 23:40:40 caress Exp $
+ *    $Id: mbview.h,v 5.4 2004-07-27 19:50:28 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/05/21 23:40:40  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.2  2004/02/24 22:52:29  caress
  * Added spherical projection to MBview.
  *
@@ -133,14 +136,22 @@
 #define MBV_PICK_NAV			7
 
 /* region defines */
+#define MBV_REGION_REPICKWIDTH		2
 #define MBV_REGION_NONE			0
 #define MBV_REGION_ONEPOINT		1
 #define MBV_REGION_QUAD			2
+#define MBV_REGION_PICKCORNER0		0
+#define MBV_REGION_PICKCORNER1		1
+#define MBV_REGION_PICKCORNER2		2
+#define MBV_REGION_PICKCORNER3		3
 
 /* area defines */
+#define MBV_AREA_REPICKWIDTH		2
 #define MBV_AREA_NONE			0
 #define MBV_AREA_ONEPOINT		1
 #define MBV_AREA_QUAD			2
+#define MBV_AREA_PICKENDPOINT0		0
+#define MBV_AREA_PICKENDPOINT1		1
 
 /* site defines */
 #define MBV_SITE_OFF			0
@@ -390,10 +401,12 @@ struct mbview_struct {
 	
 	/* area data */
 	int	area_type;
+	int	area_pickendpoint;
 	struct mbview_area_struct area;
 	
 	/* region data */
 	int	region_type;
+	int	region_pickcorner;
 	struct mbview_region_struct region;
 	
 	/* nav pick */
@@ -577,6 +590,7 @@ int mbview_allocroutearrays(int verbose,
 			double	**routelat,
 			int	**interpolated,
 			double	**routetopo,
+			double	**routebearing,
 			double	**distlateral,
 			double	**distovertopo,
 			double	**slope,
@@ -586,6 +600,7 @@ int mbview_freeroutearrays(int verbose,
 			double	**routelat,
 			int	**interpolated,
 			double	**routetopo,
+			double	**routebearing,
 			double	**distlateral,
 			double	**distovertopo,
 			double	**slope,
@@ -605,6 +620,7 @@ int mbview_getroute(int verbose, int instance,
 			double	*routelat,
 			int	*interpolated,
 			double	*routetopo,
+			double	*routebearing,
 			double	*distlateral,
 			double	*distovertopo,
 			double	*slope,
