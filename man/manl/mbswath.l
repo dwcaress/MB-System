@@ -1,4 +1,4 @@
-.TH mbswath l "26 January 1995"
+.TH mbswath l "14 February 1995"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
