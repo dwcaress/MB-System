@@ -36,14 +36,17 @@ Earth Observatory</A></B></DT></CENTER>
 
 <CENTER><DT><B><FONT SIZE=+1>Introduction</FONT></B></DT></CENTER>
 
-<P>MB-System is a software package consisting of programs which manipulate,
-process, list, or display swath sonar bathymetry, amplitude, and sidescan
-data. This software is distributed freely (and for free) in the form of
-source code for Unix platforms. The heart of the system is an input/output
-library called MBIO which allows programs to work transparently with any
-of a number of supported swath sonar data formats. This approach has allowed
-the creation of &quot;generic&quot; utilities which can be applied in a
-uniform manner to sonar data from a variety of sources. </P>
+<P>MB-System is an open source software package for the processing and
+display of bathymetry and backscatter imagery data derived from multibeam,
+interferometry, and sidescan sonars. This software is distributed freely
+(and for free) in the form of source code for Unix platforms. The heart
+of the system is an input/output library called MBIO which allows programs
+to work transparently with any of a number of supported swath sonar data
+formats. This approach has allowed the creation of &quot;generic&quot;
+utilities which can be applied in a uniform manner to sonar data from a
+variety of sources. Most of the programs are command-line tools, but the
+package does include graphical tools for editing swath bathymetry, editing
+navigation, modeling bathymetry calculation, and adjusting survey navigation.</P>
 
 <P>The acronym MB stands for MultiBeam; this reflects the fact that the
 early development of MB-System focused on processing deep sea data from
@@ -52,14 +55,14 @@ from sidescan and interferometric sonars and works with data from all depth
 ranges. </P>
 
 <P>The <A HREF="http://www.nsf.gov">National Science Foundation</A> (NSF)
-has been the primary supporter of MB-System development through grants
-to the authors at the <A HREF="http://www.ldeo.columbia.edu">Lamont-Doherty
-Earth Observatory</A> in 1993 (two years) and 1995 (five years). Now that
-one of the authors (Caress) has joined the <A HREF="http://www.mbari.org">Monterey
-Bay Aquarium Research Institute</A> (MBARI), MBARI will also be directly
-supporting our efforts to improve and maintain this software. SeaBeam Instruments,
-Inc., a manufacturer of multibeam sonars, has also contributed significantly
-to MB-System development over the years. </P>
+has been the primary supporter of MB-System development. NSF initially
+provided grants to the authors at the <A HREF="http://www.ldeo.columbia.edu">Lamont-Doherty
+Earth Observatory</A> in 1993 (two years), and 1995 (five years). <A HREF="http://www.seabeam.com/">SeaBeam
+Instruments</A> also contributed significant effort from 1994 to 1999.
+This support has been renewed through a new five year grant (2001-2005)
+to Caress at the <A HREF="http://www.mbari.org">Monterey Bay Aquarium Research
+Institute</A> (MBARI) and to Chayes at Lamont. MBARI is matching the NSF
+support as part of its seafloor mapping program.</P>
 
 <P>The original NSF mandate was to create a set of generic tools which
 would work with all of the sonar data used in NSF-supported projects. Not
@@ -67,12 +70,25 @@ surprisingly, the core of the MB-System user community consists of NSF-supported
 researchers at U.S. institutions such as the Lamont-Doherty Earth Observatory,
 the Scripps Institution of Oceanography, and the Woods Hole Oceanographic
 Institution. However, MB-System has also come to be used widely in the
-international marine geological community. 
+international marine geological community. </P>
+
+<P>The MB-System source code is distributed under the <A HREF="gpl.html">GNU
+General Public License</A> as formulated by the <A HREF="http://www.gnu.org/">GNU&nbsp;Project.</A>
+MB-System installation depends on some other software packages (e.g. <A HREF="http://imina.soest.hawaii.edu/gmt/">GMT</A>
+and <A HREF="http://unidata.ucar.edu/packages/netcdf/">netCDF</A>), all
+of which are freely available as source code.</P>
+
+<P>This documention is distributed with and refers to MB-System release
+5.0.beta0.</P>
+
+<P>
 <HR></P>
 
 <CENTER><DT><B><FONT SIZE=+1>Information About MB-System:</FONT></B></DT></CENTER>
 
 <UL>
+<LI><A HREF="mbsystem_whatsnew.html">What's new in MB-System version 5</A></LI>
+
 <LI><A HREF="mbsystem_capabilities.html">Short list of capabilities</A></LI>
 
 <LI><A HREF="mbsystem_man_list.html">List of MB-System programs and links
@@ -83,6 +99,8 @@ to manual pages</A></LI>
 <LI><A HREF="mbsystem_how_to_get.html">How to get and install MB-System</A></LI>
 
 <LI><A HREF="mbsystem_faq.html">Frequently Asked Questions (and answers)</A></LI>
+
+<LI><A HREF="mbsystem_future.html">Future MB-System development plans</A></LI>
 
 <LI><A HREF="mbsystem_copyright.html">Copyright and Caveat</A></LI>
 </UL>
@@ -96,7 +114,7 @@ to manual pages</A></LI>
 
 <CENTER><DT><B><FONT SIZE=+1>&nbsp;</FONT></B></DT></CENTER>
 
-<CENTER><DD><IMG SRC="caress.gif" HEIGHT=126 WIDTH=109 ALIGN=LEFT></DD></CENTER>
+<CENTER><DD><IMG SRC="caress2001.gif" HEIGHT=146 WIDTH=108 ALIGN=LEFT></DD></CENTER>
 
 <DD><B><A HREF="http://www.mbari.org/~caress">David W. Caress</A></B></DD>
 
@@ -129,7 +147,7 @@ to manual pages</A></LI>
 
 <TR>
 <TD>
-<DD>P.O. Box 628</DD>
+<DD>7700 Sandholdt Road</DD>
 </TD>
 
 <TD>
@@ -183,7 +201,7 @@ of <A HREF="http://www.columbia.edu">Columbia University</A></DD>
 
 <CENTER><P>&nbsp; </P></CENTER>
 
-<CENTER><P>Last Updated: $Date: 2001-01-22 08:13:38 $ $Revision: 5.0 $
+<CENTER><P>Last Updated: $Date: 2001-03-23 01:49:16 $ $Revision: 5.1 $
 </P></CENTER>
 
 <P>
