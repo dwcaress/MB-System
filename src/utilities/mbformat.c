@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 4.3 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbformat.c,v 4.4 1995-04-12 16:25:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/10/21  13:02:31  caress
  * Release V4.0
  *
@@ -56,10 +59,10 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 4.3 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 4.4 1995-04-12 16:25:54 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the multibeam data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
-	static char usage_message[] = "mbformat [-Fformat -V -H]";
+	static char usage_message[] = "mbformat [-A -Fformat -L -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -73,6 +76,8 @@ char **argv;
 	int	format;
 	int	format_num;
 	char	*message;
+	int	list_all;
+	int	list_simple;
 	int	i;
 
 	char	*getenv();
@@ -80,11 +85,25 @@ char **argv;
 	help = 0;
 	verbose = 0;
 	format = 0;
+	list_all = MB_NO;
+	list_simple = MB_NO;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:")) != -1)
+	while ((c = getopt(argc, argv, "AaF:f:HhLlVv")) != -1)
 	  switch (c) 
 		{
+		case 'A':
+		case 'a':
+			list_all = MB_YES;
+			break;
+		case 'F':
+		case 'f':
+			sscanf (optarg,"%d", &format);
+			break;
+		case 'L':
+		case 'l':
+			list_simple = MB_YES;
+			break;
 		case 'H':
 		case 'h':
 			help++;
@@ -92,10 +111,6 @@ char **argv;
 		case 'V':
 		case 'v':
 			verbose++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf (optarg,"%d", &format);
 			break;
 		case '?':
 			errflg++;
@@ -144,7 +159,7 @@ char **argv;
 		printf("\nMBIO data format id: %d\n",format);
 		printf("%s",message);
 		}
-	else
+	else if (list_simple == MB_NO)
 		{
 		printf("\nSupported MBIO Formats:\n");
 		for (i=1;i<=MB_FORMATS;i++)
@@ -157,15 +172,29 @@ char **argv;
 				printf("%s",message);
 				}
 			}
-		printf("\n\nUnsupported MBIO Formats which will be supported someday:\n");
+		if (list_all == MB_YES)
+			{
+			printf("\n\nUnsupported MBIO Formats which will be supported someday:\n");
+			for (i=1;i<=MB_FORMATS;i++)
+				{
+				if (supported_format_table[i] == MB_NO)
+					{
+					status = mb_format_inf(verbose,i,&message);
+					printf("\nMBIO Data Format ID:  %d\n",
+						format_table[i]);
+					printf("%s",message);
+					}
+				}
+			}
+		}
+	else 
+		{
 		for (i=1;i<=MB_FORMATS;i++)
 			{
-			if (supported_format_table[i] == MB_NO)
+			if (supported_format_table[i] == MB_YES
+				|| list_all == MB_YES)
 				{
-				status = mb_format_inf(verbose,i,&message);
-				printf("\nMBIO Data Format ID:  %d\n",
-					format_table[i]);
-				printf("%s",message);
+				printf("%d\n",format_table[i]);
 				}
 			}
 		}

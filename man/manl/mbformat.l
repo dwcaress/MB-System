@@ -7,12 +7,13 @@ supported by the \fBMBIO\fP library.
 Version 4.2
 
 .SH SYNOPSIS
-\fBmbformat\fP [\fB-F\fIformat \fB-V -H\fP]
+\fBmbformat\fP [\fB -A -F\fIformat \fB -L -V -H\fP]
 
 .SH DESCRIPTION
 \fBmbformat\fP is an utility which identifies the multibeam data formats
 associated with \fBmbio\fP format id's.  If no format id is specified,
 \fBmbformat\fP lists all of the currently supported formats.
+By default, the listing includes a brief description of each format.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -25,6 +26,11 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
+.B \fB-A\fP
+Causes formats which are expected to be supported
+in the future to be
+listed in addition to the formats which are fully supported.
+.TP
 .B \fB-F\fIformat\fP
 Sets the format id to be listed.  If no format is given, all of the 
 currently supported formats will be listed. A list of the multibeam data formats
@@ -34,6 +40,10 @@ is given in the \fBMBIO\fP manual page.
 .B \fB-H\fP
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
+.TP
+.B \fB-L\fP
+Causes the format descriptions to be omitted 
+so that only the \fBMBIO\fP format id numbers are listed.
 .TP
 .B \fB-V\fP
 Normally, \fBmbformat\fP only prints out format descriptions.  If the
