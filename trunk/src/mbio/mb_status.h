@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.11 2001-10-19 19:41:09 caress Exp $
+ *    $Id: mb_status.h,v 5.12 2001-11-06 22:29:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2001/10/19  19:41:09  caress
+ * Now uses relative paths.
+ *
  * Revision 5.10  2001/10/12  21:10:41  caress
  * Added interpolation of attitude data.
  *
@@ -144,8 +147,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.0.beta08"
-#define	MB_BUILD_DATE	"September 19, 2001"
+#define	MB_VERSION	"5.0.beta09"
+#define	MB_BUILD_DATE	"November 6, 2001"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
