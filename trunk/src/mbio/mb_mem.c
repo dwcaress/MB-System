@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.6 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_mem.c,v 5.7 2004-12-18 01:34:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.5  2003/04/16 16:47:41  caress
  * Release 5.0.beta30
  *
@@ -112,8 +115,12 @@
 static int	n_mb_alloc = 0;
 static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static size_t	mb_alloc_size[MB_MEMORY_HEAP_MAX];
+static int	mb_alloc_overflow = MB_NO;
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
+/* Local debug define */
+/* #define MB_MEM_DEBUG 1 */
+
+static char rcs_id[]="$Id: mb_mem.c,v 5.7 2004-12-18 01:34:43 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, size_t size, void **ptr, int *error)
@@ -166,11 +173,21 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 		}
 
 	/* add to list if size > 0 */
-	if (n_mb_alloc < MB_MEMORY_HEAP_MAX && size > 0)
+	if (size > 0)
 		{
-		mb_alloc_ptr[n_mb_alloc] = *ptr;
-		mb_alloc_size[n_mb_alloc] = size;
-		n_mb_alloc++;
+		if (n_mb_alloc < MB_MEMORY_HEAP_MAX)
+			{
+			mb_alloc_ptr[n_mb_alloc] = *ptr;
+			mb_alloc_size[n_mb_alloc] = size;
+			n_mb_alloc++;
+			}
+		else
+			{
+			mb_alloc_overflow = MB_YES;
+#ifdef MB_MEM_DEBUG
+		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
+#endif		
+			}
 		}
 
 	/* print debug statements */
@@ -267,13 +284,23 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		}
 	    }
     
-	/* else add to list if possible */
+	/* else add to list if possible if size > 0 */
 	else if (status == MB_SUCCESS
-	    && n_mb_alloc < MB_MEMORY_HEAP_MAX && size > 0)
+	    && size > 0)
 	    {
-	    mb_alloc_ptr[n_mb_alloc] = *ptr;
-	    mb_alloc_size[n_mb_alloc] = size;
-	    n_mb_alloc++;
+	    if (n_mb_alloc < MB_MEMORY_HEAP_MAX)
+		{
+		mb_alloc_ptr[n_mb_alloc] = *ptr;
+		mb_alloc_size[n_mb_alloc] = size;
+		n_mb_alloc++;
+		}
+	    else
+		{
+		mb_alloc_overflow = MB_YES;
+#ifdef MB_MEM_DEBUG
+		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
+#endif		
+		}
 	    }
 
 	/* print debug statements */
@@ -352,6 +379,18 @@ int mb_free(int verbose, void **ptr, int *error)
 			}
 		n_mb_alloc--;
 
+		/* free the memory */
+		free(*ptr);
+		*ptr = NULL;
+		}
+
+	/* else deallocate the memory if pointer is non-null and
+		heap overflow has occurred */
+	else if (mb_alloc_overflow == MB_YES && *ptr != NULL)
+		{
+#ifdef MB_MEM_DEBUG
+		fprintf(stderr,"NOTICE: mbm_mem overflow pointer freed %d in function %s\n",*ptr, function_name);
+#endif		
 		/* free the memory */
 		free(*ptr);
 		*ptr = NULL;

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvnavusbl.c	11/21/2004
  *
- *    $Id: mbauvnavusbl.c,v 5.0 2004-12-02 06:41:47 caress Exp $
+ *    $Id: mbauvnavusbl.c,v 5.1 2004-12-18 01:38:52 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	November 21, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/12/02 06:41:47  caress
+ * New program to help process ROV/AUV navigation data.
+ *
  *
  *
  */
@@ -48,7 +51,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.0 2004-12-02 06:41:47 caress Exp $";
+	static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.1 2004-12-18 01:38:52 caress Exp $";
 	static char program_name[] = "MBauvnavusbl";
 	static char help_message[] = "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n swath survey) and also reads secondary navigation (e.g. USBL fixes).\n The program calculates position offsets between the raw survey navigation\n and the secondary navigation every 3600 seconds (10 minutes), and then\n linearly interpolates and applies this adjustment vector for each\n primary navigation position. The adjusted navigation is output.";
 	static char usage_message[] = "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
@@ -101,6 +104,7 @@ main (int argc, char **argv)
 	char	date[25], user[128], *user_ptr, host[128];
 	
 	/* navigation handling variables */
+	int	useaverage = MB_NO;
 	double	tieinterval = 600.0;
 	int	nnav;
 	double	*ntime = NULL;
@@ -128,6 +132,8 @@ main (int argc, char **argv)
 	double	*tlat = NULL;
 	double	*theading = NULL;
 	double	*tsonardepth = NULL;
+	double	loncoravg;
+	double	latcoravg;
 	
 	int	nav_ok;
 	int	nstime_i[7], nftime_i[7];
@@ -158,7 +164,7 @@ main (int argc, char **argv)
 	strcpy (ufile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -168,6 +174,11 @@ main (int argc, char **argv)
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'A':
+		case 'a':
+			useaverage = MB_YES;
+			flag++;
 			break;
 		case 'F':
 		case 'f':
@@ -236,6 +247,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       usbl file:       %s\n",ufile);
 		fprintf(stderr,"dbg2       nav format:      %d\n",navformat);
 		fprintf(stderr,"dbg2       usbl format:     %d\n",usblformat);
+		fprintf(stderr,"dbg2       useaverage:      %d\n",useaverage);
 		}
 
 	/* if help desired then print it and exit */
@@ -560,6 +572,8 @@ main (int argc, char **argv)
 
 	/* now loop over nav data getting ties every tieinterval fixes */
 	ntie = 0;
+	loncoravg = 0.0;
+	latcoravg = 0.0;
 	for (i=0;i<nnav;i++)
 		{
 		if (ntie == 0 
@@ -596,12 +610,25 @@ main (int argc, char **argv)
 				theading[ntie] -= 360.0;
 			tsonardepth[ntie] = sonardepth - nsonardepth[i];
 			ntie++;
+			
+			/* get averages */
+			loncoravg += tlon[ntie-1];
+			latcoravg += tlat[ntie-1];
 			}
 		}
+
+	/* get averages */
+	if (ntie > 0)
+		{
+		loncoravg /= ntie;
+		latcoravg /= ntie;
+		}
+	
 fprintf(stderr,"\nCalculated %d adjustment points:\n",ntie);
 for (i=0;i<ntie;i++)
 fprintf(stderr,"time:%f lon:%f lat:%f heading:%f sonardepth:%f\n",
 ttime[i],tlon[i],tlat[i],theading[i],tsonardepth[i]);
+fprintf(stderr,"Average lon:%f lat:%f\n",loncoravg,latcoravg);
 
 	/* open output file */
 	if ((fp = fopen(ofile, "w")) == NULL) 
@@ -617,19 +644,31 @@ ttime[i],tlon[i],tlat[i],theading[i],tsonardepth[i]);
 	/* now loop over nav data applying adjustments */
 	for (i=0;i<nnav;i++)
 		{
-		/* get adjustment by interpolation */
-		intstat = mb_linear_interp(verbose, 
-				ttime-1, tlon-1,
-				ntie, ntime[i], &navlon, &j, 
-				&error);
-		intstat = mb_linear_interp(verbose, 
-				ttime-1, tlat-1,
-				ntie, ntime[i], &navlat, &j, 
-				&error);
-				
-		/* apply adjustment */
-		nlon[i] += navlon;
-		nlat[i] += navlat;
+		/* interpolate adjustment */
+		if (useaverage == MB_NO)
+			{
+			/* get adjustment by interpolation */
+			intstat = mb_linear_interp(verbose, 
+					ttime-1, tlon-1,
+					ntie, ntime[i], &navlon, &j, 
+					&error);
+			intstat = mb_linear_interp(verbose, 
+					ttime-1, tlat-1,
+					ntie, ntime[i], &navlat, &j, 
+					&error);
+
+			/* apply adjustment */
+			nlon[i] += navlon;
+			nlat[i] += navlat;
+			}
+		
+		/* else use average adjustments */
+		else
+			{
+			/* apply adjustment */
+			nlon[i] += loncoravg;
+			nlat[i] += latcoravg;
+			}
 		
 		/* write out the adjusted navigation */
 		mb_get_date(verbose,ntime[i],time_i);

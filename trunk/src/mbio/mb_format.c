@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.33 2004-12-02 06:33:29 caress Exp $
+ *    $Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2002, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.33  2004/12/02 06:33:29  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.32  2004/11/06 03:55:15  caress
  * Working to support the Reson 7k format.
  *
@@ -201,7 +204,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.33 2004-12-02 06:33:29 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1430,7 +1433,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.33 2004-12-02 06:33:29 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1500,7 +1503,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.33 2004-12-02 06:33:29 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1569,7 +1572,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.33 2004-12-02 06:33:29 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1635,7 +1638,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.33 2004-12-02 06:33:29 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1708,7 +1711,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.33 2004-12-02 06:33:29 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1779,7 +1782,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.33 2004-12-02 06:33:29 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -3119,13 +3122,14 @@ int mb_datalist_read(int verbose,
 /*--------------------------------------------------------------------*/
 int mb_get_relative_path(int verbose,
 		char *path,
-		char *pwd,
+		char *ipwd,
 		int *error)
 {
 	/* local variables */
 	char	*function_name = "mb_get_relative_path";
 	int	status = MB_SUCCESS;
 	char	relativepath[MB_PATH_MAXLINE];
+	char	pwd[MB_PATH_MAXLINE];
 	int	pathlen;
 	int	pwdlen;
 	int	same, isame, ndiff;
@@ -3139,22 +3143,60 @@ int mb_get_relative_path(int verbose,
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
-		fprintf(stderr,"dbg2       pwd:           %s\n",pwd);
+		fprintf(stderr,"dbg2       ipwd:          %s\n",ipwd);
 		}
 		
 	/* get string lengths */
 	pathlen = strlen(path);
-	pwdlen = strlen(pwd);
+	pwdlen = strlen(ipwd);
 
 	/* if path doesn't start with '/' not an absolute path */
-	if (pathlen > 0 && path[0] != '/')
+	if (pathlen > 0 && path[0] != '/' )
 	    {
-	    status = MB_SUCCESS;
-	    *error = MB_ERROR_NO_ERROR;
+	    strncpy(relativepath,path,MB_PATH_MAXLINE);
+	    getcwd(path, MB_PATH_MAXLINE);
+	    if (strlen(path) + pathlen + 1 >= MB_PATH_MAXLINE)
+	        {
+	        strcpy(path,relativepath);
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_PARAMETER;
+		}
+	    else
+	        {
+		strcat(path,"/");
+		   strcat(path,relativepath);
+		} 
 	    }
-	    
-	/* else try to get best relative path */
-	else if (pathlen > 0 && pwdlen > 0)
+
+	/* if path doesn't start with '/' not an absolute path */
+	if (pwdlen == 0)
+	     pwd[0] = '\0';
+	else if (ipwd[0] == '/' )
+	     strncpy(pwd,ipwd,MB_PATH_MAXLINE);
+	else
+	    {
+	    getcwd(pwd, MB_PATH_MAXLINE);
+	    if (strlen(pwd) + pwdlen + 1 >= MB_PATH_MAXLINE)
+	        {
+	        strncpy(pwd,ipwd,MB_PATH_MAXLINE);
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_PARAMETER;
+		}
+	    else
+	        {
+		strcat(pwd,"/");
+		strcat(pwd,ipwd);
+		} 
+	    }
+
+	mb_get_shortest_path(verbose,path,error);
+	mb_get_shortest_path(verbose,pwd,error);
+	
+	pathlen = strlen(path);
+	pwdlen = strlen(pwd);
+
+	/* try to get best relative path */
+	if (pathlen > 0 && pwdlen > 0)
 	    {
 	    /* look for last identical slash-terminated section */
 	    same = MB_YES;
@@ -3327,3 +3369,63 @@ int mb_get_shortest_path(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+
+int mb_get_basename(int verbose,
+		char *path,
+		int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_get_basename";
+	int	status = MB_SUCCESS;
+	char	tmppath[MB_PATH_MAXLINE];
+	char	*result;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       path:          %s\n",path);
+		}
+		
+	/* copy the path */
+	strncpy(tmppath, path, MB_PATH_MAXLINE);
+
+	/* return everything after the last '/' */
+	result = strrchr(tmppath,'/');
+	if (result != NULL  && strlen(result) > 1)
+		strcpy(path,&result[1]);
+		
+	/* remove .fbt suffix if present */
+	if (strlen(path) > 4)
+		{
+		i = strlen(path) - 4;
+		if ((result = strstr(&path[i],".fbt")) != NULL)
+			{
+			path[i] = '\0';
+			}
+		}
+	  
+	/* no error even if no path */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       path:          %s\n",path);
+		fprintf(stderr,"dbg2       error:         %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+

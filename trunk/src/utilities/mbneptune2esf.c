@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
- *    $Id: mbneptune2esf.c,v 5.0 2004-12-02 06:40:49 caress Exp $
+ *    $Id: mbneptune2esf.c,v 5.1 2004-12-18 01:38:52 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    Gordon Keith
@@ -46,6 +46,9 @@
  * This program is based on a skeleton derived from mbclean.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/12/02 06:40:49  caress
+ * New program submitted by Gordon Keith.
+ *
  *
  */
 
@@ -134,7 +137,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.0 2004-12-02 06:40:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.1 2004-12-18 01:38:52 caress Exp $";
 	static char program_name[] = "mbneptune2esf";
 	static char help_message[] =  "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand applies the flags in the rules file to the esf file of the coresponding line";
 	static char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
@@ -488,7 +491,12 @@ main (int argc, char **argv)
 					    if (MB_SUCCESS == status)
 					      status = find_ping(verbose,ping_no,&(line->pings),MB_YES,&ping,&error);
 					    
-					    beam = NULL;
+                                            beam = ping->beams;
+                                            if (NULL != beam)
+					      {
+                                              while (NULL != beam->next)
+                                                beam = beam->next;
+					      }
 					    if (MB_SUCCESS == status)
 					      for (k = 0; k < nbeams; k++) 
 						{
@@ -812,7 +820,7 @@ main (int argc, char **argv)
 	ping_no = sim_ping ->png_count;
 	
 	/* if ping in rules get it and flag beams */
-	if (MB_SUCCESS == find_ping(verbose,ping_no,&line->pings,MB_NO,&ping,error)) {
+	if (MB_SUCCESS == find_ping(verbose,ping_no,&line->pings,MB_NO,&ping,&error)) {
 	  beam = ping->beams;
 	  while (NULL != beam) {
 	    beam_no = beam->beam;

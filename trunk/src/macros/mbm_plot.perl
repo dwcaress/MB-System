@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.15 2004-09-16 22:43:32 caress Exp $
+#    $Id: mbm_plot.perl,v 5.16 2004-12-18 01:31:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.15 2004-09-16 22:43:32 caress Exp $
+#   $Id: mbm_plot.perl,v 5.16 2004-12-18 01:31:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.15  2004/09/16 22:43:32  caress
+#   Fixed bug using -MME option.
+#
 #   Revision 5.14  2004/09/16 19:11:48  caress
 #   Supports postscript viewer ggv.
 #
@@ -446,9 +449,9 @@ if ($help)
 	print "specified swath sonar data. The plot may include bathymetry color \n";
 	print "fill (-G1), bathymetry color shaded relief (-G2), bathymetry \n";
 	print "shaded with amplitudes (-G3), greyshade fill amplitude (-G4), \n";
-	print "greyshade fill sidescan (-G5), contoured bathymetry (-C),\n";
-	print "or annotated navigation. The plot may also include text\n";
-	print "labels and xy data in lines or symbols. Five different color \n";
+	print "greyshade fill sidescan (-G5), contoured bathymetry (-C), or\n";
+	print "annotated navigation. The plot may also include navigation tracks,\n";
+	print "text labels and xy data in lines or symbols. Five different color \n";
 	print "schemes are included. The plot will be scaled to fit on \n";
 	print "the specified page size or, if the scale is user defined, \n";
 	print "the page size will be chosen in accordance with the plot \n";
@@ -463,7 +466,7 @@ if ($help)
 	print "\t$program_name -Fformat -Ifile [-Amagnitude[/azimuth | zero_level]\n";
 	print "\t\t-C[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\n";
 	print "\t\t-Gcolor_mode -H\n";
-	print "\t\t-N[time_tick/time_annot/date_annot/time_tick_len]\n";
+	print "\t\t-N[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F]\n";
 	print "\t\t-Oroot -Ppagesize -S[color/shade] -T -Uorientation -V \n";
 	print "\t\t-Wcolor_style[/pallette] ]\n";
 	print "Additional Options:\n";
@@ -849,9 +852,25 @@ if ($navigation_control && $navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
 	{
 	$navigation_mode = 1;
 	}
+elsif ($navigation_control && ($navigation_control =~ /F/ 
+				|| $navigation_control =~ /f/))
+	{
+	$navigation_mode = 1;
+	$name_mode = 1;
+	$navigation_control = "0.25/1/4/0.15";
+	$nav_name_hgt = "0.15";
+	}
 elsif ($navigation_control)
 	{
-	if ($navigation_control =~ /\S+\/\S+\/\S+/)
+	if ($navigation_control =~ /\S+\/\S+\/\S+\/\S+\/\S+/)
+		{
+		$navigation_mode = 1;
+		$name_mode = 1;
+		($nav_time_tick, $nav_time_annot, 
+				$nav_date_annot, $nav_tick_size, $nav_name_hgt) 
+				= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($navigation_control =~ /\S+\/\S+\/\S+/)
 		{
 		($nav_time_tick, $nav_time_annot, 
 			$nav_date_annot) 
@@ -2343,6 +2362,10 @@ if ($contour_mode || $navigation_mode)
 		{
 		printf FCMD "-D$navigation_control \\\n\t";
 		}
+	if ($name_mode)
+		{
+		printf FCMD "-G$nav_name_hgt \\\n\t";
+		}
 	if ($mb_btime)
 		{
 		printf FCMD "-b$mb_btime \\\n\t";
@@ -2781,6 +2804,10 @@ if ($verbose)
 	if ($navigation_mode)
 		{
 		print "    Navigation control:       $navigation_control\n";
+		}
+	if ($name_mode)
+		{
+		print "    Name annotation height:   $nav_name_hgt\n";
 		}
 	if ($color_mode)
 		{

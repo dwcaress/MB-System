@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.12 2004-10-06 18:56:11 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.13 2004-12-18 01:31:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.12 2004-10-06 18:56:11 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.13 2004-12-18 01:31:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.12  2004/10/06 18:56:11  caress
+#   Release 5.0.5 update.
+#
 #   Revision 5.11  2004/09/16 19:11:48  caress
 #   Supports postscript viewer ggv.
 #
@@ -2017,7 +2020,7 @@ if ($contour_mode)
 	printf FCMD "-C$contour_control \\\n\t";
 	if (!$contour_pen)
 		{
-		$contour_pen = "-Wc1p";
+		$contour_pen = "c1p";
 		}
 	printf FCMD "-L$zmin/$zmax -W$contour_pen\\\n\t";
 	if ($contour_anot_int)
@@ -2173,7 +2176,7 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 			}
 		else
 			{
-			printf FCMD "-M$xysegchars[$i] \\\n\t";
+			printf FCMD "-M\'$xysegchars[$i]\' \\\n\t";
 			}
 		}
 	if ($xypens[$i] ne "N")

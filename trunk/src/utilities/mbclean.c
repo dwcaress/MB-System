@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.9 2004-12-02 06:39:28 caress Exp $
+ *    $Id: mbclean.c,v 5.10 2004-12-18 01:38:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -238,10 +238,10 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.9 2004-12-02 06:39:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.10 2004-12-18 01:38:52 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
-	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
+	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Sspike_slope/mode/format -Xzap_beams \n\t-V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -306,6 +306,7 @@ main (int argc, char **argv)
 	int	nrailtot = 0;
 	int	nmintot = 0;
 	int	nbadtot = 0;
+	int	nspiketot = 0;
 	int	nflagtot = 0;
 	int	nunflagtot = 0;
 	int	nzerotot = 0;
@@ -320,6 +321,7 @@ main (int argc, char **argv)
 	int	nrail = 0;
 	int	nmin = 0;
 	int	nbad = 0;
+	int	nspike = 0;
 	int	nflag = 0;
 	int	nunflag = 0;
 	int	nzero = 0;
@@ -329,6 +331,10 @@ main (int argc, char **argv)
 	char	comment[256];
 	int	check_slope = MB_NO;
 	double	slopemax = 1.0;
+	int	check_spike = MB_NO;
+	double	spikemax = 1.0;
+	int	spike_mode = 1;
+	int	slope_form = 0;
 	double	distancemin = 0.01;
 	double	distancemax = 0.25;
 	int	mode = MBCLEAN_FLAG_ONE;
@@ -371,7 +377,9 @@ main (int argc, char **argv)
 	double	*list = NULL;
 	double	median = 0.0;
 	double	dd;
+	double	dd2;
 	double	slope;
+	double	slope2;
 
 	/* save file control variables */
 	int	esffile_open = MB_NO;
@@ -412,7 +420,7 @@ main (int argc, char **argv)
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:QqU:u:X:x:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:QqS:s:U:u:X:x:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -437,8 +445,13 @@ main (int argc, char **argv)
 			break;
 		case 'C':
 		case 'c':
-			sscanf (optarg,"%lf", &slopemax);
+			slope_form = 0;
+			sscanf (optarg,"%lf/%d", &slopemax, &slope_form);
 			check_slope = MB_YES;
+			if (2 == slope_form)
+			  slopemax = tan(DTR * slopemax);
+			if (1 == slope_form)
+			  slopemax = tan(slopemax);
 			flag++;
 			break;
 		case 'D':
@@ -477,6 +490,17 @@ main (int argc, char **argv)
 			zap_rails = MB_YES;
 			flag++;
 			break;
+		case 'S':
+		case 's':
+			slope_form = 0;
+			sscanf (optarg,"%lf/%d/%d", &spikemax, &spike_mode, &slope_form);
+			check_spike = MB_YES;
+			if (2 == slope_form)
+			  spikemax = tan(DTR * spikemax);
+			if (1 == slope_form)
+			  spikemax = tan(spikemax);
+			flag++;
+			break;
 		case 'U':
 		case 'u':
 			sscanf (optarg,"%d", &num_good_min);
@@ -506,6 +530,7 @@ main (int argc, char **argv)
 	if (check_slope == MB_NO
 		&& zap_beams == 0
 		&& zap_rails == MB_NO
+		&& check_spike == MB_NO
 		&& check_range == MB_NO
 		&& check_fraction == MB_NO
 		&& check_deviation == MB_NO
@@ -558,6 +583,9 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       zap_rails:      %d\n",zap_rails);
 		fprintf(stderr,"dbg2       check_slope:    %d\n",check_slope);
 		fprintf(stderr,"dbg2       maximum slope:  %f\n",slopemax);
+		fprintf(stderr,"dbg2       check_spike:    %d\n",check_spike);
+		fprintf(stderr,"dbg2       maximum spike:  %f\n",spikemax);
+		fprintf(stderr,"dbg2       spike mode:     %f\n",spike_mode);
 		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemin);
 		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemax);
 		fprintf(stderr,"dbg2       check_range:    %d\n",check_range);
@@ -635,8 +663,8 @@ main (int argc, char **argv)
 		for the specified data format */
 	if (beam_flagging == MB_NO && mode <= 2)
 		{
-		fprintf(stderr,"\nMBIO format %d does not support flagging of bad data (specified by cleaning mode %d).\n",format,mode);
-		fprintf(stderr,"\nCopy the data to another format or set the cleaning mode to null \nbad soundings (-M3 or -M4).\n");
+		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data \nas negative numbers (specified by cleaning mode %d).\n",format,mode);
+		fprintf(stderr,"\nCopy the data to another format or set the cleaning mode to zero \nbad data values (-M3 or -M4).\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -670,6 +698,7 @@ main (int argc, char **argv)
 	nrail = 0;
 	nmin = 0;
 	nbad = 0;
+	nspike = 0;
 	nflag = 0;
 	nunflag = 0;
 	nzero = 0;
@@ -802,6 +831,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2    ndeviation: %d\n",ndeviation);
 		fprintf(stderr,"dbg2    nrail:      %d\n",nrail);
 		fprintf(stderr,"dbg2    nbad:       %d\n",nbad);
+		fprintf(stderr,"dbg2    npike;      %d\n",nspike);
 		fprintf(stderr,"dbg2    nflag:      %d\n",nflag);
 		fprintf(stderr,"dbg2    nunflag:    %d\n",nunflag);
 		fprintf(stderr,"dbg2    nzero:      %d\n",nzero);
@@ -1097,6 +1127,7 @@ main (int argc, char **argv)
 		/* do tests that require looping over all available beams */
 		if (check_fraction == MB_YES 
 		    || check_deviation == MB_YES
+		    || check_spike == MB_YES
 		    || check_slope == MB_YES)
 		    {
 		    for (i=0;i<ping[irec].beams_bath;i++)
@@ -1207,6 +1238,147 @@ main (int argc, char **argv)
 					mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
 					}
 				    }
+				}
+
+			    /* check spikes - acrosstrack */
+			    if (check_spike == MB_YES
+				&& 0 != (spike_mode & 1)
+				&& median > 0.0
+				&& i > 0
+				&& i < ping[irec].beams_bath -1
+				&& mb_beam_ok(ping[irec].beamflag[i-1])
+				&& mb_beam_ok(ping[irec].beamflag[i+1]))
+				{
+				dd = sqrt((ping[irec].bathx[i-1] 
+					- ping[irec].bathx[i])
+					*(ping[irec].bathx[i-1] 
+					- ping[irec].bathx[i])
+					+ (ping[irec].bathy[i-1] 
+					- ping[irec].bathy[i])
+					*(ping[irec].bathy[i-1] 
+					- ping[irec].bathy[i]));
+				if (dd > distancemin * median && dd <= distancemax * median)
+					{
+					slope = (ping[irec].bath[i-1] 
+						- ping[irec].bath[i])/dd;
+					dd2 = sqrt((ping[irec].bathx[i+1] 
+						- ping[irec].bathx[i])
+						*(ping[irec].bathx[i+1] 
+						- ping[irec].bathx[i])
+						+ (ping[irec].bathy[i+1] 
+						- ping[irec].bathy[i])
+						*(ping[irec].bathy[i+1] 
+						- ping[irec].bathy[i]));
+					if (dd2 > distancemin * median && dd2 <= distancemax * median)
+						{
+						slope2 = (ping[irec].bath[i] 
+							- ping[irec].bath[i+1])/dd2;
+						if ((slope > spikemax && slope2 < -spikemax) ||
+						    (slope2 > spikemax && slope < -spikemax))
+						  {
+						    nspike++;
+						    nflag++;
+						    if (mode == MBCLEAN_FLAG_ONE
+							|| mode == MBCLEAN_FLAG_BOTH)
+						      {
+							ping[irec].beamflag[i] 
+							  = MB_FLAG_FLAG + MB_FLAG_FILTER;
+							mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+						      }
+						    else if (mode == MBCLEAN_ZERO_ONE
+							|| mode == MBCLEAN_ZERO_BOTH)
+						      {
+							ping[irec].beamflag[i] = MB_FLAG_NULL;
+							mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+						      }
+						    if (verbose >= 1)
+						      {
+							if (verbose >= 2)
+							  fprintf(stderr,"\n");
+							fprintf(stderr,"s: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f %6.2f %6.2f %6.2f %6.2f\n",
+								ping[irec].time_i[0],
+								ping[irec].time_i[1],
+								ping[irec].time_i[2],
+								ping[irec].time_i[3],
+								ping[irec].time_i[4],
+								ping[irec].time_i[5],
+								ping[irec].time_i[6],
+								i,ping[irec].bath[i],median,slope,slope2,dd,dd2);
+						      }
+
+						  }
+						}
+					}
+				}
+
+			    /* check spikes - alongtrack */
+			    if (check_spike == MB_YES
+				&& nrec == 3
+				&& 0 != (spike_mode & 2)
+				&& mb_beam_ok(ping[0].beamflag[i])
+				&& mb_beam_ok(ping[2].beamflag[i]))
+				{
+				dd = sqrt((ping[0].bathx[i] 
+					- ping[1].bathx[i])
+					*(ping[0].bathx[i] 
+					- ping[1].bathx[i])
+					+ (ping[0].bathy[i] 
+					- ping[1].bathy[i])
+					*(ping[0].bathy[i] 
+					- ping[1].bathy[i]));
+				if (dd > distancemin * median && dd <= distancemax * median)
+					{
+					slope = (ping[0].bath[i] 
+						- ping[1].bath[i])/dd;
+					dd2 = sqrt((ping[2].bathx[i] 
+						- ping[1].bathx[i])
+						*(ping[2].bathx[i] 
+						- ping[1].bathx[i])
+						+ (ping[2].bathy[i] 
+						- ping[1].bathy[i])
+						*(ping[2].bathy[i] 
+						- ping[1].bathy[i]));
+					if (dd2 > distancemin * median && dd2 <= distancemax * median)
+						{
+						slope2 = (ping[1].bath[i] 
+							- ping[2].bath[i])/dd2;
+						if ((slope > spikemax && slope2 < -spikemax) ||
+						    (slope2 > spikemax && slope < -spikemax))
+						  {
+						    nspike++;
+						    nflag++;
+						    if (mode == MBCLEAN_FLAG_ONE
+							|| mode == MBCLEAN_FLAG_BOTH)
+						      {
+							ping[1].beamflag[i] 
+							  = MB_FLAG_FLAG + MB_FLAG_FILTER;
+							mb_ess_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_FILTER, &error);
+						      }
+						    else if (mode == MBCLEAN_ZERO_ONE
+							|| mode == MBCLEAN_ZERO_BOTH)
+						      {
+							ping[1].beamflag[i] = MB_FLAG_NULL;
+							mb_ess_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_ZERO, &error);
+						      }
+						    if (verbose >= 1)
+						      {
+							if (verbose >= 2)
+							  fprintf(stderr,"\n");
+							fprintf(stderr,"s: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f %6.2f %6.2f %6.2f %6.2f\n",
+								ping[1].time_i[0],
+								ping[1].time_i[1],
+								ping[1].time_i[2],
+								ping[1].time_i[3],
+								ping[1].time_i[4],
+								ping[1].time_i[5],
+								ping[1].time_i[6],
+								i,ping[1].bath[i],median,slope,slope2,dd,dd2);
+						      }
+
+						  }
+						}
+					}
+
 				}
 
 			    /* check slopes - loop over each of the beams in the current ping */
@@ -1617,6 +1789,7 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 	nrailtot += nrail;
 	nmintot += nmin;
 	nbadtot += nbad;
+	nspiketot += nspike;
 	nflagtot += nflag;
 	nunflagtot += nunflag;
 	nzerotot += nzero;
@@ -1638,6 +1811,7 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 		fprintf(stderr,"%d beams exceed acceptable deviation from median depth\n",ndeviation);
 		fprintf(stderr,"%d bad rail beams identified\n",nrail);
 		fprintf(stderr,"%d excessive slopes identified\n",nbad);
+		fprintf(stderr,"%d excessive spikes identified\n",nspike);
 		fprintf(stderr,"%d beams flagged\n",nflag);
 		fprintf(stderr,"%d beams unflagged\n",nunflag);
 		fprintf(stderr,"%d beams zeroed\n",nzero);
@@ -1679,6 +1853,7 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 		fprintf(stderr,"%d total beams out of acceptable fractional depth range\n",nfractiontot);
 		fprintf(stderr,"%d total beams exceed acceptable deviation from median depth\n",ndeviationtot);
 		fprintf(stderr,"%d total bad rail beams identified\n",nrailtot);
+		fprintf(stderr,"%d total excessive spikes identified\n",nspiketot);
 		fprintf(stderr,"%d total excessive slopes identified\n",nbadtot);
 		fprintf(stderr,"%d total beams flagged\n",nflagtot);
 		fprintf(stderr,"%d total beams unflagged\n",nunflagtot);
