@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.11 1995-09-28 18:05:43 caress Exp $
+#    $Id: mbm_plot.perl,v 4.12 1995-11-22 22:46:40 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.11 1995-09-28 18:05:43 caress Exp $
+#   $Id: mbm_plot.perl,v 4.12 1995-11-22 22:46:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.11  1995/09/28  18:05:43  caress
+# Various bug fixes working toward release 4.3.
+#
 # Revision 4.10  1995/08/17  14:52:53  caress
 # Revision for release 4.3.
 #
@@ -221,7 +224,9 @@ $ncpt = 11;
 			    "High Intensity Colors", 
 			    "Low Intensity Colors", 
 			    "Grayscale", 
-			    "Uniform Gray");
+			    "Uniform Gray",
+			    "Uniform Black",
+			    "Uniform White");
 
 # original Haxby color pallette
 #	$ncolors = 15;
@@ -254,6 +259,16 @@ $ncpt = 11;
 	@cptbr5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbg5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbb5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
+
+# color pallette 6 - Uniform Black
+	@cptbr6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+	@cptbg6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+	@cptbb6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+
+# color pallette 7 - Uniform White
+	@cptbr7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
+	@cptbg7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
+	@cptbb7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 
 # Deal with command line arguments
 $command_line = "@ARGV";
@@ -552,7 +567,7 @@ if ($color_control)
 		($color_style, $color_pallette, $ncolors) 
 			= $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
 		if ($color_pallette < 1 
-			|| $color_pallette > 5)
+			|| $color_pallette > 7)
 			{
 			$color_pallette = 1;
 			}
@@ -566,7 +581,7 @@ if ($color_control)
 		($color_style, $color_pallette) = $color_control
 			=~  /(\S+)\/(\S+)/;
 		if ($color_pallette < 1 
-			|| $color_pallette > 5)
+			|| $color_pallette > 7)
 			{
 			$color_pallette = 1;
 			}
@@ -1751,7 +1766,15 @@ if ($color_mode)
 	printf FCMD "-J$projection$projection_pars \\\n\t";
 	printf FCMD "-R$bounds_plot \\\n\t";
 	printf FCMD "-C$cptfile \\\n\t";
-	print FCMD "-p1 -A1 -Z$color_mode \\\n\t";
+	print FCMD "-p1 -Z$color_mode \\\n\t";
+	if ($swath_footprint)
+		{
+		printf FCMD "-A$swath_footprint \\\n\t";
+		}
+	else
+		{
+		printf FCMD "-A1 \\\n\t";
+		}
 	if ($color_mode == 2 || $color_mode == 3)
 		{
 		print FCMD "-G$shade_control \\\n\t";
@@ -1787,10 +1810,6 @@ if ($color_mode)
 	if ($mb_timegap)
 		{
 		printf FCMD "-T$mb_timegap \\\n\t";
-		}
-	if ($swath_footprint)
-		{
-		printf FCMD "-A$swath_footprint \\\n\t";
 		}
 	if ($swath_scale)
 		{
@@ -1916,7 +1935,7 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 	}
 
 # do psscale plot
-if ($color_mode && $color_pallette != 5)
+if ($color_mode && $color_pallette < 5)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
@@ -2776,6 +2795,7 @@ sub GetProjection {
 		$use_width = 1;
 		$separator = "";
 		}
+
 }
 #-----------------------------------------------------------------------
 sub GetBaseTick {

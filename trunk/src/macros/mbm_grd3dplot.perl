@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 4.2 1995-09-28 19:52:25 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 4.3 1995-11-22 22:46:40 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 4.2 1995-09-28 19:52:25 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.3 1995-11-22 22:46:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.2  1995/09/28  19:52:25  caress
+# Fixed handling of null plane specification.
+#
 # Revision 4.1  1995/09/28  18:05:43  caress
 # Various bug fixes working toward release 4.3.
 #
@@ -147,7 +150,9 @@ $ncpt = 11;
 			    "High Intensity Colors", 
 			    "Low Intensity Colors", 
 			    "Grayscale", 
-			    "Uniform Gray");
+			    "Uniform Gray",
+			    "Uniform Black",
+			    "Uniform White");
 
 # original Haxby color pallette
 #	$ncolors = 15;
@@ -180,6 +185,16 @@ $ncpt = 11;
 	@cptbr5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbg5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbb5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
+
+# color pallette 6 - Uniform Black
+	@cptbr6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+	@cptbg6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+	@cptbb6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+
+# color pallette 7 - Uniform White
+	@cptbr7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
+	@cptbg7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
+	@cptbb7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 
 # define degrees to radians conversion
 $PI = 3.1415926;
@@ -453,11 +468,8 @@ if ($color_control)
 		{
 		($color_style, $color_pallette, $ncolors) 
 			= $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
-		if ($color_pallette != 1 
-			&& $color_pallette != 2
-			&& $color_pallette != 3
-			&& $color_pallette != 4
-			&& $color_pallette != 5)
+		if ($color_pallette < 1 
+			|| $color_pallette > 7)
 			{
 			$color_pallette = 1;
 			}
@@ -470,11 +482,8 @@ if ($color_control)
 		{
 		($color_style, $color_pallette) = $color_control
 			=~  /(\S+)\/(\S+)/;
-		if ($color_pallette != 1 
-			&& $color_pallette != 2
-			&& $color_pallette != 3
-			&& $color_pallette != 4
-			&& $color_pallette != 5)
+		if ($color_pallette < 1 
+			|| $color_pallette > 7)
 			{
 			$color_pallette = 1;
 			}
@@ -1573,7 +1582,7 @@ if ($color_mode)
 	}
 
 # do psscale plot
-if ($color_mode && $color_mode < 5 && $color_pallette != 5)
+if ($color_mode && $color_mode < 5 && $color_pallette < 5)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
@@ -1715,7 +1724,7 @@ if ($verbose)
 		{
 		print "    Contour Plot\n";
 		}
-	if ($color_mode && $color_pallette != 5)
+	if ($color_mode && $color_pallette < 5)
 		{
 		if ($colorscale_vh eq "v")
 			{
