@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.16 1998-12-17 23:01:15 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.17 1998-12-18 01:39:32 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -44,6 +44,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1998/12/17  23:01:15  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.15  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -973,7 +976,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.16 1998-12-17 23:01:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.17 1998-12-18 01:39:32 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1107,7 +1110,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.16 1998-12-17 23:01:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.17 1998-12-18 01:39:32 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2402,6 +2405,102 @@ int	*error;
 		*roll = 0.01*ping->roll;
 		*pitch = 0.01*ping->pitch;
 		*heave = 0.01*ping->ping_heave;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
+			fprintf(stderr,"dbg4       roll:       %f\n",
+				*roll);
+			fprintf(stderr,"dbg4       pitch:      %f\n",
+				*pitch);
+			fprintf(stderr,"dbg4       heave:      %f\n",
+				*heave);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_NAV)
+		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+
+		/* get time */
+		time_i[0] = store->pos_year + 1900;
+		time_i[1] = store->pos_month;
+		time_i[2] = store->pos_day;
+		time_i[3] = store->pos_hour;
+		time_i[4] = store->pos_minute;
+		time_i[5] = store->pos_second;
+		time_i[6] = 10000*store->pos_centisecond;
+		mb_get_time(verbose,time_i,time_d);
+		*navlon = store->longitude;
+		*navlat = store->latitude;
+		if (mb_io_ptr->lonflip < 0)
+			{
+			if (*navlon > 0.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -360.)
+				*navlon = *navlon + 360.;
+			}
+		else if (mb_io_ptr->lonflip == 0)
+			{
+			if (*navlon > 180.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -180.)
+				*navlon = *navlon + 360.;
+			}
+		else
+			{
+			if (*navlon > 360.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < 0.)
+				*navlon = *navlon + 360.;
+			}
+
+		/* get heading */
+		*heading = 0.0;
+
+		/* get speed  */
+		*speed = 3.6*store->speed;
+
+		/* get roll pitch and heave */
+		*roll = 0.0;
+		*pitch = 0.0;
+		*heave = 0.0;
 
 		/* print debug statements */
 		if (verbose >= 5)
