@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.7 1994-10-21 13:02:31 caress Exp $
+ *    $Id: mblist.c,v 4.8 1994-12-21 20:22:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1994/10/21  13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.6  1994/07/29  19:02:56  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * using unix second time base.
@@ -125,7 +128,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.7 1994-10-21 13:02:31 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.8 1994-12-21 20:22:30 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -904,29 +907,29 @@ char **argv;
 					break;
 				case 'X': /* longitude */
 				case 'x':
-					if (j == beams_bath/2)
+					if (j == pixels_ss/2)
 						printf("%11.6f",navlon);
 					else
 						{
 						dlon = navlon 
 						+ headingy*mtodeglon
-							*bathacrosstrack[j]
+							*ssacrosstrack[j]
 						+ headingy*mtodeglon
-							*bathalongtrack[j];
+							*ssalongtrack[j];
 						printf("%11.6f",dlon);
 						}
 					break;
 				case 'Y': /* latitude */
 				case 'y':
-					if (j == beams_bath/2)
+					if (j == pixels_ss/2)
 						printf("%10.6f",navlat);	
 					else
 						{
 						dlat = navlat 
 						- headingx*mtodeglat
-							*bathacrosstrack[j]
+							*ssacrosstrack[j]
 						- headingx*mtodeglat
-							*bathalongtrack[j];
+							*ssalongtrack[j];
 						printf("%11.6f",dlat);
 						}
 					break;
