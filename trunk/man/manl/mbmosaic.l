@@ -1,4 +1,4 @@
-.TH mbmosaic l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbmosaic l "12 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -430,7 +430,7 @@ Then, run \fBmbmosaic\fP as follows:
  	mbmosaic -Idatalist \\
  		-R114.1333/114.7833/-32.1166/-31.55 \\
  		-A4 -E100/100/meters -N \\
- 		-Wangle_priority.dat -F0.10 -C10 \\
+ 		-Yangle_priority.dat -F0.10 -C10 \\
  		-Operth_ss -V
 
 The \fB-E\fP option specifies grid spacings of 100 meters in
@@ -444,7 +444,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 4.0 1997-04-21 17:18:47 caress Exp $
+ Version $Id: mbmosaic.l,v 4.1 1997-09-12 15:02:35 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:
@@ -602,7 +602,7 @@ The following will suffice:
  	mbmosaic -Idatalist \\
  		-R114.1333/114.7833/-32.1166/-31.55 \\
  		-A4 -E100/100/meters -N \\
- 		-Wangle_priority.dat -F0.10 -C10 \\
+ 		-Yangle_priority.dat -F0.10 -C10 \\
  		-Operth_ss -U90/2.0 -V
 
 .SH SEE ALSO
