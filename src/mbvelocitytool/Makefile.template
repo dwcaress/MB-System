@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.2 1994-10-31 20:06:09 caress Exp $
+#	$Id: Makefile.template,v 4.3 1994-11-18 18:58:19 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		September 14, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.2  1994/10/31  20:06:09  caress
+# Change man pages from section 1 to l.
+#
 # Revision 4.1  1994/10/31  18:30:17  caress
 # y
 # Changed man pages from section 1 to section l.
@@ -48,12 +51,14 @@ INCDIR = ../../include
 MANDIR = ../../man/manl
 
 ### make all makes the executable, .uid file, and man page
-all: $(BINDIR)/mbvelocitytool $(BINDIR)/mbvelocity.uid
+all: $(BINDIR)/mbvelocitytool $(BINDIR)/mbvelocity.uid \
+	$(MANDIR)/mbvelocitytool.l
 
 ### link the executable
-$(BINDIR)/mbvelocitytool: mbvelocity.o mbvelocity_uid_loc.h mbvelocity_prog.o xgraphics.o $(LIBDIR)/libmbio.a
+$(BINDIR)/mbvelocitytool: mbvelocity.o mbvelocity_uid_loc.h \
+		mbvelocity_prog.o xgraphics.o mb_rt.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbvelocity.o mbvelocity_prog.o xgraphics.o \
-		$(LIBDIR)/libmbio.a \
+		mb_rt.o $(LIBDIR)/libmbio.a \
 		$(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbvelocitytool
 
 ### compile the source files
@@ -65,7 +70,9 @@ mbvelocity.o: mbvelocity.c mbvelocity_define.c $(INCDIR)/mb_format.h \
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity.c
 mbvelocity_prog.o: mbvelocity_prog.c  $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity_prog.c
+	$(CC) $(CFLAGS) -I$(INCDIR) -c mbvelocity_prog.c
+mb_rt.o: mb_rt.c $(INCDIR)/mb_status.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -c mb_rt.c
 xgraphics.o: xgraphics.c
 	$(CC) $(CFLAGS) -c xgraphics.c 
 

@@ -12,7 +12,7 @@
 /*                                                          */
 /************************************************************/
 /*    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocity.c,v 4.1 1994-11-10 01:16:07 caress Exp $
+ *    $Id: mbvelocity.c,v 4.2 1994-11-18 18:58:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/11/10  01:16:07  caress
+ * Set program to do raytracing for every ping rather than once at beginning.
+ *
  * Revision 4.0  1994/10/21  12:43:44  caress
  * Release V4.0
  *
@@ -137,6 +140,7 @@ int	status;
 static char *ed_message;
 static char *mb_message;
 static char *status_message;
+static char message_str[256];
 
 Arg arglist[2];
 
@@ -181,7 +185,7 @@ int	open_type;
 /* Set these to the dimensions of your canvas drawing */
 /* area, minus 1, located in mbvelocity.uil.              */
 static int borders[4] =
-	{ 0, 747, 0, 684 };
+	{ 0, 1098, 0, 684 };
 
 
 /************************************************************/
@@ -781,15 +785,6 @@ static void mbvelocity_set_controls()
 	/* get some default values from mbvelocitytool */
 	mbvt_get_defaults(&edit_gui,&ndisplay_gui,&maxdepth_gui,
 		&velrange_gui,&resrange_gui,&format_gui,&nbuffer_gui);
-
-	if (edit_gui == 1)
-	{
-	    ed_message = (char *) 
-		XmStringLtoRCreate("Open Editable Velocity Profile","");
-	    XtSetArg (arglist[0], XmNlabelString, ed_message);
-	    XtSetValues (widget_array[k_ed_message], arglist, 1);
-	}
-
 }
 
 /********************************************************************/
@@ -883,6 +878,12 @@ static void action_new_profile(w, tag, list)
 	/* get new edit velocity profile */
 	mbvt_new_edit_profile();
 
+	strcpy(message_str, "Open Editable Velocity Profile: no filename");
+	ed_message = (char *) 
+		XmStringLtoRCreate(message_str,"");
+	XtSetArg (arglist[0], XmNlabelString, ed_message);
+	XtSetValues (widget_array[k_ed_message], arglist, 1);
+
 	/* replot everything */
 	mbvelocity_set_controls();
 
@@ -906,6 +907,13 @@ static void controls_save_file(w, tag, list)
 	save_file = XmTextGetString(widget_array[k_save_filename]);
 
 	mbvt_save_edit_profile(save_file);
+
+	strcpy(message_str, "Open Editable Velocity Profile: ");
+	strcat(message_str, save_file);
+	ed_message = (char *) 
+		XmStringLtoRCreate(message_str,"");
+	XtSetArg (arglist[0], XmNlabelString, ed_message);
+	XtSetValues (widget_array[k_ed_message], arglist, 1);
 
 	/* Remove popup screen */
         XtUnmanageChild(widget_array[k_popup_save_ed]);
@@ -980,11 +988,13 @@ static void open_file_ok(fs, client_data, cbs)
 		status = mbvt_open_edit_profile(input_file);
 	        /* Remove popup screen */
                 XtUnmanageChild(widget_array[k_file_sel_board]);
-	        /* rename popup title */
+	        /* rename message */
 		if (status == 1)
 		  {
-	           ed_message = (char *) 
-			XmStringLtoRCreate("Open Editable Velocity Profile","");
+		   strcpy(message_str, "Open Editable Velocity Profile: ");
+		   strcat(message_str, input_file);
+		   ed_message = (char *) 
+			XmStringLtoRCreate(message_str,"");
 	           XtSetArg (arglist[0], XmNlabelString, ed_message);
 	           XtSetValues (widget_array[k_ed_message], arglist, 1);
 		  }
@@ -996,13 +1006,24 @@ static void open_file_ok(fs, client_data, cbs)
 		status = mbvt_open_multibeam_file(input_file,format_gui);
 	        /* Remove popup screen */
                 XtUnmanageChild(widget_array[k_mb_file_sel_board]);
-	        /* rename popup title */
+	        /* rename message */
 		if (status == 1)
 		  {
+		   strcpy(message_str, "Open Multibeam Data File: ");
+		   strcat(message_str, input_file);
 	           mb_message = (char *) 
-			XmStringLtoRCreate("Open Multibeam Data File","");
+			XmStringLtoRCreate(message_str,"");
 	           XtSetArg (arglist[0], XmNlabelString, mb_message);
 	           XtSetValues (widget_array[k_mb_message], arglist, 1);
+		  }
+		if (status == 1 && edit_gui != 1)
+		  {
+		   strcpy(message_str, "Open Editable Velocity Profile: ");
+		   strcat(message_str, "no filename");
+		   ed_message = (char *) 
+			XmStringLtoRCreate(message_str,"");
+	           XtSetArg (arglist[0], XmNlabelString, ed_message);
+	           XtSetValues (widget_array[k_ed_message], arglist, 1);
 		  }
 		}
 
