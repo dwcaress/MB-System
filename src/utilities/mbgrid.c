@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.27 2005-02-17 07:37:10 caress Exp $
+ *    $Id: mbgrid.c,v 5.28 2005-03-25 04:41:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2005/02/17 07:37:10  caress
+ * Improved the background data capability. Moved interpolation back to surface algorithm.
+ *
  * Revision 5.26  2004/12/02 06:38:50  caress
  * Fix suggested by Gordon Keith
  *
@@ -386,7 +389,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.27 2005-02-17 07:37:10 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.28 2005-03-25 04:41:30 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1730,7 +1733,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				    foot_dyn = 0.0;
 				    }
 				foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
-				foot_theta = RTD * atan2(foot_lateral, bath[ib]);
+				foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
 				foot_dtheta = 0.5 * mb_io_ptr->beamwidth_xtrack;
 				foot_dphi = 0.5 * mb_io_ptr->beamwidth_ltrack;
 				if (foot_dtheta <= 0.0)
@@ -1739,7 +1742,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				    foot_dphi = 1.0;
 /*fprintf(outfp, "dx:%f dy:%f lateral:%f range:%f theta:%f\n", 
 foot_dx, foot_dy, foot_lateral, foot_range, foot_theta);*/
-				foot_hwidth =bath[ib] * tan(DTR * (foot_theta + foot_dtheta)) 
+				foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) 
 						    - foot_lateral;
 				foot_hlength = foot_range * tan(DTR * foot_dphi);
 /*fprintf(outfp, "dx:%f dy:%f mtodeglon:%f mtodeglat:%f\n", 
