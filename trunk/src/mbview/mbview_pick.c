@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.0 2003-12-02 20:38:31 caress Exp $
+ *    $Id: mbview_pick.c,v 5.1 2004-01-06 21:11:03 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:31  caress
+ * Making version number 5.0
+ *
  * Revision 1.2  2003/11/25 01:43:18  caress
  * MBview version generated during EW0310.
  *
@@ -70,7 +73,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.0 2003-12-02 20:38:31 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.1 2004-01-06 21:11:03 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -382,6 +385,18 @@ int mbview_pick_text(int instance)
 			data->area.width,
 			data->area.bearing);
 		}
+	else if (data->pickinfo_mode == MBV_PICK_REGION)
+		{
+		mbview_setlonlatstrings(data->region.cornerpoints[0].xlon, data->region.cornerpoints[0].ylat, 
+					lonstr0, latstr0);
+		mbview_setlonlatstrings(data->region.cornerpoints[3].xlon, data->region.cornerpoints[3].ylat, 
+					lonstr1, latstr1);
+		sprintf(value_text,
+		":::t\"Region Info:\":t\" West: %s\":t\" North: %s\":t\" East: %s\":t\" South: %s\":t\" Width: %,3f m\":t\" Height: %.3f m\"", 
+			lonstr0, latstr0, lonstr1, latstr1,
+			data->region.width,
+			data->region.height);
+		}
 	else if (data->pickinfo_mode == MBV_PICK_SITE)
 		{
 		mbview_setlonlatstrings(data->sites[data->site_selected].point.xlon, 
@@ -518,6 +533,215 @@ int mbview_setlonlatstrings(double lon, double lat, char *lonstring, char *latst
 }
 
 /*------------------------------------------------------------------------------*/
+int mbview_region(int instance, int which, int xpixel, int ypixel)
+{
+
+	/* local variables */
+	char	*function_name = "mbview_region";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	found;
+	double	xgrid, ygrid;
+	double	xlon, ylat, zdata;
+	double	xdisplay, ydisplay, zdisplay;
+	double	dx, dy, dxuse, dyuse;
+	int	ok;
+	int	i, j, k;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       which:            %d\n",which);
+		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
+		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
+		}
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* deal with start of new area */
+	if (which == MBV_REGION_DOWN
+		|| (which == MBV_REGION_MOVE)
+			&& data->region_type == MBV_REGION_NONE)
+		{
+		/* look for point */
+		mbview_findpoint(instance, xpixel, ypixel, 
+				&found, 
+				&xgrid, &ygrid,
+				&xlon, &ylat, &zdata,
+				&xdisplay, &ydisplay, &zdisplay);
+				
+		/* use any good point */
+		if (found == MB_YES)
+			{
+			/* set the first endpoint */
+			data->region_type = MBV_REGION_ONEPOINT;
+			data->region.cornerpoints[0].xgrid = xgrid;
+			data->region.cornerpoints[0].ygrid = ygrid;
+			data->region.cornerpoints[0].xlon = xlon;
+			data->region.cornerpoints[0].ylat = ylat;
+			data->region.cornerpoints[0].zdata = zdata;
+			data->region.cornerpoints[0].xdisplay = xdisplay;
+			data->region.cornerpoints[0].ydisplay = ydisplay;
+			data->region.cornerpoints[0].zdisplay = zdisplay;
+			}
+		}
+
+	/* deal with definition or change of second endpoint */
+	else if (which == MBV_REGION_MOVE)
+		{
+		/* look for point */
+		mbview_findpoint(instance, xpixel, ypixel, 
+				&found, 
+				&xgrid, &ygrid,
+				&xlon, &ylat, &zdata,
+				&xdisplay, &ydisplay, &zdisplay);
+				
+		/* ignore an identical pair of points */
+		if (found == MB_YES
+			&& data->region.cornerpoints[0].xgrid
+				== xgrid
+			&& data->region.cornerpoints[0].ygrid
+				== ygrid)
+			{
+			data->region_type = MBV_REGION_ONEPOINT;
+			XBell(view->dpy,100);
+			}
+			
+		/* use any good pair of points */
+		else if (found == MB_YES)
+			{
+			/* set the second endpoint */
+			data->region_type = MBV_REGION_QUAD;
+			data->region.cornerpoints[3].xgrid = xgrid;
+			data->region.cornerpoints[3].ygrid = ygrid;
+			data->region.cornerpoints[3].xlon = xlon;
+			data->region.cornerpoints[3].ylat = ylat;
+			data->region.cornerpoints[3].zdata = zdata;
+			data->region.cornerpoints[3].xdisplay = xdisplay;
+			data->region.cornerpoints[3].ydisplay = ydisplay;
+			data->region.cornerpoints[3].zdisplay = zdisplay;
+			
+			}
+				
+		/* ignore a bad point */
+		else if (found == MB_NO)
+			{
+			XBell(view->dpy,100);
+			}
+		}
+
+	/* recalculate any good quad region */
+	if (data->region_type == MBV_REGION_QUAD
+		&& which != MBV_REGION_UP)
+		{
+			
+		/* now define the quad corners in grid coordinates */
+		data->region.cornerpoints[1].xgrid
+			= data->region.cornerpoints[0].xgrid;
+		data->region.cornerpoints[1].ygrid 
+			= data->region.cornerpoints[3].ygrid;
+		mbview_projectforward(instance, MB_YES,
+				data->region.cornerpoints[1].xgrid, 
+				data->region.cornerpoints[1].ygrid,
+				&(data->region.cornerpoints[1].xlon), 
+				&(data->region.cornerpoints[1].ylat),
+				&(data->region.cornerpoints[1].xdisplay), 
+				&(data->region.cornerpoints[1].ydisplay));
+		mbview_getzdata(instance, 
+				data->region.cornerpoints[1].xgrid, 
+				data->region.cornerpoints[1].ygrid, 
+				&ok,
+				&(data->region.cornerpoints[1].zdata));
+		if (ok == MB_NO)
+			data->region.cornerpoints[1].zdata
+				= 0.5 * (data->region.cornerpoints[0].zdata
+						+ data->region.cornerpoints[3].zdata);
+		data->region.cornerpoints[1].zdisplay 
+			= view->zscale 
+				* (data->region.cornerpoints[1].zdata 
+					- view->zorigin);
+
+		data->region.cornerpoints[2].xgrid
+			= data->region.cornerpoints[3].xgrid;
+		data->region.cornerpoints[2].ygrid 
+			= data->region.cornerpoints[0].ygrid;
+		mbview_projectforward(instance, MB_YES,
+				data->region.cornerpoints[2].xgrid, 
+				data->region.cornerpoints[2].ygrid,
+				&(data->region.cornerpoints[2].xlon), 
+				&(data->region.cornerpoints[2].ylat),
+				&(data->region.cornerpoints[2].xdisplay), 
+				&(data->region.cornerpoints[2].ydisplay));
+		mbview_projectforward(instance, MB_YES,
+				data->region.cornerpoints[2].xgrid, 
+				data->region.cornerpoints[2].ygrid,
+				&(data->region.cornerpoints[2].xlon), 
+				&(data->region.cornerpoints[2].ylat),
+				&(data->region.cornerpoints[2].xdisplay), 
+				&(data->region.cornerpoints[2].ydisplay));
+		mbview_getzdata(instance, 
+				data->region.cornerpoints[2].xgrid, 
+				data->region.cornerpoints[2].ygrid, 
+				&ok,
+				&(data->region.cornerpoints[2].zdata));
+		if (ok == MB_NO)
+			data->region.cornerpoints[2].zdata
+				= 0.5 * (data->region.cornerpoints[0].zdata
+						+ data->region.cornerpoints[3].zdata);
+		data->region.cornerpoints[2].zdisplay 
+			= view->zscale 
+				* (data->region.cornerpoints[2].zdata 
+					- view->zorigin);
+				
+		/* calculate width and length */
+		data->region.width = fabs(data->region.cornerpoints[3].xdisplay
+						- data->region.cornerpoints[0].xdisplay) / view->scale;
+		data->region.height = fabs(data->region.cornerpoints[3].ydisplay
+						- data->region.cornerpoints[0].ydisplay) / view->scale;
+		
+		/* set pick info */
+		data->pickinfo_mode = MBV_PICK_REGION;
+		
+		/* set pick annotation */
+		mbview_pick_text(instance);
+		}
+
+	/* now set and drape the segments 
+		if either 3D display 
+		or the pick move is final  */
+	if (data->region_type == MBV_REGION_QUAD
+		&& (data->display_mode == MBV_DISPLAY_3D 
+			|| which == MBV_REGION_UP))
+		{
+		for (i=0;i<4;i++)
+			{
+			/* drape the segment */
+			mbview_drapesegment(instance, &(data->region.segments[i]));
+			}
+		}
+	
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*------------------------------------------------------------------------------*/
 int mbview_area(int instance, int which, int xpixel, int ypixel)
 {
 
@@ -592,11 +816,10 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 				
 		/* ignore an identical pair of points */
 		if (found == MB_YES
-			&& data->area.endpoints[0].xgrid
-				== data->area.endpoints[1].xgrid
-			&& data->area.endpoints[0].ygrid
-				== data->area.endpoints[1].ygrid)
+			&& data->area.endpoints[0].xgrid == xgrid
+			&& data->area.endpoints[0].ygrid == ygrid)
 			{
+			data->area_type = MBV_AREA_ONEPOINT;
 			XBell(view->dpy,100);
 			}
 			
@@ -916,6 +1139,85 @@ int mbview_drawpick(int instance)
 	/* return */
 	return(status);
 }
+
+/*------------------------------------------------------------------------------*/
+int mbview_drawregion(int instance)
+{
+	/* local variables */
+	char	*function_name = "mbview_drawregion";
+	int	status = MB_SUCCESS;
+	int	i, j;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		}
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+		
+	/* draw current area */
+	if (data->region_type == MBV_REGION_QUAD)
+		{
+		/* set color and linewidth */
+		glColor3f(colortable_object_red[MBV_COLOR_YELLOW], 
+				colortable_object_green[MBV_COLOR_YELLOW], 
+				colortable_object_blue[MBV_COLOR_YELLOW]);
+		glLineWidth(3.0);
+				
+		/* plot quad segments */
+		for (i=0;i<4;i++)
+			{
+			if (data->display_mode == MBV_DISPLAY_3D 
+				&& data->region.segments[i].nls > 2)
+				{
+fprintf(stderr,"PLOT segment %d: nls:%d\n", i, data->region.segments[i].nls);
+				glBegin(GL_LINE_STRIP);
+				for (j=0;j<data->region.segments[i].nls-1;j++)
+					{
+					glVertex3f((float)(data->region.segments[i].lspoints[j].xdisplay), 
+							(float)(data->region.segments[i].lspoints[j].ydisplay), 
+							(float)(data->region.segments[i].lspoints[j].zdisplay));
+					}
+				glEnd();
+				}
+			else
+				{
+fprintf(stderr,"PLOT segment %d: ignore nls:%d\n", i, data->region.segments[i].nls);
+				glBegin(GL_LINES);
+				glVertex3f((float)(data->region.segments[i].endpoints[0]->xdisplay), 
+						(float)(data->region.segments[i].endpoints[0]->ydisplay), 
+						(float)(data->region.segments[i].endpoints[0]->zdisplay));
+				glVertex3f((float)(data->region.segments[i].endpoints[1]->xdisplay), 
+						(float)(data->region.segments[i].endpoints[1]->ydisplay), 
+						(float)(data->region.segments[i].endpoints[1]->zdisplay));
+				glEnd();
+				}
+			}
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
 
 /*------------------------------------------------------------------------------*/
 int mbview_drawarea(int instance)

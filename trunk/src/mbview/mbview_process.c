@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.0 2003-12-02 20:38:34 caress Exp $
+ *    $Id: mbview_process.c,v 5.1 2004-01-06 21:11:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:34  caress
+ * Making version number 5.0
+ *
  * Revision 1.3  2003/12/01 20:55:48  caress
  * Changed debug output.
  *
@@ -73,7 +76,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.0 2003-12-02 20:38:34 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.1 2004-01-06 21:11:04 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -564,6 +567,31 @@ view->xmin, view->xmax, view->ymin, view->ymax);
 			}
 		}
 		
+	/* handle region */
+	if (data->region_type == MBV_REGION_QUAD)
+		{
+		for (i=0;i<4;i++)
+			{
+			mbview_projectforward(instance, MB_YES,
+					data->region.cornerpoints[i].xgrid,
+					data->region.cornerpoints[i].ygrid,
+					&(data->region.cornerpoints[i].xlon),
+					&(data->region.cornerpoints[i].ylat),
+					&(data->region.cornerpoints[i].xdisplay),
+					&(data->region.cornerpoints[i].ydisplay));
+			for (j=0;j<data->region.segments[i].nls;j++)
+				{
+				mbview_projectforward(instance, MB_YES,
+						data->region.segments[i].lspoints[j].xgrid,
+						data->region.segments[i].lspoints[j].ygrid,
+						&(data->region.segments[i].lspoints[j].xlon),
+						&(data->region.segments[i].lspoints[j].ylat),
+						&(data->region.segments[i].lspoints[j].xdisplay),
+						&(data->region.segments[i].lspoints[j].ydisplay));
+				}
+			}
+		}
+		
 	/* clear zscale for grid */
 	mbview_zscaleclear(instance);
 		
@@ -772,6 +800,27 @@ fprintf(stderr,"mbview_zscale: %d\n", instance);
 				data->area.segments[i].lspoints[j].zdisplay 
 					= (float)(view->zscale 
 						* (data->area.segments[i].lspoints[j].zdata 
+							- view->zorigin)
+							+ MBV_OPENGL_3D_LINE_OFFSET);
+				}
+			}
+		}
+		
+	/* handle region */
+	if (data->region_type == MBV_REGION_QUAD)
+		{
+		for (i=0;i<4;i++)
+			{
+			data->region.cornerpoints[i].zdisplay 
+				= (float)(view->zscale 
+					* (data->region.cornerpoints[i].zdata 
+						- view->zorigin)
+						+ MBV_OPENGL_3D_LINE_OFFSET);
+			for (j=0;j<data->region.segments[i].nls;j++)
+				{
+				data->region.segments[i].lspoints[j].zdisplay 
+					= (float)(view->zscale 
+						* (data->region.segments[i].lspoints[j].zdata 
 							- view->zorigin)
 							+ MBV_OPENGL_3D_LINE_OFFSET);
 				}

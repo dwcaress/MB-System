@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.0 2003-12-02 20:38:31 caress Exp $
+ *    $Id: mbview.h,v 5.1 2004-01-06 21:11:03 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:31  caress
+ * Making version number 5.0
+ *
  * Revision 1.3  2003/11/25 01:43:18  caress
  * MBview version generated during EW0310.
  *
@@ -116,9 +119,15 @@
 #define MBV_PICK_ONEPOINT		1
 #define MBV_PICK_TWOPOINT		2
 #define MBV_PICK_AREA			3
-#define MBV_PICK_SITE			4
-#define MBV_PICK_ROUTE			5
-#define MBV_PICK_NAV			6
+#define MBV_PICK_REGION			4
+#define MBV_PICK_SITE			5
+#define MBV_PICK_ROUTE			6
+#define MBV_PICK_NAV			7
+
+/* region defines */
+#define MBV_REGION_NONE			0
+#define MBV_REGION_ONEPOINT		1
+#define MBV_REGION_QUAD			2
 
 /* area defines */
 #define MBV_AREA_NONE			0
@@ -194,6 +203,13 @@ struct mbview_pick_struct {
 	struct mbview_point_struct xpoints[8];
 	struct mbview_linesegment_struct segment;
 	struct mbview_linesegment_struct xsegments[4];
+	};
+
+struct mbview_region_struct {
+	double	width;
+	double	height;
+	struct mbview_point_struct cornerpoints[4];
+	struct mbview_linesegment_struct segments[4];
 	};
 
 struct mbview_area_struct {
@@ -355,6 +371,10 @@ struct mbview_struct {
 	/* area data */
 	int	area_type;
 	struct mbview_area_struct area;
+	
+	/* region data */
+	int	region_type;
+	struct mbview_region_struct region;
 	
 	/* nav pick */
 	int	navpick_type;
