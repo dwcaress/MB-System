@@ -237,7 +237,7 @@ file 20040722_152111.s7k.segy. The contents of the sinf file 20040722_152111.s7k
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbsegyinfo\fP(l), \fBmbsegylist\fP(l), \fBmbsegygrid\fP(l),
-\fBSIOSEIS\fP(http://sioseis.ucsd.edu/)
+\fBSIOSEIS\fP(http://sioseis.ucsd.edu/ )
 
 .SH BUGS
 Doesn't support all of the data formats containing subbottom or center beam

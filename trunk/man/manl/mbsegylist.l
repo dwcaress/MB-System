@@ -188,7 +188,7 @@ The output will be as follows:
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbextractsegy\fP(l), \fBmbsegyinfo\fP(l), \fBmbsegygrid\fP(l),
-\fBSIOSEIS\fP(http://sioseis.ucsd.edu/)
+\fBSIOSEIS\fP(http://sioseis.ucsd.edu/ )
 
 .SH BUGS
 Si. Oui. Ya. Da. Yes. Mess.
