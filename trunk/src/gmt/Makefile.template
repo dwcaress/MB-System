@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.0 2003-07-27 20:52:44 caress Exp $
+#	$Id: Makefile.template,v 5.1 2004-10-18 03:50:51 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2003 by 
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.0  2003/07/27 20:52:44  caress
+# Release 5.0.0
+#
 # Revision 4.17  2003/03/10 07:39:29  caress
 # Added mr1pr library.
 #
@@ -121,8 +124,7 @@ $(BINDIR)/mbcontour: mbcontour.o \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbps.a \
-		$(GMTLIBDIR)/libpsl.a \
-		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbcontour
 $(BINDIR)/mbswath: mbswath.o \
 		$(LIBDIR)/libmbio.a  \
@@ -136,14 +138,13 @@ $(BINDIR)/mbswath: mbswath.o \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
-		$(GMTLIBDIR)/libpsl.a \
-		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbswath
 $(BINDIR)/mbgrdtiff: mbgrdtiff.o \
 		$(LIBDIR)/libmbio.a 
 	$(CC) $(CFLAGS) mbgrdtiff.o \
 		$(LIBDIR)/libmbio.a \
-		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbgrdtiff
 
 ### compile the source files
