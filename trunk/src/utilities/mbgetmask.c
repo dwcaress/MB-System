@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 4.5 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbgetmask.c,v 4.6 1996-03-11 15:31:18 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.4  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -67,7 +71,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 4.5 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetmask.c,v 4.6 1996-03-11 15:31:18 caress Exp $";
 	static char program_name[] = "MBGETMASK";
 	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
 	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";
@@ -423,7 +427,7 @@ char **argv;
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6]);
 			for (i=0;i<beams_bath;i++)
-				if (bath[i] >= 0.0)
+				if (bath[i] > 0.0)
 					printf("1");
 				else
 					{
@@ -432,7 +436,7 @@ char **argv;
 					}
 			printf("\n");
 			for (i=0;i<beams_amp;i++)
-				if (amp[i] >= 0.0)
+				if (amp[i] > 0.0)
 					printf("1");
 				else
 					{
