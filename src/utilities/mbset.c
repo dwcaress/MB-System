@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.20 2002-10-02 23:56:06 caress Exp $
+ *    $Id: mbset.c,v 5.21 2003-01-15 20:52:13 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2002/10/02 23:56:06  caress
+ * Release 5.0.beta24
+ *
  * Revision 5.19  2002/09/19 00:28:12  caress
  * Release 5.0.beta23
  *
@@ -117,7 +120,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.20 2002-10-02 23:56:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.21 2003-01-15 20:52:13 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -506,6 +509,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "RAYTRACE", 8) == 0)
 		    {
 		    sscanf(pargv[i], "RAYTRACE:%d", &process.mbp_svp_mode);
+		    }
+		else if (strncmp(pargv[i], "SVPMODE", 7) == 0)
+		    {
+		    sscanf(pargv[i], "SVPMODE:%d", &process.mbp_svp_mode);
 		    }
 		else if (strncmp(pargv[i], "SVPFILE", 7) == 0)
 		    {

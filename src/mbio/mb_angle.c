@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.3 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_angle.c,v 5.4 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -175,6 +175,9 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.2  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -379,6 +382,149 @@ int mb_xyz_to_takeoff(int verbose,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       theta:           %f\n",*theta);
 		fprintf(stderr,"dbg2       phi:             %f\n",*phi);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_lever(int verbose,
+		double sonar_offset_x,
+		double sonar_offset_y,
+		double sonar_offset_z,
+		double nav_offset_x,
+		double nav_offset_y,
+		double nav_offset_z,
+		double vru_offset_x,
+		double vru_offset_y,
+		double vru_offset_z,
+		double vru_alpha,
+		double vru_beta,
+		double *lever_x,
+		double *lever_y,
+		double *lever_z,
+		int *error)
+{
+	char	*function_name = "mb_lever";
+	int	status = MB_SUCCESS;
+	double	x, y, z;
+	double	xx, yy, zz, r;
+	double	alpha, beta;
+
+	/* print input debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       sonar_offset_x: %f\n",sonar_offset_x);
+		fprintf(stderr,"dbg2       sonar_offset_y: %f\n",sonar_offset_y);
+		fprintf(stderr,"dbg2       sonar_offset_z: %f\n",sonar_offset_z);
+		fprintf(stderr,"dbg2       nav_offset_x:   %f\n",nav_offset_x);
+		fprintf(stderr,"dbg2       nav_offset_y:   %f\n",nav_offset_y);
+		fprintf(stderr,"dbg2       nav_offset_z:   %f\n",nav_offset_z);
+		fprintf(stderr,"dbg2       vru_offset_x:   %f\n",vru_offset_x);
+		fprintf(stderr,"dbg2       vru_offset_y:   %f\n",vru_offset_y);
+		fprintf(stderr,"dbg2       vru_offset_z:   %f\n",vru_offset_z);
+		fprintf(stderr,"dbg2       vru_alpha:      %f\n",vru_alpha);
+		fprintf(stderr,"dbg2       vru_beta:       %f\n",vru_beta);
+		}
+
+	/* do lever calculation to find heave implied by roll and pitch
+	   for a sonar displaced from the vru:
+		x = r * COS(alpha) * COS(beta) 
+		y = r * SIN(alpha)
+		z = r * COS(alpha) * SIN(beta) */
+	/* get net offset between sonar and vru */
+	xx = sonar_offset_x - vru_offset_x;
+	yy = sonar_offset_y - vru_offset_y;
+	zz = sonar_offset_z - vru_offset_z;
+	r = sqrt(xx * xx + yy * yy + zz * zz);
+	
+	/* lever arm only matters if offset is nonzero */
+	if (r > 0.0)
+	    {
+	    /* get initial angles */
+	    alpha = RTD * asin(yy / r);
+	    if (cos(DTR * alpha) != 0.0)
+		beta = RTD * acos(xx / (r * cos(DTR * alpha)));
+	    else
+		beta = 0.0;
+		
+  	    /* apply angle change */
+	    alpha += vru_alpha;
+	    beta += vru_beta;
+	    
+	    /* calculate new offsets */
+	    x =  r * cos(DTR * alpha) * cos(DTR * beta);
+	    y =  r * sin(DTR * alpha);
+	    z =  r * cos(DTR * alpha) * sin(DTR * beta);
+	    
+	    /* get heave change due to lever arm */
+	    *lever_z =  z - zz;
+	    }
+	else
+	    {
+	    *lever_z = 0.0;
+	    }
+
+	/* do lever calculation to find position shift implied by roll and pitch
+	   for a sonar displaced from the nav sensor:
+		x = r * COS(alpha) * COS(beta) 
+		y = r * SIN(alpha)
+		z = r * COS(alpha) * SIN(beta) */
+	/* get net offset between sonar and nav sensor */
+	xx = sonar_offset_x - nav_offset_x;
+	yy = sonar_offset_y - nav_offset_y;
+	zz = sonar_offset_z - nav_offset_z;
+	r = sqrt(xx * xx + yy * yy + zz * zz);
+	
+	/* lever arm only matters if offset is nonzero */
+	if (r > 0.0)
+	    {
+	    /* get initial angles */
+	    alpha = RTD * asin(yy / r);
+	    if (cos(DTR * alpha) != 0.0)
+		beta = RTD * acos(xx / (r * cos(DTR * alpha)));
+	    else
+		beta = 0.0;
+		
+  	    /* apply angle change */
+	    alpha += vru_alpha;
+	    beta += vru_beta;
+	    
+	    /* calculate new offsets */
+	    x =  r * cos(DTR * alpha) * cos(DTR * beta);
+	    y =  r * sin(DTR * alpha);
+	    z =  r * cos(DTR * alpha) * sin(DTR * beta);
+	    
+	    /* get position change due to lever arm */
+	    *lever_x =  x - xx;
+	    *lever_y =  y - yy;
+	    }
+	else
+	    {
+	    *lever_x = 0.0;
+	    *lever_y = 0.0;
+	    }
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       lever_x:         %f\n",*lever_x);
+		fprintf(stderr,"dbg2       lever_y:         %f\n",*lever_y);
+		fprintf(stderr,"dbg2       lever_z:         %f\n",*lever_z);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

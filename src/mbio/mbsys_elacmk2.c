@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elacmk2.c,v 5.6 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_elacmk2.c,v 5.7 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.5  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -123,7 +126,7 @@
 int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_elacmk2.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_elacmk2.c,v 5.7 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbsys_elacmk2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -169,8 +172,8 @@ int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->time_delay = 0;		/* positioning system delay (sec) */
 	store->transducer_port_height = 0;
 	store->transducer_starboard_height = 0;
-	store->transducer_port_depth = 192;
-	store->transducer_starboard_depth = 192;
+	store->transducer_port_depth = 0;
+	store->transducer_starboard_depth = 0;
 	store->transducer_port_x = 0;
 	store->transducer_starboard_x = 0;
 	store->transducer_port_y = 0;
@@ -1489,8 +1492,8 @@ int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->speed = speed / 3.6;
 
 		/* get draft */
-		store->transducer_starboard_depth = 200 * draft;
-		store->transducer_port_depth = 200 * draft;
+		store->transducer_starboard_depth = 100 * draft;
+		store->transducer_port_depth = 100 * draft;
 
 		/* get roll pitch and heave */
 		}
@@ -1518,8 +1521,8 @@ int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->heading = (int) (heading *100);
 
 		/* get draft */
-		store->transducer_starboard_depth = 200 * draft;
-		store->transducer_port_depth = 200 * draft;
+		store->transducer_starboard_depth = 100 * draft;
+		store->transducer_port_depth = 100 * draft;
 
 		/* get roll pitch and heave */
 		}

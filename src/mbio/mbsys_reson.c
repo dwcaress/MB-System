@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 5.4 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_reson.c,v 5.5 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.3  2001/08/25 00:57:48  caress
  * Adding beamwidth values to extract functions.
  *
@@ -119,7 +122,7 @@
 int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_reson.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 5.5 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1180,6 +1183,11 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get draft  */
 		*draft = 0.001 * store->transducer_depth;
 
+		/* get roll pitch and heave */
+		*roll = 0.005*store->roll;
+		*pitch = 0.005*store->pitch;
+		*heave = 0.001*store->heave;
+
 		/* print debug statements */
 		if (verbose >= 5)
 			{
@@ -1378,6 +1386,11 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get draft  */
 		store->transducer_depth = 1000 * draft;
+
+		/* get roll pitch and heave */
+		store->roll = roll*200.0;
+		store->pitch = pitch*200.0;
+		store->heave = heave*200.0;
 		}
 
 	/* print output debug statements */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.16 2002-10-02 23:53:44 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.17 2003-01-15 20:50:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2002/10/02 23:53:44  caress
+ * Release 5.0.beta24
+ *
  * Revision 5.15  2002/09/19 00:35:53  caress
  * Release 5.0.beta23
  *
@@ -319,7 +322,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.16 2002-10-02 23:53:44 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.17 2003-01-15 20:50:40 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -436,6 +439,7 @@ int	neditsave;
 double	*editsave_time_d;
 int	*editsave_beam;
 int	*editsave_action;
+int	*editsave_use;
 char	notice[MB_PATH_MAXLINE];
 
 /* filter variables */
@@ -4227,6 +4231,11 @@ int mbedit_open_file(char *file, int form, int savemode)
 			status = mb_malloc(verbose,neditsave *sizeof(double),&editsave_time_d,&error);
 			status = mb_malloc(verbose,neditsave *sizeof(int),&editsave_beam,&error);
 			status = mb_malloc(verbose,neditsave *sizeof(int),&editsave_action,&error);
+			status = mb_malloc(verbose,neditsave *sizeof(int),&editsave_use,&error);
+			memset(editsave_time_d, 0, neditsave *sizeof(double));
+			memset(editsave_beam, 0, neditsave *sizeof(int));
+			memset(editsave_action, 0, neditsave *sizeof(int));
+			memset(editsave_use, 0, neditsave *sizeof(int));
 	
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR)
@@ -4285,12 +4294,12 @@ int mbedit_open_file(char *file, int form, int savemode)
 			    /* insert into sorted array */
 			    if (i > 0)
 				{
-				if (stime_d < editsave_time_d[insert - 1])
+				if (insert > 0 && stime_d < editsave_time_d[insert])
 				    {
-				    for (j = insert - 1; j >= 0 && stime_d < editsave_time_d[j]; j--)
+				    for (j = insert; j >= 0 && stime_d < editsave_time_d[j]; j--)
 					insert--;
 				    }
-				else if (stime_d >= editsave_time_d[insert - 1])
+				else if (stime_d >= editsave_time_d[insert])
 				    {
 				    for (j = insert; j < i && stime_d >= editsave_time_d[j]; j++)
 					insert++;
@@ -4425,6 +4434,7 @@ int mbedit_close_file()
 	    mb_free(verbose,&editsave_time_d,&error);
 	    mb_free(verbose,&editsave_beam,&error);
 	    mb_free(verbose,&editsave_action,&error);
+	    mb_free(verbose,&editsave_use,&error);
 	    neditsave = 0;
 	    }
 	if (sofile_open == MB_YES)
@@ -4583,6 +4593,7 @@ int mbedit_load_data(int buffer_size,
 	char	*function_name = "mbedit_load_data";
 	int	status = MB_SUCCESS;
 	int	apply;
+	double	last_time_d;
 	int	firstedit, lastedit;
 	int	namp, nss;
 	char	string[50];
@@ -4763,10 +4774,19 @@ int mbedit_load_data(int buffer_size,
 		
 		/* loop over each data record, checking each edit */
 		firstedit = 0;
+		last_time_d = 0.0;
 		for (i = 0; i < nbuff; i++)
 		    {
 		    /* find first and last edits for this ping */
-		    lastedit = firstedit - 1;
+		    if (ping[i].time_d <= last_time_d)
+			{
+			fprintf(stderr, "Encountered duplicate or reverse ping times: beam flag search reset.\n");
+			firstedit = 0;
+			lastedit = -1;
+			}
+		    else
+			lastedit = firstedit - 1;
+		    last_time_d = ping[i].time_d;
 		    for (j = firstedit; j < neditsave && ping[i].time_d >= editsave_time_d[j]; j++)
 			{
 			if (editsave_time_d[j] == ping[i].time_d)
@@ -4778,7 +4798,7 @@ int mbedit_load_data(int buffer_size,
 			}
 			
 		    /* apply relevant edits, if any, to this ping */
-		    if (lastedit > -1)
+		    if (lastedit >= firstedit)
 			{
 			for (k=0;k<ping[i].beams_bath;k++)
 			    editcount[k] = MBEDIT_NOACTION;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mstiffss.c	4/7/98
- *	$Id: mbr_mstiffss.c,v 5.4 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_mstiffss.c,v 5.5 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 7, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.3  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -73,11 +76,6 @@
 #include "../../include/mbsys_mstiff.h"
 #include "../../include/mbf_mstiffss.h"
 
-/* include for byte swapping on little-endian machines */
-#ifndef BYTESWAPPED
-#include "../../include/mb_swap.h"
-#endif
-
 /* essential function prototypes */
 int mbr_register_mstiffss(int verbose, void *mbio_ptr, 
 		int *error);
@@ -108,7 +106,7 @@ int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mstiffss.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_mstiffss.c,v 5.5 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_register_mstiffss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -238,7 +236,7 @@ int mbr_info_mstiffss(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mstiffss.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_mstiffss.c,v 5.5 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_info_mstiffss";
 	int	status = MB_SUCCESS;
 
@@ -307,7 +305,7 @@ int mbr_info_mstiffss(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mstiffss.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbr_mstiffss.c,v 5.5 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_alm_mstiffss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -403,9 +401,9 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mstiffss_struct *data;
 	struct mbsys_mstiff_struct *store;
-	char    mstiff_id[4];
+	char	buffer[MBF_MSTIFFSS_BUFFERSIZE];
 	int	ifd_offset;
-	int	nentry;
+	short	nentry;
 	short	tag;
 	short	type;
 	int	count;
@@ -414,19 +412,24 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	*bits_per_pixel;
 	int	*n_ping_file;
 	int	*n_pixel_channel;
-	int	*time_corr_offset;
 	int	*left_channel_offset;
 	int	*right_channel_offset;
 	int	*sonar_data_info_offset;
+	int	*sonar_data_info_tag;
 	int	*n_nav;
 	int	*n_nav_use;
 	int	*nav_info_offset;
+	int	*nav_info_tag;
+	int	timecorr_tag;
+	int	timecorr_offset;
 	short	corr_time[9];
 	int	*ref_windows_time;
 	int	corr_time_i[7];
 	double	*corr_time_d;
+	int	date, time;
 	int	pingtime;
 	short   range_code;
+	short	frequency_code;
 	short   range_delay_bin;
 	short   altitude_bin;
 	int	range_mode;
@@ -435,14 +438,17 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double  range;
 	double  range_delay;
 	double  altitude;
+	double	frequency;
+	short	sonar_gain[16];
+	int	navsize;
 	int	navtime1, navtime2;
 	float	lon1, lon2;
 	float	lat1, lat2;
 	float	speed1, speed2;
 	float	course1, course2;
-	double	lon, lat, speed, heading;
+	float	heading1, heading2;
+	double	lon, lat, speed, course, heading;
 	double	factor;
-	double	course;
 	int	idummy[10];
 	short	sdummy[1];
 	double	range_tot;
@@ -450,6 +456,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	unsigned char right_channel[MBF_MSTIFFSS_PIXELS/2];
 	int	ibottom;
 	int	istart;
+	int	index;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -475,28 +482,31 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	bits_per_pixel = &(mb_io_ptr->save_flag);
 	n_ping_file = &(mb_io_ptr->save1);
 	n_pixel_channel = &(mb_io_ptr->save2);
-	time_corr_offset = &(mb_io_ptr->save3);
-	left_channel_offset = &(mb_io_ptr->save4);
-	right_channel_offset = &(mb_io_ptr->save5);
-	sonar_data_info_offset = &(mb_io_ptr->save6);
+	left_channel_offset = &(mb_io_ptr->save3);
+	right_channel_offset = &(mb_io_ptr->save4);
+	sonar_data_info_offset = &(mb_io_ptr->save5);
+	sonar_data_info_tag = &(mb_io_ptr->save6);
 	n_nav = &(mb_io_ptr->save7);
 	n_nav_use = &(mb_io_ptr->save8);
 	nav_info_offset = &(mb_io_ptr->save9);
-	ref_windows_time = &(mb_io_ptr->save10);
+	nav_info_tag = &(mb_io_ptr->save10);
+	ref_windows_time = &(mb_io_ptr->save11);
 	corr_time_d = &(mb_io_ptr->saved1);
 	
 	/* if first time through, read file header and
 	    offsets, setting up for later reads */
 	if (*n_read <= 0)
 	    {
+	    /* set defaults */
+	    *bits_per_pixel = 8;
 	    /* check for proper file tag */
-	    if ((status = fread(mstiff_id, sizeof(char), 
-			    4, mb_io_ptr->mbfp)) != 4)
+	    if ((status = fread(buffer, 4 * sizeof(char), 
+			    1, mb_io_ptr->mbfp)) != 1)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;		    
 		}
-	    else if (strncmp(mstiff_id, "MSTL", 4) != 0)
+	    else if (strncmp(buffer, "MSTL", 4) != 0)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_DATA;		    
@@ -508,12 +518,10 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 		
 	    /* now get the image file directory offset */
-	    if ((status = fread(&ifd_offset, 
+	    if ((status = fread(buffer, 
 			    sizeof(int), 1, mb_io_ptr->mbfp)) == 1)
 		{
-#ifndef BYTESWAPPED
-		ifd_offset = mb_swap_int(ifd_offset);
-#endif
+		mb_get_binary_int(MB_YES, buffer, &ifd_offset);
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;		    
 		}
@@ -527,104 +535,192 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		and grab the important values */
 	    if (status == MB_SUCCESS)
 		{
-		fseek(mb_io_ptr->mbfp, ifd_offset, SEEK_SET);
-		if ((status = fread(&nentry, sizeof(short), 
+		status = fseek(mb_io_ptr->mbfp, (long) ifd_offset, SEEK_SET);
+		status = ftell(mb_io_ptr->mbfp);
+		if ((status = fread(buffer, sizeof(short), 
 			1, mb_io_ptr->mbfp)) == 1)
 		    {
+		    mb_get_binary_short(MB_YES, buffer, &nentry);
+		    
 		    /* loop over all entries in the directory */
-#ifndef BYTESWAPPED
-		    nentry = mb_swap_short(nentry);
-#endif
-		    for (i=0;i<nentry && status == MB_SUCCESS;i++)
+		    if ((status = status = fread(buffer, 
+		    	6 * nentry * sizeof(short), 1, mb_io_ptr->mbfp)) == 1)
 			{
-			/*read entry */
-			status = fread(&tag, sizeof(short), 1, mb_io_ptr->mbfp);
-			status = fread(&type, sizeof(short), 1, mb_io_ptr->mbfp);
-			status = fread(&count, sizeof(int), 1, mb_io_ptr->mbfp);
-			if ((status = fread(&value_offset, 
-					sizeof(int), 1, mb_io_ptr->mbfp))
-					== 1)
-			    {
-			    status = MB_SUCCESS;
-			    *error = MB_ERROR_NO_ERROR;
-			    }
-			else
-			    {
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_EOF;		    				
-			    }
-			if (status == MB_SUCCESS)
-			    {
-#ifndef BYTESWAPPED
-			    tag = mb_swap_short(tag);
-			    type = mb_swap_short(type);
-			    count = mb_swap_int(count);
-			    value_offset = mb_swap_int(value_offset);
-#endif
+			index = 0;
+		    	for (i=0;i<nentry && status == MB_SUCCESS;i++)
+			     {
+		    	     mb_get_binary_short(MB_YES, &(buffer[index]), &tag);
+			     index += sizeof(short);
+		    	     mb_get_binary_short(MB_YES, &(buffer[index]), &type);
+			     index += sizeof(short);
+		    	     mb_get_binary_int(MB_YES, &(buffer[index]), &count);
+			     index += sizeof(int);
+		    	     mb_get_binary_int(MB_YES, &(buffer[index]), &value_offset);
+			     index += sizeof(int);
+/*fprintf(stderr,"tag:%d type:%d count:%d value_offset:%d\n",
+tag,type,count,value_offset);*/
 
 			    /* set values for important entries */
-			    if (tag == 258)
+			    
+			    /* BitsPerBin */
+			    if (tag == BitsPerBin)
 				{
 				*bits_per_pixel = value_offset;
 				}
-			    else if (tag == 259)
+				
+			    /* SonarLines */
+			    else if (tag == SonarLines)
 				{
 				*n_ping_file = value_offset;
 				}
-			    else if (tag == 260)
+				
+			    /* BinsPerChannel */
+			    else if (tag == BinsPerChannel)
 				{
 				*n_pixel_channel = value_offset;
 				}
-			    else if (tag == 262)
+				
+			    /* TimeCorrelation */
+			    else if (tag == TimeCorrelation)
 				{
-				*time_corr_offset = value_offset;
+				timecorr_tag = tag;
+				timecorr_offset = value_offset;
 				}
-			    else if (tag == 263)
+				
+			    /* Y2KTimeCorrelation */
+			    else if (tag == Y2KTimeCorrelation)
+				{
+				timecorr_tag = tag;
+				timecorr_offset = value_offset;
+				}
+				
+			    /* LeftChannel */
+			    else if (tag == LeftChannel)
 				{
 				*left_channel_offset = value_offset;
 				}
-			    else if (tag == 264)
+				
+			    /* LeftChannel2 */
+			    else if (tag == LeftChannel2)
+				{
+				*left_channel_offset = value_offset;
+				}
+
+			    /* RightChannel */
+			    else if (tag == RightChannel)
 				{
 				*right_channel_offset = value_offset;
 				}
-			    else if (tag == 265)
+				
+			    /* RightChannel2 */
+			    else if (tag == RightChannel2)
+				{
+				*right_channel_offset = value_offset;
+				}
+
+			    /* SonarDataInfo */
+			    else if (tag == SonarDataInfo)
 				{
 				*sonar_data_info_offset = value_offset;
+				*sonar_data_info_tag = tag;
 				}
-			    else if (tag == 266)
+
+			    /* SonarDataInfo2 */
+			    else if (tag == SonarDataInfo2)
+				{
+				*sonar_data_info_offset = value_offset;
+				*sonar_data_info_tag = tag;
+				}
+
+			    /* SonarDataInfo3 */
+			    else if (tag == SonarDataInfo3)
+				{
+				*sonar_data_info_offset = value_offset;
+				*sonar_data_info_tag = tag;
+				}
+
+			    /* NavInfoCount */
+			    else if (tag == NavInfoCount)
 				{
 				*n_nav = value_offset;
 				}
-			    else if (tag == 267)
+				
+			    /* NavInfo */
+			    else if (tag == NavInfo)
 				{
 				*nav_info_offset = value_offset;
+				*nav_info_tag = tag;
 				}
-			    }
-			}
-			
-		    /* get time correlation values */
-		    fseek(mb_io_ptr->mbfp, *time_corr_offset, SEEK_SET);
-		    fread(ref_windows_time, sizeof(int), 1, mb_io_ptr->mbfp);
-		    if ((status = fread(corr_time, sizeof(short), 
-			    9, mb_io_ptr->mbfp)) == 9)
-			{
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
+				
+			    /* NavInfo2 */
+			    else if (tag == NavInfo2)
+				{
+				*nav_info_offset = value_offset;
+				*nav_info_tag = tag;
+				}
+				
+			    /* NavInfo3 */
+			    else if (tag == NavInfo3)
+				{
+				*nav_info_offset = value_offset;
+				*nav_info_tag = tag;
+				}
+				
+			    /* NavInfo4 */
+			    else if (tag == NavInfo4)
+				{
+				*nav_info_offset = value_offset;
+				*nav_info_tag = tag;
+				}
+				
+			    /* NavInfo5 */
+			    else if (tag == NavInfo5)
+				{
+				*nav_info_offset = value_offset;
+				*nav_info_tag = tag;
+				}
+				
+			    /* NavInfo6 */
+			    else if (tag == NavInfo6)
+				{
+				*nav_info_offset = value_offset;
+				*nav_info_tag = tag;
+				}
+			     }
 			}
 		    else
 			{
 			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
+			*error = MB_ERROR_EOF;		    				
 			}
-		    if (status == MB_SUCCESS)
+		    }			
+		else
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_EOF;		    				
+		    }
+		}
+			
+	    /* set the time correlation */
+	    if (status == MB_SUCCESS)
+		{
+	    	/* TimeCorrelation */
+	    	if (timecorr_tag == TimeCorrelation)
+		    {
+		    /* get time correlation values */
+		    fseek(mb_io_ptr->mbfp, timecorr_offset, SEEK_SET);
+		    if ((status = fread(buffer, sizeof(int) + 9 * sizeof(short), 
+			    1, mb_io_ptr->mbfp)) == 1)
 			{
-#ifndef BYTESWAPPED
-			*ref_windows_time = mb_swap_int(*ref_windows_time);
+			index = 0;
+		    	mb_get_binary_int(MB_YES, &(buffer[index]), ref_windows_time);
+			index += sizeof(int);
 			for (i=0;i<9;i++)
 			    {
-			    corr_time[i] = mb_swap_short(corr_time[i]);
+		    	    mb_get_binary_short(MB_YES, &(buffer[index]), 
+			    			&(corr_time[i]));
+			    index += sizeof(short);
 			    }
-#endif
 			mb_fix_y2k(verbose,(int)corr_time[5],
 				    &corr_time_i[0]);
 			corr_time_i[1] = corr_time[4] + 1;
@@ -635,6 +731,50 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			corr_time_i[6] = 0;
 			mb_get_time(verbose,corr_time_i,
 				corr_time_d);
+			    
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		    else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		    }
+
+		/* Y2KTimeCorrelation */
+		else if (timecorr_tag == Y2KTimeCorrelation)
+		    {
+		    /* get time correlation values */
+		    fseek(mb_io_ptr->mbfp, timecorr_offset, SEEK_SET);
+		    if ((status = fread(buffer, 3 * sizeof(int), 
+			    1, mb_io_ptr->mbfp)) == 1)
+			{
+			index = 0;
+		    	mb_get_binary_int(MB_YES, &(buffer[index]), ref_windows_time);
+			index += sizeof(int);
+		    	mb_get_binary_int(MB_YES, &(buffer[index]), &date);
+			index += sizeof(int);
+		    	mb_get_binary_int(MB_YES, &(buffer[index]), &time);
+			index += sizeof(int);
+			corr_time_i[0] = date / 10000;
+			corr_time_i[1] = (date - corr_time_i[0] * 10000)/ 100;
+			corr_time_i[2] = (date - corr_time_i[0] * 10000
+				    	    - corr_time_i[1] * 100);
+			corr_time_i[3] = (time / 3600);
+			corr_time_i[4] = (time - corr_time_i[3] * 3600) / 60;
+			corr_time_i[5] = (time - corr_time_i[3] * 3600 
+				    	    - corr_time_i[4] * 60);
+			corr_time_i[6] = 0;
+			mb_get_time(verbose,corr_time_i,
+				corr_time_d);
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		    else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
 			}
 		    }
 		else
@@ -656,37 +796,111 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	else if (status == MB_SUCCESS)
 	    {
 	    /* get sonar data info */
-	    fseek(mb_io_ptr->mbfp, 
-		    *sonar_data_info_offset 
-			+ (*n_read) * (sizeof(int) + 3 * sizeof(short)), 
-		    SEEK_SET);
-	    status = fread(&pingtime, sizeof(int), 
-			    1, mb_io_ptr->mbfp);
-	    status = fread(&range_code, sizeof(short), 
-			    1, mb_io_ptr->mbfp);
-	    status = fread(&range_delay_bin, sizeof(short),  
-			    1, mb_io_ptr->mbfp);
-	    if ((status = fread(&altitude_bin, sizeof(short),  
-			    1, mb_io_ptr->mbfp)) == 1)
-		{
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
+	    if (*sonar_data_info_tag == SonarDataInfo)
+	    	{
+		fseek(mb_io_ptr->mbfp, 
+			*sonar_data_info_offset 
+			    + (*n_read) * (sizeof(int) + 3 * sizeof(short)), 
+			SEEK_SET);
+		if ((status = fread(buffer, sizeof(int) + 3 * sizeof(short),  
+				1, mb_io_ptr->mbfp)) == 1)
+		    {
+		    index = 0;
+		    mb_get_binary_int(MB_YES, &(buffer[index]), &pingtime);
+		    index += sizeof(int);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &range_code);
+		    index += sizeof(short);
+		    frequency_code = FREQ_UNKNOWN;
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &range_delay_bin);
+		    index += sizeof(short);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &altitude_bin);
+		    index += sizeof(short);
+		    status = MB_SUCCESS;
+		    *error = MB_ERROR_NO_ERROR;
+		    for (i=0;i<16;i++)
+		    	sonar_gain[i] = 0;
+		    }
+		else
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_EOF;
+		    }
 		}
-	    else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
+
+	    /* get sonar data info */
+	    else if (*sonar_data_info_tag == SonarDataInfo2)
+	    	{
+		fseek(mb_io_ptr->mbfp, 
+			*sonar_data_info_offset 
+			    + (*n_read) * (sizeof(int) + 4 * sizeof(short)), 
+			SEEK_SET);
+		if ((status = fread(buffer, sizeof(int) + 4 * sizeof(short),  
+				1, mb_io_ptr->mbfp)) == 1)
+		    {
+		    index = 0;
+		    mb_get_binary_int(MB_YES, &(buffer[index]), &pingtime);
+		    index += sizeof(int);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &range_code);
+		    index += sizeof(short);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &frequency_code);
+		    index += sizeof(short);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &range_delay_bin);
+		    index += sizeof(short);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &altitude_bin);
+		    index += sizeof(short);
+		    status = MB_SUCCESS;
+		    *error = MB_ERROR_NO_ERROR;
+		    for (i=0;i<16;i++)
+		    	sonar_gain[i] = 0;
+		    status = MB_SUCCESS;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+		else
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_EOF;
+		    }
+		}
+		
+	    /* get sonar data info */
+	    else if (*sonar_data_info_tag == SonarDataInfo3)
+	    	{
+		fseek(mb_io_ptr->mbfp, 
+			*sonar_data_info_offset 
+			    + (*n_read) * (sizeof(int) + 20 * sizeof(short)), 
+			SEEK_SET);
+		if ((status = fread(buffer, sizeof(int) + 20 * sizeof(short),  
+				1, mb_io_ptr->mbfp)) == 1)
+		    {
+		    index = 0;
+		    mb_get_binary_int(MB_YES, &(buffer[index]), &pingtime);
+		    index += sizeof(int);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &range_code);
+		    index += sizeof(short);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &frequency_code);
+		    index += sizeof(short);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &range_delay_bin);
+		    index += sizeof(short);
+		    mb_get_binary_short(MB_YES, &(buffer[index]), &altitude_bin);
+		    index += sizeof(short);
+		    for (i=0;i<16;i++)
+		    	{
+			mb_get_binary_short(MB_YES, &(buffer[index]), &(sonar_gain[i]));
+		        index += sizeof(short);
+			}
+		    status = MB_SUCCESS;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+		else
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_EOF;
+		    }
 		}
 		
 	    /* make sense of sonar data info */
 	    if (status == MB_SUCCESS)
 		{
-#ifndef BYTESWAPPED
-		pingtime = mb_swap_int(pingtime);
-		range_code = mb_swap_short(range_code);
-		range_delay_bin = mb_swap_short(range_delay_bin);
-		altitude_bin = mb_swap_short(altitude_bin);
-#endif
 		channel_mode = (range_code & ~63) >> 6;
 		if (channel_mode == 3) channel_mode = 0;
 		range_mode = range_code & 15;
@@ -729,85 +943,182 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		range_per_bin = range / *n_pixel_channel;
 		range_delay = range_delay_bin * range_per_bin;
 		altitude = altitude_bin * range_per_bin;
+		switch (frequency_code)
+		    {
+		    case 1:
+			frequency = 150.0;
+			break;
+		    case 2:
+			frequency = 300.0;
+			break;
+		    case 3:
+			frequency = 600.0;
+			break;
+		    case 4:
+			frequency = 1200.0;
+			break;
+		    case 5:
+			frequency = 0.0;
+			break;
+		    }
 		}
-		
+
 	    /* now get navigation */
 	    if (status == MB_SUCCESS
 		&& *n_nav_use < *n_nav)
 		{
-		/* read first two nav points starting with last
+		switch (*nav_info_tag)
+		    {
+		    case NavInfo:
+			navsize = 16 * sizeof(int);
+			break;
+		    case NavInfo2:
+			navsize = 19 * sizeof(int);
+			break;
+		    case NavInfo3:
+			navsize = 16 * sizeof(int);
+			break;
+		    case NavInfo4:
+			navsize = 19 * sizeof(int);
+			break;
+		    case NavInfo5:
+			navsize = 20 * sizeof(int);
+			break;
+		    case NavInfo6:
+			navsize = 20 * sizeof(int);
+			break;
+		    default:
+			navsize = 20 * sizeof(int);
+			break;
+		    }
+
+		/* read first nav point starting with last
 		   nav used */
 		fseek(mb_io_ptr->mbfp, 
 		    *nav_info_offset + (*n_nav_use) 
-			* (sizeof(short) + 11 * sizeof(int) 
-			    + 4 * sizeof(float)), 
-		    SEEK_SET);
-		fread(&navtime1, sizeof(int), 1, mb_io_ptr->mbfp);
-		fread(&lat1, sizeof(float), 1, mb_io_ptr->mbfp);
-		fread(&lon1, sizeof(float), 1, mb_io_ptr->mbfp);
-		fread(&speed1, sizeof(float), 1, mb_io_ptr->mbfp);
-		fread(&course1, sizeof(float), 1, mb_io_ptr->mbfp);
-		fread(idummy, sizeof(int), 10, mb_io_ptr->mbfp);
-		fread(sdummy, sizeof(short), 1, mb_io_ptr->mbfp);
-		fread(&navtime2, sizeof(int), 1, mb_io_ptr->mbfp);
-		fread(&lat2, sizeof(float), 1, mb_io_ptr->mbfp);
-		fread(&lon2, sizeof(float), 1, mb_io_ptr->mbfp);
-		fread(&speed2, sizeof(float), 1, mb_io_ptr->mbfp);
-		fread(&course2, sizeof(float), 1, mb_io_ptr->mbfp);
-		fread(idummy, sizeof(int), 10, mb_io_ptr->mbfp);
-		fread(sdummy, sizeof(short), 1, mb_io_ptr->mbfp);
-#ifndef BYTESWAPPED
-		navtime1 = mb_swap_int(navtime1);
-		mb_swap_float(&lat1);
-		mb_swap_float(&lon1);
-		mb_swap_float(&speed1);
-		mb_swap_float(&course1);
-		navtime2 = mb_swap_int(navtime2);
-		mb_swap_float(&lat2);
-		mb_swap_float(&lon2);
-		mb_swap_float(&speed2);
-		mb_swap_float(&course2);
-#endif
-		lon1 /= 60.;
-		lat1 /= 60.;
-		lon2 /= 60.;
-		lat2 /= 60.;
-		if (course1 > 359 && course2 <360)
-		    course1 = course2;
-		else if (course1 > 359)
-		    course1 = 0;
-		if (course2 > 359)
-		    course2 = course1;
+			* navsize, SEEK_SET);
+		if ((status = fread(buffer, navsize,  
+				1, mb_io_ptr->mbfp)) == 1)
+		    {
+		    index = 0;
+		    mb_get_binary_int(MB_YES, &(buffer[index]), &navtime1);
+		    index += sizeof(int);
+		    mb_get_binary_float(MB_YES, &(buffer[index]), &lat1);
+		    index += sizeof(float);
+		    mb_get_binary_float(MB_YES, &(buffer[index]), &lon1);
+		    index += sizeof(float);
+		    mb_get_binary_float(MB_YES, &(buffer[index]), &speed1);
+		    index += sizeof(float);
+		    mb_get_binary_float(MB_YES, &(buffer[index]), &course1);
+		    if (*nav_info_tag == NavInfo6)
+		    	{
+			index += 3 * sizeof(float);
+		        mb_get_binary_float(MB_YES, &(buffer[index]), &heading1);
+			}
+		    else
+			{
+			heading1 = course1;
+			}
+		    lon1 /= 60.;
+		    lat1 /= 60.;
+		    status = MB_SUCCESS;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+		else
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_EOF;
+		    }
+
+		/* read second nav point starting with last
+		   nav used */
+		fseek(mb_io_ptr->mbfp, 
+		    *nav_info_offset + (*n_nav_use+1) 
+			* navsize, SEEK_SET);
+		if ((status = fread(buffer, navsize,  
+				1, mb_io_ptr->mbfp)) == 1)
+		    {
+		    index = 0;
+		    mb_get_binary_int(MB_YES, &(buffer[index]), &navtime2);
+		    index += sizeof(int);
+		    mb_get_binary_float(MB_YES, &(buffer[index]), &lat2);
+		    index += sizeof(float);
+		    mb_get_binary_float(MB_YES, &(buffer[index]), &lon2);
+		    index += sizeof(float);
+		    mb_get_binary_float(MB_YES, &(buffer[index]), &speed2);
+		    index += sizeof(float);
+		    mb_get_binary_float(MB_YES, &(buffer[index]), &course2);
+		    if (*nav_info_tag == NavInfo6)
+		    	{
+			index += 3 * sizeof(float);
+		        mb_get_binary_float(MB_YES, &(buffer[index]), &heading2);
+			}
+		    else
+			{
+			heading2 = course2;
+			}
+		    lon2 /= 60.;
+		    lat2 /= 60.;
+		    status = MB_SUCCESS;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+		else
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_EOF;
+		    }
 
 		/* if first two nav points don't bracket ping
 		   in time keep reading until two found that
 		   do or end of nav reached */
 		while (pingtime > navtime2 && *n_nav_use < *n_nav - 2)
 		    {
+		    /* move nav 2 to nav 1 */
 		    navtime1 = navtime2;
 		    lat1 = lat2;
 		    lon1 = lon2;
 		    speed1 = speed2;
 		    course1 = course2;
-		    fread(&navtime2, sizeof(int), 1, mb_io_ptr->mbfp);
-		    fread(&lat2, sizeof(float), 1, mb_io_ptr->mbfp);
-		    fread(&lon2, sizeof(float), 1, mb_io_ptr->mbfp);
-		    fread(&speed2, sizeof(float), 1, mb_io_ptr->mbfp);
-		    fread(&course2, sizeof(float), 1, mb_io_ptr->mbfp);
-		    fread(idummy, sizeof(int), 10, mb_io_ptr->mbfp);
-		    fread(sdummy, sizeof(short), 1, mb_io_ptr->mbfp);
-#ifndef BYTESWAPPED
-		    navtime2 = mb_swap_int(navtime2);
-		    mb_swap_float(&lat2);
-		    mb_swap_float(&lon2);
-		    mb_swap_float(&speed2);
-		    mb_swap_float(&course2);
-#endif
-		    lon2 /= 60.;
-		    lat2 /= 60.;
-		    if (course2 > 359)
-			course2 = course1;
-		    (*n_nav_use)++;
+
+		    /* read second nav point starting with last
+		       nav used */
+		    fseek(mb_io_ptr->mbfp, 
+			*nav_info_offset + (*n_nav_use+2) 
+			    * navsize, SEEK_SET);
+		    if ((status = fread(buffer, navsize,  
+				    1, mb_io_ptr->mbfp)) == 1)
+			{
+			index = 0;
+			mb_get_binary_int(MB_YES, &(buffer[index]), &navtime2);
+			index += sizeof(int);
+			mb_get_binary_float(MB_YES, &(buffer[index]), &lat2);
+			index += sizeof(float);
+			mb_get_binary_float(MB_YES, &(buffer[index]), &lon2);
+			index += sizeof(float);
+			mb_get_binary_float(MB_YES, &(buffer[index]), &speed2);
+			index += sizeof(float);
+			mb_get_binary_float(MB_YES, &(buffer[index]), &course2);
+			if (*nav_info_tag == NavInfo6)
+		    	    {
+			    index += 3 * sizeof(float);
+		            mb_get_binary_float(MB_YES, &(buffer[index]), &heading2);
+			    }
+			else
+		    	    {
+			    heading2 = course2;
+			    }
+			lon2 /= 60.;
+			lat2 /= 60.;
+		        (*n_nav_use)++;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		    else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+
 		    }
 		    
 		/* now interpolate nav */
@@ -816,10 +1127,30 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		lon = lon1 + factor * (lon2 - lon1);
 		lat = lat1 + factor * (lat2 - lat1);
 		speed = speed1 + factor * (speed2 - speed1);
-		if (factor <= 0.5)
-		    course = course1;
+		if (course2 - course1 > 180.0)
+			{
+			course = course1 + factor * (course2 - course1 - 360.0);
+			}
+		else if (course2 - course1 < -180.0)
+			{
+			course = course1 + factor * (course2 - course1 + 360.0);
+			}
 		else
-		    course = course2;
+			{
+			course = course1 + factor * (course2 - course1);
+			}
+		if (heading2 - heading1 > 180.0)
+			{
+			heading = heading1 + factor * (heading2 - heading1 - 360.0);
+			}
+		else if (heading2 - heading1 < -180.0)
+			{
+			heading = heading1 + factor * (heading2 - heading1 + 360.0);
+			}
+		else
+			{
+			heading = heading1 + factor * (heading2 - heading1);
+			}
 		}
 		
 	    /* now get left channel sonar data */
@@ -888,33 +1219,102 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				+ 0.001 * (pingtime - *ref_windows_time);
 		data->lon = lon;
 		data->lat = lat;
-		data->heading = course;
+		data->heading = heading;
+		data->course = course;
 		data->speed = speed;
 		data->altitude = altitude;
+		data->slant_range_max = range;
+		data->range_delay = range_delay;
+		data->sample_interval = range_per_bin;
+		data->sonar_depth = 0.0;
+		data->frequency = frequency;
 		data->pixels_ss = 2 * (*n_pixel_channel);
-		istart = (altitude - range_delay) / range_per_bin;
-		for (i=0;i<istart; i++)
+		istart = (altitude - range_delay) / range_per_bin + 1;
+		
+		/* port and starboard channels */
+		if (channel_mode == 0)
 		    {
-		    j = (*n_pixel_channel) - 1 - i;
-		    data->ss[j] = left_channel[i] & 63;
-		    data->ssacrosstrack[j] = 0.0;
-		    j = (*n_pixel_channel) + i;
-		    data->ss[j] = right_channel[i] & 63;
-		    data->ssacrosstrack[j] = 0.0;
+		    for (i=0;i<istart; i++)
+			{
+			j = (*n_pixel_channel) - 1 - i;
+			data->ss[j] = left_channel[i] & 63;
+			data->ssacrosstrack[j] = 0.0;
+			j = (*n_pixel_channel) + i;
+			data->ss[j] = right_channel[i] & 63;
+			data->ssacrosstrack[j] = 0.0;
+			}
+		    for (i=istart;i<*n_pixel_channel; i++)
+			{
+			range_tot = range_delay + i * range_per_bin;
+			j = (*n_pixel_channel) - 1 - i;
+			data->ss[j] = left_channel[i] & 63;
+			data->ssacrosstrack[j] 
+			    = -sqrt(range_tot * range_tot
+				    - altitude * altitude);
+			j = (*n_pixel_channel) + i;
+			data->ss[j] = right_channel[i] & 63;
+			data->ssacrosstrack[j] 
+			    = sqrt(range_tot * range_tot
+				    - altitude * altitude);
+			}
 		    }
-		for (i=istart;i<*n_pixel_channel; i++)
+		    
+		/* port channel only */
+		else if (channel_mode == 1)
 		    {
-		    range_tot = range_delay + i * range_per_bin;
-		    j = (*n_pixel_channel) - 1 - i;
-		    data->ss[j] = left_channel[i] & 63;
-		    data->ssacrosstrack[j] 
-			= -sqrt(range_tot * range_tot
-				- altitude * altitude);
-		    j = (*n_pixel_channel) + i;
-		    data->ss[j] = right_channel[i] & 63;
-		    data->ssacrosstrack[j] 
-			= sqrt(range_tot * range_tot
-				- altitude * altitude);
+		    for (i=0;i<istart; i++)
+			{
+			j = 2 * (*n_pixel_channel) - 1 - 2 * i;
+			data->ss[j] = left_channel[i] & 63;
+			data->ssacrosstrack[j] = 0.0;
+			j = 2 * (*n_pixel_channel) - 2 - 2 * i;
+			data->ss[j] = right_channel[i] & 63;
+			data->ssacrosstrack[j] = 0.0;
+			}
+		    for (i=istart;i<*n_pixel_channel; i++)
+			{
+			range_tot = range_delay + (i - 0.5) * range_per_bin;
+			j = 2 * (*n_pixel_channel) - 1 - 2 * i;
+			data->ss[j] = left_channel[i] & 63;
+			data->ssacrosstrack[j] 
+			    = -sqrt(range_tot * range_tot
+				    - altitude * altitude);
+			range_tot = range_delay + i * range_per_bin;
+			j = 2 * (*n_pixel_channel) - 2 - 2 * i;
+			data->ss[j] = right_channel[i] & 63;
+			data->ssacrosstrack[j] 
+			    = -sqrt(range_tot * range_tot
+				    - altitude * altitude);
+			}
+		    }
+		    
+		/* starboard channel only */
+		else if (channel_mode == 2)
+		    {
+		    for (i=0;i<istart; i++)
+			{
+			j = 2 * i;
+			data->ss[j] = right_channel[i] & 63;
+			data->ssacrosstrack[j] = 0.0;
+			j = 2 * i + 1;
+			data->ss[j] = left_channel[i] & 63;
+			data->ssacrosstrack[j] = 0.0;
+			}
+		    for (i=istart;i<*n_pixel_channel; i++)
+			{
+			range_tot = range_delay + (i - 0.5) * range_per_bin;
+			j = 2 * i;
+			data->ss[j] = right_channel[i] & 63;
+			data->ssacrosstrack[j] 
+			    = sqrt(range_tot * range_tot
+				    - altitude * altitude);
+			range_tot = range_delay + i * range_per_bin;
+			j = 2 * i + 1;
+			data->ss[j] = left_channel[i] & 63;
+			data->ssacrosstrack[j] 
+			    = sqrt(range_tot * range_tot
+				    - altitude * altitude);
+			}
 		    }
 		}
 	    }
@@ -974,8 +1374,14 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* heading and speed */
 		store->heading = data->heading;
+		store->course = data->course;
 		store->speed = data->speed;
 		store->altitude = data->altitude;
+		store->slant_range_max = data->slant_range_max;
+		store->range_delay = data->range_delay;
+		store->sample_interval = data->sample_interval;
+		store->sonar_depth = data->sonar_depth;
+		store->frequency = data->frequency;
 		
 		/* sidescan data */
 		store->pixels_ss = data->pixels_ss;
