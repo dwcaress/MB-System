@@ -67,9 +67,13 @@ port positive.
 Default: \fIroll_bias\fP = 0.0
 .TP
 .B \fB-D\fIdraught\fP
-Sets the draught in meters of the ship used to collect the multibeam data.
+Sets the \fIdraught\fP in meters of the ship used to collect the multibeam data.
 This value will be added to the depth values determined by raytracing.
-Default: \fIdraught\fP = 5.5, the standard value for the R/V Ewing.
+Note that if the data stream includes a \fIdraught\fP value, it will
+automatically be included in the bathymetry calculations. 
+Thus, this option should only be used when the \fIdraught\fP value is
+not included in the data stream or is in error.
+Default: \fIdraught\fP = 0.0.
 .TP
 .B \fB-F\fIformat\fP
 Sets the format for the input and output multibeam data using 
