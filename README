@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.1 README FILE:
+MB-SYSTEM VERSION 5.0.2 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.1 release of the MB-System software package for 
+5.0.2 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.2          December 24, 2003
 Version 5.0.1          December 12, 2003
 Version 5.0.0          December 5, 2003
 
@@ -119,6 +120,19 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
+
+MB-SYSTEM VERSION 5.0.2 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.2 release of MB-System includes two bug fixes
+relative to the 5.0.1 release. 
+
+We have fixed a bug in the i/o module for Elac Bottomchart data 
+in the XSE format (94) in which the sonar depth was added to
+bathymetry values when new data files were written.
+
+We have also fixed problems related to reading and writing
+SeaBeam 2100 data in the binary formats 42 and 43.
 
 MB-SYSTEM VERSION 5.0.1 RELEASE NOTES:
 ------------------------------------------
@@ -721,10 +735,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.41 2003-12-12 08:06:00 caress Exp $
+RCS ID: $Id: README,v 5.42 2003-12-24 08:51:05 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.41  2003/12/12 08:06:00  caress
+Release 5.0.1
+
 Revision 5.40  2003/12/05 08:21:22  caress
 *** empty log message ***
 
