@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.4 1999-07-16 19:21:16 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.5 1999-09-15 21:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1999/07/16  19:21:16  caress
+ * Smaller window with new dialogs for Linux.
+ *
  * Revision 4.3  1998/10/05 17:45:32  caress
  * MB-System version 4.6beta
  *
@@ -71,6 +74,7 @@
 
 /* mbedit widget includes */
 #include "mbedit_creation.h"
+#include "mb_status.h"
 
 /*
  * Macros to make code look nicer between ANSI and K&R.
@@ -193,6 +197,7 @@ static int mb_borders[4] =
 void do_filebutton_on();
 void do_filebutton_off();
 void set_label_string(Widget, String);
+void set_label_multiline_string(Widget, String);
 void get_text_string(Widget, String);
 
 /*--------------------------------------------------------------------*/
@@ -424,7 +429,7 @@ do_mbedit_init(argc, argv)
 
 int do_setup_data()
 {
-	char value_text[10];
+	char value_text[128];
 
 	/* get some default values from mbedit */
 	status = mbedit_get_defaults(&plot_size_max,
@@ -434,6 +439,11 @@ int do_setup_data()
 			&mplot_width,&mexager,
 			&mx_interval,&my_interval,
 			ttime_i,&mode_output);
+			
+	/* set about version label */
+	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", 
+		MB_VERSION, MB_BUILD_DATE);
+	set_label_multiline_string(label_about_version, value_text);
 
 	/* set values of number of pings slider */
 	XtVaSetValues(slider_number_pings, 
@@ -1928,6 +1938,25 @@ void set_label_string(Widget w, String str)
 	    NULL);
     else 
 	XtWarning("Failed to update labelString");
+
+    XmStringFree( xstr );
+}
+/*--------------------------------------------------------------------*/
+/* Change multiline label string cleanly, no memory leak */
+/*--------------------------------------------------------------------*/
+
+void set_label_multiline_string(Widget w, String str)
+{
+    XmString xstr;
+    int      argok;
+
+    xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
+    if ( xstr != NULL && argok)
+        XtVaSetValues(w,
+            XmNlabelString, xstr,
+            NULL);
+    else
+        XtWarning("Failed to update labelString");
 
     XmStringFree( xstr );
 }

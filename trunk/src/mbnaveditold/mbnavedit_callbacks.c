@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.9 1999-04-14 04:33:10 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.10 1999-09-15 21:01:04 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1999/04/14  04:33:10  caress
+ * Final (?) version 4.6 release
+ *
  * Revision 4.8  1999/04/09  22:34:08  caress
  * Added time interval plot.
  *
@@ -64,6 +67,7 @@
 #define MBNAVEDIT_DECLARE_GLOBALS
 #include "mbnavedit_extrawidgets.h"
 #include "mbnavedit.h"
+#include "mb_status.h"
 
 #include "mbnavedit_creation.h"
 
@@ -151,6 +155,7 @@ char	string[128];
 
 void	do_fileselection_list();
 void	set_label_string(Widget, String);
+void	set_label_multiline_string(Widget, String);
 void	get_text_string(Widget, String);
 void	do_set_controls();
 void	do_scroll();
@@ -646,6 +651,13 @@ do_mbnavedit_init(argc, argv)
 
 void do_set_controls()
 {
+	char	value_text[128];
+				
+	/* set about version label */
+	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", 
+		MB_VERSION, MB_BUILD_DATE);
+	set_label_multiline_string(label_about_version, value_text);
+
 	/* set value of format text item */
 	sprintf(string,"%2.2d",format);
 	XmTextFieldSetString(textField_format, string);
@@ -2372,6 +2384,25 @@ void set_label_string(Widget w, String str)
 	    NULL);
     else 
 	XtWarning("Failed to update labelString");
+
+    XmStringFree( xstr );
+}
+/*--------------------------------------------------------------------*/
+/* Change multiline label string cleanly, no memory leak */
+/*--------------------------------------------------------------------*/
+
+void set_label_multiline_string(Widget w, String str)
+{
+    XmString xstr;
+    int      argok;
+
+    xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
+    if ( xstr != NULL && argok)
+        XtVaSetValues(w,
+            XmNlabelString, xstr,
+            NULL);
+    else
+        XtWarning("Failed to update labelString");
 
     XmStringFree( xstr );
 }
