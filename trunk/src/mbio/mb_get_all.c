@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 4.8 1999-08-08 04:12:45 caress Exp $
+ *    $Id: mb_get_all.c,v 4.9 2000-07-19 03:28:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1999/08/08  04:12:45  caress
+ * Added ELMK2XSE format.
+ *
  * Revision 4.7  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -114,7 +117,7 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 4.8 1999-08-08 04:12:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 4.9 2000-07-19 03:28:02 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -210,7 +213,9 @@ int	*error;
 
 	/* if first ping read set "old" navigation values */
 	if (status == MB_SUCCESS 
-		&& *kind != MB_DATA_COMMENT
+		&& (*kind == MB_DATA_DATA
+		    || *kind == MB_DATA_NAV
+		    || *kind == MB_DATA_CALIBRATE)
 		&& mb_io_ptr->ping_count == 1)
 		{
 		mb_io_ptr->old_time_d = mb_io_ptr->new_time_d;
@@ -258,7 +263,10 @@ int	*error;
 		}
 
 	/* calculate speed and distance */
-	if (status == MB_SUCCESS && *kind != MB_DATA_COMMENT)
+	if (status == MB_SUCCESS
+		&& (*kind == MB_DATA_DATA
+		    || *kind == MB_DATA_NAV
+		    || *kind == MB_DATA_CALIBRATE))
 		{
 		/* get coordinate scaling */
 		mb_coor_scale(verbose,*navlat,&mtodeglon,&mtodeglat);
@@ -321,11 +329,9 @@ int	*error;
 
 	/* check for out of location or time bounds */
 	if (status == MB_SUCCESS 
-		&& *kind != MB_DATA_COMMENT
-		&& *kind != MB_DATA_ANGLE
-		&& *kind != MB_DATA_START
-		&& *kind != MB_DATA_STOP
-		&& *kind != MB_DATA_EVENT)
+		&& (*kind == MB_DATA_DATA
+		    || *kind == MB_DATA_NAV
+		    || *kind == MB_DATA_CALIBRATE))
 		{
 		if (*navlon < mb_io_ptr->bounds[0] 
 			|| *navlon > mb_io_ptr->bounds[1] 
@@ -345,11 +351,9 @@ int	*error;
 
 	/* check for time gap */
 	if (status == MB_SUCCESS 
-		&& *kind != MB_DATA_COMMENT 
-		&& *kind != MB_DATA_ANGLE
-		&& *kind != MB_DATA_START
-		&& *kind != MB_DATA_STOP
-		&& *kind != MB_DATA_EVENT 
+		&& (*kind == MB_DATA_DATA
+		    || *kind == MB_DATA_NAV
+		    || *kind == MB_DATA_CALIBRATE) 
 		&& mb_io_ptr->ping_count > 1)
 		{
 		if ((*time_d - mb_io_ptr->old_time_d) 
@@ -363,11 +367,9 @@ int	*error;
 	/* check for less than minimum speed */
 	if ((*error == MB_ERROR_NO_ERROR 
 		|| *error == MB_ERROR_TIME_GAP)
-		&& *kind != MB_DATA_COMMENT 
-		&& *kind != MB_DATA_ANGLE
-		&& *kind != MB_DATA_START
-		&& *kind != MB_DATA_STOP
-		&& *kind != MB_DATA_EVENT 
+		&& (*kind == MB_DATA_DATA
+		    || *kind == MB_DATA_NAV
+		    || *kind == MB_DATA_CALIBRATE) 
 		&& mb_io_ptr->ping_count > 1)
 		{
 		if (*speed < mb_io_ptr->speedmin)
@@ -397,6 +399,9 @@ int	*error;
 
 	/* reset "old" navigation values */
 	if (*error <= MB_ERROR_NO_ERROR 
+		&& (*kind == MB_DATA_DATA
+		    || *kind == MB_DATA_NAV
+		    || *kind == MB_DATA_CALIBRATE)
 		&& *error > MB_ERROR_COMMENT)
 		{
 		mb_io_ptr->old_time_d = *time_d;

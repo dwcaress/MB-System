@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em1000rw.c	8/8/94
- *	$Id: mbr_em1000rw.c,v 4.13 1999-03-31 18:11:35 caress Exp $
+ *	$Id: mbr_em1000rw.c,v 4.14 2000-07-19 03:28:02 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.12  1999/02/04  23:52:54  caress
  * MB-System version 4.6beta7
  *
@@ -95,7 +98,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em1000rw.c,v 4.13 1999-03-31 18:11:35 caress Exp $";
+	static char res_id[]="$Id: mbr_em1000rw.c,v 4.14 2000-07-19 03:28:02 caress Exp $";
 	char	*function_name = "mbr_alm_em1000rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -3831,17 +3834,19 @@ int	*error;
 		*char_ptr = (char) odatagram;
 		char_ptr = &line[21];
 		*char_ptr = (char) num_beams;
+		j=0;
 		for (i=datagram_start[datagram];i<=datagram_end[datagram];i++)
 			{
-			char_ptr = line + 22 + 6*i;
+			char_ptr = line + 22 + 6*j;
 			obeam = i + 1;
 			*char_ptr = (char) obeam;
-			char_ptr = line + 23 + 6*i;
+			char_ptr = line + 23 + 6*j;
 			*char_ptr = (char) data->beam_frequency[i];
-			short_ptr = ((short int *) line) + 1;
+			short_ptr = ((short int *) line) + 12 + 3*j;
 			*short_ptr = (short int) data->beam_samples[i];
-			short_ptr = ((short int *) line) + 2;
+			short_ptr = ((short int *) line) + 13 + 3*j;
 			*short_ptr = (short int) data->beam_center_sample[i];
+			j++;
 			}
 		ioffset = 22 + 6*num_beams;
 		for (i=datagram_start[datagram];i<=datagram_end[datagram];i++)
@@ -3849,7 +3854,7 @@ int	*error;
 			beam_ss = &data->ss[data->beam_start_sample[i]];
 			for (j=0;j<data->beam_samples[i];j++)
 				{
-				char_ptr = &line[ioffset+j];
+				char_ptr = line + ioffset + j;
 				*char_ptr = (char) beam_ss[j];
 				}
 			ioffset = ioffset + data->beam_samples[i];
