@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mgd77dat.c	5/18/99
- *	$Id: mbr_mgd77dat.c,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_mgd77dat.c,v 5.4 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -89,10 +92,11 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+static char res_id[]="$Id: mbr_mgd77dat.c,v 5.4 2002-02-22 09:03:43 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mgd77dat.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_register_mgd77dat";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -103,6 +107,7 @@ int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
 
@@ -222,7 +227,6 @@ int mbr_info_mgd77dat(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mgd77dat.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_info_mgd77dat";
 	int	status = MB_SUCCESS;
 
@@ -232,6 +236,7 @@ int mbr_info_mgd77dat(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
 
@@ -291,10 +296,8 @@ int mbr_info_mgd77dat(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mgd77dat(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mgd77dat.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_alm_mgd77dat";
 	int	status = MB_SUCCESS;
-	int	i;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77dat_struct *data;
 	char	*data_ptr;
@@ -305,6 +308,7 @@ int mbr_alm_mgd77dat(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
@@ -361,6 +365,7 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
@@ -400,6 +405,7 @@ int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
@@ -472,7 +478,7 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77dat_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -480,6 +486,7 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -567,6 +574,7 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -656,6 +664,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
@@ -688,7 +697,30 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
-	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
+		
+	/* handle "pseudo-mgd77" in which each record is
+	 * followed by a cr or lf */
+	while (status == MB_SUCCESS
+	    && (line[0] == '\r' || line[0] == '\n'))
+	    {
+	    for (i=0;i<MBF_MGD77DAT_DATA_LEN-1;i++)
+		line[i] = line[i+1];
+	    if ((read_len = fread(&line[MBF_MGD77DAT_DATA_LEN-1],1,1,
+			    mb_io_ptr->mbfp)) == 1) 
+		    {
+		    mb_io_ptr->file_bytes += read_len;
+		    status = MB_SUCCESS;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+	    else
+		    {
+		    mb_io_ptr->file_bytes += read_len;
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_EOF;
+		    }
+	    }
+	
+	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);	
 
 	/* handle the data */
 	if (status == MB_SUCCESS
@@ -754,10 +786,14 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	    data->bath = 0.1 * itmp;
 	    mb_get_int(&data->bath_corr, &line[shift], 2); shift += 2;
 	    mb_get_int(&data->bath_type, &line[shift], 1); shift += 1;
-	    if (data->bath > 0.0)
+	    if (data->bath > 0.0 && data->bath < 99999.9)
+		{
 		data->flag = MB_FLAG_NONE;
+		}
 	    else
+		{
 		data->flag = MB_FLAG_NULL;
+		}
 	    
 	    /* get magnetics */
 	    mb_get_int(&itmp, &line[shift], 6); shift += 6;
@@ -823,10 +859,14 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	    data->bath = 0.1 * itmp;
 	    mb_get_int(&data->bath_corr, &line[shift], 2); shift += 2;
 	    mb_get_int(&data->bath_type, &line[shift], 1); shift += 1;
-	    if (data->bath > 0.0)
+	    if (data->bath > 0.0 && data->bath < 99999.9)
+		{
 		data->flag = MB_FLAG_NONE;
+		}
 	    else
+		{
 		data->flag = MB_FLAG_NULL;
+		}
 	    
 	    /* get magnetics */
 	    mb_get_int(&itmp, &line[shift], 6); shift += 6;
@@ -878,7 +918,6 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	struct mbf_mgd77dat_struct *data;
 	char	line[MBF_MGD77DAT_DATA_LEN+1];
 	int	itmp;
-	double	dtmp;
 	int	write_len;
 	int	shift;
 	int	i;
@@ -889,6 +928,7 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
@@ -932,7 +972,7 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		    + 1000.0 * (data->time_i[5] 
 			+ 1000000 * data->time_i[6])/ 60.0;
 	    sprintf(&line[shift], "%5.5d", itmp); shift += 5;
-	
+
 	    /* get nav */
 	    itmp = 100000 * data->latitude;
 	    sprintf(&line[shift], "%8.8d", itmp); shift += 8;
@@ -941,10 +981,19 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	    sprintf(&line[shift], "%1.1d", data->nav_type); shift += 1;
 	    
 	    /* get bath */
-	    itmp = 10000 * data->tt;
-	    sprintf(&line[shift], "%6.6d", itmp); shift += 6;
-	    itmp = 10 * data->bath;
-	    sprintf(&line[shift], "%6.6d", itmp); shift += 6;
+	    if (data->flag == MB_FLAG_NONE)
+		{
+		itmp = 10000 * data->tt;
+		sprintf(&line[shift], "%6.6d", itmp); shift += 6;
+		itmp = 10 * data->bath;
+		sprintf(&line[shift], "%6.6d", itmp); shift += 6;
+		}
+	    else
+		{
+		itmp = 999999;
+		sprintf(&line[shift], "%6.6d", itmp); shift += 6;
+		sprintf(&line[shift], "%6.6d", itmp); shift += 6;
+		}
 	    sprintf(&line[shift], "%2.2d", data->bath_corr); shift += 2;
 	    sprintf(&line[shift], "%1.1d", data->bath_type); shift += 1;
 

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.4 2001-11-15 22:58:02 caress Exp $
+#	$Id: Makefile.template,v 5.5 2002-02-22 09:07:08 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.4  2001/11/15 22:58:02  caress
+# Reordered program building.
+#
 # Revision 5.3  2001/10/12  21:08:10  caress
 # Added mbdatalist
 #
@@ -105,7 +108,6 @@
 # Locations of GMT libraries, binaries, and include files:
 GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
 GMTINCDIR = /ocean/mgg/gmt2/src
-NETCDFLIBDIR = /ocean/mgg/netcdf/lib
 NETCDFINCDIR = /ocean/mgg/netcdf/include
 #
 # Location of Levitus annual database file
@@ -199,11 +201,11 @@ $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 		-o $(BINDIR)/mbunclean
 $(BINDIR)/mbgrid:	mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a \
-		$(GMTLIBDIR)/libgmt.a $(NETCDFLIBDIR)/libnetcdf.a \
+		$(GMTLIBDIR)/libgmt.a \
 		$(LFLAGS) -o $(BINDIR)/mbgrid
 $(BINDIR)/mbmosaic:	mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a \
-		$(GMTLIBDIR)/libgmt.a $(NETCDFLIBDIR)/libnetcdf.a \
+		$(GMTLIBDIR)/libgmt.a \
 		$(LFLAGS) -o $(BINDIR)/mbmosaic
 $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
@@ -232,7 +234,7 @@ $(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 		-o $(BINDIR)/mbsmooth
 $(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(GMTLIBDIR)/libgmt.a \
-		$(GMTLIBDIR)/libpsl.a $(NETCDFLIBDIR)/libnetcdf.a $(LFLAGS) -o $(BINDIR)/mbps
+		$(GMTLIBDIR)/libpsl.a $(LFLAGS) -o $(BINDIR)/mbps
 $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbhistogram

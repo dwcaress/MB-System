@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.1 2001-03-22 20:45:56 caress Exp $
+ *    $Id: mb_check_info.c,v 5.2 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -62,7 +65,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.1 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.2 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
@@ -188,7 +191,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 			    lon_max += 360.0;
 			    
 			/* check for lonflip conflict with bounds */
-			if (lon_min >= lon_max || lat_min >= lat_max)
+			if (lon_min > lon_max || lat_min > lat_max)
 			    *file_in_bounds = MB_YES;
 			    
 			/* else check mask against desired input bounds */

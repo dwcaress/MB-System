@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.1 2001-10-19 00:56:17 caress Exp $
+ *    $Id: mbdatalist.c,v 5.2 2002-02-22 09:07:08 caress Exp $
  *
- *    Copyright (c) 2001 by
+ *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/10/19  00:56:17  caress
+ * Now tries to use relative paths.
+ *
  * Revision 5.0  2001/10/12  21:07:31  caress
  * Initial revision.
  *
@@ -41,7 +44,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.1 2001-10-19 00:56:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.2 2002-02-22 09:07:08 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbdatalist [-Fformat -Ifile -P -R -V -H]";
@@ -75,7 +78,9 @@ main (int argc, char **argv)
 	double	timegap;
 	char	file[MB_PATH_MAXLINE];
 	char	pwd[MB_PATH_MAXLINE];
-
+	char	command[MB_PATH_MAXLINE];
+	int	make_inf = MB_NO;
+	
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
 	FILE	*output;
@@ -89,7 +94,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:PpRr")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:OoPpRr")) != -1)
 	  switch (c) 
 		{
 		case 'F':
@@ -104,6 +109,11 @@ main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'O':
+		case 'o':
+			make_inf = MB_YES;
 			flag++;
 			break;
 		case 'P':
@@ -160,6 +170,7 @@ main (int argc, char **argv)
 		fprintf(output,"dbg2       file:           %d\n",read_file);
 		fprintf(output,"dbg2       format:         %d\n",format);
 		fprintf(output,"dbg2       look_processed: %d\n",look_processed);
+		fprintf(output,"dbg2       make_inf:       %d\n",make_inf);
 		fprintf(output,"dbg2       pings:          %d\n",pings);
 		fprintf(output,"dbg2       lonflip:        %d\n",lonflip);
 		fprintf(output,"dbg2       bounds[0]:      %f\n",bounds[0]);
@@ -199,7 +210,14 @@ main (int argc, char **argv)
 	/* if not a datalist just output filename format and weight */
 	if (format > 0)
 		{
-		fprintf(output, "%s %d %f\n", read_file, format, file_weight);
+		if (make_inf == MB_YES)
+		    {
+		    sprintf(command, "mbinfo -G -F %d -I %s -O", format, read_file);
+		    fprintf(output, "Generating inf file for %s %d %f\n", read_file, format, file_weight);
+		    system(command);
+		    }
+		else
+		    fprintf(output, "%s %d %f\n", read_file, format, file_weight);
 		}
 		
 	/* else parse datalist */
@@ -221,7 +239,14 @@ main (int argc, char **argv)
 			{
 			getcwd(pwd, MB_PATH_MAXLINE);
 			mb_get_relative_path(verbose, file, pwd, &error);
-			fprintf(output, "%s %d %f\n", file, format, file_weight);
+			if (make_inf == MB_YES)
+			    {
+			    sprintf(command, "mbinfo -G -F %d -I %s -O", format, file);
+			    fprintf(output, "Generating inf file for %s %d %f\n", file, format, file_weight);
+			    system(command);
+			    }
+			else
+			    fprintf(output, "%s %d %f\n", file, format, file_weight);
 			}
 		mb_datalist_close(verbose,&datalist,&error);
 		}

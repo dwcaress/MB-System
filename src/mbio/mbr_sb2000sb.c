@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000sb.c	10/11/94
- *	$Id: mbr_sb2000sb.c,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_sb2000sb.c,v 5.4 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 11, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -140,7 +143,7 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000sb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2000sb.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2000sb.c,v 5.4 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_register_sb2000sb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -270,7 +273,7 @@ int mbr_info_sb2000sb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2000sb.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2000sb.c,v 5.4 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_info_sb2000sb";
 	int	status = MB_SUCCESS;
 
@@ -339,7 +342,7 @@ int mbr_info_sb2000sb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2000sb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sb2000sb.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000sb.c,v 5.4 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000sb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -426,7 +429,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_sb2000_struct *store;
 	int	read_status;
 	char	dummy[2];
-	char	buffer[2048];
+	char	buffer[2*MBSYS_SB2000_PIXELS+4];
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -819,7 +822,7 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
-	char	buffer[2048];
+	char	buffer[2*MBSYS_SB2000_PIXELS+4];
 	int	i, j;
 
 	/* print input debug statements */

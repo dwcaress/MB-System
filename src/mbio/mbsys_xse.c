@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.11 2001-12-30 20:32:12 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.12 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 2000, 2001 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2001/12/30 20:32:12  caress
+ * Fixed array overflows in handling XSE data.
+ *
  * Revision 5.10  2001/12/20 20:48:51  caress
  * Release 5.0.beta11
  *
@@ -90,7 +93,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.11 2001-12-30 20:32:12 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.12 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -508,6 +511,7 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 			amp[j] = store->beams[i].amplitude;
 			}
 		    }
+
 		if (store->sid_frame == MB_YES)
 		    {
 		    *nss = store->sid_num_pixels;
@@ -516,7 +520,7 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 			j = store->sid_num_pixels - i - 1;
 			ss[j] = store->ss[i];
 			ssacrosstrack[j] 
-			    = -0.001 * store->sid_bin_size 
+			    = dsign * 0.001 * store->sid_bin_size 
 				* (i - store->sid_num_pixels / 2);
 			if (store->mul_frame == MB_YES)
 			    ssalongtrack[j] 

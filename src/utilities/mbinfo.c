@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.8 2001-11-20 20:41:55 caress Exp $
+ *    $Id: mbinfo.c,v 5.9 2002-02-22 09:07:08 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/11/20  20:41:55  caress
+ * Reset output of comments to not use ##.
+ *
  * Revision 5.7  2001/11/20  02:00:19  caress
  * Now prints ## before comments when -C option used.
  *
@@ -178,7 +181,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.8 2001-11-20 20:41:55 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.9 2002-02-22 09:07:08 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -198,7 +201,7 @@ main (int argc, char **argv)
 
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
-	char	read_file[128];
+	char	read_file[MB_PATH_MAXLINE];
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
@@ -212,7 +215,7 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	file[128];
+	char	file[MB_PATH_MAXLINE];
 	int	pings_get = 1;
 	int	pings_read = 1;
 	int	beams_bath_alloc;
@@ -258,6 +261,8 @@ main (int argc, char **argv)
 	double	speed_threshold = 50.0;
 	int	bathy_in_feet = MB_NO;
 	double	bathy_scale;
+	int	lonflip_use = 0;
+	int	lonflip_set = MB_NO;
 
 	/* limit variables */
 	double	lonmin = 0.0;
@@ -355,10 +360,14 @@ main (int argc, char **argv)
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
-	FILE	*output;
+	FILE	*stream = NULL;
+	FILE	*output = NULL;
+	int	output_usefile = MB_NO;
+	char	output_file[MB_PATH_MAXLINE];
+	char	*fileprint;
 
 	int	read_data;
-	char	line[128];
+	char	line[MB_PATH_MAXLINE];
 	double	speed_apparent, time_d_last;
 	int	val_int;
 	double	val_double;
@@ -381,7 +390,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:P:p:R:r:S:s:T:t:Ww")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:OoP:p:R:r:S:s:T:t:Ww")) != -1)
 	  switch (c) 
 		{
 		case 'B':
@@ -427,12 +436,19 @@ main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			lonflip_set = MB_YES;
+			lonflip_use = lonflip;
 			flag++;
 			break;
 		case 'M':
 		case 'm':
 			sscanf (optarg,"%d/%d", &mask_nx, &mask_ny);
 			coverage_mask = MB_YES;
+			flag++;
+			break;
+		case 'O':
+		case 'o':
+			output_usefile = MB_YES;
 			flag++;
 			break;
 		case 'P':
@@ -473,15 +489,15 @@ main (int argc, char **argv)
 
 	/* set output stream */
 	if (verbose <= 1)
-		output = stdout;
+		stream = stdout;
 	else
-		output = stderr;
+		stream = stderr;
 
 	/* if error flagged then print it and exit */
 	if (errflg)
 		{
-		fprintf(output,"usage: %s\n", usage_message);
-		fprintf(output,"\nProgram <%s> Terminated\n",
+		fprintf(stream,"usage: %s\n", usage_message);
+		fprintf(stream,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
@@ -490,60 +506,61 @@ main (int argc, char **argv)
 	/* print starting message */
 	if (verbose == 1 || help)
 		{
-		fprintf(output,"\nProgram %s\n",program_name);
-		fprintf(output,"Version %s\n",rcs_id);
-		fprintf(output,"MB-system Version %s\n",MB_VERSION);
+		fprintf(stream,"\nProgram %s\n",program_name);
+		fprintf(stream,"Version %s\n",rcs_id);
+		fprintf(stream,"MB-system Version %s\n",MB_VERSION);
 		}
 
 	/* print starting debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(output,"\ndbg2  Program <%s>\n",program_name);
-		fprintf(output,"dbg2  Version %s\n",rcs_id);
-		fprintf(output,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(output,"dbg2  Control Parameters:\n");
-		fprintf(output,"dbg2       verbose:    %d\n",verbose);
-		fprintf(output,"dbg2       help:       %d\n",help);
-		fprintf(output,"dbg2       format:     %d\n",format);
-		fprintf(output,"dbg2       pings:      %d\n",pings_read);
-		fprintf(output,"dbg2       lonflip:    %d\n",lonflip);
-		fprintf(output,"dbg2       bounds[0]:  %f\n",bounds[0]);
-		fprintf(output,"dbg2       bounds[1]:  %f\n",bounds[1]);
-		fprintf(output,"dbg2       bounds[2]:  %f\n",bounds[2]);
-		fprintf(output,"dbg2       bounds[3]:  %f\n",bounds[3]);
-		fprintf(output,"dbg2       btime_i[0]: %d\n",btime_i[0]);
-		fprintf(output,"dbg2       btime_i[1]: %d\n",btime_i[1]);
-		fprintf(output,"dbg2       btime_i[2]: %d\n",btime_i[2]);
-		fprintf(output,"dbg2       btime_i[3]: %d\n",btime_i[3]);
-		fprintf(output,"dbg2       btime_i[4]: %d\n",btime_i[4]);
-		fprintf(output,"dbg2       btime_i[5]: %d\n",btime_i[5]);
-		fprintf(output,"dbg2       btime_i[6]: %d\n",btime_i[6]);
-		fprintf(output,"dbg2       etime_i[0]: %d\n",etime_i[0]);
-		fprintf(output,"dbg2       etime_i[1]: %d\n",etime_i[1]);
-		fprintf(output,"dbg2       etime_i[2]: %d\n",etime_i[2]);
-		fprintf(output,"dbg2       etime_i[3]: %d\n",etime_i[3]);
-		fprintf(output,"dbg2       etime_i[4]: %d\n",etime_i[4]);
-		fprintf(output,"dbg2       etime_i[5]: %d\n",etime_i[5]);
-		fprintf(output,"dbg2       etime_i[6]: %d\n",etime_i[6]);
-		fprintf(output,"dbg2       speedmin:   %f\n",speedmin);
-		fprintf(output,"dbg2       timegap:    %f\n",timegap);
-		fprintf(output,"dbg2       good_nav:   %d\n",good_nav_only);
-		fprintf(output,"dbg2       comments:   %d\n",comments);
-		fprintf(output,"dbg2       file:       %s\n",read_file);
-		fprintf(output,"dbg2       bathy feet: %d\n",bathy_in_feet);
-		fprintf(output,"dbg2       coverage:   %d\n",coverage_mask);
+		fprintf(stream,"\ndbg2  Program <%s>\n",program_name);
+		fprintf(stream,"dbg2  Version %s\n",rcs_id);
+		fprintf(stream,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stream,"dbg2  Control Parameters:\n");
+		fprintf(stream,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stream,"dbg2       help:       %d\n",help);
+		fprintf(stream,"dbg2       format:     %d\n",format);
+		fprintf(stream,"dbg2       pings:      %d\n",pings_read);
+		fprintf(stream,"dbg2       lonflip:    %d\n",lonflip);
+		fprintf(stream,"dbg2       bounds[0]:  %f\n",bounds[0]);
+		fprintf(stream,"dbg2       bounds[1]:  %f\n",bounds[1]);
+		fprintf(stream,"dbg2       bounds[2]:  %f\n",bounds[2]);
+		fprintf(stream,"dbg2       bounds[3]:  %f\n",bounds[3]);
+		fprintf(stream,"dbg2       btime_i[0]: %d\n",btime_i[0]);
+		fprintf(stream,"dbg2       btime_i[1]: %d\n",btime_i[1]);
+		fprintf(stream,"dbg2       btime_i[2]: %d\n",btime_i[2]);
+		fprintf(stream,"dbg2       btime_i[3]: %d\n",btime_i[3]);
+		fprintf(stream,"dbg2       btime_i[4]: %d\n",btime_i[4]);
+		fprintf(stream,"dbg2       btime_i[5]: %d\n",btime_i[5]);
+		fprintf(stream,"dbg2       btime_i[6]: %d\n",btime_i[6]);
+		fprintf(stream,"dbg2       etime_i[0]: %d\n",etime_i[0]);
+		fprintf(stream,"dbg2       etime_i[1]: %d\n",etime_i[1]);
+		fprintf(stream,"dbg2       etime_i[2]: %d\n",etime_i[2]);
+		fprintf(stream,"dbg2       etime_i[3]: %d\n",etime_i[3]);
+		fprintf(stream,"dbg2       etime_i[4]: %d\n",etime_i[4]);
+		fprintf(stream,"dbg2       etime_i[5]: %d\n",etime_i[5]);
+		fprintf(stream,"dbg2       etime_i[6]: %d\n",etime_i[6]);
+		fprintf(stream,"dbg2       speedmin:   %f\n",speedmin);
+		fprintf(stream,"dbg2       timegap:    %f\n",timegap);
+		fprintf(stream,"dbg2       good_nav:   %d\n",good_nav_only);
+		fprintf(stream,"dbg2       comments:   %d\n",comments);
+		fprintf(stream,"dbg2       file:       %s\n",read_file);
+		fprintf(stream,"dbg2       bathy feet: %d\n",bathy_in_feet);
+		fprintf(stream,"dbg2       lonflip_set:%d\n",lonflip_set);
+		fprintf(stream,"dbg2       coverage:   %d\n",coverage_mask);
 		if (coverage_mask == MB_YES)
 			{
-			fprintf(output,"dbg2       mask_nx:    %d\n",mask_nx);
-			fprintf(output,"dbg2       mask_ny:    %d\n",mask_ny);
+			fprintf(stream,"dbg2       mask_nx:    %d\n",mask_nx);
+			fprintf(stream,"dbg2       mask_ny:    %d\n",mask_ny);
 			}
 		}
 
 	/* if help desired then print it and exit */
 	if (help)
 		{
-		fprintf(output,"\n%s\n",help_message);
-		fprintf(output,"\nusage: %s\n", usage_message);
+		fprintf(stream,"\n%s\n",help_message);
+		fprintf(stream,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
 
@@ -565,6 +582,19 @@ main (int argc, char **argv)
 		are disabled */
 	if (read_datalist == MB_YES)
 		pings_read = 1;
+		
+	/* Open output file if requested */
+	if (output_usefile == MB_YES)
+	    {
+	    strcpy(output_file, read_file);
+	    strcat(output_file, ".inf");
+	    if ((output = fopen(output_file, "w")) == NULL)
+		output = stream;
+	    }
+	else
+	    {
+	    output = stream;
+	    }
 		
 	/* read only once unless coverage mask requested */
 	pass = 0;
@@ -614,9 +644,9 @@ main (int argc, char **argv)
 		&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
-		fprintf(output,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(output,"\nSwath File <%s> not initialized for reading\n",file);
-		fprintf(output,"\nProgram <%s> Terminated\n",
+		fprintf(stream,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+		fprintf(stream,"\nSwath File <%s> not initialized for reading\n",file);
+		fprintf(stream,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
 		}
@@ -728,8 +758,8 @@ main (int argc, char **argv)
 	if (error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,error,&message);
-		fprintf(output,"\nMBIO Error allocating data arrays:\n%s\n",message);
-		fprintf(output,"\nProgram <%s> Terminated\n",
+		fprintf(stream,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		fprintf(stream,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
 		}
@@ -765,8 +795,12 @@ main (int argc, char **argv)
 	/* printf out file and format */
 	if (pass == 0)
 		{
+		if (strrchr(file, '/') == NULL)
+		    fileprint = file;
+		else
+		    fileprint = strrchr(file, '/') + 1;
 		mb_format_description(verbose,&format,format_description,&error);
-		fprintf(output,"\nSwath Data File:      %s\n",file);
+		fprintf(output,"\nSwath Data File:      %s\n",fileprint);
 		fprintf(output,"MBIO Data Format ID:  %d\n",format);
 		fprintf(output,"%s",format_description);
 		}
@@ -917,9 +951,9 @@ main (int argc, char **argv)
 				&& error >= MB_ERROR_OTHER)
 				{
 				mb_error(verbose,error,&message);
-				fprintf(output,"\nNonfatal MBIO Error:\n%s\n",
+				fprintf(stream,"\nNonfatal MBIO Error:\n%s\n",
 					message);
-				fprintf(output,"Time: %d %d %d %d %d %d %d\n",
+				fprintf(stream,"Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],
 					time_i[6]);
@@ -927,17 +961,17 @@ main (int argc, char **argv)
 			else if (verbose >= 1 && error < MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
-				fprintf(output,"\nNonfatal MBIO Error:\n%s\n",
+				fprintf(stream,"\nNonfatal MBIO Error:\n%s\n",
 					message);
-				fprintf(output,"Number of good records so far: %d\n",irec);
+				fprintf(stream,"Number of good records so far: %d\n",irec);
 				}
 			else if (verbose >= 1 && error > MB_ERROR_NO_ERROR 
 				&& error != MB_ERROR_EOF)
 				{
 				mb_error(verbose,error,&message);
-				fprintf(output,"\nFatal MBIO Error:\n%s\n",
+				fprintf(stream,"\nFatal MBIO Error:\n%s\n",
 					message);
-				fprintf(output,"Last Good Time: %d %d %d %d %d %d %d\n",
+				fprintf(stream,"Last Good Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],
 					time_i[6]);
@@ -958,6 +992,62 @@ main (int argc, char **argv)
 				ntdbeams += beams_bath;
 				ntabeams += beams_amp;
 				ntsbeams += pixels_ss;
+				
+				/* set lonflip if needed */
+				if (lonflip_set == MB_NO
+				    && (navlon != 0.0 || navlat != 0.0))
+				    {
+				    lonflip_set = MB_YES;
+				    if (navlon < -270.0)
+					lonflip_use = 0;
+				    else if (navlon >= -270.0 && navlon < -90.0)
+					lonflip_use = -1;
+				    else if (navlon >= -90.0 && navlon < 90.0)
+					lonflip_use = 0;
+				    else if (navlon >= 90.0 && navlon < 270.0)
+					lonflip_use = 1;
+				    else if (navlon >= 270.0)
+					lonflip_use = 0;
+				    }
+				    
+				/* apply lonflip if needed */
+				if (lonflip_use != lonflip)
+				    {
+				    if (lonflip_use == -1)
+					{
+					if (navlon > 0.0)
+					    navlon -= 360.0;
+					for (i=0;i<beams_bath;i++)
+					    {
+					    if (bathlon[i] > 0.0)
+						bathlon[i] -= 360.0;
+					    }
+					}
+				    else if (lonflip_use == 1)
+					{
+					if (navlon < 0.0)
+					    navlon += 360.0;
+					for (i=0;i<beams_bath;i++)
+					    {
+					    if (bathlon[i] < 0.0)
+						bathlon[i] += 360.0;
+					    }
+					}
+				    else if (lonflip_use == 0)
+					{
+					if (navlon < -180.0)
+					    navlon += 360.0;
+					if (navlon > 180.0)
+					    navlon -= 360.0;
+					for (i=0;i<beams_bath;i++)
+					    {
+					    if (bathlon[i] < -180.0)
+						bathlon[i] += 360.0;
+					    if (bathlon[i] > 180.0)
+						bathlon[i] -= 360.0;
+					    }
+					}
+				    }
 				
 				/* get beginning values */
 				if (irec == 1)
@@ -1169,12 +1259,12 @@ main (int argc, char **argv)
 		/* print debug statements */
 		if (verbose >= 2)
 			{
-			fprintf(output,"\ndbg2  Reading loop finished in program <%s>\n",
+			fprintf(stream,"\ndbg2  Reading loop finished in program <%s>\n",
 				program_name);
-			fprintf(output,"dbg2       status:     %d\n",status);
-			fprintf(output,"dbg2       error:      %d\n",error);
-			fprintf(output,"dbg2       nread:      %d\n",nread);
-			fprintf(output,"dbg2       pings_read: %d\n",pings_read);
+			fprintf(stream,"dbg2       status:     %d\n",status);
+			fprintf(stream,"dbg2       error:      %d\n",error);
+			fprintf(stream,"dbg2       nread:      %d\n",nread);
+			fprintf(stream,"dbg2       pings_read: %d\n",pings_read);
 			}
 
 		/* process the pings */
@@ -1312,12 +1402,12 @@ main (int argc, char **argv)
 		/* print debug statements */
 		if (verbose >= 2)
 			{
-			fprintf(output,"\ndbg2  Processing loop finished in program <%s>\n",
+			fprintf(stream,"\ndbg2  Processing loop finished in program <%s>\n",
 				program_name);
-			fprintf(output,"dbg2       status:     %d\n",status);
-			fprintf(output,"dbg2       error:      %d\n",error);
-			fprintf(output,"dbg2       nread:      %d\n",nread);
-			fprintf(output,"dbg2       pings_read: %d\n",pings_read);
+			fprintf(stream,"dbg2       status:     %d\n",status);
+			fprintf(stream,"dbg2       error:      %d\n",error);
+			fprintf(stream,"dbg2       nread:      %d\n",nread);
+			fprintf(stream,"dbg2       pings_read: %d\n",pings_read);
 			}
 		}
 
@@ -1564,6 +1654,13 @@ main (int argc, char **argv)
 		    }
 		}
 
+	/* close output file */
+	if (output_usefile == MB_YES
+	    && output != NULL)
+	    {
+	    fclose(output);
+	    }
+
 	/* deallocate memory used for data arrays */
 	mb_free(verbose,&bathmean,&error);
 	mb_free(verbose,&bathvar,&error);
@@ -1586,10 +1683,10 @@ main (int argc, char **argv)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(output,"\ndbg2  Program <%s> completed\n",
+		fprintf(stream,"\ndbg2  Program <%s> completed\n",
 			program_name);
-		fprintf(output,"dbg2  Ending status:\n");
-		fprintf(output,"dbg2       status:  %d\n",status);
+		fprintf(stream,"dbg2  Ending status:\n");
+		fprintf(stream,"dbg2       status:  %d\n",status);
 		}
 
 	/* end it all */

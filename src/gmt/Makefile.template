@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.14 2001-06-30 17:35:20 caress Exp $
+#	$Id: Makefile.template,v 4.15 2002-02-22 09:05:09 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by 
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.14  2001/06/30 17:35:20  caress
+# Fixed problem with cc
+#
 # Revision 4.13  2001/03/22  21:03:31  caress
 # Trying to make release 5.0.beta0.
 #
@@ -66,7 +69,6 @@
 # Locations of GMT libraries, binaries, and include files:
 GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
 GMTINCDIR = /ocean/mgg/gmt2/src
-NETCDFLIBDIR = /ocean/mgg/netcdf/sun4/lib
 NETCDFINCDIR = /ocean/mgg/netcdf/include
 #
 # Compilers
@@ -106,7 +108,6 @@ $(BINDIR)/mbcontour: mbcontour.o \
 		$(LIBDIR)/libmbps.a \
 		$(GMTLIBDIR)/libpsl.a \
 		$(GMTLIBDIR)/libgmt.a \
-		$(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbcontour
 $(BINDIR)/mbswath: mbswath.o \
 		$(LIBDIR)/libmbio.a  \
@@ -116,14 +117,12 @@ $(BINDIR)/mbswath: mbswath.o \
 		$(LIBDIR)/libgsf.a \
 		$(GMTLIBDIR)/libpsl.a \
 		$(GMTLIBDIR)/libgmt.a \
-		$(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbswath
 $(BINDIR)/mbgrdtiff: mbgrdtiff.o \
 		$(LIBDIR)/libmbio.a 
 	$(CC) $(CFLAGS) mbgrdtiff.o \
 		$(LIBDIR)/libmbio.a \
 		$(GMTLIBDIR)/libgmt.a \
-		$(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbgrdtiff
 
 ### compile the source files

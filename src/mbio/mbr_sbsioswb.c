@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 5.4 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -135,7 +138,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sbsioswb.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sbsioswb.c,v 5.4 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_register_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -265,7 +268,7 @@ int mbr_info_sbsioswb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sbsioswb.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sbsioswb.c,v 5.4 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_info_sbsioswb";
 	int	status = MB_SUCCESS;
 
@@ -334,7 +337,7 @@ int mbr_info_sbsioswb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sbsioswb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 5.4 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -430,7 +433,8 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	dummy[2];
 	double	lon, lat;
 	int	id;
-	int	i, j, k;
+	int	skip;
+	int	i, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -455,6 +459,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	sensorptr = (char *) &data->eclipse_time;
 	datarecptr = (char *) &data->beams_bath;
 	commentptr = (char *) &data->comment[0];
+	skip = 0;
 
 	/* read next header record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -556,6 +561,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			1,1,mb_io_ptr->mbfp)) == 1) 
 			{
 			mb_io_ptr->file_bytes += status;
+			skip++;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}
@@ -589,6 +595,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"\ndbg5  Header record after byte shift in MBIO function <%s>\n",
 				function_name);
 			fprintf(stderr,"dbg5  New header values:\n");
+			fprintf(stderr,"dbg5       skip:       %d\n",skip);
 			fprintf(stderr,"dbg5       year:       %d\n",data->year);
 			fprintf(stderr,"dbg5       day:        %d\n",data->day);
 			fprintf(stderr,"dbg5       min:        %d\n",data->min);
@@ -760,6 +767,21 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    data->bath_struct[i].bath_acrosstrack = 0;
 		    }
 		}
+		
+	/* zero ridiculous soundings */
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
+		{
+		for (i=0;i<data->beams_bath;i++)
+		    {
+		    if (data->bath_struct[i].bath > 11000
+			|| data->bath_struct[i].bath_acrosstrack > 11000
+			    || data->bath_struct[i].bath_acrosstrack < -11000)
+			{
+			data->bath_struct[i].bath = 0;
+			data->bath_struct[i].bath_acrosstrack = 0;
+			}
+		    }
+		}
 
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 
@@ -888,10 +910,9 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*sensorptr;
 	char	*datarecptr;
 	char	*commentptr;
-	int	time_j[5];
 	double	lon, lat;
 	int	id;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)

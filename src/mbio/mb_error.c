@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
- *    $Id: mb_error.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_error.c,v 5.1 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	February 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.7  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -77,10 +80,11 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
+static char rcs_id[]="$Id: mb_error.c,v 5.1 2002-02-22 09:03:43 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message)
 {
-  static char rcs_id[]="$Id: mb_error.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_error";
 	int	status;
 
@@ -90,6 +94,7 @@ int mb_error(int verbose, int error, char **message)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:  %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		fprintf(stderr,"dbg2       error:   %d\n",error);
 		fprintf(stderr,"dbg2       message: %d\n",message);
