@@ -15,12 +15,12 @@
  *
  */
 #include <Xm/Xm.h>
-#include <Xm/BulletinB.h>
+#include <Xm/Form.h>
 #include <Xm/Label.h>
 #include <Xm/PushB.h>
 #include <Xm/ScrolledW.h>
 #include <Xm/List.h>
-#include <Xm/BulletinB.h>
+#include <Xm/Form.h>
 #include <Xm/Label.h>
 #include <Xm/PushB.h>
 #include <Xm/ScrolledW.h>
@@ -87,7 +87,7 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
      * Register the converters for the widgets.
      */
     RegisterBxConverters(XtWidgetToApplicationContext(parent));
-    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
@@ -106,28 +106,15 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
     SetAppDefaults(parent, appDefaults, name, False);
     
     ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(parent, (char *)"Navigation List", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 14); ac++;
-        XtSetArg(args[ac], XmNy, 187); ac++;
-        XtSetArg(args[ac], XmNwidth, 421); ac++;
-        XtSetArg(args[ac], XmNheight, 377); ac++;
-        class_in->MB3DNavList = XmCreateBulletinBoard(parent,
-            (char *)name,
-            args, 
-            ac);
-        
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
+    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+    XtSetArg(args[ac], XmNx, 134); ac++;
+    XtSetArg(args[ac], XmNy, 500); ac++;
+    XtSetArg(args[ac], XmNwidth, 415); ac++;
+    XtSetArg(args[ac], XmNheight, 243); ac++;
+    class_in->MB3DNavList = XmCreateForm(parent,
+        (char *)name,
+        args, 
+        ac);
     
     ac = 0;
     {
@@ -137,8 +124,8 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNwidth, 390); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -164,8 +151,8 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
         tmp0 = (XmString) BX_CONVERT(class_in->MB3DNavList, (char *)"Delete Selected Navigation", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 200); ac++;
         XtSetArg(args[ac], XmNwidth, 210); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -192,8 +179,8 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
         tmp0 = (XmString) BX_CONVERT(class_in->MB3DNavList, (char *)"Dismiss", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 240); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNx, 290); ac++;
+        XtSetArg(args[ac], XmNy, 200); ac++;
         XtSetArg(args[ac], XmNwidth, 110); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -215,10 +202,10 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
     
     ac = 0;
     XtSetArg(args[ac], XmNscrollingPolicy, XmAPPLICATION_DEFINED); ac++;
-    XtSetArg(args[ac], XmNx, 20); ac++;
-    XtSetArg(args[ac], XmNy, 70); ac++;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 40); ac++;
     XtSetArg(args[ac], XmNwidth, 390); ac++;
-    XtSetArg(args[ac], XmNheight, 300); ac++;
+    XtSetArg(args[ac], XmNheight, 150); ac++;
     class_in->mbview_scrolledWindow_navlist = XmCreateScrolledWindow(class_in->MB3DNavList,
         (char *)"mbview_scrolledWindow_navlist",
         args, 
@@ -227,9 +214,8 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
     
     ac = 0;
     XtSetArg(args[ac], XmNselectionPolicy, XmEXTENDED_SELECT); ac++;
-    XtSetArg(args[ac], XmNlistSizePolicy, XmRESIZE_IF_POSSIBLE); ac++;
     XtSetArg(args[ac], XmNwidth, 390); ac++;
-    XtSetArg(args[ac], XmNheight, 300); ac++;
+    XtSetArg(args[ac], XmNheight, 150); ac++;
     XtSetArg(args[ac], XmNfontList, 
         BX_CONVERT(class_in->mbview_scrolledWindow_navlist, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
@@ -241,6 +227,43 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
     XtAddCallback(class_in->mbview_list_navlist, XmNsingleSelectionCallback, do_mbview_navlistselect, (XtPointer)0);
     XtAddCallback(class_in->mbview_list_navlist, XmNextendedSelectionCallback, do_mbview_navlistselect, (XtPointer)0);
     XtAddCallback(class_in->mbview_list_navlist, XmNbrowseSelectionCallback, do_mbview_navlistselect, (XtPointer)0);
+    ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 15); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetValues(class_in->mbview_navlist_label, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 13); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetValues(class_in->mbview_pushButton_navlist_delete, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 13); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 15); ac++;
+    XtSetValues(class_in->mbview_pushButton_navlist_dismiss, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 53); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 15); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopWidget, class_in->mbview_navlist_label); ac++;
+    XtSetValues(class_in->mbview_scrolledWindow_navlist, args, ac);
+    
     
     /*
      * Assign functions to class record

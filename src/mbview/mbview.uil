@@ -143,17 +143,16 @@ list Style_useReasons : callbacks {
 !(BX)};
 
 
-object mB3DNavList : XmBulletinBoardDialog widget {
+object mB3DNavList : XmFormDialog widget {
     arguments {
 !(BX) BxNclass = "MB3DNavList";
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
-        XmNdialogTitle = compound_string("Navigation List");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 430;
-        XmNy = 324;
-        XmNwidth = 421;
-        XmNheight = 377;
+        XmNx = 8;
+        XmNy = 32;
+        XmNwidth = 200;
+        XmNheight = 200;
     };
     controls {
          managed XmLabel mB3DNavList_mbview_navlist_label;
@@ -172,11 +171,12 @@ object mB3DNavList : XmBulletinBoardDialog widget {
 !(BX)object mbview_dialogShell_navlist : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNwidth = 421;
-!(BX)        XmNheight = 377;
+!(BX)        XmNtitle = "Navigation List";
+!(BX)        XmNwidth = 200;
+!(BX)        XmNheight = 200;
 !(BX)    };
 !(BX)    controls {
-!(BX)         managed XmBulletinBoardDialog mB3DNavList;
+!(BX)         managed XmFormDialog mB3DNavList;
 !(BX)    };
 !(BX)    callbacks {
 !(BX)        callbacks Style_useReasons;
@@ -186,17 +186,16 @@ object mB3DNavList : XmBulletinBoardDialog widget {
 !(BX)    };
 !(BX)};
 
-object mB3DRouteList : XmBulletinBoardDialog widget {
+object mB3DRouteList : XmFormDialog widget {
     arguments {
 !(BX) BxNclass = "MB3DRouteList";
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
-        XmNdialogTitle = compound_string("Route List");
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 8;
         XmNy = 32;
-        XmNwidth = 421;
-        XmNheight = 377;
+        XmNwidth = 200;
+        XmNheight = 200;
     };
     controls {
          managed XmLabel mB3DRouteList_mbview_routelist_label;
@@ -215,11 +214,12 @@ object mB3DRouteList : XmBulletinBoardDialog widget {
 !(BX)object mbview_dialogShell_routelist : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNwidth = 421;
-!(BX)        XmNheight = 377;
+!(BX)        XmNtitle = "Route List";
+!(BX)        XmNwidth = 200;
+!(BX)        XmNheight = 200;
 !(BX)    };
 !(BX)    controls {
-!(BX)         managed XmBulletinBoardDialog mB3DRouteList;
+!(BX)         managed XmFormDialog mB3DRouteList;
 !(BX)    };
 !(BX)    callbacks {
 !(BX)        callbacks Style_useReasons;
@@ -229,23 +229,21 @@ object mB3DRouteList : XmBulletinBoardDialog widget {
 !(BX)    };
 !(BX)};
 
-object mB3DSiteList : XmBulletinBoardDialog widget {
+object mB3DSiteList : XmFormDialog widget {
     arguments {
 !(BX) BxNclass = "MB3DSiteList";
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
-        XmNborderWidth = 0;
-        XmNdialogTitle = compound_string("Site List");
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 8;
         XmNy = 32;
-        XmNwidth = 421;
-        XmNheight = 377;
+        XmNwidth = 200;
+        XmNheight = 200;
     };
     controls {
-         managed XmLabel mB3DSiteList_mbview_sitelist_label;
-         managed XmPushButton mB3DSiteList_mbview_pushButton_sitelist_delete;
          managed XmPushButton mB3DSiteList_mbview_pushButton_sitelist_dismiss;
+         managed XmPushButton mB3DSiteList_mbview_pushButton_sitelist_delete;
+         managed XmLabel mB3DSiteList_mbview_sitelist_label;
          managed XmScrolledWindow mB3DSiteList_mbview_scrolledWindow_sitelist;
     };
     callbacks {
@@ -259,11 +257,12 @@ object mB3DSiteList : XmBulletinBoardDialog widget {
 !(BX)object mbview_dialogShell_sitelist : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNwidth = 421;
-!(BX)        XmNheight = 377;
+!(BX)        XmNtitle = "Site List";
+!(BX)        XmNwidth = 200;
+!(BX)        XmNheight = 200;
 !(BX)    };
 !(BX)    controls {
-!(BX)         managed XmBulletinBoardDialog mB3DSiteList;
+!(BX)         managed XmFormDialog mB3DSiteList;
 !(BX)    };
 !(BX)    callbacks {
 !(BX)        callbacks Style_useReasons;
@@ -278,7 +277,6 @@ object mbview_mbgrdviz : XmBulletinBoardDialog widget {
 !(BX) BxNclass = "MB3DView";
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
-        XmNborderWidth = 0;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 249;
         XmNy = 55;
@@ -408,37 +406,46 @@ object mainWindow_mbgrdviz : XmMainWindow widget {
 !(BX)    };
 !(BX)};
 
-object mB3DNavList_mbview_list_navlist : XmList widget {
+object mB3DSiteList_mbview_list_sitelist : XmList widget {
     arguments {
         arguments Style_use;
         XmNselectionPolicy = XmEXTENDED_SELECT;
         XmNwidth = 390;
-        XmNheight = 300;
+        XmNheight = 180;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNsingleSelectionCallback = procedure do_mbview_navlistselect();
-        XmNextendedSelectionCallback = procedure do_mbview_navlistselect();
-        XmNbrowseSelectionCallback = procedure do_mbview_navlistselect();
+        XmNsingleSelectionCallback = procedure do_mbview_sitelistselect();
+        XmNextendedSelectionCallback = procedure do_mbview_sitelistselect();
+        XmNbrowseSelectionCallback = procedure do_mbview_sitelistselect();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
 
-object mB3DNavList_mbview_scrolledWindow_navlist : XmScrolledWindow widget {
+object mB3DSiteList_mbview_scrolledWindow_sitelist : XmScrolledWindow widget {
     arguments {
         arguments Style_use;
         XmNscrollingPolicy = XmAPPLICATION_DEFINED;
-        XmNx = 20;
-        XmNy = 70;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 60;
+        XmNleftOffset = 10;
+        XmNrightOffset = 11;
+        XmNtopOffset = 6;
+        XmNtopWidget = XmLabel mB3DSiteList_mbview_sitelist_label;
+        XmNx = 10;
+        XmNy = 46;
         XmNwidth = 390;
-        XmNheight = 300;
+        XmNheight = 180;
     };
     controls {
-         managed XmList mB3DNavList_mbview_list_navlist;
+         managed XmList mB3DSiteList_mbview_list_sitelist;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -448,12 +455,68 @@ object mB3DNavList_mbview_scrolledWindow_navlist : XmScrolledWindow widget {
 !(BX)    };
 };
 
-object mB3DNavList_mbview_pushButton_navlist_dismiss : XmPushButton widget {
+object mB3DSiteList_mbview_sitelist_label : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Site List:");
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNrightOffset = 11;
+        XmNtopOffset = 10;
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 390;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DSiteList_mbview_pushButton_sitelist_delete : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Delete Selected Sites");
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 16;
+        XmNleftOffset = 10;
+        XmNx = 10;
+        XmNy = 240;
+        XmNwidth = 170;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_sitelist_delete();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DSiteList_mbview_pushButton_sitelist_dismiss : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Dismiss");
-        XmNx = 240;
-        XmNy = 10;
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_NONE;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 16;
+        XmNrightOffset = 11;
+        XmNx = 290;
+        XmNy = 240;
         XmNwidth = 110;
         XmNheight = 30;
     };
@@ -461,82 +524,41 @@ object mB3DNavList_mbview_pushButton_navlist_dismiss : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNactivateCallback = procedure do_mbview_navlist_popdown();
+        XmNactivateCallback = procedure do_mbview_sitelist_popdown();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
 
-object mB3DNavList_mbview_pushButton_navlist_delete : XmPushButton widget {
+object mB3DSiteList_mbview_form_sitelist : XmForm widget {
     arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Delete Selected Navigation");
-        XmNx = 20;
-        XmNy = 10;
-        XmNwidth = 210;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        XmNactivateCallback = procedure do_mbview_navlist_delete();
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object mB3DNavList_mbview_navlist_label : XmLabel widget {
-    arguments {
-        arguments Style_use;
-        XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Navigation List:");
-        XmNx = 20;
-        XmNy = 40;
-        XmNwidth = 390;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object mB3DNavList_mbview_bulletinBoard_navlist : XmBulletinBoard widget {
-    arguments {
-!(BX) BxNclassOnly = "MB3DNavList";
+!(BX) BxNclassOnly = "MB3DSiteList";
 !(BX) BxNsubclassDerived = "False";
 !(BX) BxNclassOnlyFile = "False";
 !(BX) BxNbaseInclude = asciz_string_table('');
 !(BX) BxNderivedInclude = asciz_string_table('');
-!(BX) BxNderived = "MB3DNavListDerived";
-!(BX) BxNfilebase = "MB3DNavListDerived";
-!(BX) BxNclassFilebase = "MB3DNavList";
-!(BX) BxNclassGeometry = "421x377+14+187";
+!(BX) BxNderived = "MB3DSiteListDerived";
+!(BX) BxNfilebase = "MB3DSiteListDerived";
+!(BX) BxNclassFilebase = "MB3DSiteList";
+!(BX) BxNclassGeometry = "411x286+134+145";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
-!(BX) BxNpaletteName = "MB3DNavList";
+!(BX) BxNpaletteName = "MB3DSiteList";
 !(BX) BxNpaletteGeom = "+0+0";
         arguments Style_use;
-        XmNdialogTitle = compound_string("Navigation List");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 14;
-        XmNy = 187;
-        XmNwidth = 421;
-        XmNheight = 377;
+        XmNx = 134;
+        XmNy = 145;
+        XmNwidth = 411;
+        XmNheight = 286;
     };
     controls {
-         managed XmLabel mB3DNavList_mbview_navlist_label;
-         managed XmPushButton mB3DNavList_mbview_pushButton_navlist_delete;
-         managed XmPushButton mB3DNavList_mbview_pushButton_navlist_dismiss;
-         managed XmScrolledWindow mB3DNavList_mbview_scrolledWindow_navlist;
+         managed XmPushButton mB3DSiteList_mbview_pushButton_sitelist_dismiss;
+         managed XmPushButton mB3DSiteList_mbview_pushButton_sitelist_delete;
+         managed XmLabel mB3DSiteList_mbview_sitelist_label;
+         managed XmScrolledWindow mB3DSiteList_mbview_scrolledWindow_sitelist;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -551,7 +573,7 @@ object mB3DRouteList_mbview_list_routelist : XmList widget {
         arguments Style_use;
         XmNselectionPolicy = XmEXTENDED_SELECT;
         XmNwidth = 390;
-        XmNheight = 290;
+        XmNheight = 150;
     };
     controls {
     };
@@ -570,10 +592,19 @@ object mB3DRouteList_mbview_scrolledWindow_routelist : XmScrolledWindow widget {
     arguments {
         arguments Style_use;
         XmNscrollingPolicy = XmAPPLICATION_DEFINED;
-        XmNx = 20;
-        XmNy = 70;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 49;
+        XmNleftOffset = 10;
+        XmNrightOffset = 15;
+        XmNtopOffset = 0;
+        XmNtopWidget = XmLabel mB3DRouteList_mbview_routelist_label;
+        XmNx = 10;
+        XmNy = 40;
         XmNwidth = 390;
-        XmNheight = 290;
+        XmNheight = 150;
     };
     controls {
          managed XmList mB3DRouteList_mbview_list_routelist;
@@ -590,8 +621,14 @@ object mB3DRouteList_mbview_pushButton_routelist_dismiss : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Dismiss");
-        XmNx = 200;
-        XmNy = 10;
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_NONE;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 9;
+        XmNrightOffset = 15;
+        XmNx = 290;
+        XmNy = 200;
         XmNwidth = 110;
         XmNheight = 30;
     };
@@ -610,8 +647,13 @@ object mB3DRouteList_mbview_pushButton_routelist_delete : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Delete Selected Routes");
-        XmNx = 20;
-        XmNy = 10;
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 9;
+        XmNleftOffset = 10;
+        XmNx = 10;
+        XmNy = 200;
         XmNwidth = 170;
         XmNheight = 30;
     };
@@ -631,8 +673,13 @@ object mB3DRouteList_mbview_routelist_label : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Route List:");
-        XmNx = 20;
-        XmNy = 40;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNrightOffset = 15;
+        XmNtopOffset = 10;
+        XmNx = 10;
+        XmNy = 10;
         XmNwidth = 390;
         XmNheight = 30;
     };
@@ -646,7 +693,7 @@ object mB3DRouteList_mbview_routelist_label : XmLabel widget {
 !(BX)    };
 };
 
-object mB3DRouteList_mbview_bulletinBoard_routelist : XmBulletinBoard widget {
+object mB3DRouteList_mbview_form_routelist : XmForm widget {
     arguments {
 !(BX) BxNclassOnly = "MB3DRouteList";
 !(BX) BxNsubclassDerived = "False";
@@ -656,19 +703,18 @@ object mB3DRouteList_mbview_bulletinBoard_routelist : XmBulletinBoard widget {
 !(BX) BxNderived = "MB3DRouteListDerived";
 !(BX) BxNfilebase = "MB3DRouteListDerived";
 !(BX) BxNclassFilebase = "MB3DRouteList";
-!(BX) BxNclassGeometry = "421x377+8+32";
+!(BX) BxNclassGeometry = "415x239+135+318";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
 !(BX) BxNpaletteName = "MB3DRouteList";
 !(BX) BxNpaletteGeom = "+0+0";
         arguments Style_use;
-        XmNdialogTitle = compound_string("Route List");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
-        XmNwidth = 421;
-        XmNheight = 377;
+        XmNx = 135;
+        XmNy = 318;
+        XmNwidth = 415;
+        XmNheight = 239;
     };
     controls {
          managed XmLabel mB3DRouteList_mbview_routelist_label;
@@ -684,37 +730,46 @@ object mB3DRouteList_mbview_bulletinBoard_routelist : XmBulletinBoard widget {
 !(BX)    };
 };
 
-object mB3DSiteList_mbview_list_sitelist : XmList widget {
+object mB3DNavList_mbview_list_navlist : XmList widget {
     arguments {
         arguments Style_use;
         XmNselectionPolicy = XmEXTENDED_SELECT;
         XmNwidth = 390;
-        XmNheight = 300;
+        XmNheight = 150;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNsingleSelectionCallback = procedure do_mbview_sitelistselect();
-        XmNextendedSelectionCallback = procedure do_mbview_sitelistselect();
-        XmNbrowseSelectionCallback = procedure do_mbview_sitelistselect();
+        XmNsingleSelectionCallback = procedure do_mbview_navlistselect();
+        XmNextendedSelectionCallback = procedure do_mbview_navlistselect();
+        XmNbrowseSelectionCallback = procedure do_mbview_navlistselect();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
 
-object mB3DSiteList_mbview_scrolledWindow_sitelist : XmScrolledWindow widget {
+object mB3DNavList_mbview_scrolledWindow_navlist : XmScrolledWindow widget {
     arguments {
         arguments Style_use;
         XmNscrollingPolicy = XmAPPLICATION_DEFINED;
-        XmNx = 20;
-        XmNy = 70;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 53;
+        XmNleftOffset = 10;
+        XmNrightOffset = 15;
+        XmNtopOffset = 0;
+        XmNtopWidget = XmLabel mB3DNavList_mbview_navlist_label;
+        XmNx = 10;
+        XmNy = 40;
         XmNwidth = 390;
-        XmNheight = 300;
+        XmNheight = 150;
     };
     controls {
-         managed XmList mB3DSiteList_mbview_list_sitelist;
+         managed XmList mB3DNavList_mbview_list_navlist;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -724,12 +779,18 @@ object mB3DSiteList_mbview_scrolledWindow_sitelist : XmScrolledWindow widget {
 !(BX)    };
 };
 
-object mB3DSiteList_mbview_pushButton_sitelist_dismiss : XmPushButton widget {
+object mB3DNavList_mbview_pushButton_navlist_dismiss : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Dismiss");
-        XmNx = 200;
-        XmNy = 10;
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_NONE;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 13;
+        XmNrightOffset = 15;
+        XmNx = 290;
+        XmNy = 200;
         XmNwidth = 110;
         XmNheight = 30;
     };
@@ -737,40 +798,50 @@ object mB3DSiteList_mbview_pushButton_sitelist_dismiss : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNactivateCallback = procedure do_mbview_sitelist_popdown();
+        XmNactivateCallback = procedure do_mbview_navlist_popdown();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
 
-object mB3DSiteList_mbview_pushButton_sitelist_delete : XmPushButton widget {
+object mB3DNavList_mbview_pushButton_navlist_delete : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Delete Selected Sites");
-        XmNx = 20;
-        XmNy = 10;
-        XmNwidth = 170;
+        XmNlabelString = compound_string("Delete Selected Navigation");
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 13;
+        XmNleftOffset = 10;
+        XmNx = 10;
+        XmNy = 200;
+        XmNwidth = 210;
         XmNheight = 30;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNactivateCallback = procedure do_mbview_sitelist_delete();
+        XmNactivateCallback = procedure do_mbview_navlist_delete();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
 
-object mB3DSiteList_mbview_sitelist_label : XmLabel widget {
+object mB3DNavList_mbview_navlist_label : XmLabel widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Site List:");
-        XmNx = 20;
-        XmNy = 40;
+        XmNlabelString = compound_string("Navigation List:");
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNrightOffset = 15;
+        XmNtopOffset = 10;
+        XmNx = 10;
+        XmNy = 10;
         XmNwidth = 390;
         XmNheight = 30;
     };
@@ -784,35 +855,34 @@ object mB3DSiteList_mbview_sitelist_label : XmLabel widget {
 !(BX)    };
 };
 
-object mB3DSiteList_mbview_bulletinBoard_sitelist : XmBulletinBoard widget {
+object mB3DNavList_mbview_form_navlist : XmForm widget {
     arguments {
-!(BX) BxNclassOnly = "MB3DSiteList";
+!(BX) BxNclassOnly = "MB3DNavList";
 !(BX) BxNsubclassDerived = "False";
 !(BX) BxNclassOnlyFile = "False";
 !(BX) BxNbaseInclude = asciz_string_table('');
 !(BX) BxNderivedInclude = asciz_string_table('');
-!(BX) BxNderived = "MB3DSiteListDerived";
-!(BX) BxNfilebase = "MB3DSiteListDerived";
-!(BX) BxNclassFilebase = "MB3DSiteList";
-!(BX) BxNclassGeometry = "425x385+8+32";
+!(BX) BxNderived = "MB3DNavListDerived";
+!(BX) BxNfilebase = "MB3DNavListDerived";
+!(BX) BxNclassFilebase = "MB3DNavList";
+!(BX) BxNclassGeometry = "415x243+134+500";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
-!(BX) BxNpaletteName = "MB3DSiteList";
+!(BX) BxNpaletteName = "MB3DNavList";
 !(BX) BxNpaletteGeom = "+0+0";
         arguments Style_use;
-        XmNdialogTitle = compound_string("Site List");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
-        XmNwidth = 425;
-        XmNheight = 385;
+        XmNx = 134;
+        XmNy = 500;
+        XmNwidth = 415;
+        XmNheight = 243;
     };
     controls {
-         managed XmLabel mB3DSiteList_mbview_sitelist_label;
-         managed XmPushButton mB3DSiteList_mbview_pushButton_sitelist_delete;
-         managed XmPushButton mB3DSiteList_mbview_pushButton_sitelist_dismiss;
-         managed XmScrolledWindow mB3DSiteList_mbview_scrolledWindow_sitelist;
+         managed XmLabel mB3DNavList_mbview_navlist_label;
+         managed XmPushButton mB3DNavList_mbview_pushButton_navlist_delete;
+         managed XmPushButton mB3DNavList_mbview_pushButton_navlist_dismiss;
+         managed XmScrolledWindow mB3DNavList_mbview_scrolledWindow_navlist;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -3177,6 +3247,7 @@ object mB3DView_mbview_label_about_version : XmLabel widget {
  "B-System Release 5.0.0", separate=true) &
  compound_string(#character_set("T" &
  "imesMedium14")"August 26, 2003");
+        XmNrecomputeSize = false;
         XmNx = 10;
         XmNy = 410;
         XmNwidth = 440;
@@ -5385,7 +5456,7 @@ object mbview_bulletinBoard_mbview : XmBulletinBoard widget {
 !(BX) BxNderived = "MB3DViewDerived";
 !(BX) BxNfilebase = "MB3DViewDerived";
 !(BX) BxNclassFilebase = "MB3DView";
-!(BX) BxNclassGeometry = "801x814+11+155";
+!(BX) BxNclassGeometry = "801x814+12+338";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
@@ -5393,8 +5464,8 @@ object mbview_bulletinBoard_mbview : XmBulletinBoard widget {
 !(BX) BxNpaletteGeom = "+0+0";
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 11;
-        XmNy = 155;
+        XmNx = 12;
+        XmNy = 338;
         XmNwidth = 801;
         XmNheight = 814;
     };

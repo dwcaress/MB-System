@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.3 2005-02-02 08:23:50 caress Exp $
+ *    $Id: mbview_plot.c,v 5.4 2005-02-08 22:37:42 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -82,7 +82,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.3 2005-02-02 08:23:50 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.4 2005-02-08 22:37:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)

@@ -43,9 +43,9 @@ typedef struct _MB3DSiteListData
      * Widgets created by this class.
      */
     Widget MB3DSiteList;
-    Widget mbview_sitelist_label;
-    Widget mbview_pushButton_sitelist_delete;
     Widget mbview_pushButton_sitelist_dismiss;
+    Widget mbview_pushButton_sitelist_delete;
+    Widget mbview_sitelist_label;
     Widget mbview_scrolledWindow_sitelist;
     Widget mbview_list_sitelist;
     

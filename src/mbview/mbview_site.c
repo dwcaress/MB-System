@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.2 2005-02-02 08:23:51 caress Exp $
+ *    $Id: mbview_site.c,v 5.3 2005-02-08 22:37:43 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -88,7 +88,7 @@ Cardinal 	ac = 0;
 Arg      	args[256];
 char	value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.2 2005-02-02 08:23:51 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.3 2005-02-08 22:37:43 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -1214,14 +1214,12 @@ int mbview_drawsite(int instance, int rez)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	on, flip;
-	int	stride;
-	int	ixmin, ixmax, jymin, jymax;
-	int	ix, jy;
-	int	ixsize, jysize;
+	GLUquadricObj *globj;
+	double	sitesizesmall, sitesizelarge;
+	double	rr, xx, yy;
 	int	isite;
 	int	icolor;
-	int	i, j, k, l, m, n, kk, ll;
+	int	k0, k1;
 	
 
 	/* print starting debug statements */
@@ -1239,245 +1237,96 @@ int mbview_drawsite(int instance, int rez)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
-	/* draw sites in 2D */
+	
+	/* Generate GL lists to be plotted */
 	if (shared.shareddata.site_mode != MBV_SITE_OFF
-		&& data->display_mode == MBV_DISPLAY_2D
 		&& data->site_view_mode == MBV_VIEW_ON
 		&& shared.shareddata.nsite > 0)
 		{
-		/* set stride for looping over data */
-		stride = 1;
-	
-		/* loop over the sites */
-		for (isite=0;isite<shared.shareddata.nsite;isite++)
-			{
-			/* get grid bounds for plotting */
-			ix = (shared.shareddata.sites[isite].point.xgrid[instance] - data->primary_xmin) / data->primary_dx;
-			jy = (shared.shareddata.sites[isite].point.ygrid[instance] - data->primary_ymin) / data->primary_dy;
-			if (ix >= 0 && ix < data->primary_nx && jy >= 0 && jy < data->primary_ny)
-				{
-				ixsize = MAX(data->viewbounds[1] - data->viewbounds[0] + 1, 
-						data->viewbounds[3] - data->viewbounds[2] + 1);
-				if (isite == shared.shareddata.site_selected)
-					ixsize /= 100;
-				else
-					ixsize /= 125;
-				if (ixsize < 1) ixsize = 1;
-				jysize = (int)((ixsize * (1000.0 * data->primary_dy / data->primary_dx)) / 1000.0);
-				if (jysize < 1) jysize = 1;
-				ixmin = MAX(ix - ixsize, 0);
-				ixmax = MIN(ix + ixsize, data->primary_nx - stride);
-				jymin = MAX(jy - jysize, 0);
-				jymax = MIN(jy + jysize, data->primary_ny - stride);
-
-				/* set the color for this site */
-				if (isite == shared.shareddata.site_selected)
-					icolor = MBV_COLOR_RED;
-				else
-					icolor = MBV_COLOR_GREEN;
-				glColor3f(colortable_object_red[icolor], 
-					colortable_object_green[icolor], 
-					colortable_object_blue[icolor]);
-
-				/* draw the site box */
-				glLineWidth(2.0);
-				glBegin(GL_QUADS);
-				k = ixmin * data->primary_ny + jymin;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmax * data->primary_ny + jymin;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmax * data->primary_ny + jymax;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmin * data->primary_ny + jymax;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				glEnd();
-
-				/* draw the boundary */
-				glColor3f(colortable_object_red[MBV_COLOR_BLACK], 
-					colortable_object_green[MBV_COLOR_BLACK], 
-					colortable_object_blue[MBV_COLOR_BLACK]);
-				glLineWidth(2.0);
-				glBegin(GL_LINE_LOOP);
-				k = ixmin * data->primary_ny + jymin;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmax * data->primary_ny + jymin;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmax * data->primary_ny + jymax;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmin * data->primary_ny + jymax;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				glEnd();
-				}
-			}
-		}
+		/* get size according to viewbounds */
+		k0 = data->viewbounds[0] * data->primary_ny + data->viewbounds[2];
+		k1 = data->viewbounds[1] * data->primary_ny + data->viewbounds[3];
+		xx = data->primary_x[k1] - data->primary_x[k0];
+		yy = data->primary_y[k1] - data->primary_y[k0];
+		sitesizesmall = 0.004 * sqrt(xx * xx + yy * yy);
+		sitesizelarge = 1.4 * sitesizesmall;
 		
-	/* draw sites in 3D */
-	else if (shared.shareddata.site_mode != MBV_SITE_OFF
-		&& data->display_mode == MBV_DISPLAY_3D
-		&& data->site_view_mode == MBV_VIEW_ON
-		&& shared.shareddata.nsite > 0)
-		{
-		/* set stride for looping over data */
-		if (rez == MBV_REZ_FULL)
-		    stride = 1;
-		else if (rez == MBV_REZ_HIGH)
-		    stride = MAX((int)ceil(((double)data->primary_nx) 
-					/ ((double)data->hirez_dimension)), 
-				(int)ceil(((double)data->primary_ny) 
-					/ ((double)data->hirez_dimension)));
-		else
-		    stride = MAX((int)ceil(((double)data->primary_nx) 
-					/ ((double)data->lorez_dimension)), 
-				(int)ceil(((double)data->primary_ny) 
-					/ ((double)data->lorez_dimension)));
-stride = 1;
+		/* Use disks for 2D plotting */
+		if (data->display_mode == MBV_DISPLAY_2D)
+			{
+			/* make list for small site */
+	    		glNewList((GLuint)MBV_GLLIST_SITESMALL, GL_COMPILE);
+			globj = gluNewQuadric();
+			gluDisk(globj, 0.0, sitesizesmall, 10, 1);
+			gluDeleteQuadric(globj);
+			icolor = MBV_COLOR_BLACK;
+			glColor3f(colortable_object_red[icolor], 
+				colortable_object_green[icolor], 
+				colortable_object_blue[icolor]);
+			globj = gluNewQuadric();
+			gluDisk(globj, 0.8 * sitesizesmall, sitesizesmall, 10, 1);
+			gluDeleteQuadric(globj);
+			glEndList();
+
+			/* make list for large site */
+	    		glNewList((GLuint)MBV_GLLIST_SITELARGE, GL_COMPILE);
+			globj = gluNewQuadric();
+			gluDisk(globj, 0.0, sitesizelarge, 10, 1);
+			gluDeleteQuadric(globj);
+			icolor = MBV_COLOR_BLACK;
+			glColor3f(colortable_object_red[icolor], 
+				colortable_object_green[icolor], 
+				colortable_object_blue[icolor]);
+			globj = gluNewQuadric();
+			gluDisk(globj, 0.8 * sitesizelarge, sitesizelarge, 10, 1);
+			gluDeleteQuadric(globj);
+			glEndList();
+			}
+		
+		/* Use spheres for 3D plotting */
+		else if (data->display_mode == MBV_DISPLAY_3D)
+			{
+			/* make list for small site */
+	    		glNewList((GLuint)MBV_GLLIST_SITESMALL, GL_COMPILE);
+			globj = gluNewQuadric();
+			gluSphere(globj, sitesizesmall, 10, 10);
+			gluDeleteQuadric(globj);
+			glEndList();
+
+			/* make list for large site */
+	    		glNewList((GLuint)MBV_GLLIST_SITELARGE, GL_COMPILE);
+			globj = gluNewQuadric();
+			gluSphere(globj, sitesizelarge, 10, 10);
+			gluDeleteQuadric(globj);
+			glEndList();	
+			}
 	
 		/* loop over the sites */
 		for (isite=0;isite<shared.shareddata.nsite;isite++)
 			{
-			/* get grid bounds for plotting */
-			ix = (shared.shareddata.sites[isite].point.xgrid[instance] - data->primary_xmin) / data->primary_dx;
-			jy = (shared.shareddata.sites[isite].point.ygrid[instance] - data->primary_ymin) / data->primary_dy;
-			if (ix >= 0 && ix < data->primary_nx && jy >= 0 && jy < data->primary_ny)
-				{
-				ixsize = MAX(data->viewbounds[1] - data->viewbounds[0] + 1, 
-						data->viewbounds[3] - data->viewbounds[2] + 1);
-				if (isite == shared.shareddata.site_selected)
-					ixsize /= 400;
-				else
-					ixsize /= 500;
-				if (ixsize < 1) ixsize = 1;
-				jysize = (int)((ixsize * (1000.0 * data->primary_dy / data->primary_dx)) / 1000.0);
-				if (ixsize < 1) ixsize = 1;
-				ixmin = MAX(stride * ((ix - ixsize) / stride), 0);
-				ixmax = MIN(stride * ((ix + ixsize) / stride + 1), 
-						data->primary_nx - stride);
-				jymin = MAX(stride * ((jy - jysize) / stride), 0);
-				jymax = MIN(stride * ((jy + jysize) / stride + 1), 
-						data->primary_ny - stride);
 
-				/* set the color for this site */
-				if (isite == shared.shareddata.site_selected)
-					icolor = MBV_COLOR_RED;
-				else
-					icolor = MBV_COLOR_GREEN;
-				glColor3f(colortable_object_red[icolor], 
-					colortable_object_green[icolor], 
-					colortable_object_blue[icolor]);
+			/* set the color for this site */
+			if (isite == shared.shareddata.site_selected)
+				icolor = MBV_COLOR_RED;
+			else
+				icolor = MBV_COLOR_GREEN;
+			glColor3f(colortable_object_red[icolor], 
+				colortable_object_green[icolor], 
+				colortable_object_blue[icolor]);
 
-				/* draw the data as triangle strips */
-				for (i=ixmin;i<ixmax;i+=stride)
-					{
-					on = MB_NO;
-					flip = MB_NO;
-					for (j=jymin;j<=jymax;j+=stride)
-						{
-						k = i * data->primary_ny + j;
-						l = (i + stride) * data->primary_ny + j;
-						if (flip == MB_NO)
-							{
-							kk = k;
-							ll = l;
-							}
-						else
-							{
-							kk = l;
-							ll = k;
-							}
-						if (data->primary_data[kk] != data->primary_nodatavalue)
-							{
-							if (on == MB_NO)
-								{
-								glBegin(GL_TRIANGLE_STRIP);
-								on = MB_YES;
-								if (kk == k)
-									flip = MB_NO;
-								else
-									flip = MB_YES;
-								}
-							glVertex3f(data->primary_x[kk],
-								data->primary_y[kk],
-								data->primary_z[kk]+MBV_OPENGL_3D_LINE_OFFSET);
-							}
-						else
-							{
-							glEnd();
-							on = MB_NO;
-							flip = MB_NO;
-							}
-						if (data->primary_data[ll] != data->primary_nodatavalue)
-							{
-							if (on == MB_NO)
-								{
-								glBegin(GL_TRIANGLE_STRIP);
-								on = MB_YES;
-								if (ll == l)
-									flip = MB_NO;
-								else
-									flip = MB_YES;
-								}
-							glVertex3f(data->primary_x[ll],
-								data->primary_y[ll],
-								data->primary_z[ll]+MBV_OPENGL_3D_LINE_OFFSET);
-							}
-						else
-							{
-							glEnd();
-							on = MB_NO;
-							flip = MB_NO;
-							}
-						}
-					if (on == MB_YES)
-						{
-						glEnd();
-						on = MB_NO;
-						flip = MB_NO;
-						}
-					glEnd();
-					}
-
-				/* draw the boundary */
-				glColor3f(colortable_object_red[MBV_COLOR_BLACK], 
-					colortable_object_green[MBV_COLOR_BLACK], 
-					colortable_object_blue[MBV_COLOR_BLACK]);
-				glLineWidth(2.0);
-				glBegin(GL_LINE_LOOP);
-				k = ixmin * data->primary_ny + jymin;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmax * data->primary_ny + jymin;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmax * data->primary_ny + jymax;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				k = ixmin * data->primary_ny + jymax;
-				glVertex3f(data->primary_x[k],
-					   data->primary_y[k],
-					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-				glEnd();
-				}
+			/* draw the site as a disk or sphere using GLUT */
+			glTranslatef(shared.shareddata.sites[isite].point.xdisplay[instance],
+					shared.shareddata.sites[isite].point.ydisplay[instance],
+					shared.shareddata.sites[isite].point.zdisplay[instance]);
+			if (isite == shared.shareddata.site_selected)
+	    			glCallList((GLuint)MBV_GLLIST_SITELARGE);
+			else
+	    			glCallList((GLuint)MBV_GLLIST_SITESMALL);
+			glTranslatef(-shared.shareddata.sites[isite].point.xdisplay[instance],
+					-shared.shareddata.sites[isite].point.ydisplay[instance],
+					-shared.shareddata.sites[isite].point.zdisplay[instance]);
 			}
+
 		}
 
 	/* print output debug statements */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.5 2005-02-02 08:23:51 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.6 2005-02-08 22:37:40 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -108,7 +108,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.5 2005-02-02 08:23:51 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.6 2005-02-08 22:37:40 caress Exp $";
 
 /* function prototypes */
 
@@ -337,11 +337,6 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
 	XtSetValues(shared.mb3d_sitelist.mbview_sitelist_label, args, ac);
     	XtManageChild(shared.mb3d_sitelist.MB3DSiteList);
-	XtAddEventHandler(shared.topLevelShell_sitelist, 
-				StructureNotifyMask, 
-				False, 
-				mbview_sitelistresize, 
-				(XtPointer)0);
 	
 	/* create and manage route list window */
 	shared.init_routelist = MBV_WINDOW_NULL;
@@ -370,11 +365,6 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
 	XtSetValues(shared.mb3d_routelist.mbview_routelist_label, args, ac);
     	XtManageChild(shared.mb3d_routelist.MB3DRouteList);
-	XtAddEventHandler(shared.topLevelShell_routelist, 
-				StructureNotifyMask, 
-				False, 
-				mbview_routelistresize, 
-				(XtPointer)0);
 	
 	/* create and manage navigation list window */
 	shared.init_navlist = MBV_WINDOW_NULL;
@@ -403,11 +393,6 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
 	XtSetValues(shared.mb3d_navlist.mbview_navlist_label, args, ac);
     	XtManageChild(shared.mb3d_navlist.MB3DNavList);
-	XtAddEventHandler(shared.topLevelShell_navlist, 
-				StructureNotifyMask, 
-				False, 
-				mbview_navlistresize, 
-				(XtPointer)0);
 
 	/* set timer function */
 	/*do_mbview_settimer();*/
@@ -7290,107 +7275,6 @@ fprintf(stderr,"do_mbview_navlistpopup:\n");
     	XtPopup(XtParent(shared.mainWindow_navlist), XtGrabNone);
 	shared.init_navlist = MBV_WINDOW_VISIBLE;
 	mbview_updatenavlist();
-}
-/*------------------------------------------------------------------------------*/
-void 
-mbview_sitelistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
-{
-	int	instance;
-	Dimension	width;
-	Dimension	height;
-	XConfigureEvent *cevent = (XConfigureEvent *) event;
-	
-	/* do this only if a resize event happens */
-	if (cevent->type == ConfigureNotify)
-	    {
-	    /* get new shell size */
-	    XtVaGetValues(shared.mainWindow_sitelist, 
-	    XmNwidth, &width, 
-	    XmNheight, &height, 
-	    NULL);
-
-fprintf(stderr,"mbview_sitelistresize: %d %d\n", width, height);
-	    /* do this only if the shell was REALLY resized and not just moved */
-	    if (width != width - LEFT_WIDTH
-	    	|| height != height - LEFT_HEIGHT)
-	    	{
-
-		/* set ScrolledWindow size */
-		ac = 0;
-		XtSetArg(args[ac], XmNwidth, width - LEFT_WIDTH); ac++;
-		XtSetArg(args[ac], XmNheight, height - LEFT_HEIGHT); ac++;
-		XtSetValues(shared.mb3d_sitelist.mbview_scrolledWindow_sitelist, args, ac);
-printf(stderr,"mbview_sitelistresize: reset list width:%d %d\n", 
-width - LEFT_WIDTH, height - LEFT_HEIGHT);
-
-	    	}
-	    }
-}
-/*------------------------------------------------------------------------------*/
-void 
-mbview_routelistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
-{
-	int	instance;
-	Dimension	width;
-	Dimension	height;
-	XConfigureEvent *cevent = (XConfigureEvent *) event;
-	
-	/* do this only if a resize event happens */
-	if (cevent->type == ConfigureNotify)
-	    {
-	    /* get new shell size */
-	    XtVaGetValues(shared.mainWindow_routelist, 
-	    XmNwidth, &width, 
-	    XmNheight, &height, 
-	    NULL);
-
-fprintf(stderr,"mbview_routelistresize: %d %d\n", width, height);
-	    /* do this only if the shell was REALLY resized and not just moved */
-	    if (width != width - LEFT_WIDTH
-	    	|| height != height - LEFT_HEIGHT)
-	    	{
-
-		/* set ScrolledWindow size */
-		ac = 0;
-		XtSetArg(args[ac], XmNwidth, width - LEFT_WIDTH); ac++;
-		XtSetArg(args[ac], XmNheight, height - LEFT_HEIGHT); ac++;
-		XtSetValues(shared.mb3d_routelist.mbview_scrolledWindow_routelist, args, ac);
-
-	    	}
-	    }
-}
-/*------------------------------------------------------------------------------*/
-void 
-mbview_navlistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
-{
-	int	instance;
-	Dimension	width;
-	Dimension	height;
-	XConfigureEvent *cevent = (XConfigureEvent *) event;
-	
-	/* do this only if a resize event happens */
-	if (cevent->type == ConfigureNotify)
-	    {
-	    /* get new shell size */
-	    XtVaGetValues(shared.mainWindow_navlist, 
-	    XmNwidth, &width, 
-	    XmNheight, &height, 
-	    NULL);
-
-fprintf(stderr,"mbview_navlistresize: %d %d\n", width, height);
-	    /* do this only if the shell was REALLY resized and not just moved */
-	    if (width != width - LEFT_WIDTH
-	    	|| height != height - LEFT_HEIGHT)
-	    	{
-
-		/* set ScrolledWindow size */
-		ac = 0;
-		XtSetArg(args[ac], XmNwidth, width - LEFT_WIDTH); ac++;
-		XtSetArg(args[ac], XmNheight, height - LEFT_HEIGHT); ac++;
-		XtSetValues(shared.mb3d_navlist.mbview_scrolledWindow_navlist, args, ac);
-
-	    	}
-	    }
 }
 /*------------------------------------------------------------------------------*/
 

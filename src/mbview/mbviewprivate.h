@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.5 2005-02-02 08:23:50 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.6 2005-02-08 22:37:43 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,12 @@
 #define MBV_OPENGL_ZMAX3D 100000000.0
 #define MBV_OPENGL_3D_CONTOUR_OFFSET 0.001
 #define MBV_OPENGL_3D_LINE_OFFSET 0.005
+
+/* OpenGL list IDs */
+#define MBV_GLLIST_SITESMALL  (3 * MBV_MAX_WINDOWS + 0)
+#define MBV_GLLIST_SITELARGE  (3 * MBV_MAX_WINDOWS + 1)
+#define MBV_GLLIST_ROUTESMALL (3 * MBV_MAX_WINDOWS + 2)
+#define MBV_GLLIST_ROUTELARGE (3 * MBV_MAX_WINDOWS + 3)
 
 #define MBV_REZ_NONE 	0
 #define MBV_REZ_LOW 	1
@@ -415,9 +421,6 @@ void do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_dat
 void do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data);
 void mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
-void mbview_sitelistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
-void mbview_routelistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
-void mbview_navlistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
 void do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_data_primary( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_data_primaryslope( Widget w, XtPointer client_data, XtPointer call_data);
