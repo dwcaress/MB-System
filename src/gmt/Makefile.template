@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.4 1994-10-31 19:34:00 caress Exp $
+#	$Id: Makefile.template,v 4.5 1995-06-22 17:32:25 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,10 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.4  1994/10/31  19:34:00  caress
+# Changing man pages to .manl instead of .l to avoid make
+# calling lex.
+#
 # Revision 4.3  1994/10/31  14:59:51  caress
 # Changed man pages from section 1 to l
 #
@@ -82,7 +86,7 @@ mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mb_pslibface.c
 $(INCDIR)/mb_contour.h:	 mb_contour.h
 	cp mb_contour.h $(INCDIR)/mb_contour.h
-mbswath.o:	mbswath.c  $(INCDIR)/mb_status.h
+mbswath.o:	mbswath.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) ../../lib/libmbio.a  mbswath.c
 
 ### copy the man pages to the man page directory
