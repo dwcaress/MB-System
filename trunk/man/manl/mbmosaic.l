@@ -1,4 +1,4 @@
-.TH mbmosaic l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -17,7 +17,7 @@ Version 5.0
 \fB-Y\fIpriority_file\fP \fB-Z\fIbath_default\fP]
 
 .SH DESCRIPTION
-\fBmbmosaic\fP is an utility used to mosaic amplitude or sidescan 
+\fBmbmosaic\fP is a utility used to mosaic amplitude or sidescan 
 data contained in a set of swath sonar data files. This program 
 allows users to prioritize data according to the associated grazing
 angle and according to look azimuth. Individual mosaic bin values
@@ -497,7 +497,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ Version $Id: mbmosaic.l,v 5.1 2001-07-13 19:52:33 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

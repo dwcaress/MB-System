@@ -1,4 +1,4 @@
-.TH mbm_grdplot l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grdplot l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
 a GMT map of gridded data in a GMT grd file.
@@ -44,7 +44,7 @@ Miscellaneous Options:
 \fB-MXS\fP\fIsymbol/size\fP \fB-MXW\fP\fIpen\fP]
 
 .SH DESCRIPTION
-\fBmbm_grdplot\fP is an utility that generates a 
+\fBmbm_grdplot\fP is a macro that generates a 
 shellscript of \fBGMT\fP commands which, 
 when executed, will generate a Postscript plot of gridded 
 data.  Several styles of plots can be generated, including 

@@ -1,4 +1,4 @@
-.TH mbinfo l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbinfo l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of swath sonar data files.
 
@@ -12,7 +12,7 @@ Version 5.0
 \fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-W -V -H\fP]
 
 .SH DESCRIPTION
-\fBMBinfo\fP is an utility for reading a swath sonar data file 
+\fBMBinfo\fP is a utility for reading a swath sonar data file 
 or files and outputting some basic statistics.  The table generated
 shows the filename, the data format id, a brief description of
 the format, data counts, navigation totals, time and navigation

@@ -1,4 +1,4 @@
-.TH mblist l "24 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l "12 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -15,7 +15,8 @@ Version 5.0
 \fB-O\fP\fIoutput_format\fP \fB-P\fP\fIpings\fP \fB-Q\fP 
 \fB-R\fP\fIwest/east/south/north\fP 
 \fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP 
-\fB-U\fP\fIcheck\fP \fB-V\fP \fB-W\fP]
+\fB-U\fP\fIcheck\fP \fB-V\fP \fB-W\fP 
+\fB-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
 \fBmblist\fP is a utility to list the contents of a swath 
@@ -25,7 +26,8 @@ spreadsheet style, with data columns separated by tabs. Alternatively,
 the output can be binary, with each field represented 
 as a double precision float (\fB-A\fP option). The output of
 \fBmblist\fP can be piped to plotting and data analysis programs. The
-option \fB-O\fP\fIoutput_format\fP can be used to control the data types that
+option \fB-O\fP\fIoutput_format\fP can be 
+used to control the data types that
 are sent to stdout. The default is to output a single record for
 each survey ping, and for any output navigation values to reflect
 the sonar or ship navigation. In this mode, any output depth,
@@ -316,6 +318,18 @@ Normally, \fBmblist\fP outputs bathymetry and across and along
 track distances in meters.  If the
 \fB-W\fP flag is given, then \fBmblist\fP outputs these values
 in feet.
+.TP
+.B \-Z
+\fIsegment\fP
+.br
+Causes the ascii output of different input swath files
+(e.g. when a datalist is specified with the \fB-I\fP option)
+to be separated by lines with \fIsegment\fP. If \fIsegment\fP
+is a single character, then the output is a multiple segment
+file of the sort accepted by the \fBGMT\fP program \fBpsxy\fP.
+This option only works with ascii output, and is thus disabled
+when the \fB-A\fP option is specified. The most common usage
+is \fB-Z\fP\I>\fP.
 
 .SH EXAMPLES
 Suppose one wishes to obtain a centerbeam profile 

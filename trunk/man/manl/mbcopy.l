@@ -1,4 +1,4 @@
-.TH mbcopy l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbcopy l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbcopy\fP - Copy swath sonar bathymetry data files.
 
@@ -14,7 +14,7 @@ Version 5.0
 \fB-S\fIspeed\fP \fB-V\fP]
 
 .SH DESCRIPTION
-\fBmbcopy\fP is an utility for copying swath sonar data files which
+\fBmbcopy\fP is a utility for copying swath sonar data files which
 may be used to change formats, average pings, or window
 in time and space. \fBmbcopy\fP can be used as a filter from
 stdin to stdout, or it may do i/o to and from files.

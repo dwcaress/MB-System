@@ -1,4 +1,4 @@
-.TH mbdefaults l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbdefaults l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdefaults\fP - Set or list default mbio parameters for reading and writing swath sonar data
 
@@ -11,7 +11,7 @@ Version 5.0
 \fB-S\fIspeed \fB-T\fItimegap \fB-W\fIproject \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbdefaults\fP is an utility for setting or listing the default read
+\fBmbdefaults\fP is a utility for setting or listing the default read
 parameters used by some \fBMBIO\fP utilities such as \fBMBCOPY\fP.  
 If a user wishes to set default
 parameters different from those set by the \fBMBIO\fP library, then

@@ -1,4 +1,4 @@
-.TH mbsimradmakess l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbsimradmakess l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsimradmakess\fP - Regenerates sidescan
 imagery from the raw amplitude samples contained in data from 
@@ -13,7 +13,7 @@ Version 5.0
 \fB-V -H\fP]
 
 .SH DESCRIPTION
-The program \fBmbsimradmakess\fP is an utility for regenerating sidescan
+The program \fBmbsimradmakess\fP is a utility for regenerating sidescan
 imagery from the raw amplitude samples contained in data from 
 Simrad EM300 and EM3000 multibeam sonars. This program ignores
 amplitude data associated with flagged (bad) bathymetry data, 

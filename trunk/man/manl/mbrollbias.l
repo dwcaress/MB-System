@@ -1,4 +1,4 @@
-.TH mbrollbias l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbrollbias l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbrollbias\fP - Assess roll bias of swath sonar sonar systems.
 
@@ -9,7 +9,7 @@ Version 5.0
 \fBmbrollbias\fP \fB-F\fIformat1/format2 \fB-L\fIlonflip \fB-I\fIfile1 \fB-J\fIfile2 \fB-R\fIwest/east/south/north [\fB-D\fIxdim/ydim \fB-H -V\fI]
 
 .SH DESCRIPTION
-\fBmbrollbias\fP is an utility used to assess roll bias of swath sonar 
+\fBmbrollbias\fP is a utility used to assess roll bias of swath sonar 
 sonar systems using bathymetry data from two swaths covering the same  
 seafloor in opposite directions. The program takes two input  
 files and calculates best fitting planes for each dataset.   
@@ -106,7 +106,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ Version $Id: mbrollbias.l,v 5.1 2001-07-13 19:52:33 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:

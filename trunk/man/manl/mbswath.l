@@ -1,4 +1,4 @@
-.TH mbswath l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbswath l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -20,7 +20,7 @@ Version 5.0
 \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbswath\fP is an utility for plotting swath sonar data in color fill
+\fBmbswath\fP is a utility for plotting swath sonar data in color fill
 or color shaded relief using Postscript.  Like \fBmbcontour\fP, \fBmbswath\fP
 is fully compatible with the GMT package version 3, including the use
 of GMT style color pallete (cpt) files to control the color table. 

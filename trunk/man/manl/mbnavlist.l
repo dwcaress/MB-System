@@ -1,4 +1,4 @@
-.TH mbnavlist l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist l "12 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP - List navigation data in swath sonar data files.
 
@@ -10,13 +10,19 @@ Version 5.0
 \fB-E\fIyr/mo/da/hr/mn/sc \fB-F\fIformat \fB-H \fB-I\fIfile 
 \fB-L\fIlonflip
 \fB-O\fIoutput_format \fB-R\fIwest/east/south/north 
-\fB-S\fIspeed \fB-T\fItimegap \fB-V\fP]
+\fB-S\fIspeed \fB-T\fItimegap \fB-V\fP -\fB-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
 \fBmbnavlist\fP prints the specified contents of navigation records
-in a swath sonar data file to stdout. The form of the 
-output is quite flexible; mbnavlist is tailored to produce 
-ascii files in spreadsheet style with data columns separated by tabs.
+in a swath sonar data file to stdout. By default, \fBmblist\fP 
+produces ASCII files in
+spreadsheet style, with data columns separated by tabs. Alternatively,
+the output can be binary, with each field represented 
+as a double precision float (\fB-A\fP option). The output of
+\fBmbnavlist\fP can be piped to plotting and data analysis programs. The
+option \fB-O\fP\fIoutput_format\fP can be 
+used to control the data types that
+are sent to stdout. 
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -29,6 +35,16 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
 
 .SH OPTIONS
+.TP
+.B \-A
+.br
+Causes the output to be binary (native double precision floating
+point) rather than ASCII. Some
+output options cannot be represented as single binary floats (e.g.
+time strings and longitude or latitude broken into degrees
+and minutes. These values are output as multiple fields as
+appropriate.
+Default: ASCII output with fields separated by tabs.
 .TP
 .B \-B
 \fIyr/mo/da/hr/mn/sc\fP
@@ -147,6 +163,18 @@ Normally, \fBmblist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
+.TP
+.B \-Z
+\fIsegment\fP
+.br
+Causes the ascii output of different input swath files
+(e.g. when a datalist is specified with the \fB-I\fP option)
+to be separated by lines with \fIsegment\fP. If \fIsegment\fP
+is a single character, then the output is a multiple segment
+file of the sort accepted by the \fBGMT\fP program \fBpsxy\fP.
+This option only works with ascii output, and is thus disabled
+when the \fB-A\fP option is specified. The most common usage
+is \fB-Z\fP\I>\fP.
 
 .SH EXAMPLES
 Suppose one wishes to obtain a navigation list from a Simrad EM300 data file
