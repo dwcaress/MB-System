@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.11 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mblist.c,v 5.12 2003-07-30 16:41:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.10  2002/05/29 23:43:09  caress
  * Release 5.0.beta18
  *
@@ -265,7 +268,7 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.11 2003-04-17 21:18:57 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.12 2003-07-30 16:41:06 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -330,6 +333,7 @@ main (int argc, char **argv)
 	int	use_amp = MB_NO;
 	int	use_ss = MB_NO;
 	int	use_slope = MB_NO;
+	int	use_nav = MB_NO;
 	int	check_values = MBLIST_CHECK_ON;
 	int	check_bath = MB_NO;
 	int	check_amp = MB_NO;
@@ -416,8 +420,8 @@ main (int argc, char **argv)
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 
-	/* set default input to stdin */
-	strcpy (read_file, "stdin");
+	/* set default input to datalist.mb-1 */
+	strcpy (read_file, "datalist.mb-1");
 
 	/* set up the default list controls 
 		(Time, lon, lat, heading, speed, along-track distance, center beam depth) */
@@ -735,6 +739,9 @@ main (int argc, char **argv)
 			if (list[i] == 'A' || list[i] == 'a'
 				|| list[i] == 'G' || list[i] == 'g')
 				use_slope = MB_YES;
+			if (list[i] == 'P' || list[i] == 'p' 
+				|| list[i] == 'R' || list[i] == 'r')
+				use_nav = MB_YES;
 			}
 	if (check_values == MBLIST_CHECK_ON
 		|| check_values == MBLIST_CHECK_ON_NULL)
@@ -789,9 +796,13 @@ main (int argc, char **argv)
 	first = MB_YES;
 	while (error <= MB_ERROR_NO_ERROR)
 		{
+		/* reset error */
+		error = MB_ERROR_NO_ERROR;
+		
 		/* read a ping of data */
-		if (pings == 1)
+		if (pings == 1 || use_nav == MB_YES)
 		    {
+		    /* read next data record */
 		    status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
 			time_i,&time_d,&navlon,&navlat,
 			&speed,&heading,
@@ -800,6 +811,15 @@ main (int argc, char **argv)
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
+
+		    /* time gaps are not a problem here */
+		    if (error == MB_ERROR_TIME_GAP)
+			    {
+			    error = MB_ERROR_NO_ERROR;
+			    status = MB_SUCCESS;
+			    }
+
+		    /* if survey data extract nav */
 		    if (error == MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			status = mb_extract_nav(verbose,mbio_ptr,store_ptr,&kind,
@@ -817,19 +837,19 @@ main (int argc, char **argv)
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
+
+		    /* time gaps are not a problem here */
+		    if (error == MB_ERROR_TIME_GAP)
+			    {
+			    error = MB_ERROR_NO_ERROR;
+			    status = MB_SUCCESS;
+			    }
 		    }
 		    
 		/* make sure non survey data records are ignored */
 		if (error == MB_ERROR_NO_ERROR
 			&& kind != MB_DATA_DATA)
 			error = MB_ERROR_OTHER;
-
-		/* time gaps are not a problem here */
-		if (error == MB_ERROR_TIME_GAP)
-			{
-			error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-			}
 
 		/* increment counter and set cumulative distance */
 		if (error <= MB_ERROR_NO_ERROR 
