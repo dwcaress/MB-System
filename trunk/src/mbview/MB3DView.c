@@ -23,6 +23,8 @@
 #include <Xm/MwmUtil.h>
 #include <Xm/TextF.h>
 #include <Xm/Scale.h>
+#include <Xm/ScrolledW.h>
+#include <Xm/List.h>
 #include "MB3DView.h"
 
 /*
@@ -67,7 +69,11 @@ extern void do_mbview_colortable_gray(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_flat(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_sealevel(Widget, XtPointer, XtPointer);
 extern void do_mbview_colorboundspopup(Widget, XtPointer, XtPointer);
+extern void do_mbview_2dparmspopup(Widget, XtPointer, XtPointer);
+extern void do_mbview_3dparmspopup(Widget, XtPointer, XtPointer);
+extern void do_mbview_shadeparmspopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_resolutionpopup(Widget, XtPointer, XtPointer);
+extern void do_mbview_sitelistpopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_mouse_mode(Widget, XtPointer, XtPointer);
 extern void do_mbview_aboutpopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_dismiss(Widget, XtPointer, XtPointer);
@@ -76,6 +82,14 @@ extern void do_mbview_colorboundspopdown(Widget, XtPointer, XtPointer);
 extern void do_mbview_resolutionchange(Widget, XtPointer, XtPointer);
 extern void do_mbview_resolutionpopdown(Widget, XtPointer, XtPointer);
 extern void do_mbview_aboutpopdown(Widget, XtPointer, XtPointer);
+extern void do_mbview_shadeparmsapply(Widget, XtPointer, XtPointer);
+extern void do_mbview_shadeparmspopdown(Widget, XtPointer, XtPointer);
+extern void do_mbview_3dparmsapply(Widget, XtPointer, XtPointer);
+extern void do_mbview_3dparmspopdown(Widget, XtPointer, XtPointer);
+extern void do_mbview_2dparmsapply(Widget, XtPointer, XtPointer);
+extern void do_mbview_2dparmspopdown(Widget, XtPointer, XtPointer);
+extern void do_mbview_sitelistpopdown(Widget, XtPointer, XtPointer);
+extern void do_mbview_sitelistapply(Widget, XtPointer, XtPointer);
 
 /*
  * This table is used to define class resources that are placed
@@ -128,6 +142,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmListWidgetClass);
     /*
      * Setup app-defaults fallback table if not already done.
      */
@@ -143,10 +159,10 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 9); ac++;
-    XtSetArg(args[ac], XmNy, 33); ac++;
-    XtSetArg(args[ac], XmNwidth, 785); ac++;
-    XtSetArg(args[ac], XmNheight, 949); ac++;
+    XtSetArg(args[ac], XmNx, 12); ac++;
+    XtSetArg(args[ac], XmNy, 47); ac++;
+    XtSetArg(args[ac], XmNwidth, 801); ac++;
+    XtSetArg(args[ac], XmNheight, 814); ac++;
     class_in->MB3DView = XmCreateBulletinBoard(parent,
         name,
         args, 
@@ -1077,10 +1093,10 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNx, 27); ac++;
+    XtSetArg(args[ac], XmNy, 110); ac++;
     XtSetArg(args[ac], XmNwidth, 144); ac++;
-    XtSetArg(args[ac], XmNheight, 52); ac++;
+    XtSetArg(args[ac], XmNheight, 148); ac++;
     class_in->mbview_pulldownMenu_controls = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_controls),
         "mbview_pulldownMenu_controls",
         args, 
@@ -1114,6 +1130,78 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     {
         XmString    tmp0;
         
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, "2D Controls", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_2dview = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
+            "mbview_pushButton_2dview",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_2dview);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_2dview, XmNactivateCallback, do_mbview_2dparmspopup, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, "3D Controls", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_3dview = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
+            "mbview_pushButton_3dview",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_3dview);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_3dview, XmNactivateCallback, do_mbview_3dparmspopup, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, "Shading", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_shadeparms = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
+            "mbview_pushButton_shadeparms",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_shadeparms);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_shadeparms, XmNactivateCallback, do_mbview_shadeparmspopup, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
         tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, "Resolution", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
@@ -1133,6 +1221,30 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     }
     
     XtAddCallback(class_in->mbview_pushButton_resolution, XmNactivateCallback, do_mbview_resolutionpopup, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, "Site List", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_pulldownMenu_controls, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_sitelist = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
+            "mbview_pushButton_sitelist",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_sitelist);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_sitelist, XmNactivateCallback, do_mbview_sitelistpopup, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_controls); ac++;
@@ -1404,8 +1516,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 24); ac++;
-    XtSetArg(args[ac], XmNy, 144); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 123); ac++;
     XtSetArg(args[ac], XmNheight, 28); ac++;
     class_in->mbview_pulldownMenu_action = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_action),
@@ -1557,8 +1669,1529 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtManageChild(class_in->mbview_drawingArea_mbview);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 170); ac++;
-    XtSetArg(args[ac], XmNy, 242); ac++;
+    XtSetArg(args[ac], XmNx, 159); ac++;
+    XtSetArg(args[ac], XmNy, 298); ac++;
+    XtSetArg(args[ac], XmNwidth, 506); ac++;
+    XtSetArg(args[ac], XmNheight, 311); ac++;
+    class_in->mbview_dialogShell_sitelist = XtCreatePopupShell("mbview_dialogShell_sitelist",
+        xmDialogShellWidgetClass,
+        class_in->MB3DView,
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_sitelist, "MBview Site List", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 159); ac++;
+        XtSetArg(args[ac], XmNy, 298); ac++;
+        XtSetArg(args[ac], XmNwidth, 506); ac++;
+        XtSetArg(args[ac], XmNheight, 311); ac++;
+        class_in->mbview_bulletinBoard_sitelist = XmCreateBulletinBoard(class_in->mbview_dialogShell_sitelist,
+            "mbview_bulletinBoard_sitelist",
+            args, 
+            ac);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_sitelist, "Current Sites:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 0); ac++;
+        XtSetArg(args[ac], XmNwidth, 130); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_sitelist, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_sitelist = XmCreateLabel(class_in->mbview_bulletinBoard_sitelist,
+            "mbview_label_sitelist",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_sitelist);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNscrollingPolicy, XmAPPLICATION_DEFINED); ac++;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 30); ac++;
+    XtSetArg(args[ac], XmNwidth, 480); ac++;
+    XtSetArg(args[ac], XmNheight, 210); ac++;
+    class_in->mbview_scrolledWindow_sitelist = XmCreateScrolledWindow(class_in->mbview_bulletinBoard_sitelist,
+        "mbview_scrolledWindow_sitelist",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_scrolledWindow_sitelist);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNwidth, 480); ac++;
+    XtSetArg(args[ac], XmNheight, 210); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_scrolledWindow_sitelist, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_list_sitelist = XmCreateList(class_in->mbview_scrolledWindow_sitelist,
+        "mbview_list_sitelist",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_list_sitelist);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_sitelist, "Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 270); ac++;
+        XtSetArg(args[ac], XmNy, 250); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_sitelist, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_sitelist_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_sitelist,
+            "mbview_pushButton_sitelist_dismiss",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_sitelist_dismiss);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_sitelist_dismiss, XmNactivateCallback, do_mbview_sitelistpopdown, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_sitelist, "Apply", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 130); ac++;
+        XtSetArg(args[ac], XmNy, 250); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_sitelist, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_sitelist_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_sitelist,
+            "mbview_pushButton_sitelist_apply",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_sitelist_apply);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_sitelist_apply, XmNactivateCallback, do_mbview_sitelistapply, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 175); ac++;
+    XtSetArg(args[ac], XmNy, 528); ac++;
+    XtSetArg(args[ac], XmNwidth, 187); ac++;
+    XtSetArg(args[ac], XmNheight, 215); ac++;
+    class_in->mbview_dialogShell_2dparms = XtCreatePopupShell("mbview_dialogShell_2dparms",
+        xmDialogShellWidgetClass,
+        class_in->MB3DView,
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_2dparms, "MBview 2D Parameters", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 175); ac++;
+        XtSetArg(args[ac], XmNy, 528); ac++;
+        XtSetArg(args[ac], XmNwidth, 187); ac++;
+        XtSetArg(args[ac], XmNheight, 215); ac++;
+        class_in->mbview_bulletinBoard_2dparms = XmCreateBulletinBoard(class_in->mbview_dialogShell_2dparms,
+            "mbview_bulletinBoard_2dparms",
+            args, 
+            ac);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 70); ac++;
+    XtSetArg(args[ac], XmNy, 100); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_view_2dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
+        "mbview_textField_view_2dzoom",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_view_2dzoom);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "Zoom:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 100); ac++;
+        XtSetArg(args[ac], XmNwidth, 60); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_2dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
+            "mbview_label_view_2dzoom",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_2dzoom);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 70); ac++;
+    XtSetArg(args[ac], XmNy, 70); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_view_2doffsety = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
+        "mbview_textField_view_2doffsety",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_view_2doffsety);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "Y:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 70); ac++;
+        XtSetArg(args[ac], XmNwidth, 50); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_2doffsety = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
+            "mbview_label_view_2doffsety",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_2doffsety);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 130); ac++;
+    XtSetArg(args[ac], XmNwidth, 170); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    class_in->mbview_separator14 = XmCreateSeparator(class_in->mbview_bulletinBoard_2dparms,
+        "mbview_separator14",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator14);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 70); ac++;
+    XtSetArg(args[ac], XmNy, 40); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_view_2doffsetx = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
+        "mbview_textField_view_2doffsetx",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_view_2doffsetx);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "X:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 40); ac++;
+        XtSetArg(args[ac], XmNwidth, 50); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_2doffsetx = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
+            "mbview_label_view_2doffsetx",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_2doffsetx);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "View Offset:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 90); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_2d_offset = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
+            "mbview_label_2d_offset",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_2d_offset);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "Apply", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 150); ac++;
+        XtSetArg(args[ac], XmNwidth, 70); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_view_2d_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_2dparms,
+            "mbview_pushButton_view_2d_apply",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_view_2d_apply);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_view_2d_apply, XmNactivateCallback, do_mbview_2dparmsapply, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 150); ac++;
+        XtSetArg(args[ac], XmNwidth, 70); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_view_2d_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_2dparms,
+            "mbview_pushButton_view_2d_dismiss",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_view_2d_dismiss);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_view_2d_dismiss, XmNactivateCallback, do_mbview_2dparmspopdown, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 43); ac++;
+    XtSetArg(args[ac], XmNy, 454); ac++;
+    XtSetArg(args[ac], XmNwidth, 281); ac++;
+    XtSetArg(args[ac], XmNheight, 478); ac++;
+    class_in->mbview_dialogShell_3dparms = XtCreatePopupShell("mbview_dialogShell_3dparms",
+        xmDialogShellWidgetClass,
+        class_in->MB3DView,
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_3dparms, "MBview 3D Parameters", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 43); ac++;
+        XtSetArg(args[ac], XmNy, 454); ac++;
+        XtSetArg(args[ac], XmNwidth, 281); ac++;
+        XtSetArg(args[ac], XmNheight, 478); ac++;
+        class_in->mbview_bulletinBoard_3dparms = XmCreateBulletinBoard(class_in->mbview_dialogShell_3dparms,
+            "mbview_bulletinBoard_3dparms",
+            args, 
+            ac);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 100); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_model_3dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_model_3dzoom",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_model_3dzoom);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Zoom:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 60); ac++;
+        XtSetArg(args[ac], XmNy, 100); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_model_3dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_model_3dzoom",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_model_3dzoom);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 320); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    class_in->mbview_separator11 = XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_separator11",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator11);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 240); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_view_3dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_view_3dzoom",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_view_3dzoom);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Zoom:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 60); ac++;
+        XtSetArg(args[ac], XmNy, 240); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_3dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_view_3dzoom",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_3dzoom);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 370); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_view_3doffsety = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_view_3doffsety",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_view_3doffsety);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Y:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 60); ac++;
+        XtSetArg(args[ac], XmNy, 370); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_3doffsety = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_view_3doffsety",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_3doffsety);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 400); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    class_in->mbview_separator20 = XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_separator20",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator20);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 340); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_view_3doffsetx = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_view_3doffsetx",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_view_3doffsetx);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "X:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 340); ac++;
+        XtSetArg(args[ac], XmNwidth, 60); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_3doffsetx = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_view_3doffsetx",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_3doffsetx);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Pan:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 340); ac++;
+        XtSetArg(args[ac], XmNwidth, 90); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_offset = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_view_offset",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_offset);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 210); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_view_elevation = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_view_elevation",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_view_elevation);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Elevation (degrees):", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 210); ac++;
+        XtSetArg(args[ac], XmNwidth, 150); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_elevation = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_view_elevation",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_elevation);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 270); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    class_in->mbview_separator4 = XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_separator4",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator4);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 180); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_view_azimuth = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_view_azimuth",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_view_azimuth);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Azimuth (degrees):", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 180); ac++;
+        XtSetArg(args[ac], XmNwidth, 150); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view_azimuth = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_view_azimuth",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view_azimuth);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "View Orientation & Zoom:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 150); ac++;
+        XtSetArg(args[ac], XmNwidth, 200); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_view = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_view",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_view);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 70); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_model_elevation = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_model_elevation",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_model_elevation);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 40); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_model_azimuth = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_model_azimuth",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_model_azimuth);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Elevation (degrees):", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 70); ac++;
+        XtSetArg(args[ac], XmNwidth, 150); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_model_elevation = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_model_elevation",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_model_elevation);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Azimuth (degrees):", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 40); ac++;
+        XtSetArg(args[ac], XmNwidth, 140); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_model_azimuth = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_model_azimuth",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_model_azimuth);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Model Orientation & Zoom:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 200); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_model = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_model",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_model);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 130); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    class_in->mbview_separator9 = XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_separator9",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator9);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Apply", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 420); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_view_3d_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_pushButton_view_3d_apply",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_view_3d_apply);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_view_3d_apply, XmNactivateCallback, do_mbview_3dparmsapply, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Vertical Exageration:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 290); ac++;
+        XtSetArg(args[ac], XmNwidth, 150); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_exager = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_label_exager",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_exager);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 290); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_exageration = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
+        "mbview_textField_exageration",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_exageration);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 160); ac++;
+        XtSetArg(args[ac], XmNy, 420); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_view_3d_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_3dparms,
+            "mbview_pushButton_view_3d_dismiss",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_view_3d_dismiss);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_view_3d_dismiss, XmNactivateCallback, do_mbview_3dparmspopdown, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 71); ac++;
+    XtSetArg(args[ac], XmNy, 525); ac++;
+    XtSetArg(args[ac], XmNwidth, 278); ac++;
+    XtSetArg(args[ac], XmNheight, 439); ac++;
+    class_in->mbview_dialogShell_shadeparms = XtCreatePopupShell("mbview_dialogShell_shadeparms",
+        xmDialogShellWidgetClass,
+        class_in->MB3DView,
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_shadeparms, "MBview Shading Parameters", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 71); ac++;
+        XtSetArg(args[ac], XmNy, 525); ac++;
+        XtSetArg(args[ac], XmNwidth, 278); ac++;
+        XtSetArg(args[ac], XmNheight, 439); ac++;
+        class_in->mbview_bulletinBoard_shadeparms = XmCreateBulletinBoard(class_in->mbview_dialogShell_shadeparms,
+            "mbview_bulletinBoard_shadeparms",
+            args, 
+            ac);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 360); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    class_in->mbview_separator13 = XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_separator13",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator13);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 300); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_overlay_center = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_textField_overlay_center",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_overlay_center);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Center:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 60); ac++;
+        XtSetArg(args[ac], XmNy, 300); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_overlay_center = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_overlay_center",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_overlay_center);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Shading by Overlay:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 240); ac++;
+        XtSetArg(args[ac], XmNwidth, 200); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_overlayshade = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_overlayshade",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_overlayshade);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+    XtSetArg(args[ac], XmNx, 30); ac++;
+    XtSetArg(args[ac], XmNy, 330); ac++;
+    XtSetArg(args[ac], XmNwidth, 243); ac++;
+    XtSetArg(args[ac], XmNheight, 34); ac++;
+    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
+    class_in->mbview_radioBox_overlay_shade = XmCreateRadioBox(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_radioBox_overlay_shade",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_radioBox_overlay_shade);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_overlay_shade, "Cold-to-Hot", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 117); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_radioBox_overlay_shade, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_overlay_shade_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_overlay_shade,
+            "mbview_toggleButton_overlay_shade_ctoh",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_overlay_shade_ctoh);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_overlay_shade, "Hot-to-Cold", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 117); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_radioBox_overlay_shade, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_overlay_shade_htoc = XmCreateToggleButton(class_in->mbview_radioBox_overlay_shade,
+            "mbview_toggleButton_overlay_shade_htoc",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_overlay_shade_htoc);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 270); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_overlay_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_textField_overlay_amp",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_overlay_amp);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Amplitude:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 60); ac++;
+        XtSetArg(args[ac], XmNy, 270); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_overlay_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_overlay_amp",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_overlay_amp);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 220); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    class_in->mbview_separator15 = XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_separator15",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator15);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 190); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_slope_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_textField_slope_amp",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_slope_amp);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Amplitude:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 50); ac++;
+        XtSetArg(args[ac], XmNy, 190); ac++;
+        XtSetArg(args[ac], XmNwidth, 110); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_slope_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_slope_amp",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_slope_amp);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Shading by Slope:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 160); ac++;
+        XtSetArg(args[ac], XmNwidth, 200); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_slopeshade = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_slopeshade",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_slopeshade);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 70); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_illum_azi = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_textField_illum_azi",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_illum_azi);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 40); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_illum_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_textField_illum_amp",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_illum_amp);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Azimuth (degrees):", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 70); ac++;
+        XtSetArg(args[ac], XmNwidth, 140); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_illum_azi = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_illum_azi",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_illum_azi);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Amplitude:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 40); ac++;
+        XtSetArg(args[ac], XmNwidth, 150); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_illum_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_illum_amp",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_illum_amp);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Shading by Illumination:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 180); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_illumination = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_illumination",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_illumination);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 140); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    class_in->mbview_separator16 = XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_separator16",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator16);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Apply", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 380); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_shadeparms_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_pushButton_shadeparms_apply",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_shadeparms_apply);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_shadeparms_apply, XmNactivateCallback, do_mbview_shadeparmsapply, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Elevation (degrees):", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 100); ac++;
+        XtSetArg(args[ac], XmNwidth, 150); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_label_illum_elev = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_label_illum_elev",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_label_illum_elev);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 160); ac++;
+    XtSetArg(args[ac], XmNy, 100); ac++;
+    XtSetArg(args[ac], XmNwidth, 110); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    class_in->mbview_textField_illum_elev = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
+        "mbview_textField_illum_elev",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_textField_illum_elev);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 160); ac++;
+        XtSetArg(args[ac], XmNy, 380); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_pushButton_shadeparms_dismiss2 = XmCreatePushButton(class_in->mbview_bulletinBoard_shadeparms,
+            "mbview_pushButton_shadeparms_dismiss2",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_pushButton_shadeparms_dismiss2);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_pushButton_shadeparms_dismiss2, XmNactivateCallback, do_mbview_shadeparmspopdown, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, -60); ac++;
+    XtSetArg(args[ac], XmNy, 605); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
     XtSetArg(args[ac], XmNheight, 531); ac++;
     class_in->mbview_dialogShell_about = XtCreatePopupShell("mbview_dialogShell_about",
@@ -1568,15 +3201,28 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         ac);
     
     ac = 0;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 170); ac++;
-    XtSetArg(args[ac], XmNy, 242); ac++;
-    XtSetArg(args[ac], XmNwidth, 463); ac++;
-    XtSetArg(args[ac], XmNheight, 531); ac++;
-    class_in->mbview_bulletinBoard_about = XmCreateBulletinBoard(class_in->mbview_dialogShell_about,
-        "mbview_bulletinBoard_about",
-        args, 
-        ac);
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_about, "About MBview...", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, -60); ac++;
+        XtSetArg(args[ac], XmNy, 605); ac++;
+        XtSetArg(args[ac], XmNwidth, 463); ac++;
+        XtSetArg(args[ac], XmNheight, 531); ac++;
+        class_in->mbview_bulletinBoard_about = XmCreateBulletinBoard(class_in->mbview_dialogShell_about,
+            "mbview_bulletinBoard_about",
+            args, 
+            ac);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
     
     ac = 0;
     {
@@ -1791,8 +3437,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtAddCallback(class_in->mbview_pushButton_about_dismiss, XmNactivateCallback, do_mbview_aboutpopdown, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 191); ac++;
-    XtSetArg(args[ac], XmNy, 460); ac++;
+    XtSetArg(args[ac], XmNx, -55); ac++;
+    XtSetArg(args[ac], XmNy, 651); ac++;
     XtSetArg(args[ac], XmNwidth, 421); ac++;
     XtSetArg(args[ac], XmNheight, 95); ac++;
     class_in->mbview_dialogShell_message = XtCreatePopupShell("mbview_dialogShell_message",
@@ -1805,13 +3451,13 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_message, "MB3Dview: Please wait...", 
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_message, "MBview: Please wait...", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 191); ac++;
-        XtSetArg(args[ac], XmNy, 460); ac++;
+        XtSetArg(args[ac], XmNx, -55); ac++;
+        XtSetArg(args[ac], XmNy, 651); ac++;
         XtSetArg(args[ac], XmNwidth, 421); ac++;
         XtSetArg(args[ac], XmNheight, 95); ac++;
         class_in->mbview_bulletinBoard_message = XmCreateBulletinBoard(class_in->mbview_dialogShell_message,
@@ -1884,8 +3530,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MB3DView Rendering Resolution"); ac++;
-    XtSetArg(args[ac], XmNx, 246); ac++;
-    XtSetArg(args[ac], XmNy, 386); ac++;
+    XtSetArg(args[ac], XmNx, 88); ac++;
+    XtSetArg(args[ac], XmNy, 574); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 242); ac++;
     class_in->mbview_dialogShell_resolution = XtCreatePopupShell("mbview_dialogShell_resolution",
@@ -1895,16 +3541,29 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         ac);
     
     ac = 0;
-    XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 246); ac++;
-    XtSetArg(args[ac], XmNy, 386); ac++;
-    XtSetArg(args[ac], XmNwidth, 311); ac++;
-    XtSetArg(args[ac], XmNheight, 242); ac++;
-    class_in->mbview_bulletinBoard_resolution = XmCreateBulletinBoard(class_in->mbview_dialogShell_resolution,
-        "mbview_bulletinBoard_resolution",
-        args, 
-        ac);
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_resolution, "MBview Rendering Resolution", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 88); ac++;
+        XtSetArg(args[ac], XmNy, 574); ac++;
+        XtSetArg(args[ac], XmNwidth, 311); ac++;
+        XtSetArg(args[ac], XmNheight, 242); ac++;
+        class_in->mbview_bulletinBoard_resolution = XmCreateBulletinBoard(class_in->mbview_dialogShell_resolution,
+            "mbview_bulletinBoard_resolution",
+            args, 
+            ac);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
     
     ac = 0;
     {
@@ -2031,10 +3690,10 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MB3DView Colors & Contours"); ac++;
-    XtSetArg(args[ac], XmNx, 181); ac++;
-    XtSetArg(args[ac], XmNy, 241); ac++;
+    XtSetArg(args[ac], XmNx, -104); ac++;
+    XtSetArg(args[ac], XmNy, 602); ac++;
     XtSetArg(args[ac], XmNwidth, 440); ac++;
-    XtSetArg(args[ac], XmNheight, 533); ac++;
+    XtSetArg(args[ac], XmNheight, 445); ac++;
     class_in->mbview_dialogShell_colorbounds = XtCreatePopupShell("mbview_dialogShell_colorbounds",
         xmDialogShellWidgetClass,
         class_in->MB3DView,
@@ -2042,90 +3701,22 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         ac);
     
     ac = 0;
-    XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 181); ac++;
-    XtSetArg(args[ac], XmNy, 241); ac++;
-    XtSetArg(args[ac], XmNwidth, 440); ac++;
-    XtSetArg(args[ac], XmNheight, 533); ac++;
-    class_in->mbview_bulletinBoard_colorbounds = XmCreateBulletinBoard(class_in->mbview_dialogShell_colorbounds,
-        "mbview_bulletinBoard_colorbounds",
-        args, 
-        ac);
-    
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 440); ac++;
-    XtSetArg(args[ac], XmNwidth, 410); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator5 = XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds,
-        "mbview_separator5",
-        args, 
-        ac);
-    XtManageChild(class_in->mbview_separator5);
-    
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 110); ac++;
-    XtSetArg(args[ac], XmNy, 410); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_overlaycenter = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
-        "mbview_textField_overlaycenter",
-        args, 
-        ac);
-    XtManageChild(class_in->mbview_textField_overlaycenter);
-    
-    ac = 0;
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, "Center:", 
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_colorbounds, "MBview Colors and Contours", 
                 XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 30); ac++;
-        XtSetArg(args[ac], XmNy, 410); ac++;
-        XtSetArg(args[ac], XmNwidth, 60); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_overlaycenter = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            "mbview_label_overlaycenter",
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, -104); ac++;
+        XtSetArg(args[ac], XmNy, 602); ac++;
+        XtSetArg(args[ac], XmNwidth, 440); ac++;
+        XtSetArg(args[ac], XmNheight, 445); ac++;
+        class_in->mbview_bulletinBoard_colorbounds = XmCreateBulletinBoard(class_in->mbview_dialogShell_colorbounds,
+            "mbview_bulletinBoard_colorbounds",
             args, 
             ac);
-        XtManageChild(class_in->mbview_label_overlaycenter);
-        
-        /*
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, "Overlay Color Bounds:", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 380); ac++;
-        XtSetArg(args[ac], XmNwidth, 200); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_overlayshadebounds = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            "mbview_label_overlayshadebounds",
-            args, 
-            ac);
-        XtManageChild(class_in->mbview_label_overlayshadebounds);
         
         /*
          * Free any memory allocated for resources.
@@ -2139,11 +3730,11 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNy, 360); ac++;
     XtSetArg(args[ac], XmNwidth, 410); ac++;
     XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator4 = XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds,
-        "mbview_separator4",
+    class_in->mbview_separator5 = XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds,
+        "mbview_separator5",
         args, 
         ac);
-    XtManageChild(class_in->mbview_separator4);
+    XtManageChild(class_in->mbview_separator5);
     
     ac = 0;
     XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
@@ -2700,7 +4291,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 110); ac++;
-        XtSetArg(args[ac], XmNy, 470); ac++;
+        XtSetArg(args[ac], XmNy, 380); ac++;
         XtSetArg(args[ac], XmNwidth, 100); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -2770,7 +4361,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 240); ac++;
-        XtSetArg(args[ac], XmNy, 470); ac++;
+        XtSetArg(args[ac], XmNy, 380); ac++;
         XtSetArg(args[ac], XmNwidth, 110); ac++;
         XtSetArg(args[ac], XmNheight, 50); ac++;
         XtSetArg(args[ac], XmNfontList, 

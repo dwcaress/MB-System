@@ -33,6 +33,7 @@ EXTERNAL Widget   pushButton_file_openprimary;
 EXTERNAL Widget   pulldownMenu_openoverlay;
 EXTERNAL Widget   pulldownMenu_openroute;
 EXTERNAL Widget   pulldownMenu_opensite;
+EXTERNAL Widget   pulldownMenu_opennav;
 EXTERNAL Widget   pulldownMenu_saveroute;
 EXTERNAL Widget   pulldownMenu_savesite;
 /*

@@ -53,9 +53,10 @@ names = case_sensitive
 procedure BxGlobalWidgetId;
 identifier BXG_pulldownMenu_savesite;
 identifier BXG_pulldownMenu_saveroute;
-identifier BXG_pulldownMenu_opensite;
 identifier BXG_pulldownMenu_openroute;
 identifier BXG_pulldownMenu_openoverlay;
+identifier BXG_pulldownMenu_opensite;
+identifier BXG_pulldownMenu_opennav;
 identifier BXG_pushButton_file_openprimary;
 identifier BXG_label_about_version;
 identifier BXG_fileSelectionBox;
@@ -96,10 +97,10 @@ object fileSelectionBox : XmFileSelectionDialog widget {
         arguments Style_use;
         XmNautoUnmanage = true;
         XmNpattern = compound_string("*grd");
-        XmNx = 217;
-        XmNy = 95;
-        XmNwidth = 278;
-        XmNheight = 416;
+        XmNx = 8;
+        XmNy = 32;
+        XmNwidth = 334;
+        XmNheight = 505;
     };
     controls {
     };
@@ -117,8 +118,8 @@ object fileSelectionBox : XmFileSelectionDialog widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "Open GMT Grid File";
-!(BX)        XmNwidth = 278;
-!(BX)        XmNheight = 416;
+!(BX)        XmNwidth = 334;
+!(BX)        XmNheight = 505;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmFileSelectionDialog fileSelectionBox;
@@ -355,8 +356,8 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 39;
+        XmNx = 124;
+        XmNy = 32;
         XmNwidth = 463;
         XmNheight = 528;
     };
@@ -503,14 +504,15 @@ object cascadeButton_openroute : XmCascadeButton widget {
 
 object pulldownMenu_opensite : XmPulldownMenu widget {
     arguments {
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 416;
+        XmNy = 304;
         XmNwidth = 1;
         XmNheight = 1;
     };
     controls {
     };
     callbacks {
+        callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_opensite);
     };
 };
@@ -522,6 +524,40 @@ object cascadeButton_opensite : XmCascadeButton widget {
     };
     controls {
          unmanaged XmPulldownMenu pulldownMenu_opensite;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pulldownMenu_opennav : XmPulldownMenu widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 456;
+        XmNy = 328;
+        XmNwidth = 1;
+        XmNheight = 1;
+    };
+    controls {
+    };
+    callbacks {
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_opennav);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object cascadeButton_opennav : XmCascadeButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Open Swath or Nav Data");
+    };
+    controls {
+         unmanaged XmPulldownMenu pulldownMenu_opennav;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -651,16 +687,17 @@ object pushButton_quit : XmPushButton widget {
 object pulldownMenu_file : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 160;
-        XmNheight = 176;
+        XmNx = 262;
+        XmNy = 225;
+        XmNwidth = 200;
+        XmNheight = 200;
     };
     controls {
          managed XmPushButton pushButton_file_openprimary;
          managed XmCascadeButton cascadeButton_openoverlay;
          managed XmCascadeButton cascadeButton_openroute;
          managed XmCascadeButton cascadeButton_opensite;
+         managed XmCascadeButton cascadeButton_opennav;
          managed XmSeparator separator;
          managed XmCascadeButton cascadeButton_saveroute;
          managed XmCascadeButton cascadeButton_savesite;

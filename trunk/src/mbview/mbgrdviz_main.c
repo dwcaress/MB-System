@@ -65,10 +65,9 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 /* global mbview variables */
 Widget mainWindow;
 
-static char rcs_id[] = "$Id: mbgrdviz_main.c,v 1.1 2003-09-23 21:25:43 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_main.c,v 1.2 2003-11-07 01:10:54 caress Exp $";
 static char program_name[] = "MBgrdviz";
-static char help_message[] =  
-"MBgrdviz is a simple vizualization demo for GMT grd files.";
+static char help_message[] =  "MBgrdviz is a simple vizualization demo for GMT grd files.";
 static char usage_message[] = "mbgrdviz [-Igrdfile -V -H]";
 char	ifile[MB_PATH_MAXLINE];
 
@@ -191,10 +190,10 @@ int main( int argc, char **argv)
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBgrdviz"); ac++;
-    XtSetArg(args[ac], XmNx, 346); ac++;
-    XtSetArg(args[ac], XmNy, 163); ac++;
+    XtSetArg(args[ac], XmNx, 257); ac++;
+    XtSetArg(args[ac], XmNy, 196); ac++;
     XtSetArg(args[ac], XmNwidth, 197); ac++;
-    XtSetArg(args[ac], XmNheight, 170); ac++;
+    XtSetArg(args[ac], XmNheight, 214); ac++;
     topLevelShell = XtCreatePopupShell("topLevelShell",
         topLevelShellWidgetClass,
         parent,
