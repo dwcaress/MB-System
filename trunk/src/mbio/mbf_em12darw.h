@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12darw.h	1/20/93
- *	$Id: mbf_em12darw.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_em12darw.h,v 5.3 2003-12-04 23:10:22 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  *		R. B. Owens (University of Oxford)
  * Date:	January 20, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -60,7 +63,7 @@
  *   1. This data format is used to store 81 beam SIMRAD EM12 bathymetry
  *      data.  This format was created and used by R.B.Owens for
  *      SIMRAD EM12 data collected on the RRS Charles Darwin;
- *   2. The data consist of 1042-byte records including 1-byte characters,
+ *   2. The data consist of 1056-byte records including 1-byte characters,
  *      2-byte and 4-byte integers, 4-byte floats and 8-byte doubles.
  *   3. The 81 depth values are stored centered in 81 value arrays.  The
  *      center beam is in word 40 of the depth and distance arrays.
@@ -79,7 +82,7 @@
  */
 
 /* record length in bytes */
-#define MBF_EM12DARW_RECORD_LENGTH 1042
+#define MBF_EM12DARW_RECORD_LENGTH 1056
 
 /* number of beams for EM12 */
 #define MBF_EM12DARW_BEAMS 81

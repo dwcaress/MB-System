@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.10 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.11 2003-12-04 23:10:24 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.9  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -152,7 +155,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.10 2003-04-17 21:05:23 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.11 2003-12-04 23:10:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -363,6 +366,7 @@ int mbsys_simrad_survey_alloc(int verbose,
 			ping->amp[i] = 0;
 			ping->quality[i] = 0;
 			ping->heave[i] = 0;
+			ping->beamflag[i] = MB_FLAG_NULL;
 			ping->beam_frequency[i] = 0;
 			ping->beam_samples[i] = 0;
 			ping->beam_center_sample[i] = 0;
@@ -612,10 +616,7 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			ss_spacing = 0.15;
 		for (i=0;i<*nbath;i++)
 			{
-			if (ping->bath[i] > 0)
-			    beamflag[i] = MB_FLAG_NONE;
-			else
-			    beamflag[i] = MB_FLAG_NULL;
+			beamflag[i] = ping->beamflag[i];
 			bath[i] = depthscale*ping->bath[i];
 			bathacrosstrack[i] 
 				= dacrscale*ping->bath_acrosstrack[i];
@@ -629,14 +630,21 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			else
 				amp[i] = 0;
 			}
-		*nss = MBSYS_SIMRAD_MAXPIXELS;
-		pixel_size = 0.01 * ping->pixel_size;
-		for (i=0;i<MBSYS_SIMRAD_MAXPIXELS;i++)
+		if (ss != NULL)
 			{
-			ss[i] = 0.01 * ping->ss[i];
-			ssacrosstrack[i] = pixel_size 
-					* (i - MBSYS_SIMRAD_MAXPIXELS / 2);
-			ssalongtrack[i] = daloscale * ping->ssalongtrack[i];
+			*nss = MBSYS_SIMRAD_MAXPIXELS;
+			pixel_size = 0.01 * ping->pixel_size;
+			for (i=0;i<MBSYS_SIMRAD_MAXPIXELS;i++)
+				{
+				ss[i] = 0.01 * ping->ss[i];
+				ssacrosstrack[i] = pixel_size 
+						* (i - MBSYS_SIMRAD_MAXPIXELS / 2);
+				ssalongtrack[i] = daloscale * ping->ssalongtrack[i];
+				}
+			}
+		else
+			{
+			*nss = 0;
 			}
 
 		/* print debug statements */
@@ -1049,7 +1057,8 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					= bathacrosstrack[i]/dacrscale;
 				ping->bath_alongtrack[i] 
 					= bathalongtrack[i]/daloscale;
-				if (beamflag[i] != MB_FLAG_NONE)
+				ping->beamflag[i] = beamflag[i];
+				if (beamflag[i] == MB_FLAG_NULL)
 				    ping->bath[i] = 0;
 				}
 			for (i=0;i<namp;i++)

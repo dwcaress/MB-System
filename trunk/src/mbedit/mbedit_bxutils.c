@@ -1332,7 +1332,6 @@ XtPointer BX_CONVERT
      * value later if the conversion is a success.
      */
     *success = False;
-
     /*
      * Since we are converting from a string to some type we need to
      * set the fromVal structure up with the string information that

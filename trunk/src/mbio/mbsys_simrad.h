@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 5.7 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_simrad.h,v 5.8 2003-12-04 23:10:24 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2002/08/21 00:55:46  caress
  * Release 5.0.beta22
  *
@@ -1252,6 +1255,7 @@ struct mbsys_simrad_survey_struct
 	mb_s_char	amp[MBSYS_SIMRAD_MAXBEAMS];	/* 0.5 dB */
 	mb_u_char	quality[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
 	mb_s_char	heave[MBSYS_SIMRAD_MAXBEAMS];	/* 0.1 meters */
+	mb_s_char	beamflag[MBSYS_SIMRAD_MAXBEAMS];	/* MB-System beamflags */
 	
 	/* sidescan */
 	int	ss_status;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.13 2003-11-24 21:09:09 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.14 2003-12-04 23:10:24 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	June 20, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2003/11/24 21:09:09  caress
+ * Implement Reinhard Holtkamp's suggested mods for better SURF format support.
+ *
  * Revision 5.12  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -64,7 +67,7 @@ double mbsys_get_depth(	SurfMultiBeamDepth* 			MultiBeamDepth,
 						float	heave,
 						int		n );
 
-static char res_id[]="$Id: mbsys_surf.c,v 5.13 2003-11-24 21:09:09 caress Exp $";
+static char res_id[]="$Id: mbsys_surf.c,v 5.14 2003-12-04 23:10:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
@@ -243,12 +246,12 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				beamflag[i] = MB_FLAG_NULL;
 			else if ((store->MultiBeamDepth[i].depthFlag &
 					 (SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) != 0)
-				beamflag[i] = MB_FLAG_FLAG;
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 			else
 				beamflag[i] = MB_FLAG_NONE;
 			bath[i] = (double) store->MultiBeamDepth[i].depth;
 			if (bath[i] < tlz)
-				beamflag[i] |= MB_FLAG_FLAG;
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 			bathacrosstrack[i] = (double) store->MultiBeamDepth[i].beamPositionStar;
 			bathalongtrack[i] = (double) store->MultiBeamDepth[i].beamPositionAhead;
 			}
@@ -297,7 +300,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 					beamflag[0] = MB_FLAG_NULL;
 				else if ((int)(store->SingleBeamDepth.depthFlag
 					& (SB_DEPTH_SUPPRESSED + SB_REDUCED_FAN)) != 0)
-					beamflag[0] = MB_FLAG_FLAG;
+					beamflag[0] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				else
 					beamflag[0] = MB_FLAG_NONE;
 				}

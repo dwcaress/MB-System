@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.20 2003-11-24 20:44:51 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.21 2003-12-04 23:10:23 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2003/11/24 20:44:51  caress
+ * Fixes to more gracefully handle unsupported datagrams.
+ *
  * Revision 5.19  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -255,7 +258,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.20 2003-11-24 20:44:51 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.21 2003-12-04 23:10:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -3739,7 +3742,10 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp,
 			ping->png_window[i] = (mb_u_char) line[13];
 			ping->png_amp[i] = (mb_s_char) line[14];
 			ping->png_beam_num[i] = (mb_u_char) line[15];
-			ping->png_beamflag[i] = MB_FLAG_NONE;
+			if (ping->png_depth[i] == 0)
+				ping->png_beamflag[i] = MB_FLAG_NULL;
+			else
+				ping->png_beamflag[i] = MB_FLAG_NONE;
 			}
 		else
 			{
@@ -7327,6 +7333,8 @@ int mbr_em300raw_wr_bath(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<ping->png_nbeams;i++)
 		{
+		if (!mb_beam_ok(ping->png_beamflag[i]))
+			ping->png_depth[i] = 0;
 		if (store->sonar == MBSYS_SIMRAD2_EM120
 			|| store->sonar == MBSYS_SIMRAD2_EM300)
 		    mb_put_binary_short(MB_NO, (unsigned short) ping->png_depth[i], (void *) &line[0]);
