@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.13 2003-11-24 22:56:20 caress Exp $
+ *    $Id: mbcopy.c,v 5.14 2003-12-10 02:18:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2003/11/24 22:56:20  caress
+ * Added inbounds check so that ancillary data records are only output when the last survey record was within the specified or default time and space bounds. This should allow time and space windowing for data formats containing large numbers of ancillary records.
+ *
  * Revision 5.12  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -208,7 +211,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.13 2003-11-24 22:56:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.14 2003-12-10 02:18:04 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -840,6 +843,13 @@ main (int argc, char **argv)
 			&& kind == MB_DATA_COMMENT)
 			icomment++;
 			
+		/* time gaps do not matter to mbcopy */
+		if (error == MB_ERROR_TIME_GAP)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+			
 		/* check for survey data in or out of bounds */
 		if (kind == MB_DATA_DATA)
 			{
@@ -883,13 +893,6 @@ main (int argc, char **argv)
 				opixels_ss = ipixels_ss;
 			setup_transfer_rules(verbose,ipixels_ss,opixels_ss,
 				&istart_ss,&iend_ss,&offset_ss,&error);
-			}
-			
-		/* time gaps do not matter to mbcopy */
-		if (error == MB_ERROR_TIME_GAP)
-			{
-			status = MB_SUCCESS;
-			error = MB_ERROR_NO_ERROR;
 			}
 
 		/* output error messages */
