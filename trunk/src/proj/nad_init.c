@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nad_init.c,v 5.0 2002-07-20 20:47:57 caress Exp $
+ * $Id: nad_init.c,v 5.1 2002-09-19 00:33:55 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Load datum shift files into memory.
@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2001/08/17 17:28:37  warmerda
+ * removed use of emess()
+ *
  * Revision 1.3  2001/04/05 19:31:54  warmerda
  * substantially reorganized and added NTv1 support
  *
@@ -126,7 +129,7 @@ static struct CTABLE *nad_load_ntv1( FILE * fid )
     if( *((int *) (header+8)) != 12 )
     {
         pj_errno = -38;
-        emess("NTv1 grid shift file has wrong record count, is it corrupt?");
+        printf("NTv1 grid shift file has wrong record count, corrupt?\n");
         return NULL;
     }
 

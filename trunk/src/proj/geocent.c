@@ -64,6 +64,11 @@
  *    ----              -----------
  *    25-02-97          Original Code
  *
+ * $Log: not supported by cvs2svn $
+ * Revision 1.3  2002/01/08 15:04:08  warmerda
+ * The latitude clamping fix from September in Convert_Geodetic_To_Geocentric
+ * was botched.  Fixed up now.
+ *
  */
 
 
@@ -188,14 +193,20 @@ long Convert_Geodetic_To_Geocentric (double Latitude,
   double Sin2_Lat;      /*  Square of sin(Latitude)  */
   double Cos_Lat;       /*  cos(Latitude)  */
 
-  if ((Latitude < -PI_OVER_2) || (Latitude > PI_OVER_2))
+  /*
+  ** Don't blow up if Latitude is just a little out of the value
+  ** range as it may just be a rounding issue.  Also removed longitude
+  ** test, it should be wrapped by cos() and sin().  NFW for PROJ.4, Sep/2001.
+  */
+  if( Latitude < -PI_OVER_2 && Latitude > -1.001 * PI_OVER_2 )
+      Latitude = -PI_OVER_2;
+  else if( Latitude > PI_OVER_2 && Latitude < 1.001 * PI_OVER_2 )
+      Latitude = PI_OVER_2;
+  else if ((Latitude < -PI_OVER_2) || (Latitude > PI_OVER_2))
   { /* Latitude out of range */
     Error_Code |= GEOCENT_LAT_ERROR;
   }
-  if ((Longitude < -PI) || (Longitude > (2*PI)))
-  { /* Longitude out of range */
-    Error_Code |= GEOCENT_LON_ERROR;
-  }
+
   if (!Error_Code)
   { /* no errors */
     if (Longitude > PI)

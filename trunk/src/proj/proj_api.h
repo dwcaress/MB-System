@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: proj_api.h,v 5.0 2002-07-20 20:47:57 caress Exp $
+ * $Id: proj_api.h,v 5.1 2002-09-19 00:33:55 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Public (application) include file for PROJ.4 API, and constants.
@@ -28,6 +28,18 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2002/01/09 14:36:22  warmerda
+ * updated to 4.4.5
+ *
+ * Revision 1.4  2001/09/15 22:55:28  warmerda
+ * final prep for 4.4.4 release
+ *
+ * Revision 1.3  2001/08/23 20:25:55  warmerda
+ * added pj_set_finder function
+ *
+ * Revision 1.2  2001/06/02 03:35:36  warmerda
+ * added pj_get_errno_ref()
+ *
  * Revision 1.1  2001/04/06 01:24:22  warmerda
  * New
  *
@@ -46,7 +58,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 443
+#define PJ_VERSION 445
 
 extern char const pj_release[]; /* global release id string */
 
@@ -90,12 +102,14 @@ void pj_deallocate_grids();
 int pj_is_latlong(projPJ);
 void pj_pr_list(projPJ);
 void pj_free(projPJ);
+void pj_set_finder( const char *(*)(const char *) );
 projPJ pj_init(int, char **);
 projPJ pj_init_plus(const char *);
 projPJ pj_latlong_from_proj( projPJ );
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
 char *pj_strerrno(int);
+int *pj_get_errno_ref();
 
 #ifdef __cplusplus
 }

@@ -6,7 +6,7 @@ static const char SCCSID[]="@(#)geod.c	4.8	95/09/23	GIE	REL";
 # include <stdio.h>
 # include "geodesic.h"
 # include "emess.h"
-/*# include <ctype.h>*/
+# include <ctype.h>
 # include <string.h>
 
 # define MAXLINE 200
