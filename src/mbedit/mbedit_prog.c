@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.0 2000-12-01 22:54:35 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.1 2000-12-10 20:29:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:54:35  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.32  2000/10/11  01:01:50  caress
  * Convert to ANSI C
  *
@@ -248,7 +251,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.0 2000-12-01 22:54:35 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.1 2000-12-10 20:29:13 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -257,7 +260,7 @@ been read in, MBedit displays the bathymetry profiles from\n\
 several pings, allowing the user to identify and flag\n\
 anomalous beams. Flagging is handled internally by setting\n\
 depth values negative, so that no information is lost.";
-static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -S -V -H]";
+static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -S -X -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -282,6 +285,7 @@ char	ifile[128];
 char	*imbio_ptr = NULL;
 char	*ombio_ptr = NULL;
 int	output_mode = MBEDIT_OUTPUT_EDIT;
+int	run_mbprocess = MB_NO;
 int	gui_mode = MB_NO;
 int	startup_save_mode = MB_NO;
 
@@ -436,7 +440,7 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:Ss")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:SsXx")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -487,6 +491,11 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 		case 'S':
 		case 's':
 			startup_save_mode = MB_YES;
+			flag++;
+			break;
+		case 'X':
+		case 'x':
+			run_mbprocess = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -3384,7 +3393,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 	int	sb_len;
 	struct stat file_status;
 	int	fstat;
-	char	command[256];
+	char	command[MB_PATH_MAXLINE];
 	double	stime_d;
 	int	sbeam;
 	int	saction;
@@ -3643,6 +3652,7 @@ int mbedit_close_file()
 	/* local variables */
 	char	*function_name = "mbedit_close_file";
 	int	status = MB_SUCCESS;
+	char	command[MB_PATH_MAXLINE];
 	int	i;
 
 	/* print input debug statements */
@@ -3654,30 +3664,6 @@ int mbedit_close_file()
 
 	/* reset message */
 	do_message_on("MBedit is closing a data file...");	
-
-	/* close the files */
-	status = mb_close(verbose,&imbio_ptr,&error);
-	if (neditsave > 0)
-	    {
-	    mb_free(verbose,&editsave_time_d,&error);
-	    mb_free(verbose,&editsave_beam,&error);
-	    mb_free(verbose,&editsave_action,&error);
-	    neditsave = 0;
-	    }
-	if (sofile_open == MB_YES)
-	    {
-	    /* close edit save file */
-	    fclose(sofp);
-	    sofile_open = MB_NO;
-	    
-	    /* update mbprocess parameter file */
-	    status = mb_pr_update_format(verbose, ifile, 
-			MB_YES, format, 
-			&error);
-	    status = mb_pr_update_edit(verbose, ifile, 
-			MBP_EDIT_ON, sofile, 
-			&error);
-	    }
 
 	/* deallocate memory for data arrays */
 	mb_free(verbose,&beamflag,&error);
@@ -3714,6 +3700,44 @@ int mbedit_close_file()
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose,&error);
+
+	/* close the files */
+	status = mb_close(verbose,&imbio_ptr,&error);
+	if (neditsave > 0)
+	    {
+	    mb_free(verbose,&editsave_time_d,&error);
+	    mb_free(verbose,&editsave_beam,&error);
+	    mb_free(verbose,&editsave_action,&error);
+	    neditsave = 0;
+	    }
+	if (sofile_open == MB_YES)
+	    {
+	    /* close edit save file */
+	    fclose(sofp);
+	    sofile_open = MB_NO;
+	    
+	    /* update mbprocess parameter file */
+	    status = mb_pr_update_format(verbose, ifile, 
+			MB_YES, format, 
+			&error);
+	    status = mb_pr_update_edit(verbose, ifile, 
+			MBP_EDIT_ON, sofile, 
+			&error);
+			
+	    /* run mbprocess if desired */
+	    if (run_mbprocess == MB_YES)
+		    {
+		    /* turn message on */
+		    do_message_on("Bathymetry edits being applied using mbprocess...");
+		    
+		    /* run mbprocess */
+		    sprintf(command, "mbprocess -I %s\n",ifile);
+		    system(command);
+
+		    /* turn message off */
+		    do_message_off();
+		    }
+	    }
 
 	/* if we got here we must have succeeded */
 	if (verbose >= 0)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.12  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -174,7 +177,7 @@ int mbr_info_mbldeoih(int verbose,
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbldeoih.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_mbldeoih.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_info_mbldeoih";
 	int	status = MB_SUCCESS;
 
@@ -191,8 +194,8 @@ int mbr_info_mbldeoih(int verbose,
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_LDEOIH;
-	*beams_bath_max = 200;
-	*beams_amp_max = 200;
+	*beams_bath_max = 250;
+	*beams_amp_max = 250;
 	*pixels_ss_max = 10000;
 	strncpy(format_name, "MBLDEOIH", MB_NAME_LENGTH);
 	strncpy(system_name, "LDEOIH", MB_NAME_LENGTH);
@@ -275,7 +278,7 @@ int mbr_info_mbldeoih(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbldeoih(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbr_mbldeoih.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

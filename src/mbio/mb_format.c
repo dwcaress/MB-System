@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.10  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *
@@ -102,7 +105,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_format.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_info(int verbose, 
@@ -140,7 +143,7 @@ int mb_format_info(int verbose,
 			int (**copyrecord)(), 
 			int *error)
 {
-	char	*function_name = "mb_format";
+	char	*function_name = "mb_format_info";
 	int	status;
 	int	i;
 
@@ -518,9 +521,9 @@ int mb_format_info(int verbose,
 			ttimes, copyrecord, 
 			error);
 		}
-	else if (*format == MBF_EM12DRAW)
+	else if (*format == MBF_EM12IFRM)
 		{
-		status = mbr_info_em12draw(verbose, system, 
+		status = mbr_info_em12ifrm(verbose, system, 
 			beams_bath_max, beams_amp_max, pixels_ss_max, 
 			format_name, system_name, format_description, 
 			numfile, filetype, 
@@ -1022,6 +1025,24 @@ int mb_format_info(int verbose,
 			ttimes, copyrecord, 
 			error);
 		}
+	else if (*format == MBF_HS10JAMS)
+		{
+		status = mbr_info_hs10jams(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			format_alloc, format_free, 
+			store_alloc, store_free, 
+			read_ping, write_ping, 
+			extract, insert, 
+			extract_nav, insert_nav, 
+			altitude, insert_altitude, 
+			ttimes, copyrecord, 
+			error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -1082,6 +1103,7 @@ int mb_format(int verbose, int *format, int *error)
 	int	status;
 
 	/* format parameters */
+	int	system;		/* system id */
 	int	beams_bath_max;	/* maximum number of bathymetry beams */
 	int	beams_amp_max;	/* maximum number of amplitude beams
 					- either 0 or = beams_bath */
@@ -1166,7 +1188,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1262,7 +1284,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1357,7 +1379,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char **description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1451,7 +1473,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1549,7 +1571,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1647,7 +1669,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 

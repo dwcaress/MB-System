@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12sraw.h	7/8/96
- *	$Id: mbf_em12sraw.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbf_em12sraw.h,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.7  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -62,6 +65,11 @@
  *         EM-12S:   Deep water system with up to 81 beams of
  *                   bathymetry and up to 523 sidescan samples per
  *                   bathymetry beam.
+ *         EM-12D:   Deep water system with up to 81 beams of
+ *                   bathymetry and up to 523 sidescan samples per
+ *                   bathymetry beam in each of two swaths. The
+ *                   port side and starboard side pings are reported
+ *                   separately.
  *   4. Each datagram is preceded by a two byte start code and
  *      followed by a three byte end code consisting of 0x03
  *      followed by two bytes representing the checksum for
@@ -75,6 +83,10 @@
  *         0x029A: Sound velocity profile                 416 data bytes
  *         0x0296: EM-12S bathymetry                      923 data bytes
  *         0x02CD: EM-12S or EM-1000 sidescan + phase    1465 data bytes
+ *         0x0294: EM-12D port bathymetry                 923 data bytes
+ *         0x02CB: EM-12D port sidescan + phase          1465 data bytes
+ *         0x0295: EM-12D starboard bathymetry            923 data bytes
+ *         0x02CC: EM-12D starboard sidescan + phase     1465 data bytes
  *   6. Multiple sidescan datagrams are recorded for each ping because 
  *      there is too much information to fit in a single datagram.
  *   7. Simrad systems record navigation fixes using the position 
@@ -170,11 +182,16 @@ struct mbf_em12sraw_struct
 	int	second;
 	int	centisecond;
 
+	/* swath id */
+	int	swath_id;	/* EM_SWATH_CENTER:	0
+				   EM_SWATH_PORT:	-1  (EM12D only)
+				   EM_SWATH_STARBOARD:	1   (EM12D only) */
+
 	/* bathymetry */
 	int	ping_number;
 	int	beams_bath;	/* EM-1000:  60
 				   EM12S:    81
-				   EM12D:   162 */
+				   EM12D:    81 */
 	int	bath_mode;	/* EM-1000: 1=deep; 2=medium; 3=shallow 
 				   EM-12S:  1=shallow equiangle spacing
 				            2=deep equiangle spacing

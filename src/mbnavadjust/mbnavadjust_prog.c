@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.0 2000-12-01 22:55:48 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.1 2000-12-10 20:29:34 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:55:48  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.1  2000/10/03  21:49:28  caress
  * Fixed handling count of nav points while importing data.
  *
@@ -80,7 +83,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.0 2000-12-01 22:55:48 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.1 2000-12-10 20:29:34 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -1735,13 +1738,13 @@ int mbnavadjust_import_file(char *path, int format)
 				mb_pr_get_heading(mbna_verbose, file->file, 
 						    &mbp_heading_mode, 
 						    &mbp_headingbias, 
-						    error);
+						    &error);
 				mb_pr_get_rollbias(mbna_verbose, file->file, 
 						    &mbp_rollbias_mode, 
 						    &mbp_rollbias, 
 						    &mbp_rollbias_port, 
 						    &mbp_rollbias_stbd, 
-						    error);
+						    &error);
 				if (mbp_heading_mode == MBP_HEADING_OFFSET
 				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
 				    {

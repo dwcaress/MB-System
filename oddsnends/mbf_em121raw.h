@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em121raw.h	8/8/94
- *	$Id: mbf_em121raw.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbf_em121raw.h,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.7  2000/09/30  06:29:44  caress
  * Snapshot for Dale.
  *
@@ -185,7 +188,7 @@ struct mbf_em121raw_struct
 	int	beams_bath;	/* EM-1000:  60
 				   EM12S:    81
 				   EM121:   121 
-				   EM12D:   162 */
+				   EM12D:    81 */
 	int	bath_mode;	/* EM-1000: 1=deep; 2=medium; 3=shallow 
 				   EM-12S:  1=shallow equiangle spacing
 				            2=deep equiangle spacing

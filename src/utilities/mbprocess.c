@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbprocess.c,v 5.1 2000-12-10 20:30:44 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -63,6 +63,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.3  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -98,7 +101,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.1 2000-12-10 20:30:44 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -546,7 +549,7 @@ and mbedit edit save files.\n";
 		}
 	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 		{
-		fprintf(stderr,"dbg2       Bathymetry recalculated by rigid rotation.\n");
+		fprintf(stderr,"dbg2       bathymetry recalculated by rigid rotation.\n");
 		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
 		    fprintf(stderr,"dbg2       roll bias:       OFF\n");
 		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
@@ -563,7 +566,7 @@ and mbedit edit save files.\n";
 		}
 	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
 		{
-		fprintf(stderr,"dbg2       Bathymetry recalculated by transducer depth shift.\n");
+		fprintf(stderr,"dbg2       bathymetry recalculated by transducer depth shift.\n");
 		}
 	    if (process.mbp_navadj_mode == MBP_NAV_OFF)
 		fprintf(stderr,"dbg2       merge adjusted navigation:OFF\n");
@@ -576,11 +579,11 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"dbg2       adjusted navigation algorithm: spline interpolation\n");
 		}
 	    if (process.mbp_nav_mode == MBP_NAV_OFF)
-		fprintf(stderr,"dbg2       merge navigation:OFF\n");
+		fprintf(stderr,"dbg2       merge edited navigation:OFF\n");
 	    else if (process.mbp_nav_mode == MBP_NAV_ON)
 		{
-		fprintf(stderr,"dbg2       navigation file:      %s\n", process.mbp_navfile);
-		fprintf(stderr,"dbg2       navigation format:    %d\n", process.mbp_nav_format);
+		fprintf(stderr,"dbg2       edited navigation file:      %s\n", process.mbp_navfile);
+		fprintf(stderr,"dbg2       edited navigation format:    %d\n", process.mbp_nav_format);
 		if (process.mbp_nav_heading == MBP_NAV_ON)
 		    fprintf(stderr,"dbg2     heading merge:    ON\n");
 		else
@@ -738,11 +741,11 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"     adjusted navigation algorithm: spline interpolation\n");
 		}
 	    if (process.mbp_nav_mode == MBP_NAV_OFF)
-		fprintf(stderr,"     merge navigation:     OFF\n");
+		fprintf(stderr,"     merge edited navigation:     OFF\n");
 	    else if (process.mbp_nav_mode == MBP_NAV_ON)
 		{
-		fprintf(stderr,"     navigation file:      %s\n", process.mbp_navfile);
-		fprintf(stderr,"     navigation format:    %d\n", process.mbp_nav_format);
+		fprintf(stderr,"     edited navigation file:      %s\n", process.mbp_navfile);
+		fprintf(stderr,"     edited navigation format:    %d\n", process.mbp_nav_format);
 		if (process.mbp_nav_heading == MBP_NAV_ON)
 		    fprintf(stderr,"     heading merge:    ON\n");
 		else
@@ -2005,40 +2008,40 @@ and mbedit edit save files.\n";
 	if (process.mbp_navadj_mode == MBP_NAV_OFF)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"     merge adjusted navigation: OFF");
+		sprintf(comment,"  Merge adjusted navigation: OFF");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
 	else if (process.mbp_navadj_mode == MBP_NAV_ON)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"     adjusted navigation file: %s", process.mbp_navadjfile);
+		sprintf(comment,"  Adjusted navigation file: %s", process.mbp_navadjfile);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
-		    sprintf(comment,"     adjusted navigation algorithm: linear interpolation");
+		    sprintf(comment,"  Adjusted navigation algorithm: linear interpolation");
 		else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
-		    sprintf(comment,"     adjusted navigation algorithm: spline interpolation");
+		    sprintf(comment,"  Adjusted navigation algorithm: spline interpolation");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
 	if (process.mbp_nav_mode == MBP_NAV_OFF)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Merge navigation:     OFF");
+		sprintf(comment,"  Merge edited navigation:     OFF");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
 	else if (process.mbp_nav_mode == MBP_NAV_ON)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Navigation file:      %s", process.mbp_navfile);
+		sprintf(comment,"  Edited navigation file:      %s", process.mbp_navfile);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Navigation format:    %d", process.mbp_nav_format);
+		sprintf(comment,"  Edited navigation format:    %d", process.mbp_nav_format);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 

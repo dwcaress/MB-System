@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12sraw.c	7/8/96
- *	$Id: mbr_em12sraw.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_em12sraw.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.11  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -158,7 +161,7 @@ int mbr_info_em12sraw(int verbose,
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12sraw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_em12sraw.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_info_em12sraw";
 	int	status = MB_SUCCESS;
 
@@ -180,7 +183,7 @@ int mbr_info_em12sraw(int verbose,
 	*pixels_ss_max = 4050;
 	strncpy(format_name, "EM12SRAW", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_EM12SRAW\nInformal Description: Simrad EM12S vendor format\nAttributes:           Simrad EM12S, bathymetry, amplitude, and sidescan,\n                      81 beams, variable pixels, ascii + binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_EM12SRAW\nInformal Description: Simrad EM12 vendor format\nAttributes:           Simrad EM12S and EM12D, bathymetry, amplitude, and sidescan,\n                      81 beams, variable pixels, ascii + binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_NO;
@@ -259,7 +262,7 @@ int mbr_info_em12sraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12sraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12sraw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_em12sraw.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_alm_em12sraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -449,6 +452,7 @@ int mbr_zero_em12sraw(int verbose, char *data_ptr, int *error)
 		data->minute = 0;
 		data->second = 0;
 		data->centisecond = 0;
+		data->swath_id = EM_SWATH_CENTER;
 		data->ping_number = 0;
 		data->beams_bath = MBF_EM12SRAW_MAXBEAMS;
 		data->bath_mode = 0;
@@ -864,6 +868,7 @@ int mbr_rt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			/* copy data */
 			ping->longitude = plon;
 			ping->latitude = plat;
+			ping->swath_id = data->swath_id;
 			ping->ping_number = data->ping_number;
 			ping->beams_bath = data->beams_bath;
 			ping->bath_mode = data->bath_mode;
@@ -1048,6 +1053,7 @@ int mbr_wt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 				store->ping;
 
 			/* copy survey data */
+			data->swath_id = ping->swath_id;
 			data->ping_number = ping->ping_number;
 			data->beams_bath = ping->beams_bath;
 			data->bath_mode = ping->bath_mode;
@@ -1223,12 +1229,12 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == EM_NONE)
 			{
-	/*fprintf(stderr,"call nothing, read failure, no expect\n");*/
+	/*fprintf(stderr,"call nothing, read failure, no expect\n");
 			done = MB_YES;
 			}
 		else if (status == MB_FAILURE && expect != EM_NONE)
 			{
-	/*fprintf(stderr,"call nothing, read failure, expect %x\n",expect);*/
+	/*fprintf(stderr,"call nothing, read failure, expect %x\n",expect);
 			done = MB_YES;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
@@ -1239,9 +1245,13 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& *type != EM_POS
 			&& *type != EM_SVP
 			&& *type != EM_12S_BATH
-			&& *type != EM_12S_SSP)
+			&& *type != EM_12DP_BATH
+			&& *type != EM_12DS_BATH
+			&& *type != EM_12S_SSP
+			&& *type != EM_12DP_SSP
+			&& *type != EM_12DS_SSP)
 			{
-	/*fprintf(stderr,"call nothing, try again\n");*/
+	/*fprintf(stderr,"call nothing, try again\n");
 			done = MB_NO;
 			}
 		else if (*type == EM_START)
@@ -1362,7 +1372,8 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			{
 	/*fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);*/
 			status = mbr_em12sraw_rd_bath(
-				verbose,mbfp,data,error);
+				verbose,mbfp,data,
+				EM_SWATH_CENTER,error);
 			if (status == MB_SUCCESS)
 				{
 				data->kind = MB_DATA_DATA;
@@ -1392,7 +1403,9 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			{
 	/*fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);*/
 			status = mbr_em12sraw_rd_ss(
-				verbose,mbfp,data,first_ss,&more_ss,error);
+				verbose,mbfp,data,
+				EM_SWATH_CENTER,
+				first_ss,&more_ss,error);
 			if (status == MB_SUCCESS 
 				&& more_ss == MB_NO)
 				{
@@ -1423,6 +1436,179 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 					done = MB_NO;
 					first_type = EM_12S_SSP;
 					expect = EM_12S_BATH;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
+				first_ss = MB_YES;
+				}
+			}
+		else if (*type == EM_12DP_BATH 
+			&& expect != EM_NONE 
+			&& expect != EM_12DP_BATH)
+			{
+	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+			}
+		else if (*type == EM_12DP_BATH)
+			{
+	/*fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);*/
+			status = mbr_em12sraw_rd_bath(
+				verbose,mbfp,data,
+				EM_SWATH_PORT,error);
+			if (status == MB_SUCCESS)
+				{
+				data->kind = MB_DATA_DATA;
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_12DP_BATH;
+					expect = EM_12DP_SSP;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
+				}
+			}
+		else if (*type == EM_12DP_SSP 
+			&& expect != EM_NONE 
+			&& expect != EM_12DP_SSP)
+			{
+	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+			}
+		else if (*type == EM_12DP_SSP)
+			{
+	/*fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);*/
+			status = mbr_em12sraw_rd_ss(
+				verbose,mbfp,data,
+				EM_SWATH_PORT,
+				first_ss,&more_ss,error);
+			if (status == MB_SUCCESS 
+				&& more_ss == MB_NO)
+				{
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_12DP_SSP;
+					expect = EM_12DP_BATH;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
+				first_ss = MB_YES;
+				}
+			else if (status == MB_SUCCESS 
+				&& more_ss == MB_YES)
+				{
+				done = MB_NO;
+				expect = EM_12DP_SSP;
+				first_ss = MB_NO;
+				}
+			else if (status == MB_FAILURE)
+				{
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_12DP_SSP;
+					expect = EM_12DP_BATH;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
+				first_ss = MB_YES;
+				}
+			}
+
+		else if (*type == EM_12DS_BATH 
+			&& expect != EM_NONE 
+			&& expect != EM_12DS_BATH)
+			{
+	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+			}
+		else if (*type == EM_12DS_BATH)
+			{
+	/*fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);*/
+			status = mbr_em12sraw_rd_bath(
+				verbose,mbfp,data,
+				EM_SWATH_STARBOARD,error);
+			if (status == MB_SUCCESS)
+				{
+				data->kind = MB_DATA_DATA;
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_12DS_BATH;
+					expect = EM_12DS_SSP;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
+				}
+			}
+		else if (*type == EM_12DS_SSP 
+			&& expect != EM_NONE 
+			&& expect != EM_12DS_SSP)
+			{
+	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+			}
+		else if (*type == EM_12DS_SSP)
+			{
+	/*fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);*/
+			status = mbr_em12sraw_rd_ss(
+				verbose,mbfp,data,
+				EM_SWATH_STARBOARD,
+				first_ss,&more_ss,error);
+			if (status == MB_SUCCESS 
+				&& more_ss == MB_NO)
+				{
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_12DS_SSP;
+					expect = EM_12DS_BATH;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
+				first_ss = MB_YES;
+				}
+			else if (status == MB_SUCCESS 
+				&& more_ss == MB_YES)
+				{
+				done = MB_NO;
+				expect = EM_12DS_SSP;
+				first_ss = MB_NO;
+				}
+			else if (status == MB_FAILURE)
+				{
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_12DS_SSP;
+					expect = EM_12DS_BATH;
 					}
 				else
 					{
@@ -1987,7 +2173,7 @@ int mbr_em12sraw_rd_svp(int verbose, FILE *mbfp,
 }
 /*--------------------------------------------------------------------*/
 int mbr_em12sraw_rd_bath(int verbose, FILE *mbfp, 
-		struct mbf_em12sraw_struct *data, int *error)
+		struct mbf_em12sraw_struct *data, int swath_id, int *error)
 {
 	char	*function_name = "mbr_em12sraw_rd_bath";
 	int	status = MB_SUCCESS;
@@ -2006,6 +2192,7 @@ int mbr_em12sraw_rd_bath(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
+		fprintf(stderr,"dbg2       swath_id:   %d\n",swath_id);
 		}
 
 	/* read record into char array */
@@ -2030,6 +2217,9 @@ int mbr_em12sraw_rd_bath(int verbose, FILE *mbfp,
 		mb_get_int(&(data->minute),           line+8,    2);
 		mb_get_int(&(data->second),           line+10,   2);
 		mb_get_int(&(data->centisecond),      line+12,   2);
+
+		/* set swath id */
+		data->swath_id = swath_id;
 
 		/* get binary stuff */
 #ifdef BYTESWAPPED
@@ -2157,7 +2347,7 @@ int mbr_em12sraw_rd_bath(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp, 
 		struct mbf_em12sraw_struct *data, 
-		int first, int *more, int *error)
+		int swath_id, int first, int *more, int *error)
 {
 	char	*function_name = "mbr_em12sraw_rd_ss";
 	int	status = MB_SUCCESS;
@@ -2184,6 +2374,7 @@ int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
+		fprintf(stderr,"dbg2       swath_id:   %d\n",swath_id);
 		fprintf(stderr,"dbg2       first:      %d\n",first);
 		}
 
@@ -2221,6 +2412,9 @@ int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp,
 		mb_get_int(&(data->minute),           line+8,    2);
 		mb_get_int(&(data->second),           line+10,   2);
 		mb_get_int(&(data->centisecond),      line+12,   2);
+
+		/* set swath id */
+		data->swath_id = swath_id;
 
 		/* get binary stuff */
 #ifdef BYTESWAPPED
@@ -2426,6 +2620,7 @@ int mbr_em12sraw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 
 	if (data->kind == MB_DATA_COMMENT)
 		{
+fprintf(stderr, "write comment\n");
 		status = mbr_em12sraw_wr_parameter(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_START)
@@ -2438,6 +2633,7 @@ int mbr_em12sraw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 		}
 	else if (data->kind == MB_DATA_NAV)
 		{
+fprintf(stderr, "write pos\n");
 		status = mbr_em12sraw_wr_pos(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_VELOCITY_PROFILE)
@@ -2446,6 +2642,7 @@ int mbr_em12sraw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 		}
 	else if (data->kind == MB_DATA_DATA)
 		{
+fprintf(stderr, "write bath\n");
 		status = mbr_em12sraw_wr_bath(verbose,mbfp,data,error);
 		status = mbr_em12sraw_wr_ss(verbose,mbfp,data,error);
 		}
@@ -3209,7 +3406,12 @@ int mbr_em12sraw_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		}
 
 	/* write the record label */
-	label = EM_12S_BATH;
+	if (data->swath_id == EM_SWATH_CENTER)
+		label = EM_12S_BATH;
+	else if (data->swath_id == EM_SWATH_PORT)
+		label = EM_12DP_BATH;
+	else
+		label = EM_12DS_BATH;
 #ifdef BYTESWAPPED
 	label = (short) mb_swap_short(label);
 #endif
@@ -3528,7 +3730,12 @@ int mbr_em12sraw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		}
 
 	/* write the record label */
-	label = EM_12S_SSP;
+	if (data->swath_id == EM_SWATH_CENTER)
+		label = EM_12S_SSP;
+	else if (data->swath_id == EM_SWATH_PORT)
+		label = EM_12DP_SSP;
+	else
+		label = EM_12DS_SSP;
 #ifdef BYTESWAPPED
 	label = (short) mb_swap_short(label);
 #endif

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbldeoih.h	1/20/93
- *	$Id: mbf_mbldeoih.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbf_mbldeoih.h,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -84,7 +87,7 @@
  */
 
 /* define maximum number of beams */
-#define	MBF_MBLDEOIH_MAX_BEAMS	200
+#define	MBF_MBLDEOIH_MAX_BEAMS	250
 #define	MBF_MBLDEOIH_MAX_PIXELS	10000
 
 struct mbf_mbldeoih_header_struct

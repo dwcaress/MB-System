@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_xse.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    The MB-system:	mbsys_xse.c	3.00	9/1/99
+ *	$Id: mbsys_xse.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,7 @@
  * and SeaBeam 2100 multibeam sonars (made by L-3 Communications
  * SeaBeam Instruments).
  * The data format associated with XSE is:
- *      MBF_ELMK2HYD : MBIO ID 94
+ *      MBF_ELMK2XSE : MBIO ID 94
  *
  * These functions include:
  *   mbsys_xse_alloc	  - allocate memory for mbsys_xse_struct structure
@@ -41,6 +41,9 @@
  * Date:	August 1,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.2  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -69,7 +72,7 @@
 int mbsys_xse_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

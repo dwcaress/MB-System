@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.3  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -127,7 +130,7 @@ int mbr_info_mbpronav(int verbose,
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_info_mbpronav";
 	int	status = MB_SUCCESS;
 
@@ -228,7 +231,7 @@ int mbr_info_mbpronav(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbpronav(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -413,27 +416,6 @@ int mbr_rt_mbpronav(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-
-	/* copy comment to mbio descriptor structure */
-	if (status == MB_SUCCESS
-		&& data->kind == MB_DATA_COMMENT)
-		{
-		/* copy comment */
-		strncpy(mb_io_ptr->new_comment,data->comment,
-			MBF_MBPRONAV_MAXLINE);
-
-		/* print debug statements */
-		if (verbose >= 4)
-			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  New ping values:\n");
-			fprintf(stderr,"dbg4       error:      %d\n",
-				mb_io_ptr->new_error);
-			fprintf(stderr,"dbg4       comment:    %s\n",
-				mb_io_ptr->new_comment);
-			}
-		}
 
 	/* translate values to data storage structure */
 	if (status == MB_SUCCESS

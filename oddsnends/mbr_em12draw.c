@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12draw.c	7/8/96
- *	$Id: mbr_em12draw.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_em12draw.c,v 5.1 2000-12-10 20:26:50 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.10  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -158,7 +161,7 @@ int mbr_info_em12draw(int verbose,
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12draw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_em12draw.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_info_em12draw";
 	int	status = MB_SUCCESS;
 
@@ -180,7 +183,7 @@ int mbr_info_em12draw(int verbose,
 	*pixels_ss_max = 4050;
 	strncpy(format_name, "EM12DRAW", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_EM12DRAW\nInformal Description: Simrad EM12D vendor format\nAttributes:           Simrad EM12D, bathymetry, amplitude, and sidescan,\n                      162 beams, variable pixels, ascii + binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_EM12DRAW\nInformal Description: Simrad EM12D vendor format\nAttributes:           Simrad EM12D, bathymetry, amplitude, and sidescan,\n                      81 beams, variable pixels, ascii + binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_NO;
@@ -259,7 +262,7 @@ int mbr_info_em12draw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12draw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12draw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_em12draw.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
 	char	*function_name = "mbr_alm_em12draw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
