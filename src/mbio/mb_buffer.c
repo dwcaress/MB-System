@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.19 1999-08-08 04:12:45 caress Exp $
+ *    $Id: mb_buffer.c,v 4.20 2000-09-30 06:26:58 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -41,6 +43,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1999/08/08  04:12:45  caress
+ * Added ELMK2XSE format.
+ *
  * Revision 4.18  1999/07/16  19:24:15  caress
  * Yet another version.
  *
@@ -157,7 +162,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.19 1999-08-08 04:12:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.20 2000-09-30 06:26:58 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -1085,7 +1090,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_next_nav(verbose,buff_ptr,mbio_ptr,start,id,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*buff_ptr;
@@ -1098,6 +1103,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1158,7 +1164,8 @@ int	*error;
 	if (found == MB_YES)
 		status = mb_buffer_extract_nav(verbose,
 			buff_ptr,mbio_ptr,*id,&kind,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft, 
 			roll,pitch,heave,error);
 
 	/* print output debug statements */
@@ -1183,6 +1190,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1574,8 +1582,8 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_extract_nav(verbose,buff_ptr,mbio_ptr,id,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
-		roll,pitch,heave, 
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
+		roll,pitch,heave,
 		error)
 int	verbose;
 char	*buff_ptr;
@@ -1588,6 +1596,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1644,7 +1653,8 @@ int	*error;
 			{
 			status = mbsys_sb_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1652,7 +1662,8 @@ int	*error;
 			{
 			status = mbsys_hsds_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1660,7 +1671,8 @@ int	*error;
 			{
 			status = mbsys_sb2000_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1668,7 +1680,8 @@ int	*error;
 			{
 			status = mbsys_sb2100_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1676,7 +1689,8 @@ int	*error;
 			{
 			status = mbsys_simrad_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1684,7 +1698,8 @@ int	*error;
 			{
 			status = mbsys_simrad2_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1692,7 +1707,8 @@ int	*error;
 			{
 			status = mbsys_mr1_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1700,7 +1716,8 @@ int	*error;
 			{
 			status = mbsys_mr1b_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1708,7 +1725,8 @@ int	*error;
 			{
 			status = mbsys_ldeoih_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1716,7 +1734,8 @@ int	*error;
 			{
 			status = mbsys_reson_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1724,7 +1743,8 @@ int	*error;
 			{
 			status = mbsys_elac_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1732,7 +1752,8 @@ int	*error;
 			{
 			status = mbsys_elacmk2_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1740,7 +1761,8 @@ int	*error;
 			{
 			status = mbsys_hsmd_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1748,7 +1770,8 @@ int	*error;
 			{
 			status = mbsys_dsl_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1756,7 +1779,8 @@ int	*error;
 			{
 			status = mbsys_gsf_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1764,7 +1788,8 @@ int	*error;
 			{
 			status = mbsys_mstiff_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1772,7 +1797,8 @@ int	*error;
 			{
 			status = mbsys_oic_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1780,7 +1806,8 @@ int	*error;
 			{
 			status = mbsys_hdcs_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1788,7 +1815,8 @@ int	*error;
 			{
 			status = mbsys_singlebeam_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1796,7 +1824,8 @@ int	*error;
 			{
 			status = mbsys_xse_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
+				time_i,time_d,navlon,navlat,
+				speed,heading,draft,
 				roll,pitch,heave, 
 				error);
 			}
@@ -1830,6 +1859,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -2176,7 +2206,8 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_insert_nav(verbose,buff_ptr,mbio_ptr,id,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,
+		speed,heading,draft,
 		roll,pitch,heave, 
 		error)
 int	verbose;
@@ -2189,6 +2220,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -2223,9 +2255,10 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
-		fprintf(stderr,"dbg2       heading:    %f\n",roll);
-		fprintf(stderr,"dbg2       heading:    %f\n",pitch);
-		fprintf(stderr,"dbg2       heading:    %f\n",heave);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
+		fprintf(stderr,"dbg2       roll:       %f\n",roll);
+		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
+		fprintf(stderr,"dbg2       heave:      %f\n",heave);
 		}
 
 	/* get buffer structure */
@@ -2253,7 +2286,8 @@ int	*error;
 		{
 		status = mbsys_sb_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2261,7 +2295,8 @@ int	*error;
 		{
 		status = mbsys_hsds_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2269,7 +2304,8 @@ int	*error;
 		{
 		status = mbsys_sb2000_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2277,7 +2313,8 @@ int	*error;
 		{
 		status = mbsys_sb2100_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2285,7 +2322,8 @@ int	*error;
 		{
 		status = mbsys_simrad_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2293,7 +2331,8 @@ int	*error;
 		{
 		status = mbsys_simrad2_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2301,7 +2340,8 @@ int	*error;
 		{
 		status = mbsys_mr1_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2309,7 +2349,8 @@ int	*error;
 		{
 		status = mbsys_mr1b_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2317,7 +2358,8 @@ int	*error;
 		{
 		status = mbsys_ldeoih_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2325,7 +2367,8 @@ int	*error;
 		{
 		status = mbsys_reson_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2333,7 +2376,8 @@ int	*error;
 		{
 		status = mbsys_elac_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2341,7 +2385,8 @@ int	*error;
 		{
 		status = mbsys_elacmk2_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2349,7 +2394,8 @@ int	*error;
 		{
 		status = mbsys_hsmd_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2357,7 +2403,8 @@ int	*error;
 		{
 		status = mbsys_dsl_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2365,7 +2412,8 @@ int	*error;
 		{
 		status = mbsys_gsf_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2373,7 +2421,8 @@ int	*error;
 		{
 		status = mbsys_mstiff_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2381,7 +2430,8 @@ int	*error;
 		{
 		status = mbsys_oic_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2389,7 +2439,8 @@ int	*error;
 		{
 		status = mbsys_hdcs_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2397,7 +2448,8 @@ int	*error;
 		{
 		status = mbsys_singlebeam_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}
@@ -2405,7 +2457,8 @@ int	*error;
 		{
 		status = mbsys_xse_insert_nav(verbose,
 			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
 			roll,pitch,heave, 
 			error);
 		}

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.20 1999-10-21 22:38:36 caress Exp $
+#	$Id: Makefile.template,v 4.21 2000-09-30 06:35:13 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.20  1999/10/21  22:38:36  caress
+# Added MBPRONAV format.
+#
 # Revision 4.19  1999/08/08  04:26:33  caress
 # Added MBF_ELMK2XSE format.
 #
@@ -96,7 +99,7 @@ MANDIR = ../../man/manl
 all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mb_io.h $(INCDIR)/mb_swap.h \
-	$(INCDIR)/mb_define.h \
+	$(INCDIR)/mb_define.h $(INCDIR)/mb_process.h \
 	$(INCDIR)/mbsys_sb.h $(INCDIR)/mbsys_hsds.h \
 	$(INCDIR)/mbsys_sb2100.h \
 	$(INCDIR)/mbsys_simrad.h $(INCDIR)/mbsys_simrad2.h \
@@ -145,11 +148,12 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mb_coor_scale.o mb_check_info.o \
 		mb_time.o mb_angle.o \
 		mb_get_value.o mb_defaults.o \
+		mb_process.o \
 		mb_get.o mb_put.o mb_put_comment.o \
 		mb_get_all.o mb_put_all.o \
 		mb_read.o mb_write.o mb_buffer.o \
 		mb_read_ping.o mb_write_ping.o \
-		mb_ttimes.o mb_altitude.o \
+		mb_ttimes.o mb_nav.o mb_altitude.o \
 		mbsys_sb.o mbsys_hsds.o mbsys_sb2100.o \
 		mbsys_simrad.o mbsys_simrad2.o \
 		mbsys_mr1.o mbsys_mr1b.o \
@@ -194,11 +198,12 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mb_coor_scale.o mb_check_info.o\
 		mb_time.o mb_angle.o \
 		mb_get_value.o mb_defaults.o \
+		mb_process.o \
 		mb_get.o mb_put.o mb_put_comment.o \
 		mb_get_all.o mb_put_all.o \
 		mb_read.o mb_write.o mb_buffer.o \
 		mb_read_ping.o mb_write_ping.o \
-		mb_ttimes.o mb_altitude.o \
+		mb_ttimes.o mb_nav.o mb_altitude.o \
 		mbsys_sb.o mbsys_hsds.o mbsys_sb2100.o \
 		mbsys_simrad.o mbsys_simrad2.o \
 		mbsys_mr1.o mbsys_mr1b.o \
@@ -239,7 +244,7 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 ### compile the source files
 mb_format_inf.o:	mb_format_inf.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_format_inf.c
-mb_format.o:	mb_format.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mb_format.o:	mb_format.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h
 	$(CC) -c $(CFLAGS) mb_format.c
 mb_error.o:	mb_error.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_error.c
@@ -271,6 +276,8 @@ mb_get_value.o:	mb_get_value.c
 	$(CC) -c $(CFLAGS) mb_get_value.c
 mb_defaults.o:	mb_defaults.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_defaults.c
+mb_process.o:	mb_process.c $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_process.h
+	$(CC) -c $(CFLAGS) mb_process.c
 mb_get.o:	mb_get.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_get.c
 mb_put.o:	mb_put.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
@@ -293,6 +300,8 @@ mb_write_ping.o:	mb_write_ping.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(I
 	$(CC) -c $(CFLAGS) mb_write_ping.c
 mb_ttimes.o:	mb_ttimes.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_ttimes.c
+mb_nav.o:	mb_nav.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_nav.c
 mb_altitude.o:	mb_altitude.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_altitude.c
 mbsys_sb.o:	mbsys_sb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_sb.h
@@ -451,6 +460,9 @@ $(INCDIR)/mb_swap.h:	mb_swap.h
 $(INCDIR)/mb_define.h:	mb_define.h
 	cp mb_define.h $(INCDIR)/mb_define.h
 	chmod 664 $(INCDIR)/mb_define.h
+$(INCDIR)/mb_process.h:	mb_process.h
+	cp mb_process.h $(INCDIR)/mb_process.h
+	chmod 664 $(INCDIR)/mb_process.h
 $(INCDIR)/mbsys_sb.h:	mbsys_sb.h
 	cp mbsys_sb.h $(INCDIR)/mbsys_sb.h
 	chmod 664 $(INCDIR)/mbsys_sb.h

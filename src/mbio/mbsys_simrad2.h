@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 4.2 2000-07-20 20:24:59 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 4.3 2000-09-30 06:31:19 caress Exp $
  *
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -25,6 +25,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/07/20  20:24:59  caress
+ * First cut at supporting both EM120 and EM1002.
+ *
  * Revision 4.1  2000/07/19  03:54:23  caress
  * Added support for EM120.
  *
@@ -83,6 +86,7 @@
  *        *0x0244: Bathymetry                             48-4092 bytes
  *         0x0245: Single beam echosounder depth          32 bytes
  *         0x0246: Raw range and beam angle               24-2056 bytes
+ *         0x0247: Surface sound speed                    variable size
  *        *0x0248: Heading Output                         422 bytes
  *        *0x0249: Parameter - Start                      variable size
  *         0x024A: Mechanical transducer tilt             variable size

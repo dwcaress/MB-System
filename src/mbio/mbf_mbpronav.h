@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbpronav.h	5/20/99
- *	$Id: mbf_mbpronav.h,v 4.0 1999-10-21 22:39:24 caress Exp $
+ *	$Id: mbf_mbpronav.h,v 4.1 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1999 by
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -20,6 +20,9 @@
  * Date:	May 20, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/10/21  22:39:24  caress
+ * Added MBPRONAV format.
+ *
  *
  *
  */
@@ -51,6 +54,10 @@ struct mbf_mbpronav_struct
 	double	latitude;
         double  heading;
 	double  speed;
+	double  sonardepth;
+	double  roll;
+	double  pitch;
+	double  heave;
  
 	/* comment */
 	char	comment[MBF_MBPRONAV_MAXLINE];

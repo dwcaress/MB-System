@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 4.8 2000-09-19 23:13:26 caress Exp $
+ *	$Id: mbr_em300raw.c,v 4.9 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/09/19  23:13:26  caress
+ * Applied fixes from Gordon Keith at AGSO.
+ *
  * Revision 4.7  2000/07/20  20:24:59  caress
  * First cut at supporting both EM120 and EM1002.
  *
@@ -80,7 +83,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 4.8 2000-09-19 23:13:26 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 4.9 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2511,7 +2514,7 @@ int	*error;
 				}
 			while (status == MB_SUCCESS
 				&& mbr_em300raw_chk_label(verbose, 
-					*type, *sonar) != MB_SUCCESS)
+					mbio_ptr, *type, *sonar) != MB_SUCCESS)
 			    {
 			    /* get next byte */
 			    for (i=0;i<3;i++)
@@ -2881,14 +2884,17 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_chk_label(verbose,type,sonar)
+int mbr_em300raw_chk_label(verbose,mbio_ptr,type,sonar)
 int	verbose;
+char	*mbio_ptr;
 short	type;
 short	sonar;
 {
 	char	*function_name = "mbr_em300raw_chk_label";
 	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
 	char	*startid;
+	short	*sonar_save;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2897,9 +2903,14 @@ short	sonar;
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       type:       %d\n",type);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+
+	/* get pointer to mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	sonar_save = (short *) (&mb_io_ptr->save4);
 
 		/* swap bytes if necessary */
 #ifdef BYTESWAPPED
@@ -2967,9 +2978,13 @@ short	sonar;
 		{
 		status = MB_FAILURE;
 		}
+			
+	/* save sonar if successful */
+	if (status == MB_SUCCESS)
+	    *sonar_save = sonar;
 		
 	/* allow exception found in some EM3000 data */
-	if (type == EM2_SVP && sonar == 0)
+	if (type == EM2_SVP && sonar == 0 && *sonar_save == EM2_EM3000)
 		{
 		status = MB_SUCCESS;
 		}

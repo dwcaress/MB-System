@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100B1.h	1/16/94
- *	$Id: mbf_sb2100b1.h,v 4.2 1998-10-05 18:32:27 caress Exp $
+ *	$Id: mbf_sb2100b1.h,v 4.3 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1997 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1997, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -17,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	January 16, 1997
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.1  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 4.15 1999-08-16 23:14:41 caress Exp $
+ *	$Id: mbsys_reson.c,v 4.16 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -38,6 +40,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1999/08/16  23:14:41  caress
+ * Added ability to handle Mesotech SM2000 data
+ *
  * Revision 4.14  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -114,7 +119,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_reson.c,v 4.15 1999-08-16 23:14:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 4.16 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1097,7 +1102,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1109,6 +1114,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1186,6 +1192,9 @@ int	*error;
 		/* get speed  */
 		*speed = 0.0;
 
+		/* get draft  */
+		*draft = 0.001 * store->transducer_depth;
+
 		/* get roll pitch and heave */
 		*roll = 0.005*store->roll;
 		*pitch = 0.005*store->pitch;
@@ -1225,6 +1234,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			fprintf(stderr,"dbg4       roll:       %f\n",
 				*roll);
 			fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1282,6 +1293,9 @@ int	*error;
 		/* get speed  */
 		*speed = 0.0;
 
+		/* get draft  */
+		*draft = 0.001 * store->transducer_depth;
+
 		/* print debug statements */
 		if (verbose >= 5)
 			{
@@ -1316,6 +1330,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			}
 
 		/* done translating values */
@@ -1361,6 +1377,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1377,7 +1394,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1388,6 +1405,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -1423,6 +1441,7 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1455,6 +1474,9 @@ int	*error;
 		/* get heading */
 		store->heading = (int) (heading * 100);
 
+		/* get draft  */
+		store->transducer_depth = 1000 * draft;
+
 		/* get roll pitch and heave */
 		store->roll = roll*200.0;
 		store->pitch = pitch*200.0;
@@ -1481,6 +1503,9 @@ int	*error;
 
 		/* get heading */
 		store->heading = (int) (heading * 100);
+
+		/* get draft  */
+		store->transducer_depth = 1000 * draft;
 		}
 
 	/* print output debug statements */

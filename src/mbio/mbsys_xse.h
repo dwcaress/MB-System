@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	8/1/99
- *	$Id: mbsys_xse.h,v 4.0 1999-08-08 04:14:35 caress Exp $
+ *	$Id: mbsys_xse.h,v 4.1 2000-09-30 06:31:19 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -27,6 +27,9 @@
  * Date:	August 1,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/08/08  04:14:35  caress
+ * Initial revision.
+ *
  *
  */
 /*

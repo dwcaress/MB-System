@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiolsi.c	2/2/93
- *	$Id: mbr_sbsiolsi.c,v 4.8 1998-10-05 18:32:27 caress Exp $
+ *	$Id: mbr_sbsiolsi.c,v 4.9 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 1.1  1998/10/05  17:46:15  caress
  * Initial revision
  *
@@ -91,7 +96,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiolsi.c,v 4.8 1998-10-05 18:32:27 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsiolsi.c,v 4.9 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiolsi";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

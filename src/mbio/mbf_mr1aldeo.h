@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mr1aldeo.h	3/3/94
- *	$Id: mbf_mr1aldeo.h,v 1.2 1998-10-05 18:32:27 caress Exp $
+ *	$Id: mbf_mr1aldeo.h,v 1.3 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -17,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	October 23, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 1.1  1996/01/26  21:27:27  caress
  * Initial revision
  *

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100b2.c	3/3/94
- *	$Id: mbr_sb2100b2.c,v 4.3 1999-09-14 20:39:11 caress Exp $
+ *	$Id: mbr_sb2100b2.c,v 4.4 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1997 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1997, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1999/09/14  20:39:11  caress
+ * Fixed bugs handling HSMD
+ *
  * Revision 4.2  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -65,7 +70,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100b2.c,v 4.3 1999-09-14 20:39:11 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b2.c,v 4.4 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100b2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

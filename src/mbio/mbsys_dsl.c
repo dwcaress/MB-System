@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.c	3.00	8/5/96
- *	$Id: mbsys_dsl.c,v 4.3 1998-10-05 18:32:27 caress Exp $
+ *	$Id: mbsys_dsl.c,v 4.4 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1996 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1996, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -38,6 +40,9 @@
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 1.1  1998/10/05  17:46:15  caress
  * Initial revision
  *
@@ -81,7 +86,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_dsl.c,v 4.3 1998-10-05 18:32:27 caress Exp $";
+ static char res_id[]="$Id: mbsys_dsl.c,v 4.4 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_dsl_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -904,7 +909,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_dsl_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -916,6 +921,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -994,6 +1000,9 @@ int	*error;
 		/* get speed  */
 		*speed = 0.0;
 
+		/* get draft  */
+		*draft = store->depth;
+
 		/* get roll pitch and heave */
 		*roll = store->roll;
 		*pitch = store->pitch;
@@ -1033,6 +1042,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			fprintf(stderr,"dbg4       roll:       %f\n",
 				*roll);
 			fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1084,6 +1095,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1100,7 +1112,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_dsl_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1111,6 +1123,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -1143,6 +1156,7 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1163,6 +1177,9 @@ int	*error;
 
 		/* get heading */
 		store->heading = heading;
+
+		/* get draft  */
+		store->depth = draft;
 
 		/* get roll pitch and heave */
 		store->roll = roll;

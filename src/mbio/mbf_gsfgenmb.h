@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_gsfgenmb.h	2/27/98
- *	$Id: mbf_gsfgenmb.h,v 4.0 1998-10-05 19:16:02 caress Exp $
+ *	$Id: mbf_gsfgenmb.h,v 4.1 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -17,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/10/05  19:16:02  caress
+ * MB-System version 4.6beta
+ *
  * Revision 1.1  1998/10/05  18:32:27  caress
  * Initial revision
  *

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.15 2000-03-06 21:54:21 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.16 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,10 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  2000/03/06  21:54:21  caress
+ * Added check for Hydrosweep Y2k problem - Ewing sonar
+ * started putting out 1900 instead of 2000 in February 2000.
+ *
  * Revision 4.14  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -122,7 +128,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.15 2000-03-06 21:54:21 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.16 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;

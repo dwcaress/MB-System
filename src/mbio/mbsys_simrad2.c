@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 4.3 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -42,6 +42,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/07/20  20:24:59  caress
+ * First cut at supporting both EM120 and EM1002.
+ *
  * Revision 4.1  2000/07/19  04:01:41  caress
  * Supported EM120.
  *
@@ -70,7 +73,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 4.3 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -387,7 +390,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 4.3 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -615,7 +618,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 4.3 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -705,7 +708,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 4.3 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1699,7 +1702,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1711,6 +1714,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1753,7 +1757,6 @@ int	*error;
 		/* get survey data structure */
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 
-		
 		/* get time */
 		time_i[0] = ping->png_date / 10000;
 		time_i[1] = (ping->png_date % 10000) / 100;
@@ -1798,6 +1801,10 @@ int	*error;
 		else
 			*speed = 0.0;
 
+		/* get draft  */
+		*draft = 0.01 * ping->png_xducer_depth
+				+ 655.36 * ping->png_offset_multiplier;
+
 		/* get roll pitch and heave */
 		*roll = 0.0; /* kluge must get from attitude datagrams */
 		*pitch = 0.0;
@@ -1837,6 +1844,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			fprintf(stderr,"dbg4       roll:       %f\n",
 				*roll);
 			fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1852,6 +1861,10 @@ int	*error;
 	/* extract data from nav structure */
 	else if (*kind == MB_DATA_NAV)
 		{
+                /* get survey data structure */
+		if (store->ping != NULL)
+                	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+
 		/* get time */
 		time_i[0] = store->pos_date / 10000;
 		time_i[1] = (store->pos_date % 10000) / 100;
@@ -1899,6 +1912,13 @@ int	*error;
 		else
 			*speed = 0.0;
 
+		/* get draft  */
+		if (store->ping != NULL)
+			*draft = 0.01 * ping->png_xducer_depth
+				+ 655.36 * ping->png_offset_multiplier;
+		else
+			*draft = 0.0;
+
 		/* get roll pitch and heave */
 		*roll = 0.0; /* kluge must get from attitude datagrams */
 		*pitch = 0.0;
@@ -1938,6 +1958,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			fprintf(stderr,"dbg4       roll:       %f\n",
 				*roll);
 			fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1989,6 +2011,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -2005,7 +2028,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -2016,6 +2039,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -2052,6 +2076,7 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -2098,6 +2123,11 @@ int	*error;
 
 		/* get speed  */
 		ping->png_speed = (int) (speed / 0.036);
+
+		/* get draft  */
+		ping->png_offset_multiplier = (int)(draft / 655.36);
+		ping->png_xducer_depth 
+			= 100 * (draft - 655.36 * ping->png_offset_multiplier);
 
 		/* get roll pitch and heave */
 		}

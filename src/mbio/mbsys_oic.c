@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_oic.c	3/1/99
- *	$Id: mbsys_oic.c,v 4.0 1999-03-31 18:29:20 caress Exp $
+ *	$Id: mbsys_oic.c,v 4.1 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -42,6 +42,9 @@
  * Date:	March 1, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/03/31  18:29:20  caress
+ * MB-System 4.6beta7
+ *
  * Revision 1.1  1999/03/31  18:11:35  caress
  * Initial revision
  *
@@ -67,7 +70,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_oic.c,v 4.0 1999-03-31 18:29:20 caress Exp $";
+ static char res_id[]="$Id: mbsys_oic.c,v 4.1 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_oic_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -787,13 +790,15 @@ int	*error;
 				    &angles[i],
 				    &angles_forward[i],error);
 		angles_null[i] = 0.0;
-		heave[i] = store->fish_depth;
+		heave[i] = 0.0;
 		alongtrack_offset[i] = 0.0;
 		}
 
 	    /* get ssv */
 	    *ssv = store->sound_velocity;
-	    *draft = 0.0;
+	    
+	    /* get draft */
+	    *draft = store->fish_depth;
 
 	    /* set status */
 	    *error = MB_ERROR_NO_ERROR;
@@ -1000,7 +1005,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_oic_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1012,6 +1017,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1088,11 +1094,14 @@ int	*error;
 
 	    /* get speed */
 	    *speed = 3.6 * store->ship_speed;
-
+	    
+	    /* get draft */
+	    *draft = store->fish_depth;
+	    
 	    /* get roll pitch and heave */
 	    *roll = store->fish_roll;
 	    *pitch = store->fish_pitch;
-	    *heave = store->fish_depth;
+	    *heave = 0.0;
 
 	    /* print debug statements */
 	    if (verbose >= 5)
@@ -1128,6 +1137,8 @@ int	*error;
 			*speed);
 		fprintf(stderr,"dbg4       heading:    %f\n",
 			*heading);
+		fprintf(stderr,"dbg4       draft:      %f\n",
+			*draft);
 		fprintf(stderr,"dbg4       roll:       %f\n",
 			*roll);
 		fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1179,6 +1190,7 @@ int	*error;
 	    fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 	    fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 	    fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+	    fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 	    fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 	    fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 	    fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1195,7 +1207,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_oic_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1206,6 +1218,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -1238,6 +1251,7 @@ int	*error;
 	    fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 	    fprintf(stderr,"dbg2       speed:      %f\n",speed);
 	    fprintf(stderr,"dbg2       heading:    %f\n",heading);
+	    fprintf(stderr,"dbg2       draft:      %f\n",draft);
 	    fprintf(stderr,"dbg2       roll:       %f\n",roll);
 	    fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 	    fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1268,10 +1282,12 @@ int	*error;
 	    /* get speed */
 	    store->ship_speed = speed / 3.6;
 
+	    /* get draft */
+	    store->fish_depth = draft;
+
 	    /* get roll pitch and heave */
 	    store->fish_roll = roll;
 	    store->fish_pitch = pitch;
-	    store->fish_depth = heave;
 	    }
 
 	/* print output debug statements */
