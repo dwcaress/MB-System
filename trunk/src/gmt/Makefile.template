@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.9 1998-10-04 04:18:07 caress Exp $
+#	$Id: Makefile.template,v 4.10 1998-10-29 20:54:29 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.9  1998/10/04  04:18:07  caress
+# MB-System version 4.6beta
+#
 # Revision 4.8  1997/09/16  13:23:50  caress
 # Fixed typos.
 #
@@ -106,6 +109,7 @@ mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_pslibface.c
 $(INCDIR)/mb_contour.h:	 mb_contour.h
 	cp mb_contour.h $(INCDIR)/mb_contour.h
+	chmod 664 $(INCDIR)/mb_contour.h
 mbswath.o:	mbswath.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_format.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbswath.c
 
