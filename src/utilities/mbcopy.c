@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	3.00	2/4/93
- *    $Id: mbcopy.c,v 3.0 1993-05-04 22:25:09 dale Exp $
+ *    $Id: mbcopy.c,v 3.1 1993-06-14 17:53:29 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/05/04  22:25:09  dale
+ * Initial version.
+ *
  */
 
 /* standard include files */
@@ -40,7 +43,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 3.0 1993-05-04 22:25:09 dale Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 3.1 1993-06-14 17:53:29 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input multibeam data file to an output \nmultibeam data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Fiformat/oformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Ccommentfile \n\t-N -V -H  -Iinfile -Ooutfile]";
@@ -688,7 +691,7 @@ char **argv;
 			}
 
 		/* write some data */
-		if (error == MB_ERROR_NO_ERROR
+		if ((error == MB_ERROR_NO_ERROR && kind != MB_DATA_COMMENT)
 			|| (kind == MB_DATA_COMMENT && stripcomments == MB_NO))
 			{
 			if (fullcopy == MB_YES)
