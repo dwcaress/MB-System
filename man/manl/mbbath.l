@@ -1,43 +1,113 @@
-.TH mbbath l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbbath l "17 September 1998" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbbath\fP - Generates bathymetry from travel times in swath sonar data.
+\fBmbbath\fP - Recalculates bathymetry swath bathymetry data using
+new sound velocity profile, roll bias, pitch bias and draft values.
 
 .SH VERSION
 Version 4.5
 
 .SH SYNOPSIS
-\fBmbbath\fP [\fB-A\fIangle\fP \fB-B\fIroll_bias\fP \fB-D\fIdraught\fP 
-\fB-F\fIformat\fP \fB-I\fIinfile\fP \fB-O\fIoutfile \fB-P\fIpitch_bias\fP 
+\fBmbbath\fP [\fB-B\fIroll_bias\fP 
+\fB-C\fP \fB-D\fIdraft\fP 
+\fB-F\fIformat\fP \fB-I\fIinfile\fP \fB-K\fIssv\fP 
+\fB-O\fIoutfile \fB-P\fIpitch_bias\fP 
 \fB-R\fIrollfile\fP \fB-S\fIstaticfile\fP 
-\fB-U\fP \fB-W\fIvelfile\fP \fB-V -H\fP]
+\fB-U\fP \fB-W\fIvelfile\fP \fB-Z -V -H\fP]
 
 .SH DESCRIPTION
-\fBmbbath\fP is an utility for calculating bathymetry from travel times
-in swath sonar data.  The depths and crosstrack distances are calculated 
-from the travel times by raytracing through a water sound velocity profile 
-(SVP) specified by the user.  This program only works with data formats
-that store travel time data for each beam.
+\fBmbbath\fP is an utility for recalculating swath
+bathymetry data using new values for some of the fundamental
+sonar operational parameters. Users may apply changes to the
+water sound velocity profile, roll bias, pitch bias, and draft
+parameters. Static corrections can also be applied to the depth
+values.
+
+If a file containing a water sound velocity profile (SVP) is
+specified with the \fB-W\fP option, then the bathymetry will
+be recalculated from the raw travel times and arrival angles by
+raytracing through the SVP. Raytracing can only be performed
+using data formats that store both travel times and arrival angles
+for each sounding.
 
 The input SVP is specified in terms of velocity values
 at specific depths with linear interpolation between these "nodes".
 Because the velocity gradients are constant between nodes, the
 geometrical raypaths take the form of circular arcs within each
 layer, allowing analytical solutions for raypaths and travel times.
+The initial position used in the raytracing is the transducer depth
+as determined by the sum of the draft and heave values.
 
-If the previous
-version of the bathymetry includes beams that have been flagged as bad
-by having the depths set negative, the corresponding new depths will
-also be set negative to preserve the existing data editing.
-The depths can be saved in corrected 
+The surface sound velocity (SSV - the sound speed at the transducer arrays)
+used by the sonar is a critical element in the depth calculation
+because the SSV is used in the beamforming calculation by multibeam
+sonars and in the phase calculation by interferometry sonars.
+When recalculating bathymetry, users have two options:
+.br
+ 	1) Assume that the SSV used by the sonar is 
+ 		correct (default).
+ 	2) Change the SSV, using the sound speed at
+ 		the transducer depth in the SVP
+ 		(the \fB-C\fP option).
+.br
+For the first option, in general the SSV will not be the same as
+the initial sound speed used in the raytracing. This situation 
+requires that the initial ray angles be adjusted for the sound
+speed change using Snell's law (and assuming an horizontal interface
+for the calculation).
+
+The \fB-C\fP option should only be used if the original SSV is known to
+be incorrect and the new SSV derived from the SVP is closer to 
+correct. This situation requires that the initial ray angles be
+adjusted to correct the errors in the beamforming or phase
+calculations done by the sonar. If the transducer receiver arrays
+are flat and horizontal, this correction is equivalent to the
+Snell's law adjustment in the first option. If the transducer 
+receiver arrays are tilted, then this correction is made in 
+a reference frame rotated by the tilt angle. The \fBMBIO\fP i/o
+library knows about the array geometries of the supported sonars
+and provides the relevent information to \fBmbbath\fP.
+
+In all cases, the SSV must be known for the raytracing to proceed. 
+Unfortunately, in some data
+formats the SSV is recorded only sporadically in special data
+records, and thus users may encounter data files which contain
+no information about the SSV. Normally, \fBmbbath\fP makes a
+preliminary pass through an input data file looking for the first
+SSV value and then uses this value from the beginning of the file
+until overridden by other values. If no SSV values are found, a
+default value (specified with the \fB-K\fP\fIssv\fP option) is used. 
+This preliminary pass is inconsistent
+with input from stdin (e.g. using \fBmbbath\fP in a pipe), and users
+may turn off the preliminary pass 
+with the \fB-Z\fP option.
+
+The newly raytraced depths can be saved in corrected 
 meters, where the depth values obtained by raytracing are not adjusted 
 further, or in uncorrected meters, where the depth values are adjusted
-to correspond to a vertical mean water velocity of 1500 m/s.  Roll bias
-and pitch bias values can be input; the roll bias affects the calculation
-of survey (athwartships) pings and the pitch bias affects the calculation
-of calibration (fore-aft) pings.  Static corrections to the bathymetry
-as a function of beam number can be read from a file and applied.  
-Roll corrections as a function of time can be read from a file and
-applied as the bathymetry is generated.
+to correspond to a vertical mean water velocity of 1500 m/s. 
+
+If the raytracing recalculation is done, then any roll bias
+(\fB-B\fP and \fB-R\fP options) and 
+pitch bias (\fB-P\fP option) corrections specified
+will be applied to the arrival angles prior to the raytracing.
+If no raytracing is done, then the roll and pitch bias corrections
+are performed by rigid rotations of the sounding positions.
+Users should be aware that the roll and pitch bias corrections
+are made in addition to the roll and pitch bias corrections
+originally made by the sonar. Users therefore should NOT reenter
+the original roll bias and pitch bias values!
+
+If no SVP is specified, then any roll bias
+(\fB-B\fP and \fB-R\fP options) and 
+pitch bias (\fB-P\fP option) corrections specified 
+are applied by performing rigid rotations of the
+soundings in a ship-centered reference frame.
+
+Static corrections to the bathymetry
+as a function of beam number can be read from a file and applied
+to the bathymetry regardless of the other options specified.  
+Any bathymetry data flags set in the input data are preserved in
+the output.
 
 The default input and output streams are stdin and stdout.
 
@@ -52,34 +122,41 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \-A
-\fIangle\fP
-.br
-Sets the angle interval of adjacent beams.  The default value
-for the appropriate swath sonar system is internal to MB-System,
-but could be different on different installations of the
-same sonar.
-.TP
 .B \-B
 \fIroll_bias\fP
 .br
-Sets the roll bias (in degrees) used in calculating 
-beam locations.  The roll bias is
+Sets the change to the roll bias value (in degrees) 
+to be used in calculating soundings. This value is
+added to the roll bias used by the sonar, so users should
+NOT reenter the original roll bias value.  If raytracing is 
+done, the roll bias change is
 added to the acrosstrack component of the beam takeoff angles prior to
-the raytracing.  Ship roll is measured with starboard negative and
+the raytracing. If no raytracing is done, the roll bias change 
+is applied via a rigid rotation of the soundings in a ship-centered
+reference frame. Ship roll is measured with starboard negative and
 port positive.
 Default: \fIroll_bias\fP = 0.0
 .TP
-.B \-D
-\fIdraught\fP
+.B \-C
 .br
-Sets the \fIdraught\fP in meters of the ship used to collect the swath sonar data.
-This value will be added to the depth values determined by raytracing.
-Note that if the data stream includes a \fIdraught\fP value, it will
-automatically be included in the bathymetry calculations. 
-Thus, this option should only be used when the \fIdraught\fP value is
-not included in the data stream or is in error.
-Default: \fIdraught\fP = 0.0.
+Corrects initial ray angles for error in the original surface sound 
+velocity (SSV) value used by the sonar. The new SSV value is
+taken from the user-specified SVP at the transducer depth. The
+correction incorporates the geometry of the receiving transducer
+array.
+Default: treats original SSV as correct, and uses Snell's law
+to adjust the initial ray angles for the difference between the
+SSV and the sound speed at the transducer depth in the SVP.
+.TP
+.B \-D
+\fIdraft\fP
+.br
+Sets the depth in meters of the sonar used to 
+collect the swath bathymetry data. For hull mounted sonars, this
+value is equivalent to the draft of the vessel. This value is 
+only used when recalculating bathymetry by raytracing, and
+replaces any draft value in the input data stream
+Default: \fIdraft\fP value found in data used.
 .TP
 .B \-F
 \fIformat\fP
@@ -100,6 +177,14 @@ Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
+.B \-K
+\fIssv\fP
+.br
+Sets the initial SSV value used
+from the beginning of the input data until a new SSV value is
+encountered in the data stream. 
+Default: \fIssv\fP = 1500 m/s.
+.TP
 .B \-O
 \fIoutfile\fP
 .br
@@ -110,10 +195,15 @@ stdout. Default: \fIoutfile\fP = stdout.
 .B \-P
 \fIpitch_bias\fP
 .br
-Sets the pitch bias (in degrees) used in calculating beam 
-locations.  The pitch bias is
+Sets the change to the pitch bias value (in degrees) 
+to be used in calculating soundings. This value is
+added to the pitch bias used by the sonar, so users should
+NOT reenter the original pitch bias value.  If raytracing is 
+done, the pitch bias change is
 added to the fore-aft component of the beam takeoff angles prior to
-the raytracing.  Ship pitch is measured with aft (bow down) negative and
+the raytracing. If no raytracing is done, the pitch bias change 
+is applied via a rigid rotation of the soundings in a ship-centered
+reference frame. Ship pitch is measured with aft (bow down) negative and
 fore (bow up) positive.
 Default: \fIpitch_bias\fP = 0.0
 .TP
@@ -182,18 +272,29 @@ to depths of 12000 m (deeper than the deepest known seafloor),
 then \fBmbbath\fP extends the profile to that depth using the
 velocity of the deepest layer.  The default water velocity
 profile is simply a halfspace with a velocity of 1500 m/s.
+.TP
+.B \-Z
+.br
+Normally \fBmbbath\fP makes an initial pass through the input
+data to find the first SSV value, and then uses this value
+from the beginning of the file to the first change in the SSV.
+If the \fB-Z\fP option is given, the preliminary pass is
+skipped and a default value (see the \fB-K\fP\fIssv\fP option)
+is used until the first SSV value is encountered in the data stream.
 
 .SH EXAMPLES
 Suppose one wishes to recalculate the bathymetry for Hydrosweep DS data
-contained in the raw Hydrosweep (format 21) file hsraw using a water
-velocity profile specified in the file velprof. Further suppose that
-the roll and pitch biases are known to be 1.0 and -0.5 degrees,
-respectively.
+contained in the raw Hydrosweep (format 21) file hsturkey.mb21 using a water
+velocity profile specified in the file dodo.svp. Further suppose that
+the roll and pitch biases used in the sonar are known to be wrong by 
+1.0 and -0.5 degrees, respectively.
 The following will suffice:
- 	mbbath -F21 -Wnavhs -R1.0 -P-0.5 -Ihsraw -Ohsraytrace
+ 	mbbath -F21 -Wdodo.svp -R1.0 -P-0.5 \\
+ 		-Ihsturkey.mb21 -Ohsturkey_b.mb21
 .br
-The bathymetry in the output file hsraytrace will be completely
-recalculated from the travel time data in the file hsraw.
+The bathymetry in the output file hsturkey_b.mb21 will be completely
+recalculated from the travel time and arrival angle 
+data in the file hsturkey.mb21.
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmblevitus\fP(l), \fBmbvelocitytool\fP(l), 

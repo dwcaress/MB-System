@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 4.1 1997-04-21 17:09:54 caress Exp $
+ *    $Id: xgraphics.c,v 4.2 1998-10-05 19:18:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/04/21  17:09:54  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.1  1997/04/16  21:35:31  caress
  * Complete rewrite of mbvelocitytool without uid file.
  *
@@ -54,8 +57,8 @@ struct xg_graphic
 	int		display_depth;	/* 1-bit or 8-bit */
 	Visual		*visual;	/* We get it but we don't use it */
 	XVisualInfo	visinfo;	/* We get it but we don't use it */
-	unsigned long	bg_pixel;	/* background color */
-	unsigned long	fg_pixel;	/* foreground color */
+	unsigned int	bg_pixel;	/* background color */
+	unsigned int	fg_pixel;	/* foreground color */
 	GC		gc_solid;	/* Xwindows graphics context */
 	GC		gc_dash;	/* Xwindows graphics context */
 	XFontStruct	*font_info;	/* XFontStruct pointer */
@@ -71,7 +74,7 @@ Window	can_xid;
 int	*can_bounds;
 char	*fontname;
 {
-static char rcs_id[]="$Id: xgraphics.c,v 4.1 1997-04-21 17:09:54 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 4.2 1998-10-05 19:18:58 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;
@@ -184,7 +187,7 @@ int	xgid;
 void xg_drawpoint(xgid, x, y, pixel, style)
 int	xgid;
 int	x, y;
-unsigned long	pixel;
+unsigned int	pixel;
 int	style;
 {
 	struct xg_graphic *graphic;
@@ -205,7 +208,7 @@ int	style;
 void xg_drawline(xgid, x1, y1, x2, y2, pixel, style)
 int	xgid;
 int	x1, y1, x2, y2;
-unsigned long	pixel;
+unsigned int	pixel;
 int	style;
 {
 	struct xg_graphic *graphic;
@@ -226,7 +229,7 @@ int	style;
 void xg_drawrectangle(xgid, x, y, width, height, pixel, style)
 int	xgid;
 int	x, y, width, height;
-unsigned long	pixel;
+unsigned int	pixel;
 int	style;
 {
 	struct xg_graphic *graphic;
@@ -248,7 +251,7 @@ int	style;
 void xg_drawtriangle(xgid, x1, y1, x2, y2, x3, y3, pixel, style)
 int	xgid;
 int	x1, y1, x2, y2, x3, y3;
-unsigned long	pixel;
+unsigned int	pixel;
 int	style;
 {
 	struct xg_graphic *graphic;
@@ -284,7 +287,7 @@ int	style;
 void xg_fillrectangle(xgid, x, y, width, height, pixel, style)
 int	xgid;
 int	x, y, width, height;
-unsigned long	pixel;
+unsigned int	pixel;
 int	style;
 {
 	struct xg_graphic *graphic;
@@ -306,7 +309,7 @@ int	style;
 void xg_filltriangle(xgid, x1, y1, x2, y2, x3, y3, pixel, style)
 int	xgid;
 int	x1, y1, x2, y2, x3, y3;
-unsigned long	pixel;
+unsigned int	pixel;
 int	style;
 {
 	struct xg_graphic *graphic;
@@ -339,7 +342,7 @@ void xg_drawstring(xgid, x, y, string, pixel, style)
 int	xgid;
 int	x, y;
 char	*string;
-unsigned long	pixel;
+unsigned int	pixel;
 int	style;
 {
 	struct xg_graphic *graphic;

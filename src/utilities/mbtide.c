@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtide.c	8/24/93
  *
- *    $Id: mbtide.c,v 4.4 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbtide.c,v 4.5 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	August 24, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.3  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -45,6 +48,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <strings.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -58,9 +62,9 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbtide.c,v 4.4 1997-09-15 19:11:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbtide.c,v 4.5 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBTIDE";
-	static char help_message[] =  "MBTIDE corrects multibeam bathymetry data for tides. \nThe default input and output streams are stdin and stdout.";
+	static char help_message[] =  "MBTIDE corrects swath bathymetry data for tides. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbtide [-Fformat -V -H  -Iinfile -Mtide_format -Ooutfile -Ttidefile]";
 
 	/* parsing variables */
@@ -112,6 +116,7 @@ char **argv;
 	int	nbath;
 	int	namp;
 	int	nss;
+	char	*beamflag;
 	double	*bath;
 	double	*bathacrosstrack;
 	double	*bathalongtrack;
@@ -126,7 +131,7 @@ char **argv;
 	char	comment[256];
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	/* tide handling variables */
@@ -228,7 +233,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -345,7 +350,7 @@ char **argv;
 		/* deal with tide in form: yr jday hour min sec tide */
 		else if (tformat == 3)
 			{
-			sscanf(buffer,"%d %d %d %d %lf %lf",
+			sscanf(buffer,"%d %d %lf %d %lf %lf",
 				&time_j[0],&time_j[1],&hr,
 				&time_j[2],&sec,
 				&tide[ntide]);
@@ -435,6 +440,7 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -466,9 +472,8 @@ char **argv;
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -510,7 +515,7 @@ char **argv;
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -585,10 +590,8 @@ char **argv;
 			{
 			for (i=0;i<beams_bath;i++)
 				{
-				if (bath[i] > 0.0)
+				if (beamflag[i] != MB_FLAG_NULL)
 					bath[i] = bath[i] - tideval;
-				else if (bath[i] < 0.0)
-					bath[i] = bath[i] + tideval;
 				}
 			}
 
@@ -602,7 +605,7 @@ char **argv;
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					beams_bath,beams_amp,pixels_ss,
-					bath,amp,bathacrosstrack,bathalongtrack,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			if (status == MB_SUCCESS)
@@ -637,6 +640,7 @@ char **argv;
 	mb_free(verbose,&tide_time,&error);
 	mb_free(verbose,&tide,&error);
 	mb_free(verbose,&tidespl,&error);
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&amp,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 

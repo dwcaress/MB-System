@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.1 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbmosaic.c,v 4.2 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.0  1997/04/21  17:17:47  caress
  * MB-System 4.5 Beta Release.
  *
@@ -36,10 +39,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* Includes for System 5 type operating system */
 #if defined (IRIX) || defined (LYNX)
-#include <time.h>
 #include <stdlib.h>
 #endif
 
@@ -74,7 +77,7 @@
 #define	NO_DATA_FLAG	99999.9
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.1 1997-09-15 19:11:06 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.2 1998-10-05 19:19:24 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -170,6 +173,7 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -425,8 +429,15 @@ char **argv;
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg, "%lf/%lf/%lf/%lf", 
-				&gbnd[0],&gbnd[1],&gbnd[2],&gbnd[3]);
+			sscanf (optarg, "%s", buffer);
+			result = strtok(buffer, "/");
+			i = 0;
+			while (result)
+			    {
+			    gbnd[i] = ddmmss_to_degree (result);
+			    i++;
+			    result = strtok (NULL, "/");
+			    }
 			flag++;
 			break;
 		case 'S':
@@ -494,7 +505,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(outfp,"\nProgram %s\n",program_name);
 		fprintf(outfp,"Version %s\n",rcs_id);
@@ -548,9 +559,9 @@ char **argv;
 		fprintf(outfp,"dbg2       extend:               %f\n",extend);
 		fprintf(outfp,"dbg2       tension:              %f\n",tension);
 		fprintf(outfp,"dbg2       grid_mode:            %d\n",grid_mode);
-		fprintf(outfp,"dbg2       priority_mode:        %f\n",priority_mode);
+		fprintf(outfp,"dbg2       priority_mode:        %d\n",priority_mode);
 		fprintf(outfp,"dbg2       priority_range:       %f\n",priority_range);
-		fprintf(outfp,"dbg2       pfile:                %f\n",pfile);
+		fprintf(outfp,"dbg2       pfile:                %s\n",pfile);
 		fprintf(outfp,"dbg2       priority_azimuth:     %f\n",priority_azimuth);
 		fprintf(outfp,"dbg2       priority_azimuth_fac: %f\n",priority_azimuth_factor);
 		fprintf(outfp,"dbg2       bath_default:         %f\n",bath_default);
@@ -1025,6 +1036,8 @@ char **argv;
 			}
 
 		    /* allocate memory for reading data arrays */
+		    status = mb_malloc(verbose,beams_bath*sizeof(char),
+				    &beamflag,&error);
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bath,&error);
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -1076,7 +1089,7 @@ char **argv;
 				&rpings,time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -1114,7 +1127,7 @@ char **argv;
 			  /* translate beam locations to lon/lat */
 			  for (ib=0;ib<beams_amp;ib++)
 			    {
-			    if (amp[ib] > 0.0)
+			    if (mb_beam_ok(beamflag[ib]))
 				{
 				bathlon[ib] = navlon 
 				    + headingy * mtodeglon
@@ -1133,7 +1146,7 @@ char **argv;
 			  if (use_projection == MB_YES)
 			    {
 			    for (ib=0;ib<beams_amp;ib++)
-			      if (amp[ib] > 0.0)
+			      if (mb_beam_ok(beamflag[ib]))
 				mbmosaic_project(verbose, bathlon[ib], bathlat[ib], 
 					&bathlon[ib], &bathlat[ib], &error);
 			    }
@@ -1142,7 +1155,7 @@ char **argv;
 			  mbmosaic_get_priorities(verbose, priority_mode,  
 				n_priority_angle, priority_angle_angle, priority_angle_priority, 
 				priority_azimuth, priority_azimuth_factor, 
-				beams_bath, bath, bathacrosstrack,
+				beams_bath, beamflag, bath, bathacrosstrack,
 				work1, work2,  
 				bath_default, heading, 
 				beams_amp, amp, bathacrosstrack, 
@@ -1150,7 +1163,7 @@ char **argv;
 
 			  /* deal with data */
 			  for (ib=0;ib<beams_amp;ib++) 
-			    if (amp[ib] > 0.0)
+			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
 			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
@@ -1210,7 +1223,7 @@ char **argv;
 			  mbmosaic_get_priorities(verbose, priority_mode,  
 				n_priority_angle, priority_angle_angle, priority_angle_priority, 
 				priority_azimuth, priority_azimuth_factor, 
-				beams_bath, bath, bathacrosstrack,
+				beams_bath, beamflag, bath, bathacrosstrack,
 				work1, work2,  
 				bath_default, heading, 
 				pixels_ss, ss, ssacrosstrack, 
@@ -1245,6 +1258,7 @@ char **argv;
 			  }
 			}
 		    status = mb_close(verbose,&mbio_ptr,&error);
+		    mb_free(verbose,&beamflag,&error); 
 		    mb_free(verbose,&bath,&error); 
 		    mb_free(verbose,&bathacrosstrack,&error); 
 		    mb_free(verbose,&bathalongtrack,&error); 
@@ -1340,6 +1354,8 @@ char **argv;
 			}
 
 		    /* allocate memory for reading data arrays */
+		    status = mb_malloc(verbose,beams_bath*sizeof(char),
+				    &beamflag,&error);
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bath,&error);
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -1391,7 +1407,7 @@ char **argv;
 				&rpings,time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -1429,7 +1445,7 @@ char **argv;
 			  /* translate beam locations to lon/lat */
 			  for (ib=0;ib<beams_amp;ib++)
 			    {
-			    if (amp[ib] > 0.0)
+			    if (mb_beam_ok(beamflag[ib]))
 				{
 				bathlon[ib] = navlon 
 				    + headingy * mtodeglon
@@ -1448,7 +1464,7 @@ char **argv;
 			  if (use_projection == MB_YES)
 			    {
 			    for (ib=0;ib<beams_amp;ib++)
-			      if (amp[ib] > 0.0)
+			      if (mb_beam_ok(beamflag[ib]))
 				mbmosaic_project(verbose, bathlon[ib], bathlat[ib], 
 					&bathlon[ib], &bathlat[ib], &error);
 			    }
@@ -1457,7 +1473,7 @@ char **argv;
 			  mbmosaic_get_priorities(verbose, priority_mode,  
 				n_priority_angle, priority_angle_angle, priority_angle_priority, 
 				priority_azimuth, priority_azimuth_factor, 
-				beams_bath, bath, bathacrosstrack,
+				beams_bath, beamflag, bath, bathacrosstrack,
 				work1, work2,  
 				bath_default, heading, 
 				beams_amp, amp, bathacrosstrack, 
@@ -1465,7 +1481,7 @@ char **argv;
 
 			  /* deal with data */
 			  for (ib=0;ib<beams_amp;ib++) 
-			    if (amp[ib] > 0.0)
+			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
 			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
@@ -1539,7 +1555,7 @@ char **argv;
 			  mbmosaic_get_priorities(verbose, priority_mode,  
 				n_priority_angle, priority_angle_angle, priority_angle_priority, 
 				priority_azimuth, priority_azimuth_factor, 
-				beams_bath, bath, bathacrosstrack,
+				beams_bath, beamflag, bath, bathacrosstrack,
 				work1, work2,  
 				bath_default, heading, 
 				pixels_ss, ss, ssacrosstrack, 
@@ -1588,6 +1604,7 @@ char **argv;
 			  }
 			}
 		    status = mb_close(verbose,&mbio_ptr,&error);
+		    mb_free(verbose,&beamflag,&error); 
 		    mb_free(verbose,&bath,&error); 
 		    mb_free(verbose,&bathacrosstrack,&error); 
 		    mb_free(verbose,&bathalongtrack,&error); 
@@ -1924,12 +1941,12 @@ char **argv;
 		/* execute mbm_grdplot */
 		if (datatype == MBMOSAIC_DATA_AMPLITUDE)
 			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -V -L\"File %s - %s:%s\"", 
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
 				ofile, ofile, title, zlabel);
 			}
 		else
 			{
-			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -V -L\"File %s - %s:%s\"", 
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", 
 				ofile, ofile, title, zlabel);
 			}
 		if (verbose)
@@ -2132,7 +2149,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	FILE	*fp;
 	int	i;
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 	char	*ctime();
 	char	*getenv();
@@ -2167,7 +2184,7 @@ int	*error;
 	if (status == MB_SUCCESS)
 		{
 		fprintf(fp,"grid created by program mbmosaic\n");
-		right_now = time((long *)0);
+		right_now = time((time_t *)0);
 		strncpy(date,"\0",25);
 		strncpy(date,ctime(&right_now),24);
 		if ((user_ptr = getenv("USER")) == NULL)
@@ -2301,7 +2318,7 @@ int	*error;
 	int	pad[4];
 	int	complex;
 	float	*a;
-	long int	right_now;
+	time_t	right_now;
 	char	date[128], user[128], *user_ptr, host[128];
 	char	*message;
 	int	i, j, kg, ka;
@@ -2357,9 +2374,8 @@ int	*error;
 	strcpy(grd.z_units,zlab);
 	strcpy(grd.title,titl);
 	strcpy(grd.command,"\0");
-	right_now = time((long *)0);
 	strncpy(date,"\0",128);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -2396,6 +2412,7 @@ int	*error;
 				}
 
 		/* write the GMT netCDF grd file */
+fprintf(stderr, "write_grd: %s\n", outfile);
 		write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
 
 		/* free memory for output array */
@@ -2470,7 +2487,7 @@ int	*error;
 int mbmosaic_get_priorities(verbose, mode,  
 	nangle, aangles, apriorities, 
 	azimuth, factor, 
-	nbath, bath, bathacrosstrack,
+	nbath, beamflag, bath, bathacrosstrack,
 	depth, depthacrosstrack,  
 	bath_default, heading, 
 	ndata, data, acrosstrack, 
@@ -2483,6 +2500,7 @@ double	*apriorities;
 double	azimuth;
 double	factor;
 int	nbath;
+char	*beamflag;
 double	*bath;
 double	*bathacrosstrack;
 double	*depth;
@@ -2522,8 +2540,8 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:         %d\n",nbath);
 		fprintf(stderr,"dbg2       bathymetry:\n");
 		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2       i:%d bath:%f xtrack:%f\n",
-				i, bath[i], bathacrosstrack[i]);
+			fprintf(stderr,"dbg2       i:%d flag:%3d bath:%f xtrack:%f\n",
+				i, beamflag[i], bath[i], bathacrosstrack[i]);
 		fprintf(stderr,"dbg2       bath_default:  %f\n", bath_default);
 		fprintf(stderr,"dbg2       heading:       %f\n", heading);
 		fprintf(stderr,"dbg2       amplitude/sidescan data:\n");
@@ -2565,7 +2583,7 @@ int	*error;
 		ndepthgood = 0;
 		for (i=0;i<nbath;i++)
 		    {
-		    if (bath[i] > 0.0)
+		    if (mb_beam_ok(beamflag[i]))
 			{
 			depth[ndepthgood] = bath[i];
 			depthacrosstrack[ndepthgood] = bathacrosstrack[i];
@@ -2735,5 +2753,25 @@ double	*b;
 		return(1);
 	else
 		return(-1);
+}
+/*--------------------------------------------------------------------*/
+double ddmmss_to_degree (text)
+char *text; 
+{
+	int i, colons = 0;
+	double degree, minute, degfrac, second;
+
+	for (i = 0; text[i]; i++) if (text[i] == ':') colons++;
+	if (colons == 2) {	/* dd:mm:ss format */
+		sscanf (text, "%lf:%lf:%lf", &degree, &minute, &second);
+		degfrac = degree + copysign (minute / 60.0, degree) + copysign (second / 3600.0, degree);
+	}
+	else if (colons == 1) {	/* dd:mm format */
+		sscanf (text, "%lf:%lf", &degree, &minute);
+		degfrac = degree + copysign (minute / 60.0, degree);
+	}
+	else
+		degfrac = atof (text);
+	return (degfrac);
 }
 /*--------------------------------------------------------------------*/

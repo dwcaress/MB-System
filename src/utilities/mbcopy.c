@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.9 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbcopy.c,v 4.10 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,8 +11,8 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBCOPY copies an input multibeam data file to an output
- * multibeam data file with the specified conversions.  Options include
+ * MBCOPY copies an input swath sonar data file to an output
+ * swath sonar data file with the specified conversions.  Options include
  * windowing in time and space and ping averaging.  The input and
  * output data formats may differ, though not all possible combinations
  * make sense.  The default input and output streams are stdin 
@@ -22,6 +22,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.9  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -81,6 +84,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 /* mbio include files */
@@ -95,9 +99,9 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.9 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 4.10 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBCOPY";
-	static char help_message[] =  "MBCOPY copies an input multibeam data file to an output \nmultibeam data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
+	static char help_message[] =  "MBCOPY copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
 
 	/* parsing variables */
@@ -151,6 +155,7 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
+	char	*ibeamflag = NULL;
 	double	*ibath = NULL;
 	double	*ibathacrosstrack = NULL;
 	double	*ibathalongtrack = NULL;
@@ -158,6 +163,7 @@ char **argv;
 	double	*iss = NULL;
 	double	*issacrosstrack = NULL;
 	double	*issalongtrack = NULL;
+	char	*obeamflag = NULL;
 	double	*obath = NULL;
 	double	*obathacrosstrack = NULL;
 	double	*obathalongtrack = NULL;
@@ -186,7 +192,7 @@ char **argv;
 	unsigned int	sleep_time;
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	FILE	*fp;
@@ -310,7 +316,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -420,7 +426,7 @@ char **argv;
 		fprintf(stderr,"dbg2       fullcopy:      %d\n",fullcopy);
 			}
 
-	/* initialize reading the input multibeam file */
+	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
 		verbose,ifile,iformat,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -435,7 +441,7 @@ char **argv;
 		exit(error);
 		}
 
-	/* initialize writing the output multibeam file */
+	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
 		verbose,ofile,oformat,&ombio_ptr,
 		&obeams_bath,&obeams_amp,&opixels_ss,&error)) != MB_SUCCESS)
@@ -449,6 +455,7 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,ibeams_bath*sizeof(char),&ibeamflag,&error);
 	status = mb_malloc(verbose,ibeams_bath*sizeof(double),&ibath,&error);
 	status = mb_malloc(verbose,ibeams_bath*sizeof(double),&ibathacrosstrack,
 				&error);
@@ -460,6 +467,7 @@ char **argv;
 				&error);
 	status = mb_malloc(verbose,ipixels_ss*sizeof(double),&issalongtrack,
 				&error);
+	status = mb_malloc(verbose,obeams_bath*sizeof(char),&obeamflag,&error);
 	status = mb_malloc(verbose,obeams_bath*sizeof(double),&obath,&error);
 	status = mb_malloc(verbose,obeams_bath*sizeof(double),&obathacrosstrack,
 				&error);
@@ -518,12 +526,7 @@ char **argv;
 			{
 			kind = MB_DATA_COMMENT;
 			comment[(int)strlen(comment)-1] = '\0';
-			status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+			status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -539,27 +542,16 @@ char **argv;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"This data copied by program %s version %s",
 			program_name,rcs_id);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"MB-system Version %s",MB_VERSION);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		right_now = time((long *)0);
 		strncpy(date,"\0",25);
-		right_now = time((long *)0);
+		right_now = time((time_t *)0);
 		strncpy(date,ctime(&right_now),24);
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
@@ -571,158 +563,83 @@ char **argv;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 			user,host,date);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"Control Parameters:");
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Input file:         %s",ifile);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Input MBIO format:  %d",iformat);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Output file:        %s",ofile);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Output MBIO format: %d",oformat);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Ping averaging:     %d",pings);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Longitude flip:     %d",lonflip);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Longitude bounds:   %f %f",
 			bounds[0],bounds[1]);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Latitude bounds:    %f %f",
 			bounds[2],bounds[3]);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Begin time:         %d %d %d %d %d %d %d",
 			btime_i[0],btime_i[1],btime_i[2],
 			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  End time:           %d %d %d %d %d %d %d",
 			etime_i[0],etime_i[1],etime_i[2],
 			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Minimum speed:      %f",speedmin);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Time gap:           %f",timegap);
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment," ");
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				obeams_bath,obeams_amp,opixels_ss,
-				obath,oamp,obathacrosstrack,obathalongtrack,
-				oss,ossacrosstrack,ossalongtrack,
+		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
@@ -738,7 +655,8 @@ char **argv;
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&nbath,&namp,&nss,
-				ibath,iamp,ibathacrosstrack,ibathalongtrack,
+				ibeamflag,ibath,iamp,
+				ibathacrosstrack,ibathalongtrack,
 				iss,issacrosstrack,issalongtrack,
 				comment,&error);
 		else
@@ -746,7 +664,8 @@ char **argv;
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&nbath,&namp,&nss,
-				ibath,iamp,ibathacrosstrack,ibathalongtrack,
+				ibeamflag,ibath,iamp,
+				ibathacrosstrack,ibathalongtrack,
 				iss,issacrosstrack,issalongtrack,
 				comment,&error);
 
@@ -860,6 +779,7 @@ char **argv;
 			/* do bathymetry */
 			for (j=0;j<offset_bath;j++)
 				{
+				obeamflag[j] = MB_FLAG_NULL;
 				obath[j] = 0.0;
 				obathacrosstrack[j] = 0.0;
 				obathalongtrack[j] = 0.0;
@@ -867,12 +787,14 @@ char **argv;
 			for (i=istart_bath;i<iend_bath;i++)
 				{
 				j = i + offset_bath;
+				obeamflag[j] = ibeamflag[i];
 				obath[j] = ibath[i];
 				obathacrosstrack[j] = ibathacrosstrack[i];
 				obathalongtrack[j] = ibathalongtrack[i];
 				}
 			for (j=iend_bath+offset_bath;j<obeams_bath;j++)
 				{
+				obeamflag[j] = MB_FLAG_NULL;
 				obath[j] = 0.0;
 				obathacrosstrack[j] = 0.0;
 				obathalongtrack[j] = 0.0;
@@ -925,7 +847,7 @@ char **argv;
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					obeams_bath,obeams_amp,opixels_ss,
-					obath,oamp,obathacrosstrack,
+					obeamflag,obath,oamp,obathacrosstrack,
 					obathalongtrack,
 					oss,ossacrosstrack,ossalongtrack,
 					comment,&error);
@@ -934,7 +856,7 @@ char **argv;
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					obeams_bath,obeams_amp,opixels_ss,
-					obath,oamp,obathacrosstrack,
+					obeamflag,obath,oamp,obathacrosstrack,
 					obathalongtrack,
 					oss,ossacrosstrack,ossalongtrack,
 					comment,&error);
@@ -967,6 +889,7 @@ char **argv;
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
+	mb_free(verbose,&ibeamflag,&error); 
 	mb_free(verbose,&ibath,&error); 
 	mb_free(verbose,&ibathacrosstrack,&error); 
 	mb_free(verbose,&ibathalongtrack,&error); 
@@ -974,6 +897,7 @@ char **argv;
 	mb_free(verbose,&iss,&error); 
 	mb_free(verbose,&issacrosstrack,&error); 
 	mb_free(verbose,&issalongtrack,&error); 
+	mb_free(verbose,&obeamflag,&error); 
 	mb_free(verbose,&obath,&error); 
 	mb_free(verbose,&obathacrosstrack,&error); 
 	mb_free(verbose,&obathalongtrack,&error); 

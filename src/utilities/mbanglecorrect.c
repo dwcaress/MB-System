@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.11 1997-07-25 14:28:10 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.12 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1997/07/25  14:28:10  caress
+ * Version 4.5beta2
+ *
  * Revision 4.10  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -89,6 +92,7 @@ The default input and output streams are stdin and stdout.\n";
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -119,6 +123,7 @@ struct mbanglecorrect_ping_struct
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
+	char	*beamflag;
 	double	*bath;
 	double	*bathacrosstrack;
 	double	*bathalongtrack;
@@ -141,7 +146,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.11 1997-07-25 14:28:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.12 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -224,7 +229,7 @@ The default input and output streams are stdin and stdout.\n";
 	double	save_time_d = 0.0;
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	/* angle function variables */
@@ -436,7 +441,7 @@ The default input and output streams are stdin and stdout.\n";
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -518,7 +523,7 @@ The default input and output streams are stdin and stdout.\n";
 		exit(error);
 		}
 
-	/* initialize reading the input multibeam file */
+	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -533,7 +538,7 @@ The default input and output streams are stdin and stdout.\n";
 		exit(error);
 		}
 
-	/* initialize writing the output multibeam file */
+	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
@@ -549,6 +554,7 @@ The default input and output streams are stdin and stdout.\n";
 	/* allocate memory for data arrays */
 	for (i=0;i<n_buffer_max;i++)
 		{
+		ping[i].beamflag = NULL;
 		ping[i].bath = NULL;
 		ping[i].amp = NULL;
 		ping[i].bathacrosstrack = NULL;
@@ -557,6 +563,8 @@ The default input and output streams are stdin and stdout.\n";
 		ping[i].ssacrosstrack = NULL;
 		ping[i].ssalongtrack = NULL;
 		ping[i].dataprocess = NULL;
+		status = mb_malloc(verbose,beams_bath*sizeof(char),
+			&ping[i].beamflag,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&ping[i].bath,&error);
 		status = mb_malloc(verbose,beams_amp*sizeof(double),
@@ -765,9 +773,8 @@ The default input and output streams are stdin and stdout.\n";
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -892,7 +899,9 @@ The default input and output streams are stdin and stdout.\n";
 				&ping[ndata].beams_bath,
 				&ping[ndata].beams_amp,
 				&ping[ndata].pixels_ss,
-				ping[ndata].bath,ping[ndata].amp,
+				ping[ndata].beamflag,
+				ping[ndata].bath,
+				ping[ndata].amp,
 				ping[ndata].bathacrosstrack,
 				ping[ndata].bathalongtrack,
 				ping[ndata].ss,
@@ -908,6 +917,7 @@ The default input and output streams are stdin and stdout.\n";
 				{
 				check_ss_for_bath(verbose, 
 					ping[ndata].beams_bath,
+					ping[ndata].beamflag,					
 					ping[ndata].bath,
 					ping[ndata].bathacrosstrack,
 					ping[ndata].pixels_ss,
@@ -923,6 +933,7 @@ The default input and output streams are stdin and stdout.\n";
 				set_bathyslope(verbose, 
 					nsmooth, 
 					ping[ndata].beams_bath,
+					ping[ndata].beamflag,
 					ping[ndata].bath,
 					ping[ndata].bathacrosstrack,
 					&ping[ndata].ndepths,
@@ -1385,7 +1396,9 @@ The default input and output streams are stdin and stdout.\n";
 				ping[j].beams_bath,
 				ping[j].beams_amp,
 				ping[j].pixels_ss,
-				ping[j].bath,ping[j].amp,
+				ping[j].beamflag,
+				ping[j].bath,
+				ping[j].amp,
 				ping[j].bathacrosstrack,
 				ping[j].bathalongtrack,
 				ping[j].ss,
@@ -1398,7 +1411,7 @@ The default input and output streams are stdin and stdout.\n";
 		/* find number of pings to hold */
 		if (done == MB_YES)
 			nhold = 0;
-		else if (jend <= jbeg)
+		else if (nhold_ping == 0 || jend <= jbeg)
 			nhold = 0;
 		else if (nhold_ping < jend)
 			nhold = nbuff - ping[jend+1-nhold_ping].id;
@@ -1434,6 +1447,7 @@ The default input and output streams are stdin and stdout.\n";
 	/* free the memory */
 	for (j=0;j<n_buffer_max;j++)
 		{
+		mb_free(verbose,&ping[j].beamflag,&error); 
 		mb_free(verbose,&ping[j].bath,&error); 
 		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
 		mb_free(verbose,&ping[j].bathalongtrack,&error); 
@@ -1470,11 +1484,12 @@ The default input and output streams are stdin and stdout.\n";
 }
 /*--------------------------------------------------------------------*/
 int check_ss_for_bath(verbose,
-	nbath,bath,bathacrosstrack,
+	nbath,beamflag,bath,bathacrosstrack,
 	nss,ss,ssacrosstrack, 
 	error)
 int	verbose;
 int	nbath;
+char	*beamflag;
 double	*bath;
 double	*bathacrosstrack;
 int	nss;
@@ -1511,7 +1526,7 @@ int	*error;
 	i = 0;
 	for (i=0;i<nbath;i++)
 	    {
-	    if (bath[i] > 0.0)
+	    if (mb_beam_ok(beamflag[i]))
 		{
 		if (ifirst < 0)
 		    ifirst = i;
@@ -1528,9 +1543,9 @@ int	*error;
 		{
 		/* make sure ibath sets right interval for ss */
 		while (ibath < ilast - 1
-		    && (bath[ibath] <= 0.0
-			|| bath[ibath+1] <= 0.0
-			|| (bath[ibath+1] > 0.0
+		    && (!mb_beam_ok(beamflag[ibath])
+			|| !mb_beam_ok(beamflag[ibath+1])
+			|| (mb_beam_ok(beamflag[ibath+1])
 			    && ssacrosstrack[iss] > bathacrosstrack[ibath+1])))
 		    ibath++;
 /*fprintf(stderr,"iss:%d ibath:%d %f %f  %f %f  ss: %f %f\n",
@@ -1539,7 +1554,7 @@ bathacrosstrack[ibath],bathacrosstrack[ibath+1],
 ss[iss],ssacrosstrack[iss]);*/
 		
 		/* now zero sidescan if not surrounded by good bathy */
-		if (bath[ibath] <= 0.0 || bath[ibath+1] <= 0.0)
+		if (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath+1]))
 		    ss[iss] = 0.0;
 		else if (ssacrosstrack[iss] < bathacrosstrack[ibath])
 		    ss[iss] = 0.0;
@@ -1574,7 +1589,7 @@ ss[iss],ssacrosstrack[iss]);*/
 /*--------------------------------------------------------------------*/
 int set_bathyslope(verbose,
 	nsmooth, 
-	nbath,bath,bathacrosstrack,
+	nbath,beamflag,bath,bathacrosstrack,
 	ndepths,depths,depthacrosstrack, 
 	nslopes,slopes,slopeacrosstrack, 
 	depthsmooth, 
@@ -1582,6 +1597,7 @@ int set_bathyslope(verbose,
 int	verbose;
 int	nsmooth;
 int	nbath;
+char	*beamflag;
 double	*bath;
 double	*bathacrosstrack;
 int	*ndepths;
@@ -1633,7 +1649,7 @@ int	*error;
 	nbathgood = 0;
 	for (i=0;i<nbath;i++)
 		{
-		if (bath[i] > 0.0)
+		if (mb_beam_ok(beamflag[i]))
 			{
 			if (first == -1)
 				{
@@ -1650,7 +1666,7 @@ int	*error;
 	if (nbathgood > 0)
 	for (i=first;i<last;i++)
 		{
-		if (bath[i] > 0.0)
+		if (mb_beam_ok(beamflag[i]))
 			{
 			next = i;
 			j = i + 1;

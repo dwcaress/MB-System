@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangleold.c,v 4.7 1997-07-25 14:28:10 caress Exp $
+ *    $Id: mbbackangleold.c,v 4.8 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,7 +11,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBBACKANGLE reads a multibeam data file and generates a table
+ * MBBACKANGLE reads a swath sonar data file and generates a table
  * of the average amplitude or sidescan values as a function of
  * the grazing angle with the seafloor. If bathymetry is
  * not available,  the seafloor is assumed to be flat. The takeoff
@@ -23,6 +23,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/07/25  14:28:10  caress
+ * Version 4.5beta2
+ *
  * Revision 4.6  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -69,10 +72,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.7 1997-07-25 14:28:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.8 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
-"mbbackangle reads a multibeam data file and generates a table\n\t\
+"mbbackangle reads a swath sonar data file and generates a table\n\t\
 of the average amplitude or sidescan values as a function of\n\t\
 the angle of interaction with the seafloor. If bathymetry is\n\t\
 not available,  the seafloor is assumed to be flat.\n\t\
@@ -123,6 +126,7 @@ The results are dumped to stdout.";
 	double	speed;
 	double	heading;
 	double	distance;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -262,7 +266,7 @@ The results are dumped to stdout.";
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -404,7 +408,7 @@ The results are dumped to stdout.";
 		be aliased to current id if old format id given */
 	status = mb_format(verbose,&format,&format_num,&error);
 
-	/* initialize reading the multibeam file */
+	/* initialize reading the swath sonar file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -420,6 +424,9 @@ The results are dumped to stdout.";
 		}
 
 	/* allocate memory for data arrays */
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_bath*sizeof(char),
+					&beamflag,&error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&bath,&error);
@@ -482,7 +489,7 @@ The results are dumped to stdout.";
 				time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -496,7 +503,7 @@ The results are dumped to stdout.";
 		    /* get the seafloor slopes */
 		    if (beams_bath > 0)
 			set_bathyslope(verbose, 
-				beams_bath,bath,bathacrosstrack,
+				beams_bath,beamflag,bath,bathacrosstrack,
 				&ndepths,depths,depthacrosstrack,
 				&nslopes,slopes,slopeacrosstrack,
 				&error);
@@ -602,7 +609,7 @@ The results are dumped to stdout.";
 		    }
 		}
 
-	/* close the multibeam file */
+	/* close the swath sonar file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 	nrectot += nrec;
 	nvaluetot += nvalue;
@@ -615,6 +622,7 @@ The results are dumped to stdout.";
 	    }
 
 	/* deallocate memory used for data arrays */
+	mb_free(verbose,&beamflag,&error);
 	mb_free(verbose,&bath,&error);
 	mb_free(verbose,&amp,&error);
 	mb_free(verbose,&bathacrosstrack,&error);
@@ -728,12 +736,13 @@ The results are dumped to stdout.";
 }
 /*--------------------------------------------------------------------*/
 int set_bathyslope(verbose,
-	nbath,bath,bathacrosstrack,
+	nbath,beamflag,bath,bathacrosstrack,
 	ndepths,depths,depthacrosstrack, 
 	nslopes,slopes,slopeacrosstrack, 
 	error)
 int	verbose;
 int	nbath;
+char	*beamflag;
 double	*bath;
 double	*bathacrosstrack;
 int	*ndepths;
@@ -770,7 +779,7 @@ int	*error;
 	*ndepths = 0;
 	for (i=0;i<nbath;i++)
 		{
-		if (bath[i] > 0.0)
+		if (mb_beam_ok(beamflag[i]))
 			{
 			depths[*ndepths] = bath[i];
 			depthacrosstrack[*ndepths] = bathacrosstrack[i];

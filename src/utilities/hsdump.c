@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 4.8 1997-04-21 17:19:14 caress Exp $
+ *    $Id: hsdump.c,v 4.9 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.7  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -80,7 +83,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 4.8 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 4.9 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -155,10 +158,6 @@ char **argv;
 	int	mb_data_velocity_profile_count = 0;
 	int	mb_data_standby_count = 0;
 	int	mb_data_nav_source_count = 0;
-
-	/* time, user, host variables */
-	long int	right_now;
-	char	date[25], user[128], host[128];
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		stderr if verbose > 1) */
@@ -262,7 +261,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(output,"\nProgram %s\n",program_name);
 		fprintf(output,"Version %s\n",rcs_id);

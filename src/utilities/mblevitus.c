@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 4.7 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mblevitus.c,v 4.8 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -32,6 +32,9 @@
  * Rewrite:	March 26, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.7  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -94,6 +97,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -110,7 +114,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 4.7 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 4.8 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
@@ -131,7 +135,7 @@ char **argv;
 	char	ofile[128];
 	FILE	*ifp, *ofp, *outfp;
 	int	record_size;
-	long int location;
+	long	location;
 	double	longitude = 0.0;
 	double	latitude = 0.0;
 	double	lon_actual;
@@ -159,7 +163,7 @@ char **argv;
 	double	zero = 0.0;
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	int	last_good;
@@ -212,7 +216,7 @@ char **argv;
 		outfp = stderr;
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(outfp,"\nProgram %s\n",program_name);
 		fprintf(outfp,"Version %s\n",rcs_id);
@@ -424,9 +428,8 @@ char **argv;
 	fprintf(ofp,"# Water velocity profile created by program %s version %s\n",
 		program_name,rcs_id);
 	fprintf(ofp,"# MB-system Version %s\n",MB_VERSION);
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 4.2 1997-09-15 19:10:50 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 4.3 1998-10-05 19:18:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/09/15  19:10:50  caress
+ * Real Version 4.5
+ *
  * Revision 4.1  1997/04/22  19:25:26  caress
  * Fixed startup mode.
  *
@@ -121,7 +124,7 @@ XColor exact[2];
 /* Set the colors used for this program here. */
 #define NCOLORS 6
 XColor colors[NCOLORS];
-unsigned long pixel_values_gui[NCOLORS];
+unsigned int pixel_values_gui[NCOLORS];
 XColor db_color;
 
 /* Global mbvelocitytool definitions */

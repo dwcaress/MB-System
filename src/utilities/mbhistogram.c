@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 4.8 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbhistogram.c,v 4.9 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,7 +11,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBHISTOGRAM reads a multibeam data file and generates a histogram
+ * MBHISTOGRAM reads a swath sonar data file and generates a histogram
  * of the bathymetry,  amplitude,  or sidescan values. Alternatively, 
  * mbhistogram can output a list of values which break up the
  * distribution into equal sized regions.
@@ -21,6 +21,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.7  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -70,9 +73,9 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 4.8 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 4.9 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
-	static char help_message[] =  "MBHISTOGRAM reads a multibeam data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
+	static char help_message[] =  "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
 	extern char *optarg;
 	extern int optkind;
@@ -117,6 +120,7 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -277,7 +281,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(output,"\nProgram %s\n",program_name);
 		fprintf(output,"Version %s\n",rcs_id);
@@ -403,7 +407,7 @@ char **argv;
 		be aliased to current id if old format id given */
 	status = mb_format(verbose,&format,&format_num,&error);
 
-	/* initialize reading the multibeam file */
+	/* initialize reading the swath sonar data file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -419,6 +423,9 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_bath*sizeof(char),
+					&beamflag,&error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&bath,&error);
@@ -460,7 +467,7 @@ char **argv;
 				time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -473,7 +480,7 @@ char **argv;
 			if (mode == MBHISTOGRAM_BATH)
 			for (i=0;i<beams_bath;i++)
 				{
-				if (bath[i] > 0.0)
+				if (mb_beam_ok(beamflag[i]))
 					{
 					j = (bath[i] - value_bin_min)
 						/dvalue_bin;
@@ -497,7 +504,7 @@ char **argv;
 			if (mode == MBHISTOGRAM_AMP)
 			for (i=0;i<beams_amp;i++)
 				{
-				if (amp[i] > 0.0)
+				if (mb_beam_ok(beamflag[i]))
 					{
 					j = (amp[i] - value_bin_min)
 						/dvalue_bin;
@@ -544,10 +551,11 @@ char **argv;
 			}
 		}
 
-	/* close the multibeam file */
+	/* close the swath sonar data file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory used for data arrays */
+	mb_free(verbose,&beamflag,&error);
 	mb_free(verbose,&bath,&error);
 	mb_free(verbose,&amp,&error);
 	mb_free(verbose,&bathacrosstrack,&error);

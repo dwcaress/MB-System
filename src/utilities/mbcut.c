@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.8 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbcut.c,v 4.9 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.7  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -56,6 +59,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -78,7 +82,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.8 1997-09-15 19:11:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.9 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -138,6 +142,7 @@ The default input and output streams are stdin and stdout.";
 	int	nbath;
 	int	namp;
 	int	nss;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -165,7 +170,7 @@ The default input and output streams are stdin and stdout.";
 	int	check_ss = MB_NO;
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	int	icut, istart, iend;
@@ -275,7 +280,7 @@ The default input and output streams are stdin and stdout.";
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -333,7 +338,7 @@ The default input and output streams are stdin and stdout.";
 	/* get format_num */
 	status = mb_format(verbose,&format,&format_num,&error);
 
-	/* initialize reading the input multibeam file */
+	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -348,7 +353,7 @@ The default input and output streams are stdin and stdout.";
 		exit(error);
 		}
 
-	/* initialize writing the output multibeam file */
+	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
@@ -362,6 +367,7 @@ The default input and output streams are stdin and stdout.";
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -399,9 +405,8 @@ The default input and output streams are stdin and stdout.";
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -453,7 +458,7 @@ The default input and output streams are stdin and stdout.";
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -555,12 +560,18 @@ The default input and output streams are stdin and stdout.";
 		    /* now apply flags */
 		    for (i=0;i<beams_bath;i++)
 			{
-			if (bathflag[i] == MB_NO && bath[i] > 0.0
-			    && mb_bath_flag_table[format_num] == MB_NO)
-			    bath[i] = -bath[i];
+			if (bathflag[i] == MB_NO 
+			    && mb_beam_ok(beamflag[i])
+			    && mb_no_flag_table[format_num] == MB_NO)
+			    {
+			    beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+			    }
 			else if (bathflag[i] == MB_NO
-			    && bath[i] > 0.0)
+			    && mb_beam_ok(beamflag[i]))
+			    {
+			    beamflag[i] = MB_FLAG_NULL;
 			    bath[i] = 0.0;
+			    }
 			}		    
 		    }
 
@@ -605,12 +616,18 @@ The default input and output streams are stdin and stdout.";
 		    /* now apply flags */
 		    for (i=0;i<beams_amp;i++)
 			{
-			if (ampflag[i] == MB_NO && amp[i] > 0.0
-			    && mb_amp_flag_table[format_num])
-			    amp[i] = -amp[i];
-			else if (ampflag[i] == MB_NO 
-			    && amp[i] > 0.0)
-			    amp[i] = 0.0;
+			if (ampflag[i] == MB_NO 
+			    && mb_beam_ok(beamflag[i])
+			    && mb_no_flag_table[format_num] == MB_NO)
+			    {
+			    beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+			    }
+			else if (ampflag[i] == MB_NO
+			    && mb_beam_ok(beamflag[i]))
+			    {
+			    beamflag[i] = MB_FLAG_NULL;
+			    bath[i] = 0.0;
+			    }
 			}
 		    }
 
@@ -655,11 +672,7 @@ The default input and output streams are stdin and stdout.";
 		    /* now apply flags */
 		    for (i=0;i<pixels_ss;i++)
 			{
-			if (ssflag[i] == MB_NO && ss[i] > 0.0
-			    && mb_ss_flag_table[format_num])
-			    ss[i] = -ss[i];
-			else if (ssflag[i] == MB_NO 
-			    && ss[i] > 0.0)
+			if (ssflag[i] == MB_NO && ss[i] > 0.0)
 			    ss[i] = 0.0;
 			}		    
 		    }
@@ -673,7 +686,8 @@ The default input and output streams are stdin and stdout.";
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					beams_bath,beams_amp,pixels_ss,
-					bath,amp,bathacrosstrack,bathalongtrack,
+					beamflag,bath,amp,
+					bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			if (status == MB_SUCCESS)
@@ -705,6 +719,7 @@ The default input and output streams are stdin and stdout.";
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&amp,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 

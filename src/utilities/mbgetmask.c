@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 4.8 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbgetmask.c,v 4.9 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.8  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -69,6 +72,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -82,7 +86,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 4.8 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetmask.c,v 4.9 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBGETMASK";
 	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
 	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";
@@ -128,6 +132,10 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
+	int	nbath;
+	int	namp;
+	int	nss;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -144,7 +152,7 @@ char **argv;
 	char	comment[256];
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	int	i, j, k, l, m;
@@ -240,7 +248,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -306,6 +314,7 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -332,9 +341,8 @@ char **argv;
 	printf("# Multibeam Data Flagging Mask\n");
 	printf("# Created by program %s\n# Version: %s\n",program_name,rcs_id);
 	printf("# MB-System Version: %s\n",MB_VERSION);
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -347,14 +355,19 @@ char **argv;
 	printf("# Lines beginning with # are comments.  The first\n");
 	printf("#   uncommented line has the numbers of bathymetry\n");
 	printf("#   and amplitude beams in each ping.  Each ping\n");
-	printf("#   is represented by three lines.  The first line\n");
+	printf("#   is represented by two lines.  The first line\n");
 	printf("#   contains the time tag.  The second line consists of\n");
-	printf("#   the mask values for the bathymetry beams.  The third\n");
-	printf("#   line consists of the mask values for the amplitude\n");
-	printf("#   beams.  Mask values of 0 denote flagged beams and\n");
-	printf("#   mask values of 1 denote unflagged beams.\n");
+	printf("#   the mask values for the bathymetry and amplitude\n");
+	printf("#   beams.  Mask values are as follows:\n");
+	printf("#       0: good beam\n");
+	printf("#       1: null beam\n");
+	printf("#       3: beam flagged, manual editing\n");
+	printf("#       4: beam flagged, filter\n");
+	printf("#       5: beam flagged, > 1X IHO accuracy\n");
+	printf("#       6: beam flagged, > 2X IHO accuracy\n");
+	printf("#       7: beam flagged, footprint too large\n");
+	printf("#       8: beam flagged, by sonar\n");
 	printf("# Bathymetry beams:   %d\n",beams_bath);
-	printf("# Amplitude beams:    %d\n",beams_amp);
 	printf("# Control Parameters:\n");
 	printf("#   MBIO data format:   %d\n",format);
 	printf("#   Input file:         %s\n",ifile);
@@ -369,7 +382,9 @@ char **argv;
 			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 	printf("#   Minimum speed:      %f\n",speedmin);
 	printf("# \n");
-	printf("%4d %4d\n",beams_bath,beams_amp);
+	
+	/* set version 2 in header */
+	printf("%4d %4d 2\n",beams_bath,0);
 
 	/* read and write */
 	while (error <= MB_ERROR_NO_ERROR)
@@ -380,8 +395,8 @@ char **argv;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
 			time_i,&time_d,&navlon,&navlat,&speed,
 			&heading,&distance,
-			&beams_bath,&beams_amp,&pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
+			&nbath,&namp,&nss,
+			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 
@@ -439,27 +454,8 @@ char **argv;
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			omask++;
-			printf("%4d %2d %2d %2d %2d %2d %6.6d\n",
-				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5],time_i[6]);
-			for (i=0;i<beams_bath;i++)
-				if (bath[i] > 0.0)
-					printf("1");
-				else
-					{
-					printf("0");
-					flagged++;
-					}
-			printf("\n");
-			for (i=0;i<beams_amp;i++)
-				if (amp[i] > 0.0)
-					printf("1");
-				else
-					{
-					printf("0");
-					flagged++;
-					}
-			printf("\n");
+			fwrite(time_i, sizeof(int), 7, stdout);
+			fwrite(beamflag, 1, beams_bath, stdout);
 			}
 		}
 
@@ -467,6 +463,7 @@ char **argv;
 	status = mb_close(verbose,&imbio_ptr,&error);
 
 	/* deallocate memory for data arrays */
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&amp,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 

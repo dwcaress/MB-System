@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 4.7 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbformat.c,v 4.8 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.6  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -73,7 +76,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 4.7 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 4.8 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the multibeam data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-A -Fformat -L -V -H]";
@@ -139,7 +142,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);

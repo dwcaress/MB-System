@@ -90,7 +90,7 @@ with times before the starting time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
 .B \-C
-Normally, if \fBmbbackangle\fP generates the grazing angle
+Normally, if \fBmbanglecorrect\fP generates the grazing angle
 correction locally, the correction is forced to be symmetric 
 about the vertical
 (zero angle) axis. If \fB-C\fP is specified, the local amplitude

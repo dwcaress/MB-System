@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.24 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbbath.c,v 4.25 1998-10-05 19:19:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,7 +11,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBBATH is a tool for processing multibeam data.  This program
+ * MBBATH is a tool for processing swath sonar data.  This program
  * calculates bathymetry from the travel time data by raytracing
  * through a layered water velocity model.
  * The default input and output streams are stdin and stdout.
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.24  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.23  1997/07/25  14:28:10  caress
  * Version 4.5beta2
  *
@@ -143,12 +146,17 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_sb2100.h"
+
+/* mbbath defines */
+#define SSV_CORRECT	1
+#define SSV_INCORRECT	2
 
 /*--------------------------------------------------------------------*/
 
@@ -157,7 +165,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.24 1997-09-15 19:11:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.25 1998-10-05 19:19:24 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -165,9 +173,9 @@ model. The depths may be saved as \ncalculated by raytracing (corrected \
 meters) or adjusted as if the \nvertical water velocity is 1500 m/s \
 (uncorrected meters). The default \ninput and output streams are stdin \
 and stdout.";
-	static char usage_message[] = "mbbath [-Brollbias \
--Ddraught -Fformat  \n\t-Iinfile -Ooutfile -Ppitch_bias -Rrollfile \
-\n\t-Sstaticfile -U -Wvelfile -V -H]";
+	static char usage_message[] = "mbbath [-Brollbias -C \
+-Ddraft -Fformat  \n\t-Iinfile -Kssv -Ooutfile -Ppitch_bias -Rrollfile \
+\n\t-Sstaticfile -U -Wvelfile -Z -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -216,6 +224,7 @@ and stdout.";
 	int	nbath;
 	int	namp;
 	int	nss;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -230,7 +239,7 @@ and stdout.";
 	char	comment[256];
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	/* velocity profile handling variables */
@@ -241,6 +250,7 @@ and stdout.";
 	double	roll_angle_correction;
 	double	pitch_angle_correction;
 	double	range, alpha, beta;
+	int	draught_use = MB_NO;
 	double	draught;
 	int	uncorrected;
 	FILE	*vfp;
@@ -249,9 +259,12 @@ and stdout.";
 	double	*velocity = NULL;
 	double	*velocity_sum = NULL;
 	char	*rt_svp;
+
+	/* ssv handling variables */
+	int	ssv_mode = SSV_CORRECT;
+	int	ssv_prelimpass = MB_YES;
 	double	ssv_default;
 	double	ssv_start;
-	int	fix_2100_tt = MB_NO;
 
 	/* roll error correction handling variables */
 	char	rfile[128];
@@ -270,24 +283,24 @@ and stdout.";
 	double	*angles = NULL;
 	double	*angles_forward = NULL;
 	double	*angles_null = NULL;
-	double	*depth_offset = NULL;
+	double	*heave = NULL;
 	double	*alongtrack_offset = NULL;
-	int	*flags = NULL;
+	double	draft;
 	double	ssv;
+	double	draft_use;
 	double	depth_offset_use;
 	double	ttime;
 	int	ray_stat;
+	int	fix_2100_tt = MB_NO;
 
 	/* sb2100 store ptr */
 	struct mbsys_sb2100_struct *store;
 
-	char	buffer[128], tmp[128], *result;
+	char	buffer[128], *result;
 	int	size;
-	double	dummy;
-	double	dr, dx;
+	double	static_shift;
 	int	nbeams;
-	int	center_beam;
-	double	tt, factor, zz, xx, vavg;
+	double	zz, xx, vavg, vsum;
 	double	value_max;
 	int	i, j, k, l, m;
 	
@@ -341,7 +354,7 @@ and stdout.";
 	uncorrected = MB_NO;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:D:d:F:f:I:i:K:k:O:o:P:p:R:r:S:s:UuW:w:Zz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:CcD:d:F:f:I:i:K:k:O:o:P:p:R:r:S:s:UuW:w:XxZz")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -357,9 +370,15 @@ and stdout.";
 			sscanf (optarg,"%lf", &roll_bias);
 			flag++;
 			break;
+		case 'C':
+		case 'c':
+			ssv_mode = SSV_INCORRECT;
+			flag++;
+			break;
 		case 'D':
 		case 'd':
 			sscanf (optarg,"%lf", &draught);
+			draught_use = MB_YES;
 			flag++;
 			break;
 		case 'F':
@@ -408,9 +427,14 @@ and stdout.";
 			use_svp = MB_YES;
 			flag++;
 			break;
+		case 'X':
+		case 'x':
+			fix_2100_tt = MB_YES;
+			flag++;
+			break;
 		case 'Z':
 		case 'z':
-			fix_2100_tt = MB_YES;
+			ssv_prelimpass = MB_NO;
 			flag++;
 			break;
 		case '?':
@@ -428,7 +452,7 @@ and stdout.";
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -473,6 +497,7 @@ and stdout.";
 		fprintf(stderr,"dbg2       use_svp:         %d\n",use_svp);
 		fprintf(stderr,"dbg2       roll bias:       %f\n",roll_bias);
 		fprintf(stderr,"dbg2       pitch bias:      %f\n",pitch_bias);
+		fprintf(stderr,"dbg2       draught_use:     %d\n",draught_use);
 		fprintf(stderr,"dbg2       draught:         %f\n",draught);
 		fprintf(stderr,"dbg2       ssv_default:     %f\n",ssv_default);
 		fprintf(stderr,"dbg2       roll file:       %s\n",rfile);
@@ -482,22 +507,27 @@ and stdout.";
 	/* if help desired then print it and exit */
 	if (help)
 		{
+		fprintf(stderr,"MB-System Version %s\n",MB_VERSION);
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
 
 	/* check for format with travel time data */
-	status = mb_format(verbose,&format,&format_num,&error);
-	if (mb_traveltime_table[format_num] != MB_YES)
+	if (use_svp == MB_YES)
+	    {
+	    status = mb_format(verbose,&format,&format_num,&error);
+	    if (mb_traveltime_table[format_num] != MB_YES)
 		{
-		fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
+		fprintf(stderr,"\nProgram <%s> requires travel time data to recalculate\n",program_name);
+		fprintf(stderr,"bathymetry from travel times and angles.\n");
 		fprintf(stderr,"Format %d is unacceptable because it does not inlude travel time data.\n",format);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_FORMAT;
 		exit(error);
 		}
+	    }
 
 	/* if raytracing to be done get svp */
 	if (use_svp == MB_YES)
@@ -664,7 +694,7 @@ and stdout.";
 	if (verbose > 0 && nroll > 0)
 		fprintf(stderr,"\n%d roll correction records read\n",nroll);
 
-	/* initialize reading the input multibeam file */
+	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -679,7 +709,7 @@ and stdout.";
 		exit(error);
 		}
 
-	/* initialize writing the output multibeam file */
+	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
@@ -693,6 +723,7 @@ and stdout.";
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
 				&bathacrosstrack,&error);
@@ -708,9 +739,8 @@ and stdout.";
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth_offset,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&heave,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&alongtrack_offset,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -726,9 +756,11 @@ and stdout.";
 		is obtained, then close and reopen the file 
 		this provides the starting surface sound velocity
 		for recalculating the bathymetry */
-	error = MB_ERROR_NO_ERROR;
 	ssv_start = 0.0;
-	while (error <= MB_ERROR_NO_ERROR
+	if (ssv_prelimpass == MB_YES)
+	    {
+	    error = MB_ERROR_NO_ERROR;
+	    while (error <= MB_ERROR_NO_ERROR
 		&& ssv_start <= 0.0)
 		{
 		/* read some data */
@@ -738,11 +770,11 @@ and stdout.";
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&nbath,&namp,&nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 				
-		if (kind = MB_DATA_DATA 
+		if (kind == MB_DATA_DATA 
 			&& error <= MB_ERROR_NO_ERROR)
 			{
 			/* extract travel times */
@@ -750,20 +782,18 @@ and stdout.";
 				store_ptr,&kind,&nbeams,
 				ttimes,angles,
 				angles_forward,angles_null,
-				depth_offset,alongtrack_offset,flags,
-				&ssv,&error);
+				heave,alongtrack_offset,
+				&draft,&ssv,&error);
 				
 			/* check surface sound velocity */
 			if (ssv > 0.0)
 				ssv_start = ssv;
 			}
 		}
-	if (ssv_start <= 0.0)
-		ssv_start = ssv_default;
 	
-	/* close and reopen the input file */
-	status = mb_close(verbose,&imbio_ptr,&error);
-	if ((status = mb_read_init(
+	    /* close and reopen the input file */
+	    status = mb_close(verbose,&imbio_ptr,&error);
+	    if ((status = mb_read_init(
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&imbio_ptr,&btime_d,&etime_d,
@@ -776,6 +806,9 @@ and stdout.";
 			program_name);
 		exit(error);
 		}
+	    }
+	if (ssv_start <= 0.0)
+		ssv_start = ssv_default;
 	
 	/* reset error */
 	error = MB_ERROR_NO_ERROR;
@@ -826,37 +859,18 @@ and stdout.";
 	kind = MB_DATA_COMMENT;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Bathymetry data generated by program %s",program_name);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Version %s",rcs_id);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	right_now = time((long *)0);
 	strncpy(date,"\0",25);
-	right_now = time((long *)0);
+	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
 	if ((user_ptr = getenv("USER")) == NULL)
 		user_ptr = getenv("LOGNAME");
@@ -868,245 +882,173 @@ and stdout.";
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
-	strncpy(comment,"\0",256);
-	sprintf(comment,"Depths and crosstrack distances calculated from travel times");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  by raytracing through a water velocity profile specified");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  by the user.  The depths have been saved in units of");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	if (uncorrected)
-		sprintf(comment,"  uncorrected meters (the depth values are adjusted to be");
+	if (use_svp == MB_YES)
+	    {
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"Depths and crosstrack distances recalculated from travel times");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"  by raytracing through a water velocity profile specified");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"  by the user.  The depths have been saved in units of");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    strncpy(comment,"\0",256);
+	    if (uncorrected == MB_YES)
+		    sprintf(comment,"  uncorrected meters (the depth values are adjusted to be");
+	    else
+		    sprintf(comment,"  corrected meters (the depth values obtained by");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    strncpy(comment,"\0",256);
+	    if (uncorrected == MB_YES)
+		    sprintf(comment,"  consistent with a vertical water velocity of 1500 m/s).");
+	    else
+		    sprintf(comment,"  raytracing are not adjusted further).");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    }
+	    
 	else
-		sprintf(comment,"  corrected meters (the depth values obtained by");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	if (uncorrected)
-		sprintf(comment,"  consistent with a vertical water velocity of 1500 m/s).");
-	else
-		sprintf(comment,"  raytracing are not adjusted further).");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    {
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"Depths and crosstrack distances adjusted for roll bias, ");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"  pitch bias, and static offsets.");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    }
+	    
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Control Parameters:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  MBIO data format:   %d",format);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Input file:         %s",ifile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Output file:        %s",ofile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  Velocity file:      %s",vfile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  Input water sound velocity profile:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"    depth (m)   velocity (m/s)");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	for (i=0;i<nvel;i++)
+	if (use_svp == MB_YES)
+	    {
+	    if (ssv_mode == SSV_CORRECT)
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  SSV mode:           original SSV correct");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		}
+	    else
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  SSV mode:           original SSV incorrect");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		}
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"  Default SSV:        %f",ssv_default);
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    if (ssv_prelimpass == MB_YES)
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  SSV initial pass:   on");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		}
+	    else
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  SSV initial pass:   off");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		}
+
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"  Velocity file:      %s",vfile);
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"  Input water sound velocity profile:");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    strncpy(comment,"\0",256);
+	    sprintf(comment,"    depth (m)   velocity (m/s)");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    for (i=0;i<nvel;i++)
 		{
 		strncpy(comment,"\0",256);
 		sprintf(comment,"     %10.2f     %10.2f",
 			depth[i],velocity[i]);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
+	    }
 
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Roll bias:    %f degrees (starboard: -, port: +)",
 		roll_bias);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Pitch bias:   %f degrees (aft: -, forward: +)",
 		pitch_bias);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  Draught:      %f meters",
-		draught);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	if (draught_use == MB_YES)
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Draft:        %f meters",
+			draught);
+		}
+	else
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Draft:        as specified in data");
+		}
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Roll correction file:      %s",rfile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Static depth correction file:      %s",sfile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	if (nbath_corr == beams_bath)
 		{
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Static beam depth corrections:");
-		status = mb_put(verbose,ombio_ptr,kind,
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				beams_bath,beams_amp,pixels_ss,
-				bath,amp,bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		for (i=0;i<beams_bath;i++)
 			{
 			strncpy(comment,"\0",256);
-			sprintf(comment,"    %2d  %5d",i,bath_corr[i]);
-			status = mb_put(verbose,ombio_ptr,kind,
-					time_i,time_d,
-					navlon,navlat,speed,heading,
-					beams_bath,beams_amp,pixels_ss,
-					bath,amp,bathacrosstrack,bathalongtrack,
-					ss,ssacrosstrack,ssalongtrack,
-					comment,&error);
+			sprintf(comment,"    %2d  %f",i,bath_corr[i]);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
 		}
 	strncpy(comment,"\0",256);
 	sprintf(comment," ");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
 	/* set up the raytracing */
@@ -1122,7 +1064,8 @@ and stdout.";
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&nbath,&namp,&nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -1192,8 +1135,8 @@ and stdout.";
 				store_ptr,&kind,&nbeams,
 				ttimes,angles,
 				angles_forward,angles_null,
-				depth_offset,alongtrack_offset,flags,
-				&ssv,&error);
+				heave,alongtrack_offset,
+				&draft,&ssv,&error);
 
 			/* set surface sound speed to default if needed */
 			if (ssv <= 0.0)
@@ -1275,48 +1218,63 @@ and stdout.";
 					}
     
 				/* add user specified draught */
-				depth_offset_use = depth_offset[i];
-				if (draught > 0.0)
-					depth_offset_use += draught;
+				if (draught_use == MB_YES)
+					draft_use = draught;
+				else
+					draft_use = draft;
+				depth_offset_use = heave[i] + draft_use;
+				static_shift = 0.0;
 	
-				/* check depth_offset */
+				/* check depth_offset - use static shift if depth_offset negative */
 				if (depth_offset_use < 0.0)
-					{
-					fprintf(stderr, "\nDepth offset negative - raytracing starts above water!\n");
-					fprintf(stderr, "Depth offset is sum of heave + transducer depth.\n");
-					fprintf(stderr, "Depth offset from data: %f\n", depth_offset_use - draught);
-					fprintf(stderr, "User specified offset:  %f\n", draught);
-					fprintf(stderr, "Data Record: %d\n",odata);
-					fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
-						time_i[0], time_i[1], time_i[2], 
-						time_i[3], time_i[4], time_i[5], time_i[6]);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-						program_name);
-					error = MB_ERROR_BAD_PARAMETER;
-					status = MB_FAILURE;
-					exit(error);
-					}
-				
+				    {
+				    fprintf(stderr, "\nWarning: Depth offset negative - transducers above water?!\n");
+				    fprintf(stderr, "Raytracing performed from zero depth followed by static shift.\n");
+				    fprintf(stderr, "Depth offset is sum of heave + transducer depth.\n");
+				    fprintf(stderr, "Draft from data:       %f\n", draft);
+				    fprintf(stderr, "Heave from data:       %f\n", heave[i]);
+				    fprintf(stderr, "User specified draft:  %f\n", draught);
+				    fprintf(stderr, "Depth offset used:     %f\n", depth_offset_use);
+				    fprintf(stderr, "Data Record: %d\n",odata);
+				    fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
+					    time_i[0], time_i[1], time_i[2], 
+					    time_i[3], time_i[4], time_i[5], time_i[6]);
+	    
+				    static_shift = depth_offset_use;
+				    depth_offset_use = 0.0;
+				    }
+
 				/* raytrace */
 				status = mb_rt(verbose, rt_svp, depth_offset_use, 
 					angles[i], 0.5*ttimes[i],
-					ssv, angles_null[i], 
+					ssv_mode, ssv, angles_null[i], 
 					0, NULL, NULL, NULL, 
 					&xx, &zz, 
 					&ttime, &ray_stat, &error);
+					
+				/* apply static shift if needed */
+				if (static_shift < 0.0)
+				    zz += static_shift;
     
 				/* uncorrect depth if desired */
-				if (uncorrected)
+				if (uncorrected == MB_YES)
 				    {
 				    k = -1;
 				    for (j=0;j<nvel-1;j++)
-					if (depth[j] > zz & depth[j+1] <= zz)
-					    k = j;
-				    if (k > -1)
 					{
-					vavg = velocity_sum[k] + 0.5*(2*velocity[k] 
+					if (depth[j] < zz & depth[j+1] >= zz)
+					    k = j;
+					}
+				    if (k > 0)
+					vsum = velocity_sum[k-1];
+				    else
+					vsum = 0.0;
+				    if (k >= 0)
+					{
+					vsum += 0.5*(2*velocity[k] 
 					    + (zz - depth[k])*(velocity[k+1] - velocity[k])
 					    /(depth[k+1] - depth[k]))*(zz - depth[k]);
+					vavg = vsum / zz;
 					zz = zz*1500./vavg;
 					}
 				    }
@@ -1331,10 +1289,6 @@ and stdout.";
 				if (nbath_corr == beams_bath)
 				    bath[i] -= bath_corr[i];
 				
-				/* flag depths as needed */
-				if (flags[i] == MB_YES)
-				    bath[i] = -bath[i];
-    
 				/* output some debug values */
 				if (verbose >= 5)
 				    fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n",
@@ -1355,6 +1309,10 @@ and stdout.";
 				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
 				    }
 				}
+				
+			      /* else if no travel time no data */
+			      else
+				beamflag[i] = MB_FLAG_NULL;
 			      }
 			    }
 
@@ -1365,13 +1323,10 @@ and stdout.";
 			    /* loop over the beams */
 			    for (i=0;i<beams_bath;i++)
 			      {
-			      if (bath[i] != 0.0)
+			      if (mb_beam_ok(beamflag[i]))
 				{
-				/* set flagged depths positive */
-				bath[i] = fabs(bath[i]);
-				
 				/* strip off heave + draft */
-				bath[i] -= (depth_offset[i] + draught);
+				bath[i] -= (heave[i] + draft_use);
 				
 				/* get range and angles in 
 				    roll-pitch frame */
@@ -1398,15 +1353,11 @@ and stdout.";
 				    = range * cos(alpha) * cos(beta);	
 					
 				/* add heave and draft back in */	    
-				bath[i] += (depth_offset[i] + draught);
+				bath[i] += (heave[i] + draft_use);
     
 				/* apply static correction */
 				if (nbath_corr == beams_bath)
 				    bath[i] -= bath_corr[i];
-				
-				/* flag depths as needed */
-				if (flags[i] == MB_YES)
-				    bath[i] = -bath[i];
     
 				/* output some debug values */
 				if (verbose >= 5)
@@ -1487,7 +1438,7 @@ and stdout.";
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					nbath,namp,nss,
-					bath,amp,bathacrosstrack,bathalongtrack,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			if (status == MB_SUCCESS)
@@ -1529,9 +1480,9 @@ and stdout.";
 	mb_free(verbose,&angles,&error);
 	mb_free(verbose,&angles_forward,&error);
 	mb_free(verbose,&angles_null,&error);
-	mb_free(verbose,&depth_offset,&error);
+	mb_free(verbose,&heave,&error);
 	mb_free(verbose,&alongtrack_offset,&error);
-	mb_free(verbose,&flags,&error);
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 
 	mb_free(verbose,&bathalongtrack,&error); 
