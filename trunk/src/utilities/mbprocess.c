@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.3 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbprocess.c,v 5.4 2001-06-03 07:07:34 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.2  2001/01/22  07:54:22  caress
  * Version 5.0.beta01
  *
@@ -80,7 +83,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.3 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.4 2001-06-03 07:07:34 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -201,7 +204,8 @@ and mbedit edit save files.\n";
 	int	fstat;
 	int	nnav = 0;
 	int	nanav = 0;
-	int	size, nchar, len, nget, nav_ok;
+	int	ntide = 0;
+	int	size, nchar, len, nget, nav_ok, tide_ok;
 	int	time_j[5], stime_i[7], ftime_i[7];
 	double	sec, hr;
 	char	*bufftmp;
@@ -215,9 +219,12 @@ and mbedit edit save files.\n";
 	double	*natime, *nalon, *nalat;
 	double	*nlonspl, *nlatspl;
 	double	*nalonspl, *nalatspl;
+	double	*tidetime, *tide;
 	int	itime, iatime;
+	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
-	double	del_time, dx, dy, dist;
+	double	del_time, dx, dy, dz, r, dist;
+	double	lever_heave = 0.0;
 	int	intstat;
 	double	time_d_old = 0.0;
 	double	navlon_old = 0.0;
@@ -526,14 +533,24 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"  Draft merged from navigation file.\n");
 		else
 		    fprintf(stderr,"  Draft not merged from navigation file.\n");
+	    	fprintf(stderr,"  Navigation file:               %s\n", process.mbp_navfile);
+	    	if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
+			fprintf(stderr,"  Navigation algorithm:          linear interpolation\n");
+	    	else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
+			fprintf(stderr,"  Navigation algorithm:          spline interpolation\n");
+	    	fprintf(stderr,"  Navigation time shift:         %f\n", process.mbp_nav_timeshift);
+	    	if (process.mbp_nav_shift == MBP_NAV_ON)
+			{
+			fprintf(stderr,"  Navigation positions shifted.\n");
+			fprintf(stderr,"  Navigation offset x:       %f\n", process.mbp_nav_offsetx);
+			fprintf(stderr,"  Navigation offset y:       %f\n", process.mbp_nav_offsety);
+			fprintf(stderr,"  Navigation offset z:       %f\n", process.mbp_nav_offsetz);
+			}
+	    	else 
+			fprintf(stderr,"  Navigation positions not shifted.\n");
 		}
 	    else
 		fprintf(stderr,"  Navigation not merged from navigation file.\n");
-	    fprintf(stderr,"  Navigation file:               %s\n", process.mbp_navfile);
-	    if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
-		fprintf(stderr,"  Navigation algorithm:          linear interpolation\n");
-	    else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
-		fprintf(stderr,"  Navigation algorithm:          spline interpolation\n");
 
 	    fprintf(stderr,"\nAdjusted Navigation Merging:\n");
 	    if (process.mbp_navadj_mode == MBP_NAV_ON)
@@ -561,7 +578,7 @@ and mbedit edit save files.\n";
 	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 		fprintf(stderr,"  Bathymetry recalculated by rigid rotation.\n");
 	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
-		fprintf(stderr,"  Bathymetry recalculated by transducer depth shift.\n");
+		fprintf(stderr,"  Bathymetry recalculated by sonar depth shift.\n");
 	    fprintf(stderr,"  SVP file:                      %s\n", process.mbp_svpfile);
 	    if (process.mbp_ssv_mode == MBP_SSV_OFF)
 		fprintf(stderr,"  SSV not modified.\n");
@@ -571,10 +588,30 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"  SSV set to constant.\n");
 	    fprintf(stderr,"  SSV offset/constant:           %f m/s\n", process.mbp_ssv);
 	    fprintf(stderr,"  Travel time multiplier:        %f m\n", process.mbp_tt_mult);
+
+	    fprintf(stderr,"\nBathymetry Water Sound Speed Reference:\n");
 	    if (process.mbp_corrected == MB_YES)
-		fprintf(stderr,"  Bathymetry reference:          CORRECTED\n");
+		fprintf(stderr,"  Output bathymetry reference:   CORRECTED\n");
 	    else if (process.mbp_corrected == MB_NO)
 		fprintf(stderr,"  Bathymetry reference:          UNCORRECTED\n");
+	    if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF)
+		{
+		if (process.mbp_corrected == MB_YES)
+		    fprintf(stderr,"  Depths modified from uncorrected to corrected\n");
+		else
+		    fprintf(stderr,"  Depths modified from corrected to uncorrected\n");
+		}
+	    else if (process.mbp_svp_mode == MBP_SVP_ON)
+		{
+		if (process.mbp_corrected == MB_YES)
+		    fprintf(stderr,"  Depths recalculated as corrected\n");
+		else
+		    fprintf(stderr,"  Depths recalculated as uncorrected\n");
+		}
+	    else
+		{
+		fprintf(stderr,"  Depths unmodified with respect to water sound speed reference\n");
+		}
 
 	    fprintf(stderr,"\nDraft Correction:\n");
 	    if (process.mbp_draft_mode == MBP_DRAFT_OFF)
@@ -600,6 +637,31 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"  Heave multiplied and offset by constants.\n");
 	    fprintf(stderr,"  Heave offset:                  %f m\n", process.mbp_heave);
 	    fprintf(stderr,"  Heave multiplier:              %f m\n", process.mbp_heave_mult);
+
+	    fprintf(stderr,"\nLever Correction:\n");
+	    if (process.mbp_lever_mode == MBP_LEVER_OFF)
+		fprintf(stderr,"  Lever calculation off.\n");
+	    else
+		{
+		fprintf(stderr,"  Lever calculation used to calculate heave correction.\n");
+	    	fprintf(stderr,"  Heave offset:                  %f m\n", process.mbp_heave);
+	    	fprintf(stderr,"  VRU offset x:                  %f m\n", process.mbp_vru_offsetx);
+	    	fprintf(stderr,"  VRU offset y:                  %f m\n", process.mbp_vru_offsety);
+	    	fprintf(stderr,"  VRU offset z:                  %f m\n", process.mbp_vru_offsetz);
+	    	fprintf(stderr,"  Sonar offset x:                %f m\n", process.mbp_sonar_offsetx);
+	    	fprintf(stderr,"  Sonar offset y:                %f m\n", process.mbp_sonar_offsety);
+	    	fprintf(stderr,"  Sonar offset z:                %f m\n", process.mbp_sonar_offsetz);
+		}
+
+	    fprintf(stderr,"\nTide Correction:\n");
+	    if (process.mbp_tide_mode == MBP_TIDE_OFF)
+		fprintf(stderr,"  Tide calculation off.\n");
+	    else
+		{
+		fprintf(stderr,"  Tide correction applied to bathymetry.\n");
+	    	fprintf(stderr,"  Tide file:                     %s m\n", process.mbp_tidefile);
+	    	fprintf(stderr,"  Tide format:                   %d m\n", process.mbp_tide_format);
+ 		}
 
 	    fprintf(stderr,"\nRoll Correction:\n");
 	    if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
@@ -638,14 +700,22 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"  Sidescan pixel size:           %f\n",process.mbp_ssrecalc_pixelsize);
 	    fprintf(stderr,"  Sidescan swath width:          %f\n",process.mbp_ssrecalc_swathwidth);
 	    fprintf(stderr,"  Sidescan interpolation:        %d\n",process.mbp_ssrecalc_interpolate);
+
+	    fprintf(stderr,"\nMetadata Insertion:\n");
+	    fprintf(stderr,"  Metadata operator:             %s\n",process.mbp_meta_operator);
+	    fprintf(stderr,"  Metadata platform:             %s\n",process.mbp_meta_platform);
+	    fprintf(stderr,"  Metadata sonar:                %s\n",process.mbp_meta_sonar);
+	    fprintf(stderr,"  Metadata survey:               %s\n",process.mbp_meta_survey);
+	    fprintf(stderr,"  Metadata pi:                   %s\n",process.mbp_meta_pi);
+	    fprintf(stderr,"  Metadata client:               %s\n",process.mbp_meta_client);
 	    }
 
 	/*--------------------------------------------
 	  get svp
 	  --------------------------------------------*/
 
-	/* if raytracing to be done get svp */
-	if (process.mbp_svp_mode == MBP_SVP_ON)
+	/* if raytracing or correction/uncorrection to be done get svp */
+	if (process.mbp_svp_mode != MBP_SVP_OFF)
 	    {
 	    /* count the data points in the svp file */
 	    nsvp = 0;
@@ -1133,6 +1203,30 @@ and mbedit edit save files.\n";
 			    program_name);
 		    exit(error);
 		    }
+		    
+	    /* apply time shift if needed */
+	    if (process.mbp_nav_timeshift != 0.0)
+		for (i=0;i<nnav;i++)
+		    ntime[i] += process.mbp_nav_timeshift;
+		    
+	    /* apply position shift if needed */
+    	    if (process.mbp_nav_shift == MBP_NAV_ON)
+		{
+		for (i=0;i<nnav;i++)
+		    {
+		    mb_coor_scale(verbose,nlat[i],&mtodeglon,&mtodeglat);
+		    headingx = sin(nheading[i] * DTR);
+		    headingy = cos(nheading[i] * DTR);
+		    nlon[i] -= (headingy * mtodeglon
+				* process.mbp_nav_offsetx
+			    + headingx * mtodeglon
+				* process.mbp_nav_offsety);
+		    nlat[i] -= (-headingx * mtodeglat
+				* process.mbp_nav_offsetx
+			    + headingy * mtodeglat
+				* process.mbp_nav_offsety);
+		    }
+		}
     
 	    /* set up spline interpolation of nav points */
 	    splineflag = 1.0e30;
@@ -1314,6 +1408,190 @@ and mbedit edit save files.\n";
 			    stime_i[0],stime_i[1],stime_i[2],stime_i[3],
 			    stime_i[4],stime_i[5],stime_i[6]);
 		    fprintf(stderr,"Adjusted nav end time:   %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+			    ftime_i[0],ftime_i[1],ftime_i[2],ftime_i[3],
+			    ftime_i[4],ftime_i[5],ftime_i[6]);
+		    }
+	    }
+
+	/*--------------------------------------------
+	  get tide
+	  --------------------------------------------*/
+
+	/* if tide correction to be done get tide */
+	if (process.mbp_tide_mode == MBP_TIDE_ON)
+	    {
+	    /* set max number of characters to be read at a time */
+	    nchar = 128;
+
+	    /* count the data points in the tide file */
+	    ntide = 0;
+	    if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL) 
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    fprintf(stderr,"\nUnable to Open Tide File <%s> for reading\n",process.mbp_tidefile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
+		    ntide++;
+	    fclose(tfp);
+	    
+	    /* allocate arrays for nav */
+	    if (ntide > 1)
+		{
+		size = (ntide+1)*sizeof(double);
+		status = mb_malloc(verbose,ntide*sizeof(double),&tidetime,&error);
+		status = mb_malloc(verbose,ntide*sizeof(double),&tide,&error);
+ 	
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }		    
+		}
+	
+	    /* if no tide data then quit */
+	    else
+		{
+		error = MB_ERROR_BAD_DATA;
+		fprintf(stderr,"\nUnable to read data from tide file <%s>\n",process.mbp_tidefile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}		    
+		
+	    /* read the data points in the tide file */
+	    nnav = 0;
+	    if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to Open Tide File <%s> for reading\n",process.mbp_tidefile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
+		{
+		tide_ok = MB_NO;
+
+		/* deal with tide in form: time_d tide */
+		if (process.mbp_tide_format == 1)
+			{
+			nget = sscanf(buffer,"%lf %lf",
+				&tidetime[ntide],&tide[ntide]);
+			if (nget == 2)
+				tide_ok = MB_YES;
+			}
+
+		/* deal with tide in form: yr mon day hour min sec tide */
+		else if (process.mbp_tide_format == 2)
+			{
+			nget = sscanf(buffer,"%d %d %d %d %d %lf %lf",
+				&time_i[0],&time_i[1],&time_i[2],
+				&time_i[3],&time_i[4],&sec,
+				&tide[ntide]);
+			time_i[5] = (int) sec;
+			time_i[6] = 1000000*(sec - time_i[5]);
+			mb_get_time(verbose,time_i,&time_d);
+			tidetime[ntide] = time_d;
+			if (nget == 7)
+				tide_ok = MB_YES;
+			}
+
+		/* deal with tide in form: yr jday hour min sec tide */
+		else if (process.mbp_tide_format == 3)
+			{
+			nget = sscanf(buffer,"%d %d %d %d %lf %lf %lf",
+				&time_j[0],&time_j[1],&hr,
+				&time_j[2],&sec,
+				&tide[ntide]);
+			time_j[2] = time_j[2] + 60*hr;
+			time_j[3] = (int) sec;
+			time_j[4] = 1000000*(sec - time_j[3]);
+			mb_get_itime(verbose,time_j,time_i);
+			mb_get_time(verbose,time_i,&time_d);
+			tidetime[ntide] = time_d;
+			if (nget == 7)
+				tide_ok = MB_YES;
+			}
+
+		/* deal with tide in form: yr jday daymin sec tide */
+		else if (process.mbp_tide_format == 4)
+			{
+			nget = sscanf(buffer,"%d %d %d %lf %lf %lf",
+				&time_j[0],&time_j[1],&time_j[2],
+				&sec,
+				&tide[ntide]);
+			time_j[3] = (int) sec;
+			time_j[4] = 1000000*(sec - time_j[3]);
+			mb_get_itime(verbose,time_j,time_i);
+			mb_get_time(verbose,time_i,&time_d);
+			tidetime[ntide] = time_d;
+			if (nget == 5)
+				tide_ok = MB_YES;
+			}
+
+		/* output some debug values */
+		if (verbose >= 5 && tide_ok == MB_YES)
+			{
+			fprintf(stderr,"\ndbg5  New tide point read in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       tide[%d]: %f %f\n",
+				ntide,tidetime[ntide],tide[ntide]);
+			}
+		else if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  Error parsing line in tide file in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       line: %s\n",buffer);
+			}
+
+		/* check for reverses or repeats in time */
+		if (tide_ok == MB_YES)
+			{
+			if (ntide == 0)
+				ntide++;
+			else if (tidetime[ntide] > tidetime[ntide-1])
+				ntide++;
+			else if (ntide > 0 && tidetime[ntide] <= tidetime[ntide-1] 
+				&& verbose >= 5)
+				{
+				fprintf(stderr,"\ndbg5  Tide time error in program <%s>\n",program_name);
+				fprintf(stderr,"dbg5       tide[%d]: %f %f\n",
+					ntide-1,tidetime[ntide-1],tide[ntide-1]);
+				fprintf(stderr,"dbg5       tide[%d]: %f %f\n",
+					ntide,tidetime[ntide],tide[ntide]);
+				}
+			}
+		strncpy(buffer,"\0",sizeof(buffer));
+		}
+	    fclose(tfp);
+
+		
+	    /* check for tide */
+	    if (ntide < 2)
+		    {
+		    fprintf(stderr,"\nNo tide read from file <%s>\n",process.mbp_tidefile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+     
+	    /* get start and finish times of tide */
+	    mb_get_date(verbose,tidetime[0],stime_i);
+	    mb_get_date(verbose,tidetime[ntide-1],ftime_i);
+    
+	    /* give the statistics */
+	    if (verbose >= 1)
+		    {
+		    fprintf(stderr,"\n%d tide records read\n",ntide);
+		    fprintf(stderr,"Tide start time: %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+			    stime_i[0],stime_i[1],stime_i[2],stime_i[3],
+			    stime_i[4],stime_i[5],stime_i[6]);
+		    fprintf(stderr,"Tide end time:   %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 			    ftime_i[0],ftime_i[1],ftime_i[2],ftime_i[3],
 			    ftime_i[4],ftime_i[5],ftime_i[6]);
 		    }
@@ -1620,12 +1898,11 @@ and mbedit edit save files.\n";
 			    sprintf(comment,"  raytracing are not adjusted further).");
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
-		    }
-		    
+		    }		    
 		else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"Depths and crosstrack distances adjusted for roll bias, ");
+		    sprintf(comment,"Depths and crosstrack distances adjusted for roll bias");
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -1636,15 +1913,14 @@ and mbedit edit save files.\n";
 		else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"Depths and crosstrack distances adjusted for, ");
+		    sprintf(comment,"Depths and crosstrack distances adjusted for ");
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  change in transducer depth.");
+		    sprintf(comment,"  change in transducer depth and/or heave.");
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    }
-		    
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		sprintf(comment,"Control Parameters:");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -1723,6 +1999,36 @@ and mbedit edit save files.\n";
 				depth[i],velocity[i]);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		    }
+		if (process.mbp_svp_mode != MBP_SVP_OFF)
+		    {
+		    if (process.mbp_corrected == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			fprintf(comment,"Output bathymetry reference:   CORRECTED");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			}
+		    else if (process.mbp_corrected == MB_NO)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			fprintf(comment,"Output bathymetry reference:   UNCORRECTED");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			}
+		    }		    
+		if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF)
+		    {
+		    if (process.mbp_corrected == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"Depths modified from uncorrected to corrected.");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			}		    
+		    else
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"Depths modified from corrected to uncorrected.");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		    }
 	
@@ -1865,6 +2171,54 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
+	    	if (process.mbp_lever_mode == MBP_LEVER_OFF)
+			{
+			sprintf(comment,"  Lever calculation off.\n");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+	    	else
+			{
+			sprintf(comment,"  Lever calculation used to calculate heave correction.\n");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  VRU offset x:                  %f m\n", process.mbp_vru_offsetx);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  VRU offset y:                  %f m\n", process.mbp_vru_offsety);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  VRU offset z:                  %f m\n", process.mbp_vru_offsetz);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  Sonar offset x:                %f m\n", process.mbp_sonar_offsetx);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  Sonar offset y:                %f m\n", process.mbp_sonar_offsety);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  Sonar offset z:                %f m\n", process.mbp_sonar_offsetz);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+	    	if (process.mbp_tide_mode == MBP_TIDE_OFF)
+			{
+			sprintf(comment,"  Tide calculation off.\n");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+	    	else
+			{
+			sprintf(comment,"  Tide correction applied to bathymetry.\n");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  Tide file:                     %s m\n", process.mbp_tidefile);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  Tide format:                   %d m\n", process.mbp_tide_format);
+ 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
 		if (process.mbp_navadj_mode == MBP_NAV_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -1961,6 +2315,30 @@ and mbedit edit save files.\n";
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
+	    		sprintf(comment,"  Navigation time shift:         %f\n", process.mbp_nav_timeshift);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		if (process.mbp_nav_shift == MBP_NAV_ON)
+				{
+				sprintf(comment,"  Navigation positions shifted.\n");
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+				sprintf(comment,"  Navigation offset x:       %f\n", process.mbp_nav_offsetx);
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+				sprintf(comment,"  Navigation offset y:       %f\n", process.mbp_nav_offsety);
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+				sprintf(comment,"  Navigation offset z:       %f\n", process.mbp_nav_offsetz);
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+				}
+	    		else 
+				{
+				sprintf(comment,"  Navigation positions not shifted.\n");
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+				}
 			}
 		if (process.mbp_heading_mode == MBP_HEADING_OFF)
 			{
@@ -2004,6 +2382,44 @@ and mbedit edit save files.\n";
 		sprintf(comment," ");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
+
+		/* insert metadata */
+		if (strlen(process.mbp_meta_operator) > 0)
+			{
+			sprintf(comment,"METAOPERATOR:%s", process.mbp_meta_operator);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (strlen(process.mbp_meta_platform) > 0)
+			{
+			sprintf(comment,"METAPLATFORM:%s", process.mbp_meta_platform);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (strlen(process.mbp_meta_sonar) > 0)
+			{
+			sprintf(comment,"METASONAR:%s", process.mbp_meta_sonar);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (strlen(process.mbp_meta_survey) > 0)
+			{
+			sprintf(comment,"METASURVEY:%s", process.mbp_meta_survey);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (strlen(process.mbp_meta_pi) > 0)
+			{
+			sprintf(comment,"METAPI:%s", process.mbp_meta_pi);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (strlen(process.mbp_meta_client) > 0)
+			{
+			sprintf(comment,"METACLIENT:%s", process.mbp_meta_client);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
 		}
 
 	/* set up the raytracing */
@@ -2127,6 +2543,27 @@ and mbedit edit save files.\n";
 					time_i,&time_d,&navlon,&navlat,
 					&speed,&heading,&draft_org,&roll,&pitch,&heave,&error);
 			draft = draft_org;
+			}
+			
+		/* do lever calculation to find heave implied by roll and pitch
+		   for a sonar displaced from the vru - this will be added to the
+		   bathymetry
+		   	x = r * COS(alpha) * COS(beta) 
+		   	y = r * SIN(alpha)
+		   	z = r * COS(alpha) * SIN(beta) */
+	    	if (process.mbp_lever_mode == MBP_LEVER_ON)
+			{
+			dx = process.mbp_sonar_offsetx - process.mbp_vru_offsetx;
+			dy = process.mbp_sonar_offsety - process.mbp_vru_offsety;
+			dz = process.mbp_sonar_offsetz - process.mbp_vru_offsetz;
+			r = sqrt(dx * dx + dy * dy + dz * dz);
+			alpha = RTD * acos(dx / r);
+			beta = RTD * asin(dy / (r * cos(DTR * alpha)));
+			alpha += pitch + process.mbp_pitchbias;
+			beta += roll + process.mbp_rollbias;
+			lever_heave =  r * cos(DTR * alpha) * sin(DTR * beta);
+fprintf(stderr, "dx:%f dy:%f dz:%f alpha:%f beta:%f lever:%f\n", 
+dx, dy, dz, alpha, beta, lever_heave);
 			}
 
 		/* interpolate the navigation if desired */
@@ -2390,7 +2827,7 @@ and mbedit edit save files.\n";
 					}
     
 				/* add heave and draft */
-				depth_offset_use = bheave[i] + draft;
+				depth_offset_use = bheave[i] + draft + lever_heave;
 				static_shift = 0.0;
 	
 				/* check depth_offset - use static shift if depth_offset negative */
@@ -2401,6 +2838,7 @@ and mbedit edit save files.\n";
 				    fprintf(stderr, "Depth offset is sum of heave + transducer depth.\n");
 				    fprintf(stderr, "Draft from data:       %f\n", draft);
 				    fprintf(stderr, "Heave from data:       %f\n", bheave[i]);
+				    fprintf(stderr, "Heave from lever calc: %f\n", lever_heave);
 				    fprintf(stderr, "User specified draft:  %f\n", process.mbp_draft);
 				    fprintf(stderr, "Depth offset used:     %f\n", depth_offset_use);
 				    fprintf(stderr, "Data Record: %d\n",odata);
@@ -2425,30 +2863,7 @@ and mbedit edit save files.\n";
 				    zz += static_shift;
 /*fprintf(stderr, "%d %d : heave:%f draft:%f depth_offset:%f static:%f zz:%f\n", 
 idata, i, bheave[i], draft, depth_offset_use, static_shift, zz);*/
-
-				/* uncorrect depth if desired */
-				if (process.mbp_corrected == MB_NO)
-				    {
-				    k = -1;
-				    for (j=0;j<nsvp-1;j++)
-					{
-					if (depth[j] < zz & depth[j+1] >= zz)
-					    k = j;
-					}
-				    if (k > 0)
-					vsum = velocity_sum[k-1];
-				    else
-					vsum = 0.0;
-				    if (k >= 0)
-					{
-					vsum += 0.5*(2*velocity[k] 
-					    + (zz - depth[k])*(velocity[k+1] - velocity[k])
-					    /(depth[k+1] - depth[k]))*(zz - depth[k]);
-					vavg = vsum / zz;
-					zz = zz*1500./vavg;
-					}
-				    }
-    
+ 
 				/* get alongtrack and acrosstrack distances
 					and depth */
 				bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
@@ -2491,7 +2906,7 @@ idata, i, bheave[i], draft, depth_offset_use, static_shift, zz);*/
 			      if (beamflag[i] != MB_FLAG_NULL)
 				{
 				/* add heave and draft */
-				depth_offset_use = bheave[i] + draft;
+				depth_offset_use = bheave[i] + draft + lever_heave;
 				depth_offset_org = bheave[i] + draft_org;
 
 				/* strip off heave + draft */
@@ -2550,7 +2965,7 @@ idata, i, bheave[i], draft, depth_offset_use, static_shift, zz);*/
 			else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
 			    {
 			    /* get draft change */
-			    depth_offset_change = draft - draft_org;
+			    depth_offset_change = draft - draft_org + lever_heave;
 /*fprintf(stderr, "depth offset: %f %f %f %f\n", time_d, draft, draft_org, depth_offset_change);*/
 
 			    /* loop over the beams */
@@ -2584,6 +2999,48 @@ idata, i, bheave[i], draft, depth_offset_use, static_shift, zz);*/
 /*fprintf(stderr, "time:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d draft:%f depth_offset_change:%f\n", 
 time_i[0], time_i[1], time_i[2], time_i[3], 
 time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
+			    }
+			    
+			/* change bathymetry water sound reference if required */
+			if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF
+			    || (process.mbp_svp_mode == MBP_SVP_ON
+				&& process.mbp_corrected == MB_NO))
+			    {
+			    for (i=0;i<beams_bath;i++)
+				{
+				if (beamflag[i] != MB_FLAG_NULL)
+				    {
+				    /* calculate average water sound speed 
+					for current depth value */
+				    depth_offset_use = bheave[i] + draft + lever_heave;
+				    zz = bath[i] - depth_offset_use;
+				    k = -1;
+				    for (j=0;j<nsvp-1;j++)
+					{
+					if (depth[j] < zz & depth[j+1] >= zz)
+					    k = j;
+					}
+				    if (k > 0)
+					vsum = velocity_sum[k-1];
+				    else
+					vsum = 0.0;
+				    if (k >= 0)
+					{
+					vsum += 0.5*(2*velocity[k] 
+					    + (zz - depth[k])*(velocity[k+1] - velocity[k])
+					    /(depth[k+1] - depth[k]))*(zz - depth[k]);
+					vavg = vsum / zz;
+					}
+				    if (vavg <= 0.0) vavg = 1500.0;
+					
+				    /* if uncorrected value desired */
+				    if (process.mbp_corrected == MB_NO)
+					bath[i] = zz * 1500.0 / vavg + depth_offset_use;
+				    else
+					bath[i] = zz * vavg / 1500.0 + depth_offset_use;
+
+				    }
+				}
 			    }
 
 			/* output some debug messages */

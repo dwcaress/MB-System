@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbset.c,v 5.2 2001-06-03 07:07:34 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2001/01/22  07:55:22  caress
  * Version 5.0.beta01
  *
@@ -60,7 +63,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -471,6 +474,32 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "SSINTERPOLATE:%d", &process.mbp_ssrecalc_interpolate);
 		    }
+   
+		/* metadata insertion */
+		else if (strncmp(pargv[i], "METAOPERATOR", 12) == 0)
+		    {
+			strcpy(process.mbp_meta_operator,&(pargv[i][13]));
+		    }
+		else if (strncmp(pargv[i], "METAPLATFORM", 12) == 0)
+		    {
+			strcpy(process.mbp_meta_platform,&(pargv[i][13]));
+		    }
+		else if (strncmp(pargv[i], "METASONAR", 9) == 0)
+		    {
+			strcpy(process.mbp_meta_sonar,&(pargv[i][10]));
+		    }
+		else if (strncmp(pargv[i], "METASURVEY", 10) == 0)
+		    {
+			strcpy(process.mbp_meta_survey,&(pargv[i][11]));
+		    }
+		else if (strncmp(pargv[i], "METAPI", 6) == 0)
+		    {
+			strcpy(process.mbp_meta_pi,&(pargv[i][7]));
+		    }
+		else if (strncmp(pargv[i], "METACLIENT", 10) == 0)
+		    {
+			strcpy(process.mbp_meta_client,&(pargv[i][11]));
+		    }
 		}
 		
 	/* get bathymetry recalculation mode */
@@ -649,6 +678,14 @@ the manual pages for mbprocess and mbset. \n\n";
 	    fprintf(stderr,"  Sidescan pixel size:           %f\n",process.mbp_ssrecalc_pixelsize);
 	    fprintf(stderr,"  Sidescan swath width:          %f\n",process.mbp_ssrecalc_swathwidth);
 	    fprintf(stderr,"  Sidescan interpolation:        %d\n",process.mbp_ssrecalc_interpolate);
+
+	    fprintf(stderr,"\nMetadata Insertion:\n");
+	    fprintf(stderr,"  Metadata operator:             %s\n",process.mbp_meta_operator);
+	    fprintf(stderr,"  Metadata platform:             %s\n",process.mbp_meta_platform);
+	    fprintf(stderr,"  Metadata sonar:                %s\n",process.mbp_meta_sonar);
+	    fprintf(stderr,"  Metadata survey:               %s\n",process.mbp_meta_survey);
+	    fprintf(stderr,"  Metadata pi:                   %s\n",process.mbp_meta_pi);
+	    fprintf(stderr,"  Metadata client:               %s\n",process.mbp_meta_client);
 	    }
 
 	/* write parameters */

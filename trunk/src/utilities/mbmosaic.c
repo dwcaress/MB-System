@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbmosaic.c,v 5.2 2001-06-03 07:07:34 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -117,7 +120,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -285,8 +288,6 @@ main (int argc, char **argv)
 	char	title[128];
 	char	nlabel[128];
 	char	sdlabel[128];
-	char	psviewer[128];
-	char	mbproject[128];
 
 	/* old color table - bright standard path through rgb space */
 /*	static int ncpt = 5;
@@ -359,7 +360,6 @@ main (int argc, char **argv)
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
-	status = mb_env(verbose, psviewer, mbproject);
 
 	/* set default input and output */
 	strcpy (filelist, "data.list");
@@ -610,7 +610,6 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       priority_azimuth:     %f\n",priority_azimuth);
 		fprintf(outfp,"dbg2       priority_azimuth_fac: %f\n",priority_azimuth_factor);
 		fprintf(outfp,"dbg2       bath_default:         %f\n",bath_default);
-		fprintf(outfp,"dbg2       psviewer:             %s\n",psviewer);
 		fprintf(outfp,"dbg2       proj flag 1:          %d\n",projection_pars_f);
 		fprintf(outfp,"dbg2       proj flag 2:          %d\n",projection_origin_f);
 		fprintf(outfp,"dbg2       p_lon_o:              %f\n",p_lon_o);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $
+ *	$Id: mbdefaults.c,v 5.2 2001-06-03 07:07:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:14:16  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -82,10 +85,10 @@
 
 main (int argc, char **argv)
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
-	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
+	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Iimagedisplay\n\t-Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -96,10 +99,11 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 	int	help = 0;
 	int	flag = 0;
 	FILE	*fp;
-	char	file[128];
-	char	home[128];
-	char	psdisplay[128];
-	char	mbproject[128];
+	char	file[MB_PATH_MAXLINE];
+	char	home[MB_PATH_MAXLINE];
+	char	psdisplay[MB_PATH_MAXLINE];
+	char	imgdisplay[MB_PATH_MAXLINE];
+	char	mbproject[MB_PATH_MAXLINE];
 	char	*HOME = "HOME";
 	char	*getenv();
 
@@ -118,10 +122,10 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 		btime_i,etime_i,&speedmin,&timegap);
 
 	/* now get current mb environment values */
-	status = mb_env(verbose,psdisplay,mbproject);
+	status = mb_env(verbose,psdisplay,imgdisplay,mbproject);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:HhL:l:P:p:R:r:S:s:T:t:VvW:w:")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:HhI:i:L:l:P:p:R:r:S:s:T:t:VvW:w:")) != -1)
 	  switch (c) 
 		{
 		case 'B':
@@ -148,6 +152,11 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", imgdisplay);
 			flag++;
 			break;
 		case 'H':
@@ -241,6 +250,7 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 		fprintf(stderr,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:    %f\n",timegap);
 		fprintf(stderr,"dbg2       psdisplay:  %s\n",psdisplay);
+		fprintf(stderr,"dbg2       imgdisplay: %s\n",imgdisplay);
 		fprintf(stderr,"dbg2       mbproject:  %s\n",mbproject);
 		}
 
@@ -278,6 +288,7 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 			etime_i[0],etime_i[1],etime_i[2],
 			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 		fprintf(fp,"ps viewer:  %s\n",psdisplay);
+		fprintf(fp,"img viewer: %s\n",imgdisplay);
 		fprintf(fp,"project:    %s\n",mbproject);
 		fclose(fp);
 
@@ -296,6 +307,7 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 			etime_i[0],etime_i[1],etime_i[2],
 			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 		printf("ps viewer:  %s\n",psdisplay);
+		printf("img viewer: %s\n",imgdisplay);
 		printf("project:    %s\n",mbproject);
 		}
 
@@ -317,6 +329,7 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 			etime_i[0],etime_i[1],etime_i[2],
 			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 		printf("ps viewer:  %s\n",psdisplay);
+		printf("img viewer: %s\n",imgdisplay);
 		printf("project:    %s\n",mbproject);
 		}
 

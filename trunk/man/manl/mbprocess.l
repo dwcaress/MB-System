@@ -1,4 +1,4 @@
-.TH mbprocess l "16 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbprocess l "1 June 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbprocess\fP - this program performs a 
 variety of swath data processing 
@@ -36,6 +36,7 @@ including:
      - Recalculate sidescan from raw backscatter samples
        (Simrad multibeam data only).
      - Apply tides to bathymetry.
+     - Insert metadata.
 
 The actions of \fBmbprocess\fP are controlled by text
 parameter files. Each \fBmbprocess\fP parameter file
@@ -120,12 +121,16 @@ The \fBmbprocess\fP commands found in parameter files are:
         sets edit save file path (from mbedit) [none]
 
  BATHYMETRY RECALCULATION:
-   RAYTRACE boolean
-        sets bathymetry recalculation by raytracing [0]
-         0: raytracing off
-         1: raytracing on
+   SVPMODE mode
+        sets usage of a water sound speed model (sound
+        velocity profile, or SVP) [0]
+         0: bathymetry recalculation by raytracing off
+         1: bathymetry recalculation by raytracing on
+         2: translate depths from corrected to uncorrected
+            or vice versa depending on SOUNDSPEEDREF
+            command
    SVPFILE filename
-        sets svp file path [no default]
+        sets SVP file path [no default]
    SSVMODE boolean
         sets ssv mode [0]
          0: use ssv from file
@@ -135,8 +140,19 @@ The \fBmbprocess\fP commands found in parameter files are:
         sets ssv value or offset (m/s) [1500.0]
    TTMULTIPLY multiplier
         sets value multiplied by travel times [1.0]
-   CORRECTED boolean
-        sets raytraced bathymetry to "corrected" values [1]
+   SOUNDSPEEDREF boolean
+        determines the handling of the sound 
+        speed reference for bathymetry [1]
+	- note: if raytracing is turned off then
+          this command implies correcting or
+          uncorrecting using the SVP specified 
+          with the SVPFILE command
+         0: produce "uncorrected" bathymetry 
+            referenced to a uniform 1500 m/s 
+            water sound speed model.
+         1: produce "corrected" bathymetry
+            referenced to a realistic water 
+            sound speed model.
 
  DRAFT CORRECTION:
    DRAFTMODE mode
@@ -158,6 +174,11 @@ The \fBmbprocess\fP commands found in parameter files are:
  HEAVE CORRECTION:
    HEAVEMODE mode
         sets heave correction [0]
+        - note: heave correction by offset and/or 
+          multiplication is added to any lever
+          heave correction, and then either used in 
+          bathymetry recalculation or added to 
+          existing bathymetry
           0: no heave correction
           1: heave correction by offset
           2: heave correction by multiply
@@ -166,6 +187,35 @@ The \fBmbprocess\fP commands found in parameter files are:
         sets value added to heave (m) 
    HEAVEMULTIPLY multiplier
         sets value multiplied by heave
+	    
+ LEVER CORRECTION:
+   LEVERMODE mode
+        sets heave correction by lever calculation [0]
+        - note: lever heave correction is added to
+          any heave correction by offset and/or 
+          multiplication, and then either used in 
+          bathymetry recalculation or added to 
+          existing bathymetry
+          0: no lever calculation
+          1: heave correction by lever calculation 
+   VRUOFFSETX constant
+        sets athwartships offset of attitude sensor (m) 
+        - note: positive to starboard 
+   VRUOFFSETY constant
+        sets fore-aft offset of attitude sensor (m) 
+        - note: positive forward 
+   VRUOFFSETZ constant
+        sets vertical offset of attitude sensor (m) 
+        - note: positive down
+   SONAROFFSETX constant
+        sets athwartships offset of sonar receive array (m) 
+        - note: positive to starboard 
+   SONAROFFSETY constant
+        sets fore-aft offset of sonar receive array (m) 
+        - note: positive forward 
+   SONAROFFSETZ constant
+        sets vertical offset of sonar receive array (m) 
+        - note: positive down
 
  ROLL CORRECTION:
    ROLLBIASMODE mode
@@ -220,6 +270,25 @@ The \fBmbprocess\fP commands found in parameter files are:
    SSINTERPOLATE  constant
         sets sidescan interpolation distance 
         (number of pixels)
+
+ METADATA INSERTION:
+   METAOPERATOR  string
+        sets mbinfo metadata string for survey  
+        operator institution or company
+   METAPLATFORM  string
+        sets mbinfo metadata string for platform  
+        (ship or vehicle)
+   METASONAR     string
+        sets mbinfo metadata string for sonar model  
+        name
+   METASURVEY    string
+        sets mbinfo metadata string for survey name
+   METAPI        string
+        sets mbinfo metadata string for principal  
+        investigator
+   METACLIENT    string
+        sets mbinfo metadata string for survey client  
+        institution or company
 
  PROCESSING KLUGES:
    KLUGE001
@@ -344,7 +413,7 @@ an mbprocess parameter file "mbari_1998_526_msn.mb57.par".
 The contents of the parameter file are:
 
  ## MB-System processing parameter file
- ## Written by mb_pr_writepar version $Id: mbprocess.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ ## Written by mb_pr_writepar version $Id: mbprocess.l,v 5.1 2001-06-03 07:07:34 caress Exp $
  ## MB-system Version 5.0.0
  ## Generated by user <caress> on cpu <menard> at <Tue Jan 16 13:23:06 2001>
  ## 
@@ -381,7 +450,7 @@ The contents of the parameter file are:
  SSVMODE 0
  SSV 0.000000
  TTMULTIPLY 1.000000
- CORRECTED 1
+ SOUNDSPEEDREF 1
  ## 
  ## Draft Correction:
  DRAFTMODE 0
@@ -466,11 +535,11 @@ To process the data, run mbprocess:
 The output to the terminal is:
  
  Program mbprocess
- Version $Id: mbprocess.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ Version $Id: mbprocess.l,v 5.1 2001-06-03 07:07:34 caress Exp $
  MB-System Version 5.0.alpha01
  
  Program <mbprocess>
- Version $Id: mbprocess.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ Version $Id: mbprocess.l,v 5.1 2001-06-03 07:07:34 caress Exp $
  MB-system Version 5.0.alpha01
  
  Input and Output Files:

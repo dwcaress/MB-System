@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.1 2001-03-22 21:14:16 caress Exp $
+ *    $Id: mbcopy.c,v 5.2 2001-06-03 07:07:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:14:16  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -157,7 +160,7 @@ int mbcopy_simrad_time_convert(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -953,6 +956,7 @@ main (int argc, char **argv)
 		else if (copymode == MBCOPY_PARTIAL
 			&& error == MB_ERROR_NO_ERROR)
 			{
+			istore_ptr = imb_io_ptr->store_data;
 			ostore_ptr = omb_io_ptr->store_data;
 			if (pings == 1 && kind == MB_DATA_DATA)
 				{
