@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.9 2001-08-10 22:41:19 dcaress Exp $
+ *    $Id: mb_process.h,v 5.10 2001-12-18 04:27:45 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -323,11 +323,17 @@
  *
  * PROCESSING KLUGES:
  *   KLUGE001                       # processing kluge 001 (not yet defined)
+ *                                  # - Apply corrections to travel time data in Hydrosweep DS2
+ *                                  #   data collected on the R/V Maurice Ewing in 2001/2002
+ *   KLUGE002                       # processing kluge 002 (not yet defined)
  *                                  # - occasionaly odd processing problems will occur that
  *                                  #   are specific to a particular survey or sonar version
  *                                  # - mbprocess will allow one-time fixes to be defined
  *                                  #   as "kluges" that can be turned on throught the parameter
  *                                  #   files.
+ *   KLUGE003                       # processing kluge 003 (not yet defined)
+ *   KLUGE004                       # processing kluge 004 (not yet defined)
+ *   KLUGE005                       # processing kluge 005 (not yet defined)
  *
  * MBprocess and its associated functions and programs use
  * the following file naming convention. The unprocessed swath
@@ -349,6 +355,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001/08/10  22:41:19  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.8  2001-08-03 18:00:02-07  caress
  * Added cut by speed.
  *
@@ -389,6 +398,7 @@
 
 /* mbprocess value defines */
 #define MBP_FILENAMESIZE	MB_PATH_MAXLINE
+#define MBP_METANOVALUE		9999999.
 #define MBP_NAV_OFF		0
 #define MBP_NAV_ON		1
 #define MBP_NAV_LINEAR		0
@@ -566,6 +576,13 @@ struct mb_process_struct
 	double	mbp_meta_pitchbias;
 	double	mbp_meta_headingbias;
 	double	mbp_meta_draft;
+
+	/* processing kluges */
+	int	mbp_kluge001;
+	int	mbp_kluge002;
+	int	mbp_kluge003;
+	int	mbp_kluge004;
+	int	mbp_kluge005;
 	};
 
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -695,6 +712,13 @@ int mb_pr_update_metadata(int verbose, char *file,
 			double	mbp_meta_headingbias,
 			double	mbp_meta_draft,
 			int *error);
+int mb_pr_update_kluges(int verbose, char *file,
+			int	mbp_kluge001,
+			int	mbp_kluge002,
+			int	mbp_kluge003,
+			int	mbp_kluge004,
+			int	mbp_kluge005,
+			int *error);
 int mb_pr_get_ofile(int verbose, char *file, 
 			int	*mbp_ofile_specified, 
 			char	*mbp_ofile, 
@@ -813,4 +837,11 @@ int mb_pr_get_metadata(int verbose, char *file,
 			double	*mbp_meta_pitchbias,
 			double	*mbp_meta_headingbias,
 			double	*mbp_meta_draft,
+			int *error);
+int mb_pr_get_kluges(int verbose, char *file,
+			int	*mbp_kluge001,
+			int	*mbp_kluge002,
+			int	*mbp_kluge003,
+			int	*mbp_kluge004,
+			int	*mbp_kluge005,
 			int *error);

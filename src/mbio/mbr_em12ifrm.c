@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.4 2001-08-10 22:41:19 dcaress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.5 2001-12-18 04:27:45 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/08/10  22:41:19  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.3  2001-07-19 17:31:11-07  caress
  * Release 5.0.beta03
  *
@@ -94,7 +97,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.4 2001-08-10 22:41:19 dcaress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.5 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mbr_register_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -224,7 +227,7 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.4 2001-08-10 22:41:19 dcaress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.5 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -293,15 +296,15 @@ int mbr_info_em12ifrm(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.4 2001-08-10 22:41:19 dcaress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.5 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct stat imgfile_status, navfile_status;
 	int	imgfile_stat, navfile_stat;
-	char	path[MB_NAME_LENGTH];
-	char	imgtest[MB_NAME_LENGTH];
-	char	navtest[MB_NAME_LENGTH];
+	char	path[MB_PATH_MAXLINE];
+	char	imgtest[MB_PATH_MAXLINE];
+	char	navtest[MB_PATH_MAXLINE];
 	char	*tag_ptr;
 	char	*name;
 	double	*pixel_size;

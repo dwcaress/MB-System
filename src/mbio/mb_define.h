@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.10 2001-11-15 22:36:43 caress Exp $
+ *    $Id: mb_define.h,v 5.11 2001-12-18 04:27:45 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2001/11/15  22:36:43  caress
+ * Added function mb_get_shortest_path()
+ *
  * Revision 5.9  2001/10/19  00:54:37  caress
  * Now tries to use relative paths.
  *
@@ -76,7 +79,7 @@
 #define	MB_BUFFER_MAX	5000
 
 /* maximum path length in characters */
-#define MB_PATH_MAXLINE 256
+#define MB_PATH_MAXLINE 1024
 
 /* maximum comment length in characters */
 #define MB_COMMENT_MAXLINE 1944

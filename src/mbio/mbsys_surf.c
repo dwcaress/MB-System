@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.6 2001-08-25 00:54:13 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.7 2001-12-18 04:27:45 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	June 25, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/08/25 00:54:13  caress
+ * Adding beamwidth values to extract functions.
+ *
  * Revision 5.5  2001/08/10  22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -68,7 +71,7 @@
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_surf.c,v 5.6 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_surf.c,v 5.7 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mbsys_surf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1344,6 +1347,69 @@ int mbsys_surf_copy(int verbose, void *mbio_ptr,
 
 	/* copy the main structure */
 	*copy = *store;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_surf_ttcorr(int verbose, void *mbio_ptr, 
+			void *store_ptr,
+			int *error)
+{
+	char	*function_name = "mbsys_surf_ttcorr";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_surf_struct *store;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointers */
+	store = (struct mbsys_surf_struct *) store_ptr;
+
+	/* check for correct kind of data - hsd2 */
+	if (store->start_opmode[14] == 6
+		&& store->kind == MB_DATA_DATA
+		&& store->tt_beam_cnt == 140)
+		{
+		if (store->start_opmode[6] == 1)
+			{
+			for (i=0;i<store->tt_beam_cnt;i++)
+				{
+				store->tt_lruntime[i] += 0.001 * DS2_TimeCorrMedium1[i];
+				}
+			}
+		else if (store->start_opmode[6] == 2)
+			{
+			for (i=0;i<store->tt_beam_cnt;i++)
+				{
+				store->tt_lruntime[i] -= DS2_TimeCorrDeep3[i];
+				}
+			}
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $
+ *    $Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2001/11/16  01:30:02  caress
+ * Added mb_get_shortest_path()
+ *
  * Revision 5.10  2001/10/24  21:15:30  caress
  * Fixed problem finding processed files in mb_datalist_read()
  *
@@ -135,7 +138,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1187,7 +1190,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1255,7 +1258,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1322,7 +1325,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1386,7 +1389,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1456,7 +1459,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1526,7 +1529,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.12 2001-12-18 04:27:45 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -2124,6 +2127,8 @@ int mb_datalist_read(int verbose,
 			while (rdone == MB_NO)
 			    {
 			    buffer_ptr = fgets(buffer,MB_PATH_MAXLINE,datalist_ptr->fp);
+
+			    /* deal with end of datalist file */
 			    if (buffer_ptr != buffer)
 				{
 				rdone = MB_YES;
@@ -2131,19 +2136,24 @@ int mb_datalist_read(int verbose,
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
-				/* look for special command */
-				else if (strncmp(buffer,"$PROCESSED",10) == 0)
+
+			    /* look for special $PROCESSED command */
+			    else if (strncmp(buffer,"$PROCESSED",10) == 0)
 				{
 				if (datalist_ptr->look_processed 
 						== MB_DATALIST_LOOK_UNSET)
 						datalist_ptr->look_processed = MB_DATALIST_LOOK_YES;
 				}
-				else if (strncmp(buffer,"$RAW",4) == 0)
+
+			    /* look for special $RAW command */
+			    else if (strncmp(buffer,"$RAW",4) == 0)
 				{
 				if (datalist_ptr->look_processed 
 						== MB_DATALIST_LOOK_UNSET)
 						datalist_ptr->look_processed = MB_DATALIST_LOOK_NO;
 				}
+
+			    /* get filename */
 			    else if (buffer[0] != '#')
 				{
 				/* read datalist item */
@@ -2177,6 +2187,7 @@ int mb_datalist_read(int verbose,
 				if (datalist_ptr->look_processed 
 					== MB_DATALIST_LOOK_YES)
 				    {
+				    pfile[0] = '\0';
 				    mb_pr_get_ofile(verbose, path, 
 					    &pfile_specified, pfile, error);
 				    if (strlen(pfile) > 0 && pfile[0] != '/'
@@ -2213,7 +2224,8 @@ int mb_datalist_read(int verbose,
 						if (verbose > 0)
 					    	{
 					    	fprintf(stderr, "MBIO Warning: Datalist entry skipped because it could not be opened!\n");
-					    	fprintf(stderr, "\tFile:     %s\n\tDatalist: %s\n", path, datalist_ptr->path);					    
+					    	fprintf(stderr, "\tDatalist: %s\n", datalist_ptr->path);					    
+					    	fprintf(stderr, "\tFile:     %s\n", path);					    
 					    	}
 						}
 				    }
