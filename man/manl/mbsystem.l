@@ -1,4 +1,4 @@
-.TH mbsystem l "14 March 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbsystem l "10 August 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
@@ -357,6 +357,41 @@ with "old" added to their names (e.g. \fBmbeditold\fP,
 At present, sidescan correction and filtering are not
 yet implemented in the new scheme, so programs such as
 mbanglecorrect and mbfilter must still be used in a serial fashion.
+
+.SH THE NEW VERSION 5 DATALIST FILES
+Previous versions of \fBMB-System\fP have used lists of
+data files, or datalists, as input to several programs
+(e.g. \fBmbgrid\fP, \fBmbmosaic\fP, \fBmbinfo\fP, 
+\fBmblist\fP, and \fBmbm_plot\fP). The basic datalist
+entry has consisted of a swath data name (often including
+the entire path) followed by a space and then the \fBMB-System\fP format
+id for that file. Datalist entry lines starting with
+the character '#' are considered comments. Version 5 extends
+the definition and usage of datalists in several
+significant ways. First, datalists may now be recursive.
+A datalist entry may be another datalist file, as indicated
+by a format id of -1. Second, datalists entries may contain
+a third column which is interpreted as a gridding weight
+value by \fBmbgird\fP. This third value may be used to
+weight some data higher than other data. For example, one might
+weight SeaBeam 2112 data with a value of 1.0 and lower
+quality SeaBeam classic data with a value of 0.001. The result
+would be that the newer 2112 data effectively overlies the less good
+data wherever overlap occurs. The third new feature of datalists 
+works with data processed using the new parallel processing scheme.
+In the parallel processing scheme the raw data files are often,
+but not always,
+accompanied by processed files produced by \fBmbprocess\fP. 
+It is awkward to maintain datalists that directly refer to the
+current best datafiles. If one inserts the text $PROCESSED
+into the first line of a datalist containing raw files, 
+then programs like \fBmbgrid\fP will read the processed file
+if it exists, but otherwise will read the raw file. Similarly,
+a first line of $RAW will force the programs to only
+read the raw files directly referenced in the datalist. These
+options also work recursively. The first instance of
+a $PROCESSED or $RAW entry will prevail over all
+others encountered through a hierarchy of recursive datalists.
 
 .SH LIST OF MB-SYSTEM PROGRAMS AND MACROS
 See the individual manual pages for detailed information about 

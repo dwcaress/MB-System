@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.8 2001-08-04 01:00:02 caress Exp $
+ *    $Id: mb_process.h,v 5.9 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -302,12 +302,24 @@
  *   SSINTERPOLATE  constant        # sets sidescan interpolation distance (number of pixels)
  *
  * METADATA INSERTION:
- *   METAOPERATOR  string           # sets mbinfo metadata string for survey operator institution or company
- *   METAPLATFORM  string           # sets mbinfo metadata string for platform (ship or vehicle)
- *   METASONAR     string           # sets mbinfo metadata string for sonar model name
- *   METASURVEY    string           # sets mbinfo metadata string for survey name
- *   METAPI        string           # sets mbinfo metadata string for principal investigator
- *   METACLIENT    string           # sets mbinfo metadata string for survey client institution or company
+ *   METAVESSEL string              # sets mbinfo metadata string for vessel
+ *   METAINSTITUTION string         # sets mbinfo metadata string for vessel operator institution or company
+ *   METAPLATFORM string            # sets mbinfo metadata string for sonar platform (ship or vehicle)
+ *   METASONAR string               # sets mbinfo metadata string for sonar model name
+ *   METASONARVERSION string        # sets mbinfo metadata string for sonar version (usually software version)
+ *   METACRUISEID string            # sets mbinfo metadata string for institutional cruise id
+ *   METACRUISENAME string          # sets mbinfo metadata string for descriptive cruise name
+ *   METAPI string                  # sets mbinfo metadata string for principal investigator
+ *   METAPIINSTITUTION string       # sets mbinfo metadata string for principal investigator
+ *   METACLIENT string              # sets mbinfo metadata string for data owner (usually PI institution)
+ *   METASVCORRECTED boolean        # sets mbinfo metadata boolean for sound velocity corrected depths
+ *   METATIDECORRECTED boolean      # sets mbinfo metadata boolean for tide corrected bathymetry
+ *   METABATHEDITMANUAL boolean     # sets mbinfo metadata boolean for manually edited bathymetry
+ *   METABATHEDITAUTO boolean       # sets mbinfo metadata boolean for automatically edited bathymetry
+ *   METAROLLBIAS constant          # sets mbinfo metadata constant for roll bias (degrees + to starboard)
+ *   METAPITCHBIAS constant         # sets mbinfo metadata constant for pitch bias (degrees + forward)
+ *   METAHEADINGBIAS constant       # sets mbinfo metadata constant for heading bias (degrees)
+ *   METADRAFT constant             # sets mbinfo metadata constant for vessel draft (m)
  *
  * PROCESSING KLUGES:
  *   KLUGE001                       # processing kluge 001 (not yet defined)
@@ -337,6 +349,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001-08-03 18:00:02-07  caress
+ * Added cut by speed.
+ *
  * Revision 5.7  2001/08/02  01:49:25  caress
  * Added mb_pr_ function prototypes.
  *
@@ -431,6 +446,9 @@
 #define MBP_TIDE_ON		1
 #define MBP_SSRECALC_OFF	0
 #define MBP_SSRECALC_ON		1
+#define MBP_CORRECTION_UNKNOWN	-1
+#define MBP_CORRECTION_NO	0
+#define MBP_CORRECTION_YES	1
 
 
 struct mb_process_struct 
@@ -530,12 +548,24 @@ struct mb_process_struct
 	int	mbp_ssrecalc_interpolate;
 
 	/* metadata strings */
-	char	mbp_meta_operator[MBP_FILENAMESIZE];
+	char	mbp_meta_vessel[MBP_FILENAMESIZE];
+	char	mbp_meta_institution[MBP_FILENAMESIZE];
 	char	mbp_meta_platform[MBP_FILENAMESIZE];
 	char	mbp_meta_sonar[MBP_FILENAMESIZE];
-	char	mbp_meta_survey[MBP_FILENAMESIZE];
+	char	mbp_meta_sonarversion[MBP_FILENAMESIZE];
+	char	mbp_meta_cruiseid[MBP_FILENAMESIZE];
+	char	mbp_meta_cruisename[MBP_FILENAMESIZE];
 	char	mbp_meta_pi[MBP_FILENAMESIZE];
+	char	mbp_meta_piinstitution[MBP_FILENAMESIZE];
 	char	mbp_meta_client[MBP_FILENAMESIZE];
+	int	mbp_meta_svcorrected;
+	int	mbp_meta_tidecorrected;
+	int	mbp_meta_batheditmanual;
+	int	mbp_meta_batheditauto;
+	double	mbp_meta_rollbias;
+	double	mbp_meta_pitchbias;
+	double	mbp_meta_headingbias;
+	double	mbp_meta_draft;
 	};
 
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -646,12 +676,24 @@ int mb_pr_update_ssrecalc(int verbose, char *file,
 			int		mbp_ssrecalc_interpolate,
 			int *error);
 int mb_pr_update_metadata(int verbose, char *file, 
-			char	*mbp_meta_operator,
+			char	*mbp_meta_vessel,
+			char	*mbp_meta_institution,
 			char	*mbp_meta_platform,
 			char	*mbp_meta_sonar,
-			char	*mbp_meta_survey,
+			char	*mbp_meta_sonarversion,
+			char	*mbp_meta_cruiseid,
+			char	*mbp_meta_cruisename,
 			char	*mbp_meta_pi,
+			char	*mbp_meta_piinstitution,
 			char	*mbp_meta_client,
+			int	mbp_meta_svcorrected,
+			int	mbp_meta_tidecorrected,
+			int	mbp_meta_batheditmanual,
+			int	mbp_meta_batheditauto,
+			double	mbp_meta_rollbias,
+			double	mbp_meta_pitchbias,
+			double	mbp_meta_headingbias,
+			double	mbp_meta_draft,
 			int *error);
 int mb_pr_get_ofile(int verbose, char *file, 
 			int	*mbp_ofile_specified, 
@@ -753,10 +795,22 @@ int mb_pr_get_ssrecalc(int verbose, char *file,
 			int	*mbp_ssrecalc_interpolate,
 			int *error);
 int mb_pr_get_metadata(int verbose, char *file, 
-			char	*mbp_meta_operator,
+			char	*mbp_meta_vessel,
+			char	*mbp_meta_institution,
 			char	*mbp_meta_platform,
 			char	*mbp_meta_sonar,
-			char	*mbp_meta_survey,
+			char	*mbp_meta_sonarversion,
+			char	*mbp_meta_cruiseid,
+			char	*mbp_meta_cruisename,
 			char	*mbp_meta_pi,
+			char	*mbp_meta_piinstitution,
 			char	*mbp_meta_client,
+			int	*mbp_meta_svcorrected,
+			int	*mbp_meta_tidecorrected,
+			int	*mbp_meta_batheditmanual,
+			int	*mbp_meta_batheditauto,
+			double	*mbp_meta_rollbias,
+			double	*mbp_meta_pitchbias,
+			double	*mbp_meta_headingbias,
+			double	*mbp_meta_draft,
 			int *error);

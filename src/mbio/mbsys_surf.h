@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.h	6/22/01
- *	$Id: mbsys_surf.h,v 5.1 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_surf.h,v 5.2 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	June 22, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001-07-19 17:32:54-07  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.0  2001/06/29  22:49:07  caress
  * Added support for HSDS2RAW
  *
@@ -258,7 +261,7 @@ struct mbsys_surf_struct
 	/* processed bathymetry */
 	double		pr_navlon;					/* longitude (degrees) */
 	double		pr_navlat;					/* latitude (degrees) */
-	double		pr_speed;					/* speed made good (km/hr) */
+	double		pr_speed;					/* speed made good (m/s) */
 	double		pr_bath[MBSYS_SURF_MAXBEAMS];			/* bathymetry (m) */
 	double		pr_bathacrosstrack[MBSYS_SURF_MAXBEAMS];	/* acrosstrack distance (m) */
 	double		pr_bathalongtrack[MBSYS_SURF_MAXBEAMS];		/* alongtrack distance (m) */

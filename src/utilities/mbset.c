@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.7 2001-08-04 01:01:07 caress Exp $
+ *    $Id: mbset.c,v 5.8 2001-08-10 22:42:50 dcaress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001-08-03 18:01:07-07  caress
+ * Added cut by speed.
+ *
  * Revision 5.6  2001/07/31  00:42:12  caress
  * Added data cutting capability.
  *
@@ -78,7 +81,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.7 2001-08-04 01:01:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.8 2001-08-10 22:42:50 dcaress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -690,31 +693,83 @@ the manual pages for mbprocess and mbset. \n\n";
 		    }
    
 		/* metadata insertion */
-		else if (strncmp(pargv[i], "METAOPERATOR", 12) == 0)
-		    {
-			strcpy(process.mbp_meta_operator,&(pargv[i][13]));
-		    }
+		else if (strncmp(pargv[i], "METAVESSEL", 10) == 0)
+			{
+			strcpy(process.mbp_meta_vessel, &(pargv[i][11]));
+			}
+		else if (strncmp(pargv[i], "METAINSTITUTION", 15) == 0)
+			{
+			strcpy(process.mbp_meta_institution, &(pargv[i][16]));
+			}
 		else if (strncmp(pargv[i], "METAPLATFORM", 12) == 0)
-		    {
-			strcpy(process.mbp_meta_platform,&(pargv[i][13]));
-		    }
+			{
+			strcpy(process.mbp_meta_platform, &(pargv[i][13]));
+			}
+		else if (strncmp(pargv[i], "METASONARVERSION", 16) == 0)
+			{
+			strcpy(process.mbp_meta_sonarversion, &(pargv[i][17]));
+			}
 		else if (strncmp(pargv[i], "METASONAR", 9) == 0)
-		    {
-			strcpy(process.mbp_meta_sonar,&(pargv[i][10]));
-		    }
-		else if (strncmp(pargv[i], "METASURVEY", 10) == 0)
-		    {
-			strcpy(process.mbp_meta_survey,&(pargv[i][11]));
-		    }
+			{
+			strcpy(process.mbp_meta_sonar, &(pargv[i][10]));
+			}
+		else if (strncmp(pargv[i], "METACRUISEID", 12) == 0)
+			{
+			strcpy(process.mbp_meta_cruiseid, &(pargv[i][13]));
+			}
+		else if (strncmp(pargv[i], "METACRUISENAME", 14) == 0)
+			{
+			strcpy(process.mbp_meta_cruisename, &(pargv[i][15]));
+			}
+		else if (strncmp(pargv[i], "METAPIINSTITUTION", 17) == 0)
+			{
+			strcpy(process.mbp_meta_piinstitution, &(pargv[i][18]));
+			}
 		else if (strncmp(pargv[i], "METAPI", 6) == 0)
-		    {
-			strcpy(process.mbp_meta_pi,&(pargv[i][7]));
-		    }
+			{
+			strcpy(process.mbp_meta_pi, &(pargv[i][7]));
+			}
 		else if (strncmp(pargv[i], "METACLIENT", 10) == 0)
-		    {
-			strcpy(process.mbp_meta_client,&(pargv[i][11]));
-		    }
-   
+			{
+			strcpy(process.mbp_meta_client, &(pargv[i][11]));
+			}
+		else if (strncmp(pargv[i], "METASVCORRECTED", 15) == 0)
+			{
+			sscanf(pargv[i], "METASVCORRECTED:%d", &(process.mbp_meta_svcorrected));
+			}
+		else if (strncmp(pargv[i], "METATIDECORRECTED", 17) == 0)
+			{
+			sscanf(pargv[i], "METATIDECORRECTED:%d", &(process.mbp_meta_tidecorrected));
+			}
+		else if (strncmp(pargv[i], "METABATHEDITMANUAL", 18) == 0)
+			{
+			sscanf(pargv[i], "METABATHEDITMANUAL:%d", &(process.mbp_meta_batheditmanual));
+			}
+		else if (strncmp(pargv[i], "METABATHEDITAUTO", 16) == 0)
+			{
+			sscanf(pargv[i], "METABATHEDITAUTO:%d", &(process.mbp_meta_batheditauto));
+			}
+		else if (strncmp(pargv[i], "METAROLLBIAS", 12) == 0)
+			{
+			sscanf(pargv[i], "METAROLLBIAS:%lf", &(process.mbp_meta_rollbias));
+			}
+		else if (strncmp(pargv[i], "METAROLLBIAS", 12) == 0)
+			{
+			sscanf(pargv[i], "METAROLLBIAS:%lf", &(process.mbp_meta_rollbias));
+			}
+		else if (strncmp(pargv[i], "METAPITCHBIAS", 13) == 0)
+			{
+			sscanf(pargv[i], "METAPITCHBIAS:%lf", &(process.mbp_meta_pitchbias));
+			}
+		else if (strncmp(pargv[i], "METAHEADINGBIAS", 15) == 0)
+			{
+			sscanf(pargv[i], "METAHEADINGBIAS:%lf", &(process.mbp_meta_headingbias));
+			}
+		else if (strncmp(pargv[i], "METADRAFT", 9) == 0)
+			{
+			sscanf(pargv[i], "METADRAFT:%lf", &(process.mbp_meta_draft));
+			}
+
 		/* unrecognized command */
 		else
 		    {
@@ -966,12 +1021,24 @@ the manual pages for mbprocess and mbset. \n\n";
 	    fprintf(stderr,"  Sidescan interpolation:        %d\n",process.mbp_ssrecalc_interpolate);
 
 	    fprintf(stderr,"\nMetadata Insertion:\n");
-	    fprintf(stderr,"  Metadata operator:             %s\n",process.mbp_meta_operator);
+	    fprintf(stderr,"  Metadata vessel:               %s\n",process.mbp_meta_vessel);
+	    fprintf(stderr,"  Metadata institution:          %s\n",process.mbp_meta_institution);
 	    fprintf(stderr,"  Metadata platform:             %s\n",process.mbp_meta_platform);
 	    fprintf(stderr,"  Metadata sonar:                %s\n",process.mbp_meta_sonar);
-	    fprintf(stderr,"  Metadata survey:               %s\n",process.mbp_meta_survey);
+	    fprintf(stderr,"  Metadata sonarversion:         %s\n",process.mbp_meta_sonarversion);
+	    fprintf(stderr,"  Metadata cruiseid:             %s\n",process.mbp_meta_cruiseid);
+	    fprintf(stderr,"  Metadata cruisename:           %s\n",process.mbp_meta_cruisename);
 	    fprintf(stderr,"  Metadata pi:                   %s\n",process.mbp_meta_pi);
+	    fprintf(stderr,"  Metadata piinstitution:        %s\n",process.mbp_meta_piinstitution);
 	    fprintf(stderr,"  Metadata client:               %s\n",process.mbp_meta_client);
+	    fprintf(stderr,"  Metadata svcorrected:          %d\n",process.mbp_meta_svcorrected);
+	    fprintf(stderr,"  Metadata tidecorrected         %d\n",process.mbp_meta_tidecorrected);
+	    fprintf(stderr,"  Metadata batheditmanual        %d\n",process.mbp_meta_batheditmanual);
+	    fprintf(stderr,"  Metadata batheditauto:         %d\n",process.mbp_meta_batheditauto);
+	    fprintf(stderr,"  Metadata rollbias:             %f\n",process.mbp_meta_rollbias);
+	    fprintf(stderr,"  Metadata pitchbias:            %f\n",process.mbp_meta_pitchbias);
+	    fprintf(stderr,"  Metadata headingbias:          %f\n",process.mbp_meta_headingbias);
+	    fprintf(stderr,"  Metadata draft:                %f\n",process.mbp_meta_draft);
 	    }
 
 	/* write parameters */

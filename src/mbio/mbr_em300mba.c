@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.8 2001-08-04 01:00:02 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.9 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001-08-03 18:00:02-07  caress
+ * Applied mods from Gordon Keith.
+ *
  * Revision 5.7  2001/07/20  00:31:11  caress
  * Release 5.0.beta03
  *
@@ -206,7 +209,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.9 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_register_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -336,7 +339,7 @@ int mbr_info_em300mba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.9 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_info_em300mba";
 	int	status = MB_SUCCESS;
 
@@ -405,7 +408,7 @@ int mbr_info_em300mba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300mba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.8 2001-08-04 01:00:02 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.9 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -811,7 +814,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			    }
 			    
 			/* report problem */
-			if (skip > 0 && !(skip == 4 || *wrapper < 0))
+			if (skip > 0 && !(skip == 4 || *wrapper < 0) && verbose > 0)
 			    {
 			    if (*nbadrec == 0)
 					fprintf(stderr, 
@@ -1394,11 +1397,11 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 			|| sonar == MBSYS_SIMRAD2_EM3000D_5
 			|| sonar == MBSYS_SIMRAD2_EM3000D_6
 			|| sonar == MBSYS_SIMRAD2_EM3000D_7
-			|| sonar != MBSYS_SIMRAD2_EM12S
-			|| sonar != MBSYS_SIMRAD2_EM12D
-			|| sonar != MBSYS_SIMRAD2_EM121
-			|| sonar != MBSYS_SIMRAD2_EM100
-			|| sonar != MBSYS_SIMRAD2_EM1000))
+			|| sonar == MBSYS_SIMRAD2_EM12S
+			|| sonar == MBSYS_SIMRAD2_EM12D
+			|| sonar == MBSYS_SIMRAD2_EM121
+			|| sonar == MBSYS_SIMRAD2_EM100
+			|| sonar == MBSYS_SIMRAD2_EM1000))
 			{
 			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", type, sonar, type, sonar);
 			}

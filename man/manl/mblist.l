@@ -1,4 +1,4 @@
-.TH mblist l "16 July 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l "9 August 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -70,8 +70,14 @@ Default: ASCII output with fields separated by tabs.
 .B \-B
 \fIyr/mo/da/hr/mn/sc\fP
 .br
-Sets the starting time for data allowed in the input data; pings
-with times before the starting time will be ignored. 
+This option sets the starting time for data allowed in the input data.
+The \f-E\fP option sets the ending time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
 .B \-D
@@ -101,8 +107,14 @@ Default: \fImode\fP = 1.
 .B \-E
 \fIyr/mo/da/hr/mn/sc\fP
 .br
-Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
+This option sets the ending time for data allowed in the input data.
+The \f-B\fP option sets the starting time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \-F
@@ -298,14 +310,14 @@ Sets the manner in which \fBmblist\fP handles flagged and null
 bathymetry, amplitude, and sidescan values. By default, \fBmblist\fP
 omits lines of output if they contain flagged or null values. This
 default corresponds to \fIcheck\fP = 0. 
-If fIcheck\fP = 1, then flagged values will be output 
+If \fIcheck\fP = 1, then flagged values will be output 
 unchanged and null values will be ignored.
-If fIcheck\fP = 2,
+If \fIcheck\fP = 2,
 then flagged values will be output unchanged and null values
 will be output as zero (This corresponds to the \fB-Q\fP option).
-If fIcheck\fP = 3, then flagged values will be output unchanged
+If \fIcheck\fP = 3, then flagged values will be output unchanged
 and null values will be output as "NaN".
-If fIcheck\fP = 4, then flagged values and null values 
+If \fIcheck\fP = 4, then flagged values and null values 
 will be output as "NaN".
 .TP
 .B \-V

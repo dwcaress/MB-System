@@ -9,7 +9,7 @@ Version 5.0
 \fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
 \fB-D\fImin/max\fP \fB-F\fIformat\fP 
 \fB-G\fIfraction_low/fraction_high\fP 
-\fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-N\fIbuffersize\fP \fB-O\fIoutfile\fP 
+\fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
 \fB-M\fImode\fP \fB-Q\fP \fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
@@ -242,7 +242,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 5.1 2001-03-22 21:15:49 caress Exp $
+ 	Version $Id: mbclean.l,v 5.2 2001-08-10 22:42:50 dcaress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

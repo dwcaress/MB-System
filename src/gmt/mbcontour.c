@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.3 2001-07-20 00:29:41 caress Exp $
+ *    $Id: mbcontour.c,v 5.4 2001-08-10 22:40:02 dcaress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001-07-19 17:29:41-07  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22 21:03:31  caress
  * Trying to make release 5.0.beta0.
  *
@@ -167,11 +170,14 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_contour.h"
 
+/* GMT argument handling define */
+#define MBCONTOUR_GMT_ARG_MAX 128
+
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.3 2001-07-20 00:29:41 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.4 2001-08-10 22:40:02 dcaress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -184,6 +190,8 @@ main (int argc, char **argv)
 
 	extern char *optarg;
 	extern int optkind;
+	int     argc_gmt = 0;
+	char    *argv_gmt[MBCONTOUR_GMT_ARG_MAX];
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -339,8 +347,47 @@ main (int argc, char **argv)
 	plot_triangles = MB_NO;
 	bathy_in_feet = MB_NO;
 
+	/* get GMT options into separate argv */
+	argv_gmt[0] = argv[0];
+	argc_gmt = 1;
+	for (i=1;i<argc;i++)
+	  {
+	  if (argv[i][0] == '-')
+	    {
+	    switch (argv[i][1])
+	        {
+		case 'B':
+		case 'F':
+		case 'J':
+		case 'j':
+		case 'K':
+		case 'k':
+		case 'O':
+		case 'o':
+		case 'P':
+		case 'R':
+		case 'r':
+		case 'U':
+		case 'u':
+		case 'V':
+		case 'v':
+		case 'X':
+		case 'x':
+		case 'Y':
+		case 'y':
+		case '#':
+		        if (argc_gmt < MBCONTOUR_GMT_ARG_MAX)
+			  {
+			  argv_gmt[argc_gmt] = argv[i];
+			  argc_gmt++;
+			  break;
+			  }    
+		}
+	    }
+	  }
+
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhA:a:b:C:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:c:F:J:KOPR:UWwX:x:Y:y:Z:z:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:I:i:J:j:KkL:l:N:n:OoPp:QqR:r:S:s:T:t:UuWwX:x:Y:y:Z:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -509,7 +556,7 @@ main (int argc, char **argv)
 		}
 
 	/* initialize plotting */
-	status = plot_init(verbose,argc,argv,bounds,&scale,&inchtolon,&error);
+	status = plot_init(verbose,argc_gmt,argv_gmt,bounds,&scale,&inchtolon,&error);
 
 	/* if error flagged then print it and exit */
 	if (status == MB_FAILURE)

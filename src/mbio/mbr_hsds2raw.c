@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2raw.c,v 5.2 2001-07-26 03:40:56 caress Exp $
+ *	$Id: mbr_hsds2raw.c,v 5.3 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001-07-25 20:40:56-07  caress
+ * Fixed handling of sidescan.
+ *
  * Revision 5.1  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -82,7 +85,7 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.2 2001-07-26 03:40:56 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.3 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_register_hsds2raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -212,7 +215,7 @@ int mbr_info_hsds2raw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.2 2001-07-26 03:40:56 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.3 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_info_hsds2raw";
 	int	status = MB_SUCCESS;
 
@@ -281,7 +284,7 @@ int mbr_info_hsds2raw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.2 2001-07-26 03:40:56 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.3 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_alm_hsds2raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -554,6 +557,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	sys_wind_status;
 
 	double	rr;
+	double  pspeed;
 	double	*angle_table;
 	int	i;
 
@@ -1663,8 +1667,9 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		{
 		mb_navint_interp(verbose, mbio_ptr, 
 				store->tt_transmit_time_d, store->start_heading, 0.0, 
-				&(store->pr_navlon), &(store->pr_navlat), &(store->pr_speed), 
+				&(store->pr_navlon), &(store->pr_navlat), &pspeed, 
 				error);
+		store->pr_speed = pspeed / 3.6;
 		}
 
 	/* set kind */

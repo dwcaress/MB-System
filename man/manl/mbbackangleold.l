@@ -1,4 +1,4 @@
-.TH mbbackangle l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbbackangle l "9 August 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbbackangle\fP - Generates a table of the average amplitude or 
 sidescan values in swath sonar data as a function of 
@@ -52,8 +52,14 @@ Default: \fIkind\fP = 2.
 .B \-B
 \fIyr/mo/da/hr/mn/sc\fP
 .br
-Sets the starting time for data allowed in the input data; pings
-with times before the starting time will be ignored. 
+This option sets the starting time for data allowed in the input data.
+The \f-E\fP option sets the ending time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
 .B \-C
@@ -65,8 +71,14 @@ vs grazing angle function will not be forced to be symmetric.
 .B \-E
 \fIyr/mo/da/hr/mn/sc\fP
 .br
-Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
+This option sets the ending time for data allowed in the input data.
+The \f-B\fP option sets the starting time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \-F
