@@ -438,10 +438,10 @@ Draws a plane at the level of the \fInull\fP value (with
 respect to the data in the grid file specified with the \fB-I\fP
 option. If the optional r/g/b is provided,
 the frontal facade between the plane and the data perimeter is
-filled with this color. By default, \fBmbm_grd3dplot\fP causes
+filled with this color. If \fB-MVN\fP is given by
+itself, then \fBmbm_grd3dplot\fP causes
 the null plane to be drawn at the minimum z-level and the facade
-to be colored a light gray (r=g=b=200). If \fB-MVN\fP is given by
-itself, then no null plane or facade is drawn.
+to be colored a light gray (r=g=b=200).
 .TP
 .B \fB-O\fIroot\fP
 Sets the root used to construct the filename of the output shellscript
