@@ -308,7 +308,7 @@ manual page for details. By default the program chooses
 basemap annotations based on the map boundaries.
 .TP
 .B \-C
-\fP\fI[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\fP
+\fI[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\fP
 .br
 Given by itself, the \fB-C\fP option produces a contour plot
 of the bathymetry data with a contour interval chosen according
