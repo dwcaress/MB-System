@@ -107,6 +107,14 @@ identifier BXG_scale_controls_contourinterval;
 identifier BXG_scale_controls_colorinterval;
 identifier BXG_scale_controls_tickinterval;
 identifier BXG_scale_controls_sectionlength;
+identifier BXG_pushButton_biases_applyall;
+identifier BXG_scale_biases_heading2;
+identifier BXG_scale_biases_roll2;
+identifier BXG_scale_biases_roll1;
+identifier BXG_scale_biases_heading1;
+identifier BXG_label_biases_files;
+identifier BXG_toggleButton_biases_separate;
+identifier BXG_toggleButton_biases_together;
 procedure BxManageCB(string);
 procedure BxUnmanageCB;
 procedure BxSetValuesCB;
@@ -147,8 +155,16 @@ procedure do_naverr_selecttie();
 procedure do_view_showties();
 procedure do_naverr_resettie();
 procedure do_naverr_misfitcenter();
+procedure do_biases_apply();
+procedure do_biases_init();
+procedure do_biases_applyall();
+procedure do_biases_toggle();
+procedure do_biases_heading();
+procedure do_biases_roll();
 !(BX) "int" "mbna_fileselect_mode"
 identifier mbna_fileselect_mode;
+!(BX) "Widget" "bulletinBoard_biases"
+identifier bulletinBoard_biases;
 
 list BaseStyle : arguments {
 };
@@ -173,6 +189,367 @@ list Style_useReasons : callbacks {
 !(BX)    handlers BaseStyleHandlers;
 !(BX)};
 
+
+object pushButton_biases_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNx = 80;
+        XmNy = 550;
+        XmNwidth = 70;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure BxUnmanageCB("bulletinBoard_biases");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_biases_apply : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Apply");
+        XmNx = 10;
+        XmNy = 550;
+        XmNwidth = 70;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_biases_apply();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_biases_together : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Same biases");
+        XmNwidth = 121;
+        XmNheight = 26;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_biases_together);
+        XmNvalueChangedCallback = procedure do_biases_toggle();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_biases_separate : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Different biases");
+        XmNwidth = 121;
+        XmNheight = 26;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_biases_separate);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object radioBox_biases_together : XmRadioBox widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 10;
+        XmNy = 50;
+        XmNwidth = 127;
+        XmNheight = 61;
+    };
+    controls {
+         managed XmToggleButton toggleButton_biases_together;
+         managed XmToggleButton toggleButton_biases_separate;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_biases_files : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Section ID\'s:", separate=true) &
+ compound_string("  Section 1: XXX:XXX", separate=true) &
+ compound_string("  Section 2: XXX:XXX");
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 140;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_biases_files);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_biases_heading1 : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = -99;
+        XmNdecimalPoints = 1;
+        XmNvalue = 0;
+        XmNmaximum = 99;
+        XmNshowValue = true;
+        XmNorientation = XmVERTICAL;
+        XmNx = 10;
+        XmNy = 160;
+        XmNwidth = 60;
+        XmNheight = 140;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_biases_heading1);
+        XmNvalueChangedCallback = procedure do_biases_heading();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_biases_roll1 : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = -99;
+        XmNdecimalPoints = 1;
+        XmNvalue = 0;
+        XmNmaximum = 99;
+        XmNshowValue = true;
+        XmNorientation = XmVERTICAL;
+        XmNx = 70;
+        XmNy = 160;
+        XmNwidth = 60;
+        XmNheight = 140;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_biases_roll1);
+        XmNvalueChangedCallback = procedure do_biases_roll();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_biases_section1 : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Section 1 Biases (deg)", separate=true) &
+ compound_string("Heading     Roll");
+        XmNx = 10;
+        XmNy = 130;
+        XmNwidth = 140;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_biases_section2 : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Section 2 Biases (deg)", separate=true) &
+ compound_string("Heading     Roll");
+        XmNx = 10;
+        XmNy = 330;
+        XmNwidth = 140;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_biases_roll2 : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = -99;
+        XmNdecimalPoints = 1;
+        XmNvalue = 0;
+        XmNmaximum = 99;
+        XmNshowValue = true;
+        XmNorientation = XmVERTICAL;
+        XmNx = 70;
+        XmNy = 360;
+        XmNwidth = 60;
+        XmNheight = 140;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_biases_roll2);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_biases_heading2 : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = -99;
+        XmNdecimalPoints = 1;
+        XmNvalue = 0;
+        XmNmaximum = 99;
+        XmNshowValue = true;
+        XmNorientation = XmVERTICAL;
+        XmNx = 10;
+        XmNy = 360;
+        XmNwidth = 60;
+        XmNheight = 140;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_biases_heading2);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator6 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 310;
+        XmNwidth = 140;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object separator8 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 110;
+        XmNwidth = 140;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object pushButton_biases_applyall : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Apply to All Files");
+        XmNx = 10;
+        XmNy = 510;
+        XmNwidth = 140;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_biases_applyall);
+        XmNactivateCallback = procedure do_biases_applyall();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object bulletinBoard_biases : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("Heading & Roll Bias");
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 427;
+        XmNy = 36;
+        XmNwidth = 158;
+        XmNheight = 591;
+    };
+    controls {
+         managed XmPushButton pushButton_biases_applyall;
+         managed XmSeparator separator8;
+         managed XmSeparator separator6;
+         managed XmScale scale_biases_heading2;
+         managed XmScale scale_biases_roll2;
+         managed XmLabel label_biases_section2;
+         managed XmLabel label_biases_section1;
+         managed XmScale scale_biases_roll1;
+         managed XmScale scale_biases_heading1;
+         managed XmLabel label_biases_files;
+         managed XmRadioBox radioBox_biases_together;
+         managed XmPushButton pushButton_biases_apply;
+         managed XmPushButton pushButton_biases_dismiss;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object dialogShell_biases : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNtitle = "Attitude Biases";
+!(BX)        XmNwidth = 158;
+!(BX)        XmNheight = 591;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmBulletinBoardDialog bulletinBoard_biases;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
 
 object pushButton_controls_dismiss : XmPushButton widget {
     arguments {
@@ -401,7 +778,7 @@ object pushButton_controls_apply : XmPushButton widget {
 object separator4 : XmSeparator widget {
     arguments {
         XmNx = 10;
-        XmNy = 90;
+        XmNy = 50;
         XmNwidth = 540;
         XmNheight = 20;
     };
@@ -433,7 +810,7 @@ object scale_controls_decimation : XmScale widget {
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
         XmNx = 150;
-        XmNy = 50;
+        XmNy = 70;
         XmNwidth = 400;
         XmNheight = 40;
     };
@@ -455,7 +832,7 @@ object label_controls_decimation : XmLabel widget {
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Decimation:");
         XmNx = 10;
-        XmNy = 70;
+        XmNy = 90;
         XmNwidth = 130;
         XmNheight = 20;
     };
@@ -474,8 +851,8 @@ object bulletinBoard_controls : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 249;
-        XmNy = 87;
+        XmNx = 618;
+        XmNy = 475;
         XmNwidth = 571;
         XmNheight = 290;
     };
@@ -526,7 +903,7 @@ object pushButton_naverr_setnone : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Skip Crossing");
         XmNrecomputeSize = false;
-        XmNx = 440;
+        XmNx = 540;
         XmNy = 40;
         XmNwidth = 90;
         XmNheight = 30;
@@ -548,7 +925,7 @@ object pushButton_naverr_previous : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Previous");
         XmNrecomputeSize = false;
-        XmNx = 100;
+        XmNx = 10;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 30;
@@ -570,7 +947,7 @@ object pushButton_naverr_next : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Next");
         XmNrecomputeSize = false;
-        XmNx = 180;
+        XmNx = 90;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 30;
@@ -614,7 +991,7 @@ object pushButton_naverr_selecttie : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Select Tie");
         XmNrecomputeSize = false;
-        XmNx = 440;
+        XmNx = 540;
         XmNy = 10;
         XmNwidth = 90;
         XmNheight = 30;
@@ -648,6 +1025,7 @@ object pushButton_naverr_dismiss : XmPushButton widget {
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_dismiss);
        XmNactivateCallback = procedures {
                  do_dismiss_naverr();
+                 BxUnmanageCB("bulletinBoard_biases");
                  BxUnmanageCB("bulletinBoard_naverr");
         };
     };
@@ -737,7 +1115,7 @@ object pushButton_naverr_nextunset : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Next Unset");
         XmNrecomputeSize = false;
-        XmNx = 260;
+        XmNx = 170;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 30;
@@ -779,8 +1157,8 @@ object label_naverr_offsets : XmLabel widget {
 object pushButton_naverr_controls : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Controls");
-        XmNx = 10;
+        XmNlabelString = compound_string("Contours");
+        XmNx = 350;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 30;
@@ -820,9 +1198,9 @@ object pushButton_naverr_fullsize : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Full Size");
-        XmNx = 550;
+        XmNx = 250;
         XmNy = 10;
-        XmNwidth = 90;
+        XmNwidth = 80;
         XmNheight = 30;
     };
     controls {
@@ -841,7 +1219,7 @@ object pushButton_naverr_deletetie : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Delete Tie");
         XmNrecomputeSize = false;
-        XmNx = 350;
+        XmNx = 440;
         XmNy = 40;
         XmNwidth = 90;
         XmNheight = 30;
@@ -863,7 +1241,7 @@ object pushButton_naverr_addtie : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Add Tie");
         XmNrecomputeSize = false;
-        XmNx = 350;
+        XmNx = 440;
         XmNy = 10;
         XmNwidth = 90;
         XmNheight = 30;
@@ -960,6 +1338,29 @@ object radioBox_misfitcenter : XmRadioBox widget {
 !(BX)    };
 };
 
+object pushButton_naverr_biases : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Biases");
+        XmNx = 350;
+        XmNy = 40;
+        XmNwidth = 80;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+       XmNactivateCallback = procedures {
+                 BxManageCB("bulletinBoard_biases");
+                 do_biases_init();
+        };
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object bulletinBoard_naverr : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
@@ -969,12 +1370,13 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 124;
-        XmNy = 112;
+        XmNx = 104;
+        XmNy = 227;
         XmNwidth = 845;
         XmNheight = 595;
     };
     controls {
+         managed XmPushButton pushButton_naverr_biases;
          managed XmRadioBox radioBox_misfitcenter;
          managed XmPushButton pushButton_naverr_resettie;
          managed XmPushButton pushButton_naverr_addtie;
@@ -1096,10 +1498,10 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 227;
-        XmNy = 165;
+        XmNx = 134;
+        XmNy = 225;
         XmNwidth = 611;
-        XmNheight = 532;
+        XmNheight = 530;
     };
     controls {
          managed XmTextField textField_format;
@@ -1116,7 +1518,7 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
 !(BX)        XmNtitle = "Select Input Data File";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNwidth = 611;
-!(BX)        XmNheight = 532;
+!(BX)        XmNheight = 530;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_fileselection;
@@ -1213,8 +1615,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 379;
-        XmNy = 152;
+        XmNx = 156;
+        XmNy = 234;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -1293,8 +1695,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 264;
-        XmNy = 189;
+        XmNx = 147;
+        XmNy = 227;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -1549,8 +1951,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 211;
-        XmNy = 155;
+        XmNx = 169;
+        XmNy = 96;
         XmNwidth = 674;
         XmNheight = 470;
     };
@@ -1950,8 +2352,8 @@ object pushButton_controls : XmPushButton widget {
 object pulldownMenu_option : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 96;
-        XmNy = 59;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 61;
         XmNheight = 26;
     };
@@ -2040,8 +2442,8 @@ object pushButton_showties : XmPushButton widget {
 object pulldownMenu_view : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 151;
-        XmNy = 59;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 109;
         XmNheight = 70;
     };
@@ -2281,12 +2683,13 @@ object menuBar_mbnavadjust : XmMenuBar widget {
 
 object mainWindow : XmMainWindow widget {
     arguments {
-        XmNx = 55;
-        XmNy = 32;
+        XmNx = 26;
+        XmNy = 125;
         XmNwidth = 960;
         XmNheight = 412;
     };
     controls {
+!(BX)         unmanaged XmDialogShell dialogShell_biases;
 !(BX)         unmanaged XmDialogShell xmDialogShell_controls;
 !(BX)         unmanaged XmDialogShell dialogShell_naverr;
 !(BX)         unmanaged XmDialogShell xmDialogShell_fileselection;
@@ -2304,8 +2707,8 @@ object mainWindow : XmMainWindow widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
-!(BX)        XmNx = 55;
-!(BX)        XmNy = 26;
+!(BX)        XmNx = 26;
+!(BX)        XmNy = 125;
 !(BX)        XmNwidth = 960;
 !(BX)        XmNheight = 412;
 !(BX)    };
