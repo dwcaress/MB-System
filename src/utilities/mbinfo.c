@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	3.00	2/1/93
- *    $Id: mbinfo.c,v 3.2 1993-06-17 16:14:13 caress Exp $
+ *    $Id: mbinfo.c,v 3.3 1993-06-29 23:57:14 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.2  1993/06/17  16:14:13  caress
+ * Initialized several variables so that the programs does
+ * not print out trash if no data is found.
+ *
  * Revision 3.1  1993/06/12  04:29:33  caress
  * Added -N option which prevents mbinfo from listing out
  * comments encountered in the input data file.
@@ -55,10 +59,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 3.2 1993-06-17 16:14:13 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 3.3 1993-06-29 23:57:14 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam bathymetry data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
-	static char usage_message[] = "mbinfo [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -N -V -H -Ifile]";
+	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -107,7 +111,7 @@ char **argv;
 	int	*backdist;
 	char	comment[256];
 	int	icomment = 0;
-	int	comments = MB_YES;
+	int	comments = MB_NO;
 
 	/* limit variables */
 	double	lonmin = 0.0;
@@ -132,6 +136,8 @@ char **argv;
 	double	timend = 0.0;
 	int	timbeg_i[6];
 	int	timend_i[6];
+	int	timbeg_j[4];
+	int	timend_j[4];
 	double	distot = 0.0;
 	double	timtot = 0.0;
 	double	spdavg = 0.0;
@@ -176,7 +182,7 @@ char **argv;
 	strcpy (file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:Nn")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:Cc")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -241,9 +247,9 @@ char **argv;
 			sscanf (optarg,"%s", file);
 			flag++;
 			break;
-		case 'N':
-		case 'n':
-			comments = MB_NO;
+		case 'C':
+		case 'c':
+			comments = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -665,6 +671,8 @@ char **argv;
 	distot = distot;
 	if (distot > 0.0)
 		spdavg = distot/timtot;
+	mb_get_jtime(verbose,timbeg_i,timbeg_j);
+	mb_get_jtime(verbose,timend_i,timend_j);
 	fprintf(output,"\nData Totals:\n");
 	fprintf(output,"Number of Records:        %8d\n",irec);
 	fprintf(output,"Bathymetry Data:\n");
@@ -682,14 +690,18 @@ char **argv;
 	fprintf(output,"Total Track Length: %10.4f km\n",distot);
 	fprintf(output,"Average Speed:      %10.4f km/hr\n",spdavg);
 	fprintf(output,"\nStart of Data:\n");
-	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d\n",timbeg_i[1],
-		timbeg_i[2],timbeg_i[0],timbeg_i[3],timbeg_i[4],timbeg_i[5]);
-	fprintf(output,"Lon: %9.4f     Lat: %9.4f   Depth:%8.2f\n",lonbeg,latbeg,bathbeg);
+	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d  JD%d\n",
+		timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
+		timbeg_i[4],timbeg_i[5],timbeg_j[1]);
+	fprintf(output,"Lon: %9.4f     Lat: %9.4f   Depth:%8.2f\n",
+		lonbeg,latbeg,bathbeg);
 	fprintf(output,"Speed:%8.4f  Heading:%9.4f\n",spdbeg,hdgbeg);
 	fprintf(output,"\nEnd of Data:\n");
-	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d\n",timend_i[1],
-		timend_i[2],timend_i[0],timend_i[3],timend_i[4],timend_i[5]);
-	fprintf(output,"Lon: %9.4f     Lat: %9.4f   Depth:%8.2f\n",lonend,latend,bathend);
+	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d  JD%d\n",
+		timend_i[1],timend_i[2],timend_i[0],timend_i[3],
+		timend_i[4],timend_i[5],timend_j[1]);
+	fprintf(output,"Lon: %9.4f     Lat: %9.4f   Depth:%8.2f\n",
+		lonend,latend,bathend);
 	fprintf(output,"Speed:%8.4f  Heading:%9.4f\n",spdend,hdgend);
 	fprintf(output,"\nLimits:\n");
 	fprintf(output,"  Minimum Lon: %10.4f     Maximum Lon: %10.4f\n",lonmin,lonmax);
