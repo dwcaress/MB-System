@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.27 2000-03-08 00:03:45 caress Exp $
+ *    $Id: mbbath.c,v 4.28 2000-09-19 22:21:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.27  2000/03/08  00:03:45  caress
+ * Release 4.6.10
+ *
  * Revision 4.26  1999/01/01  23:34:40  caress
  * MB-System version 4.6beta6
  *
@@ -171,7 +174,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.27 2000-03-08 00:03:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.28 2000-09-19 22:21:09 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -181,7 +184,7 @@ meters) or adjusted as if the \nvertical water velocity is 1500 m/s \
 and stdout.";
 	static char usage_message[] = "mbbath [-Brollbias -C \
 -Ddraft -Fformat  \n\t-Iinfile -Kssv -Ooutfile -Ppitch_bias -Rrollfile \
-\n\t-Sstaticfile -U -Wvelfile -Z -V -H]";
+\n\t-Sstaticfile -Tttscale -U -Wvelfile -Z -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -271,6 +274,10 @@ and stdout.";
 	int	ssv_prelimpass = MB_YES;
 	double	ssv_default;
 	double	ssv_start;
+	
+	/* travel time scaling variables */
+	int	ttscale_mode = MB_NO;
+	double	ttscale;
 
 	/* roll error correction handling variables */
 	char	rfile[128];
@@ -360,7 +367,7 @@ and stdout.";
 	uncorrected = MB_NO;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:CcD:d:F:f:I:i:K:k:O:o:P:p:R:r:S:s:UuW:w:XxZz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:CcD:d:F:f:I:i:K:k:O:o:P:p:R:r:S:s:T:t:UuW:w:XxZz")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -420,6 +427,12 @@ and stdout.";
 		case 'S':
 		case 's':
 			sscanf (optarg,"%s", sfile);
+			flag++;
+			break;
+		case 'T':
+		case 't':
+			sscanf (optarg,"%lf", &ttscale);
+			ttscale_mode = MB_YES;
 			flag++;
 			break;
 		case 'U':
@@ -508,6 +521,10 @@ and stdout.";
 		fprintf(stderr,"dbg2       ssv_default:     %f\n",ssv_default);
 		fprintf(stderr,"dbg2       roll file:       %s\n",rfile);
 		fprintf(stderr,"dbg2       statics file:    %s\n",sfile);
+		if (ttscale_mode == MB_YES)
+		    fprintf(stderr,"dbg2       tt scale:        %f\n",ttscale);
+		else
+		    fprintf(stderr,"dbg2       tt scale:        OFF\n");
 		}
 
 	/* if help desired then print it and exit */
@@ -1031,6 +1048,16 @@ and stdout.";
 		}
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
+
+	if (ttscale_mode == MB_YES)
+	    {
+	    fprintf(stderr,"dbg2       tt scale:        %f\n",ttscale);
+	    }
+	else
+	    {
+	    fprintf(stderr,"dbg2       tt scale:        OFF\n");
+	    }
+
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Roll correction file:      %s",rfile);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -1144,6 +1171,13 @@ and stdout.";
 				angles_forward,angles_null,
 				heave,alongtrack_offset,
 				&draft,&ssv,&error);
+				
+			/* rescale travel times if necessary */
+			if (ttscale_mode == MB_YES)
+				{
+				for (i=0;i<beams_bath;i++)
+					ttimes[i] = ttscale * ttimes[i];
+				}
 
 			/* set surface sound speed to default if needed */
 			if (ssv <= 0.0)
