@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrollbias.c	5/16/93
- *    $Id: mbrollbias.c,v 4.4 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbrollbias.c,v 4.5 1996-01-17 23:02:17 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,10 @@
  * Date:	May 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.3  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -72,6 +76,7 @@
 #define	M_PI	3.14159265358979323846
 #endif
 #define DTR	(M_PI/180.)
+#define RTD	(180./M_PI)
 
 /* structure definitions */
 struct bath
@@ -87,10 +92,10 @@ struct bathptr
 	};
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbrollbias.c,v 4.4 1995-05-12 17:12:32 caress Exp $";
+static char rcs_id[] = "$Id: mbrollbias.c,v 4.5 1996-01-17 23:02:17 caress Exp $";
 static char program_name[] = "MBROLLBIAS";
 static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of multibeam \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the multibeam system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
-static char usage_message[] = "mbrollbias -Dxdim/ydim -Rw/e/s/n  -Llonflip -V -H -Ifile1 -Jfile2]";
+static char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
 
 /*--------------------------------------------------------------------*/
 
@@ -172,6 +177,7 @@ char **argv;
 	double	jheading;
 	double	iaa, ibb, icc, ihh;
 	double	jaa, jbb, jcc, jhh;
+	double	hx, hy, dd;
 	double	sumx2, sumy2;
 	double	isine, icosine, jsine, jcosine;
 	double	roll_bias;
@@ -889,6 +895,8 @@ char **argv;
 
 			/* zero the arrays */
 			ihh = 0.0;
+			hx = 0.0;
+			hy = 0.0;
 			for (ii=0;ii<nmatrix;ii++)
 			  {
 			  vector[ii] = 0.0;
@@ -900,6 +908,8 @@ char **argv;
 			for (kk=0;kk<icount[indx];kk++)
 			  {
 			  ihh += zone[kk].h;
+			  hx += sin(DTR * zone[kk].h);
+			  hy += cos(DTR * zone[kk].h);
 			  xx[0] = 1.0;
 			  xx[1] = zone[kk].x;
 			  xx[2] = zone[kk].y;
@@ -920,13 +930,25 @@ char **argv;
 			iaa = vector[0];
 			ibb = vector[1];
 			icc = vector[2];
-			ihh = ihh/icount[indx];
+			hx = hx/icount[indx];
+			hy = hy/icount[indx];
+			dd = sqrt(hx * hx + hy * hy);
+			if (dd > 0.0)
+				ihh = RTD * atan2((hx/dd), (hy/dd));
+			else
+				ihh = ihh/icount[indx];
+			if (ihh > 360.0)
+				ihh = ihh - 360.0;
+			else if (ihh < 0.0)
+				ihh = ihh + 360.0;
 
 			/* use data from second data file */
 			zone = jdata[indx].ptr;
 
 			/* zero the arrays */
 			jhh = 0.0;
+			hx = 0.0;
+			hy = 0.0;
 			for (ii=0;ii<nmatrix;ii++)
 			  {
 			  vector[ii] = 0.0;
@@ -938,6 +960,8 @@ char **argv;
 			for (kk=0;kk<jcount[indx];kk++)
 			  {
 			  jhh += zone[kk].h;
+			  hx += sin(DTR * zone[kk].h);
+			  hy += cos(DTR * zone[kk].h);
 			  xx[0] = 1.0;
 			  xx[1] = zone[kk].x;
 			  xx[2] = zone[kk].y;
@@ -962,7 +986,17 @@ char **argv;
 			jaa = vector[0];
 			jbb = vector[1];
 			jcc = vector[2];
-			jhh = jhh/jcount[indx];
+			hx = hx/jcount[indx];
+			hy = hy/jcount[indx];
+			dd = sqrt(hx * hx + hy * hy);
+			if (dd > 0.0)
+				jhh = RTD * atan2((hx/dd), (hy/dd));
+			else
+				jhh = jhh/jcount[indx];
+			if (jhh > 360.0)
+				jhh = jhh - 360.0;
+			else if (jhh < 0.0)
+				jhh = jhh + 360.0;
 
 			/* report results */
 			fprintf(outfp,"First data file:    %s\n",ifile);
