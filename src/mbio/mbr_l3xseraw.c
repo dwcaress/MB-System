@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.0 2001-04-05 18:33:25 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.1 2001-04-09 18:04:51 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,10 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/04/05  18:33:25  caress
+ * Initial version.
+ * Consolidates two former i/o modules elmk2xse and sb2120xs.
+ *
  *
  */
 
@@ -97,7 +101,7 @@ int mbr_wt_l3xseraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.0 2001-04-05 18:33:25 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.1 2001-04-09 18:04:51 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -227,7 +231,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.0 2001-04-05 18:33:25 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.1 2001-04-09 18:04:51 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -296,7 +300,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.0 2001-04-05 18:33:25 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.1 2001-04-09 18:04:51 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -418,34 +422,42 @@ store->mul_frame, store->sid_frame);*/
 	/* save fix if nav data */
 	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_NAV)
-		{				
-		/* make room for latest fix */
-		if (mb_io_ptr->nfix >= MB_NAV_SAVE_MAX)
-			{
-			for (i=0;i<mb_io_ptr->nfix-1;i++)
-				{
-				mb_io_ptr->fix_time_d[i]
-				    = mb_io_ptr->fix_time_d[i+1];
-				mb_io_ptr->fix_lon[i]
-				    = mb_io_ptr->fix_lon[i+1];
-				mb_io_ptr->fix_lat[i]
-				    = mb_io_ptr->fix_lat[i+1];
-				}
-			mb_io_ptr->nfix--;
-			}
-			
-		/* add latest fix */
-		mb_io_ptr->fix_time_d[mb_io_ptr->nfix] 
-			= store->nav_sec 
+		{
+		/* get time */
+		time_d = store->nav_sec 
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->nav_usec;
-		mb_io_ptr->fix_lon[mb_io_ptr->nfix] = RTD * store->nav_x;
-		mb_io_ptr->fix_lat[mb_io_ptr->nfix] = RTD * store->nav_y;
-/*fprintf(stderr, "lon: %f %f   lat:%f %f\n", 
-store->nav_x, mb_io_ptr->fix_lon[mb_io_ptr->nfix], 
+			    
+		/* only add to navlist if timestamp updated */
+		if (mb_io_ptr->nfix == 0
+		    || time_d > mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+		    {
+		    /* make room for latest fix */
+		    if (mb_io_ptr->nfix >= MB_NAV_SAVE_MAX)
+			    {
+			    for (i=0;i<mb_io_ptr->nfix-1;i++)
+				    {
+				    mb_io_ptr->fix_time_d[i]
+					= mb_io_ptr->fix_time_d[i+1];
+				    mb_io_ptr->fix_lon[i]
+					= mb_io_ptr->fix_lon[i+1];
+				    mb_io_ptr->fix_lat[i]
+					= mb_io_ptr->fix_lat[i+1];
+				    }
+			    mb_io_ptr->nfix--;
+			    }
+			    
+		    /* add latest fix */
+		    mb_io_ptr->fix_time_d[mb_io_ptr->nfix] 
+			    = time_d;
+		    mb_io_ptr->fix_lon[mb_io_ptr->nfix] = RTD * store->nav_x;
+		    mb_io_ptr->fix_lat[mb_io_ptr->nfix] = RTD * store->nav_y;
+/*fprintf(stderr, "time:%f  lon: %f %f   lat:%f %f\n", 
+time_d, store->nav_x, mb_io_ptr->fix_lon[mb_io_ptr->nfix], 
 store->nav_y, mb_io_ptr->fix_lat[mb_io_ptr->nfix]);*/
-
-		mb_io_ptr->nfix++;
+    
+		    mb_io_ptr->nfix++;
+		    }
 		}
 
 	/* interpolate navigation for survey pings if needed */
@@ -453,9 +465,9 @@ store->nav_y, mb_io_ptr->fix_lat[mb_io_ptr->nfix]);*/
 		&& store->kind == MB_DATA_DATA
 		&& mb_io_ptr->nfix >= 1)
 		{
-		time_d = store->nav_sec 
+		time_d = store->mul_sec 
 			    - MBSYS_XSE_TIME_OFFSET
-			    + 0.000001 * store->nav_usec;
+			    + 0.000001 * store->mul_usec;
 		heading = RTD * store->nav_course_ground;
 		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
 				    &lon, &lat, &speed, error);
@@ -2471,6 +2483,8 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,char *store
 				store->sbm_message = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_message_id); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_message_len); index += 4;
+if (store->sbm_message_len > buffer_size)
+ fprintf(stderr,"Read message: %d %d %d\n",buffer_size,store->sbm_message_len,store->sbm_message_id);
 				for (i=0;i<store->sbm_message_len;i++)
 				    {
 				    store->sbm_message_txt[i] = buffer[index]; 
