@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.6 1994-11-21 20:40:18 caress Exp $
+#	$Id: Makefile.template,v 4.7 1995-01-04 17:08:14 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,10 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.6  1994/11/21  20:40:18  caress
+# Fixed mblevitus target so changing Makefile causes remake
+# of mblevitus.
+#
 # Revision 4.5  1994/11/21  19:05:43  caress
 # Added mb_rt for gradient raytracing with mbbath.
 #
@@ -79,7 +83,8 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.l \
 	$(BINDIR)/mbmask $(MANDIR)/mbmask.l \
 	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.l \
-	$(BINDIR)/mbps $(MANDIR)/mbps.l
+	$(BINDIR)/mbps $(MANDIR)/mbps.l \
+	$(BINDIR)/mbhistogram $(MANDIR)/mbhistogram.l
 
 ### make clean removes the object files
 clean:
@@ -140,6 +145,9 @@ $(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a
 $(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a \
 		$(GMTLIBDIR)/libpsl.a $(LFLAGS) -o $(BINDIR)/mbps
+$(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbhistogram.o $(LIBDIR)/libmbio.a \
+		$(LFLAGS) -o $(BINDIR)/mbhistogram
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
@@ -181,6 +189,8 @@ mbsmooth.o:	mbsmooth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbsmooth.c
 mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbps.c
+mbhistogram.o:	mbhistogram.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbhistogram.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbsystem.l:	mbsystem.manl
@@ -239,4 +249,6 @@ $(MANDIR)/mbsmooth.l:	mbsmooth.manl
 $(MANDIR)/mbps.l:	mbps.manl
 	cp mbps.manl $(MANDIR)/mbps.l
 	chmod 664 $(MANDIR)/mbps.l
-
+$(MANDIR)/mbhistogram.l:	mbhistogram.manl
+	cp mbhistogram.manl $(MANDIR)/mbhistogram.l
+	chmod 664 $(MANDIR)/mbhistogram.l
