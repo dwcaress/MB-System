@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.21 1995-05-12 17:15:38 caress Exp $
+ *    $Id: mbgrid.c,v 4.22 1995-05-17 21:51:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,10 @@
  * Rerewrite:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  1995/05/12  17:15:38  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.20  1995/04/25  19:09:03  caress
  * Now use C version of zgrid for thin plate spline interpolation.
  *
@@ -181,7 +185,7 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.21 1995-05-12 17:15:38 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.22 1995-05-17 21:51:20 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry data contained \nin a set of multibeam data files.  This program uses either a \nGaussian weighted average scheme or a median filter scheme to \ngrid regions covered by multibeam swaths and then can fill in gaps \nbetween the swaths (to the degree specified by the user) using \na minimum curvature interpolation algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n     -Bborder  -Cclip -Dxdim/ydim -Edx/dy -F -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n     -Ttension -Utime -V -Wscale -Xextend]";
@@ -2756,7 +2760,6 @@ int	*error;
 	long int	right_now;
 	char	date[128], user[128], host[128];
 	char	*message;
-	int	grd_status;
 	int	i, j, kg, ka;
 	int	grdstatus;
 	char	*ctime();
@@ -2829,17 +2832,10 @@ int	*error;
 				}
 
 		/* write the GMT netCDF grd file */
-		grdstatus = write_grd(outfile,&grd,a);
+		write_grd(outfile,&grd,a);
 
 		/* free memory for output array */
 		mb_free(verbose, &a, error);
-
-		/* check status */
-		if (grd_status != 0)
-			{
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-			}
 		}
 
 	/* print output debug statements */
