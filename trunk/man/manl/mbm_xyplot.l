@@ -311,14 +311,31 @@ to set as many \fBGMT\fP defaults as required. For example, to
 set the basemap annotation font to Courier, use 
 "-MGDANOT_FONT/Courier".
 .TP
-.B \-MCT
-[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] 
+.B \-MGT
+\fIx/y/size/angle/font/just/text\fP
 .br
-Will draw tickmarks pointing in the downward direction every \fIgap\fP along the innermost closed contours.  Append \fIgap\fP and tickmark length (in inch) or use defaults [0.2/0.05].
-User may choose to tick only local highs or local lows by specifying \fB\-T+\fP or \fB\-T-\fP, respectively.  Appending :LH will plot the characters L and H at the center of closed
-innermost contours (local lows and highs).  L and H can be any single character (e.g., LH, -+, etc.)
-If a file is given by \fB\-C\fP and \fB\-T\fP is set, 
-then only contours marked with upper case C or A will have tickmarks [and anotation].
+Causes a text label to plotted on the map.
+\fIsize\fP is text size in points, \fIangle\fP is 
+measured in degrees counter-clockwise from horizontal, 
+\fIfontno\fP sets the font type, \fIjustify\fP sets the alignment. 
+If \fIfontno\fP starts with a leading hyphen, then 
+the remainder of \fIfontno\fP is taken to be a 
+textstring with the desired fontname.  See the 
+\fBgmtdefaults\fP man page for names and numbers of available fonts 
+(or run \fBpstext \-L\fP).  The alignment 
+number refers to the part of the textstring that will be mapped 
+onto the (\fIx,y\fP) point: 1 = Lower Left corner, 
+2 = Lower Center, 3 = Lower Right, 5 = Mid Left, 6 = Mid Center, 
+7 = Mid Right, 9 = Upper Left, 10 = Upper Center, 
+11 = Upper Right. This option may be given as many times as
+needed.
+.TP
+.B \-MGU
+\fP[\fI/dx/dy/\fP][\fIlabel\fP]
+.br
+Draw Unix System time stamp on plot.  User may specify where the lower left corner
+of the stamp should fall on the page relative to lower left corner of plot in inch [Default is (-0.75,-0.75)].  Optionally,
+append a label, or \fBc\fP (which will plot the command string.)
 .TP
 .B \-O
 \fIroot\fP

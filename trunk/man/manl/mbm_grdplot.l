@@ -41,6 +41,7 @@ Miscellaneous Options:
 \fB-MTN\fP\fIborder[/pen]\fP \fB-MTS\fP\fIfill\fP 
 \fB-MTW\fP\fIpen\fP
 \fB-MXG\fP\fIfill\fP \fB-MXI\fP\fIxy_file \fP
+\fB-MXM\fP
 \fB-MXS\fP\fIsymbol/size\fP \fB-MXW\fP\fIpen\fP]
 
 .SH DESCRIPTION
@@ -697,6 +698,16 @@ given multiple times, so by stringing series of these
 commands together the user can plot different files
 using different line or symbol characteristics.
 [Default is a solid black line].
+.TP
+.B \-MXM
+.br
+Toggles expectation for xy data files having multiple
+segments, in which each segment is to be plotted 
+separately. Segments are separated by a
+record whose first character is '>'. By default, 
+unsegmented files are expected. Users may give this
+command multiple times, allowing some input files to
+be handled as segmented and others not.
 .TP
 .B \-MXS
 \fIsymbol/size\fP 
