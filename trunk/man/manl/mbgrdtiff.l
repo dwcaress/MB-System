@@ -1,10 +1,10 @@
-.TH mbgrdtiff l "5 November 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbgrdtiff l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrdtiff\fP - generates a geographically located TIFF image from
 a GMT grid file.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbgrdtiff\fP \fB-C\fIcptfile\fP \fB-I\fIgrdfile\fP 
