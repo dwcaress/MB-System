@@ -1,0 +1,34 @@
+
+Navadjust System Plan
+August 2, 1990
+
+Programs:
+
+  navcross - finds all crossing or overlapping swaths.
+  usage:
+    navcross -Rwest/east/south/north -Dxdim/ydim -Iinputlist inputfiles...
+
+  naverr - finds relative errors graphically and through correlation
+  usage:
+    naverr sectionid sectionid
+
+  navsetup - collates preliminary navigation and navigation errors to
+             set up navigation adjustment inverse problem.
+  
+  navsolve - solves inverse problem for optimal navigation adjustments
+
+  navadjust - adjust navigation for all of the multibeam files.
+
+
+
+
+
+navsetup:
+
+1) read in all sections.
+2) read in nav, accepting or discarding each fix as a tie point.
+3) read in naverr.list, adding each crossing point to the tie point list.
+4) sort the tie points into time order.
+5) find distance between adjacent tie points.
+6) collapse points which are too close together into a single point.
+7) output problem.
