@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prvr2.c	3/6/2003
- *	$Id: mbr_mr1prvr2.c,v 5.1 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_mr1prvr2.c,v 5.2 2004-04-27 01:01:46 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 6, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.0  2003/03/10 20:03:59  caress
  * Initial version.
  *
@@ -76,7 +79,7 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.1 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.2 2004-04-27 01:01:46 caress Exp $";
 	char	*function_name = "mbr_register_mr1prvr2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -208,7 +211,7 @@ int mbr_info_mr1prvr2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.1 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.2 2004-04-27 01:01:46 caress Exp $";
 	char	*function_name = "mbr_info_mr1prvr2";
 	int	status = MB_SUCCESS;
 
@@ -278,7 +281,7 @@ int mbr_info_mr1prvr2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.1 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.2 2004-04-27 01:01:46 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prvr2";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -503,7 +506,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 		if (mr1pr_status == MR1_SUCCESS)
 			{
 			mb_io_ptr->fileheader = MB_YES;
-			status == MB_SUCCESS;
+			status = MB_SUCCESS;
 			}
 		else
 			{
