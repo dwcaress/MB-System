@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_stubs.c	3.00	4/8/93
- *    $Id: mbedit_stubs.c,v 3.0 1993-05-14 23:36:46 sohara Exp $
+ *    $Id: mbedit_stubs.c,v 3.1 1993-08-17 00:30:34 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/05/14  23:36:46  sohara
+ * fixed rcs_id messages
+ *
  * Revision 1.1  1993/05/14  23:30:52  sohara
  * Initial revision
  *
@@ -117,7 +120,7 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-  static char rcs_id[]="$Id: mbedit_stubs.c,v 3.0 1993-05-14 23:36:46 sohara Exp $";
+  static char rcs_id[]="$Id: mbedit_stubs.c,v 3.1 1993-08-17 00:30:34 caress Exp $";
 	int	status;
 	int	i;
 
@@ -517,6 +520,7 @@ do_load_ok(item, event)
 {
 	/* local definitions */
 	int	selected;
+	char	*output_file;
 
 	mbedit_popup_load_objects *ip = (mbedit_popup_load_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
 
@@ -525,6 +529,8 @@ do_load_ok(item, event)
 				PANEL_LIST_FIRST_SELECTED);
 	format = (int) xv_get(Mbedit_popup_load->textfield_format,
 				PANEL_VALUE);
+	output_file = (char *) xv_get(Mbedit_popup_load->textfield_output,
+			PANEL_VALUE);
 
 	/* get current number of pings to be plotted */
 	plot_size = (int) xv_get(Mbedit_window_mbedit->slider_number_pings,
@@ -533,10 +539,11 @@ do_load_ok(item, event)
 	/* deal with it */
 	if (selected > -1)
 		{
+		status = mbedit_set_output_file(output_file);
 		status = mbedit_action_open(open_files[selected]->d_name,
-				format,buffer_size,
+				format,hold_size,buffer_size,
 				xscale,yscale,x_interval,y_interval,plot_size,
-				&nloaded,&nbuffer,
+				&ndumped,&nloaded,&nbuffer,
 				&ngood,&icurrent,&nplot);
 		if (status == 0) XBell(dpy,100);
 		}
@@ -807,4 +814,113 @@ do_event(win, event, arg, type)
 	/* gxv_end_connections */
 
 	return notify_next_event_func(win, (Notify_event) event, arg, type);
+}
+
+/*
+ * Notify callback function for `list_files'.
+ */
+int
+set_output_name(item, string, client_data, op, event, row)
+	Panel_item	item;
+	char		*string;
+	Xv_opaque	client_data;
+	Panel_list_op	op;
+	Event		*event;
+	int		row;
+{
+	char	output_file[128];
+	char	*suffix;
+	int	len;
+
+	mbedit_popup_load_objects *ip = (mbedit_popup_load_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
+	
+	switch(op) {
+	case PANEL_LIST_OP_DESELECT:
+		break;
+
+	case PANEL_LIST_OP_SELECT:
+		len = 0;
+		if ((suffix = strstr(string,".mb")) != NULL)
+			len = strlen(suffix);
+		if (len >= 4 && len <= 5)
+			{
+			strncpy(output_file,"\0",128);
+			strncpy(output_file,string,strlen(string)-len);
+			strcat(output_file,"e");
+			strcat(output_file,suffix);
+			}
+		else
+			{
+			strcpy(output_file,string);
+			strcat(output_file,".ed");
+			}
+		xv_set(Mbedit_popup_load->textfield_output,
+			PANEL_VALUE, output_file,
+			NULL);
+		break;
+
+	case PANEL_LIST_OP_VALIDATE:
+		break;
+
+	case PANEL_LIST_OP_DELETE:
+		break;
+	}
+	
+	/* gxv_start_connections DO NOT EDIT THIS SECTION */
+
+	/* gxv_end_connections */
+
+	return XV_OK;
+}
+
+/*
+ * Menu handler for `menu_file (Show Colors)'.
+ */
+Menu_item
+action_show_colors(item, op)
+	Menu_item	item;
+	Menu_generate	op;
+{
+	int	i, ii, i0, i1, j, jj, j0, j1;
+	int	k;
+
+	mbedit_window_mbedit_objects * ip = (mbedit_window_mbedit_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
+	
+	switch (op) {
+	case MENU_DISPLAY:
+		break;
+
+	case MENU_DISPLAY_DONE:
+		break;
+
+	case MENU_NOTIFY:
+
+		/* plot squares on canvas */
+		ii = borders[1]/16;
+		jj = borders[3]/16;
+		for (i=0;i<16;i++)
+			for (j=0;j<16;j++)
+				{
+				i0 = i*ii + 1;
+				i1 = i0 + ii + 1;
+				j0 = j*jj + 1;
+				j1 = j0 + jj + 1;
+				k = -(i + 16*j + 1);
+				xg_fillrectangle(can_xgid,i0,j0,(i1-i0),(j1-j0),k);
+				xg_drawline(can_xgid,i0,j0,i0,j1,1);
+				xg_drawline(can_xgid,i0,j1,i1,j1,1);
+				xg_drawline(can_xgid,i1,j1,i1,j0,1);
+				xg_drawline(can_xgid,i1,j0,i0,j0,1);
+				}
+
+		/* gxv_start_connections DO NOT EDIT THIS SECTION */
+
+		/* gxv_end_connections */
+
+		break;
+
+	case MENU_NOTIFY_DONE:
+		break;
+	}
+	return item;
 }
