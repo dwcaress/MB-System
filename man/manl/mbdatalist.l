@@ -1,0 +1,188 @@
+.TH mbdatalist l "12 October 2001" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbdatalist\fP - parses recursive datalist files and outputs the
+complete list of data files, formats, and file weights.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbdatalist\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-P -R -V -H\fP]
+
+.SH DESCRIPTION
+\fBMBdatalist\fP is a utility for parsing datalist files. 
+Datalist files, or lists of swath data files and their format ids, 
+are used by a number
+of \fBMB-System\fP programs. These lists may contain references
+to other datalists, making them recursive. See the \fBMB-System\fP
+manual page for details on the format and structure of datalists. 
+The program \fBmbdatalist\fP outputs each 
+swath data filename, format id, and file
+weight encountered as it descends through the input datalist tree. If a
+swath data file rather than a datalist is provided as input, the
+same swath data filename and format will be the sole output.
+
+This program
+can be used in shellscripts to read datalists in the same fashion
+as \fBMB-System\fP programs like \fBmbgrid\fP and \fBmbprocess\fP.
+This program can also be used to check and debug complex recursive
+datalist structures.
+
+The program \fBmbprocess\fP operates on "raw" swath data files,
+producing a "processed" swath data file (see the \fBmbprocess\fP man 
+page for explanation).
+The \fBMB-System\fP algorithm for reading datalists will, 
+if a flag is set, replace a swath file name with the associated
+"processed" file name when that "processed" file exists. This
+flag may be set by embedding "$PROCESSED" as a line in a datalist
+or it may be set first by the calling program. The flag may also
+be set to preclude reporting "processed" file names (embedding "$RAW"
+in a datalist accomplishes this). When setting this flag within
+datalists, the first encounter of a $PROCESSED or $RAW tag will
+prevail over later instances of either tag. The \fB-P\fP and \fB-R\fP 
+options force \fBmbdatalist\fP to output processed file names 
+when they exist (\fB-P\fP) or to only output raw file names (\fB-R\fP).
+
+All output is to stdout.
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B \-F
+\fIformat\fP
+.br
+Sets the data format associated with the datalist or swath data
+file specified with the \fB-I\fP option. By default, this program
+will attempt to determine the format from the input file suffix
+(e.g. a file ending in .mb57 has a format id of 57, and a file 
+ending in .mb-1 has a format id of -1). A datalist has a format id
+of -1. 
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I
+\fIfilename\fP
+.br
+Sets the input filename. If \fIformat\fP > 0 (set with the 
+\fB-f\fP option) then the swath data filename specified by \fIinfile\fP 
+is output along with its format and a file weight of 1.0. 
+If \fIformat\fP < 0, then \fIinfile\fP
+is treated as a datalist file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will parse 
+the datalist (recursively, if necessary) and output each swath filename
+and the associated format and file weight. 
+.TP
+.B \-P
+Normally, \fBmbdatalist\fP allows $PROCESSED and $RAW tags within
+the datalist files to determine whether processed file names are
+reported when available ($PROCESSED) or only raw file names are
+reported ($RAW). The \fB-P\fP option forces \fBmbdatalist\fP 
+to output processed file names when they exist.
+.TP
+.B \-R
+Normally, \fBmbdatalist\fP allows $PROCESSED and $RAW tags within
+the datalist files to determine whether processed file names are
+reported when available ($PROCESSED) or only raw file names are
+reported ($RAW). The \fB-R\fP option forces \fBmbdatalist\fP 
+to only output raw file names.
+.TP
+.B \-V
+Normally, \fBmbdatalist\fP only prints out the filenames and formats.  
+If the \fB-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
+outputs the program version being used.
+
+.SH EXAMPLES
+Suppose we have two swath data files from an EM3000 multibeam
+and another two from an Hydrosweep MD multibeam. We might
+construct two datalist files. For the EM3000 we might
+have a file dlst_em3000.mb-1 containing:
+ 	0004_20010705_165004_raw.mb57 57
+ 	0005_20010705_172010_raw.mb57 57
+.br
+For the Hydrosweep MD data we might have a file dlst_hsmd.mb-1
+containing:
+ 	al10107051649.mb102 102
+ 	al10107051719.mb102 102
+
+Further suppose that we have found it necessary to edit
+the bathymetry in 0005_20010705_172010_raw.mb57 and
+al10107051719.mb102 using \fBmbedit\fP, and that \fBmbprocess\fP
+has been run on both files to generate processed files
+called 0005_20010705_172010_rawp.mb57 and
+al10107051719p.mb102. 
+
+If we run:
+ 	mbdatalist -I dlst_em3000.mb-1
+.br
+the output is:
+ 	0004_20010705_165004_raw.mb57 57 1.000000
+ 	0005_20010705_172010_raw.mb57 57 1.000000
+.br
+Here the file name is followed by the format and then
+by a third column containing the default file weight of 1.0.
+
+Similarly, if we run:
+ 	mbdatalist -I dlst_hsmd.mb-1
+.br
+the output is:
+ 	al10107051649.mb102 102 1.000000
+ 	al10107051719.mb102 102 1.000000
+
+If we insert a line
+ 	$PROCESSED
+.br
+at the top of both dlst_hsmd.mb-1 and dlst_em3000.mb-1,
+then the output of \fBmbdatalist\fP changes so that:
+ 	mbdatalist -I dlst_em3000.mb-1
+.br
+yields:
+ 	0004_20010705_165004_raw.mb57 57 1.000000
+ 	0005_20010705_172010_rawp.mb57 57 1.000000
+and:
+ 	mbdatalist -I dlst_hsmd.mb-1
+.br
+yields:
+ 	al10107051649.mb102 102 1.000000
+ 	al10107051719p.mb102 102 1.000000
+
+Now suppose we create a datalist file called dlst_all.mb-1 
+that refers to the two datalists shown above (without the
+$PROCESSED tags). If the contents of dlst_all.mb-1 are:
+ 	dlst_em3000.mb-1 -1 100.0
+ 	dlst_hsmd.mb-1   -1   1.0
+.br
+where we have specified different file weights for the
+two datalists, then:
+ 	mbdatalist -I dlst_all.mb-1
+.br
+yields:
+ 	0004_20010705_165004_raw.mb57 57 100.000000
+ 	0005_20010705_172010_raw.mb57 57 100.000000
+ 	al10107051649.mb102 102 1.000000
+ 	al10107051719.mb102 102 1.000000
+
+Now, if we use the \fB-P\fP option to force \fBmbdatalist\fP
+to output processed data file names when possible, then:
+ 	mbdatalist -I dlst_all.mb-1 -P
+.br
+yields:
+ 	0004_20010705_165004_raw.mb57 57 100.000000
+ 	0005_20010705_172010_rawp.mb57 57 100.000000
+ 	al10107051649.mb102 102 1.000000
+ 	al10107051719p.mb102 102 1.000000
+
+.SH SEE ALSO
+\fBmbsystem\fP(l)
+
+.SH BUGS
+No true bugs here, only distantly related arthropods... Yum.
