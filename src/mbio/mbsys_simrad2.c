@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.15 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.16 2002-10-02 23:55:42 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.14  2002/08/21 00:55:46  caress
  * Release 5.0.beta22
  *
@@ -109,7 +112,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.15 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.16 2002-10-02 23:55:42 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1761,6 +1764,10 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->msec = ping->png_msec;
 		
 		/* get navigation */
+		if (navlon < -180.0)
+			navlon += 360.0;
+		else if (navlon > 180.0)
+			navlon -= 360.0;
 		ping->png_longitude = 10000000 * navlon;
 		ping->png_latitude = 20000000 * navlat;
 
@@ -1949,6 +1956,10 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->date = store->pos_date;
 		
 		/* get navigation */
+		if (navlon < -180.0)
+			navlon += 360.0;
+		else if (navlon > 180.0)
+			navlon -= 360.0;
 		store->pos_longitude = 10000000 * navlon;
 		store->pos_latitude = 20000000 * navlat;
 
@@ -2764,6 +2775,10 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->date = ping->png_date;
 		
 		/* get navigation */
+		if (navlon < -180.0)
+			navlon += 360.0;
+		else if (navlon > 180.0)
+			navlon -= 360.0;
 		ping->png_longitude = 10000000 * navlon;
 		ping->png_latitude = 20000000 * navlat;
 
@@ -2803,6 +2818,10 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->date = store->pos_date;
 		
 		/* get navigation */
+		if (navlon < -180.0)
+			navlon += 360.0;
+		else if (navlon > 180.0)
+			navlon -= 360.0;
 		store->pos_longitude = 10000000 * navlon;
 		store->pos_latitude = 20000000 * navlat;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.8 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.9 2002-10-02 23:55:42 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.7  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -106,7 +109,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.8 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.9 2002-10-02 23:55:42 caress Exp $";
 	char	*function_name = "mbr_register_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -237,7 +240,7 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.8 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.9 2002-10-02 23:55:42 caress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -306,7 +309,7 @@ int mbr_info_em12ifrm(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.8 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.9 2002-10-02 23:55:42 caress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -765,28 +768,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				    (double)data->line_heading, 0.0, 
 				    &plon, &plat, &pspeed, error);
 		data->speed = pspeed / 3.6;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (plon > 0.) 
-				plon = plon - 360.;
-			else if (plon < -360.)
-				plon = plon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (plon > 180.) 
-				plon = plon - 360.;
-			else if (plon < -180.)
-				plon = plon + 360.;
-			}
-		else
-			{
-			if (plon > 360.) 
-				plon = plon - 360.;
-			else if (plon < 0.)
-				plon = plon + 360.;
-			}
-
+\
 		/* print debug statements */
 		if (verbose >= 4)
 			{

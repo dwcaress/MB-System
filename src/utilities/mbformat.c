@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.4 2001-07-21 22:04:10 caress Exp $
+ *    $Id: mbformat.c,v 5.5 2002-10-02 23:56:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/21 22:04:10  caress
+ * Made the -i and -f options work better.
+ *
  * Revision 5.3  2001/07/20 17:05:25  caress
  * Set mbformat to output accurate format update date with
  * -W option (html output).
@@ -98,7 +101,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.4 2001-07-21 22:04:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.5 2002-10-02 23:56:06 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
@@ -127,8 +130,6 @@ main (int argc, char **argv)
 	char	format_attributes[MB_DESCRIPTION_LENGTH];
 	int	list_simple;
 	int	i;
-
-	char	*getenv();
 
 	help = 0;
 	verbose = 0;

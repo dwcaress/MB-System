@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.6 2002-04-06 02:45:59 caress Exp $
+ *    $Id: mbswath.c,v 5.7 2002-10-02 23:52:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/04/06 02:45:59  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.5  2001/08/10 22:40:02  dcaress
  * Release 5.0.beta07
  *
@@ -296,7 +299,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.6 2002-04-06 02:45:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.7 2002-10-02 23:52:37 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -329,6 +332,7 @@ main (int argc, char **argv)
 	double	beamwidth_ltrack;
 	int	pings;
 	int	lonflip;
+	int	lonflip_set = MB_NO;
 	double	bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
@@ -507,6 +511,7 @@ main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			lonflip_set = MB_YES;
 			flag++;
 			break;
 		case 'N':
@@ -769,6 +774,19 @@ main (int argc, char **argv)
 			program_name);
 		error = MB_ERROR_BAD_PARAMETER;
 		exit(error);
+		}
+	
+	/* set lonflip if possible */
+	if (lonflip_set == MB_NO)
+		{
+		if (borders_use[0] < -180.0)
+			lonflip = -1;
+		else if (borders_use[1] > 180.0)
+			lonflip = 1;
+		else if (lonflip == -1 && borders_use[1] > 0.0)
+			lonflip = 0;
+		else if (lonflip == 1 && borders_use[0] < 0.0)
+			lonflip = 0;
 		}
 
 	/* set bounds for data reading larger than

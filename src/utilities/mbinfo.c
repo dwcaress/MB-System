@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.12 2002-09-19 00:28:12 caress Exp $
+ *    $Id: mbinfo.c,v 5.13 2002-10-02 23:56:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/09/19 00:28:12  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.11  2002/07/20 20:56:55  caress
  * Release 5.0.beta20
  *
@@ -172,6 +175,7 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
 
 #define MBINFO_MAXPINGS 50
 struct ping
@@ -190,7 +194,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.12 2002-09-19 00:28:12 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.13 2002-10-02 23:56:06 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -239,6 +243,7 @@ main (int argc, char **argv)
 
 	/* MBIO read values */
 	void	*mbio_ptr = NULL;
+	struct mb_io_struct *mb_io_ptr;
 	int	kind;
 	struct ping *data[MBINFO_MAXPINGS];
 	struct ping *datacur;
@@ -1156,43 +1161,66 @@ main (int argc, char **argv)
 					lonflip_use = 1;
 				    else if (navlon >= 270.0)
 					lonflip_use = 0;
-				    }
 				    
-				/* apply lonflip if needed */
-				if (lonflip_use != lonflip)
-				    {
-				    if (lonflip_use == -1)
+				    /* change and apply lonflip if needed */
+				    if (lonflip_use != lonflip)
 					{
-					if (navlon > 0.0)
-					    navlon -= 360.0;
-					for (i=0;i<beams_bath;i++)
+					/* change lonflip used in reading */
+					mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+					mb_io_ptr->lonflip = lonflip_use;
+					lonflip = lonflip_use;
+					
+					/* apply lonflip to data already read */
+					if (lonflip_use == -1)
 					    {
-					    if (bathlon[i] > 0.0)
-						bathlon[i] -= 360.0;
+					    if (navlon > 0.0)
+						navlon -= 360.0;
+					    for (i=0;i<beams_bath;i++)
+						{
+						if (bathlon[i] > 0.0)
+						    bathlon[i] -= 360.0;
+						}
+					    for (i=0;i<pixels_ss;i++)
+						{
+						if (sslon[i] > 0.0)
+						    sslon[i] -= 360.0;
+						}
 					    }
-					}
-				    else if (lonflip_use == 1)
-					{
-					if (navlon < 0.0)
-					    navlon += 360.0;
-					for (i=0;i<beams_bath;i++)
+					else if (lonflip_use == 1)
 					    {
-					    if (bathlon[i] < 0.0)
-						bathlon[i] += 360.0;
+					    if (navlon < 0.0)
+						navlon += 360.0;
+					    for (i=0;i<beams_bath;i++)
+						{
+						if (bathlon[i] < 0.0)
+						    bathlon[i] += 360.0;
+						}
+					    for (i=0;i<pixels_ss;i++)
+						{
+						if (sslon[i] < 0.0)
+						    sslon[i] += 360.0;
+						}
 					    }
-					}
-				    else if (lonflip_use == 0)
-					{
-					if (navlon < -180.0)
-					    navlon += 360.0;
-					if (navlon > 180.0)
-					    navlon -= 360.0;
-					for (i=0;i<beams_bath;i++)
+					else if (lonflip_use == 0)
 					    {
-					    if (bathlon[i] < -180.0)
-						bathlon[i] += 360.0;
-					    if (bathlon[i] > 180.0)
-						bathlon[i] -= 360.0;
+					    if (navlon < -180.0)
+						navlon += 360.0;
+					    if (navlon > 180.0)
+						navlon -= 360.0;
+					    for (i=0;i<beams_bath;i++)
+						{
+						if (bathlon[i] < -180.0)
+						    bathlon[i] += 360.0;
+						if (bathlon[i] > 180.0)
+						    bathlon[i] -= 360.0;
+						}
+					    for (i=0;i<pixels_ss;i++)
+						{
+						if (sslon[i] < -180.0)
+						    sslon[i] += 360.0;
+						if (sslon[i] > 180.0)
+						    sslon[i] -= 360.0;
+						}
 					    }
 					}
 				    }

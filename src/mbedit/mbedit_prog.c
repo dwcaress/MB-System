@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.15 2002-09-19 00:35:53 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.16 2002-10-02 23:53:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2002/09/19 00:35:53  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.14  2002/08/30 19:28:21  caress
  * Added time series style plots.
  *
@@ -316,7 +319,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.15 2002-09-19 00:35:53 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.16 2002-10-02 23:53:44 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -493,10 +496,6 @@ double	*bathlist;
 #define	XG_DASHLINE	1
 int	ncolors;
 int	pixel_values[256];
-
-/* system function declarations */
-char	*ctime();
-char	*getenv();
 
 /* compare function for qsort */
 int mb_double_compare();

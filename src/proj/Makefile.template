@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/16/2002
-#	$Id: Makefile.template,v 5.1 2002-09-19 00:33:55 caress Exp $
+#	$Id: Makefile.template,v 5.2 2002-10-02 23:55:08 caress Exp $
 #
 #     Copyright (c) 2002 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		July 16, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.1  2002/09/19 00:33:55  caress
+# More recent version of PROJ4
+#
 # Revision 5.0  2002/07/20 20:47:57  caress
 # Initial Revision
 #
@@ -40,10 +43,7 @@ MANDIR = ../../man/manl
 
 ### make all makes the proj library, executables, man pages, 
 ### and associated include files
-all:	$(BINDIR)/proj \
-	$(MANDIR)/proj.l \
-	$(MANDIR)/pj_init.l \
-	$(LIBDIR)/libproj.a \
+all:	$(LIBDIR)/libproj.a \
 	$(INCDIR)/proj_api.h
 	
 ### make clean removes the object files
@@ -51,11 +51,11 @@ clean:
 	rm -f *.o
 
 ### link or copy the executables
-$(BINDIR)/proj: proj.o \
-		$(LIBDIR)/libproj.a
-	$(CC) $(CFLAGS) proj.o \
-		$(LIBDIR)/libproj.a \
-		$(LFLAGS) -o $(BINDIR)/proj
+#$(BINDIR)/proj: proj.o \
+#		$(LIBDIR)/libproj.a
+#	$(CC) $(CFLAGS) proj.o \
+#		$(LIBDIR)/libproj.a \
+#		$(LFLAGS) -o $(BINDIR)/proj
 
 ### put together the library
 $(LIBDIR)/libproj.a: \
@@ -894,9 +894,9 @@ $(INCDIR)/proj_api.h:	proj_api.h
 	chmod 664 $(INCDIR)/proj_api.h
 
 ### copy the man pages to the man page directory
-$(MANDIR)/proj.l:	proj.1
-	cp proj.1 $(MANDIR)/proj.l
-	chmod 664 $(MANDIR)/proj.l
-$(MANDIR)/pj_init.l:	pj_init.3
-	cp pj_init.3 $(MANDIR)/pj_init.l
-	chmod 664 $(MANDIR)/pj_init.l
+#$(MANDIR)/proj.l:	proj.1
+#	cp proj.1 $(MANDIR)/proj.l
+#	chmod 664 $(MANDIR)/proj.l
+#$(MANDIR)/pj_init.l:	pj_init.3
+#	cp pj_init.3 $(MANDIR)/pj_init.l
+#	chmod 664 $(MANDIR)/pj_init.l

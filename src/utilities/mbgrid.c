@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.10 2002-09-25 20:12:30 caress Exp $
+ *    $Id: mbgrid.c,v 5.11 2002-10-02 23:56:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/09/25 20:12:30  caress
+ * Have it use fbt files again for footprint gridding algorithm.
+ *
  * Revision 5.9  2002/09/20 22:30:45  caress
  * Made interpolation only fill in data gaps.
  *
@@ -324,7 +327,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.10 2002-09-25 20:12:30 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.11 2002-10-02 23:56:06 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -508,9 +511,6 @@ main (int argc, char **argv)
 	double	xx0, yy0, bdx, bdy, xx1, xx2, yy1, yy2;
 	double	prx[5], pry[5];
 	int	use_weight;
-
-	char	*ctime();
-	char	*getenv();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -3047,7 +3047,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 
 		/* do the interpolation */
 		if (verbose > 0)
-			fprintf(outfp,"\nDoing spline interpolation with %d data points...\n",ndata);
+		    fprintf(outfp,"\nDoing spline interpolation with %d data points...\n",ndata);
 		cay = tension;
 		xmin = sxmin;
 		ymin = symin;
