@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.6 2001-11-20 00:36:45 caress Exp $
+#    $Id: mbm_plot.perl,v 5.7 2001-12-18 04:26:12 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.6 2001-11-20 00:36:45 caress Exp $
+#   $Id: mbm_plot.perl,v 5.7 2001-12-18 04:26:12 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.6  2001/11/20  00:36:45  caress
+# Now reads inf files with -R option first and runs mbinfo
+# only if really needed (if file bounds not completely
+# inside specified bounds).
+#
 # Revision 5.5  2001/11/02  21:07:40  caress
 # Adjusted handling of segmented xy files.
 #
@@ -614,10 +619,12 @@ if ($misc)
 		# deal with pscoast options
 		##############################
 
+
 		# set pscoast lake fill
 		if ($cmd =~ /^[Tt][Cc]./)
 			{
 			($coast_lakefill) = $cmd =~ /^[Tt][Cc](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast resolution
@@ -630,12 +637,14 @@ if ($misc)
 		if ($cmd =~ /^[Tt][Gg]./)
 			{
 			($coast_dryfill) = $cmd =~ /^[Tt][Gg](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast rivers
 		if ($cmd =~ /^[Tt][Ii]./)
 			{
 			($coast_river) = $cmd =~ /^[Tt][Ii](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast national boundaries
@@ -643,18 +652,21 @@ if ($misc)
 			{
 			($coast_boundary) = $cmd =~ /^[Tt][Nn](.+)/;
 			push(@coast_boundaries, $coast_boundary);
+			$coast_control = 1;
 			}
 
 		# set pscoast wet fill
 		if ($cmd =~ /^[Tt][Ss]./)
 			{
 			($coast_wetfill) = $cmd =~ /^[Tt][Ss](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast coastline pen
 		if ($cmd =~ /^[Tt][Ww]./)
 			{
 			($coast_pen) = $cmd =~ /^[Tt][Ww](.+)/;
+			$coast_control = 1;
 			}
 
 		# deal with psxy options
@@ -962,6 +974,7 @@ $cnt = 0;
 foreach $file_mb (@files_data)
 	{
 	# use .inf file if it exists and no time or space bounds applied
+	@mbinfo = 0;
 	$use_inf = 0;
 	$file_inf = $file_mb . ".inf";
 	if (-r $file_inf && !$mb_btime && !$mb_etime)
@@ -975,20 +988,20 @@ foreach $file_mb (@files_data)
 			while ($line = <FILEINF>)
 				{
 				push(@mbinfo, $line);
-				if ($line =~ /Number of Records:\s+(\S+)/)
+				if ($line =~ /^Number of Records:\s+(\S+)/)
 					{
 					($nrec_f) = 
-						$line =~ /Number of Records:\s+(\S+)/;
+						$line =~ /^Number of Records:\s+(\S+)/;
 					}
-				if ($line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
+				if ($line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 					{
 					($xmin_f,$xmax_f) = 
-						$line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
+						$line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
 					}
-				if ($line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
+				if ($line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
 					{
 					($ymin_f,$ymax_f) = 
-						$line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
+						$line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
 					}
 				}
 			close FILEINF;
@@ -1043,35 +1056,35 @@ print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
 	while (@mbinfo)
 		{
 		$line = shift @mbinfo;
-		if ($line =~ /Number of Records:\s+(\S+)/)
+		if ($line =~ /^Number of Records:\s+(\S+)/)
 			{
 			($nrec_f) = 
-				$line =~ /Number of Records:\s+(\S+)/;
+				$line =~ /^Number of Records:\s+(\S+)/;
 			}
-		if ($line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
+		if ($line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 			{
 			($xmin_f,$xmax_f) = 
-				$line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
+				$line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
 			}
-		if ($line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
+		if ($line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
 			{
 			($ymin_f,$ymax_f) = 
-				$line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
+				$line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
 			}
-		if ($line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
+		if ($line =~ /^Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
 			{
 			($zmin_f,$zmax_f) = 
-			$line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/;
+			$line =~ /^Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/;
 			}
-		if ($line =~ /Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/)
+		if ($line =~ /^Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/)
 			{
 			($amin_f,$amax_f) = 
-			$line =~ /Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/;
+			$line =~ /^Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/;
 			}
-		if ($line =~ /Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/)
+		if ($line =~ /^Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/)
 			{
 			($smin_f,$smax_f) = 
-			$line =~ /Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/;
+			$line =~ /^Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/;
 			}
 		}
 
@@ -1714,7 +1727,7 @@ if ($contour_mode)
 if ($coast_control
 	&& !$coast_wetfill
 	&& !$coast_dryfill
-	&& !$coast_coast
+	&& !$coast_pen
 	&& !$coast_boundary
 	&& !$coast_river)
 	{
