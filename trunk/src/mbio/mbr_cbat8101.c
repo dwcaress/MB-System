@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat8101.c	8/8/94
- *	$Id: mbr_cbat8101.c,v 4.1 1999-03-31 18:11:35 caress Exp $
+ *	$Id: mbr_cbat8101.c,v 4.2 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.0  1999/01/01  23:38:01  caress
  * MB-System version 4.6beta6
  *
@@ -53,7 +56,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_cbat8101.c,v 4.1 1999-03-31 18:11:35 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat8101.c,v 4.2 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

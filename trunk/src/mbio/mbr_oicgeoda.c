@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
- *	$Id: mbr_oicgeoda.c,v 4.2 1999-12-29 00:34:06 caress Exp $
+ *	$Id: mbr_oicgeoda.c,v 4.3 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -25,6 +25,9 @@
  * Date:	February 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1999/12/29  00:34:06  caress
+ * Release 4.6.8
+ *
  * Revision 4.1  1999/10/21  22:40:10  caress
  * Let module pass easting northing nav.
  *
@@ -62,7 +65,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_oicgeoda.c,v 4.2 1999-12-29 00:34:06 caress Exp $";
+ static char res_id[]="$Id: mbr_oicgeoda.c,v 4.3 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_oicgeoda";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 4.0 1999-01-01 23:38:01 caress Exp $
+ *    $Id: mb_angle.c,v 4.1 2000-09-30 06:26:58 caress Exp $
  *
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -175,6 +175,9 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/01/01  23:38:01  caress
+ * MB-System version 4.6beta6
+ *
  *
  */
 

@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 4.9 2000-04-19 21:06:32 caress Exp $
+ *    $Id: mb_format.c,v 4.10 2000-09-30 06:26:58 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -24,6 +24,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  2000/04/19  21:06:32  caress
+ * Added #include mb_io.h
+ *
  * Revision 4.8  2000/04/19  20:51:58  caress
  * Added datalist parsing code.
  *
@@ -95,7 +98,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_io.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 4.9 2000-04-19 21:06:32 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 4.10 2000-09-30 06:26:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format(int verbose, int *format, int *format_num, int *error)
@@ -215,6 +218,46 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
+	/* look for mbnavedit and mbnavadjust navigation suffixes */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".nv")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    *format = MBF_MBPRONAV;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for datalist suffixes */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".dls")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    *format = -1;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
 	/* look for SeaBeam suffix convention */
 	if (found == MB_NO)
 	    {
@@ -229,7 +272,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    {
 		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
 		    fileroot[strlen(filename)-suffix_len] = '\0';
-		    *format = 41;
+		    *format = MBF_SB2100RW;
 		    found = MB_YES;
 		    }
 		}
@@ -438,9 +481,9 @@ int mb_datalist_read(int verbose,
 					else if (buffer[0] != '#')
 						{
 						nscan = sscanf(buffer,"%s %d %lf",path,format,weight);
-						if (nscan >= 2 && *format > 0)
+						if (nscan >= 2 && *format >= 0)
 							{
-							if (*weight <= 0.0)
+							if (nscan != 3 || *weight <= 0.0)
 								*weight = 1.0;
 							done = MB_YES;
 							rdone = MB_YES;

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 4.12 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 4.13 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -35,6 +37,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.11  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -102,7 +107,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 4.12 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 4.13 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -852,7 +857,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2000_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -864,6 +869,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -941,6 +947,9 @@ int	*error;
 		/* get speed */
 		*speed = 0.00185*store->speed;
 
+		/* get draft */
+		*draft = 0.0;
+
 		/* get roll pitch and heave */
 		*roll = 0.01*store->roll;
 		*pitch = 0.01*store->pitch;
@@ -980,6 +989,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			fprintf(stderr,"dbg4       roll:       %f\n",
 				*roll);
 			fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1031,6 +1042,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1047,7 +1059,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2000_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1058,6 +1070,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -1094,6 +1107,7 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1124,6 +1138,8 @@ int	*error;
 		/* get heading and speed */
 		store->heading = (short int) 10*heading;
 		store->speed = (short int) 540.5405405*speed;
+
+		/* get draft */
 
 		/* get roll pitch and heave */
 		store->roll = roll*100.0;

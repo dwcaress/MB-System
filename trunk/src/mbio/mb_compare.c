@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_compare.c	11/19/98
- *    $Id: mb_compare.c,v 4.0 1998-12-17 22:57:26 caress Exp $
+ *    $Id: mb_compare.c,v 4.1 2000-09-30 06:26:58 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -18,11 +20,14 @@
  * Date:	November 19,  1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/12/17  22:57:26  caress
+ * MB-System version 4.6beta4
+ *
  *
  *
  */
 
-static char rcs_id[]="$Id: mb_compare.c,v 4.0 1998-12-17 22:57:26 caress Exp $";
+static char rcs_id[]="$Id: mb_compare.c,v 4.1 2000-09-30 06:26:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_int_compare compares int values. */

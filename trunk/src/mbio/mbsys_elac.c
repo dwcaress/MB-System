@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.14 1999-03-31 18:11:35 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.15 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -37,6 +39,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.13  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -110,7 +115,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.14 1999-03-31 18:11:35 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.15 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1016,7 +1021,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1028,6 +1033,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1105,6 +1111,10 @@ int	*error;
 		/* get speed  */
 		*speed = 0.0;
 
+		/* get draft  */
+		*draft = 0.005 * (store->transducer_starboard_depth
+					+ store->transducer_port_depth);
+
 		/* get roll pitch and heave */
 		*roll = 0.005 * store->profile[0].roll;
 		*pitch = 0.005 * store->profile[0].pitch;
@@ -1144,6 +1154,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			fprintf(stderr,"dbg4       roll:       %f\n",
 				*roll);
 			fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1195,6 +1207,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1211,7 +1224,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1222,6 +1235,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -1256,6 +1270,7 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1289,7 +1304,14 @@ int	*error;
 		/* get heading */
 		store->profile[0].heading = (int) (heading *100);
 
+		/* get draft  */
+		store->transducer_starboard_depth = 200 * draft;
+		store->transducer_port_depth = 200 * draft;
+
 		/* get roll pitch and heave */
+		store->profile[0].roll = 200 * roll;
+		store->profile[0].pitch = 200 * pitch;
+		store->profile[0].heave = 1000 * heave;
 		}
 
 	/* print output debug statements */

@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_oicmbari.h	1/8/99
- *	$Id: mbf_oicmbari.h,v 4.0 1999-03-31 18:29:20 caress Exp $
+ *	$Id: mbf_oicmbari.h,v 4.1 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -20,6 +20,9 @@
  * Date:	January 8, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/03/31  18:29:20  caress
+ * MB-System 4.6beta7
+ *
  * Revision 1.1  1999/03/31  18:11:35  caress
  * Initial revision
  *

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.7 1999-09-14 20:39:11 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.8 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -26,10 +28,10 @@
  *   mbsys_hsmd_insert	- insert basic data into mbsys_hsmd_struct structure
  *   mbsys_hsmd_ttimes  - extract travel time and beam angle data from
  *                        mbsys_hsmd_struct structure
- *   mbsys_hsmd_nav_get - extract navigation and attitude 
+ *   mbsys_hsmd_extract_nav - extract navigation and attitude 
  *		          sensor data from
  *                        mbsys_hsmd_struct structure
- *   mbsys_hsmd_nav_put - insert navigation and attitude 
+ *   mbsys_hsmd_insert_nav - insert navigation and attitude 
  *			  sensor data into
  *                        mbsys_hsmd_struct structure
  *   mbsys_hsmd_copy	- copy data in one mbsys_hsmd_struct structure
@@ -39,6 +41,9 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1999/09/14  20:39:11  caress
+ * Fixed bugs handling HSMD
+ *
  * Revision 4.6  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -105,7 +110,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbsys_hsmd.c,v 4.7 1999-09-14 20:39:11 caress Exp $";
+	static char res_id[]="$Id: mbsys_hsmd.c,v 4.8 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1002,7 +1007,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1014,6 +1019,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1087,8 +1093,11 @@ int	*error;
 		/* get heading */
 		*heading = store->heading_tx;
 
-		/* set speed */
+		/* get speed */
 		*speed = store->speed;
+
+		/* get draft */
+		*draft = 0.0;
 
 		/* get roll pitch and heave */
 		*roll = store->roll_tx;
@@ -1129,6 +1138,14 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
+			fprintf(stderr,"dbg4       roll:       %f\n",
+				*roll);
+			fprintf(stderr,"dbg4       pitch:      %f\n",
+				*pitch);
+			fprintf(stderr,"dbg4       heave:      %f\n",
+				*heave);
 			}
 
 		/* done translating values */
@@ -1175,6 +1192,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1191,7 +1209,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1202,6 +1220,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -1236,6 +1255,7 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1268,6 +1288,8 @@ int	*error;
 
 		/* get speed */
 		store->speed = speed;
+
+		/* get draft */
 
 		/* get roll pitch and heave */
 		store->roll_tx = roll;

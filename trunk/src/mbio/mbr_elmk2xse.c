@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2xse.c	3/27/99
- *	$Id: mbr_elmk2xse.c,v 4.0 1999-08-08 04:14:35 caress Exp $
+ *	$Id: mbr_elmk2xse.c,v 4.1 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -25,6 +25,9 @@
  * Date:	March 27, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/08/08  04:14:35  caress
+ * Initial revision.
+ *
  *
  */
 
@@ -69,7 +72,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 4.0 1999-08-08 04:14:35 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2xse.c,v 4.1 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2xse";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elacmk2.h	6/10/97
- *	$Id: mbsys_elacmk2.h,v 4.1 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbsys_elacmk2.h,v 4.2 2000-09-30 06:31:19 caress Exp $
  *
- *    Copyright (c) 1997 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1997, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.0  1997/07/25  14:25:40  caress
  * Version 4.5beta2.
  *

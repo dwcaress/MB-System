@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_altitude.c	4/28/98
- *    $Id: mb_altitude.c,v 4.4 1999-08-08 04:12:45 caress Exp $
+ *    $Id: mb_altitude.c,v 4.5 2000-09-30 06:26:58 caress Exp $
 
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,9 @@
  * Date:	April 28, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1999/08/08  04:12:45  caress
+ * Added ELMK2XSE format.
+ *
  * Revision 4.3  1999/07/16  19:24:15  caress
  * Yet another version.
  *
@@ -69,7 +74,7 @@ double	*transducer_depth;
 double	*altitude;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_altitude.c,v 4.4 1999-08-08 04:12:45 caress Exp $";
+	static char rcs_id[]="$Id: mb_altitude.c,v 4.5 2000-09-30 06:26:58 caress Exp $";
 	char	*function_name = "mb_altitude";
 	int	status;
 	int	system;
@@ -226,7 +231,7 @@ double	transducer_depth;
 double	altitude;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_altitude.c,v 4.4 1999-08-08 04:12:45 caress Exp $";
+	static char rcs_id[]="$Id: mb_altitude.c,v 4.5 2000-09-30 06:26:58 caress Exp $";
 	char	*function_name = "mb_insert_altitude";
 	int	status;
 	int	system;

@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 4.1 1999-12-29 00:34:06 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 4.2 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1999 by
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/12/29  00:34:06  caress
+ * Release 4.6.8
+ *
  * Revision 4.0  1999/10/21  22:39:24  caress
  * Added MBPRONAV format.
  *
@@ -50,7 +53,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 4.1 1999-12-29 00:34:06 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 4.2 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -183,6 +186,10 @@ int	*error;
 		data->latitude = 0.0;
 		data->heading = 0.0;
 		data->speed = 0.0;
+		data->sonardepth = 0.0;
+		data->roll = 0.0;
+		data->pitch = 0.0;
+		data->heave = 0.0;
 		for (i=0;i<MBF_MBPRONAV_MAXLINE;i++)
 		    data->comment[i] = 0;
 		}
@@ -380,6 +387,10 @@ int	*error;
 		store->latitude = data->latitude;
 		store->heading = data->heading;
 		store->speed = data->speed;
+		store->sonar_depth = data->sonardepth;
+		store->roll = data->roll;
+		store->pitch = data->pitch;
+		store->heave = data->heave;
         	for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
 		    store->comment[i] = data->comment[i];
 		}
@@ -441,6 +452,10 @@ int	*error;
 		data->latitude = store->latitude;
 		data->heading = store->heading;
 		data->speed = store->speed;
+		data->sonardepth = store->sonar_depth;
+		data->roll = store->roll;
+		data->pitch = store->pitch;
+		data->heave = store->heave;
 		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
 		    data->comment[i] = store->comment[i];
 		}
@@ -516,6 +531,7 @@ int	*error;
 	int	nread;
 	double  sec;
 	double  d1, d2, d3, d4, d5;
+	double  d6, d7, d8, d9;
 	int	i;
 
 	/* print input debug statements */
@@ -569,7 +585,7 @@ int	*error;
 
 	    /* read data */
 	    nread = sscanf(line,
-			"%d %d %d %d %d %lf %lf %lf %lf %lf %lf",
+			"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 			&data->time_i[0],
 			&data->time_i[1],
 			&data->time_i[2],
@@ -580,7 +596,11 @@ int	*error;
 			&d2,
 			&d3,
 			&d4,
-			&d5);
+			&d5, 
+			&d6,
+			&d7,
+			&d8,
+			&d9);
 	    data->time_i[5] = (int) sec;
 	    data->time_i[6] = 1000000.0 * (sec - data->time_i[5]);
 	    if (nread == 8)
@@ -590,6 +610,10 @@ int	*error;
 		data->latitude = d2;
 		data->heading = 0.0;
 		data->speed = 0.0;
+		data->sonardepth = 0.0;
+		data->roll = 0.0;
+		data->pitch = 0.0;
+		data->heave = 0.0;
 	    	status = MB_SUCCESS;
 	   	*error = MB_ERROR_NO_ERROR;
 		}
@@ -600,6 +624,10 @@ int	*error;
 		data->latitude = d3;
 		data->heading = 0.0;
 		data->speed = 0.0;
+		data->sonardepth = 0.0;
+		data->roll = 0.0;
+		data->pitch = 0.0;
+		data->heave = 0.0;
 	    	status = MB_SUCCESS;
 	   	*error = MB_ERROR_NO_ERROR;
 		}
@@ -610,6 +638,10 @@ int	*error;
 		data->latitude = d3;
 		data->heading = d4;
 		data->speed = 0.0;
+		data->sonardepth = 0.0;
+		data->roll = 0.0;
+		data->pitch = 0.0;
+		data->heave = 0.0;
 	    	status = MB_SUCCESS;
 	   	*error = MB_ERROR_NO_ERROR;
 		}
@@ -620,6 +652,38 @@ int	*error;
 		data->latitude = d3;
 		data->heading = d4;
 		data->speed = d5;
+		data->sonardepth = 0.0;
+		data->roll = 0.0;
+		data->pitch = 0.0;
+		data->heave = 0.0;
+	    	status = MB_SUCCESS;
+	   	*error = MB_ERROR_NO_ERROR;
+		}
+	    else if (nread == 12)
+	        {
+	        data->time_d = d1;
+		data->longitude = d2;
+		data->latitude = d3;
+		data->heading = d4;
+		data->speed = d5;
+		data->sonardepth = d6;
+		data->roll = 0.0;
+		data->pitch = 0.0;
+		data->heave = 0.0;
+	    	status = MB_SUCCESS;
+	   	*error = MB_ERROR_NO_ERROR;
+		}
+	    else if (nread == 15)
+	        {
+	        data->time_d = d1;
+		data->longitude = d2;
+		data->latitude = d3;
+		data->heading = d4;
+		data->speed = d5;
+		data->sonardepth = d6;
+		data->roll = d7;
+		data->pitch = d8;
+		data->heave = d9;
 	    	status = MB_SUCCESS;
 	   	*error = MB_ERROR_NO_ERROR;
 		}
@@ -644,6 +708,10 @@ int	*error;
 			fprintf(stderr,"dbg4       longitude:    %f\n",data->longitude);
 			fprintf(stderr,"dbg4       heading:      %f\n",data->heading);
 			fprintf(stderr,"dbg4       speed:        %f\n",data->speed);
+			fprintf(stderr,"dbg4       sonardepth:   %f\n",data->sonardepth);
+			fprintf(stderr,"dbg4       roll:         %f\n",data->roll);
+			fprintf(stderr,"dbg4       pitch:        %f\n",data->pitch);
+			fprintf(stderr,"dbg4       heave:        %f\n",data->heave);
 			fprintf(stderr,"dbg4       error:        %d\n",*error);
 			fprintf(stderr,"dbg4       status:       %d\n",status);
 			}
@@ -733,12 +801,16 @@ int	*error;
 		    fprintf(stderr,"dbg4       longitude:    %f\n",data->longitude);
 		    fprintf(stderr,"dbg4       heading:      %f\n",data->heading);
 		    fprintf(stderr,"dbg4       speed:        %f\n",data->speed);
+		    fprintf(stderr,"dbg4       sonardepth:   %f\n",data->sonardepth);
+		    fprintf(stderr,"dbg4       roll:         %f\n",data->roll);
+		    fprintf(stderr,"dbg4       pitch:        %f\n",data->pitch);
+		    fprintf(stderr,"dbg4       heave:        %f\n",data->heave);
 		    fprintf(stderr,"dbg4       error:        %d\n",*error);
 		    fprintf(stderr,"dbg4       status:       %d\n",status);
 		    }
 
             sprintf(line,
-			"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f\r\n",
+			"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
 			data->time_i[0],
 			data->time_i[1],
 			data->time_i[2],
@@ -750,7 +822,11 @@ int	*error;
 			data->longitude,
 			data->latitude,
 			data->heading,
-			data->speed);
+			data->speed,
+			data->sonardepth,
+			data->roll,
+			data->pitch,
+			data->heave);
 	    }
 
 	if (fputs(line,mb_io_ptr->mbfp) == EOF)

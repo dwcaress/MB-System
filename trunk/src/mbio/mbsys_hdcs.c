@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 4.1 1999-08-08 04:16:03 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 4.2 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -41,6 +41,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/08/08  04:16:03  caress
+ * Added ELMK2XSE format.
+ *
  * Revision 4.0  1999/03/31  18:29:20  caress
  * MB-System 4.6beta7
  *
@@ -69,7 +72,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 4.1 1999-08-08 04:16:03 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 4.2 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -978,7 +981,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hdcs_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -990,6 +993,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1073,8 +1077,12 @@ int	*error;
 	    /* get heading */
 	    *heading = RTD * (double)store->vesselHeading
 					* 1.0E-07 + M_PI / 2.0;
+
 	    /* get speed */
 	    *speed = 3.6e-3 * store->vesselVelocity;
+
+	    /* get draft */
+	    *draft = 0.0;
 
 	    /* get roll pitch and heave */
 	    *roll = RTD * 1E-7 * store->vesselRoll;
@@ -1115,6 +1123,8 @@ int	*error;
 			*speed);
 		fprintf(stderr,"dbg4       heading:    %f\n",
 			*heading);
+		fprintf(stderr,"dbg4       draft:      %f\n",
+			*draft);
 		fprintf(stderr,"dbg4       roll:       %f\n",
 			*roll);
 		fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1166,6 +1176,7 @@ int	*error;
 	    fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 	    fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 	    fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+	    fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 	    fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 	    fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 	    fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1182,7 +1193,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hdcs_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1193,6 +1204,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -1225,6 +1237,7 @@ int	*error;
 	    fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 	    fprintf(stderr,"dbg2       speed:      %f\n",speed);
 	    fprintf(stderr,"dbg2       heading:    %f\n",heading);
+	    fprintf(stderr,"dbg2       draft:      %f\n",draft);
 	    fprintf(stderr,"dbg2       roll:       %f\n",roll);
 	    fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 	    fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1263,6 +1276,8 @@ int	*error;
 
 	    /* get speed */
 	    store->vesselVelocity = speed / 3.6E-3;
+
+	    /* get draft */
 
 	    /* get roll pitch and heave */
 	    store->vesselRoll = DTR * 1E7 * roll;

@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 4.2 1999-10-21 22:40:10 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 4.3 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -42,6 +42,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1999/10/21  22:40:10  caress
+ * Added MBPRONAV format.
+ *
  * Revision 4.1  1999/07/16  19:24:15  caress
  * Yet another version.
  *
@@ -68,7 +71,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_singlebeam.c,v 4.2 1999-10-21 22:40:10 caress Exp $";
+ static char res_id[]="$Id: mbsys_singlebeam.c,v 4.3 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_singlebeam_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -603,7 +606,16 @@ int	*error;
 
 		/* get ssv */
 		*ssv = 0.0;
-		*draft = 0.0;
+
+		/* get draft */
+		if (store->sonar_depth <= 0.0
+		    && store->rov_pressure > 0.0)
+		    mbsys_singlebeam_pressuredepth(verbose, 
+						    store->rov_pressure,
+						    store->latitude,  
+						    &store->sonar_depth, 
+						    error);
+		*draft = store->sonar_depth;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -698,20 +710,37 @@ int	*error;
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
-		if (store->rov_altitude > 0.0
-		    && store->bath > 0.0)
+		*altitude = 0.0;
+		*transducer_depth = 0.0;
+		if (store->sonar_depth <= 0.0
+		    && store->rov_pressure > 0.0)
+		    mbsys_singlebeam_pressuredepth(verbose, 
+						    store->rov_pressure,
+						    store->latitude,  
+						    &store->sonar_depth, 
+						    error);
+		if (store->rov_altitude > 0.0)
 		    {
 		    *altitude = store->rov_altitude;
-		    *transducer_depth = store->bath - store->rov_altitude;
+		    if (store->sonar_depth > 0.0)
+			*transducer_depth = store->sonar_depth;
+		    else if (store->bath != 0.0)
+			*transducer_depth = store->bath - store->rov_altitude;
 		    }
-		else if (store->rov_altitude > 0.0)
+		else if (store->sonar_depth > 0.0)
 		    {
-		    *altitude = store->rov_altitude;
+		    *transducer_depth = store->sonar_depth;
+		    if (store->bath > 0.0)
+			*altitude = store->bath - store->sonar_depth;
+		    }
+		else if (store->bath > 0.0)
+		    {
+		    *altitude = store->bath - store->heave;
 		    *transducer_depth = store->heave;
 		    }
 		else
 		    {
-		    *altitude = store->bath - store->heave;
+		    *altitude = 0.0;
 		    *transducer_depth = store->heave;
 		    }
 
@@ -758,7 +787,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -770,6 +799,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -842,6 +872,16 @@ int	*error;
 		/* get speed */
 		*speed = store->speed;
 
+		/* get draft */
+		if (store->sonar_depth <= 0.0
+		    && store->rov_pressure > 0.0)
+		    mbsys_singlebeam_pressuredepth(verbose, 
+						    store->rov_pressure,
+						    store->latitude,  
+						    &store->sonar_depth, 
+						    error);
+		*draft = store->sonar_depth;
+   
 		/* get roll pitch and heave */
 		*roll = store->roll;
 		*pitch = store->pitch;
@@ -932,6 +972,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -948,7 +989,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -959,6 +1000,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -994,6 +1036,7 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1022,6 +1065,9 @@ int	*error;
 
 		/* get speed */
 		store->speed = speed;
+
+		/* get draft */
+		store->sonar_depth = draft;
 
 		/* get roll pitch and heave */
 		store->roll = roll;
@@ -1085,6 +1131,62 @@ int	*error;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_singlebeam_pressuredepth(verbose,pressure,latitude,depth,error)
+int	verbose;
+double	pressure;
+double	latitude;
+double	*depth;
+int	*error;
+{
+	char	*function_name = "mbsys_singlebeam_pressuredepth";
+	int	status = MB_SUCCESS;
+	double	phi, sinphi, sinphi2, denom, numer;
+#define C0  5.2788e-3; 
+#define C1  2.36e-5; 
+#define C3  1.092e-6; 
+#define C4  -1.82e-15; 
+#define C5  2.279e-10; 
+#define C6  2.2512e-5; 
+#define C7  9.72659;
+
+ 	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       pressure:   %f\n",pressure);
+		fprintf(stderr,"dbg2       latitude:   %f\n",latitude);
+		}
+
+	/* calculate depth in m from pressure in dBars */
+	phi = DTR * latitude; 
+	sinphi  = sin(phi); 
+	sinphi2= sinphi * sinphi;
+ 	denom = 9.780318 * (1.0 + (5.2788e-3 
+			    + 2.36e-5 * sinphi2) * sinphi2) 
+				+ 1.092e-6 * pressure; 
+	numer = (((-1.82e-15 * pressure + 2.279e-10) * pressure 
+		    - 2.2512e-5) * pressure + 9.72659) * pressure; 
+	*depth = denom / numer; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       depth:      %f\n",*depth);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_xse.c,v 4.0 1999-08-08 04:14:35 caress Exp $
+ *	$Id: mbsys_xse.c,v 4.1 2000-09-30 06:32:52 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -39,6 +41,9 @@
  * Date:	August 1,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/08/08  04:14:35  caress
+ * Initial revision.
+ *
  *
  */
 
@@ -61,7 +66,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_xse.c,v 4.0 1999-08-08 04:14:35 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 4.1 2000-09-30 06:32:52 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1039,7 +1044,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_xse_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1051,6 +1056,7 @@ double	*navlon;
 double	*navlat;
 double	*speed;
 double	*heading;
+double	*draft;
 double	*roll;
 double	*pitch;
 double	*heave;
@@ -1122,6 +1128,10 @@ int	*error;
 		/* get speed  */
 		*speed  = 1.8 * store->nav_speed_ground;
 
+		/* get draft */
+		*draft = 0.5 * (store->par_trans_z_port
+				    + store->par_trans_z_stbd);
+
 		/* get roll pitch and heave */
 		if (store->mul_num_beams > 0)
 			{
@@ -1170,6 +1180,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			fprintf(stderr,"dbg4       roll:       %f\n",
 				*roll);
 			fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1222,6 +1234,10 @@ int	*error;
 		/* get speed  */
 		*speed  = 1.8 * store->nav_speed_ground;
 
+		/* get draft */
+		*draft = 0.5 * (store->par_trans_z_port
+				    + store->par_trans_z_stbd);
+
 		/* get roll pitch and heave */
 		if (store->mul_num_beams > 0)
 			{
@@ -1270,6 +1286,8 @@ int	*error;
 				*speed);
 			fprintf(stderr,"dbg4       heading:    %f\n",
 				*heading);
+			fprintf(stderr,"dbg4       draft:      %f\n",
+				*draft);
 			fprintf(stderr,"dbg4       roll:       %f\n",
 				*roll);
 			fprintf(stderr,"dbg4       pitch:      %f\n",
@@ -1321,6 +1339,7 @@ int	*error;
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1337,7 +1356,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_xse_insert_nav(verbose,mbio_ptr,store_ptr,
-		time_i,time_d,navlon,navlat,speed,heading,
+		time_i,time_d,navlon,navlat,speed,heading,draft, 
 		roll,pitch,heave,error)
 int	verbose;
 char	*mbio_ptr;
@@ -1348,6 +1367,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	roll;
 double	pitch;
 double	heave;
@@ -1381,6 +1401,7 @@ int	*error;
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1412,6 +1433,10 @@ int	*error;
 		/* get speed */
 		store->nav_speed_ground = speed / 1.8;
 
+		/* get draft */
+		store->par_trans_z_port = draft;
+		store->par_trans_z_stbd = draft;
+		
 		/* get roll pitch and heave */
 		}
 
@@ -1432,6 +1457,10 @@ int	*error;
 
 		/* get speed */
 		store->nav_speed_ground = speed / 1.8;
+
+		/* get draft */
+		store->par_trans_z_port = draft;
+		store->par_trans_z_stbd = draft;
 
 		/* get roll pitch and heave */
 		}

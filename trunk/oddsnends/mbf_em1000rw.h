@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em1000rw.h	8/8/94
- *	$Id: mbf_em1000rw.h,v 4.7 1998-10-05 18:32:27 caress Exp $
+ *	$Id: mbf_em1000rw.h,v 4.8 2000-09-30 06:29:44 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -17,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.6  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *

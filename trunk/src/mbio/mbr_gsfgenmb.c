@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 4.2 2000-07-19 03:51:38 caress Exp $
+ *	$Id: mbr_gsfgenmb.c,v 4.3 2000-09-30 06:34:20 caress Exp $
  *
- *    Copyright (c) 1998 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1998, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/07/19  03:51:38  caress
+ * Fixed some things.
+ *
  * Revision 4.1  1999/05/05  22:48:29  caress
  * Disabled handling of ping flags in GSF data.
  *
@@ -57,7 +62,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_gsfgenmb.c,v 4.2 2000-07-19 03:51:38 caress Exp $";
+ static char res_id[]="$Id: mbr_gsfgenmb.c,v 4.3 2000-09-30 06:34:20 caress Exp $";
 	char	*function_name = "mbr_alm_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format_inf.c	1/21/93
- *    $Id: mb_format_inf.c,v 4.4 1998-10-05 18:32:27 caress Exp $
+ *    $Id: mb_format_inf.c,v 4.5 2000-09-30 06:26:58 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -18,6 +20,9 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.3  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -71,7 +76,7 @@ int	verbose;
 int	format_num;
 char	**message;
 {
-  static char rcs_id[]="$Id: mb_format_inf.c,v 4.4 1998-10-05 18:32:27 caress Exp $";
+  static char rcs_id[]="$Id: mb_format_inf.c,v 4.5 2000-09-30 06:26:58 caress Exp $";
 	char	*function_name = "mb_format_inf";
 	int	status;
 

@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
- *	$Id: mbsys_singlebeam.h,v 4.2 1999-10-21 22:40:10 caress Exp $
+ *	$Id: mbsys_singlebeam.h,v 4.3 2000-09-30 06:31:19 caress Exp $
  *
- *    Copyright (c) 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -28,6 +28,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1999/10/21  22:40:10  caress
+ * Added MBPRONAV format.
+ *
  * Revision 4.1  1999/07/16  19:24:15  caress
  * Yet another version.
  *
@@ -89,6 +92,7 @@ struct mbsys_singlebeam_struct
 	double	heave;		/* heave or rov depth in m */
 	
 	/* submersible/ROV data */
+	double	sonar_depth;	/* platform depth in m */
 	double	rov_pressure;	/* platform pressure in decibar */
 	double	rov_altitude;	/* altitude above seafloor in m */
 

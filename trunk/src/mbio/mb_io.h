@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.11 2000-04-19 21:06:32 caress Exp $
+ *    $Id: mb_io.h,v 4.12 2000-09-30 06:29:44 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1993, 1994, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/04/19  21:06:32  caress
+ * Added MB_PATH_MAX define
+ *
  * Revision 4.10  2000/04/19  20:55:07  caress
  * Added datalist parsing structure for use in code in mb_format.c
  *
