@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.0 1994-10-21 11:55:41 caress Exp $
+#	$Id: Makefile.template,v 4.1 1994-10-31 18:24:28 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		August 2, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/10/21  11:55:41  caress
+# Release V4.0
+#
 #
 #
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
@@ -38,10 +41,10 @@ LFLAGS = -lm
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/man1
+MANDIR = ../../man/manl
 
 ### make all makes the executable, .uid file, and man page
-all: $(BINDIR)/mbedit $(BINDIR)/mbedit.uid $(MANDIR)/mbedit.1
+all: $(BINDIR)/mbedit $(BINDIR)/mbedit.uid $(MANDIR)/mbedit.l
 
 ### link the executable
 $(BINDIR)/mbedit: mbedit.o mbedit_uid_loc.h mbedit_prog.o xgraphics.o $(LIBDIR)/libmbio.a
@@ -68,9 +71,9 @@ $(BINDIR)/mbedit.uid: mbedit.uil mbedit_define.uil mbedit_init.uil Makefile
 		 -o $(BINDIR)/mbedit.uid
 
 ### copy the man page to the man page directory
-$(MANDIR)/mbedit.1:	mbedit.1
-	cp mbedit.1 $(MANDIR)/mbedit.1
-	chmod 664 $(MANDIR)/mbedit.1
+$(MANDIR)/mbedit.l:	mbedit.l
+	cp mbedit.l $(MANDIR)/mbedit.l
+	chmod 664 $(MANDIR)/mbedit.l
 
 clean: 
 	rm -f core *.o

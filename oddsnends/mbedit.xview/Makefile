@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile  5/25/93
-#	$Id: Makefile,v 4.1 1994-10-21 12:01:43 caress Exp $
+#	$Id: Makefile,v 4.2 1994-10-31 18:26:17 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.1  1994/10/21  12:01:43  caress
+# Release V4.0
+#
 # Revision 4.0  1994/03/05  23:54:35  caress
 # First cut at version 4.0
 #
@@ -40,7 +43,7 @@
 
 PROGRAM = mbedit
 EXEC = ../../bin/$(PROGRAM)
-MANPAGE = ../../man/man1/$(PROGRAM).1
+MANPAGE = ../../man/manl/$(PROGRAM).l
 SOURCES.c = mbedit.c xgraphics.c
 SOURCES.h = \
 	../../include/mb_io.h \
@@ -99,8 +102,8 @@ targets: $(SOURCES) $(TARGETS)
 $(EXEC): $(PROGRAM)
 	cp $(PROGRAM) $(EXEC)
 
-$(MANPAGE): $(PROGRAM).1
-	cp $(PROGRAM).1 $(MANPAGE)
+$(MANPAGE): $(PROGRAM).l
+	cp $(PROGRAM).l $(MANPAGE)
 	chmod 664 $(MANPAGE)
 
 $(PROGRAM): $(SOURCES.c) $(TARGETS.c) $(TARGETS.h) $(OBJECTS)

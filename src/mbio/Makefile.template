@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.2 1994-10-21 12:11:25 caress Exp $
+#	$Id: Makefile.template,v 4.3 1994-10-31 18:28:56 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.2  1994/10/21  12:11:25  caress
+# Release V4.0
+#
 # Revision 4.1  1994/06/22  19:23:09  caress
 # Added ARCHIVE variable to accommodate different archivers
 # used in different operating systems.
@@ -37,10 +40,10 @@ ARCHIVE = ar rcv
 
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/man1
+MANDIR = ../../man/manl
 
 ### make all makes the mbio library, man page, and associated include files
-all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.1 \
+all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mb_io.h $(INCDIR)/mb_swap.h \
 	$(INCDIR)/mbsys_sb.h $(INCDIR)/mbsys_hsds.h \
@@ -211,9 +214,9 @@ mbr_sb2000ss.o: mbr_sb2000ss.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_sb2000ss.c
 
 ### copy the man page to the man page directory
-$(MANDIR)/mbio.1:	mbio.1
-	cp mbio.1 $(MANDIR)/mbio.1
-	chmod 664 $(MANDIR)/mbio.1
+$(MANDIR)/mbio.l:	mbio.l
+	cp mbio.l $(MANDIR)/mbio.l
+	chmod 664 $(MANDIR)/mbio.l
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h
