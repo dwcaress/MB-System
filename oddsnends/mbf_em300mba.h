@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em300mba.h	10/16/98
- *	$Id: mbf_em300mba.h,v 5.1 2001-03-22 20:50:02 caress Exp $
+ *	$Id: mbf_em300mba.h,v 5.2 2001-05-24 23:18:07 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -228,6 +231,7 @@
 #define	MBF_EM300MBA_MAXSVP		1024
 #define	MBF_EM300MBA_MAXATTITUDE	100
 #define	MBF_EM300MBA_MAXHEADING		100
+#define	MBF_EM300MBA_MAXSSV		100
 #define	MBF_EM300MBA_COMMENT_LENGTH	256
 #define	MBF_EM300MBA_BUFFER_SIZE	1024
 	
@@ -567,8 +571,37 @@ struct mbf_em300mba_struct
 				    second head of EM3000D */
 	char	png_beamflag[MBF_EM300MBA_MAXBEAMS];	
 				/* uses standard MB-System beamflags */
+				
+	/* raw travel time and angle data */
+	int	png_raw_read;	/* flag indicating actual reading of rawbeam record */
+	int	png_nrawbeams;	/* number of raw travel times and angles
+				    - nonzero only if raw beam record read */
+	int	png_rawpointangle[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Raw beam pointing angles in 0.01 degree,
+					positive to port. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+	int	png_rawtiltangle[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Raw transmit tilt angles in 0.01 degree,
+					positive forward. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+	int	png_rawrange[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Ranges as raw two way travel times in time 
+					units defined as one-fourth the inverse 
+					sampling rate. These values have not 
+					been corrected for changes in the
+					heave during the ping cycle. */
+	int	png_rawamp[MBSYS_SIMRAD2_MAXBEAMS];		
+				/* 0.5 dB */
+	int	png_rawbeam_num[MBSYS_SIMRAD2_MAXBEAMS];	
+				/* beam 128 is first beam on 
+				    second head of EM3000D */
 	
 	/* sidescan */
+	int	png_ss_read;	/* flag indicating actual reading of sidescan record */
 	int	png_ss_date;	/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
 	int	png_ss_msec;	/* time since midnight in msec
@@ -652,4 +685,17 @@ struct mbf_em300mba_struct
 				/* heading (0.01 degree) */
 	int	hed_heading_status;
 				/* heading status (0=inactive) */
+
+	/* ssv data */
+	int	ssv_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	ssv_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	ssv_count;	/* sequential counter or input identifier */
+	int	ssv_serial;	/* system 1 or system 2 serial number */
+	int	ssv_ndata;	/* number of ssv data */
+	int	ssv_time[MBF_EM300MBA_MAXSSV];
+				/* time since record start (msec) */
+	int	ssv_ssv[MBF_EM300MBA_MAXSSV];
+				/* ssv (0.1 m/s) */
 	};
