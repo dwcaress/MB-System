@@ -82,10 +82,10 @@ Some representative lines are:
 \fItideformat\fP = 3:  
 .br
 This format consists for lines of the form:
- 	year jday hour min sec lon lat
+ 	year jday hour min sec tide
 .br
 where jday is the julian day of the year and 
-lon and lat are in decimal degrees.
+tide is in meters above zero tide.
 Some representative lines are:
  1995 177 11 04 00 2.91
  1995 177 11 11 00 2.98
@@ -95,10 +95,10 @@ Some representative lines are:
 \fItideformat\fP = 4:  
 .br
 This format consists for lines of the form:
- 	year jday daymin sec lon lat
+ 	year jday daymin sec tide
 .br
 where jday is the julian day of the year, daymin is the minute
-of the day, and lon and lat are in decimal degrees.
+of the day, and tide is in meters above zero tide.
 Some representative lines are:
  1995 177 664 00 2.91
  1995 177 671 00 2.98
