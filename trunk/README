@@ -1,5 +1,8 @@
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 3.7  1993/12/14  22:15:56  caress
+# Changed for release version 3.4
+#
 # Revision 3.6  1993/11/06  21:24:39  caress
 # Added discussion of src/realtime directory.
 #
@@ -24,9 +27,9 @@ $Log: not supported by cvs2svn $
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 3.7 1993-12-14 22:15:56 caress Exp $
+RCS ID: $Id: README,v 4.0 1994-03-05 23:06:24 caress Exp $
 
-MBSYSTEM 3.40 RELEASE Notes:
+MBSYSTEM 4.00 RELEASE Notes:
 ----------------------------
 
 	This directory structure contains a release of the MBSYSTEM
@@ -43,7 +46,7 @@ Palisades, NY 10964
 
 Copyright:
 ----------
-Copyright 1992, 1993 by David W. Caress and Dale N. Chayes
+Copyright 1993, 1994 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
 Caveat:
@@ -168,9 +171,9 @@ part of the COSE response to NT) it is switching to some Motif-like
 thing that COSE will proably call by some other name. Its not clear
 exactly what Sun is going to do, but we assume that they are going to
 re-market some commercial tool.
-        We (at Lamont), are currently evaluating Motif GUI builders
-with the intent of getting something soon and would be intersted in
-any suggestions based on experience at your organizaion.
+        We (at Lamont), have obtained a Motif GUI builder but have
+not yet used it to convert hsvelocitytool and mbedit; we expect to
+do the conversion sometime soon (before August?).
         For the short term, we suggest that you run the binaries
 provided in the 3.4 distribution on Suns (if you can) while the GUI
 builder issue settles out.
@@ -197,7 +200,7 @@ new, clever tools for data manipulation and processing.
 
 Suggestions:
 ------------
-	We expect to get support from NSF to continue work on the
+	We have obtained support from NSF to continue work on the
 MB-System in 1994. Our primary efforts will be in the direction of
 enhanced usability through easier user interfaces, more documentation,
 cookbook examples, etc. We are interested in your suggestions.
