@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 5.0 2001-03-22 21:11:38 caress Exp $
+#	$Id: Makefile.template,v 5.1 2001-06-30 17:41:22 caress Exp $
 #
 #     Copyright (c) 1995, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		June 23, 1995
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.0  2001/03/22  21:11:38  caress
+# Trying to make release 5.0.beta0.
+#
 # Revision 4.6  2000/09/30  07:21:55  caress
 # Snapshot for Dale.
 #
@@ -50,7 +53,7 @@ MOTIFINCDIR = /usr/include/Xm
 MOTIFLIBS = -lXm -lXt -lX11
 #
 # Compilers 
-# C compiler left as default
+CC = cc
 #
 # Compile and load flags:
 CFLAGS = -g -DIRIX

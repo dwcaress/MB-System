@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.5 2001-06-03 07:06:25 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.6 2001-06-30 17:41:04 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/03  07:06:25  caress
+ * Release 5.0.beta01
+ *
  * Revision 5.4  2001/04/06 22:16:01  caress
  * Fixed unflagging.
  *
@@ -208,7 +211,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.5 2001-06-03 07:06:25 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.6 2001-06-30 17:41:04 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -389,12 +392,14 @@ int mbnavedit_init_globals()
 
 
 /*--------------------------------------------------------------------*/
-int mbnavedit_init(int argc, char **argv, int *startup_file)
+int mbnavedit_init(int argc, char **argv)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_init";
 	int	status = MB_SUCCESS;
 	int	fileflag = 0;
+	struct stat file_status;
+	int	fstat;
 	int	i;
 
 	/* parsing variables */
@@ -553,14 +558,26 @@ int mbnavedit_init(int argc, char **argv, int *startup_file)
 
 	/* if file specified then use it */
 	if (fileflag > 0)
-		{
-		status = mbnavedit_action_open(MB_NO);
-		if (status == MB_SUCCESS)
-			*startup_file = MB_YES;
+		{    
+		/* get the output filename */
+		strcpy(nfile,ifile);
+		strcat(nfile,".nve");
+		
+		/* check if output file exists */
+		fstat = stat(nfile, &file_status);
+		if (fstat != 0 
+		    || (file_status.st_mode & S_IFMT) == S_IFDIR)
+		    {
+		    /* open file directly */
+		    do_open_file(MB_NO);
+		    }
+		else
+		    {
+		    /* check if previous edits to be used
+		       - then open the file */
+		    do_checkuseprevious();
+		    }
 		}
-	else
-		*startup_file = MB_NO;
-
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -701,6 +718,8 @@ int mbnavedit_open_file(int useprevious)
 	char	ifile_use[MB_PATH_MAXLINE];
 	char	command[MB_PATH_MAXLINE];
 	int	format_use;
+	int	form;
+	int	format_error;
 	struct stat file_status;
 	int	fstat;
 	int	i;
@@ -720,6 +739,17 @@ int mbnavedit_open_file(int useprevious)
 		fprintf(stderr,"dbg2       useprevious: %d\n",useprevious);
 		}
 		
+	/* get format if required */
+	if (format == 0)
+	    {
+	    if (mb_get_format(verbose, ifile, NULL, 
+				    &form, &format_error) 
+			== MB_SUCCESS)
+		    {
+		    format = form;
+		    }
+	    }
+ 		
 	/* if output on and using previously edited nav first copy old nav
 	    and then read it as input instead of specified
 	    input file */
