@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.11 1995-05-12 17:19:02 caress Exp $
+ *    $Id: mbswath.c,v 4.12 1995-07-13 19:15:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1995/05/12  17:19:02  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.10  1995/03/06  19:40:17  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -194,7 +198,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.11 1995-05-12 17:19:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.12 1995-07-13 19:15:53 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -1066,7 +1070,7 @@ int	*error;
 	double	headingx, headingy;
 	double	dx, dy, r, dlon1, dlon2, dlat1, dlat2, tt, x, y;
 	double	ddlonx, ddlaty, rfactor;
-	double	dddepth = 0.0;
+	static double	dddepth = 0.0;
 	int	setprint;
 	int	i, j, k;
 
@@ -1337,8 +1341,8 @@ int	*error;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
 				if (swath->beams_bath > 0 
-					&& pingcur->bath[swath->beams_bath] > 0.0)
-					dddepth = pingcur->bath[swath->beams_bath];
+					&& pingcur->bath[swath->beams_bath/2] > 0.0)
+					dddepth = pingcur->bath[swath->beams_bath/2];
 				else if (dddepth <= 0.0)
 					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
