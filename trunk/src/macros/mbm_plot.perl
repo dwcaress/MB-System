@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.5 2001-11-02 21:07:40 caress Exp $
+#    $Id: mbm_plot.perl,v 5.6 2001-11-20 00:36:45 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.5 2001-11-02 21:07:40 caress Exp $
+#   $Id: mbm_plot.perl,v 5.6 2001-11-20 00:36:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.5  2001/11/02  21:07:40  caress
+# Adjusted handling of segmented xy files.
+#
 # Revision 5.4  2001/10/29  20:07:39  caress
 # Now checks that the number of records is > 0 before
 # using the min max data values in mbinfo output.
@@ -470,6 +473,17 @@ if ($verbose)
 	{
 	print "\nRunning $program_name...\n";
 	}
+
+# set up user defined geographic limits
+if ($bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
+       	{
+       	($xmin_raw,$xmax_raw,$ymin_raw,$ymax_raw) = $bounds =~
+       		/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+       	$xmin = &GetDecimalDegrees($xmin_raw);
+       	$xmax = &GetDecimalDegrees($xmax_raw);
+       	$ymin = &GetDecimalDegrees($ymin_raw);
+       	$ymax = &GetDecimalDegrees($ymax_raw);
+       	}
 
 # set ping averaging
 $mb_pings = 1;
@@ -950,7 +964,7 @@ foreach $file_mb (@files_data)
 	# use .inf file if it exists and no time or space bounds applied
 	$use_inf = 0;
 	$file_inf = $file_mb . ".inf";
-	if (-r $file_inf && !$mb_btime && !$mb_etime && !$bounds_info)
+	if (-r $file_inf && !$mb_btime && !$mb_etime)
 		{
 		if ($verbose) 
 			{
@@ -958,12 +972,51 @@ foreach $file_mb (@files_data)
 			}
 		if (open(FILEINF,"<$file_inf"))
 			{
-			while (<FILEINF>)
+			while ($line = <FILEINF>)
 				{
-				push(@mbinfo, $_);
+				push(@mbinfo, $line);
+				if ($line =~ /Number of Records:\s+(\S+)/)
+					{
+					($nrec_f) = 
+						$line =~ /Number of Records:\s+(\S+)/;
+					}
+				if ($line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
+					{
+					($xmin_f,$xmax_f) = 
+						$line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
+					}
+				if ($line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
+					{
+					($ymin_f,$ymax_f) = 
+						$line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
+					}
 				}
 			close FILEINF;
-			$use_inf = 1;
+
+			if (!$bounds)
+			    {
+			    $use_inf = 1;
+			    }
+			elsif ($nrec_f > 0 &&
+			    $xmin_f >= $xmin && $xmin_f <= $xmax
+				&& $xmax_f >= $xmin && $xmax_f <= $xmax
+			    && $ymin_f >= $ymin && $ymin_f <= $ymax
+				&& $ymax_f >= $ymin && $ymax_f <= $ymax)
+			    {
+			    $use_inf = 1;
+			    }
+			elsif ($nrec_f > 0 &&
+			    ($xmin_f < $xmin 
+				|| $xmax_f > $xmax
+				|| $ymin_f < $ymin 
+				|| $ymax_f > $ymax))
+			    {
+			    $use_inf = 0;
+			    }
+			elsif ($nrec_f > 0)
+			    {
+			    $use_inf = 1;
+			    }
 			}
 		}
 
