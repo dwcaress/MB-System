@@ -1,0 +1,170 @@
+.TH MBEDIT 1 "15 April 1993"
+.SH NAME
+\fBMBEDIT\fP - Interactive editor used to flag bad beams in multibeam bathymetry data.
+
+.SH VERSION
+Version 3.00
+
+.SH SYNOPSIS
+\fBmbedit\fP [\fB-F\fIformat \fB-I\fIinfile \fB-V -H\fP]
+
+.SH DESCRIPTION
+\fBMBEDIT\fP is an interactive editor used to identify and flag 
+artifacts in multibeam bathymetry data. Once a file has been
+read in, \fBMBEDIT\fP displays the bathymetry profiles
+from several pings, allowing the user to identify and flag anomalous
+beams.  The output filename is the input filename with ".ed" appended.
+
+
+.SH AUTHORSHIP
+David W. Caress (caress@lamont.ldeo.columbia.edu)
+.br
+Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+.br
+Lamont-Doherty Earth Observatory
+.br
+Palisades, NY 10964
+
+.SH OPTIONS
+.TP
+.B \fB-F\fIformat\fP
+Sets the format at startup for the input and output multibeam data using 
+\fBMBIO\fP integer format identifiers. This value can also be set
+interactively when specifying the input file.
+This program uses the \fBMBIO\fP library and will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+Default: \fIformat\fP = 1.
+.TP
+.B \fB-I\fIinfile\fP
+Sets the data file from which the input data will be read at startup.
+This value can also be set interactively.  The output file will
+be \fIinfile\fP with ".ed" appended.
+.TP
+.B \fB-V\fP
+Normally, \fBMBEDIT\fP works "silently" without outputting
+anything to the stderr stream.  If the
+\fB-V\fP flag is given, then \fBMBEDIT\fP works in a "verbose" mode and
+outputs the program version being used, all error status messages, 
+and a large amount of other information.
+.TP
+.B \fB-H\fP
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+
+.SH INTERACTIVE CONTROLS
+.TP
+.B \fBFile\fP
+This button brings up a popup window which allows the user to
+specify the input multibeam bathymetry data file and its \fBMBIO\fP
+format id.  When a valid file is specified, as much data as will fit
+into the data buffer is read and several pings are displayed as 
+stacked bathymetry profiles.
+.TP
+.B \fBQuit\fP
+This button causes the program to exit gracefully.  If a data file
+has been read, all of the data will be written to the output file
+before exiting.
+.TP
+.B \fBNext Buffer\fP
+This button causes the program to write out the data from the
+current buffer and then read in and display the next buffer.
+If there is no more data to be read in after the current buffer
+has been written out, then the input and output files are closed.
+.TP
+.B \fBDone\fP
+This button causes the program to write out all of the data from the
+input file and then close the input and output files.
+.TP
+.B \fBForward\fP
+This button causes the set of displayed pings to step \fInstep\fP 
+pings forward in the current buffer.  The right mouse button causes
+the same action.
+.TP
+.B \fBReverse\fP
+This button causes the set of displayed pings to step \fInstep\fP 
+pings backward in the current buffer.  The middle mouse button causes
+the same action.
+.TP
+.B \fBNumber of pings shown\fP
+This slider sets the number of pings shown at a time.
+.TP
+.B \fBX Scale\fP
+This slider sets the cross track distance scale in m/100 pixels.
+.TP
+.B \fBY Scale\fP
+This slider sets the depth scale in m/100 pixels.
+.TP
+.B \fBNumber of pings to step\fP
+This textitem sets the number of pings to step when the \fBForward\fP
+or \fBReverse\fP buttons are pushed.
+.TP
+.B \fBX Axis Tick Interval\fP
+This textitem sets the tick interval in m for the cross track distance axis.
+.TP
+.B \fBY Axis Tick Interval\fP
+This textitem sets the tick interval in m for the depth axis.
+.TP
+.B \fBData Buffer Size\fP
+This slider sets the number of data records which can be held 
+in the data buffer.  Any change becomes effective the next time
+that a data file is read in.
+.TP
+.B \fBBuffer Retain Size\fP
+This slider sets the number of data records which are held over in
+the buffer each time the old buffer is written out.
+
+.SH MOUSE AND KEYBOARD ACTIONS
+.TP
+.B \fBLeft Mouse Button\fP
+The left mouse button is used to pick individual beams.  Good beams are
+shown as filled squares and bad beams as empty squares.  Picking
+a particular beam toggles it from good to bad and vice versa.  The
+last picked beam (and ping) is remembered for use with the keyboard actions
+described below.
+.TP
+.B \fBMiddle Mouse Button\fP
+The middle mouse button causes the set of displayed pings to step \fInstep\fP 
+pings backward in the current buffer.  The control button \fBReverse\fP causes
+the same action.
+.TP
+.B \fBRight Mouse Button\fP
+The right mouse button causes the set of displayed pings to step \fInstep\fP 
+pings forward in the current buffer.  The control button \fBForward\fP causes
+the same action.
+.TP
+.B \fBBad Ping: Keyboard 'B', 'b', 'Z', or 'z'\fP
+Pressing one of these keys causes all of the beams in the last picked
+ping to be flagged as bad.
+.TP
+.B \fBBad Ping: Keyboard 'G' or 'g'\fP
+Pressing one of these keys causes all of the beams in the last picked
+ping to be unflagged as good.
+.TP
+.B \fBBad Ping: Keyboard 'L' or 'l'\fP
+Pressing one of these keys causes all of the beams including and to 
+the left of the last picked beam to be flagged as bad.
+.TP
+.B \fBBad Ping: Keyboard 'R' or 'r'\fP
+Pressing one of these keys causes all of the beams including and to 
+the right of the last picked beam to be flagged as bad.
+
+.SH BUGS
+There are many shortcomings to this program:
+
+1. \fBMBEDIT\fP uses the XVIEW widget set, which is now obsolete.
+A Motif version will be written when L-DEO has a suitable
+Motif development package.
+
+2. One cannot specify or search through directories for the input files.
+The user has to run the program from the directory containing the data
+files of interest.
+
+3. The program needs a bit of color.
+
+4. The program needs a font control option.
+
+5. When an input file is specified at startup (e.g. mbedit -f1 -isbfile)
+the graphics don't show up until the user hits one of the mouse
+or keyboard buttons.
