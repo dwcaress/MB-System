@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/27/2003
-#	$Id: Makefile.template,v 5.1 2004-01-06 21:04:12 caress Exp $
+#	$Id: Makefile.template,v 5.2 2004-10-18 03:43:18 caress Exp $
 #
 #     Copyright (c) 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		August 31, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.1  2004/01/06 21:04:12  caress
+# Added mbeditviz
+#
 # Revision 5.0  2003/12/02 20:20:35  caress
 # Making version number 5.0
 #
@@ -94,8 +97,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbps.a \
-		$(LIBDIR)/libmbxgr.a \
-		$(GMTLIBDIR)/libgmt.a
+		$(LIBDIR)/libmbxgr.a
 	$(CC) $(CFLAGS) mbgrdviz_main.o \
 		mbgrdviz_bxutils.o \
 		mbgrdviz_callbacks.o \
@@ -108,6 +110,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbxgr.a \
 		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libpsl.a \
 		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbgrdviz
 $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		mbeditviz_bxutils.o \
@@ -120,8 +123,7 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbps.a \
-		$(LIBDIR)/libmbxgr.a \
-		$(GMTLIBDIR)/libgmt.a
+		$(LIBDIR)/libmbxgr.a
 	$(CC) $(CFLAGS) mbeditviz_main.o \
 		mbeditviz_bxutils.o \
 		mbeditviz_callbacks.o \
@@ -134,6 +136,7 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbxgr.a \
 		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libpsl.a \
 		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbeditviz
 
 ### compile the source files
