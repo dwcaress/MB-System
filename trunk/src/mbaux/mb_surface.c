@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_surface.c	5/2/94
- *    $Id: mb_surface.c,v 5.0 2003-03-22 03:10:36 caress Exp $
+ *    $Id: mb_surface.c,v 5.1 2003-04-29 20:27:48 caress Exp $
  *
  *    Inclusion in MB-System:
  *    Copyright (c) 1994, 2003 by
@@ -57,6 +57,9 @@
  * Date:	May 2, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/03/22 03:10:36  caress
+ * Reinserting this code into MB-System for first time in years.
+ *
  * Revision 4.2  1994/10/21  13:02:31  caress
  * Release V4.0
  *
@@ -107,7 +110,7 @@ int	grid_east;
 int n_fact = 0;			/* Number of factors in common (ny-1, nx-1) */
 int factors[32];		/* Array of common factors */
 int local_verbose = FALSE;
-int error = MB_ERROR_NO_ERROR;
+int local_error = MB_ERROR_NO_ERROR;
 int status = MB_SUCCESS;
 int n_empty;			/* No of unconstrained nodes at initialization  */
 int set_low = 0;		/* 0 unconstrained,1 = by min data value, 2 = by user value */
@@ -177,7 +180,7 @@ float	*sgrid;
 
 {
 
-	int	i, j, ij, error = FALSE, size_query = FALSE;
+	int	i, j, ij, serror = FALSE, size_query = FALSE;
 	char	modifier, low[100], high[100];
 	char	*function_name = "mb_surface";
 
@@ -219,8 +222,8 @@ float	*sgrid;
 	/* New in v4.3:  Default to unconstrained:  */
 	set_low = set_high = 0; 
 	
-	if (xmin >= xmax || ymin >= ymax) error = TRUE;
-	if (xinc <= 0.0 || yinc <= 0.0) error = TRUE;
+	if (xmin >= xmax || ymin >= ymax) serror = TRUE;
+	if (xinc <= 0.0 || yinc <= 0.0) serror = TRUE;
 
 	if (tension != 0.0) {
 		boundary_tension = tension;
@@ -273,9 +276,9 @@ float	*sgrid;
 
 	/* Allocate more space  */
 	
-	status = mb_malloc(local_verbose, npoints * sizeof(struct BRIGGS), &briggs, &error);
-	status = mb_malloc(local_verbose, mx * my * sizeof(char), &iu, &error);
-	status = mb_malloc(local_verbose, mx * my * sizeof(float), &u, &error);
+	status = mb_malloc(local_verbose, npoints * sizeof(struct BRIGGS), &briggs, &local_error);
+	status = mb_malloc(local_verbose, mx * my * sizeof(char), &iu, &local_error);
+	status = mb_malloc(local_verbose, mx * my * sizeof(float), &u, &local_error);
 
 	if (radius > 0) initialize_grid(); /* Fill in nodes with a weighted avg in a search radius  */
 
@@ -307,12 +310,12 @@ float	*sgrid;
 
 	get_output(sgrid);
 
-	status = mb_free(verbose, &data, &error);
-	status = mb_free(verbose, &briggs, &error);
-	status = mb_free(verbose, &iu, &error);
-	status = mb_free(verbose, &u, &error);
-	if (set_low) status = mb_free(verbose, &lower, &error);
-	if (set_high) status = mb_free(verbose, &upper, &error);
+	status = mb_free(verbose, &data, &local_error);
+	status = mb_free(verbose, &briggs, &local_error);
+	status = mb_free(verbose, &iu, &local_error);
+	status = mb_free(verbose, &u, &local_error);
+	if (set_low) status = mb_free(verbose, &lower, &local_error);
+	if (set_high) status = mb_free(verbose, &upper, &local_error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -320,7 +323,7 @@ float	*sgrid;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2       error:      %d\n",local_error);
 		for (i=0;i<mx*my;i++)
 			fprintf(stderr,"dbg2       grid:       %d %f\n",i,sgrid[i]);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -731,7 +734,7 @@ float	*zdat;
 	int	i, j, k, kmax, kmin, idat;
 	double	zmin = 1.0e38, zmax = -1.0e38;
 
-	status = mb_malloc(local_verbose, ndat * sizeof(struct DATA), &data, &error);
+	status = mb_malloc(local_verbose, ndat * sizeof(struct DATA), &data, &local_error);
 	
 	/* Read in xyz data and computes index no and store it in a structure */
 	k = 0;
@@ -1307,7 +1310,7 @@ int	throw_away_unusables()
 	
 	qsort ((char *)data, npoints, sizeof (struct DATA), compare_points);
 	npoints -= n_outside;
-	status = mb_realloc(local_verbose, npoints * sizeof(struct DATA), &data, &error);
+	status = mb_realloc(local_verbose, npoints * sizeof(struct DATA), &data, &local_error);
 	if (local_verbose && (n_outside)) {
 		fprintf(stderr,"surface: %ld unusable points were supplied; these will be ignored.\n", n_outside);
 		fprintf(stderr,"\tYou should have pre-processed the data with blockmean or blockmedian.\n");
@@ -1345,7 +1348,7 @@ char *low, *high; {
 	/* Load lower/upper limits, verify range, deplane, and rescale */
 	
 	if (set_low > 0) {
-		status = mb_malloc(local_verbose, nx * ny * sizeof(float), &lower, &error);
+		status = mb_malloc(local_verbose, nx * ny * sizeof(float), &lower, &local_error);
 		if (set_low < 3)
 			for (i = 0; i < nx * ny; i++) lower[i] = low_limit;
 /* Comment this out:
@@ -1382,7 +1385,7 @@ char *low, *high; {
 		constrained = TRUE;
 	}
 	if (set_high > 0) {
-		status = mb_malloc(local_verbose, nx * ny * sizeof(float), &upper, &error);
+		status = mb_malloc(local_verbose, nx * ny * sizeof(float), &upper, &local_error);
 		if (set_high < 3)
 			for (i = 0; i < nx * ny; i++) upper[i] = high_limit;
 /* Comment this out:
