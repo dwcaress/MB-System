@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.h	8/20/94
- *	$Id: mbsys_reson8k.h,v 5.0 2001-09-17 23:24:10 caress Exp $
+ *	$Id: mbsys_reson8k.h,v 5.1 2001-11-15 22:36:43 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	September 2, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/09/17  23:24:10  caress
+ * Added XTF format.
+ *
  *
  *
  */
@@ -88,7 +91,7 @@ struct mbsys_reson8k_struct
 	float	nav_heading;
 
 	/* attitude data */
-	double	att_time_d;
+	double	att_timetag;
 	float	att_heading;
 	float	att_heave;
 	float	att_roll;
