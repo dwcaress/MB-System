@@ -1,4 +1,4 @@
-.TH mbedit l "30 July 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit l "10 November 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -53,8 +53,12 @@ a box with annotation showing the scaling of the x
 (acrosstrack distance) and y (depth) axes. The number of pings displayed,
 and the width, vertical exageration, and annotation of the plot 
 are all set by the user. Unflagged bathymetry points
-are shown as small black rectangles, and flagged bathymtetry points
-are shown as small red rectangles. The unflagged or good bathymetry
+are shown as small filled black squares, and flagged bathymtetry points
+are shown as small unfilled red or blue squares. Soundings 
+flagged manually are shown in red, and those flagged by filter
+algorithms are shown in green. When a sounding is selected in the
+info mode, it is displayed as a large, filled, blue square.
+The unflagged or good bathymetry
 points are connected by black line segments to show the acrosstrack
 bathymetry profiles for each ping. If the \fBShow Flagged Profile\fP
 toggle is set on, then red line segments connect the flagged depth
@@ -63,13 +67,16 @@ Each of the displayed pings has a label giving the record number
 in the data file, the ping time, and the center beam depth. 
 
 The editing is driven by the left mouse button and 
-involves four basic edit modes. In toggle
+involves four basic edit modes and one information mode. In toggle
 mode each mouse pick toggles the nearest bathymetry point between
 flagged and unflagged states. In pick mode each mouse pick flags
 the nearest bathymetry point. In erase mode the left mouse button
 is held down as the cursor is dragged over the data; all bathymetry
 points touched by the mouse are flagged. Restore mode is just like
 erase mode, except that the affected bathymetry values are unflagged.
+Finally, info mode acts like pick mode, except that instead of flagging
+the nearest sounding, the program displays information about the
+selected ping and sounding above the bathymetry profile box.
 A few keyboard macros described below add additional flexibility
 to the editing process.
 
@@ -478,12 +485,17 @@ is set to \fIErase\fP, then the cursor will change to an erasor and
 any beam with the cursor while the left mouse button is held down
 will be flagged.  If mode is set to \fIRestore\fP, the behavior will
 be the same as for \fIErase\fP except that the affected beams will be
-unflagged instead of flagged.  The edit mode can also be set using
+unflagged instead of flagged. Info mode acts like pick mode, 
+except that instead of flagging
+the nearest sounding, the program displays information about the
+selected ping and sounding above the bathymetry profile box. 
+The edit mode can also be set using
 key macros (see the keyboard action section):  
  	Toggle:		'Q', 'q', 'U', 'u' 
  	Pick:		'W', 'w', 'I', 'i' 
  	Erase:		'E', 'e', 'O', 'o' 
  	Restore:	'R', 'r', 'P', 'p' 
+ 	Info:		'T', 't', '{', '[' 
 .TP
 .B Unflag View
 This button unflags all flagged beams among the currently
@@ -516,7 +528,8 @@ associated with the flagged depth points.
 .TP
 .B Left Mouse Button
 The left mouse button is used to pick beams.  Good beams are
-shown as filled squares and bad (flagged) beams as empty squares.  The 
+shown as filled black squares and bad (flagged) beams as unfilled red
+or green squares.  The 
 result of picking a particular beam depends on the current edit mode,
 as set by the \fBMode\fP button or keyboard macros defined below. The
 last picked beam (and ping) is remembered for use with 
@@ -566,14 +579,14 @@ the values are not recoverable.
 Pressing one of these keys sets the edit mode to "toggle" so that
 clicking the left mouse button will cause
 the nearest beam to toggle between flagged and unflagged.  
-The edit mode can also be set using the \fBMode\fP button.
+The edit mode can also be set using the \fBMode\fP toggle buttons.
 .TP
 .B 'W', 'w', 'I', or 'i'
 .B Pick Mode:
 Pressing one of these keys sets the edit mode to "pick" so that
 clicking the left mouse button will cause
 the nearest unflagged beam to be flagged.  
-The edit mode can also be set using the \fBMode\fP button.
+The edit mode can also be set using the \fBMode\fP toggle buttons.
 .TP
 .B 'E', 'e', 'O', or 'o'
 .B Erase Mode:
@@ -581,14 +594,21 @@ Pressing one of these keys sets the edit mode to "erase" so that
 clicking the left mouse button will cause
 any beam under the cursor while the left mouse button is held down
 to be flagged.
-The edit mode can also be set using the \fBMode\fP button.
+The edit mode can also be set using the \fBMode\fP toggle buttons.
 .TP
 .B 'R', 'r', 'P', or 'p'
 .B Restore Mode:
 Pressing one of these keys sets the edit mode to "restore" so that
 clicking the left mouse button will cause any beam under the cursor 
 while the left mouse button is held down to be unflagged.
-The edit mode can also be set using the \fBMode\fP button.
+The edit mode can also be set using the \fBMode\fP toggle buttons.
+.TP
+.B 'T', 't', '{', or '['
+.B Info Mode:
+Pressing one of these keys sets the edit mode to "info" so that
+clicking the left mouse button will cause information about the
+nearest beam to be displayed above the bathymetry profile box.
+The edit mode can also be set using the \fBMode\fP toggle buttons.
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbprocess\fP(l), \fBmbset\fP(l), 

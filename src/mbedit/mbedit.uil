@@ -66,6 +66,7 @@ identifier BXG_slider_num_pings_max_label;
 identifier BXG_slider_number_step_label;
 identifier BXG_slider_number_step;
 identifier BXG_slider_number_max_step_label;
+identifier BXG_setting_mode_toggle_info;
 identifier BXG_setting_mode_toggle_restore;
 identifier BXG_setting_mode_toggle_erase;
 identifier BXG_setting_mode_toggle_pick;
@@ -156,6 +157,7 @@ procedure do_show_flagged();
 procedure do_show_time();
 procedure do_check_median_xtrack();
 procedure do_check_median_ltrack();
+procedure do_mode_info();
 
 list BaseStyle : arguments {
 };
@@ -742,8 +744,8 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 756;
-        XmNy = 35;
+        XmNx = 304;
+        XmNy = 444;
         XmNwidth = 426;
         XmNheight = 300;
     };
@@ -955,8 +957,8 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 279;
-        XmNy = 519;
+        XmNx = 249;
+        XmNy = 527;
         XmNwidth = 536;
         XmNheight = 135;
     };
@@ -1167,8 +1169,8 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 279;
-        XmNy = 515;
+        XmNx = 249;
+        XmNy = 523;
         XmNwidth = 536;
         XmNheight = 142;
     };
@@ -1285,8 +1287,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 391;
-        XmNy = 506;
+        XmNx = 361;
+        XmNy = 514;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1405,8 +1407,8 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 122;
-        XmNy = 529;
+        XmNx = 301;
+        XmNy = 528;
         XmNwidth = 431;
         XmNheight = 133;
     };
@@ -1491,8 +1493,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 357;
-        XmNy = 543;
+        XmNx = 327;
+        XmNy = 551;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1745,8 +1747,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 56;
-        XmNy = 527;
+        XmNx = 280;
+        XmNy = 442;
         XmNwidth = 473;
         XmNheight = 457;
     };
@@ -2059,8 +2061,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 449;
-        XmNy = 435;
+        XmNx = 419;
+        XmNy = 443;
         XmNwidth = 196;
         XmNheight = 302;
     };
@@ -2380,8 +2382,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 40;
-        XmNy = 516;
+        XmNx = 250;
+        XmNy = 442;
         XmNwidth = 541;
         XmNheight = 489;
     };
@@ -2513,6 +2515,25 @@ object setting_mode_toggle_restore : XmToggleButton widget {
 !(BX)    };
 };
 
+object setting_mode_toggle_info : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Info");
+        XmNwidth = 54;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_setting_mode_toggle_info);
+        XmNvalueChangedCallback = procedure do_mode_info();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object setting_mode : XmRowColumn widget {
     arguments {
         arguments Style_use;
@@ -2523,7 +2544,7 @@ object setting_mode : XmRowColumn widget {
         XmNorientation = XmHORIZONTAL;
         XmNx = 50;
         XmNy = 110;
-        XmNwidth = 289;
+        XmNwidth = 343;
         XmNheight = 34;
     };
     controls {
@@ -2531,6 +2552,7 @@ object setting_mode : XmRowColumn widget {
          managed XmToggleButton setting_mode_toggle_pick;
          managed XmToggleButton setting_mode_toggle_erase;
          managed XmToggleButton setting_mode_toggle_restore;
+         managed XmToggleButton setting_mode_toggle_info;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -3136,7 +3158,7 @@ object pushButton_unflag_view : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Unflag View");
-        XmNx = 370;
+        XmNx = 440;
         XmNy = 110;
         XmNwidth = 120;
         XmNheight = 30;
@@ -3156,7 +3178,7 @@ object pushButton_unflag_all : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Unflag Forward");
-        XmNx = 490;
+        XmNx = 560;
         XmNy = 110;
         XmNwidth = 120;
         XmNheight = 30;
@@ -3177,9 +3199,9 @@ object toggleButton_show_flagged_on : XmToggleButton widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Show Flagged Profile");
-        XmNx = 790;
+        XmNx = 820;
         XmNy = 110;
-        XmNwidth = 210;
+        XmNwidth = 190;
         XmNheight = 28;
     };
     controls {
@@ -3199,9 +3221,9 @@ object toggleButton_show_time : XmToggleButton widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Show Time");
-        XmNx = 650;
+        XmNx = 700;
         XmNy = 110;
-        XmNwidth = 140;
+        XmNwidth = 110;
         XmNheight = 30;
     };
     controls {
@@ -3288,8 +3310,8 @@ object mbedit_bboard : XmBulletinBoard widget {
 object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 40;
-        XmNy = 254;
+        XmNx = 10;
+        XmNy = 262;
         XmNwidth = 1014;
         XmNheight = 665;
     };
@@ -3354,8 +3376,8 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        XmNiconName = "MBedit";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
-!(BX)        XmNx = 40;
-!(BX)        XmNy = 254;
+!(BX)        XmNx = 10;
+!(BX)        XmNy = 262;
 !(BX)        XmNwidth = 1014;
 !(BX)        XmNheight = 665;
 !(BX)    };

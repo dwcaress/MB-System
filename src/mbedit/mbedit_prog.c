@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.8 2001-09-17 17:00:48 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.9 2001-11-16 01:25:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/09/17  17:00:48  caress
+ * Added local median filter, angle filter, time display toggle.
+ *
  * Revision 5.7  2001/07/31  00:40:17  caress
  * Added flagging by beam number and acrosstrack distance.
  *
@@ -273,7 +276,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.8 2001-09-17 17:00:48 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.9 2001-11-16 01:25:20 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -355,6 +358,23 @@ int	current_id = 0;
 int	nload_total = 0;
 int	ndump_total = 0;
 char	last_ping[MB_PATH_MAXLINE];
+
+/* info parameters */
+int	info_set = MB_NO;
+int	info_ping;
+int	info_beam;
+int	info_time_i[7];
+double	info_time_d;
+double	info_navlon;
+double	info_navlat;
+double	info_speed;
+double	info_heading;
+double	info_altitude;
+int	info_beams_bath;
+char	info_beamflag;
+double	info_bath;
+double	info_bathacrosstrack;
+double	info_bathalongtrack;
 
 /* save file control variables */
 int	sofile_open = MB_NO;
@@ -698,7 +718,7 @@ int mbedit_set_scaling(int *brdr, int sh_time)
 	else
 		{
 		margin = (borders[1] - borders[0])/16;
-		xmin = 2 * margin;
+		xmin = 2 * margin + 20;
 		xmax = borders[1] - margin;
 		ymin = margin;
 		ymax = borders[3] - margin/2;
@@ -1084,6 +1104,9 @@ int mbedit_action_open(
 		fprintf(stderr,"dbg2       hold_size:       %d\n",*hold_size);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* set the output mode */
 	output_mode = outmode;
 
@@ -1191,6 +1214,9 @@ int mbedit_action_next_buffer(
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
+
+	/* reset info */
+	info_set = MB_NO;
 
 	/* clear the screen */
 	status = mbedit_clear_screen();
@@ -1310,6 +1336,9 @@ int mbedit_action_close(
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* clear the screen */
 	status = mbedit_clear_screen();
 
@@ -1416,7 +1445,10 @@ int mbedit_action_done(
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
 		}
-		
+
+	/* reset info */
+	info_set = MB_NO;
+
 	/* if in normal mode done does not mean quit,
 		if in gui mode done does mean quit */
 	if (gui_mode == MB_YES)
@@ -1485,6 +1517,9 @@ int mbedit_action_quit(
 	if (verbose >= 1)
 		fprintf(stderr,"\nShutting MBedit down without further ado...\n");
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
 		status = mbedit_action_close(buffer_size,ndumped,nloaded,
@@ -1548,6 +1583,9 @@ int mbedit_action_step(
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
+
+	/* reset info */
+	info_set = MB_NO;
 
 	/* check if a file has been opened and there is data */
 	if (file_open == MB_YES && nbuff > 0)
@@ -1734,6 +1772,9 @@ int mbedit_action_mouse_toggle(
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
+
+	/* reset info */
+	info_set = MB_NO;
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -1931,6 +1972,9 @@ int mbedit_action_mouse_pick(
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
 		{
@@ -2117,6 +2161,9 @@ int mbedit_action_mouse_erase(
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
 	    {
@@ -2289,6 +2336,9 @@ int mbedit_action_mouse_restore(
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
 	    {
@@ -2422,6 +2472,158 @@ int mbedit_action_mouse_restore(
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbedit_action_mouse_info(
+		int	x_loc, 
+		int	y_loc, 
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_flggd, 
+		int	sh_time,
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
+{
+	/* local variables */
+	char	*function_name = "mbedit_action_mouse_info";
+	int	status = MB_SUCCESS;
+	int	zap_box, zap_ping;
+	int	ix, iy, range, range_min;
+	int	found;
+	int	iping, jbeam;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       x_loc:       %d\n",x_loc);
+		fprintf(stderr,"dbg2       y_loc:       %d\n",y_loc);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
+		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
+		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
+		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
+		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
+		}
+
+	/* do nothing unless file has been opened */
+	if (file_open == MB_YES)
+		{
+		/* replot old info beam if needed */
+		if (info_set == MB_YES)
+			{
+			status = mbedit_unplot_beam(info_ping,info_beam);
+			status = mbedit_unplot_info();
+			info_set = MB_NO;
+			status = mbedit_plot_beam(info_ping,info_beam-1);
+			status = mbedit_plot_beam(info_ping,info_beam);
+			status = mbedit_plot_beam(info_ping,info_beam+1);
+			status = mbedit_plot_ping(info_ping);
+			}
+
+		/* check if a beam has been picked */
+		iping = 0;
+		jbeam = 0;
+		range_min = 100000;
+		for (i=current_id;i<current_id+nplot;i++)
+			{
+			for (j=0;j<ping[i].beams_bath;j++)
+				{
+				if (ping[i].beamflag[j] != MB_FLAG_NULL)
+					{
+					ix = x_loc - ping[i].bath_x[j];
+					iy = y_loc - ping[i].bath_y[j];
+					range = (int) 
+						sqrt((double) (ix*ix + iy*iy));
+					if (range < range_min)
+						{
+						range_min = range;
+						iping = i;
+						jbeam = j;
+						}
+					}
+				}
+			}
+
+		/* check to see if closest beam is 
+			close enough to be id'd */
+		if (range_min <= MBEDIT_PICK_DISTANCE)
+			{
+			info_set = MB_YES;
+			info_ping = iping;
+			info_beam = jbeam;
+			info_time_i[0] = ping[iping].time_i[0];
+			info_time_i[1] = ping[iping].time_i[1];
+			info_time_i[2] = ping[iping].time_i[2];
+			info_time_i[3] = ping[iping].time_i[3];
+			info_time_i[4] = ping[iping].time_i[4];
+			info_time_i[5] = ping[iping].time_i[5];
+			info_time_i[6] = ping[iping].time_i[6];
+			info_time_d = ping[iping].time_d;
+			info_navlon = ping[iping].navlon;
+			info_navlat = ping[iping].navlat;
+			info_speed = ping[iping].speed;
+			info_heading = ping[iping].heading;
+			info_altitude = ping[iping].altitude;
+			info_beams_bath = ping[iping].beams_bath;
+			info_beamflag = ping[iping].beamflag[jbeam];
+			info_bath = ping[iping].bath[jbeam];
+			info_bathacrosstrack = ping[iping].bathacrosstrack[jbeam];
+			info_bathalongtrack = ping[iping].bathalongtrack[jbeam];
+			fprintf(stderr,"\nping: %d beam:%d depth:%10.3f \n",
+				iping,jbeam,ping[iping].bath[jbeam]);
+
+			/* replot old info beam if needed */
+			status = mbedit_plot_beam(info_ping,info_beam);
+			status = mbedit_plot_info();
+
+			}
+		else
+			info_set = MB_NO;
+
+		/* set some return values */
+		*nbuffer = nbuff;
+		*ngood = nbuff;
+		*icurrent = current_id;
+		}
+		
+	/* if no file open set failure status */
+	else if (file_open == MB_NO)
+		{
+		status = MB_FAILURE;
+		*nbuffer = nbuff;
+		*nbuffer = nbuff;
+		*ngood = nbuff;
+		current_id = 0;
+		*icurrent = current_id;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
+		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
+		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
+		fprintf(stderr,"dbg2       nplt:        %d\n",*nplt);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbedit_action_zap_outbounds(
 		int	iping, 
 		int	plwd, 
@@ -2457,6 +2659,9 @@ int mbedit_action_zap_outbounds(
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
+
+	/* reset info */
+	info_set = MB_NO;
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -2582,6 +2787,9 @@ int mbedit_action_bad_ping(
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
 	if (file_open == MB_YES && beam_save == MB_YES)
@@ -2682,6 +2890,9 @@ int mbedit_action_good_ping(
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
+
+	/* reset info */
+	info_set = MB_NO;
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
@@ -2786,6 +2997,9 @@ int mbedit_action_left_ping(
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
 	if (file_open == MB_YES && beam_save == MB_YES)
@@ -2886,6 +3100,9 @@ int mbedit_action_right_ping(
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
+
+	/* reset info */
+	info_set = MB_NO;
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
@@ -2988,6 +3205,9 @@ int mbedit_action_zero_ping(
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
 	if (file_open == MB_YES && beam_save == MB_YES)
@@ -3089,6 +3309,9 @@ int mbedit_action_unflag_view(
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
+
+	/* reset info */
+	info_set = MB_NO;
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -3206,6 +3429,9 @@ int mbedit_action_unflag_all(
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
 		{
@@ -3320,6 +3546,9 @@ int mbedit_action_filter_all(
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
 		}
 
+	/* reset info */
+	info_set = MB_NO;
+
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
 		{
@@ -3399,6 +3628,9 @@ int mbedit_filter_ping(int iping)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       iping:       %d\n",iping);
 		}
+
+	/* reset info */
+	info_set = MB_NO;
 
 	/* do nothing unless file has been opened and filters set on */
 	if (file_open == MB_YES
@@ -4698,14 +4930,7 @@ int mbedit_plot_all(
 	dxscale = 100.0/xscale;
 	dyscale = 100.0/yscale;
 
-	/* plot top label */
-	sprintf(string,"Vertical Exageration: %4.2f",(exager/100.));
-	xg_justify(mbedit_xgid,string,&swidth,
-		&sascent,&sdescent);
-	xg_drawstring(mbedit_xgid,xcen-swidth/2,
-		ymin-margin/2+sascent,string,
-		pixel_values[BLACK],XG_SOLIDLINE);
-	sprintf(string,"Acrosstrack Distances and Depths in Meters");
+	sprintf(string,"Vertical Exageration: %4.2f   All Distances and Depths in Meters",(exager/100.));
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,xcen-swidth/2,
@@ -4717,7 +4942,7 @@ int mbedit_plot_all(
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,margin/2,
-		ymin-margin/2-3*sascent/2,string,
+		ymin-margin/2-1*(sascent+sdescent),string,
 		pixel_values[BLACK],XG_SOLIDLINE);
 	string_ptr = strrchr(ifile, '/');
 	if (string_ptr == NULL)
@@ -4725,7 +4950,7 @@ int mbedit_plot_all(
 	else if (strlen(string_ptr) > 0)
 		string_ptr++;
 	xg_drawstring(mbedit_xgid,margin/2+2+swidth,
-		ymin-margin/2-3*sascent/2,string_ptr,
+		ymin-margin/2-1*(sascent+sdescent),string_ptr,
 		pixel_values[BLACK],XG_SOLIDLINE);
 		
 	/* plot file position bar */
@@ -4886,7 +5111,15 @@ int mbedit_plot_beam(int iping, int jbeam)
 		}
 
 	/* plot the beam */
-	if (jbeam >= 0 && jbeam < ping[iping].beams_bath)
+	if (info_set == MB_YES && iping == info_ping && jbeam == info_beam)
+		{
+		if (ping[iping].beamflag[jbeam] != MB_FLAG_NULL)
+			xg_fillrectangle(mbedit_xgid, 
+				ping[iping].bath_x[jbeam]-4, 
+				ping[iping].bath_y[jbeam]-4, 8, 8, 
+				pixel_values[BLUE],XG_SOLIDLINE);
+		}
+	else if (jbeam >= 0 && jbeam < ping[iping].beams_bath)
 		{
 		if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 			xg_fillrectangle(mbedit_xgid, 
@@ -5151,6 +5384,75 @@ int mbedit_plot_ping_label(int iping, int save)
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbedit_plot_info()
+{
+	/* local variables */
+	char	*function_name = "mbedit_plot_info";
+	int	status = MB_SUCCESS;
+	char	string[MB_PATH_MAXLINE];
+	int	sascent, sdescent, swidth;
+	int	xcen;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* plot the info */
+	if (info_set == MB_YES)
+		{
+		xcen = xmin + (xmax - xmin)/2;
+
+		sprintf(string,"Selected Sounding: Ping:%d Beam:%d",
+			info_ping, info_beam);
+		sprintf(string,"Ping:%d  Beam:%d  Time: %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d",
+			info_ping, info_beam,
+			info_time_i[1],info_time_i[2],
+			info_time_i[0],info_time_i[3],
+			info_time_i[4],info_time_i[5],
+			(int)(0.001 * info_time_i[6]));
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,xcen-swidth/2,
+			ymin-margin/2-2*(sascent+sdescent),string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+
+		sprintf(string,"Longitude:%.5f  Latitude:%.5f  Heading:%.1f  Speed:%.1f",
+			info_navlon, info_navlat, info_heading, info_speed);
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,xcen-swidth/2,
+			ymin-margin/2-1*(sascent+sdescent),string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+
+		sprintf(string,"Depth:%.2f  XTrack:%.2f  LTrack:%.2f  Altitude:%.2f",
+			info_bath, info_bathacrosstrack, 
+			info_bathalongtrack, info_altitude);
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,xcen-swidth/2,
+			ymin-margin/2,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbedit_unplot_beam(int iping, int jbeam)
 {
 	/* local variables */
@@ -5169,7 +5471,15 @@ int mbedit_unplot_beam(int iping, int jbeam)
 		}
 
 	/* unplot the beam */
-	if (jbeam >= 0 && jbeam < ping[iping].beams_bath)
+	if (info_set == MB_YES && iping == info_ping && jbeam == info_beam)
+		{
+		if (ping[iping].beamflag[jbeam] != MB_FLAG_NULL)
+			xg_fillrectangle(mbedit_xgid, 
+				ping[iping].bath_x[jbeam]-4, 
+				ping[iping].bath_y[jbeam]-4, 8, 8, 
+				pixel_values[WHITE],XG_SOLIDLINE);
+		}
+	else if (jbeam >= 0 && jbeam < ping[iping].beams_bath)
 		{
 		if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 			xg_fillrectangle(mbedit_xgid, 
@@ -5234,6 +5544,75 @@ int mbedit_unplot_ping(int iping)
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];
 			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_unplot_info()
+{
+	/* local variables */
+	char	*function_name = "mbedit_unplot_info";
+	int	status = MB_SUCCESS;
+	char	string[MB_PATH_MAXLINE];
+	int	sascent, sdescent, swidth;
+	int	xcen;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* plot the info */
+	if (info_set == MB_YES)
+		{
+		xcen = xmin + (xmax - xmin)/2;
+
+		sprintf(string,"Selected Sounding: Ping:%d Beam:%d",
+			info_ping, info_beam);
+		sprintf(string,"Ping:%d  Beam:%d  Time: %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d",
+			info_ping, info_beam,
+			info_time_i[1],info_time_i[2],
+			info_time_i[0],info_time_i[3],
+			info_time_i[4],info_time_i[5],
+			(int)(0.001 * info_time_i[6]));
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,xcen-swidth/2,
+			ymin-margin/2-2*(sascent+sdescent),string,
+			pixel_values[WHITE],XG_SOLIDLINE);
+
+		sprintf(string,"Longitude:%.5f  Latitude:%.5f  Heading:%.1f  Speed:%.1f",
+			info_navlon, info_navlat, info_heading, info_speed);
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,xcen-swidth/2,
+			ymin-margin/2-1*(sascent+sdescent),string,
+			pixel_values[WHITE],XG_SOLIDLINE);
+
+		sprintf(string,"Depth:%.2f  XTrack:%.2f  LTrack:%.2f  Altitude:%.2f",
+			info_bath, info_bathacrosstrack, 
+			info_bathalongtrack, info_altitude);
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,xcen-swidth/2,
+			ymin-margin/2,string,
+			pixel_values[WHITE],XG_SOLIDLINE);
 		}
 
 	/* print output debug statements */
