@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.2 2003-07-26 18:01:22 caress Exp $
+ *    $Id: mbareaclean.c,v 5.3 2004-09-16 00:57:46 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/07/26 18:01:22  caress
+ * Changed beamflag handling code.
+ *
  * Revision 5.1  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -116,7 +119,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.2 2003-07-26 18:01:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.3 2004-09-16 00:57:46 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Mthreshold/nmin -Sbinsize]";
@@ -319,11 +322,7 @@ main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&areabounds[0],
-				&areabounds[1],
-				&areabounds[2],
-				&areabounds[3]);
+				mb_get_bounds(optarg, areabounds);
 			flag++;
 			break;
 		case 'S':
