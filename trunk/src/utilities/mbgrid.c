@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.42 1999-08-08 04:17:40 caress Exp $
+ *    $Id: mbgrid.c,v 4.43 1999-09-14 21:28:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.42  1999/08/08  04:17:40  caress
+ * Unknown changes.
+ *
  * Revision 4.41  1999/04/16  01:29:39  caress
  * Version 4.6 final release?
  *
@@ -258,7 +261,7 @@
 int mb_double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.42 1999-08-08 04:17:40 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.43 1999-09-14 21:28:50 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -2098,7 +2101,7 @@ char **argv;
 				  {
 				  num[kgrid] += REALLOC_STEP_SIZE;
 				  if ((data[kgrid] = (double *) 
-					realloc(data[kgrid], cnt[kgrid]*sizeof(double))) 
+					realloc(data[kgrid], num[kgrid]*sizeof(double))) 
 					== NULL)
 					{
 					error = MB_ERROR_MEMORY_FAIL;
@@ -2184,7 +2187,7 @@ char **argv;
 				  {
 				  num[kgrid] += REALLOC_STEP_SIZE;
 				  if ((data[kgrid] = (double *) 
-					realloc(data[kgrid], cnt[kgrid]*sizeof(double))) 
+					realloc(data[kgrid], num[kgrid]*sizeof(double))) 
 					== NULL)
 					{
 					error = MB_ERROR_MEMORY_FAIL;
@@ -2279,7 +2282,7 @@ char **argv;
 			      {
 			      num[kgrid] += REALLOC_STEP_SIZE;
 			      if ((data[kgrid] = (double *) 
-				    realloc(data[kgrid], cnt[kgrid]*sizeof(double))) 
+				    realloc(data[kgrid], num[kgrid]*sizeof(double))) 
 				    == NULL)
 				    {
 				    error = MB_ERROR_MEMORY_FAIL;
