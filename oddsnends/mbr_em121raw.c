@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em121raw.c	7/8/96
- *	$Id: mbr_em121raw.c,v 4.0 1996-07-26 21:07:59 caress Exp $
+ *	$Id: mbr_em121raw.c,v 4.1 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1996/07/26  21:07:59  caress
+ * Initial version.
+ *
  *
  */
 
@@ -47,7 +50,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em121raw.c,v 4.0 1996-07-26 21:07:59 caress Exp $";
+	static char res_id[]="$Id: mbr_em121raw.c,v 4.1 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbr_alm_em121raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -73,8 +76,9 @@ int	*error;
 	mb_io_ptr->data_structure_size = 0;
 	status = mb_malloc(verbose,mb_io_ptr->structure_size,
 				&mb_io_ptr->raw_data,error);
-	status = mb_malloc(verbose,sizeof(struct mbsys_simrad_struct),
-				&mb_io_ptr->store_data,error);
+	status = mbsys_simrad_alloc(
+			verbose,mbio_ptr,
+			&mb_io_ptr->store_data,error);
 
 	/* initialize everything to zeros */
 	mbr_zero_em121raw(verbose,mb_io_ptr->raw_data,error);
@@ -118,7 +122,9 @@ int	*error;
 
 	/* deallocate memory for data descriptor */
 	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
+	status = mbsys_simrad_deall(
+			verbose,mbio_ptr,
+			&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -314,6 +320,7 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_em121raw_struct *data;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	signed char *data_ss, *store_ss;
 	int	ntime_i[7];
 	double	ntime_d;
@@ -322,6 +329,7 @@ int	*error;
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
 	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
+	int	ifix;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -430,6 +438,34 @@ int	*error;
 		else
 			mb_get_time(verbose,mb_io_ptr->new_time_i,
 				&mb_io_ptr->new_time_d);
+				
+		/* save fix if nav data */
+		if (data->kind == MB_DATA_NAV)
+			{
+			/* make room for latest fix */
+			if (mb_io_ptr->nfix >= MB_NAV_SAVE_MAX)
+				{
+				for (i=0;i<mb_io_ptr->nfix-1;i++)
+					{
+					mb_io_ptr->fix_time_d[i]
+					    = mb_io_ptr->fix_time_d[i+1];
+					mb_io_ptr->fix_lon[i]
+					    = mb_io_ptr->fix_lon[i+1];
+					mb_io_ptr->fix_lat[i]
+					    = mb_io_ptr->fix_lat[i+1];
+					}
+				mb_io_ptr->nfix--;
+				}
+			
+			/* add latest fix */
+			mb_io_ptr->fix_time_d[mb_io_ptr->nfix] 
+				= mb_io_ptr->new_time_d;
+			mb_io_ptr->fix_lon[mb_io_ptr->nfix] 
+				= data->longitude;
+			mb_io_ptr->fix_lat[mb_io_ptr->nfix] 
+				= data->latitude;
+			mb_io_ptr->nfix++;
+			}
 
 		/* print debug statements */
 		if (verbose >= 4)
@@ -463,7 +499,72 @@ int	*error;
 	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA)
 		{
-		if (data->pos_year != 0)
+		/* interpolate from saved nav if possible */
+		if (mb_io_ptr->nfix > 1)
+			{
+			/* interpolation possible */
+			if (mb_io_ptr->new_time_d 
+				>= mb_io_ptr->fix_time_d[0]
+			    && mb_io_ptr->new_time_d
+				<= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			    {
+			    ifix = 0;
+			    while (mb_io_ptr->new_time_d
+				> mb_io_ptr->fix_time_d[ifix+1])
+				ifix++;
+			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[ifix]
+				+ (mb_io_ptr->fix_lon[ifix+1] 
+				    - mb_io_ptr->fix_lon[ifix])
+				* (mb_io_ptr->new_time_d
+				    - mb_io_ptr->fix_time_d[ifix])
+				/ (mb_io_ptr->fix_time_d[ifix+1]
+				    - mb_io_ptr->fix_time_d[ifix]);
+			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[ifix]
+				+ (mb_io_ptr->fix_lat[ifix+1] 
+				    - mb_io_ptr->fix_lat[ifix])
+				* (mb_io_ptr->new_time_d
+				    - mb_io_ptr->fix_time_d[ifix])
+				/ (mb_io_ptr->fix_time_d[ifix+1]
+				    - mb_io_ptr->fix_time_d[ifix]);
+			    }
+			
+			/* extrapolate from first fix */
+			else if (mb_io_ptr->new_time_d 
+				< mb_io_ptr->fix_time_d[0])
+			    {
+			    dd = (mb_io_ptr->new_time_d 
+				- mb_io_ptr->fix_time_d[0])
+				* data->speed;
+			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[0],
+				&mtodeglon,&mtodeglat);
+			    headingx = sin(DTR*data->line_heading);
+			    headingy = cos(DTR*data->line_heading);
+			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[0] 
+				+ headingx*mtodeglon*dd;
+			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[0] 
+				+ headingy*mtodeglat*dd;
+			    }
+			
+			/* extrapolate from last fix */
+			else if (mb_io_ptr->new_time_d 
+				> mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+			    {
+			    dd = (mb_io_ptr->new_time_d 
+				- mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
+				* data->speed;
+			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
+				&mtodeglon,&mtodeglat);
+			    headingx = sin(DTR*data->line_heading);
+			    headingy = cos(DTR*data->line_heading);
+			    mb_io_ptr->new_lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
+				+ headingx*mtodeglon*dd;
+			    mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
+				+ headingy*mtodeglat*dd;
+			    }
+			}
+			
+		/* else extrapolate from most recent fix */
+		else if (data->pos_year != 0)
 			{
 			ntime_i[0] = data->pos_year + 1900;
 			ntime_i[1] = data->pos_month;
@@ -725,54 +826,75 @@ int	*error;
 		store->minute = data->minute;
 		store->second = data->second;
 		store->centisecond = data->centisecond;
-		store->ping_number = data->ping_number;
-		store->beams_bath = data->beams_bath;
-		store->bath_mode = data->bath_mode;
-		store->bath_res = data->bath_res;
-		store->bath_quality = data->bath_quality;		
-		store->bath_num = data->bath_num;
-		store->pulse_length = data->pulse_length;
-		store->beam_width = data->beam_width;
-		store->power_level = data->power_level;
-		store->tx_status = data->tx_status;
-		store->rx_status = data->rx_status;
-		store->along_res = data->along_res;
-		store->across_res = data->across_res;
-		store->depth_res = data->depth_res;
-		store->range_res = data->range_res;
-		store->keel_depth = data->keel_depth;
-		store->heading = data->heading;
-		store->roll = data->roll;
-		store->pitch = data->pitch;
-		store->xducer_pitch = data->xducer_pitch;
-		store->ping_heave = data->ping_heave;
-		store->sound_vel = data->sound_vel;
-		store->pixels_ss = data->pixels_ss;
-		store->ss_mode = data->ss_mode;
-		for (i=0;i<store->beams_bath;i++)
+		
+		/* allocate secondary data structure for
+			survey data if needed */
+		if (data->kind == MB_DATA_DATA
+			&& store->ping == NULL)
 			{
-			store->bath[i] = data->bath[i];
-			store->bath_acrosstrack[i] = data->bath_acrosstrack[i];
-			store->bath_alongtrack[i] = data->bath_alongtrack[i];
-			store->tt[i] = data->tt[i];
-			store->amp[i] = data->amp[i];
-			store->quality[i] = data->quality[i];
-			store->heave[i] = data->heave[i];
-			store->beam_frequency[i] = data->beam_frequency[i];
-			store->beam_samples[i] = data->beam_samples[i];
-			store->beam_center_sample[i] 
-				= data->beam_center_sample[i];
-			store->beam_start_sample[i] 
-				= data->beam_start_sample[i];
-			if (store->beam_samples[i] > 0)
+			status = mbsys_simrad_survey_alloc(
+					verbose,mbio_ptr,
+					store_ptr,error);
+			}
+		
+		/* deal with putting survey data into
+		secondary data structure */
+		if (status == MB_SUCCESS 
+			&& data->kind == MB_DATA_DATA)
+			{
+			/* get data structure pointer */
+			ping = (struct mbsys_simrad_survey_struct *) 
+				store->ping;
+
+			/* copy data */
+			ping->ping_number = data->ping_number;
+			ping->beams_bath = data->beams_bath;
+			ping->bath_mode = data->bath_mode;
+			ping->bath_res = data->bath_res;
+			ping->bath_quality = data->bath_quality;		
+			ping->bath_num = data->bath_num;
+			ping->pulse_length = data->pulse_length;
+			ping->beam_width = data->beam_width;
+			ping->power_level = data->power_level;
+			ping->tx_status = data->tx_status;
+			ping->rx_status = data->rx_status;
+			ping->along_res = data->along_res;
+			ping->across_res = data->across_res;
+			ping->depth_res = data->depth_res;
+			ping->range_res = data->range_res;
+			ping->keel_depth = data->keel_depth;
+			ping->heading = data->heading;
+			ping->roll = data->roll;
+			ping->pitch = data->pitch;
+			ping->xducer_pitch = data->xducer_pitch;
+			ping->ping_heave = data->ping_heave;
+			ping->sound_vel = data->sound_vel;
+			ping->pixels_ss = data->pixels_ss;
+			ping->ss_mode = data->ss_mode;
+			for (i=0;i<ping->beams_bath;i++)
 				{
-				store_ss = &store->ss[data->beam_start_sample[i]];
-				data_ss = &data->ss[data->beam_start_sample[i]];
-				for (j=0;j<store->beam_samples[i];j++)
-					store_ss[j] = data_ss[j];
+				ping->bath[i] = data->bath[i];
+				ping->bath_acrosstrack[i] = data->bath_acrosstrack[i];
+				ping->bath_alongtrack[i] = data->bath_alongtrack[i];
+				ping->tt[i] = data->tt[i];
+				ping->amp[i] = data->amp[i];
+				ping->quality[i] = data->quality[i];
+				ping->heave[i] = data->heave[i];
+				ping->beam_frequency[i] = data->beam_frequency[i];
+				ping->beam_samples[i] = data->beam_samples[i];
+				ping->beam_center_sample[i] 
+					= data->beam_center_sample[i];
+				ping->beam_start_sample[i] 
+					= data->beam_start_sample[i];
+				if (ping->beam_samples[i] > 0)
+					{
+					store_ss = &ping->ss[data->beam_start_sample[i]];
+					data_ss = &data->ss[data->beam_start_sample[i]];
+					for (j=0;j<ping->beam_samples[i];j++)
+						store_ss[j] = data_ss[j];
+					}
 				}
 			}
-
 		}
 
 	/* print output debug statements */
@@ -802,6 +924,7 @@ int	*error;
 	struct mbf_em121raw_struct *data;
 	char	*data_ptr;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	double	scalefactor;
 	int	time_j[5];
 	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
@@ -905,54 +1028,64 @@ int	*error;
 		data->minute = store->minute;
 		data->second = store->second;
 		data->centisecond = store->centisecond;
-		data->ping_number = store->ping_number;
-		data->beams_bath = store->beams_bath;
-		data->bath_mode = store->bath_mode;
-		data->bath_res = store->bath_res;
-		data->bath_quality = store->bath_quality;
-		data->bath_num = store->bath_num;
-		data->pulse_length = store->pulse_length;
-		data->beam_width = store->beam_width;
-		data->power_level = store->power_level;
-		data->tx_status = store->tx_status;
-		data->rx_status = store->rx_status;
-		data->along_res = store->along_res;
-		data->across_res = store->across_res;
-		data->depth_res = store->depth_res;
-		data->range_res = store->range_res;
-		data->keel_depth = store->keel_depth;
-		data->heading = store->heading;
-		data->roll = store->roll;
-		data->pitch = store->pitch;
-		data->xducer_pitch = store->xducer_pitch;
-		data->ping_heave = store->ping_heave;
-		data->sound_vel = store->sound_vel;
-		data->pixels_ss = store->pixels_ss;
-		data->ss_mode = store->ss_mode;
-		for (i=0;i<data->beams_bath;i++)
+		
+		/* deal with survey data 
+			in secondary data structure */
+		if (store->ping != NULL)
 			{
-			data->bath[i] = store->bath[i];
-			data->bath_acrosstrack[i] = store->bath_acrosstrack[i];
-			data->bath_alongtrack[i] = store->bath_alongtrack[i];
-			data->tt[i] = store->tt[i];
-			data->amp[i] = store->amp[i];
-			data->quality[i] = store->quality[i];
-			data->heave[i] = store->heave[i];
-			data->beam_frequency[i] = store->beam_frequency[i];
-			data->beam_samples[i] = store->beam_samples[i];
-			data->beam_center_sample[i] 
-				= store->beam_center_sample[i];
-			data->beam_start_sample[i] 
-				= store->beam_start_sample[i];
-			if (data->beam_samples[i] > 0)
+			/* get data structure pointer */
+			ping = (struct mbsys_simrad_survey_struct *) 
+				store->ping;
+
+			/* copy survey data */
+			data->ping_number = ping->ping_number;
+			data->beams_bath = ping->beams_bath;
+			data->bath_mode = ping->bath_mode;
+			data->bath_res = ping->bath_res;
+			data->bath_quality = ping->bath_quality;
+			data->bath_num = ping->bath_num;
+			data->pulse_length = ping->pulse_length;
+			data->beam_width = ping->beam_width;
+			data->power_level = ping->power_level;
+			data->tx_status = ping->tx_status;
+			data->rx_status = ping->rx_status;
+			data->along_res = ping->along_res;
+			data->across_res = ping->across_res;
+			data->depth_res = ping->depth_res;
+			data->range_res = ping->range_res;
+			data->keel_depth = ping->keel_depth;
+			data->heading = ping->heading;
+			data->roll = ping->roll;
+			data->pitch = ping->pitch;
+			data->xducer_pitch = ping->xducer_pitch;
+			data->ping_heave = ping->ping_heave;
+			data->sound_vel = ping->sound_vel;
+			data->pixels_ss = ping->pixels_ss;
+			data->ss_mode = ping->ss_mode;
+			for (i=0;i<data->beams_bath;i++)
 				{
-				data_ss = &data->ss[data->beam_start_sample[i]];
-				store_ss = &store->ss[store->beam_start_sample[i]];
-				for (j=0;j<data->beam_samples[i];j++)
-					data_ss[j] = store_ss[j];
+				data->bath[i] = ping->bath[i];
+				data->bath_acrosstrack[i] = ping->bath_acrosstrack[i];
+				data->bath_alongtrack[i] = ping->bath_alongtrack[i];
+				data->tt[i] = ping->tt[i];
+				data->amp[i] = ping->amp[i];
+				data->quality[i] = ping->quality[i];
+				data->heave[i] = ping->heave[i];
+				data->beam_frequency[i] = ping->beam_frequency[i];
+				data->beam_samples[i] = ping->beam_samples[i];
+				data->beam_center_sample[i] 
+					= ping->beam_center_sample[i];
+				data->beam_start_sample[i] 
+					= ping->beam_start_sample[i];
+				if (data->beam_samples[i] > 0)
+					{
+					data_ss = &data->ss[data->beam_start_sample[i]];
+					store_ss = &ping->ss[ping->beam_start_sample[i]];
+					for (j=0;j<data->beam_samples[i];j++)
+						data_ss[j] = store_ss[j];
+					}
 				}
 			}
-
 		}
 
 	/* set kind from current ping */
@@ -1055,13 +1188,19 @@ int	*error;
 	char	*data_ptr;
 	FILE	*mbfp;
 	int	done;
+	char	*label;
+	int	*label_save_flag;
 	short int expect;
 	short int *type;
+	short int first_type;
 	int	first_ss;
 	int	more_ss;
-	static char label[2];
 
-	static int label_save_flag = MB_NO;
+	short int *expect_save;
+	int	*expect_save_flag;
+	short int *first_type_save;
+	int	*first_ss_save;
+	int	*more_ss_save;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1080,32 +1219,58 @@ int	*error;
 	data = (struct mbf_em121raw_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
 	mbfp = mb_io_ptr->mbfp;
+	
+	/* get saved values */
+	label = (char *) mb_io_ptr->save_label;
+	type = (short int *) mb_io_ptr->save_label;
+	label_save_flag = (int *) &mb_io_ptr->save_label_flag;
+	expect_save_flag = (int *) &mb_io_ptr->save_flag;
+	expect_save = (short int *) &mb_io_ptr->save1;
+	first_type_save = (short int *) &mb_io_ptr->save2;
+	first_ss_save = (int *) &mb_io_ptr->save3;
+	more_ss_save = (int *) &mb_io_ptr->save4;
+	if (*expect_save_flag == MB_YES)
+		{
+		expect = *expect_save;
+		first_type = *first_type_save;
+		first_ss = *first_ss_save;
+		more_ss = *more_ss_save;
+		*expect_save_flag = MB_NO;
+		}
+	else
+		{
+		expect = EM_NONE;
+		first_type = EM_NONE;
+		first_ss = MB_YES;
+		more_ss = MB_NO;
+		}
 
+	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
-	expect = EM_NONE;
-	type = (short int *) label;
-	first_ss = MB_YES;
-	more_ss = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO)
 		{
-		/* get next record label */
-		if (label_save_flag == MB_NO)
+		/* if no label saved get next record label */
+		if (*label_save_flag == MB_NO)
 			{
-			if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
+			if ((status = fread(&label[0],
+				1,1,mb_io_ptr->mbfp)) != 1)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
 			if (label[0] == 0x02)
-			    if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
+			    if ((status = fread(&label[1],
+				    1,1,mb_io_ptr->mbfp)) != 1)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
 			}
+		
+		/* else use saved label */
 		else
-			label_save_flag = MB_NO;
+			*label_save_flag = MB_NO;
 
 		/* swap bytes if necessary */
 #ifdef BYTESWAPPED
@@ -1116,7 +1281,9 @@ int	*error;
 		fprintf(stderr,"done:%d\n",done);
 		fprintf(stderr,"expect:%x\n",expect);
 		fprintf(stderr,"type:%x\n",*type);
-		fprintf(stderr,"label_save_flag:%x\n",label_save_flag);*/
+		fprintf(stderr,"first_type:%x\n",first_type);
+		fprintf(stderr,"first_ss:%d\n",first_ss);
+		fprintf(stderr,"more_ss:%d\n",more_ss);*/
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == EM_NONE)
@@ -1142,14 +1309,6 @@ int	*error;
 	/*fprintf(stderr,"call nothing, try again\n");*/
 			done = MB_NO;
 			}
-		else if (expect != EM_NONE && expect != *type)
-			{
-	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
-			done = MB_YES;
-			expect = EM_NONE;
-			label_save_flag = MB_YES;
-			first_ss = MB_YES;
-			}
 		else if (*type == EM_START)
 			{
 	/*fprintf(stderr,"call mbr_em121raw_rd_start type %x\n",*type);*/
@@ -1159,6 +1318,16 @@ int	*error;
 				{
 				done = MB_YES;
 				data->kind = MB_DATA_START;
+				if (expect != EM_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+					}
+				else
+					*expect_save_flag = MB_NO;
 				}
 			}
 		else if (*type == EM_STOP)
@@ -1170,6 +1339,16 @@ int	*error;
 				{
 				done = MB_YES;
 				data->kind = MB_DATA_STOP;
+				if (expect != EM_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+					}
+				else
+					*expect_save_flag = MB_NO;
 				}
 			}
 		else if (*type == EM_PARAMETER)
@@ -1181,6 +1360,16 @@ int	*error;
 				{
 				done = MB_YES;
 				data->kind = MB_DATA_COMMENT;
+				if (expect != EM_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+					}
+				else
+					*expect_save_flag = MB_NO;
 				}
 			}
 		else if (*type == EM_POS)
@@ -1192,6 +1381,16 @@ int	*error;
 				{
 				done = MB_YES;
 				data->kind = MB_DATA_NAV;
+				if (expect != EM_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+					}
+				else
+					*expect_save_flag = MB_NO;
 				}
 			}
 		else if (*type == EM_SVP)
@@ -1203,7 +1402,26 @@ int	*error;
 				{
 				done = MB_YES;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
+				if (expect != EM_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+					}
+				else
+					*expect_save_flag = MB_NO;
 				}
+			}
+		else if (*type == EM_121_BATH 
+			&& expect != EM_NONE 
+			&& expect != EM_121_BATH)
+			{
+	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM_121_BATH)
 			{
@@ -1212,10 +1430,28 @@ int	*error;
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
 				{
-				done = MB_YES;
 				data->kind = MB_DATA_DATA;
-				expect = EM_NONE;
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_121_BATH;
+					expect = EM_12S_SS;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
 				}
+			}
+		else if (*type == EM_12S_SS 
+			&& expect != EM_NONE 
+			&& expect != EM_12S_SS)
+			{
+	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM_12S_SS)
 			{
@@ -1225,8 +1461,17 @@ int	*error;
 			if (status == MB_SUCCESS 
 				&& more_ss == MB_NO)
 				{
-				done = MB_NO;
-				expect = EM_121_BATH;
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_12S_SS;
+					expect = EM_121_BATH;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
 				first_ss = MB_YES;
 				}
 			else if (status == MB_SUCCESS 
@@ -1238,7 +1483,17 @@ int	*error;
 				}
 			else if (status == MB_FAILURE)
 				{
-				done = MB_YES;
+				if (first_type == EM_NONE)
+					{
+					done = MB_NO;
+					first_type = EM_12S_SS;
+					expect = EM_121_BATH;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM_NONE;
+					}
 				first_ss = MB_YES;
 				}
 			}
@@ -1248,11 +1503,9 @@ int	*error;
 			done = MB_YES;
 
 		/*fprintf(stderr,"end of mbr_em121raw_rd_data loop:\n");
-		fprintf(stderr,"status:%d\n",status);
 		fprintf(stderr,"done:%d\n",done);
 		fprintf(stderr,"expect:%x\n",expect);
-		fprintf(stderr,"type:%x\n",*type);
-		fprintf(stderr,"label_save_flag:%x\n",label_save_flag);*/
+		fprintf(stderr,"type:%x\n",*type);*/
 		}
 
 	/* print output debug statements */
@@ -2096,6 +2349,12 @@ int	*error;
 		ioffset = 22+6*num_beams;
 		for (i=0;i<num_beams;i++)
 			{
+			/* do not ever load more data than we can store */
+			if (data->pixels_ss + data->beam_samples[beamlist[i]]
+				> MBF_EM121RAW_MAXPIXELS)
+				data->beam_samples[beamlist[i]] = 0;
+			
+			/* get the sidescan */
 			data->beam_start_sample[beamlist[i]] = data->pixels_ss;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{
@@ -2134,6 +2393,12 @@ int	*error;
 		ioffset = 22+6*num_beams;
 		for (i=0;i<num_beams;i++)
 			{
+			/* do not ever load more data than we can store */
+			if (data->pixels_ss + data->beam_samples[beamlist[i]]
+				> MBF_EM121RAW_MAXPIXELS)
+				data->beam_samples[beamlist[i]] = 0;
+			
+			/* get the sidescan */
 			data->beam_start_sample[beamlist[i]] = data->pixels_ss;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{

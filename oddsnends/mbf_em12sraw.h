@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12sraw.h	7/8/96
- *	$Id: mbf_em12sraw.h,v 4.0 1996-07-26 21:07:59 caress Exp $
+ *	$Id: mbf_em12sraw.h,v 4.1 1996-08-05 15:25:43 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1996/07/26  21:07:59  caress
+ * Initial version.
+ *
  *
  */
 /*
@@ -137,9 +140,9 @@ struct mbf_em12sraw_struct
 	int	minute;
 	int	second;
 	int	centisecond;
-	int	ping_number;
 
 	/* bathymetry */
+	int	ping_number;
 	int	beams_bath;	/* EM-1000:  60
 				   EM12S:    81
 				   EM12D:   162 */

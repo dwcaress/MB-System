@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_deall.c	2/3/93
- *    $Id: mb_mem_deall.c,v 4.8 1996-04-22 13:21:19 caress Exp $
+ *    $Id: mb_mem_deall.c,v 4.9 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.7  1996/04/22  10:57:09  caress
  * DTR define now in mb_io.h
  *
@@ -82,7 +85,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem_deall.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem_deall.c,v 4.9 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mb_mem_deall";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -165,9 +168,21 @@ int	*error;
 		{
 		status = mbr_dem_em1000rw(verbose,mbio_ptr,error);
 		}
+	else if (mb_io_ptr->format == MBF_EM12SRAW)
+		{
+		status = mbr_dem_em12sraw(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_EM12DRAW)
+		{
+		status = mbr_dem_em12draw(verbose,mbio_ptr,error);
+		}
 	else if (mb_io_ptr->format == MBF_EM12DARW)
 		{
 		status = mbr_dem_em12darw(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_EM121RAW)
+		{
+		status = mbr_dem_em121raw(verbose,mbio_ptr,error);
 		}
 	else if (mb_io_ptr->format == MBF_MR1PRHIG)
 		{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 4.4 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 4.5 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.3  1996/04/22  10:57:09  caress
  * DTR define now in mb_io.h
  *
@@ -63,7 +66,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.4 1996-04-22 13:21:19 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.5 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -510,8 +513,17 @@ int	*error;
 				+ factor*(mb_io_ptr->fix_lon[j] - mb_io_ptr->fix_lon[j]);
 			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[j-1] 
 				+ factor*(mb_io_ptr->fix_lat[j] - mb_io_ptr->fix_lat[j]);
-			data->profile[0].longitude = 
-				(int) (mb_io_ptr->new_lon*11111111.0);
+			if (mb_io_ptr->new_lon > 180.0)
+				data->profile[0].longitude = 
+					(int) ((mb_io_ptr->new_lon - 360.0)
+						 * 11111111.0);
+			else if (mb_io_ptr->new_lon < -180.0)
+				data->profile[0].longitude = 
+					(int) ((mb_io_ptr->new_lon + 360.0)
+						 * 11111111.0);
+			else
+				data->profile[0].longitude = 
+					(int) (mb_io_ptr->new_lon * 11111111.0);
 			data->profile[0].latitude = 
 				(int) (mb_io_ptr->new_lat*11111111.0);
 			}
@@ -541,8 +553,17 @@ int	*error;
 			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
 				+ headingy*mtodeglat*dd;
 			mb_io_ptr->speed = 3.6*speed;
-			data->profile[0].longitude = 
-				(int) (mb_io_ptr->new_lon*11111111.0);
+			if (mb_io_ptr->new_lon > 180.0)
+				data->profile[0].longitude = 
+					(int) ((mb_io_ptr->new_lon - 360.0)
+						 * 11111111.0);
+			else if (mb_io_ptr->new_lon < -180.0)
+				data->profile[0].longitude = 
+					(int) ((mb_io_ptr->new_lon + 360.0)
+						 * 11111111.0);
+			else
+				data->profile[0].longitude = 
+					(int) (mb_io_ptr->new_lon * 11111111.0);
 			data->profile[0].latitude = 
 				(int) (mb_io_ptr->new_lat*11111111.0);
 			}
@@ -554,8 +575,17 @@ int	*error;
 			{
 			mb_io_ptr->new_lon = mb_io_ptr->fix_lon[0];
 			mb_io_ptr->new_lat = mb_io_ptr->fix_lat[0];
-			data->profile[0].longitude = 
-				(int) (mb_io_ptr->new_lon*11111111.0);
+			if (mb_io_ptr->new_lon > 180.0)
+				data->profile[0].longitude = 
+					(int) ((mb_io_ptr->new_lon - 360.0)
+						 * 11111111.0);
+			else if (mb_io_ptr->new_lon < -180.0)
+				data->profile[0].longitude = 
+					(int) ((mb_io_ptr->new_lon + 360.0)
+						 * 11111111.0);
+			else
+				data->profile[0].longitude = 
+					(int) (mb_io_ptr->new_lon * 11111111.0);
 			data->profile[0].latitude = 
 				(int) (mb_io_ptr->new_lat*11111111.0);
 			}
@@ -1063,8 +1093,17 @@ int	*error;
 		&& mb_io_ptr->new_kind == MB_DATA_DATA)
 		{
 		/*get navigation */
-		data->profile[0].longitude 
-			= (int) (mb_io_ptr->new_lon*11111111.0);
+		if (mb_io_ptr->new_lon > 180.0)
+			data->profile[0].longitude = 
+				(int) ((mb_io_ptr->new_lon - 360.0)
+					* 11111111.0);
+		else if (mb_io_ptr->new_lon < -180.0)
+			data->profile[0].longitude = 
+				(int) ((mb_io_ptr->new_lon + 360.0)
+					 * 11111111.0);
+		else
+			data->profile[0].longitude = 
+				(int) (mb_io_ptr->new_lon * 11111111.0);
 		data->profile[0].latitude 
 			= (int) (mb_io_ptr->new_lat*11111111.0);
 
@@ -1658,6 +1697,12 @@ int	*error;
 		data->other_quality = (int) mb_swap_short(*short_ptr);
 #endif
 		}
+		
+	/* KLUGE for 1996 UNB TRAINING COURSE - FLIP LONGITUDE */
+	if (data->pos_year == 96 
+	    && data->pos_month >= 6 
+	    && data->pos_month <= 8)
+		data->pos_longitude = -data->pos_longitude;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -1714,6 +1759,7 @@ int	*error;
 	int	*int_ptr;
 	int	i;
 
+verbose = 5;
 	/* print input debug statements */
 	if (verbose >= 2)
 		{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.11 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.12 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,6 +33,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.10  1996/04/22  11:16:30  caress
  * DTR define now in mb_io.h
  *
@@ -97,7 +100,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.11 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.12 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -733,13 +736,13 @@ int	*error;
 		for (i=0;i<store->port_btycount;i++)
 			{
 			j = beam_center - i - 2;
-			angles_forward[j] = 0.0;
-			angles_null[j] = -MBSYS_MR1_XDUCER_ANGLE;
+			angles_null[j] = MBSYS_MR1_XDUCER_ANGLE;
+			angles_forward[j] = 180.0;
 			flags[j] = MB_NO;
 			if (fabs(store->bath_port[i]) > 0.0)
 				{
 				ttimes[j] = store->tt_port[i];
-				angles[j] = store->angle_port[i];
+				angles[j] = fabs(store->angle_port[i]);
 				if (store->bath_port[i] < 0.0)
 					flags[j] = MB_YES;
 				}
@@ -752,8 +755,8 @@ int	*error;
 		for (i=0;i<3;i++)
 			{
 			j = beam_center + i - 1;
-			angles_forward[j] = 0.0;
 			angles_null[j] = 0.0;
+			angles_forward[j] = 0.0;
 			flags[j] = MB_NO;
 			if (j == beam_center)
 				{
@@ -771,13 +774,14 @@ int	*error;
 		for (i=0;i<store->stbd_btycount;i++)
 			{
 			j = beam_center + 2 + i;
-			angles_forward[j] = 0.0;
 			angles_null[j] = MBSYS_MR1_XDUCER_ANGLE;
+			angles_forward[j] = 0.0;
 			flags[j] = MB_NO;
 			if (fabs(store->bath_stbd[i]) > 0.0)
 				{
 				ttimes[j] = store->tt_stbd[i];
 				angles[j] = store->angle_stbd[i];
+				angles_forward[j] = 0.0;
 				if (store->bath_stbd[i] < 0.0)
 					flags[j] = MB_YES;
 				}

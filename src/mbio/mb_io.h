@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.4 1996-04-22 10:59:25 caress Exp $
+ *    $Id: mb_io.h,v 4.5 1996-08-05 15:25:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1996/04/22  10:59:25  caress
+ * Put DTR defines in this include file.
+ *
  * Revision 4.3  1995/03/22  18:59:33  caress
  * Added record counting ints for use with sburivax format.
  *
@@ -63,22 +66,14 @@
  *
  */
  
-/* declare degrees/radians conversions */
-
 /* declare buffer maximum */
 #define	MB_BUFFER_MAX	5000
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	0.01745329251994329500
-#define RTD	57.2957795130823230000
-
-/* min max define */
-#define	MIN(A, B)	((A) < (B) ? (A) : (B))
-#define	MAX(A, B)	((A) > (B) ? (A) : (B))
 
 /* maximum comment length in characters */
 #define MB_COMMENT_MAXLINE 1944
+
+/* maximum number of navigation points saved */
+#define MB_NAV_SAVE_MAX 20
 
 /* MBIO input/output control structure */
 struct mb_io_struct
@@ -86,6 +81,10 @@ struct mb_io_struct
 	/* file descriptor, file name, and usage flag */
 	FILE	*mbfp;		/* file descriptor */
 	char	file[256];	/* file name */
+	FILE	*mbfp2;		/* file descriptor #2 */
+	char	file2[256];	/* file name #2 */
+	FILE	*mbfp3;		/* file descriptor #3 */
+	char	file3[256];	/* file name #3 */
 	char	*xdrs;		/* XDR stream handle */
 
 	/* read or write history */
@@ -183,12 +182,22 @@ struct mb_io_struct
 	double	*new_ss_acrosstrack;
 	double	*new_ss_alongtrack;
 
-	/* variables for extrapolating navigation 
-		for certain troublesome formats */
+	/* variables for interpolating/extrapolating navigation 
+		for formats containing nav as asynchronous
+		position records separate from ping data */
 	int nfix;
-	double fix_time_d[5];
-	double fix_lon[5];
-	double fix_lat[5];
+	double fix_time_d[MB_NAV_SAVE_MAX];
+	double fix_lon[MB_NAV_SAVE_MAX];
+	double fix_lat[MB_NAV_SAVE_MAX];
+	
+	/* variables for saving information */
+	char	save_label[4];
+	int	save_label_flag;
+	int	save_flag;
+	int	save1;
+	int	save2;
+	int	save3;
+	int	save4;
 	};
 
 /* MBIO buffer control structure */
