@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 4.3 1994-11-24 01:53:22 caress Exp $
+ *	$Id: mb_close.c,v 4.4 1995-01-25 17:13:46 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 25, 1993
  *	$Log: not supported by cvs2svn $
+ * Revision 4.3  1994/11/24  01:53:22  caress
+ * Some fixes related to MR1 data.
+ *
  * Revision 4.2  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -54,6 +57,9 @@
 #ifdef IRIX
 #include <rpc/rpc.h>
 #endif
+#ifdef SOLARIS
+#include <rpc/rpc.h>
+#endif
 #ifdef LYNX
 #include <rpc/rpc.h>
 #endif
@@ -75,7 +81,7 @@ int	verbose;
 char	**mbio_ptr;
 int	*error;
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 4.3 1994-11-24 01:53:22 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 4.4 1995-01-25 17:13:46 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
