@@ -417,6 +417,27 @@ The following swath mapping sonar data formats are supported in this version of
                           binary TIFF variant, single files, 
                           Sea Scan. 
 
+    MBIO Data Format ID:  141
+    Format name:          MBF_OICGEODA
+    Informal Description: OIC swath sonar format
+    Attributes:           variable beam bathymetry and
+                          amplitude, variable pixel sidescan, binary,
+                          Oceanic Imaging Consultants
+
+    MBIO Data Format ID:  142
+    Format name:          MBF_OICMBARI
+    Informal Description: OIC-style extended swath sonar format
+    Attributes:           variable beam bathymetry and
+                          amplitude, variable pixel sidescan, binary,
+                          MBARI
+
+    MBIO Data Format ID:  151
+    Format name:          MBF_OMGHDCSJ
+    Informal Description: UNB OMG HDCS format (the John Hughes Clarke format)
+    Attributes:           variable beam bathymetry and
+                          amplitude, variable pixel sidescan, binary,
+                          UNB
+
 
 The institutional acronyms used above have the following meanings:
  	L-DEO	Lamont-Doherty Earth Observatory
