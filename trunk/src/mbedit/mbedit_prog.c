@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.20 2003-04-17 20:50:01 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.21 2003-07-26 17:58:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2003/04/17 20:50:01  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.19  2003/04/17 20:45:42  caress
  * Release 5.0.beta30
  *
@@ -268,13 +271,6 @@
 #define	MBEDIT_OUTPUT_EDIT   1
 #define	MBEDIT_OUTPUT_BROWSE 2
 
-/* edit action defines */
-#define	MBEDIT_NOACTION	0
-#define	MBEDIT_FLAG	1
-#define	MBEDIT_UNFLAG	2
-#define	MBEDIT_ZERO	3
-#define	MBEDIT_FILTER	4
-
 /* edit outbounds defines */
 #define	MBEDIT_OUTBOUNDS_NONE		0
 #define	MBEDIT_OUTBOUNDS_FLAGGED	1
@@ -316,6 +312,7 @@ struct mbedit_ping_struct
 	double	heave;
 	int	beams_bath;
 	char	*beamflag;
+	char	*beamflagorg;
 	double	*bath;
 	double	*bathacrosstrack;
 	double	*bathalongtrack;
@@ -331,7 +328,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.20 2003-04-17 20:50:01 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.21 2003-07-26 17:58:52 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -1919,15 +1916,15 @@ int mbedit_action_mouse_toggle(
 			if (esffile_open == MB_YES)
 			    {
 			    if (mb_beam_ok(ping[iping].beamflag[jbeam]))
-				mb_esf_save(verbose, &esf,
+				mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
 				    jbeam, 
-				    MBEDIT_FLAG, &error);
+				    MBP_EDIT_FLAG, &error);
 			    else if (ping[iping].beamflag[jbeam] != MB_FLAG_NULL)
-				mb_esf_save(verbose, &esf,
+				mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
 				    jbeam, 
-				    MBEDIT_UNFLAG, &error);
+				    MBP_EDIT_UNFLAG, &error);
 			    }
 			
 			/* apply edit */
@@ -2119,10 +2116,10 @@ int mbedit_action_mouse_pick(
 			/* write edit to save file */
 			if (esffile_open == MB_YES)
 			    {
-			    mb_esf_save(verbose, &esf,
+			    mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
 				    jbeam, 
-				    MBEDIT_FLAG, &error);
+				    MBP_EDIT_FLAG, &error);
 			    }
 			
 			/* apply edit */
@@ -2283,9 +2280,9 @@ int mbedit_action_mouse_erase(
 			/* write edit to save file */
 			if (esffile_open == MB_YES)
 			    {
-			    mb_esf_save(verbose, &esf,
+			    mb_ess_save(verbose, &esf,
 			    	    ping[i].time_d, 
-				    j, MBEDIT_FLAG, &error);
+				    j, MBP_EDIT_FLAG, &error);
 			    }
 			
 	          	/* unplot the affected beam and ping */
@@ -2461,9 +2458,9 @@ int mbedit_action_mouse_restore(
 			/* write edit to save file */
 			if (esffile_open == MB_YES)
 			    {
-			    mb_esf_save(verbose, &esf,
+			    mb_ess_save(verbose, &esf,
 				    ping[i].time_d, 
-				    j, MBEDIT_UNFLAG, &error);
+				    j, MBP_EDIT_UNFLAG, &error);
 			    }
 			
 	          	/* unplot the affected beam and ping */
@@ -2755,9 +2752,9 @@ int mbedit_action_zap_outbounds(
 		    /* write edit to save file */
 		    if (esffile_open == MB_YES)
 			{
-			mb_esf_save(verbose, &esf,
+			mb_ess_save(verbose, &esf,
 				ping[iping].time_d, 
-				j, MBEDIT_FLAG, &error);
+				j, MBP_EDIT_FLAG, &error);
 			}
 		    
 		    /* unplot the affected beam and ping */
@@ -2876,9 +2873,9 @@ int mbedit_action_bad_ping(
 		    {
 		    for (j=0;j<ping[iping_save].beams_bath;j++)
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
-			    mb_esf_save(verbose, &esf,
+			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBEDIT_FLAG, &error);
+				j, MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -2983,9 +2980,9 @@ int mbedit_action_good_ping(
 		    for (j=0;j<ping[iping_save].beams_bath;j++)
 			if (!mb_beam_ok(ping[iping_save].beamflag[j])
 			    && ping[iping_save].beamflag[j] != MB_FLAG_NULL)
-			    mb_esf_save(verbose, &esf,
+			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBEDIT_UNFLAG, &error);
+				j, MBP_EDIT_UNFLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3090,9 +3087,9 @@ int mbedit_action_left_ping(
 		    {
 		    for (j=0;j<=jbeam_save;j++)
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
-			    mb_esf_save(verbose, &esf,
+			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBEDIT_FLAG, &error);
+				j, MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3196,9 +3193,9 @@ int mbedit_action_right_ping(
 		    {
 		    for (j=jbeam_save;j<ping[iping_save].beams_bath;j++)
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
-			    mb_esf_save(verbose, &esf,
+			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBEDIT_FLAG, &error);
+				j, MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3302,9 +3299,9 @@ int mbedit_action_zero_ping(
 		    {
 		    for (j=0;j<ping[iping_save].beams_bath;j++)
 			if (ping[iping_save].beamflag[j] != MB_FLAG_NULL)
-			    mb_esf_save(verbose, &esf,
+			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBEDIT_ZERO, &error);
+				j, MBP_EDIT_ZERO, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3412,9 +3409,9 @@ int mbedit_action_unflag_view(
 				    {
 				    /* write edit to save file */
 				    if (esffile_open == MB_YES)
-					mb_esf_save(verbose, &esf,
+					mb_ess_save(verbose, &esf,
 						ping[i].time_d, j, 
-						MBEDIT_UNFLAG, &error);
+						MBP_EDIT_UNFLAG, &error);
 		    
 				    /* apply edit */
 				    ping[i].beamflag[j] =  MB_FLAG_NONE;
@@ -3529,9 +3526,9 @@ int mbedit_action_unflag_all(
 			    {
 			    /* write edit to save file */
 			    if (esffile_open == MB_YES)
-				mb_esf_save(verbose, &esf,
+				mb_ess_save(verbose, &esf,
 					ping[i].time_d, j, 
-					MBEDIT_UNFLAG, &error);
+					MBP_EDIT_UNFLAG, &error);
 	    
 			    /* apply edit */
 			    ping[i].beamflag[j] =  MB_FLAG_NONE;
@@ -3613,6 +3610,8 @@ int mbedit_action_filter_all(
 	int	i;
 
 	/* print input debug statements */
+fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+function_name);
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
@@ -3727,9 +3726,9 @@ int mbedit_filter_ping(int iping)
 		    		{
 			    	/* write edit to save file */
 			    	if (esffile_open == MB_YES)
-				    mb_esf_save(verbose, &esf,
+				    mb_ess_save(verbose, &esf,
 						ping[iping].time_d, j,
-						MBEDIT_UNFLAG, &error);
+						MBP_EDIT_UNFLAG, &error);
 	
 			    	/* apply edit */
 				ping[iping].beamflag[j] = MB_FLAG_NONE;
@@ -3782,9 +3781,9 @@ int mbedit_filter_ping(int iping)
 				    {
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
-					mb_esf_save(verbose, &esf,
+					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, jbeam,
-						MBEDIT_FILTER, &error);
+						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
 				    ping[iping].beamflag[jbeam] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -3812,9 +3811,9 @@ int mbedit_filter_ping(int iping)
 		 	    	{
 			   	/* write edit to save file */
 			        if (esffile_open == MB_YES)
-					mb_esf_save(verbose, &esf,
+					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, j,
-						MBEDIT_FILTER, &error);
+						MBP_EDIT_FILTER, &error);
 	
 			        /* apply edit */
 			    	ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -3835,9 +3834,9 @@ int mbedit_filter_ping(int iping)
 		 	    	{
 			   	/* write edit to save file */
 			        if (esffile_open == MB_YES)
-					mb_esf_save(verbose, &esf,
+					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, j,
-						MBEDIT_FILTER, &error);
+						MBP_EDIT_FILTER, &error);
 	
 			        /* apply edit */
 			    	ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -3865,9 +3864,9 @@ int mbedit_filter_ping(int iping)
 				    {
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
-					mb_esf_save(verbose, &esf,
+					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, j,
-						MBEDIT_FILTER, &error);
+						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
 				    ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -3891,9 +3890,9 @@ int mbedit_filter_ping(int iping)
 				    {
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
-					mb_esf_save(verbose, &esf,
+					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, j,
-						MBEDIT_FILTER, &error);
+						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
 				    ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -3923,9 +3922,9 @@ int mbedit_filter_ping(int iping)
 				    	{
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
-						mb_esf_save(verbose, &esf,
+						mb_ess_save(verbose, &esf,
 							ping[iping].time_d, j,
-							MBEDIT_FILTER, &error);
+							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
 				    	ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -3952,9 +3951,9 @@ int mbedit_filter_ping(int iping)
 				    	{
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
-						mb_esf_save(verbose, &esf,
+						mb_ess_save(verbose, &esf,
 							ping[iping].time_d, j,
-							MBEDIT_FILTER, &error);
+							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
 				    	ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -3988,9 +3987,9 @@ int mbedit_filter_ping(int iping)
 				    	{
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
-						mb_esf_save(verbose, &esf,
+						mb_ess_save(verbose, &esf,
 							ping[iping].time_d, j,
-							MBEDIT_FILTER, &error);
+							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
 				    	ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -4020,9 +4019,9 @@ int mbedit_filter_ping(int iping)
 				    	{
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
-						mb_esf_save(verbose, &esf,
+						mb_ess_save(verbose, &esf,
 							ping[iping].time_d, j,
-							MBEDIT_FILTER, &error);
+							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
 				    	ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
@@ -4385,7 +4384,8 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 	/* local variables */
 	char	*function_name = "mbedit_dump_data";
 	int	status = MB_SUCCESS;
-	int	iping;
+	int	action;
+	int	iping, jbeam;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4403,6 +4403,30 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 		/* turn message on */
 		do_message_on("MBedit is clearing data...");
 
+		/* output changed edits in pings to be dumped */
+		for (iping=0;iping<nbuff-hold_size;iping++)
+			{
+			for (jbeam=0;jbeam<ping[iping].beams_bath;jbeam++)
+			    {
+			    if (ping[iping].beamflag[jbeam] != ping[iping].beamflagorg[jbeam])
+			    	{
+				if (mb_beam_ok(ping[iping].beamflag[jbeam]))
+					action = MBP_EDIT_UNFLAG;
+				else if (mb_beam_check_flag_filter2(ping[iping].beamflag[jbeam]))
+					action = MBP_EDIT_FILTER;
+				else if (mb_beam_check_flag_filter(ping[iping].beamflag[jbeam]))
+					action = MBP_EDIT_FILTER;
+				else if (ping[iping].beamflag[jbeam] != MB_FLAG_NULL)
+					action = MBP_EDIT_FLAG;
+				else
+					action = MBP_EDIT_ZERO;
+				mb_esf_save(verbose, &esf,
+						ping[iping].time_d, jbeam,
+						action, &error);
+				}
+			    }
+			}
+
 		/* deallocate pings to be dumped */
 		for (iping=0;iping<nbuff-hold_size;iping++)
 			{
@@ -4410,6 +4434,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 			    {
 			    ping[iping].allocated = 0;
 			    free(ping[iping].beamflag);
+			    free(ping[iping].beamflagorg);
 			    free(ping[iping].bath);
 			    free(ping[iping].bathacrosstrack);
 			    free(ping[iping].bathalongtrack);
@@ -4560,6 +4585,7 @@ int mbedit_load_data(int buffer_size,
 			{
 			ping[nbuff].allocated = 0;
 			free(ping[nbuff].beamflag);
+			free(ping[nbuff].beamflagorg);
 			free(ping[nbuff].bath);
 			free(ping[nbuff].bathacrosstrack);
 			free(ping[nbuff].bathalongtrack);
@@ -4571,12 +4597,14 @@ int mbedit_load_data(int buffer_size,
 			&& ping[nbuff].allocated < ping[nbuff].beams_bath)
 			{
 			ping[nbuff].beamflag = NULL;
+			ping[nbuff].beamflagorg = NULL;
 			ping[nbuff].bath = NULL;
 			ping[nbuff].bathacrosstrack = NULL;
 			ping[nbuff].bathalongtrack = NULL;
 			ping[nbuff].bath_x = NULL;
 			ping[nbuff].bath_y = NULL;
 			ping[nbuff].beamflag = (char *) malloc(ping[nbuff].beams_bath*sizeof(char));
+			ping[nbuff].beamflagorg = (char *) malloc(ping[nbuff].beams_bath*sizeof(char));
 			ping[nbuff].bath = (double *) malloc(ping[nbuff].beams_bath*sizeof(double));
 			ping[nbuff].bathacrosstrack = (double *) malloc(ping[nbuff].beams_bath*sizeof(double));
 			ping[nbuff].bathalongtrack = (double *) malloc(ping[nbuff].beams_bath*sizeof(double));
@@ -4591,6 +4619,7 @@ int mbedit_load_data(int buffer_size,
 			for (i=0;i<ping[nbuff].beams_bath;i++)
 			    {
 			    ping[nbuff].beamflag[i] = beamflag[i];
+			    ping[nbuff].beamflagorg[i] = beamflag[i];
 			    ping[nbuff].bath[i] = bath[i];
 			    ping[nbuff].bathacrosstrack[i] = bathacrosstrack[i];
 			    ping[nbuff].bathalongtrack[i] = bathalongtrack[i];
