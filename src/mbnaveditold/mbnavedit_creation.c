@@ -1265,7 +1265,7 @@ CreatemainWindow(Widget parent)
     XtAddCallback(drawingArea, XmNexposeCallback, do_expose, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNtitle, "About MBnavedit"); ac++;
+    XtSetArg(args[ac], XmNtitle, "About MBnaveditold"); ac++;
     XtSetArg(args[ac], XmNdeleteResponse, XmUNMAP); ac++;
     XtSetArg(args[ac], XmNwidth, 481); ac++;
     XtSetArg(args[ac], XmNheight, 463); ac++;
@@ -1464,7 +1464,7 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "One Component of the", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "One Obsolete Component of the", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -1584,7 +1584,7 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "MBnavedit", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "MBnaveditold", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 

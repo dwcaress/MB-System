@@ -4,7 +4,7 @@
  *
  * Builder Xcessory Personal Edition Version 5.0.5.
  *
- * Identification: $Id: mbedit.uil,v 4.12 2000-09-08 00:29:20 caress Exp $
+ * Identification: $Id: mbedit.uil,v 5.0 2001-01-22 07:56:52 caress Exp $
  */
 module main_uil
 version = 'V1.0'
@@ -1050,7 +1050,7 @@ object label_message : XmLabel widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("MBedit is loading data...");
+        XmNlabelString = compound_string("MBeditold is loading data...");
         XmNx = 10;
         XmNy = 10;
         XmNwidth = 360;
@@ -1135,7 +1135,7 @@ object label_about_mbedit : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("MBedit");
+        XmNlabelString = compound_string("MBeditold");
         XmNx = 10;
         XmNy = 10;
         XmNwidth = 450;
@@ -1217,7 +1217,7 @@ object label_about_component : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("One Component of the");
+        XmNlabelString = compound_string("One Obsolete Component of the");
         XmNx = 10;
         XmNy = 90;
         XmNwidth = 450;
@@ -1374,7 +1374,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
 
 !(BX)object xmDialogShell_about : XmDialogShell widget {
 !(BX)    arguments {
-!(BX)        XmNtitle = "About MBedit";
+!(BX)        XmNtitle = "About MBeditold";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 473;
 !(BX)        XmNheight = 457;
@@ -3050,8 +3050,8 @@ object window_mbedit : XmMainWindow widget {
 !(BX)object topLevelShell : TopLevelShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNtitle = "MBedit";
-!(BX)        XmNiconName = "MBedit";
+!(BX)        XmNtitle = "MBeditold";
+!(BX)        XmNiconName = "MBeditold";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
 !(BX)        XmNx = 0;

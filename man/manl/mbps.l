@@ -1,14 +1,15 @@
-.TH MBPS l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH MBPS l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbps\fP - Generates a PostScript perspective plot of a piece of swath sonar data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
-\fBmbps\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-E\fIyr/mo/da/hr/mn/sc 
-\fB-F\fIformat \fB-I\fIfilename \fB-D\fIview_direction \fB-A\fIalpha  
-\fB-K\fIeta \fB-X\fIve \fB-T\fI"title" \fB-G\fIgap \fB-S\fIspeedmin
+\fBmbps\fP [\fB-F\fIformat \fB-I\fIfilename \fB-Nnpingsmax\fI \fB-Ppings\fI
+\fB-A\fIalpha \fB-B\fIyr/mo/da/hr/mn/sc 
+\fB-D\fIview_direction \fB-E\fIyr/mo/da/hr/mn/sc \fB-G\fIgap 
+\fB-K\fIeta \fB-S\fIspeedmin \fB-T\fI"title" \fB-X\fIve  
 \fB-W\fImeters_per_inch \fB-Y\fIdisplay_stats \fB-Z\fIdisplay_scales 
 \fB-V -H\fP]
 
@@ -103,6 +104,23 @@ from stdin. Default: \fIfilename\fP = stdin.
 .br
 Sets the angle eta (degrees) that is the elevation of the observer over
 the plane defined by the mean depth. Default \fIeta = 45.
+.TP
+.B \-N
+\fInpingsmax\fP
+.br
+Sets the maximum number of pings to be read and plotted.
+Default: \fInpingsmax\fP = 1000.
+.TP
+.B \-P
+\fIpings\fP
+.br
+Sets the ping averaging of the input data. If \fIpings\fP = 1, then
+no ping averaging is performed. If \fIpings\fP > 0, then
+that number of input pings will be averaged to produce one output
+ping.  If \fIpings\fP = 0, then the ping averaging will automatically
+be done so that the along-track ping spacing is equal to the across-track
+beam spacing. 
+Default: \fIpings\fP = 1 (no ping averaging).
 .TP
 .B \-S
 \fIspeedmin\fP

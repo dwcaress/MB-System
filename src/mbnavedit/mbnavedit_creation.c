@@ -65,10 +65,11 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  * Declarations for callbacks and handlers.
  */
 extern void BxExitCB(Widget, XtPointer, XtPointer);
+extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
+extern void do_timeinterpolation_apply(Widget, XtPointer, XtPointer);
 extern void do_useprevious_no(Widget, XtPointer, XtPointer);
 extern void do_useprevious_yes(Widget, XtPointer, XtPointer);
 extern void do_modeling_apply(Widget, XtPointer, XtPointer);
-extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
 extern void do_driftlat(Widget, XtPointer, XtPointer);
 extern void do_driftlon(Widget, XtPointer, XtPointer);
 extern void do_model_mode(Widget, XtPointer, XtPointer);
@@ -130,6 +131,11 @@ CreatemainWindow(Widget parent)
     Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow;
+    Widget   xmDialogShell_timeinterpolation;
+    Widget   bulletinBoard_timeinterpolation;
+    Widget   label_timeinterpolation;
+    Widget   pushButton_timeinterpolation_dismiss;
+    Widget   pushButton_timeinterpolation_apply;
     Widget   xmDialogShell_useprevious;
     Widget   label_useprevious;
     Widget   pushButton_useprevious_no;
@@ -170,7 +176,7 @@ CreatemainWindow(Widget parent)
     Widget   bulletinBoard;
     Widget   menuBar_controls;
     Widget   cascadeButton_controls;
-    Widget   pulldownMenu_controls1;
+    Widget   pulldownMenu_controls;
     Widget   pushButton_controls_timespan;
     Widget   pushButton_controls_modeling;
     Widget   pushButton_lonlat_dr;
@@ -266,10 +272,10 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 111); ac++;
-    XtSetArg(args[ac], XmNheight, 52); ac++;
-    pulldownMenu_controls1 = XmCreatePulldownMenu(XtParent(cascadeButton_controls),
-        "pulldownMenu_controls1",
+    XtSetArg(args[ac], XmNwidth, 137); ac++;
+    XtSetArg(args[ac], XmNheight, 76); ac++;
+    pulldownMenu_controls = XmCreatePulldownMenu(XtParent(cascadeButton_controls),
+        "pulldownMenu_controls",
         args, 
         ac);
     
@@ -277,13 +283,13 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_controls1, "Time Stepping", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_controls, "Time Stepping", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_controls1, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_controls, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_controls_timespan = XmCreatePushButton(pulldownMenu_controls1,
+        pushButton_controls_timespan = XmCreatePushButton(pulldownMenu_controls,
             "pushButton_controls_timespan",
             args, 
             ac);
@@ -301,13 +307,13 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_controls1, "Nav Modeling", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_controls, "Nav Modeling", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(pulldownMenu_controls1, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(pulldownMenu_controls, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_controls_modeling = XmCreatePushButton(pulldownMenu_controls1,
+        pushButton_controls_modeling = XmCreatePushButton(pulldownMenu_controls,
             "pushButton_controls_modeling",
             args, 
             ac);
@@ -322,7 +328,31 @@ CreatemainWindow(Widget parent)
     XtAddCallback(pushButton_controls_modeling, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_modeling");
     
     ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_controls1); ac++;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_controls, "Time Interpolation", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_controls, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_controls_timeinterpolation = XmCreatePushButton(pulldownMenu_controls,
+            "pushButton_controls_timeinterpolation",
+            args, 
+            ac);
+        XtManageChild(pushButton_controls_timeinterpolation);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_controls_timeinterpolation, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_timeinterpolation");
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_controls); ac++;
     XtSetValues(cascadeButton_controls, args, ac);
     
     ac = 0;
@@ -1436,8 +1466,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 259); ac++;
-    XtSetArg(args[ac], XmNy, 136); ac++;
+    XtSetArg(args[ac], XmNx, 8); ac++;
+    XtSetArg(args[ac], XmNy, 32); ac++;
     XtSetArg(args[ac], XmNwidth, 481); ac++;
     XtSetArg(args[ac], XmNheight, 463); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(xmDialogShell_about,
@@ -1781,8 +1811,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 310); ac++;
-    XtSetArg(args[ac], XmNy, 325); ac++;
+    XtSetArg(args[ac], XmNx, 8); ac++;
+    XtSetArg(args[ac], XmNy, 32); ac++;
     XtSetArg(args[ac], XmNwidth, 379); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
     bulletinBoard_message = XmCreateBulletinBoard(xmDialogShell_message,
@@ -1860,8 +1890,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 344); ac++;
-    XtSetArg(args[ac], XmNy, 287); ac++;
+    XtSetArg(args[ac], XmNx, 8); ac++;
+    XtSetArg(args[ac], XmNy, 32); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 161); ac++;
     bulletinBoard_error = XmCreateBulletinBoard(xmDialogShell_error,
@@ -1993,8 +2023,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 193); ac++;
-    XtSetArg(args[ac], XmNy, 65); ac++;
+    XtSetArg(args[ac], XmNx, 8); ac++;
+    XtSetArg(args[ac], XmNy, 32); ac++;
     XtSetArg(args[ac], XmNwidth, 614); ac++;
     XtSetArg(args[ac], XmNheight, 606); ac++;
     bulletinBoard_fileselection = XmCreateBulletinBoard(xmDialogShell_fileselection,
@@ -2077,7 +2107,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNx, 390); ac++;
     XtSetArg(args[ac], XmNy, 480); ac++;
-    XtSetArg(args[ac], XmNwidth, 180); ac++;
+    XtSetArg(args[ac], XmNwidth, 167); ac++;
     XtSetArg(args[ac], XmNheight, 65); ac++;
     XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
     radioBox_output = XmCreateRadioBox(bulletinBoard_fileselection,
@@ -2096,7 +2126,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(radioBox_output, "-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 174); ac++;
+        XtSetArg(args[ac], XmNwidth, 161); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         toggleButton_output_on = XmCreateToggleButton(radioBox_output,
             "toggleButton_output_on",
@@ -2122,7 +2152,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(radioBox_output, "-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 174); ac++;
+        XtSetArg(args[ac], XmNwidth, 161); ac++;
         XtSetArg(args[ac], XmNheight, 28); ac++;
         toggleButton_output_off = XmCreateToggleButton(radioBox_output,
             "toggleButton_output_off",
@@ -2243,8 +2273,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 254); ac++;
-        XtSetArg(args[ac], XmNy, 270); ac++;
+        XtSetArg(args[ac], XmNx, 8); ac++;
+        XtSetArg(args[ac], XmNy, 32); ac++;
         XtSetArg(args[ac], XmNwidth, 491); ac++;
         XtSetArg(args[ac], XmNheight, 195); ac++;
         bulletinBoard_timestepping = XmCreateBulletinBoard(xmDialogShell_timestepping,
@@ -2470,8 +2500,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 252); ac++;
-        XtSetArg(args[ac], XmNy, 142); ac++;
+        XtSetArg(args[ac], XmNx, 8); ac++;
+        XtSetArg(args[ac], XmNy, 32); ac++;
         XtSetArg(args[ac], XmNwidth, 496); ac++;
         XtSetArg(args[ac], XmNheight, 451); ac++;
         bulletinBoard_modeling = XmCreateBulletinBoard(xmDialogShell_modeling,
@@ -2890,8 +2920,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 248); ac++;
-        XtSetArg(args[ac], XmNy, 305); ac++;
+        XtSetArg(args[ac], XmNx, 8); ac++;
+        XtSetArg(args[ac], XmNy, 32); ac++;
         XtSetArg(args[ac], XmNwidth, 503); ac++;
         XtSetArg(args[ac], XmNheight, 126); ac++;
         bulletinBoard_useprevious = XmCreateBulletinBoard(xmDialogShell_useprevious,
@@ -2988,6 +3018,112 @@ CreatemainWindow(Widget parent)
     }
     
     XtAddCallback(pushButton_useprevious_yes, XmNactivateCallback, do_useprevious_yes, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtitle, "Time Interpolation"); ac++;
+    XtSetArg(args[ac], XmNwidth, 307); ac++;
+    XtSetArg(args[ac], XmNheight, 149); ac++;
+    xmDialogShell_timeinterpolation = XtCreatePopupShell("xmDialogShell_timeinterpolation",
+        xmDialogShellWidgetClass,
+        mainWindow,
+        args, 
+        ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+    XtSetArg(args[ac], XmNx, 8); ac++;
+    XtSetArg(args[ac], XmNy, 32); ac++;
+    XtSetArg(args[ac], XmNwidth, 307); ac++;
+    XtSetArg(args[ac], XmNheight, 149); ac++;
+    bulletinBoard_timeinterpolation = XmCreateBulletinBoard(xmDialogShell_timeinterpolation,
+        "bulletinBoard_timeinterpolation",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_timeinterpolation, ":::t\"Click \\\"Apply\\\" to interpolate duplicate \":t\"time stamps. Non-duplicate time stamps \"\"will not be affected.\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 290); ac++;
+        XtSetArg(args[ac], XmNheight, 70); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_timeinterpolation, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_timeinterpolation = XmCreateLabel(bulletinBoard_timeinterpolation,
+            "label_timeinterpolation",
+            args, 
+            ac);
+        XtManageChild(label_timeinterpolation);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_timeinterpolation, "Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 160); ac++;
+        XtSetArg(args[ac], XmNy, 80); ac++;
+        XtSetArg(args[ac], XmNwidth, 130); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_timeinterpolation, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_timeinterpolation_dismiss = XmCreatePushButton(bulletinBoard_timeinterpolation,
+            "pushButton_timeinterpolation_dismiss",
+            args, 
+            ac);
+        XtManageChild(pushButton_timeinterpolation_dismiss);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_timeinterpolation_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_timeinterpolation");
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_timeinterpolation, "Apply", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNy, 80); ac++;
+        XtSetArg(args[ac], XmNwidth, 130); ac++;
+        XtSetArg(args[ac], XmNheight, 50); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_timeinterpolation, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_timeinterpolation_apply = XmCreatePushButton(bulletinBoard_timeinterpolation,
+            "pushButton_timeinterpolation_apply",
+            args, 
+            ac);
+        XtManageChild(pushButton_timeinterpolation_apply);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_timeinterpolation_apply, XmNactivateCallback, do_timeinterpolation_apply, (XtPointer)0);
+    XtAddCallback(pushButton_timeinterpolation_apply, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_timeinterpolation");
     
     
     /* Begin user code block <end_CreatemainWindow> */

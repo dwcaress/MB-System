@@ -50,6 +50,7 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
+identifier BXG_pushButton_controls_timeinterpolation;
 identifier BXG_toggleButton_org_sonardepth;
 identifier BXG_toggleButton_sonardepth;
 identifier BXG_toggleButton_dr_lat;
@@ -166,10 +167,7 @@ procedure do_model_mode();
 procedure do_modeling_apply();
 procedure do_useprevious_yes();
 procedure do_useprevious_no();
-!(BX) "Widget" "bulletinBoard_controls"
-identifier bulletinBoard_controls;
-!(BX) "Widget" "bulletinBoard_modeling"
-identifier bulletinBoard_modeling;
+procedure do_timeinterpolation_apply();
 
 list BaseStyle : arguments {
 };
@@ -194,6 +192,112 @@ list Style_useReasons : callbacks {
 !(BX)    handlers BaseStyleHandlers;
 !(BX)};
 
+
+object pushButton_timeinterpolation_apply : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Apply");
+        XmNx = 20;
+        XmNy = 80;
+        XmNwidth = 130;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+       XmNactivateCallback = procedures {
+                 do_timeinterpolation_apply();
+                 BxUnmanageCB("bulletinBoard_timeinterpolation");
+        };
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_timeinterpolation_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNx = 160;
+        XmNy = 80;
+        XmNwidth = 130;
+        XmNheight = 50;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure BxUnmanageCB("bulletinBoard_timeinterpolation");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_timeinterpolation : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Click \"Apply\" to interpolate d" &
+ "uplicate ", separate=true) &
+ compound_string("time stamps. Non-duplicate time stamps ", separate=true) &
+ compound_string("will not be affected.");
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 290;
+        XmNheight = 70;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object bulletinBoard_timeinterpolation : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 8;
+        XmNy = 32;
+        XmNwidth = 307;
+        XmNheight = 149;
+    };
+    controls {
+         managed XmLabel label_timeinterpolation;
+         managed XmPushButton pushButton_timeinterpolation_dismiss;
+         managed XmPushButton pushButton_timeinterpolation_apply;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object xmDialogShell_timeinterpolation : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNtitle = "Time Interpolation";
+!(BX)        XmNwidth = 307;
+!(BX)        XmNheight = 149;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmBulletinBoardDialog bulletinBoard_timeinterpolation;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
 
 object pushButton_useprevious_yes : XmPushButton widget {
     arguments {
@@ -263,8 +367,8 @@ object bulletinBoard_useprevious : XmBulletinBoardDialog widget {
  "?");
         XmNautoUnmanage = true;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 248;
-        XmNy = 305;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 503;
         XmNheight = 126;
     };
@@ -635,8 +739,8 @@ object bulletinBoard_modeling : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Navigation Modeling");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 252;
-        XmNy = 142;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 496;
         XmNheight = 451;
     };
@@ -876,8 +980,8 @@ object bulletinBoard_timestepping : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Time Stepping");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 254;
-        XmNy = 270;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 491;
         XmNheight = 195;
     };
@@ -991,7 +1095,7 @@ object toggleButton_output_on : XmToggleButton widget {
         XmNfontList = font_table(
 		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
         XmNlabelString = compound_string("Output Edited Data");
-        XmNwidth = 174;
+        XmNwidth = 161;
         XmNheight = 28;
     };
     controls {
@@ -1007,7 +1111,7 @@ object toggleButton_output_off : XmToggleButton widget {
         XmNfontList = font_table(
 		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
         XmNlabelString = compound_string("Browse Only");
-        XmNwidth = 174;
+        XmNwidth = 161;
         XmNheight = 28;
     };
     controls {
@@ -1022,7 +1126,7 @@ object radioBox_output : XmRadioBox widget {
     arguments {
         XmNx = 390;
         XmNy = 480;
-        XmNwidth = 180;
+        XmNwidth = 167;
         XmNheight = 65;
     };
     controls {
@@ -1091,8 +1195,8 @@ object textField_output_file : XmTextField widget {
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 193;
-        XmNy = 65;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 614;
         XmNheight = 606;
     };
@@ -1212,8 +1316,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 344;
-        XmNy = 287;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1293,8 +1397,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 310;
-        XmNy = 325;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1547,8 +1651,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 259;
-        XmNy = 136;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 481;
         XmNheight = 463;
     };
@@ -2544,17 +2648,36 @@ object pushButton_controls_modeling : XmPushButton widget {
 !(BX)    };
 };
 
-object pulldownMenu_controls1 : XmPulldownMenu widget {
+object pushButton_controls_timeinterpolation : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Time Interpolation");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_controls_timeinterpolation);
+        XmNactivateCallback = procedure BxManageCB("bulletinBoard_timeinterpolation" &
+ "");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
         XmNx = 0;
         XmNy = 0;
-        XmNwidth = 111;
-        XmNheight = 52;
+        XmNwidth = 137;
+        XmNheight = 76;
     };
     controls {
          managed XmPushButton pushButton_controls_timespan;
          managed XmPushButton pushButton_controls_modeling;
+         managed XmPushButton pushButton_controls_timeinterpolation;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -2574,7 +2697,7 @@ object cascadeButton_controls : XmCascadeButton widget {
         XmNheight = 24;
     };
     controls {
-         unmanaged XmPulldownMenu pulldownMenu_controls1;
+         unmanaged XmPulldownMenu pulldownMenu_controls;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -2662,6 +2785,7 @@ object mainWindow : XmMainWindow widget {
         XmNheight = 680;
     };
     controls {
+!(BX)         unmanaged XmDialogShell xmDialogShell_timeinterpolation;
 !(BX)         unmanaged XmDialogShell xmDialogShell_useprevious;
 !(BX)         unmanaged XmDialogShell xmDialogShell_modeling;
 !(BX)         unmanaged XmDialogShell xmDialogShell_timestepping;

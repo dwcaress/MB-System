@@ -1,18 +1,25 @@
-.TH mbnavedit l "16 July 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbnaveditold l "18 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
+\fBmbnaveditold\fP - Old interactive navigation editor for swath sonar data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
+\fBmbnaveditold\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
 \fB-D\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fIformat \fB-I\fIinfile \fB-P -V -H\fP]
 
 .SH DESCRIPTION
-\fBmbnavedit\fP is an interactive editor used to identify and fix 
-problems with the navigation of swath sonar data. Once a file has been
+\fBMBnavedit\fP is an interactive editor used to identify and fix 
+problems with the navigation of swath sonar data.  The current
+version of \fBmbnavedit\fP works in conjunction with
+the \fBmbprocess\fP utility and uses a different i/o scheme.
+This version has been retained for compatibility with 
+previous releases of \fBMB-System\fP, but may be dropped
+from future releases.
+
+Once a file has been
 read in, \fBmbnavedit\fP displays autoscaled plots of the longitude,
 latitude, speed, and heading time series, along with a plot of
 the time interval between navigation values. 
@@ -70,6 +77,15 @@ For some data formats, the user can also
 inspect plots of roll, pitch, and heaved
 data to determine if the ship's vertical reference sensors
 were working properly.
+
+In some cases, it may be useful to inspect or even use 
+navigation derived from "dead reckoning" (DR). The DR
+navigation is calculated from the initial position using the
+heading and speed data. Separate longitude and latitude 
+drift rates may be applied to force the DR navigation to
+follow known positions. The primary use so far of this function
+has been to rationalize noisy ultra-short-baseline (USBL)
+navigation of towed vehicles. 
 
 One special case which has been encountered is a problem with
 the time stamps of survey records in data using a format with
@@ -141,7 +157,7 @@ corresponds to the \fBMBIO\fP format id), then the output file name
 will have an "e.mbXX" suffix. Otherwise, the output file will
 be \fIinfile\fP with ".ed" appended.
 .TP
-.B \-I
+.B \-O
 \fIoutfile\fP
 .br
 Sets the output data file, overriding the file naming conventions
@@ -284,12 +300,34 @@ This toggle button turns the longitude plot on and off.
 When this toggle button is on, the longitude plot includes a
 green line representing the original longitude values.
 .TP
+.B Show Dead Reckoning (Longitude Plot)
+When this toggle button is on, the longitude plot includes a
+blue line representing the dead reckoning (DR) navigation.
+The DR is calculated starting with the initial position
+using the current heading and speed values. Longitude and
+Latitude drift rates set from the Controls menu are also
+used in the calculation.
+.TP
 .B Latitude Plot
 This toggle button turns the latitude plot on and off.
 .TP
 .B Show Original Data (Latitude Plot)
 When this toggle button is on, the latitude plot includes a
 green line representing the original latitude values.
+.TP
+.B Show Dead Reckoning (Latitude Plot)
+When this toggle button is on, the latitude plot includes a
+blue line representing the dead reckoning (DR) navigation.
+The DR is calculated starting with the initial position
+using the current heading and speed values. Longitude and
+Latitude drift rates set from the Controls menu are also
+used in the calculation.
+.TP
+.B Use Dead Reckoning (Longitude and Latitude Plots)
+When this button is pushed, any selected data in either the
+longitude or latitude plots will be replaced by the 
+current estimates of dead reckoning navigation. Both longitude
+and latitude values will be affected.
 .TP
 .B Speed Plot
 This toggle button turns the speed plot on and off.
@@ -356,8 +394,8 @@ The control button \fBForward\fP causes
 the same action.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbmerge\fP(l), 
-\fBmbedit\fP(l), \fBmbinfo\fP(l)
+\fBmbsystem\fP(l), \fBmbnavedit\fP(l), \fBmbio\fP(l), \fBmbmerge\fP(l), 
+\fBmbeditold\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
 This program doesn't handle the roll, pitch, and

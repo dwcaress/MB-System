@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsimradmakess.c	11/29/98
  *
- *    $Id: mbsimradmakess.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbsimradmakess.c,v 5.1 2001-01-22 07:54:22 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -58,6 +58,9 @@
  * Date:	November 29, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.5  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -96,7 +99,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsimradmakess.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbsimradmakess.c,v 5.1 2001-01-22 07:54:22 caress Exp $";
 	static char program_name[] = "MBSIMRADMAKESS";
 	static char help_message[] =  "MBSIMRADMAKESS is an utility for regenerating sidescan imagery from the raw amplitude samples contained in data from  Simrad \nEM300 and EM3000 multibeam sonars. This program ignores amplitude \ndata associated with flagged (bad) bathymetry data, thus removing \none important source of noise in the sidescan data. The default \ninput and output streams are stdin and stdout.";
 	static char usage_message[] = "mbsimradmakess [-Fformat -V -H  -Iinfile -Ooutfile -Ppixel_size -Sswath_width -Tpixel_int]";
@@ -183,7 +186,6 @@ main (int argc, char **argv)
 	double  pixel_size_calc;
 	double	ss_spacing;
 	int	pixel_int = 0;
-	int	pixel_int_use;
 	double	xtrack;
 	int	first, last, k1, k2;
 	int	i, j, k, jj, kk, l, m;
@@ -525,246 +527,12 @@ main (int argc, char **argv)
 		if (error == MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			{
-			/* get pointers to raw data structure */
-			store = (struct mbsys_simrad2_struct *) store_ptr;
-			ping = (struct mbsys_simrad2_ping_struct *) store->ping;
-
-			/* zero the sidescan */
-			for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
-				{
-				ss[i] = 0.0;
-				ssacrosstrack[i] = 0.0;
-				ssalongtrack[i] = 0.0;
-				ss_cnt[i] = 0;
-				}
-
-			/* set scaling parameters */
-			depthscale = 0.01 * ping->png_depth_res;
-			depthoffset = 0.01 * ping->png_xducer_depth
-					+ 655.36 * ping->png_offset_multiplier;
-			dacrscale  = 0.01 * ping->png_distance_res;
-			daloscale  = 0.01 * ping->png_distance_res;
-			reflscale  = 0.5;
-			ssoffset = 64.0;
-			if (store->run_mode == 4)
-			    {
-			    if (depthscale * ping->png_depth[ping->png_nbeams/2] > 3500.0
-				&& ping->png_max_range > 19000
-				&& ping->png_bsn + ping->png_bso < -60)
-				{
-				ssoffset = 64.0 - 0.6 * (ping->png_bsn + ping->png_bso + 60);
-				}
-			    }
-
-			/* get median depth */
-			nbathsort = 0;
-			for (i=0;i<ping->png_nbeams;i++)
-			    {
-			    if (mb_beam_ok(ping->png_beamflag[i]))
-				{
-				bathsort[nbathsort] = depthscale 
-					* ping->png_depth[i]
-					    + depthoffset;
- 				nbathsort++;
-				}
-			    }
-		
-			/* get sidescan pixel size */
-			if (swath_width_set == MB_NO
-			    && nbathsort > 0)
-			    {
-			    swath_width = 2.5 + MAX(90.0 - 0.01 * ping->png_depression[0], 
-					    90.0 - 0.01 * ping->png_depression[ping->png_nbeams-1]);
-			    swath_width = MAX(swath_width, 60.0);
-			    }
-			if (pixel_size_set == MB_NO
-			    && nbathsort > 0)
-			    {
-			    qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
-			    pixel_size_calc = 2 * tan(DTR * swath_width) * bathsort[nbathsort/2] 
-						/ MBSYS_SIMRAD2_MAXPIXELS;
-			    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
-			    if (pixel_size <= 0.0)
-				pixel_size = pixel_size_calc;
-			    else if (0.95 * pixel_size > pixel_size_calc)
-				pixel_size = 0.95 * pixel_size;
-			    else if (1.05 * pixel_size < pixel_size_calc)
-				pixel_size = 1.05 * pixel_size;
-			    else
-				pixel_size = pixel_size_calc;
-			    }
-	
-			/* get raw pixel size */
-			if (store->sonar == 300 || store->sonar == 3000)
-			    ss_spacing = 750.0 / ping->png_sample_rate;
-			else
-			    ss_spacing = 750.0 / 14000;
-			    
-			/* get pixel interpolation */
-			pixel_int_use = pixel_int + 1;
-	
-			/* loop over raw sidescan, putting each raw pixel into
-				the binning arrays */
-			pixels_ss = MBSYS_SIMRAD2_MAXPIXELS;
-			for (i=0;i<ping->png_nbeams_ss;i++)
-				{
-				beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
-				j = ping->png_beam_num[i] - 1;
-				if (mb_beam_ok(beamflag[j]))
-				    for (k=0;k<ping->png_beam_samples[i];k++)
-					{
-					if (beam_ss[k] != EM2_INVALID_AMP)
-						{
-						/* interpolate based on range */
-						if (k == ping->png_center_sample[i])
-						    {
-						    xtrack = bathacrosstrack[j];
-						    }
-						else if (i == ping->png_nbeams_ss - 1 
-						    || (k <= ping->png_center_sample[i]
-							&& i != 0))
-						    {
-						    if (ping->png_range[i] != ping->png_range[i-1])
-							{
-							jj = ping->png_beam_num[i-1] - 1;
-							xtrack = bathacrosstrack[j]
-							    + (bathacrosstrack[j]
-								- bathacrosstrack[jj])
-							    * 2 *((double)(k - ping->png_center_sample[i]))
-							    / fabs((double)(ping->png_range[i] - ping->png_range[i-1]));
-							}
-						    else
-							{
-							xtrack = bathacrosstrack[j]
-							    + ss_spacing * (k - ping->png_center_sample[i]);
-							}
-						    }
-						else
-						    {
-						    if (ping->png_range[i] != ping->png_range[i+1])
-							{
-							jj = ping->png_beam_num[i+1] - 1;
-							    
-							xtrack = bathacrosstrack[j]
-							    + (bathacrosstrack[jj]
-								- bathacrosstrack[j])
-							    * 2 *((double)(k - ping->png_center_sample[i]))
-							    / fabs((double)(ping->png_range[i+1] - ping->png_range[i]));
-							}
-						    else
-							{
-							xtrack = bathacrosstrack[j]
-							    + ss_spacing * (k - ping->png_center_sample[i]);
-							}
-						    }
-						kk = MBSYS_SIMRAD2_MAXPIXELS / 2 
-						    + (int)(xtrack / pixel_size);
-						if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
-						    {
-						    ss[kk]  += reflscale*((double)beam_ss[k]) + ssoffset;
-						    ssalongtrack[kk] 
-							    += bathalongtrack[j];
-						    ss_cnt[kk]++;
-						    }
-						}
-					}
-				}
-				
-			/* average the sidescan */
-			first = MBSYS_SIMRAD2_MAXPIXELS;
-			last = -1;
-			for (k=0;k<MBSYS_SIMRAD2_MAXPIXELS;k++)
-				{
-				if (ss_cnt[k] > 0)
-					{
-					ss[k] /= ss_cnt[k];
-					ssalongtrack[k] /= ss_cnt[k];
-					ssacrosstrack[k] 
-						= (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
-							* pixel_size;
-					first = MIN(first, k);
-					last = k;
-					}
-				}
-				
-			/* interpolate the sidescan */
-			k1 = first;
-			k2 = first;
-			for (k=first+1;k<last;k++)
-			    {
-			    if (ss_cnt[k] <= 0)
-				{
-				if (k2 <= k)
-				    {
-				    k2 = k+1;
-				    while (ss_cnt[k2] <= 0 && k2 < last)
-					k2++;
-				    }
-				if (k2 - k1 <= pixel_int_use)
-				    {
-				    ss[k] = ss[k1]
-					+ (ss[k2] - ss[k1])
-					    * ((double)(k - k1)) / ((double)(k2 - k1));
-				    ssacrosstrack[k] 
-					    = (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
-						    * pixel_size;
-				    ssalongtrack[k] = ssalongtrack[k1]
-					+ (ssalongtrack[k2] - ssalongtrack[k1])
-					    * ((double)(k - k1)) / ((double)(k2 - k1));
-				    }
-				}
-			    else
-				{
-				k1 = k;
-				}
-			    }
-	
-			/* print debug statements */
-			if (verbose >= 2)
-				{
-				fprintf(stderr,"\ndbg2  Sidescan regenerated in <%s>\n",
-					program_name);
-				fprintf(stderr,"dbg2       longitude:  %f\n",
-					navlon);
-				fprintf(stderr,"dbg2       latitude:   %f\n",
-					navlat);
-				fprintf(stderr,"dbg2       speed:      %f\n",
-					speed);
-				fprintf(stderr,"dbg2       heading:    %f\n",
-					heading);
-				fprintf(stderr,"dbg2       beams_bath: %d\n",
-					beams_bath);
-				fprintf(stderr,"dbg2       beams_amp:  %d\n",
-					beams_amp);
-				for (i=0;i<beams_bath;i++)
-				  fprintf(stderr,"dbg2       beam:%d  flag:%3d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-					i,beamflag[i],
-					bath[i],
-					amp[i],
-					bathacrosstrack[i],
-					bathalongtrack[i]);
-				fprintf(stderr,"dbg2       pixels_ss:  %d\n",
-					pixels_ss);
-				for (i=0;i<pixels_ss;i++)
-				  fprintf(stderr,"dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n",
-					i,ss_cnt[i],ss[i],
-					ssacrosstrack[i],
-					ssalongtrack[i]);
-				}
-				
-			/* insert the new sidescan into store */
-			ping->png_pixel_size = (int) (100 * pixel_size);
-			if (last > first)
-			    ping->png_pixels_ss = 2 * MAX(MBSYS_SIMRAD2_MAXPIXELS/2 - first, 
-						last - MBSYS_SIMRAD2_MAXPIXELS/2);
-			else 
-			    ping->png_pixels_ss = 0;
-			for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
-			    {
-			    ping->png_ss[i] = (short)(100 * ss[i]);
-			    ping->png_ssalongtrack[i] 
-				    = (short)(ssalongtrack[i] / daloscale);
-			    }
+			status = mbsys_simrad2_makess(verbose,
+					imbio_ptr,store_ptr,
+					pixel_size_set,&pixel_size, 
+					swath_width_set,&swath_width, 
+					pixel_int, 
+					&error);
 			}
 
 		/* write some data */

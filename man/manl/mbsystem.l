@@ -1,53 +1,41 @@
-.TH mbsystem l "14 April 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbsystem l "19 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH INTRODUCTION
-The \fBMB-System\fP is a software package consisting of programs which 
-manipulate, process, list, or display swath sonar bathymetry, amplitude, 
-and sidescan data which has been developed at the Lamont-Doherty 
-Earth Observatory (L-DEO) (and, as of late 1998, the Monterey Bay
-Aquarium Research Institute (MBARI)). The heart of 
-the system is an input/output library 
+\fBMB-System\fP is an open source software package for the processing
+and display of swath mapping sonar data which is being
+developed at the Monterey Bay Aquarium Research Institute (MBARI)
+and the Lamont-Doherty Earth Observatory (L-DEO).
+
+This software is distributed as source code under the GNU General
+Public License.
+The heart of the system is an input/output library 
 called \fBMBIO\fP which allows programs to transparently
 work with any of a number of supported swath sonar data formats.  This
 approach has allowed the creation of "generic" utilities which can
 be applied in a uniform manner to sonar data from a variety
-of sources.
+of sources. Most of the utilities are run from the command
+line and are controlled by command line arguments. A few
+graphical utilities are included to provide data editing
+and modeling capabilities.
 
-The development of \fBMBIO\fP and its associated programs began in 1990
-as part of ongoing research at L-DEO involving multibeam bathymetry data. 
-Development was accelerated in 1991 as part of the effort to support
-the Atlas Hydrosweep DS multibeam sonar on L-DEO's ship, the R/V
-Maurice Ewing.  The National Science Foundation provided support in
-1993 to improve and extend \fBMB-System\fP so as to provide
-a standard "generic" set of tools for processing and display of 
-swath sonar data that could be used by the U.S. academic community.
-SeaBeam Instruments and Antarctic Support Associates provided
-additional support in 1994 for the
-development of \fBMB-System\fP, with particular emphasis on capabilities 
-related to the new SeaBeam 2100 series of sonars.
-
-The National Science Foundation funded a five year effort
-begun in 1995 to maintain and further 
-develop \fBMB-System\fP; this funding
-has been augmented by additional efforts at SeaBeam Instruments
-which related to SeaBeam products but were nonetheless released
-to public domain distribution.
-
-The source code for \fBMB-System\fP is written in C and should be portable
-to a wide variety of Unix platforms. Graphical utilities are based 
-on the Motif widget set.  To date, \fBMB-System\fP has been successfully
-installed on Sun workstations running under SunOS4.1 and Solaris, 
-Silicon Graphics (SGI)
-workstations running under IRIX, Hewlett Packard workstations,
-486 and Pentium PC's running under the Lynx 
-operating system, and PC's running under the public domain
-LINUX operatings system.
+The source code for \fBMB-System\fP is written 
+in ANSI C and should be portable
+to a wide variety of Unix and Linux platforms. 
+The graphical utilities are based 
+on the X Window System and the Motif widget 
+set (and work with the open source Lesstif widget set).  
+To date, \fBMB-System\fP has been successfully
+installed on computers running under the SunOS4.1 
+(older Sun workstations), Solaris (recent Sun workstations
+and PC's), IRIX (Silicon Graphics workstations), 
+HPUX (Hewlett Packard workstations), Linux (PC's and Macintosh's), 
+and Lynx (PC's) operating systems.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -57,6 +45,226 @@ David W. Caress (caress@mbari.org)
 Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
   Lamont-Doherty Earth Observatory
+
+.SH COPYRIGHT AND LICENSING
+\fBMB-System\fP Version 5 Copyright (C) 2001 by
+.br
+David W. Caress (caress@mbari.org)
+    Monterey Bay Aquarium Research Institute
+    Moss Landing, CA 95039
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+    Lamont-Doherty Earth Observatory
+    Palisades, NY 10964
+
+The \fBMB-System\fP source code is distributed under the
+GNU General Public License (http:\\www.gnu.org/copyleft/gpl).
+As such, \fBMB-System\fP is open source software.
+Some elements of the source code included in \fBMB-System\fP
+derive from other organizations, and may be obtained 
+elsewhere with different licensing and distribution terms.
+Such special circumstances are noted in the comments in 
+the affected source code files.
+
+.SH HISTORY
+The development of \fBMBIO\fP and its associated programs began in 1990
+as part of ongoing research at L-DEO involving multibeam bathymetry data. 
+Development was accelerated in 1991 as part of the effort to support
+the Atlas Hydrosweep DS multibeam sonar on L-DEO's ship, the R/V
+Maurice Ewing.  The National Science Foundation (NSF) 
+provided support in 1993 
+to improve and extend \fBMB-System\fP so as to provide
+a standard "generic" set of tools for processing and display of 
+swath sonar data that could be used by the U.S. academic community.
+SeaBeam Instruments and Antarctic Support Associates provided
+additional support in 1994 for the
+development of \fBMB-System\fP, with particular emphasis on capabilities 
+related to the new SeaBeam 2100 series of sonars.
+
+The NSF supported a five year effort at L-DEO
+begun in 1995 to maintain and further 
+develop \fBMB-System\fP; this funding
+was augmented by additional efforts at SeaBeam Instruments
+which related to SeaBeam products but were nonetheless released
+to the open source distribution. MBARI became involved in the
+\fBMB-System\fP project beginning in late 1998. NSF has now renewed support
+for another five years of \fBMB-System\fP development and 
+support at MBARI and L-DEO beginning in 2001.
+
+.SH VERSION 5 CHANGES - A NEW DATA PROCESSING STRUCTURE
+Previous versions of MB-System have emphasized
+processing utilities that operate serially, that is, that
+read in an input swath data file, modify it, and then
+output a second swath data file. Serial processing utilities do allow
+for great flexibility in processing because one uses only
+the programs required and, in general, the order in which
+the programs are used does matter. However, one consequence of serial
+processing has been that processing data frequently results in a large
+number of intermediate data files. For instance, if
+an EM300 data file called "mbari_1998_524.mb57" has
+spikes in the bathymetry, outliers in the navigation, and 
+the bathymetry has been calculated using an incorrect model
+for the water sound speed structure, users of MB-System
+would previously have processed it with a sequence 
+something like this:
+
+     1) Run \fBmbclean\fP to automatically flag
+        the obvious bathymetric artifacts.
+            Input:  mbari_1998_524.mb57
+            Output: mbari_1998_524_c.mb57
+
+     2) Run \fBmbedit\fP to interactively flag
+        bathymetric artifacts.
+            Input:  mbari_1998_524_c.mb57
+            Output: mbari_1998_524_ce.mb57
+
+     3) Run \fBmbnavedit\fP to interactively clean
+        the navigation.
+            Input:  mbari_1998_524_ce.mb57
+            Output: mbari_1998_524_cen.mb57
+
+     4) Run \fBmbvelocitytool\fP to generate an
+        appropriate sound velocity profile (SVP) for
+        recalculating the bathymetry.
+            Input:  mbari_1998_524_cen.mb57
+            Output: good.svp
+
+     5) Run \fBmbbath\fP to recalculate the
+        bathymetry using the SVP file generated
+        using \fBmbvelocitytool\fP.
+            Input:  mbari_1998_524_cen.mb57
+            Input:  good.svp
+            Output: mbari_1998_524_cenb.mb57
+
+The result of this processing includes the input swath
+data file, the final swath data file, and three 
+intermediate swath data files. The impact of this approach
+on data storage requirements is obvious (though some users
+have ameliorated the issue by working with scripts that
+automatically delete unneeded data files or by piping
+data from one non-graphical process to 
+another to avoid making intermediate files). 
+The serial processing approach
+also presents data management problems because data files
+frequently have different processing requirements, even
+within a single survey. We have found that working with
+very large datasets can be awkward when only a minority
+of data files require navigation editing or bathymetric
+recalculation, or when some data files require multiple
+episodes of bathymetry and navigation editing.
+
+\fBMB-System\fP version 5 includes new utilities implementing
+a parallel processing scheme that simplifies the processing
+of most swath data. This scheme is centered around the program
+\fBmbprocess\fP, which can accomplish the following
+processing tasks in a single step:
+     - Merge edited navigation generated by \fBmbnavedit\fP.
+     - Apply bathymetry edit flags from \fBmbedit\fP 
+       and \fBmbclean\fP
+     - Recalculate bathymetry from raw travel time and
+       angle data by raytracing through water sound speed
+       models from \fBmbvelocitytool\fP or \fBmbsvplist\fP.
+     - Apply changes to roll bias, pitch bias, heading
+       bias, and draft values.
+     - Recalculate sidescan from raw backscatter samples
+       (Simrad multibeam data only).
+     - Apply tides to bathymetry.
+.br
+The actions of \fBmbprocess\fP are controlled by text
+parameter files. Each \fBmbprocess\fP parameter file is
+named by adding a ".par" suffix to the associated input
+swath data file and contains single line commands that set 
+processing modes and parameters. Tools such as \fBmbedit\fP,
+\fBmbnavedit\fP, and \fBmbclean\fP all generate and/or modify
+parameter files in addition to generating parallel files
+used by \fBmbprocess\fP. The program \fBmbset\fP 
+can also be used to create and modify \fBmbprocess\fP 
+parameter files.
+
+The same processing steps described above as a serial 
+processing scheme can be accomplished with the new parallel
+processing scheme as follows:
+
+     1) Run \fBmbclean\fP to identify 
+        the obvious bathymetric artifacts
+        and output a list of the edit events.
+        The parameter file is created and
+        set to apply bathymetry flags from 
+        the ".esf" file.
+            Input:  mbari_1998_524.mb57
+            Output: mbari_1998_524.mb57.esf
+                    mbari_1998_524.mb57.par
+
+     2) Run \fBmbedit\fP to interactively 
+        identify bathymetric artifacts
+        and output a list of the edit events.
+        The existing edits from \fBmbclean\fP
+        are loaded and applied prior to editing.
+        The parameter file is updated and
+        set to apply bathymetry flags from 
+        the ".esf" file.
+            Input:  mbari_1998_524.mb57
+                    mbari_1998_524.mb57.esf
+                    mbari_1998_524.mb57.par
+            Output: mbari_1998_524.mb57.esf
+                    mbari_1998_524.mb57.par
+
+     3) Run \fBmbnavedit\fP to interactively 
+        clean the navigation. The edited 
+        navigation is output to the ".nve" file.
+        The parameter file is updated and
+        set to merge the navigation from 
+        the ".nve" file.
+            Input:  mbari_1998_524.mb57
+                    mbari_1998_524.mb57.par
+            Output: mbari_1998_524.mb57.nve
+                    mbari_1998_524.mb57.par
+
+     4) Run \fBmbvelocitytool\fP to generate an
+        an appropriate sound velocity profile  
+        (SVP) for recalculating the bathymetry.   
+        The SVP is output to the ".svp" file.  
+        The parameter file is updated and
+        set to recalculate the bathymetry by 
+        raytracing throught SVP model from
+        the ".svp" file.
+            Input:  mbari_1998_524.mb57
+                    mbari_1998_524.mb57.par
+            Output: mbari_1998_524.mb57.svp
+                    mbari_1998_524.mb57.par
+
+     5) Run \fBmbprocess\fP to apply the bathymetric
+        edits, merge the cleaned navigation, and
+        recalculate the bathymetry. The processed
+        swath data is written to an output file.
+            Input:  mbari_1998_524.mb57
+                    mbari_1998_524.mb57.esf
+                    mbari_1998_524.mb57.nve
+                    mbari_1998_524.mb57.svp
+                    mbari_1998_524.mb57.par
+            Output: mbari_1998_524.mb57.esf
+
+The result of this processing is a single output swath
+data file. Moreover, the processed output can be easily
+updated if, for example, additional bathymetry editing
+is required. If the \fBmbedit\fP program is used again,
+it will load the existing edit events from the ".esf"
+file and then update the ".esf" file. To incorporate the
+updated bathymetry edits, one just runs \fBmbprocess\fP
+again. One can similarly change the SVP file without
+impacting on the bathymetry editing or navigation editing
+components of the processing.
+
+All of the old, serial processing utilities are still
+distributed with MB-System. However, some of the serial
+tools have been replaced by new versions of the same name
+(e.g. \fBmbedit\fP, \fBmbclean\fP, and \fBmbnavedit\fP).
+In these cases, the old versions are preserved as programs
+with "old" added to their names (e.g. \fBmbeditold\fP, 
+\fBmbcleanold\fP, and \fBmbnaveditold\fP).
+At present, sidescan correction and filtering are not
+yet implemented in the new scheme, so programs such as
+mbanglecorrect and mbfilter must still be used in a serial fashion.
 
 .SH LIST OF MB-SYSTEM PROGRAMS AND MACROS
 See the individual manual pages for detailed information about 
@@ -75,8 +283,12 @@ These are the current MB-system programs:
  		the seafloor.
  \fBmbbath\fP:  Generates bathymetry from travel times 
  		in swath sonar data. 
- \fBmbclean\fP:  Identifies and flags bad beams in 
- 		swath sonar bathymetry data. 
+ \fBmbclean\fP:  Automatically identifies and 
+ 		flags bad beams in swath sonar
+ 		bathymetry data. 
+ \fBmbcleanold\fP:  Old tool that utomatically 
+ 		identifies and flags bad beams 
+ 		in swath sonar bathymetry data. 
  \fBmbcontour\fP:  Generate GMT compatible Postscript 
  		color swath contour plots.
  \fBmbcopy\fP:  Copy swath sonar data files. 
@@ -85,6 +297,8 @@ These are the current MB-system programs:
  \fBmbdefaults\fP:  Set or list default mbio parameters 
  		for reading and writing swath sonar data 
  \fBmbedit\fP:  Interactive editor used to flag bad 
+ 		beams in swath sonar bathymetry data. 
+ \fBmbeditold\fP:  Old interactive editor used to flag bad 
  		beams in swath sonar bathymetry data. 
  \fBmbfilter\fP:   Apply some simple filter functions 
  		to sidescan, beam amplitude, or 
@@ -111,18 +325,37 @@ These are the current MB-system programs:
  \fBmbmerge\fP:  Merge swath sonar data with new 
  		navigation. 
  \fBmbmosaic\fP:  Mosaic sidescan and amplitude data. 
+ \fBmbnavadjust\fP:  Interactive navigation adjustment
+ 		package that adjusts navigation so
+ 		that swath bathymetry matches where
+ 		swathes overlap or cross. 
  \fBmbnavedit\fP:  Interactive editor used to fix
  		problems with navigation in
  		swath sonar data files. 
+ \fBmbnaveditold\fP:  Old interactive editor used to fix
+ 		problems with navigation in
+ 		swath sonar data files. 
+ \fBmbnavlist\fP:  List navigation data in swath 
+ 		sonar data files. 
+ \fBmbprocess\fP: Performs a variety of processing
+ 		tasks in a single step, including
+ 		merging navigation, applying 
+ 		bathymetry edits, recalculating
+ 		bathymetry, and recalculating
+ 		sidescan.
  \fBmbps\fP:    Simple perspective views of swath
  		bathymetry in Postscript. 
  \fBmbrollbias\fP:  Evaluate the roll bias of a 
  		swath sonar system using two pieces 
  		of coincident bathymetry data 
  		collected with opposing ship headings.
+ \fBmbset\fP:  Create and modify \fBmbprocess\fP
+ 		parameter files. 
  \fBmbsimradmakess\fP:  Regenerate sidescan imagery 
  		from the raw amplitude samples contained 
  		in data from Simrad EM300 and EM3000 sonars. 
+ \fBmbsvplist\fP:  List water sound velocity profiles in swath
+ 		sonar data files.
  \fBmbswath\fP:  Generate GMT compatible Postscript 
  		color and color shaded relief swath plots.
  \fBmbtide\fP:  Corrects swath sonar bathymetry
@@ -175,6 +408,14 @@ tasks easily.  These are the current MB-system macros:
  \fBmbm_xyplot\fP:  Reads one or more ASCII "X-Y" 
  		data files and writes a shellscript 
  		which will generate an XY plot of the data.
+
+.SH EXAMPLE PROCESSING APPROACHES
+A number of processing streams for different kinds
+of swath sonar data are provided below. All of these
+examples use the older, serial processing tools.
+Examples incorporating the new, parallel processing
+scheme will be included in this documentation at a
+later date.
 
 .SH PROCESSING SEABEAM 2100 DATA
 
@@ -724,7 +965,7 @@ DS data.
 Should one wish to export data from format 102 files
 back to data files usable by Atlas data processing
 software, be sure to run mbcopy with the \fB-N\fP so
-that comments are stripped from the data. The MB-System
+that comments are stripped from the data. The \fBMB-System\fP
 implementation of format 101 includes comment records
 that are not supported by the Atlas software. For example: 
 
@@ -747,7 +988,7 @@ is generally poor. The processed navigation resides in the
 pings, and is reported in UTM easting and northing meters.
 The \fBmbm_dslnavfix\fP macro is used to translate the
 eastings and northings into the geographic coordinates
-(longitude and latitude) used by MB-System programs. The
+(longitude and latitude) used by \fBMB-System\fP programs. The
 program \fBmbmerge\fP can be used to merge the translated
 navigation in with the bathymetry and sidescan.
 
@@ -761,7 +1002,7 @@ and processing will be slow relative to data from multibeam
 sonars.
 
 We recommend the following initial procedure when
-processing old WHOI DSL AMS-120 data with MB-System:
+processing old WHOI DSL AMS-120 data with \fBMB-System\fP:
 
 \fBStep 1\fP: Concatenate all of the processed navigation
 files into a single file.
@@ -829,7 +1070,7 @@ but it is sampled less frequently than the sonar
 pings, and is reported in UTM easting and northing meters.
 The \fBmbm_dslnavfix\fP macro is used to translate the
 eastings and northings into the geographic coordinates
-(longitude and latitude) used by MB-System programs. The
+(longitude and latitude) used by \fBMB-System\fP programs. The
 program \fBmbmerge\fP can be used to merge the translated
 navigation in with the bathymetry and sidescan.
 
@@ -844,7 +1085,7 @@ and processing will be slow relative to data from multibeam
 sonars.
 
 We recommend the following initial procedure when
-processing new WHOI DSL AMS-120 data with MB-System:
+processing new WHOI DSL AMS-120 data with \fBMB-System\fP:
 
 \fBStep 1\fP: Concatenate all of the processed navigation
 files into a single file.

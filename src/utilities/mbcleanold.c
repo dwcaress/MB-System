@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbcleanold.c,v 1.1 2001-01-22 07:54:22 caress Exp $
+ *    $Id: mbcleanold.c,v 5.0 2001-01-22 07:56:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2001/01/22  07:54:22  caress
+ * Initial revision
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -182,7 +185,7 @@ int mb_double_compare();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbcleanold.c,v 1.1 2001-01-22 07:54:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbcleanold.c,v 5.0 2001-01-22 07:56:11 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";

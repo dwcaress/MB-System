@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.1 2000-12-10 20:30:08 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.2 2001-01-22 07:47:40 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:30:08  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:56:08  caress
  * First cut at Version 5.0.
  *
@@ -195,7 +198,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.1 2000-12-10 20:30:08 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.2 2001-01-22 07:47:40 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -297,7 +300,6 @@ int	pixel_values[256];
 /* system function declarations */
 char	*ctime();
 char	*getenv();
-char	*strstr();
 
 /*--------------------------------------------------------------------*/
 int mbnavedit_init_globals()
@@ -348,11 +350,12 @@ int mbnavedit_init_globals()
 	if (plot_speed == MB_YES)   number_plots++;
 	if (plot_heading == MB_YES) number_plots++;
 	if (plot_draft == MB_YES) number_plots++;
-	time_fix = MB_NO;
+	timestamp_problem = MB_NO;
 	use_ping_data = MB_NO;
+	strip_comments = MB_NO;
 	model_mode = MODEL_MODE_OFF;
-	weight_speed = 10.0;
-	weight_acceleration = 0.0;
+	weight_speed = 100.0;
+	weight_acceleration = 100.0;
 	scrollcount = 0;
 	
 	/* print output debug statements */
@@ -416,7 +419,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file)
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:PpTtXx")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:NnPpXx")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -464,14 +467,14 @@ int mbnavedit_init(int argc, char **argv, int *startup_file)
 			flag++;
 			fileflag++;
 			break;
+		case 'N':
+		case 'n':
+			strip_comments = MB_YES;
+			flag++;
+			break;
 		case 'P':
 		case 'p':
 			use_ping_data = MB_YES;
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			time_fix = MB_YES;
 			flag++;
 			break;
 		case 'X':
@@ -909,7 +912,10 @@ int mbnavedit_close_file()
 		    do_message_on("Navigation edits being applied using mbprocess...");
 		    
 		    /* run mbprocess */
-		    sprintf(command, "mbprocess -I %s\n",ifile);
+		    if (strip_comments == MB_YES)
+			sprintf(command, "mbprocess -I %s -N\n",ifile);
+		    else
+			sprintf(command, "mbprocess -I %s\n",ifile);
 		    system(command);
 
 		    /* turn message off */
@@ -1066,6 +1072,7 @@ int mbnavedit_load_data()
 	/* turn message on */
 	start = 0;
 	nload = 0;
+	timestamp_problem = MB_NO;
 	sprintf(string, "MBnavedit: %d records loaded so far...", nload);
 	do_message_on(string);
 
@@ -1191,9 +1198,15 @@ int mbnavedit_load_data()
 		error = MB_ERROR_NO_ERROR;
 		}
 		
-	/* if requested fix time stamp repeats */
-	if (time_fix == MB_YES)
-		mbnavedit_action_fixtime();
+	/* check for time stamp repeats */
+	timestamp_problem = MB_NO;
+	for (i=0;i<nbuff-1;i++)
+		{
+		if (ping[i+1].time_d <= ping[i].time_d)
+		    {
+		    timestamp_problem = MB_YES;
+		    }
+		}
 		
 	/* calculate expected time */
 	if (nbuff > 1)
@@ -1247,7 +1260,18 @@ int mbnavedit_load_data()
 		fprintf(stderr,"Current global data record: %d\n",
 			current_id + ndump_total);
 		}
-
+		
+	/* put up warning if timestamp problem detected */
+	if (timestamp_problem == MB_YES)
+		{
+		do_error_dialog("Duplicate or reverse order time", 
+				"stamps detected!! Time interpolation", 
+				"available under Controls menu.");
+		}
+		
+	/* update controls */
+	do_set_controls();
+	
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -1610,6 +1634,14 @@ int mbnavedit_action_step(int step)
 			new_id = 0;
 		if (new_id >= nbuff)
 			new_id = nbuff - 1;
+		if (step < 0 
+			&& new_id > 0 
+			&& new_id == old_id)
+			new_id--;
+		if (step > 0 
+			&& new_id < nbuff - 1 
+			&& new_id == old_id)
+			new_id++;
 		current_id = new_id;
 
 		/* replot */
@@ -3307,6 +3339,14 @@ int mbnavedit_action_fixtime()
 				mb_get_date(verbose, 
 					ping[j].time_d, 
 					ping[j].time_i);
+				ping[j].file_time_d = 
+					ping[j].time_d - file_start_time_d;
+				if (j>0)
+				ping[j-1].tint = ping[j].time_d 
+						- ping[j-1].time_d;
+				if (j<nbuff-1)
+				ping[j].tint = ping[j+1].time_d 
+						- ping[j].time_d;
 				}
 			istart = i;
 			start_time_d = ping[i].time_d;
@@ -4444,8 +4484,8 @@ int mbnavedit_plot_all()
 			+ margin_y;
 		plot[number_plots].xmin = time_min;
 		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = draft_min;
-		plot[number_plots].ymax = draft_max;
+		plot[number_plots].ymin = draft_max;
+		plot[number_plots].ymax = draft_min;
 		plot[number_plots].xscale = 
 			(plot[number_plots].ixmax 
 			- plot[number_plots].ixmin)
@@ -4725,7 +4765,8 @@ int mbnavedit_plot_all()
 			pixel_values[BLACK],XG_SOLIDLINE);
 
 		/* plot zero values */
-		if (plot[iplot].ymax > 0.0 && plot[iplot].ymin < 0.0)
+		if (plot[iplot].ymax > 0.0 && plot[iplot].ymin < 0.0
+			|| plot[iplot].ymax < 0.0 && plot[iplot].ymin > 0.0)
 			{
 			if (plot[iplot].type == PLOT_LONGITUDE ||
 				plot[iplot].type == PLOT_LATITUDE)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 5.0 2000-12-01 22:56:47 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.1 2001-01-22 07:51:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:56:47  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.6  2000/10/11  01:06:03  caress
  * Convert to ANSI C
  *
@@ -137,9 +140,9 @@ XColor closest[2];
 XColor exact[2];
 
 /* Set the colors used for this program here. */
-#define NCOLORS 6
+#define NCOLORS 7
 XColor colors[NCOLORS];
-unsigned int pixel_values_gui[NCOLORS];
+unsigned int mpixel_values[NCOLORS];
 XColor db_color;
 
 /* Global mbvelocitytool definitions */
@@ -512,63 +515,30 @@ do_mbvelocity_init(int argc, char **argv)
     XSelectInput(display, can_xid, EV_MASK );
     
     /* Load the colors that will be used in this program. */
-    status = XLookupColor(display,colormap,
-	    "white",&db_color,&colors[0]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[0]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "white",&db_color,&colors[0]);
+    if ((status = XAllocColor(display,colormap,&colors[0])) == 0)
 	    fprintf(stderr,"Failure to allocate color: white\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "black",&db_color,&colors[1]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[1]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "black",&db_color,&colors[1]);
+    if ((status = XAllocColor(display,colormap,&colors[1])) == 0)
 	    fprintf(stderr,"Failure to allocate color: black\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "red",&db_color,&colors[2]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[2]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "red",&db_color,&colors[2]);
+    if ((status = XAllocColor(display,colormap,&colors[2])) == 0)
 	    fprintf(stderr,"Failure to allocate color: red\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "green",&db_color,&colors[3]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[3]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "green",&db_color,&colors[3]);
+    if ((status = XAllocColor(display,colormap,&colors[3])) == 0)
 	    fprintf(stderr,"Failure to allocate color: green\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "blue",&db_color,&colors[4]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[4]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "blue",&db_color,&colors[4]);
+    if ((status = XAllocColor(display,colormap,&colors[4])) == 0)
 	    fprintf(stderr,"Failure to allocate color: blue\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "coral",&db_color,&colors[5]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[5]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "coral",&db_color,&colors[5]);
+    if ((status = XAllocColor(display,colormap,&colors[5])) == 0)
 	    fprintf(stderr,"Failure to allocate color: coral\n");
-	    exit(-1);
-	    }
+    status = XLookupColor(display,colormap, "lightgrey",&db_color,&colors[6]);
+    if ((status = XAllocColor(display,colormap,&colors[6])) == 0)
+	    fprintf(stderr,"Failure to allocate color: lightgrey\n");
     for (i=0;i<NCOLORS;i++)
 	    {
-	    pixel_values_gui[i] = colors[i].pixel;
+	    mpixel_values[i] = colors[i].pixel;
 	    }
     
     /* Setup initial cursor. This will be changed when changing "MODE". */
@@ -582,7 +552,7 @@ do_mbvelocity_init(int argc, char **argv)
     can_xgid = xg_init(display, can_xid, borders, xgfont );
     
     status = mbvt_set_graphics(can_xgid, borders, 
-		    NCOLORS, pixel_values_gui);
+		    NCOLORS, mpixel_values);
     
     /* initialize mbvelocitytool proper */
     status = mbvt_init(argc,argv);

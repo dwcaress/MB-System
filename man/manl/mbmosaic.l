@@ -1,10 +1,10 @@
-.TH mbmosaic l "5 October 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbmosaic l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
@@ -497,7 +497,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 4.7 1999-10-05 22:04:18 caress Exp $
+ Version $Id: mbmosaic.l,v 5.0 2001-01-22 07:51:57 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

@@ -1,9 +1,9 @@
-.TH mbunclean l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbunclean l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbunclean\fP - Unflags edited beams in swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbunclean\fP [\fB-B\fIlow/high \fB-F\fIformat \fB-L\fIlonflip\fP 

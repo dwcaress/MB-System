@@ -1,9 +1,9 @@
-.TH mbnavlist l "28 December 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbnavlist l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP - List navigation data in swath sonar data files.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbnavlist\fP [\fB-B\fIyr/mo/da/hr/mn/sc 

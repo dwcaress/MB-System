@@ -38,7 +38,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -51,6 +50,7 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
+identifier BXG_pushButton_save_svpfile;
 identifier BXG_drawingArea;
 identifier BXG_label_status_display;
 identifier BXG_label_status_edit;
@@ -88,6 +88,7 @@ procedure do_io_mode_mb();
 procedure do_io_mode_save_svp();
 procedure do_io_mode_open_svp_edit();
 procedure do_io_mode_open_svp_display();
+procedure do_save_swath_svp();
 
 list BaseStyle : arguments {
 };
@@ -370,7 +371,7 @@ object bulletinBoard_scaling : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 241;
+        XmNx = 8;
         XmNy = 278;
         XmNwidth = 532;
         XmNheight = 164;
@@ -1167,7 +1168,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 266;
-        XmNy = 143;
+        XmNy = 135;
         XmNwidth = 481;
         XmNheight = 449;
     };
@@ -1480,13 +1481,31 @@ object pushButton_open_mb : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_save_svpfile : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNsensitive = false;
+        XmNlabelString = compound_string("Save swath svp file");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_save_svpfile);
+        XmNactivateCallback = procedure do_save_swath_svp();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object pulldownMenu_file : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 13;
+        XmNy = 61;
         XmNwidth = 172;
-        XmNheight = 126;
+        XmNheight = 150;
     };
     controls {
          managed XmPushButton pushButton_open_svp_display;
@@ -1495,6 +1514,7 @@ object pulldownMenu_file : XmPulldownMenu widget {
          managed XmPushButton pushButton_save_svp;
          managed XmSeparator separator1;
          managed XmPushButton pushButton_open_mb;
+         managed XmPushButton pushButton_save_svpfile;
     };
     callbacks {
         callbacks Style_useReasons;

@@ -1,6 +1,6 @@
 .TH mbclean l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbclean\fP - Tool to automatically flag bad beams in swath sonar bathymetry data.
+\fBmbcleanold\fP - Old tool to automatically flag bad beams in swath sonar bathymetry data.
 
 .SH VERSION
 Version 5.0
@@ -251,7 +251,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ 	Version $Id: mbcleanold.l,v 5.0 2001-01-22 07:51:57 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

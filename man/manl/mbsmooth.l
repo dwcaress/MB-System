@@ -1,9 +1,9 @@
-.TH mbsmooth l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbsmooth l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsmooth\fP - Smooths swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbsmooth\fP [\fB-F\fIformat\fP \fB-G\fIwidth\fP \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-N\fIbuffersize\fP \fB-O\fIoutfile\fP \fB-W\fIfilterfile\fP \fB-V -H\fP]

@@ -1,10 +1,10 @@
-.TH mbbath l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbbath l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbbath\fP - Recalculates bathymetry swath bathymetry data using
 new sound velocity profile, roll bias, pitch bias and draft values.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbbath\fP [\fB-B\fIroll_bias\fP 

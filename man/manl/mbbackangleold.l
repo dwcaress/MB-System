@@ -1,11 +1,11 @@
-.TH mbbackangle l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbbackangle l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbbackangle\fP - Generates a table of the average amplitude or 
 sidescan values in swath sonar data as a function of 
 the grazing angle with the seafloor.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbbackangle\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc 
