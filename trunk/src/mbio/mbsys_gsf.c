@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 4.0 1998-10-05 18:30:03 caress Exp $
+ *	$Id: mbsys_gsf.c,v 4.1 1999-05-05 22:48:29 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/10/05  18:30:03  caress
+ * MB-System version 4.6beta
+ *
  * Revision 1.1  1998/10/05  18:22:40  caress
  * Initial revision
  *
@@ -66,7 +69,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 4.0 1998-10-05 18:30:03 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 4.1 1999-05-05 22:48:29 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -268,6 +271,12 @@ int	*error;
 		/* read depth and beam location values into storage arrays */
 		for (i=0;i<*nbath;i++)
 			{
+			/* set null beam flag if required */
+			if (mb_ping->depth[i] == 0.0
+			    && mb_ping->across_track[i] == 0.0
+			    && mb_ping->beam_flags[i] != MB_FLAG_NULL)
+			    mb_ping->beam_flags[i] = MB_FLAG_NULL;
+
 			beamflag[i] = mb_ping->beam_flags[i];
 			bath[i] = mb_ping->depth[i];
 			bathacrosstrack[i] = mb_ping->across_track[i];
@@ -275,12 +284,12 @@ int	*error;
 			}
 
 		/* set beamflags if ping flag set */
-		if (mb_ping->ping_flags != 0)
+/*		if (mb_ping->ping_flags != 0)
 		    for (i=0;i<*nbath;i++)
 			if (mb_beam_ok(beamflag[i]))
 			    beamflag[i] 
 				= mb_beam_set_flag_manual(beamflag[i]);
-
+*/
 		/* read amplitude values into storage arrays */
 		if (mb_ping->mc_amplitude != NULL)
 		for (i=0;i<*namp;i++)
@@ -581,6 +590,14 @@ int	*error;
 			}
 		    }
 
+		/* if ping flag set check for any unset
+		    beam flags - unset ping flag if any
+		    good beams found */
+/*		if (mb_ping->ping_flags != 0)
+		    for (i=0;i<nbath;i++)
+			if (mb_beam_ok(beamflag[i]))
+			    mb_ping->ping_flags = 0;
+*/
 		/* read depth and beam location values into storage arrays */
 		for (i=0;i<nbath;i++)
 			{
