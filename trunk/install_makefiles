@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.5 1995-02-15 14:42:44 caress Exp $
+#    $Id: install_makefiles,v 4.6 1995-03-22 19:19:27 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.5 1995-02-15 14:42:44 caress Exp $
+#   $Id: install_makefiles,v 4.6 1995-03-22 19:19:27 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.5  1995/02/15  14:42:44  caress
+# Version 4.2 Release
+#
 # Revision 4.4  1994/10/21  13:38:18  caress
 # Release V4.0
 #
@@ -69,7 +72,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	MBSYSTEM_HOME	Absolute path to the directory containing
 #				this file.
 #	OS		Operating system (SUN, IRIX, LYNX, 
-#				SOLARIS, or OTHER).
+#				SOLARIS, HPUX, or OTHER).
 #	BYTESWAPPED	If set to "YES" will enable byte swapping
 #				of input and output binary data.
 #				Otherwise byte swapping is disabled.
@@ -205,9 +208,30 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
 #	$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
 #
+# Example for installing on Hewlett Packard workstations
+# running HPUX version 9.0X or later:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "HPUX";
+#	$BYTESWAPPED = "NO";
+#	$CFLAGS = "-Ae +O3 -I/usr/include/X11R5 -I/usr/include/Motif1.2";
+#	$FFLAGS = "+O3";
+#	$LFLAGS = "-lm ";
+#	$FWITHCFLAGS = "-lF77 -lU77";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/lib/Motif1.2/Xm";
+#	$MOTIFLIBS = "-Wl,-L/usr/lib/Motif1.2 -Wl,-lMrm -Wl,-lXm -Wl,-L/usr/lib/X11R5 -Wl,-lX11 -Wl,-lXt";
+#	$UIL = "/usr/bin/X11/uil";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFDIR = "/usr/local/gmt/lib";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#	$REALTIME = 0;
+#	$GRPHLIBDIR = "";
+#	$GRPHINCDIR = "";
+#
 # **** EDIT THE PARAMETERS HERE ****
 # Set the environment parameters:
-$MBSYSTEM_HOME = "/usr/people/caress/dev/mbsystem";
+$MBSYSTEM_HOME = "/SB3/caress/dev/mbsystem";
 $OS = "IRIX";
 $BYTESWAPPED = "NO";
 $CFLAGS = "-g";
