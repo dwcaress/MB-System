@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 4.3 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 4.4 1995-05-08 21:26:28 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/06/21  22:54:21  caress
  * Added #ifdef statements to handle byte swapping.
  *
@@ -97,6 +100,7 @@ struct mbsys_sb2100_struct
 	int	roll_bias_port;			/* 0.01 deg */
 	int	roll_bias_starboard;		/* 0.01 deg */
 	int	pitch_bias;			/* 0.01 deg */
+	int	ship_draft;			/* 0.01 m */
 	int	num_svp;
 	int	vdepth[MBSYS_SB2100_MAXVEL];	/* 0.01 m */
 	int	velocity[MBSYS_SB2100_MAXVEL];	/* 0.01 m/sec */
@@ -105,6 +109,8 @@ struct mbsys_sb2100_struct
 	double	longitude;
 	double	latitude;
 	int	speed;			/* 0.001 m/sec */
+	int	heave; 			/* 0.001 m; + up */
+	char	range_scale; 		/* D = m; I = 0.1 m; S = 0.01 m */
 	int	surface_sound_velocity;	/* 0.01 m/sec */
 	char	ssv_source;		/* V=Velocimeter, M=Manual, 
 						T=Temperature */
@@ -115,8 +121,7 @@ struct mbsys_sb2100_struct
 	char	svp_corr_beams;		/* 0=None; A=True Xtrack 
 						and Apparent Depth;
 						T=True Xtrack and True Depth */
-	char	spare[8];
-	char	range_scale; 		/* D = meters; S = cm */
+	char	spare_dr[2];
 	int	num_algorithms;		/* If 1 then only "best" algorithm 
 						recorded, else multiple 
 						algorithm results recorded */
@@ -130,9 +135,11 @@ struct mbsys_sb2100_struct
 	char	pixel_algorithm;	/* pixel intensity algorithm
 						D = logarithm, L = linear */
 	int	num_pixels_12khz;
-	int	pixel_size_12khz;	/* meters */
+	double	pixel_size_12khz;	/* meters */
 	int	num_pixels_36khz;
-	int	pixel_size_36khz;	/* meters */
+	double	pixel_size_36khz;	/* meters */
+	char	spare_ss;
+	char	pixel_size_scale;
 
 	/* transmit parameters and navigation (DR and SS) */
 	char	frequency[2];		/* LL=12kHz; HH=36kHz; number=36kHz
