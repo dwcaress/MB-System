@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.18 1997-09-15 19:06:10 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.19 1997-10-03 18:32:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1997/09/15  19:06:10  caress
+ * Real Version 4.5
+ *
  * Revision 4.17  1997/07/25  14:42:55  caress
  * Version 4.5beta2
  *
@@ -195,7 +198,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.18 1997-09-15 19:06:10 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.19 1997-10-03 18:32:07 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -3592,7 +3595,7 @@ int	autoscale;
 		bathmean = bathsum/nbathsum;
 	if (nbathlist > 0)
 		{
-		sort(nbathlist, bathlist);
+		sort(nbathlist, bathlist-1);
 		bathmedian = bathlist[nbathlist/2];
 		}
 		
@@ -4527,7 +4530,7 @@ double *r;
 		status = MB_FAILURE;
 		return(status);
 		}
-
+		
 	lognb2 = (log((double) n)*ALN2I + TINY);
 	m = n;
 	for (nn=1;nn<=lognb2;nn++)
@@ -4545,7 +4548,7 @@ double *r;
 			r[i+m] = tr;
 			}
 		}
-
+		
 	return(status);
 }
 /*--------------------------------------------------------------------*/
