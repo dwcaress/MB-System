@@ -1,7 +1,7 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.2 1994-06-22 19:30:38 caress Exp $
+#    $Id: install_makefiles,v 4.3 1994-10-20 21:23:53 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,10 +39,15 @@
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.2 1994-06-22 19:30:38 caress Exp $
+#   $Id: install_makefiles,v 4.3 1994-10-20 21:23:53 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.2  1994/06/22  19:30:38  caress
+# Added support for different archivers used under
+# different operating systems (e.g. ar used for Suns and
+# SGIs, libr used under Lynx).
+#
 # Revision 4.1  1994/06/21  22:52:01  caress
 # Changes to support PCs running Lynx OS.
 #
@@ -53,17 +58,30 @@
 #
 #
 # The important parameters to be set are:
-#	OS		Operating system (e.g. SUN, IRIX, or LYNX).
+#	MBSYSTEM_HOME	Absolute path to the directory containing
+#				this file.
+#	OS		Operating system (SUN, IRIX, LYNX, or OTHER).
 #	BYTESWAPPED	If set to "YES" will enable byte swapping
 #				of input and output binary data.
 #				Otherwise byte swapping is disabled.
 #				Byte swapping needs to be enabled
 #				when installing on "little endian"
 #				machines such as PCs or VAXs.
+#	CC		C compiler to be used (optional).
+#	FC		Fortran compiler to be used (optional).
 #	CFLAGS		Compile flags for C source files.
 #	FFLAGS		Compile flags for F77 source files.
 #	LFLAGS		Load flags for all object files.
 #	FWITHCFLAGS	Load flags for C and F77 object files together.
+#	GRAPHICAL	If set to "YES" will enable the installation
+#			of the Motif based graphical utilities mbedit
+#			and mbvelocitytool. If Motif is not available
+#			but the nongraphical utilities are desired then
+#			disable with "NO" (optional, default is "YES").
+#       MOTIFINCDIR	Location of Motif include files.
+#       MOTIFLIBS	X and Motif libraries required for graphical tools.
+#       UIL		Location of Motif tool used to compile
+#				interface definition files.
 #	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
 #	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
 #				and pslib.h
@@ -77,12 +95,17 @@
 #				include file graphics.h
 #
 # Example for installing on L-DEO Sun workstations:
+#	$MBSYSTEM_HOME = "/home/hs/caress/dev/mbsystem";
 #	$OS = "SUN";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
 #	$FFLAGS = "-O2";
 #	$LFLAGS = "-lm";
 #	$FWITHCFLAGS = "-lF77";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
+#	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/ocean/mgg/gmt2/sun4/lib";
 #	$GMTINCDIR = "/ocean/mgg/gmt2/src";
 #	$NETCDFDIR = "/ocean/mgg/netcdf/sun4/lib";
@@ -92,12 +115,17 @@
 #	$GRPHINCDIR = "/otter/home/graphics/lib";
 #
 # Example for installing on R/V Ewing Sun workstations:
+#	$MBSYSTEM_HOME = "/net/heezen/packages/mbsystem";
 #	$OS = "SUN";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
 #	$FFLAGS = "-O2";
 #	$LFLAGS = "-lm";
 #	$FWITHCFLAGS = "-lF77";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
+#	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/net/heezen/packages/gmt2/bin";
 #	$GMTINCDIR = "/net/heezen/packages/gmt2/src";
 #	$NETCDFDIR = "/net/heezen/packages/netcdf/lib";
@@ -107,12 +135,17 @@
 #	$GRPHINCDIR = "/otter/home/graphics/lib";
 #
 # Example for installing on SeaBeam Instruments SGI IRIX workstations:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "IRIX";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
 #	$FFLAGS = "-O2";
 #	$LFLAGS = "-lm -lsun";
 #	$FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam -lfgl";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
+#	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
 #	$NETCDFDIR = "/usr/local/netcdf/lib";
@@ -122,12 +155,19 @@
 #	$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
 #
 # Example for installing on SeaBeam Instruments Lynx PC:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "LYNX";
 #	$BYTESWAPPED = "YES";
-#	$CFLAGS = "-O";
-#	$FFLAGS = "-O";
-#	$LFLAGS = "-lm -X";
+#	$CC = "cc";
+#	$FC = "epcf77";
+#	$CFLAGS = "-k";
+#	$FFLAGS = "-k";
+#	$LFLAGS = "-lm -lbsd -X";
 #	$FWITHCFLAGS = "-lMEPC -lVEPC -lCEPC";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
+#	$UIL = "/usr/bin/X11/uil";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
 #	$NETCDFDIR = "/usr/local/netcdf/lib";
@@ -138,19 +178,24 @@
 #
 # **** EDIT THE PARAMETERS HERE ****
 # Set the environment parameters:
-$OS =	   "SUN";
+$MBSYSTEM_HOME = "/usr/people/caress/dev/mbsystem";
+$OS = "IRIX";
 $BYTESWAPPED = "NO";
-$CFLAGS =  "-O2";
-$FFLAGS =  "-O2";
-$LFLAGS =  "-lm";
-$FWITHCFLAGS = "-lF77";
-$GMTLIBDIR =  "/ocean/mgg/gmt2/sun4/lib";
-$GMTINCDIR =  "/ocean/mgg/gmt2/src";
-$NETCDFDIR =  "/ocean/mgg/netcdf/sun4/lib";
-$LEVITUS = "/ocean/mgg/levitus/annual";
+$CFLAGS = "-g";
+$FFLAGS = "-g";
+$LFLAGS = " -lmalloc_cv -lm -lsun -g";
+$FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam -lfgl";
+$GRAPHICAL = "YES";
+$MOTIFINCDIR = "/usr/include/Xm";
+$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
+$UIL = "/usr/bin/X11/uil";
+$GMTLIBDIR = "/usr/local/gmt/src";
+$GMTINCDIR = "/usr/local/gmt/src";
+$NETCDFDIR = "/usr/local/netcdf/lib";
+$LEVITUS = "/usr/local/levitus/annual";
 $REALTIME = 1;
-$GRPHLIBDIR = "/otter/home/graphics/lib";
-$GRPHINCDIR = "/otter/home/graphics/lib";
+$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
+$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
 
@@ -176,8 +221,15 @@ else
 	$ARCHIVE = "ar rcv";
 	}
 
+# set $GRAPHICAL if not set
+if (!$GRAPHICAL)
+	{
+	$GRAPHICAL = "YES";
+	}
+
 # outputting attributes:
 print "\nParameters defined for Makefiles:\n";
+print "Mb-System Home:            $MBSYSTEM_HOME\n";
 print "Operating System:          $OS\n";
 if ($BYTESWAPPED eq "YES")
 	{
@@ -187,11 +239,30 @@ else
 	{
 	print "Byte swapping:             disabled\n";
 	}
+if ($CC)
+	{
+	print "C Compiler:                $CC\n";
+	}
+if ($FC)
+	{
+	print "Fortran Compiler:          $FC\n";
+	}
 print "C Compile Flags:           $CFLAGS\n";
 print "F77 Compile Flags:         $FFLAGS\n";
 print "Load Flags:                $LFLAGS\n";
 print "F77 with C Load Flags:     $FWITHCFLAGS\n";
 print "Library Archiver:          $ARCHIVE\n";
+if ($GRAPHICAL eq "YES")
+	{
+	print "Graphical Utilities:       enabled\n";
+	}
+else
+	{
+	print "Graphical Utilities:       disabled\n";
+	}
+print "Motif Include Location:    $MOTIFINCDIR\n";
+print "Motif Libraries:           $MOTIFLIBS\n";
+print "UIL compiler:              $UIL\n";
 print "GMT Library Location:      $GMTLIBDIR\n";
 print "GMT Include Location:      $GMTINCDIR\n";
 print "NetCDF Library Location:   $NETCDFDIR\n";
@@ -229,9 +300,35 @@ while (@files)
 	# loop through the file
 	while (<TMP>)
 		{
-		if (index($_,"OS",0) == 0)
+		if (index($_,"MBSYSTEM_HOME",0) == 0)
+			{
+			print MAK "MBSYSTEM_HOME = $MBSYSTEM_HOME\n";
+			}
+		elsif (index($_,"OS",0) == 0)
 			{
 			print MAK "OS = $OS\n";
+			}
+		elsif (index($_,"CC",0) == 0)
+			{
+			if ($CC)
+				{
+				print MAK "CC = $CC\n";
+				}
+			else
+				{
+				print MAK "# C compiler left as default\n";
+				}
+			}
+		elsif (index($_,"FC",0) == 0)
+			{
+			if ($FC)
+				{
+				print MAK "FC = $FC\n";
+				}
+			else
+				{
+				print MAK "# Fortran compiler left as default\n";
+				}
 			}
 		elsif (index($_,"CFLAGS",0) == 0)
 			{
@@ -248,6 +345,18 @@ while (@files)
 		elsif (index($_,"FWITHCFLAGS",0) == 0)
 			{
 			print MAK "FWITHCFLAGS = $FWITHCFLAGS\n";
+			}
+		elsif (index($_,"MOTIFINCDIR",0) == 0)
+			{
+			print MAK "MOTIFINCDIR = $MOTIFINCDIR\n";
+			}
+		elsif (index($_,"MOTIFLIBS",0) == 0)
+			{
+			print MAK "MOTIFLIBS = $MOTIFLIBS\n";
+			}
+		elsif (index($_,"UIL",0) == 0)
+			{
+			print MAK "UIL = $UIL\n";
 			}
 		elsif (index($_,"GMTLIBDIR",0) == 0)
 			{
@@ -283,10 +392,10 @@ while (@files)
 		elsif (index($_,"catman",0) >= 0 && $OS ne "SUN")
 			{
 			}
-		elsif (index($_,"cd mbedit",0) >= 0 && $OS ne "SUN")
+		elsif (index($_,"cd mbedit",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
-		elsif (index($_,"cd mbvelocitytool",0) >= 0 && $OS ne "SUN")
+		elsif (index($_,"cd mbvelocitytool",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
 		elsif (index($_,"cd realtime",0) >= 0 && $REALTIME == 0)
