@@ -1,17 +1,17 @@
-.TH MBLEVITUS 1 "24 February 1994"
+.TH mblevitus l "31 October 1994"
 .SH NAME
 \fBmblevitus\fP - Create a water velocity profile which is representative
 of the mean annual water column for a specified 1 degree by 1 degree
 region.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmblevitus\fP [\fB-R\fIlon/lat \fB-O\fIoutfile \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBMBLEVITUS\fP generates a mean water velocity profile for a 
+\fBmblevitus\fP generates a mean water velocity profile for a 
 specified location from the Levitus temperature and salinity database.
 The water velocity profile is representative of the mean annual
 water column structure for a specified 1 degree by 1 degree region.
@@ -20,7 +20,7 @@ used by programs (e.g. \fBHSBATH\fP) which calculate multibeam sonar
 bathymetry from travel times by raytracing through a water velocity
 model.  The depth to which the Levitus database defines the water
 column reflects regional water depths which may be exceeded in
-places.  \fBMBLEVITUS\fP extrapolates water velocity profiles
+places.  \fBmblevitus\fP extrapolates water velocity profiles
 to a depth of 12000 meters using a velocity gradient obtained from
 the deepest two velocities defined by the Levitus database.
 The water velocity values are calculated using standard physical
@@ -59,9 +59,9 @@ has a 1 degree by 1 degree resolution.
 Default: \fIlon\fP=0, \fIlat\fP=0.
 .TP
 .B \fB-V\fP
-Normally, \fBMBLEVITUS\fP outputs only a minor bit of information 
+Normally, \fBmblevitus\fP outputs only a minor bit of information 
 to the stdout stream.  If the
-\fB-V\fP flag is given, then \fBMBLEVITUS\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmblevitus\fP works in a "verbose" mode and
 also outputs the program version being used and the complete
 water column structure used to calculate the water velocity profile.
 
@@ -75,7 +75,7 @@ The following will suffice:
 .br
 The output will be:
 
- 	Program MBLEVITUS
+ 	Program mblevitus
  	Version 4.00
  	MB-system Version 4.00
 
@@ -138,7 +138,7 @@ The output will be:
 
 The contents of the output file velocity_profile are:
 
- 	# Water velocity profile created by program MBLEVITUS version 3.00
+ 	# Water velocity profile created by program mblevitus version 3.00
  	# MB-system Version 4.00
  	# Run by user <caress> on cpu <menard> at <Tue Mar 1 12:12:39 1994>
  	# Water velocity profile derived from Levitus

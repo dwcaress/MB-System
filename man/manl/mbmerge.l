@@ -1,16 +1,16 @@
-.TH MBMERGE 1 "24 February 1994"
+.TH mbmerge l "31 October 1994"
 .SH NAME
 \fBmbmerge\fP - Merges multibeam data with new navigation.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbmerge\fP [\fB-F\fIformat \fB-L\fIlonflip\fP 
 \fB-I\fIinfile \fB-O\fIoutfile \fB-M\fInavformat\fP \fB-N\fInavfile\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBMBMERGE\fP is an utility for merging navigation with multibeam
+\fBmbmerge\fP is an utility for merging navigation with multibeam
 echosounder data.  The input navigation can be in one of several
 formats, including the L-DEO shipboard processing format. 
 The default input and output streams are stdin and stdout.
@@ -60,7 +60,7 @@ five formats are allowed, all consisting of ascii records:
 
 \fInavformat\fP = 1:  
 .br
-This format consists for lines of the form:
+This format consists of lines of the form:
  	time_d lon lat
 .br
 where time_d is decimal unix time in seconds since
@@ -74,7 +74,7 @@ with the \fB-O\fP\fIUXY\fP option. Some representative lines are:
 
 \fInavformat\fP = 2:  
 .br
-This format consists for lines of the form:
+This format consists of lines of the form:
  	year mon day hour min sec lon lat
 .br
 where lon and lat are in decimal degrees.
@@ -87,7 +87,7 @@ with the \fB-O\fP\fItXY\fP option. Some representative lines are:
 
 \fInavformat\fP = 3:  
 .br
-This format consists for lines of the form:
+This format consists of lines of the form:
  	year jday hour min sec lon lat
 .br
 where jday is the julian day of the year and 
@@ -101,7 +101,7 @@ with the \fB-O\fP\fIJXY\fP option. Some representative lines are:
 
 \fInavformat\fP = 4:  
 .br
-This format consists for lines of the form:
+This format consists of lines of the form:
  	year jday daymin sec lon lat
 .br
 where jday is the julian day of the year, daymin is the minute
@@ -128,7 +128,7 @@ ascii records.  Some representative lines of the format are:
               |second               |longitude degrees
                                         |longitude minutes
 
-\fInavformat\fP = 5:  
+\fInavformat\fP = 6:  
 .br
 This is modified ISAH navigation format used on the ship Hai Yang 4. 
 The raw data stream includes heading and speed records denoted by
@@ -185,9 +185,9 @@ no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
 .B \fB-V\fP
-Normally, \fBMBMERGE\fP works "silently" without outputting
+Normally, \fBmbmerge\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBMBMERGE\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbmerge\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 
 .SH EXAMPLES

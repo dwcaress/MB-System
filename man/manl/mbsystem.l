@@ -1,10 +1,10 @@
-.TH MBSYSTEM 1 "26 October 1994"
+.TH mbsystem l "31 October 1994"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and processing multibeam
 bathymetry data.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH INTRODUCTION
 The \fBMB-System\fP is a software package consisting of programs which 
@@ -28,7 +28,6 @@ multibeam data that could be used by the U.S. academic community.
 SeaBeam Instruments and Antarctic Support Associates are also supporting 
 development of MB-System, with particular emphasis on capabilities 
 related to the new SeaBeam 2100 series of sonars.
-
 
 The source code for \fBMB-System\fP is written in C and should be portable
 to a wide variety of Unix platforms. Graphical utilities are based 
@@ -54,7 +53,7 @@ i/o library and the multibeam data formats supported by \fBMBIO\fP.
 
 These are the current MB-system programs:
  \fBhsdump\fP:  Lists contents of the various sorts of 
-                data records in Hydrosweep DS data. 
+ 		data records in Hydrosweep DS data. 
  \fBmbbath\fP:  Generates bathymetry from travel times 
  		in multibeam data. 
  \fBmbclean\fP:  Identifies and flags bad beams in 
@@ -112,6 +111,16 @@ tasks easily.  These are the current MB-system macros:
  		writes a shellscript which will 
  		generate a swath and/or contour 
  		plot of the data.
+ \fBmbm_rollerror\fP:  Reads a multibeam data file,
+ 		calculates the noise in the vertical reference 
+ 		used by the sonar, and generates a file 
+ 		containing roll corrections which
+ 		can be applied to the data.
+ \fBmbm_stat\fP:  Runs \fBmbinfo\fP on a multibeam data  
+ 		file and extracts beam statistics from 
+ 		the output of mbinfo.
+ \fBmbm_vrefcheck\fP:  Generates a plot of high pass
+ 		filtered apparent crosstrack seafloor slope.
  \fBmbm_xbt\fP:  Processes a Sparton XBT data file 
  		and outputs a sound velocity profile 
  		file which can be used to process 

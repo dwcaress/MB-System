@@ -1,9 +1,9 @@
-.TH MBINFO 1 "7 October 1994"
+.TH mbinfo l "31 October 1994"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-C -E\fIyr/mo/da/hr/mn/sc 
@@ -38,7 +38,7 @@ with times before the starting time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
 .B \fB-C\fP
-Normally, \fBMBINFO\fP ignores comments encountered in the
+Normally, \fBmbinfo\fP ignores comments encountered in the
 data file.  If the \fB-C\fP flag is given, all of the comments will be 
 printed out.
 .TP
@@ -98,7 +98,7 @@ Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
 .B \fB-V\fP
-Normally, \fBMBINFO\fP only prints out the statistics obtained
+Normally, \fBmbinfo\fP only prints out the statistics obtained
 by reading all of the data.  If the
 \fB-V\fP flag is given, then \fBMBCOPY\fP works in a "verbose" mode and
 outputs the program version being used and all read error status messages.

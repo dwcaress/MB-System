@@ -1,9 +1,9 @@
-.TH MBBATH 1 "23 February 1994"
+.TH mbbath l "31 October 1994"
 .SH NAME
 \fBmbbath\fP - Generates bathymetry from travel times in multibeam data.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbbath\fP [\fB-A\fIangle\fP \fB-B\fIroll_bias\fP \fB-D\fIdraught\fP 
@@ -12,7 +12,7 @@ Version 4.00
 \fB-U\fP \fB-W\fIvelfile\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBMBBATH\fP is an utility for calculating bathymetry from travel times
+\fBmbbath\fP is an utility for calculating bathymetry from travel times
 in multibeam data.  The depths and crosstrack distances are calculated 
 from the travel times by raytracing through a water velocity profile 
 specified by the user.  This program only works with data formats
@@ -133,9 +133,9 @@ accurate with respect to a presumably realistic water velocity model.
 Default: meters calculated in corrected meters.
 .TP
 .B \fB-V\fP
-Normally, \fBMBBATH\fP works "silently" without outputting
+Normally, \fBmbbath\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBMBBATH\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbbath\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
 .B \fB-W\fIvelfile\fP
@@ -157,13 +157,13 @@ would be:
 where the first column is depth in meters and the second column
 is velocity in meters/second.  If the first character of a line is
 '\#', then the line is treated as a comment and ignored.
-\fBMBBATH\fP converts the velocity
+\fBmbbath\fP converts the velocity
 profile to a model consisting of homogeneous layers by using the
 average velocity between each pair of adjacent depth/velocity pairs
 as the velocity of a homogeneous layer between those two depth
 points. If the velocity profile does not extend
 to depths of 12000 m (deeper than the deepest known seafloor),
-then \fBMBBATH\fP extends the profile to that depth using the
+then \fBmbbath\fP extends the profile to that depth using the
 velocity of the deepest layer.  The default water velocity
 profile is simply a halfspace with a velocity of 1500 m/s.
 

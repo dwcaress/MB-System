@@ -1,15 +1,15 @@
-.TH MBROLLBIAS 1 "25 February 1994"
+.TH mbrollbias l "31 October 1994"
 .SH NAME
 \fBmbrollbias\fP - Assess roll bias of multibeam sonar systems.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbrollbias\fP \fB-D\fIxdim/ydim \fB-R\fIwest/east/south/north \fB-L\fIlonflip \fB-I\fIfile1 \fB-J\fIfile2 [\fB-H -V\fI]
 
 .SH DESCRIPTION
-\fBMBROLLBIAS\fP is an utility used to assess roll bias of multibeam 
+\fBmbrollbias\fP is an utility used to assess roll bias of multibeam 
 sonar systems using bathymetry data from two swaths covering the same  
 seafloor in opposite directions. The program takes two input  
 files and calculates best fitting planes for each dataset.   
@@ -86,18 +86,18 @@ and version during execution.
 .SH EXAMPLE
 Suppose you want to calculate roll bias using two coincident swaths
 of Hydrosweep DS data collected in nearly opposite directions.
-Run \fBMBROLLBIAS\fP as follows:
+Run \fBmbrollbias\fP as follows:
 
  	mbrollbias -R-51.07/-50.98/9.0166/9.117 -D1/1 -F22/22 
  		-Ihs_leg1_z.mb22 -Jhs_leg2_z.mb22 -V
 
 The output looks like:
 
- Program MBROLLBIAS
- Version $Id: mbrollbias.l,v 4.0 1994-10-31 20:26:20 caress Exp $
+ Program mbrollbias
+ Version $Id: mbrollbias.l,v 4.1 1994-10-31 21:54:07 caress Exp $
  MB-system Version 4.00
 
- MBROLLBIAS Parameters:
+ mbrollbias Parameters:
  Input file 1:     hs_leg1_z.mb22
  Input file 2:     hs_leg2_z.mb22
  Region grid bounds:

@@ -1,9 +1,9 @@
-.TH MBCLEAN 1 "23 February 1994"
+.TH mbclean l "31 October 1994"
 .SH NAME
 \fBmbclean\fP - Identifies and flags bad beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbclean\fP [\fB-B\fIlow/high \fB-C\fIslope\fP 
@@ -119,9 +119,9 @@ of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: \fIzap_beams\fP = 0.
 .TP
 .B \fB-V\fP
-Normally, \fBMBCLEAN\fP works "silently" without outputting
+Normally, \fBmbclean\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBMBCLEAN\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages, 
 and the number of beams flagged as bad.
 

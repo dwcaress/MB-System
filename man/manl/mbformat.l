@@ -1,18 +1,18 @@
-.TH MBFORMAT 1 "21 February 1994"
+.TH mbformat l "31 October 1994"
 .SH NAME
 \fBmbformat\fP -  List information about multibeam bathymetry data formats
 supported by the \fBMBIO\fP library.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbformat\fP [\fB-F\fIformat \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBMBFORMAT\fP is an utility which identifies the multibeam data formats
+\fBmbformat\fP is an utility which identifies the multibeam data formats
 associated with \fBmbio\fP format id's.  If no format id is specified,
-\fBMBFORMAT\fP lists all of the currently supported formats.
+\fBmbformat\fP lists all of the currently supported formats.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -36,8 +36,8 @@ This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
 .B \fB-V\fP
-Normally, \fBMBFORMAT\fP only prints out format descriptions.  If the
-\fB-V\fP flag is given, then \fBMBFORMAT\fP works in a "verbose" mode and
+Normally, \fBmbformat\fP only prints out format descriptions.  If the
+\fB-V\fP flag is given, then \fBmbformat\fP works in a "verbose" mode and
 also outputs the program version being used.
 
 .SH EXAMPLES

@@ -1,16 +1,16 @@
-.TH MBGRID 1 "13 June 1994"
+.TH mbgrid l "31 October 1994"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from multibeam data files.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP \fB-E\fIdx/dy\fP \fB-F\fP \fB-G\fIgridkind\fP \fB-L\fIlonflip\fP \fB-M -N \fB-P\fIpings\fP \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
 
 .SH DESCRIPTION
-\fBMBGRID\fP is an utility used to grid bathymetry, amplitude, or sidescan 
+\fBmbgrid\fP is an utility used to grid bathymetry, amplitude, or sidescan 
 data contained in a set of multibeam data files. This program can use
 either a gaussian weighted average scheme or a median filter scheme
 to grid regions covered by multibeam 
@@ -41,7 +41,7 @@ the working grid in both longitude and latitude.  The program reads all
 pings which lie within the data input bounds, and accepts all beam
 values with locations within the working grid. In addition to multibeam
 data in formats supported by \fBMB-System\fP (see the \fBMB-System\fP manual
-page), \fBMBGRID\fP can also read data from ASCII text files in
+page), \fBmbgrid\fP can also read data from ASCII text files in
 longitude, latitude, value triples. This allows one to incorporate
 conventional echosounder bathymetry data into the gridding.
 
@@ -168,7 +168,7 @@ Sets the format of the output grid file.
  	\fIgridkind\fP = 2:	binary file (GMT version 1 GRD file)
  	\fIgridkind\fP = 3:	netCDF file (GMT version 2 GRD file)
 .br
-\fBMBGRID\fP also outputs shellscripts which run graphics programs,
+\fBmbgrid\fP also outputs shellscripts which run graphics programs,
 thus providing a preliminary view of the gridded data.  If 
 \fIgridkind\fP = 1 or 2 then the shellscript will run the program
 \fBSHADE\fP (this will probably vanish soon since \fBSHADE\fP is
@@ -248,7 +248,7 @@ information.
 Default: \fItension\fP = 0.35.
 .TP
 .B \fB-V\fP
-Normally, \fBMBGRID\fP prints out information regarding its
+Normally, \fBmbgrid\fP prints out information regarding its
 controlling parameters during execution; the 
 \fB-V\fP option causes the program to also print out statements
 indicating its progress.
@@ -283,7 +283,7 @@ data filenames followed by the appropriate format identifier:
  	d130e.mb24 24
  	d131e.mb24 24
 
-Then, run \fBMBGRID\fP as follows:
+Then, run \fBmbgrid\fP as follows:
  	mbgrid -R220.1/220.35/-9.7/-9.45 -D251/251 -L1 -C251 
  		-Idatalist -Ourville_int -V
 
@@ -291,11 +291,11 @@ By specifying a clipping dimension of 251 we insure that the grid
 will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
- Program MBGRID
- Version $Id: mbgrid.l,v 4.0 1994-10-31 20:26:20 caress Exp $
+ Program mbgrid
+ Version $Id: mbgrid.l,v 4.1 1994-10-31 21:54:07 caress Exp $
  MB-system Version 4.00
 
- MBGRID Parameters:
+ mbgrid Parameters:
  List of input files: datalist
  Output fileroot:     urville_int
  Input Data Type:     Bathymetry
@@ -368,11 +368,11 @@ standard deviation values. The following will suffice:
 
 The output looks like:
 
- Program MBGRID
- Version $Id: mbgrid.l,v 4.0 1994-10-31 20:26:20 caress Exp $
+ Program mbgrid
+ Version $Id: mbgrid.l,v 4.1 1994-10-31 21:54:07 caress Exp $
  MB-system Version 4.00
 
- MBGRID Parameters:
+ mbgrid Parameters:
  List of input files: datalist
  Output fileroot:     urville_int
  Input Data Type:     Bathymetry

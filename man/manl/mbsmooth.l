@@ -1,9 +1,9 @@
-.TH MBSMOOTH 1 "25 February 1994"
+.TH mbsmooth l "31 October 1994"
 .SH NAME
 \fBmbsmooth\fP - Smooths multibeam bathymetry data.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbsmooth\fP [\fB-F\fIformat\fP \fB-G\fIwidth\fP \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP \fB-W\fIfilterfile\fP \fB-V -H\fP]
@@ -90,9 +90,9 @@ Use of this operation overrides the use of the default filter
 width set with the \fB-G\fP option.
 .TP
 .B \fB-V\fP
-Normally, \fBMBSMOOTH\fP works "silently" without outputting
+Normally, \fBmbsmooth\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBMBSMOOTH\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbsmooth\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 
 .SH EXAMPLES

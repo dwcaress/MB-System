@@ -1,9 +1,9 @@
-.TH MBCOPY 1 "22 February 1994"
+.TH mbcopy l "31 October 1994"
 .SH NAME
 \fBmbcopy\fP - Copy multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbcopy\fP [\fB-F\fIinformat/outformat \fB-R\fIwest/east/south/north \fB-P\fIpings 
@@ -11,9 +11,9 @@ Version 4.00
 \fB-I\fIinfilename \fB-O\fIoutfilename \fB-C\fIcommentfile\fP \fB-N \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBMBCOPY\fP is an utility for copying multibeam data files which
+\fBmbcopy\fP is an utility for copying multibeam data files which
 may be used to change formats, average pings, or window
-in time and space. \fBMBCOPY\fP can be used as a filter from
+in time and space. \fBmbcopy\fP can be used as a filter from
 stdin to stdout, or it may do i/o to and from files.
 
 .SH AUTHORSHIP
@@ -80,9 +80,9 @@ the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
 .B \fB-N\fP
-Normally, \fBMBCOPY\fP generates a set of comment records at
+Normally, \fBmbcopy\fP generates a set of comment records at
 the beginning of the output stream which record when, how,
-and by whom \fBMBCOPY\fP was run.  If the
+and by whom \fBmbcopy\fP was run.  If the
 \fB-N\fP flag is given, these comments are not included in 
 the output stream, and, in addition, any preexisting comment records
 in the input data stream are not passed to the output data stream.
@@ -120,9 +120,9 @@ Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
 .B \fB-V\fP
-Normally, \fBMBCOPY\fP works "silently" without outputting
+Normally, \fBmbcopy\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBMBCOPY\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbcopy\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages, 
 and the number of records input and output.
 
@@ -138,7 +138,7 @@ data to be input in the URI format (format 23) to stdin, but the existing
 data is in a raw Hydrosweep file (format 21).  The following will work:
  	mbcopy -P1 -F21/23 | thrash_prog
 
-where a pipe (|) has been used to direct the stdout stream from \fBMBCOPY\fP
+where a pipe (|) has been used to direct the stdout stream from \fBmbcopy\fP
 to the stdin stream of thrash_prog.
 .SH BUGS
 Certainly.
