@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.0 1994-03-05 23:55:38 caress Exp $
+ *    $Id: mb_buffer.c,v 4.1 1994-04-12 00:24:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -32,6 +32,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:55:38  caress
+ * First cut at version 4.0
+ *
  * Revision 4.4  1994/03/05  22:51:44  caress
  * Added ability to handle Simrad EM12 system and
  * format MBF_EM12DARW.
@@ -83,7 +86,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.0 1994-03-05 23:55:38 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.1 1994-04-12 00:24:27 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -121,7 +124,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_close(verbose,buff_ptr,error)
+int mb_buffer_close(verbose,buff_ptr,mbio_ptr,error)
 int	verbose;
 char	*buff_ptr;
 int	*error;
@@ -139,6 +142,7 @@ int	*error;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		}
 
 	/* get buffer structure */
@@ -151,10 +155,10 @@ int	*error;
 			{
 			fprintf(stderr,"\ndbg4  Remaining records in buffer: %d\n",buff->nbuffer);
 			for (i=0;i<buff->nbuffer;i++);
-				fprintf(stderr,"dbg4       Record[%] pointer: %d\n",i,buff->buffer[i]);
+				fprintf(stderr,"dbg4       Record[%d] pointer: %d\n",i,buff->buffer[i]);
 			}
 		for (i=0;i<buff->nbuffer;i++);
-			status = mb_buffer_deall(verbose,buff_ptr,NULL,
+			status = mb_buffer_deall(verbose,buff_ptr,mbio_ptr,
 				buff->buffer[i],error);
 		}
 
@@ -1298,6 +1302,14 @@ int	*error;
 	else if (system == MB_SYS_HSDS)
 		{
 		status = mbsys_hsds_deall(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_SB2100)
+		{
+		status = mbsys_sb2100_deall(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_EM12)
+		{
+		status = mbsys_em12_deall(verbose,mbio_ptr,store_ptr,error);
 		}
 	else if (system == MB_SYS_LDEOIH)
 		{
