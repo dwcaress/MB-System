@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.5 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbset.c,v 5.6 2001-07-31 00:42:12 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.4  2001/06/11 17:47:38  caress
  * Fixed pitchbias bug.
  *
@@ -72,7 +75,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.5 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.6 2001-07-31 00:42:12 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -281,7 +284,98 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "NAVADJINTERP:%d", &process.mbp_navadj_algorithm);
 		    }
-    
+
+		/* data cutting */
+		else if (strncmp(pargv[i], "DATACUTCLEAR", 12) == 0)
+			{
+			process.mbp_cut_num = 0;
+			}
+		else if (strncmp(pargv[i], "DATACUT", 7) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "DATACUT:%d:%d:%lf:%lf", 
+					&process.mbp_cut_kind[process.mbp_cut_num],
+					&process.mbp_cut_mode[process.mbp_cut_num],
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_num++;
+				}
+			}
+		else if (strncmp(pargv[i], "BATHCUTNUMBER", 13) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "BATHCUTNUMBER:%lf:%lf", 
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process.mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(pargv[i], "BATHCUTDISTANCE", 15) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "BATHCUTDISTANCE:%lf:%lf", 
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process.mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(pargv[i], "AMPCUTNUMBER", 12) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "AMPCUTNUMBER:%lf:%lf", 
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process.mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(pargv[i], "AMPCUTDISTANCE", 14) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "AMPCUTDISTANCE:%lf:%lf", 
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process.mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(pargv[i], "SSCUTNUMBER", 12) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "SSCUTNUMBER:%lf:%lf", 
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process.mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(pargv[i], "SSCUTDISTANCE", 14) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "SSCUTDISTANCE:%lf:%lf",  
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process.mbp_cut_num++;
+				}
+			}
+	
+
 		/* bathymetry editing */
 		else if (strncmp(pargv[i], "EDITSAVEMODE", 12) == 0)
 		    {
@@ -671,6 +765,26 @@ the manual pages for mbprocess and mbset. \n\n";
 		fprintf(stderr,"  Adjusted navigation algorithm: linear interpolation\n");
 	    else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
 		fprintf(stderr,"  Adjusted navigation algorithm: spline interpolation\n");
+
+	    fprintf(stderr,"\nData Cutting:\n");
+	    if (process.mbp_cut_num > 0)
+		fprintf(stderr,"  Data cutting enabled (%d commands).\n", process.mbp_cut_num);
+	    else
+		fprintf(stderr,"  Data cutting disabled.\n");
+	    for (i=0;i<process.mbp_cut_num;i++)
+		{
+		if (process.mbp_cut_kind[i] == MBP_CUT_DATA_BATH)
+		    fprintf(stderr, "  Cut[%d]: bathymetry", i);
+		else if (process.mbp_cut_kind[i] == MBP_CUT_DATA_AMP)
+		    fprintf(stderr, "  Cut[%d]: amplitude ", i);
+		else if (process.mbp_cut_kind[i] == MBP_CUT_DATA_SS)
+		    fprintf(stderr, "  Cut[%d]: sidescan  ", i);
+		if (process.mbp_cut_mode[i] == MBP_CUT_MODE_NUMBER)
+		    fprintf(stderr, "  number   ");
+		else if (process.mbp_cut_kind[i] == MBP_CUT_MODE_DISTANCE)
+		    fprintf(stderr, "  distance ");
+		fprintf(stderr, "  %f %f\n", process.mbp_cut_min[i], process.mbp_cut_max[i]);
+		}
 
 	    fprintf(stderr,"\nBathymetry Editing:\n");
 	    if (process.mbp_edit_mode == MBP_EDIT_ON)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.5 2001-07-27 19:07:16 caress Exp $
+ *    $Id: mb_process.h,v 5.6 2001-07-31 00:40:52 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -100,6 +100,54 @@
  *   NAVADJINTERP boolean           # sets adjusted navigation interpolation algorithm [0]
  *                                  #   0: linear interpolation (recommended)
  *                                  #   1: spline interpolation
+ *
+#define	MBP_CUT_DATA_BATH	0
+#define	MBP_CUT_DATA_AMP	1
+#define	MBP_CUT_DATA_SS		2
+#define	MBP_CUT_MODE_NONE	0
+#define	MBP_CUT_MODE_NUMBER   	1
+#define	MBP_CUT_MODE_DISTANCE 	2
+#define	MBP_CUT_NUM_MAX	20
+ * DATA CUTTING:
+ *   DATACUTCLEAR                   # clears all data cutting commands
+ *   DATACUT kind mode min max      # adds data cutting command that flags
+ *                                  # specified bathymetery and amplitude
+ *                                  # beams and zeroes specified sidescan 
+ *                                  # pixels. 
+ *                                  # - kind:
+ *                                  #   0: bathymetry
+ *                                  #   1: amplitude
+ *                                  #   2: sidescan
+ *                                  # - mode:
+ *                                  #   0: cut by beam/pixel number
+ *                                  #   1: cut by distance
+ *                                  # - min: minimum beam/pixel number
+ *                                  #   or acrosstrack distance for data
+ *                                  #   data cutting zone.
+ *                                  # - max: maximum beam/pixel number
+ *                                  #   or acrosstrack distance for data
+ *                                  #   data cutting zone.
+ *   BATHCUTNUMBER min max          # adds data cutting command to cut
+ *                                  #   bathymetry by beam number from
+ *                                  #   beam min to beam max.
+ *   BATHCUTDISTANCE min max        # adds data cutting command to cut
+ *                                  #   bathymetry by beam number from
+ *                                  #   acrosstrack distance  min to 
+ *                                  #   distance max.
+ *   AMPCUTNUMBER min max           # adds data cutting command to cut
+ *                                  #   amplitude by beam number from
+ *                                  #   beam min to beam max.
+ *   AMPCUTDISTANCE min max         # adds data cutting command to cut
+ *                                  #   amplitude by beam number from
+ *                                  #   acrosstrack distance  min to 
+ *                                  #   distance max.
+ *   SSCUTNUMBER min max            # adds data cutting command to cut
+ *                                  #   sidescan by beam number from
+ *                                  #   beam min to beam max.
+ *   SSCUTDISTANCE min max          # adds data cutting command to cut
+ *                                  #   sidescan by beam number from
+ *                                  #   acrosstrack distance  min to 
+ *                                  #   distance max.
  *
  * BATHYMETRY EDITING:
  *   EDITSAVEMODE boolean           # turns on reading edit save file (from mbedit) [0]
@@ -275,6 +323,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/07/27  19:07:16  caress
+ * Added data cutting.
+ *
  * Revision 5.4  2001/06/03 06:54:56  caress
  * Improved handling of lever calculation.
  *

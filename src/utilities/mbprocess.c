@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.7 2001-07-27 19:09:41 caress Exp $
+ *    $Id: mbprocess.c,v 5.8 2001-07-31 00:42:12 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/07/27  19:09:41  caress
+ * Started adding data cutting, but not done yet.
+ *
  * Revision 5.6  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -92,7 +95,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.7 2001-07-27 19:09:41 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.8 2001-07-31 00:42:12 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -293,6 +296,7 @@ and mbedit edit save files.\n";
 	struct stat statbuf;
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	int	nbeams;
+	int	istart, iend, icut;
 	int	i, j, k, l, m, n, mm;
 	
 	char	*ctime();
@@ -769,6 +773,26 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"  Adjusted navigation algorithm: linear interpolation\n");
 	    else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
 		fprintf(stderr,"  Adjusted navigation algorithm: spline interpolation\n");
+
+	    fprintf(stderr,"\nData Cutting:\n");
+	    if (process.mbp_cut_num > 0)
+		fprintf(stderr,"  Data cutting enabled (%d commands).\n", process.mbp_cut_num);
+	    else
+		fprintf(stderr,"  Data cutting disabled.\n");
+	    for (i=0;i<process.mbp_cut_num;i++)
+		{
+		if (process.mbp_cut_kind[i] == MBP_CUT_DATA_BATH)
+		    fprintf(stderr, "  Cut[%d]: bathymetry", i);
+		else if (process.mbp_cut_kind[i] == MBP_CUT_DATA_AMP)
+		    fprintf(stderr, "  Cut[%d]: amplitude ", i);
+		else if (process.mbp_cut_kind[i] == MBP_CUT_DATA_SS)
+		    fprintf(stderr, "  Cut[%d]: sidescan  ", i);
+		if (process.mbp_cut_mode[i] == MBP_CUT_MODE_NUMBER)
+		    fprintf(stderr, "  number   ");
+		else if (process.mbp_cut_kind[i] == MBP_CUT_MODE_DISTANCE)
+		    fprintf(stderr, "  distance ");
+		fprintf(stderr, "  %f %f\n", process.mbp_cut_min[i], process.mbp_cut_max[i]);
+		}
 
 	    fprintf(stderr,"\nBathymetry Editing:\n");
 	    if (process.mbp_edit_mode == MBP_EDIT_ON)
@@ -1995,7 +2019,7 @@ and mbedit edit save files.\n";
 		&& process.mbp_ssv_mode != MBP_SSV_SET)
 	    {
 	    ssv_start = 0.0;
-	    ssv_prelimpass == MB_YES;
+	    ssv_prelimpass = MB_YES;
 	    error = MB_ERROR_NO_ERROR;
 	    while (error <= MB_ERROR_NO_ERROR
 		&& ssv_start <= 0.0)
@@ -2577,6 +2601,25 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
+
+		strncpy(comment,"\0",MBP_FILENAMESIZE);
+		if (process.mbp_cut_num > 0)
+			sprintf(comment,"  Data cutting enabled (%d commands).\n", process.mbp_cut_num);
+		else
+			sprintf(comment,"  Data cutting disabled.\n");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		for (i=0;i<process.mbp_cut_num;i++)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment, "  Cut[%d]: %d %d %f %f", 
+				i, process.mbp_cut_kind[i], process.mbp_cut_mode[i], 
+				process.mbp_cut_min[i], process.mbp_cut_max[i]);
+			sprintf(comment, "  %f %f\n", process.mbp_cut_min[i], process.mbp_cut_max[i]);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+
 		if (process.mbp_edit_mode == MBP_EDIT_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -3269,7 +3312,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    fprintf(stderr,"\ndbg5  Depth values calculated in program <%s>:\n",program_name);
 			    fprintf(stderr,"dbg5       kind:  %d\n",kind);
 			    fprintf(stderr,"dbg5      beam    time      depth        dist\n");	
-			    for (i=0;i<nbath;i++)
+			    for (i=0;i<beams_bath;i++)
 				fprintf(stderr,"dbg5       %2d   %f   %f   %f   %f\n",
 				    i,ttimes[i],
 				    bath[i],bathacrosstrack[i],
@@ -3316,6 +3359,92 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    else if (edit_action[j] == MBP_EDIT_ZERO)
 				beamflag[edit_beam[j]] = MB_FLAG_NULL;
 			    }			
+			}
+		    }
+
+		/* apply data cutting if specified */
+		if (process.mbp_cut_num > 0
+		    && error == MB_ERROR_NO_ERROR
+		    && kind == MB_DATA_DATA)
+		    {
+		    for (icut=0;icut<process.mbp_cut_num;icut++)
+			{
+			/* flag data according to beam number range */
+			if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_BATH
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER)
+			    {
+			    istart = MAX((int)process.mbp_cut_min[icut], 0);
+			    iend = MIN((int)process.mbp_cut_max[icut], beams_bath - 1);
+			    for (i=istart;i<=iend;i++)
+				{
+				if (mb_beam_ok(beamflag[i]))
+					beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				}
+			    }
+
+			/* flag data according to beam 
+				acrosstrack distance */
+			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_BATH
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
+			    {
+			    for (i=0;i<=beams_bath;i++)
+				{
+				if (mb_beam_ok(beamflag[i]) 
+				    && bathacrosstrack[i] >= process.mbp_cut_min[icut]
+				    && bathacrosstrack[i] <= process.mbp_cut_max[icut])
+					beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				}
+			    }
+			/* flag data according to beam number range */
+			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER)
+			    {
+			    istart = MAX((int)process.mbp_cut_min[icut], 0);
+			    iend = MIN((int)process.mbp_cut_max[icut], beams_amp - 1);
+			    for (i=istart;i<=iend;i++)
+				{
+				if (mb_beam_ok(beamflag[i]))
+					beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				}
+			    }
+
+			/* flag data according to beam 
+				acrosstrack distance */
+			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
+			    {
+			    for (i=0;i<=beams_amp;i++)
+				{
+				if (mb_beam_ok(beamflag[i]) 
+				    && bathacrosstrack[i] >= process.mbp_cut_min[icut]
+				    && bathacrosstrack[i] <= process.mbp_cut_max[icut])
+					beamflag[i]= MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				}
+			    }
+			/* flag data according to pixel number range */
+			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER)
+			    {
+			    istart = MAX((int)process.mbp_cut_min[icut], 0);
+			    iend = MIN((int)process.mbp_cut_max[icut], pixels_ss - 1);
+			    for (i=istart;i<=iend;i++)
+				{
+				ss[i] = 0.0;
+				}
+			    }
+
+			/* flag data according to pixel 
+				acrosstrack distance */
+			else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS
+			    && process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE)
+			    {
+			    for (i=0;i<=pixels_ss;i++)
+				{
+				if (ssacrosstrack[i] >= process.mbp_cut_min[icut]
+				    && ssacrosstrack[i] <= process.mbp_cut_max[icut])
+					ss[i]= 0.0;
+				}
+			    }
 			}
 		    }
 
