@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 4.6 1995-03-22 19:14:25 caress Exp $
+ *    $Id: mb_read_init.c,v 4.7 1995-11-02 19:48:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/03/22  19:14:25  caress
+ * Added #ifdef's for HPUX.
+ *
  * Revision 4.5  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -127,11 +130,13 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 4.6 1995-03-22 19:14:25 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 4.7 1995-11-02 19:48:51 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	int	format_num;
 	struct mb_io_struct *mb_io_ptr;
+	int	status_save;
+	int	error_save;
 	int	i;
 	char	*stdin_string = "stdin";
 
@@ -374,6 +379,11 @@ int	*error;
 	/* if error terminate */
 	if (status == MB_FAILURE)
 		{
+		/* save status and error values */
+		status_save = status;
+		error_save = *error;
+
+		/* free allocated memory */
 		if (mb_xdr_table[format_num] == MB_YES)
 			status = mb_free(verbose,&mb_io_ptr->xdrs,error);
 		status = mb_free(verbose,&mb_io_ptr->bath,error);
@@ -394,8 +404,15 @@ int	*error;
 		status = mb_free(verbose,&mb_io_ptr->new_ss_acrosstrack,error);
 		status = mb_free(verbose,&mb_io_ptr->new_ss_alongtrack,error);
 		status = mb_free(verbose,&mb_io_ptr,error);
-		*error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
+
+		/* restore error and status values */
+		if (status == MB_SUCCESS)
+			{
+			status = status_save;
+			*error = error_save;
+			}
+
+		/* output debug message */
 		if (verbose >= 2)
 			{
 			fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
