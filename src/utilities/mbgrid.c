@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.5 2002-04-06 02:53:45 caress Exp $
+ *    $Id: mbgrid.c,v 5.6 2002-07-25 19:07:17 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/04/06 02:53:45  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.4  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -311,7 +314,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.5 2002-04-06 02:53:45 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.6 2002-07-25 19:07:17 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1254,11 +1257,11 @@ main (int argc, char **argv)
 		if (file_in_bounds == MB_YES)
 		    {
 		    /* check for "fast bathymetry" or "fbt" file */
-		    if (datatype == MBGRID_DATA_TOPOGRAPHY
+		    /*if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
 			{
 			mb_get_fbt(verbose, file, &format, &error);
-			}
+			}*/
 		
 		    /* call mb_read_init() */
 		    if ((status = mb_read_init(

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 5.5 2002-04-06 02:51:54 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 5.6 2002-07-25 19:05:02 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -63,10 +63,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 5.5 2002-04-06 02:51:54 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 5.6 2002-07-25 19:05:02 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.5  2002/04/06 02:51:54  caress
+#   Release 5.0.beta16
+#
 #   Revision 5.4  2001/12/18 04:26:12  caress
 #   Version 5.0.beta11.
 #
@@ -285,7 +288,7 @@ while (@grdinfo)
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('A:a:B:b:C%c%D%d%E:e:e:G%g%HhI:i:J+j+K:k:L:l:M+m+N:n:O:o:P:p:QqR:r:S%s%TtU:u:VvW:w:XxYyZ:z:');
+&MBGetopts('A:a:B:b:C%c%D%d%E:e:e:F:f:G%g%HhI:i:J+j+K:k:L:l:M+m+N:n:O:o:P:p:QqR:r:S%s%TtU:u:VvW:w:XxYyZ:z:');
 $shade_control = 	($opt_A || $opt_a);
 $tick_info = 		($opt_B || $opt_b);
 $contour_mode = 	($flg_C || $flg_c);
@@ -293,6 +296,7 @@ $contour_control = 	($opt_C || $opt_c);
 $color_flip_mode = 	($flg_D || $flg_d);
 $color_flip_control = 	($opt_D || $opt_d);
 $view_control = 	($opt_E || $opt_e);
+$exaggeration =		($opt_F || $opt_f);
 $color_mode =   	($opt_G || $opt_g || $flg_G || $flg_g);
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
@@ -337,7 +341,7 @@ if ($help)
 	print "\nBasic Usage: \n";
 	print "\t$program_name -Ifile [-Amagnitude[/azimuth/elevation] \n";
 	print "\t\t-C[contour_control] -Eview_az/view_el \n";
-	print "\t\t-Gcolor_mode -H -Kintensity_file \n";
+	print "\t\t-Fexaggeration -Gcolor_mode -H -Kintensity_file \n";
 	print "\t\t-Ndrape_file -Oroot -Ppagesize \n";
 	print "\t\t-S[color/shade] -Uorientation -V\n";
 	print "\t\t-Wcolor_style[/pallette] ]\n";
@@ -980,10 +984,6 @@ if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 	$plot_width_factor = ($x_axis_rot + $y_axis_rot) / $dxx;
 	$plot_width = $plot_width_factor * $plot_width_xaxis;
 	$plot_height = $plot_width_factor * $plot_height_yaxis;
-	if (!$map_zscale)
-		{
-		$map_zscale = 2.0/($zmax - $zmin);
-		}
 
 	# decide which plot orientation to use
 	if ($orientation == 1)
@@ -1122,10 +1122,6 @@ elsif ($use_scale)
 	$y_axis_rot = &abs($dyy * sin($DTR * $view_azimuth));
 	$plot_scale_factor = $dxx / ($x_axis_rot + $y_axis_rot);
 	$plot_scale = $plot_scale_factor * $plot_scale;
-	if (!$map_zscale)
-		{
-		$map_zscale = 2.0/($zmax - $zmin);
-		}
 
 	# set plot width
 	$plot_width_xaxis = $plot_scale_factor * $plot_width;
@@ -1202,10 +1198,6 @@ elsif ($use_width)
 	$plots_width_factor = $dxx / ($x_axis_rot + $y_axis_rot);
 	$plot_width_xaxis = $plot_width_factor * $plot_width;
 	$plot_height_yaxis = $plot_width_factor * $plot_height;
-	if (!$map_zscale)
-		{
-		$map_zscale = 2.0/($zmax - $zmin);
-		}
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
@@ -1216,6 +1208,35 @@ elsif ($use_width)
 		{
 		$projection_pars = "$projection_pars" . "d";
 		}
+	}
+
+# set zscale and/or exaggeration
+$C1 = 111412.84;
+$C2 = -93.5;
+$C3 = 0.118;
+$C4 = 111132.92;
+$C5 = -559.82;
+$C6 = 1.175;
+$C7 = 0.0023;
+$DTR = 3.14159265358979323846 / 180.0;
+$radlat = 0.5 * ($ymax - $ymin) * DTR;
+$mtodeglat = 1./abs($C4 + $C5*cos(2*$radlat) 
+			+ $C6*cos(4*$radlat) + $C7*cos(6*$radlat));
+$mtodeglon = 1./abs($C1*cos($radlat) + $C2*cos(3*$radlat) 
+			+ $C3*cos(5*$radlat));
+if (!$map_zscale && $exaggeration)
+	{
+	$map_zscale =  $exaggeration * $plot_width * $mtodeglon
+			/ ($xmax - $xmin);
+	}
+elsif (!$map_zscale)
+	{
+	$map_zscale = 2.0/($zmax - $zmin);
+	}
+if (!$exaggeration)
+	{
+	$exaggeration = $map_zscale * ($xmax - $xmin) 
+				/ $plot_width / $mtodeglon;
 	}
 
 # place the origin so plot is more or less centered
@@ -2196,6 +2217,7 @@ if ($verbose)
 	print "    Page height:              $height\n";
 	print "    Projection:               -J$projection$projection_pars\n";
 	print "    Z Projection:             -Jz$map_zscale\n";
+	print "    Vertical Exaggeration:    $exaggeration\n";
 	print "    Axes annotation:          $axes\n";
 	if ($portrait)
 		{

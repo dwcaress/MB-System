@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.8 2002-04-06 02:51:54 caress Exp $
+#    $Id: mbm_plot.perl,v 5.9 2002-07-25 19:05:02 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.8 2002-04-06 02:51:54 caress Exp $
+#   $Id: mbm_plot.perl,v 5.9 2002-07-25 19:05:02 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.8  2002/04/06 02:51:54  caress
+#   Release 5.0.beta16
+#
 #   Revision 5.7  2001/12/18 04:26:12  caress
 #   Version 5.0.beta11.
 #
@@ -936,13 +939,22 @@ if (!$ps_viewer)
 				{
 				($ps_viewer) = /ps viewer:\s+(\S+)/;
 				}
+			if (/lonflip:\s+(\S+)/)
+				{
+				($lonflip) = /lonflip:\s+(\S+)/;
+				}
 			}
 		}
 	}
-# just set it to ghostview
+# just set $ps_viewer to ghostview
 if (!$ps_viewer)
 	{
 	$ps_viewer = "ghostview";
+	}
+# just set $lonflip to 0
+if (!$lonflip)
+	{
+	$lonflip = 0;
 	}
 
 # get limits of file using mbinfo
@@ -1008,6 +1020,32 @@ foreach $file_mb (@files_data)
 					}
 				}
 			close FILEINF;
+			
+			# reset longitude min max if they conflict with $lonflip
+			if ($lonflip == 0
+				&& $xmin_f < -180.0) 
+				{
+				$xmin_f = $xmin_f + 360.0;
+				$xmax_f = $xmax_f + 360.0;
+				}
+			elsif ($lonflip == 0
+				&& $xmax_f > 180.0) 
+				{
+				$xmin_f = $xmin_f - 360.0;
+				$xmax_f = $xmax_f - 360.0;
+				}
+			elsif ($lonflip == -1
+				&& $xmax_f > 0.0) 
+				{
+				$xmin_f = $xmin_f - 360.0;
+				$xmax_f = $xmax_f - 360.0;
+				}
+			elsif ($lonflip == 1
+				&& $xmin_f < 0.0) 
+				{
+				$xmin_f = $xmin_f + 360.0;
+				$xmax_f = $xmax_f + 360.0;
+				}
 
 			if (!$bounds)
 			    {
@@ -1090,6 +1128,34 @@ print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
 			$line =~ /^Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/;
 			}
 		}
+			
+	# reset longitude min max if they conflict with $lonflip
+print "lonflip:$lonflip xminmax: $xmin_f $xmax_f\n";
+	if ($lonflip == 0
+		&& $xmin_f < -180.0) 
+		{
+		$xmin_f = $xmin_f + 360.0;
+		$xmax_f = $xmax_f + 360.0;
+		}
+	elsif ($lonflip == 0
+		&& $xmax_f > 180.0) 
+		{
+		$xmin_f = $xmin_f - 360.0;
+		$xmax_f = $xmax_f - 360.0;
+		}
+	elsif ($lonflip == -1
+		&& $xmax_f > 0.0) 
+		{
+		$xmin_f = $xmin_f - 360.0;
+		$xmax_f = $xmax_f - 360.0;
+		}
+	elsif ($lonflip == 1
+		&& $xmin_f < 0.0) 
+		{
+		$xmin_f = $xmin_f + 360.0;
+		$xmax_f = $xmax_f + 360.0;
+		}
+print "lonflip:$lonflip xminmax: $xmin_f $xmax_f\n";
 
 	if (!$first_mb && $nrec_f > 0)
 		{

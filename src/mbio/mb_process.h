@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.12 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_process.h,v 5.13 2002-07-25 19:09:04 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -306,12 +306,33 @@
  *                                  # - time_d = decimal seconds since 1/1/1970
  *                                  # - daymin = decimal minutes start of day
  *
+ * AMPLITUDE CORRECTION:
+ *   AMPCORRMODE  boolean           # sets correction of amplitude by amplitude vs grazing 
+ *                                  # angle function
+ *                                  #   0: amplitude correction off
+ *                                  #   1: amplitude correction on
+ *   AMPCORRFILE filename           # sets amplitude correction file path [no default]
+ *   AMPCORRTYPE mode               # sets amplitude correction mode [0]
+ *                                  #   0: correction is by subtraction
+ *                                  #   1: correction is by division
+ *   AMPCORRSYMMETRY boolean        # sets amplitude vs grazing angle table symmetry mode [0]
+ *                                  #   0: amplitude vs grazing table left asymmetric
+ *                                  #   1: amplitude vs grazing table forced to be symmetric
+ *   AMPCORRANGLE constant          # sets characteristic angle for amplitude correction (degrees) [30.0]
+ *
  * SIDESCAN CORRECTION:
- *   SSCORRMODE  boolean            # sets correction of sidescan for amplitude vs grazing 
+ *   SSCORRMODE  boolean            # sets correction of sidescan by amplitude vs grazing 
  *                                  # angle function
  *                                  #   0: sidescan correction off
  *                                  #   1: sidescan correction on
  *   SSCORRFILE filename            # sets sidescan correction file path [no default]
+ *   SSCORRTYPE mode                # sets sidescan correction mode [0]
+ *                                  #   0: correction is by subtraction
+ *                                  #   1: correction is by division
+ *   SSCORRSYMMETRY boolean         # sets amplitude vs grazing angle table symmetry mode [0]
+ *                                  #   0: amplitude vs grazing table left asymmetric
+ *                                  #   1: amplitude vs grazing table forced to be symmetric
+ *   SSCORRANGLE constant           # sets characteristic angle for sidescan correction (degrees) [30.0]
  *
  * SIDESCAN RECALCULATION:
  *   SSRECALCMODE  boolean          # sets recalculation of sidescan for Simrad multibeam data
@@ -379,6 +400,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.11  2002/04/06 02:43:39  caress
  * Release 5.0.beta16
  *
@@ -486,8 +510,18 @@
 #define MBP_HEADING_CALCOFFSET  3
 #define MBP_TIDE_OFF		0
 #define MBP_TIDE_ON		1
+#define MBP_AMPCORR_OFF		0
+#define MBP_AMPCORR_ON		1
+#define MBP_AMPCORR_SUBTRACTION	0
+#define MBP_AMPCORR_DIVISION	1
+#define MBP_AMPCORR_ASYMMETRIC	0
+#define MBP_AMPCORR_SYMMETRIC	1
 #define MBP_SSCORR_OFF		0
 #define MBP_SSCORR_ON		1
+#define MBP_SSCORR_SUBTRACTION	0
+#define MBP_SSCORR_DIVISION	1
+#define MBP_SSCORR_ASYMMETRIC	0
+#define MBP_SSCORR_SYMMETRIC	1
 #define MBP_SSRECALC_OFF	0
 #define MBP_SSRECALC_ON		1
 #define MBP_CORRECTION_UNKNOWN	-1
@@ -586,9 +620,19 @@ struct mb_process_struct
 	char	mbp_tidefile[MBP_FILENAMESIZE];
 	int	mbp_tide_format;
 	
+	/* amplitude correction */
+	int	mbp_ampcorr_mode;
+	char	mbp_ampcorrfile[MBP_FILENAMESIZE];
+	int	mbp_ampcorr_type;
+	int	mbp_ampcorr_symmetry;
+	double	mbp_ampcorr_angle;
+	
 	/* sidescan correction */
 	int	mbp_sscorr_mode;
 	char	mbp_sscorrfile[MBP_FILENAMESIZE];
+	int	mbp_sscorr_type;
+	int	mbp_sscorr_symmetry;
+	double	mbp_sscorr_angle;
 	
 	/* sidescan recalculation */
 	int	mbp_ssrecalc_mode;
@@ -729,9 +773,19 @@ int mb_pr_update_edit(int verbose, char *file,
 			int	mbp_edit_mode, 
 			char	*mbp_editfile, 
 			int *error);
+int mb_pr_update_ampcorr(int verbose, char *file, 
+			int	mbp_ampcorr_mode,
+			char	*mbp_ampcorrfile,
+			int	mbp_ampcorrmode,
+			int	mbp_ampcorrsymmetry,
+			double	mbp_ampcorrangle,
+			int *error);
 int mb_pr_update_sscorr(int verbose, char *file, 
 			int	mbp_sscorr_mode,
 			char	*mbp_sscorrfile,
+			int	mbp_sscorrmode,
+			int	mbp_sscorrsymmetry,
+			double	mbp_sscorrangle,
 			int *error);
 int mb_pr_update_ssrecalc(int verbose, char *file, 
 			int	mbp_ssrecalc_mode,
@@ -863,9 +917,19 @@ int mb_pr_get_edit(int verbose, char *file,
 			int	*mbp_edit_mode, 
 			char	*mbp_editfile, 
 			int *error);
+int mb_pr_get_ampcorr(int verbose, char *file, 
+			int	*mbp_ampcorr_mode,
+			char	*mbp_ampcorrfile,
+			int	*mbp_ampcorr_type,
+			int	*mbp_ampcorr_symmetry,
+			double	*mbp_ampcorr_angle,
+			int *error);
 int mb_pr_get_sscorr(int verbose, char *file, 
 			int	*mbp_sscorr_mode,
 			char	*mbp_sscorrfile,
+			int	*mbp_sscorr_type,
+			int	*mbp_sscorr_symmetry,
+			double	*mbp_sscorr_angle,
 			int *error);
 int mb_pr_get_ssrecalc(int verbose, char *file, 
 			int	*mbp_ssrecalc_mode,

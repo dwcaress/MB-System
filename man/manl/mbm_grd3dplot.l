@@ -10,7 +10,7 @@ Version 5.0
 \fBmbm_grd3dplot\fP \fB-I\fP\fIfile\fP 
 [\fB-A\fP[\fImagnitude\fP[\fI/azimuth/elevation\fP] 
 \fB-D\fP[\fIflipcolor/flipshade\fP]
-\fB-E\fP[\fIview_az/view_el\fP] 
+\fB-E\fP[\fIview_az/view_el\fP] \fB-F\fP\fIexaggeration\fP
 \fB-G\fP\fIcolor_mode\fP \fB-H\fP \fB-K\fP\fIintensity_file \fP
 \fB-N\fP\fIdrape_file\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
@@ -43,7 +43,8 @@ including color fill views, color shaded relief views, mesh
 plot views, and text labels. Five different color schemes are 
 included. The plot will be scaled to fit on the specified page  
 size or, if the scale is user defined, the page size will be  
-chosen in accordance with the plot size. The primary purpose 
+chosen in accordance with the plot size. The vertical exaggeration
+may be specified. The primary purpose 
 of this macro is to allow the simple, semi-automated 
 production of nice looking maps with a few command line 
 arguments. For users seeking more control over the plot 
@@ -104,6 +105,14 @@ represents a view from the north, and \fIview_az\fP = 90
 represents a view from the east.  An \fIview_el\fP of 0
 represents a horizontal view.  Default: \fIview_az\fP = 200.;
 elevation = 40.
+.TP
+.B \-F
+[\fIexaggeration\fP]
+.br
+Sets the vertical exaggeration of the perspective plot.
+By default the vertical exaggeration is chosen so that the
+plot fits nicely on the page. This option works only if the
+data are in geographic coordinates (longitude and latitude).
 .TP
 .B \-G
 \fIcolor_mode\fP

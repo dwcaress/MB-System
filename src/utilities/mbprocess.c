@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.21 2002-07-20 20:56:55 caress Exp $
+ *    $Id: mbprocess.c,v 5.22 2002-07-25 19:07:17 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2002/07/20 20:56:55  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.20  2002/05/29 23:43:09  caress
  * Release 5.0.beta18
  *
@@ -145,7 +148,7 @@ struct mbprocess_sscorr_struct
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.21 2002-07-20 20:56:55 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.22 2002-07-25 19:07:17 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -346,15 +349,12 @@ and mbedit edit save files.\n";
 	double	ssv_start;
 	
 	/* sidescan correction */
-	double	depth_default = 1000.0;
-	int	use_depth_default = MB_YES;
-	int	subtract_mode = MB_YES;
+	double	altitude_default = 1000.0;
 	int	use_slope = MB_YES;
 	int	nsmooth = 5;
-	double	characteristic_angle = 30.0;
-	double	characteristic_amp;
-	double	characteristic_amp_port;
-	double	characteristic_amp_stbd;
+	double	reference_amp;
+	double	reference_amp_port;
+	double	reference_amp_stbd;
 	int	itable;
 	int	nsscorrtable;
 	int	nsscorrangle;
@@ -1049,11 +1049,38 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"  Heading replaced by course-made-good and then offset by bias.\n");
 	    fprintf(stderr,"  Heading offset:                %f deg\n", process.mbp_headingbias);
 
-	    fprintf(stderr,"\nSidescan Amplitude vs Grazing Angle Corrections:\n");
+	    fprintf(stderr,"\nAmplitude Corrections:\n");
+	    if (process.mbp_ampcorr_mode == MBP_SSCORR_ON)
+		{
+		fprintf(stderr,"  Amplitude vs grazing angle corrections applied to amplitudes.\n");
+	    	fprintf(stderr,"  Amplitude correction file:      %s m\n", process.mbp_ampcorrfile);
+		if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
+	    		fprintf(stderr,"  Amplitude correction by subtraction (dB scale)\n");
+		else
+	    		fprintf(stderr,"  Amplitude correction by division (linear scale)\n");
+		if (process.mbp_ampcorr_symmetry == MBP_AMPCORR_SYMMETRIC)
+	    		fprintf(stderr,"  AVGA tables forced to be symmetric\n");
+		else
+	    		fprintf(stderr,"  AVGA tables allowed to be asymmetric\n");
+	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_ampcorr_angle);
+ 		}
+	    else
+		fprintf(stderr,"  Amplitude correction off.\n");
+
+	    fprintf(stderr,"\nSidescan Corrections:\n");
 	    if (process.mbp_sscorr_mode == MBP_SSCORR_ON)
 		{
 		fprintf(stderr,"  Amplitude vs grazing angle corrections applied to sidescan.\n");
 	    	fprintf(stderr,"  Sidescan correction file:      %s m\n", process.mbp_sscorrfile);
+		if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
+	    		fprintf(stderr,"  Sidescan correction by subtraction (dB scale)\n");
+		else
+	    		fprintf(stderr,"  Sidescan correction by division (linear scale)\n");
+		if (process.mbp_sscorr_symmetry == MBP_SSCORR_SYMMETRIC)
+	    		fprintf(stderr,"  AVGA tables forced to be symmetric\n");
+		else
+	    		fprintf(stderr,"  AVGA tables allowed to be asymmetric\n");
+	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_sscorr_angle);
  		}
 	    else
 		fprintf(stderr,"  Sidescan correction off.\n");
@@ -4200,23 +4227,23 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					}
 				}
 				
-			/* set the characteristic amplitudes */
+			/* set the reference amplitudes */
 			status = get_anglecorr(verbose, 
 						sscorrtableuse.nangle, 
 						sscorrtableuse.angle, 
 						sscorrtableuse.amplitude, 
-						(-characteristic_angle), 
-						&characteristic_amp_port, 
+						(-process.mbp_sscorr_angle), 
+						&reference_amp_port, 
 						&error);
 			status = get_anglecorr(verbose, 
 						sscorrtableuse.nangle, 
 						sscorrtableuse.angle, 
 						sscorrtableuse.amplitude, 
-						characteristic_angle, 
-						&characteristic_amp_stbd, 
+						process.mbp_sscorr_angle, 
+						&reference_amp_stbd, 
 						&error);
-			characteristic_amp = 0.5 * (characteristic_amp_port
-							+ characteristic_amp_stbd);
+			reference_amp = 0.5 * (reference_amp_port
+							+ reference_amp_stbd);
 			
 /*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
 itable, sscorrtableuse.time_d, 
@@ -4257,7 +4284,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 				    				&bathy,&slope,&error);
 						if (status != MB_SUCCESS)
 				    			{
-				    			bathy = depth_default;
+				    			bathy = altitude_default;
 				    			slope = 0.0;
 				    			status = MB_SUCCESS;
 				    			error = MB_ERROR_NO_ERROR;
@@ -4265,7 +4292,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 						}
 			    		else
 						{
-						bathy = depth_default;
+						bathy = altitude_default;
 						slope = 0.0;
 						}
 			    		if (use_slope == MB_NO)
@@ -4284,10 +4311,10 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 								angle, &correction, &error);
 /*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f ss: %f", 
 j, i, slopeangle, rawangle, correction, ss[i]);*/
-						if (subtract_mode == MB_YES)
-				    			ss[i] = ss[i] - correction + characteristic_amp;
+						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
+				    			ss[i] = ss[i] - correction + reference_amp;
 						else
-				    			ss[i] = ss[i] / correction * characteristic_amp;
+				    			ss[i] = ss[i] / correction * reference_amp;
 /*fprintf(stderr, " ss: %f\n", ss[i]);*/
 						if (ss[i] < 0.0)
 				    			ss[i] = 0.0;

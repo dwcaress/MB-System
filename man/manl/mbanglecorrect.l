@@ -261,7 +261,7 @@ are more evident, the user can run \fBmbbackangle\fP as follows:
 .br
 Given the correction file, \fBmbanglecorrect\fP can now be used
 to apply the correction uniformly to the data:
- 	mbanglecorrect -F41 -Itest.mb41 -Otest_corr.mb41 \
+ 	mbanglecorrect -F41 -Itest.mb41 -Otest_corr.mb41 \\ 
  		-A2/1000 -Sgaf.dat
 .br
 Here the scale of 1000 applied with the \fB-A\fP option implies
@@ -270,7 +270,7 @@ originally equal to the correction function
 at their grazing angle) will end up with values of 1000.
 In order to calculate the grazing angle correction locally,
 the following will work:
- 	mbanglecorrect -F41 -Itest.mb41 -Otest_corr.mb41 \
+ 	mbanglecorrect -F41 -Itest.mb41 -Otest_corr.mb41 \\ 
  		-A2/1000 -D2/1 -N161/80
 .br
 Here the local grazing angle correction for each ping will be
