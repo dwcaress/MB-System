@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 4.6 2000-01-20 00:09:23 caress Exp $
+ *    $Id: mb_format.c,v 4.7 2000-01-25 01:45:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/01/20  00:09:23  caress
+ * Added function mb_get_format().
+ *
  * Revision 4.5  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -83,7 +86,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 4.6 2000-01-20 00:09:23 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 4.7 2000-01-25 01:45:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format(verbose,format,format_num,error)
@@ -205,6 +208,7 @@ int	*error;
 	    if (suffix_len >= 4 && suffix_len <= 6)
 		{
 		strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		fileroot[strlen(filename)-suffix_len] = '\0';
 		sscanf(suffix, ".mb%d", format);
 		found = MB_YES;
 		}
@@ -223,6 +227,7 @@ int	*error;
 		if (suffix_len == 4)
 		    {
 		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    *format = 41;
 		    found = MB_YES;
 		    }
@@ -236,7 +241,7 @@ int	*error;
 	    i = format_alias_table[*format];
 
 	    /* print output debug statements */
-	    if (verbose >= 2)
+	    if (verbose >= 0)
 		    {
 		    fprintf(stderr,"\ndbg2  Old format id aliased to current value in MBIO function <%s>\n",
 			    function_name);
