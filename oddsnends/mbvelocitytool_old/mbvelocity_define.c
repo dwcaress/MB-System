@@ -54,8 +54,10 @@
 #define k_main_window			29	
 #define k_mb_file_sel_board		30	
 #define k_cancel_mb_file_sel_box	31	
+#define k_filelist_list			32	
+#define k_selection_text		33	
 
-#define k_max_widget			31	
+#define k_max_widget			33	
 
 
 /*******************************************************/
