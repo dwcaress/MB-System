@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.17 1995-10-23 19:26:45 caress Exp $
+ *    $Id: mbbath.c,v 4.18 1995-10-23 19:32:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1995/10/23  19:26:45  caress
+ * Now uses depth offset as correction after bathymetry is
+ * calculated rather than before raytracing.
+ *
  * Revision 4.16  1995/09/22  18:40:21  caress
  * Added SB2100 specific fix for bad range scale.
  *
@@ -139,7 +143,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.17 1995-10-23 19:26:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.18 1995-10-23 19:32:03 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -1089,9 +1093,9 @@ and stdout.";
 				angles_forward,flags,
 				&depth_offset,&error);
 
-			/* use user specified draught */
+			/* add user specified draught */
 			if (draught > 0.0)
-				depth_offset = draught;
+				depth_offset = depth_offset + draught;
 
 			/* if needed get roll correction */
 			if (nroll > 0 && kind == MB_DATA_DATA)
