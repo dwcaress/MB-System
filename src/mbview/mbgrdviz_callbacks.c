@@ -67,7 +67,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.1 2003-12-10 03:18:57 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.2 2004-02-24 22:52:28 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -81,19 +81,20 @@ char	**pargv;
 /* widgets */
 int	mbview_id[MBV_MAX_WINDOWS];
 extern 	Widget mainWindow;
-Widget	pushButton_openoverlay[MBV_MAX_WINDOWS];
-Widget	pushButton_openroute[MBV_MAX_WINDOWS];
-Widget	pushButton_opensite[MBV_MAX_WINDOWS];
-Widget	pushButton_opennav[MBV_MAX_WINDOWS];
-Widget	pushButton_openswath[MBV_MAX_WINDOWS];
-Widget	pushButton_saveroute[MBV_MAX_WINDOWS];
-Widget	pushButton_savesite[MBV_MAX_WINDOWS];
 Widget	fileSelectionList;
 Widget	fileSelectionText;
 
 /* function prototypes */
-int do_mbgrdviz_dismiss_notify(int id);
+int do_mbgrdviz_dismiss_notify(int instance);
 void do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data);
 
 /*
  * Motif required Headers
@@ -279,7 +280,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	/* initialize mbview_id list */
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 	    {
-	    mbview_id[i] == -1;
+	    mbview_id[i] = MB_NO;
 	    }
 	
 	return(0);
@@ -305,110 +306,244 @@ do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_da
 	
 	/* set title to open primary grid */
 	ac = 0;
-	if (mode <= MBGRDVIZ_OPENGRID)
-		{
-		XtSetArg(args[ac], XmNtitle, "Open GMT Grid File"); ac++;
-		}
-	
-	/* else set title to open overlay grid */
-	else if (mode == MBGRDVIZ_OPENOVERLAY)
-		{
-		XtSetArg(args[ac], XmNtitle, "Open Overlay GMT Grid File"); ac++;
-		}
-	
-	/* else set title to open route data */
-	else if (mode == MBGRDVIZ_OPENROUTE)
-		{
-		XtSetArg(args[ac], XmNtitle, "Open Route File"); ac++;
-		}
-	
-	/* else set title to open site data */
-	else if (mode == MBGRDVIZ_OPENSITE)
-		{
-		XtSetArg(args[ac], XmNtitle, "Open Site File"); ac++;
-		}
-	
-	/* else set title to open nav data */
-	else if (mode == MBGRDVIZ_OPENNAV)
-		{
-		XtSetArg(args[ac], XmNtitle, "Open Navigation Datalist File"); ac++;
-		}
-	
-	/* else set title to save route data */
-	else if (mode == MBGRDVIZ_SAVEROUTE)
-		{
-		XtSetArg(args[ac], XmNtitle, "Save Route File"); ac++;
-		}
-	
-	/* else set title to save site data */
-	else if (mode == MBGRDVIZ_SAVESITE)
-		{
-		XtSetArg(args[ac], XmNtitle, "Save Site File"); ac++;
-		}
-		
+	XtSetArg(args[ac], XmNtitle, "Open GMT Grid File"); ac++;
 	XtSetValues(dialogShell_open, args, ac);
 	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
 
 	
 	/* open primary grid */
 	ac = 0;
-	if (mode <= MBGRDVIZ_OPENGRID)
-		{
-        	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.grd", 
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.grd", 
                 				XmRXmString, 0, &argok);
-        	XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-		}
-	
-	/* else open overlay grid */
-	else if (mode == MBGRDVIZ_OPENOVERLAY)
-		{
-        	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.grd", 
-                				XmRXmString, 0, &argok);
-        	XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-		}
-	
-	/* else open route data */
-	else if (mode == MBGRDVIZ_OPENROUTE)
-		{
-        	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
-                				XmRXmString, 0, &argok);
-        	XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-		}
-	
-	/* else open site data */
-	else if (mode == MBGRDVIZ_OPENSITE)
-		{
-        	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
-                				XmRXmString, 0, &argok);
-        	XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-		}
-	
-	/* else open nav data */
-	else if (mode == MBGRDVIZ_OPENNAV)
-		{
-        	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*mb-1", 
-                				XmRXmString, 0, &argok);
-        	XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-		}
-	
-	/* else save route data */
-	else if (mode == MBGRDVIZ_SAVEROUTE)
-		{
-        	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
-                				XmRXmString, 0, &argok);
-        	XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-		}
-	
-	/* else save site data */
-	else if (mode == MBGRDVIZ_SAVESITE)
-		{
-        	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
-                				XmRXmString, 0, &argok);
-        	XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-		}
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 
 	XtSetArg(args[ac], XmNuserData, actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Open Overlay GMT Grid File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.grd", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_OPENOVERLAY * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Open Route File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Open Site File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Open Navigation Datalist File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.mb-1", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Open Swath Datalist File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.mb-1", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Save Route File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_SAVEROUTE * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Save Site File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
     
 }
 /*---------------------------------------------------------------------------------------*/
@@ -416,6 +551,8 @@ void
 do_mbgrdviz_close( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mbgrdviz_close\n");
 }
 /*---------------------------------------------------------------------------------------*/
 
@@ -426,28 +563,31 @@ do_mbgrdviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_dismiss_notify(int id)
+int do_mbgrdviz_dismiss_notify(int instance)
 {
 	char function_name[] = "do_mbgrdviz_dismiss_notify";
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
-	int	instance;
 	int	i, j, k;
 	
 	/* set mbview window <id> to inactive */
-	instance = -1;
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-	    {
-	    if (mbview_id[i] == id)
-	    	{
-		mbview_id[i] = -1;
-		instance = i;
+	if (instance >= 0 && instance < MBV_MAX_WINDOWS
+		&& mbview_id[instance] == MB_YES)
+		{
+		mbview_id[instance] = MB_NO;
 		}
-	    }
-	if (instance < 0)
-	    {
-	    fprintf(stderr, "Unable to free mbview - mbview window %d not found in loal list...\n", id);
-	    }
+	else
+	    	{
+	   	fprintf(stderr, "Unable to free mbview - mbview window %d not found in local list...\n", 
+				instance);
+	    	}
+
+	/* update widgets of remaining mbview windows */
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (mbview_id[i] == MB_YES)
+			status = mbview_update(verbose, i, &error);
+		}
 	
 	return(status);
 }
@@ -603,7 +743,9 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 	int	mbv_display_mode;
 	int	mbv_mouse_mode;
 	int	mbv_grid_mode;
-	int	mbv_grid_shade_mode;
+	int	mbv_primary_shade_mode;
+	int	mbv_slope_shade_mode;
+	int	mbv_secondary_shade_mode;
 	int	mbv_grid_contour_mode;
 	int	mbv_site_view_mode;
 	int	mbv_route_view_mode;
@@ -652,7 +794,6 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 	double	mbv_primary_ymax;
 	double	mbv_primary_dx;
 	double	mbv_primary_dy;
-	float	*mbv_primary_rawdata;
 	float	*mbv_primary_data;
 
 	/* get next instance number */
@@ -749,7 +890,9 @@ fprintf(stderr, "using internal test grid...\n");
 		mbv_display_mode = MBV_DISPLAY_2D;
 		mbv_mouse_mode = MBV_MOUSE_MOVE;
 		mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
-		mbv_grid_shade_mode = MBV_SHADE_VIEW_SLOPE;
+		mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
+		mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
+		mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
 		mbv_grid_contour_mode = MBV_VIEW_OFF;
 		mbv_site_view_mode = MBV_VIEW_OFF;
 		mbv_route_view_mode = MBV_VIEW_OFF;
@@ -789,6 +932,14 @@ fprintf(stderr, "using internal test grid...\n");
 			{
 			mbv_display_projection_mode = mbv_primary_grid_projection_mode;
 			strcpy(mbv_display_projection_id,mbv_primary_grid_projection_id);
+			}
+			
+		/* else if grid geographic and covers much of the world use spheroid */
+		else if (mbv_primary_xmax - mbv_primary_xmin > 15.0
+			|| mbv_primary_ymax - mbv_primary_ymin > 15.0)
+			{
+			mbv_display_projection_mode = MBV_PROJECTION_SPHEROID;
+			sprintf(mbv_display_projection_id, "SPHEROID", projectionid);
 			}
 			
 		/* else if grid geographic then use appropriate UTM zone for non-polar grids */
@@ -839,7 +990,9 @@ fprintf(stderr, "using internal test grid...\n");
 					mbv_display_mode,
 					mbv_mouse_mode,
 					mbv_grid_mode,
-					mbv_grid_shade_mode,
+					mbv_primary_shade_mode,
+					mbv_slope_shade_mode,
+					mbv_secondary_shade_mode,
 					mbv_grid_contour_mode,
 					mbv_site_view_mode,
 					mbv_route_view_mode,
@@ -907,131 +1060,49 @@ fprintf(stderr, "using internal test grid...\n");
 			{
 fprintf(stderr,"about to open mbview instance:%d\n",instance);
 			status = mbview_open(verbose, instance, &error);
-fprintf(stderr,"done opening mbview instance:%d  id:%d\n",instance, mbview_id[instance]);
-			}
-			
-		/* add menus for opening more data for this instance */
-		if (status == MB_SUCCESS)
-			{
-			/* add pushbutton for opening overlay grid */
-    			ac = 0;
-        		tmp0 = (XmString) BX_CONVERT(pulldownMenu_openoverlay, button_name_ptr, 
-                		XmRXmString, 0, &argok);
-        		XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        		XtSetArg(args[ac], XmNfontList, 
-        		    BX_CONVERT(pulldownMenu_openoverlay, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        		    XmRFontList, 0, &argok)); if (argok) ac++;
-        		pushButton_openoverlay[instance] = (Widget) XmCreatePushButton(pulldownMenu_openoverlay,
-        		    button_name_ptr,
-        		    args, 
-        		    ac);
-        		XmStringFree((XmString)tmp0);
-        		XtManageChild(pushButton_openoverlay[instance]);
-			actionid = MBGRDVIZ_OPENOVERLAY * MBV_MAX_WINDOWS + instance;
-			XtAddCallback(pushButton_openoverlay[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
+			if (status == MB_SUCCESS)
+				mbview_id[instance] = MB_YES;
+			else
+				mbview_id[instance] = MB_NO;
+fprintf(stderr,"done opening mbview instance:%d\n",instance);
 
-			/* add pushbutton for opening route file */
-    			ac = 0;
-        		tmp0 = (XmString) BX_CONVERT(pulldownMenu_openroute, button_name_ptr, 
-                		XmRXmString, 0, &argok);
-        		XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        		XtSetArg(args[ac], XmNfontList, 
-        		    BX_CONVERT(pulldownMenu_openroute, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        		    XmRFontList, 0, &argok)); if (argok) ac++;
-        		pushButton_openroute[instance] = (Widget) XmCreatePushButton(pulldownMenu_openroute,
-        		    button_name_ptr,
-        		    args, 
-        		    ac);
-        		XmStringFree((XmString)tmp0);
-        		XtManageChild(pushButton_openroute[instance]);
-			actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
-			XtAddCallback(pushButton_openroute[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
+			/* add action button */
+			if (status == MB_SUCCESS)
+				{
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_openoverlay,
+					"Open Overlay Grid", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_opensite,
+					"Open Site File", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_openroute,
+					"Open Route File", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_opennav,
+					"Open Navigation", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_openswath,
+					"Open Swath Data", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_savesite,
+					"Save Site File", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_saveroute,
+					"Save Route File", 
+					MBV_PICKMASK_NONE, &error);
 
-			/* add pushbutton for opening site file */
-    			ac = 0;
-        		tmp0 = (XmString) BX_CONVERT(pulldownMenu_opensite, button_name_ptr, 
-                		XmRXmString, 0, &argok);
-        		XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        		XtSetArg(args[ac], XmNfontList, 
-        		    BX_CONVERT(pulldownMenu_opensite, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        		    XmRFontList, 0, &argok)); if (argok) ac++;
-        		pushButton_opensite[instance] = (Widget) XmCreatePushButton(pulldownMenu_opensite,
-        		    button_name_ptr,
-        		    args, 
-        		    ac);
-        		XmStringFree((XmString)tmp0);
-        		XtManageChild(pushButton_opensite[instance]);
-			actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
-			XtAddCallback(pushButton_opensite[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
-
-			/* add pushbutton for opening nav file */
-    			ac = 0;
-        		tmp0 = (XmString) BX_CONVERT(pulldownMenu_opennav, button_name_ptr, 
-                		XmRXmString, 0, &argok);
-        		XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        		XtSetArg(args[ac], XmNfontList, 
-        		    BX_CONVERT(pulldownMenu_opennav, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        		    XmRFontList, 0, &argok)); if (argok) ac++;
-        		pushButton_opennav[instance] = (Widget) XmCreatePushButton(pulldownMenu_opennav,
-        		    button_name_ptr,
-        		    args, 
-        		    ac);
-        		XmStringFree((XmString)tmp0);
-        		XtManageChild(pushButton_opennav[instance]);
-			actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
-			XtAddCallback(pushButton_opennav[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
-
-			/* add pushbutton for opening swath file */
-    			ac = 0;
-        		tmp0 = (XmString) BX_CONVERT(pulldownMenu_openswath, button_name_ptr, 
-                		XmRXmString, 0, &argok);
-        		XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        		XtSetArg(args[ac], XmNfontList, 
-        		    BX_CONVERT(pulldownMenu_openswath, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        		    XmRFontList, 0, &argok)); if (argok) ac++;
-        		pushButton_openswath[instance] = (Widget) XmCreatePushButton(pulldownMenu_openswath,
-        		    button_name_ptr,
-        		    args, 
-        		    ac);
-        		XmStringFree((XmString)tmp0);
-        		XtManageChild(pushButton_openswath[instance]);
-			actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
-			XtAddCallback(pushButton_openswath[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
-
-			/* add pushbutton for saving route file */
-    			ac = 0;
-        		tmp0 = (XmString) BX_CONVERT(pulldownMenu_saveroute, button_name_ptr, 
-                		XmRXmString, 0, &argok);
-        		XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        		XtSetArg(args[ac], XmNfontList, 
-        		    BX_CONVERT(pulldownMenu_saveroute, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        		    XmRFontList, 0, &argok)); if (argok) ac++;
-        		pushButton_saveroute[instance] = (Widget) XmCreatePushButton(pulldownMenu_saveroute,
-        		    button_name_ptr,
-        		    args, 
-        		    ac);
-        		XmStringFree((XmString)tmp0);
-        		XtManageChild(pushButton_saveroute[instance]);
-			actionid = MBGRDVIZ_SAVEROUTE * MBV_MAX_WINDOWS + instance;
-			XtAddCallback(pushButton_saveroute[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
-
-			/* add pushbutton for saving site file */
-    			ac = 0;
-        		tmp0 = (XmString) BX_CONVERT(pulldownMenu_savesite, button_name_ptr, 
-                		XmRXmString, 0, &argok);
-        		XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        		XtSetArg(args[ac], XmNfontList, 
-        		    BX_CONVERT(pulldownMenu_savesite, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        		    XmRFontList, 0, &argok)); if (argok) ac++;
-        		pushButton_savesite[instance] = (Widget) XmCreatePushButton(pulldownMenu_savesite,
-        		    button_name_ptr,
-        		    args, 
-        		    ac);
-        		XmStringFree((XmString)tmp0);
-        		XtManageChild(pushButton_savesite[instance]);
-			actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
-			XtAddCallback(pushButton_savesite[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
-
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_open_region,
+					"Open Region as New View", 
+					MBV_PICKMASK_REGION, &error);
+				}
 			}
 
 		}
@@ -1050,7 +1121,6 @@ int do_mbgrdviz_openoverlay(int instance, char *input_file_ptr)
         Cardinal cdc = 0;
         Boolean  argok = False;
         XmString    tmp0;
-	int	actionid;
 	char	*testname = "Internal Test Grid";
 	
 	/* mbview parameters */
@@ -2542,5 +2612,271 @@ int do_mbgrdviz_opentest(int instance,
 			}
 	
 	return(status);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	char function_name[] = "do_mbgrdviz_open_region";
+	int	status = MB_SUCCESS;
+	int	projectionid, utmzone;
+	double	reference_lon;
+        Cardinal ac = 0;
+        Arg      args[256];
+        Cardinal cdc = 0;
+        Boolean  argok = False;
+        XmString    tmp0;
+	int	actionid;
+	double	xx, yy;
+	int	ixmin, ixmax, jymin, jymax;
+	int	i, j, k, ksource;
+	
+	/* existing mbview instance */
+	int	instance_source;
+	struct mbview_struct *data_source;
+	char	button_name_source[MB_PATH_MAXLINE];
+	
+	/* new mbview instance */
+	int	instance;
+	char	button_name[MB_PATH_MAXLINE];
+	
+	/* mbview parameters */
+	int 	(*mbview_dismiss_notify)(int id);
+	char	mbv_title[MB_PATH_MAXLINE];
+	int	mbv_xo;
+	int	mbv_yo;
+	int	mbv_width;
+	int	mbv_height;
+	int	mbv_lorez_dimension;
+	int	mbv_hirez_dimension;
+	int	mbv_primary_nxy;
+	int	mbv_primary_nx;
+	int	mbv_primary_ny;
+	double	mbv_primary_min;
+	double	mbv_primary_max;
+	double	mbv_primary_xmin;
+	double	mbv_primary_xmax;
+	double	mbv_primary_ymin;
+	double	mbv_primary_ymax;
+	double	mbv_primary_dx;
+	double	mbv_primary_dy;
+	float	*mbv_primary_data;
+   
+    	/* get source mbview instance */
+	instance_source = (int) client_data;
+fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);
+
+	/* get new instance number */
+	if (instance_source >= 0 && instance_source < MBV_MAX_WINDOWS)
+		{
+		status = mbview_init(verbose, &instance, &error);
+		if (instance < 0)
+			{
+			fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n", 
+			MBV_MAX_WINDOWS);
+			status = MB_FAILURE;
+			}
+		}
+	else
+		{
+		status = MB_FAILURE;
+		}
+	    
+    	/* check data source for region to extract */
+	if (status == MB_SUCCESS)
+		{
+		/* get source data */
+		mbview_getdataptr(verbose, instance_source, &data_source, &error);
+					
+		/* extract the grid from the source */
+		if (data_source->region_type != MBV_REGION_QUAD)
+			status = MB_FAILURE;
+		}
+	    
+    	/* extract data from source and create new mbview instance */
+	if (status == MB_SUCCESS)
+		{
+		/* get source data */
+		mbview_getdataptr(verbose, instance_source, &data_source, &error);
+
+		/* get button name */
+		sscanf(data_source->title,"MBgrdviz: %s", button_name_source);
+		sprintf(button_name,"Region from %s", button_name_source);
+
+		/* set parameters */
+		sprintf(mbv_title, "MBgrdviz: %s\n", button_name);
+		mbv_xo = 200;
+		mbv_yo = 200;
+		mbv_width = 560;
+		mbv_height = 500;
+		mbv_lorez_dimension = data_source->lorez_dimension;
+		mbv_hirez_dimension = data_source->hirez_dimension;
+
+		/* set basic mbview window parameters */
+		status = mbview_setwindowparms(verbose, instance,
+					&do_mbgrdviz_dismiss_notify,
+					mbv_title,
+					mbv_xo,
+					mbv_yo,
+					mbv_width,
+					mbv_height,
+					mbv_lorez_dimension,
+					mbv_hirez_dimension,
+					&error);
+					
+		/* extract the grid from the source */
+		mbv_primary_dx = data_source->primary_dx;
+		mbv_primary_dy = data_source->primary_dy;
+		mbv_primary_xmin = MIN(data_source->region.cornerpoints[0].xgrid,
+					data_source->region.cornerpoints[3].xgrid);
+		mbv_primary_xmax = MAX(data_source->region.cornerpoints[0].xgrid,
+					data_source->region.cornerpoints[3].xgrid);
+		mbv_primary_ymin = MIN(data_source->region.cornerpoints[0].ygrid,
+					data_source->region.cornerpoints[3].ygrid);
+		mbv_primary_ymax = MAX(data_source->region.cornerpoints[0].ygrid,
+					data_source->region.cornerpoints[3].ygrid);
+		ixmin = (mbv_primary_xmin
+				- data_source->primary_xmin) 
+				/ mbv_primary_dx;
+		ixmax = ((mbv_primary_xmax
+				- data_source->primary_xmin) 
+				/ mbv_primary_dx) + 1;
+		jymin = (mbv_primary_ymin
+				- data_source->primary_ymin) 
+				/ mbv_primary_dy;
+		jymax = ((mbv_primary_ymax
+				- data_source->primary_ymin) 
+				/ mbv_primary_dy) + 1;
+		ixmin = MAX(ixmin, 0);
+		ixmax = MIN(ixmax, data_source->primary_nx - 1);
+		jymin = MAX(jymin, 0);
+		jymax = MIN(jymax, data_source->primary_ny - 1);
+		mbv_primary_xmin = data_source->primary_xmin + mbv_primary_dx * ixmin;
+		mbv_primary_xmax = data_source->primary_xmin + mbv_primary_dx * ixmax;
+		mbv_primary_ymin = data_source->primary_ymin + mbv_primary_dy * jymin;
+		mbv_primary_ymax = data_source->primary_ymin + mbv_primary_dy * jymax;
+		mbv_primary_nx = ixmax - ixmin + 1;
+		mbv_primary_ny = jymax - jymin + 1;
+		mbv_primary_nxy = mbv_primary_nx * mbv_primary_ny;
+		status = mb_malloc(verbose, sizeof(float) * mbv_primary_nxy, 
+    				&mbv_primary_data,
+				&error);
+		mbv_primary_min = data_source->primary_nodatavalue;
+		mbv_primary_max = data_source->primary_nodatavalue;
+		for (i=0;i<mbv_primary_nx;i++)
+			{
+			for (j=0;j<mbv_primary_ny;j++)
+				{
+				k = i * mbv_primary_ny + j;
+				ksource = (i + ixmin) * data_source->primary_ny + (j + jymin);
+				mbv_primary_data[k] = data_source->primary_data[ksource];
+				if (mbv_primary_data[k] != data_source->primary_nodatavalue)
+					{
+					if (mbv_primary_min == data_source->primary_nodatavalue
+						|| mbv_primary_data[k] < mbv_primary_min)
+						{
+						mbv_primary_min = mbv_primary_data[k];
+						}
+					if (mbv_primary_max == data_source->primary_nodatavalue
+						|| mbv_primary_data[k] > mbv_primary_max)
+						{
+						mbv_primary_max = mbv_primary_data[k];
+						}
+					}
+				}
+			}
+
+		/* set basic mbview view controls */
+		if (status == MB_SUCCESS)
+		status = mbview_setviewcontrols(verbose, instance,
+					data_source->display_mode,
+					data_source->mouse_mode,
+					data_source->grid_mode,
+					data_source->primary_shade_mode,
+					data_source->slope_shade_mode,
+					data_source->secondary_shade_mode,
+					data_source->grid_contour_mode,
+					data_source->site_view_mode,
+					data_source->route_view_mode,
+					data_source->nav_view_mode,
+					data_source->navdrape_view_mode,
+					data_source->exageration,
+					data_source->modelelevation3d,
+					data_source->modelazimuth3d,
+					data_source->viewelevation3d,
+					data_source->viewazimuth3d,
+					data_source->illuminate_magnitude,
+					data_source->illuminate_elevation,
+					data_source->illuminate_azimuth,
+					data_source->slope_magnitude,
+					data_source->overlay_shade_magnitude,
+					data_source->overlay_shade_center,
+					data_source->overlay_shade_mode,
+					data_source->contour_interval,
+					data_source->display_projection_mode,
+					data_source->display_projection_id,
+					&error);
+
+		/* set more mbview control values */
+		if (status == MB_SUCCESS)
+		status = mbview_setprimarygrid(verbose, instance,
+					data_source->primary_grid_projection_mode,
+					data_source->primary_grid_projection_id,
+					data_source->primary_nodatavalue,
+					mbv_primary_nx,
+					mbv_primary_ny,
+					mbv_primary_min,
+					mbv_primary_max,
+					mbv_primary_xmin,
+					mbv_primary_xmax,
+					mbv_primary_ymin,
+					mbv_primary_ymax,
+					mbv_primary_dx,
+					mbv_primary_dy,
+					mbv_primary_data,
+					&error);
+		if (status == MB_SUCCESS)
+		status = mbview_setprimarycolortable(verbose, instance,
+					data_source->primary_colortable,
+					data_source->primary_colortable_mode,
+					data_source->primary_colortable_min,
+					data_source->primary_colortable_max,
+					&error);
+		if (status == MB_SUCCESS)
+		status = mbview_setslopecolortable(verbose, instance,
+					data_source->slope_colortable,
+					data_source->slope_colortable_mode,
+					data_source->slope_colortable_min,
+					data_source->slope_colortable_max,
+					&error);
+		if (status == MB_SUCCESS)
+		status = mbview_enableeditsites(verbose, instance,
+					&error);
+		if (status == MB_SUCCESS)
+		status = mbview_enableeditroutes(verbose, instance,
+					&error);
+
+		/* open up mbview window */
+		if (status == MB_SUCCESS)
+			{
+fprintf(stderr,"about to open mbview instance:%d\n",instance);
+			status = mbview_open(verbose, instance, &error);
+			if (status == MB_SUCCESS)
+				mbview_id[instance] = MB_YES;
+			else
+				mbview_id[instance] = MB_NO;
+fprintf(stderr,"done opening mbview instance:%d\n",instance);
+
+			/* add action button */
+			if (status == MB_SUCCESS)
+				{
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_open_region,
+					"Open Region as New View", 
+					MBV_PICKMASK_REGION, &error);
+				}
+			}
+
+		}
 }
 /*---------------------------------------------------------------------------------------*/

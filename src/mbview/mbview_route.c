@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.0 2003-12-02 20:38:34 caress Exp $
+ *    $Id: mbview_route.c,v 5.1 2004-02-24 22:52:29 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:34  caress
+ * Making version number 5.0
+ *
  * Revision 1.2  2003/11/25 01:43:19  caress
  * MBview version generated during EW0310.
  *
@@ -70,7 +73,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.0 2003-12-02 20:38:34 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.1 2004-02-24 22:52:29 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -412,38 +415,15 @@ fprintf(stderr,"Called mbview_addroute:%d\n",instance);
 	/* loop over the points in the new route */
 	for (i=0;i<npoint;i++)
 		{
-		/* get route positions in grid and display coordinates */
-		status = mbview_projectfromlonlat(instance,
+		/* get route positions in grid coordinates */
+		status = mbview_projectll2xyzgrid(instance,
 				routelon[i], routelat[i], 
-				&xgrid, &ygrid,
-				&xdisplay, &ydisplay);
-				
-		/* get topo from primary grid */
-		nfound = 0;
-		zdata = 0.0;
-		ii = (int)((xgrid - data->primary_xmin) / data->primary_dx);
-		jj = (int)((ygrid - data->primary_ymin) / data->primary_dy);
-		if (ii >= 0 && ii < data->primary_nx - 1
-		    && jj >= 0 && jj < data->primary_ny - 1)
-			{
-			for (iii=ii;iii<=ii+1;iii++)
-			for (jjj=jj;jjj<=jj+1;jjj++)
-			    {
-			    kkk = iii * data->primary_ny + jjj;
-			    if (data->primary_data[kkk] != data->primary_nodatavalue)
-				{
-				nfound++;
-				zdata += data->primary_data[kkk];
-				}
-			    }
-			}
-		if (nfound > 0)
-			zdata /= (double)nfound;
-		else
-			zdata = 0.0;
-		    
-		/* get zdisplay */
-		zdisplay = view->zscale * (zdata - view->zorigin);
+				&xgrid, &ygrid, &zdata);
+
+		/* get route positions in display coordinates */
+		status = mbview_projectll2display(instance,
+				routelon[i], routelat[i], zdata,
+				&xdisplay, &ydisplay, &zdisplay);
 			
 		/* add the route point */
 		mbview_route_add(instance, iroute, i,
@@ -554,6 +534,9 @@ fprintf(stderr,"Called mbview_getroute:%d\n",instance);
 			routelat[*npointtotal] = data->routes[route].points[i].ylat ;
 			waypoint[*npointtotal] = MB_YES;
 			routetopo[*npointtotal] = data->routes[route].points[i].zdata;
+			distlateral[*npointtotal] = 0.0;
+			distovertopo[*npointtotal] = 0.0;
+			slope[*npointtotal] = 0.0;
 			(*npointtotal)++;
 			
 			/* loop over interior of segment */
@@ -563,6 +546,14 @@ fprintf(stderr,"Called mbview_getroute:%d\n",instance);
 				routelat[*npointtotal] = data->routes[route].segments[i].lspoints[j].ylat;
 				waypoint[*npointtotal] = MB_NO;
 				routetopo[*npointtotal] = data->routes[route].segments[i].lspoints[j].zdata;
+				mbview_projectdistance(instance,
+					routelon[*npointtotal-1], routelat[*npointtotal-1], routetopo[*npointtotal-1],
+					routelon[*npointtotal], routelat[*npointtotal], routetopo[*npointtotal],
+					&distlateral[*npointtotal],
+					&distovertopo[*npointtotal],
+					&slope[*npointtotal]);
+				distlateral[*npointtotal] += distlateral[*npointtotal-1];
+				distovertopo[*npointtotal] += distovertopo[*npointtotal-1];
 				(*npointtotal)++;
 				}
 			}
@@ -573,6 +564,14 @@ fprintf(stderr,"Called mbview_getroute:%d\n",instance);
 		routelat[*npointtotal] = data->routes[route].points[j].ylat ;
 		waypoint[*npointtotal] = MB_YES;
 		routetopo[*npointtotal] = data->routes[route].points[j].zdata;
+		mbview_projectdistance(instance,
+			routelon[*npointtotal-1], routelat[*npointtotal-1], routetopo[*npointtotal-1],
+			routelon[*npointtotal], routelat[*npointtotal], routetopo[*npointtotal],
+			&distlateral[*npointtotal],
+			&distovertopo[*npointtotal],
+			&slope[*npointtotal]);
+		distlateral[*npointtotal] += distlateral[*npointtotal-1];
+		distovertopo[*npointtotal] += distovertopo[*npointtotal-1];
 		(*npointtotal)++;
 		
 		/* get color size and name */
@@ -580,67 +579,35 @@ fprintf(stderr,"Called mbview_getroute:%d\n",instance);
 		*routesize = data->routes[route].size;
 		strcpy(routename, data->routes[route].name);
 		
-		/* calculate distance and slope */
-		mbview_projectll2meters(instance,
-			routelon[0], routelat[0],
-			&xx1, &yy1);
-		zz1 = routetopo[0];
-		distlateral[0] = 0.0;
-		distovertopo[0] = 0.0;
+		/* recalculate slope */
 		for (j=0;j<*npointtotal;j++)
 			{
-			if (j < *npointtotal - 1)
-				{
-				mbview_projectll2meters(instance,
-					routelon[j+1], routelat[j+1],
-					&xx2, &yy2);
-				zz2 = routetopo[j+1];
-				}
 			if (j == 0 && *npointtotal == 1)
 				{
-				dxx = 0.0;
-				dyy = 0.0;
-				dzz = 0.0;
+				slope[j] = 0.0;
 				}
 			else if (j == 0)
 				{
-				dxx = xx2 - xx1;
-				dyy = yy2 - yy1;
-				dzz = zz2 - zz1;
+				if (distlateral[j+1] > 0.0)
+					slope[j] = (routetopo[j+1] - routetopo[j]) / distlateral[j+1];
+				else
+					slope[j] = 0.0;
 				}
 			else if (j == *npointtotal - 1)
 				{
-				dxx = xx1 - xx0;
-				dyy = yy1 - yy0;
-				dzz = zz1 - zz0;
+				if ((distlateral[j] - distlateral[j-1]) > 0.0)
+					slope[j] = (routetopo[j] - routetopo[j-1]) 
+							/ (distlateral[j] - distlateral[j-1]);
+				else
+					slope[j] = 0.0;
 				}
 			else
 				{
-				dxx = xx2 - xx0;
-				dyy = yy2 - yy0;
-				dzz = zz2 - zz0;
-				}
-			dll = sqrt(dxx * dxx + dyy * dyy);
-			doo = sqrt(dxx * dxx + dyy * dyy + dzz * dzz);
-			if (j > 0)
-				{
-				distlateral[j] += dll;
-				distovertopo[j] += doo;
-				}
-			if (dll > 0.0)
-				slope[j] = dzz / dll;
-			else
-				slope[j] = 0.0;
-			xx0 = xx1;
-			yy0 = yy1;
-			zz0 = zz1;
-			xx1 = xx2;
-			yy1 = yy2;
-			zz1 = zz2;
-			if (j < *npointtotal - 1)
-				{
-				distlateral[j+1] = distlateral[j];
-				distovertopo[j+1] = distovertopo[j];
+				if ((distlateral[j+1] - distlateral[j-1]) > 0.0)
+					slope[j] = (routetopo[j+1] - routetopo[j-1]) 
+							/ (distlateral[j+1] - distlateral[j-1]);
+				else
+					slope[j] = 0.0;
 				}
 			}
 		}

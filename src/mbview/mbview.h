@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.1 2004-01-06 21:11:03 caress Exp $
+ *    $Id: mbview.h,v 5.2 2004-02-24 22:52:29 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/01/06 21:11:03  caress
+ * Added pick region capability.
+ *
  * Revision 5.0  2003/12/02 20:38:31  caress
  * Making version number 5.0
  *
@@ -66,6 +69,8 @@
 #define	MBV_PROJECTION_GEOGRAPHIC	0
 #define	MBV_PROJECTION_PROJECTED	1
 #define	MBV_PROJECTION_ALREADYPROJECTED	2
+#define	MBV_PROJECTION_SPHEROID		3
+#define	MBV_PROJECTION_ELLIPSOID	4
 
 /* display mode defines */
 #define	MBV_DISPLAY_2D		0
@@ -157,6 +162,18 @@
 #define MBV_STATMASK5	0x20
 #define MBV_STATMASK6	0x40
 #define MBV_STATMASK7	0x80
+
+/* pick sensitivity masks */
+#define MBV_PICKMASK_NONE			0
+#define MBV_PICKMASK_ONEPOINT			1
+#define MBV_PICKMASK_TWOPOINT			2
+#define MBV_PICKMASK_AREA			4
+#define MBV_PICKMASK_REGION			8
+#define MBV_PICKMASK_SITE			16
+#define MBV_PICKMASK_ROUTE			32
+#define MBV_PICKMASK_NAVONEPOINT		64
+#define MBV_PICKMASK_NAVTWOPOINT		128
+#define MBV_PICKMASK_NAVANY			256
 
 /* structure declarations */
 struct mbview_contoursegment_struct {
@@ -282,17 +299,17 @@ struct mbview_struct {
 	int	primary_colortable_mode;
 	double	primary_colortable_min;
 	double	primary_colortable_max;
-	double	primary_shade_mode;
+	int	primary_shade_mode;
 	int	slope_colortable;
 	int	slope_colortable_mode;
 	double	slope_colortable_min;
 	double	slope_colortable_max;
-	double	slope_shade_mode;
+	int	slope_shade_mode;
 	int	secondary_colortable;
 	int	secondary_colortable_mode;
 	double	secondary_colortable_min;
 	double	secondary_colortable_max;
-	double	secondary_shade_mode;
+	int	secondary_shade_mode;
 
 	/* view controls */
 	double	exageration;
@@ -428,7 +445,9 @@ int mbview_setviewcontrols(int verbose, int instance,
 			int	display_mode,
 			int	mouse_mode,
 			int	grid_mode,
-			int	grid_shade_mode,
+			int	primary_shade_mode,
+			int	slope_shade_mode,
+			int	secondary_shade_mode,
 			int	grid_contour_mode,
 			int	site_view_mode,
 			int	route_view_mode,
@@ -658,10 +677,15 @@ int mbview_enableeditroutes(int verbose, int instance,
 			int *error);
 int mbview_enableviewnavs(int verbose, int instance,
 			int *error);
+int mbview_addaction(int verbose, int instance,
+			void	(mbview_action_notify)(Widget, XtPointer, XtPointer),
+			char	*label,
+			int	sensitive,
+			int *error);
 
 int mbview_open(int verbose, int instance, int *error);
 int mbview_update(int verbose, int instance, int *error);
-int mbview_destroy(int verbose, int instance, int *error);
+int mbview_destroy(int verbose, int instance, int destroywidgets, int *error);
 
 int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel);

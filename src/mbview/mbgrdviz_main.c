@@ -51,6 +51,12 @@ extern void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
 extern Pixmap XPM_PIXMAP(Widget, char **);
 extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 
+/*
+ * Declarations for shell callbacks.
+ */
+extern void do_mbgrdviz_quit(Widget, XtPointer, XtPointer);
+extern void BxExitCB(Widget, XtPointer, XtPointer);
+
 /* Begin user code block <globals> */
 
 #include <stdio.h>
@@ -65,7 +71,7 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 /* global mbview variables */
 Widget mainWindow;
 
-static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.0 2003-12-02 20:26:32 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.1 2004-02-24 22:52:29 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] =  "MBgrdviz is a simple vizualization demo for GMT grd files.";
 static char usage_message[] = "mbgrdviz [-Igrdfile -V -H]";
@@ -190,8 +196,8 @@ int main( int argc, char **argv)
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBgrdviz"); ac++;
-    XtSetArg(args[ac], XmNx, 257); ac++;
-    XtSetArg(args[ac], XmNy, 196); ac++;
+    XtSetArg(args[ac], XmNx, 299); ac++;
+    XtSetArg(args[ac], XmNy, 85); ac++;
     XtSetArg(args[ac], XmNwidth, 197); ac++;
     XtSetArg(args[ac], XmNheight, 214); ac++;
     topLevelShell = XtCreatePopupShell("topLevelShell",
@@ -199,6 +205,8 @@ int main( int argc, char **argv)
         parent,
         args, 
         ac);
+    XtAddCallback(topLevelShell, XmNdestroyCallback, do_mbgrdviz_quit, (XtPointer)0);
+    XtAddCallback(topLevelShell, XmNdestroyCallback, BxExitCB, (XtPointer)0);
     mainWindow_mbgrdviz = (Widget)CreatemainWindow_mbgrdviz(topLevelShell);
     XtManageChild(mainWindow_mbgrdviz);
     XtPopup(XtParent(mainWindow_mbgrdviz), XtGrabNone);

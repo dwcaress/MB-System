@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.1 2004-01-06 21:11:04 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.2 2004-02-24 22:52:30 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/01/06 21:11:04  caress
+ * Added pick region capability.
+ *
  * Revision 5.0  2003/12/02 20:38:34  caress
  * Making version number 5.0
  *
@@ -74,6 +77,12 @@
 #define MBV_WINDOW_HEIGHT_THRESHOLD 	700
 
 #define	MBV_NUM_COLORS   11
+
+#define	MBV_NUM_ACTIONS   20
+
+/* Spheroid parameters */
+#define	MBV_SPHEROID_RADIUS   6371000.0
+
 
 /* library variables */
 /*   note that global mbview variables will only be defined when
@@ -228,6 +237,9 @@ struct mbview_world_struct
     int			plot_done;
     int			plot_interrupt_allowed;
     int			work_function_set;
+    int			naction;
+    int			actionsensitive[MBV_NUM_ACTIONS];
+    Widget		pushButton_action[MBV_NUM_ACTIONS];
        
     /* cursors */
     Cursor TargetBlackCursor;
@@ -251,6 +263,13 @@ struct mbview_world_struct
     void *display_pjptr;
     double mtodeglon;
     double mtodeglat;
+    double sphere_reflon;
+    double sphere_reflat;
+    double sphere_refx;
+    double sphere_refy;
+    double sphere_refz;
+    double sphere_eulerforward[9];
+    double sphere_eulerreverse[9];
     
     /* drawing variables */
     Dimension gl_width;
@@ -296,7 +315,6 @@ struct mbview_world_struct
     double yorigin;
     double zorigin;
     double scale;
-    double zscale;
     
     /* relevant mbio defaults */
     double timegap;
@@ -372,18 +390,50 @@ void set_mbview_navdrape_view_mode(int instance, int mode);
 void set_mbview_display_mode(int instance, int mode);
 void set_mbview_colortable_mode(int instance, int mode);
 void set_mbview_colortable(int instance, int mode);
+void do_mbview_set_projection_label(int instance);
 void set_mbview_label_string(Widget w, String str);
 void set_mbview_label_multiline_string(Widget w, String str);
 void get_mbview_text_string(Widget w, String str);
 void do_mbview_xevents();
+int mbview_zscalegridpoint(int instance, int k);
+int mbview_zscalepoint(int instance, 
+				int global, double offset_factor, 
+				struct mbview_point_struct *point);
 int mbview_projectforward(int instance, int needlonlat,
-				double xgrid, double ygrid,
+				double xgrid, double ygrid, double zgrid,
 				double *xlon, double *ylat,
-				double *xdisplay, double *ydisplay);
+				double *xdisplay, double *ydisplay, double *zdisplay);
 int mbview_projectinverse(int instance, int needlonlat,
-				double xdisplay, double ydisplay,
+				double xdisplay, double ydisplay, double zdisplay,
 				double *xlon, double *ylat,
 				double *xgrid, double *ygrid);
+int mbview_projectfromlonlat(int instance,
+				double xlon, double ylat, double zdata,
+				double *xgrid, double *ygrid,
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectgrid2ll(int instance,
+				double xgrid, double ygrid,
+				double *xlon, double *ylat);
+int mbview_projectll2grid(int instance,
+				double xlon, double ylat,
+				double *xgrid, double *ygrid);
+int mbview_projectll2display(int instance,
+				double xlon, double ylat, double zdata,
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectdisplay2ll(int instance,
+				double xdisplay, double ydisplay, double zdisplay,
+				double *xlon, double *ylat);
+int mbview_projectdistance(int instance,
+				double xlon1, double ylat1, double zdata1,
+				double xlon2, double ylat2, double zdata2,
+				double *distancelateral, 
+				double *distanceoverground,
+				double *slope);
+int mbview_spheroid_forward(int instance, double xlon, double ylat,
+			double *xx, double *yy, double *zz);
+int mbview_spheroid_inverse(int instance, double xx, double yy, double zz, 
+			double *xlon, double *ylat);
+
 int mbview_getzdata(int instance, 
 			double xgrid, double ygrid,
 			int *found, double *zdata);
@@ -404,5 +454,6 @@ int do_mbview_setbackgroundwork(int instance);
 int do_mbview_settimer();
 int do_mbview_workfunction(XtPointer client_data);
 int mbview_setcolorparms(int instance);
-
+int mbview_update_sensitivity(int verbose, int instance, int *error);
+int mbview_action_sensitivity(int instance);
 /*--------------------------------------------------------------------*/

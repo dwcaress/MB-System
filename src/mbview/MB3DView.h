@@ -81,6 +81,7 @@ typedef struct _MB3DViewData
     Widget mbview_pushButton_shadeparms;
     Widget mbview_pushButton_resolution;
     Widget mbview_pushButton_sitelist;
+    Widget mbview_pushButton_projections;
     Widget mbview_cascadeButton_mouse;
     Widget mbview_pulldownMenu_mouse;
     Widget mbview_toggleButton_mode_move;
@@ -226,6 +227,15 @@ typedef struct _MB3DViewData
     Widget mbview_list_sitelist;
     Widget mbview_pushButton_sitelist_dismiss;
     Widget mbview_pushButton_sitelist_apply;
+    Widget mbview_dialogShell_projection;
+    Widget mbview_bulletinBoard_projection;
+    Widget mbview_label_displayprojection;
+    Widget mbview_radioBox_projection;
+    Widget mbview_toggleButton_geographic;
+    Widget mbview_toggleButton_utm;
+    Widget mbview_toggleButton_spheroid;
+    Widget mbview_label_projection;
+    Widget mbview_pushButton_projection_dismiss;
     
     /*
      * All methods and data..

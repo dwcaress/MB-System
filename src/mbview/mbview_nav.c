@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.0 2003-12-02 20:38:33 caress Exp $
+ *    $Id: mbview_nav.c,v 5.1 2004-02-24 22:52:28 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/02 20:38:33  caress
+ * Making version number 5.0
+ *
  * Revision 1.2  2003/11/25 01:43:19  caress
  * MBview version generated during EW0310.
  *
@@ -67,7 +70,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.0 2003-12-02 20:38:33 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.1 2004-02-24 22:52:28 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -425,11 +428,9 @@ int mbview_addnav(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	nfound;
 	int	nadded;
 	int	inav;
-	double	zdata;
-	int	i, j, ii, jj, iii, jjj, kkk;
+	int	i, j;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -566,142 +567,81 @@ int mbview_addnav(int verbose, int instance,
 			if (data->navs[inav].cdp == MB_YES)
 				data->navs[inav].navpts[i].cdp = cdp[i];
 			
+			/* ************************************************* */
 			/* get nav positions in grid and display coordinates */
 			data->navs[inav].navpts[i].point.xlon = navlon[i];
 			data->navs[inav].navpts[i].point.ylat = navlat[i];
+			data->navs[inav].navpts[i].point.zdata = navz[i];
 			status = mbview_projectfromlonlat(instance,
 					data->navs[inav].navpts[i].point.xlon, 
 					data->navs[inav].navpts[i].point.ylat, 
+					data->navs[inav].navpts[i].point.zdata, 
 					&data->navs[inav].navpts[i].point.xgrid, 
 					&data->navs[inav].navpts[i].point.ygrid,
 					&data->navs[inav].navpts[i].point.xdisplay, 
-					&data->navs[inav].navpts[i].point.ydisplay);
-			data->navs[inav].navpts[i].point.zdata = navz[i];
-			data->navs[inav].navpts[i].point.zdisplay 
-				= view->zscale * (navz[i] - view->zorigin);
+					&data->navs[inav].navpts[i].point.ydisplay, 
+					&data->navs[inav].navpts[i].point.zdisplay);
 
-			/* get center on-bottom nav positions in grid and display coordinates */
+			/* ************************************************* */
+			/* get center on-bottom nav positions in grid coordinates */
 			data->navs[inav].navpts[i].pointcntr.xlon = navlon[i];
 			data->navs[inav].navpts[i].pointcntr.ylat = navlat[i];
-			status = mbview_projectfromlonlat(instance,
+			status = mbview_projectll2xyzgrid(instance,
 					data->navs[inav].navpts[i].pointcntr.xlon, 
 					data->navs[inav].navpts[i].pointcntr.ylat, 
 					&data->navs[inav].navpts[i].pointcntr.xgrid, 
-					&data->navs[inav].navpts[i].pointcntr.ygrid,
+					&data->navs[inav].navpts[i].pointcntr.ygrid, 
+					&data->navs[inav].navpts[i].pointcntr.zdata);
+
+			/* get center on-bottom nav positions in display coordinates */
+			status = mbview_projectll2display(instance,
+					data->navs[inav].navpts[i].pointcntr.xlon, 
+					data->navs[inav].navpts[i].pointcntr.ylat, 
+					data->navs[inav].navpts[i].pointcntr.zdata, 
 					&data->navs[inav].navpts[i].pointcntr.xdisplay, 
-					&data->navs[inav].navpts[i].pointcntr.ydisplay);
+					&data->navs[inav].navpts[i].pointcntr.ydisplay, 
+					&data->navs[inav].navpts[i].pointcntr.zdisplay);
 
-			/* get topo from primary grid */
-			nfound = 0;
-			zdata = 0.0;
-			ii = (int)((data->navs[inav].navpts[i].pointcntr.xgrid 
-					- data->primary_xmin) / data->primary_dx);
-			jj = (int)((data->navs[inav].navpts[i].pointcntr.ygrid 
-					- data->primary_ymin) / data->primary_dy);
-			if (ii >= 0 && ii < data->primary_nx - 1
-			    && jj >= 0 && jj < data->primary_ny - 1)
-				{
-				for (iii=ii;iii<=ii+1;iii++)
-				for (jjj=jj;jjj<=jj+1;jjj++)
-				    {
-				    kkk = iii * data->primary_ny + jjj;
-				    if (data->primary_data[kkk] != data->primary_nodatavalue)
-					{
-					nfound++;
-					zdata += data->primary_data[kkk];
-					}
-				    }
-				}
-			if (nfound > 0)
-				{
-				zdata /= (double)nfound;
-				data->navs[inav].navpts[i].draped = MB_NO;
-				}
-			else
-				zdata = 0.0;
-			data->navs[inav].navpts[i].pointcntr.zdata = zdata;
-			data->navs[inav].navpts[i].pointcntr.zdisplay 
-				= view->zscale * (data->navs[inav].navpts[i].pointcntr.zdata - view->zorigin);
-
+			/* ************************************************* */
 			/* get port swathbound nav positions in grid and display coordinates */
 			data->navs[inav].navpts[i].pointport.xlon = navportlon[i];
 			data->navs[inav].navpts[i].pointport.ylat = navportlat[i];
-			status = mbview_projectfromlonlat(instance,
+			status = mbview_projectll2xyzgrid(instance,
 					data->navs[inav].navpts[i].pointport.xlon, 
 					data->navs[inav].navpts[i].pointport.ylat, 
 					&data->navs[inav].navpts[i].pointport.xgrid, 
-					&data->navs[inav].navpts[i].pointport.ygrid,
+					&data->navs[inav].navpts[i].pointport.ygrid, 
+					&data->navs[inav].navpts[i].pointport.zdata);
+
+			/* get port on-bottom nav positions in display coordinates */
+			status = mbview_projectll2display(instance,
+					data->navs[inav].navpts[i].pointport.xlon, 
+					data->navs[inav].navpts[i].pointport.ylat, 
+					data->navs[inav].navpts[i].pointport.zdata, 
 					&data->navs[inav].navpts[i].pointport.xdisplay, 
-					&data->navs[inav].navpts[i].pointport.ydisplay);
+					&data->navs[inav].navpts[i].pointport.ydisplay, 
+					&data->navs[inav].navpts[i].pointport.zdisplay);
 
-			/* get topo from primary grid */
-			nfound = 0;
-			zdata = 0.0;
-			ii = (int)((data->navs[inav].navpts[i].pointport.xgrid 
-					- data->primary_xmin) / data->primary_dx);
-			jj = (int)((data->navs[inav].navpts[i].pointport.ygrid 
-					- data->primary_ymin) / data->primary_dy);
-			if (ii >= 0 && ii < data->primary_nx - 1
-			    && jj >= 0 && jj < data->primary_ny - 1)
-				{
-				for (iii=ii;iii<=ii+1;iii++)
-				for (jjj=jj;jjj<=jj+1;jjj++)
-				    {
-				    kkk = iii * data->primary_ny + jjj;
-				    if (data->primary_data[kkk] != data->primary_nodatavalue)
-					{
-					nfound++;
-					zdata += data->primary_data[kkk];
-					}
-				    }
-				}
-			if (nfound > 0)
-				zdata /= (double)nfound;
-			else
-				zdata = data->navs[inav].navpts[i].pointcntr.zdata;
-			data->navs[inav].navpts[i].pointport.zdata = zdata;
-			data->navs[inav].navpts[i].pointport.zdisplay 
-				= view->zscale * (data->navs[inav].navpts[i].pointport.zdata - view->zorigin);
-
-			/* get starboard swathbound nav positions in grid and display coordinates */
+			/* ************************************************* */
+			/* get starboard swathbound nav positions in grid coordinates */
 			data->navs[inav].navpts[i].pointstbd.xlon = navstbdlon[i];
 			data->navs[inav].navpts[i].pointstbd.ylat = navstbdlat[i];
-			status = mbview_projectfromlonlat(instance,
+			status = mbview_projectll2xyzgrid(instance,
 					data->navs[inav].navpts[i].pointstbd.xlon, 
 					data->navs[inav].navpts[i].pointstbd.ylat, 
 					&data->navs[inav].navpts[i].pointstbd.xgrid, 
-					&data->navs[inav].navpts[i].pointstbd.ygrid,
-					&data->navs[inav].navpts[i].pointstbd.xdisplay, 
-					&data->navs[inav].navpts[i].pointstbd.ydisplay);
+					&data->navs[inav].navpts[i].pointstbd.ygrid, 
+					&data->navs[inav].navpts[i].pointstbd.zdata);
 
-			/* get topo from primary grid */
-			nfound = 0;
-			zdata = 0.0;
-			ii = (int)((data->navs[inav].navpts[i].pointstbd.xgrid 
-					- data->primary_xmin) / data->primary_dx);
-			jj = (int)((data->navs[inav].navpts[i].pointstbd.ygrid 
-					- data->primary_ymin) / data->primary_dy);
-			if (ii >= 0 && ii < data->primary_nx - 1
-			    && jj >= 0 && jj < data->primary_ny - 1)
-				{
-				for (iii=ii;iii<=ii+1;iii++)
-				for (jjj=jj;jjj<=jj+1;jjj++)
-				    {
-				    kkk = iii * data->primary_ny + jjj;
-				    if (data->primary_data[kkk] != data->primary_nodatavalue)
-					{
-					nfound++;
-					zdata += data->primary_data[kkk];
-					}
-				    }
-				}
-			if (nfound > 0)
-				zdata /= (double)nfound;
-			else
-				zdata = data->navs[inav].navpts[i].pointcntr.zdata;
-			data->navs[inav].navpts[i].pointstbd.zdata = zdata;
-			data->navs[inav].navpts[i].pointstbd.zdisplay 
-				= view->zscale * (data->navs[inav].navpts[i].pointstbd.zdata - view->zorigin);
+			/* get starboard on-bottom nav positions in display coordinates */
+			status = mbview_projectll2display(instance,
+					data->navs[inav].navpts[i].pointstbd.xlon, 
+					data->navs[inav].navpts[i].pointstbd.ylat, 
+					data->navs[inav].navpts[i].pointstbd.zdata, 
+					&data->navs[inav].navpts[i].pointstbd.xdisplay, 
+					&data->navs[inav].navpts[i].pointstbd.ydisplay, 
+					&data->navs[inav].navpts[i].pointstbd.zdisplay);
+			/* ************************************************* */
 			}
 			
 		/* drape the segments */
@@ -1272,6 +1212,7 @@ int mbview_navpicksize(int instance)
 			mbview_projectinverse(instance, MB_YES,
 				data->navpick.xpoints[i].xdisplay, 
 				data->navpick.xpoints[i].ydisplay,
+				data->navpick.xpoints[i].zdisplay,
 				&data->navpick.xpoints[i].xlon, 
 				&data->navpick.xpoints[i].ylat, 
 				&data->navpick.xpoints[i].xgrid, 
@@ -1283,8 +1224,13 @@ int mbview_navpicksize(int instance)
 			if (found == MB_NO)
 				data->navpick.xpoints[i].zdata 
 					= data->navpick.endpoints[0].zdata;
-			data->navpick.xpoints[i].zdisplay = view->zscale 
-				* (data->navpick.xpoints[i].zdata - view->zorigin);
+			mbview_projectll2display(instance,
+				data->navpick.xpoints[i].xlon, 
+				data->navpick.xpoints[i].ylat, 
+				data->navpick.xpoints[i].zdata ,
+				&data->navpick.xpoints[i].xdisplay, 
+				&data->navpick.xpoints[i].ydisplay,
+				&data->navpick.xpoints[i].zdisplay);
 			}
 
 		/* drape the V marker line segments */
@@ -1316,6 +1262,7 @@ int mbview_navpicksize(int instance)
 			mbview_projectinverse(instance, MB_YES,
 				data->navpick.xpoints[i+4].xdisplay, 
 				data->navpick.xpoints[i+4].ydisplay,
+				data->navpick.xpoints[i+4].zdisplay,
 				&data->navpick.xpoints[i+4].xlon, 
 				&data->navpick.xpoints[i+4].ylat, 
 				&data->navpick.xpoints[i+4].xgrid, 
@@ -1327,8 +1274,15 @@ int mbview_navpicksize(int instance)
 			if (found == MB_NO)
 				data->navpick.xpoints[i+4].zdata 
 					= data->navpick.endpoints[1].zdata;
-			data->navpick.xpoints[i].zdisplay = view->zscale 
-				* (data->navpick.xpoints[i+4].zdata - view->zorigin);
+			data->navpick.xpoints[i].zdisplay = view->scale 
+				* (data->exageration * data->navpick.xpoints[i+4].zdata - view->zorigin);
+			mbview_projectll2display(instance,
+				data->navpick.xpoints[i+4].xlon, 
+				data->navpick.xpoints[i+4].ylat, 
+				data->navpick.xpoints[i+4].zdata ,
+				&data->navpick.xpoints[i+4].xdisplay, 
+				&data->navpick.xpoints[i+4].ydisplay,
+				&data->navpick.xpoints[i+4].zdisplay);
 			}
 
 		/* drape the V marker line segments */
