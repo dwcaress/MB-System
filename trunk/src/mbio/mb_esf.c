@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.3 2003-07-30 16:19:20 caress Exp $
+ *    $Id: mb_esf.c,v 5.4 2004-02-24 22:29:02 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/07/30 16:19:20  caress
+ * Changes during iSSP meeting July 2003.
+ *
  * Revision 5.2  2003/07/27 21:58:57  caress
  * Added mb_mergesort function for 5.0.0
  *
@@ -46,7 +49,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.3 2003-07-30 16:19:20 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.4 2004-02-24 22:29:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -286,8 +289,8 @@ int mb_esf_open(int verbose, char *esffile,
 			    else
 				{
 				mb_swap_double(&(esf->edit[i].time_d));
-				sbeam = mb_swap_int(esf->edit[i].beam);
-				saction = mb_swap_int(esf->edit[i].action);
+				esf->edit[i].beam = mb_swap_int(esf->edit[i].beam);
+				esf->edit[i].action = mb_swap_int(esf->edit[i].action);
 				}
 #endif
 /*fprintf(stderr,"EDITS READ: i:%d edit: %f %d %d  use:%d\n",
@@ -541,9 +544,9 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 		}
 
 	/* write out the edit */
-/*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
 	if (esf->esffp != NULL)
 	    {		
+/*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
 #ifdef BYTESWAPPED
 	    mb_swap_double(&time_d);
 	    beam = mb_swap_int(beam);
@@ -611,9 +614,9 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf,
 		}
 
 	/* write out the edit */
-/* fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
 	if (esf->essfp != NULL)
 	    {		
+/*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
 #ifdef BYTESWAPPED
 	    mb_swap_double(&time_d);
 	    beam = mb_swap_int(beam);

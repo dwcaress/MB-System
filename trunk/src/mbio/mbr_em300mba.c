@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.18 2003-11-24 20:44:51 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.19 2004-02-24 22:29:02 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2003/11/24 20:44:51  caress
+ * Fixes to more gracefully handle unsupported datagrams.
+ *
  * Revision 5.17  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -242,7 +245,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.18 2003-11-24 20:44:51 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.19 2004-02-24 22:29:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -904,6 +907,11 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_EOF;
 					}
 				record_size_save = *record_size;
+
+#ifdef BYTESWAPPED
+				/* swap bytes if necessary */
+				record_size_save = (int) mb_swap_int(record_size_save);
+#endif
 				}
 				
 			/* look for label */
