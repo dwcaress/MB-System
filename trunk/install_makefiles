@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.13 2004-05-21 23:06:29 caress Exp $
+#    $Id: install_makefiles,v 5.14 2004-10-06 22:06:32 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.13 2004-05-21 23:06:29 caress Exp $
+#   $Id: install_makefiles,v 5.14 2004-10-06 22:06:32 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.13  2004/05/21 23:06:29  caress
+#   Supporting GMT 4.0
+#
 #   Revision 5.12  2004/04/16 19:35:28  caress
 #   Changed MacOs X $LFLAG settings so OpenMotif can be used instead of LessTif.
 #
@@ -177,9 +180,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #       MOTIFINCDIR	Location of Motif include files.
 #       MOTIFLIBS	X and Motif libraries required for graphical tools.
 #       OPENGLLIBS	OpenGL libraries required for future graphical tools.
-#       GMTVERSION	Version of GMT to be used and linked with.
-#				The options are 3.0, 3.1, 3.2, or 3.3.
-#				The default is 3.3.
+#       GMTVERSION	Version of GMT to be used and linked with. GMT 
+#                       versions prior to 4.0 are no longer supported, so
+#                       under most circumstances this parameter need not
+#                       be set.
+#				The default is 4.0.
+#                            
 #	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
 #	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
 #				and pslib.h
@@ -248,7 +254,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/dt/include";
 #	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11";
-#	$GMTVERSION = "3.4";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
 #	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
@@ -267,7 +272,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
 #	$MOTIFLIBS = "-lXm -lXt -lX11";
-#	$GMTVERSION = "3.1";
 #	$GMTLIBDIR = "/big/sys/GMT3.1/src";
 #	$GMTINCDIR = "/big/sys/GMT3.1/src";
 #	$NETCDFLIBDIR = "/big/sys/netcdf-3.4/lib";
@@ -352,7 +356,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/sw/include";
 #	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-#	$GMTVERSION = "3.4";
 #	$GMTLIBDIR = "/sw/lib";
 #	$GMTINCDIR = "/sw/include";
 #	$NETCDFLIBDIR = "/sw/lib";
@@ -372,7 +375,6 @@ $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/sw/include";
 $MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 $OPENGLLIBS = "-lGLw -lGLU -lGL";
-$GMTVERSION = "4.0";
 $GMTLIBDIR = "/usr/local/gmt4/lib";
 $GMTINCDIR = "/usr/local/gmt4/include";
 $NETCDFLIBDIR = "/sw/lib";
@@ -399,7 +401,9 @@ if ($BYTESWAPPED eq "YES")
 	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
 	}
 
-# use GMT 3.0 instead of GMT 3.1 if desired
+# sets version of GMT
+# Note: only GMT 4.0 and later is actively supported, and the code support
+# within MB-System for GMT 3 releases will not be supported in the future.
 if ($GMTVERSION eq "3.0")
 	{
 	$CFLAGS = "$CFLAGS -DGMT3_0";
