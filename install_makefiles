@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.16 2005-02-20 07:25:08 caress Exp $
+#    $Id: install_makefiles,v 5.17 2005-03-25 04:01:02 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -57,10 +57,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.16 2005-02-20 07:25:08 caress Exp $
+#   $Id: install_makefiles,v 5.17 2005-03-25 04:01:02 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.16  2005/02/20 07:25:08  caress
+#   Release 5.0.6
+#
 #   Revision 5.15  2004/10/18 03:32:55  caress
 #   Added -P preset option.
 #
@@ -402,8 +405,8 @@ $preset = 	($opt_P || $opt_p);
 if ($preset eq "macosxfink")
 	{
 	print "\nUsing preset configuration for MacOs X by fink in /sw...\n";
-	$FINKPREFIX = "/sw";
-	$GMTVERSION = "3.4";
+	$FINKPREFIX = "@FINKPREFIX@";
+	$GMTVERSION = "4.0";
 	$MBSYSTEM_HOME = "$FINKPREFIX";
 	$OS = "DARWIN";
 	$CC = "cc";
