@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiomrg.c	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 4.4 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbr_sbsiomrg.c,v 4.5 1995-02-14 15:10:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.3  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -76,7 +79,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.4 1994-10-21 12:20:01 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.5 1995-02-14 15:10:38 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiomrg";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -265,6 +268,37 @@ int	*error;
 	mb_io_ptr->new_kind = dataplus->kind;
 	mb_io_ptr->new_error = *error;
 
+	/* print debug statements */
+	if (verbose >= 5 && status == MB_SUCCESS 
+		&& dataplus->kind == MB_DATA_DATA)
+		{
+		fprintf(stderr,"\ndbg5  New ping read by MBIO function <%s>\n",
+				function_name);
+		fprintf(stderr,"dbg5  Raw ping values:\n");
+		fprintf(stderr,"dbg5       year:       %d\n",data->year);
+		fprintf(stderr,"dbg5       day:        %d\n",data->day);
+		fprintf(stderr,"dbg5       min:        %d\n",data->min);
+		fprintf(stderr,"dbg5       sec:        %d\n",data->sec);
+		fprintf(stderr,"dbg5       lon2u:      %d\n",data->lon2u);
+		fprintf(stderr,"dbg5       lon2b:      %d\n",data->lon2b);
+		fprintf(stderr,"dbg5       lat2u:      %d\n",data->lat2u);
+		fprintf(stderr,"dbg5       lat2b:      %d\n",data->lat2b);
+		fprintf(stderr,"dbg5       spare1[0]:  %d\n",data->spare1[0]);
+		fprintf(stderr,"dbg5       spare1[1]:  %d\n",data->spare1[1]);
+		fprintf(stderr,"dbg5       spare1[2]:  %d\n",data->spare1[2]);
+		fprintf(stderr,"dbg5       sbtim:      %d\n",data->sbtim);
+		fprintf(stderr,"dbg5       sbhdg:      %d\n",data->sbhdg);
+		fprintf(stderr,"dbg5       spare2[0]:  %d\n",data->spare2[0]);
+		fprintf(stderr,"dbg5       spare2[1]:  %d\n",data->spare2[1]);
+		fprintf(stderr,"dbg5       spare2[2]:  %d\n",data->spare2[2]);
+		fprintf(stderr,"dbg5       spare2[3]:  %d\n",data->spare2[3]);
+		fprintf(stderr,"dbg5       spare2[4]:  %d\n",data->spare2[4]);
+		for (i=0;i<MB_BEAMS_RAW_SBSIOMRG;i++)
+			fprintf(stderr,"dbg5       deph[%d]: %d  dist[%d]: %d\n",
+				i,data->deph[i],
+				i,data->dist[i]);
+		}
+
 	/* translate values to current ping variables 
 		in mbio descriptor structure */
 	if (status == MB_SUCCESS 
@@ -423,46 +457,46 @@ int	*error;
 				mb_io_ptr->new_bath[i+id] = data->deph[i];
 				mb_io_ptr->new_bath_acrosstrack[i+id] 
 					= data->dist[i];
-				mb_io_ptr->new_bath_acrosstrack[i+id] = 0.0;
+				mb_io_ptr->new_bath_alongtrack[i+id] = 0.0;
 				}
 			}
 
 		/* print debug statements */
 		if (verbose >= 5)
 			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
+			fprintf(stderr,"\ndbg5  New ping read by MBIO function <%s>\n",
 				function_name);
-			fprintf(stderr,"dbg4  New ping values:\n");
-			fprintf(stderr,"dbg4       error:      %d\n",
+			fprintf(stderr,"dbg5  New ping values:\n");
+			fprintf(stderr,"dbg5       error:      %d\n",
 				mb_io_ptr->new_error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+			fprintf(stderr,"dbg5       time_i[0]:  %d\n",
 				mb_io_ptr->new_time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+			fprintf(stderr,"dbg5       time_i[1]:  %d\n",
 				mb_io_ptr->new_time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+			fprintf(stderr,"dbg5       time_i[2]:  %d\n",
 				mb_io_ptr->new_time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+			fprintf(stderr,"dbg5       time_i[3]:  %d\n",
 				mb_io_ptr->new_time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+			fprintf(stderr,"dbg5       time_i[4]:  %d\n",
 				mb_io_ptr->new_time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+			fprintf(stderr,"dbg5       time_i[5]:  %d\n",
 				mb_io_ptr->new_time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+			fprintf(stderr,"dbg5       time_i[6]:  %d\n",
 				mb_io_ptr->new_time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
+			fprintf(stderr,"dbg5       time_d:     %f\n",
 				mb_io_ptr->new_time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
+			fprintf(stderr,"dbg5       longitude:  %f\n",
 				mb_io_ptr->new_lon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
+			fprintf(stderr,"dbg5       latitude:   %f\n",
 				mb_io_ptr->new_lat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
+			fprintf(stderr,"dbg5       speed:      %f\n",
 				mb_io_ptr->new_speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
+			fprintf(stderr,"dbg5       heading:    %f\n",
 				mb_io_ptr->new_heading);
-			fprintf(stderr,"dbg4       beams_bath: %d\n",
+			fprintf(stderr,"dbg5       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
+			  fprintf(stderr,"dbg5       bath[%d]: %f  bathdist[%d]: %f\n",
 				i,mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
