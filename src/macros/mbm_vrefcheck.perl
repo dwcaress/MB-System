@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl 
+#! /home/hs/bin/perl 
 #
 # Purpose:
 #   Perl shellscript to generate plot of crosstrack seafloor slope
