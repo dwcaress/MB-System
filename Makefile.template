@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template	5/24/94
-#     $Id: Makefile.template,v 4.0 1994-05-24 18:33:14 caress Exp $
+#     $Id: Makefile.template,v 4.1 1994-10-31 14:27:40 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 24, 1994
 
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/05/24  18:33:14  caress
+# First cut.
+#
 #
 #
 
@@ -26,7 +29,7 @@ clean:
 	cd bin; rm -f *
 	cd lib; rm -f *
 	cd include; rm -f *
-	cd man/man1; rm -f *
+	cd man/manl; rm -f *
 	cd man; rm -f -r cat1 whatis
 	cd src; make clean
 
