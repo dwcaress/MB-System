@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA05 README FILE:
+MB-SYSTEM VERSION 5.0.BETA07 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta06 release of the MB-System software package for 
+5.0.beta07 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta07     August 10, 2001
 Version 5.0.beta06     July 30, 2001
 Version 5.0.beta05     July 23, 2001
 Version 5.0.beta04     July 20, 2001
@@ -89,6 +90,13 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA07 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.beta07 release of MB-System includes 
+a number of small fixes related to processing of
+EM120 data from the R/V Revelle.
 
 MB-SYSTEM VERSION 5.0.BETA06 RELEASE NOTES:
 ------------------------------------------
@@ -577,10 +585,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.6 2001-07-31 00:51:15 caress Exp $
+RCS ID: $Id: README,v 5.7 2001-08-10 23:10:08 dcaress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.6  2001-07-30 17:51:15-07  caress
+Release 5.0.beta06
+
 # Revision 5.5  2001/07/27  19:28:38  caress
 # Release 5.0.beta06.
 #
