@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1b.c	7/19/94
- *	$Id: mbsys_mr1b.c,v 1.1 1996-03-12 17:21:55 caress Exp $
+ *	$Id: mbsys_mr1b.c,v 4.0 1996-03-12 17:23:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,6 +34,9 @@
  * Date:	July 19, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1996/03/12  17:21:55  caress
+ * Initial revision
+ *
  *
  *
  *
@@ -61,7 +64,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1b.c,v 1.1 1996-03-12 17:21:55 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1b.c,v 4.0 1996-03-12 17:23:04 caress Exp $";
 	char	*function_name = "mbsys_mr1b_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
