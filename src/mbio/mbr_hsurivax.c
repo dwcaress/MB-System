@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsurivax.c	2/2/93
- *	$Id: mbr_hsurivax.c,v 1.1 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mbr_hsurivax.c,v 4.0 1994-07-29 18:59:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1994/07/29  18:46:51  caress
+ * Initial revision
+ *
  *
  */
 
@@ -52,7 +55,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsurivax.c,v 1.1 1994-07-29 18:46:51 caress Exp $";
+ static char res_id[]="$Id: mbr_hsurivax.c,v 4.0 1994-07-29 18:59:33 caress Exp $";
 	char	*function_name = "mbr_alm_hsurivax";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
