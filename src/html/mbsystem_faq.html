@@ -40,6 +40,8 @@ MB-System?</A></B></LI>
 
 <LI><B><A HREF="#MB-FAQ-references">Are there any MB-System References?</A></B></LI>
 
+<LI><B><A HREF="#MB-FAQ-y2k">Is MB-System Y2K compliant?</A></B></LI>
+
 <LI><B><A HREF="#MB-FAQ-whopays">Who pays for MB-System development?</A></B></LI>
 
 <LI><B><A HREF="#MB-FAQ-history">What is the history of MB-System?</A></B></LI>
@@ -164,6 +166,16 @@ Oceans 95 Conference</I>, 997-1000, 1995.</P>
 multibeam data on the R/V Maurice Ewing, <I>Mar. Geophys. Res.</I>, 18,
 631-650, 1996.</P>
 
+<LI><A NAME="MB-FAQ-y2k"></A><B>Is MB-System Y2K compliant?</B></LI>
+
+<P>MB-System is Y2K compliant as of the final release of version 4.6. Surprisingly,
+a number of data formats associated with current commercial products still
+use two digits to represent the year. MB-System treats two digit year values
+as being in the 1900's if the year value is greater than or equal to 62,
+and in the 2000's if the year value is less than 62. The use of 1962 derives
+from the invention of the multibeam sonar in that year - there are no digital
+swath mapping data available from an earlier time.</P>
+
 <LI><A NAME="MB-FAQ-whopays"></A><B>Who pays for MB-System development?</B></LI>
 
 <P>MB-System is primarily supported by a grant from the National Science
@@ -237,7 +249,7 @@ file formats and sonar system specific characteristics.</P>
 </UL>
 
 <CENTER><P><BR>
-Last Updated: $Date: 1998-10-04 04:32:24 $ $Revision: 4.4 $</P></CENTER>
+Last Updated: $Date: 1999-04-16 01:22:25 $ $Revision: 4.5 $</P></CENTER>
 
 <P>
 <HR WIDTH="100%"></P>
