@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.22 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.23 1996-06-05 21:06:27 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.21  1996/01/26  21:23:30  caress
  * Version 4.3 distribution
  *
@@ -127,7 +130,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.22 1996-04-22 13:21:19 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.23 1996-06-05 21:06:27 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -528,14 +531,14 @@ int	*error;
 			{
 			pixel_size = data->pixel_size_12khz;
 			gain_db = data->ping_gain_12khz 
-				+ data->transmitter_attenuation_12khz
+				- data->transmitter_attenuation_12khz
 				- 30.0;
 			}
 		else
 			{
 			pixel_size = data->pixel_size_36khz;
 			gain_db = data->ping_gain_36khz 
-				+ data->transmitter_attenuation_36khz
+				- data->transmitter_attenuation_36khz
 				- 30.0;
 			}
 		gain_factor = pow(10.0, (-gain_db / 20.0));
@@ -937,11 +940,11 @@ int	*error;
 			}
 		if (data->frequency[0] == 'L')
 			gain_db = data->ping_gain_12khz 
-				+ data->transmitter_attenuation_12khz
+				- data->transmitter_attenuation_12khz
 				- 30.0;
 		else
 			gain_db = data->ping_gain_36khz 
-				+ data->transmitter_attenuation_36khz
+				- data->transmitter_attenuation_36khz
 				- 30.0;
 		gain_factor = pow(10.0, (gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.12 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.13 1996-06-05 21:06:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.11  1996/01/26  21:23:30  caress
  * Version 4.3 distribution
  *
@@ -102,7 +105,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.12 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.13 1996-06-05 21:06:27 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -305,14 +308,14 @@ int	*error;
 			{
 			pixel_size = store->pixel_size_12khz;
 			gain_db = store->ping_gain_12khz 
-				+ store->transmitter_attenuation_12khz
+				- store->transmitter_attenuation_12khz
 				- 30.0;
 			}
 		else
 			{
 			pixel_size = store->pixel_size_36khz;
 			gain_db = store->ping_gain_36khz 
-				+ store->transmitter_attenuation_36khz
+				- store->transmitter_attenuation_36khz
 				- 30.0;
 			}
 		gain_factor = pow(10.0, (-gain_db / 20.0));
@@ -592,11 +595,11 @@ int	*error;
 			}
 		if (store->frequency[0] == 'L')
 			gain_db = store->ping_gain_12khz 
-				+ store->transmitter_attenuation_12khz
+				- store->transmitter_attenuation_12khz
 				- 30.0;
 		else
 			gain_db = store->ping_gain_36khz 
-				+ store->transmitter_attenuation_36khz
+				- store->transmitter_attenuation_36khz
 				- 30.0;
 		gain_factor = pow(10.0, (gain_db / 20.0));
 		for (i=0;i<nbath;i++)
@@ -719,6 +722,12 @@ int	*error;
 			ttimes[i] = 0.001*store->travel_time[i];
 			angles[i] = 0.001*store->angle_across[i];
 			angles_forward[i] = 0.01*store->angle_forward[i];
+			if (angles[i] < 0.0)
+				{
+				angles[i] = -angles[i];
+				angles_forward[i] = angles_forward[i]
+					+ 180.0;
+				}
 			angles_null[i] = 0.0;
 			if (store->quality[i] != ' ')
 				flags[i] = MB_YES;
