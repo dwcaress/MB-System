@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.23 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mblist.c,v 4.24 2000-09-11 20:10:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.23  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.22  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -173,7 +176,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.23 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.24 2000-09-11 20:10:02 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V -W]";
@@ -193,7 +196,8 @@ char **argv;
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	FILE	*fp;
+	struct mb_datalist_struct *datalist;
+	double	file_weight;
 	int	format;
 	int	pings;
 	int	lonflip;
@@ -495,7 +499,8 @@ char **argv;
 	/* open file list */
 	if (read_datalist == MB_YES)
 	    {
-	    if ((fp = fopen(read_file,"r")) == NULL)
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -504,8 +509,9 @@ char **argv;
 			program_name);
 		exit(error);
 		}
-	    if (fgets(line,128,fp) != NULL
-		&& sscanf(line,"%s %d",file,&format) == 2)
+	    if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
 		read_data = MB_NO;
@@ -1224,8 +1230,9 @@ char **argv;
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-                if (fgets(line,128,fp) != NULL
-                        && sscanf(line,"%s %d",file,&format) == 2)
+		if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
                         read_data = MB_NO;
@@ -1238,7 +1245,7 @@ char **argv;
 	/* end loop over files in list */
 	}
 	if (read_datalist == MB_YES)
-		fclose (fp);
+		mb_datalist_close(verbose,&datalist,&error);
 
 	/* check memory */
 	if (verbose >= 4)

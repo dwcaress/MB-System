@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.9 2000-06-20 21:00:19 caress Exp $
+ *    $Id: mbmosaic.c,v 4.10 2000-09-11 20:10:02 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  2000/06/20  21:00:19  caress
+ * Moved execution of mbm_grdplot to after deallocation of array memory.
+ *
  * Revision 4.8  1999/10/05  22:04:18  caress
  * Improved the facility for outputting ArcView grids.
  *
@@ -99,7 +102,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.9 2000-06-20 21:00:19 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.10 2000-09-11 20:10:02 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -149,6 +152,8 @@ char **argv;
 	/* mbmosaic control variables */
 	char	filelist[128];
 	char	fileroot[128];
+	struct mb_datalist_struct *datalist;
+	double	file_weight;
 	int	xdim = 0;
 	int	ydim = 0;
 	int	spacing_priority = MB_NO;
@@ -1098,7 +1103,8 @@ char **argv;
 
 	/* read in data */
 	ndata = 0;
-	if ((fp = fopen(filelist,"r")) == NULL)
+	if (status = mb_datalist_open(verbose,&datalist,
+					filelist,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1107,7 +1113,9 @@ char **argv;
 			program_name);
 		exit(error);
 		}
-	while (fscanf(fp,"%s %d",file,&format) != EOF)
+	while ((status = mb_datalist_read(verbose,datalist,
+			file,&format,&file_weight,&error))
+			== MB_SUCCESS)
 		{
 		ndatafile = 0;
 
@@ -1258,7 +1266,7 @@ char **argv;
 			    }
 			    
 			  /* get angles and priorities */
-			  mbmosaic_get_priorities(verbose, priority_mode,  
+			  mbmosaic_get_priorities(verbose, priority_mode, file_weight,  
 				n_priority_angle, priority_angle_angle, priority_angle_priority, 
 				priority_azimuth, priority_azimuth_factor, 
 				beams_bath, beamflag, bath, bathacrosstrack,
@@ -1326,7 +1334,7 @@ char **argv;
 			    }
 			    
 			  /* get angles and priorities */
-			  mbmosaic_get_priorities(verbose, priority_mode,  
+			  mbmosaic_get_priorities(verbose, priority_mode, file_weight, 
 				n_priority_angle, priority_angle_angle, priority_angle_priority, 
 				priority_azimuth, priority_azimuth_factor, 
 				beams_bath, beamflag, bath, bathacrosstrack,
@@ -1391,7 +1399,8 @@ char **argv;
 		} /* end if (format > 0) */
 
 		}
-	fclose(fp);
+	if (datalist != NULL)
+		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed in highest weight pass\n",ndata);
 	if (verbose > 0 && grid_mode == MBMOSAIC_AVERAGE)
@@ -1416,7 +1425,8 @@ char **argv;
 
 	/* read in data */
 	ndata = 0;
-	if ((fp = fopen(filelist,"r")) == NULL)
+	if (status = mb_datalist_open(verbose,&datalist,
+					filelist,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1425,7 +1435,9 @@ char **argv;
 			program_name);
 		exit(error);
 		}
-	while (fscanf(fp,"%s %d",file,&format) != EOF)
+	while ((status = mb_datalist_read(verbose,datalist,
+			file,&format,&file_weight,&error))
+			== MB_SUCCESS)
 		{
 		ndatafile = 0;
 
@@ -1576,7 +1588,7 @@ char **argv;
 			    }
 			    
 			  /* get angles and priorities */
-			  mbmosaic_get_priorities(verbose, priority_mode,  
+			  mbmosaic_get_priorities(verbose, priority_mode, file_weight,  
 				n_priority_angle, priority_angle_angle, priority_angle_priority, 
 				priority_azimuth, priority_azimuth_factor, 
 				beams_bath, beamflag, bath, bathacrosstrack,
@@ -1613,7 +1625,7 @@ char **argv;
 					{
 					xx = wbnd[0] + ii*dx - bathlon[ib];
 					yy = wbnd[2] + jj*dy - bathlat[ib];
-					norm_weight = exp(-(xx*xx + yy*yy)*factor);
+					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
 					grid[kgrid] += norm_weight * amp[ib];
 					norm[kgrid] += norm_weight;
 					sigma[kgrid] += norm_weight * amp[ib] * amp[ib];
@@ -1658,7 +1670,7 @@ char **argv;
 			    }
 			    
 			  /* get angles and priorities */
-			  mbmosaic_get_priorities(verbose, priority_mode,  
+			  mbmosaic_get_priorities(verbose, priority_mode, file_weight,  
 				n_priority_angle, priority_angle_angle, priority_angle_priority, 
 				priority_azimuth, priority_azimuth_factor, 
 				beams_bath, beamflag, bath, bathacrosstrack,
@@ -1695,7 +1707,7 @@ char **argv;
 					{
 					xx = wbnd[0] + ii*dx - sslon[ib];
 					yy = wbnd[2] + jj*dy - sslat[ib];
-					norm_weight = exp(-(xx*xx + yy*yy)*factor);
+					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
 					grid[kgrid] += norm_weight * ss[ib];
 					norm[kgrid] += norm_weight;
 					sigma[kgrid] += norm_weight * ss[ib] * ss[ib];
@@ -1737,7 +1749,8 @@ char **argv;
 		} /* end if (format > 0) */
 
 		}
-	fclose(fp);
+	if (datalist != NULL)
+		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed in averaging pass\n",ndata);
 
@@ -2731,7 +2744,8 @@ int	*error;
  * function mbmosaic_get_priorities obtains data priorities based on
  * grazing angles and look azimuths
  */
-int mbmosaic_get_priorities(verbose, mode,  
+int mbmosaic_get_priorities(verbose, 
+	mode, file_weight, 
 	nangle, aangles, apriorities, 
 	azimuth, factor, 
 	nbath, beamflag, bath, bathacrosstrack,
@@ -2741,6 +2755,7 @@ int mbmosaic_get_priorities(verbose, mode,
 	angles, priorities, error)
 int	verbose;
 int	mode;
+double	file_weight;
 int	nangle;
 double	*aangles;
 double	*apriorities;
@@ -2777,6 +2792,7 @@ int	*error;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       mode:	  %d\n",mode);
+		fprintf(stderr,"dbg2       file_weight:	  %f\n",file_weight);
 		fprintf(stderr,"dbg2       nangle:        %d\n",nangle);
 		fprintf(stderr,"dbg2       grazing angle priorities:\n");
 		for (i=0;i<nangle;i++)
@@ -2971,6 +2987,12 @@ int	*error;
 			}
 		    }
 
+		}
+		
+	/* apply file weighting */
+	for (i=0;i<ndata;i++)
+		{
+		priorities[i] = file_weight * priorities[i];
 		}
 
 	/* print output debug statements */

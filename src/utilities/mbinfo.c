@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.18 1999-03-31 18:33:06 caress Exp $
+ *    $Id: mbinfo.c,v 4.19 2000-09-11 20:10:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1999/03/31 18:33:06  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.17  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -141,7 +144,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.18 1999-03-31 18:33:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.19 2000-09-11 20:10:02 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -290,6 +293,16 @@ char **argv;
 	double	*ssmean = NULL;
 	double	*ssvar = NULL;
 	int	*nssvar = NULL;
+	
+	/* coverage mask variables */
+	int	coverage_mask = MB_NO;
+	int	pass;
+	int	done;
+	int	mask_nx = 0;
+	int	mask_ny = 0;
+	double	mask_dx = 0.0;
+	double	mask_dy = 0.0;
+	int	*mask = NULL;
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
@@ -298,7 +311,8 @@ char **argv;
 	int	read_data;
 	char	line[128];
 	double	speed_apparent, time_d_last;
-	int i, j, k, l, m;
+	int	ix, iy;
+	int	i, j, k, l, m;
 
 	char	*getenv();
 
@@ -316,7 +330,7 @@ char **argv;
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:P:p:R:r:S:s:T:t:Ww")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:P:p:R:r:S:s:T:t:Ww")) != -1)
 	  switch (c) 
 		{
 		case 'B':
@@ -362,6 +376,12 @@ char **argv;
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			sscanf (optarg,"%d/%d", &mask_nx, &mask_ny);
+			coverage_mask = MB_YES;
 			flag++;
 			break;
 		case 'P':
@@ -461,6 +481,12 @@ char **argv;
 		fprintf(output,"dbg2       comments:   %d\n",comments);
 		fprintf(output,"dbg2       file:       %s\n",read_file);
 		fprintf(output,"dbg2       bathy feet: %d\n",bathy_in_feet);
+		fprintf(output,"dbg2       coverage:   %d\n",coverage_mask);
+		if (coverage_mask == MB_YES)
+			{
+			fprintf(output,"dbg2       mask_nx:    %d\n",mask_nx);
+			fprintf(output,"dbg2       mask_ny:    %d\n",mask_ny);
+			}
 		}
 
 	/* if help desired then print it and exit */
@@ -485,6 +511,12 @@ char **argv;
 		are disabled */
 	if (read_datalist == MB_YES)
 		pings_read = 1;
+		
+	/* read only once unless coverage mask requested */
+	pass = 0;
+	done = MB_NO;
+	while (done == MB_NO)
+	{
 
 	/* open file list */
 	if (read_datalist == MB_YES)
@@ -580,7 +612,7 @@ char **argv;
 			status = mb_malloc(verbose,pixels_ss_alloc*sizeof(double),
 					&datacur->sslat,&error);
 		}
-	if (pings_read > 1)
+	if (pings_read > 1 && pass == 0)
 		{
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_malloc(verbose,beams_bath_alloc*sizeof(double),
@@ -610,6 +642,35 @@ char **argv;
 			status = mb_malloc(verbose,pixels_ss_alloc*sizeof(int),
 				&nssvar,&error);
 		}
+		
+	/* if coverage mask requested get cell sizes */
+	if (pass == 1 && coverage_mask == MB_YES)
+	    {
+	    if (mask_nx > 1 && mask_ny <= 0)
+		{
+		if ((lonmax - lonmin) > (latmax - latmin))
+		    {
+		    mask_ny = mask_nx * (latmax - latmin) / (lonmax - lonmin);
+		    }
+		else
+		    {
+		    mask_ny = mask_nx;
+		    mask_nx = mask_ny * (lonmax - lonmin) / (latmax - latmin);
+		    if (mask_ny < 2)
+			mask_ny = 2;
+		    }
+		}
+	    if (mask_nx < 2)
+		mask_nx = 2;
+	    if (mask_ny < 2)
+		mask_ny = 2;
+	    mask_dx = (lonmax - lonmin) / mask_nx;
+	    mask_dy = (latmax - latmin) / mask_ny;
+
+	    /* allocate mask */
+	    status = mb_malloc(verbose,mask_nx*mask_ny*sizeof(int),
+				&mask,&error);
+	    }
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -622,7 +683,7 @@ char **argv;
 		}
 
 	/* initialize data arrays */
-	if (pings_read > 1)
+	if (pass == 0 && pings_read > 1)
 		{
 		for (i=0;i<beams_bath_alloc;i++)
 			{
@@ -643,12 +704,20 @@ char **argv;
 			nssvar[i] = 0;
 			}
 		}
+	if (pass == 1 && coverage_mask == MB_YES)
+		{
+		for (i=0;i<mask_nx*mask_ny;i++)
+		    mask[i] = MB_NO;
+		}
 
 	/* printf out file and format */
-	mb_format_inf(verbose,format_num,&message);
-	fprintf(output,"\nMultibeam Data File:  %s\n",file);
-	fprintf(output,"MBIO Data Format ID:  %d\n",format);
-	fprintf(output,"%s",message);
+	if (pass == 0)
+		{
+		mb_format_inf(verbose,format_num,&message);
+		fprintf(output,"\nMultibeam Data File:  %s\n",file);
+		fprintf(output,"MBIO Data Format ID:  %d\n",format);
+		fprintf(output,"%s",message);
+		}
 
 	/* read and process data */
 	while (error <= MB_ERROR_NO_ERROR)
@@ -677,7 +746,8 @@ char **argv;
 				comment,&error);
 
 			/* increment counters */
-			if (error == MB_ERROR_NO_ERROR 
+			if (pass == 0 
+				&& error == MB_ERROR_NO_ERROR 
 				|| error == MB_ERROR_TIME_GAP)
 				{
 				irec++;
@@ -685,7 +755,9 @@ char **argv;
 				}
 
 			/* print comment records */
-			if (error == MB_ERROR_COMMENT && comments == MB_YES)
+			if (pass == 0 
+				&& error == MB_ERROR_COMMENT 
+				&& comments == MB_YES)
 				{
 				if (icomment == 0)
 					{
@@ -696,7 +768,7 @@ char **argv;
 				}
 
 			/* output error messages */
-			if (error == MB_ERROR_COMMENT)
+			if (pass != 0 || error == MB_ERROR_COMMENT)
 				{
 				/* do nothing */
 				}
@@ -731,8 +803,9 @@ char **argv;
 				}
 
 			/* take note of min and maxes */
-			if (error == MB_ERROR_NO_ERROR 
-				|| error == MB_ERROR_TIME_GAP)
+			if (pass == 0
+				&& (error == MB_ERROR_NO_ERROR 
+				    || error == MB_ERROR_TIME_GAP))
 				{
 				/* update data counts */
 				beams_bath_max 
@@ -893,6 +966,37 @@ char **argv;
 				/* reset time of last ping */
 				time_d_last = time_d;
 				}
+				
+			/* update coverage mask */
+			if (pass == 1 && coverage_mask == MB_YES)
+			    {
+			    for (i=0;i<beams_bath;i++)
+				{
+				if (mb_beam_ok(beamflag[i]))
+				    {
+				    ix = (int)((bathlon[i] - lonmin) / mask_dx);
+				    iy = (int)((bathlat[i] - latmin) / mask_dy);
+				    if (ix >= 0 && ix < mask_nx
+					&& iy >= 0 && iy < mask_ny)
+					{
+					mask[ix+iy*mask_nx] = MB_YES;
+					}
+				    }
+				}
+			    for (i=0;i<pixels_ss;i++)
+				{
+				if (ss[i] > 0.0)
+				    {
+				    ix = (int)((sslon[i] - lonmin) / mask_dx);
+				    iy = (int)((sslat[i] - latmin) / mask_dy);
+				    if (ix >= 0 && ix < mask_nx
+					&& iy >= 0 && iy < mask_ny)
+					{
+					mask[ix+iy*mask_nx] = MB_YES;
+					}
+				    }
+				}
+			    }
 			}
 
 		/* print debug statements */
@@ -907,7 +1011,8 @@ char **argv;
 			}
 
 		/* process the pings */
-		if (pings_read > 2 
+		if (pass == 0
+			&& pings_read > 2 
 			&& nread == pings_read
 			&& (error == MB_ERROR_NO_ERROR 
 			|| error == MB_ERROR_TIME_GAP))
@@ -1081,6 +1186,14 @@ char **argv;
 	}
 	if (read_datalist == MB_YES)
 		fclose (fp);
+		
+	/* figure out if done */
+	if (pass > 0 || coverage_mask == MB_NO)
+	    done = MB_YES;
+	pass++;
+		
+	/* end loop over reading passes */
+	} 
 
 	/* calculate final variances */
 	if (pings_read > 2)
@@ -1259,6 +1372,20 @@ char **argv;
 				ssvar[i],sqrt(ssvar[i]));
 		fprintf(output,"\n");
 		}
+	if (coverage_mask == MB_YES)
+		{
+		fprintf(output,"\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
+		for (j=mask_ny-1;j>=0;j--)
+		    {
+		    fprintf(output, "CM:  ");
+		    for (i=0;i<mask_nx;i++)
+			{
+			k = i + j * mask_nx;
+			fprintf(output, " %1d", mask[k]);
+			}
+		    fprintf(output, "\n");
+		    }
+		}
 
 	/* deallocate memory used for data arrays */
 	mb_free(verbose,&bathmean,&error);
@@ -1270,6 +1397,7 @@ char **argv;
 	mb_free(verbose,&ssmean,&error);
 	mb_free(verbose,&ssvar,&error);
 	mb_free(verbose,&nssvar,&error);
+	mb_free(verbose,&mask,&error);
 
 	/* set program status */
 	status = MB_SUCCESS;

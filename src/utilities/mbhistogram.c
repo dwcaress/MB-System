@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 4.9 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbhistogram.c,v 4.10 2000-09-11 20:10:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.8  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -73,7 +76,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 4.9 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 4.10 2000-09-11 20:10:02 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -93,7 +96,8 @@ char **argv;
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	FILE	*fp;
+	struct mb_datalist_struct *datalist;
+	double	file_weight;
 	int	format;
 	int	format_num;
 	int	pings;
@@ -136,8 +140,8 @@ char **argv;
 	int	gaussian = MB_NO;
 	int	nbins = 0;
 	int	nintervals = 0;
-	double	value_min;
-	double	value_max;
+	double	value_min = 0.0;
+	double	value_max = 128.0;
 	double	dvalue_bin;
 	double	value_bin_min;
 	double	value_bin_max;
@@ -162,6 +166,9 @@ char **argv;
 
 	int	read_data;
 	char	line[128];
+	int	nrec, nvalue;
+	int	nrectot = 0;
+	int	nvaluetot = 0;
 	int	i, j, k, l, m;
 	double	qsnorm();
 
@@ -361,6 +368,20 @@ char **argv;
 		exit(error);
 		}
 
+	/* output some information */
+	if (verbose > 0)
+		{
+		fprintf(stderr, "\nNumber of data bins: %d\n", nbins);
+		fprintf(stderr, "Minimum value:         %f\n", value_min);
+		fprintf(stderr, "Maximum value:         %f\n", value_max);
+		if (mode == MBHISTOGRAM_BATH)
+			fprintf(stderr, "Working on bathymetry data...\n");
+		else if (mode == MBHISTOGRAM_AMP)
+			fprintf(stderr, "Working on beam amplitude data...\n");
+		else
+			fprintf(stderr, "Working on sidescan data...\n");
+		}
+
 	/* get size of bins */
 	dvalue_bin = (value_max - value_min)/(nbins-1);
 	value_bin_min = value_min - 0.5*dvalue_bin;
@@ -377,7 +398,8 @@ char **argv;
 	/* open file list */
 	if (read_datalist == MB_YES)
 	    {
-	    if ((fp = fopen(read_file,"r")) == NULL)
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -386,8 +408,9 @@ char **argv;
 			program_name);
 		exit(error);
 		}
-	    if (fgets(line,128,fp) != NULL
-		&& sscanf(line,"%s %d",file,&format) == 2)
+	    if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
 		read_data = MB_NO;
@@ -458,6 +481,16 @@ char **argv;
 		exit(error);
 		}
 
+	/* output information */
+	if (error == MB_ERROR_NO_ERROR && verbose > 0)
+	    {
+	    fprintf(stderr, "\nprocessing file: %s %d\n", file, format);
+	    }
+
+	/* initialize counting variables */
+	nrec = 0;
+	nvalue = 0;
+
 	/* read and process data */
 	while (error <= MB_ERROR_NO_ERROR)
 		{
@@ -475,6 +508,8 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR 
 			|| error == MB_ERROR_TIME_GAP)
 			{
+			/* increment record counter */
+			nrec++;
 
 			/* do the bathymetry */
 			if (mode == MBHISTOGRAM_BATH)
@@ -482,6 +517,7 @@ char **argv;
 				{
 				if (mb_beam_ok(beamflag[i]))
 					{
+					nvalue++;
 					j = (bath[i] - value_bin_min)
 						/dvalue_bin;
 					if (j >= 0 && j < nbins)
@@ -506,6 +542,7 @@ char **argv;
 				{
 				if (mb_beam_ok(beamflag[i]))
 					{
+					nvalue++;
 					j = (amp[i] - value_bin_min)
 						/dvalue_bin;
 					if (j >= 0 && j < nbins)
@@ -530,6 +567,7 @@ char **argv;
 				{
 				if (ss[i] > 0.0)
 					{
+					nvalue++;
 					j = (ss[i] - value_bin_min)
 						/dvalue_bin;
 					if (j >= 0 && j < nbins)
@@ -553,6 +591,15 @@ char **argv;
 
 	/* close the swath sonar data file */
 	status = mb_close(verbose,&mbio_ptr,&error);
+	nrectot += nrec;
+	nvaluetot += nvalue;
+
+	/* output information */
+	if (error == MB_ERROR_NO_ERROR && verbose > 0)
+	    {
+	    fprintf(stderr, "%d records processed\n%d data processed\n", 
+		    nrec, nvalue);
+	    }
 
 	/* deallocate memory used for data arrays */
 	mb_free(verbose,&beamflag,&error);
@@ -567,8 +614,9 @@ char **argv;
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-                if (fgets(line,128,fp) != NULL
-                        && sscanf(line,"%s %d",file,&format) == 2)
+		if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
                         read_data = MB_NO;
@@ -581,7 +629,14 @@ char **argv;
 	/* end loop over files in list */
 	}
 	if (read_datalist == MB_YES)
-		fclose (fp);
+		mb_datalist_close(verbose,&datalist,&error);
+
+	/* output information */
+	if (error == MB_ERROR_NO_ERROR && verbose > 0)
+	    {
+	    fprintf(stderr, "\n%d total records processed\n", nrectot);
+	    fprintf(stderr, "%d total data processed\n\n", nvaluetot);
+	    }
 
 	/* recast histogram as gaussian */
 	if (gaussian == MB_YES)

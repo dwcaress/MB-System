@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.47 2000-06-20 21:00:19 caress Exp $
+ *    $Id: mbgrid.c,v 4.48 2000-09-11 20:10:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.47  2000/06/20  21:00:19  caress
+ * Moved execution of mbm_grdplot to after deallocation of array memory.
+ *
  * Revision 4.46  1999/12/29  00:35:11  caress
  * Release 4.6.8
  *
@@ -283,7 +286,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.47 2000-06-20 21:00:19 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.48 2000-09-11 20:10:02 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -331,6 +334,8 @@ char **argv;
 	/* mbgrid control variables */
 	char	filelist[128];
 	char	fileroot[128];
+	struct mb_datalist_struct *datalist;
+	double	file_weight;
 	int	xdim = 0;
 	int	ydim = 0;
 	int	spacing_priority = MB_NO;
@@ -1248,7 +1253,8 @@ char **argv;
 
 	/* read in data */
 	ndata = 0;
-	if ((fp = fopen(filelist,"r")) == NULL)
+	if (status = mb_datalist_open(verbose,&datalist,
+					filelist,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1257,7 +1263,9 @@ char **argv;
 			program_name);
 		exit(error);
 		}
-	while (fscanf(fp,"%s %d",file,&format) != EOF)
+	while ((status = mb_datalist_read(verbose,datalist,
+			file,&format,&file_weight,&error))
+			== MB_SUCCESS)
 		{
 		ndatafile = 0;
 		
@@ -1441,7 +1449,12 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				    }
 				foot_range = sqrt(foot_lateral * foot_lateral + bath[ib] * bath[ib]);
 				foot_theta = RTD * atan2(foot_lateral, bath[ib]);
-				if (format >= 20)
+				if (format == 121)
+				    {
+				    foot_dtheta = 0.5;
+				    foot_dphi = 0.5;
+				    }
+				else if (format >= 20)
 				    {
 				    foot_dtheta = 1.0;
 				    foot_dphi = 1.0;
@@ -1517,6 +1530,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 
 				   if (use_weight != MBGRID_USE_NO)
 					{
+					weight *= file_weight;
 					norm[kgrid] = norm[kgrid] + weight;
 					grid[kgrid] = grid[kgrid] 
 						+ weight*topofactor*bath[ib];
@@ -1557,7 +1571,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		} /* end if (format > 0) */
 
 		}
-	fclose(fp);
+	if (datalist != NULL)
+		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed\n",ndata);
 
@@ -1626,7 +1641,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 
 	/* read in data */
 	ndata = 0;
-	if ((fp = fopen(filelist,"r")) == NULL)
+	if (status = mb_datalist_open(verbose,&datalist,
+					filelist,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1635,7 +1651,9 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			program_name);
 		exit(error);
 		}
-	while (fscanf(fp,"%s %d",file,&format) != EOF)
+	while ((status = mb_datalist_read(verbose,datalist,
+			file,&format,&file_weight,&error))
+			== MB_SUCCESS)
 		{
 		ndatafile = 0;
 		
@@ -1809,7 +1827,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				   kgrid = ii*gydim + jj;
 				   xx = wbnd[0] + ii*dx - bathlon[ib];
 				   yy = wbnd[2] + jj*dy - bathlat[ib];
-				   weight = exp(-(xx*xx + yy*yy)*factor);
+				   weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
 				   norm[kgrid] = norm[kgrid] + weight;
 				   grid[kgrid] = grid[kgrid] 
 					+ weight*topofactor*bath[ib];
@@ -1930,7 +1948,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				   kgrid = ii*gydim + jj;
 				   xx = wbnd[0] + ii*dx - bathlon[ib];
 				   yy = wbnd[2] + jj*dy - bathlat[ib];
-				   weight = exp(-(xx*xx + yy*yy)*factor);
+				   weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
 				   norm[kgrid] = norm[kgrid] + weight;
 				   grid[kgrid] = grid[kgrid] + weight*amp[ib];
 				   sigma[kgrid] = sigma[kgrid] 
@@ -2048,7 +2066,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				   kgrid = ii*gydim + jj;
 				   xx = wbnd[0] + ii*dx - sslon[ib];
 				   yy = wbnd[2] + jj*dy - sslat[ib];
-				   weight = exp(-(xx*xx + yy*yy)*factor);
+				   weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
 				   norm[kgrid] = norm[kgrid] + weight;
 				   grid[kgrid] = grid[kgrid] + weight*ss[ib];
 				   sigma[kgrid] = sigma[kgrid] 
@@ -2170,7 +2188,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			       kgrid = ii*gydim + jj;
 			       xx = wbnd[0] + ii*dx - tlon;
 			       yy = wbnd[2] + jj*dy - tlat;
-			       weight = exp(-(xx*xx + yy*yy)*factor);
+			       weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
 			       norm[kgrid] = norm[kgrid] + weight;
 			       grid[kgrid] = grid[kgrid] 
 				    + weight*topofactor*tvalue;
@@ -2221,7 +2239,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		} /* end if (format == 0) */
 
 		}
-	fclose(fp);
+	if (datalist != NULL)
+		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed\n",ndata);
 
@@ -2288,9 +2307,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			data[kgrid] = NULL;
 			}
 
-	/* read in and process data */
+	/* read in data */
 	ndata = 0;
-	if ((fp = fopen(filelist,"r")) == NULL)
+	if (status = mb_datalist_open(verbose,&datalist,
+					filelist,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -2299,7 +2319,9 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			program_name);
 		exit(error);
 		}
-	while (fscanf(fp,"%s %d",file,&format) != EOF)
+	while ((status = mb_datalist_read(verbose,datalist,
+			file,&format,&file_weight,&error))
+			== MB_SUCCESS)
 		{
 		ndatafile = 0;
 
@@ -2756,7 +2778,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		} /* end if (format == 0) */
 
 		}
-	fclose(fp);
+	if (datalist != NULL)
+		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
 		fprintf(outfp,"\n%d total data points processed\n",ndata);
 

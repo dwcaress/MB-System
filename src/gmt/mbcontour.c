@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.21 1998-10-28 21:32:29 caress Exp $
+ *    $Id: mbcontour.c,v 4.22 2000-09-11 20:09:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  1998/10/28  21:32:29  caress
+ * Fixed handling of data with variable numbers of beams.
+ *
  * Revision 4.20  1998/10/04  04:18:07  caress
  * MB-System version 4.6beta
  *
@@ -149,7 +152,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.21 1998-10-28 21:32:29 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.22 2000-09-11 20:09:14 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -177,6 +180,8 @@ char **argv;
 	char	read_file[128];
         int     read_datalist;
 	int	read_data;
+	struct mb_datalist_struct *datalist;
+	double	file_weight;
 	FILE	*fp;
 	int	format;
 	int	pings;
@@ -668,7 +673,8 @@ char **argv;
 	nping_read = 0;
 	if (read_datalist == MB_YES)
 	    {
-	    if ((fp = fopen(read_file,"r")) == NULL)
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -677,8 +683,9 @@ char **argv;
 			program_name);
 		exit(error);
 		}
-	    if (fgets(line,128,fp) != NULL
-		&& sscanf(line,"%s %d",file,&format) == 2)
+	    if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
 		read_data = MB_NO;
@@ -938,8 +945,9 @@ char **argv;
 	    /* figure out whether and what to read next */
 	    if (read_datalist == MB_YES)
                 {
-                if (fgets(line,128,fp) != NULL
-                        && sscanf(line,"%s %d",file,&format) == 2)
+		if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
                         read_data = MB_NO;
@@ -952,7 +960,7 @@ char **argv;
 	    /* end loop over files in list */
 	    }
 	if (read_datalist == MB_YES)
-		fclose (fp);
+		mb_datalist_close(verbose,&datalist,&error);
 
 	/* end plot */
 	plot_end(verbose,&error);
