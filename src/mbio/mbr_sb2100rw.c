@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.7 1994-11-07 14:04:33 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.8 1994-12-21 20:18:10 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1994/11/07  14:04:33  caress
+ * Fixed data flagging.
+ *
  * Revision 4.6  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -77,7 +80,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.7 1994-11-07 14:04:33 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.8 1994-12-21 20:18:10 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -790,7 +793,8 @@ int	*error;
 		data->kind = mb_io_ptr->new_kind;
 
 	/* set times from current ping */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR)
+	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR 
+		&& data->kind == MB_DATA_DATA)
 		{
 		/* get time */
 		mb_get_jtime(verbose,mb_io_ptr->new_time_i,time_j);
