@@ -1486,10 +1486,10 @@ void BX_MENU_POST
 #ifdef DEFINE_OLD_BXUTILS
 void MENU_POST
     ARGLIST((p, mw, ev, dispatch))
-        ARG(Widget, p)
+        UARG(Widget, p)
         ARG(XtPointer, mw)
         ARG(XEvent *, ev)
-        GRA(Boolean *, dispatch)
+        GRAU(Boolean *, dispatch)
 {
     BX_MENU_POST(p, mw, ev, dispatch);
 }
@@ -2584,6 +2584,7 @@ GRA(BxXpmAttributes *, attributes)
     Boolean pixel_defined;
     unsigned int key;
 
+
     /*
      * retrieve information from the BxXpmAttributes 
      */
@@ -3634,38 +3635,23 @@ GRA(char **, pixmapName)
     Pixmap		pixmap;
     Pixmap		shape;
     int			returnValue;
-
-    attributes.valuemask = 0;
-    attributes.depth = 0;
-    attributes.colormap = 0;
-    attributes.visual = 0;
-
+    
     argcnt = 0;
     XtSetArg(args[argcnt], XmNdepth, &(attributes.depth)); argcnt++;
     XtSetArg(args[argcnt], XmNcolormap, &(attributes.colormap)); argcnt++;
-    if ( ! XtIsWidget(w) )
-    {
-	XtGetValues(XtParent(w), args, argcnt);
-    }
-    else
-    {
-	XtGetValues(w, args, argcnt);
-    }
+    XtGetValues(w, args, argcnt);
 
-    attributes.visual = DefaultVisual(XtDisplayOfObject(w),
-				      DefaultScreen(XtDisplayOfObject(w)));
-
-    if ( attributes.depth != 0 ) attributes.valuemask |= BxXpmDepth;
-    if ( attributes.colormap != 0 ) attributes.valuemask |= BxXpmColormap;
-    if ( attributes.visual != 0 ) attributes.valuemask |= BxXpmVisual;
+    attributes.visual = DefaultVisual(XtDisplay(w),
+				      DefaultScreen(XtDisplay(w)));
+    attributes.valuemask = (BxXpmDepth | BxXpmColormap | BxXpmVisual);
     
-    returnValue = BxXpmCreatePixmapFromData(XtDisplayOfObject(w),
-				       DefaultRootWindow(XtDisplayOfObject(w)),
-				       pixmapName, &pixmap, &shape,
-				       &attributes);
+    returnValue = BxXpmCreatePixmapFromData(XtDisplay(w),
+					  DefaultRootWindow(XtDisplay(w)),
+					  pixmapName, &pixmap, &shape,
+					  &attributes);
     if ( shape )
     {
-	XFreePixmap(XtDisplayOfObject(w), shape);
+	XFreePixmap(XtDisplay(w), shape);
     }	
 
     switch(returnValue)

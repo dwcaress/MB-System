@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 4.3 1998-10-05 19:18:58 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 4.4 1999-09-15 21:01:47 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1998/10/05  19:18:58  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.2  1997/09/15  19:10:50  caress
  * Real Version 4.5
  *
@@ -59,6 +62,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "mbvelocity_creation.h"
+#include "mb_status.h"
 #include <X11/cursorfont.h>
 
 /*
@@ -151,6 +155,7 @@ static int borders[4] =
 
 void	do_fileselection_list();
 void	set_label_string(Widget, String);
+void	set_label_multiline_string(Widget, String);
 void	get_text_string(Widget, String);
 void	do_set_controls();
 
@@ -582,11 +587,16 @@ do_mbvelocity_init(argc, argv)
 
 void do_set_controls()
 {
-	char	value_text[10];
+	char	value_text[128];
 
 	/* get some values from mbvelocitytool */
 	mbvt_get_values(&edit_gui,&ndisplay_gui,&maxdepth_gui,
 		&velrange_gui,&resrange_gui,&format_gui);
+			
+	/* set about version label */
+	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", 
+		MB_VERSION, MB_BUILD_DATE);
+	set_label_multiline_string(label_about_version, value_text);
 
 	/* set values of maximum depth slider */
 	XtVaSetValues(slider_maxdepth, 
@@ -1204,6 +1214,25 @@ void set_label_string(Widget w, String str)
 	    NULL);
     else 
 	XtWarning("Failed to update labelString");
+
+    XmStringFree( xstr );
+}
+/*--------------------------------------------------------------------*/
+/* Change multiline label string cleanly, no memory leak */
+/*--------------------------------------------------------------------*/
+
+void set_label_multiline_string(Widget w, String str)
+{
+    XmString xstr;
+    int      argok;
+
+    xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
+    if ( xstr != NULL && argok)
+        XtVaSetValues(w,
+            XmNlabelString, xstr,
+            NULL);
+    else
+        XtWarning("Failed to update labelString");
 
     XmStringFree( xstr );
 }
