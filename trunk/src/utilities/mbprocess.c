@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.31 2003-07-30 16:43:59 caress Exp $
+ *    $Id: mbprocess.c,v 5.32 2003-11-25 01:16:58 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,10 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.31  2003/07/30 16:43:59  caress
+ * Fixed handling of nonfatal errors in data.
+ * Added KLUGE003 for fixing roll units error in Healy 2112 data.
+ *
  * Revision 5.30  2003/07/26 18:01:22  caress
  * Changed beamflag handling code.
  *
@@ -148,6 +152,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -202,7 +207,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.31 2003-07-30 16:43:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.32 2003-11-25 01:16:58 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -446,6 +451,7 @@ and mbedit edit save files.\n";
 	int	nbeams;
 	int	istart, iend, icut;
 	int	intstat;
+	int	ioff;
 	int	i, j, k, ii, mm;
 	
 	char	*ctime();
@@ -1463,34 +1469,52 @@ and mbedit edit save files.\n";
 		else if (process.mbp_nav_format == 5)
 			{
 			strncpy(dummy,"\0",128);
-			time_j[0] = atoi(strncpy(dummy,buffer,2));
-			mb_fix_y2k(verbose, time_j[0], &time_j[0]);
+			if (buffer[2] == '+')
+				{
+				time_j[0] = atoi(strncpy(dummy,buffer,2));
+				mb_fix_y2k(verbose, time_j[0], &time_j[0]);
+				ioff = 3;
+				}
+			else
+				{
+				time_j[0] = atoi(strncpy(dummy,buffer,4));
+				ioff = 5;
+				}
 			strncpy(dummy,"\0",128);
-			time_j[1] = atoi(strncpy(dummy,buffer+3,3));
+			time_j[1] = atoi(strncpy(dummy,buffer+ioff,3));
 			strncpy(dummy,"\0",128);
-			hr = atoi(strncpy(dummy,buffer+7,2));
+			ioff += 4;
+			hr = atoi(strncpy(dummy,buffer+ioff,2));
 			strncpy(dummy,"\0",128);
-			time_j[2] = atoi(strncpy(dummy,buffer+10,2))
+			ioff += 3;
+			time_j[2] = atoi(strncpy(dummy,buffer+ioff,2))
 				+ 60*hr;
 			strncpy(dummy,"\0",128);
-			time_j[3] = atof(strncpy(dummy,buffer+13,3));
+			ioff += 3;
+			time_j[3] = atoi(strncpy(dummy,buffer+ioff,2));
 			time_j[4] = 0;
 			mb_get_itime(verbose,time_j,time_i);
 			mb_get_time(verbose,time_i,&time_d);
 			ntime[nnav] = time_d;
 
 			strncpy(NorS,"\0",sizeof(NorS));
-			strncpy(NorS,buffer+20,1);
+			ioff += 7;
+			NorS[0] = buffer[ioff];
+			ioff += 1;
 			strncpy(dummy,"\0",128);
-			mlat = atof(strncpy(dummy,buffer+21,3));
+			mlat = atof(strncpy(dummy,buffer+ioff,3));
 			strncpy(dummy,"\0",128);
-			llat = atof(strncpy(dummy,buffer+24,8));
+			ioff += 3;
+			llat = atof(strncpy(dummy,buffer+ioff,8));
 			strncpy(EorW,"\0",sizeof(EorW));
-			strncpy(EorW,buffer+33,1);
+			ioff += 9;
+			EorW[0] = buffer[ioff];
 			strncpy(dummy,"\0",128);
-			mlon = atof(strncpy(dummy,buffer+34,4));
+			ioff += 1;
+			mlon = atof(strncpy(dummy,buffer+ioff,4));
 			strncpy(dummy,"\0",128);
-			llon = atof(strncpy(dummy,buffer+38,8));
+			ioff += 4;
+			llon = atof(strncpy(dummy,buffer+ioff,8));
 			nlon[nnav] = mlon + llon/60.;
 			if (strncmp(EorW,"W",1) == 0) 
 				nlon[nnav] = -nlon[nnav];
@@ -4532,7 +4556,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 								sscorrtableuse.amplitude, 
 								angle, &correction, &error);
 /*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f reference:%f ss: %f", 
-j, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
+idata, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 				    			ss[i] = ss[i] - correction + reference_amp;
 						else
