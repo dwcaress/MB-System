@@ -69,6 +69,7 @@ identifier BXG_slider_number_max_step_label;
 identifier BXG_setting_mode_toggle_restore;
 identifier BXG_setting_mode_toggle_erase;
 identifier BXG_setting_mode_toggle_pick;
+identifier BXG_setting_mode_toggle_toggle;
 identifier BXG_canvas_mbedit;
 identifier BXG_fileSelectionBox;
 identifier BXG_textfield_format_label;
@@ -135,6 +136,9 @@ procedure do_load_check();
 procedure do_load_ok_with_save();
 procedure do_show_flagged_on();
 procedure do_show_flagged_off();
+procedure do_mode_toggle();
+procedure do_unflag_view();
+procedure do_unflag_all();
 
 list BaseStyle : arguments {
 };
@@ -1446,8 +1450,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 987;
-        XmNy = 185;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 196;
         XmNheight = 302;
     };
@@ -1803,8 +1807,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1219;
-        XmNy = 64;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 521;
         XmNheight = 573;
     };
@@ -1867,6 +1871,25 @@ object canvas_mbedit : XmDrawingArea widget {
 !(BX)    };
 };
 
+object setting_mode_toggle_toggle : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Toggle");
+        XmNwidth = 75;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_setting_mode_toggle_toggle);
+        XmNvalueChangedCallback = procedure do_mode_toggle();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object setting_mode_toggle_pick : XmToggleButton widget {
     arguments {
         arguments Style_use;
@@ -1922,16 +1945,17 @@ object setting_mode : XmRowColumn widget {
     arguments {
         arguments Style_use;
         XmNnumColumns = 1;
-        XmNpacking = XmPACK_COLUMN;
+        XmNpacking = XmPACK_TIGHT;
         XmNradioBehavior = true;
         XmNspacing = 0;
         XmNorientation = XmHORIZONTAL;
         XmNx = 70;
         XmNy = 110;
-        XmNwidth = 255;
+        XmNwidth = 289;
         XmNheight = 34;
     };
     controls {
+         managed XmToggleButton setting_mode_toggle_toggle;
          managed XmToggleButton setting_mode_toggle_pick;
          managed XmToggleButton setting_mode_toggle_erase;
          managed XmToggleButton setting_mode_toggle_restore;
@@ -2285,7 +2309,7 @@ object label_show_flagged : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Show flagged profile:");
-        XmNx = 540;
+        XmNx = 730;
         XmNy = 110;
         XmNwidth = 160;
         XmNheight = 30;
@@ -2343,7 +2367,7 @@ object radioBox_show_flagged : XmRadioBox widget {
         arguments Style_use;
         XmNspacing = 10;
         XmNorientation = XmHORIZONTAL;
-        XmNx = 700;
+        XmNx = 880;
         XmNy = 110;
         XmNwidth = 114;
         XmNheight = 34;
@@ -2464,7 +2488,7 @@ object pushButton_file : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("File");
-        XmNx = 10;
+        XmNx = 0;
         XmNy = 0;
         XmNwidth = 80;
         XmNheight = 30;
@@ -2602,6 +2626,46 @@ object menuBar_controls : XmMenuBar widget {
     };
 };
 
+object pushButton_unflag_view : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Unflag View");
+        XmNx = 410;
+        XmNy = 110;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_unflag_view();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_unflag_all : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Unflag All");
+        XmNx = 530;
+        XmNy = 110;
+        XmNwidth = 110;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_unflag_all();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object controls_mbedit : XmBulletinBoard widget {
     arguments {
         arguments Style_use;
@@ -2611,9 +2675,11 @@ object controls_mbedit : XmBulletinBoard widget {
         XmNx = 0;
         XmNy = 0;
         XmNwidth = 1040;
-        XmNheight = 144;
+        XmNheight = 150;
     };
     controls {
+         managed XmPushButton pushButton_unflag_all;
+         managed XmPushButton pushButton_unflag_view;
          managed XmMenuBar menuBar_controls;
          managed XmPushButton pushButton_about;
          managed XmPushButton pushButton_file;
@@ -2650,11 +2716,12 @@ object controls_mbedit : XmBulletinBoard widget {
 object mbedit_bboard : XmBulletinBoard widget {
     arguments {
         arguments Style_use;
+        XmNnoResize = false;
         XmNmarginHeight = 0;
         XmNmarginWidth = 0;
-        XmNresizePolicy = XmRESIZE_GROW;
-        XmNwidth = 1016;
-        XmNheight = 668;
+        XmNresizePolicy = XmRESIZE_ANY;
+        XmNwidth = 1014;
+        XmNheight = 665;
     };
     controls {
          managed XmBulletinBoard controls_mbedit;
@@ -2671,10 +2738,10 @@ object mbedit_bboard : XmBulletinBoard widget {
 object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 143;
-        XmNy = 58;
-        XmNwidth = 1016;
-        XmNheight = 668;
+        XmNx = 180;
+        XmNy = 124;
+        XmNwidth = 1014;
+        XmNheight = 665;
     };
     controls {
         Xm_Separator1 {
@@ -2734,11 +2801,12 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MBedit";
 !(BX)        XmNiconName = "MBedit";
+!(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
-!(BX)        XmNx = 153;
-!(BX)        XmNy = 58;
-!(BX)        XmNwidth = 1016;
-!(BX)        XmNheight = 668;
+!(BX)        XmNx = 180;
+!(BX)        XmNy = 124;
+!(BX)        XmNwidth = 1014;
+!(BX)        XmNheight = 665;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmMainWindow window_mbedit;
