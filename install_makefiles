@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.12 2004-04-16 19:35:28 caress Exp $
+#    $Id: install_makefiles,v 5.13 2004-05-21 23:06:29 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.12 2004-04-16 19:35:28 caress Exp $
+#   $Id: install_makefiles,v 5.13 2004-05-21 23:06:29 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.12  2004/04/16 19:35:28  caress
+#   Changed MacOs X $LFLAG settings so OpenMotif can be used instead of LessTif.
+#
 #   Revision 5.11  2004/02/13 20:24:06  caress
 #   Added up to date parameters for Solaris 2.7
 #
@@ -369,9 +372,9 @@ $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/sw/include";
 $MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 $OPENGLLIBS = "-lGLw -lGLU -lGL";
-$GMTVERSION = "3.4";
-$GMTLIBDIR = "/sw/lib";
-$GMTINCDIR = "/sw/include";
+$GMTVERSION = "4.0";
+$GMTLIBDIR = "/usr/local/gmt4/lib";
+$GMTINCDIR = "/usr/local/gmt4/include";
 $NETCDFLIBDIR = "/sw/lib";
 $NETCDFINCDIR = "/sw/include";
 $LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
@@ -409,9 +412,17 @@ elsif ($GMTVERSION eq "3.2")
 	{
 	$CFLAGS = "$CFLAGS -DGMT3_2";
 	}
-else
+elsif ($GMTVERSION eq "3.3")
 	{
 	$CFLAGS = "$CFLAGS -DGMT3_3";
+	}
+elsif ($GMTVERSION eq "3.4")
+	{
+	$CFLAGS = "$CFLAGS -DGMT3_3";
+	}
+else
+	{
+	$CFLAGS = "$CFLAGS -DGMT4_0";
 	}
 
 # set archiver 
