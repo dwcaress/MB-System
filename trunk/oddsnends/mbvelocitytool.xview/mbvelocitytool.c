@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocitytool.c,v 4.3 1994-10-21 12:47:11 caress Exp $
+ *    $Id: mbvelocitytool.c,v 4.4 1995-02-27 18:04:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  12:47:11  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/04/12  01:13:24  caress
  * First cut at translation from hsvelocitytool. The new program
  * mbvelocitytool will deal with all supported multibeam data
@@ -92,7 +95,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocitytool.c,v 4.3 1994-10-21 12:47:11 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocitytool.c,v 4.4 1995-02-27 18:04:50 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -168,6 +171,7 @@ int	nload;
 /* survey ping raytracing arrays */
 double	*ttimes;
 double	*angles;
+double	*angles_forward;
 int	*flags;
 double	*p;
 double	**ttime_tab;
@@ -337,7 +341,8 @@ int mbvt_quit()
 		mb_close(verbose,&mbio_ptr,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
-		mb_free(verbose,&angles,&error);
+		mb_free(verbose,&angles_forward,&error);
+		mb_free(verbose,&flags,&error);
 		mb_free(verbose,&p,&error);
 		for (i=0;i<beams_bath;i++)
 			{
@@ -1567,7 +1572,8 @@ int	form;
 		mb_close(verbose,&mbio_ptr,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
-		mb_free(verbose,&angles,&error);
+		mb_free(verbose,&angles_forward,&error);
+		mb_free(verbose,&flags,&error);
 		mb_free(verbose,&p,&error);
 		for (i=0;i<beams_bath;i++)
 			{
@@ -1600,6 +1606,7 @@ int	form;
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&p,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double *),
@@ -1737,7 +1744,8 @@ int mbvt_setup_raytracing()
 			{
 			status = mb_ttimes(verbose,mbio_ptr,
 					buff->buffer[i],&kind,&nbeams,
-					ttimes,angles,flags,&error);
+					ttimes,angles,angles_forward,
+					flags,&error);
 			if (status == MB_SUCCESS)
 				angles_found = MB_YES;
 			}
@@ -1880,7 +1888,8 @@ int mbvt_process_hydrosweep()
 			{
 			status = mb_ttimes(verbose,mbio_ptr,
 				buff->buffer[k],&kind,&nbeams,
-				ttimes,angles,flags,&error);
+				ttimes,angles,angles_forward,
+				flags,&error);
 			}
 
 		/* loop over the beams */
