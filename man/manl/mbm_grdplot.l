@@ -1,10 +1,10 @@
-.TH mbm_grdplot 1 "4 March 1994"
+.TH mbm_grdplot l "31 October 1994"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
 a GMT plot of gridded data in a GMT grd file.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbm_grdplot\fP \fB-I\fIfile \fP[\fB-A\fIazimuth\fP \fB-C -D -E\fIazimuth/elevation\fP \fB-G -H -O\fIroot\fP \fB-P -S -T -V -X\fP]

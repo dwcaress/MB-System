@@ -1,9 +1,9 @@
-.TH MBEDIT 1 "15 September 1994"
+.TH mbedit l "31 October 1994"
 .SH NAME
 \fBMBEDIT\fP - Interactive editor used to flag bad beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.30
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbedit\fP [\fB-F\fIformat \fB-I\fIinfile \fB-V -H\fP]
@@ -14,7 +14,6 @@ artifacts in multibeam bathymetry data. Once a file has been
 read in, \fBMBEDIT\fP displays the bathymetry profiles
 from several pings, allowing the user to identify and flag anomalous
 beams.  The output filename is the input filename with ".ed" appended.
-
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)

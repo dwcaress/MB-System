@@ -1,12 +1,12 @@
-.TH xbt 1 "26 February 1994"
+.TH xbt l "31 October 1994"
 .SH NAME
 \fBxbt\fP - Overview of \fBxbt\fP proceedures on the R/V Ewing.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH DESCRIPTION
-On the Ewing, \fIxbt\fP (eXpendable BathyThermograph) probes are used
+On the R/V Ewing, \fIxbt\fP (eXpendable BathyThermograph) probes are used
 to measure the temperature as a function of depth. This temperature is
 used to estimate the sound velocity as a function of depth in the
 upper (0 to 800 meters) of the water column.
