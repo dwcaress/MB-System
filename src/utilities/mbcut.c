@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.4 1996-01-26 21:25:58 caress Exp $
+ *    $Id: mbcut.c,v 4.5 1996-03-11 15:29:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1996/01/26  21:25:58  caress
+ * Version 4.3 distribution
+ *
  * Revision 4.3  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -73,7 +76,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.4 1996-01-26 21:25:58 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.5 1996-03-11 15:29:02 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -620,7 +623,7 @@ The default input and output streams are stdin and stdout.";
 		    for (i=0;i<beams_bath;i++)
 			{
 			if (bathflag[i] == MB_NO && bath[i] > 0.0
-			    && mb_bath_flag_table[format_num])
+			    && mb_bath_flag_table[format_num] == MB_NO)
 			    bath[i] = -bath[i];
 			else if (bathflag[i] == MB_NO
 			    && bath[i] > 0.0)
