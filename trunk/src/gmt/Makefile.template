@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.13 2001-03-22 21:03:31 caress Exp $
+#	$Id: Makefile.template,v 4.14 2001-06-30 17:35:20 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by 
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.13  2001/03/22  21:03:31  caress
+# Trying to make release 5.0.beta0.
+#
 # Revision 4.12  2000/09/30  07:19:12  caress
 # Snapshot for Dale.
 #
@@ -68,7 +71,6 @@ NETCDFINCDIR = /ocean/mgg/netcdf/include
 #
 # Compilers
 CC = cc
-FC = f77
 #
 # Compile and load flags:
 CFLAGS = -O2
