@@ -1,4 +1,4 @@
-.TH mbio l "30 May 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbio l "6 May 2002" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
