@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	3.00	1/25/93
- *	$Id: mb_close.c,v 3.2 1993-05-14 22:32:19 sohara Exp $
+ *	$Id: mb_close.c,v 3.3 1993-05-15 14:35:27 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 25, 1993
  *	$Log: not supported by cvs2svn $
+ * Revision 3.2  1993/05/14  22:32:19  sohara
+ * fixed rcs id message
+ *
  * Revision 3.1  1993/05/14  22:18:32  sohara
  * fixed rcs_id messages
  *
@@ -38,7 +41,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static	char	rcs_id[]"$Id: mb_close.c,v 3.2 1993-05-14 22:32:19 sohara Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 3.3 1993-05-15 14:35:27 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

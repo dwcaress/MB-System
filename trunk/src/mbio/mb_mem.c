@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3.00	3/1/93
- *    $Id: mb_mem.c,v 3.1 1993-05-14 22:27:48 sohara Exp $
+ *    $Id: mb_mem.c,v 3.2 1993-05-15 14:37:45 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/05/14  22:27:48  sohara
+ * fixed rcs_id message
+ *
  * Revision 3.0  1993/04/23  16:03:04  dale
  * Initial version
  *
@@ -45,7 +48,7 @@ int	size;
 char	**ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 3.1 1993-05-14 22:27:48 sohara Exp $;
+  static char rcs_id[]="$Id: mb_mem.c,v 3.2 1993-05-15 14:37:45 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
 	int	i;
