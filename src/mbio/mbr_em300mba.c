@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.20 2004-07-15 19:25:04 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.21 2005-03-25 04:18:14 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2004/07/15 19:25:04  caress
+ * Progress in supporting Reson 7k data.
+ *
  * Revision 5.19  2004/02/24 22:29:02  caress
  * Fixed errors in handling Simrad datagrams and edit save files on byteswapped machines (e.g. Intel or AMD processors).
  *
@@ -248,7 +251,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.20 2004-07-15 19:25:04 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.21 2005-03-25 04:18:14 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -1960,15 +1963,9 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 	    {
 	    /* if EM2_END not yet found then the 
 		next byte should be EM2_END */
-#ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d", line[0], line[0]);
-#endif
 	    if (line[0] != EM2_END)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
-#ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "| %2.2hX %d", line[0], line[0]);
-#endif
 		}
 		
 	    /* if EM2_END not yet found then the 
@@ -1976,15 +1973,12 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 	    if (line[0] != EM2_END)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
-#ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "| %2.2hX %d", line[0], line[0]);
-#endif
 		}
 		
 	    /* if we got the end byte then get check sum bytes */
 	    if (line[0] == EM2_END)
 		{
-		read_len = fread(&line[0],2,1,mbfp);
+		read_len = fread(&line[1],2,1,mbfp);
 	    /* don't check success of read
 	        - return success here even if read fails
 	        because all of the
@@ -1992,9 +1986,10 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 		already been read - next attempt to read
 		file will return error */
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "| %4.4hX %d", 
-		*((short int *)&(line[0])), 
-		*((short int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[0], line[0], 
+		line[1], line[1], 
+		line[2], line[2]);
 #endif
 		}
 #ifdef MBR_EM300MBA_DEBUG
@@ -2178,9 +2173,10 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp,
 		for (i=0;i<6;i++)
 		    store->run_spare[i] = line[39+i];
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[EM2_RUN_PARAMETER_SIZE-9])), 
-		*((int *)&(line[EM2_RUN_PARAMETER_SIZE-9])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[EM2_RUN_PARAMETER_SIZE-7], line[EM2_RUN_PARAMETER_SIZE-7], 
+		line[EM2_RUN_PARAMETER_SIZE-6], line[EM2_RUN_PARAMETER_SIZE-6], 
+		line[EM2_RUN_PARAMETER_SIZE-5], line[EM2_RUN_PARAMETER_SIZE-5]);
 #endif
 		}
 
@@ -2290,9 +2286,10 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp,
 		mb_get_binary_int(MB_NO, &line[16], &store->clk_origin_msec); 
 		store->clk_1_pps_use = (mb_u_char) line[20];
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[EM2_CLOCK_SIZE-9])), 
-		*((int *)&(line[EM2_CLOCK_SIZE-9])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[EM2_CLOCK_SIZE-7], line[EM2_CLOCK_SIZE-7], 
+		line[EM2_CLOCK_SIZE-6], line[EM2_CLOCK_SIZE-6], 
+		line[EM2_CLOCK_SIZE-5], line[EM2_CLOCK_SIZE-5]);
 #endif
 		}
 
@@ -2386,9 +2383,10 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp,
 		mb_get_binary_short(MB_NO, &line[20], &short_val); 
 		    store->tid_tide = (int) short_val;
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[EM2_TIDE_SIZE-9])), 
-		*((int *)&(line[EM2_TIDE_SIZE-9])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[EM2_TIDE_SIZE-7], line[EM2_TIDE_SIZE-7], 
+		line[EM2_TIDE_SIZE-6], line[EM2_TIDE_SIZE-6], 
+		line[EM2_TIDE_SIZE-5], line[EM2_TIDE_SIZE-5]);
 #endif
 		}
 
@@ -2480,9 +2478,10 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp,
 		mb_get_binary_int(MB_NO, &line[12], &store->hgt_height); 
 		store->hgt_type = (mb_u_char) line[16];
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[EM2_HEIGHT_SIZE-9])), 
-		*((int *)&(line[EM2_HEIGHT_SIZE-9])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[EM2_HEIGHT_SIZE-7], line[EM2_HEIGHT_SIZE-7], 
+		line[EM2_HEIGHT_SIZE-6], line[EM2_HEIGHT_SIZE-6], 
+		line[EM2_HEIGHT_SIZE-5], line[EM2_HEIGHT_SIZE-5]);
 #endif
 		}
 
@@ -2623,8 +2622,10 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp,
 			status = MB_SUCCESS;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 
@@ -2766,8 +2767,10 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp,
 			status = MB_SUCCESS;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 
@@ -2906,8 +2909,10 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp,
 			status = MB_SUCCESS;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 
@@ -3057,8 +3062,10 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp,
 			status = MB_SUCCESS;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 
@@ -3189,25 +3196,20 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    {
 	    done = MB_NO;
-#ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes:");
-#endif
 	    while (done == MB_NO)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
-#ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, " %2.2hX %d |", line[0], line[0]);
-#endif
 		if (read_len == 1 && line[0] == EM2_END)
 			{
 			done = MB_YES;
 			status = MB_SUCCESS;
 			/* get last two check sum bytes */
-			read_len = fread(&line[0],2,1,mbfp);
+			read_len = fread(&line[1],2,1,mbfp);
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, " %4.4hX %d", 
-		*((short int *)&(line[0])), 
-		*((short int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[0], line[0], 
+		line[1], line[1], 
+		line[2], line[2]);
 #endif
 			}
 		else if (read_len == 1)
@@ -3403,8 +3405,10 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp,
 			status = MB_SUCCESS;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 
@@ -3545,8 +3549,10 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 			status = MB_SUCCESS;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 
@@ -3740,8 +3746,10 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 			*error = MB_ERROR_EOF;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 		
@@ -3942,8 +3950,10 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 			*error = MB_ERROR_EOF;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 		
@@ -4183,8 +4193,10 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp,
 			*error = MB_ERROR_EOF;
 			}
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes: %8.8X %d\n", 
-		*((int *)&(line[0])), *((int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
 #endif
 		}
 		
@@ -4537,25 +4549,20 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    {
 	    done = MB_NO;
-#ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, "End Bytes:");
-#endif
 	    while (done == MB_NO)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
-#ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, " %2.2hX %d |", line[0], line[0]);
-#endif
 		if (read_len == 1 && line[0] == EM2_END)
 			{
 			done = MB_YES;
 			status = MB_SUCCESS;
 			/* get last two check sum bytes */
-			read_len = fread(&line[0],2,1,mbfp);
+			read_len = fread(&line[1],2,1,mbfp);
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr, " %4.4hX %d", 
-		*((short int *)&(line[0])), 
-		*((short int *)&(line[0])));
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[0], line[0], 
+		line[1], line[1], 
+		line[2], line[2]);
 #endif
 			}
 		else if (read_len == 1)
