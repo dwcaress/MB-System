@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.14 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbbath.c,v 4.15 1995-08-21 17:25:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.13  1995/03/22  19:52:56  caress
  * Fixed some ANSI C compliance details.
  *
@@ -125,7 +129,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.14 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.15 1995-08-21 17:25:25 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -233,6 +237,7 @@ and stdout.";
 	double	*angles = NULL;
 	double	*angles_forward = NULL;
 	int	*flags = NULL;
+	double	depth_offset;
 	double	ttime;
 	int	ray_stat;
 
@@ -291,7 +296,7 @@ and stdout.";
 	pitch_bias = 0.0;
 	roll_correction = 0.0;
 	dangle = 0.0;
-	draught = 5.5; /* set for R/V Ewing data */
+	draught = 0.0;
 	uncorrected = MB_NO;
 
 	/* process argument list */
@@ -1067,7 +1072,8 @@ and stdout.";
 			status = mb_ttimes(verbose,imbio_ptr,
 				store_ptr,&kind,&nbeams,
 				ttimes,angles,
-				angles_forward,flags,&error);
+				angles_forward,flags,
+				&depth_offset,&error);
 
 			/* if needed get roll correction */
 			if (nroll > 0 && kind == MB_DATA_DATA)
@@ -1097,7 +1103,7 @@ and stdout.";
 			    angles[i] = angles[i] + angle_correction;
 			    
 			    /* raytrace */
-			    status = mb_rt(verbose, rt_svp, 0.0, 
+			    status = mb_rt(verbose, rt_svp, depth_offset, 
 				    angles[i], 0.5*ttimes[i],
 				    0, NULL, NULL, NULL, 
 				    &xx, &zz, 
