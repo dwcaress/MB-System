@@ -6,9 +6,9 @@
 Version 4.2
 
 .SH SYNOPSIS
-\fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-C -E\fIyr/mo/da/hr/mn/sc 
-\fB-F\fIformat \fB-I\fIfilename \fB-L\fIlonflip \fB-P\fIping 
-\fB-R\fIwest/east/south/norths \fB-S\fIspeed \fB-V -H\fP]
+\fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 
+\fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP \fB-L\fIlonflip\fP \fB-P\fIping\fP 
+\fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbinfo\fP is an utility for reading a multibeam data file 
@@ -56,6 +56,15 @@ and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
+.TP
+.B \fB-G\fP
+Enables checking for reasonable navigation to be used in
+calculating the minimum and maximum longitude and latitude values.
+This mode excludes longitude and latitude values of 0.0 or
+those values associated with very large apparent speeds 
+between pings (calculated using distance and time differences
+between adjacent pings). This option is particularly useful 
+when one is trying to obtain reasonable bounds for a plot.
 .TP
 .B \fB-I\fIfilename\fP
 Sets the input filename. If \fIformat\fP > 0 (set with the 
