@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 4.1 1997-09-17 20:07:29 caress Exp $
+#    $Id: make_mbhtml,v 4.2 1997-09-17 21:46:07 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 4.1 1997-09-17 20:07:29 caress Exp $
+#   $Id: make_mbhtml,v 4.2 1997-09-17 21:46:07 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1997/09/17  20:07:29  caress
+# Fixed details.
+#
 # Revision 4.0  1997/09/15  19:13:10  caress
 # Real Version 4.5
 #
@@ -69,6 +72,11 @@ foreach $man_page (@manual_pages) {
 
     # Generate an initial html file
     $raw_html_file = "./$man_page.html";
+    $date = `head -1 ../../man/manl/$man_page.l | awk '{print \$4,\$5,\$6}'`;
+    chop($date);
+    chop($date);
+    $date = substr($date, 1);
+    print "$date\n";
     `awf -man ../../man/manl/$man_page.l | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`;
 
     # Open the input file
@@ -110,6 +118,9 @@ foreach $man_page (@manual_pages) {
     # Close and remove the raw html file
     close IHTML;
     `rm -f $raw_html_file`;
+    
+    # Put last update date line into html file
+    print OHTML "</PRE>\n\n<CENTER><P><BR>\nLast Updated: $date</P></CENTER>\n\n";
 
     # Put footer stuff into html file
     foreach $line (@man_footer_lines) {
