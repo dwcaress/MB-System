@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.3 1994-10-31 14:59:51 caress Exp $
+#	$Id: Makefile.template,v 4.4 1994-10-31 19:34:00 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.3  1994/10/31  14:59:51  caress
+# Changed man pages from section 1 to l
+#
 # Revision 4.2  1994/10/21  11:34:20  caress
 # Release V4.0
 #
@@ -83,10 +86,10 @@ mbswath.o:	mbswath.c  $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) ../../lib/libmbio.a  mbswath.c
 
 ### copy the man pages to the man page directory
-$(MANDIR)/mbcontour.l:	mbcontour.l
-	cp mbcontour.l $(MANDIR)/mbcontour.l
+$(MANDIR)/mbcontour.l:	mbcontour.manl
+	cp mbcontour.manl $(MANDIR)/mbcontour.l
 	chmod 664 $(MANDIR)/mbcontour.l
-$(MANDIR)/mbswath.l:	mbswath.l
-	cp mbswath.l $(MANDIR)/mbswath.l
+$(MANDIR)/mbswath.l:	mbswath.manl
+	cp mbswath.manl $(MANDIR)/mbswath.l
 	chmod 664 $(MANDIR)/mbswath.l
 
