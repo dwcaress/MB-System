@@ -1,10 +1,10 @@
-.TH mbfilter l "22 January 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbfilter l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbfilter\fP - Apply some simple filter functions to sidescan, beam
 amplitude, or bathymetry data from swath sonar data files.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbfilter\fP [\fB-A\fIkind\fP 

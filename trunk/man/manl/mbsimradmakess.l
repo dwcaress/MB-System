@@ -1,11 +1,11 @@
-.TH mbsimradmakess l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbsimradmakess l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsimradmakess\fP - Regenerates sidescan
 imagery from the raw amplitude samples contained in data from 
 Simrad EM300 and EM3000 multibeam sonars.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbsimradmakess\fP [\fB-F\fIformat \fB-I\fIinfile \fB-O\fIoutfile 

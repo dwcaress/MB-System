@@ -114,8 +114,8 @@ int main( int argc, char **argv)
     /* End user code block <create_topLevelShell> */
     
     ac = 0;
-    XtSetArg(args[ac], XmNtitle, "MBnavedit"); ac++;
-    XtSetArg(args[ac], XmNiconName, "MBnavedit"); ac++;
+    XtSetArg(args[ac], XmNtitle, "MBnaveditold"); ac++;
+    XtSetArg(args[ac], XmNiconName, "MBnaveditold"); ac++;
     XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 29); ac++;
     XtSetArg(args[ac], XmNwidth, 1020); ac++;

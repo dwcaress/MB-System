@@ -58,6 +58,7 @@ EXTERNAL Widget   label_error_three;
 EXTERNAL Widget   bulletinBoard_message;
 EXTERNAL Widget   label_message;
 EXTERNAL Widget   label_about_version;
+EXTERNAL Widget   pushButton_controls_timeinterpolation;
 EXTERNAL Widget   toggleButton_org_sonardepth;
 EXTERNAL Widget   toggleButton_sonardepth;
 EXTERNAL Widget   toggleButton_dr_lat;

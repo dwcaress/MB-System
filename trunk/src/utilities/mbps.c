@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbps.c,v 5.1 2001-01-22 07:54:22 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.16  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -124,6 +127,7 @@
 
 struct ping
 	{
+	int	beams_bath;
 	char	*beamflag;
 	double	*bath;
 	double	*bathacrosstrack;
@@ -140,10 +144,10 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.1 2001-01-22 07:54:22 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
-	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
+	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -200,11 +204,12 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
+	int	num_pings_max = MBPS_MAXPINGS;
 
 	/* MBIO read values */
 	char	*mbio_ptr = NULL;
 	int	kind;
-	struct ping data[MBPS_MAXPINGS];
+	struct ping data[MBPS_MAXPINGS+3];
 	int	time_i[7];
 	double	time_d;
 	double	navlon;
@@ -250,7 +255,7 @@ main (int argc, char **argv)
 	strcpy (file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:B:b:E:e:S:s:T:t:I:i:A:a:X:x:K:k:D:d:M:m:W:w:G:g:YyZz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:B:b:E:e:S:s:T:t:I:i:A:a:X:x:K:k:D:d:N:n:P:p:W:w:G:g:YyZz")) != -1)
 	    switch (c) 
 		{
 		case 'H':
@@ -305,6 +310,19 @@ main (int argc, char **argv)
 		case 'K':
 		case 'k':
 			sscanf (optarg, "%lf", &eta);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf (optarg, "%d", &num_pings_max);
+			if (num_pings_max < 2
+			    || num_pings_max > MBPS_MAXPINGS) 
+			num_pings_max = MBPS_MAXPINGS;
+			flag++;
+			break;
+		case 'P':
+		case 'p':
+			sscanf (optarg, "%d", &pings);
 			flag++;
 			break;
 		case 'S':
@@ -451,10 +469,11 @@ main (int argc, char **argv)
 			&ssacrosstrack,&error);
 	status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ssalongtrack,&error);
-	for (i=0;i<MBPS_MAXPINGS;i++) 
+	for (i=0;i<num_pings_max+3;i++) 
 		{
 		if (error == MB_ERROR_NO_ERROR) 
 			{
+			data[i].beams_bath = 0;
 			data[i].beamflag = NULL;
 			data[i].bath = NULL;
 			data[i].bathacrosstrack = NULL;
@@ -493,7 +512,7 @@ main (int argc, char **argv)
 	nread = 0;
 	done = MB_NO;
 	error = MB_ERROR_NO_ERROR;
-	while (error <= MB_ERROR_NO_ERROR)
+	while (done == MB_NO && error <= MB_ERROR_NO_ERROR)
 		{
 		/* read a ping of data */
 		beamflag = data[nread].beamflag;
@@ -505,7 +524,7 @@ main (int argc, char **argv)
 		status = mb_get(verbose,mbio_ptr,&kind,&pings,
 			time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
-			&beams_bath,&beams_amp,&pixels_ss,
+			&data[nread].beams_bath,&beams_amp,&pixels_ss,
 			beamflag,bath,amp,bathacrosstrack,
 			bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
@@ -516,12 +535,6 @@ main (int argc, char **argv)
 			{
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-
-		/* increment counters */
-		if (error == MB_ERROR_NO_ERROR)
-			{
-			nread++;
 			}
 
 		/* output error messages */
@@ -559,17 +572,6 @@ main (int argc, char **argv)
 				time_i[6]);
 			}
 
-		/* print debug statements */
-		if (verbose >= 2) 
-			{
-			fprintf(stderr,"\ndbg2  Reading loop finished in program <%s>\n",
-			program_name);
-			fprintf(stderr,"dbg2       status:     %d\n",status);
-			fprintf(stderr,"dbg2       error:      %d\n",error);
-			fprintf(stderr,"dbg2       nread:      %d\n",nread);
-			fprintf(stderr,"dbg2       pings: %d\n",pings);
-			}
-
 		/* calculate raw x,y locations for each beam */
 		if (status == MB_SUCCESS) 
 			{
@@ -592,7 +594,13 @@ main (int argc, char **argv)
 			/* loop over the beams */
 			for (j=0; j<beams_bath; j++) 
 				{
-				if (mb_beam_ok(beamflag[j])) 
+				if (j >= data[nread].beams_bath)
+					{
+					beamflag[j] = MB_FLAG_NULL;
+					xp[j] = BAD;
+					yp[j] = BAD;
+					}
+				else if (mb_beam_ok(beamflag[j])) 
 					{
 					xx = dheadingy * bathacrosstrack[j]
 					    + dheadingx * bathalongtrack[j];
@@ -647,22 +655,48 @@ main (int argc, char **argv)
 			else
 				for (k=0; k<7; k++)
 					timend_i[k]=time_i[k];
-			if (nread >= (MBPS_MAXPINGS-3)) 
-				{
-				fprintf(stderr, "%s: WARNING: Too many pings\n",
-				    program_name);
-				done = MB_YES;
-				}
 
 			}	/* if status==MB_SUCCESS */
 
+		/* increment counters */
+		if (error == MB_ERROR_NO_ERROR)
+			{
+			nread++;
+			}
+
+		/* print debug statements */
+		if (verbose >= 2) 
+			{
+			fprintf(stderr,"\ndbg2  Reading loop finished in program <%s>\n",
+			program_name);
+			fprintf(stderr,"dbg2       status:     %d\n",status);
+			fprintf(stderr,"dbg2       error:      %d\n",error);
+			fprintf(stderr,"dbg2       nread:      %d\n",nread);
+			fprintf(stderr,"dbg2       pings:      %d\n",pings);
+			}
+
+		/* test if done */
+		if (nread >= num_pings_max
+			&& verbose >= 1) 
+			{
+			fprintf(stderr, "%s: Maximum number of pings [%d] read before end of file reached...\n",
+			    program_name, num_pings_max);
+			done = MB_YES;
+			}
+		if (error > MB_ERROR_NO_ERROR) 
+			{
+			done = MB_YES;
+			}
+
 		}  /* end of processing data, 1'st while under read/process data */
 
+	/* close the swath file */
+	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* print debug statements */
 	if (verbose >= 2) 
 		{
-		fprintf(stderr,"\ndbg2  Processing loop finished in program <%s>\n",
+		fprintf(stderr,"\ndbg2  Reading loop finished in program <%s>\n",
 				program_name);
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		fprintf(stderr,"dbg2       error:      %d\n",error);
@@ -684,11 +718,11 @@ main (int argc, char **argv)
 	max_yp = min_yp = max_xp = min_xp = 0.0;
 	for (i=0; i<nread; i++) 
 		{
-		for (j=0; j<beams_bath; j++) 
+		beamflag = data[i].beamflag;
+		xp = data[i].xp;
+		yp = data[i].yp;
+		for (j=0; j<data[i].beams_bath; j++) 
 			{
-			xp = data[i].xp;
-			yp = data[i].yp;
-			beamflag = data[i].beamflag;
 			if (mb_beam_ok(beamflag[j])) 
 				{
 				yp[j] -= mean_yp;
@@ -987,28 +1021,21 @@ main (int argc, char **argv)
 	/* end the postscript file */
 	ps_plotend(1);
 
-	/* close the swath file */
-	status = mb_close(verbose,&mbio_ptr,&error);
-
 	/* deallocate memory */
 	mb_free(verbose,&amp,&error);
 	mb_free(verbose,&ss,&error);
 	mb_free(verbose,&ssacrosstrack,&error);
 	mb_free(verbose,&ssalongtrack,&error);
-	for (i=0;i<pings;i++) 
+	for (i=0;i<nread;i++) 
 		{
-		if (error == MB_ERROR_NO_ERROR) 
-			{
-			mb_free(verbose,&data[i].beamflag,&error);
-			mb_free(verbose,&data[i].bath,&error);
-			mb_free(verbose,&data[i].bathacrosstrack,&error);
-			mb_free(verbose,&data[i].bathalongtrack,&error);
-			mb_free(verbose,&data[i].xp,&error);
-			mb_free(verbose,&data[i].yp,&error);
-			} /* if data[i] */
-		mb_free(verbose,pings*sizeof(struct ping),
-					&data[i],&error);
-		} 	 /* for i */	  
+		mb_free(verbose,&data[i].beamflag,&error);
+		mb_free(verbose,&data[i].bath,&error);
+		mb_free(verbose,&data[i].bathacrosstrack,&error);
+		mb_free(verbose,&data[i].bathalongtrack,&error);
+		mb_free(verbose,&data[i].xp,&error);
+		mb_free(verbose,&data[i].yp,&error);
+		mb_free(verbose,&data[i],&error);
+		}
 
 	/* check memory */
 	if (verbose >= 4)

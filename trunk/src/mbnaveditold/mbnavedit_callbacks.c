@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.0 2000-12-01 22:56:26 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.1 2001-01-22 07:49:44 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:56:26  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.14  2000/10/11  01:05:41  caress
  * Convert to ANSI C
  *
@@ -160,7 +163,7 @@ int key_a_down = 0;
 int key_d_down = 0;
 
 /* Set the colors used for this program here. */
-#define NCOLORS 6
+#define NCOLORS 7
 XColor colors[NCOLORS];
 unsigned int mpixel_values[NCOLORS];
 XColor db_color;
@@ -583,60 +586,27 @@ do_mbnavedit_init(int argc, char **argv)
     XSelectInput(display, can_xid, EV_MASK );
     
     /* Load the colors that will be used in this program. */
-    status = XLookupColor(display,colormap,
-	    "white",&db_color,&colors[0]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[0]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "white",&db_color,&colors[0]);
+    if ((status = XAllocColor(display,colormap,&colors[0])) == 0)
 	    fprintf(stderr,"Failure to allocate color: white\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "black",&db_color,&colors[1]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[1]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "black",&db_color,&colors[1]);
+    if ((status = XAllocColor(display,colormap,&colors[1])) == 0)
 	    fprintf(stderr,"Failure to allocate color: black\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "red",&db_color,&colors[2]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[2]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "red",&db_color,&colors[2]);
+    if ((status = XAllocColor(display,colormap,&colors[2])) == 0)
 	    fprintf(stderr,"Failure to allocate color: red\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "green",&db_color,&colors[3]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[3]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "green",&db_color,&colors[3]);
+    if ((status = XAllocColor(display,colormap,&colors[3])) == 0)
 	    fprintf(stderr,"Failure to allocate color: green\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "blue",&db_color,&colors[4]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[4]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "blue",&db_color,&colors[4]);
+    if ((status = XAllocColor(display,colormap,&colors[4])) == 0)
 	    fprintf(stderr,"Failure to allocate color: blue\n");
-	    exit(-1);
-	    }
-    status = XLookupColor(display,colormap,
-	    "coral",&db_color,&colors[5]);
-    if(status != 0)
-	    status = XAllocColor(display,colormap,&colors[5]);
-    if (status == 0)
-	    {
+    status = XLookupColor(display,colormap, "coral",&db_color,&colors[5]);
+    if ((status = XAllocColor(display,colormap,&colors[5])) == 0)
 	    fprintf(stderr,"Failure to allocate color: coral\n");
-	    exit(-1);
-	    }
+    status = XLookupColor(display,colormap, "lightgrey",&db_color,&colors[6]);
+    if ((status = XAllocColor(display,colormap,&colors[6])) == 0)
+	    fprintf(stderr,"Failure to allocate color: lightgrey\n");
     for (i=0;i<NCOLORS;i++)
 	    {
 	    mpixel_values[i] = colors[i].pixel;

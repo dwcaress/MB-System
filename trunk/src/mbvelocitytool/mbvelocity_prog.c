@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.0 2000-12-01 22:56:47 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.1 2001-01-22 07:51:19 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:56:47  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.23  2000/10/11  01:06:03  caress
  * Convert to ANSI C
  *
@@ -137,6 +140,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 
 /* MBIO include files */
@@ -150,7 +154,7 @@ struct profile
 	{
 	int	n;
 	int	nalloc;
-	char	name[128];
+	char	name[MB_PATH_MAXLINE];
 	double	*depth;
 	double	*velocity;
 	};
@@ -184,7 +188,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.0 2000-12-01 22:56:47 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.1 2001-01-22 07:51:19 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -195,13 +199,13 @@ int	verbose = 0;
 char	*message = NULL;
 
 /* mbvelocitytool control variables */
-#define	MAX_PROFILES	10
+#define	MAX_PROFILES	100
 #define	PICK_DISTANCE	50
 struct profile	profile_display[MAX_PROFILES];
 struct profile	profile_edit;
 int	*edit_x = NULL;
 int	*edit_y = NULL;
-char	editfile[128];
+char	editfile[MB_PATH_MAXLINE];
 int	edit = 0;
 int	ndisplay = 0;
 int	mbvt_xgid;
@@ -244,7 +248,7 @@ double	timegap;
 int	beams_bath;
 int	beams_amp;
 int	pixels_ss;
-char	swathfile[256];
+char	swathfile[MB_PATH_MAXLINE];
 char	*mbio_ptr;
 
 /* mbio read and write values */
@@ -334,7 +338,7 @@ int mbvt_init(int argc, char **argv)
 	/* local variables */
 	char	*function_name = "mbvt_init";
 	int	status = MB_SUCCESS;
-	char	ifile[256], sfile[256], wfile[256];
+	char	ifile[MB_PATH_MAXLINE], sfile[MB_PATH_MAXLINE], wfile[MB_PATH_MAXLINE];
 	int	i, n;
 
 	/* parsing variables */
@@ -727,7 +731,7 @@ int mbvt_open_edit_profile(char *file)
 	char	*function_name = "mbvt_open_edit_profile";
 	int	status = MB_SUCCESS;
 	int	size;
-	char	buffer[128];
+	char	buffer[MB_PATH_MAXLINE];
 	char	*result;
 	struct profile *profile;
 	FILE	*fp;
@@ -767,7 +771,7 @@ int mbvt_open_edit_profile(char *file)
 				"read permission in this directory!");
 		return(status);
 		}
-	while ((result = fgets(buffer,128,fp)) == buffer)
+	while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer)
 		if (buffer[0] != '#')
 			profile->n++;
 	fclose(fp);
@@ -801,7 +805,7 @@ int mbvt_open_edit_profile(char *file)
 		return(status);
 		}
 	strncpy(buffer,"\0",sizeof(buffer));
-	while ((result = fgets(buffer,128,fp)) == buffer)
+	while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer)
 		{
 		if (buffer[0] != '#')
 			{
@@ -970,7 +974,7 @@ int mbvt_save_edit_profile(char *file)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
+	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -995,10 +999,11 @@ int mbvt_save_edit_profile(char *file)
 		return(status);
 		}
 
-	/* write comments */
-	fprintf(fp,"# Water velocity profile created by program %s\n",
-		program_name);
-	fprintf(fp,"# Version %s\n",rcs_id);
+	/* write the svp */
+	fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
+	fprintf(fp, "## Output by Program %s\n",program_name); 
+	fprintf(fp, "## Program Version %s\n",rcs_id);
+	fprintf(fp, "## MB-System Version %s\n",MB_VERSION);
 	strncpy(date,"\0",25);
 	right_now = time((time_t *)0);
 	strncpy(date,ctime(&right_now),24);
@@ -1008,11 +1013,10 @@ int mbvt_save_edit_profile(char *file)
 		strcpy(user,user_ptr);
 	else
 		strcpy(user, "unknown");
-	gethostname(host,128);
-	fprintf(fp,"# Run by user <%s> on cpu <%s> at <%s>\n",
+	gethostname(host,MB_PATH_MAXLINE);
+	fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n",
 		user,host,date);
-
-	/* write the profile */
+	fprintf(fp, "## Number of SVP Points: %d\n",profile->n); 
 	for (i=0;i<profile->n;i++)
 		fprintf(fp,"%f %f\n",profile->depth[i],
 			profile->velocity[i]);
@@ -1058,7 +1062,7 @@ int mbvt_save_swath_profile(char *file)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
+	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1088,26 +1092,27 @@ int mbvt_save_swath_profile(char *file)
 		return(status);
 		}
 
-	    /* write comments */
-	    fprintf(fp,"# Water velocity profile created by program %s\n",
-		    program_name);
-	    fprintf(fp,"# Version %s\n",rcs_id);
+	    /* write the svp */
+	    fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
+	    fprintf(fp, "## Output by Program %s\n", program_name); 
+	    fprintf(fp, "## Program Version %s\n", rcs_id);
+	    fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
 	    strncpy(date,"\0",25);
 	    right_now = time((time_t *)0);
 	    strncpy(date,ctime(&right_now),24);
 	    if ((user_ptr = getenv("USER")) == NULL)
 		    user_ptr = getenv("LOGNAME");
 	    if (user_ptr != NULL)
-		    strcpy(user,user_ptr);
+		    strcpy(user, user_ptr);
 	    else
 		    strcpy(user, "unknown");
-	    gethostname(host,128);
-	    fprintf(fp,"# Run by user <%s> on cpu <%s> at <%s>\n",
-		    user,host,date);
-    
-	    /* write the profile */
+	    gethostname(host,MB_PATH_MAXLINE);
+	    fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n",
+		    user, host, date);
+	    fprintf(fp, "## Swath File: %s\n", swathfile); 
+	    fprintf(fp, "## Number of SVP Points: %d\n", profile->n); 
 	    for (i=0;i<profile->n;i++)
-		    fprintf(fp,"%f %f\n",profile->depth[i],
+		    fprintf(fp,"%f %f\n", profile->depth[i],
 			    profile->velocity[i]);
     
 	    /* close the file */
@@ -1147,7 +1152,7 @@ int mbvt_open_display_profile(char *file)
 	/* local variables */
 	char	*function_name = "mbvt_open_display_profile";
 	int	status = MB_SUCCESS;
-	char	buffer[128];
+	char	buffer[MB_PATH_MAXLINE];
 	char	*result;
 	struct profile *profile;
 	FILE	*fp;
@@ -1186,7 +1191,7 @@ int mbvt_open_display_profile(char *file)
 				"read permission in this directory!");
 		return(status);
 		}
-	while ((result = fgets(buffer,128,fp)) == buffer)
+	while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer)
 		if (buffer[0] != '#')
 			profile->n++;
 	fclose(fp);
@@ -1220,7 +1225,7 @@ int mbvt_open_display_profile(char *file)
 		return(status);
 		}
 	strncpy(buffer,"\0",sizeof(buffer));
-	while ((result = fgets(buffer,128,fp)) == buffer)
+	while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer)
 		{
 		if (buffer[0] != '#')
 			{
@@ -1427,7 +1432,7 @@ int mbvt_plot()
 	double	vx, vy;
 	int	xxo, yyo;
 	int	swidth, sascent, sdescent;
-	char	string[128];
+	char	string[MB_PATH_MAXLINE];
 	char	format_str[10];
 	int	color;
 	int	i, j;
@@ -2283,6 +2288,10 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	int	beam_flagging; 
 	char	command[64];
 	char	string[50];
+	char	svp_file[MB_PATH_MAXLINE];
+	int	done, count;
+	struct stat file_status;
+	int	fstat;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -2589,6 +2598,24 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		system(command);
 		mbvt_open_display_profile("mbvt_levitus_tmp.svp");
 		system("rm -f mbvt_levitus_tmp.svp");
+		}
+		
+	/* load svp files generated by mbsvplist if available */
+	done = MB_NO;
+	count = 0;
+	while (done == MB_NO)
+		{
+		sprintf(svp_file, "%s_%3.3d.svp", swathfile, count);
+fprintf(stderr, "checking for %s\n", svp_file);
+		if ((fstat = stat(svp_file, &file_status)) == 0
+		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+		    {
+		    mbvt_open_display_profile(svp_file);
+		    }
+		else if (count > 0)
+		    done = MB_YES;
+fprintf(stderr, "done:%d fstat:%d\n", done, fstat);
+		count++;
 		}
 
 	/* allocate memory for raytracing arrays */

@@ -1,9 +1,9 @@
-.TH mbinfo l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbinfo l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of swath sonar data files.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 

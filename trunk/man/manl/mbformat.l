@@ -1,10 +1,10 @@
-.TH mbformat l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbformat l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbformat\fP -  List information about swath sonar data formats
 supported by the \fBMBIO\fP library.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbformat\fP [\fB -F\fIformat \fB -L -V -H\fP]

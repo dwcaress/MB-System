@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 1.1 2001-01-22 07:54:22 caress Exp $
+ *    $Id: mbset.c,v 5.0 2001-01-22 07:55:22 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2001/01/22  07:54:22  caress
+ * Initial revision
+ *
  *
  *
  */
@@ -54,7 +57,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 1.1 2001-01-22 07:54:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.0 2001-01-22 07:55:22 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\

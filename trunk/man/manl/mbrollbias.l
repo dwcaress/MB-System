@@ -1,9 +1,9 @@
-.TH mbrollbias l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbrollbias l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbrollbias\fP - Assess roll bias of swath sonar sonar systems.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbrollbias\fP \fB-F\fIformat1/format2 \fB-L\fIlonflip \fB-I\fIfile1 \fB-J\fIfile2 \fB-R\fIwest/east/south/north [\fB-D\fIxdim/ydim \fB-H -V\fI]
@@ -106,7 +106,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 4.12 1998-12-17 22:50:20 caress Exp $
+ Version $Id: mbrollbias.l,v 5.0 2001-01-22 07:51:57 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:

@@ -1,9 +1,9 @@
-.TH mbdefaults l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbdefaults l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdefaults\fP - Set or list default mbio parameters for reading and writing swath sonar data
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbdefaults\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIpsdisplay \fB-E\fIyr/mo/da/hr/mn/sc 

@@ -4,7 +4,7 @@
  *
  * Builder Xcessory Personal Edition Version 5.0.5.
  *
- * Identification: $Id: mbnavedit.uil,v 4.8 2000-08-28 22:45:11 caress Exp $
+ * Identification: $Id: mbnavedit.uil,v 5.0 2001-01-22 07:56:52 caress Exp $
  */
 module main_uil
 version = 'V1.0'
@@ -924,7 +924,7 @@ object label_about_mbedit : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("MBnavedit");
+        XmNlabelString = compound_string("MBnaveditold");
         XmNx = 10;
         XmNy = 10;
         XmNwidth = 450;
@@ -1005,7 +1005,7 @@ object label_about_component : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("One Component of the");
+        XmNlabelString = compound_string("One Obsolete Component of the");
         XmNx = 10;
         XmNy = 90;
         XmNwidth = 450;
@@ -1162,7 +1162,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
 
 !(BX)object xmDialogShell_about : XmDialogShell widget {
 !(BX)    arguments {
-!(BX)        XmNtitle = "About MBnavedit";
+!(BX)        XmNtitle = "About MBnaveditold";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 481;
 !(BX)        XmNheight = 463;
@@ -2141,8 +2141,8 @@ object mainWindow : XmMainWindow widget {
 
 !(BX)object topLevelShell : TopLevelShell widget {
 !(BX)    arguments {
-!(BX)        XmNtitle = "MBnavedit";
-!(BX)        XmNiconName = "MBnavedit";
+!(BX)        XmNtitle = "MBnaveditold";
+!(BX)        XmNiconName = "MBnaveditold";
 !(BX)        XmNx = 10;
 !(BX)        XmNy = 29;
 !(BX)        XmNwidth = 1020;

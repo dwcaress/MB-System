@@ -1,10 +1,10 @@
-.TH mbgrid l "5 October 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbgrid l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
@@ -429,7 +429,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 4.20 1999-10-05 22:04:18 caress Exp $
+ Version $Id: mbgrid.l,v 5.0 2001-01-22 07:51:57 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

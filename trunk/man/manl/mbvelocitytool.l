@@ -1,9 +1,9 @@
-.TH mbvelocitytool l "16 July 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbvelocitytool l "18 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbvelocitytool\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
@@ -12,20 +12,61 @@ Version 4.6
 
 .SH DESCRIPTION
 \fBMBvelocitytool\fP is an interactive water sound velocity profile 
-(SVP) editor used to examine multiple SVPs and to create
-new SVPs which can be used for the processing
-of swath sonar data.  In general, this tool is used to examine
-SVPs obtained from XBTs, CTDs, or databases,
+(SVP) editor used to examine multiple SVPs, to create
+new SVPs, and to model the impact of SVP modification on swath bathymetry
+data. SVPs created using \fBMBvelocitytool\fP can be used by the program
+\fBmbprocess\fP to recalculate swath bathymetry from raw travel time
+and angle data.  
+
+In general, \fBMBvelocitytool\fP is used to examine
+SVPs obtained from swath data files (see \fBmbsvplist\fP
+manual page), XBTs, CTDs, or databases,
 and to construct new profiles consistent with these various
 sources of information. The SVPs are represented by a set
 of paired depth and velocity values which are connected
-by linear interpolation. In order to calculate bathymetry
+by linear interpolation. Users may load a number of SVPs
+for display. Users may load or create a single editable
+SVP and then interactively modify this profile. 
+
+When users load swath bathymetry
+data containing raw travel time and angle data (many but not
+all swath data format include this information), 
+\fBMBvelocitytool\fP  recalculates the bathymetry by raytracing
+through the current SVP model. The bathymetry of each 
+ping is fit with a line, and bathymetry residuals
+are calculated for each good beam relative to the linear fit.  The
+average of the bathymetry residuals is displayed along with "error bars"
+indicating the standard deviations of the residuals. 
+Anomalously shallow
+bathymetry maps into negative residuals and deep bathymetry into positive
+residuals; the residuals are displayed so that shallow is up and deep
+is down. If the seafloor is reasonably smooth so that
+a linear fit is appropriate, then the residuals will accurately reflect
+any problems with the water velocity profile.  If the water velocity profile
+is correct, then the residual plot will be roughly flat.  If the water
+velocity profile is significantly in error, then the outer beam depths
+may anomalously shallow (edge curl up) or deep (edge curl down).  In practice,
+the editable velocity profile is altered interactively until a reasonably
+residual pattern is achieved.
+
+In order to calculate bathymetry
 values from travel time observations, geometrical raypaths
 are traced through the SVP for each beam. Because the sound
 velocity gradients are uniform between the depth-velocity
 nodes (linear interpolation), the raypaths are be calculated
 analytically as pieces of circular arcs. This raytracing algorithm
-is the same used in the program \fBmbbath\fP.
+is the same used in the program \fBmbprocess\fP.
+
+\fBMBvelocitytool\fP can be used in conjunction with \fBmbprocess\fP.
+If the user uses the \fBSave swath SVP file\fP option to 
+save an SVP model developed through the analysis of a
+particular swath data file,\fBMBvelocitytool\fP also sets
+the associated \fBmbprocess\fP parameter file so that \fBmbprocess\fP
+recalculates the bathymetry using the new SVP model. The program
+\fBmbset\fP may be used to set the SVP file in the parameter file for
+any swath data file. Users may also save SVP models without setting
+any \fBmbprocess\fP parameters by using the \fBSave Editable SVP\fP
+option.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -126,8 +167,10 @@ Any previously defined editable velocity profile will disappear. The profile
 will be displayed in a depth vs velocity plot along with any
 display profiles that have been opened.  This profile will be plotted
 as black lines with small black squares at the velocity depth points.
-The velocity depth points may be selected and dragged using the mouse
-to change the editable velocity profile.  
+The velocity depth points may be selected and dragged using the left mouse button
+to change the editable velocity profile. The center mouse button adds new 
+velocity-depth points, and the right mouse button removes velocity-depth
+points.
 .TP
 .B File->Save Editable Profile
 Selecting this menu item brings up a popup window which allows the 
@@ -148,8 +191,8 @@ suffix convention (format 11 files end with ".mb11", format
 41 files end with ".mb41", etc.), then the program will
 automatically use the appropriate format id.
 The swath sonar data file must be in one of the formats which store
-travel time data for each beam. The first 1000 data records
-of the data file will be read into a buffer for processing.
+travel time data for each beam. Up to 25000 data records
+will be read into a buffer for processing.
 If there is no current editable velocity profile, then a
 default profile consisting of 14 velocity-depth points 
 with a velocity of 1500 m/s will be created. A display profile
@@ -160,6 +203,13 @@ the water sound velocity structure at the location of the
 swath data being analyzed. The travel time
 data will then be processed and displayed in the manner described
 below for the \fBReprocess\fP button.
+.TP
+.B File->Save Swath SVP File
+Selecting this menu item saves the current editable velocity 
+profile as a file. The SVP filename is that of the current
+swath data input file with a ".svp" suffix added. \fBMBvelocitytool\fP
+also sets the swath data file's \fBmbprocess\fP parameter file
+to recalculate bathymetry using the new SVP file.
 .TP
 .B Plot Scaling
 This button brings up a dialog containing the three controls
@@ -216,11 +266,13 @@ any questions.  If you haven't already saved your edited velocity profile
 it will be lost when you quit.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbbath\fP(l), \fBmblevitus\fP(l), 
+\fBmbsystem\fP(l), \fBmbprocess\fP(l), \fBmbset\fP, \fBmbsvplist\fP,
+\fBmbbath\fP, \fBmblevitus\fP(l), 
 \fBmbm_xbt\fP(l), \fBmbxbt\fP(l)
 
 .SH BUGS
 Users cannot remove display sound velocity profiles from the screen
 once they are read in. The main window for mbvelocitytool 
 is too large for use on screens smaller than 1024 X 768 pixels.
+
 
