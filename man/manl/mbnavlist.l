@@ -1,4 +1,4 @@
-.TH mbnavlist l "28 May 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist l "29 July 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP - List navigation data in swath sonar data files.
 
@@ -126,7 +126,8 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIfile\fP = "stdin".
+is given in the \fBMBIO\fP manual page. 
+Default: \fIfile\fP = "datalist.mb-1".
 .TP
 .B \-L
 \fIlonflip\fP

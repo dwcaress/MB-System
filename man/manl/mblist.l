@@ -1,4 +1,4 @@
-.TH mblist l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l "29 July 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -148,7 +148,8 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read any swath
 format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+is given in the \fBMBIO\fP manual page. 
+Default: \fIinfile\fP = "datalist.mb-1".
 .TP
 .B \-L
 \fIlonflip\fP
