@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	3.00	2/15/93
- *    $Id: mb_get_value.c,v 3.1 1993-05-14 22:27:02 sohara Exp $
+ *    $Id: mb_get_value.c,v 3.2 1993-05-15 14:44:54 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/05/14  22:27:02  sohara
+ * fixed rcs_id message
+ *
  * Revision 3.0  1993/04/23  16:00:04  dale
  * Inital version
  *
@@ -32,6 +35,8 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
+static char rcs_id[]="$Id: mb_get_value.c,v 3.2 1993-05-15 14:44:54 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 /*	function mb_get_double reads a double value from a string.
  */
@@ -40,7 +45,6 @@ double *value;
 char *str;
 int nchar;
 {
-  static char rcs_id[]="$Id: mb_get_value.c,v 3.1 1993-05-14 22:27:02 sohara Exp $";
 	char	tmp[MB_GET_VALUE_MAXLINE];
 	strncpy(tmp,"\0",sizeof(tmp));
 	*value = 0.0;
@@ -55,7 +59,6 @@ int *value;
 char *str;
 int nchar;
 {
-  char rcs_id[]="$Id: mb_get_value.c,v 3.1 1993-05-14 22:27:02 sohara Exp $";
 	char	tmp[MB_GET_VALUE_MAXLINE];
 	strncpy(tmp,"\0",sizeof(tmp));
 	*value = atoi(strncpy(tmp,str,nchar));
