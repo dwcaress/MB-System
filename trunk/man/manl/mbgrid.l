@@ -21,8 +21,7 @@ data contained in a set of multibeam data files. This program can use
 either a gaussian weighted average scheme or a median filter scheme
 to grid regions covered by multibeam 
 swaths and then can fill in gaps between the swaths (to the degree 
-specified by the user) using the same minimum curvature algorithm
-implemented in the \fBGMT\fP program \fBsurface\fP.
+specified by the user) using a thin plate spline interpolation.
 
 The user must specify the bounds of the region to be gridded (\fB-R\fP), 
 the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid, 
@@ -32,7 +31,7 @@ and a character string to be used as the root of the
 output filenames (\fB-O\fP).  The user can also specify the type of the
 input data (\fB-A\fP), the width of the gaussian filter used for 
 weighted average gridding (\fB-W\fP), the maximum distance from 
-data points that the minimum curvature 
+data points that the spline 
 interpolation is used (\fB-C\fP), the format of the output files, and
 other parameters.
 
@@ -101,11 +100,6 @@ the nearest data points (this distance is specified in terms of
 grid point spacing using the \fB-C\fP command).  Thus, small gaps
 in the data can be filled, or the whole grid can be filled in with
 a smooth interpolation.
-
-The minimum curvature interpolation algorithm used is identical to that of the
-\fBGMT-system\fP program \fBsurface\fP (the source code has been
-modified only slightly); see the \fBsurface\fP manual page for
-more information on its operation.
 
 For magnetic inversions it is useful to have a bathymetry grid which
 tails off to a constant value at the border.  To facilitate this, the
@@ -259,13 +253,15 @@ the input data; pings associated with a smaller ship speed will not be
 output. Default: \fIspeed\fP = 0.
 .TP
 .B \fB-T\fItension\fP
-Sets the \fItension\fP value used in the thin plate spline interpolation. 
+Sets the \fItension\fP value used in the thin plate spline interpolation.
+ 
 A \fItension\fP of 0 gives a minimum curvature surface with free edges;
-a nonzero \fItension\fP tends to suppress spurious oscillations and flatten
-the interpolation toward the edges. The \fItension\fP must be between 0 and
-1.  See the manual page for the \fBGMT\fP program \fBsurface\fP for more 
-information.
-Default: \fItension\fP = 0.35.
+this is a pure Laplacian solution. A nonzero \fItension\fP tends to 
+suppress spurious oscillations and flatten
+the interpolation toward the edges; a \fItension\fP of infinity
+yields a pure spline solution. The \fItension\fP must be zero or
+greater.  
+Default: \fItension\fP = 1.0e10 (pure spline solution).
 .TP
 .B \fB-U\fItime\fP
 Forces \fBmbgrid\fP to avoid averaging overlapping swaths by
@@ -320,7 +316,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.5 1995-03-15 14:16:25 caress Exp $
+ Version $Id: mbgrid.l,v 4.6 1995-04-25 19:47:57 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -343,7 +339,7 @@ not covered by data. The output looks like:
  Latitude interval:  0.001000 degrees or 0.110605 km
  Gaussian filter 1/e length: 0.055096 km
  Spline interpolation applied with clipping dimension: 251
- Spline tension (range 0.0 to 1.0): 0.350000
+ Spline tension (range 0.0 to infinity): 10000000000.000000
  Grid format 3:  GMT version 2 grd (netCDF)
  Real value of 99999.900000 used to flag regions with no data
  MBIO parameters:
@@ -397,7 +393,7 @@ standard deviation values. The following will suffice:
 The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.5 1995-03-15 14:16:25 caress Exp $
+ Version $Id: mbgrid.l,v 4.6 1995-04-25 19:47:57 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -420,7 +416,7 @@ The output looks like:
  Latitude interval:  0.001000 degrees or 0.110605 km
  Gaussian filter 1/e length: 0.055096 km
  Spline interpolation applied with clipping dimension: 251
- Spline tension (range 0.0 to 1.0): 0.350000
+ Spline tension (range 0.0 to infinity): 10000000000.000000
  Grid format 3:  GMT version 2 grd (netCDF)
  Real value of 99999.900000 used to flag regions with no data
  Data density and sigma grids also created
