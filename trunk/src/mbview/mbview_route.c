@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.2 2004-06-18 04:26:06 caress Exp $
+ *    $Id: mbview_route.c,v 5.3 2004-07-15 19:26:44 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/06/18 04:26:06  caress
+ * June 17, 2004 update.
+ *
  * Revision 5.1  2004/02/24 22:52:29  caress
  * Added spherical projection to MBview.
  *
@@ -76,7 +79,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.2 2004-06-18 04:26:06 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.3 2004-07-15 19:26:44 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -88,8 +91,6 @@ int mbview_getroutecount(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_getroutecount:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -139,8 +140,6 @@ int mbview_getroutepointcount(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	i;
-
-fprintf(stderr,"Called mbview_getroutepointcount:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -205,8 +204,6 @@ int mbview_allocroutearrays(int verbose,
 	/* local variables */
 	char	*function_name = "mbview_allocroutearrays";
 	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_allocroutearrays: npointtotal:%d\n", npointtotal);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -289,8 +286,6 @@ int mbview_freeroutearrays(int verbose,
 	/* local variables */
 	char	*function_name = "mbview_freeroutearrays";
 	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_freeroutearrays:\n");
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -378,8 +373,6 @@ int mbview_addroute(int verbose, int instance,
 	int	nadded;
 	int	iroute;
 	int	i, ii, jj, iii, jjj, kkk;
-
-fprintf(stderr,"Called mbview_addroute:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -484,8 +477,6 @@ int mbview_getroute(int verbose, int instance,
 	double	dxx, dyy, dzz;
 	double	dll, doo;
 	int	i, j;
-
-fprintf(stderr,"Called mbview_getroute:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -661,8 +652,6 @@ int mbview_enableviewroutes(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-fprintf(stderr,"Called mbview_enableviewroutes:%d\n",instance);
-
 	/* print starting debug statements */
 	if (verbose >= 2)
 		{
@@ -711,8 +700,6 @@ int mbview_enableeditroutes(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_enableeditroutes:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -1288,7 +1275,7 @@ int mbview_route_add(int instance, int inew, int jnew,
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-
+	
 	/* add route if required */
 	if (inew == data->nroute)
 		{
@@ -1696,6 +1683,7 @@ int mbview_drawroute(int instance, int rez)
 						/ data->primary_dx;
 				jy = (data->routes[iroute].points[jpoint].ygrid - data->primary_ymin) 
 						/ data->primary_dy;
+
 				if (ix >= 0 && ix < data->primary_nx
 					&& jy >= 0 && jy < data->primary_ny)
 					{

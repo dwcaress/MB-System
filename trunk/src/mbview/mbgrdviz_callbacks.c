@@ -67,7 +67,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.4 2004-06-18 04:26:06 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.5 2004-07-15 19:26:44 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -95,6 +95,7 @@ void do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, Xt
 void do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data);
 
 /*
  * Motif required Headers
@@ -1102,6 +1103,10 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 					do_mbgrdviz_open_region,
 					"Open Region as New View", 
 					MBV_PICKMASK_REGION, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_make_survey,
+					"Generate Survey Route from Area", 
+					MBV_PICKMASK_AREA, &error);
 				}
 			}
 
@@ -2891,6 +2896,165 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 					MBV_PICKMASK_REGION, &error);
 				}
 			}
+
+		}
+}
+/*---------------------------------------------------------------------------------------*/
+
+void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	char function_name[] = "do_mbgrdviz_make_survey";
+	int	status = MB_SUCCESS;
+	
+	/* mbview instance */
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	char	button_name[MB_PATH_MAXLINE];
+	
+	/* survey construction parameters */
+	double	line_spacing = 200.0;
+	double	line_spacing_use;
+	int	nlines;
+	int	lineskip = 5;
+	int	nlinegroups, npoints;
+	int	iroute;
+	double xgrid, ygrid;
+	double xlon, ylat, zdata;
+	double xdisplay, ydisplay, zdisplay;
+	
+	double	xx, dx, dy, r, dxuse, dyuse;
+	int	iline, jendpoint, ok;
+	int	i, j;
+
+    	/* get source mbview instance */
+	instance = (int) client_data;
+fprintf(stderr,"Called do_mbgrdviz_make_survey instance:%d\n", instance);
+	    
+    	/* check data source for area to bounding desired survey */
+	status = mbview_getdataptr(verbose, instance, &data, &error);
+					
+	/* check if area is currently defined */
+	if (status == MB_SUCCESS)
+		{
+		if (data->area_type != MBV_AREA_QUAD)
+			status = MB_FAILURE;
+		}
+	    
+    	/* generate survey lines from area and add as new route */
+	if (status == MB_SUCCESS)
+		{
+		/* work in display coordinates */
+		
+		/* get number of lines */
+		nlines = (data->area.width / line_spacing) + 1;
+		nlinegroups = nlines / lineskip + 1;
+		
+		/* get unit vector for survey area boundaries */
+		dx = data->area.cornerpoints[1].xdisplay 
+			- data->area.cornerpoints[0].xdisplay;
+		dy = data->area.cornerpoints[1].ydisplay 
+			- data->area.cornerpoints[0].ydisplay;
+		r = sqrt(dx * dx + dy * dy);
+		dx = dx / r;
+		dy = dy / r;
+		line_spacing_use = line_spacing * r / data->area.width;
+fprintf(stderr,"width:%f spacing:%f nlines:%d r:%f dx:%f dy:%f\n",
+data->area.width,line_spacing_use,nlines,r,dx,dy);
+
+		/* get new route number to use */
+		mbview_getroutecount(verbose, instance, &iroute, &error);
+		
+		/* generate points */
+		jendpoint = 0;
+		npoints = 0;
+		for (j=0;j<lineskip;j++)
+		for (i=0;i<nlinegroups;i++)
+			{
+			/* get line number */
+			iline = i * lineskip + j;
+			
+			if (iline < nlines)
+				{
+				/* get line position in survey area */
+				xx = -0.5 * line_spacing_use * (nlines - 1)
+					+ iline * line_spacing_use;
+				dxuse = dx * xx;
+				dyuse = dy * xx;
+
+				/* get first point */
+				xdisplay = data->area.endpoints[jendpoint].xdisplay
+					+ dxuse;
+				ydisplay = data->area.endpoints[jendpoint].ydisplay
+					+ dyuse;
+				zdisplay = data->area.endpoints[jendpoint].zdisplay;
+				mbview_projectinverse(instance, MB_YES,
+						xdisplay, ydisplay, zdisplay, 
+						&xlon, &ylat,
+						&xgrid, &ygrid);
+				mbview_getzdata(instance, 
+						xgrid, ygrid, 
+						&ok, &zdata);
+				if (ok == MB_NO)
+					zdata = data->area.endpoints[jendpoint].zdata;
+				mbview_projectll2display(instance,
+					xlon, ylat, zdata, 
+					&xdisplay, &ydisplay, &zdisplay);
+	fprintf(stderr,"\nSurvey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n",
+	iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
+
+				/* add new route for first point, just add single point
+					after that */
+				if (iline == 0)
+					{
+					mbview_addroute(verbose, instance,
+							1, &xlon, &ylat,
+							MBV_COLOR_PURPLE, 2,
+							"Survey Route", &error);
+					}
+				else
+					{
+					mbview_route_add(instance, iroute, npoints, 
+							xgrid, ygrid,
+							xlon, ylat, zdata,
+							xdisplay, ydisplay, zdisplay);
+					}
+				npoints++;
+
+				/* switch endpoint */
+				jendpoint = ++jendpoint % 2;
+
+				/* get second point */
+				xdisplay = data->area.endpoints[jendpoint].xdisplay
+					+ dxuse;
+				ydisplay = data->area.endpoints[jendpoint].ydisplay
+					+ dyuse;
+				zdisplay = data->area.endpoints[jendpoint].zdisplay;			
+				mbview_projectinverse(instance, MB_YES,
+						xdisplay, ydisplay, zdisplay, 
+						&xlon, &ylat,
+						&xgrid, &ygrid);
+				mbview_getzdata(instance, 
+						xgrid, ygrid, 
+						&ok, &zdata);
+				if (ok == MB_NO)
+					zdata = data->area.endpoints[jendpoint].zdata;
+				mbview_projectll2display(instance,
+					xlon, ylat, zdata, 
+					&xdisplay, &ydisplay, &zdisplay);
+	fprintf(stderr,"Survey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n",
+	iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
+
+				/* add single point after that */
+				mbview_route_add(instance, iroute, npoints, 
+						xgrid, ygrid,
+						xlon, ylat, zdata,
+						xdisplay, ydisplay, zdisplay);
+				npoints++;
+				}
+			}
+
+		
 
 		}
 }

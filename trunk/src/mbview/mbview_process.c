@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.3 2004-05-21 23:40:40 caress Exp $
+ *    $Id: mbview_process.c,v 5.4 2004-07-15 19:26:44 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/05/21 23:40:40  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.2  2004/02/24 22:52:29  caress
  * Added spherical projection to MBview.
  *
@@ -82,7 +85,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.3 2004-05-21 23:40:40 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.4 2004-07-15 19:26:44 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -1242,6 +1245,13 @@ int mbview_projectll2xygrid(int instance,
 		}
 	else
 		{
+		if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+			{
+			if (data->primary_xmin < -180.0 && xlon > 0.0)
+				xlon -= 360.0;
+			if (data->primary_xmax > 180.0 && xlon < 0.0)
+				xlon += 360.0;
+			}
 		*xgrid = xlon;
 		*ygrid = ylat;
 		}
@@ -1305,6 +1315,13 @@ int mbview_projectll2xyzgrid(int instance,
 		}
 	else
 		{
+		if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+			{
+			if (data->primary_xmin < -180.0 && xlon > 0.0)
+				xlon -= 360.0;
+			if (data->primary_xmax > 180.0 && xlon < 0.0)
+				xlon += 360.0;
+			}
 		*xgrid = xlon;
 		*ygrid = ylat;
 		}
@@ -2534,15 +2551,35 @@ fprintf(stderr,"mbview_colorpoint: %d %d %d\n", i, j, k);
 		}
 
 	/* get color */
-	if (view->colortable != MBV_COLORTABLE_SEALEVEL)
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE 
+		&& view->colortable != MBV_COLORTABLE_SEALEVEL)
+	    {
 	    mbview_getcolor(value, view->min, view->max, view->colortable_mode, 
+	    		(float) 0.0, (float) 0.0, (float) 1.0, 
+	    		(float) 1.0, (float) 0.0, (float) 0.0, 
 			view->colortable_red,
 			view->colortable_green,
 			view->colortable_blue,
 			&data->primary_r[k],
 			&data->primary_g[k],
 			&data->primary_b[k]);
-
+	    }
+	else if (view->colortable != MBV_COLORTABLE_SEALEVEL)
+	    {
+	    mbview_getcolor(value, view->min, view->max, view->colortable_mode, 
+			view->colortable_red[0],
+			view->colortable_green[0],
+			view->colortable_blue[0],
+			view->colortable_red[MBV_NUM_COLORS-1],
+			view->colortable_green[MBV_NUM_COLORS-1],
+			view->colortable_blue[MBV_NUM_COLORS-1],
+			view->colortable_red,
+			view->colortable_green,
+			view->colortable_blue,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+	    }
 	else
 	    {
 	    if (value > 0.0)
@@ -2550,6 +2587,12 @@ fprintf(stderr,"mbview_colorpoint: %d %d %d\n", i, j, k);
 		if (view->colortable_mode == MBV_COLORTABLE_NORMAL)
 		    {
 		    mbview_getcolor(value, 0.0, view->max, view->colortable_mode, 
+			colortable_abovesealevel_red[0],
+			colortable_abovesealevel_green[0],
+			colortable_abovesealevel_blue[0],
+			colortable_abovesealevel_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_blue[MBV_NUM_COLORS-1],
 			colortable_abovesealevel_red,
 			colortable_abovesealevel_green,
 			colortable_abovesealevel_blue,
@@ -2560,6 +2603,12 @@ fprintf(stderr,"mbview_colorpoint: %d %d %d\n", i, j, k);
 		else
 		    {
 		    mbview_getcolor(value, -view->max / 11.0, view->max, view->colortable_mode, 
+			colortable_haxby_red[0],
+			colortable_haxby_green[0],
+			colortable_haxby_blue[0],
+			colortable_haxby_red[MBV_NUM_COLORS-1],
+			colortable_haxby_green[MBV_NUM_COLORS-1],
+			colortable_haxby_blue[MBV_NUM_COLORS-1],
 			colortable_haxby_red,
 			colortable_haxby_green,
 			colortable_haxby_blue,
@@ -2573,6 +2622,12 @@ fprintf(stderr,"mbview_colorpoint: %d %d %d\n", i, j, k);
 		if (view->colortable_mode == MBV_COLORTABLE_REVERSED)
 		    {
 		    mbview_getcolor(value, view->min, 0.0, view->colortable_mode, 
+			colortable_abovesealevel_red[0],
+			colortable_abovesealevel_green[0],
+			colortable_abovesealevel_blue[0],
+			colortable_abovesealevel_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_blue[MBV_NUM_COLORS-1],
 			colortable_abovesealevel_red,
 			colortable_abovesealevel_green,
 			colortable_abovesealevel_blue,
@@ -2582,10 +2637,13 @@ fprintf(stderr,"mbview_colorpoint: %d %d %d\n", i, j, k);
 		    }
 		else
 		    {
-		    view->colortable_red = colortable_haxby_red;
-		    view->colortable_green = colortable_haxby_green;
-		    view->colortable_blue = colortable_haxby_blue;
 		    mbview_getcolor(value, view->min, -view->min / 11.0, view->colortable_mode, 
+			colortable_haxby_red[0],
+			colortable_haxby_green[0],
+			colortable_haxby_blue[0],
+			colortable_haxby_red[MBV_NUM_COLORS-1],
+			colortable_haxby_green[MBV_NUM_COLORS-1],
+			colortable_haxby_blue[MBV_NUM_COLORS-1],
 			colortable_haxby_red,
 			colortable_haxby_green,
 			colortable_haxby_blue,
@@ -2847,6 +2905,12 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 /*------------------------------------------------------------------------------*/
 int mbview_getcolor(double value, double min, double max,
 			int colortablemode, 
+			float below_red,
+			float below_green,
+			float below_blue,
+			float above_red,
+			float above_green,
+			float above_blue,
 			float *colortable_red,
 			float *colortable_green,
 			float *colortable_blue,
@@ -2870,6 +2934,12 @@ int mbview_getcolor(double value, double min, double max,
 		fprintf(stderr,"dbg2       min:              %f\n",min);
 		fprintf(stderr,"dbg2       max:              %f\n",max);
 		fprintf(stderr,"dbg2       colortablemode:   %d\n",colortablemode);
+		fprintf(stderr,"dbg2       below_red:        %f\n",below_red);
+		fprintf(stderr,"dbg2       below_green:      %f\n",below_green);
+		fprintf(stderr,"dbg2       below_blue:       %f\n",below_blue);
+		fprintf(stderr,"dbg2       above_red:        %f\n",above_red);
+		fprintf(stderr,"dbg2       above_green:      %f\n",above_green);
+		fprintf(stderr,"dbg2       above_blue:       %f\n",above_blue);
 		fprintf(stderr,"dbg2       colortable_red:   %d\n",colortable_red);
 		fprintf(stderr,"dbg2       colortable_green: %d\n",colortable_green);
 		fprintf(stderr,"dbg2       colortable_blue:  %d\n",colortable_blue);
@@ -2880,16 +2950,31 @@ int mbview_getcolor(double value, double min, double max,
 		factor = (max - value) / (max - min);
 	else
 		factor = (value -  min) / (max - min);
-	factor = MAX(factor, 0.000001);
-	factor = MIN(factor, 0.999999);
-	ii = (int) (factor * (MBV_NUM_COLORS - 1));
-	ff = factor * (MBV_NUM_COLORS - 1) - ii;
-	*red = colortable_red[ii]
-		+ ff * (colortable_red[ii+1] - colortable_red[ii]);
-	*green = colortable_green[ii]
-		+ ff * (colortable_green[ii+1] - colortable_green[ii]);
-	*blue = colortable_blue[ii]
-		+ ff * (colortable_blue[ii+1] - colortable_blue[ii]);
+	/* factor = MAX(factor, 0.000001);
+	factor = MIN(factor, 0.999999);*/
+	if (factor <= 0.0)
+		{
+		*red = below_red;
+		*green = below_green;
+		*blue = below_blue;
+		}
+	else if (factor >= 1.0)
+		{
+		*red = above_red;
+		*green = above_green;
+		*blue = above_blue;
+		}
+	else
+		{
+		ii = (int) (factor * (MBV_NUM_COLORS - 1));
+		ff = factor * (MBV_NUM_COLORS - 1) - ii;
+		*red = colortable_red[ii]
+			+ ff * (colortable_red[ii+1] - colortable_red[ii]);
+		*green = colortable_green[ii]
+			+ ff * (colortable_green[ii+1] - colortable_green[ii]);
+		*blue = colortable_blue[ii]
+			+ ff * (colortable_blue[ii+1] - colortable_blue[ii]);
+		}
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

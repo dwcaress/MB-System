@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.3 2004-05-21 23:40:40 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.4 2004-07-15 19:26:45 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/05/21 23:40:40  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.2  2004/02/24 22:52:30  caress
  * Added spherical projection to MBview.
  *
@@ -452,4 +455,87 @@ int do_mbview_workfunction(XtPointer client_data);
 int mbview_setcolorparms(int instance);
 int mbview_update_sensitivity(int verbose, int instance, int *error);
 int mbview_action_sensitivity(int instance);
+/*--------------------------------------------------------------------*/
+int mbview_projectdata(int instance);
+int mbview_zscalegridpoint(int instance, int k);
+int mbview_zscalepoint(int instance, int global, double offset_factor, 
+			struct mbview_point_struct *point);
+int mbview_zscale(int instance);
+int mbview_projectforward(int instance, int needlonlat,
+				double xgrid, double ygrid, double zdata,
+				double *xlon, double *ylat, 
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectinverse(int instance, int needlonlat,
+				double xdisplay, double ydisplay,double zdisplay,
+				double *xlon, double *ylat,
+				double *xgrid, double *ygrid);
+int mbview_projectfromlonlat(int instance,
+				double xlon, double ylat, double zdata,
+				double *xgrid, double *ygrid,
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectgrid2ll(int instance,
+				double xgrid, double ygrid,
+				double *xlon, double *ylat);
+int mbview_projectll2xygrid(int instance,
+				double xlon, double ylat,
+				double *xgrid, double *ygrid);
+int mbview_projectll2xyzgrid(int instance,
+				double xlon, double ylat,
+				double *xgrid, double *ygrid, double *zdata);
+int mbview_projectll2display(int instance,
+				double xlon, double ylat, double zdata,
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectdisplay2ll(int instance,
+				double xdisplay, double ydisplay, double zdisplay,
+				double *xlon, double *ylat);
+int mbview_projectdistance(int instance,
+				double xlon1, double ylat1, double zdata1,
+				double xlon2, double ylat2, double zdata2,
+				double *distancelateral, 
+				double *distanceoverground,
+				double *slope);
+int mbview_sphere_setup(int instance, int earthcentered, double xlon, double ylat);
+int mbview_sphere_forward(int instance, double xlon, double ylat,
+			double *xx, double *yy, double *zz);
+int mbview_sphere_inverse(int instance, double xx, double yy, double zz, 
+			double *xlon, double *ylat);
+int mbview_sphere_matrix(double phi, double theta, double psi,double *eulermatrix);
+int mbview_sphere_rotate(double *eulermatrix,
+			double *v, double *vr);
+int mbview_greatcircle_distbearing(int instance, 
+			double lon1, double lat1, double lon2,  double lat2,
+			double *bearing, double *distance);
+int mbview_greatcircle_endposition(int instance, 
+			double lon1, double lat1, double bearing, double distance,
+			double *lon2, double *lat2);
+int mbview_colorclear(int instance);
+int mbview_zscaleclear(int instance);
+int mbview_setcolorparms(int instance);
+int mbview_colorpoint(
+	struct mbview_world_struct *view,
+	struct mbview_struct *data,
+	int i, int j, int k);
+int mbview_colordata(int instance, int rez);
+int mbview_getsecondaryvalue(struct mbview_world_struct *view,
+				struct mbview_struct *data,
+				int i, int j, 
+				double *secondary_value);
+int mbview_getcolor(double value, double min, double max,
+			int colortablemode, 
+			float below_red,
+			float below_green,
+			float below_blue,
+			float above_red,
+			float above_green,
+			float above_blue,
+			float *colortable_red,
+			float *colortable_green,
+			float *colortable_blue,
+			float *red, float *green, float *blue);
+int mbview_applyshade(double intensity, float *r, float *g, float *b);
+int mbview_contour(int instance, int rez);
+int mbview_getzdata(int instance, 
+			double xgrid, double ygrid,
+			int *found, double *zdata);
+			
 /*--------------------------------------------------------------------*/
