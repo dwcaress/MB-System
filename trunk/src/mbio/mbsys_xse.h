@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.4 2001-07-22 21:19:23 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/04/06  22:05:59  caress
  * Consolidated xse formats into one format.
  *
@@ -158,9 +161,8 @@
 #define MBSYS_XSE_MAXDRAFT		200
 #define	MBSYS_XSE_COMMENT_LENGTH	200
 #define	MBSYS_XSE_DESCRIPTION_LENGTH	64
-#define	MBSYS_XSE_TIME_OFFSET	2177452800.0
-#define	MBSYS_XSE_BUFFER_SIZE	32000
-#define	MBSYS_XSE_DESCRIPTION_LENGTH	64
+#define	MBSYS_XSE_TIME_OFFSET		2177452800.0
+#define	MBSYS_XSE_BUFFER_SIZE		32000
 #define	MBSYS_XSE_MAX_SIZE		200
 
 /* frame and group id's */
