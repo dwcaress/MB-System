@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.5 2001-09-17 23:21:14 caress Exp $
+ *    $Id: mblist.c,v 5.6 2001-10-26 17:14:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/09/17  23:21:14  caress
+ * Fixed calculation of lon and lat values.
+ *
  * Revision 5.4  2001/07/20  00:34:38  caress
  * Release 5.0.beta03
  *
@@ -250,7 +253,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 5.5 2001-09-17 23:21:14 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 5.6 2001-10-26 17:14:21 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W -Zsegment]";
@@ -2070,8 +2073,11 @@ main (int argc, char **argv)
 						list[i]);
 					break;
 				}
-				if (i<(n_list-1)) printf ("\t");
-				else printf ("\n");
+                        if (ascii == MB_YES)
+                            {
+                            if (i<(n_list-1)) printf ("\t");
+                            else printf ("\n");
+                            }
 			}
 		    }
 		  }
