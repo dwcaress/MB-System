@@ -1,6 +1,6 @@
 /*********************************************************
 *                                                        *
-* $Id: mbedit.uil,v 4.1 1995-02-14 19:16:04 caress Exp $                                                   *
+* $Id: mbedit.uil,v 4.2 1995-04-04 21:06:47 caress Exp $                                                   *
 *                                                        *
 * WRITTEN FOR ANTARCTIC SUPPORT ASSOCIATES BY Rod McCabe *
 *                                                        *
@@ -15,6 +15,10 @@
 * Operating system : UNIX                                *
 *                                                        *
 * $Log: not supported by cvs2svn $
+# Revision 4.1  1995/02/14  19:16:04  caress
+# Improved widget handling, uses swath width rather than plot scale,
+# now handles default values properly.
+#
 # Revision 4.0  1994/10/21  11:55:41  caress
 # Release V4.0
 #
@@ -81,8 +85,8 @@ object window_mbedit : XmMainWindow
     {
         XmNx = 34;
         XmNy = 0;
-        XmNwidth = 1105;
-        XmNheight = 865;
+        XmNwidth = 1024;
+        XmNheight = 768;
     };
     controls 
     {
@@ -269,8 +273,8 @@ object mbedit_bboard : XmBulletinBoard widget
         XmNmarginWidth = 0;
         XmNmarginHeight = 0;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNwidth = 1105;
-        XmNheight = 848;
+        XmNwidth = 1024;
+        XmNheight = 751;
         XmNx = 0;
         XmNy = 30;
     };
@@ -298,8 +302,8 @@ object controls_mbedit : XmBulletinBoard widget
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
         XmNy = 10;
-        XmNwidth = 1100;
-        XmNheight = 195;
+        XmNwidth = 1019;
+        XmNheight = 175;
     };
     controls 
     {
@@ -362,7 +366,7 @@ object slider_scale_x : XmScale widget
         XmNscaleHeight = 15;
         XmNx = 200;
         XmNy = 0;
-        XmNwidth = 275;
+        XmNwidth = 250;
         XmNheight = 31;
         XmNvalue = 1000;
     };
@@ -380,7 +384,7 @@ object slider_scale_x_max_label : XmLabel widget
         XmNlabelString = compound_string("20000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 465;
+        XmNx = 440;
         XmNy = 15;
         XmNwidth = 65;
         XmNheight = 15;
@@ -419,7 +423,7 @@ object slider_scale_y : XmScale widget
         XmNscaleHeight = 15;
         XmNx = 200;
         XmNy = 35;
-        XmNwidth = 275;
+        XmNwidth = 250;
         XmNheight = 31;
         XmNvalue = 100;
     };
@@ -437,7 +441,7 @@ object slider_scale_y_max_label : XmLabel widget
         XmNlabelString = compound_string("20.00");
         XmNrecomputeSize = false;
 	XmNfontList = k_menu_font;
-        XmNx = 465;
+        XmNx = 440;
         XmNy = 50;
         XmNwidth = 65;
         XmNheight = 15;
@@ -476,7 +480,7 @@ object slider_number_pings : XmScale widget
 	XmNscaleMultiple = 1;
         XmNx = 200;
         XmNy = 70;
-        XmNwidth = 275;
+        XmNwidth = 250;
         XmNheight = 31;
         XmNvalue = 10;
     };
@@ -495,7 +499,7 @@ object slider_num_pings_max_label : XmLabel widget
         XmNlabelString = compound_string("20");
         XmNrecomputeSize = false;
 	XmNfontList = k_menu_font;
-        XmNx = 465;
+        XmNx = 440;
         XmNy = 85;
         XmNwidth = 65;
         XmNheight = 15;
@@ -535,7 +539,7 @@ object slider_number_step : XmScale widget
 	XmNscaleMultiple = 1;
         XmNx = 200;
         XmNy = 105;
-        XmNwidth = 275;
+        XmNwidth = 250;
         XmNheight = 31;
         XmNvalue = 5;
     };
@@ -553,7 +557,7 @@ object nu_pings_max_step_label : XmLabel widget
         XmNlabelString = compound_string("20");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 465;
+        XmNx = 440;
         XmNy = 120;
         XmNwidth = 65;
         XmNheight = 15;
@@ -575,7 +579,7 @@ object slider_x_interval_label : XmLabel widget
     {
         XmNlabelString = compound_string("X Axis Tick Interval (m): 1");
 	XmNfontList = k_menu_font;
-        XmNx = 550;
+        XmNx = 525;
         XmNy = 15;
     };
 };
@@ -591,9 +595,9 @@ object slider_x_interval : XmScale widget
         XmNshowValue = true;
         XmNscaleHeight = 15;
 	XmNscaleMultiple = 1;
-        XmNx = 750;
+        XmNx = 725;
         XmNy = 0;
-        XmNwidth = 276;
+        XmNwidth = 250;
         XmNheight = 31;
         XmNvalue = 1000;
     };
@@ -611,7 +615,7 @@ object slider_x_max_interval_label : XmLabel widget
         XmNlabelString = compound_string("5000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 1015;
+        XmNx = 965;
         XmNy = 15;
         XmNwidth = 65;
         XmNheight = 15;
@@ -634,7 +638,7 @@ object slider_y_interval_label : XmLabel widget
     {
         XmNlabelString = compound_string("Y Axis Tick Interval (m): 1");
 	XmNfontList = k_menu_font;
-        XmNx = 550;
+        XmNx = 525;
         XmNy = 50;
     };
 };
@@ -650,9 +654,9 @@ object slider_y_interval : XmScale widget
         XmNshowValue = true;
         XmNscaleHeight = 15;
 	XmNscaleMultiple = 1;
-        XmNx = 750;
+        XmNx = 725;
         XmNy = 35;
-        XmNwidth = 275;
+        XmNwidth = 250;
         XmNheight = 31;
         XmNvalue = 250;
     };
@@ -670,7 +674,7 @@ object slider_y_max_interval_label : XmLabel widget
         XmNlabelString = compound_string("1000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 1015;
+        XmNx = 965;
         XmNy = 50;
         XmNwidth = 65;
         XmNheight = 15;
@@ -692,7 +696,7 @@ object slider_buffer_size_label : XmLabel widget
     {
         XmNlabelString = compound_string("Data Buffer Size:         1");
 	XmNfontList = k_menu_font;
-        XmNx = 550;
+        XmNx = 525;
         XmNy = 85;
     };
 };
@@ -708,9 +712,9 @@ object slider_buffer_size : XmScale widget
         XmNshowValue = true;
         XmNscaleHeight = 15;
 	XmNscaleMultiple = 1;
-        XmNx = 750;
+        XmNx = 725;
         XmNy = 70;
-        XmNwidth = 275;
+        XmNwidth = 250;
         XmNheight = 31;
     };
     callbacks 
@@ -728,7 +732,7 @@ object slider_buffer_size_max_label : XmLabel widget
         XmNlabelString = compound_string("5000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 1015;
+        XmNx = 965;
         XmNy = 85;
         XmNwidth = 65;
         XmNheight = 15;
@@ -749,7 +753,7 @@ object slider_buffer_hold_label : XmLabel widget
     {
         XmNlabelString = compound_string("Buffer Retain Size:       1");
 	XmNfontList = k_menu_font;
-        XmNx = 550;
+        XmNx = 525;
         XmNy = 120;
     };
 };
@@ -765,9 +769,9 @@ object slider_buffer_hold : XmScale widget
         XmNshowValue = true;
         XmNscaleHeight = 15;
 	XmNscaleMultiple = 1;
-        XmNx = 750;
+        XmNx = 725;
         XmNy = 105;
-        XmNwidth = 275;
+        XmNwidth = 250;
         XmNheight = 31;
     };
     callbacks 
@@ -784,7 +788,7 @@ object slider_buffer_hold_max_label : XmLabel widget
         XmNlabelString = compound_string("5000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 1015;
+        XmNx = 965;
         XmNy = 120;
         XmNwidth = 65;
         XmNheight = 15;
@@ -807,7 +811,7 @@ object setting_mode : XmRowColumn widget
     {
         XmNorientation = XmHORIZONTAL;
         XmNx = 70;
-        XmNy = 159;
+        XmNy = 139;
         XmNspacing = 0;
         XmNpacking = XmPACK_COLUMN;
         XmNnumColumns = 1;
@@ -880,7 +884,7 @@ object setting_mode_label : XmLabel widget
         XmNlabelString = compound_string("Mode:");
 	XmNfontList = k_menu_bar_font;
         XmNx = 18;
-        XmNy = 167;
+        XmNy = 147;
     };
 };
 
@@ -1154,9 +1158,9 @@ object canvas_mbedit : XmDrawingArea widget
     {
         XmNborderWidth = 1;
         XmNx = 1;
-        XmNy = 210;
-        XmNwidth = 1097;
-        XmNheight = 630;
+        XmNy = 190;
+        XmNwidth = 1016;
+        XmNheight = 553;
 	XmNbackground = white;
     };
     controls 

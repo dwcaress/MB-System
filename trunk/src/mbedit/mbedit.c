@@ -147,7 +147,7 @@ XColor db_color;
 /* Set these to the dimensions of your canvas drawing */
 /* area, minus 1, located in mbedit.uil.              */
 static int mb_borders[4] =
-	{ 0, 1096, 0, 629 };
+	{ 0, 1016, 0, 552 };
 
 /************************************************************/
 /* END OF GLOBAL VARIABLES                                  */
