@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.3 2002-04-06 03:15:17 caress Exp $
+#    $Id: install_makefiles,v 5.4 2002-05-29 21:06:33 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.3 2002-04-06 03:15:17 caress Exp $
+#   $Id: install_makefiles,v 5.4 2002-05-29 21:06:33 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.3  2002/04/06 03:15:17  caress
+#   Release 5.0.beta16
+#
 #   Revision 5.2  2002/01/24 02:12:31  caress
 #   Added DARWIN
 #
@@ -300,21 +303,27 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$LEVITUS = "/usr/local/levitus/annual";
 #
 # Example for installing on Apple Macintosh Computers
-# running MacOS version 10.1 or later:
-#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+# running MacOS X version 10.1 or later. Here I am
+# using the XFree86 4.2 distribution that comes with
+# XDarwin (www.xdarwin.org) and the LessTif (www.lesstif.org)
+# port provided by Fink (www.fink.org). As of May, 2002,
+# I am unable to get mbnavedit to work under MacOs 10.1.3.
+# I do succeed in building and running mbedit, mbvelocitytool,
+# and mbnavadjust:
+#	$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
 #	$OS = "DARWIN";
 #	$BYTESWAPPED = "NO";
-#	$CFLAGS = "-I/usr/include/X11R6";
-#	$LFLAGS = "-lm ";
 #	$GRAPHICAL = "YES";
-#	$MOTIFINCDIR = "/usr/local/include/Xm";
-#	$MOTIFLIBS = "-L/usr/local/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+#	$MOTIFINCDIR = "/sw/include/Xm";
+#	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 #	$GMTVERSION = "3.4";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
 #	$GMTINCDIR = "/usr/local/gmt/src";
-#	$NETCDFLIBDIR = "/usr/local/gmt/lib";
-#	$NETCDFINCDIR = "/usr/local/gmt/include";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
+#	$CFLAGS = "-g -I/usr/include/X11R6";
+#	$LFLAGS = "-Wl -force_flat_namespace -lm -L$NETCDFLIBDIR -lnetcdf";
 #
 # **** EDIT THE PARAMETERS HERE ****
 # Set the environment parameters:
