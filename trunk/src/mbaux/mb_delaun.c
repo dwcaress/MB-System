@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 4.0 1994-05-16 22:09:29 caress Exp $
+ *    $Id: mb_delaun.c,v 4.1 1994-05-24 03:11:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -95,6 +95,9 @@
  * Date:	April, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/05/16  22:09:29  caress
+ * First cut at new contouring scheme
+ *
  *
  */
 
@@ -104,8 +107,7 @@
 #include <strings.h>
 
 /* mbio include files */
-/*#include "../../include/mb_status.h"*/
-#include "/home/hs/caress/dev/mbsystem/include/mb_status.h"
+#include "../../include/mb_status.h"
 
 /* some defines */
 #define	LARGE	1.0e10
@@ -142,7 +144,7 @@ int	*kv1;
 int	*kv2;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 4.0 1994-05-16 22:09:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_delaun.c,v 4.1 1994-05-24 03:11:40 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];
