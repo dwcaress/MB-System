@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.7 1995-01-05 23:59:20 caress Exp $
+ *    $Id: mbswath.c,v 4.8 1995-01-10 15:46:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/01/05  23:59:20  caress
+ * Made it possible to read data from a single file or
+ * from datalists.
+ *
  * Revision 4.6  1994/12/21  20:23:30  caress
  * Allows the alongtrack beam footprint to be determined
  * by alongtrack beam width in degrees. The alongtrack
@@ -105,6 +109,8 @@
 #define	MBSWATH_BATH_AMP	3
 #define	MBSWATH_AMP		4
 #define	MBSWATH_SS		5
+#define MBSWATH_FOOTPRINT_REAL	1
+#define MBSWATH_FOOTPRINT_FAKE	2
 
 /* DTR define */
 #ifndef M_PI
@@ -178,7 +184,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.7 1995-01-05 23:59:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.8 1995-01-10 15:46:08 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -202,6 +208,7 @@ char **argv;
 	int	read_data;
 	FILE	*fp;
 	int	format;
+	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -242,7 +249,9 @@ char **argv;
 	double	ampmin = 0.0;
 	double	ampmax = 1.0;
 	int	monochrome = MB_NO;
-	double	factor = 1.0;
+	int	footprint_mode = MBSWATH_FOOTPRINT_REAL;
+	double	rawfactor = 1.0;
+	double	factor;
 	int	mode = MBSWATH_BATH;
 	int	start;
 	int	plot;
@@ -355,7 +364,7 @@ char **argv;
 		{
 		case 'A':
 		case 'a':
-			sscanf (optarg,"%lf", &factor);
+			sscanf (optarg,"%lf/%d", &factor, &footprint_mode);
 			flag++;
 			break;
 		case 'b':
@@ -500,6 +509,7 @@ char **argv;
 		fprintf(stderr,"dbg2       amplitude scale:  %f\n",ampscale);
 		fprintf(stderr,"dbg2       amplitude minimum:%f\n",ampmin);
 		fprintf(stderr,"dbg2       amplitude maximum:%f\n",ampmax);
+		fprintf(stderr,"dbg2       footprint mode:   %f\n",footprint_mode);
 		fprintf(stderr,"dbg2       footprint factor: %f\n",factor);
 		fprintf(stderr,"dbg2       mode:             %d\n",mode);
 		}
@@ -655,6 +665,13 @@ char **argv;
 			program_name);
 		exit(error);
 		}
+
+	/* get fore-aft beam_width */
+	status = mb_format(verbose,&format,&format_num,&error);
+	if (footprint_mode == MBSWATH_FOOTPRINT_REAL)
+		factor = rawfactor*mb_foreaft_beamwidth_table[format_num];
+	else
+		factor = rawfactor;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,sizeof(struct swath),
@@ -870,7 +887,8 @@ char **argv;
 		if (plot == MB_YES)
 			{
 			/* get footprint locations */
-			status = get_footprints(verbose,mode,factor,swath_plot,
+			status = get_footprints(verbose,mode,
+				footprint_mode,factor,swath_plot,
 				mtodeglon,mtodeglat,&error);
 
 			/* get shading */
@@ -1010,9 +1028,11 @@ char **argv;
 	gmt_end(argc, argv);
 }
 /*--------------------------------------------------------------------*/
-int get_footprints(verbose,mode,factor,swath,mtodeglon,mtodeglat,error)
+int get_footprints(verbose,mode,fp_mode,factor,
+			swath,mtodeglon,mtodeglat,error)
 int	verbose;
 int	mode;
+int	fp_mode;
 double	factor;
 struct swath *swath;
 double	mtodeglon;
@@ -1037,13 +1057,14 @@ int	*error;
 		fprintf(stderr,"\ndbg2  MBSWATH function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mode:       %d\n",mode);
-		fprintf(stderr,"dbg2       factor:     %f\n",factor);
-		fprintf(stderr,"dbg2       swath:      %d\n",swath);
-		fprintf(stderr,"dbg2       mtodeglon:  %f\n",mtodeglon);
-		fprintf(stderr,"dbg2       mtodeglat:  %f\n",mtodeglat);
-		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
+		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
+		fprintf(stderr,"dbg2       mode:        %d\n",mode);
+		fprintf(stderr,"dbg2       fp mode:     %d\n",fp_mode);
+		fprintf(stderr,"dbg2       factor:      %f\n",factor);
+		fprintf(stderr,"dbg2       swath:       %d\n",swath);
+		fprintf(stderr,"dbg2       mtodeglon:   %f\n",mtodeglon);
+		fprintf(stderr,"dbg2       mtodeglat:   %f\n",mtodeglat);
+		fprintf(stderr,"dbg2       pings:       %d\n",swath->npings);
 		}
 
 	/* set mode of operation */
@@ -1069,7 +1090,7 @@ int	*error;
 		}
 
 	/* get fore-aft components of beam footprints */
-	if (swath->npings > 1 && factor >= 0.0)
+	if (swath->npings > 1 && fp_mode == MBSWATH_FOOTPRINT_FAKE)
 	  {
 	  for (i=0;i<swath->npings;i++)
 		{
@@ -1125,7 +1146,7 @@ int	*error;
 	  }
 
 	/* take care of just one ping with nonzero center beam */
-	else if (swath->npings == 1 && factor >= 0.0
+	else if (swath->npings == 1 && fp_mode == MBSWATH_FOOTPRINT_FAKE
 		&& swath->data[0].bath[swath->beams_bath/2] > 0.0)
 	  {
 	  pingcur = &swath->data[0];
@@ -1140,9 +1161,9 @@ int	*error;
 	  }
 
 	/* else get rfactor if using fore-aft beam width */
-	else if (factor < 0.0)
+	else if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 	  {
-	  rfactor = sin(-DTR*factor);
+	  rfactor = 0.5*sin(DTR*factor);
 	  }
 
 	/* loop over the inner beams and get 
@@ -1152,7 +1173,7 @@ int	*error;
 		pingcur = &swath->data[i];
 
 		/* get heading if using fore-aft beam width */
-		if (factor < 0.0)
+		if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 			{
 			headingx = sin(pingcur->heading*DTR);
 			headingy = cos(pingcur->heading*DTR);
@@ -1201,7 +1222,8 @@ int	*error;
 				}
 
 			/* do it using fore-aft beam width */
-			if (setprint == MB_YES && factor < 0.0)
+			if (setprint == MB_YES 
+				&& fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
 				print = &pingcur->bathfoot[j];
 				pingcur->bathflag[j] = MB_YES;
@@ -1285,7 +1307,8 @@ int	*error;
 				}
 
 			/* do it using fore-aft beam width */
-			if (setprint == MB_YES && factor < 0.0)
+			if (setprint == MB_YES 
+				&& fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
 				print = &pingcur->ssfoot[j];
 				pingcur->ssflag[j] = MB_YES;
@@ -1334,7 +1357,7 @@ int	*error;
 		pingcur = &swath->data[i];
 
 		/* get heading if using fore-aft beam width */
-		if (factor < 0.0)
+		if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 			{
 			headingx = sin(pingcur->heading*DTR);
 			headingy = cos(pingcur->heading*DTR);
@@ -1358,7 +1381,7 @@ int	*error;
 			pingcur->bathflag[j] = MB_YES;
 
 			/* using fore-aft beam width */
-			if (factor < 0.0)
+			if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
 				ddlonx = (pingcur->bathlon[j] 
 					- pingcur->navlon)/mtodeglon;
@@ -1397,7 +1420,7 @@ int	*error;
 			pingcur->bathflag[j] = MB_YES;
 
 			/* using fore-aft beam width */
-			if (factor < 0.0)
+			if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
 				ddlonx = (pingcur->bathlon[j] 
 					- pingcur->navlon)/mtodeglon;
@@ -1441,7 +1464,7 @@ int	*error;
 			pingcur->ssflag[j] = MB_YES;
 
 			/* using fore-aft beam width */
-			if (factor < 0.0)
+			if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
 				ddlonx = (pingcur->sslon[j] 
 					- pingcur->navlon)/mtodeglon;
@@ -1480,7 +1503,7 @@ int	*error;
 			pingcur->ssflag[j] = MB_YES;
 
 			/* using fore-aft beam width */
-			if (factor < 0.0)
+			if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
 				ddlonx = (pingcur->sslon[j] 
 					- pingcur->navlon)/mtodeglon;
