@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.0 README FILE:
+MB-SYSTEM VERSION 5.0.1 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.0 release of the MB-System software package for 
+5.0.1 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.1          December 12, 2003
 Version 5.0.0          December 5, 2003
 
 MB-SYSTEM VERSION 5 BETA RELEASE DATES:
@@ -118,6 +119,22 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
+
+MB-SYSTEM VERSION 5.0.1 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.1 release of MB-System includes two bug fixes
+relative to the 5.0.0 release. The program mbgrid has been 
+fixed so that it compiles correctly under Red Hat Linux. The
+program mbcopy has been fixed so that time and space bounds
+are successfully applied to pings with a time gap error.
+
+Also, the distribution now has a top directory name of mbsystem-5.0.1 
+rather than just mbsystem. This will allow users to unpack the 
+distribution in the target location without overwriting an existing 
+older MB-System installation. Users can then rename the directory to 
+mbsystem or create a soft link to mbsystem-5.0.1 named mbsystem 
+(e.g. ln -s mbsystem-5.0.1 mbsystem).
 
 MB-SYSTEM VERSION 5.0.0 RELEASE NOTES:
 ------------------------------------------
@@ -704,10 +721,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.40 2003-12-05 08:21:22 caress Exp $
+RCS ID: $Id: README,v 5.41 2003-12-12 08:06:00 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.40  2003/12/05 08:21:22  caress
+*** empty log message ***
+
 Revision 5.39  2003/12/01 20:32:47  caress
 Trying to get real 5.0.0 release out.
 
