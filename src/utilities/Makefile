@@ -1,4 +1,5 @@
 #     The MB-system:	Makefile	3.00  1/21/93
+#	$Id: Makefile,v 1.2 1993-05-25 17:29:24 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -12,6 +13,8 @@
 # Author:	D. W. Caress
 # Date:		January 21, 1993
 #
+# $Log: not supported by cvs2svn $
+#
 
 CFLAGS = -O2
 FFLAGS = -O2
@@ -22,8 +25,8 @@ BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
 MANDIR = ../../man/man1
-GMTBINDIR = /net/hess/local/home/hess/programs/gmt2/bin
-GMTINCDIR = /net/hess/local/home/hess/programs/gmt2/src
+GMTBINDIR = /net/heezen/packages/gmt2/bin
+GMTINCDIR = /net/heezen/packages/gmt2/src
 
 ### make all makes the MB-system utilites and man pages
 all:	$(MANDIR)/mbsystem.1 \
