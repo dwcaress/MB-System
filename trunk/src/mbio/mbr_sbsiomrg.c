@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiomrg.c	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 5.5 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_sbsiomrg.c,v 5.6 2002-10-15 18:34:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.4  2002/02/26 07:50:41  caress
  * Release 5.0.beta14
  *
@@ -146,7 +149,7 @@ int mbr_dem_sbsiomrg(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sbsiomrg.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbr_sbsiomrg.c,v 5.6 2002-10-15 18:34:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error)
@@ -564,144 +567,149 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* translate values to seabeam data storage structure */
-	if (status == MB_SUCCESS
-		&& store != NULL)
+	if (status == MB_SUCCESS)
 		{
 		/* type of data record */
 		store->kind = dataplus->kind;
-
-		/* position */
-		store->lon2u = data->lon2u;
-		store->lon2b = data->lon2b;
-		store->lat2u = data->lat2u;
-		store->lat2b = data->lat2b;
-
-		/* time stamp */
-		store->year = data->year;
-		store->day = data->day;
-		store->min = data->min;
-		store->sec = data->sec;
-
-		/* zero arrays */
-		for (i=0;i<MBSYS_SB_BEAMS;i++)
+		
+		if (store->kind == MB_DATA_DATA)
 			{
-			store->deph[i] = 0;
-			store->dist[i] = 0;
-			}
+			/* position */
+			store->lon2u = data->lon2u;
+			store->lon2b = data->lon2b;
+			store->lat2u = data->lat2u;
+			store->lat2b = data->lat2b;
 
-		/* find center beam */
-		icenter = -1;
-		for (i=0;i<MB_BEAMS_RAW_SBSIOMRG;i++)
-			{
-			if (data->dist[i] == 0 
-				&& data->deph[i] != 0) 
-				icenter = i;
-			if (icenter < 0 && data->dist[i] == 0 
-				&& data->dist[i-1] < 0 
-				&& data->dist[i+1] > 0) 
-				icenter = i;
-			}
+			/* time stamp */
+			store->year = data->year;
+			store->day = data->day;
+			store->min = data->min;
+			store->sec = data->sec;
 
-		/* get center beam from closest distances if still needed */
-		if (icenter < 0)
-			{
-			jpos = 0;
-			jneg = 0;
+			/* zero arrays */
+			for (i=0;i<MBSYS_SB_BEAMS;i++)
+				{
+				store->deph[i] = 0;
+				store->dist[i] = 0;
+				}
+
+			/* find center beam */
+			icenter = -1;
 			for (i=0;i<MB_BEAMS_RAW_SBSIOMRG;i++)
 				{
-				if (data->dist[i] > 0
-				&& (data->dist[i] < jpos 
-					|| jpos == 0))
-					{
-					jpos = data->dist[i];
-					ipos = i;
-					}
-				if (data->dist[i] < 0 
-					&& (data->dist[i] > jneg 
-					|| jneg == 0))
-					{
-					jneg = data->dist[i];
-					ineg = i;
-					}
+				if (data->dist[i] == 0 
+					&& data->deph[i] != 0) 
+					icenter = i;
+				if (icenter < 0 && data->dist[i] == 0 
+					&& data->dist[i-1] < 0 
+					&& data->dist[i+1] > 0) 
+					icenter = i;
 				}
-			if (jpos > 0 && jneg < 0)
-				{
-				apos = jpos;
-				aneg = jneg;
-				icenter = ineg + (int)((ipos-ineg)*
-					((0 - aneg)/(apos-aneg)) + 0.5);
-				}
-			if (icenter < 0 || icenter >= MB_BEAMS_RAW_SBSIOMRG)
-				icenter = -1;
-			}
 
-		/* get center beam from any distances if still needed */
-		if (icenter < 0)
-			{
-			jneg = 0;
-			jpos = 0;
-			for (i=0;i<MB_BEAMS_RAW_SBSIOMRG;i++)
+			/* get center beam from closest distances if still needed */
+			if (icenter < 0)
 				{
-				if (data->dist[i] != 0)
+				jpos = 0;
+				jneg = 0;
+				for (i=0;i<MB_BEAMS_RAW_SBSIOMRG;i++)
 					{
-					if (jneg == 0 && jpos == 0)
-						{
-						jneg = data->dist[i];
-						ineg = i;
-						jpos = data->dist[i];
-						ipos = i;
-						}
-					else if (data->dist[i] < jneg)
-						{
-						jneg = data->dist[i];
-						ineg = i;
-						}
-					else if (data->dist[i] > jpos)
+					if (data->dist[i] > 0
+					&& (data->dist[i] < jpos 
+						|| jpos == 0))
 						{
 						jpos = data->dist[i];
 						ipos = i;
 						}
+					if (data->dist[i] < 0 
+						&& (data->dist[i] > jneg 
+						|| jneg == 0))
+						{
+						jneg = data->dist[i];
+						ineg = i;
+						}
+					}
+				if (jpos > 0 && jneg < 0)
+					{
+					apos = jpos;
+					aneg = jneg;
+					icenter = ineg + (int)((ipos-ineg)*
+						((0 - aneg)/(apos-aneg)) + 0.5);
+					}
+				if (icenter < 0 || icenter >= MB_BEAMS_RAW_SBSIOMRG)
+					icenter = -1;
+				}
+
+			/* get center beam from any distances if still needed */
+			if (icenter < 0)
+				{
+				jneg = 0;
+				jpos = 0;
+				for (i=0;i<MB_BEAMS_RAW_SBSIOMRG;i++)
+					{
+					if (data->dist[i] != 0)
+						{
+						if (jneg == 0 && jpos == 0)
+							{
+							jneg = data->dist[i];
+							ineg = i;
+							jpos = data->dist[i];
+							ipos = i;
+							}
+						else if (data->dist[i] < jneg)
+							{
+							jneg = data->dist[i];
+							ineg = i;
+							}
+						else if (data->dist[i] > jpos)
+							{
+							jpos = data->dist[i];
+							ipos = i;
+							}
+						}
+					}
+				if (jpos != 0 && jneg != 0 && jpos != jneg)
+					{
+					apos = jpos;
+					aneg = jneg;
+					icenter = ineg + (int)((ipos-ineg)*
+						((0 - aneg)/(apos-aneg)) + 0.5);
+					}
+				if (icenter < 0 || icenter >= MB_BEAMS_RAW_SBSIOMRG)
+					icenter = -1;
+				}
+
+			/* center the data in the global arrays */
+			if (icenter >= 0)
+				{
+				id = MB_BEAMS_PROC_SBSIOMRG/2 - icenter;
+				j = 0;
+				k = MB_BEAMS_RAW_SBSIOMRG;
+				if (id < 0) j = -id;
+				if (id > (MB_BEAMS_PROC_SBSIOMRG 
+					- MB_BEAMS_RAW_SBSIOMRG)) 
+					k = MB_BEAMS_PROC_SBSIOMRG - id;
+				for (i=j;i<k;i++)
+					{
+					l = MBSYS_SB_BEAMS - 1 - id - i;
+					store->deph[l] = data->deph[i];
+					store->dist[l] = data->dist[i];
 					}
 				}
-			if (jpos != 0 && jneg != 0 && jpos != jneg)
-				{
-				apos = jpos;
-				aneg = jneg;
-				icenter = ineg + (int)((ipos-ineg)*
-					((0 - aneg)/(apos-aneg)) + 0.5);
-				}
-			if (icenter < 0 || icenter >= MB_BEAMS_RAW_SBSIOMRG)
-				icenter = -1;
+
+			/* additional values */
+			store->sbtim = data->sbtim;
+			store->sbhdg = data->sbhdg;
+			store->axis = 0;
+			store->major = 0;
+			store->minor = 0;
 			}
 
-		/* center the data in the global arrays */
-		if (icenter >= 0)
+		else if (store->kind == MB_DATA_COMMENT)
 			{
-			id = MB_BEAMS_PROC_SBSIOMRG/2 - icenter;
-			j = 0;
-			k = MB_BEAMS_RAW_SBSIOMRG;
-			if (id < 0) j = -id;
-			if (id > (MB_BEAMS_PROC_SBSIOMRG 
-				- MB_BEAMS_RAW_SBSIOMRG)) 
-				k = MB_BEAMS_PROC_SBSIOMRG - id;
-			for (i=j;i<k;i++)
-				{
-				l = MBSYS_SB_BEAMS - 1 - id - i;
-				store->deph[l] = data->deph[i];
-				store->dist[l] = data->dist[i];
-				}
+			/* comment */
+			strncpy(store->comment,&datacomment[2],
+				MBSYS_SB_MAXLINE);
 			}
-
-		/* additional values */
-		store->sbtim = data->sbtim;
-		store->sbhdg = data->sbhdg;
-		store->axis = 0;
-		store->major = 0;
-		store->minor = 0;
-
-		/* comment */
-		strncpy(store->comment,&datacomment[2],
-			MBSYS_SB_MAXLINE);
 		}
 
 	/* print output debug statements */
@@ -751,72 +759,65 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	datacomment = (char *) data;
 	store = (struct mbsys_sb_struct *) store_ptr;
 
-	/* first set some plausible amounts for some of the 
-		variables in the record */
-	data->sbtim = 0;
-
-	/* second translate values from seabeam data storage structure */
-	if (store != NULL)
-		{
+	/* translate values from seabeam data storage structure */
 		dataplus->kind = store->kind;
-		if (store->kind == MB_DATA_DATA)
+	if (store->kind == MB_DATA_DATA)
+		{
+		/* position */
+		data->lon2u = store->lon2u;
+		data->lon2b = store->lon2b;
+		data->lat2u = store->lat2u;
+		data->lat2b = store->lat2b;
+
+		/* time stamp */
+		data->year = store->year;
+		data->day = store->day;
+		data->min = store->min;
+		data->sec = store->sec;
+
+		/* put distance and depth values 
+			into sbsiomrg data structure */
+
+		/* initialize depth and distance in 
+			output structure */
+		for (i=0;i<MB_BEAMS_RAW_SBSIOMRG;i++)
 			{
-			/* position */
-			data->lon2u = store->lon2u;
-			data->lon2b = store->lon2b;
-			data->lat2u = store->lat2u;
-			data->lat2b = store->lat2b;
-
-			/* time stamp */
-			data->year = store->year;
-			data->day = store->day;
-			data->min = store->min;
-			data->sec = store->sec;
-
-			/* put distance and depth values 
-				into sbsiomrg data structure */
-
-			/* initialize depth and distance in 
-				output structure */
-			for (i=0;i<MB_BEAMS_RAW_SBSIOMRG;i++)
-				{
-				data->deph[i] = 0;
-				data->dist[i] = 0;
-				}
-
-			/* find first nonzero beam */
-			id = MB_BEAMS_PROC_SBSIOMRG - 1;
-			offset = -1;
-			for (i=0;i<MB_BEAMS_PROC_SBSIOMRG;i++)
-				if (store->deph[id-i] != 0 
-					&& offset == -1) 
-					offset = i;
-			if (offset == -1) offset = 0;
-			iend = MB_BEAMS_RAW_SBSIOMRG;
-			if (iend + offset > MB_BEAMS_PROC_SBSIOMRG) 
-				iend = MB_BEAMS_PROC_SBSIOMRG - offset;
-
-			/* read depth and distance values into 
-				output structure */
-			for (i=0;i<iend;i++)
-				{
-				j = id - i - offset;
-				data->deph[i] = store->deph[j];
-				data->dist[i] = store->dist[j];
-				}
-
-			/* additional values */
-			data->sbtim = store->sbtim;
-			data->sbhdg = store->sbhdg;
+			data->deph[i] = 0;
+			data->dist[i] = 0;
 			}
 
-		/* comment */
-		else if (store->kind == MB_DATA_COMMENT)
+		/* find first nonzero beam */
+		id = MB_BEAMS_PROC_SBSIOMRG - 1;
+		offset = -1;
+		for (i=0;i<MB_BEAMS_PROC_SBSIOMRG;i++)
+			if (store->deph[id-i] != 0 
+				&& offset == -1) 
+				offset = i;
+		if (offset == -1) offset = 0;
+		iend = MB_BEAMS_RAW_SBSIOMRG;
+		if (iend + offset > MB_BEAMS_PROC_SBSIOMRG) 
+			iend = MB_BEAMS_PROC_SBSIOMRG - offset;
+
+		/* read depth and distance values into 
+			output structure */
+		for (i=0;i<iend;i++)
 			{
-			strcpy(datacomment,"##");
-			strncat(datacomment,store->comment,
-				mb_io_ptr->data_structure_size-3);
+			j = id - i - offset;
+			data->deph[i] = store->deph[j];
+			data->dist[i] = store->dist[j];
 			}
+
+		/* additional values */
+		data->sbtim = store->sbtim;
+		data->sbhdg = store->sbhdg;
+		}
+
+	/* comment */
+	else if (store->kind == MB_DATA_COMMENT)
+		{
+		strcpy(datacomment,"##");
+		strncat(datacomment,store->comment,
+			mb_io_ptr->data_structure_size-3);
 		}
 
 	/* print debug statements */
@@ -832,8 +833,7 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (dataplus->kind == MB_DATA_DATA
-		|| dataplus->kind == MB_DATA_COMMENT)
+	if (dataplus->kind == MB_DATA_DATA)
 		{
 		data->year = mb_swap_short(data->year);
 		data->day = mb_swap_short(data->day);

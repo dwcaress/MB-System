@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.2 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_mem.c,v 5.3 2002-10-15 18:34:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.1  2002/05/29 23:36:53  caress
  * Release 5.0.beta18
  *
@@ -101,7 +104,7 @@ static int	n_mb_alloc = 0;
 static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static int	mb_alloc_size[MB_MEMORY_HEAP_MAX];
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.2 2002-09-18 23:32:59 caress Exp $";
+static char rcs_id[]="$Id: mb_mem.c,v 5.3 2002-10-15 18:34:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, int size, void **ptr, int *error)
@@ -404,8 +407,8 @@ int mb_memory_list(int verbose, int *error)
 		fprintf(stderr,"\ndbg4  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg4       i:%d  ptr:%d  size:%d\n",
-				i,mb_alloc_ptr[i],mb_alloc_size[i]);
+			fprintf(stderr,"dbg4       i:%d  ptr:%12d %12x  size:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_ptr[i],mb_alloc_size[i]);
 		}
 	else if (verbose >= 4)
 		{
