@@ -1,9 +1,9 @@
-.TH MBIO 1 "16 September 1994"
+.TH mbio l "31 October 1994"
 .SH NAME
-\fBMBIO\fP - Format independent input/output library for multibeam sonar data.
+\fBmbio\fP - Format independent input/output library for multibeam sonar data.
 
 .SH VERSION
-This manual page describes \fBMBIO\fP version 4.00
+Version 4.1
 
 .SH DESCRIPTION
 \fBMBIO\fP (\fBM\fPulti\fBB\fPeam \fBI\fPnput/\fBO\fPutput) is a library
