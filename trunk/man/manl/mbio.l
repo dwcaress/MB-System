@@ -528,6 +528,32 @@ The following swath mapping sonar data formats are supported in this version of
     Informal Description: MB-System simple navigation format
     Attributes:           navigation, MBARI
 
+    MBIO Data Format ID:  171
+    Format name:          MBF_HS10JAMS
+    Informal Description: Furuno HS-10 multibeam format,
+    Attributes:           45 beams bathymetry and amplitude,
+                          ascii, JAMSTEC
+
+    MBIO Data Format ID:  182
+    Format name:          MBF_HSDS2RAW
+    Informal Description: STN Atlas raw multibeam format
+    Attributes:           STN Atlas multibeam sonars, 
+                          Hydrosweep DS2, Hydrosweep MD, 
+                          Fansweep 10, Fansweep 20, 
+                          bathymetry, amplitude, and sidescan,
+                          up to 1440 beams and 4096 pixels,
+                          XDR binary, STN Atlas.
+
+    MBIO Data Format ID:  183
+    Format name:          MBF_HSDS2LAM
+    Informal Description: L-DEO HSDS2 processing format
+    Attributes:           STN Atlas multibeam sonars, 
+                          Hydrosweep DS2, Hydrosweep MD, 
+                          Fansweep 10, Fansweep 20, 
+                          bathymetry, amplitude, and sidescan,
+                          up to 1440 beams and 4096 pixels,
+                          XDR binary, L-DEO.
+
 
 The institutional acronyms used above have the following meanings:
  	L-DEO	Lamont-Doherty Earth Observatory
