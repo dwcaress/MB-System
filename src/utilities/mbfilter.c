@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.4 1995-08-17 15:04:52 caress Exp $
+ *    $Id: mbfilter.c,v 4.5 1995-11-17 22:33:12 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/08/17  15:04:52  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.3  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -111,7 +114,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.4 1995-08-17 15:04:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.5 1995-11-17 22:33:12 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -587,10 +590,13 @@ The default input and output streams are stdin and stdout.\n";
 			&ping[i].ssacrosstrack,&error);
 		status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ping[i].ssalongtrack,&error);
-		if (datakind == MBFILTER_SS)
+		if (datakind == MBFILTER_BATH)
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
+				&ping[i].dataprocess,&error);
+		else if (datakind == MBFILTER_SS)
 			status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				&ping[i].dataprocess,&error);
-		else
+		else if (datakind == MBFILTER_AMP)
 			status = mb_malloc(verbose,beams_amp*sizeof(double),
 				&ping[i].dataprocess,&error);
 		}
