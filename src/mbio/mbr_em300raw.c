@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 4.6 2000-07-17 23:36:24 caress Exp $
+ *	$Id: mbr_em300raw.c,v 4.7 2000-07-20 20:24:59 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/07/17  23:36:24  caress
+ * Added support for EM120.
+ *
  * Revision 4.5  2000/02/07  22:59:47  caress
  * Fixed problem with depth_offset_multiplier
  *
@@ -74,7 +77,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 4.6 2000-07-17 23:36:24 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 4.7 2000-07-20 20:24:59 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1295,9 +1298,7 @@ data->png_bso);*/
 		    }
 
 		/* get raw pixel size */
-		if (data->sonar == EM2_EM120
-			|| data->sonar == EM2_EM300 
-			|| data->sonar == EM2_EM3000)
+		if (data->sonar <= EM2_EM3000)
 		    ss_spacing = 750.0 / data->png_sample_rate;
 		else
 		    ss_spacing = 750.0 / 14000;
@@ -2275,7 +2276,23 @@ int	*error;
 		/* insert distance and depth values into storage arrays */
 		if (data->sonar == MBSYS_SIMRAD2_UNKNOWN)
 			{
-			if (mb_io_ptr->beams_bath <= 127)
+			if (mb_io_ptr->beams_bath <= 87)
+				{
+				data->sonar = MBSYS_SIMRAD2_EM2000;
+				if (data->png_depth_res == 0)
+				    data->png_depth_res = 1; /* kluge */
+				if (data->png_distance_res == 0)
+				    data->png_distance_res = 1; /* kluge */
+				}
+			else if (mb_io_ptr->beams_bath <= 111)
+				{
+				data->sonar = MBSYS_SIMRAD2_EM1002;
+				if (data->png_depth_res == 0)
+				    data->png_depth_res = 1; /* kluge */
+				if (data->png_distance_res == 0)
+				    data->png_distance_res = 1; /* kluge */
+				}
+			else if (mb_io_ptr->beams_bath <= 127)
 				{
 				data->sonar = MBSYS_SIMRAD2_EM3000;
 				if (data->png_depth_res == 0)
@@ -2318,9 +2335,7 @@ int	*error;
 				+ 655.36 * data->png_offset_multiplier;
 		dacrscale  = 0.01 * data->png_distance_res;
 		daloscale  = 0.01 * data->png_distance_res;
-		if (data->sonar == EM2_EM120 
-			|| data->sonar == EM2_EM300 
-			|| data->sonar == EM2_EM3000)
+		if (data->sonar <= EM2_EM3000)
 		    ttscale = 0.5 / data->png_sample_rate;
 		else
 		    ttscale = 0.5 / 14000;
@@ -2555,6 +2570,7 @@ int	*error;
 			&& *type != EM2_HEADING
 			&& *type != EM2_ATTITUDE
 			&& *type != EM2_POS
+			&& *type != EM2_SVP2
 			&& *type != EM2_SVP
 			&& *type != EM2_BATH
 			&& *type != EM2_SS)
@@ -2748,6 +2764,26 @@ int	*error;
 					*expect_save_flag = MB_NO;
 				}
 			}
+		else if (*type == EM2_SVP2)
+			{
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr,"call mbr_em300raw_rd_svp2 type %x\n",*type);
+#endif
+			status = mbr_em300raw_rd_svp2(
+				verbose,mbfp,data,*sonar,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				if (expect != EM2_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					}
+				else
+					*expect_save_flag = MB_NO;
+				}
+			}
 		else if (*type == EM2_BATH 
 			&& expect == EM2_SS)
 			{
@@ -2849,6 +2885,7 @@ short	sonar;
 {
 	char	*function_name = "mbr_em300raw_chk_label";
 	int	status = MB_SUCCESS;
+	char	*startid;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2887,15 +2924,35 @@ short	sonar;
 		&& type != EM2_ATTITUDE
 		&& type != EM2_POS
 		&& type != EM2_SVP
+		&& type != EM2_SVP2
 		&& type != EM2_BATH
 		&& type != EM2_SS)
 		{
 		status = MB_FAILURE;
+		startid = (char *) &type;
+		if ((verbose >= 1 && *startid == 2)
+		    && (sonar == EM2_EM120
+			|| sonar == EM2_EM300
+			|| sonar == EM2_EM1002
+			|| sonar == EM2_EM2000
+			|| sonar == EM2_EM3000
+			|| sonar == EM2_EM3000D_1
+			|| sonar == EM2_EM3000D_2
+			|| sonar == EM2_EM3000D_3
+			|| sonar == EM2_EM3000D_4
+			|| sonar == EM2_EM3000D_5
+			|| sonar == EM2_EM3000D_6
+			|| sonar == EM2_EM3000D_7))
+			{
+			fprintf(stderr, "Bad datagram type: %d %x   %d %x\n", type, type, sonar, sonar);
+			}
 		}
 		
 	/* check for valid sonar model */
 	if (sonar != EM2_EM120
 		&& sonar != EM2_EM300
+		&& sonar != EM2_EM1002
+		&& sonar != EM2_EM2000
 		&& sonar != EM2_EM3000
 		&& sonar != EM2_EM3000D_1
 		&& sonar != EM2_EM3000D_2
@@ -4476,6 +4533,180 @@ int	*error;
 			data->svp_depth[i] = (unsigned short) *short_ptr;
 			short_ptr = (short *) &line[2];
 			data->svp_vel[i] = (unsigned short) *short_ptr;
+#endif
+			}
+		}
+	    data->svp_num = MIN(data->svp_num, MBF_EM300RAW_MAXSVP);
+	    }
+		
+	/* now get last bytes of record */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread(&line[0],1,4,mbfp);
+		if (read_len == 4)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			/* return success here because all of the
+			    important information in this record has
+			    already been read - next attempt to read
+			    file will return error */
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",data->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",data->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",data->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",data->msec);
+		fprintf(stderr,"dbg5       svp_use_date:    %d\n",data->svp_use_date);
+		fprintf(stderr,"dbg5       svp_use_msec:    %d\n",data->svp_use_msec);
+		fprintf(stderr,"dbg5       svp_count:       %d\n",data->svp_count);
+		fprintf(stderr,"dbg5       svp_serial:      %d\n",data->svp_serial);
+		fprintf(stderr,"dbg5       svp_origin_date: %d\n",data->svp_origin_date);
+		fprintf(stderr,"dbg5       svp_origin_msec: %d\n",data->svp_origin_msec);
+		fprintf(stderr,"dbg5       svp_num:         %d\n",data->svp_num);
+		fprintf(stderr,"dbg5       svp_depth_res:   %d\n",data->svp_depth_res);
+		fprintf(stderr,"dbg5       count    depth    speed\n");
+		fprintf(stderr,"dbg5       -----------------------\n");
+		for (i=0;i<data->svp_num;i++)
+			fprintf(stderr,"dbg5        %d   %d  %d\n",
+				i, data->svp_depth[i], data->svp_vel[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300raw_rd_svp2(verbose,mbfp,data,sonar,error)
+int	verbose;
+FILE	*mbfp;
+struct mbf_em300raw_struct *data;
+short	sonar;
+int	*error;
+{
+	char	*function_name = "mbr_em300raw_rd_svp2";
+	int	status = MB_SUCCESS;
+	char	line[256];
+	short	*short_ptr;
+	int	*int_ptr;
+	int	read_len, len;
+	int	done;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		}
+		
+	/* set kind and type values */
+	data->kind = MB_DATA_VELOCITY_PROFILE;
+	data->type = EM2_SVP2;
+	data->sonar = sonar;
+
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM2_SVP_HEADER_SIZE,mbfp);
+	if (read_len == EM2_SVP_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+#ifdef BYTESWAPPED
+		int_ptr = (int *) &line[0];
+		data->svp_use_date = (int) mb_swap_int(*int_ptr);
+		data->date = data->svp_use_date;
+		int_ptr = (int *) &line[4];
+		data->svp_use_msec = (int) mb_swap_int(*int_ptr);
+		data->msec = data->svp_use_msec;
+		short_ptr = (short *) &line[8];
+		data->svp_count = (unsigned short) mb_swap_short(*short_ptr);
+		short_ptr = (short *) &line[10];
+		data->svp_serial = (unsigned short) mb_swap_short(*short_ptr);
+		int_ptr = (int *) &line[12];
+		data->svp_origin_date = (int) mb_swap_int(*int_ptr);
+		int_ptr = (int *) &line[16];
+		data->svp_origin_msec = (int) mb_swap_int(*int_ptr);
+		short_ptr = (short *) &line[20];
+		data->svp_num = (unsigned short) mb_swap_short(*short_ptr);
+		short_ptr = (short *) &line[22];
+		data->svp_depth_res = (unsigned short) mb_swap_short(*short_ptr);
+#else
+		int_ptr = (int *) &line[0];
+		data->svp_use_date = (int) *int_ptr;
+		data->date = data->svp_use_date;
+		int_ptr = (int *) &line[4];
+		data->svp_use_msec = (int) *int_ptr;
+		data->msec = data->svp_use_msec;
+		short_ptr = (short *) &line[8];
+		data->svp_count = (unsigned short) *short_ptr;
+		short_ptr = (short *) &line[10];
+		data->svp_serial = (unsigned short) *short_ptr;
+		int_ptr = (int *) &line[12];
+		data->svp_origin_date = (int) *int_ptr;
+		int_ptr = (int *) &line[16];
+		data->svp_origin_msec = (int) *int_ptr;
+		short_ptr = (short *) &line[20];
+		data->svp_num = (unsigned short) *short_ptr;
+		short_ptr = (short *) &line[22];
+		data->svp_depth_res = (unsigned short) *short_ptr;
+#endif
+		}
+
+	/* read binary svp values */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<data->svp_num && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,8,mbfp);
+		if (read_len != 8)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		else if (i < MBF_EM300RAW_MAXSVP)
+			{
+			status = MB_SUCCESS;
+#ifdef BYTESWAPPED
+			int_ptr = (int *) &line[0];
+			data->svp_depth[i] = (int) mb_swap_int(*int_ptr);
+			int_ptr = (int *) &line[4];
+			data->svp_vel[i] = (int) mb_swap_int(*int_ptr);
+#else
+			int_ptr = (int *) &line[0];
+			data->svp_depth[i] = (int) *int_ptr;
+			int_ptr = (int *) &line[4];
+			data->svp_vel[i] = (int) *int_ptr;
 #endif
 			}
 		}
@@ -7245,7 +7476,7 @@ int	*error;
 	char	*function_name = "mbr_em300raw_wr_svp";
 	int	status = MB_SUCCESS;
 	struct mbf_em300raw_struct *data;
-	char	line[EM2_SVP_HEADER_SIZE];
+	char	line[EM2_SVP2_HEADER_SIZE];
 	short	label;
 	int	write_len;
 	int	write_size;
@@ -7297,8 +7528,8 @@ int	*error;
 	checksum = 0;
 
 	/* write the record size */
-	write_size = EM2_SVP_HEADER_SIZE 
-			+ EM2_SVP_SLICE_SIZE * data->svp_num + 8;
+	write_size = EM2_SVP2_HEADER_SIZE 
+			+ EM2_SVP2_SLICE_SIZE * data->svp_num + 8;
 #ifdef BYTESWAPPED
 	write_size = (int) mb_swap_int(write_size);
 #endif
@@ -7314,7 +7545,7 @@ int	*error;
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		label = EM2_SVP;
+		label = EM2_SVP2;
 #ifdef BYTESWAPPED
 		label = (short) mb_swap_short(label);
 #endif
@@ -7395,12 +7626,12 @@ int	*error;
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
-		for (j=0;j<EM2_SVP_HEADER_SIZE;j++)
+		for (j=0;j<EM2_SVP2_HEADER_SIZE;j++)
 		    checksum += uchar_ptr[j];
 
 		/* write out data */
-		write_len = fwrite(line,1,EM2_SVP_HEADER_SIZE,mbfp);
-		if (write_len != EM2_SVP_HEADER_SIZE)
+		write_len = fwrite(line,1,EM2_SVP2_HEADER_SIZE,mbfp);
+		if (write_len != EM2_SVP2_HEADER_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -7417,24 +7648,24 @@ int	*error;
 	    for (i=0;i<data->svp_num;i++)
 		{
 #ifdef BYTESWAPPED
-		short_ptr = (short *) &line[0];
-		*short_ptr = (unsigned short) mb_swap_short(data->svp_depth[i]);
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) mb_swap_short(data->svp_vel[i]);
+		int_ptr = (int *) &line[0];
+		*int_ptr = (int) mb_swap_int(data->svp_depth[i]);
+		int_ptr = (int *) &line[4];
+		*int_ptr = (int) mb_swap_int(data->svp_vel[i]);
 #else
-		short_ptr = (short *) &line[0];
-		*short_ptr = (unsigned short) data->svp_depth[i];
-		short_ptr = (short *) &line[2];
-		*short_ptr = (unsigned short) data->svp_vel[i];
+		int_ptr = (int *) &line[0];
+		*int_ptr = (int) data->svp_depth[i];
+		int_ptr = (int *) &line[4];
+		*int_ptr = (int) data->svp_vel[i];
 #endif
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
-		for (j=0;j<EM2_SVP_SLICE_SIZE;j++)
+		for (j=0;j<EM2_SVP2_SLICE_SIZE;j++)
 		    checksum += uchar_ptr[j];
 
 		/* write out data */
-		write_len = fwrite(line,1,EM2_SVP_SLICE_SIZE,mbfp);
+		write_len = fwrite(line,1,EM2_SVP2_SLICE_SIZE,mbfp);
 		if (write_len != EM2_SVP_SLICE_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
