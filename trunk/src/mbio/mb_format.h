@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_format.h,v 4.1 1994-04-09 15:49:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.8  1994/03/05  22:51:44  caress
  * Added ability to handle Simrad EM12 system and
  * format MBF_EM12DARW.
@@ -86,12 +89,12 @@
  					bathymetry and amplitude, 
  					binary, centered, L-DEO. */
 #define	MBF_SB2100RW	41	/* SeaBeam 2100/1000 series vender format, 
-					59 beam, bathymetry, amplitude,
-					and sidescan, ascii, centered,
+					151 beam bathymetry and amplitude,
+					2000 pixel sidescan, ascii, centered,
 					SeaBeam Instruments */ 
 #define	MBF_SB2100IH	42	/* SeaBeam 2100/1000 series processed format, 
-					59 beam, bathymetry, amplitude,
-					and sidescan, binary, centered,
+					151 beam bathymetry and amplitude,
+					2000 pixel sidescan, binary, centered,
 					SeaBeam Instruments and L-DEO */ 
 #define	MBF_EM12DARW	51	/* Simrad EM12 RRS Darwin processed format, 
 					81 beam, bathymetry and amplitude,
@@ -145,8 +148,8 @@ static char *format_description[] =
 	"Format name:          MBF_HSLDEDMB\nInformal Description: EDMB Hydrosweep\nAttributes:           Hydrosweep DS, bathymetry, 59 beams, binary, NRL.\n",
 	"Format name:          MBF_HSURICEN\nInformal Description: URI Hydrosweep\nAttributes:           Hydrosweep DS, 59 beams, bathymetry, binary, URI.\n",
 	"Format name:          MBF_HSLDEOIH\nInformal Description: L-DEO in-house binary Hydrosweep\nAttributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, \n                      binary, centered, L-DEO.\n",
-	"Format name:          MBF_SB2100RW\nInformal Description: SeaBeam 2100/1000 series vender format\nAttributes:           SeaBeam 2100/1000, bathymetry, amplitude \n                      and sidescan, 151 beams and 1000 pixels, ascii \n                      with binary sidescan, SeaBeam Instruments.\n",
-	"Format name:          MBF_SB2100IH\nInformal Description: SeaBeam 2100/1000 series processing format\nAttributes:           SeaBeam 2100/1000, bathymetry, amplitude \n                      and sidescan, 151 beams bathymetry,\n                      1000 pixels sidescan, binary,\n                      L-DEO and SeaBeam Instruments.\n",
+	"Format name:          MBF_SB2100RW\nInformal Description: SeaBeam 2100/1000 series vender format\nAttributes:           SeaBeam 2100/1000, bathymetry, amplitude \n                      and sidescan, 151 beams and 2000 pixels, ascii \n                      with binary sidescan, SeaBeam Instruments.\n",
+	"Format name:          MBF_SB2100IH\nInformal Description: SeaBeam 2100/1000 series processing format\nAttributes:           SeaBeam 2100/1000, bathymetry, amplitude \n                      and sidescan, 151 beams bathymetry,\n                      2000 pixels sidescan, binary,\n                      L-DEO and SeaBeam Instruments.\n",
 	"Format name:          MBF_EM12DARW\nInformal Description: Simrad EM12 RRS Darwin processed format\nAttributes:           Simrad EM12, bathymetry and amplitude,\n                      81 beams, binary, Oxford University.\n",
 	"Format name:          MBF_MBLDEOIH\nInformal Description: L-DEO in-house generic multibeam\nAttributes:           Data from all sonar systems, bathymetry, \n                      amplitude and sidescan, variable beams and pixels, \n                      binary, centered, L-DEO.\n"
 	};
@@ -255,7 +258,7 @@ static int mb_bath_flag_table[] =
 	1,		/* MBF_HSLDEDMB */
 	1,		/* MBF_HSURICEN */
 	1,		/* MBF_HSLDEOIH */
-	0,		/* MBF_SB2100RW */
+	1,		/* MBF_SB2100RW */
 	1,		/* MBF_SB2100IH */
 	1,		/* MBF_EM12DARW */
 	1,		/* MBF_MBLDEOIH */
