@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 4.3 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_mem.c,v 4.4 1994-10-28 03:10:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -73,7 +76,7 @@ int	size;
 char	**ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 4.3 1994-10-21 12:11:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem.c,v 4.4 1994-10-28 03:10:24 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
 	int	iptr;
@@ -91,17 +94,21 @@ int	*error;
 		fprintf(stderr,"dbg2       *ptr:       %d\n",*ptr);
 		}
 
-	/* check if pointer is in list */
-/*	iptr = -1;
-	for (i=0;i<n_mb_alloc;i++)
-		if (mb_alloc_ptr[i] == *ptr)
-			iptr = i;
-	fprintf(stderr, "ptr:%d iptr:%d\n", *ptr, iptr);
-*/
-
 	/* allocate memory */
-	*ptr = NULL;
-	if (size > 0)
+	if (size > 0 && *ptr == NULL)
+		{
+		if ((*ptr = (char *) malloc(size)) == NULL)
+			{
+			*error = MB_ERROR_MEMORY_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+	else if (size > 0)
 		{
 		if ((*ptr = (char *) realloc(*ptr, size)) == NULL)
 			{
