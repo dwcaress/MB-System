@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.22 2002-07-25 19:07:17 caress Exp $
+ *    $Id: mbprocess.c,v 5.23 2002-09-07 04:49:23 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2002/07/25 19:07:17  caress
+ * Release 5.0.beta21
+ *
  * Revision 5.21  2002/07/20 20:56:55  caress
  * Release 5.0.beta20
  *
@@ -148,7 +151,7 @@ struct mbprocess_sscorr_struct
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.22 2002-07-25 19:07:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.23 2002-09-07 04:49:23 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -350,7 +353,6 @@ and mbedit edit save files.\n";
 	
 	/* sidescan correction */
 	double	altitude_default = 1000.0;
-	int	use_slope = MB_YES;
 	int	nsmooth = 5;
 	double	reference_amp;
 	double	reference_amp_port;
@@ -358,8 +360,12 @@ and mbedit edit save files.\n";
 	int	itable;
 	int	nsscorrtable;
 	int	nsscorrangle;
-	struct mbprocess_sscorr_struct	*sscorrtable;
+	struct mbprocess_sscorr_struct	*sscorrtable = NULL;
 	struct mbprocess_sscorr_struct	sscorrtableuse;
+	int	nampcorrtable;
+	int	nampcorrangle;
+	struct mbprocess_sscorr_struct	*ampcorrtable = NULL;
+	struct mbprocess_sscorr_struct	ampcorrtableuse;
 	int	ndepths;
 	double	*depths;
 	double	*depthsmooth;
@@ -1050,7 +1056,7 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"  Heading offset:                %f deg\n", process.mbp_headingbias);
 
 	    fprintf(stderr,"\nAmplitude Corrections:\n");
-	    if (process.mbp_ampcorr_mode == MBP_SSCORR_ON)
+	    if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
 		{
 		fprintf(stderr,"  Amplitude vs grazing angle corrections applied to amplitudes.\n");
 	    	fprintf(stderr,"  Amplitude correction file:      %s m\n", process.mbp_ampcorrfile);
@@ -1063,6 +1069,10 @@ and mbedit edit save files.\n";
 		else
 	    		fprintf(stderr,"  AVGA tables allowed to be asymmetric\n");
 	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_ampcorr_angle);
+		if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE)
+	    		fprintf(stderr,"  Amplitude correction ignores seafloor slope\n");
+		else
+	    		fprintf(stderr,"  Amplitude correction uses seafloor slope\n");
  		}
 	    else
 		fprintf(stderr,"  Amplitude correction off.\n");
@@ -1081,6 +1091,10 @@ and mbedit edit save files.\n";
 		else
 	    		fprintf(stderr,"  AVGA tables allowed to be asymmetric\n");
 	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_sscorr_angle);
+		if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE)
+	    		fprintf(stderr,"  Sidescan correction ignores seafloor slope\n");
+		else
+	    		fprintf(stderr,"  Sidescan correction uses seafloor slope\n");
  		}
 	    else
 		fprintf(stderr,"  Sidescan correction off.\n");
@@ -2249,6 +2263,131 @@ i, edit_time_d[i], edit_beam[i], edit_action[i]);
 	    }
 
 	/*--------------------------------------------
+	  get amplitude corrections
+	  --------------------------------------------*/
+	if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
+	    {
+	    /* count the data points in the amplitude correction file */
+	    nampcorrtable = 0;
+	    nampcorrangle = 0;
+	    if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) 
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    fprintf(stderr,"\nUnable to Open Amplitude Correction File <%s> for reading\n",process.mbp_ampcorrfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
+	    	{
+		if (strncmp(buffer,"# table:",8) == 0)
+		    nampcorrtable++;
+		else if (strncmp(buffer,"# nangles:",10) == 0)
+		    sscanf(buffer,"# nangles:%d",&nampcorrangle);
+		}
+	    fclose(tfp);
+	    
+	    /* allocate arrays for amplitude correction tables */
+	    if (nampcorrtable > 0)
+		{
+		size = nampcorrtable*sizeof(struct mbprocess_sscorr_struct);
+		ampcorrtable = NULL;
+		status = mb_malloc(verbose,size,&ampcorrtable,&error);
+		for (i=0;i<nampcorrtable;i++)
+			{
+			ampcorrtable[i].angle = NULL;
+			ampcorrtable[i].amplitude = NULL;
+			ampcorrtable[i].sigma = NULL;
+			status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtable[i].angle),&error);
+			status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtable[i].amplitude),&error);
+			status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtable[i].sigma),&error);
+			}
+		ampcorrtableuse.angle = NULL;
+		ampcorrtableuse.amplitude = NULL;
+		ampcorrtableuse.sigma = NULL;
+		status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtableuse.angle),&error);
+		status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtableuse.amplitude),&error);
+		status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtableuse.sigma),&error);
+	
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }		    
+		}
+	
+	    /* if no amplitude correction file then quit */
+	    else
+		{
+		error = MB_ERROR_BAD_DATA;
+		fprintf(stderr,"\nUnable to read data from amplitude correction file <%s>\n",process.mbp_ampcorrfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}		    
+
+	    /* read the data points in the amplitude correction file */
+	    nampcorrtable = 0;
+	    if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to Open Amplitude Correction File <%s> for reading\n",process.mbp_ampcorrfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
+		{
+		/* deal with amplitude correction tables */
+		if (strncmp(buffer, "# table:",8) == 0)
+			{
+			nget = sscanf(buffer, "# table:%d", &itable);
+	    		nampcorrtable++;
+			ampcorrtable[itable].nangle = 0;
+			}
+		else if (strncmp(buffer, "# time:",7) == 0)
+			nget = sscanf(buffer, "# time: %d/%d/%d %d:%d:%d.%d %lf",
+				&time_i[0], &time_i[1], &time_i[2],
+				&time_i[3], &time_i[4], &time_i[5],
+				&time_i[6], &(ampcorrtable[itable].time_d));
+		else if (buffer[0] != '#')
+			{
+			nget = sscanf(buffer, "%lf %lf %lf", 
+				&(ampcorrtable[itable].angle[ampcorrtable[itable].nangle]),
+				&(ampcorrtable[itable].amplitude[ampcorrtable[itable].nangle]),
+				&(ampcorrtable[itable].sigma[ampcorrtable[itable].nangle]));
+			(ampcorrtable[itable].nangle)++;
+			if (nget != 3)
+				{
+				fprintf(stderr,"\ndbg5  Error parsing line in sidescan correction file in program <%s>\n",program_name);
+				fprintf(stderr,"dbg5       line: %s\n",buffer);
+				}
+			}
+		}
+	    fclose(tfp);
+		
+	    /* check for good amplitude correction data */
+	    if (nampcorrtable < 1)
+		    {
+		    fprintf(stderr,"\nNo amplitude correction tables read from file <%s>\n",process.mbp_ampcorrfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+    
+	    /* give the statistics */
+	    if (verbose >= 1)
+		    {
+		    fprintf(stderr,"\n%d amplitude correction tables with %d angles read\n",
+		    		nampcorrtable, nampcorrangle);
+		    }
+	    }
+
+	/*--------------------------------------------
 	  get sidescan corrections
 	  --------------------------------------------*/
 	if (process.mbp_sscorr_mode == MBP_SSCORR_ON)
@@ -2277,13 +2416,20 @@ i, edit_time_d[i], edit_beam[i], edit_action[i]);
 	    if (nsscorrtable > 0)
 		{
 		size = nsscorrtable*sizeof(struct mbprocess_sscorr_struct);
+		sscorrtable = NULL;
 		status = mb_malloc(verbose,size,&sscorrtable,&error);
 		for (i=0;i<nsscorrtable;i++)
 			{
+			sscorrtable[i].angle = NULL;
+			sscorrtable[i].amplitude = NULL;
+			sscorrtable[i].sigma = NULL;
 			status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtable[i].angle),&error);
 			status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtable[i].amplitude),&error);
 			status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtable[i].sigma),&error);
 			}
+		sscorrtableuse.angle = NULL;
+		sscorrtableuse.amplitude = NULL;
+		sscorrtableuse.sigma = NULL;
 		status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtableuse.angle),&error);
 		status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtableuse.amplitude),&error);
 		status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtableuse.sigma),&error);
@@ -2417,13 +2563,14 @@ i, edit_time_d[i], edit_beam[i], edit_action[i]);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bheave,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&alongtrack_offset,&error);
-	if (process.mbp_sscorr_mode == MBP_SSCORR_ON)
+	if (process.mbp_sscorr_mode == MBP_SSCORR_ON
+		|| process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
 		{
 		status = mb_malloc(verbose,beams_bath*sizeof(double),&(depths),&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),&(depthsmooth),&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),&(depthacrosstrack),&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&(slopes),&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&(slopeacrosstrack),&error);
+		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),&(slopes),&error);
+		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),&(slopeacrosstrack),&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -4164,6 +4311,168 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			}
 		    }
 
+		/* correct the amplitude if desired */
+		if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+		    && error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& nampcorrtable > 0
+			&& nampcorrangle > 0)
+			{
+			/* find the correction table */
+			if (nampcorrtable == 1
+				|| time_d <= ampcorrtable[0].time_d)
+				{
+				ampcorrtableuse.time_d = ampcorrtable[0].time_d;
+				ampcorrtableuse.nangle = ampcorrtable[0].nangle;
+				for (i=0;i<nampcorrangle;i++)
+					{
+					ampcorrtableuse.angle[i] = ampcorrtable[0].angle[i];
+					ampcorrtableuse.amplitude[i] = ampcorrtable[0].amplitude[i];
+					ampcorrtableuse.sigma[i] = ampcorrtable[0].sigma[i];
+					}
+				}
+			else if (time_d > ampcorrtable[nampcorrtable-1].time_d)
+				{
+				ampcorrtableuse.time_d = ampcorrtable[nampcorrtable-1].time_d;
+				ampcorrtableuse.nangle = ampcorrtable[nampcorrtable-1].nangle;
+				for (i=0;i<nampcorrangle;i++)
+					{
+					ampcorrtableuse.angle[i] = ampcorrtable[nampcorrtable-1].angle[i];
+					ampcorrtableuse.amplitude[i] = ampcorrtable[nampcorrtable-1].amplitude[i];
+					ampcorrtableuse.sigma[i] = ampcorrtable[nampcorrtable-1].sigma[i];
+					}
+				}
+			else
+				{
+				itable = 0;
+				for (i=0;i<nampcorrtable-1;i++)
+					{
+					if (ampcorrtable[i].time_d <= time_d
+						&& ampcorrtable[i+1].time_d > time_d)
+						itable = i;
+					}
+				factor = (time_d - ampcorrtable[itable].time_d)
+						/ (ampcorrtable[itable+1].time_d 
+							- ampcorrtable[itable].time_d);
+				ampcorrtableuse.time_d = time_d;
+				ampcorrtableuse.nangle = MIN(ampcorrtable[itable].nangle,
+								ampcorrtable[itable].nangle);
+				for (i=0;i<ampcorrtableuse.nangle;i++)
+					{
+					ampcorrtableuse.angle[i]
+						= ampcorrtable[itable].angle[i]
+							+ factor * (ampcorrtable[itable+1].angle[i]
+									- ampcorrtable[itable].angle[i]);
+					ampcorrtableuse.amplitude[i]
+						= ampcorrtable[itable].amplitude[i]
+							+ factor * (ampcorrtable[itable+1].amplitude[i]
+									- ampcorrtable[itable].amplitude[i]);
+					ampcorrtableuse.sigma[i]
+						= ampcorrtable[itable].sigma[i]
+							+ factor * (ampcorrtable[itable+1].sigma[i]
+									- ampcorrtable[itable].sigma[i]);
+					}
+				}
+				
+			/* set the reference amplitudes */
+			status = get_anglecorr(verbose, 
+						ampcorrtableuse.nangle, 
+						ampcorrtableuse.angle, 
+						ampcorrtableuse.amplitude, 
+						(-process.mbp_ampcorr_angle), 
+						&reference_amp_port, 
+						&error);
+			status = get_anglecorr(verbose, 
+						ampcorrtableuse.nangle, 
+						ampcorrtableuse.angle, 
+						ampcorrtableuse.amplitude, 
+						process.mbp_ampcorr_angle, 
+						&reference_amp_stbd, 
+						&error);
+			reference_amp = 0.5 * (reference_amp_port
+							+ reference_amp_stbd);
+			
+/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
+itable, ampcorrtableuse.time_d, 
+ampcorrtableuse.nangle);
+for (i=0;i<ampcorrtableuse.nangle;i++)
+fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
+i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
+
+			/* get seafloor slopes */
+			set_bathyslope(verbose, 
+					nsmooth, 
+					beams_bath,
+					beamflag,
+					bath,
+					bathacrosstrack,
+					&ndepths,
+					depths,
+					depthacrosstrack,
+					&nslopes,
+					slopes,
+					slopeacrosstrack,
+					depthsmooth,
+					&error);
+		    	for (i=0;i<beams_amp;i++)
+				{
+				if (mb_beam_ok(beamflag[i]))
+			    		{
+			    		if (ndepths > 1)
+						{
+						status = get_bathyslope(verbose,
+				    				ndepths,
+				    				depths,
+				    				depthacrosstrack,
+				    				nslopes,
+				    				slopes,
+				    				slopeacrosstrack,
+				    				bathacrosstrack[i],
+				    				&bathy,&slope,&error);
+						if (status != MB_SUCCESS)
+				    			{
+				    			bathy = altitude_default;
+				    			slope = 0.0;
+				    			status = MB_SUCCESS;
+				    			error = MB_ERROR_NO_ERROR;
+				    			}
+						}
+			    		else
+						{
+						bathy = altitude_default;
+						slope = 0.0;
+						}
+				
+			    		if (bathy > 0.0)
+						{
+						rawangle = RTD*
+				    			atan(bathacrosstrack[i]/bathy);
+						if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE)
+						    angle = rawangle;
+						else
+						    {
+						    slopeangle = RTD*atan(slope);
+						    angle = rawangle + slopeangle;
+						    }
+						status = get_anglecorr(verbose, 
+								ampcorrtableuse.nangle, 
+								ampcorrtableuse.angle, 
+								ampcorrtableuse.amplitude, 
+								angle, &correction, &error);
+/*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f amp: %f", 
+j, i, slopeangle, rawangle, correction, amp[i]);*/
+						if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
+				    			amp[i] = amp[i] - correction + reference_amp;
+						else
+				    			amp[i] = amp[i] / correction * reference_amp;
+/*fprintf(stderr, " amp: %f\n", amp[i]);*/
+						if (amp[i] < 0.0)
+				    			amp[i] = 0.0;
+						}
+			    		}
+				}
+			}
+
 		/* correct the sidescan if desired */
 		if (process.mbp_sscorr_mode == MBP_SSCORR_ON
 		    && error == MB_ERROR_NO_ERROR
@@ -4295,15 +4604,18 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 						bathy = altitude_default;
 						slope = 0.0;
 						}
-			    		if (use_slope == MB_NO)
-						slope = 0.0;
 				
 			    		if (bathy > 0.0)
 						{
 						rawangle = RTD*
 				    			atan(ssacrosstrack[i]/bathy);
-						slopeangle = RTD*atan(slope);
-						angle = rawangle + slopeangle;
+						if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE)
+						    angle = rawangle;
+						else
+						    {
+						    slopeangle = RTD*atan(slope);
+						    angle = rawangle + slopeangle;
+						    }
 						status = get_anglecorr(verbose, 
 								sscorrtableuse.nangle, 
 								sscorrtableuse.angle, 
@@ -4491,7 +4803,6 @@ j, i, slopeangle, rawangle, correction, ss[i]);*/
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
 int check_ss_for_bath(int verbose,
 	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
 	int nss, double *ss, double *ssacrosstrack, 
@@ -4501,7 +4812,7 @@ int check_ss_for_bath(int verbose,
 	int	status = MB_SUCCESS;
 	int	ifirst, ilast;
 	int	iss, ibath;
-	int	i, j;
+	int	i;
 	
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4603,7 +4914,7 @@ int set_bathyslope(int verbose,
 	double	dacrosstrack;
 	int	j1, j2;
 	int	i, j;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -4907,8 +5218,7 @@ int get_anglecorr(int verbose,
 	char	*function_name = "get_anglecorr";
 	int	status = MB_SUCCESS;
 	int	iangle, found;
-	int	i, j;
-	
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)

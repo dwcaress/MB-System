@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.17 2002-07-25 19:07:17 caress Exp $
+ *    $Id: mbset.c,v 5.18 2002-09-07 04:49:23 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2002/07/25 19:07:17  caress
+ * Release 5.0.beta21
+ *
  * Revision 5.16  2002/05/29 23:43:09  caress
  * Release 5.0.beta18
  *
@@ -108,7 +111,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.17 2002-07-25 19:07:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.18 2002-09-07 04:49:23 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -807,6 +810,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "AMPCORRANGLE:%lf", &process.mbp_ampcorr_angle);
 		    }
+		else if (strncmp(pargv[i], "AMPCORRSLOPE", 12) == 0)
+		    {
+		    sscanf(pargv[i], "AMPCORRSLOPE:%d", &process.mbp_ampcorr_slope);
+		    }
 	
 		/* sidescan correction */
 		else if (strncmp(pargv[i], "SSCORRMODE", 10) == 0)
@@ -832,6 +839,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "SSCORRANGLE", 11) == 0)
 		    {
 		    sscanf(pargv[i], "SSCORRANGLE:%lf", &process.mbp_sscorr_angle);
+		    }
+		else if (strncmp(pargv[i], "SSCORRSLOPE", 11) == 0)
+		    {
+		    sscanf(pargv[i], "SSCORRSLOPE:%d", &process.mbp_sscorr_slope);
 		    }
 
 		/* sidescan recalculation */
@@ -1196,6 +1207,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else
 	    		fprintf(stderr,"  AVGA tables allowed to be asymmetric\n");
 	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_ampcorr_angle);
+		if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE)
+	    		fprintf(stderr,"  Amplitude correction ignores seafloor slope\n");
+		else
+	    		fprintf(stderr,"  Amplitude correction uses seafloor slope\n");
  		}
 	    else
 		fprintf(stderr,"  Amplitude correction off.\n");
@@ -1214,6 +1229,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else
 	    		fprintf(stderr,"  AVGA tables allowed to be asymmetric\n");
 	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_sscorr_angle);
+		if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE)
+	    		fprintf(stderr,"  Sidescan correction ignores seafloor slope\n");
+		else
+	    		fprintf(stderr,"  Sidescan correction uses seafloor slope\n");
  		}
 	    else
 		fprintf(stderr,"  Sidescan correction off.\n");
