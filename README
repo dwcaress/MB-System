@@ -1,5 +1,8 @@
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/05  23:06:24  caress
+# Changes for release 4.0.
+#
 # Revision 3.7  1993/12/14  22:15:56  caress
 # Changed for release version 3.4
 #
@@ -27,15 +30,25 @@ $Log: not supported by cvs2svn $
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 4.0 1994-03-05 23:06:24 caress Exp $
+RCS ID: $Id: README,v 4.1 1994-08-03 21:00:43 dale Exp $
 
-MBSYSTEM 4.00 RELEASE Notes:
+MBSYSTEM 4.BETA RELEASE Notes:
 ----------------------------
 
-	This directory structure contains a release of the MBSYSTEM
+	This directory structure contains a PRE-release BETA test version  of the MBSYSTEM
 software package for processing and display of multibeam data.  There
 are undoubtably numerous bugs in this software - the user should
 beware (and let us know about it!).
+
+Because this is a beta version we ask that you:
+ 1) Not pass it around.
+ 2) Discuss (by e-mail preferably) problems and strategies and ideas with us
+ 3) Tell us about what you had to do to get to build/run/work properly in 
+    your hardware and software  environment so that we can improve the 
+    distribution.
+ 4) Accept the fact that the documentation is not up to date
+ 5) Be skeptical about comments and documentation below the copyright 
+    line below.
 
 Authors:
 --------
