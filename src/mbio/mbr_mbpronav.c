@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 5.8 2004-06-18 03:15:51 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 5.9 2005-03-25 04:23:10 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2004/06/18 03:15:51  caress
+ * Adding support for segy i/o and working on support for Reson 7k format 88.
+ *
  * Revision 5.7  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -108,7 +111,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.8 2004-06-18 03:15:51 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.9 2005-03-25 04:23:10 caress Exp $";
 	char	*function_name = "mbr_register_mbpronav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -240,7 +243,7 @@ int mbr_info_mbpronav(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.8 2004-06-18 03:15:51 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.9 2005-03-25 04:23:10 caress Exp $";
 	char	*function_name = "mbr_info_mbpronav";
 	int	status = MB_SUCCESS;
 
@@ -310,7 +313,7 @@ int mbr_info_mbpronav(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 5.8 2004-06-18 03:15:51 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 5.9 2005-03-25 04:23:10 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -514,6 +517,39 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->heave = data->heave;
         	for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
 		    store->comment[i] = data->comment[i];
+
+		/* zero the other parts of the structure */
+		for (i=0;i<8;i++)
+		    store->survey_id[i] = 0;
+		store->timezone = 0;
+		store->easting = 0.0;
+		store->northing = 0.0;
+		store->nav_type = 9;
+		store->nav_quality = 9;
+		store->rov_pressure = 0.0;
+		store->rov_altitude = 0.0;
+		store->flag = MB_FLAG_NULL;
+		store->tt = 0.0;
+		store->bath = 0.0;
+		store->tide = 0.0;
+		store->bath_corr = 99;
+		store->bath_type = 9;
+		store->mag_tot_1 = 0.0;
+		store->mag_tot_2 = 0.0;
+		store->mag_res = 0.0;
+		store->mag_res_sensor = 9;
+		store->mag_diurnal = 0.0;
+		store->mag_altitude = 0.0;
+		store->gravity = 0.0;
+		store->eotvos = 0.0;
+		store->free_air = 0.0;
+		store->seismic_line = 0;
+		store->seismic_shot = 0;
+		store->position_flag = 0;
+		store->pressure_flag = 0;
+		store->heading_flag = 0;
+		store->altitude_flag = 0;
+		store->attitude_flag = 0;
 		}
 
 	/* print output debug statements */
