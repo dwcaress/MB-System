@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_format.c,v 4.1 1994-04-22 17:49:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.5  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -57,7 +60,7 @@ int	*format;
 int	*format_num;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_format.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 4.1 1994-04-22 17:49:13 caress Exp $";
 	char	*function_name = "mb_format";
 	int	status;
 	int	i;
@@ -79,16 +82,6 @@ int	*error;
 		i = format_alias_table[*format];
 
 		/* print output debug statements */
-		if (verbose == 1)
-			{
-			fprintf(stdout,"\nFormat id %d automatically aliased to current format %d\n",
-				*format,i);
-			}
-		else if (verbose > 1)
-			{
-			fprintf(stderr,"\nFormat id %d automatically aliased to current format %d\n",
-				*format,i);
-			}
 		if (verbose >= 2)
 			{
 			fprintf(stderr,"\ndbg2  Old format id aliased to current value in MBIO function <%s>\n",
