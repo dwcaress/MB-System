@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.4 1994-10-21 16:08:22 caress Exp $
+ *    $Id: mbswath.c,v 4.5 1994-10-25 12:32:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/10/21  16:08:22  caress
+ * Release V4.0
+ *
  * Revision 4.3  1994/10/21  11:34:20  caress
  * Release V4.0
  *
@@ -165,7 +168,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.4 1994-10-21 16:08:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.5 1994-10-25 12:32:41 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -1822,7 +1825,7 @@ int	*error;
 			}
 		if (ixmin < 0) ixmin = 0;
 		if (ixmax > nx-1) ixmax = nx - 1;
-		if (iymin < 0) iymin = 0;
+		if (iymin < 1) iymin = 1;
 		if (iymax > ny-1) iymax = ny - 1;
 
 		/* loop over all y values */
