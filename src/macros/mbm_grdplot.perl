@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.11 1999-04-16 01:25:51 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.12 1999-05-06 23:46:32 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.11 1999-04-16 01:25:51 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.12 1999-05-06 23:46:32 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.11  1999/04/16  01:25:51  caress
+# Version 4.6 final release?
+#
 # Revision 4.10  1999/04/15  19:28:52  caress
 # Fixed sprintf statements.
 #
@@ -246,10 +249,10 @@ while (@grdinfo)
 	{
 	$line = shift @grdinfo;
 	if ($line =~ 
-		/grdinfo\s+(\S+)\s+\S+/)
+		/^grdinfo\s+(\S+)\s+\S+/)
 		{
 		($gmt_version) = $line =~ 
-			/grdinfo\s+(\S+)\s+\S+/;
+			/^grdinfo\s+(\S+)\s+\S+/;
 		}
 	}
 
