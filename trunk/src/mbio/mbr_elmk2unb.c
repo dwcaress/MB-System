@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
- *	$Id: mbr_elmk2unb.c,v 4.5 1999-04-02 00:55:11 caress Exp $
+ *	$Id: mbr_elmk2unb.c,v 4.6 1999-04-07 20:38:24 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,12 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1999/04/03 07:36:16  caress
+ * Fix bugs in byteswapped code.
+ *
+ * Revision 4.5  1999/04/02 00:55:11  caress
+ * Handles nav and nav records more properly.
+ *
  * Revision 4.4  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -66,7 +72,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.5 1999-04-02 00:55:11 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.6 1999-04-07 20:38:24 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1953,16 +1959,16 @@ int	*error;
 #else
 			int_ptr = (int *) &line[0];
 			data->beams[i].bath = (unsigned int) 
-					mb_swap_int(int_ptr);
+					mb_swap_int(*int_ptr);
 			int_ptr = (int *) &line[4];
 			data->beams[i].bath_acrosstrack = (int) 
-					mb_swap_int(int_ptr);
+					mb_swap_int(*int_ptr);
 			int_ptr = (int *) &line[8];
 			data->beams[i].bath_alongtrack = (int) 
-					mb_swap_int(int_ptr);
+					mb_swap_int(*int_ptr);
 			int_ptr = (int *) &line[12];
 			data->beams[i].tt = (unsigned int) 
-					mb_swap_int(int_ptr);
+					mb_swap_int(*int_ptr);
 #endif
 			data->beams[i].quality = line[16];
 			if (data->beams[i].quality <= 0)
@@ -1984,19 +1990,19 @@ int	*error;
 #else
 			short_ptr = (short *) &line[18];
 			data->beams[i].time_offset = (unsigned short) 
-				mb_swap_short(short_ptr);
+				mb_swap_short(*short_ptr);
 			short_ptr = (short *) &line[20];
 			data->beams[i].heave = (short) 
-				mb_swap_short(short_ptr);
+				mb_swap_short(*short_ptr);
 			short_ptr = (short *) &line[22];
 			data->beams[i].roll = (short) 
-				mb_swap_short(short_ptr);
+				mb_swap_short(*short_ptr);
 			short_ptr = (short *) &line[24];
 			data->beams[i].pitch = (short) 
-				mb_swap_short(short_ptr);
+				mb_swap_short(*short_ptr);
 			short_ptr = (short *) &line[26];
 			data->beams[i].angle = (short) 
-				mb_swap_short(short_ptr);
+				mb_swap_short(*short_ptr);
 #endif		
 			}
 
@@ -2956,16 +2962,16 @@ int	*error;
 #else
 		    int_ptr = (int *) &line[0];
 		    *int_ptr = (unsigned int) 
-				    mb_swap_int(&data->beams[i].bath);
+				    mb_swap_int(data->beams[i].bath);
 		    int_ptr = (int *) &line[4];
 		     *int_ptr = (int) 
-				    mb_swap_int(&data->beams[i].bath_acrosstrack);
+				    mb_swap_int(data->beams[i].bath_acrosstrack);
 		    int_ptr = (int *) &line[8];
 		     *int_ptr = (int) 
-				    mb_swap_int(&data->beams[i].bath_alongtrack);
+				    mb_swap_int(data->beams[i].bath_alongtrack);
 		    int_ptr = (int *) &line[12];
 		     *int_ptr = (unsigned int) 
-				    mb_swap_int(&data->beams[i].tt);
+				    mb_swap_int(data->beams[i].tt);
 #endif
 		    line[16] = data->beams[i].quality;
 		    line[17] = (char)
@@ -2985,19 +2991,19 @@ int	*error;
 #else
 		    short_ptr = (short *) &line[18];
 		    *short_ptr = (unsigned short) 
-			    mb_swap_short(&data->beams[i].time_offset);
+			    mb_swap_short(data->beams[i].time_offset);
 		    short_ptr = (short *) &line[20];
 		    *short_ptr = (short) 
-			    mb_swap_short(&data->beams[i].heave);
+			    mb_swap_short(data->beams[i].heave);
 		    short_ptr = (short *) &line[22];
 		    *short_ptr = (short) 
-			    mb_swap_short(&data->beams[i].roll);
+			    mb_swap_short(data->beams[i].roll);
 		    short_ptr = (short *) &line[24];
 		    *short_ptr = (short) 
-			    mb_swap_short(&data->beams[i].pitch);
+			    mb_swap_short(data->beams[i].pitch);
 		    short_ptr = (short *) &line[26];
 		    *short_ptr = (short) 
-			    mb_swap_short(&data->beams[i].angle);
+			    mb_swap_short(data->beams[i].angle);
 #endif		
 
 		    /* write out data */

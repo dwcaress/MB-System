@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 4.1 1999-02-04 23:52:54 caress Exp $
+ *	$Id: mbr_em300mba.c,v 4.2 1999-04-07 20:38:24 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,12 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1999/04/03 07:36:16  caress
+ * Fix bugs in byteswapped code.
+ *
+ * Revision 4.1  1999/02/04 23:52:54  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.0  1998/12/17  22:59:14  caress
  * MB-System version 4.6beta4
  *
@@ -53,7 +59,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 4.1 1999-02-04 23:52:54 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 4.2 1999-04-07 20:38:24 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2743,8 +2749,8 @@ short	sonar;
 
 		/* swap bytes if necessary */
 #ifdef BYTESWAPPED
-		*type = (short) mb_swap_short(*type);
-		*sonar = (short) mb_swap_short(*sonar);
+		type = (short) mb_swap_short(type);
+		sonar = (short) mb_swap_short(sonar);
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2  Input values byte swapped:\n");
@@ -7576,7 +7582,7 @@ int	*error;
 		int_ptr = (int *) &line[16];
 		*int_ptr = (int) mb_swap_int(data->png_longitude);
 		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) mb_swap_short(data->png_apeed);
+		*short_ptr = (unsigned short) mb_swap_short(data->png_speed);
 		short_ptr = (short *) &line[22];
 		*short_ptr = (unsigned short) mb_swap_short(data->png_heading);
 		short_ptr = (short *) &line[24];
