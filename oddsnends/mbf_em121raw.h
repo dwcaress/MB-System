@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em121raw.h	8/8/94
- *	$Id: mbf_em121raw.h,v 4.2 1996-08-26 18:33:50 caress Exp $
+ *	$Id: mbf_em121raw.h,v 4.3 1996-08-26 19:03:38 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1996/08/26  18:33:50  caress
+ * Changed "signed char" to "char" for SunOs 4.1 compiler compatibility.
+ *
  * Revision 4.1  1996/08/05  15:25:43  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -223,9 +226,9 @@ struct mbf_em121raw_struct
 					EM-12 high res:  0.20 msec 
 					EM-12 low res:   0.80 msec
 					EM-121:          range_res meters */
-	signed char	amp[MBF_EM121RAW_MAXBEAMS];	    /* 0.5 dB */
+	char	amp[MBF_EM121RAW_MAXBEAMS];	    /* 0.5 dB */
 	unsigned char	quality[MBF_EM121RAW_MAXBEAMS];	    /* meters */
-	signed char	heave[MBF_EM121RAW_MAXBEAMS];	    /* 0.1 meters */
+	char	heave[MBF_EM121RAW_MAXBEAMS];	    /* 0.1 meters */
 	
 	/* sidescan */
 	int	pixels_ss;	/* total number of samples for this ping */
