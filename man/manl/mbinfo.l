@@ -130,7 +130,8 @@ data files. This program uses the \fBMBIO\fP library
 and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
+is given in the \fBMBIO\fP manual page. The default format is
+set using \fBmbdefaults\fP.
 .TP
 .B \-G
 Enables checking for reasonable navigation to be used in
