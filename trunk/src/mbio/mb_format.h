@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.11 1996-03-12 17:23:31 caress Exp $
+ *    $Id: mb_format.h,v 4.12 1996-04-22 10:59:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1996/03/12  17:23:31  caress
+ * Added format 63, short HMR1 processing format.
+ *
  * Revision 4.10  1996/01/26  21:27:27  caress
  * Version 4.3 distribution.
  *
@@ -122,6 +125,9 @@
 #define	MBF_SBSIOSWB	16	/* SeaBeam, 19 beam, bathymetry, 
  					binary, centered, 
 					swath-bathy, SIO. */
+#define	MBF_SBIFREMR	17	/* SeaBeam, 19 beam, bathymetry, 
+ 					ascii, centered, 
+					sounding-oriented, IFREMER. */
 #define	MBF_HSATLRAW	21	/* Hydrosweep DS raw format, 59 beam, 
  					bathymetry and amplitude, 
   					ascii, Atlas Electronik. */
@@ -204,6 +210,7 @@ static int format_table[] =
 	14,	/* MBF_SBURICEN */
 	15,	/* MBF_SBURIVAX */
 	16,	/* MBF_SBSIOSWB */
+	17,	/* MBF_SBIFREMR */
 	21,	/* MBF_HSATLRAW */
 	22,	/* MBF_HSLDEDMB */
 	23,	/* MBF_HSURICEN */
@@ -239,6 +246,7 @@ static int supported_format_table[] =
 	1,	/* MBF_SBURICEN */
 	1,	/* MBF_SBURIVAX */
 	1,	/* MBF_SBSIOSWB */
+	1,	/* MBF_SBIFREMR */
 	1,	/* MBF_HSATLRAW */
 	1,	/* MBF_HSLDEDMB */
 	1,	/* MBF_HSURICEN */
@@ -289,6 +297,7 @@ static char *format_description[] =
 	"Format name:          MBF_SBURICEN\nInformal Description: URI Sea Beam\nAttributes:           Sea Beam, bathymetry, 19 beams, binary, centered,\n                      URI.\n",
 	"Format name:          MBF_SBURIVAX\nInformal Description: URI Sea Beam from VAX\nAttributes:           Sea Beam, bathymetry, 19 beams, binary, centered,\n                      VAX byte order, URI.\n",
 	"Format name:          MBF_SBSIOSWB\nInformal Description: SIO Swath-bathy SeaBeam\nAttributes:           Sea Beam, bathymetry, 19 beams, binary, centered,\n                      SIO.\n",
+	"Format name:          MBF_SBIFREMR\nInformal Description: IFREMER Archive SeaBeam\nAttributes:           Sea Beam, bathymetry, 19 beams, ascii, centered,\n                      IFREMER.\n",
 	"Format name:          MBF_HSATLRAW\nInformal Description: Raw Hydrosweep\nAttributes:           Hydrosweep DS, bathymetry and amplitude, 59 beams,\n                      ascii, Atlas Electronik.\n",
 	"Format name:          MBF_HSLDEDMB\nInformal Description: EDMB Hydrosweep\nAttributes:           Hydrosweep DS, bathymetry, 59 beams, binary, NRL.\n",
 	"Format name:          MBF_HSURICEN\nInformal Description: URI Hydrosweep\nAttributes:           Hydrosweep DS, 59 beams, bathymetry, binary, URI.\n",
@@ -325,6 +334,7 @@ static int mb_system_table[] =
 	MB_SYS_SB,	/* MBF_SBURICEN */
 	MB_SYS_SB,	/* MBF_SBURIVAX */
 	MB_SYS_SB,	/* MBF_SBSIOSWB */
+	MB_SYS_SB,	/* MBF_SBIFREMR */
 	MB_SYS_HSDS,	/* MBF_HSATLRAW */
 	MB_SYS_HSDS,	/* MBF_HSLDEDMB */
 	MB_SYS_HSDS,	/* MBF_HSURICEN */
@@ -361,6 +371,7 @@ static int mb_xdr_table[] =
 	0,		/* MBF_SBURICEN */
 	0,		/* MBF_SBURIVAX */
 	0,		/* MBF_SBSIOSWB */
+	0,		/* MBF_SBIFREMR */
 	0,		/* MBF_HSATLRAW */
 	0,		/* MBF_HSLDEDMB */
 	0,		/* MBF_HSURICEN */
@@ -396,6 +407,7 @@ static int beams_bath_table[] =
 	19,	/* MBF_SBURICEN */
 	19,	/* MBF_SBURIVAX */
 	19,	/* MBF_SBSIOSWB */
+	19,	/* MBF_SBIFREMR */
 	59,	/* MBF_HSATLRAW */
 	59,	/* MBF_HSLDEDMB */
 	59,	/* MBF_HSURICEN */
@@ -431,6 +443,7 @@ static int beams_amp_table[] =
 	0,	/* MBF_SBURICEN */
 	0,	/* MBF_SBURIVAX */
 	0,	/* MBF_SBSIOSWB */
+	0,	/* MBF_SBIFREMR */
 	59,	/* MBF_HSATLRAW */
 	0,	/* MBF_HSLDEDMB */
 	0,	/* MBF_HSURICEN */
@@ -466,6 +479,7 @@ static int pixels_ss_table[] =
 	0,	/* MBF_SBURICEN */
 	0,	/* MBF_SBURIVAX */
 	0,	/* MBF_SBSIOSWB */
+	0,	/* MBF_SBIFREMR */
 	0,	/* MBF_HSATLRAW */
 	0,	/* MBF_HSLDEDMB */
 	0,	/* MBF_HSURICEN */
@@ -501,6 +515,7 @@ static int variable_beams_table[] =
 	0,	/* MBF_SBURICEN */
 	0,	/* MBF_SBURIVAX */
 	0,	/* MBF_SBSIOSWB */
+	0,	/* MBF_SBIFREMR */
 	0,	/* MBF_HSATLRAW */
 	0,	/* MBF_HSLDEDMB */
 	0,	/* MBF_HSURICEN */
@@ -537,6 +552,7 @@ static int mb_traveltime_table[] =
 	0,	/* MBF_SBURICEN */
 	0,	/* MBF_SBURIVAX */
 	0,	/* MBF_SBSIOSWB */
+	0,	/* MBF_SBIFREMR */
 	1,	/* MBF_HSATLRAW */
 	0,	/* MBF_HSLDEDMB */
 	0,	/* MBF_HSURICEN */
@@ -573,6 +589,7 @@ static int mb_bath_flag_table[] =
 	0,	/* MBF_SBURICEN */
 	0,	/* MBF_SBURIVAX */
 	0,	/* MBF_SBSIOSWB */
+	0,	/* MBF_SBIFREMR */
 	1,	/* MBF_HSATLRAW */
 	0,	/* MBF_HSLDEDMB */
 	0,	/* MBF_HSURICEN */
@@ -609,6 +626,7 @@ static int mb_amp_flag_table[] =
 	0,	/* MBF_SBURICEN */
 	0,	/* MBF_SBURIVAX */
 	0,	/* MBF_SBSIOSWB */
+	0,	/* MBF_SBIFREMR */
 	1,	/* MBF_HSATLRAW */
 	0,	/* MBF_HSLDEDMB */
 	0,	/* MBF_HSURICEN */
@@ -645,6 +663,7 @@ static int mb_ss_flag_table[] =
 	0,	/* MBF_SBURICEN */
 	0,	/* MBF_SBURIVAX */
 	0,	/* MBF_SBSIOSWB */
+	0,	/* MBF_SBIFREMR */
 	0,	/* MBF_HSATLRAW */
 	0,	/* MBF_HSLDEDMB */
 	0,	/* MBF_HSURICEN */
@@ -680,6 +699,7 @@ static float mb_foreaft_beamwidth_table[] =
 	2.67,	/* MBF_SBURICEN */
 	2.67,	/* MBF_SBURIVAX */
 	2.67,	/* MBF_SBSIOSWB */
+	2.67,	/* MBF_SBIFREMR */
 	2.00,	/* MBF_HSATLRAW */
 	2.00,	/* MBF_HSLDEDMB */
 	2.00,	/* MBF_HSURICEN */ 
@@ -715,6 +735,7 @@ static char *mb_button_name[] =
         " SBURICEN ",
         " SBURIVAX ",
         " SBSIOSWB ",
+        " SBIFREMR ",
         " HSATLRAW ",
         " HSLDEDMB ",
         " HSURICEN ",
