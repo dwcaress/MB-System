@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.2 1994-03-25 14:02:38 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.3 1994-04-09 15:49:21 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/25  14:02:38  caress
+ * Made changes in accordance with latest iteration of
+ * SeaBeam 2100 vendor format.
+ *
  * Revision 4.1  1994/03/13  04:48:05  caress
  * Changed order in which parameters are read and written.
  *
@@ -55,7 +59,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.2 1994-03-25 14:02:38 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.3 1994-04-09 15:49:21 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -218,6 +222,7 @@ int	*error;
 
 		/* SS header info */
 		data->ss_data_length = 0;
+		data->pixel_algorithm = 'D';
 		data->svp_corr_ss = '0';
 		data->num_pixels_12khz = 0;
 		data->pixel_size_12khz = 0;
@@ -562,6 +567,8 @@ int	*error;
 
 		/* SS header info */
 		store->ss_data_length = data->ss_data_length;
+		store->num_pixels = data->num_pixels;
+		store->pixel_algorithm = data->pixel_algorithm;
 		store->svp_corr_ss = data->svp_corr_ss;
 		store->num_pixels_12khz = data->num_pixels_12khz;
 		store->pixel_size_12khz = data->pixel_size_12khz;
@@ -709,6 +716,8 @@ int	*error;
 
 		/* SS header info */
 		data->ss_data_length = store->ss_data_length;
+		data->num_pixels = store->num_pixels;
+		data->pixel_algorithm = store->pixel_algorithm;
 		data->svp_corr_ss = store->svp_corr_ss;
 		data->num_pixels_12khz = store->num_pixels_12khz;
 		data->pixel_size_12khz = store->pixel_size_12khz;
@@ -947,7 +956,7 @@ int	*error;
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
-				data->kind = MB_DATA_MEAN_VELOCITY;
+				data->kind = MB_DATA_PARAMETER;
 				}
 			}
 		else if (type == MBF_SB2100RW_TR)
@@ -1175,14 +1184,14 @@ int	*error;
 		mb_get_int(&(data->num_svp),              line+34,  2);
 		}
 
-	/* read and parse data from second line of record */
-	if ((status = mbr_sb2100rw_read_line(verbose,mbfp,1,line,error)) 
-		== MB_SUCCESS)
+	/* read and parse data from other lines of record */
+	for (i=0;i<data->num_svp;i++)
 		{
-		for (i=0;i<data->num_svp;i++)
+		if ((status = mbr_sb2100rw_read_line(verbose,mbfp,1,line,error))
+			== MB_SUCCESS)
 			{
-			mb_get_int(&(data->vdepth[i]),line+i*13,7);
-			mb_get_int(&(data->velocity[i]),line+i*13+7,6);
+			mb_get_int(&(data->vdepth[i]),line,7);
+			mb_get_int(&(data->velocity[i]),line+7,6);
 			}
 		}
 
@@ -1460,7 +1469,7 @@ int	*error;
 		mb_get_int(&(data->amplitude_beam[i]),   line+34, 3);
 		mb_get_int(&(data->signal_to_noise[i]),  line+37, 2);
 		mb_get_int(&(data->echo_length[i]),      line+39, 3);
-		data->quality[i] = line[43];
+		data->quality[i] = line[42];
 		}
 	  }
 
@@ -1512,7 +1521,7 @@ int	*error;
 	char	line[MBF_SB2100RW_MAXLINE];
 	int	shift;
 	char	ew, ns;
-	char	read_ss[4*MBF_SB2100RW_PIXELS+2];
+	short int	read_ss[2*MBF_SB2100RW_PIXELS+2];
 	int	degrees, minutes;
 	int	i;
 
@@ -1562,12 +1571,13 @@ int	*error;
 		for (i=0;i<8;i++)
 			data->spare[i] = line[49+i];
 		data->range_scale = line[57];
-		mb_get_int(&(data->surface_sound_velocity),line+58,6);
-		data->ssv_source = line[64];
-		data->depth_gate_mode = line[65];
+		data->pixel_algorithm = line[58];
+		mb_get_int(&(data->surface_sound_velocity),line+59,6);
+		data->ssv_source = line[65];
+		data->depth_gate_mode = line[66];
 
 		/* handle 12 kHz parameters if not in 36 kHz mode */
-		shift = 66;
+		shift = 67;
 		if (data->frequency[0] != 'H')
 		  {
 		  mb_get_int(&(data->num_pixels_12khz),   line+shift,     4);
@@ -1630,6 +1640,8 @@ int	*error;
 		fprintf(stderr,"\n");
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
+		fprintf(stderr,"dbg5       pixel_algorithm:  %c\n",
+			data->pixel_algorithm);
 		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
 			data->surface_sound_velocity);
 		fprintf(stderr,"dbg5       ssv_source:       %c\n",
@@ -2018,6 +2030,7 @@ int	*error;
 			{
 			status = fprintf(mbfp,"%7d",data->vdepth[i]);
 			status = fprintf(mbfp,"%6d",data->velocity[i]);
+			status = fprintf(mbfp,"\r\n");
 			}
 		status = fprintf(mbfp,"\r\n");
 
@@ -2364,7 +2377,7 @@ int	*error;
 	char	*function_name = "mbr_sb2100rw_wr_ss";
 	int	status = MB_SUCCESS;
 	struct mbf_sb2100rw_struct *data;
-	char	write_ss[2*MBF_SB2100RW_PIXELS+2];
+	short int	write_ss[2*MBF_SB2100RW_PIXELS];
 	double	degrees;
 	int	idegrees, minutes;
 	int	i;
@@ -2402,6 +2415,8 @@ int	*error;
 			data->speed);
 		fprintf(stderr,"dbg5       num_pixels:       %d\n",
 			data->num_pixels);
+		fprintf(stderr,"dbg5       ss_data_length:   %d\n",
+			data->ss_data_length);
 		fprintf(stderr,"dbg5       svp_corr_beams:   %c\n",
 			data->svp_corr_beams);
 		fprintf(stderr,"dbg5       frequency:        %c%c\n",
@@ -2412,8 +2427,14 @@ int	*error;
 		fprintf(stderr,"\n");
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
-		fprintf(stderr,"dbg5       ss_data_length:   %d\n",
-			data->ss_data_length);
+		fprintf(stderr,"dbg5       pixel_algorithm:  %c\n",
+			data->pixel_algorithm);
+		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
+			data->surface_sound_velocity);
+		fprintf(stderr,"dbg5       ssv_source:       %c\n",
+			data->ssv_source);
+		fprintf(stderr,"dbg5       depth_gate_mode:  %c\n",
+			data->depth_gate_mode);
 		fprintf(stderr,"dbg5       num_pixels_12khz: %d\n",
 			data->num_pixels_12khz);
 		fprintf(stderr,"dbg5       pixel_size_12khz: %d\n",
@@ -2446,12 +2467,6 @@ int	*error;
 			data->roll_36khz);
 		fprintf(stderr,"dbg5       heading_36khz:    %d\n",
 			data->heading_36khz);
-		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
-			data->surface_sound_velocity);
-		fprintf(stderr,"dbg5       ssv_source:       %c\n",
-			data->ssv_source);
-		fprintf(stderr,"dbg5       depth_gate_mode:  %c\n",
-			data->depth_gate_mode);
 		fprintf(stderr,"dbg5       beam amp_ss ltrack\n");
 		for (i=0;i<data->num_pixels;i++)
 		  {
@@ -2512,6 +2527,7 @@ int	*error;
 		for (i=0;i<8;i++)
 			status = fprintf(mbfp,"%c",data->spare[i]);
 		status = fprintf(mbfp,"%c",data->range_scale);
+		status = fprintf(mbfp,"%c",data->pixel_algorithm);
 		status = fprintf(mbfp,"%6d",data->surface_sound_velocity);
 		status = fprintf(mbfp,"%c",data->ssv_source);
 		status = fprintf(mbfp,"%c",data->depth_gate_mode);

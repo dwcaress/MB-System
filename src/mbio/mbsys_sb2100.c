@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.1 1994-04-09 15:49:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -16,8 +16,8 @@
  * SeaBeam 1000 series multibeam sonar systems.
  * The data formats which are commonly used to store SeaBeam 1000/2100
  * data in files include
- *      MBF_SB2100RW : MBIO ID 71
- *      MBF_SB2100BN : MBIO ID 72
+ *      MBF_SB2100RW : MBIO ID 41
+ *      MBF_SB2100BN : MBIO ID 42
  * These functions include:
  *   mbsys_sb2100_alloc	- allocate memory for mbsys_sb2100_struct structure
  *   mbsys_sb2100_deall	- deallocate memory for mbsys_sb2100_struct structure
@@ -29,6 +29,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/05  02:12:07  caress
  * First cut for SeaBeam 2100 i/o.
  *
@@ -53,7 +56,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.1 1994-04-09 15:49:21 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -196,7 +199,7 @@ int	*error;
 		time_j[2] = 60*store->hour + store->minute;
 		time_j[3] = 0.001*store->msec;
 		mb_get_itime(verbose,time_j,time_i);
-		mb_get_time(verbose,time_i,&time_d);
+		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
 		*navlon = store->longitude;

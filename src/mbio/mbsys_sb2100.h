@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 4.1 1994-04-09 15:49:21 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -15,12 +15,15 @@
  * to store data from SeaBeam 2100 and 1000 multibeam sonar systems.
  * The data formats which are commonly used to store SeaBeam 1000/2100
  * data in files include
- *      MBF_SB2100RW : MBIO ID 71
- *      MBF_SB2100BN : MBIO ID 72
+ *      MBF_SB2100RW : MBIO ID 41
+ *      MBF_SB2100BN : MBIO ID 42
  *
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/05  02:12:07  caress
  * First cut for SeaBeam 2100 i/o.
  *
@@ -31,7 +34,7 @@
  *   1. SeaBeam 1000/2100 multibeam systems output raw data in an
  *      ascii format.  The data consists of a number of different
  *      multi-line ascii records.
- *   2. The 2100/2100 systems output 59 beams of bathymetry and 151 pixels
+ *   2. The 2100/2100 systems output 151 beams of bathymetry and 2000 pixels
  *      of sidescan measurements, along with a plethora of other
  *      information.
  *   3. The records all include navigation and time stamp information.
@@ -61,16 +64,16 @@
 #define MBSYS_SB2100_MAXLINE 1944
 
 /* maximum number of formed beams for SeaBeam 1000/2100 */
-#define MBSYS_SB2100_BEAMS 59
+#define MBSYS_SB2100_BEAMS 151
 
 /* maximum number of sidescan pixels for SeaBeam 1000/2100 */
-#define MBSYS_SB2100_PIXELS 151
+#define MBSYS_SB2100_PIXELS 2000
 
 /* center beam for SeaBeam 1000/2100 */
-#define MBSYS_SB2100_CENTER_BEAM 29
+#define MBSYS_SB2100_CENTER_BEAM 75
 
 /* center pixel for SeaBeam 1000/2100 */
-#define MBSYS_SB2100_CENTER_PIXEL 75
+#define MBSYS_SB2100_CENTER_PIXEL 1000
 
 struct mbsys_sb2100_struct
 	{
@@ -118,6 +121,8 @@ struct mbsys_sb2100_struct
 	int	num_pixels;		/* number of sidescan pixels recorded */
 	char	svp_corr_ss;		/* 0=off; 1=on */
 	int	ss_data_length;		/* number of bytes of sidescan data */
+	char	pixel_algorithm;	/* pixel intensity algorithm
+						D = logarithm, L = linear */
 	int	num_pixels_12khz;
 	int	pixel_size_12khz;	/* meters */
 	int	num_pixels_36khz;
@@ -156,8 +161,8 @@ struct mbsys_sb2100_struct
 							blank otherwise */
 
 	/* sidescan data (SS) */
-	int	amplitude_ss[MBSYS_SB2100_PIXELS];	/* dB */
-	int	alongtrack_ss[MBSYS_SB2100_PIXELS];	/*  m or cm */
+	int	amplitude_ss[MBSYS_SB2100_PIXELS];	/* range 0-65535 */
+	int	alongtrack_ss[MBSYS_SB2100_PIXELS];	/* m or cm */
 
 	/* comment (TR) */
 	char	comment[MBSYS_SB2100_MAXLINE ];
