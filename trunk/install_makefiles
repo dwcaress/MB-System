@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.8 1995-06-06 14:18:26 caress Exp $
+#    $Id: install_makefiles,v 4.9 1995-07-14 14:09:01 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.8 1995-06-06 14:18:26 caress Exp $
+#   $Id: install_makefiles,v 4.9 1995-07-14 14:09:01 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.8  1995/06/06  14:18:26  caress
+# Updated example for installing under Solaris 2.4
+#
 # Revision 4.7  1995/03/23  16:30:08  caress
 # Added -Olimit flag for compiling mbgrid.c under IRIX
 #
@@ -248,13 +251,13 @@ $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
 $UIL = "/usr/bin/X11/uil";
-$GMTLIBDIR = "/indy02/usr/local/gmt/src";
-$GMTINCDIR = "/indy02/usr/local/gmt/src";
-$NETCDFDIR = "/indy02/usr/local/netcdf/lib";
-$LEVITUS = "/indy02/usr/local/levitus/annual";
+$GMTLIBDIR = "/usr/local/gmt/src";
+$GMTINCDIR = "/usr/local/gmt/src";
+$NETCDFDIR = "/usr/local/netcdf/lib";
+$LEVITUS = "/usr/local/levitus/annual";
 $REALTIME = 1;
-$GRPHLIBDIR = "/indy02/usr/local/lamont_graphics/graphics/src";
-$GRPHINCDIR = "/indy02/usr/local/lamont_graphics/graphics/src";
+$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
+$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
 
