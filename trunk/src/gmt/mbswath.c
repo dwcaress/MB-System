@@ -25,6 +25,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/06/19  01:16:43  caress
+ * Initial version.
+ *
  *
  */
 
@@ -114,10 +117,11 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 3.0 1993-06-19 01:16:43 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 3.1 1993-06-20 23:08:30 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
-	static char usage_message[] = "mbswath -Idatalist -Ccptfile -Jparameters \n\t-Rwest/east/south/north [-Fred/green/blue \n\t-Btickinfo -K -M -O -P -ppings -Afactor -U -#copies \n-Xx-shift -Yy-shift -Zmode -V -H]";
+	static char usage_message[] = "mbswath -Ccptfile -Idatalist -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -Fred/green/blue -Gmagnitude/azimuth -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
+
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
