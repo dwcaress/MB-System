@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.3 1994-11-09 21:40:34 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.4 1995-03-06 19:38:54 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/11/09  21:40:34  caress
+ * Changed ttimes extraction routines to handle forward beam angles
+ * so that alongtrack distances can be calculated.
+ *
  * Revision 4.2  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -39,7 +43,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -60,7 +64,7 @@ double	*angles_forward;
 int	*flags;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.3 1994-11-09 21:40:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.4 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;

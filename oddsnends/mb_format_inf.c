@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format_inf.c	1/21/93
- *    $Id: mb_format_inf.c,v 4.1 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_format_inf.c,v 4.2 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -44,7 +47,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_format.h"
@@ -56,7 +59,7 @@ int	verbose;
 int	format_num;
 char	**message;
 {
-  static char rcs_id[]="$Id: mb_format_inf.c,v 4.1 1994-10-21 12:11:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_format_inf.c,v 4.2 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mb_format_inf";
 	int	status;
 

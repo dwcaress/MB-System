@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.4 1994-11-24 01:53:22 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.5 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/11/24  01:53:22  caress
+ * Some fixes related to MR1 data.
+ *
  * Revision 4.3  1994/11/23  23:16:34  caress
  * Now uses png_course instead of png_heading for heading
  * value because png_heading has large errors. Will
@@ -55,7 +58,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 #include <time.h>
 
 /* mbio include files */
@@ -71,7 +74,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.4 1994-11-24 01:53:22 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.5 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

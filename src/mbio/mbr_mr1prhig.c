@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.2 1994-11-23 23:16:34 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.3 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/11/23  23:16:34  caress
+ * Now uses png_course instead of png_heading for heading
+ * value because png_heading has large errors. Will
+ * change back after processing tools to correct heading
+ * are created.
+ *
  * Revision 4.1  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -38,7 +44,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 #include <time.h>
 
 /* mbio include files */
@@ -54,7 +60,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.2 1994-11-23 23:16:34 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;

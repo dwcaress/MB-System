@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.12 1995-02-15 14:37:51 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.13 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1995/02/15  14:37:51  caress
+ * Changed "signed short" declarations to "short" in order to
+ * placate the SunOS 4.1 compiler.
+ *
  * Revision 4.11  1995/02/14  21:59:53  caress
  * Version 4.2
  *
@@ -75,7 +79,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -95,7 +99,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.12 1995-02-15 14:37:51 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.13 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

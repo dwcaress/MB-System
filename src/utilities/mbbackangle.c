@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 4.2 1995-03-02 13:49:21 caress Exp $
+ *    $Id: mbbackangle.c,v 4.3 1995-03-06 19:37:59 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/03/02  13:49:21  caress
+ * Fixed bug related to error messages.
+ *
  * Revision 4.1  1995/02/27  14:43:18  caress
  * Fixed bug regarding closing a text input file.
  *
@@ -34,7 +37,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -55,7 +58,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 4.2 1995-03-02 13:49:21 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangle.c,v 4.3 1995-03-06 19:37:59 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a multibeam data file and generates a table\n\t\

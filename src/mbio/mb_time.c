@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.5 1995-02-14 21:59:53 caress Exp $
+ *    $Id: mb_time.c,v 4.6 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,10 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/02/14  21:59:53  caress
+ * Initialize time_i[1] in mb_get_itime() to avoid core dump when
+ * doing mbmerge on format 54 data.
+ *
  * Revision 4.4  1995/01/03  22:49:33  caress
  * Fixed bug in mb_get_date() as per David Brock of ASA.
  *
@@ -56,7 +60,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -68,7 +72,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.5 1995-02-14 21:59:53 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.6 1995-03-06 19:38:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from

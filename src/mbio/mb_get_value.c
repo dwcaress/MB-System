@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 4.1 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_get_value.c,v 4.2 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -45,12 +48,12 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 4.1 1994-10-21 12:11:53 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 4.2 1995-03-06 19:38:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /*	function mb_get_double reads a double value from a string.

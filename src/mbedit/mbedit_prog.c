@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.2 1995-02-14 19:16:04 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.3 1995-03-06 19:40:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/02/14  19:16:04  caress
+ * Improved widget handling, uses swath width rather than plot scale,
+ * now handles default values properly.
+ *
  * Revision 4.1  1994/11/24  01:52:07  caress
  * Now centers profiles based on bathymetry median value
  * rather than mean.
@@ -79,7 +83,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* MBIO include files */
 #include "mb_format.h"
@@ -113,7 +117,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.2 1995-02-14 19:16:04 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.3 1995-03-06 19:40:49 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";

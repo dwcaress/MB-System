@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.4 1995-02-22 21:55:10 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.5 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/02/22  21:55:10  caress
+ * Fixed reading of amplitude data from existing data.
+ *
  * Revision 4.3  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -54,7 +57,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -74,7 +77,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.4 1995-02-22 21:55:10 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.5 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 4.3 1995-02-14 21:59:53 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 4.4 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/02/14  21:59:53  caress
+ * Version 4.2
+ *
  * Revision 4.2  1994/12/21  20:21:09  caress
  * Changes to support high resolution SeaBeam 2000 sidescan files
  * from R/V Melville data.
@@ -51,7 +54,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -66,7 +69,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 4.3 1995-02-14 21:59:53 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 4.4 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
