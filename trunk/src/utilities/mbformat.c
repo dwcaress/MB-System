@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.1 2001-03-22 21:14:16 caress Exp $
+ *    $Id: mbformat.c,v 5.2 2001-04-25 05:39:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:14:16  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -88,7 +91,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.2 2001-04-25 05:39:43 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -Ifile -L -V -H]";
@@ -242,7 +245,7 @@ main (int argc, char **argv)
 		{
 		printf("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
 		printf("<HTML>\n<HEAD>\n   <TITLE>MB-System Supported Data Formats</TITLE>\n");
-		printf("</HEAD>\n<BODY>\n\n");
+		printf("</HEAD>\n<BODY TEXT=\"#000000\" BGCOLOR=\"#FFFFFF\" LINK=\"#336699\" VLINK=\"#997040\" ALINK=\"#CC9900\">\n\n");
 		printf("<CENTER><P><B><FONT SIZE=+2>MB-System Supported Swath Data Formats</FONT></B></P></CENTER>\n\n");
 		printf("<P>Each swath mapping sonar system outputs a data stream which includes\n");
 		printf("some values or parameters unique to that system. In general, a number of\n");
@@ -301,7 +304,7 @@ main (int argc, char **argv)
 			}
 
 		printf("\n<CENTER><P><BR>\n");
-		printf("Last Updated: $Date: 2001-03-22 21:14:16 $ $Revision: 5.1 $</P></CENTER>\n");
+		printf("Last Updated: $Date: 2001-04-25 05:39:43 $ $Revision: 5.2 $</P></CENTER>\n");
 		printf("\n<P>\n<HR WIDTH=\"100%%\"></P>\n\n");
 		printf("<P><IMG SRC=\"mbsystem_logo_small.gif\" HEIGHT=55 WIDTH=158><A HREF=\"mbsystem_home.html\">Back\n");
 		printf("to MB-System Home Page...</A></P>\n");
