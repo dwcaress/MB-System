@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.5 1995-03-09 12:41:58 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 4.6 1995-03-17 15:12:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/03/09  12:41:58  caress
+ * Fixed bug related to handling shallow water data.
+ *
  * Revision 4.4  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -74,7 +77,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.5 1995-03-09 12:41:58 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 4.6 1995-03-17 15:12:59 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -364,11 +367,14 @@ int	*error;
 				mb_io_ptr->new_heading);
 			fprintf(stderr,"dbg4       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
+			for (i=0;i<mb_io_ptr->beams_bath;i++)
+			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
+				i,mb_io_ptr->new_bath[i],
+				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			fprintf(stderr,"dbg4       beams_amp: %d\n",
 				mb_io_ptr->beams_amp);
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %f  amp[%d]: %f  bathdist[%d]: %f\n",
-				i,mb_io_ptr->new_bath[i],
+			for (i=0;i<mb_io_ptr->beams_amp;i++)
+			  fprintf(stderr,"dbg4       amp[%d]: %f  bathdist[%d]: %f\n",
 				i,mb_io_ptr->new_amp[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
