@@ -12,6 +12,7 @@
  * who	when	  what
  * ---	----	  ----
  * hem  08/20/96  Added gsfEncodeSinglebeam.
+ * jsb  09/28/98  Added gsfEncodeHVNavigationError.
  *
  * Classification : Unclassified
  *
@@ -35,6 +36,7 @@
    int OPTLK gsfEncodeComment(unsigned char *sptr, gsfComment *comment);
    int OPTLK gsfEncodeHistory(unsigned char *sptr, gsfHistory *history);
    int OPTLK gsfEncodeNavigationError(unsigned char *sptr, gsfNavigationError *nav_error);
+   int OPTLK gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_error);
    int OPTLK gsfEncodeSinglebeam (unsigned char *sptr, gsfSingleBeamPing * ping);
 
 #endif
