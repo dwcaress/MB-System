@@ -123,6 +123,7 @@ At present, formats associated with the following multibeam systems are
 supported:
  	Sea Beam "classic" 16 beam multibeam sonar 
  	Hydrosweep DS 59 beam sonar 
+ 	Hydrosweep MD 40 beam mid-depth sonar 
  	Sea Beam 2000 multibeam sonar 
  	Sea Beam 2100 series multibeam sonars
 	Simrad EM12 and EM1000 multibeam sonars
@@ -275,6 +276,18 @@ The following multibeam data formats are supported in this version of
     Informal Description: Elac BottomChart multibeam
     Attributes:           56 beam bathymetry and amplitude,
                           binary, UNB.
+
+    MBIO Data Format ID:  101
+    Format name:          MBF_HSMDARAW
+    Informal Description: Atlas HSMD medium depth multibeam raw format
+    Attributes:           40 beam bathymetry, 160 pixel sidescan,
+                          XDR (binary), STN Atlas Elektronik.
+
+    MBIO Data Format ID:  102
+    Format name:          MBF_HSMDLDIH
+    Informal Description: Atlas HSMD medium depth multibeam process format
+    Attributes:           40 beam bathymetry, 160 pixel sidescan,
+                          XDR (binary), L-DEO.
 
 
 The institutional acronyms used above have the following meanings:
