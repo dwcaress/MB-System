@@ -94,6 +94,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     Widget   cascadeButton_openoverlay;
     Widget   cascadeButton_openroute;
     Widget   cascadeButton_opensite;
+    Widget   cascadeButton_opennav;
     Widget   separator;
     Widget   cascadeButton_saveroute;
     Widget   cascadeButton_savesite;
@@ -177,10 +178,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 160); ac++;
-    XtSetArg(args[ac], XmNheight, 176); ac++;
+    XtSetArg(args[ac], XmNx, 262); ac++;
+    XtSetArg(args[ac], XmNy, 225); ac++;
+    XtSetArg(args[ac], XmNwidth, 200); ac++;
+    XtSetArg(args[ac], XmNheight, 200); ac++;
     pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
         "pulldownMenu_file",
         args, 
@@ -308,8 +309,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNx, 416); ac++;
+    XtSetArg(args[ac], XmNy, 304); ac++;
     XtSetArg(args[ac], XmNwidth, 1); ac++;
     XtSetArg(args[ac], XmNheight, 1); ac++;
     pulldownMenu_opensite = XmCreatePulldownMenu(XtParent(cascadeButton_opensite),
@@ -320,6 +321,43 @@ CreatemainWindow_mbgrdviz(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_opensite); ac++;
     XtSetValues(cascadeButton_opensite, args, ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, "Open Swath or Nav Data", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_file, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        cascadeButton_opennav = XmCreateCascadeButton(pulldownMenu_file,
+            "cascadeButton_opennav",
+            args, 
+            ac);
+        XtManageChild(cascadeButton_opennav);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 456); ac++;
+    XtSetArg(args[ac], XmNy, 328); ac++;
+    XtSetArg(args[ac], XmNwidth, 1); ac++;
+    XtSetArg(args[ac], XmNheight, 1); ac++;
+    pulldownMenu_opennav = XmCreatePulldownMenu(XtParent(cascadeButton_opennav),
+        "pulldownMenu_opennav",
+        args, 
+        ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_opennav); ac++;
+    XtSetValues(cascadeButton_opennav, args, ac);
     
     ac = 0;
     separator = XmCreateSeparator(pulldownMenu_file,
@@ -515,8 +553,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 8); ac++;
-    XtSetArg(args[ac], XmNy, 39); ac++;
+    XtSetArg(args[ac], XmNx, 124); ac++;
+    XtSetArg(args[ac], XmNy, 32); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
     XtSetArg(args[ac], XmNheight, 528); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(dialogShell_about,
@@ -738,8 +776,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "Open GMT Grid File"); ac++;
-    XtSetArg(args[ac], XmNwidth, 278); ac++;
-    XtSetArg(args[ac], XmNheight, 416); ac++;
+    XtSetArg(args[ac], XmNwidth, 334); ac++;
+    XtSetArg(args[ac], XmNheight, 505); ac++;
     dialogShell_open = XtCreatePopupShell("dialogShell_open",
         xmDialogShellWidgetClass,
         mainWindow_mbgrdviz,
@@ -754,10 +792,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, True); ac++;
-        XtSetArg(args[ac], XmNx, 217); ac++;
-        XtSetArg(args[ac], XmNy, 95); ac++;
-        XtSetArg(args[ac], XmNwidth, 278); ac++;
-        XtSetArg(args[ac], XmNheight, 416); ac++;
+        XtSetArg(args[ac], XmNx, 8); ac++;
+        XtSetArg(args[ac], XmNy, 32); ac++;
+        XtSetArg(args[ac], XmNwidth, 334); ac++;
+        XtSetArg(args[ac], XmNheight, 505); ac++;
         fileSelectionBox = XmCreateFileSelectionBox(dialogShell_open,
             "fileSelectionBox",
             args, 

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/27/2003
-#	$Id: Makefile.template,v 1.1 2003-09-23 21:22:00 caress Exp $
+#	$Id: Makefile.template,v 1.2 2003-11-07 01:12:44 caress Exp $
 #
 #     Copyright (c) 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		August 31, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.1  2003/09/23 21:22:00  caress
+# Adding first cut on mbview to cvs.
+#
 #
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 #
@@ -50,9 +53,27 @@ INCDIR = ../../include
 all: $(BINDIR)/mbgrdviz $(LIBDIR)/libmbview.a
 
 ### make the library
-$(LIBDIR)/libmbview.a:	MB3DView.o mbview_callbacks.o
+$(LIBDIR)/libmbview.a:	MB3DView.o \
+		mbview_callbacks.o\
+		mbview_process.o \
+		mbview_plot.o \
+		mbview_primary.o \
+		mbview_secondary.o \
+		mbview_pick.o \
+		mbview_site.o \
+		mbview_route.o\
+		mbview_nav.o
 	$(ARCHIVE) $(LIBDIR)/libmbview.a \
-		MB3DView.o mbview_callbacks.o
+		MB3DView.o \
+		mbview_callbacks.o \
+		mbview_process.o \
+		mbview_plot.o \
+		mbview_primary.o \
+		mbview_secondary.o \
+		mbview_pick.o \
+		mbview_site.o \
+		mbview_route.o\
+		mbview_nav.o
 	ranlib $(LIBDIR)/libmbview.a
 
 ### link the executables
@@ -65,6 +86,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		$(GMTLIBDIR)/libgmt.a
@@ -75,23 +97,42 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(LIBDIR)/libmbview.a \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libproj.a \
+		$(LIBDIR)/libgsf.a \
+		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbxgr.a \
 		$(GMTLIBDIR)/libgmt.a \
 		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbgrdviz
 
 ### compile the source files
-MB3DView.o: MB3DView.c MB3DView.h mbview.h
+MB3DView.o: MB3DView.c MB3DView.h mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c MB3DView.c
-mbview_callbacks.o: mbview_callbacks.c mbview.h
+mbview_callbacks.o: mbview_callbacks.c mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_callbacks.c
+mbview_process.o: mbview_process.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_process.c
+mbview_plot.o: mbview_plot.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_plot.c
+mbview_primary.o: mbview_primary.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_primary.c
+mbview_secondary.o: mbview_secondary.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_secondary.c
+mbview_pick.o: mbview_pick.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_pick.c
+mbview_site.o: mbview_site.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_site.c
+mbview_route.o: mbview_route.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_route.c
+mbview_nav.o: mbview_nav.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_nav.c
 mbgrdviz_bxutils.o: mbgrdviz_bxutils.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbgrdviz_bxutils.c
-mbgrdviz_callbacks.o: mbgrdviz_callbacks.c mbview.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbgrdviz_callbacks.c
 mbgrdviz_creation.o: mbgrdviz_creation.c mbgrdviz_creation.h 
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbgrdviz_creation.c
 mbgrdviz_main.o: mbgrdviz_main.c mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbgrdviz_main.c
+mbgrdviz_callbacks.o: mbgrdviz_callbacks.c mbview.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbgrdviz_callbacks.c
 
 ### copy the man page to the man page directory
 
