@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.3 1994-06-13 20:18:48 caress Exp $
+#	$Id: Makefile.template,v 4.4 1994-10-21 12:56:50 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.3  1994/06/13  20:18:48  caress
+# Changed make for mbcontourfilter.
+#
 # Revision 4.2  1994/05/24  18:04:28  caress
 # Fixed references to L-DEO graphics.
 #
@@ -35,6 +38,10 @@ NETCDFDIR = /ocean/mgg/netcdf/sun4/lib
 # Location of L-DEO shipboard graphics library:
 GRPHLIBDIR = /usr/local/lamont_graphics/graphics/src
 GRPHINCDIR = /usr/local/lamont_graphics/graphics/src
+# 
+# Compilers 
+CC = cc 
+FC = f77 
 #
 # Compile and load flags:
 CFLAGS = -O2
@@ -60,7 +67,7 @@ clean:
 	rm -f *.o
 
 ### link or copy the executables
-$(BINDIR)/mbcontourfilter: ../gmt/mbcontourfilter.o ../gmt/mb_truecont.o ../../include/mb_contour.h ../gmt/mb_delaun.o ../gmt/mb_track.o mb_penface.o label.o letter.o blocka.o
+$(BINDIR)/mbcontourfilter: ../gmt/mbcontourfilter.o ../gmt/mb_truecont.o ../../include/mb_contour.h ../gmt/mb_delaun.o ../gmt/mb_track.o mb_penface.o label.o letter.o blocka.o ../../lib/libmbio.a
 	$(CC) $(CFLAGS) ../gmt/mbcontourfilter.o ../gmt/mb_truecont.o ../gmt/mb_delaun.o ../gmt/mb_track.o label.o mb_penface.o letter.o blocka.o ../../lib/libmbio.a $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbcontourfilter
 
 $(BINDIR)/mbplotfilter:	mbplotfilter.o
@@ -71,8 +78,10 @@ $(BINDIR)/mbm_calcomp_plot: mbm_calcomp_plot.perl
 	chmod +x $(BINDIR)/mbm_calcomp_plot
 
 ### compile the source files
-../gmt/mbcontourfilter.o:	../gmt/mbcontour.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
+../gmt/mbcontourfilter.o:	../gmt/mbcontourfilter.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
 	cd ../gmt; make mbcontourfilter.o
+../gmt/mbcontourfilter.c:	../gmt/mbcontour.c
+	cd ../gmt; make mbcontourfilter.c
 ../gmt/mb_truecont.o:	../gmt/mb_truecont.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
 	cd ../gmt; make all
 ../gmt/mb_delaun.o:	../gmt/mb_delaun.c

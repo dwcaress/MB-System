@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocitytool_stubs.c,v 4.3 1994-04-12 14:32:21 caress Exp $
+ *    $Id: mbvelocitytool_stubs.c,v 4.4 1994-10-21 12:50:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/04/12  14:32:21  caress
+ * Changed a few "Hydrosweep" text strings to "Multibeam"
+ *
  * Revision 4.2  1994/04/12  01:13:24  caress
  * First cut at translation from hsvelocitytool. The new program
  * mbvelocitytool will deal with all supported multibeam data
@@ -130,7 +133,7 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-	static char rcs_id[]="$Id: mbvelocitytool_stubs.c,v 4.3 1994-04-12 14:32:21 caress Exp $";
+	static char rcs_id[]="$Id: mbvelocitytool_stubs.c,v 4.4 1994-10-21 12:50:33 caress Exp $";
 	int	status;
 	int	i;
 

@@ -50,7 +50,7 @@ OBJECTS = \
 CFLAGS += -g 
 CPPFLAGS += -I$(GUIDEHOME)/include -I$(OPENWINHOME)/include -DMAIN
 LDFLAGS += -L$(GUIDEHOME)/lib -L$(OPENWINHOME)/lib -L../../lib
-LDLIBS += -lguidexv -lguide -lxview -lolgx -lX11 -lmbio
+LDLIBS += -lguidexv -lguide -lxview -lolgx -lX11 -lmbio -lm
 
 # Standard targets.
 
@@ -67,7 +67,7 @@ $(MANPAGE): $(PROGRAM).1
 	chmod 664 $(MANPAGE)
 
 $(PROGRAM): $(SOURCES.c) $(TARGETS.c) $(TARGETS.h) $(OBJECTS)
-	$(LINK.c) -o $@ $(OBJECTS) $(LDLIBS)
+	$(LINK.c) -Bstatic -o $@ $(OBJECTS) $(LDLIBS)
 
 # link old program to new program
 ../../man/man1/hsvelocitytool.1: $(MANPAGE)
