@@ -23,7 +23,6 @@
 
 
 extern SurfDataInfo*      sapiToSurfData;
-extern SdaInfo*           sapiToSdaInfo;
 extern SurfSoundingData*  sapiToSdaBlock;
 
 static char sccsid[50] = {"@(#)libsapi.a  Version 3.1 17.10.2001"};
@@ -60,7 +59,7 @@ long SAPI_posPresentationIsRad(void)
  {
   if(sapiToSurfData->toGlobalData->presentationOfPosition == EASTING_NORTHING)
     return((long)1);
- } 
+ }
  return((long)0);
 }
 
@@ -77,11 +76,11 @@ char* SAPI_getTypeOfSounder(void)
 char* SAPI_getNameOfSounder(void)
 {
  static char nameOfSounder[20] = {"?"};
- 
+
  if(sapiToSurfData != NULL)
  {
   strncpy(nameOfSounder,sapiToSurfData->toGlobalData->nameOfSounder,STRING_SIZE);
- } 
+ }
  return(nameOfSounder);
 }
 
@@ -89,11 +88,11 @@ char* SAPI_getNameOfSounder(void)
 char* SAPI_getNameOfShip(void)
 {
  static char nameOfShip[20] = {"?"};
- 
+
  if(sapiToSurfData != NULL)
  {
   strncpy(nameOfShip,sapiToSurfData->toGlobalData->shipsName,STRING_SIZE);
- } 
+ }
  return(nameOfShip);
 }
 
@@ -140,8 +139,8 @@ long SAPI_dataHaveHighFrequencyLayer(void)
  if(sapiToSurfData != NULL)
  {
   if(sapiToSurfData->toGlobalData->highFrequency > 0.0) layer=1;
- } 
- return(layer);    
+ }
+ return(layer);
 }
 
 
@@ -151,8 +150,8 @@ long SAPI_dataHaveMediumFrequencyLayer(void)
  if(sapiToSurfData != NULL)
  {
   if(sapiToSurfData->toGlobalData->mediumFrequency > 0.0) layer=1;
- } 
- return(layer);    
+ }
+ return(layer);
 }
 
 
@@ -162,8 +161,8 @@ long SAPI_dataHaveLowFrequencyLayer(void)
  if(sapiToSurfData != NULL)
  {
   if(sapiToSurfData->toGlobalData->lowFrequency > 0.0) layer=1;
- } 
- return(layer);    
+ }
+ return(layer);
 }
 
 
@@ -185,7 +184,7 @@ SurfPositionAnySensor* SAPI_getPositionSensor(long nrSensor)
 {
  SurfPositionSensorArray* toSensor;
  long maxNrPosSens = 0;
- 
+
  if(sapiToSurfData == NULL) return(NULL);
  maxNrPosSens = SAPI_getNrPositionsensors();
  if((nrSensor >= 0) && (nrSensor < maxNrPosSens))
@@ -200,7 +199,7 @@ SurfPositionAnySensor* SAPI_getPositionSensor(long nrSensor)
 SurfEventValues* SAPI_getEvent(long nrEvent)
 {
  long maxNrEvents = 0;
- 
+
  if(sapiToSurfData == NULL) return(NULL);
  maxNrEvents = SAPI_getNrEvents();
  if((nrEvent >= 0) && (nrEvent < maxNrEvents))
@@ -222,7 +221,7 @@ SurfPolygons* SAPI_getPolygons(void)
 double SAPI_getAbsoluteStartTimeOfProfile(void)
 {
  SurfTm sTm;
- 
+
  if(sapiToSurfData == NULL) return(0.0);
  surf_timeSizetoSurfTm(sapiToSurfData->toGlobalData->startTimeOfProfile,&sTm);
  return(surf_timeAbsoluteFromSurfTm (&sTm));
