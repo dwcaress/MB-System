@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.h	6/13/02
- *	$Id: mbsys_surf.h,v 5.7 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_surf.h,v 5.8 2003-11-24 21:09:09 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	June 13, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2003/03/10 20:04:45  caress
  * Added mr1pr library.
  *
@@ -102,6 +105,13 @@ struct mbsys_surf_struct
 	char	NameOfSounder[LABEL_SIZE];
 	int	NrSoundings;
 	int	NrBeams;
+	int NrSidescan;
+	int	NrDepths;			/*	should be either 0 or NrBeams */
+	int	NrTravelTimes;		/*	should be either 0 or NrBeams */
+	int NrRxSets;			/*	should be either 0 or NrBeams */
+	int NrAmplitudes;		/*	should be either 0 or NrBeams */
+	int NrExtAmplitudes;	/*	should be either 0 or NrBeams */
+	int NrTxSets;			/*  missing in "SurfTxParameter"  */
 	int	SAPI_posPresentationIsRad;
 	int	NrPositionsensors;
 	int	NrSoundvelocityProfiles;
@@ -125,6 +135,7 @@ struct mbsys_surf_struct
 	SurfMultiBeamTT			MultiBeamTraveltime[MBSYS_SURF_MAXBEAMS];
 	SurfMultiBeamReceive		MultiBeamReceiveParams[MBSYS_SURF_MAXBEAMS];
 	SurfAmplitudes			MultibeamBeamAmplitudes[MBSYS_SURF_MAXBEAMS];
+	SurfExtendedAmplitudes		MultibeamExtendedBeamAmplitudes[MBSYS_SURF_MAXBEAMS];
 	SurfSignalParameter		MultibeamSignalParameters;
 	TvgRxSets			reserved3[MBSYS_SURF_MAXRXSETS - 1];
 	SurfTxParameter			MultibeamTransmitterParameters;

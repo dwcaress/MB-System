@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.12 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.13 2003-11-24 21:09:09 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	June 20, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.11  2003/03/06 00:14:52  caress
  * Put in Reinhard Holtkamp's mod's to support SVP data.
  *
@@ -56,7 +59,12 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_surf.h"
 
-static char res_id[]="$Id: mbsys_surf.c,v 5.12 2003-04-17 21:05:23 caress Exp $";
+double mbsys_get_depth(	SurfMultiBeamDepth* 			MultiBeamDepth,
+						SurfTransducerParameterTable	TransducerTable,
+						float	heave,
+						int		n );
+
+static char res_id[]="$Id: mbsys_surf.c,v 5.13 2003-11-24 21:09:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
@@ -164,8 +172,8 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
-	double	range, tt, timeslice, ssdepth;
-	int	i, j;
+	double	v0, tlx, tly, tlz, z0, t0, t2, tn, dt, y;
+	int		i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -193,7 +201,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get time */
 		*time_d = store->AbsoluteStartTimeOfProfile
-			    + (double) store->SoundingData.relTime;
+				+ (double) store->SoundingData.relTime;
 		mb_get_date(verbose, *time_d, time_i);
 
 		/* get navigation */
@@ -212,8 +220,13 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_io_ptr->beamwidth_ltrack = 2.3;
 		mb_io_ptr->beamwidth_xtrack = 2.3;
 
-		/* read distance and depth values into storage arrays */
-		*nbath = store->NrBeams;
+		/* transducer location */
+		tlx = store->ActualTransducerTable.transducerPositionAhead;
+		tly = store->ActualTransducerTable.transducerPositionStar;
+		tlz = store->ActualTransducerTable.transducerDepth
+			- store->SoundingData.heaveWhileTransmitting;
+
+		/* reset storage arrays */
 		for (i=0;i<MBSYS_SURF_MAXBEAMS;i++)
 			{
 			bath[i] = 0.0;
@@ -222,21 +235,30 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 			}
-		for (i=0;i<store->NrBeams;i++)
+		/* read distance and depth values into storage arrays */
+		*nbath = store->NrBeams;
+		for (i = 0; i < store->NrBeams; i ++)
 			{
-			bath[i] = (double) store->MultiBeamDepth[i].depth;
-			if ((int)(store->MultiBeamDepth[i].depthFlag & SB_DELETED) != 0)
-			    beamflag[i] = MB_FLAG_NULL;
-			else if ((int)(store->MultiBeamDepth[i].depthFlag
-				& (SB_DEPTH_SUPPRESSED + SB_REDUCED_FAN)) != 0)
-			    beamflag[i] = MB_FLAG_FLAG;
+			if ((store->MultiBeamDepth[i].depthFlag & SB_DELETED) != 0)
+				beamflag[i] = MB_FLAG_NULL;
+			else if ((store->MultiBeamDepth[i].depthFlag &
+					 (SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) != 0)
+				beamflag[i] = MB_FLAG_FLAG;
 			else
-			    beamflag[i] = MB_FLAG_NONE;
+				beamflag[i] = MB_FLAG_NONE;
+			bath[i] = (double) store->MultiBeamDepth[i].depth;
+			if (bath[i] < tlz)
+				beamflag[i] |= MB_FLAG_FLAG;
 			bathacrosstrack[i] = (double) store->MultiBeamDepth[i].beamPositionStar;
 			bathalongtrack[i] = (double) store->MultiBeamDepth[i].beamPositionAhead;
+			}
+
+		/* get beam amplitudes */
+		*namp = store->NrAmplitudes;
+		for (i=0;i<store->NrAmplitudes;i++)
+			{
 			amp[i] = (double) store->MultibeamBeamAmplitudes[i].beamAmplitude;
 			}
-		*namp = *nbath;
 
 		/* get single beam if not multibeam file */
 		if (store->NrBeams == 0
@@ -272,59 +294,71 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			if (*nbath == 1)
 				{
 				if ((int)(store->SingleBeamDepth.depthFlag & SB_DELETED) != 0)
-				    beamflag[0] = MB_FLAG_NULL;
+					beamflag[0] = MB_FLAG_NULL;
 				else if ((int)(store->SingleBeamDepth.depthFlag
 					& (SB_DEPTH_SUPPRESSED + SB_REDUCED_FAN)) != 0)
-				    beamflag[0] = MB_FLAG_FLAG;
+					beamflag[0] = MB_FLAG_FLAG;
 				else
-				    beamflag[0] = MB_FLAG_NONE;
+					beamflag[0] = MB_FLAG_NONE;
 				}
 			}
 
-		/* get sidescan */
-		*nss = store->SidescanData.actualNrOfSsDataPort
-				+ store->SidescanData.actualNrOfSsDataStb;
-		for (i=0;i<*nss;i++)
+		/* reset sidescan */
+		*nss = 0;
+		for (i = 0; i < store->NrSidescan; i++)
 			{
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
 			}
-		if (store->SidescanData.actualNrOfSsDataPort > 1)
-		    {
-		    ssdepth = store->SoundingData.cMean
-				* store->SidescanData.minSsTimePort / 2.0;
-		    timeslice = (store->SidescanData.maxSsTimePort
-				- store->SidescanData.minSsTimePort)
-				/ store->SidescanData.actualNrOfSsDataPort;
-		    }
-		for (i=0;i<store->SidescanData.actualNrOfSsDataPort;i++)
-			{
-			j = store->SidescanData.actualNrOfSsDataPort - i - 1;
-			tt = store->SidescanData.minSsTimePort + timeslice * i;
-			ss[j] = store->SidescanData.ssData[i];
-			range = store->SoundingData.cMean * tt / 2.0;
-			ssacrosstrack[j] = -sqrt(range * range - ssdepth * ssdepth);
-			ssalongtrack[j] = 0.0;
-			}
-		if (store->SidescanData.actualNrOfSsDataStb > 1)
-		    {
-		    ssdepth = store->SoundingData.cMean
-				* store->SidescanData.minSsTimeStb / 2.0;
-		    timeslice = (store->SidescanData.maxSsTimeStb
-				- store->SidescanData.minSsTimeStb)
-				/ store->SidescanData.actualNrOfSsDataStb;
-		    }
-		for (i=0;i<store->SidescanData.actualNrOfSsDataStb;i++)
-			{
-			j = store->SidescanData.actualNrOfSsDataPort + i;
-			tt = store->SidescanData.minSsTimeStb + timeslice * i;
-			ss[j] = store->SidescanData.ssData[i];
-			range = store->SoundingData.cMean * tt / 2.0;
-			ssacrosstrack[j] = sqrt(range * range - ssdepth * ssdepth);
-			ssalongtrack[j] = 0.0;
-			}
 
+		/* get sidescan */
+		v0 = (store->SoundingData.cMean > 0.0 ?
+				store->SoundingData.cMean : 1500.0);
+		z0 = mbsys_get_depth(store->MultiBeamDepth,
+							 store->ActualTransducerTable,
+							 store->SoundingData.heaveWhileTransmitting,
+							 store->NrBeams);
+		if ((store->NrSidescan > 0) && (z0 > tlz))
+			{
+			*nss = store->NrSidescan;
+		    z0 -= tlz;
+			t0 = z0/v0;
+			t2 = t0*t0;
+			/* read portside scan */
+			if (store->SidescanData.actualNrOfSsDataPort > 1)
+				{
+				/* initialise */
+				tn = store->SidescanData.minSsTimePort / 2;
+				dt = (store->SidescanData.maxSsTimePort / 2 - tn)
+					/ (store->SidescanData.actualNrOfSsDataPort - 1);
+				/* start reading: */
+				for (i = 0, j = store->SidescanData.actualNrOfSsDataPort; 0 < --j; i++)
+					{
+					y = (tn > t0 ? v0 * sqrt(tn*tn - t2) : 0.0);
+					ssalongtrack[j]	 = tlx;
+					ssacrosstrack[j] = tly - y;
+					ss[j] = store->SidescanData.ssData[i];
+					tn += dt;
+					}
+				}
+			/* read starboard scan */
+			if (store->SidescanData.actualNrOfSsDataStb > 1)
+				{
+				/* initialise */
+				tn = store->SidescanData.minSsTimeStb / 2;
+				dt = (store->SidescanData.maxSsTimeStb / 2 - tn)
+					/ (store->SidescanData.actualNrOfSsDataStb - 1);
+				for (j = store->SidescanData.actualNrOfSsDataPort; j < store->NrSidescan; j++)
+					{
+					y = (tn > t0 ? v0 * sqrt(tn*tn - t2) : 0.0);
+					ssalongtrack[j]	 = tlx;
+					ssacrosstrack[j] = tly + y;
+					ss[j] = store->SidescanData.ssData[j];
+					tn += dt;
+					}
+				}
+			}
 		/* print debug statements */
 		if (verbose >= 5)
 			{
@@ -347,7 +381,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+			fprintf(stderr,"dbg4        time_i[6]:  %d\n",
 				time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				*time_d);
@@ -374,7 +408,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				*nss);
 			for (i=0;i<*nss;i++)
 			  fprintf(stderr,"dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
+				i,ss[i],ssacrosstrack[i ],ssalongtrack[i]);
 			}
 
 		/* done translating values */
@@ -507,7 +541,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f   acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
@@ -539,23 +573,23 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
-		/* get time */
+		/* set time */
 		store->SoundingData.relTime = (float) (time_d
 		    - store->AbsoluteStartTimeOfProfile);
 
-		/* get navigation */
+		/* set navigation */
 		store->CenterPosition[0].centerPositionX = (float)
 			(DTR * navlon - store->GlobalData.referenceOfPositionX);
 		store->CenterPosition[0].centerPositionY = (float)
 			(DTR * navlat - store->GlobalData.referenceOfPositionY);
 
-		/* get heading */
+		/* set heading */
 		store->SoundingData.headingWhileTransmitting = (float) (DTR * heading);
 
-		/* get speed  */
+		/* set speed  */
 		store->CenterPosition[0].speed = (float) (speed / 3.6);
 
-		/* read distance and depth values into storage arrays */
+		/* write distance and depth values into storage arrays */
 		if (store->GlobalData.typeOfSounder == 'B'
 			|| store->GlobalData.typeOfSounder == 'F')
 			{
@@ -576,17 +610,19 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 							| SB_DEPTH_SUPPRESSED;
 				store->MultiBeamDepth[i].beamPositionStar = (float) bathacrosstrack[i];
 				store->MultiBeamDepth[i].beamPositionAhead = (float) bathalongtrack[i];
-				store->MultibeamBeamAmplitudes[i].beamAmplitude = (unsigned short) amp[i];
 				}
 			}
 		else if (store->GlobalData.typeOfSounder == 'V')
 			{
-			if (store->SingleBeamDepth.depthHFreq > 0.0)
-				store->SingleBeamDepth.depthHFreq = bath[0];
-			if (store->SingleBeamDepth.depthMFreq > 0.0)
-				store->SingleBeamDepth.depthHFreq = bath[0];
-			if (store->SingleBeamDepth.depthLFreq > 0.0)
-				store->SingleBeamDepth.depthHFreq = bath[0];
+			store->NrBeams = 0;
+  			if (store->SingleBeamDepth.depthHFreq > 0.0)
+  				store->SingleBeamDepth.depthHFreq = bath[0];
+			else if (store->SingleBeamDepth.depthMFreq > 0.0)
+				store->SingleBeamDepth.depthMFreq = bath[0];
+			else if (store->SingleBeamDepth.depthLFreq > 0.0)
+				store->SingleBeamDepth.depthLFreq = bath[0];
+			else
+				store->SingleBeamDepth.depthMFreq = bath[0];
 			if (beamflag[i] == MB_FLAG_NULL)
 			   	store->SingleBeamDepth.depthFlag
 					= store->SingleBeamDepth.depthFlag | SB_DELETED;
@@ -597,14 +633,26 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    	store->SingleBeamDepth.depthFlag
 					= store->SingleBeamDepth.depthFlag | SB_DEPTH_SUPPRESSED;
 			}
-		for (i=0;i<store->SidescanData.actualNrOfSsDataPort;i++)
+
+		/* set beam amplitudes */
+		store->NrAmplitudes = namp;
+		for (i=0;i<store->NrAmplitudes;i++)
 			{
-			store->SidescanData.ssData[i] = ss[store->SidescanData.actualNrOfSsDataPort - i - 1];
+			store->MultibeamBeamAmplitudes[i].beamAmplitude = (unsigned short) amp[i];
 			}
-		for (i=store->SidescanData.actualNrOfSsDataStb;i<nss;i++)
+
+		if (nss == store->SidescanData.actualNrOfSsDataPort
+				 + store->SidescanData.actualNrOfSsDataStb)
 			{
-			store->SidescanData.ssData[i] = ss[i];
-			}
+    		for (i=0;i<store->SidescanData.actualNrOfSsDataPort;i++)
+    			{
+    			store->SidescanData.ssData[i] = ss[store->SidescanData.actualNrOfSsDataPort - i - 1];
+    			}
+    		for (i=store->SidescanData.actualNrOfSsDataStb;i<nss;i++)
+    			{
+    			store->SidescanData.ssData[i] = ss[i];
+    			}
+    		}
 		}
 
 	/* insert comment in structure */
@@ -640,6 +688,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
+	double pitch, angle;
 	int	i;
 
 	/* print input debug statements */
@@ -672,11 +721,21 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
+
+		/* get draft */
+		*draft = store->ActualTransducerTable.transducerDepth;
+
+		/* get ssv */
+		*ssv = store->SoundingData.cKeel;
+
 		/* get travel times */
-		if (store->GlobalData.typeOfSounder == 'B'
-			|| store->GlobalData.typeOfSounder == 'F')
+		if (((store->GlobalData.typeOfSounder == 'B')
+		|| 	 (store->GlobalData.typeOfSounder == 'F'))
+		&&	(store->NrBeams == store->ActualAngleTable.actualNumberOfBeams)
+		&&	(store->NrBeams == store->NrTravelTimes))
 			{
 			*nbeams = store->NrBeams;
+			pitch = - RTD * store->SoundingData.pitchWhileTransmitting;
 			for (i=0;i<store->NrBeams;i++)
 				{
 				ttimes[i] = 0.0;
@@ -688,41 +747,40 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			for (i=0;i<store->NrBeams;i++)
 				{
-				ttimes[i] = store->MultiBeamTraveltime[i].travelTimeOfRay;
-				angles[i] = RTD * fabs(store->ActualAngleTable.beamAngle[i]);
-				if (angles[i] < 0.0)
-			    		angles_forward[i] = 180.0;
-				else
-			    		angles_forward[i] = 0.0;
-				angles_null[i] = 0.0;
-				heave[i] = 0.5 * (store->SoundingData.heaveWhileTransmitting
+				ttimes[i] = 2*store->MultiBeamTraveltime[i].travelTimeOfRay;
+				angle = 90. - RTD * store->ActualAngleTable.beamAngle[i];
+				mb_rollpitch_to_takeoff(verbose,
+					pitch, angle,
+					&angles[i],&angles_forward[i], error);
+				heave[i] =  -0.5 * (store->SoundingData.heaveWhileTransmitting
 					+ store->MultiBeamReceiveParams[i].heaveWhileReceiving);
-				alongtrack_offset[i] = 0.0;
 				}
+			/* set status */
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
 			}
 		else if (store->GlobalData.typeOfSounder == 'V')
 			{
 			*nbeams = 1;
-			ttimes[0] = store->SingleBeamDepth.travelTimeOfRay;
-			angles_forward[i] = 0.0;
-			angles_null[i] = 0.0;
-			heave[i] = 0.5 * (store->SoundingData.heaveWhileTransmitting
+			ttimes[0] = 2*store->SingleBeamDepth.travelTimeOfRay;
+			angles_forward[0] = 0.0;
+			angles_null[0] = 0.0;
+			heave[0] = -0.5 * (store->SoundingData.heaveWhileTransmitting
 					+ store->MultiBeamReceiveParams[i].heaveWhileReceiving);
-			alongtrack_offset[i] = 0.0;
+			alongtrack_offset[0] = 0.0;
+
+			/* set status */
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			/* set status */
+			*error = MB_ERROR_OTHER;
+			status = MB_FAILURE;
 			}
 
-		/* get draft */
-		*draft = store->ActualTransducerTable.transducerDepth;
-
-		/* get ssv */
-		*ssv = store->SoundingData.cKeel;
-
-		/* set status */
-		*error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
-
 		/* done translating values */
-
 		}
 
 	/* deal with comment */
@@ -880,6 +938,53 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+double mbsys_get_depth(	SurfMultiBeamDepth* 			MultiBeamDepth,
+						SurfTransducerParameterTable	TransducerTable,
+						float	heave,
+						int		n )
+{
+	double	x, y, z, a, b, c, d, depth;
+	int		i, N;
+
+	a = b = c = d = 0.0;
+	N = 0;
+	/* include all beams with a lateral distance within ~15 % of the depth
+	   and calculate the depth @ centre assuming a linear slope.
+	 */
+	for (i = 0; i < n; i++)
+		if ((MultiBeamDepth[i].depthFlag &
+			(SB_DELETED | SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) == 0)
+			{
+			x = MultiBeamDepth[i].beamPositionAhead	-
+				TransducerTable.transducerPositionAhead;
+			y = MultiBeamDepth[i].beamPositionStar -
+				TransducerTable.transducerPositionStar;
+			z = MultiBeamDepth[i].depth + heave -
+				TransducerTable.transducerDepth;
+			if ((x*x + y*y) <= (z*z/50.))
+				{
+					a += y;
+					b += y*y;
+					c += z;
+					d += z*y;
+					N++;
+				}
+			}
+
+	if (N > 0)
+		depth = (b*c - a*d)/(N*b - a*a)	- heave + TransducerTable.transducerDepth;
+	else
+		depth = 0.0;
+
+	return(depth);
+}
+/*----------------------------------------------------------------------
+roll in MB-System is positive rotating starboard to down, same as in SURF
+pitch in MB-System is positive rotating down to forward, opposite in SURF
+heave in MB-System is positive down, which conforms to the cartesian
+		coordinates convention, but seems rather a contradiction in terms
+													     opposite in SURF
+*/
 int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, double *transducer_depth, double *altitude,
 	int *error)
@@ -889,7 +994,6 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
 	double	bath_best;
-	double	xtrack_min;
 	int	found;
 	int	i;
 
@@ -919,43 +1023,23 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get transducer depth and altitude */
 		*transducer_depth = store->ActualTransducerTable.transducerDepth
-					+ store->SoundingData.heaveWhileTransmitting;
-		found = MB_NO;
-		bath_best = 0.0;
-		xtrack_min = 99999999.9;
-		for (i=0;i<store->NrBeams;i++)
-		    {
-		    if ((int)(store->MultiBeamDepth[i].depthFlag
-		    		& (SB_DEPTH_SUPPRESSED + SB_REDUCED_FAN + SB_DELETED)) == 0
-			&& fabs((double)store->MultiBeamDepth[i].beamPositionStar) < xtrack_min)
+					- store->SoundingData.heaveWhileTransmitting;
+		bath_best = mbsys_get_depth(store->MultiBeamDepth,
+									store->ActualTransducerTable,
+									store->SoundingData.heaveWhileTransmitting,
+									store->NrBeams);;
+		if (bath_best > *transducer_depth)
 			{
-			xtrack_min = fabs((double)store->MultiBeamDepth[i].beamPositionStar);
-			bath_best = (double) store->MultiBeamDepth[i].depth;
-			found = MB_YES;
-			}
-		    }
-		if (found == MB_NO)
-		    {
-		    xtrack_min = 99999999.9;
-		    for (i=0;i<store->NrBeams;i++)
-			{
-			if ((int)(store->MultiBeamDepth[i].depthFlag & SB_DELETED) == 0
-			&& fabs((double)store->MultiBeamDepth[i].beamPositionStar) < xtrack_min)
-			    {
-			    xtrack_min = fabs((double)store->MultiBeamDepth[i].beamPositionStar);
-			    bath_best = (double) store->MultiBeamDepth[i].depth;
-			    found = MB_YES;
-			    }
-			}
-		    }
-		if (found == MB_YES)
 		    *altitude = bath_best - *transducer_depth;
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
 		else
+			{
 		    *altitude = 0.0;
-
-		/* set status */
-		*error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
+			*error = MB_ERROR_OTHER;
+			status = MB_FAILURE;
+		    }
 
 		/* done translating values */
 
@@ -1042,6 +1126,9 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*navlat = RTD * ((double) store->CenterPosition[0].centerPositionY
 					+ store->GlobalData.referenceOfPositionY);
 
+		/* get draft */
+		*draft = store->ActualTransducerTable.transducerDepth;
+
 		/* get heading */
 		*heading = RTD * store->SoundingData.headingWhileTransmitting;
 
@@ -1050,8 +1137,8 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get roll pitch and heave */
 		*roll = RTD * store->SoundingData.rollWhileTransmitting;
-		*pitch = RTD * store->SoundingData.pitchWhileTransmitting;
-		*heave = store->SoundingData.heaveWhileTransmitting;
+		*pitch = -RTD * store->SoundingData.pitchWhileTransmitting;
+		*heave = -store->SoundingData.heaveWhileTransmitting;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1226,8 +1313,8 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get roll pitch and heave */
 		store->SoundingData.rollWhileTransmitting = (float) (DTR * roll);
-		store->SoundingData.pitchWhileTransmitting = (float) (DTR * pitch);
-		store->SoundingData.heaveWhileTransmitting = (float) heave;
+		store->SoundingData.pitchWhileTransmitting = (float) (-DTR * pitch);
+		store->SoundingData.heaveWhileTransmitting = (float) (-heave);
 		}
 
 	/* print output debug statements */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_samesurf.c	6/13/2002
- *	$Id: mbr_samesurf.c,v 5.7 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_samesurf.c,v 5.8 2003-11-24 21:04:29 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -93,7 +93,7 @@ int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.8 2003-11-24 21:04:29 caress Exp $";
 	char	*function_name = "mbr_register_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -221,12 +221,12 @@ int mbr_info_samesurf(int verbose,
 			int *nav_source,
 			int *heading_source,
 			int *vru_source,
-			int *svp_source,
+			int *svp_source, 
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.8 2003-11-24 21:04:29 caress Exp $";
 	char	*function_name = "mbr_info_samesurf";
 	int	status = MB_SUCCESS;
 
@@ -243,9 +243,9 @@ int mbr_info_samesurf(int verbose,
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SURF;
-	*beams_bath_max = 1440;
-	*beams_amp_max = 1440;
-	*pixels_ss_max = 4096;
+	*beams_bath_max = MBSYS_SURF_MAXBEAMS;
+	*beams_amp_max = MBSYS_SURF_MAXBEAMS;
+	*pixels_ss_max = MBSYS_SURF_MAXPIXELS;
 	strncpy(format_name, "SAMESURF", MB_NAME_LENGTH);
 	strncpy(system_name, "SURF", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_SAMESURF\nInformal Description: SAM Electronics SURF format.\nAttributes:           variable beams,  bathymetry, amplitude,  and sidescan,\n                      binary, single files, SAM Electronics (formerly Krupp-Atlas Electronik). \n", MB_DESCRIPTION_LENGTH);
@@ -281,6 +281,7 @@ int mbr_info_samesurf(int verbose,
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
 		fprintf(stderr,"dbg2       svp_source:         %d\n",*svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
@@ -296,7 +297,7 @@ int mbr_info_samesurf(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_samesurf.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+ static char res_id[]="$Id: mbr_samesurf.c,v 5.8 2003-11-24 21:04:29 caress Exp $";
 	char	*function_name = "mbr_alm_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -393,6 +394,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	SurfMultiBeamTT			*MultiBeamTraveltimePtr;
 	SurfMultiBeamReceive		*MultiBeamReceiveParamsPtr;
 	SurfAmplitudes			*MultibeamBeamAmplitudesPtr;
+	SurfExtendedAmplitudes		*MultibeamExtendedBeamAmplitudesPtr;
 	SurfSignalParameter		*MultibeamSignalParametersPtr;
 	SurfTxParameter			*MultibeamTransmitterParametersPtr;
 	SurfSidescanData		*SidescanDataPtr;
@@ -428,7 +430,8 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* read global info if the structure is blank (usually first time through) */
 	if (store->initialized == MB_NO)
 		{
-		strncpy(store->NameOfShip, SAPI_getNameOfSounder(),LABEL_SIZE);
+		strncpy(store->NameOfShip, SAPI_getNameOfShip(),LABEL_SIZE);
+		strncpy(store->NameOfSounder, SAPI_getNameOfSounder(),LABEL_SIZE);
 		strncpy(store->TypeOfSounder, SAPI_getTypeOfSounder(),LABEL_SIZE);
 		store->NrSoundings = SAPI_getNrSoundings();
 		store->NrBeams = SAPI_getNrBeams();
@@ -471,6 +474,26 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->GlobalData.referenceOfPositionY = DTR * lat;
 			*refeasting = easting;
 			*refnorthing = northing;
+
+			/* Set min longitude and latitude */
+			easting = store->Statistics.minEasting;
+			northing = store->Statistics.minNorthing;
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr,
+							easting, northing,
+							&lon, &lat,
+							error);
+			store->Statistics.minEasting = DTR * lon;
+			store->Statistics.minNorthing = DTR * lat;
+
+			/* Set max longitude and latitude */
+			easting = store->Statistics.maxEasting;
+			northing = store->Statistics.maxNorthing;
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr,
+							easting, northing,
+							&lon, &lat,
+							error);
+			store->Statistics.maxEasting = DTR * lon;
+			store->Statistics.maxNorthing = DTR * lat;
 			}
 
 		store->initialized = MB_YES;
@@ -558,25 +581,45 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (SingleBeamDepthPtr != NULL)
 			store->SingleBeamDepth = *SingleBeamDepthPtr;
 
-		for (i=0; i<MIN(MBSYS_SURF_MAXBEAMS,
-				store->NrBeams); i++)
+		i = 0;
+		while ( (i < MIN(MBSYS_SURF_MAXBEAMS, store->NrBeams)) &&
+				((MultiBeamDepthPtr = SAPI_getMultiBeamDepth(i)) != NULL) )
 			{
-			MultiBeamDepthPtr = SAPI_getMultiBeamDepth(i);
-			if (MultiBeamDepthPtr != NULL)
-				store->MultiBeamDepth[i] = *MultiBeamDepthPtr;
-
-			MultiBeamTraveltimePtr = SAPI_getMultiBeamTraveltime(i);
-			if (MultiBeamTraveltimePtr != NULL)
-				store->MultiBeamTraveltime[i] = *MultiBeamTraveltimePtr;
-
-			MultiBeamReceiveParamsPtr = SAPI_getMultiBeamReceiveParams(i);
-			if (MultiBeamReceiveParamsPtr != NULL)
-				store->MultiBeamReceiveParams[i] = *MultiBeamReceiveParamsPtr;
-
-			MultibeamBeamAmplitudesPtr = SAPI_getMultibeamBeamAmplitudes(i);
-			if (MultibeamBeamAmplitudesPtr != NULL)
-				store->MultibeamBeamAmplitudes[i] = *MultibeamBeamAmplitudesPtr;
+			store->MultiBeamDepth[i++] = *MultiBeamDepthPtr;
 			}
+		store->NrDepths = i;
+
+		i = 0;
+		while ( (i < MIN(MBSYS_SURF_MAXBEAMS, store->NrBeams)) &&
+				((MultiBeamTraveltimePtr = SAPI_getMultiBeamTraveltime(i)) != NULL) )
+			{
+			store->MultiBeamTraveltime[i++] = *MultiBeamTraveltimePtr;
+			}
+		store->NrTravelTimes = i;
+
+		i = 0;
+		while ( (i < MIN(MBSYS_SURF_MAXBEAMS, store->NrBeams)) &&
+				((MultiBeamReceiveParamsPtr = SAPI_getMultiBeamReceiveParams(i)) != NULL) )
+			{
+			store->MultiBeamReceiveParams[i++] = *MultiBeamReceiveParamsPtr;
+			}
+		store->NrRxSets = i;
+
+		i = 0;
+		while ( (i < MIN(MBSYS_SURF_MAXBEAMS, store->NrBeams)) &&
+				((MultibeamBeamAmplitudesPtr = SAPI_getMultibeamBeamAmplitudes(i)) != NULL) )
+			{
+			store->MultibeamBeamAmplitudes[i++] = *MultibeamBeamAmplitudesPtr;
+			}
+		store->NrAmplitudes = i;
+
+		i = 0;
+		while ( (i < MIN(MBSYS_SURF_MAXBEAMS, store->NrBeams)) &&
+				((MultibeamExtendedBeamAmplitudesPtr = SAPI_getMultibeamExtendedBeamAmplitudes(i)) != NULL) )
+			{
+			store->MultibeamExtendedBeamAmplitudes[i++] = *MultibeamExtendedBeamAmplitudesPtr;
+			}
+		store->NrExtAmplitudes = i;
 
 		MultibeamSignalParametersPtr = SAPI_getMultibeamSignalParameters();
 		if (MultibeamSignalParametersPtr != NULL)
@@ -591,29 +634,29 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				}
 			}
 
-		MultibeamTransmitterParametersPtr = SAPI_getMultibeamTransmitterParameters();
+		store->NrTxSets = 0;
+		MultibeamTransmitterParametersPtr =
+			SAPI_getMultibeamTransmitterParameters(&store->NrTxSets);
 		if (MultibeamTransmitterParametersPtr != NULL)
 			{
+			store->NrTxSets = MIN(MBSYS_SURF_MAXTXSETS,store->NrTxSets);
 			store->MultibeamTransmitterParameters = *MultibeamTransmitterParametersPtr;
-/* there's no indication of how many sets there are anywhwere ...
-			for (i=1; i<MIN(MBSYS_SURF_MAXTXSETS,
-					MultibeamTransmitterParametersPtr->????);
-					i++)
+			for (i=1; i<store->NrTxSets; i++)
 				{
 				store->MultibeamTransmitterParameters.txSets[i]
 					= MultibeamTransmitterParametersPtr->txSets[i];
 				}
- */
-			}
+ 			}
 
+		store->NrSidescan = 0;
 		SidescanDataPtr = SAPI_getSidescanData();
 		if (SidescanDataPtr != NULL)
 			{
 			store->SidescanData = *SidescanDataPtr;
-			for (i=1; i<MIN(MBSYS_SURF_MAXPIXELS,
+			store->NrSidescan = MIN(MBSYS_SURF_MAXPIXELS,
 					SidescanDataPtr->actualNrOfSsDataPort
 					+ SidescanDataPtr->actualNrOfSsDataStb);
-					i++)
+			for (i=1; i<store->NrSidescan; i++)
 				{
 				store->SidescanData.ssData[i]
 					= SidescanDataPtr->ssData[i];
@@ -809,14 +852,17 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0; i<MIN(MBSYS_SURF_MAXBEAMS,
 				store->NrBeams); i++)
 		{
-		fprintf(stderr,"\ndbg4       MultiBeamDepth[%3d].depthFlag:                     %d\n", i, store->MultiBeamDepth[i].depthFlag);
-		fprintf(stderr,"dbg4       MultiBeamDepth[%3d].depth:                         %f\n", i, store->MultiBeamDepth[i].depth);
-		fprintf(stderr,"dbg4       MultiBeamDepth[%3d].beamPositionAhead:             %f\n", i, store->MultiBeamDepth[i].beamPositionAhead);
-		fprintf(stderr,"dbg4       MultiBeamDepth[%3d].beamPositionStar:              %f\n", i, store->MultiBeamDepth[i].beamPositionStar);
-		fprintf(stderr,"dbg4       MultiBeamTraveltime[%3d].travelTimeOfRay:          %f\n", i, store->MultiBeamTraveltime[i].travelTimeOfRay);
-		fprintf(stderr,"dbg4       MultiBeamReceiveParams[%3d].headingWhileReceiving: %f\n", i, store->MultiBeamReceiveParams[i].headingWhileReceiving);
-		fprintf(stderr,"dbg4       MultiBeamReceiveParams[%3d].heaveWhileReceiving:   %f\n", i, store->MultiBeamReceiveParams[i].heaveWhileReceiving);
-		fprintf(stderr,"dbg4       MultibeamBeamAmplitudes[%3d].beamAmplitude:        %d\n", i, store->MultibeamBeamAmplitudes[i].beamAmplitude);
+		fprintf(stderr,"\ndbg4       MultiBeamDepth[%3d].depthFlag:                      %d\n", i, store->MultiBeamDepth[i].depthFlag);
+		fprintf(stderr,"dbg4       MultiBeamDepth[%3d].depth:                          %f\n", i, store->MultiBeamDepth[i].depth);
+		fprintf(stderr,"dbg4       MultiBeamDepth[%3d].beamPositionAhead:              %f\n", i, store->MultiBeamDepth[i].beamPositionAhead);
+		fprintf(stderr,"dbg4       MultiBeamDepth[%3d].beamPositionStar:               %f\n", i, store->MultiBeamDepth[i].beamPositionStar);
+		fprintf(stderr,"dbg4       MultiBeamTraveltime[%3d].travelTimeOfRay:           %f\n", i, store->MultiBeamTraveltime[i].travelTimeOfRay);
+		fprintf(stderr,"dbg4       MultiBeamReceiveParams[%3d].headingWhileReceiving:  %f\n", i, store->MultiBeamReceiveParams[i].headingWhileReceiving);
+		fprintf(stderr,"dbg4       MultiBeamReceiveParams[%3d].heaveWhileReceiving:    %f\n", i, store->MultiBeamReceiveParams[i].heaveWhileReceiving);
+		fprintf(stderr,"dbg4       MultibeamBeamAmplitudes[%3d].beamAmplitude:         %d\n", i, store->MultibeamBeamAmplitudes[i].beamAmplitude);
+		fprintf(stderr,"dbg4       MultibeamBeamExtendedAmplitudes[%3d].mtau:          %f\n", i, store->MultibeamExtendedBeamAmplitudes[i].mtau);
+		fprintf(stderr,"dbg4       MultibeamBeamExtendedAmplitudes[%3d].nis:           %d\n", i, store->MultibeamExtendedBeamAmplitudes[i].nis);
+		fprintf(stderr,"dbg4       MultibeamBeamExtendedAmplitudes[%3d].beamAmplitude: %d\n", i, store->MultibeamExtendedBeamAmplitudes[i].beamAmplitude);
 		}
 
 		fprintf(stderr,"\ndbg4       MultibeamSignalParameters.bscatClass:          %d\n", store->MultibeamSignalParameters.bscatClass);
