@@ -1,15 +1,33 @@
-MB-SYSTEM VERSION 4.6a RELEASE NOTES:
------------------------------------
+MB-SYSTEM VERSION 4.6.6 RELEASE NOTES:
+--------------------------------------
 
-This directory structure contains the version 4.6a release  
+This directory structure contains the version 4.6.6 release  
 of the MB-System software package for processing and display of 
 swath sonar data.  
+
+Release 4.6.6 Notes:
+--------------------
+
+Version 4.6.6 incorporates support for a new data format and
+fixes to several bugs found in the version 4.6a and 4.6b 
+releases. The new data format (MBIO ID 94) supports data
+from the current generation of ELAC Bottomchart Mk II 
+multibeam sonars. The fixed problems involve the programs
+mbgrid, mbvelocitytool, and the handling of data from Atlas 
+Hydrosweep MD sonars (MBIO ID's 101 and 102) and SeaBeam 2100 
+sonars (MBIO ID's 41, 42, and 43).
+
+Release 4.6a Notes:
+-------------------
 
 Version 4.6a incorporates fixes to several bugs found in the 
 original version 4.6 release. The fixed problems all involve 
 the handling of specific data formats. The affected formats are 
 the GSF format (MBIO ID 121), the HDCS format (MBIO ID 151), and
 all of the MR1 formats (MBIO ID's 61, 62, and 63).
+
+Release 4.6 Notes:
+------------------
 
 Version 4.6 includes significant enhancements relative to 
 version 4.5. The enhancements for version 4.6 include support
@@ -117,8 +135,9 @@ incorporated in the new release.
 
 RELEASE DATE:
 ------------
-April 14, 1999 	(Original release of version 4.6)
-May 6, 1999	(Release of version 4.6a)
+April 14, 1999 		(Original release of version 4.6)
+May 6, 1999		(Release of version 4.6a)
+September 15, 1999	(Release of version 4.6.6)
 
 Authors:
 --------
@@ -134,7 +153,7 @@ Palisades, NY 10964
 
 Copyright:
 ----------
-MB-System Copyright 1993-1998
+MB-System Copyright 1993-1999
 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
@@ -205,8 +224,8 @@ Installing MB-System:
 The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
 
-		% uncompress MB-System4.6.tar.Z
-		% tar xvf MB-System4.6.tar
+		% uncompress MB-System4.6.6.tar.Z
+		% tar xvf MB-System4.6.6.tar
 
 This will create a directory structure called mbsystem. 
 In order to configure your installation, you must edit the
@@ -299,7 +318,7 @@ Its a fair bet that if you provide us with a really cool
 to try making MB-System run on it.
 
 Levitus Database:
---------------------------
+-----------------
 The program mblevitus depends on a 16 MByte data file that is not
 included in the MB-System tarfile.  It is in the 'annual.Z' file which
 is available by anonymous ftp from lamont.ldgo.columbia.edu in the
@@ -315,14 +334,14 @@ be POSIX compliant and we will be able to stay in the mainstream of
 the evolution of GUIs and WIMPS.
 
 Motif:
---------------------------
+------
 The graphical tools mbedit, mbnavedit, and mbvelocitytool 
 now use the Motif widget set for their graphical user
 interface.  Motif libraries are required 
 to successfully link and install these programs. 
  
 Web Based Documentation:
---------------------------
+------------------------
 The html documentation consists of a number of html
 documents and images in the directory mbsystem/html.
 This documentation also comprises the MB-System
@@ -359,7 +378,7 @@ Suggestions:
 We are interested in your suggestions.
 
 Bugs:
-------------
+-----
 There are undoubtably bugs in this software. Although we
 make no promises about how rapidly problems will be fixed, we
 strongly encourage users to notify us of bugs (and fixes!!).
@@ -367,7 +386,7 @@ We will continue to support this software for the forseeable
 future.
 
 Acknowledgments:
-------------
+----------------
 A number of people have made contributions to the code
 included in MB-System.  These include:
 	Suzanne O'Hara (Lamont-Doherty Earth Observatory) 
@@ -389,10 +408,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.18 1999-05-07 00:30:38 caress Exp $
+RCS ID: $Id: README,v 4.19 1999-09-15 21:29:37 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.18  1999/05/07  00:30:38  caress
+# Version 4.6a release
+#
 # Revision 4.17  1999/04/16  00:26:05  caress
 # Final 4.6 release?
 #
