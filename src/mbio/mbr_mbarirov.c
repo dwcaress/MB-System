@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarirov.c	5/20/99
- *	$Id: mbr_mbarirov.c,v 4.1 1999-07-16 19:29:09 caress Exp $
+ *	$Id: mbr_mbarirov.c,v 4.2 1999-09-24 23:10:12 caress Exp $
  *
  *    Copyright (c) 1999 by
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 20, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/07/16  19:29:09  caress
+ * First revision.
+ *
  * Revision 1.1  1999/07/16  19:24:15  caress
  * Initial revision
  *
@@ -50,7 +53,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbarirov.c,v 4.1 1999-07-16 19:29:09 caress Exp $";
+ static char res_id[]="$Id: mbr_mbarirov.c,v 4.2 1999-09-24 23:10:12 caress Exp $";
 	char	*function_name = "mbr_alm_mbarirov";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -549,7 +552,8 @@ int	*error;
 	struct mbf_mbarirov_struct *data;
 	char	line[MBF_MBARIROV_MAXLINE+1];
 	int	read_len;
-	int	year,jday,timetag;
+	int	year,jday;
+	double	timetag;
 	char	*line_ptr;
 	int	nread;
 	int	i;
@@ -604,8 +608,10 @@ int	*error;
 	    data->kind = MB_DATA_DATA;
 
 	    /* read data */
-            nread = sscanf(line,
-			"%d,%d,%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
+	    if (strchr(line, ',') != NULL)
+		{
+		nread = sscanf(line,
+			"%d,%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
 			&year,
 			&jday,
 			&timetag,
@@ -619,6 +625,25 @@ int	*error;
 			&data->rov_altitude,
 			&data->rov_pitch,
 			&data->rov_roll);
+		}
+	    else
+		{
+		nread = sscanf(line,
+			"%d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+			&year,
+			&jday,
+			&timetag,
+			&data->time_d,
+			&data->latitude,
+			&data->longitude,
+			&data->easting,
+			&data->northing,
+			&data->rov_pressure,
+			&data->rov_heading,
+			&data->rov_altitude,
+			&data->rov_pitch,
+			&data->rov_roll);
+		}
 	    if (nread == 13)
 	    	{
 	    	status = MB_SUCCESS;
@@ -634,6 +659,26 @@ int	*error;
 				    	* sin(DTR * data->latitude)
                     		    	* sin(DTR * data->latitude)));
 	    	
+
+		/* print output debug statements */
+		if (verbose >= 4)
+			{
+			fprintf(stderr,"\ndbg4  Data read in MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Values,read:\n");
+			fprintf(stderr,"dbg4       time_d:       %f\n",data->time_d);
+			fprintf(stderr,"dbg4       latitude:     %f\n",data->latitude);
+			fprintf(stderr,"dbg4       longitude:    %f\n",data->longitude);
+			fprintf(stderr,"dbg4       easting:      %f\n",data->easting);
+			fprintf(stderr,"dbg4       northing:     %f\n",data->northing);
+			fprintf(stderr,"dbg4       rov_pressure: %f\n",data->rov_pressure);
+			fprintf(stderr,"dbg4       rov_heading:  %f\n",data->rov_heading);
+			fprintf(stderr,"dbg4       rov_altitude: %f\n",data->rov_altitude);
+			fprintf(stderr,"dbg4       rov_pitch:    %f\n",data->rov_pitch);
+			fprintf(stderr,"dbg4       rov_roll:     %f\n",data->rov_roll);
+			fprintf(stderr,"dbg4       error:        %d\n",*error);
+			fprintf(stderr,"dbg4       status:       %d\n",status);
+			}
 	    	}
 	    	
 	    else
@@ -703,6 +748,26 @@ int	*error;
 	    }
 	else if (data->kind == MB_DATA_DATA)
 	    {
+	    /* print output debug statements */
+	    if (verbose >= 4)
+		    {
+		    fprintf(stderr,"\ndbg4  Data to be written in MBIO function <%s>\n",
+			    function_name);
+		    fprintf(stderr,"dbg4  Values,read:\n");
+		    fprintf(stderr,"dbg4       time_d:       %f\n",data->time_d);
+		    fprintf(stderr,"dbg4       latitude:     %f\n",data->latitude);
+		    fprintf(stderr,"dbg4       longitude:    %f\n",data->longitude);
+		    fprintf(stderr,"dbg4       easting:      %f\n",data->easting);
+		    fprintf(stderr,"dbg4       northing:     %f\n",data->northing);
+		    fprintf(stderr,"dbg4       rov_pressure: %f\n",data->rov_pressure);
+		    fprintf(stderr,"dbg4       rov_heading:  %f\n",data->rov_heading);
+		    fprintf(stderr,"dbg4       rov_altitude: %f\n",data->rov_altitude);
+		    fprintf(stderr,"dbg4       rov_pitch:    %f\n",data->rov_pitch);
+		    fprintf(stderr,"dbg4       rov_roll:     %f\n",data->rov_roll);
+		    fprintf(stderr,"dbg4       error:        %d\n",*error);
+		    fprintf(stderr,"dbg4       status:       %d\n",status);
+		    }
+
 	    mb_get_jtime(verbose,data->time_i,time_j);
 	    year = data->time_i[0];
 	    jday = time_j[1];
