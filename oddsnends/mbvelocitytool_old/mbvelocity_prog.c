@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.5 1995-03-06 19:41:22 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.6 1995-03-17 15:23:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/03/06  19:41:22  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.4  1995/02/14  18:26:46  caress
  * Moved the widgets around, made the format defaults work, and made
  * the program recognize the MB-System file suffix convention.
@@ -92,7 +95,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.5 1995-03-06 19:41:22 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.6 1995-03-17 15:23:00 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -131,12 +134,20 @@ double	xpscale, ypscale;
 int	active = -1;
 
 /* default edit profile */
-int	numedit = 14;
-int	depthedit[14] = {   0, 100, 200, 400, 800, 1200, 1600, 2000,
-			3000, 4000, 5000, 7000, 9000, 12000};
-int	veledit[28] = { 1500, 1500, 1500, 1500, 1500,
+int	numedit = 30;
+int	depthedit[30] = {   0, 50, 100, 200, 300, 400, 500, 
+			  600, 700, 800, 900, 1000, 
+			 1250, 1500, 1750, 2000,
+			 2250, 2500, 2750, 3000,
+			 3500, 4000, 4500, 5000, 
+			 6000, 7000, 8000, 9000, 
+			 10000, 12000};
+int	veledit[30] = { 1500, 1500, 1500, 1500, 1500,
 			1500, 1500, 1500, 1500, 1500,
-			1500, 1500, 1500, 1500 };
+			1500, 1500, 1500, 1500, 1500,
+			1500, 1500, 1500, 1500, 1500,
+			1500, 1500, 1500, 1500, 1500,
+			1500, 1500, 1500, 1500, 1500 };
 
 /* MBIO control parameters */
 int	format;
