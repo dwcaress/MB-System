@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.8 1995-02-14 21:20:26 caress Exp $
+#	$Id: Makefile.template,v 4.9 1995-03-23 16:29:34 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.8  1995/02/14  21:20:26  caress
+# Added new sidescan processing programs.
+#
 # Revision 4.7  1995/01/04  17:08:14  caress
 # Added mbhistogram
 #
@@ -58,6 +61,7 @@ FC = f77
 # Compile and load flags:
 CFLAGS = -O2
 LFLAGS = -lm
+BIGFLAG = -Olimit 2000
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
@@ -186,7 +190,7 @@ mbclean.o:	mbclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbunclean.c
 mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbgrid.c
+	$(CC) -c $(CFLAGS) $(BIGFLAG) -I$(GMTINCDIR) mbgrid.c
 mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h Makefile
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c

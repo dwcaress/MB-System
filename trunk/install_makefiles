@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.6 1995-03-22 19:19:27 caress Exp $
+#    $Id: install_makefiles,v 4.7 1995-03-23 16:30:08 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.6 1995-03-22 19:19:27 caress Exp $
+#   $Id: install_makefiles,v 4.7 1995-03-23 16:30:08 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.6  1995/03/22  19:19:27  caress
+# Added support for HPUX.
+#
 # Revision 4.5  1995/02/15  14:42:44  caress
 # Version 4.2 Release
 #
@@ -280,6 +283,16 @@ if (!$GRAPHICAL)
 	$GRAPHICAL = "YES";
 	}
 
+# set $BIGFLAG for compiling mbgrid.c under IRIX
+if ($OS eq "IRIX")
+	{
+	$BIGFLAG = "-Olimit 2000";
+	}
+else
+	{
+	$BIGFLAG = "";
+	}
+
 # outputting attributes:
 print "\nParameters defined for Makefiles:\n";
 print "Mb-System Home:            $MBSYSTEM_HOME\n";
@@ -438,6 +451,10 @@ while (@files)
 		elsif (index($_,"ARCHIVE",0) == 0)
 			{
 			print MAK "ARCHIVE = $ARCHIVE\n";
+			}
+		elsif (index($_,"BIGFLAG",0) == 0)
+			{
+			print MAK "BIGFLAG = $BIGFLAG\n";
 			}
 		elsif (index($_,"ranlib",0) >= 0 && $OS ne "SUN")
 			{
