@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.2 2001-06-03 07:07:34 caress Exp $
+ *    $Id: mbgrid.c,v 5.3 2001-06-29 22:50:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/03  07:07:34  caress
+ * Release 5.0.beta01.
+ *
  * Revision 5.1  2001/03/22 21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -305,7 +308,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.3 2001-06-29 22:50:23 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1578,7 +1581,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		    }
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
-		if (verbose > 0)
+		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,file);
 		} /* end if (format > 0) */
@@ -2134,7 +2137,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		    }
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
-		if (verbose > 0)
+		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,file);
 		} /* end if (format > 0) */
@@ -2705,7 +2708,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		    }
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
-		if (verbose > 0)
+		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,file);
 		} /* end if (format > 0) */

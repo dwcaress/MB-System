@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.3 2001-06-08 21:45:46 caress Exp $
+ *    $Id: mbcopy.c,v 5.4 2001-06-29 22:50:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/08  21:45:46  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.2  2001/06/03  07:07:34  caress
  * Release 5.0.beta01.
  *
@@ -125,6 +128,7 @@
 #include "../../include/mbsys_elacmk2.h"
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
+#include "../../include/mbsys_ldeoih.h"
 
 /* defines for special copying routines */
 #define	MBCOPY_PARTIAL			0
@@ -157,13 +161,24 @@ int mbcopy_simrad_time_convert(int verbose,
 		int centisecond, 
 		int *date, int *msec, 
 		int *error);
+int mbcopy_any_to_mbldeoih(int verbose, 
+		int kind, int *time_i, double time_d, 
+		double navlon, double navlat, double speed, double heading, 
+		double draft, double roll, double pitch, double heave, 
+		int nbath, int namp, int nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, 
+		char *ombio_ptr, char *ostore_ptr, 
+		int *error);
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.3 2001-06-08 21:45:46 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.4 2001-06-29 22:50:23 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -524,6 +539,9 @@ main (int argc, char **argv)
 		&& imb_io_ptr->system == MB_SYS_SIMRAD 
 		&& omb_io_ptr->format == MBF_EM300MBA)
 		copymode = MBCOPY_SIMRAD_TO_SIMRAD2;
+	else if (pings == 1 
+		&& omb_io_ptr->format == MBF_MBLDEOIH)
+		copymode = MBCOPY_ANY_TO_MBLDEOIH;
 	else
 		copymode = MBCOPY_PARTIAL;
 
@@ -955,6 +973,27 @@ main (int argc, char **argv)
 			ostore_ptr = omb_io_ptr->store_data;
 			status = mbcopy_simrad_to_simrad2(verbose, 
 				    istore_ptr, ostore_ptr, &error);
+			}
+		else if (copymode == MBCOPY_ANY_TO_MBLDEOIH
+			&& error == MB_ERROR_NO_ERROR)
+			{
+			if (kind == MB_DATA_DATA)
+				mb_extract_nav(verbose, imbio_ptr, istore_ptr, 
+					&kind, time_i, &time_d, 
+					&navlon, &navlat, &speed, &heading, &draft, 
+					&roll, &pitch, &heave, 
+					&error);
+			ostore_ptr = omb_io_ptr->store_data;
+			status = mbcopy_any_to_mbldeoih(verbose, 
+				    kind, time_i, time_d, 
+				    navlon, navlat, speed, heading, 
+				    draft, roll, pitch, heave, 
+				    nbath,namp,nss,
+				    ibeamflag,ibath,iamp,ibathacrosstrack,
+				    ibathalongtrack,
+				    iss,issacrosstrack,issalongtrack,
+				    comment, 
+				    ombio_ptr, ostore_ptr, &error);
 			}
 		else if (copymode == MBCOPY_PARTIAL
 			&& error == MB_ERROR_NO_ERROR)
@@ -2399,6 +2438,243 @@ int mbcopy_simrad_time_convert(int verbose,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       date:       %d\n",*date);
 		fprintf(stderr,"dbg2       msec:       %d\n",*msec);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbcopy_any_to_mbldeoih(int verbose, 
+		int kind, int *time_i, double time_d, 
+		double navlon, double navlat, double speed, double heading, 
+		double draft, double roll, double pitch, double heave, 
+		int nbath, int namp, int nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, 
+		char *ombio_ptr, char *ostore_ptr, 
+		int *error)
+{
+	char	*function_name = "mbcopy_any_to_mbldeoih";
+	int	status = MB_SUCCESS;
+	struct mbsys_ldeoih_struct *ostore;
+	int	i, j;
+
+	/* get data structure pointer */
+	ostore = (struct mbsys_ldeoih_struct *) ostore_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       ombio_ptr:  %d\n",ombio_ptr);
+		fprintf(stderr,"dbg2       ostore_ptr: %d\n",ostore_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
+		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
+		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
+		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
+		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
+		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
+		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
+		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
+		fprintf(stderr,"dbg2       speed:      %f\n",speed);
+		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       draft:      %f\n",draft);
+		fprintf(stderr,"dbg2       roll:       %f\n",roll);
+		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
+		fprintf(stderr,"dbg2       heave:      %f\n",heave);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
+		fprintf(stderr,"dbg2       nbath:      %d\n",
+			nbath);
+		if (verbose >= 3) 
+		 for (i=0;i<nbath;i++)
+		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
+		fprintf(stderr,"dbg2       namp:       %d\n",namp);
+		if (verbose >= 3) 
+		 for (i=0;i<namp;i++)
+		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+		fprintf(stderr,"dbg2        nss:       %d\n",nss);
+		if (verbose >= 3) 
+		 for (i=0;i<nss;i++)
+		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
+		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
+		}
+
+	/* copy the data  */
+	if (ostore != NULL)
+		{
+		/* if needed reset numbers of beams and allocate 
+		   memory for store arrays */
+		if (nbath > ostore->beams_bath_alloc)
+		    {
+		    ostore->beams_bath_alloc = nbath;
+		    if (ostore->beamflag != NULL)
+			status = mb_free(verbose, &ostore->beamflag, error);
+		    if (ostore->bath != NULL)
+			status = mb_free(verbose, &ostore->bath, error);
+		    if (ostore->bath_acrosstrack != NULL)
+			status = mb_free(verbose, &ostore->bath_acrosstrack, error);
+		    if (ostore->bath_alongtrack != NULL)
+			status = mb_free(verbose, &ostore->bath_alongtrack, error);
+		    status = mb_malloc(verbose, 
+				ostore->beams_bath_alloc * sizeof(char),
+				&ostore->beamflag,error);
+		    status = mb_malloc(verbose, 
+				ostore->beams_bath_alloc * sizeof(short),
+				&ostore->bath,error);
+		    status = mb_malloc(verbose, 
+				ostore->beams_bath_alloc * sizeof(short),
+				&ostore->bath_acrosstrack,error);
+		    status = mb_malloc(verbose, 
+				ostore->beams_bath_alloc * sizeof(short),
+				&ostore->bath_alongtrack,error);
+
+		    /* deal with a memory allocation failure */
+		    if (status == MB_FAILURE)
+			{
+			status = mb_free(verbose, &ostore->beamflag, error);
+			status = mb_free(verbose, &ostore->bath, error);
+			status = mb_free(verbose, &ostore->bath_acrosstrack, error);
+			status = mb_free(verbose, &ostore->bath_alongtrack, error);
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			if (verbose >= 2)
+				{
+				fprintf(stderr,"\ndbg2  MBcopy function <%s> terminated with error\n",
+					function_name);
+				fprintf(stderr,"dbg2  Return values:\n");
+				fprintf(stderr,"dbg2       error:      %d\n",*error);
+				fprintf(stderr,"dbg2  Return status:\n");
+				fprintf(stderr,"dbg2       status:  %d\n",status);
+				}
+			return(status);
+			}
+		    }
+		if (namp > ostore->beams_amp_alloc)
+		    {
+		    ostore->beams_amp_alloc = namp;
+		    if (ostore != NULL)
+			{
+			if (ostore->amp != NULL)
+			    status = mb_free(verbose, &ostore->amp, error);
+			status = mb_malloc(verbose, 
+				    ostore->beams_amp_alloc * sizeof(short),
+				    &ostore->amp,error);
+
+			/* deal with a memory allocation failure */
+			if (status == MB_FAILURE)
+			    {
+			    status = mb_free(verbose, &ostore->amp, error);
+			    status = MB_FAILURE;
+			    *error = MB_ERROR_MEMORY_FAIL;
+			    if (verbose >= 2)
+				    {
+				    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
+					    function_name);
+				    fprintf(stderr,"dbg2  Return values:\n");
+				    fprintf(stderr,"dbg2       error:      %d\n",*error);
+				    fprintf(stderr,"dbg2  Return status:\n");
+				    fprintf(stderr,"dbg2       status:  %d\n",status);
+				    }
+			    return(status);
+			    }
+			}
+		    }
+		if (nss > ostore->pixels_ss_alloc)
+		    {
+		    ostore->pixels_ss_alloc = nss;
+		    if (ostore != NULL)
+			{
+			if (ostore->ss != NULL)
+			    status = mb_free(verbose, &ostore->ss, error);
+			if (ostore->ss_acrosstrack != NULL)
+			    status = mb_free(verbose, &ostore->ss_acrosstrack, error);
+			if (ostore->ss_alongtrack != NULL)
+			    status = mb_free(verbose, &ostore->ss_alongtrack, error);
+			status = mb_malloc(verbose, 
+				    ostore->pixels_ss_alloc * sizeof(short),
+				    &ostore->ss,error);
+			status = mb_malloc(verbose, 
+				    ostore->pixels_ss_alloc * sizeof(short),
+				    &ostore->ss_acrosstrack,error);
+			status = mb_malloc(verbose, 
+				    ostore->pixels_ss_alloc * sizeof(short),
+				    &ostore->ss_alongtrack,error);
+
+			/* deal with a memory allocation failure */
+			if (status == MB_FAILURE)
+			    {
+			    status = mb_free(verbose, &ostore->ss, error);
+			    status = mb_free(verbose, &ostore->ss_acrosstrack, error);
+			    status = mb_free(verbose, &ostore->ss_alongtrack, error);
+			    status = MB_FAILURE;
+			    *error = MB_ERROR_MEMORY_FAIL;
+			    if (verbose >= 2)
+				    {
+				    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
+					    function_name);
+				    fprintf(stderr,"dbg2  Return values:\n");
+				    fprintf(stderr,"dbg2       error:      %d\n",*error);
+				    fprintf(stderr,"dbg2  Return status:\n");
+				    fprintf(stderr,"dbg2       status:  %d\n",status);
+				    }
+			    return(status);
+			    }
+			}
+		    }
+		    
+		/* get scaling */
+		ostore->depth_scale = 1000;
+		ostore->distance_scale = 1000;
+
+		/* insert data */
+		if (kind == MB_DATA_DATA
+		    || kind == MB_DATA_NAV)
+			mb_insert_nav(verbose, ombio_ptr, (char *)ostore, 
+					time_i, time_d, 
+					navlon, navlat, speed, heading, draft, 
+					roll, pitch, heave, 
+					&error);
+		status = mb_insert(verbose, ombio_ptr, (char *)ostore,
+				kind, time_i, time_d, 
+				navlon, navlat, speed, heading, 
+				nbath,namp,nss,
+				beamflag,bath,amp,bathacrosstrack,
+				bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment, &error);
+		  
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
