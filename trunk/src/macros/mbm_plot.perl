@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.3 1994-10-21 13:54:57 caress Exp $
+#    $Id: mbm_plot.perl,v 4.4 1995-02-14 19:50:31 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,8 +29,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   The -X option will cause the shellscript to be executed immediately.
 #
 # Usage:
-#   mbm_plot -Fformat -Ifile [-Oroot -Rw/e/s/n -Gmode -Amagnitude/azimuth
-#            -C -N -X -P -V -H]
+#   mbm_plot -Fformat -Ifile [-Amagnitude/azimuth
+#            -C -Gmode -H -N -Oroot -P -Rw/e/s/n -S -V -X]
 #
 # Author:
 #   David W. Caress
@@ -39,10 +39,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.3 1994-10-21 13:54:57 caress Exp $
+#   $Id: mbm_plot.perl,v 4.4 1995-02-14 19:50:31 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1994/10/21  13:54:57  caress
+# Release V4.0
+#
 # Revision 4.2  1994/10/21  11:36:58  caress
 # Release V4.0
 #
@@ -97,7 +100,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 $program_name = "mbm_plot";
 
 # Deal with command line arguments
-&Getopts('F:f:I:i:O:o:R:r:G:g:CcNnA:a:XxPpVvHh');
+&Getopts('A:a:CcF:f:G:g:HhI:i:NnO:o:PpR:r:SsVvXx');
 $file =    ($opt_I || $opt_i);
 $root =    ($opt_O || $opt_o);
 $format =  ($opt_F || $opt_f);
@@ -107,6 +110,7 @@ $contour = ($opt_C || $opt_c);
 $navigation = ($opt_N || $opt_n);
 $shadecontrol = ($opt_A || $opt_a);
 $execute = ($opt_X || $opt_x);
+$stretch = ($opt_S || $opt_s);
 $view_ps = ($opt_P || $opt_p);
 $help =    ($opt_H || $opt_h);
 $verbose = ($opt_V || $opt_v);
@@ -131,7 +135,7 @@ if (!$root)
 	}
 if (!$format) 
 	{
-	$format = "24";
+	$format = "-1";
 	}
 if (!$color && !$contour && !$navigation)
 	{
@@ -356,39 +360,39 @@ $colorscale_offy = -0.5;
 $base_tick = $dxx/5;
 if ($base_tick < 0.0166667)
 	{
-	$base_tick = 0.0166667;
+	$base_tick = "1m";
 	}
 elsif ($base_tick < 0.0333333)
 	{
-	$base_tick = 0.0333333;
+	$base_tick = "2m";
 	}
 elsif ($base_tick < 0.0833333)
 	{
-	$base_tick = 0.0833333;
+	$base_tick = "5m";
 	}
 elsif ($base_tick < 0.1666667)
 	{
-	$base_tick = 0.1666667;
+	$base_tick = "10m";
 	}
 elsif ($base_tick < 0.25)
 	{
-	$base_tick = 0.25;
+	$base_tick = "15m";
 	}
 elsif ($base_tick < 0.5)
 	{
-	$base_tick = 0.5;
+	$base_tick = "30m";
 	}
 elsif ($base_tick < 1.0)
 	{
-	$base_tick = 1.0;
+	$base_tick = "1";
 	}
 elsif ($base_tick < 2.0)
 	{
-	$base_tick = 2.0;
+	$base_tick = "2";
 	}
 elsif ($base_tick < 5.0)
 	{
-	$base_tick = 5.0;
+	$base_tick = "5";
 	}
 
 
@@ -405,9 +409,17 @@ $date_annot = 4;
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
-$listfile = "datalist\$\$";
+if ($format <= -1)
+	{
+	$listfile = $file;
+	}
+else
+	{
+	$listfile = "datalist\$\$";
+	}
 $cptfile = "$root.cpt";
 $navfile = "$root\$\$.nav";
+$gmtfile = "gmtdefaults\$\$";
 
 # open the shellscript file
 open(FCMD,">$cmdfile") || die "Cannot open output file $cmdfile\nMacro $program_name aborted.\n";
@@ -416,10 +428,23 @@ open(FCMD,">$cmdfile") || die "Cannot open output file $cmdfile\nMacro $program_
 print FCMD "#\n# Shellscript to create Postscript plot of multibeam data\n";
 print FCMD "# Created by macro $program_name\n";
 
-# generate datalist file
-print FCMD "#\n# Make datalist file \n";
-print FCMD "echo Making datalist file...\n";
-print FCMD "echo $file $format > $listfile\n";
+# Reset GMT fonts, saving old defaults
+print FCMD "#\n# Save existing GMT defaults\n";
+print FCMD "echo Saving GMT defaults...\n";
+print FCMD "gmtdefaults -D > $gmtfile\n";
+print FCMD "#\n# Set new GMT fonts\n";
+print FCMD "echo Setting new GMT fonts...\n";
+print FCMD "gmtset ANOT_FONT Helvetica ANOT_FONT_SIZE 8 \\\n";
+print FCMD "\tHEADER_FONT Helvetica HEADER_FONT_SIZE 10 \\\n";
+print FCMD "\tLABEL_FONT Helvetica LABEL_FONT_SIZE 8\n";
+
+# generate datalist file if needed
+if ($format != -1)
+	{
+	print FCMD "#\n# Make datalist file \n";
+	print FCMD "echo Making datalist file...\n";
+	print FCMD "echo $file $format > $listfile\n";
+	}
 
 # generate color pallette table file if needed
 if ($color == 1 || $color == 2 || $color == 3)
@@ -430,11 +455,37 @@ if ($color == 1 || $color == 2 || $color == 3)
 	@cptbr = (255, 255, 255, 255, 255, 240, 205, 138, 106,  87,  50,   0,  40,  21,  37);
 	@cptbg = (255, 221, 186, 161, 189, 236, 255, 236, 235, 215, 190, 160, 127,  92,  57);
 	@cptbb = (255, 171, 133,  68,  87, 121, 162, 174, 255, 255, 255, 255, 251, 236, 175);
-	$dd = 1.1 * ($zmax - $zmin)/($ncpt - 1);
-	$d1 = $zmin - 0.05*($zmax - $zmin);
+
+	# break data distribution up into equal size 
+	# regions using mbhistogram
+	if ($stretch)
+		{
+		if ($verbose) 
+			{
+			print "\nRunning mbhistogram...\n";
+			}
+		@mbhistogram = `mbhistogram -F$format -I$file -A0 -D$zmin/$zmax -M$ncpt -N1000`;
+		$d1 = shift @mbhistogram;
+		}
+
+	# get spacing the old way
+	else
+		{
+		$dd = 1.1 * ($zmax - $zmin)/($ncpt - 1);
+		$d1 = $zmin - 0.05*($zmax - $zmin);
+		}
+
+	# print out the cpt
 	foreach $i (0 .. $ncpt - 2)
 		{
-		$d2 = $d1 + $dd;
+		if ($stretch)
+			{
+			$d2 = shift @mbhistogram;
+			}
+		else
+			{
+			$d2 = $d1 + $dd;
+			}
 		printf FCMD "echo %.0f %d %d %d %.0f %d %d %d",
 			$d1,@cptbr[$i],@cptbg[$i],@cptbb[$i],
 			$d2,@cptbr[$i+1],@cptbg[$i+1],@cptbb[$i+1];
@@ -454,6 +505,7 @@ if ($color == 1 || $color == 2 || $color == 3)
 # generate greyscale pallette table file if needed
 if ($color == 4 || $color == 5)
 	{
+
 	print FCMD "#\n# Make greyshade pallette table file\n";
 	print FCMD "echo Making greyshade pallette table file...\n";
 	$ncpt = 15;
@@ -463,26 +515,59 @@ if ($color == 4 || $color == 5)
 	@cptbr = (255, 233, 215, 197, 179, 161, 143, 125, 107,  89,  71,   53,  35,  17,  0);
 	@cptbg = (255, 233, 215, 197, 179, 161, 143, 125, 107,  89,  71,   53,  35,  17,  0);
 	@cptbb = (255, 233, 215, 197, 179, 161, 143, 125, 107,  89,  71,   53,  35,  17,  0);
-	if ($color == 4)
+
+	# break data distribution up into equal size 
+	# regions using mbhistogram
+	if ($stretch)
 		{
-		$dd = 1.1 * ($amax - $amin)/($ncpt - 1);
-		$d1 = $amin - 0.05*($amax - $amin);
+		if ($verbose) 
+			{
+			print "\nRunning mbhistogram...\n";
+			}
+		if ($color == 4)
+			{
+			@mbhistogram = `mbhistogram -F$format -I$file -A1 -D$amin/$amax -M$ncpt -N1000`;
+			}
+		elsif ($color == 5)
+			{
+			@mbhistogram = `mbhistogram -F$format -I$file -A2 -D$smin/$smax -M$ncpt -N1000`;
+			}
+		$d1 = shift @mbhistogram;
 		}
-	if ($color == 5 && $format == 41)
+
+	# get spacing the old way
+	else
 		{
-		$smin = 20 * log($smin) / log(10);
-		$smax = 20 * log($smax) / log(10);
-		$dd = 1.01 * ($smax - $smin)/($ncpt - 1);
-		$d1 = $smin - 0.01*($smax - $smin);
+		if ($color == 4)
+			{
+			$dd = 1.1 * ($amax - $amin)/($ncpt - 1);
+			$d1 = $amin - 0.05*($amax - $amin);
+			}
+		if ($color == 5 && $format == 41)
+			{
+			$smin = 20 * log($smin) / log(10);
+			$smax = 20 * log($smax) / log(10);
+			$dd = 1.01 * ($smax - $smin)/($ncpt - 1);
+			$d1 = $smin - 0.01*($smax - $smin);
+			}
+		elsif ($color == 5)
+			{
+			$dd = 1.05 * ($smax - $smin)/($ncpt - 1);
+			$d1 = $smin - 0.05*($smax - $smin);
+			}
 		}
-	elsif ($color == 5)
-		{
-		$dd = 1.05 * ($smax - $smin)/($ncpt - 1);
-		$d1 = $smin - 0.05*($smax - $smin);
-		}
+
+	# print out the cpt
 	foreach $i (0 .. $ncpt - 2)
 		{
-		$d2 = $d1 + $dd;
+		if ($stretch)
+			{
+			$d2 = shift @mbhistogram;
+			}
+		else
+			{
+			$d2 = $d1 + $dd;
+			}
 		printf FCMD "echo %.0f %d %d %d %.0f %d %d %d",
 			$d1,@cptbr[$i],@cptbg[$i],@cptbb[$i],
 			$d2,@cptbr[$i+1],@cptbg[$i+1],@cptbb[$i+1];
@@ -502,13 +587,13 @@ if ($color == 4 || $color == 5)
 # set shade control if not set by user
 if (!$shadecontrol && $color == 3)
 	{
-	$shademagnitude = 1.0/($amax - $amin);
-	$shadenull = 0.5 * ($amax + $amin);
-	$shadecontrol = "$shademagnitude/$shadenull";
+	$shademagnitude = -2.0/($amax - $amin);
+	$shadenull = $amin + 0.3 * ($amax - $amin);
+	$shadecontrol = sprintf("%.4g/%.4g",$shademagnitude,$shadenull);
 	}
 elsif (!$shadecontrol)
 	{
-	$shadecontrol = "5/0";
+	$shadecontrol = "2.5/0";
 	}
 
 # do swath plot if needed
@@ -516,19 +601,20 @@ if ($color)
 	{
 	print FCMD "#\n# Run mbswath\n";
 	print FCMD "echo Running mbswath...\n";
-	printf FCMD "mbswath -I%s -Jm%g", $listfile,$plotscale;
-	printf FCMD " -R%.4f/%.4f/%.4f/%.4f", $xmin,$xmax,$ymin,$ymax;
-	printf FCMD " -Ba%.4fg%.4f\":.Data File %s:\"", 
+	printf FCMD "mbswath -I%s -Jm%g \\\n", $listfile,$plotscale;
+	printf FCMD "\t-R%.4f/%.4f/%.4f/%.4f \\\n", $xmin,$xmax,$ymin,$ymax;
+	printf FCMD "\t-Ba%sg%sf\":.Data File %s:\" \\\n", 
 		$base_tick,$base_tick,$file;
-	print FCMD " -C$cptfile -p1 -A1 -Q100 -Z$color";
+	print FCMD "\t-C$cptfile -p1 -A1 -Q100 -Z$color";
 	if ($color == 2 || $color == 3)
 		{
 		print FCMD " -G$shadecontrol";
 		}
-	if ($color == 5 && $format == 41)
-		{
-		print FCMD " -D3/1/0/1";
-		}
+#	if ($color == 5 && $format == 41)
+#		{
+#		print FCMD " -D3/1/0/1";
+#		}
+	print FCMD " \\\n\t";
 	if ($portrait)
 		{
 		print FCMD " -P";
@@ -542,32 +628,36 @@ if ($contour || $navigation)
 	{
 	print FCMD "#\n# Run mbcontour\n";
 	print FCMD "echo Running mbcontour...\n";
-	printf FCMD "mbcontour -I%s -Jm%g", $listfile,$plotscale;
-	printf FCMD " -R%.4f/%.4f/%.4f/%.4f", $xmin,$xmax,$ymin,$ymax;
-	printf FCMD " -Ba%.4fg%.4f\":.Data File %s:\"", 
+	printf FCMD "mbcontour -I%s -Jm%g \\\n\t", $listfile,$plotscale;
+	printf FCMD "-R%.4f/%.4f/%.4f/%.4f \\\n\t", $xmin,$xmax,$ymin,$ymax;
+	printf FCMD "-Ba%sg%s\":.Data File %s:\" \\\n\t", 
 		$base_tick,$base_tick,$file;
 	if ($color && $contour)
 		{
-		print FCMD " -C$cptfile";
+		print FCMD "-C$cptfile";
 		}
 	elsif ($contour)
 		{
-		printf FCMD " -A%.4f/%.4f/%.4f/%.4f/0.01/0.1",
+		printf FCMD "-A%.4f/%.4f/%.4f/%.4f/0.01/0.1",
 			$contour_int,$color_int,$tick_int,$color_int;
 		}
 	if ($contour && $format == 41)
 		{
 		print FCMD " -Z1";
 		}
+	if ($contour)
+		{
+		print FCMD " \\\n\t";
+		}
 	if ($navigation)
 		{
-		printf FCMD " -D%.4f/%.4f/%.4f/0.15",
+		printf FCMD "-D%.4f/%.4f/%.4f/0.15 ",
 			$time_tick,$time_annot,$date_annot;
 		}
-	print FCMD " -p1";
+	print FCMD "-p1 \\\n\t";
 	if ($portrait)
 		{
-		print FCMD " -P";
+		print FCMD "-P";
 		}
 	if ($color)
 		{
@@ -585,7 +675,7 @@ if ($color)
 	print FCMD "#\n# Run psscale\n";
 	print FCMD "echo Running psscale...\n";
 	print FCMD "psscale  -C$cptfile";
-	printf FCMD " -D%.4f/%.4f/%.4f/%.4fh", 
+	printf FCMD " -D%.4f/%.4f/%.4f/%.4fh \\\n\t", 
 		$colorscale_offx,$colorscale_offy,
 		$colorscale_width,$colorscale_height;
 	if ($color == 5)
@@ -610,7 +700,16 @@ if ($color)
 # delete surplus files
 print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
-print FCMD "rm -f $cptfile $listfile\n";
+print FCMD "rm -f $cptfile\n";
+if ($format > -1)
+	{
+	print FCMD "rm -f $listfile\n";
+	}
+
+# reset GMT defaults
+print FCMD "#\n# Reset GMT default fonts\n";
+print FCMD "echo Resetting GMT fonts...\n";
+print FCMD "mv $gmtfile .gmtdefaults\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";

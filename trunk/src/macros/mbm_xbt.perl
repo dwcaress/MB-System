@@ -2,8 +2,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                     & eval 'exec perl -S $0 $argv:q'
                          if 0;
 #--------------------------------------------------------------------
-#    The MB-system:	mbm_xbt.perl	6/18/93
-#    $Id: mbm_xbt.perl,v 4.0 1994-10-21 11:47:31 caress Exp $
+#    The MB-system: mbm_xbt.perl   6/18/93
+#    $Id: mbm_xbt.perl,v 4.1 1995-02-14 19:50:31 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,13 +19,21 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 # Purpose: 
 #   Perl shellscript to translate Sparton XBT data or NBP MK12 XBT data
-#   from depth and temperature into depth and sound velocity. Header lines are 
+#   from depth and temperature into depth and sound velocity. 
+#   Sound Velocity is computed according to DelGrosso's equations.
+#
+#   We use the DelGrosso equation because of the results presented in 
+#   Dusha, Brian D. Worcester, Peter F., Cornuelle, Bruce D., Howe, Bruce. M.
+#   "On equations for the speed of sound in seawater", J. Acoust. Soc. Am. 
+#   Vol 93, No 1, January 1993, pp 255-275.
+#
+#   Header lines are 
 #   turned into comments beginning with '#' characters.
 #   The output filename consists of the input filename with the
 #   suffix ".sv".
 #
 # Usage:
-#   mbm_xbt -Iinfile [-Ssalinity -Fformat -V -H]
+#   mbm_xbt -Iinfile [-Fformat -Llatitude -Ssalinity -V -H]
 #
 # Known XBT formats:
 #   Sparton  =  1
@@ -38,7 +46,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 #   Perl program to convert Sparton XBT data and MK12 XBT data into depth 
 #   and Sound Velocity
-# Dale Chayes
 # 
 # Authors:
 #   Dale N. Chayes
@@ -46,13 +53,40 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   Lamont-Doherty Earth Observatory
 #   Palisades, NY  10964
 #
+#   David Brock of ASA added the Sippican MK12 header parsing code and switch
+#
 # Version:
-# $Id: mbm_xbt.perl,v 4.0 1994-10-21 11:47:31 caress Exp $
+# $Id: mbm_xbt.perl,v 4.1 1995-02-14 19:50:31 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
-# Revision 4.1  1994/10/12  22:27:58  dale
-# Add handling of Sippican MK12 XBT data files (by Dave Brock)
+# Revision 4.3  1995/01/23  10:20:14  dale
+#    Move the latitude calculation out of the loop, we only need to
+# do it once. Its now in the if/else test for the existance of a user
+# supplied latitude. If a negative lat is provided, its converted to be
+# positive.
+#
+# Revision 4.2  1995/01/23  10:16:10  dale
+#    Corrected the output statement to only put out one velocity
+# (instead of both.)
+#
+# Revision 4.1  1995/01/23  10:14:54  dale
+#    Implemented SV calculation with DelGrosso's equation. Added
+# argument for Latitude input. Buried code for Lovett's equation. Canned
+# the old and not correct SV calculation code.
+#
+#    The DelGrosso code is the same as used in the Thermoalinograph
+# code (r_tsg) on the Thompson and is based upon code from the Scripp's
+# Ocean Data Facility (ODF).
+#
+#    This code does latitude density correction. The conversion of
+# depth in meters to pressure (decibars) is done according to the
+# equation presented in Coates.
+#
+# Revision 4.0  1995/01/23  03:21:58  dale
+# This was the version that was distrubuted with MB 4.1
+# It is known to have a number of problems and does not produce t
+# either at the surface or at depth.
 #
 # Revision 4.0  1994/03/05  23:52:40  caress
 # First cut at version 4.0
@@ -104,36 +138,49 @@ $foundData = "NO";
 $SPARTON = 1;
 $MK12    = 2;
 
+
 # Deal with command line arguments
-&Getopts('I:i:S:s:F:f:VvHh');
+&Getopts('I:i:S:s:F:f:L:l:VvHh');
 $file =     ($opt_I || $opt_i);
-$salinity = ($opt_S || $opt_s);
+$sal = ($opt_S || $opt_s);
 $XBTtype =  ($opt_F || $opt_f || $SPARTON);
 $help =     ($opt_H || $opt_h);
 $verbose =  ($opt_V || $opt_v);
+$latitude = ($opt_L || $opt_l);    # pick up the Latitude for pressure conversion
 
 # print out help message if required
 if ($help) {
-   print "\n$program_name:\n";
-   print "\nPerl shellscript to translate various XBT (with -F option) \n";
-   print "data from depth and temperature into depth and sound velocity.\n";
-   print "Header lines are turned into comments beginning with # characters.\n";
-   print "The output filename consists of the input filename \n";
-   print "with the suffix .sv\n";
-   print "\nUsage: $program_name -Ifile [-Ssalinity -Fformat -V -H]\n";
-   print "   Currently supported formats:\n";
-   print "      XBT       Format Number\n";
-   print "   --------------------------\n";
-   print "    Sparton           1\n";
-   print "    MK12              2\n\n";
-   die "\n";
+    print "\n$program_name:\n";    
+    print "\nPerl shellscript to translate various XBT (with -F option) \n";
+    print "data from depth and temperature into depth and sound velocity.\n";
+    print "Header lines are turned into comments beginning with # characters.\n";
+     print "The output filename consists of the input filename \n";
+    print "with the suffix .sv\n";
+    print "\nUsage: $program_name -Ifile [-Ssalinity -Fformat -Llatitude -V -H]\n";
+    print "   Currently supported formats:\n";
+    print "      XBT       Format Number\n";
+    print "   --------------------------\n";
+    print "    Sparton           1\n";
+    print "    MK12              2\n\n";
+    die "\n";
+}                   # 
+                    # 
+
+
+if (!$sal) {                    # set salinity if it was defaulted 
+    $sal = 35;
 }
 
-# set salinity if required
-if (!$salinity)
-	{
-	$salinity = 35;
-	}
+if (!$latitude) {        # if Lat not provided, use the equator
+    $latitude = 0;
+}
+else {
+    $latitude = $latitude * $DTR; # Lat comes in in degrees, but we need
+}                   # radians for the sin() function.
+
+if ($latitude < 0 ) {         # make sure the latitude is positive
+    $latitude = $latitude * -1.;
+}
 
 # set degree conversion factor
 $PI = 3.1415926;
@@ -145,8 +192,10 @@ $OUTFILE = $file.$suffix;
 $count=0;
 
 # Open the input and output files
-open(F,$file) || die "Cannot open input file: $file\n$program_name aborted.\n";
-open(O,"+>".$OUTFILE) || die "Cannot open temporary file: $TMPFILE\n$program_name aborted.\n";
+open(F,$file) || die "Cannot open input file: $file\n$program_name 
+aborted.\n";
+open(O,"+>".$OUTFILE) || die "Cannot open temporary file: 
+$TMPFILE\n$program_name aborted.\n";
 
 # Put leading comment in output file, depending on format selected
 if ($XBTtype == $SPARTON) {
@@ -157,93 +206,99 @@ else {
 }
 
 # Loop over the input records
-while (<F>) 
-	{
-        ++$count;
-        # process the data set header depending on the format specified
-        if ($XBTtype == $SPARTON) {
-           &SpartonHeader();
-        }
-        else {
-           &MK12header();
-        }
+while (<F>) {
+    ++$count;            
+    # process the data set header depending on the format specified
+                    # The headder reading processes return when
+                    # they have consumed all the headder data
+    if ($XBTtype == $SPARTON) {    
+     &SpartonHeader();
+    }
+    else {
+     &MK12header();
+    }
 
-	# once through the header fields, deal with the data
-	if ( $foundData eq "YES")
-		{
-		# parse depth and temperature
-		($depth, $temperature) = /(\S+)\s+(\S+)/;
+     # once through the header fields, deal with the data
+     if ( $foundData eq "YES") {
+      # parse depth and temperature
+      ($depth, $temp) = /(\S+)\s+(\S+)/;
+ 
+# First calculate the Pressure term (P) in decibars from depth in meters
+# This conversion is from Coates, 1989, Page 4.
 
-		# Calculate water sound velocity using Medwin's (1975) equation
-		# as referenced in Clay and Medwin's "Acoustical Oceanography",
-		# page 88.  Temperature is in degrees centigrade, salinity in
-		# parts per thousand (ppt), and depth in meters.
-		$pressure = 0.016*depth;
-		$velocity = 1449.2 + 4.6 * $temperature
-			- 0.055 * $temperature * $temperature
-			+ 0.00029 * $temperature * $temperature * $temperature
-			+ 1.34 - (0.01 * $temperature * ($salinity - 35))
-			+ 0.00000158 * $pressure;
+     $P=1.0052405 * ( 1+ 5.28E-3 * ((sin ($latitude)) 
+                    * (sin($latitude))))
+               * $depth + 2.36E-6 * ($depth * $depth);
 
-		# get geoid latitude */
-		$theta = $DTR*$latitude;
-		$sine_theta = sin($theta);
-		$sine_two_theta = sin(2.0*$theta);
-		$geoid_latitude = 978.0309 
-			+ 5.18552*$sine_theta*$sine_theta 
-			 - 0.0057*$sine_two_theta*$sine_two_theta;
+# Then calculate SV according to DelGrosso
 
-		# get depth for a given pressure 
-		# as a function of latitude
-		$d1 = (-3.434e-12*$depth[i] + 1.113e-07)*$depth[i] + 0.712953;
-		$d2 = $d1*$depth[i] + 14190.7*log(1 + 1.83e-05*$depth[i]);
-		$depth_pressure = 1000.*($d2/($geoid_latitude 
-					+ 0.0001113*$depth[i]));
-		if ($depth_pressure < 0.0)
-			{
-			$depth_pressure = -$depth_pressure;
-			}
-		if (($depth_pressure - $depth[i]) >= 0.5)
-			{
-			$pressure = $depth[i]*$depth[i]/$depth_pressure;
-			}
-		else
-			{
-			$pressure = $depth[i];
-			}
+      $P1      = $P * 0.1019716;   # to pressure in kg/cm**2 gauge 
+      $c0      = 1402.392;         
 
-		# Calculate water sound velocity using Wilson's October
-		# 1960 formula
-		$sm = $salinity - 35.0;
-		$pkc = $pressure * 0.1019716 + 1.03323;
-		$c00 = (((7.9851e-06 * temperature - 2.6054e-04)
-			 * temperature - 0.044532)
-			 * temperature + 4.5721)
-			 * temperature + 1449.14;
-		$c01 = (7.7711e-07 * temperature - 0.011244)
-			 * temperature + 1.39799;
-		$c10 = ((4.5283e-08 * temperature + 7.4812e-06)
-			 * temperature - 1.8607e-04)
-			 * temperature + 0.16027;
-		$c11 = (1.579e-09 * temperature + 3.158e-08)
-			 * temperature + 7.7016e-05;
-		$c20 = (1.8563e-09 * temperature - 2.5294e-07)
-			 * temperature + 1.0268e-05;
-		$b0 =  (1.69202E-03 * sm + $c01) * sm + $c00;
-		$b1 =  $c11 * sm + $c10;
-		$b2 =  -1.2943E-07 * sm + c20;
-		$b3 =  -1.9646E-10 * temperature + 3.5216E-09;
-		$velocity2 =  (((-3.3603E-12 * $pkc + $b3) * $pkc + $b2)
-			 * $pkc + $b1) * $pkc + $b0;
+      $dltact  = $temp*( 0.501109398873E1 + $temp*(-0.550946843172E-1+ $temp
+                 *  0.221535969240E-3));
 
+      $dltacs  = $sal*(0.132952290781E1 
+                 + $sal* 0.128955756844E-3);
+      
+      $dltacp  = $P1*( 0.156059257041E0 +  $P1*( 0.24499868841E-4 
+                  + $P1*(-0.883392332513E-8)));
+     $dcstp   =  $temp*(-0.127562783426E-1*$sal      + 
+             $P1*( 0.635191613389E-2        +
+             $P1*( 0.265484716608E-7*$temp      +
+                -0.159349479045E-5        +
+                 0.522116437235E-9*$P1)     +
+               (-0.438031096213E-6)*$temp*$temp)) +
+               $sal*((-0.161674495909E-8)*$sal*$P1*$P1 +
+             $temp*( 0.968403156410E-4*$temp      +
+             $P1*( 0.485639620015E-5*$sal      +
+               (-0.340597039004E-3))));
 
+      $velocity = $c0 + $dltact + $dltacs + $dltacp + $dcstp;
 
-		# Output the result
-		printf O "%.2f %.2f\n", $depth, $velocity;
-		}
-  
-	}
-
+# Lovett:  This commented out section of code does the calculation per
+# Lovett:  Lovett: Lovett, J. R. Merged Sea-Water Sound Speed Equations
+# Lovett:  J. Acoust. Soc. Am. Vol 63, No. 6, 1978, pp. 1713-1718.
+# Lovett:  as presented by Coates on Page 4.
+# Lovett:
+# Lovett: # Set up the coeficients for the calculation
+# Lovett: 
+# Lovett:     $K1  =  5.01132;
+# Lovett:     $K2  = -1.26628E-2;
+# Lovett:     $K3  =  2.062107E-8;
+# Lovett: 
+# Lovett:     $K4  = -1.052396E-8;
+# Lovett:     $K5  = -5.513036E-2;
+# Lovett:     $K6  =  9.543664E-5;
+# Lovett: 
+# Lovett:     $K7  =  2.221008E-4;
+# Lovett:     $K8  =  1.332947;
+# Lovett:     $K9  =  1.605336E-2;
+# Lovett:  
+# Lovett:     $K10 =  2.12448E-7;
+# Lovett:     $K11 =  2.183988E-13;
+# Lovett:     $K12 = -2.253828E-13;
+# Lovett: 
+# Lovett: # Calculate SV according to Lovett per Coates, page 4.
+# Lovett:                      
+# Lovett:      $velocity2 = 1402.394 +
+# Lovett:          $temp * ($K1 + $sal *  ($K2 + $K3 * $sal * $P)
+# Lovett:           + $K4 * ($P * $P)   
+# Lovett:               + $temp *(($K5 +$K6 * $sal) +$K7 *temp) )
+# Lovett:                + $K8 * $sal   
+# Lovett:                    + $P * ($K9 
+# Lovett:               +$P * ($K10+$P*($K11*$temp + $K12 * $sal)));
+# Lovett:      
+     
+     # Output the result
+     if ($temp > 0.0)
+	    {
+	    printf O "%.2f %.2f\n", $depth, $velocity;
+	    }
+    }
+    
+}
+# 
 print STDERR "Processed ", $count," lines of XBT data\n";
 
 # Close the input and output files
@@ -254,8 +309,8 @@ close(O);
 die "\nAll done!\n";
 
 #-----------------------------------------------------------------------
-# This should be loaded from the library but the shipboard installation
-# of Perl is screwed up so....
+# This should be loaded from the library but its safer to
+# just include it....
 #
 ;# getopts.pl - a better getopt.pl
 
@@ -271,37 +326,37 @@ sub Getopts {
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
-	($first,$rest) = ($1,$2);
-	$pos = index($argumentative,$first);
-	if($pos >= $[) {
-	    if($args[$pos+1] eq ':') {
-		shift(@ARGV);
-		if($rest eq '') {
-		    ++$errs unless @ARGV;
-		    $rest = shift(@ARGV);
-		}
-		eval "\$opt_$first = \$rest;";
-	    }
-	    else {
-		eval "\$opt_$first = 1";
-		if($rest eq '') {
-		    shift(@ARGV);
-		}
-		else {
-		    $ARGV[0] = "-$rest";
-		}
-	    }
-	}
-	else {
-	    print STDERR "Unknown option: $first\n";
-	    ++$errs;
-	    if($rest ne '') {
-		$ARGV[0] = "-$rest";
-	    }
-	    else {
-		shift(@ARGV);
-	    }
-	}
+     ($first,$rest) = ($1,$2);
+     $pos = index($argumentative,$first);
+     if($pos >= $[) {
+         if($args[$pos+1] eq ':') {
+          shift(@ARGV);
+          if($rest eq '') {
+              ++$errs unless @ARGV;
+              $rest = shift(@ARGV);
+          }
+          eval "\$opt_$first = \$rest;";
+         }
+         else {
+          eval "\$opt_$first = 1";
+          if($rest eq '') {
+              shift(@ARGV);
+          }
+          else {
+              $ARGV[0] = "-$rest";
+          }
+         }
+     }
+     else {
+         print STDERR "Unknown option: $first\n";
+         ++$errs;
+         if($rest ne '') {
+          $ARGV[0] = "-$rest";
+         }
+         else {
+          shift(@ARGV);
+         }
+     }
     }
     $errs == 0;
 }
@@ -380,37 +435,29 @@ if ( $count == 13 )
 
 #-----------------------------------------------------------------------
 # MK12header - deals with the MK12 XBT Header, which is of variable
-# length. Currently keying on the // depth field in the header record
+# length. This routine parses the incomming data and watches for a
+# numeric pattern of ##### ###### to indicate the start of data.
 #
 # Usage:
 #      MK12header();  
 #                       
 sub MK12header {
 
-   # look for the "end of header" maker
-#   if ( $_ =~ "// depth" || $searchForMaker eq "YES" ) {
-   if ( $_ =~ " depth" || $searchForMaker eq "YES" ) {
+   # parse out the depth and temperature values from the input
+   ($depth, $temperature) = /(\S+)\s+(\S+)/;
 
-      if ( $MKdataFound eq "NO" ) {
-         # indicate that the end of header has been found
-         # skip past the remaining header fields
-         $_ = <F>;
-         $_ = <F>;
-      }
+   # get the numeric ASCII value of the first character in the depth
+   # and temperature variables
+   $depAscii = ord($depth);
+   $tempAscii = ord($temperature);
 
-      $pattern = /(\d)/;
-      if ( $pattern == 1 ) {
-         print O "# ------------------------------------------\n";
-         $foundData = "YES";
-         $searchForMaker = "NO";
-      }
-      else {
-         $searchForMaker = "YES";
-      }
+   # check to see if these numeric ASCII values are numerals (ASCII 0
+   # is 48, and ASCII 9 is 57). The both these values are numbers,
+   # then we have found the start of the header
+   if ( ($depAscii > 47 && $depAscii < 58) && 
+        ($tempAscii > 47 && $tempAscii < 58) ) {
+      $foundData = "YES";
    }
-   # if we have not reached the end of the header yet, write the
-   # header info out as a comment to the output file
-   elsif ( $foundData eq "NO" ) {
-      print O "# ",$_;
-   }
+
 }
+

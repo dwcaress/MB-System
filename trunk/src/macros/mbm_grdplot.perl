@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	10/19/94
-#    $Id: mbm_grdplot.perl,v 4.0 1994-10-21 11:49:39 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.1 1995-02-14 19:50:31 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.0 1994-10-21 11:49:39 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.1 1995-02-14 19:50:31 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1994/10/21  11:49:39  caress
+# Release V4.0
+#
 # Revision 1.1  1994/10/21  11:36:58  caress
 # Initial revision
 #
@@ -247,39 +250,39 @@ $colorscale_offy = -0.5;
 $base_tick = $dxx/5;
 if ($base_tick < 0.0166667)
 	{
-	$base_tick = 0.0166667;
+	$base_tick = "1m";
 	}
 elsif ($base_tick < 0.0333333)
 	{
-	$base_tick = 0.0333333;
+	$base_tick = "2m";
 	}
 elsif ($base_tick < 0.0833333)
 	{
-	$base_tick = 0.0833333;
+	$base_tick = "5m";
 	}
 elsif ($base_tick < 0.1666667)
 	{
-	$base_tick = 0.1666667;
+	$base_tick = "10m";
 	}
 elsif ($base_tick < 0.25)
 	{
-	$base_tick = 0.25;
+	$base_tick = "15m";
 	}
 elsif ($base_tick < 0.5)
 	{
-	$base_tick = 0.5;
+	$base_tick = "30m";
 	}
 elsif ($base_tick < 1.0)
 	{
-	$base_tick = 1.0;
+	$base_tick = "1";
 	}
 elsif ($base_tick < 2.0)
 	{
-	$base_tick = 2.0;
+	$base_tick = "2";
 	}
 elsif ($base_tick < 5.0)
 	{
-	$base_tick = 5.0;
+	$base_tick = "5";
 	}
 
 
@@ -290,6 +293,7 @@ $contour_int = ($zmax - $zmin)/20;
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
 $cptfile = "$root.cpt";
+$gmtfile = "gmtdefaults\$\$";
 
 # set some gmtisms
 $first_gmt = 1;
@@ -303,6 +307,16 @@ open(FCMD,">$cmdfile") || die "Cannot open output file $cmdfile\nMacro $program_
 # write the shellscript header
 print FCMD "#\n# Shellscript to create Postscript plot of data in grd file\n";
 print FCMD "# Created by macro $program_name\n";
+
+# Reset GMT fonts, saving old defaults
+print FCMD "#\n# Save existing GMT defaults\n";
+print FCMD "echo Saving GMT defaults...\n";
+print FCMD "gmtdefaults -D > $gmtfile\n";
+print FCMD "#\n# Set new GMT fonts\n";
+print FCMD "echo Setting new GMT fonts...\n";
+print FCMD "gmtset ANOT_FONT Helvetica ANOT_FONT_SIZE 8\\\n";
+print FCMD "\tHEADER_FONT Helvetica HEADER_FONT_SIZE 10\\\n";
+print FCMD "\tLABEL_FONT Helvetica LABEL_FONT_SIZE 8\n";
 
 # generate color pallette table file if needed
 if ($color)
@@ -533,6 +547,11 @@ if ($threed)
 print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
 print FCMD "rm -f $cptfile\n";
+
+# reset GMT defaults
+print FCMD "#\n# Reset GMT default fonts\n";
+print FCMD "echo Resetting GMT fonts...\n";
+print FCMD "mv $gmtfile .gmtdefaults\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
