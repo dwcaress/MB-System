@@ -1,4 +1,4 @@
-.TH mbedit l "16 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit l "30 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -80,10 +80,15 @@ button unflags all soundings from the current position forward
 to the end of the data held in memory. The \fBControls\fP menu
 includes a \fBFilters...\fP button that brings up a dialog
 which sets the automatic flagging functions. At present, these
-include a median filter algorithm and a "wrong side filter"
-that flags soundings positioned on the "wrong" side of the
+include a median filter algorithm, a "wrong side filter", "data 
+cutting" by beam number, and "data cutting" by acrosstrack
+distance. The "wrong side" filter
+flags soundings positioned on the "wrong" side of the
 swath (port soundings incorrectly located on the starboard side,
-or vice versa). Additional automatic filters will be added
+or vice versa). The two "data cutting" algorithms flag
+beams inside or outside of specified beam number ranges
+or acrosstrack distance ranges, respectively. 
+Additional automatic filters will be added
 in later versions.
 
 If the ping includes flagged depths outside the plotting box, the ping label
@@ -372,6 +377,49 @@ a threshold number of the midway beam.
 .B Controls->Filters->Beams from Center Threshold
 This slider sets the threshold of beam locations
 checked by the wrong side filter. 
+.TP
+.B Controls->Filters->Flag by Beam Number
+This toggle button turns automatic beam flagging by
+beam number on and off. The flagging is controlled by
+start and end beam number values (set by the two
+sliders discussed immediately below). If the start beam
+number is less than or equal to the end beam number, then
+all beams between and including the start and end are
+flagged, producing a flagged zone within the swath. If
+the start beam number is greater than the end beam number,
+then all beams before and including the end beam are flagged,
+and all beams including and after the start beam are flagged.
+This produces flagging of both swath edges.
+.TP
+.B Controls->Filters->Start Flagging Beam Number
+This slider sets the beam number at which flagging by beam number starts. 
+.TP
+.B Controls->Filters->End Flagging Beam Number
+This slider sets the beam number at which flagging by beam number ends. 
+.TP
+.B Controls->Filters->Flag by Distance
+This toggle button turns automatic beam flagging by
+acrosstrack distance on and off. The flagging is controlled by
+start and end distance values (set by the two
+sliders discussed immediately below). If the start distance
+is less than or equal to the end distance, then
+all beams with acrosstrack distances between 
+the start and end distances are
+flagged, producing a flagged zone within the swath. If
+the start distance is greater than the end distance,
+then all beams with acrosstrack distance less than 
+the end distance are flagged,
+and all beams with acrosstrack distance greater than 
+the start distance are flagged.
+This produces flagging of both swath edges.
+.TP
+.B Controls->Filters->Start Flagging Distance
+This slider sets the beam number at which flagging 
+by acrosstrack distance starts. 
+.TP
+.B Controls->Filters->End Flagging Distance
+This slider sets the beam number at which flagging 
+by acrosstrack distance ends. 
 .TP
 .B Next Buffer
 This button causes the program to write out the data from the

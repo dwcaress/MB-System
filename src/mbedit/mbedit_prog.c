@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.6 2001-07-20 00:30:32 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.7 2001-07-31 00:40:17 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/20  00:30:32  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.5  2001/06/30 17:39:31  caress
  * Release 5.0.beta02
  *
@@ -266,7 +269,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.6 2001-07-20 00:30:32 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.7 2001-07-31 00:40:17 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -366,6 +369,14 @@ int	filter_medianspike = MB_NO;
 int	filter_medianspike_threshold = 10;
 int	filter_wrongside = MB_NO;
 int	filter_wrongside_threshold = 15;
+int	filter_cutbeam = MB_NO;
+int	filter_cutbeam_begin = 0;
+int	filter_cutbeam_end = 0;
+int	filter_cutbeam_max = 200;
+int	filter_cutdistance = MB_NO;
+double	filter_cutdistance_begin = 0.0;
+double	filter_cutdistance_end = 0.0;
+double	filter_cutdistance_max = 10000.0;
 
 /* ping drawing control variables */
 #define	MBEDIT_MAX_PINGS	100
@@ -653,7 +664,9 @@ int mbedit_set_graphics(int xgid, int *brdr, int ncol, int *pixels)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_set_filters(int f_m, int f_m_t, int f_w, int f_w_t)
+int mbedit_set_filters(int f_m, int f_m_t, int f_w, int f_w_t, 
+			int f_b, int f_b_b, int f_b_e, 
+			int f_d, double f_d_b, double f_d_e)
 {
 	/* local variables */
 	char	*function_name = "mbedit_set_filters";
@@ -669,6 +682,12 @@ int mbedit_set_filters(int f_m, int f_m_t, int f_w, int f_w_t)
 		fprintf(stderr,"dbg2       f_m_t:   %d\n",f_m_t);
  		fprintf(stderr,"dbg2       f_w:     %d\n",f_w);
 		fprintf(stderr,"dbg2       f_w_t:   %d\n",f_w_t);
+ 		fprintf(stderr,"dbg2       f_b:     %d\n",f_b);
+		fprintf(stderr,"dbg2       f_b_b:   %d\n",f_b_b);
+		fprintf(stderr,"dbg2       f_b_e:   %d\n",f_b_e);
+ 		fprintf(stderr,"dbg2       f_d:     %d\n",f_d);
+		fprintf(stderr,"dbg2       f_d_b:   %f\n",f_d_b);
+		fprintf(stderr,"dbg2       f_d_e:   %f\n",f_d_e);
  		}
  		
  	/* set the filter values */
@@ -676,6 +695,12 @@ int mbedit_set_filters(int f_m, int f_m_t, int f_w, int f_w_t)
  	filter_medianspike_threshold = f_m_t;
  	filter_wrongside = f_w;
  	filter_wrongside_threshold = f_w_t;
+ 	filter_cutbeam = f_b;
+ 	filter_cutbeam_begin = f_b_b;
+ 	filter_cutbeam_end = f_b_e;
+ 	filter_cutdistance = f_d;
+ 	filter_cutdistance_begin = f_d_b;
+ 	filter_cutdistance_end = f_d_e;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -691,29 +716,69 @@ int mbedit_set_filters(int f_m, int f_m_t, int f_w, int f_w_t)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_get_filters(int *f_m, int *f_m_t, int *f_w, int *f_w_t)
+int mbedit_get_filters( int *b_m, double *d_m, 
+			int *f_m, int *f_m_t, int *f_w, int *f_w_t, 
+			int *f_b, int *f_b_b, int *f_b_e, 
+			int *f_d, double *f_d_b, double *f_d_e)
 {
 	/* local variables */
 	char	*function_name = "mbedit_get_filters";
 	int	status = MB_SUCCESS;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
+		fprintf(stderr,"dbg2       b_m:     %d\n",b_m);
+		fprintf(stderr,"dbg2       d_m:     %d\n",d_m);
  		fprintf(stderr,"dbg2       f_m:     %d\n",f_m);
 		fprintf(stderr,"dbg2       f_m_t:   %d\n",f_m_t);
  		fprintf(stderr,"dbg2       f_w:     %d\n",f_w);
 		fprintf(stderr,"dbg2       f_w_t:   %d\n",f_w_t);
+ 		fprintf(stderr,"dbg2       f_b:     %d\n",f_b);
+		fprintf(stderr,"dbg2       f_b_b:   %d\n",f_b_b);
+		fprintf(stderr,"dbg2       f_b_e:   %d\n",f_b_e);
+ 		fprintf(stderr,"dbg2       f_d:     %d\n",f_d);
+		fprintf(stderr,"dbg2       f_d_b:   %d\n",f_d_b);
+		fprintf(stderr,"dbg2       f_d_e:   %d\n",f_d_e);
 		}
+
+	/* set max beam number and acrosstrack distance */
+	*b_m = 0;
+	*d_m = 0.0;
+	if (file_open == MB_YES)
+		{
+		/* loop over all pings */
+		for (i=0;i<nbuff;i++)
+		    {
+		    for (j=0;j<ping[i].beams_bath;j++)
+			{
+			if (mb_beam_ok(ping[i].beamflag[j]))
+			    {
+			    *b_m = MAX(*b_m, ping[i].beams_bath);
+			    *d_m = MAX(*d_m, fabs(ping[i].bathacrosstrack[j]));;
+			    }
+			}
+		    }
+		}
+	if (*b_m == 0)
+ 		*b_m = 200;
+	if (*d_m == 0.0)
+ 		*d_m = 10000.0;
 		
  	/* set the filter values */
  	*f_m = filter_medianspike;
  	*f_m_t = filter_medianspike_threshold;
  	*f_w = filter_wrongside;
  	*f_w_t = filter_wrongside_threshold;
+ 	*f_b = filter_cutbeam;
+ 	*f_b_b = filter_cutbeam_begin;
+ 	*f_b_e = filter_cutbeam_end;
+ 	*f_d = filter_cutdistance;
+ 	*f_d_b = filter_cutdistance_begin;
+ 	*f_d_e = filter_cutdistance_end;
  	
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -721,10 +786,18 @@ int mbedit_get_filters(int *f_m, int *f_m_t, int *f_w, int *f_w_t)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       b_m:     %d\n",*b_m);
+		fprintf(stderr,"dbg2       d_m:     %f\n",*d_m);
 		fprintf(stderr,"dbg2       f_m:     %d\n",*f_m);
 		fprintf(stderr,"dbg2       f_m_t:   %d\n",*f_m_t);
  		fprintf(stderr,"dbg2       f_w:     %d\n",*f_w);
 		fprintf(stderr,"dbg2       f_w_t:   %d\n",*f_w_t);
+ 		fprintf(stderr,"dbg2       f_b:     %d\n",*f_b);
+		fprintf(stderr,"dbg2       f_b_b:   %d\n",*f_b_b);
+		fprintf(stderr,"dbg2       f_b_e:   %d\n",*f_b_e);
+ 		fprintf(stderr,"dbg2       f_d:     %d\n",*f_d);
+		fprintf(stderr,"dbg2       f_d_b:   %f\n",*f_d_b);
+		fprintf(stderr,"dbg2       f_d_e:   %f\n",*f_d_e);
 		fprintf(stderr,"dbg2       error:   %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -3339,6 +3412,130 @@ int mbedit_filter_ping(int iping)
 		 	    	}
 		 	    }
 			}
+		
+		    /* apply cut by beam number filter if desired */
+		    if (filter_cutbeam == MB_YES)
+		    	{
+			/* handle cut inside swath */
+		 	if (filter_cutbeam_begin <= filter_cutbeam_end)
+		 	    {
+		    	    start = MAX(filter_cutbeam_begin, 0);
+		    	    end = MIN(filter_cutbeam_end, ping[iping].beams_bath - 1);
+		    	    for (j=start;j<end;j++)
+			    	{
+			    	if (mb_beam_ok(ping[iping].beamflag[j]))
+				    {
+			    	    found = MB_YES;
+
+			    	    /* write edit to save file */
+			    	    if (sofile_open == MB_YES)
+					mbedit_save_edit(
+						ping[iping].time_d, j,
+						MBEDIT_FILTER);
+	
+			    	    /* apply edit */
+				    ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
+			    	    if (verbose >= 1)
+				 	{
+					fprintf(stderr,"\nping: %d beam:%d depth:%10.3f ",
+						iping,j,ping[iping].bath[j]);
+					fprintf(stderr," flagged\n");
+					}
+				    }
+			    	}
+			    }
+
+			/* handle cut at edges of swath */
+		 	else if (filter_cutbeam_begin > filter_cutbeam_end)
+		 	    {
+		    	    for (j=0;j<ping[iping].beams_bath;j++)
+			    	{
+			    	if ((j <= filter_cutbeam_end || j >= filter_cutbeam_begin)
+				    && mb_beam_ok(ping[iping].beamflag[j]))
+				    {
+			    	    found = MB_YES;
+
+			    	    /* write edit to save file */
+			    	    if (sofile_open == MB_YES)
+					mbedit_save_edit(
+						ping[iping].time_d, j,
+						MBEDIT_FILTER);
+	
+			    	    /* apply edit */
+				    ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
+			    	    if (verbose >= 1)
+				 	{
+					fprintf(stderr,"\nping: %d beam:%d depth:%10.3f ",
+						iping,j,ping[iping].bath[j]);
+					fprintf(stderr," flagged\n");
+					}
+				    }
+			    	}
+			    }
+			}
+		
+		    /* apply cut by distance filter if desired */
+		    if (filter_cutdistance == MB_YES)
+		    	{
+			/* handle cut inside swath */
+		 	if (filter_cutdistance_begin <= filter_cutdistance_end)
+		 	    {
+		    	    for (j=0;j<ping[iping].beams_bath;j++)
+			    	{
+			    	if (mb_beam_ok(ping[iping].beamflag[j])
+				    && ping[iping].bathacrosstrack[j] >= filter_cutdistance_begin
+				    && ping[iping].bathacrosstrack[j] <= filter_cutdistance_end)
+				    {
+			    	    found = MB_YES;
+
+			    	    /* write edit to save file */
+			    	    if (sofile_open == MB_YES)
+					mbedit_save_edit(
+						ping[iping].time_d, j,
+						MBEDIT_FILTER);
+	
+			    	    /* apply edit */
+				    ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
+			    	    if (verbose >= 1)
+				 	{
+					fprintf(stderr,"\nping: %d beam:%d depth:%10.3f ",
+						iping,j,ping[iping].bath[j]);
+					fprintf(stderr," flagged\n");
+					}
+				    }
+			    	}
+			    }
+
+			/* handle cut at edges of swath */
+		 	else if (filter_cutdistance_begin > filter_cutdistance_end)
+		 	    {
+		    	    for (j=0;j<ping[iping].beams_bath;j++)
+			    	{
+			    	if (mb_beam_ok(ping[iping].beamflag[j])
+				    && (ping[iping].bathacrosstrack[j] >= filter_cutdistance_begin
+					|| ping[iping].bathacrosstrack[j] <= filter_cutdistance_end))
+				    {
+			    	    found = MB_YES;
+
+			    	    /* write edit to save file */
+			    	    if (sofile_open == MB_YES)
+					mbedit_save_edit(
+						ping[iping].time_d, j,
+						MBEDIT_FILTER);
+	
+			    	    /* apply edit */
+				    ping[iping].beamflag[j] = MB_FLAG_FILTER2 + MB_FLAG_FLAG;
+			    	    if (verbose >= 1)
+				 	{
+					fprintf(stderr,"\nping: %d beam:%d depth:%10.3f ",
+						iping,j,ping[iping].bath[j]);
+					fprintf(stderr," flagged\n");
+					}
+				    }
+			    	}
+			    }
+			}
+
 		    }
   		}
 		
