@@ -1,11 +1,13 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.19 2000-03-08 00:06:36 caress Exp $
+#	$Id: Makefile.template,v 4.20 2000-09-30 07:22:17 caress Exp $
 #
-#     Copyright (c) 1993, 1994 by 
-#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
-#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#     Lamont-Doherty Earth Observatory
-#     Palisades, NY  10964
+#     Copyright (c) 1993, 1994, 2000 by
+#     David W. Caress (caress@mbari.org)
+#       Monterey Bay Aquarium Research Institute
+#       Moss Landing, CA 95039
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
+#       Lamont-Doherty Earth Observatory
+#       Palisades, NY  10964
 #
 #     See README file for copying and redistribution conditions.
 #
@@ -14,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.19  2000/03/08  00:06:36  caress
+# Release 4.6.10
+#
 # Revision 4.18  1999/12/29  00:35:11  caress
 # Release 4.6.8
 #
@@ -175,9 +180,9 @@ $(BINDIR)/mbmosaic:	mbmosaic.o zgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mblevitus
-$(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbrt.a
+$(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
-		$(LIBDIR)/libmbrt.a $(LFLAGS) \
+		$(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbbath
 $(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
@@ -221,8 +226,8 @@ $(BINDIR)/mbsimradmakess:	mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.
 $(BINDIR)/mbnavlist:	mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbnavlist
-$(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbrt.a
-	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbrt.a \
+$(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbprocess
 
 ### compile the source files
