@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.21 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbgrid.c,v 5.22 2003-08-28 18:36:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.20  2003/03/22 03:09:09  caress
  * Added mode parameter to -C option.
  *
@@ -363,8 +366,12 @@
 double erfcc();
 double mbgrid_erf();
 
+/* output stream for basic stuff (stdout if verbose <= 1,
+	stderr if verbose > 1) */
+FILE	*outfp = stdout;
+
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.21 2003-04-17 21:17:10 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.22 2003-08-28 18:36:49 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -527,10 +534,6 @@ main (int argc, char **argv)
 	char	title[MB_PATH_MAXLINE];
 	char	nlabel[MB_PATH_MAXLINE];
 	char	sdlabel[MB_PATH_MAXLINE];
-
-	/* output stream for basic stuff (stdout if verbose <= 1,
-		stderr if verbose > 1) */
-	FILE	*outfp;
 
 	/* variables needed to handle Not-a-Number values */
 	float	zero = 0.0;
@@ -753,7 +756,8 @@ main (int argc, char **argv)
 		}
 
 	/* set output stream to stderr */
-	outfp = stderr;
+	if (verbose >= 2)
+	    outfp = stderr;
 
 	/* if error flagged then print it and exit */
 	if (errflg)
@@ -1043,11 +1047,11 @@ main (int argc, char **argv)
 				strcpy(units, "unknown");
 			}
 
-/*fprintf(stderr," Projected coordinates on: proj_status:%d  projection:%s\n",
+/*fprintf(outfp," Projected coordinates on: proj_status:%d  projection:%s\n",
 proj_status, projection_id);
-fprintf(stderr," Lon Lat Bounds: %f %f %f %f\n",
+fprintf(outfp," Lon Lat Bounds: %f %f %f %f\n",
 obnd[0], obnd[1], obnd[2], obnd[3]);
-fprintf(stderr," XY Bounds: %f %f %f %f\n",
+fprintf(outfp," XY Bounds: %f %f %f %f\n",
 gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 */
 		}
@@ -1241,7 +1245,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			glonmax += 360.0;
 			}
 		sprintf(plot_cmd, "grdraster %d -R%f/%f/%f/%f | grep -v NaN",
-		grdrasterid,glonmin,glonmax,bounds[2],bounds[3]);
+			grdrasterid,glonmin,glonmax,bounds[2],bounds[3]);
 		nbackground = 0;
 		if ((dfp = popen(plot_cmd,"r")) != NULL)
 			{
@@ -1283,9 +1287,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				if (use_projection == MB_YES)
 					mb_proj_forward(verbose, pjptr, tlon, tlat,
 					&tlon, &tlat, &error);
-				bdata[nbackground*3] = tlon;
-				bdata[nbackground*3+1] = tlat;
-				bdata[nbackground*3+2] = tvalue;
+				bdata[nbackground*3] = (float) tlon;
+				bdata[nbackground*3+1] = (float) tlat;
+				bdata[nbackground*3+2] = (float) tvalue;
 				nbackground++;
 				}
 			pclose(dfp);
@@ -1640,13 +1644,13 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			/* print debug statements */
 			if (verbose >= 2)
 				{
-				fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
-				fprintf(stderr,"dbg2       kind:           %d\n",kind);
-				fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
-				fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
-				fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
-				fprintf(stderr,"dbg2       error:          %d\n",error);
-				fprintf(stderr,"dbg2       status:         %d\n",status);
+				fprintf(outfp,"\ndbg2  Ping read in program <%s>\n",program_name);
+				fprintf(outfp,"dbg2       kind:           %d\n",kind);
+				fprintf(outfp,"dbg2       beams_bath:     %d\n",beams_bath);
+				fprintf(outfp,"dbg2       beams_amp:      %d\n",beams_amp);
+				fprintf(outfp,"dbg2       pixels_ss:      %d\n",pixels_ss);
+				fprintf(outfp,"dbg2       error:          %d\n",error);
+				fprintf(outfp,"dbg2       status:         %d\n",status);
 				}
 
 			if ((datatype == MBGRID_DATA_BATHYMETRY
@@ -1676,7 +1680,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			      /* get position in grid */
 			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
 			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
-/*fprintf(stderr, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n", 
+/*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n", 
 ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 
 			      /* check if within allowed time */
@@ -1766,12 +1770,12 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				    foot_dtheta = 1.0;
 				if (foot_dphi <= 0.0)
 				    foot_dphi = 1.0;
-/*fprintf(stderr, "dx:%f dy:%f lateral:%f range:%f theta:%f\n", 
+/*fprintf(outfp, "dx:%f dy:%f lateral:%f range:%f theta:%f\n", 
 foot_dx, foot_dy, foot_lateral, foot_range, foot_theta);*/
 				foot_hwidth =bath[ib] * tan(DTR * (foot_theta + foot_dtheta)) 
 						    - foot_lateral;
 				foot_hlength = foot_range * tan(DTR * foot_dphi);
-/*fprintf(stderr, "dx:%f dy:%f mtodeglon:%f mtodeglat:%f\n", 
+/*fprintf(outfp, "dx:%f dy:%f mtodeglon:%f mtodeglat:%f\n", 
 dx, dy, mtodeglon, mtodeglat);*/
 
 				/* get range of bins around footprint to examine */
@@ -1791,14 +1795,14 @@ dx, dy, mtodeglon, mtodeglat);*/
 				  }
 				foot_dix = 2 * MAX(foot_wix, foot_lix);
 				foot_diy = 2 * MAX(foot_wiy, foot_liy);
-/*fprintf(stderr, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
-fprintf(stderr, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n", 
+/*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
+fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n", 
 foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
 			        ix1 = MAX(ix - foot_dix, 0);
 			        ix2 = MIN(ix + foot_dix, gxdim - 1);
 			        iy1 = MAX(iy - foot_diy, 0);
 			        iy2 = MIN(iy + foot_diy, gydim - 1);
-/*fprintf(stderr, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
+/*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
 				
 				/* loop over neighborhood of bins */
 			        for (ii=ix1;ii<=ix2;ii++)
@@ -1828,8 +1832,8 @@ foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
 				   xx2 = xx0 + bdx;
 				   yy1 = yy0 - bdy;
 				   yy2 = yy0 + bdy;
-/*fprintf(stderr, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
-fprintf(stderr, "p0: %f %f   p1: %f %f   p2: %f %f\n", 
+/*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
+fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n", 
 xx0, yy0, xx1, yy1, xx2, yy2);*/
 				   
 				   /* rotate center and corners of bin to footprint coordinates */
@@ -2081,13 +2085,13 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			/* print debug statements */
 			if (verbose >= 2)
 				{
-				fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
-				fprintf(stderr,"dbg2       kind:           %d\n",kind);
-				fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
-				fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
-				fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
-				fprintf(stderr,"dbg2       error:          %d\n",error);
-				fprintf(stderr,"dbg2       status:         %d\n",status);
+				fprintf(outfp,"\ndbg2  Ping read in program <%s>\n",program_name);
+				fprintf(outfp,"dbg2       kind:           %d\n",kind);
+				fprintf(outfp,"dbg2       beams_bath:     %d\n",beams_bath);
+				fprintf(outfp,"dbg2       beams_amp:      %d\n",beams_amp);
+				fprintf(outfp,"dbg2       pixels_ss:      %d\n",pixels_ss);
+				fprintf(outfp,"dbg2       error:          %d\n",error);
+				fprintf(outfp,"dbg2       status:         %d\n",status);
 				}
 
 			if ((datatype == MBGRID_DATA_BATHYMETRY
@@ -2113,7 +2117,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			      /* get position in grid */
 			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
 			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
-/*fprintf(stderr, "ib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   dx:%f dy:%f  origin: lon:%f lat:%f\n", 
+/*fprintf(outfp, "ib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   dx:%f dy:%f  origin: lon:%f lat:%f\n", 
 ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 			      /* check if within allowed time */
@@ -2781,13 +2785,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			/* print debug statements */
 			if (verbose >= 2)
 				{
-				fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
-				fprintf(stderr,"dbg2       kind:           %d\n",kind);
-				fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
-				fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
-				fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
-				fprintf(stderr,"dbg2       error:          %d\n",error);
-				fprintf(stderr,"dbg2       status:         %d\n",status);
+				fprintf(outfp,"\ndbg2  Ping read in program <%s>\n",program_name);
+				fprintf(outfp,"dbg2       kind:           %d\n",kind);
+				fprintf(outfp,"dbg2       beams_bath:     %d\n",beams_bath);
+				fprintf(outfp,"dbg2       beams_amp:      %d\n",beams_amp);
+				fprintf(outfp,"dbg2       pixels_ss:      %d\n",pixels_ss);
+				fprintf(outfp,"dbg2       error:          %d\n",error);
+				fprintf(outfp,"dbg2       status:         %d\n",status);
 				}
 
 			if ((datatype == MBGRID_DATA_BATHYMETRY
@@ -3331,8 +3335,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		ndata = ndata/3;
 
 		/* do the interpolation */
-		if (verbose > 0)
-		    fprintf(outfp,"\nDoing spline interpolation with %d data points...\n",ndata);
+		fprintf(outfp,"\nDoing spline interpolation with %d data points...\n",ndata);
 		cay = tension;
 		xmin = sxmin;
 		ymin = symin;
@@ -3341,11 +3344,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
-		if (verbose > 0 && clipmode == MBGRID_INTERP_GAP)
+		if (clipmode == MBGRID_INTERP_GAP)
 		    fprintf(outfp,"Applying spline interpolation to fill gaps of %d cells or less...\n",clip);
-		else if (verbose > 0 && clipmode == MBGRID_INTERP_NEAR)
+		else if (clipmode == MBGRID_INTERP_NEAR)
 		    fprintf(outfp,"Applying spline interpolation to fill %d cells from data...\n",clip);
-		else if (verbose > 0 && clipmode == MBGRID_INTERP_ALL)
+		else if (clipmode == MBGRID_INTERP_ALL)
 		    fprintf(outfp,"Applying spline interpolation to fill all undefined cells in the grid...\n");
 
 		/* translate the interpolation into the grid array 
@@ -3510,15 +3513,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
+		memset((char *)sgrid,0,gxdim*gydim*sizeof(float));
 		memset((char *)work1,0,nbackground*sizeof(float));
 		memset((char *)work2,0,nbackground*sizeof(int));
 		memset((char *)work3,0,(gxdim+gydim)*sizeof(int));
 
 		/* do the interpolation */
-		if (verbose > 0)
-		    fprintf(outfp,"\nDoing spline interpolation with %d data points from background...\n",nbackground);
-		sxmin = gbnd[0] - offx*dx;
-		symin = gbnd[2] - offy*dy;
+		fprintf(outfp,"\nDoing spline interpolation with %d data points from background...\n",nbackground);
 		cay = tension;
 		xmin = sxmin;
 		ymin = symin;
@@ -3544,7 +3545,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				nbinbackground++;
 				}
 			}
-		mb_free(verbose,&sdata,&error);
+		mb_free(verbose,&bdata,&error);
 		mb_free(verbose,&sgrid,&error);
 		mb_free(verbose,&work1,&error);
 		mb_free(verbose,&work2,&error);
@@ -3728,9 +3729,9 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	if (status != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nError writing output file: %s\n%s\n",
+		fprintf(outfp,"\nError writing output file: %s\n%s\n",
 			ofile,message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
 		mb_memory_clear(verbose, &error);
 		exit(error);
@@ -3798,9 +3799,9 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		if (status != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
-			fprintf(stderr,"\nError writing output file: %s\n%s\n",
+			fprintf(outfp,"\nError writing output file: %s\n%s\n",
 				ofile,message);
-			fprintf(stderr,"\nProgram <%s> Terminated\n",
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
 			mb_memory_clear(verbose, &error);
 			exit(error);
@@ -3866,9 +3867,9 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		if (status != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
-			fprintf(stderr,"\nError writing output file: %s\n%s\n",
+			fprintf(outfp,"\nError writing output file: %s\n%s\n",
 				ofile,message);
-			fprintf(stderr,"\nProgram <%s> Terminated\n",
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
 			mb_memory_clear(verbose, &error);
 			exit(error);
@@ -3916,13 +3917,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 		if (verbose)
 			{
-			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+			fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", 
 				plot_cmd);
 			}
 		plot_status = system(plot_cmd);
 		if (plot_status == -1)
 			{
-			fprintf(stderr, "\nError executing mbm_grdplot on output file %s\n", ofile);
+			fprintf(outfp, "\nError executing mbm_grdplot on output file %s\n", ofile);
 			}
 		}
 	if (more == MB_YES
@@ -3935,13 +3936,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			ofile, gridkindstring, ofile, title, nlabel);
 		if (verbose)
 			{
-			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+			fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", 
 				plot_cmd);
 			}
 		plot_status = system(plot_cmd);
 		if (plot_status == -1)
 			{
-			fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+			fprintf(outfp, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
 			}
 
 		/* execute mbm_grdplot */
@@ -3951,13 +3952,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			ofile, gridkindstring, ofile, title, sdlabel);
 		if (verbose)
 			{
-			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+			fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", 
 				plot_cmd);
 			}
 		plot_status = system(plot_cmd);
 		if (plot_status == -1)
 			{
-			fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+			fprintf(outfp, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
 			}
 		}
 
@@ -3971,10 +3972,10 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Program <%s> completed\n",
+		fprintf(outfp,"\ndbg2  Program <%s> completed\n",
 			program_name);
-		fprintf(stderr,"dbg2  Ending status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
+		fprintf(outfp,"dbg2  Ending status:\n");
+		fprintf(outfp,"dbg2       status:  %d\n",status);
 		}
 
 	/* end it all */
@@ -4001,20 +4002,20 @@ int write_ascii(int verbose, char *outfile, float *grid,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+		fprintf(outfp,"\ndbg2  Function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
-		fprintf(stderr,"dbg2       nx:         %d\n",nx);
-		fprintf(stderr,"dbg2       ny:         %d\n",ny);
-		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
-		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
-		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
-		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
-		fprintf(stderr,"dbg2       dx:         %f\n",dx);
-		fprintf(stderr,"dbg2       dy:         %f\n",dy);
+		fprintf(outfp,"dbg2  Input arguments:\n");
+		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
+		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
+		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       nx:         %d\n",nx);
+		fprintf(outfp,"dbg2       ny:         %d\n",ny);
+		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
+		fprintf(outfp,"dbg2       xmax:       %f\n",xmax);
+		fprintf(outfp,"dbg2       ymin:       %f\n",ymin);
+		fprintf(outfp,"dbg2       ymax:       %f\n",ymax);
+		fprintf(outfp,"dbg2       dx:         %f\n",dx);
+		fprintf(outfp,"dbg2       dy:         %f\n",dy);
 		}
 
 	/* open the file */
@@ -4052,12 +4053,12 @@ int write_ascii(int verbose, char *outfile, float *grid,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(outfp,"dbg2  Return values:\n");
+		fprintf(outfp,"dbg2       error:      %d\n",*error);
+		fprintf(outfp,"dbg2  Return status:\n");
+		fprintf(outfp,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */
@@ -4080,21 +4081,21 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+		fprintf(outfp,"\ndbg2  Function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
-		fprintf(stderr,"dbg2       nx:         %d\n",nx);
-		fprintf(stderr,"dbg2       ny:         %d\n",ny);
-		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
-		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
-		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
-		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
-		fprintf(stderr,"dbg2       dx:         %f\n",dx);
-		fprintf(stderr,"dbg2       dy:         %f\n",dy);
-		fprintf(stderr,"dbg2       nodata:     %f\n",nodata);
+		fprintf(outfp,"dbg2  Input arguments:\n");
+		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
+		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
+		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       nx:         %d\n",nx);
+		fprintf(outfp,"dbg2       ny:         %d\n",ny);
+		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
+		fprintf(outfp,"dbg2       xmax:       %f\n",xmax);
+		fprintf(outfp,"dbg2       ymin:       %f\n",ymin);
+		fprintf(outfp,"dbg2       ymax:       %f\n",ymax);
+		fprintf(outfp,"dbg2       dx:         %f\n",dx);
+		fprintf(outfp,"dbg2       dy:         %f\n",dy);
+		fprintf(outfp,"dbg2       nodata:     %f\n",nodata);
 		}
 
 	/* open the file */
@@ -4131,12 +4132,12 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(outfp,"dbg2  Return values:\n");
+		fprintf(outfp,"dbg2       error:      %d\n",*error);
+		fprintf(outfp,"dbg2  Return status:\n");
+		fprintf(outfp,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */
@@ -4159,20 +4160,20 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+		fprintf(outfp,"\ndbg2  Function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
-		fprintf(stderr,"dbg2       nx:         %d\n",nx);
-		fprintf(stderr,"dbg2       ny:         %d\n",ny);
-		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
-		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
-		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
-		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
-		fprintf(stderr,"dbg2       dx:         %f\n",dx);
-		fprintf(stderr,"dbg2       dy:         %f\n",dy);
+		fprintf(outfp,"dbg2  Input arguments:\n");
+		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
+		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
+		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       nx:         %d\n",nx);
+		fprintf(outfp,"dbg2       ny:         %d\n",ny);
+		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
+		fprintf(outfp,"dbg2       xmax:       %f\n",xmax);
+		fprintf(outfp,"dbg2       ymin:       %f\n",ymin);
+		fprintf(outfp,"dbg2       ymax:       %f\n",ymax);
+		fprintf(outfp,"dbg2       dx:         %f\n",dx);
+		fprintf(outfp,"dbg2       dy:         %f\n",dy);
 		}
 
 	/* open the file */
@@ -4200,12 +4201,12 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(outfp,"dbg2  Return values:\n");
+		fprintf(outfp,"dbg2       error:      %d\n",*error);
+		fprintf(outfp,"dbg2  Return status:\n");
+		fprintf(outfp,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */
@@ -4241,26 +4242,26 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+		fprintf(outfp,"\ndbg2  Function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
-		fprintf(stderr,"dbg2       nx:         %d\n",nx);
-		fprintf(stderr,"dbg2       ny:         %d\n",ny);
-		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
-		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
-		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
-		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
-		fprintf(stderr,"dbg2       dx:         %f\n",dx);
-		fprintf(stderr,"dbg2       dy:         %f\n",dy);
-		fprintf(stderr,"dbg2       xlab:       %s\n",xlab);
-		fprintf(stderr,"dbg2       ylab:       %s\n",ylab);
-		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
-		fprintf(stderr,"dbg2       titl:       %s\n",titl);
-		fprintf(stderr,"dbg2       argc:       %d\n",argc);
-		fprintf(stderr,"dbg2       *argv:      %d\n",*argv);
+		fprintf(outfp,"dbg2  Input arguments:\n");
+		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
+		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
+		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       nx:         %d\n",nx);
+		fprintf(outfp,"dbg2       ny:         %d\n",ny);
+		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
+		fprintf(outfp,"dbg2       xmax:       %f\n",xmax);
+		fprintf(outfp,"dbg2       ymin:       %f\n",ymin);
+		fprintf(outfp,"dbg2       ymax:       %f\n",ymax);
+		fprintf(outfp,"dbg2       dx:         %f\n",dx);
+		fprintf(outfp,"dbg2       dy:         %f\n",dy);
+		fprintf(outfp,"dbg2       xlab:       %s\n",xlab);
+		fprintf(outfp,"dbg2       ylab:       %s\n",ylab);
+		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
+		fprintf(outfp,"dbg2       titl:       %s\n",titl);
+		fprintf(outfp,"dbg2       argc:       %d\n",argc);
+		fprintf(outfp,"dbg2       *argv:      %d\n",*argv);
 		}
 
 	/* inititialize grd header */
@@ -4318,9 +4319,9 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	if (*error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
-		fprintf(stderr,"\nMBIO Error allocating output arrays.\n",
+		fprintf(outfp,"\nMBIO Error allocating output arrays.\n",
 			message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
 		mb_memory_clear(verbose, &error);
 		exit(status);
@@ -4352,12 +4353,12 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(outfp,"dbg2  Return values:\n");
+		fprintf(outfp,"dbg2       error:      %d\n",*error);
+		fprintf(outfp,"dbg2  Return status:\n");
+		fprintf(outfp,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */
@@ -4382,25 +4383,25 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+		fprintf(outfp,"\ndbg2  Function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       foot_a:     %f\n",foot_a);
-		fprintf(stderr,"dbg2       foot_b:     %f\n",foot_b);
-		fprintf(stderr,"dbg2       scale:      %f\n",scale);
-		fprintf(stderr,"dbg2       pcx:        %f\n",pcx);
-		fprintf(stderr,"dbg2       pcy:        %f\n",pcy);
-		fprintf(stderr,"dbg2       dx:         %f\n",dx);
-		fprintf(stderr,"dbg2       dy:         %f\n",dy);
-		fprintf(stderr,"dbg2       p1 x:       %f\n",px[0]);
-		fprintf(stderr,"dbg2       p1 y:       %f\n",py[0]);
-		fprintf(stderr,"dbg2       p2 x:       %f\n",px[1]);
-		fprintf(stderr,"dbg2       p2 y:       %f\n",py[1]);
-		fprintf(stderr,"dbg2       p3 x:       %f\n",px[2]);
-		fprintf(stderr,"dbg2       p3 y:       %f\n",py[2]);
-		fprintf(stderr,"dbg2       p4 x:       %f\n",px[3]);
-		fprintf(stderr,"dbg2       p4 y:       %f\n",py[3]);
+		fprintf(outfp,"dbg2  Input arguments:\n");
+		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
+		fprintf(outfp,"dbg2       foot_a:     %f\n",foot_a);
+		fprintf(outfp,"dbg2       foot_b:     %f\n",foot_b);
+		fprintf(outfp,"dbg2       scale:      %f\n",scale);
+		fprintf(outfp,"dbg2       pcx:        %f\n",pcx);
+		fprintf(outfp,"dbg2       pcy:        %f\n",pcy);
+		fprintf(outfp,"dbg2       dx:         %f\n",dx);
+		fprintf(outfp,"dbg2       dy:         %f\n",dy);
+		fprintf(outfp,"dbg2       p1 x:       %f\n",px[0]);
+		fprintf(outfp,"dbg2       p1 y:       %f\n",py[0]);
+		fprintf(outfp,"dbg2       p2 x:       %f\n",px[1]);
+		fprintf(outfp,"dbg2       p2 y:       %f\n",py[1]);
+		fprintf(outfp,"dbg2       p3 x:       %f\n",px[2]);
+		fprintf(outfp,"dbg2       p3 y:       %f\n",py[2]);
+		fprintf(outfp,"dbg2       p4 x:       %f\n",px[3]);
+		fprintf(outfp,"dbg2       p4 y:       %f\n",py[3]);
 		}
 		
 	/* The weighting function is
@@ -4459,14 +4460,14 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(outfp,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2       weight:     %f\n",*weight);
-		fprintf(stderr,"dbg2       use:        %d\n",*use);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(outfp,"dbg2  Return values:\n");
+		fprintf(outfp,"dbg2       error:      %d\n",*error);
+		fprintf(outfp,"dbg2       weight:     %f\n",*weight);
+		fprintf(outfp,"dbg2       use:        %d\n",*use);
+		fprintf(outfp,"dbg2  Return status:\n");
+		fprintf(outfp,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */
@@ -4483,7 +4484,7 @@ double erfcc(double x)
 	ans=t*exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
 		t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
 		t*(-0.82215223+t*0.17087277)))))))));
-/* fprintf(stderr, "x:%f ans:%f\n", x, ans); */
+/* fprintf(outfp, "x:%f ans:%f\n", x, ans); */
 	return  x >= 0.0 ? ans : 2.0-ans;
 }
 /*--------------------------------------------------------------------*/
