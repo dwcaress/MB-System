@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_io.h,v 4.1 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.5  1994/03/05  02:14:41  caress
  * Altered to accomodate MBF_SB2100RW format.
  *
@@ -62,6 +65,18 @@ struct mb_io_struct
 	/* file descriptor, file name, and usage flag */
 	FILE	*mbfp;		/* file descriptor */
 	char	file[256];	/* file name */
+	char	*xdrs;		/* XDR stream handle */
+
+	/* read or write history */
+	int	fileheader;	/* indicates whether file header has
+					been read or written */
+	int	hdr_comment_size;/* number of characters in
+					header_comment string */
+	int	hdr_comment_loc;/* number of characters already extracted
+					from header_comment string */
+	char	*hdr_comment;	/* placeholder for long comment strings
+					for formats using a single
+					comment string in a file header */
 
 	/* pointer to structure containing raw data (could be any format) */
 	int	structure_size;

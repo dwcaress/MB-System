@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsldedmb.h	1/20/93
- *	$Id: mbf_hsldedmb.h,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbf_hsldedmb.h,v 4.1 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.2  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -42,13 +45,15 @@
  *   3. The 59 depth values are stored centered in 59 value arrays.  The
  *      center beam is in word 30 of the depth and distance arrays.
  *   4. There is no provision for embedding comments in the data.
+ *   4. Comments can be embedded in the data as 328 byte ascii strings,
+ *	where the first four characters must always be "zzzz" so that the
+ *      seconds value is 2054847098.  
  *   5. We expect the use of this format to be superceded by format
  *      MBF_MBLDEOIH.
  *
- * The kind value in the mbf_hsldedmb_struct should always be 1, indicating
- * that the mbf_hsldedmb_data_struct structure holds data; if this format
- * allowed ascii comments then kind = 2 would indicate the presence of
- * a comment.
+ * The kind value in the mbf_hsldedmb_struct indicates whether the
+ * mbf_hsldedmb_data_struct structure holds data (kind = 1) or an
+ * ascii comment record (kind = 2).
  *
  * The mbf_hsldedmb_data_struct structure is a direct representation  
  * of the binary data structure used in the MBF_HSLDEDMB format.

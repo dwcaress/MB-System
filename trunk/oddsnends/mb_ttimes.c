@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.0 1994-04-11 23:37:14 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.1 1994-07-29 18:46:51 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/04/11  23:37:14  caress
+ * Setting version number properly.
+ *
  * Revision 1.1  1994/04/11  23:34:41  caress
  * Initial revision
  *
@@ -49,7 +52,7 @@ double	*angles;
 int	*flags;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.0 1994-04-11 23:37:14 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -91,6 +94,11 @@ int	*error;
 	else if (system == MB_SYS_EM12)
 		{
 		status = mbsys_em12_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,angles,flags,error);
+		}
+	else if (system == MB_SYS_MR1)
+		{
+		status = mbsys_mr1_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,angles,flags,error);
 		}
 	else if (system == MB_SYS_LDEOIH)

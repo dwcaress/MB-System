@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.1 1994-05-21 02:23:29 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.2 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/21  02:23:29  caress
+ * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -53,13 +56,18 @@
 #include "../../include/mbsys_hsds.h"
 #include "../../include/mbf_hsldeoih.h"
 
+/* include for byte swapping on little-endian machines */
+#ifdef BYTESWAPPED
+#include "../../include/mb_swap.h"
+#endif
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldeoih(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.1 1994-05-21 02:23:29 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -920,6 +928,11 @@ int	*error;
 		*error = MB_ERROR_EOF;
 		}
 
+	/* swap bytes if necessary */
+#ifdef BYTESWAPPED
+	label = mb_swap_long(label);
+#endif
+
 	/* see if we just encountered a record label */
 	if (status == MB_SUCCESS && label != MBF_HSLDEOIH_LABEL)
 		{
@@ -933,7 +946,11 @@ int	*error;
 		if ((status = fread(&tmp,1,sizeof(short int),
 			mbfp)) == sizeof(short int))
 			{
+#ifdef BYTESWAPPED
+			data->kind = (int) mb_swap_short(tmp);
+#else
 			data->kind = (int) tmp;
+#endif
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}
@@ -948,7 +965,11 @@ int	*error;
 		if ((status = fread(&tmp,1,sizeof(short int),mbfp)) 
 			== sizeof(short int))
 			{
+#ifdef BYTESWAPPED
+			record_size = (int) mb_swap_short(tmp);
+#else
 			record_size = (int) tmp;
+#endif
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}
@@ -1053,6 +1074,25 @@ int	*error;
 		*error = MB_ERROR_NO_ERROR;
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		mb_swap_float(&read_data.lon);
+		mb_swap_float(&read_data.lat);
+		read_data.year = mb_swap_short(read_data.year);
+		read_data.month = mb_swap_short(read_data.month);
+		read_data.day = mb_swap_short(read_data.day);
+		read_data.hour = mb_swap_short(read_data.hour);
+		read_data.minute = mb_swap_short(read_data.minute);
+		read_data.second = mb_swap_short(read_data.second);
+		read_data.alt_minute = mb_swap_short(read_data.alt_minute);
+		read_data.alt_second = mb_swap_short(read_data.alt_second);
+		mb_swap_float(&read_data.pos_corr_x);
+		mb_swap_float(&read_data.pos_corr_y);
+		}
+#endif
+
 	/* copy data to internal storage */
 	if (status == MB_SUCCESS)
 		{
@@ -1148,6 +1188,27 @@ int	*error;
                 status = MB_SUCCESS;
                 *error = MB_ERROR_NO_ERROR;
                 }
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		mb_swap_float(&read_data.lon);
+		mb_swap_float(&read_data.lat);
+		read_data.year = mb_swap_short(read_data.year);
+		read_data.month = mb_swap_short(read_data.month);
+		read_data.day = mb_swap_short(read_data.day);
+		read_data.hour = mb_swap_short(read_data.hour);
+		read_data.minute = mb_swap_short(read_data.minute);
+		read_data.second = mb_swap_short(read_data.second);
+		read_data.alt_minute = mb_swap_short(read_data.alt_minute);
+		read_data.alt_second = mb_swap_short(read_data.alt_second);
+		mb_swap_float(&read_data.draught);
+		mb_swap_float(&read_data.vel_mean);
+		mb_swap_float(&read_data.vel_keel);
+		mb_swap_float(&read_data.tide);
+		}
+#endif
 
 	/* copy data to internal storage */
 	if (status == MB_SUCCESS)
@@ -1248,6 +1309,27 @@ int	*error;
                 *error = MB_ERROR_NO_ERROR;
                 }
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		mb_swap_float(&read_data.lon);
+		mb_swap_float(&read_data.lat);
+		read_data.year = mb_swap_short(read_data.year);
+		read_data.month = mb_swap_short(read_data.month);
+		read_data.day = mb_swap_short(read_data.day);
+		read_data.hour = mb_swap_short(read_data.hour);
+		read_data.minute = mb_swap_short(read_data.minute);
+		read_data.second = mb_swap_short(read_data.second);
+		data->num_vel = mb_swap_short(read_data.num_vel);
+		for (i=0;i<MBF_HSLDEOIH_MAXVEL;i++)
+			{
+			mb_swap_float(&read_data.vdepth[i]);
+			mb_swap_float(&read_data.velocity[i]);
+			}
+		}
+#endif
+
 	/* copy data to internal storage */
 	if (status == MB_SUCCESS)
 		{
@@ -1341,6 +1423,29 @@ int	*error;
                 *error = MB_ERROR_NO_ERROR;
                 }
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		mb_swap_float(&read_data.lon);
+		mb_swap_float(&read_data.lat);
+		read_data.year = mb_swap_short(read_data.year);
+		read_data.month = mb_swap_short(read_data.month);
+		read_data.day = mb_swap_short(read_data.day);
+		read_data.hour = mb_swap_short(read_data.hour);
+		read_data.minute = mb_swap_short(read_data.minute);
+		read_data.second = mb_swap_short(read_data.second);
+		read_data.alt_minute = mb_swap_short(read_data.alt_minute);
+		read_data.alt_second = mb_swap_short(read_data.alt_second);
+		mb_swap_float(&read_data.course_true);
+		mb_swap_float(&read_data.speed_transverse);
+		mb_swap_float(&read_data.speed);
+		mb_swap_float(&read_data.pitch);
+		read_data.track = mb_swap_short(read_data.track);
+		mb_swap_float(&read_data.depth_center);
+		}
+#endif
+
 	/* copy data to internal storage */
 	if (status == MB_SUCCESS)
 		{
@@ -1357,7 +1462,6 @@ int	*error;
 		data->course_true = read_data.course_true;
 		data->speed_transverse = read_data.speed_transverse;
 		data->speed = read_data.speed;
-		data->speed_reference[0] = read_data.speed_reference[0];
 		data->pitch = read_data.pitch;
 		data->track = read_data.track;
 		data->depth_center = read_data.depth_center;
@@ -1449,6 +1553,107 @@ int	*error;
                 status = MB_SUCCESS;
                 *error = MB_ERROR_NO_ERROR;
                 }
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		/* position */
+		mb_swap_float(&read_data.lon);
+		mb_swap_float(&read_data.lat);
+
+		/* time stamp */
+		read_data.year = mb_swap_short(read_data.year);
+		read_data.month = mb_swap_short(read_data.month);
+		read_data.day = mb_swap_short(read_data.day);
+		read_data.hour = mb_swap_short(read_data.hour);
+		read_data.minute = mb_swap_short(read_data.minute);
+		read_data.second = mb_swap_short(read_data.second);
+		read_data.alt_minute = mb_swap_short(read_data.alt_minute);
+		read_data.alt_second = mb_swap_short(read_data.alt_second);
+
+		/* additional navigation and depths */
+		mb_swap_float(&read_data.course_true);
+		mb_swap_float(&read_data.speed_transverse);
+		mb_swap_float(&read_data.speed);
+		mb_swap_float(&read_data.pitch);
+		read_data.track = mb_swap_short(read_data.track);
+		mb_swap_float(&read_data.depth_center);
+		mb_swap_float(&read_data.depth_scale);
+		read_data.spare = mb_swap_short(read_data.spare);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			{
+			read_data.distance[i] = 
+				mb_swap_short(read_data.distance[i]);
+			read_data.depth[i] = 
+				mb_swap_short(read_data.depth[i]);
+			}
+
+		/* travel time data */
+		mb_swap_float(&read_data.course_ground);
+		mb_swap_float(&read_data.speed_ground);
+		mb_swap_float(&read_data.heave);
+		mb_swap_float(&read_data.roll);
+		mb_swap_float(&read_data.time_center);
+		mb_swap_float(&read_data.time_scale);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			read_data.time[i] = mb_swap_short(read_data.time[i]);
+		for (i=0;i<11;i++)
+			mb_swap_float(&read_data.gyro[i]);
+
+		/* amplitude data */
+		read_data.trans_strbd = mb_swap_short(read_data.trans_strbd);
+		read_data.trans_vert = mb_swap_short(read_data.trans_vert);
+		read_data.trans_port = mb_swap_short(read_data.trans_port);
+		read_data.pulse_len_strbd 
+			= mb_swap_short(read_data.pulse_len_strbd);
+		read_data.pulse_len_vert 
+			= mb_swap_short(read_data.pulse_len_vert);
+		read_data.pulse_len_port 
+			= mb_swap_short(read_data.pulse_len_port);
+		read_data.gain_start 
+			= mb_swap_short(read_data.gain_start);
+		read_data.r_compensation_factor 
+			= mb_swap_short(read_data.r_compensation_factor);
+		read_data.compensation_start 
+			= mb_swap_short(read_data.compensation_start);
+		read_data.increase_start 
+			= mb_swap_short(read_data.increase_start);
+		read_data.tvc_near = mb_swap_short(read_data.tvc_near);
+		read_data.tvc_far = mb_swap_short(read_data.tvc_far);
+		read_data.increase_int_near 
+			= mb_swap_short(read_data.increase_int_near);
+		read_data.increase_int_far 
+			= mb_swap_short(read_data.increase_int_far);
+		read_data.gain_center = mb_swap_short(read_data.gain_center);
+		mb_swap_float(&read_data.filter_gain);
+		read_data.amplitude_center 
+			= mb_swap_short(read_data.amplitude_center);
+		read_data.echo_duration_center 
+			= mb_swap_short(read_data.echo_duration_center);
+		read_data.echo_scale_center 
+			= mb_swap_short(read_data.echo_scale_center);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			{
+			read_data.amplitude[i] 
+				= mb_swap_short(read_data.amplitude[i]);
+			read_data.echo_duration[i] 
+				= mb_swap_short(read_data.echo_duration[i]);
+			}
+		for (i=0;i<16;i++)
+			{
+			read_data.gain[i] 
+				= mb_swap_short(read_data.gain[i]);
+			read_data.echo_scale[i] 
+				= mb_swap_short(read_data.echo_scale[i]);
+			}
+
+		/* processed backscatter data */
+		mb_swap_float(&read_data.back_scale);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			read_data.back[i] = mb_swap_short(read_data.back[i]);
+		}
+#endif
 
 	/* copy data to internal storage */
 	if (status == MB_SUCCESS)
@@ -1704,6 +1909,107 @@ int	*error;
                 status = MB_SUCCESS;
                 *error = MB_ERROR_NO_ERROR;
                 }
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		/* position */
+		mb_swap_float(&read_data.lon);
+		mb_swap_float(&read_data.lat);
+
+		/* time stamp */
+		read_data.year = mb_swap_short(read_data.year);
+		read_data.month = mb_swap_short(read_data.month);
+		read_data.day = mb_swap_short(read_data.day);
+		read_data.hour = mb_swap_short(read_data.hour);
+		read_data.minute = mb_swap_short(read_data.minute);
+		read_data.second = mb_swap_short(read_data.second);
+		read_data.alt_minute = mb_swap_short(read_data.alt_minute);
+		read_data.alt_second = mb_swap_short(read_data.alt_second);
+
+		/* additional navigation and depths */
+		mb_swap_float(&read_data.course_true);
+		mb_swap_float(&read_data.speed_transverse);
+		mb_swap_float(&read_data.speed);
+		mb_swap_float(&read_data.pitch);
+		read_data.track = mb_swap_short(read_data.track);
+		mb_swap_float(&read_data.depth_center);
+		mb_swap_float(&read_data.depth_scale);
+		read_data.spare = mb_swap_short(read_data.spare);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			{
+			read_data.distance[i] = 
+				mb_swap_short(read_data.distance[i]);
+			read_data.depth[i] = 
+				mb_swap_short(read_data.depth[i]);
+			}
+
+		/* travel time data */
+		mb_swap_float(&read_data.course_ground);
+		mb_swap_float(&read_data.speed_ground);
+		mb_swap_float(&read_data.heave);
+		mb_swap_float(&read_data.roll);
+		mb_swap_float(&read_data.time_center);
+		mb_swap_float(&read_data.time_scale);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			read_data.time[i] = mb_swap_short(read_data.time[i]);
+		for (i=0;i<11;i++)
+			mb_swap_float(&read_data.gyro[i]);
+
+		/* amplitude data */
+		read_data.trans_strbd = mb_swap_short(read_data.trans_strbd);
+		read_data.trans_vert = mb_swap_short(read_data.trans_vert);
+		read_data.trans_port = mb_swap_short(read_data.trans_port);
+		read_data.pulse_len_strbd 
+			= mb_swap_short(read_data.pulse_len_strbd);
+		read_data.pulse_len_vert 
+			= mb_swap_short(read_data.pulse_len_vert);
+		read_data.pulse_len_port 
+			= mb_swap_short(read_data.pulse_len_port);
+		read_data.gain_start 
+			= mb_swap_short(read_data.gain_start);
+		read_data.r_compensation_factor 
+			= mb_swap_short(read_data.r_compensation_factor);
+		read_data.compensation_start 
+			= mb_swap_short(read_data.compensation_start);
+		read_data.increase_start 
+			= mb_swap_short(read_data.increase_start);
+		read_data.tvc_near = mb_swap_short(read_data.tvc_near);
+		read_data.tvc_far = mb_swap_short(read_data.tvc_far);
+		read_data.increase_int_near 
+			= mb_swap_short(read_data.increase_int_near);
+		read_data.increase_int_far 
+			= mb_swap_short(read_data.increase_int_far);
+		read_data.gain_center = mb_swap_short(read_data.gain_center);
+		mb_swap_float(&read_data.filter_gain);
+		read_data.amplitude_center 
+			= mb_swap_short(read_data.amplitude_center);
+		read_data.echo_duration_center 
+			= mb_swap_short(read_data.echo_duration_center);
+		read_data.echo_scale_center 
+			= mb_swap_short(read_data.echo_scale_center);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			{
+			read_data.amplitude[i] 
+				= mb_swap_short(read_data.amplitude[i]);
+			read_data.echo_duration[i] 
+				= mb_swap_short(read_data.echo_duration[i]);
+			}
+		for (i=0;i<16;i++)
+			{
+			read_data.gain[i] 
+				= mb_swap_short(read_data.gain[i]);
+			read_data.echo_scale[i] 
+				= mb_swap_short(read_data.echo_scale[i]);
+			}
+
+		/* processed backscatter data */
+		mb_swap_float(&read_data.back_scale);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			read_data.back[i] = mb_swap_short(read_data.back[i]);
+		}
+#endif
 
 	/* copy data to internal storage */
 	if (status == MB_SUCCESS)
@@ -2030,6 +2336,9 @@ int	*error;
 
 	/* write record label to file */
 	label = MBF_HSLDEOIH_LABEL;
+#ifdef BYTESWAPPED
+	label = mb_swap_long(label);
+#endif
 	if ((status = fwrite(&label,1,sizeof(int),mbfp)) != sizeof(int))
 		{
 		status = MB_FAILURE;
@@ -2041,6 +2350,9 @@ int	*error;
 		*error = MB_ERROR_NO_ERROR;
 		}
 	shortkind = data->kind;
+#ifdef BYTESWAPPED
+	shortkind = mb_swap_short(shortkind);
+#endif
 	if ((status = fwrite(&shortkind,1,sizeof(short int),mbfp)) 
 		!= sizeof(short int))
 		{
@@ -2167,9 +2479,31 @@ int	*error;
 		strncpy(write_data.sensors,data->sensors,8);
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		mb_swap_float(&write_data.lon);
+		mb_swap_float(&write_data.lat);
+		write_data.year = mb_swap_short(write_data.year);
+		write_data.month = mb_swap_short(write_data.month);
+		write_data.day = mb_swap_short(write_data.day);
+		write_data.hour = mb_swap_short(write_data.hour);
+		write_data.minute = mb_swap_short(write_data.minute);
+		write_data.second = mb_swap_short(write_data.second);
+		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+		write_data.alt_second = mb_swap_short(write_data.alt_second);
+		mb_swap_float(&write_data.pos_corr_x);
+		mb_swap_float(&write_data.pos_corr_y);
+		}
+#endif
+
 	/* write record to file */
 	write_size = sizeof(write_data);
 	write_size_short = write_size;
+#ifdef BYTESWAPPED
+	write_size_short = mb_swap_short(write_size_short);
+#endif
 	if ((status = fwrite(&write_size_short,1,sizeof(short int),mbfp))
 		!= sizeof(short int))
 		{
@@ -2278,9 +2612,33 @@ int	*error;
 		write_data.tide = data->tide;
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		mb_swap_float(&write_data.lon);
+		mb_swap_float(&write_data.lat);
+		write_data.year = mb_swap_short(write_data.year);
+		write_data.month = mb_swap_short(write_data.month);
+		write_data.day = mb_swap_short(write_data.day);
+		write_data.hour = mb_swap_short(write_data.hour);
+		write_data.minute = mb_swap_short(write_data.minute);
+		write_data.second = mb_swap_short(write_data.second);
+		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+		write_data.alt_second = mb_swap_short(write_data.alt_second);
+		mb_swap_float(&write_data.draught);
+		mb_swap_float(&write_data.vel_mean);
+		mb_swap_float(&write_data.vel_keel);
+		mb_swap_float(&write_data.tide);
+		}
+#endif
+
 	/* write record to file */
 	write_size = sizeof(write_data);
 	write_size_short = write_size;
+#ifdef BYTESWAPPED
+	write_size_short = mb_swap_short(write_size_short);
+#endif
 	if ((status = fwrite(&write_size_short,1,sizeof(short int),mbfp))
 		!= sizeof(short int))
 		{
@@ -2385,9 +2743,33 @@ int	*error;
 			}
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		mb_swap_float(&write_data.lon);
+		mb_swap_float(&write_data.lat);
+		write_data.year = mb_swap_short(write_data.year);
+		write_data.month = mb_swap_short(write_data.month);
+		write_data.day = mb_swap_short(write_data.day);
+		write_data.hour = mb_swap_short(write_data.hour);
+		write_data.minute = mb_swap_short(write_data.minute);
+		write_data.second = mb_swap_short(write_data.second);
+		data->num_vel = mb_swap_short(write_data.num_vel);
+		for (i=0;i<MBF_HSLDEOIH_MAXVEL;i++)
+			{
+			mb_swap_float(&write_data.vdepth[i]);
+			mb_swap_float(&write_data.velocity[i]);
+			}
+		}
+#endif
+
 	/* write record to file */
 	write_size = sizeof(write_data);
 	write_size_short = write_size;
+#ifdef BYTESWAPPED
+	write_size_short = mb_swap_short(write_size_short);
+#endif
 	if ((status = fwrite(&write_size_short,1,sizeof(short int),mbfp))
 		!= sizeof(short int))
 		{
@@ -2506,9 +2888,35 @@ int	*error;
 		write_data.depth_center = data->depth_center;
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		mb_swap_float(&write_data.lon);
+		mb_swap_float(&write_data.lat);
+		write_data.year = mb_swap_short(write_data.year);
+		write_data.month = mb_swap_short(write_data.month);
+		write_data.day = mb_swap_short(write_data.day);
+		write_data.hour = mb_swap_short(write_data.hour);
+		write_data.minute = mb_swap_short(write_data.minute);
+		write_data.second = mb_swap_short(write_data.second);
+		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+		write_data.alt_second = mb_swap_short(write_data.alt_second);
+		mb_swap_float(&write_data.course_true);
+		mb_swap_float(&write_data.speed_transverse);
+		mb_swap_float(&write_data.speed);
+		mb_swap_float(&write_data.pitch);
+		write_data.track = mb_swap_short(write_data.track);
+		mb_swap_float(&write_data.depth_center);
+		}
+#endif
+
 	/* write record to file */
 	write_size = sizeof(write_data);
 	write_size_short = write_size;
+#ifdef BYTESWAPPED
+	write_size_short = mb_swap_short(write_size_short);
+#endif
 	if ((status = fwrite(&write_size_short,1,sizeof(short int),mbfp))
 		!= sizeof(short int))
 		{
@@ -2774,9 +3182,113 @@ int	*error;
 			write_data.back[i] = data->back[i];
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		/* position */
+		mb_swap_float(&write_data.lon);
+		mb_swap_float(&write_data.lat);
+
+		/* time stamp */
+		write_data.year = mb_swap_short(write_data.year);
+		write_data.month = mb_swap_short(write_data.month);
+		write_data.day = mb_swap_short(write_data.day);
+		write_data.hour = mb_swap_short(write_data.hour);
+		write_data.minute = mb_swap_short(write_data.minute);
+		write_data.second = mb_swap_short(write_data.second);
+		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+		write_data.alt_second = mb_swap_short(write_data.alt_second);
+
+		/* additional navigation and depths */
+		mb_swap_float(&write_data.course_true);
+		mb_swap_float(&write_data.speed_transverse);
+		mb_swap_float(&write_data.speed);
+		mb_swap_float(&write_data.pitch);
+		write_data.track = mb_swap_short(write_data.track);
+		mb_swap_float(&write_data.depth_center);
+		mb_swap_float(&write_data.depth_scale);
+		write_data.spare = mb_swap_short(write_data.spare);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			{
+			write_data.distance[i] = 
+				mb_swap_short(write_data.distance[i]);
+			write_data.depth[i] = 
+				mb_swap_short(write_data.depth[i]);
+			}
+
+		/* travel time data */
+		mb_swap_float(&write_data.course_ground);
+		mb_swap_float(&write_data.speed_ground);
+		mb_swap_float(&write_data.heave);
+		mb_swap_float(&write_data.roll);
+		mb_swap_float(&write_data.time_center);
+		mb_swap_float(&write_data.time_scale);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			write_data.time[i] = mb_swap_short(write_data.time[i]);
+		for (i=0;i<11;i++)
+			mb_swap_float(&write_data.gyro[i]);
+
+		/* amplitude data */
+		write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
+		write_data.trans_vert = mb_swap_short(write_data.trans_vert);
+		write_data.trans_port = mb_swap_short(write_data.trans_port);
+		write_data.pulse_len_strbd 
+			= mb_swap_short(write_data.pulse_len_strbd);
+		write_data.pulse_len_vert 
+			= mb_swap_short(write_data.pulse_len_vert);
+		write_data.pulse_len_port 
+			= mb_swap_short(write_data.pulse_len_port);
+		write_data.gain_start 
+			= mb_swap_short(write_data.gain_start);
+		write_data.r_compensation_factor 
+			= mb_swap_short(write_data.r_compensation_factor);
+		write_data.compensation_start 
+			= mb_swap_short(write_data.compensation_start);
+		write_data.increase_start 
+			= mb_swap_short(write_data.increase_start);
+		write_data.tvc_near = mb_swap_short(write_data.tvc_near);
+		write_data.tvc_far = mb_swap_short(write_data.tvc_far);
+		write_data.increase_int_near 
+			= mb_swap_short(write_data.increase_int_near);
+		write_data.increase_int_far 
+			= mb_swap_short(write_data.increase_int_far);
+		write_data.gain_center = mb_swap_short(write_data.gain_center);
+		mb_swap_float(&write_data.filter_gain);
+		write_data.amplitude_center 
+			= mb_swap_short(write_data.amplitude_center);
+		write_data.echo_duration_center 
+			= mb_swap_short(write_data.echo_duration_center);
+		write_data.echo_scale_center 
+			= mb_swap_short(write_data.echo_scale_center);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			{
+			write_data.amplitude[i] 
+				= mb_swap_short(write_data.amplitude[i]);
+			write_data.echo_duration[i] 
+				= mb_swap_short(write_data.echo_duration[i]);
+			}
+		for (i=0;i<16;i++)
+			{
+			write_data.gain[i] 
+				= mb_swap_short(write_data.gain[i]);
+			write_data.echo_scale[i] 
+				= mb_swap_short(write_data.echo_scale[i]);
+			}
+
+		/* processed backscatter data */
+		mb_swap_float(&write_data.back_scale);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			write_data.back[i] = mb_swap_short(write_data.back[i]);
+		}
+#endif
+
 	/* write record to file */
 	write_size = sizeof(write_data);
 	write_size_short = write_size;
+#ifdef BYTESWAPPED
+	write_size_short = mb_swap_short(write_size_short);
+#endif
 	if ((status = fwrite(&write_size_short,1,sizeof(short int),mbfp))
 		!= sizeof(short int))
 		{
@@ -3042,9 +3554,113 @@ int	*error;
 			write_data.back[i] = data->back[i];
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		/* position */
+		mb_swap_float(&write_data.lon);
+		mb_swap_float(&write_data.lat);
+
+		/* time stamp */
+		write_data.year = mb_swap_short(write_data.year);
+		write_data.month = mb_swap_short(write_data.month);
+		write_data.day = mb_swap_short(write_data.day);
+		write_data.hour = mb_swap_short(write_data.hour);
+		write_data.minute = mb_swap_short(write_data.minute);
+		write_data.second = mb_swap_short(write_data.second);
+		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+		write_data.alt_second = mb_swap_short(write_data.alt_second);
+
+		/* additional navigation and depths */
+		mb_swap_float(&write_data.course_true);
+		mb_swap_float(&write_data.speed_transverse);
+		mb_swap_float(&write_data.speed);
+		mb_swap_float(&write_data.pitch);
+		write_data.track = mb_swap_short(write_data.track);
+		mb_swap_float(&write_data.depth_center);
+		mb_swap_float(&write_data.depth_scale);
+		write_data.spare = mb_swap_short(write_data.spare);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			{
+			write_data.distance[i] = 
+				mb_swap_short(write_data.distance[i]);
+			write_data.depth[i] = 
+				mb_swap_short(write_data.depth[i]);
+			}
+
+		/* travel time data */
+		mb_swap_float(&write_data.course_ground);
+		mb_swap_float(&write_data.speed_ground);
+		mb_swap_float(&write_data.heave);
+		mb_swap_float(&write_data.roll);
+		mb_swap_float(&write_data.time_center);
+		mb_swap_float(&write_data.time_scale);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			write_data.time[i] = mb_swap_short(write_data.time[i]);
+		for (i=0;i<11;i++)
+			mb_swap_float(&write_data.gyro[i]);
+
+		/* amplitude data */
+		write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
+		write_data.trans_vert = mb_swap_short(write_data.trans_vert);
+		write_data.trans_port = mb_swap_short(write_data.trans_port);
+		write_data.pulse_len_strbd 
+			= mb_swap_short(write_data.pulse_len_strbd);
+		write_data.pulse_len_vert 
+			= mb_swap_short(write_data.pulse_len_vert);
+		write_data.pulse_len_port 
+			= mb_swap_short(write_data.pulse_len_port);
+		write_data.gain_start 
+			= mb_swap_short(write_data.gain_start);
+		write_data.r_compensation_factor 
+			= mb_swap_short(write_data.r_compensation_factor);
+		write_data.compensation_start 
+			= mb_swap_short(write_data.compensation_start);
+		write_data.increase_start 
+			= mb_swap_short(write_data.increase_start);
+		write_data.tvc_near = mb_swap_short(write_data.tvc_near);
+		write_data.tvc_far = mb_swap_short(write_data.tvc_far);
+		write_data.increase_int_near 
+			= mb_swap_short(write_data.increase_int_near);
+		write_data.increase_int_far 
+			= mb_swap_short(write_data.increase_int_far);
+		write_data.gain_center = mb_swap_short(write_data.gain_center);
+		mb_swap_float(&write_data.filter_gain);
+		write_data.amplitude_center 
+			= mb_swap_short(write_data.amplitude_center);
+		write_data.echo_duration_center 
+			= mb_swap_short(write_data.echo_duration_center);
+		write_data.echo_scale_center 
+			= mb_swap_short(write_data.echo_scale_center);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			{
+			write_data.amplitude[i] 
+				= mb_swap_short(write_data.amplitude[i]);
+			write_data.echo_duration[i] 
+				= mb_swap_short(write_data.echo_duration[i]);
+			}
+		for (i=0;i<16;i++)
+			{
+			write_data.gain[i] 
+				= mb_swap_short(write_data.gain[i]);
+			write_data.echo_scale[i] 
+				= mb_swap_short(write_data.echo_scale[i]);
+			}
+
+		/* processed backscatter data */
+		mb_swap_float(&write_data.back_scale);
+		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
+			write_data.back[i] = mb_swap_short(write_data.back[i]);
+		}
+#endif
+
 	/* write record to file */
 	write_size = sizeof(write_data);
 	write_size_short = write_size;
+#ifdef BYTESWAPPED
+	write_size_short = mb_swap_short(write_size_short);
+#endif
 	if ((status = fwrite(&write_size_short,1,sizeof(short int),mbfp))
 		!= sizeof(short int))
 		{
@@ -3124,6 +3740,9 @@ int	*error;
 	/* write record to file */
 	write_size = sizeof(write_data);
 	write_size_short = write_size;
+#ifdef BYTESWAPPED
+	write_size_short = mb_swap_short(write_size_short);
+#endif
 	if ((status = fwrite(&write_size_short,1,sizeof(short int),mbfp))
 		!= sizeof(short int))
 		{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 4.1 1994-04-21 21:02:39 caress Exp $
+ *    $Id: mb_write_init.c,v 4.2 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/04/21  21:02:39  caress
+ * Fixed bug so file open errors are passed back to calling function.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -48,6 +51,9 @@
 #include <math.h>
 #include <strings.h>
 
+/* XDR i/o include file */
+#include <rpc/xdr.h>
+
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
@@ -65,7 +71,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 4.1 1994-04-21 21:02:39 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	int	format_num;
@@ -239,47 +245,69 @@ int	*error;
 	else
 		if ((mb_io_ptr->mbfp = fopen(file, "w")) == NULL) 
 			{
-			status = mb_free(verbose,mb_io_ptr->bath,error);
-			status = mb_free(verbose,mb_io_ptr->amp,error);
-			status = mb_free(verbose,mb_io_ptr->bath_acrosstrack,
-						error);
-			status = mb_free(verbose,mb_io_ptr->bath_alongtrack,
-						error);
-			status = mb_free(verbose,mb_io_ptr->bath_num,error);
-			status = mb_free(verbose,mb_io_ptr->amp_num,error);
-			status = mb_free(verbose,mb_io_ptr->ss,error);
-			status = mb_free(verbose,mb_io_ptr->ss_acrosstrack,
-						error);
-			status = mb_free(verbose,mb_io_ptr->ss_alongtrack,
-						error);
-			status = mb_free(verbose,mb_io_ptr->ss_num,error);
-			status = mb_free(verbose,mb_io_ptr->new_bath,error);
-			status = mb_free(verbose,mb_io_ptr->new_amp,error);
-			status = mb_free(verbose,
-					mb_io_ptr->new_bath_acrosstrack,error);
-			status = mb_free(verbose,mb_io_ptr->new_bath_alongtrack,
-					error);
-			status = mb_free(verbose,mb_io_ptr->new_ss,error);
-			status = mb_free(verbose,mb_io_ptr->new_ss_acrosstrack,
-					error);
-			status = mb_free(verbose,mb_io_ptr->new_ss_alongtrack,
-					error);
-			status = mb_free(verbose,mb_io_ptr,error);
 			*error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
-			if (verbose >= 2)
-				{
-				fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
-					function_name);
-				fprintf(stderr,"dbg2  Return values:\n");
-				fprintf(stderr,"dbg2       error:      %d\n",
-					*error);
-				fprintf(stderr,"dbg2  Return status:\n");
-				fprintf(stderr,"dbg2       status:  %d\n",
-					status);
-				}
-			return(status);
 			}
+
+	/* if needed, initialize XDR stream */
+	if (status == MB_SUCCESS && mb_xdr_table[format_num] == MB_YES)
+		{
+		status = mb_malloc(verbose,sizeof(XDR),
+				&mb_io_ptr->xdrs,error);
+		if (status == MB_SUCCESS)
+			{
+			xdrstdio_create(mb_io_ptr->xdrs, 
+				mb_io_ptr->mbfp, XDR_ENCODE);
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_MEMORY_FAIL;
+			}
+		}
+
+	/* if error terminate */
+	if (status == MB_FAILURE)
+		{
+		if (mb_xdr_table[format_num] == MB_YES)
+			status = mb_free(verbose,mb_io_ptr->xdrs,error);
+		status = mb_free(verbose,mb_io_ptr->bath,error);
+		status = mb_free(verbose,mb_io_ptr->amp,error);
+		status = mb_free(verbose,mb_io_ptr->bath_acrosstrack,
+						error);
+		status = mb_free(verbose,mb_io_ptr->bath_alongtrack,
+						error);
+		status = mb_free(verbose,mb_io_ptr->bath_num,error);
+		status = mb_free(verbose,mb_io_ptr->amp_num,error);
+		status = mb_free(verbose,mb_io_ptr->ss,error);
+		status = mb_free(verbose,mb_io_ptr->ss_acrosstrack,
+						error);
+		status = mb_free(verbose,mb_io_ptr->ss_alongtrack,
+						error);
+		status = mb_free(verbose,mb_io_ptr->ss_num,error);
+		status = mb_free(verbose,mb_io_ptr->new_bath,error);
+		status = mb_free(verbose,mb_io_ptr->new_amp,error);
+		status = mb_free(verbose,
+					mb_io_ptr->new_bath_acrosstrack,error);
+		status = mb_free(verbose,mb_io_ptr->new_bath_alongtrack,
+					error);
+		status = mb_free(verbose,mb_io_ptr->new_ss,error);
+		status = mb_free(verbose,mb_io_ptr->new_ss_acrosstrack,
+					error);
+		status = mb_free(verbose,mb_io_ptr->new_ss_alongtrack,
+					error);
+		status = mb_free(verbose,mb_io_ptr,error);
+		if (verbose >= 2)
+			{
+			fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
+					function_name);
+			fprintf(stderr,"dbg2  Return values:\n");
+			fprintf(stderr,"dbg2       error:      %d\n",*error);
+			fprintf(stderr,"dbg2  Return status:\n");
+			fprintf(stderr,"dbg2       status:  %d\n",status);
+			}
+		return(status);
+		}
 
 	/* initialize the working variables */
 	mb_io_ptr->ping_count = 0;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 4.1 1994-06-05 02:42:58 caress Exp $
+ *    $Id: mb_read.c,v 4.2 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/06/05  02:42:58  caress
+ * Fixed xtrack/ltrack to/from lon/lat conversions.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -74,8 +77,11 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 
-/* local define */
-#define DTR (M_PI/180.)
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
 #define RTD (180./M_PI)
 
 /*--------------------------------------------------------------------*/
@@ -110,16 +116,17 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 4.1 1994-06-05 02:42:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
 	int	i;
 	int	done;
+	int	reset_last;
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
 	double	dx, dy;
-	double	delta_time;
+	double	delta_time = 0.0;
 	double	denom;
 
 	/* print input debug statements */
@@ -171,7 +178,7 @@ int	*error;
 		{
 
 		/* print debug statements */
-		if (verbose >= 4)
+		if (verbose >= 2)
 			{
 			fprintf(stderr,"\ndbg2  About to read ping in function <%s>\n",
 				function_name);
@@ -236,7 +243,7 @@ int	*error;
 			}
 
 		/* print debug statements */
-		if (verbose >= 4)
+		if (verbose >= 2)
 			{
 			fprintf(stderr,"\ndbg2  New ping read in function <%s>\n",
 				function_name);
@@ -282,7 +289,7 @@ int	*error;
 			&& mb_io_ptr->ping_count > 1)
 		{
 		if ((mb_io_ptr->new_time_d - mb_io_ptr->last_time_d) 
-			> mb_io_ptr->timegap)
+			> 60*mb_io_ptr->timegap)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_TIME_GAP;
@@ -508,6 +515,7 @@ int	*error;
 			{
 			done = MB_NO;
 			mb_io_ptr->need_new_ping = MB_YES;
+			reset_last = MB_YES;
 			}
 
 		/* if data is ok and enough pings binned then done */
@@ -517,6 +525,7 @@ int	*error;
 			{
 			done = MB_YES;
 			mb_io_ptr->need_new_ping = MB_YES;
+			reset_last = MB_YES;
 			}
 
 		/* if data gap and only one ping read and more
@@ -531,6 +540,7 @@ int	*error;
 			mb_io_ptr->error_save = *error;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
+			reset_last = MB_YES;
 			}
 
 		/* if other kind of data and need more pings
@@ -543,6 +553,7 @@ int	*error;
 			mb_io_ptr->need_new_ping = MB_YES;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
+			reset_last = MB_NO;
 			}
 
 		/* if error and only one ping read then done */
@@ -551,6 +562,7 @@ int	*error;
 			{
 			done = MB_YES;
 			mb_io_ptr->need_new_ping = MB_YES;
+			reset_last = MB_NO;
 			}
 
 		/* if error and more than one ping read, 
@@ -561,12 +573,11 @@ int	*error;
 			mb_io_ptr->need_new_ping = MB_NO;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
+			reset_last = MB_NO;
 			}
 
-		/* if new ping is used now, reset "last" pings */
-		if (mb_io_ptr->need_new_ping == MB_YES
-			&& *error <= MB_ERROR_NO_ERROR
-			&& *error > MB_ERROR_COMMENT)
+		/* if needed reset "last" pings */
+		if (reset_last == MB_YES)
 			{
 			mb_io_ptr->last_time_d = mb_io_ptr->new_time_d;
 			mb_io_ptr->last_lon = mb_io_ptr->new_lon;

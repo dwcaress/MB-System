@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 4.1 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -47,13 +50,18 @@
 #include "../../include/mbf_mbldeoih.h"
 #include "../../include/mbsys_ldeoih.h"
 
+/* include for byte swapping on little-endian machines */
+#ifdef BYTESWAPPED
+#include "../../include/mb_swap.h"
+#endif
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbldeoih(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+ static char res_id[]="$Id: mbr_mbldeoih.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -209,6 +217,30 @@ int	*error;
 		*error = MB_ERROR_EOF;
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		header->flag = mb_swap_short(header->flag);
+		header->year = mb_swap_short(header->year);
+		header->day = mb_swap_short(header->day);
+		header->min = mb_swap_short(header->min);
+		header->sec = mb_swap_short(header->sec);
+		header->lon2u = mb_swap_short(header->lon2u);
+		header->lon2b = mb_swap_short(header->lon2b);
+		header->lat2u = mb_swap_short(header->lat2u);
+		header->lat2b = mb_swap_short(header->lat2b);
+		header->heading = mb_swap_short(header->heading);
+		header->speed = mb_swap_short(header->speed);
+		header->beams_bath = mb_swap_short(header->beams_bath);
+		header->beams_amp = mb_swap_short(header->beams_amp);
+		header->pixels_ss = mb_swap_short(header->pixels_ss);
+		header->bath_scale = mb_swap_short(header->bath_scale);
+		header->amp_scale = mb_swap_short(header->amp_scale);
+		header->ss_scale = mb_swap_short(header->ss_scale);
+		}
+#endif
+
 	/* check for comment or unintelligible records */
 	if (status == MB_SUCCESS)
 		{
@@ -312,6 +344,30 @@ int	*error;
 		status = fread(ss,1,read_size,mb_io_ptr->mbfp);
 		status = fread(ss_acrosstrack,1,read_size,mb_io_ptr->mbfp);
 		status = fread(ss_alongtrack,1,read_size,mb_io_ptr->mbfp);
+
+		/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+		for (i=0;i<header->beams_bath;i++)
+			{
+			data->bath[i] = mb_swap_short(data->bath[i]);
+			data->bath_acrosstrack[i] 
+				= mb_swap_short(data->bath_acrosstrack[i]);
+			data->bath_alongtrack[i] 
+				= mb_swap_short(data->bath_alongtrack[i]);
+			}
+		for (i=0;i<header->beams_amp;i++)
+			{
+			data->amp[i] = mb_swap_short(data->amp[i]);
+			}
+		for (i=0;i<header->pixels_ss;i++)
+			{
+			data->ss[i] = mb_swap_short(data->bath[i]);
+			data->ss_acrosstrack[i] 
+				= mb_swap_short(data->ss_acrosstrack[i]);
+			data->ss_alongtrack[i] 
+				= mb_swap_short(data->ss_alongtrack[i]);
+			}
+#endif
 
 		/* check for end of file */
 		if (status == read_size) 
@@ -587,6 +643,9 @@ int	*error;
 	int	time_j[4];
 	double	lon;
 	double	lat;
+	int	beams_bath;
+	int	beams_amp;
+	int	pixels_ss;
 	int	i;
 
 	/* print input debug statements */
@@ -620,6 +679,11 @@ int	*error;
 	/* first translate values from data storage structure */
 	if (store != NULL)
 		{
+		/* save beam and pixel numbers */
+		beams_bath = store->beams_bath;
+		beams_amp = store->beams_amp;
+		pixels_ss = store->pixels_ss;
+
 		/* type of data record */
 		dataplus->kind = store->kind;
 
@@ -687,6 +751,11 @@ int	*error;
 	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
 		&& mb_io_ptr->new_kind == MB_DATA_DATA)
 		{
+		/* save beam and pixel numbers */
+		beams_bath = mb_io_ptr->beams_bath;
+		beams_amp = mb_io_ptr->beams_amp;
+		pixels_ss = mb_io_ptr->pixels_ss;
+
 		dataplus->kind = MB_DATA_DATA;
 
 		/* get time */
@@ -790,6 +859,30 @@ int	*error;
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		{
+		header->flag = mb_swap_short(header->flag);
+		header->year = mb_swap_short(header->year);
+		header->day = mb_swap_short(header->day);
+		header->min = mb_swap_short(header->min);
+		header->sec = mb_swap_short(header->sec);
+		header->lon2u = mb_swap_short(header->lon2u);
+		header->lon2b = mb_swap_short(header->lon2b);
+		header->lat2u = mb_swap_short(header->lat2u);
+		header->lat2b = mb_swap_short(header->lat2b);
+		header->heading = mb_swap_short(header->heading);
+		header->speed = mb_swap_short(header->speed);
+		header->beams_bath = mb_swap_short(header->beams_bath);
+		header->beams_amp = mb_swap_short(header->beams_amp);
+		header->pixels_ss = mb_swap_short(header->pixels_ss);
+		header->bath_scale = mb_swap_short(header->bath_scale);
+		header->amp_scale = mb_swap_short(header->amp_scale);
+		header->ss_scale = mb_swap_short(header->ss_scale);
+		}
+#endif
+
 	/* write next header to file */
 	if ((status = fwrite(header,1,mb_io_ptr->header_structure_size,
 			mb_io_ptr->mbfp)) == mb_io_ptr->header_structure_size) 
@@ -818,13 +911,13 @@ int	*error;
 		}
 	if (verbose >=5 && dataplus->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg5       beams_bath: %d\n",header->beams_bath);
-		fprintf(stderr,"dbg5       beams_amp:  %d\n",header->beams_amp);
-		for (i=0;i<header->beams_bath;i++)
+		fprintf(stderr,"dbg5       beams_bath: %d\n",beams_bath);
+		fprintf(stderr,"dbg5       beams_amp:  %d\n",beams_amp);
+		for (i=0;i<beams_bath;i++)
 			fprintf(stderr,"dbg5       beam:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
 				i,bath[i],amp[i],bath_acrosstrack[i],bath_alongtrack[i]);
-		fprintf(stderr,"dbg5       pixels_ss:  %d\n",header->pixels_ss);
-		for (i=0;i<header->pixels_ss;i++)
+		fprintf(stderr,"dbg5       pixels_ss:  %d\n",pixels_ss);
+		for (i=0;i<pixels_ss;i++)
 			fprintf(stderr,"dbg5       beam:%d  ss:%d  acrosstrack:%d  alongtrack:%d\n",
 				i,ss[i],ss_acrosstrack[i],ss_alongtrack[i]);
 		}
@@ -848,18 +941,42 @@ int	*error;
 	else if (dataplus->kind == MB_DATA_DATA)
 		{
 
+		/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+		for (i=0;i<beams_bath;i++)
+			{
+			data->bath[i] = mb_swap_short(data->bath[i]);
+			data->bath_acrosstrack[i] 
+				= mb_swap_short(data->bath_acrosstrack[i]);
+			data->bath_alongtrack[i] 
+				= mb_swap_short(data->bath_alongtrack[i]);
+			}
+		for (i=0;i<beams_amp;i++)
+			{
+			data->amp[i] = mb_swap_short(data->amp[i]);
+			}
+		for (i=0;i<pixels_ss;i++)
+			{
+			data->ss[i] = mb_swap_short(data->bath[i]);
+			data->ss_acrosstrack[i] 
+				= mb_swap_short(data->ss_acrosstrack[i]);
+			data->ss_alongtrack[i] 
+				= mb_swap_short(data->ss_alongtrack[i]);
+			}
+#endif
+
 		/* write bathymetry */
-		write_size = sizeof(short int)*header->beams_bath;
+		write_size = sizeof(short int)*beams_bath;
 		status = fwrite(bath,1,write_size,mb_io_ptr->mbfp);
 		status = fwrite(bath_acrosstrack,1,write_size,mb_io_ptr->mbfp);
 		status = fwrite(bath_alongtrack,1,write_size,mb_io_ptr->mbfp);
 
 		/* write amplitude */
-		write_size = sizeof(short int)*header->beams_amp;
+		write_size = sizeof(short int)*beams_amp;
 		status = fwrite(amp,1,write_size,mb_io_ptr->mbfp);
 
 		/* write sidescan */
-		write_size = sizeof(short int)*header->pixels_ss;
+		write_size = sizeof(short int)*pixels_ss;
 		status = fwrite(ss,1,write_size,mb_io_ptr->mbfp);
 		status = fwrite(ss_acrosstrack,1,write_size,mb_io_ptr->mbfp);
 		status = fwrite(ss_alongtrack,1,write_size,mb_io_ptr->mbfp);

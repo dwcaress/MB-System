@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_get_all.c,v 4.1 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.3  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -84,7 +87,7 @@ int	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -314,8 +317,8 @@ int	*error;
 		&& *kind != MB_DATA_COMMENT 
 		&& mb_io_ptr->ping_count > 1)
 		{
-		if ((*time_d - mb_io_ptr->last_time_d) 
-			> mb_io_ptr->timegap)
+		if ((*time_d - mb_io_ptr->old_time_d) 
+			> 60*mb_io_ptr->timegap)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_TIME_GAP;

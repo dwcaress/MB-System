@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbr_em12darw.c,v 4.1 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/05  22:54:09  caress
  * First cut.
  *
@@ -42,13 +45,18 @@
 #include "mbf_em12darw.h"
 #include "mbsys_em12.h"
 
+/* include for byte swapping on little-endian machines */
+#ifdef BYTESWAPPED
+#include "../../include/mb_swap.h"
+#endif
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12darw(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -264,7 +272,6 @@ int	*error;
 	datacomment = (char *) data->depth;
 	store = (struct mbsys_em12_struct *) store_ptr;	
 
-
 	/* read next record from file */
 	if ((status = fread(data,1,mb_io_ptr->structure_size,
 			mb_io_ptr->mbfp)) == mb_io_ptr->structure_size) 
@@ -278,6 +285,42 @@ int	*error;
 		*error = MB_ERROR_EOF;
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	if (status == MB_SUCCESS)
+		data->func = mb_swap_short(data->func);
+	if (status == MB_SUCCESS && data->func == 150)
+		{
+		data->year = mb_swap_short(data->year);
+		data->jday = mb_swap_short(data->jday);
+		data->minute = mb_swap_short(data->minute);
+		data->secs = mb_swap_short(data->secs);
+		mb_swap_double(&data->latitude);
+		mb_swap_double(&data->longitude);
+		data->corflag = mb_swap_short(data->corflag);
+		mb_swap_float(&data->utm_merd);
+		data->utm_zone = mb_swap_short(data->utm_zone);
+		data->posq = mb_swap_short(data->posq);
+		data->pingno = mb_swap_long(data->pingno);
+		data->mode = mb_swap_short(data->mode);
+		mb_swap_float(&data->depthl);
+		mb_swap_float(&data->speed);
+		mb_swap_float(&data->gyro);
+		mb_swap_float(&data->roll);
+		mb_swap_float(&data->pitch);
+		mb_swap_float(&data->heave);
+		mb_swap_float(&data->sndval);
+		for (i=0;i<MBSYS_EM12_BEAMS;i++)
+			{
+			data->depth[i] = mb_swap_short(data->depth[i]);
+			data->distacr[i] = mb_swap_short(data->distacr[i]);
+			data->distalo[i] = mb_swap_short(data->distalo[i]);
+			data->range[i] = mb_swap_short(data->range[i]);
+			data->refl[i] = mb_swap_short(data->refl[i]);
+			data->beamq[i] = mb_swap_short(data->beamq[i]);
+			}
+		}
+#endif
 
 	/* check for comment or unintelligible records */
 	if (status == MB_SUCCESS)
@@ -524,6 +567,7 @@ int	*error;
 	int	time_j[4];
 	double	lon, lat;
 	double	depthscale, dacrscale,daloscale,rangescale,reflscale;
+	short	func;
 	int	i, j;
 
 	/* print input debug statements */
@@ -704,8 +748,47 @@ int	*error;
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		}
 
+	/* set func before possible byte swapping */
+	func = data->func;
+
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	data->func = mb_swap_short(data->func);
+	if (func == 150)
+		{
+		data->year = mb_swap_short(data->year);
+		data->jday = mb_swap_short(data->jday);
+		data->minute = mb_swap_short(data->minute);
+		data->secs = mb_swap_short(data->secs);
+		mb_swap_double(&data->latitude);
+		mb_swap_double(&data->longitude);
+		data->corflag = mb_swap_short(data->corflag);
+		mb_swap_float(&data->utm_merd);
+		data->utm_zone = mb_swap_short(data->utm_zone);
+		data->posq = mb_swap_short(data->posq);
+		data->pingno = mb_swap_long(data->pingno);
+		data->mode = mb_swap_short(data->mode);
+		mb_swap_float(&data->depthl);
+		mb_swap_float(&data->speed);
+		mb_swap_float(&data->gyro);
+		mb_swap_float(&data->roll);
+		mb_swap_float(&data->pitch);
+		mb_swap_float(&data->heave);
+		mb_swap_float(&data->sndval);
+		for (i=0;i<MBSYS_EM12_BEAMS;i++)
+			{
+			data->depth[i] = mb_swap_short(data->depth[i]);
+			data->distacr[i] = mb_swap_short(data->distacr[i]);
+			data->distalo[i] = mb_swap_short(data->distalo[i]);
+			data->range[i] = mb_swap_short(data->range[i]);
+			data->refl[i] = mb_swap_short(data->refl[i]);
+			data->beamq[i] = mb_swap_short(data->beamq[i]);
+			}
+		}
+#endif
+
 	/* write next record to file */
-	if (data->func == 150 || data->func == 100)
+	if (func == 150 || func == 100)
 		{
 		if ((status = fwrite(data,1,mb_io_ptr->structure_size,
 				mb_io_ptr->mbfp)) 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.4 1994-06-21 22:54:21 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.5 1994-07-29 18:46:51 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/06/21  22:54:21  caress
+ * Added #ifdef statements to handle byte swapping.
+ *
  * Revision 4.3  1994/04/09  15:49:21  caress
  * Altered to fit latest iteration of SeaBeam 2100 vendor format.
  *
@@ -49,11 +52,6 @@
 #include <math.h>
 #include <strings.h>
 
-/* include for byte swapping on little-endian machines */
-#ifdef BYTESWAPPED
-#include "../../include/mb_swap.h"
-#endif
-
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
@@ -61,13 +59,18 @@
 #include "../../include/mbsys_sb2100.h"
 #include "../../include/mbf_sb2100rw.h"
 
+/* include for byte swapping on little-endian machines */
+#ifdef BYTESWAPPED
+#include "../../include/mb_swap.h"
+#endif
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.4 1994-06-21 22:54:21 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.5 1994-07-29 18:46:51 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -1531,6 +1534,7 @@ int	*error;
 	char	ew, ns;
 	unsigned short	read_ss[2*MBF_SB2100RW_PIXELS+2];
 	int	degrees, minutes;
+	unsigned short tmp;
 	int	i;
 
 	/* print input debug statements */
@@ -1711,9 +1715,9 @@ int	*error;
 			/* deal with byte swapping if necessary */
 #ifdef BYTESWAPPED
                         tmp = read_ss[2*i];
-                        data->amplitude_ss[i] = (int) swap_2byte(tmp);
+                        data->amplitude_ss[i] = (int) mb_swap_short(tmp);
                         tmp = (short) read_ss[2*i+1];
-                        data->alongtrack_ss[i] = (int) swap_2byte(tmp);
+                        data->alongtrack_ss[i] = (int) mb_swap_short(tmp);
 #else
 			data->amplitude_ss[i] = read_ss[2*i];
 			data->alongtrack_ss[i] = (short) read_ss[2*i+1];
@@ -2580,9 +2584,9 @@ int	*error;
 			{
 			/* deal with byte swapping if necessary */
 #ifdef BYTESWAPPED
-			write_ss[2*i] = swap_2bytes((unsigned short) 
+			write_ss[2*i] = mb_swap_short((unsigned short) 
 				data->amplitude_ss[i]);
-			write_ss[2*i+1] = swap_2bytes((short) 
+			write_ss[2*i+1] = mb_swap_short((short) 
 				data->alongtrack_ss[i]);
 #else
 			write_ss[2*i] = (unsigned short) data->amplitude_ss[i];
