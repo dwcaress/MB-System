@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 4.1 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 4.2 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -61,7 +65,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
+ static char res_id[]="$Id: mbr_mbldeoih.c,v 4.2 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -129,7 +133,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,mb_io_ptr->raw_data,error);
+	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
 	status = mbsys_ldeoih_deall(verbose,mbio_ptr,
 		mb_io_ptr->store_data,error);
 
@@ -170,7 +174,7 @@ int	*error;
 	short int	*ss_acrosstrack;
 	short int	*ss_alongtrack;
 	int	read_size;
-	int	time_j[4];
+	int	time_j[5];
 	double	bathscale;
 	double	ampscale;
 	double	ssscale;
@@ -412,6 +416,7 @@ int	*error;
 		time_j[1] = header->day;
 		time_j[2] = header->min;
 		time_j[3] = header->sec;
+		time_j[4] = 0;
 		mb_get_itime(verbose,time_j,mb_io_ptr->new_time_i);
 		mb_get_time(verbose,mb_io_ptr->new_time_i,
 			&(mb_io_ptr->new_time_d));
@@ -503,6 +508,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				mb_io_ptr->new_time_d);
 			fprintf(stderr,"dbg4       longitude:  %f\n",
@@ -518,12 +525,12 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4       beam:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,bath[i],amp[i],
 				bath_acrosstrack[i],bath_alongtrack[i]);
 			fprintf(stderr,"dbg4       pixels_ss:  %d\n",
 				mb_io_ptr->pixels_ss);
-			  fprintf(stderr,"dbg4       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4       pixel:%d  ss:%f acrosstrack:%f  alongtrack:%f\n",
 				i,ss[i],
 				ss_acrosstrack[i],ss_alongtrack[i]);
 			}
@@ -640,7 +647,7 @@ int	*error;
 	short int	*ss_acrosstrack;
 	short int	*ss_alongtrack;
 	int	write_size;
-	int	time_j[4];
+	int	time_j[5];
 	double	lon;
 	double	lat;
 	int	beams_bath;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldedmb.c	2/2/93
- *	$Id: mbr_hsldedmb.c,v 4.2 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mbr_hsldedmb.c,v 4.3 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.1  1994/05/21  02:23:29  caress
  * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
  *
@@ -68,7 +72,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldedmb.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldedmb.c,v 4.3 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbr_alm_hsldedmb";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -136,8 +140,8 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,mb_io_ptr->store_data,error);
+	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
+	status = mb_free(verbose,&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -300,7 +304,7 @@ int	*error;
 			{
 			mb_io_ptr->new_bath[i] = data->depth[i];
 			mb_io_ptr->new_bath_acrosstrack[i] = data->range[i];
-			mb_io_ptr->new_bath_alongtrack[i] = 0;
+			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 			}
 
 		/* print debug statements */
@@ -323,6 +327,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				mb_io_ptr->new_time_d);
 			fprintf(stderr,"dbg4       longitude:  %f\n",
@@ -338,7 +344,7 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp: %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  bathdist[%d]: %d\n",
+			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
 				i,mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
@@ -504,7 +510,7 @@ int	*error;
 	struct mbf_hsldedmb_data_struct *data;
 	struct mbsys_hsds_struct *store;
 	char	*datacomment;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	lon, lat;
 	int	i, j;
@@ -577,6 +583,7 @@ int	*error;
 			time_i[3] = store->hour;
 			time_i[4] = store->minute;
 			time_i[5] = store->second;
+			time_i[6] = 0;
 			mb_get_time(verbose,time_i,&time_d);
 			data->seconds = (int) time_d;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mr1prhig.h	3/3/94
- *	$Id: mbf_mr1prhig.h,v 1.1 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mbf_mr1prhig.h,v 1.2 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	July 15, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1994/07/29  18:46:51  caress
+ * Initial revision
+ *
  *
  *
  */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.5 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.6 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.4  1994/06/21  22:54:21  caress
  * Added #ifdef statements to handle byte swapping.
  *
@@ -70,13 +74,10 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.5 1994-07-29 18:46:51 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.6 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
-	int	i;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_sb2100rw_struct *data;
-	char	*data_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -102,13 +103,8 @@ int	*error;
 	status = mb_malloc(verbose,sizeof(struct mbsys_sb2100_struct),
 				&mb_io_ptr->store_data,error);
 
-	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	data = (struct mbf_sb2100rw_struct *) mb_io_ptr->raw_data;
-	data_ptr = (char *) data;
-
 	/* initialize everything to zeros */
-	mbr_zero_sb2100rw(verbose,data_ptr,error);
+	mbr_zero_sb2100rw(verbose,mb_io_ptr->raw_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -148,8 +144,8 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,mb_io_ptr->store_data,error);
+	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
+	status = mb_free(verbose,&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -314,7 +310,7 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_sb2100rw_struct *data;
 	struct mbsys_sb2100_struct *store;
-	int	time_j[4];
+	int	time_j[5];
 	double	scale;
 	int	i, j, k;
 
@@ -342,6 +338,7 @@ int	*error;
 	mb_io_ptr->new_time_i[3] = 0;
 	mb_io_ptr->new_time_i[4] = 0;
 	mb_io_ptr->new_time_i[5] = 0;
+	mb_io_ptr->new_time_i[6] = 0;
 	mb_io_ptr->new_time_d = 0.0;
 	mb_io_ptr->new_lon = 0.0;
 	mb_io_ptr->new_lat = 0.0;
@@ -349,19 +346,19 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
-		mb_io_ptr->new_bath[i] = 0;
-		mb_io_ptr->new_bath_acrosstrack[i] = 0;
-		mb_io_ptr->new_bath_alongtrack[i] = 0;
+		mb_io_ptr->new_bath[i] = 0.0;
+		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
+		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 		}
 	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
-		mb_io_ptr->new_amp[i] = 0;
+		mb_io_ptr->new_amp[i] = 0.0;
 		}
 	for (i=0;i<mb_io_ptr->pixels_ss;i++)
 		{
-		mb_io_ptr->new_ss[i] = 0;
-		mb_io_ptr->new_ss_acrosstrack[i] = 0;
-		mb_io_ptr->new_ss_alongtrack[i] = 0;
+		mb_io_ptr->new_ss[i] = 0.0;
+		mb_io_ptr->new_ss_acrosstrack[i] = 0.0;
+		mb_io_ptr->new_ss_alongtrack[i] = 0.0;
 		}
 
 	/* read next data from file */
@@ -380,6 +377,7 @@ int	*error;
 		time_j[1] = data->jday;
 		time_j[2] = 60*data->hour + data->minute;
 		time_j[3] = 0.001*data->msec;
+		time_j[4] = 1000*(data->msec - 1000*time_j[3]);
 		mb_get_itime(verbose,time_j,mb_io_ptr->new_time_i);
 		mb_get_time(verbose,mb_io_ptr->new_time_i,
 			&mb_io_ptr->new_time_d);
@@ -406,6 +404,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				mb_io_ptr->new_time_d);
 			}
@@ -441,9 +441,9 @@ int	*error;
 
 		/* get heading */
 		if (data->frequency[0] != 'H')
-			mb_io_ptr->new_heading = 0.01*data->heading_12khz;
+			mb_io_ptr->new_heading = 0.001*data->heading_12khz;
 		else
-			mb_io_ptr->new_heading = 0.01*data->heading_36khz;
+			mb_io_ptr->new_heading = 0.001*data->heading_36khz;
 
 		/* get speed */
 		mb_io_ptr->new_speed = 0.0036*data->speed;
@@ -497,7 +497,7 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4       beam:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
@@ -505,7 +505,7 @@ int	*error;
 			fprintf(stderr,"dbg4       pixels_ss:  %d\n",
 				mb_io_ptr->pixels_ss);
 			for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			  fprintf(stderr,"dbg4       beam:%d  ss:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4       pixel:%d  ss:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,mb_io_ptr->new_ss[i],
 				mb_io_ptr->new_ss_acrosstrack[i],
 				mb_io_ptr->new_ss_alongtrack[i]);
@@ -660,8 +660,9 @@ int	*error;
 	char	*data_ptr;
 	struct mbsys_sb2100_struct *store;
 	double	scalefactor;
-	int	time_j[4];
+	int	time_j[5];
 	double	scale;
+	int	set_pixel_size;
 	int	i;
 
 	/* print input debug statements */
@@ -794,7 +795,7 @@ int	*error;
 		data->jday = time_j[1];
 		data->hour = time_j[2]/60;
 		data->minute = time_j[2] - 60*data->hour;
-		data->msec = 1000*time_j[3];
+		data->msec = 1000*time_j[3] + (int) 0.001*time_j[4];
 		}
 
 	/* check for comment to be copied from mb_io_ptr */
@@ -819,13 +820,13 @@ int	*error;
 
 		/* get heading */
 		if (data->frequency[0] != 'H')
-			data->heading_12khz = 100*mb_io_ptr->new_heading;
+			data->heading_12khz = 1000*mb_io_ptr->new_heading;
 		else
-			data->heading_36khz = 100*mb_io_ptr->new_heading;
+			data->heading_36khz = 1000*mb_io_ptr->new_heading;
 		if (data->heading_12khz < 0)
-			data->heading_12khz = data->heading_12khz + 36000;
+			data->heading_12khz = data->heading_12khz + 360000;
 		if (data->heading_36khz < 0)
-			data->heading_36khz = data->heading_36khz + 36000;
+			data->heading_36khz = data->heading_36khz + 360000;
 
 		/* get speed */
 		data->speed = mb_io_ptr->new_speed/0.0036;
@@ -852,15 +853,31 @@ int	*error;
 			 data->amplitude_beam[i]
 				= mb_io_ptr->new_amp[i];
 			}
+		set_pixel_size = MB_YES;
 		for (i=0;i<mb_io_ptr->pixels_ss;i++)
 			{
 			data->amplitude_ss[i]
 				= mb_io_ptr->new_ss[i];
-			if (data->pixel_size_12khz <= 0
+			if (set_pixel_size == MB_YES
+			    && (data->frequency[0] == 'H' 
+			    && data->pixel_size_36khz <= 0)
 				&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
+				{
+				data->pixel_size_36khz = 
+					mb_io_ptr->new_ss_acrosstrack[i]/
+					(i - MBF_SB2100RW_CENTER_PIXEL);
+				set_pixel_size = MB_NO;
+				}
+			else if (set_pixel_size == MB_YES
+			    && (data->frequency[0] != 'H' 
+			    && data->pixel_size_12khz <= 0)
+				&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
+				{
 				data->pixel_size_12khz = 
 					mb_io_ptr->new_ss_acrosstrack[i]/
 					(i - MBF_SB2100RW_CENTER_PIXEL);
+				set_pixel_size = MB_NO;
+				}
 			data->alongtrack_ss[i]
 				= scale*mb_io_ptr->new_ss_alongtrack[i];
 			}
@@ -1481,6 +1498,11 @@ int	*error;
 		mb_get_int(&(data->signal_to_noise[i]),  line+37, 2);
 		mb_get_int(&(data->echo_length[i]),      line+39, 3);
 		data->quality[i] = line[42];
+		if (data->quality[i] != ' ' && data->depth[i] > 0)
+			{
+			data->depth[i] = -data->depth[i];
+			data->amplitude_beam[i] = -data->amplitude_beam[i];
+			}
 		}
 	  }
 
@@ -2034,25 +2056,24 @@ int	*error;
 	if (status == MB_SUCCESS)
 		{
 		/* output the first line */
-		status = fprintf(mbfp,"%4d",data->year);
-		status = fprintf(mbfp,"%3d",data->jday);
-		status = fprintf(mbfp,"%2d",data->hour);
-		status = fprintf(mbfp,"%2d",data->minute);
-		status = fprintf(mbfp,"%5d",data->msec);
-		status = fprintf(mbfp,"%6d",data->roll_bias_port);
-		status = fprintf(mbfp,"%6d",data->roll_bias_starboard);
-		status = fprintf(mbfp,"%6d",data->pitch_bias);
-		status = fprintf(mbfp,"%2d",data->num_svp);
+		status = fprintf(mbfp,"%4.4d",data->year);
+		status = fprintf(mbfp,"%3.3d",data->jday);
+		status = fprintf(mbfp,"%2.2d",data->hour);
+		status = fprintf(mbfp,"%2.2d",data->minute);
+		status = fprintf(mbfp,"%5.5d",data->msec);
+		status = fprintf(mbfp,"%+06d",data->roll_bias_port);
+		status = fprintf(mbfp,"%+06d",data->roll_bias_starboard);
+		status = fprintf(mbfp,"%+06d",data->pitch_bias);
+		status = fprintf(mbfp,"%2.2d",data->num_svp);
 		status = fprintf(mbfp,"\r\n");
 
 		/* output the second line */
 		for (i=0;i<data->num_svp;i++)
 			{
-			status = fprintf(mbfp,"%7d",data->vdepth[i]);
-			status = fprintf(mbfp,"%6d",data->velocity[i]);
+			status = fprintf(mbfp,"%7.7d",data->vdepth[i]);
+			status = fprintf(mbfp,"%6.6d",data->velocity[i]);
 			status = fprintf(mbfp,"\r\n");
 			}
-		status = fprintf(mbfp,"\r\n");
 
 		/* check for an error */
 		if (status > 0)
@@ -2272,11 +2293,11 @@ int	*error;
 	if (status == MB_SUCCESS)
 		{
 		/* output the first line */
-		status = fprintf(mbfp,"%4d",data->year);
-		status = fprintf(mbfp,"%3d",data->jday);
-		status = fprintf(mbfp,"%2d",data->hour);
-		status = fprintf(mbfp,"%2d",data->minute);
-		status = fprintf(mbfp,"%5d",data->msec);
+		status = fprintf(mbfp,"%4.4d",data->year);
+		status = fprintf(mbfp,"%3.3d",data->jday);
+		status = fprintf(mbfp,"%2.2d",data->hour);
+		status = fprintf(mbfp,"%2.2d",data->minute);
+		status = fprintf(mbfp,"%5.5d",data->msec);
 		degrees = data->latitude;
 		if (degrees < 0.0)
 			{
@@ -2287,8 +2308,8 @@ int	*error;
 			status = fprintf(mbfp,"N");
 		idegrees = (int) degrees;
 		minutes = (int) (600000.0*(degrees - idegrees));
-		status = fprintf(mbfp,"%2d",idegrees);
-		status = fprintf(mbfp,"%6d",minutes);
+		status = fprintf(mbfp,"%2.2d",idegrees);
+		status = fprintf(mbfp,"%6.6d",minutes);
 		degrees = data->longitude;
 		if (degrees < -180.0)
 			degrees = degrees + 360.0;
@@ -2303,40 +2324,40 @@ int	*error;
 			status = fprintf(mbfp,"E");
 		idegrees = (int) degrees;
 		minutes = (int) (600000.0*(degrees - idegrees));
-		status = fprintf(mbfp,"%3d",idegrees);
-		status = fprintf(mbfp,"%6d",minutes);
-		status = fprintf(mbfp,"%7d",data->speed);
-		status = fprintf(mbfp,"%4d",data->num_beams);
+		status = fprintf(mbfp,"%3.3d",idegrees);
+		status = fprintf(mbfp,"%6.6d",minutes);
+		status = fprintf(mbfp,"%+07d",data->speed);
+		status = fprintf(mbfp,"%4.4d",data->num_beams);
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
 			data->frequency[0],data->frequency[1]);
 		for (i=0;i<8;i++)
 			status = fprintf(mbfp,"%c",data->spare[i]);
 		status = fprintf(mbfp,"%c",data->range_scale);
-		status = fprintf(mbfp,"%6d",data->surface_sound_velocity);
+		status = fprintf(mbfp,"%6.6d",data->surface_sound_velocity);
 		status = fprintf(mbfp,"%c",data->ssv_source);
 		status = fprintf(mbfp,"%c",data->depth_gate_mode);
 		if (data->frequency[0] != 'H')
 			{
-			status = fprintf(mbfp,"%2d",data->ping_gain_12khz);
-			status = fprintf(mbfp,"%2d",
+			status = fprintf(mbfp,"%2.2d",data->ping_gain_12khz);
+			status = fprintf(mbfp,"%2.2d",
 				data->ping_pulse_width_12khz);
-			status = fprintf(mbfp,"%2d",
+			status = fprintf(mbfp,"%+02d",
 				data->transmitter_attenuation_12khz);
-			status = fprintf(mbfp,"%6d",data->pitch_12khz);
-			status = fprintf(mbfp,"%6d",data->roll_12khz);
-			status = fprintf(mbfp,"%6d",data->heading_12khz);
+			status = fprintf(mbfp,"%+06d",data->pitch_12khz);
+			status = fprintf(mbfp,"%+06d",data->roll_12khz);
+			status = fprintf(mbfp,"%6.6d",data->heading_12khz);
 			}
 		if (data->frequency[0] != 'L')
 			{
-			status = fprintf(mbfp,"%2d",data->ping_gain_36khz);
-			status = fprintf(mbfp,"%2d",data->
+			status = fprintf(mbfp,"%2.2d",data->ping_gain_36khz);
+			status = fprintf(mbfp,"%2.2d",data->
 				ping_pulse_width_36khz);
-			status = fprintf(mbfp,"%2d",
+			status = fprintf(mbfp,"%+02d",
 				data->transmitter_attenuation_36khz);
-			status = fprintf(mbfp,"%6d",data->pitch_36khz);
-			status = fprintf(mbfp,"%6d",data->roll_36khz);
-			status = fprintf(mbfp,"%6d",data->heading_36khz);
+			status = fprintf(mbfp,"%+06d",data->pitch_36khz);
+			status = fprintf(mbfp,"%+06d",data->roll_36khz);
+			status = fprintf(mbfp,"%6.6d",data->heading_36khz);
 			}
 		status = fprintf(mbfp,"%1d",data->num_algorithms);
 		for (i=0;i<4;i++)
@@ -2346,16 +2367,21 @@ int	*error;
 		/* output a line for each beam */
 		for (i=0;i<data->num_beams;i++)
 			{
+			if (data->depth[i] < 0 && data->quality[i] == ' ')
+				{
+				data->quality[i] = 'F';
+				data->depth[i] = -data->depth[i];
+				}
 			status = fprintf(mbfp,"%c",data->source[i]);
-			status = fprintf(mbfp,"%5d",data->travel_time[i]);
-			status = fprintf(mbfp,"%6d",data->angle_across[i]);
-			status = fprintf(mbfp,"%5d",data->angle_forward[i]);
-			status = fprintf(mbfp,"%5d",data->depth[i]);
-			status = fprintf(mbfp,"%6d",data->acrosstrack_beam[i]);
-			status = fprintf(mbfp,"%6d",data->alongtrack_beam[i]);
-			status = fprintf(mbfp,"%3d",data->amplitude_beam[i]);
-			status = fprintf(mbfp,"%2d",data->signal_to_noise[i]);
-			status = fprintf(mbfp,"%3d",data->echo_length[i]);
+			status = fprintf(mbfp,"%5.5d",data->travel_time[i]);
+			status = fprintf(mbfp,"%+06d",data->angle_across[i]);
+			status = fprintf(mbfp,"%+05d",data->angle_forward[i]);
+			status = fprintf(mbfp,"%5.5d",data->depth[i]);
+			status = fprintf(mbfp,"%+06d",data->acrosstrack_beam[i]);
+			status = fprintf(mbfp,"%+06d",data->alongtrack_beam[i]);
+			status = fprintf(mbfp,"%3.3d",data->amplitude_beam[i]);
+			status = fprintf(mbfp,"%2.2d",data->signal_to_noise[i]);
+			status = fprintf(mbfp,"%3.3d",data->echo_length[i]);
 			status = fprintf(mbfp,"%c",data->quality[i]);
 			status = fprintf(mbfp,"\r\n");
 			}
@@ -2505,11 +2531,11 @@ int	*error;
 	if (status == MB_SUCCESS)
 		{
 		/* output the event line */
-		status = fprintf(mbfp,"%4d",data->year);
-		status = fprintf(mbfp,"%3d",data->jday);
-		status = fprintf(mbfp,"%2d",data->hour);
-		status = fprintf(mbfp,"%2d",data->minute);
-		status = fprintf(mbfp,"%5d",data->msec);
+		status = fprintf(mbfp,"%4.4d",data->year);
+		status = fprintf(mbfp,"%3.3d",data->jday);
+		status = fprintf(mbfp,"%2.2d",data->hour);
+		status = fprintf(mbfp,"%2.2d",data->minute);
+		status = fprintf(mbfp,"%5.5d",data->msec);
 		degrees = data->latitude;
 		if (degrees < 0.0)
 			{
@@ -2520,8 +2546,8 @@ int	*error;
 			status = fprintf(mbfp,"N");
 		idegrees = (int) degrees;
 		minutes = (int) (600000.0*(degrees - idegrees));
-		status = fprintf(mbfp,"%2d",idegrees);
-		status = fprintf(mbfp,"%6d",minutes);
+		status = fprintf(mbfp,"%2.2d",idegrees);
+		status = fprintf(mbfp,"%6.6d",minutes);
 		degrees = data->longitude;
 		if (degrees < -180.0)
 			degrees = degrees + 360.0;
@@ -2536,11 +2562,11 @@ int	*error;
 			status = fprintf(mbfp,"E");
 		idegrees = (int) degrees;
 		minutes = (int) (600000.0*(degrees - idegrees));
-		status = fprintf(mbfp,"%3d",idegrees);
-		status = fprintf(mbfp,"%6d",minutes);
-		status = fprintf(mbfp,"%7d",data->speed);
+		status = fprintf(mbfp,"%3.3d",idegrees);
+		status = fprintf(mbfp,"%6.6d",minutes);
+		status = fprintf(mbfp,"%+07d",data->speed);
 		data->ss_data_length = 4*data->num_pixels;
-		status = fprintf(mbfp,"%4d",data->ss_data_length);
+		status = fprintf(mbfp,"%4.4d",data->ss_data_length);
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
 			data->frequency[0],data->frequency[1]);
@@ -2548,34 +2574,34 @@ int	*error;
 			status = fprintf(mbfp,"%c",data->spare[i]);
 		status = fprintf(mbfp,"%c",data->range_scale);
 		status = fprintf(mbfp,"%c",data->pixel_algorithm);
-		status = fprintf(mbfp,"%6d",data->surface_sound_velocity);
+		status = fprintf(mbfp,"%6.6d",data->surface_sound_velocity);
 		status = fprintf(mbfp,"%c",data->ssv_source);
 		status = fprintf(mbfp,"%c",data->depth_gate_mode);
 		if (data->frequency[0] != 'H')
 			{
-			status = fprintf(mbfp,"%4d",data->num_pixels_12khz);
-			status = fprintf(mbfp,"%4d",data->pixel_size_12khz);
-			status = fprintf(mbfp,"%2d",data->ping_gain_12khz);
-			status = fprintf(mbfp,"%2d",
+			status = fprintf(mbfp,"%4.4d",data->num_pixels_12khz);
+			status = fprintf(mbfp,"%4.4d",data->pixel_size_12khz);
+			status = fprintf(mbfp,"%2.2d",data->ping_gain_12khz);
+			status = fprintf(mbfp,"%2.2d",
 				data->ping_pulse_width_12khz);
-			status = fprintf(mbfp,"%2d",
+			status = fprintf(mbfp,"%+02d",
 				data->transmitter_attenuation_12khz);
-			status = fprintf(mbfp,"%6d",data->pitch_12khz);
-			status = fprintf(mbfp,"%6d",data->roll_12khz);
-			status = fprintf(mbfp,"%6d",data->heading_12khz);
+			status = fprintf(mbfp,"%+06d",data->pitch_12khz);
+			status = fprintf(mbfp,"%+06d",data->roll_12khz);
+			status = fprintf(mbfp,"%6.6d",data->heading_12khz);
 			}
 		if (data->frequency[0] != 'L')
 			{
-			status = fprintf(mbfp,"%4d",data->num_pixels_36khz);
-			status = fprintf(mbfp,"%4d",data->pixel_size_36khz);
-			status = fprintf(mbfp,"%2d",data->ping_gain_36khz);
-			status = fprintf(mbfp,"%2d",data->
+			status = fprintf(mbfp,"%4.4d",data->num_pixels_36khz);
+			status = fprintf(mbfp,"%4.4d",data->pixel_size_36khz);
+			status = fprintf(mbfp,"%2.2d",data->ping_gain_36khz);
+			status = fprintf(mbfp,"%2.2d",data->
 				ping_pulse_width_36khz);
-			status = fprintf(mbfp,"%2d",
+			status = fprintf(mbfp,"%+02d",
 				data->transmitter_attenuation_36khz);
-			status = fprintf(mbfp,"%6d",data->pitch_36khz);
-			status = fprintf(mbfp,"%6d",data->roll_36khz);
-			status = fprintf(mbfp,"%6d",data->heading_36khz);
+			status = fprintf(mbfp,"%+06d",data->pitch_36khz);
+			status = fprintf(mbfp,"%+06d",data->roll_36khz);
+			status = fprintf(mbfp,"%6.6d",data->heading_36khz);
 			}
 		status = fprintf(mbfp,"\r\n");
 

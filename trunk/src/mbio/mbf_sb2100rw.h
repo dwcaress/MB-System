@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 4.3 1994-06-21 22:54:21 caress Exp $
+ *	$Id: mbf_sb2100rw.h,v 4.4 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/06/21  22:54:21  caress
+ * Added #ifdef statements to handle byte swapping.
+ *
  * Revision 4.2  1994/04/09  15:49:21  caress
  * Altered to fit latest iteration of SeaBeam 2100 vendor format.
  *

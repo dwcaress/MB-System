@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.0 1994-07-29 18:59:33 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.1 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/07/29  18:59:33  caress
+ * Initial Revision.
+ *
  * Revision 1.1  1994/07/29  18:46:51  caress
  * Initial revision
  *
@@ -48,7 +51,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.0 1994-07-29 18:59:33 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.1 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -129,8 +132,8 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,mb_io_ptr->store_data,error);
+	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
+	status = mb_free(verbose,&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -296,6 +299,7 @@ int	*error;
 	mb_io_ptr->new_time_i[3] = 0;
 	mb_io_ptr->new_time_i[4] = 0;
 	mb_io_ptr->new_time_i[5] = 0;
+	mb_io_ptr->new_time_i[6] = 0;
 	mb_io_ptr->new_time_d = 0.0;
 	mb_io_ptr->new_lon = 0.0;
 	mb_io_ptr->new_lat = 0.0;
@@ -303,19 +307,19 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
-		mb_io_ptr->new_bath[i] = 0;
-		mb_io_ptr->new_bath_acrosstrack[i] = 0;
-		mb_io_ptr->new_bath_alongtrack[i] = 0;
+		mb_io_ptr->new_bath[i] = 0.0;
+		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
+		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 		}
 	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
-		mb_io_ptr->new_amp[i] = 0;
+		mb_io_ptr->new_amp[i] = 0.0;
 		}
 	for (i=0;i<mb_io_ptr->pixels_ss;i++)
 		{
-		mb_io_ptr->new_ss[i] = 0;
-		mb_io_ptr->new_ss_acrosstrack[i] = 0;
-		mb_io_ptr->new_ss_alongtrack[i] = 0;
+		mb_io_ptr->new_ss[i] = 0.0;
+		mb_io_ptr->new_ss_acrosstrack[i] = 0.0;
+		mb_io_ptr->new_ss_alongtrack[i] = 0.0;
 		}
 
 	/* read next data from file */
@@ -357,6 +361,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				mb_io_ptr->new_time_d);
 			}
@@ -402,7 +408,7 @@ int	*error;
 				= data->bath_port[i];
 			mb_io_ptr->new_bath_acrosstrack[j] 
 				= -data->bath_acrosstrack_port[i];
-			mb_io_ptr->new_bath_alongtrack[j] = 0;
+			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
 			}
 		for (i=0;i<3;i++)
 			{
@@ -411,9 +417,9 @@ int	*error;
 				mb_io_ptr->new_bath[j] = 
 					data->png_prdepth + data->png_alt;
 			else
-				mb_io_ptr->new_bath[j] = 0;
-			mb_io_ptr->new_bath_acrosstrack[j] = 0;
-			mb_io_ptr->new_bath_alongtrack[j] = 0;
+				mb_io_ptr->new_bath[j] = 0.0;
+			mb_io_ptr->new_bath_acrosstrack[j] = 0.0;
+			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
 			}
 		for (i=0;i<data->stbd_btycount;i++)
 			{
@@ -422,7 +428,7 @@ int	*error;
 				= data->bath_stbd[i];
 			mb_io_ptr->new_bath_acrosstrack[j] 
 				= data->bath_acrosstrack_stbd[i];
-			mb_io_ptr->new_bath_alongtrack[j] = 0;
+			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
 			}
 		for (i=0;i<data->port_sscount;i++)
 			{
@@ -431,14 +437,14 @@ int	*error;
 				= data->ss_port[i];
 			mb_io_ptr->new_ss_acrosstrack[j] 
 				= -data->port_ssoffset - i*data->png_atssincr;
-			mb_io_ptr->new_ss_alongtrack[j] = 0;
+			mb_io_ptr->new_ss_alongtrack[j] = 0.0;
 			}
 		for (i=0;i<3;i++)
 			{
 			j = pixel_center + i - 1;
-			mb_io_ptr->new_ss[j] = 0;
-			mb_io_ptr->new_ss_acrosstrack[j] = 0;
-			mb_io_ptr->new_ss_alongtrack[j] = 0;
+			mb_io_ptr->new_ss[j] = 0.0;
+			mb_io_ptr->new_ss_acrosstrack[j] = 0.0;
+			mb_io_ptr->new_ss_alongtrack[j] = 0.0;
 			}
 		for (i=0;i<data->stbd_sscount;i++)
 			{
@@ -447,7 +453,7 @@ int	*error;
 				= data->ss_port[i];
 			mb_io_ptr->new_ss_acrosstrack[j] 
 				= data->stbd_ssoffset + i*data->png_atssincr;
-			mb_io_ptr->new_ss_alongtrack[j] = 0;
+			mb_io_ptr->new_ss_alongtrack[j] = 0.0;
 			}
 
 		/* print debug statements */
@@ -466,14 +472,14 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
 			fprintf(stderr,"dbg4       pixels_ss:  %d\n",
 				mb_io_ptr->pixels_ss);
 			for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			  fprintf(stderr,"dbg4       beam:%d  ss:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4       beam:%d  ss:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,mb_io_ptr->new_ss[i],
 				mb_io_ptr->new_ss_acrosstrack[i],
 				mb_io_ptr->new_ss_alongtrack[i]);
@@ -1214,7 +1220,7 @@ int	*error;
 		if (lenhc > 0) strcpy(tmp,mb_io_ptr->hdr_comment);
 		if (lenc > 0) strcat(tmp,data->comment);
 		if (mb_io_ptr->hdr_comment != NULL)
-			mb_free(verbose,mb_io_ptr->hdr_comment,error);
+			mb_free(verbose,&mb_io_ptr->hdr_comment,error);
 		mb_io_ptr->hdr_comment = tmp;
 		}
 

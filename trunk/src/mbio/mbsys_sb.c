@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.c	2/26/93
- *	$Id: mbsys_sb.c,v 4.1 1994-04-11 23:34:41 caress Exp $
+ *	$Id: mbsys_sb.c,v 4.2 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,6 +33,14 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/04/11  23:34:41  caress
+ * Added function to extract travel time and beam angle data
+ * from multibeam data in an internal data structure.
+ *
+ * Revision 4.1  1994/04/11  23:34:41  caress
+ * Added function to extract travel time and beam angle data
+ * from multibeam data in an internal data structure.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -66,7 +74,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb.c,v 4.1 1994-04-11 23:34:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb.c,v 4.2 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbsys_sb_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -107,7 +115,7 @@ int	*error;
 int mbsys_sb_deall(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
-char	*store_ptr;
+char	**store_ptr;
 int	*error;
 {
 	char	*function_name = "mbsys_sb_deall";
@@ -123,7 +131,7 @@ int	*error;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
 		}
 
 	/* deallocate memory for data structure */
@@ -154,7 +162,7 @@ int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 int	*kind;
-int	time_i[6];
+int	time_i[7];
 double	*time_d;
 double	*navlon;
 double	*navlat;
@@ -163,13 +171,13 @@ double	*heading;
 int	*nbath;
 int	*namp;
 int	*nss;
-int	*bath;
-int	*amp;
-int	*bathacrosstrack;
-int	*bathalongtrack;
-int	*ss;
-int	*ssacrosstrack;
-int	*ssalongtrack;
+double	*bath;
+double	*amp;
+double	*bathacrosstrack;
+double	*bathalongtrack;
+double	*ss;
+double	*ssacrosstrack;
+double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -177,7 +185,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb_struct *store;
-	int	time_j[4];
+	int	time_j[5];
 	int	id;
 	int	i;
 
@@ -209,6 +217,7 @@ int	*error;
 		time_j[1] = store->day;
 		time_j[2] = store->min;
 		time_j[3] = store->sec;
+		time_j[4] = 0;
 		mb_get_itime(verbose,time_j,time_i);
 		mb_get_time(verbose,time_i,time_d);
 
@@ -253,7 +262,7 @@ int	*error;
 			{
 			bath[id-i] = store->deph[i];
 			bathacrosstrack[id-i] = store->dist[i];
-			bathalongtrack[id-i] = 0;
+			bathalongtrack[id-i] = 0.0;
 			}
 
 		/* print debug statements */
@@ -278,6 +287,8 @@ int	*error;
 				time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				*time_d);
 			fprintf(stderr,"dbg4       longitude:  %f\n",
@@ -291,7 +302,7 @@ int	*error;
 			fprintf(stderr,"dbg4       nbath:      %d\n",
 				*nbath);
 			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  bathdist[%d]: %d\n",
+			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
 				i,bath[i],
 				i,bathacrosstrack[i]);
 			}
@@ -342,6 +353,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
 		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
@@ -353,7 +365,7 @@ int	*error;
 		{
 		fprintf(stderr,"dbg2       nbath:         %d\n",*nbath);
 		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       bath[%d]: %d  bathdist[%d]: %d\n",
+		  fprintf(stderr,"dbg2       bath[%d]: %f  bathdist[%d]: %f\n",
 			i,bath[i],i,bathacrosstrack[i]);
 		}
 	if (verbose >= 2)
@@ -376,7 +388,7 @@ int mbsys_sb_insert(verbose,mbio_ptr,store_ptr,
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
-int	time_i[6];
+int	time_i[7];
 double	time_d;
 double	navlon;
 double	navlat;
@@ -385,13 +397,13 @@ double	heading;
 int	nbath;
 int	namp;
 int	nss;
-int	*bath;
-int	*amp;
-int	*bathacrosstrack;
-int	*bathalongtrack;
-int	*ss;
-int	*ssacrosstrack;
-int	*ssalongtrack;
+double	*bath;
+double	*amp;
+double	*bathacrosstrack;
+double	*bathalongtrack;
+double	*ss;
+double	*ssacrosstrack;
+double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -400,7 +412,7 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb_struct *store;
 	int	kind;
-	int	time_j[4];
+	int	time_j[5];
 	int	id;
 	int	i;
 
@@ -419,6 +431,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       time_d:     %d\n",time_d);
 		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
@@ -427,17 +440,17 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       bath[%d]: %d  bathdist[%d]: %d\n",
+		  fprintf(stderr,"dbg3       bath[%d]: %f  bathdist[%d]: %f\n",
 			i,bath[i],i,bathacrosstrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
 		if (verbose >= 3) 
 		 for (i=0;i<namp;i++)
-		  fprintf(stderr,"dbg3        amp[%d]: %d\n",
+		  fprintf(stderr,"dbg3        amp[%d]: %f\n",
 			i,amp[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
 		if (verbose >= 3) 
 		 for (i=0;i<nss;i++)
-		  fprintf(stderr,"dbg3        ss[%d]: %d    ssdist[%d]: %d\n",
+		  fprintf(stderr,"dbg3        ss[%d]: %f    ssdist[%d]: %f\n",
 			i,ss[i],i,ssacrosstrack[i]);
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}

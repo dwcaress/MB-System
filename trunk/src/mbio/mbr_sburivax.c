@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburivax.c	2/2/93
- *	$Id: mbr_sburivax.c,v 4.0 1994-07-29 18:59:33 caress Exp $
+ *	$Id: mbr_sburivax.c,v 4.1 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/07/29  18:59:33  caress
+ * Initial Revision.
+ *
  * Revision 1.1  1994/07/29  18:46:51  caress
  * Initial revision
  *
@@ -55,7 +58,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sburivax.c,v 4.0 1994-07-29 18:59:33 caress Exp $";
+ static char res_id[]="$Id: mbr_sburivax.c,v 4.1 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbr_alm_sburivax";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -123,8 +126,8 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,mb_io_ptr->store_data,error);
+	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
+	status = mb_free(verbose,&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -154,7 +157,7 @@ int	*error;
 	struct mbf_sburicen_data_struct *data;
 	struct mbsys_sb_struct *store;
 	char	*datacomment;
-	int	time_j[4];
+	int	time_j[5];
 	int	i, j, k;
 	int	id;
 
@@ -249,6 +252,7 @@ int	*error;
 		time_j[1] = data->day;
 		time_j[2] = data->min;
 		time_j[3] = data->sec;
+		time_j[4] = 0;
 		mb_get_itime(verbose,time_j,mb_io_ptr->new_time_i);
 		mb_get_time(verbose,mb_io_ptr->new_time_i,
 			&(mb_io_ptr->new_time_d));
@@ -291,7 +295,7 @@ int	*error;
 			{
 			mb_io_ptr->new_bath[i] = data->deph[i];
 			mb_io_ptr->new_bath_acrosstrack[i] = data->dist[i];
-			mb_io_ptr->new_bath_alongtrack[i] = 0;
+			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 			}
 
 		/* print debug statements */
@@ -314,6 +318,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				mb_io_ptr->new_time_d);
 			fprintf(stderr,"dbg4       longitude:  %f\n",
@@ -327,7 +333,7 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  bathdist[%d]: %d\n",
+			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
 				i,mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
@@ -422,7 +428,7 @@ int	*error;
 	struct mbf_sburicen_data_struct *data;
 	struct mbsys_sb_struct *store;
 	char	*datacomment;
-	int	time_j[4];
+	int	time_j[5];
 	double	lon, lat;
 	int	i, j;
 	int	id;
