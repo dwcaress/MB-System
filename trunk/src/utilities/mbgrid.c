@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.30 1996-04-22 13:23:05 caress Exp $
+ *    $Id: mbgrid.c,v 4.31 1996-09-05 13:07:47 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.30  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.29  1996/04/15  19:34:32  caress
  * Now mbgrid does not attempt to spline interpolate an empty grid.
  *
@@ -218,7 +221,7 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.30 1996-04-22 13:23:05 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.31 1996-09-05 13:07:47 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -257,6 +260,7 @@ char **argv;
 	int	beams_amp;
 	int	pixels_ss;
 	char	file[128];
+	int	file_in_bounds;
 	char	*mbio_ptr = NULL;
 
 	/* mbgrid control variables */
@@ -1078,14 +1082,25 @@ char **argv;
 		}
 	while (fscanf(fp,"%s %d",file,&format) != EOF)
 		{
+		ndatafile = 0;
 
 		/* if format > 0 then input is multibeam file */
 		if (format > 0)
 		{
+		/* check for mbinfo file - get file bounds if possible */
+		status = mb_check_info(verbose, file, lonflip, wbnd, 
+				&file_in_bounds, &error);
+		if (status == MB_FAILURE)
+			{
+			file_in_bounds = MB_YES;
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
 
 		/* initialize the multibeam file */
-		ndatafile = 0;
-		if ((status = mb_read_init(
+		if (file_in_bounds == MB_YES)
+		    {
+		    if ((status = mb_read_init(
 			verbose,file,format,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
 			&mbio_ptr,&btime_d,&etime_d,
@@ -1099,24 +1114,24 @@ char **argv;
 			exit(error);
 			}
 
-		/* allocate memory for reading data arrays */
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bath,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathlon,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathlat,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-				&amp,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&sslon,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&sslat,&error);
+		    /* allocate memory for reading data arrays */
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bath,&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bathlon,&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bathlat,&error);
+		    status = mb_malloc(verbose,beams_amp*sizeof(double),
+				    &amp,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &ss,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &sslon,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &sslat,&error);
 
-		/* if error initializing memory then quit */
-		if (error != MB_ERROR_NO_ERROR)
+		    /* if error initializing memory then quit */
+		    if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
@@ -1126,8 +1141,8 @@ char **argv;
 			exit(error);
 			}
 
-		/* loop over reading */
-		while (error <= MB_ERROR_NO_ERROR)
+		    /* loop over reading */
+		    while (error <= MB_ERROR_NO_ERROR)
 			{
 			status = mb_read(verbose,mbio_ptr,&kind,
 				&rpings,time_i,&time_d,
@@ -1515,16 +1530,17 @@ char **argv;
 			      }
 			  }
 			}
-		status = mb_close(verbose,&mbio_ptr,&error);
-		mb_free(verbose,&bath,&error); 
-		mb_free(verbose,&bathlon,&error); 
-		mb_free(verbose,&bathlat,&error); 
-		mb_free(verbose,&amp,&error); 
-		mb_free(verbose,&ss,&error); 
-		mb_free(verbose,&sslon,&error); 
-		mb_free(verbose,&sslat,&error); 
-		status = MB_SUCCESS;
-		error = MB_ERROR_NO_ERROR;
+		    status = mb_close(verbose,&mbio_ptr,&error);
+		    mb_free(verbose,&bath,&error); 
+		    mb_free(verbose,&bathlon,&error); 
+		    mb_free(verbose,&bathlat,&error); 
+		    mb_free(verbose,&amp,&error); 
+		    mb_free(verbose,&ss,&error); 
+		    mb_free(verbose,&sslon,&error); 
+		    mb_free(verbose,&sslat,&error); 
+		    status = MB_SUCCESS;
+		    error = MB_ERROR_NO_ERROR;
+		    }
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
 		if (verbose > 0)
@@ -1547,7 +1563,6 @@ char **argv;
 			}
 
 		/* loop over reading */
-		ndatafile = 0;
 		while (fscanf(dfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
 			{
 			if (tvalue > 0.0)
@@ -1731,14 +1746,25 @@ char **argv;
 		}
 	while (fscanf(fp,"%s %d",file,&format) != EOF)
 		{
+		ndatafile = 0;
 
 		/* if format > 0 then input is multibeam file */
 		if (format > 0)
 		{
+		/* check for mbinfo file - get file bounds if possible */
+		status = mb_check_info(verbose, file, lonflip, wbnd, 
+				&file_in_bounds, &error);
+		if (status == MB_FAILURE)
+			{
+			file_in_bounds = MB_YES;
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
 
 		/* initialize the multibeam file */
-		ndatafile = 0;
-		if ((status = mb_read_init(
+		if (file_in_bounds == MB_YES)
+		    {
+		    if ((status = mb_read_init(
 			verbose,file,format,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
 			&mbio_ptr,&btime_d,&etime_d,
@@ -1752,24 +1778,24 @@ char **argv;
 			exit(error);
 			}
 
-		/* allocate memory for reading data arrays */
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bath,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathlon,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathlat,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-				&amp,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&sslon,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&sslat,&error);
+		    /* allocate memory for reading data arrays */
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bath,&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bathlon,&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+				    &bathlat,&error);
+		    status = mb_malloc(verbose,beams_amp*sizeof(double),
+				    &amp,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &ss,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &sslon,&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				    &sslat,&error);
 
-		/* if error initializing memory then quit */
-		if (error != MB_ERROR_NO_ERROR)
+		    /* if error initializing memory then quit */
+		    if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
@@ -1779,8 +1805,8 @@ char **argv;
 			exit(error);
 			}
 
-		/* loop over reading */
-		while (error <= MB_ERROR_NO_ERROR)
+		    /* loop over reading */
+		    while (error <= MB_ERROR_NO_ERROR)
 			{
 			status = mb_read(verbose,mbio_ptr,&kind,
 				&rpings,time_i,&time_d,
@@ -2069,16 +2095,17 @@ char **argv;
 			      }
 			  }
 			}
-		status = mb_close(verbose,&mbio_ptr,&error);
-		mb_free(verbose,&bath,&error); 
-		mb_free(verbose,&bathlon,&error); 
-		mb_free(verbose,&bathlat,&error); 
-		mb_free(verbose,&amp,&error); 
-		mb_free(verbose,&ss,&error); 
-		mb_free(verbose,&sslon,&error); 
-		mb_free(verbose,&sslat,&error); 
-		status = MB_SUCCESS;
-		error = MB_ERROR_NO_ERROR;
+		    status = mb_close(verbose,&mbio_ptr,&error);
+		    mb_free(verbose,&bath,&error); 
+		    mb_free(verbose,&bathlon,&error); 
+		    mb_free(verbose,&bathlat,&error); 
+		    mb_free(verbose,&amp,&error); 
+		    mb_free(verbose,&ss,&error); 
+		    mb_free(verbose,&sslon,&error); 
+		    mb_free(verbose,&sslat,&error); 
+		    status = MB_SUCCESS;
+		    error = MB_ERROR_NO_ERROR;
+		    }
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
 		if (verbose > 0)
@@ -2101,7 +2128,6 @@ char **argv;
 			}
 
 		/* loop over reading */
-		ndatafile = 0;
 		while (fscanf(dfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
 			{
 			if (tvalue > 0.0)
