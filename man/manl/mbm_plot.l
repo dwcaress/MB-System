@@ -1,4 +1,4 @@
-.TH mbm_plot l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_plot l "29 October 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of swath sonar swath data.
@@ -14,7 +14,7 @@ Version 5.0
 \fB-G\fP\fIcolor_mode\fP \fB-H\fP
 \fB-N\fP\fI[time_tick/time_annot/date_annot/time_tick_len]\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
-\fB-S\fP\fI[color/shade]\fP
+\fB-S\fP\fI[color/shade]\fP \fB-T\fP
 \fB-U\fP\fIorientation\fP \fB-V\fP 
 \fB-W\fP\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | \fIcptfile]\fP ]
 
@@ -41,6 +41,10 @@ Miscellaneous Options:
 \fB-MMN\fP\fInplot\fP \fB-MMP\fP\fIpings \fP
 \fB-MMS\fP\fIspeedmin\fP 
 \fB-MMT\fP\fItimegap\fP \fB-MMZ\fP\fIalgorithm\fP
+\fB-MTC\fP\fIfill\fP \fB-MTD\fP\fIresolution\fP 
+\fB-MTG\fP\fIfill\fP \fB-MTI\fP\fIriver[/pen]\fP 
+\fB-MTN\fP\fIborder[/pen]\fP \fB-MTS\fP\fIfill\fP 
+\fB-MTW\fP\fIpen\fP
 \fB-MXG\fP\fIfill\fP \fB-MXI\fP\fIxy_file \fP
 \fB-MXS\fP\fIsymbol/size\fP \fB-MXW\fP\fIpen\fP]
 
@@ -52,7 +56,8 @@ fill (\fB-G\fP\fI1\fP), bathymetry color shaded relief (\fB-G\fP\fI2\fP), bathym
 shaded with amplitudes (\fB-G\fP\fI3\fP), greyshade fill amplitude (\fB-G\fP\fI4\fP), 
 greyshade fill sidescan (\fB-G\fP\fI5\fP), contoured bathymetry (\fB-C\fP),
 or annotated navigation. The plot may also include text
-labels and xy data in lines or symbols. Five different color 
+labels, xy data in lines or symbols, and coastlines. 
+Five different color 
 schemes are included. The plot will be scaled to fit on 
 the specified page size or, if the scale is user defined, 
 the page size will be chosen in accordance with the plot 
@@ -221,6 +226,15 @@ or by overlaying amplitude data (\fB-G\fP\fI3\fP option), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
+.TP
+.B \-T
+If \fB-T\fP is given, it causes a coastline to be drawn
+on the map. The default is to draw the coastline and shade
+all dry land a uniform gray. To exercise greater control of
+the coastline plotting, use the 
+\fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP, 
+\fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options described in the
+COMPLETE DESCRIPTION OF OPTIONS section below.
 .TP
 .B \-U
 \fIorientation\fP
@@ -641,6 +655,89 @@ with the number of pings contoured; thus larger numbers of pings
 may be reasonably contoured at a time (e.g. use \fB-N\fP\fI50\fP). 
 Default: \fIalgorithm\fP = 0 unless \FIformat\fP = 41.
 .TP
+.B \-MTC
+\fIfill\fP 
+.br
+Coastline plotting option.
+Set the shade (0-255), color (r/g/b), or pattern
+(p|Pdpi/pattern; see \fB-MTG\fP) for lakes  [Default is the
+fill chosen for "wet" areas (-S)].
+.TP
+.B \-MTD
+\fIresolution\fP 
+.br
+Coastline plotting option.
+Selects the resolution of the coastline data set to use ((f)ull,
+(h)igh, (i)ntermediate, (l)ow, and (c)rude).  The
+resolution drops off by 80% between data sets. [Default
+is l].
+.TP
+.B \-MTG
+\fIfill\fP 
+.br
+Coastline plotting option.
+Select painting or clipping of "dry" areas.  Append a
+shade, color, pattern, or c for clipping.  Specify the
+shade (0-255) or color (r/g/b), or \fB-MTG\fP\fIpdpi/pattern\fP,
+where pattern gives the number of the built-in pattern
+(1-90) OR the name of a Sun 1-, 8-, or 24-bit raster
+file.  dpi sets the resolution of the image.  See \fBGMT\fP
+Cookbook & Technical Reference Appendix E for
+information on individual patterns.
+.TP
+.B \-MTI
+\fIriver[/pen]\fP 
+.br
+Coastline plotting option.
+Draw rivers.  Specify the type of rivers and
+[optionally] append pen attributes  [Default pen:
+width = 1, color = 0/0/0, texture = solid].  Choose
+from the list of river types below.  Repeat option -I
+as often as necessary.
+     1 = Permanent major rivers
+     2 = Additional major rivers
+     3 = Additional rivers
+     4 = Minor rivers
+     5 = Intermittent rivers - major
+     6 = Intermittent rivers - additional
+     7 = Intermittent rivers - minor
+     8 = Major canals
+     9 = Minor canals
+     10 = Irrigation canals
+     a = All rivers and canals (1-10)
+     r = All permanent rivers (1-4)
+     i = All intermittent rivers (5-7)
+     c = All canals (8-10)
+.TP
+.B \-MTN
+\fIborder[/pen]\fP 
+.br
+Coastline plotting option.
+Draw political boundaries.  Specify the type of
+boundary and [optionally] append pen attributes
+[Default pen:  width = 1, color = 0/0/0, texture =
+solid].  Choose from the list of boundaries below.
+Repeat option \fB-MTN\fP as often as necessary.
+     1 = National boundaries
+     2 = State boundaries within the Americas
+     3 = Marine boundaries
+     a = All boundaries (1-3)
+.TP
+.B \-MTS
+\fIfill\fP 
+.br
+Coastline plotting option.
+Select painting or clipping of "wet" areas.  Append the
+shade (0-255), color (r/g/b), pattern (see \fB-MTG\fP), or c
+for clipping.
+.TP
+.B \-MTW
+\fIpen\fP 
+.br
+Coastline plotting option.
+Append pen attributes  [Defaults:  width = 1, color = 0/0/0,
+texture = solid].
+.TP
 .B \-MXG
 \fIfill\fP 
 .br
@@ -868,6 +965,14 @@ or by overlaying amplitude data (\fB-G\fP\fI3\fP option), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
+.TP
+.B \-T
+If \fB-T\fP is given, it causes a coastline to be drawn
+on the map. The default is to draw the coastline and shade
+all dry land a uniform gray. To exercise greater control of
+the coastline plotting, use the 
+\fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP, 
+\fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options described in the
 .TP
 .B \-U
 \fIorientation\fP
