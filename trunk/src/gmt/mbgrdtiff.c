@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.2 2001-06-03 06:58:45 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.3 2001-09-19 21:51:56 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -155,6 +155,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/03  06:58:45  caress
+ * Release 5.0.beta01.
+ *
  * Revision 5.1  2001/01/22 05:03:25  caress
  * Release 5.0.beta01
  *
@@ -272,7 +275,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.2 2001-06-03 06:58:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.3 2001-09-19 21:51:56 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -378,7 +381,6 @@ fprintf(stderr,"argc:%d\n",argc);
 		}
 
 	/* process argument list */
-fprintf(stderr,"about to call getopt: %d\n",argc);
 	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:O:o:R:r:")) != -1)
 	  switch (c) 
 		{
@@ -430,10 +432,8 @@ fprintf(stderr,"about to call getopt: %d\n",argc);
 	grd_init (&header, argc, argv, FALSE);
 	grd_init (&iheader, argc, argv, FALSE);
 #else
-fprintf(stderr,"calling GMT_grd_init...\n");
 	GMT_grd_init (&header, argc, argv, FALSE);
 	GMT_grd_init (&iheader, argc, argv, FALSE);
-fprintf(stderr,"done calling GMT_grd_init...\n");
 #endif
 
 	/* print starting message */
@@ -472,9 +472,7 @@ fprintf(stderr,"done calling GMT_grd_init...\n");
 	read_cpt(cptfile);
 	if (gmt_n_colors <= 0)
 #else
-fprintf(stderr,"calling GMT_read_cpt:%s\n",cptfile);
 	GMT_read_cpt(cptfile);
-fprintf(stderr,"done calling GMT_read_cpt:%s\n",cptfile);
 	if (GMT_n_colors <= 0)
 #endif
 	  {
