@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.0 2001-10-12 21:07:31 caress Exp $
+ *    $Id: mbdatalist.c,v 5.1 2001-10-19 00:56:17 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -21,11 +21,15 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/10/12  21:07:31  caress
+ * Initial revision.
+ *
  *
  */
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -37,7 +41,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.0 2001-10-12 21:07:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.1 2001-10-19 00:56:17 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbdatalist [-Fformat -Ifile -P -R -V -H]";
@@ -55,7 +59,7 @@ main (int argc, char **argv)
 
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
-	char	read_file[128];
+	char	read_file[MB_PATH_MAXLINE];
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight = 1.0;
@@ -69,7 +73,8 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	file[128];
+	char	file[MB_PATH_MAXLINE];
+	char	pwd[MB_PATH_MAXLINE];
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
@@ -213,7 +218,11 @@ main (int argc, char **argv)
 		while (status = mb_datalist_read(verbose,datalist,
 					    file,&format,&file_weight,&error)
 			    == MB_SUCCESS)
+			{
+			getcwd(pwd, MB_PATH_MAXLINE);
+			mb_get_relative_path(verbose, file, pwd, &error);
 			fprintf(output, "%s %d %f\n", file, format, file_weight);
+			}
 		mb_datalist_close(verbose,&datalist,&error);
 		}
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.11 2001-09-17 23:22:51 caress Exp $
+ *    $Id: mb_process.c,v 5.12 2001-10-19 00:54:37 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2001/09/17  23:22:51  caress
+ * Fixed metadata support.
+ *
  * Revision 5.10  2001/08/10  22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -83,7 +86,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.11 2001-09-17 23:22:51 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.12 2001-10-19 00:54:37 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -221,6 +224,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_meta_institution[0] = '\0';
 	process->mbp_meta_platform[0] = '\0';
 	process->mbp_meta_sonar[0] = '\0';
+	process->mbp_meta_sonarversion[0] = '\0';
 	process->mbp_meta_cruiseid[0] = '\0';
 	process->mbp_meta_cruisename[0] = '\0';
 	process->mbp_meta_pi[0] = '\0';
@@ -737,10 +741,12 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			}
 		    else if (strncmp(buffer, "METAPITCHBIAS", 13) == 0)
 			{
+fprintf(stderr, "GOT METAPITCHBIAS: %s\n", buffer);
 			sscanf(buffer, "METAPITCHBIAS %lf", &process->mbp_meta_pitchbias);
 			}
 		    else if (strncmp(buffer, "METAPI", 6) == 0)
 			{
+fprintf(stderr, "GOT METAPI: %s\n", buffer);
 			strncpy(process->mbp_meta_pi, &buffer[7], MBP_FILENAMESIZE);
 			}
 		    else if (strncmp(buffer, "METAHEADINGBIAS", 15) == 0)
@@ -973,6 +979,8 @@ int mb_pr_writepar(int verbose, char *file,
 {
 	char	*function_name = "mb_pr_writepar";
 	char	parfile[MBP_FILENAMESIZE];
+	char	pwd[MBP_FILENAMESIZE];
+	char	*lastslash;
 	FILE	*fp;
 	int	status = MB_SUCCESS;
 	time_t	right_now;
@@ -1073,6 +1081,26 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_meta_headingbias:   %f\n",process->mbp_meta_headingbias);
 		fprintf(stderr,"dbg2       mbp_meta_draft:         %f\n",process->mbp_meta_draft);
 		}
+		
+	/* try to avoid absolute pathnames - get pwd */
+	if (file[0] != '/')
+	    {
+	    getcwd(pwd, MB_PATH_MAXLINE);
+	    }
+	else if ((lastslash = strrchr(file, '/')) != NULL)
+	    {
+	    strcpy(pwd, file);
+	    pwd[strlen(file) - strlen(lastslash)] = '\0';
+	    }
+	
+	/* try to make all pathnames relative */
+	status = mb_get_relative_path(verbose, process->mbp_ifile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_ofile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_navfile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_navadjfile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_editfile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_svpfile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_tidefile, pwd, error);
 
 	/* get expected process parameter file name */
 	strcpy(parfile, file);
