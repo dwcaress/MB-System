@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarirov.c	5/20/99
- *	$Id: mbr_mbarirov.c,v 1.1 1999-07-16 19:24:15 caress Exp $
+ *	$Id: mbr_mbarirov.c,v 4.1 1999-07-16 19:29:09 caress Exp $
  *
  *    Copyright (c) 1999 by
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 20, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1999/07/16  19:24:15  caress
+ * Initial revision
+ *
  *
  */
 
@@ -47,7 +50,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbarirov.c,v 1.1 1999-07-16 19:24:15 caress Exp $";
+ static char res_id[]="$Id: mbr_mbarirov.c,v 4.1 1999-07-16 19:29:09 caress Exp $";
 	char	*function_name = "mbr_alm_mbarirov";
 	int	status = MB_SUCCESS;
 	int	i;
