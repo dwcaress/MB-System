@@ -66,7 +66,7 @@ This format consists of lines of the form:
 where time_d is decimal unix time in seconds since
 1/1/1970 00:00:00.000 and lon and lat are in decimal degrees.
 This form can be obtained from multibeam data files using \fBmblist\fP
-with the \fB-O\fP\fIUXY\fP option. Some representative lines are:
+with the \fB-O\fP\fIMXY\fP option. Some representative lines are:
  5440574.017	-129.505875	 46.445255
  5440574.100	-129.506045	 46.445083
  5440574.183	-129.506208	 46.445083
