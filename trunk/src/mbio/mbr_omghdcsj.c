@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 4.0 1999-03-31 18:29:20 caress Exp $
+ *	$Id: mbr_omghdcsj.c,v 4.1 1999-04-20 06:43:57 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 10, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/03/31  18:29:20  caress
+ * MB-System 4.6beta7
+ *
  * Revision 1.1  1999/03/31  18:11:35  caress
  * Initial revision
  *
@@ -59,7 +62,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 4.0 1999-03-31 18:29:20 caress Exp $";
+ static char res_id[]="$Id: mbr_omghdcsj.c,v 4.1 1999-04-20 06:43:57 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1689,7 +1692,8 @@ int	*error;
 		    beam = &data->beams[i];
 		    if (mb_io_ptr->new_beamflag[i] != MB_FLAG_NULL)
 			{
-			if (offset_start == -1)
+			if (offset_start == -1
+				&& beam->no_samples > 0)
 			    offset_start = beam->offset;
 			for (j=0;j<beam->no_samples;j++)
 			    {
