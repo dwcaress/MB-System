@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.9 1995-01-16 12:32:15 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.10 1995-01-17 23:19:57 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,11 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1995/01/16  12:32:15  caress
+ * Changed output of transmit_attenuation values so they
+ * are not prepended with a "+", as Dale Chayes found
+ * this was breaking Palmer data.
+ *
  * Revision 4.8  1994/12/21  20:18:10  caress
  * Not sure what changes have been made.
  *
@@ -83,7 +88,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.9 1995-01-16 12:32:15 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.10 1995-01-17 23:19:57 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -805,7 +810,7 @@ int	*error;
 		data->jday = time_j[1];
 		data->hour = time_j[2]/60;
 		data->minute = time_j[2] - 60*data->hour;
-		data->msec = 1000*time_j[3] + (int) 0.001*time_j[4];
+		data->msec = 1000*time_j[3] + (int) (0.001*time_j[4]);
 		}
 
 	/* check for comment to be copied from mb_io_ptr */
@@ -1565,8 +1570,8 @@ int	*error;
 	int	shift;
 	char	ew, ns;
 	unsigned short	read_ss[2*MBF_SB2100RW_PIXELS+2];
+	signed short	*read_ss_ptr;
 	int	degrees, minutes;
-	unsigned short tmp;
 	int	i;
 
 	/* print input debug statements */
@@ -1742,17 +1747,18 @@ int	*error;
 		}
 	if (status == MB_SUCCESS)
 		{
+		read_ss_ptr = (signed short *) read_ss;
 		for (i=0;i<data->num_pixels;i++)
 			{
 			/* deal with byte swapping if necessary */
 #ifdef BYTESWAPPED
-                        tmp = read_ss[2*i];
-                        data->amplitude_ss[i] = (int) mb_swap_short(tmp);
-                        tmp = (short) read_ss[2*i+1];
-                        data->alongtrack_ss[i] = (int) mb_swap_short(tmp);
+                        data->amplitude_ss[i] = 
+				(int) mb_swap_short(read_ss[2*i]);
+                        data->alongtrack_ss[i] = 
+				(int) mb_swap_short(read_ss_ptr[2*i+1]);
 #else
 			data->amplitude_ss[i] = (int) read_ss[2*i];
-			data->alongtrack_ss[i] = (int) read_ss[2*i+1];
+			data->alongtrack_ss[i] = (int) read_ss_ptr[2*i+1];
 #endif
 	  		}
 		}
@@ -2458,6 +2464,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mbf_sb2100rw_struct *data;
 	unsigned short	write_ss[2*MBF_SB2100RW_PIXELS];
+	signed short	*write_ss_ptr;
 	double	degrees;
 	int	idegrees, minutes;
 	int	i;
@@ -2640,21 +2647,18 @@ int	*error;
 		status = fprintf(mbfp,"\r\n");
 
 		/* construct and write out sidescan data */
+		write_ss_ptr = (signed short *) write_ss;
 		for (i=0;i<data->num_pixels;i++)
 			{
 			/* deal with byte swapping if necessary */
 #ifdef BYTESWAPPED
 			write_ss[2*i] = mb_swap_short((unsigned short) 
 				data->amplitude_ss[i]);
-			write_ss[2*i+1] = mb_swap_short((short) 
+			write_ss_ptr[2*i+1] = mb_swap_short((short) 
 				data->alongtrack_ss[i]);
 #else
 			write_ss[2*i] = (unsigned short) data->amplitude_ss[i];
-			write_ss[2*i+1] = (short) data->alongtrack_ss[i];
-if (write_ss[2*i] > 60000)
-fprintf(stderr, "excess ss: i:%d ss:%d %d xt:%d %d\n", 
-i, data->amplitude_ss[i], write_ss[2*i], 
-data->alongtrack_ss[i], write_ss[2*i+1]);
+			write_ss_ptr[2*i+1] = (short) data->alongtrack_ss[i];
 #endif
 	  		}
 		if ((status = fwrite(write_ss,1,data->ss_data_length,mbfp))
