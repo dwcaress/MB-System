@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.2 2004-02-24 22:52:30 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.3 2004-05-21 23:40:40 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/02/24 22:52:30  caress
+ * Added spherical projection to MBview.
+ *
  * Revision 5.1  2004/01/06 21:11:04  caress
  * Added pick region capability.
  *
@@ -399,18 +402,6 @@ int mbview_zscalegridpoint(int instance, int k);
 int mbview_zscalepoint(int instance, 
 				int global, double offset_factor, 
 				struct mbview_point_struct *point);
-int mbview_projectforward(int instance, int needlonlat,
-				double xgrid, double ygrid, double zgrid,
-				double *xlon, double *ylat,
-				double *xdisplay, double *ydisplay, double *zdisplay);
-int mbview_projectinverse(int instance, int needlonlat,
-				double xdisplay, double ydisplay, double zdisplay,
-				double *xlon, double *ylat,
-				double *xgrid, double *ygrid);
-int mbview_projectfromlonlat(int instance,
-				double xlon, double ylat, double zdata,
-				double *xgrid, double *ygrid,
-				double *xdisplay, double *ydisplay, double *zdisplay);
 int mbview_projectgrid2ll(int instance,
 				double xgrid, double ygrid,
 				double *xlon, double *ylat);
@@ -429,11 +420,16 @@ int mbview_projectdistance(int instance,
 				double *distancelateral, 
 				double *distanceoverground,
 				double *slope);
-int mbview_spheroid_forward(int instance, double xlon, double ylat,
+int mbview_sphere_setup(int instance, int earthcentered, 
+			double xlon, double ylat);
+int mbview_sphere_forward(int instance, double xlon, double ylat,
 			double *xx, double *yy, double *zz);
-int mbview_spheroid_inverse(int instance, double xx, double yy, double zz, 
+int mbview_sphere_inverse(int instance, double xx, double yy, double zz, 
 			double *xlon, double *ylat);
-
+int mbview_sphere_matrix(double phi, double theta, double psi,
+			double *eulermatrix);
+int mbview_sphere_rotate(double *eulermatrix,
+			double *v, double *vr);
 int mbview_getzdata(int instance, 
 			double xgrid, double ygrid,
 			int *found, double *zdata);

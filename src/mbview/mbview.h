@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.2 2004-02-24 22:52:29 caress Exp $
+ *    $Id: mbview.h,v 5.3 2004-05-21 23:40:40 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/02/24 22:52:29  caress
+ * Added spherical projection to MBview.
+ *
  * Revision 5.1  2004/01/06 21:11:03  caress
  * Added pick region capability.
  *
@@ -694,4 +697,17 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_route_delete(int instance, int xpixel, int ypixel);
 	
+int mbview_projectforward(int instance, int needlonlat,
+				double xgrid, double ygrid, double zgrid,
+				double *xlon, double *ylat,
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectinverse(int instance, int needlonlat,
+				double xdisplay, double ydisplay, double zdisplay,
+				double *xlon, double *ylat,
+				double *xgrid, double *ygrid);
+int mbview_projectfromlonlat(int instance,
+				double xlon, double ylat, double zdata,
+				double *xgrid, double *ygrid,
+				double *xdisplay, double *ydisplay, double *zdisplay);
+
 /*--------------------------------------------------------------------*/

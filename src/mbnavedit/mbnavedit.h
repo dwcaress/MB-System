@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 5.3 2003-04-17 21:09:06 caress Exp $
+ *    $Id: mbnavedit.h,v 5.4 2004-05-21 23:33:03 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:09:06  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/01/22 07:47:40  caress
  * Version 5.0.beta01
  *
@@ -127,6 +130,8 @@ EXTERNAL int	scrollcount;
 EXTERNAL int	plot_width;
 EXTERNAL int	plot_height;
 EXTERNAL int	number_plots;
+EXTERNAL int	window_width;
+EXTERNAL int	window_height;
 
 /* Mode value defines */
 #define	PICK_MODE_PICK		0

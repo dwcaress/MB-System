@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.2 2004-02-24 22:52:29 caress Exp $
+ *    $Id: mbview_process.c,v 5.3 2004-05-21 23:40:40 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/02/24 22:52:29  caress
+ * Added spherical projection to MBview.
+ *
  * Revision 5.1  2004/01/06 21:11:04  caress
  * Added pick region capability.
  *
@@ -79,7 +82,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.2 2004-02-24 22:52:29 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.3 2004-05-21 23:40:40 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -260,7 +263,7 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 				|| ylatmax - ylatmin >= 90.0)
 				{
 				/* setup spheroid 3D projection with view towards the center of the grid */
-				mbview_spheroid_setup(instance, MB_YES,
+				mbview_sphere_setup(instance, MB_YES,
 							0.5 * (xlonmin + xlonmax),
 							0.5 * (ylatmin + ylatmax));
 
@@ -282,25 +285,25 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 			else
 				{
 				/* setup spheroid 3D projection with view towards the center of the grid */
-				mbview_spheroid_setup(instance, MB_NO,
+				mbview_sphere_setup(instance, MB_NO,
 							0.5 * (xlonmin + xlonmax),
 							0.5 * (ylatmin + ylatmax));
 
 				/* get origin */
-				mbview_spheroid_forward(instance,
+				mbview_sphere_forward(instance,
 							0.5 * (xlonmin + xlonmax),
 							0.5 * (ylatmin + ylatmax),
 							&view->sphere_refx, 
 							&view->sphere_refy, 
 							&view->sphere_refz);
 
-				mbview_spheroid_forward(instance,
+				mbview_sphere_forward(instance,
 							xlonmin, 
 							ylatmin,
 							&view->xmin, 
 							&view->ymin, 
 							&zdisplay);
-				mbview_spheroid_forward(instance,
+				mbview_sphere_forward(instance,
 							xlonmax, 
 							ylatmax,
 							&view->xmax, 
@@ -312,7 +315,7 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 				view->ymax -= view->sphere_refy;
 
 				/* get origin */
-				mbview_spheroid_forward(instance,
+				mbview_sphere_forward(instance,
 							0.5 * (xlonmin + xlonmax),
 							0.5 * (ylatmin + ylatmax),
 							&view->xorigin, 
@@ -1406,7 +1409,7 @@ int mbview_projectll2display(int instance,
 		}
 	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
 		{
-		mbview_spheroid_forward(instance, xlon, ylat, &xx, &yy, &zz);
+		mbview_sphere_forward(instance, xlon, ylat, &xx, &yy, &zz);
 		effective_topography = data->exageration * (zdata - 0.5 * (data->primary_min + data->primary_max))
 					+ 0.5 * (data->primary_min + data->primary_max);
 /*fprintf(stderr,"pos: %f %f %f   raw: %f %f %f  topo:%f ",
@@ -1497,7 +1500,7 @@ int mbview_projectdisplay2ll(int instance,
 		xx += view->sphere_refx;
 		yy += view->sphere_refy;
 		zz += view->sphere_refz;
-		mbview_spheroid_inverse(instance, xx, yy, zz, xlon, ylat);
+		mbview_sphere_inverse(instance, xx, yy, zz, xlon, ylat);
 		}
 
 	/* print output debug statements */
@@ -1615,10 +1618,10 @@ int mbview_projectdistance(int instance,
 	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
 		{
 		/* point 1 */
-		mbview_spheroid_forward(instance, xlon1, ylat1, &xx1, &yy1, &zz1);
+		mbview_sphere_forward(instance, xlon1, ylat1, &xx1, &yy1, &zz1);
 
 		/* point 2 */
-		mbview_spheroid_forward(instance, xlon2, ylat2, &xx2, &yy2, &zz2);
+		mbview_sphere_forward(instance, xlon2, ylat2, &xx2, &yy2, &zz2);
 
 		/* lateral distance */
 		mbview_greatcircle_distbearing(instance, 
@@ -1661,10 +1664,10 @@ int mbview_projectdistance(int instance,
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_spheroid_setup(int instance, int earthcentered, double xlon, double ylat)
+int mbview_sphere_setup(int instance, int earthcentered, double xlon, double ylat)
 {
 	/* local variables */
-	char	*function_name = "mbview_spheroid_setup";
+	char	*function_name = "mbview_sphere_setup";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
@@ -1743,29 +1746,13 @@ int mbview_spheroid_setup(int instance, int earthcentered, double xlon, double y
 	phi = DTR * xlon - 0.5 * M_PI;
 	theta = DTR * ylat - 0.5 * M_PI;
 	psi = M_PI;
-	view->sphere_eulerforward[0] = cos(phi) * cos(psi) - sin(phi) * cos(theta) * sin(psi);
-	view->sphere_eulerforward[1] = sin(phi) * cos(psi) + cos(phi) * cos(theta) * sin(psi);
-	view->sphere_eulerforward[2] = sin(theta) * sin (psi);
-	view->sphere_eulerforward[3] = -cos(phi) * sin(psi) - sin(phi) * cos(theta) * cos(psi);
-	view->sphere_eulerforward[4] = -sin(phi) * sin(psi) + cos(phi) * cos(theta) * cos(psi);
-	view->sphere_eulerforward[5] = sin(theta) * cos(psi);
-	view->sphere_eulerforward[6] = sin(phi) * sin(theta);
-	view->sphere_eulerforward[7] = -cos(phi) * sin(theta);
-	view->sphere_eulerforward[8] = cos(theta);
+	mbview_sphere_matrix(phi, theta, psi, view->sphere_eulerforward);
 	
 	/* create reverse rotation matrix */
 	phi = -M_PI;
 	theta = 0.5 * M_PI - DTR * ylat;
 	psi = 0.5 * M_PI - DTR * xlon;
-	view->sphere_eulerreverse[0] = cos(phi) * cos(psi) - sin(phi) * cos(theta) * sin(psi);
-	view->sphere_eulerreverse[1] = sin(phi) * cos(psi) + cos(phi) * cos(theta) * sin(psi);
-	view->sphere_eulerreverse[2] = sin(theta) * sin (psi);
-	view->sphere_eulerreverse[3] = -cos(phi) * sin(psi) - sin(phi) * cos(theta) * cos(psi);
-	view->sphere_eulerreverse[4] = -sin(phi) * sin(psi) + cos(phi) * cos(theta) * cos(psi);
-	view->sphere_eulerreverse[5] = sin(theta) * cos(psi);
-	view->sphere_eulerreverse[6] = sin(phi) * sin(theta);
-	view->sphere_eulerreverse[7] = -cos(phi) * sin(theta);
-	view->sphere_eulerreverse[8] = cos(theta);
+	mbview_sphere_matrix(phi, theta, psi, view->sphere_eulerreverse);
 	
 	/* now get reference location in rotated coordinates */
 	view->sphere_reflon = xlon;
@@ -1775,7 +1762,7 @@ int mbview_spheroid_setup(int instance, int earthcentered, double xlon, double y
 	view->sphere_refz = 0.0;
 	if (earthcentered == MB_NO)
 		{
-		mbview_spheroid_forward(instance, xlon, ylat, 
+		mbview_sphere_forward(instance, xlon, ylat, 
 				&view->sphere_refx,&view->sphere_refy, &view->sphere_refz);
 		}
 
@@ -1814,11 +1801,11 @@ int mbview_spheroid_setup(int instance, int earthcentered, double xlon, double y
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_spheroid_forward(int instance, double xlon, double ylat,
+int mbview_sphere_forward(int instance, double xlon, double ylat,
 			double *xx, double *yy, double *zz)
 {
 	/* local variables */
-	char	*function_name = "mbview_spheroid_forward";
+	char	*function_name = "mbview_sphere_forward";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
@@ -1855,15 +1842,7 @@ int mbview_spheroid_forward(int instance, double xlon, double ylat,
 	
 	/* apply rotation to coordinates with the reference location
 		at the center of the view, on the positive z-axis. */
-	for(i=0;i<3;i++)
-		posr[i] = 0.0;
-	for (j=0;j<3;j++)
-		{
-		for (i=0;i<3;i++)
-			{
-			posr[j] += posu[i] * view->sphere_eulerforward[i + 3 * j];
-			}
-		}
+	mbview_sphere_rotate(view->sphere_eulerforward,posu,posr);
 
 	/* make relative to reference location */
 	*xx = posr[0];
@@ -1894,11 +1873,11 @@ int mbview_spheroid_forward(int instance, double xlon, double ylat,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_spheroid_inverse(int instance, double xx, double yy, double zz, 
+int mbview_sphere_inverse(int instance, double xx, double yy, double zz, 
 			double *xlon, double *ylat)
 {
 	/* local variables */
-	char	*function_name = "mbview_spheroid_inverse";
+	char	*function_name = "mbview_sphere_inverse";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
@@ -1930,15 +1909,7 @@ int mbview_spheroid_inverse(int instance, double xx, double yy, double zz,
 	posr[2] = zz;
 	
 	/* unrotate position */
-	for(i=0;i<3;i++)
-		posu[i] = 0.0;
-	for (j=0;j<3;j++)
-		{
-		for (i=0;i<3;i++)
-			{
-			posu[j] += posr[i] * view->sphere_eulerreverse[i + 3 * j];
-			}
-		}
+	mbview_sphere_rotate(view->sphere_eulerreverse,posr,posu);
 	
 	/* get longitude and latitude */
 	*xlon = RTD * atan2(posu[1], posu[0]);
@@ -1958,6 +1929,155 @@ int mbview_spheroid_inverse(int instance, double xx, double yy, double zz,
 		fprintf(stderr,"dbg2       posu[2]:     %f\n",posu[2]);
 		fprintf(stderr,"dbg2       xlon:        %f\n",*xlon);
 		fprintf(stderr,"dbg2       ylat:        %f\n",*ylat);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_sphere_matrix(double phi, double theta, double psi,double *eulermatrix)
+{
+	/* local variables */
+	char	*function_name = "mbview_sphere_rotate";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	i,j;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       phi:              %f\n",phi);
+		fprintf(stderr,"dbg2       theta:            %f\n",theta);
+		fprintf(stderr,"dbg2       psi:              %f\n",psi);
+		}
+	
+	/* The initial spherical coordinate system is defined as:
+			x = r * cos(longitude) * cos(latitude)
+			y = r * sin(longitude) * cos(latitude)
+			z = r * sin(latitude)
+	   which is equivalent to:
+			x = r * cos(longitude) * sin(colatitude)
+			y = r * sin(longitude) * sin(colatitude)
+			z = r * cos(colatitude)
+	   where:
+	   		colatitude = PI/2 - latitude
+	
+	   Euler's rotation theorem proves than any general rotation may be
+	   described by three successive rotations about the axes. One convention
+	   is to use first a rotation about the z-axis (angle phi), then a
+	   rotation about the x'-axis (angle theta), and finally a rotation
+	   about the z''-axis (angle psi).
+	    
+	   The euler rotation matrix becomes: 
+	   		|	a11	a12	a13	|
+	   		|	a21	a22	a23	|
+	   		|	a31	a32	a33	|
+	   where:
+			a11 = cos(phi) * cos(psi) - sin(phi) * cos(theta) * sin(psi)
+			a12 = sin(phi) * cos(psi) + cos(phi) * cos(theta) * sin(psi)
+			a13 = sin(theta) * sin (psi)
+			a21 = -cos(phi) * sin(psi) - sin(phi) * cos(theta) * cos(psi)
+			a22 = -sin(phi) * sin(psi) + cos(phi) * cos(theta) * cos(psi)
+			a23 = sin(theta) * cos(psi)
+			a31 = sin(phi) * sin(theta)
+			a32 = -cos(phi) * sin(theta)
+			a33 = cos(theta)
+			
+	   We wish to rotate the coordinate system so that the reference position
+	   defined by xlon and ylat are located on the positive z-axis. The forward
+	   rotation is accomplished using:
+	   		phi = -PI/2 + xlon
+			theta = -ycolat = ylat - PI/2
+			psi = PI
+	   The reverse rotation is accomplished using:
+	   		phi = -PI
+			theta = ycolat = PI/2 - ylat
+			psi = xlon - PI/2
+			
+	  The relevant equations derived in part from:
+		http://mathworld.wolfram.com/EulerAngles.html
+	  which were viewed on January 19, 2004
+		*/
+	
+	/* create forward rotation matrix */
+	eulermatrix[0] = cos(phi) * cos(psi) - sin(phi) * cos(theta) * sin(psi);
+	eulermatrix[1] = sin(phi) * cos(psi) + cos(phi) * cos(theta) * sin(psi);
+	eulermatrix[2] = sin(theta) * sin (psi);
+	eulermatrix[3] = -cos(phi) * sin(psi) - sin(phi) * cos(theta) * cos(psi);
+	eulermatrix[4] = -sin(phi) * sin(psi) + cos(phi) * cos(theta) * cos(psi);
+	eulermatrix[5] = sin(theta) * cos(psi);
+	eulermatrix[6] = sin(phi) * sin(theta);
+	eulermatrix[7] = -cos(phi) * sin(theta);
+	eulermatrix[8] = cos(theta);
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       eulermatrix       %f %f %f\n",eulermatrix[0],eulermatrix[1],eulermatrix[2]);
+		fprintf(stderr,"dbg2       eulermatrix       %f %f %f\n",eulermatrix[3],eulermatrix[4],eulermatrix[5]);
+		fprintf(stderr,"dbg2       eulermatrix       %f %f %f\n",eulermatrix[6],eulermatrix[7],eulermatrix[8]);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_sphere_rotate(double *eulermatrix,
+			double *v, double *vr)
+{
+	/* local variables */
+	char	*function_name = "mbview_sphere_rotate";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	i,j;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       eulermatrix       %f %f %f\n",eulermatrix[0],eulermatrix[1],eulermatrix[2]);
+		fprintf(stderr,"dbg2       eulermatrix       %f %f %f\n",eulermatrix[3],eulermatrix[4],eulermatrix[5]);
+		fprintf(stderr,"dbg2       eulermatrix       %f %f %f\n",eulermatrix[6],eulermatrix[7],eulermatrix[8]);
+		fprintf(stderr,"dbg2       -----------\n");
+		fprintf(stderr,"dbg2       v:                %f %f %f\n",v[0],v[1],v[3]);
+		}
+
+	/* get original view direction in cartesian coordinates */
+	for(i=0;i<3;i++)
+		vr[i] = 0.0;
+	for (j=0;j<3;j++)
+		{
+		for (i=0;i<3;i++)
+			{
+			vr[j] += v[i] * eulermatrix[i + 3 * j];
+			}
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       vr:               %f %f %f\n",vr[0],vr[1],vr[3]);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
 		}
