@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.13 1995-11-02 19:24:45 caress Exp $
+ *    $Id: mbcontour.c,v 4.14 1995-11-22 22:13:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1995/11/02  19:24:45  caress
+ * Fixed mb_error calls.
+ *
  * Revision 4.12  1995/09/29  18:09:17  caress
  * Enabled mbio using larger bounds than plot bounds.
  *
@@ -127,7 +130,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.13 1995-11-02 19:24:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.14 1995-11-22 22:13:02 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -223,6 +226,7 @@ char **argv;
 	double	time_tick_len;
 	double	time_tick_len_map;
 	double	scale;
+	int	bathy_in_feet;
 
 	/* pen variables */
 	int	ncolor;
@@ -280,9 +284,10 @@ char **argv;
 	nlevel = 0;
 	plot_contours = MB_NO;
 	plot_triangles = MB_NO;
+	bathy_in_feet = MB_NO;
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhA:a:b:C:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:c:F:J:KOPR:UX:x:Y:y:Z:z:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:b:C:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:c:F:J:KOPR:UWwX:x:Y:y:Z:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -371,6 +376,10 @@ char **argv;
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'W':
+		case 'w':
+			bathy_in_feet = MB_YES;
 			break;
 		case 'Z':
 		case 'z':
@@ -503,6 +512,7 @@ char **argv;
 			date_annot_int);
 		fprintf(stderr,"dbg2       time tick length: %f\n\n",
 			time_tick_len);
+		fprintf(stderr,"dbg2       bathy_in_feet:    %d\n",bathy_in_feet);
 		}
 
 	/* if bounds not specified then quit */
@@ -771,6 +781,16 @@ char **argv;
 				error);
 			fprintf(stderr,"dbg2       status:         %d\n",
 				status);
+			}
+
+		/* scale bathymetry if necessary */
+		if (error == MB_ERROR_NO_ERROR
+			&& bathy_in_feet == MB_YES)
+			{
+			for (i=0;i<beams_bath;i++)
+				{
+				bath[i] = 0.3048 * bath[i];
+				}
 			}
 
 		/* update bookkeeping */

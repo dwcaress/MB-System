@@ -1,4 +1,4 @@
-.TH mbswath l "14 August 1995"
+.TH mbswath l "22 November 1995"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -15,7 +15,7 @@ Version 4.3
 \fB-f\fIformat\fP \fB-F\fIred/green/blue\fP 
 \fB-G\fImagnitude/azimuth\fP \fB-I\fIdatalist\fP \fB-K\fP 
 \fB-N\fIcptfile\fP \fB-O\fP \fB-P\fP \fB-p\fIpings \fB-Q\fIdpi\fP \fB-S\fIspeed\fP 
-\fB-T\fItimegap\fP \fB-U\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fImode\fP 
+\fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fImode\fP 
 \fB-0 -1 -2\fP
 \fB-V -H\fP]
 
@@ -56,6 +56,8 @@ depth value in meters used in the footprint calculations.
 If \fImode\fP = 2, then the along-track dimension of the beam
 or pixel footprints is just the along-track distance between
 pings multiplied by the \fIfactor\fP value.
+If \fImode\fP = 3, then each data point is plotted as a point,
+and the \fIfactor\fP and \fIdepth\fP parameters are ignored.
 Default: \fIfactor\fP = 1.0, \fImode\fP = 1, \fIdepth\fP = 3000.0.
 .TP
 .B \fB-B\fItickinfo\fP
@@ -278,6 +280,12 @@ the command string.
 .TP
 .B \-V
 Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
+.TP
+.B \fB-W\fP
+Normally, \fBmbswath\fP works with bathymetry values in meters.  If the
+\fB-W\fP flag is given, then \fBmbswath\fP will work with bathymetry
+values in feet. The color pallette file used must conform to the
+range of bathymetry values in feet.
 .TP
 .B \-X \-Y
 Shift origin of plot by (\fIx-shift,y-shift\fP) inches  [Default is (1,1) for new plots, (0,0) for overlays].

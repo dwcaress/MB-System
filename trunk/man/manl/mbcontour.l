@@ -1,4 +1,4 @@
-.TH mbcontour l "14 August 1995"
+.TH mbcontour l "22 November 1995"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -15,7 +15,7 @@ Version 4.3
 \fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIred/green/blue\fP 
 \fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP 
 \fB-N\fInplot\fP \fB-N\fImode/min/max \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
-\fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-X\fIx-shift\fP 
+\fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP 
 \fB-Y\fIy-shift\fP \fB-Z\fIalgorithm\fP 
 \fB-V -H\fP]
 
@@ -274,6 +274,11 @@ the command string.
 .TP
 .B \-V
 Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
+.TP
+.B \fB-W\fP
+Normally, \fBmbcontour\fP works with bathymetry values in meters.  If the
+\fB-W\fP flag is given, then \fBmbcontour\fP will contour the bathymetry
+values in feet.
 .TP
 .B \-X \-Y
 Shift origin of plot by (\fIx-shift,y-shift\fP) inches  [Default is (1,1) for new plots, (0,0) for overlays].
