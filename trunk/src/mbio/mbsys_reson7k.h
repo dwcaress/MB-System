@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.1 2004-05-21 23:44:50 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.2 2004-06-18 05:22:33 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/05/21 23:44:50  caress
+ * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
+ *
  * Revision 5.0  2004/04/27 01:50:16  caress
  * Adding support for Reson 7k sonar data, including segy extensions.
  *
@@ -70,8 +73,12 @@
 
 /* 3000-6999 reserved for other vendor records */
 #define R7KRECID_FSDWsidescan				3000
+#define R7KRECID_FSDWsidescanLo				0
+#define R7KRECID_FSDWsidescanHi				1
 #define R7KRECID_FSDWsubbottom				3001
-#define R7KRECID_BluefinDataFrame			3100
+#define R7KRECID_Bluefin			3100
+#define R7KRECID_BluefinNav				0
+#define R7KRECID_BluefinEnvironmental			1
 
 /* 7000-7999 reserved for SeaBat 7k records */
 #define R7KRECID_7kVolatileSonarSettings		7000
@@ -82,6 +89,7 @@
 #define R7KRECID_7kBathymetricData			7006
 #define R7KRECID_7kBackscatterImageData			7007
 #define R7KRECID_7kBeamData				7008
+#define R7KRECID_7kImageData				7011
 #define R7KRECID_7kSystemEvent				7051
 #define R7KRECID_7kDataStorageStatus			7052
 #define R7KRECID_7kFileHeader				7200
@@ -103,6 +111,74 @@
 #define R7KRECID_7kPayloadControllerCommand		11000
 #define R7KRECID_7kPayloadControllerCommandAcknowledge	11001
 #define R7KRECID_7kPayloadControllerStatus		11002
+
+/* 11200-11999 reserved for Payload Controller sensor QC records */
+
+/*---------------------------------------------------------------*/
+/* Record size definitions */
+#define	MBSYS_RESON7K_RECORDHEADER_SIZE				72
+#define	MBSYS_RESON7K_RECORDTAIL_SIZE				4
+
+/* 0 means no record at all */
+#define	R7KHDRSIZE_None						0
+
+/* 1000-1999 reserved for generic sensor records */
+#define R7KHDRSIZE_ReferencePoint				16
+#define R7KHDRSIZE_UncalibratedSensorOffset			24
+#define R7KHDRSIZE_CalibratedSensorOffset			24
+#define R7KHDRSIZE_Position					28
+#define R7KHDRSIZE_Attitude					8
+#define R7KHDRSIZE_Tide						8
+#define R7KHDRSIZE_Altitude					4
+#define R7KHDRSIZE_MotionOverGround				8
+#define R7KHDRSIZE_Depth					8
+#define R7KHDRSIZE_SoundVelocityProfile				24
+#define R7KHDRSIZE_CTD						32
+#define R7KHDRSIZE_Geodesy					320
+
+/* 2000-2999 reserved for user defined records */
+#define R7KHDRSIZE_Survey					0
+
+/* 3000-6999 reserved for other vendor records */
+#define R7KHDRSIZE_FSDWsidescan					20
+#define R7KHDRSIZE_FSDWsubbottom				20
+#define R7KHDRSIZE_BluefinDataFrame				32
+#define R7KHDRSIZE_FSDWchannelinfo				64
+#define R7KHDRSIZE_FSDWssheader					80
+#define R7KHDRSIZE_FSDWsbheader					240
+
+/* 7000-7999 reserved for SeaBat 7k records */
+#define R7KHDRSIZE_7kVolatileSonarSettings			120
+#define R7KHDRSIZE_7kConfigurationSettings			12
+#define R7KHDRSIZE_7kMatchFilter				12
+#define R7KHDRSIZE_7kBeamGeometry				12
+#define R7KHDRSIZE_7kCalibrationData				10
+#define R7KHDRSIZE_7kBathymetricData				14
+#define R7KHDRSIZE_7kBackscatterImageData			62
+#define R7KHDRSIZE_7kBeamData					28
+#define R7KHDRSIZE_7kImageData					12
+#define R7KHDRSIZE_7kSystemEvent				12
+#define R7KHDRSIZE_7kDataStorageStatus				0
+#define R7KHDRSIZE_7kFileHeader					44
+#define R7KRDTSIZE_7kFileHeader					288
+#define R7KHDRSIZE_7kTrigger					2
+#define R7KHDRSIZE_7kTriggerSequenceSetup			2
+#define R7KHDRSIZE_7kTriggerSequenceDone			2
+#define R7KHDRSIZE_7kTimeMessage				16
+#define R7KHDRSIZE_7kRemoteControl				8
+#define R7KHDRSIZE_7kRemoteControlAcknowledge			4
+#define R7KHDRSIZE_7kRemoteControlNotAcknowledge		8
+#define R7KHDRSIZE_7kRemoteControlSonarSettings			84
+#define R7KHDRSIZE_7kRoll					4
+#define R7KHDRSIZE_7kPitch					4
+#define R7KHDRSIZE_7kSoundVelocity				4
+#define R7KHDRSIZE_7kAbsorptionLoss				4
+#define R7KHDRSIZE_7kSpreadingLoss				4
+
+/* 11000-11199 reserved for Payload Controller command records */
+#define R7KHDRSIZE_7kPayloadControllerCommand			16
+#define R7KHDRSIZE_7kPayloadControllerCommandAcknowledge	12
+#define R7KHDRSIZE_7kPayloadControllerStatus			16
 
 /* 11200-11999 reserved for Payload Controller sensor QC records */
 
@@ -131,8 +207,23 @@
 
 /*---------------------------------------------------------------*/
 
+/* Edgetech trace data format definitions */
+#define	EDGETECH_TRACEFORMAT_ENVELOPE		0 	/* 2 bytes/sample (unsigned) */
+#define	EDGETECH_TRACEFORMAT_ANALYTIC		1 	/* 4 bytes/sample (I + Q) */
+#define	EDGETECH_TRACEFORMAT_RAW		2 	/* 2 bytes/sample (signed) */
+#define	EDGETECH_TRACEFORMAT_REALANALYTIC	3 	/* 2 bytes/sample (signed) */
+#define	EDGETECH_TRACEFORMAT_PIXEL		4 	/* 2 bytes/sample (signed) */
+
+/*---------------------------------------------------------------*/
+
+/* Bluefin data frame definitions */
+#define	BLUEFIN_MAX_FRAMES			25 	/* Maximum number of Bluefin 
+								data frames contained
+								in a Bluefin data record */
+
+/*---------------------------------------------------------------*/
+
 /* Structure size definitions */
-#define	MBSYS_RESON7K_RECORDHEADER_SIZE	90
 #define	MBSYS_RESON7K_BUFFER_STARTSIZE	32768
 #define	MBSYS_RESON7K_MAX_DEVICE	10
 #define MBSYS_RESON7K_MAX_RECEIVERS	1024
@@ -433,7 +524,7 @@ typedef struct s7kr_geodesy_struct
 }
 s7kr_geodesy;
 
-/* MB-System 7k survey (record 2000) */
+/* MB-System 7k survey (record 2001) */
 typedef struct s7kr_survey_struct
 {
 	s7k_header	header;
@@ -670,6 +761,85 @@ typedef struct s7kr_fsdwsb_struct
 }
 s7kr_fsdwsb;
 	
+/* Bluefin Navigation Data Frame (can be included in record 3100) */
+typedef struct s7k_bluefin_nav_struct
+{
+	int		packet_size;		/* size in bytes of this packet including the
+							header and appended data */
+	unsigned short	version;		/* Version of this frame */
+	unsigned short	offset;			/* Offset in bytes to the start of data from the
+							start of this packet */
+	int		data_type;		/* Data type identifier 
+							0 - Navigation data
+							1 - Environment data */
+	int		data_size;		/* Size of data in bytes */
+    	s7k_time 	s7kTime;		/* 7KTIME               u8*10   UTC.*/
+	unsigned int	checksum;		/* Checksum for all bytes in record */
+	short		reserved;
+	unsigned int	quality;
+	double		latitude;		/* Latitude (radians) */
+	double		longitude;		/* Longitude (radians) */
+	float		speed;			/* Speed (m/sec) */
+	double		depth;			/* Vehicle depth (m) */
+	double		altitude;		/* Vehicle altitude (m) */
+	float		roll;			/* Vehicle roll (radians) */
+	float		pitch;			/* Vehicle pitch (radians) */
+	float		yaw;			/* Vehicle yaw (radians) */
+	float		northing_rate;		/* Vehicle northing rate (m/sec) */
+	float		easting_rate;		/* Vehicle easting rate (m/sec) */
+	float		depth_rate;		/* Vehicle depth rate (m/sec) */
+	float		altitude_rate;		/* Vehicle altitude rate (m/sec) */
+	float		roll_rate;		/* Vehicle roll rate (radians/sec) */
+	float		pitch_rate;		/* Vehicle pitch rate (radians/sec) */
+	float		yaw_rate;		/* Vehicle yaw rate (radians/sec) */
+	double		position_time;		/* Vehicle position time (unix sec) */
+	double		altitude_time;		/* Vehicle altitude time (unix sec) */
+}
+s7k_bluefin_nav;
+	
+/* Bluefin Environmental Data Frame (can be included in record 3100) */
+typedef struct s7k_bluefin_environmental_struct
+{
+	int		packet_size;		/* size in bytes of this packet including the
+							header and appended data */
+	unsigned short	version;		/* Version of this frame */
+	unsigned short	offset;			/* Offset in bytes to the start of data from the
+							start of this packet */
+	int		data_type;		/* Data type identifier 
+							0 - Navigation data
+							1 - Environment data */
+	int		data_size;		/* Size of data in bytes */
+    	s7k_time	s7kTime;		/* 7KTIME               u8*10   UTC.*/
+	unsigned int	checksum;		/* Checksum for all bytes in record */
+	short		reserved1;
+	unsigned int	quality;
+	float		sound_speed;		/* Sound speed (m/sec) */
+	float		conductivity;		/* Conductivity (S/m) */
+	float		temperature;		/* Temperature (deg C) */
+	float		pressure;		/* Temperature (deg C) */
+	float		salinity;		/* Temperature (deg C) */
+	double		ctd_time;		/* CTD sample time (unix sec) */
+	double		temperature_time;	/* Temperature sample time (unix sec) */
+	char		reserved2[56];
+}
+s7k_bluefin_environmental;
+	
+/* Bluefin Data Frame (record 3100) */
+typedef struct s7kr_bluefin_struct
+{
+	s7k_header	header;
+	int		msec_timestamp;		/* Relative millisecond timer value */
+	int		number_frames;		/* Number of frames embedded in this record */
+	int		frame_size;		/* Embedded frame size in bytes */
+	int		data_format;		/* Data type identifier 
+							0 - Navigation data
+							1 - Environment data */
+	char		reserved[16];		/* Reserved */
+	s7k_bluefin_nav	nav[BLUEFIN_MAX_FRAMES];			/* Bluefin navigation frames */
+	s7k_bluefin_environmental environmental[BLUEFIN_MAX_FRAMES];	/* Bluefin environmental frames */
+}
+s7kr_bluefin;
+	
 /* Reson 7k volatile sonar settings (record 7000) */
 typedef struct s7kr_volatilesettings_struct
 {
@@ -831,7 +1001,7 @@ s7kr_backscatter;
 typedef struct s7kr_systemevent_struct
 {
 	s7k_header	header;
-	unsigned long	serial_number;		/* Sonar serial number */
+	unsigned int	serial_number;		/* Sonar serial number */
 	unsigned short	event_id;		/* Event id:
 							0: success
 							1: information (used for MB-System comment record)
@@ -878,12 +1048,9 @@ struct mbsys_reson7k_struct
 	/* Type of data record */
 	int		kind;			/* MB-System record ID */
 	int		type;			/* Reson record ID */
-	
-	/* Survey record flags (all set to -1 each time survey data is returned by mbr_reson7kr_rd_data() ) */
-	int		rec_multibeam;		/* multibeam ping number read since last survey data returned */
-	int		rec_sslow;		/* low frequency sidescan ping number read since last survey data returned */
-	int		rec_sshigh;		/* high frequency sidescan ping number read since last survey data returned */
-	int		rec_sssubbottom;	/* subbottom ping number read since last survey data returned */
+	int		sstype;			/* If type == R7KRECID_FSDWsidescan
+							sstype: 0 = low frequency sidescan 
+							 	1 = high frequency sidescan */
 	
 	/* MB-System time stamp */
 	double		time_d;	
@@ -937,6 +1104,9 @@ struct mbsys_reson7k_struct
 
 	/* Edgetech FS-DW subbottom (record 3001) */
 	s7kr_fsdwsb	fsdwsb;
+
+	/* Bluefin data frames (record 3100) */
+	s7kr_bluefin	bluefin;
 
 	/* Reson 7k volatile sonar settings (record 7000) */
 	s7kr_volatilesettings	volatilesettings;
@@ -1040,7 +1210,7 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 			int nsvp, 
 			double *depth, double *velocity,
 			int *error);
-int mbsys_reson7k_extract_segyheader(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		void *segyheader_ptr, 
 		int *error);
