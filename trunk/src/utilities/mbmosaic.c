@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.2 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbmosaic.c,v 4.3 1998-10-07 19:33:56 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.1  1997/09/15  19:11:06  caress
  * Real Version 4.5
  *
@@ -77,7 +80,7 @@
 #define	NO_DATA_FLAG	99999.9
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.2 1998-10-05 19:19:24 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.3 1998-10-07 19:33:56 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -2753,25 +2756,5 @@ double	*b;
 		return(1);
 	else
 		return(-1);
-}
-/*--------------------------------------------------------------------*/
-double ddmmss_to_degree (text)
-char *text; 
-{
-	int i, colons = 0;
-	double degree, minute, degfrac, second;
-
-	for (i = 0; text[i]; i++) if (text[i] == ':') colons++;
-	if (colons == 2) {	/* dd:mm:ss format */
-		sscanf (text, "%lf:%lf:%lf", &degree, &minute, &second);
-		degfrac = degree + copysign (minute / 60.0, degree) + copysign (second / 3600.0, degree);
-	}
-	else if (colons == 1) {	/* dd:mm format */
-		sscanf (text, "%lf:%lf", &degree, &minute);
-		degfrac = degree + copysign (minute / 60.0, degree);
-	}
-	else
-		degfrac = atof (text);
-	return (degfrac);
 }
 /*--------------------------------------------------------------------*/
