@@ -1,0 +1,1119 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_grd3dplot</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_grd3dplot</H1>
+Section: MB-System 5.0 (l)<BR>Updated: 13 November 2002<BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_grd3dplot</B> - Create an executable shellscript which will generate
+a GMT 3D perspective plot of gridded data in a GMT grd file.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_grd3dplot</B> <B>-I</B><I>file</I> 
+[<B>-A</B>[<I>magnitude</I>[<I>/azimuth/elevation</I>] 
+<B>-D</B>[<I>flipcolor/flipshade</I>]
+<B>-E</B>[<I>view_az/view_el</I>] <B>-F</B><I>exaggeration</I>
+<B>-G</B><I>color_mode</I> <B>-H</B> <B>-K</B><I>intensity_file </I>
+<B>-N</B><I>drape_file</I>
+<B>-O</B><I>root</I> <B>-P</B><I>pagesize </I>
+<B>-S</B><I>[color/shade]</I> <B>-U</B><I>orientation</I> <B>-V</B> 
+<B>-W</B>[<I>color_style</I>[<I>/pallette</I>[<I>ncolors</I>]] | <I>cptfile</I>] ]
+<P>
+Additional Options:
+<BR>
+
+[<B>-B</B><I>tickinfo</I>
+<B>-J</B><I>projection</I>[<I>/scale | width</I>]
+<B>-L</B><I>title</I>[<I>:scale_label</I>] <B>-M</B><I>misc</I> 
+<B>-Q</B> <B>-R</B><I>w/e/s/n</I> <B>-X</B> <B>-Y</B> 
+<B>-Z</B><I>min/max</I> ]
+<P>
+Miscellaneous Options:
+<BR>
+
+[<B>-MGD</B><I>gmtdef/value</I>  <B>-MGF</B><I>scale_loc</I>
+<B>-MGL</B>[<I>f</I>][<I>x</I>]<I>lon0/lat0/slat/length</I>[<I>m</I>]
+<B>-MGQ</B><I>dpi</I> <B>-MGS</B><I>scalefactor</I>
+<B>-MGT</B><I>x/y/size/angle/font/just/text</I>
+<B>-MGU</B>[<I>/dx/dy/</I>][<I>label</I>] 
+<B>-MVM</B><I>mesh_pen</I> <B>-MVN</B>[<I>null[/r/g/b]</I>] ]
+<P>
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_grd3dplot</B> is a macro to generate a shellscript of GMT commands which, when 
+executed, will generate a 3D perspective Postscript plot of  
+gridded data.  Several styles of plots can be generated, 
+including color fill views, color shaded relief views, mesh  
+plot views, and text labels. Five different color schemes are 
+included. The plot will be scaled to fit on the specified page  
+size or, if the scale is user defined, the page size will be  
+chosen in accordance with the plot size. The vertical exaggeration
+may be specified. The primary purpose 
+of this macro is to allow the simple, semi-automated 
+production of nice looking maps with a few command line 
+arguments. For users seeking more control over the plot 
+appearance, a number of additional optional arguments are 
+provided. Truly ambitious users may edit the plot shellscript 
+to take advantage of GMT capabilites not supported by this 
+macro.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SIMPLE DESCRIPTION OF BASIC OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>magnitude[/azimuth/elevation]</I>
+<BR>
+
+Sets the parameters which control the
+synthetic illumination of the gridded data (shaded relief).
+The value <I>magnitude</I>
+is an effective vertical exageration which modulates the intensity of
+the shading; typical values are in the 0.1 to 10 range.  
+The value <I>azimuth</I>
+is the azimuth in degrees from north from which the data is illuminated.
+The value <I>elevation</I> is the elevation of the illumination 
+in degrees from horizontal.
+Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0; 
+<I>elevation</I> = 30.0;
+<DT><B>-D</B>
+
+<DD>
+<I>[flipcolor/flipshade]</I>
+<BR>
+
+Normally, the color or grayscale tables used for color maps run from
+cool colors (or dark grays) for low grid values 
+to hot colors (or light grays) for high grid values.
+This option reverses the color table so that cool colors (dark grays)
+correspond to high values and hot colors (light grays) to low values.
+If <B>-D</B> is given alone, it applies to the color table used
+for color or gray fill plots,  shaded or unshaded. If the plot
+is to be shaded,  either by synthetic illumination (<B>-G</B><I>2</I>) 
+or using an intensity file (<B>-K</B> and <B>-G</B><I>3</I> options), then
+setting <I>flipshade</I> = 1 will cause the shading convention
+to be reversed (e.g. high intensities overlaid as light shading).
+Using <B>-D</B><I>0/1</I> will flip the shading convention
+but leave the default color convention.
+<DT><B>-E</B>
+
+<DD>
+[<I>view_az/view_el</I>]
+<BR>
+
+Sets the azimuth and elevation in degrees of the
+viewpoint for 3D perspective views.  An <I>view_az</I> of 0
+represents a view from the north, and <I>view_az</I> = 90
+represents a view from the east.  An <I>view_el</I> of 0
+represents a horizontal view.  Default: <I>view_az</I> = 200.;
+elevation = 40.
+<DT><B>-F</B>
+
+<DD>
+[<I>exaggeration</I>]
+<BR>
+
+Sets the vertical exaggeration of the perspective plot.
+By default the vertical exaggeration is chosen so that the
+plot fits nicely on the page. This option works only if the
+data are in geographic coordinates (longitude and latitude).
+<DT><B>-G</B>
+
+<DD>
+<I>color_mode</I>
+<BR>
+
+Turns on color fill plot and sets the style of the plot.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;1:&nbsp;3D&nbsp;color/gray&nbsp;fill.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;2:&nbsp;3D&nbsp;color/gray&nbsp;fill&nbsp;shaded&nbsp;by&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;synthetic&nbsp;illumination.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;3:&nbsp;3D&nbsp;color/gray&nbsp;fill&nbsp;shaded&nbsp;by&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;intensity&nbsp;file.&nbsp;The&nbsp;<B>-K</B>&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;option&nbsp;must&nbsp;be&nbsp;used&nbsp;to&nbsp;specify
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>the&nbsp;intensity&nbsp;file.<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;4:&nbsp;3D&nbsp;Color/gray&nbsp;fill&nbsp;of&nbsp;slope&nbsp;
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>magnitude.<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;5:&nbsp;3D&nbsp;Color/gray&nbsp;fill&nbsp;shaded&nbsp;by&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slope&nbsp;magnitude.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;6:&nbsp;3D&nbsp;mesh&nbsp;plot.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;7:&nbsp;3D&nbsp;mesh&nbsp;plot&nbsp;with&nbsp;contours.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>grdfile</I>
+<BR>
+
+Sets the name of the gridded data file to be plotted.  
+Alternatively, <I>grdfile</I> may be a list of grid files
+(one filename on each line) to be plotted together.
+<DT><B>-K</B>
+
+<DD>
+<I>intensity_file</I>
+<BR>
+
+Sets the name of the gridded data file containing
+instensity values to be used for shading the map.  
+<DT><B>-N</B>
+
+<DD>
+<I>drape_file</I>
+<BR>
+
+Sets the name of the gridded data file to be draped on
+the relief provided by the file specified with the <B>-I</B>
+option. If <B>-N</B><I>drape_file</I> is specified, then
+all color control options will apply to the data in 
+\fIdrape_file.
+<DT><B>-O</B>
+
+<DD>
+<I>root</I>
+<BR>
+
+Sets the root used to construct the filename of the output shellscript
+(<I>root</I>.cmd) and names of files created when the shellscript is 
+run.  Normally the 
+name of the input grid file or grid file list is 
+used as the <I>root</I>. 
+<DT><B>-P</B>
+
+<DD>
+<I>pagesize</I>
+<BR>
+
+This option sets the size of the page the plot will be centered
+on. If the user does not set the plot scale, the plot will be
+sized as large as will fit on the designated page. If the user
+sets the plot scale such that the plot will not fit on the
+designated page, a larger page will be used.
+The supported page sizes include ANSI A, B, C, D, E,
+F, and E1, as well as most metric page sizes. See the
+COMPLETE DESCRIPTION OF OPTIONS section 
+below for a complete list of 
+the supported page sizes. The default page size is A.
+<DT><B>-S</B>
+
+<DD>
+<I>[color/shade]</I>
+<BR>
+
+This option enables effective histogram equalization of the
+color and/or shading of the gridded data. The equalization is
+not achieved by changing the data values, but rather by
+constructing the color or shading tables so that
+the boundaries in the tables encompass equal fractions of
+the datapoints. This serves to focus color or shading contrasts
+in value ranges corresponding to the bulk of the data values.
+If <B>-S</B> is given alone or with <I>color</I> = 1,
+it enables equalization of the color table used
+for color or gray fill plots,  shaded or unshaded. If the plot
+is to be shaded,  either by synthetic illumination (<B>-G</B><I>2</I>) 
+or using an intensity file (<B>-K</B> and <B>-G</B><I>3</I> options), then
+setting <I>shade</I> = 1 will cause the shading to be equalized.
+Using <B>-S</B><I>0/1</I> will equalize the shading without
+equalizing the color table.
+<DT><B>-U</B>
+
+<DD>
+<I>orientation</I>
+<BR>
+
+Normally the orientation of the plot (portrait or landscape)
+is selected automatically so as to maximize the plot scale.
+The <B>-U</B> option allows the user to set the plot orientation. If
+<I>orientation</I> = 1, a portrait plot will be produced; if
+<I>orientation</I> = 2, a landscape plot will be produced.
+<DT><B>-V</B>
+
+<DD>
+Causes <B>mbm_grd3dplot</B> to operate in &quot;verbose&quot; mode 
+so that it outputs
+more information than usual.
+<DT><B>-W</B>
+
+<DD>
+<I>[color_style</I>[<I>/pallette</I>[<I>ncolors</I>]] | cptfile]
+<BR>
+
+This option controls the color scheme used for color
+fill plots. 
+<P>
+If <I>color_style</I> = 1 [default], then
+the color scheme used will be a continuous grading
+of colors. If <I>color_style</I> = 2, the color scheme
+will be a set of discrete color intervals. The color
+pallette used is set using <I>pallette</I>. Five pallettes
+are available:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;</TT>Haxby&nbsp;colors&nbsp;[default]<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;</TT>high&nbsp;Intensity&nbsp;colors<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;</TT>low&nbsp;Intensity&nbsp;colors<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;</TT>grayscale<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;5:<TT>&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;grayscale<BR>
+<BR>
+
+A complete description of the color pallettes is given
+in the COMPLETE DESCRIPTION OF OPTIONS section below.
+<BR>
+
+The <I>ncolors</I> parameter sets the number of color
+values used in plotting, whether the colors are 
+represented in a continuous color scale or a
+stepped, discrete color scale [default is 11].
+<P>
+If the option argument is the path to an existing <B>GMT</B> 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>COMPLETE DESCRIPTION OF OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>magnitude[/azimuth]</I>
+<BR>
+
+Sets the parameters which control the
+synthetic illumination of the gridded data (shaded relief).
+The value <I>magnitude</I>
+is an effective vertical exageration which modulates the intensity of
+the shading; typical values are in the 0.1 to 0.5 range.  
+The value <I>azimuth</I>
+is the azimuth from which the data is illuminated.
+Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0;
+<DT><B>-B</B>
+
+<DD>
+<I>tickinfo</I>
+<BR>
+
+Sets map boundary tickmark intervals. See the <B>psbasemap</B>
+manual page for details. By default the program chooses
+basemap annotations based on the map boundaries.
+<DT><B>-D</B>
+
+<DD>
+<I>[flipcolor/flipshade]</I>
+<BR>
+
+Normally, the color or grayscale tables used for color maps run from
+cool colors (or dark grays) for low grid values 
+to hot colors (or light grays) for high grid values.
+This option reverses the color table so that cool colors (dark grays)
+correspond to high values and hot colors (light grays) to low values.
+If <B>-D</B> is given alone, it applies to the color table used
+for color or gray fill plots,  shaded or unshaded. If the plot
+is to be shaded,  either by synthetic illumination (<B>-G</B><I>2</I>) 
+or using an intensity file (<B>-K</B> and <B>-G</B><I>3</I> options), then
+setting <I>flipshade</I> = 1 will cause the shading convention
+to be reversed (e.g. high intensities overlaid as light shading).
+Using <B>-D</B><I>0/1</I> will flip the shading convention
+but leave the default color convention.
+<DT><B>-E</B>
+
+<DD>
+[<I>view_az/view_el</I>]
+<BR>
+
+Sets the azimuth and elevation in degrees of the
+viewpoint for 3D perspective views.  An <I>view_az</I> of 0
+represents a view from the north, and <I>view_az</I> = 90
+represents a view from the east.  An <I>view_el</I> of 0
+represents a horizontal view.  Default: <I>view_az</I> = 200.;
+elevation = 40.
+<DT><B>-G</B>
+
+<DD>
+<I>color_mode</I>
+<BR>
+
+Turns on color fill plot and sets the style of the plot.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;1:&nbsp;3D&nbsp;color/gray&nbsp;fill.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;2:&nbsp;3D&nbsp;color/gray&nbsp;fill&nbsp;shaded&nbsp;by&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;synthetic&nbsp;illumination.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;3:&nbsp;3D&nbsp;color/gray&nbsp;fill&nbsp;shaded&nbsp;by&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;intensity&nbsp;file.&nbsp;The&nbsp;<B>-K</B>&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;option&nbsp;must&nbsp;be&nbsp;used&nbsp;to&nbsp;specify
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>the&nbsp;intensity&nbsp;file.<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;4:&nbsp;3D&nbsp;Color/gray&nbsp;fill&nbsp;of&nbsp;slope&nbsp;
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>magnitude.<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;5:&nbsp;3D&nbsp;Color/gray&nbsp;fill&nbsp;shaded&nbsp;by&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slope&nbsp;magnitude.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;6:&nbsp;3D&nbsp;mesh&nbsp;plot.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;7:&nbsp;3D&nbsp;mesh&nbsp;plot&nbsp;with&nbsp;contours.
+<BR>
+
+See the <B>grdimage</B> manual page for information on shading
+with intensity files
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>grdfile</I>
+<BR>
+
+Sets the name of the gridded data file to be plotted.  
+The data must be in a form acceptable to <B>GMT</B> version 3
+programs (see the <B>GMT</B> Cookbook &amp; Technical Reference).
+<DT><B>-J</B>
+
+<DD>
+<I>projection</I>[<I>/scale | /width</I>]
+<BR>
+
+Selects the map projection. By default the map projection is
+Mercator and the plot scale is chosen to fit on the selected
+page size (see <B>-P</B> option). The user may specify a
+different projection to be used, in which case the plot scale
+is still automatically chosen to fit the page. The user may
+also specify both the projection and the plot scale. If
+the projection specifying character is upper case, a plot
+width rather than a plot scale is used.
+The scale values are specified in inch/degree or in 1:xxxxx
+ratios. Plot widths are specified in inches. If the user
+specifies a plot scale such that the plot will not fit
+on the default A size page, a appropriately larger page
+size will be chosen.
+<BR>
+
+<P>
+<B>CYLINDRICAL PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Jc</B><I>lon0/lat0/scale</I> (Cassini)
+<BR>
+
+<B>-Jm</B><I>scale</I> (Mercator)
+<BR>
+
+<B>-Joa</B><I>lon0/lat0/azimuth/scale</I> (Oblique Mercator - point and azimuth)
+<BR>
+
+<B>-Job</B><I>lon0/lat0/lon1/lat1/scale</I> (Oblique Mercator - two points)
+<BR>
+
+<B>-Joc</B><I>lon0/lat0/lonp/latp/scale</I> (Oblique Mercator - point and pole)
+<BR>
+
+<B>-Jq</B><I>lon0/scale</I> (Equidistant Cylindrical Projection (Plate Carree))
+<BR>
+
+<B>-Jt</B><I>lon0/scale</I> (TM - Transverse Mercator)
+<BR>
+
+<B>-Ju</B><I>zone/scale</I> (UTM - Universal Transverse Mercator)
+<BR>
+
+<B>-Jy</B><I>lon0/lats/scale</I> (Basic Cylindrical Projection) 
+<BR>
+
+<P>
+<B>AZIMUTHAL PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Ja</B><I>lon0/lat0/scale</I> (Lambert).
+<BR>
+
+<B>-Je</B><I>lon0/lat0/scale</I> (Equidistant).
+<BR>
+
+<B>-Jg</B><I>lon0/lat0/scale</I> (Orthographic).
+<BR>
+
+<B>-Js</B><I>lon0/lat0/scale</I> (General Stereographic)
+<BR>
+
+<P>
+<B>CONIC PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Jb</B><I>lon0/lat0/lat1/lat2/scale</I> (Albers)
+<BR>
+
+<B>-Jl</B><I>lon0/lat0/lat1/lat2/scale</I> (Lambert)
+<BR>
+
+<P>
+<B>MISCELLANEOUS PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Jh</B><I>lon0/scale</I> (Hammer)
+<BR>
+
+<B>-Ji</B><I>lon0/scale</I> (Sinusoidal)
+<BR>
+
+<B>-Jk</B><I>lon0/scale</I> (Eckert VI)
+<BR>
+
+<B>-Jn</B><I>lon0/scale</I> (Robinson)
+<BR>
+
+<B>-Jr</B><I>lon0/scale</I> (Winkel Tripel)
+<BR>
+
+<B>-Jw</B><I>lon0/scale</I> (Mollweide)
+<BR>
+
+<P>
+<B>NON-GEOGRAPHICAL PROJECTIONS:</B>
+<BR>
+
+<P>
+<B>-Jp</B><I>scale</I> (Linear projection for polar (theta,r) coordinates)
+<BR>
+
+<B>-Jx</B><I>x-scale</I>[<B>l|p</B><I>pow</I>][<I>/y-scale</I>[<B>l|p</B><I>pow</I>]] (Linear, log, and power scaling)
+<BR>
+
+More details can be found in the <B>psbasemap</B> manpages.
+<DT><B>-K</B>
+
+<DD>
+<I>intensity_file</I>
+<BR>
+
+Sets the name of the gridded data file containing
+instensity values to be used for shading the map.  
+<DT><B>-L</B>
+
+<DD>
+<I>title:scalelabel</I>
+<BR>
+
+Sets the title and the label for the colorscale (if used) of
+the plot. Note that a colon (:) rather than a slash (/) is
+used to separate the labels. Colons cannot be used in the
+labels themselves. If this option is not used, then a default title
+and colorscale label are provided. If the title is supplied
+alone, a default colorscale label will be provided. To force
+no title use <B>-L</B>&quot; &quot;; to force no title or colorscale
+label use <B>-L</B>&quot; : &quot;.
+<DT><B>-M</B>
+
+<DD>
+A series of &quot;miscellaneous&quot; options are provided which are
+given as <B>-M</B> followed by a two character identifier, followed
+by any other parameters associated with that option.
+The <B>-M</B> options may be strung together separated by
+colons, e.g. &quot;-MGQ100:GU&quot;, which is equivalent to
+&quot;-MGQ -MGU&quot;. 
+<DT><B>-N</B>
+
+<DD>
+<I>drape_file</I>
+<BR>
+
+Sets the name of the gridded data file to be draped on
+the relief provided by the file specified with the <B>-I</B>
+option. If <B>-N</B><I>drape_file</I> is specified, then
+all color control options will apply to the data in 
+\fIdrape_file.
+<DT><B>-MGD</B>
+
+<DD>
+<I>gmtdef/value</I>
+<BR>
+
+Allows the user to set the <B>GMT</B> default values used as
+the plot is constructed. This command may be given repeatedly
+to set as many <B>GMT</B> defaults as required. For example, to
+set the basemap annotation font to Courier, use 
+&quot;-MGDANOT_FONT/Courier&quot;.
+<DT><B>-MGF</B>
+
+<DD>
+<I>scale_loc</I>
+<BR>
+
+Sets the location of the color scale. The possible values
+of <I>scale_loc</I> are:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>scale_loc</I>&nbsp;=&nbsp;b:<TT>&nbsp;&nbsp;</TT>bottom&nbsp;of&nbsp;plot<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>scale_loc</I>&nbsp;=&nbsp;t:<TT>&nbsp;&nbsp;</TT>top&nbsp;of&nbsp;plot<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>scale_loc</I>&nbsp;=&nbsp;l:<TT>&nbsp;&nbsp;</TT>left&nbsp;of&nbsp;plot<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>scale_loc</I>&nbsp;=&nbsp;r:<TT>&nbsp;&nbsp;</TT>right&nbsp;of&nbsp;plot<BR>
+<BR>
+
+[Default <I>scale_loc</I> = b]
+<DT><B>-MGL</B>
+
+<DD>
+[<I>f</I>][<I>x</I>]<I>lon0/lat0/slat/length</I>[<I>m</I>]
+<BR>
+
+Draws a simple map scale centered on <I>lon0/lat0</I>.  Use <B>-Lx</B> to specify position in inch instead.
+Scale is calculated at latitude <I>slat</I>, <I>length</I> is in km [miles if m is appended].
+Use <B>-Lf</B> to get a &quot;fancy&quot; scale [Default is plain].
+<DT><B>-MGQ</B>
+
+<DD>
+<I>dpi</I>
+<BR>
+
+Sets the resolution in dots per inch of the raster image used
+for color fill maps. Larger values of <I>dpi</I> produce larger
+Postscript plot files. [Default is 100].
+<DT><B>-MGS</B>
+
+<DD>
+<I>scalefactor</I>
+<BR>
+
+The gridded data is multiplied by <I>scalefactor</I>.
+This option is most often used flip the sign of the
+data (<I>scalefactor</I> = -1). [Default no scaling]
+<DT><B>-MGT</B>
+
+<DD>
+<I>x/y/size/angle/font/just/text</I>
+<BR>
+
+Causes a text label to plotted on the map.
+<I>size</I> is text size in points, <I>angle</I> is 
+measured in degrees counter-clockwise from horizontal, 
+<I>fontno</I> sets the font type, <I>justify</I> sets the alignment. 
+If <I>fontno</I> starts with a leading hyphen, then 
+the remainder of <I>fontno</I> is taken to be a 
+textstring with the desired fontname.  See the 
+<B>gmtdefaults</B> man page for names and numbers of available fonts 
+(or run <B>pstext -L</B>).  The alignment 
+number refers to the part of the textstring that will be mapped 
+onto the (<I>x,y</I>) point: 1 = Lower Left corner, 
+2 = Lower Center, 3 = Lower Right, 5 = Mid Left, 6 = Mid Center, 
+7 = Mid Right, 9 = Upper Left, 10 = Upper Center, 
+11 = Upper Right. This option may be given as many times as
+needed.
+<DT><B>-MGU</B>
+
+<DD>
+[<I>/dx/dy/</I>][<I>label</I>]
+<BR>
+
+Draw Unix System time stamp on plot.  User may specify where the lower left corner
+of the stamp should fall on the page relative to lower left corner of plot in inch [Default is (-0.75,-0.75)].  Optionally,
+append a label, or <B>c</B> (which will plot the command string.)
+<DT><B>-MVM</B>
+
+<DD>
+<I>mesh_pen</I>
+<BR>
+
+Set pen attributes for mesh plot.  The mesh plot must be specified
+with the <B>-G</B> option. See chapter 4.12 in the
+GMT Technical reference for a discussion of GMT pen values.  
+[Defaults: width = 1, color = 0/0/0, 
+texture = solid]. 
+<DT><B>-MVN</B>
+
+<DD>
+[<I>null[/r/g/b]</I>]
+<BR>
+
+Draws a plane at the level of the <I>null</I> value (with
+respect to the data in the grid file specified with the <B>-I</B>
+option. If the optional r/g/b is provided,
+the frontal facade between the plane and the data perimeter is
+filled with this color. If <B>-MVN</B> is given by
+itself, then <B>mbm_grd3dplot</B> causes
+the null plane to be drawn at the minimum z-level and the facade
+to be colored a light gray (r=g=b=200).
+<DT><B>-O</B>
+
+<DD>
+<I>root</I>
+<BR>
+
+Sets the root used to construct the filename of the output shellscript
+(<I>root</I>.cmd) and names of files created when the shellscript is 
+run.  Normally the 
+name of the input grid file or grid file list is 
+used as the <I>root</I>. 
+<DT><B>-P</B>
+
+<DD>
+<I>pagesize</I>
+<BR>
+
+This option sets the size of the page the plot will be centered
+on. If the user does not set the plot scale, the plot will be
+sized as large as will fit on the designated page. If the user
+sets the plot scale such that the plot will not fit on the
+designated page, a larger page will be used.
+The supported page sizes are:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;American&nbsp;ANSI&nbsp;sizes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.5&nbsp;x&nbsp;11.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;215.9&nbsp;x&nbsp;&nbsp;279.4&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B&nbsp;&nbsp;&nbsp;&nbsp;11.0&nbsp;x&nbsp;17.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;279.4&nbsp;x&nbsp;&nbsp;431.8&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C&nbsp;&nbsp;&nbsp;&nbsp;17.0&nbsp;x&nbsp;22.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;431.8&nbsp;x&nbsp;&nbsp;558.8&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;22.0&nbsp;x&nbsp;34.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;558.8&nbsp;x&nbsp;&nbsp;863.6&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;&nbsp;&nbsp;34.0&nbsp;x&nbsp;44.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;863.6&nbsp;x&nbsp;1117.6&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;F&nbsp;&nbsp;&nbsp;&nbsp;28.0&nbsp;x&nbsp;40.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;711.2&nbsp;x&nbsp;1016.0&nbsp;mm)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E1&nbsp;&nbsp;&nbsp;44.0&nbsp;x&nbsp;68.0&nbsp;in.&nbsp;&nbsp;&nbsp;&nbsp;(1117.6&nbsp;x&nbsp;1727.2&nbsp;mm)
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric&nbsp;ISO&nbsp;A&nbsp;sizes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A0&nbsp;&nbsp;&nbsp;841.0&nbsp;x&nbsp;1189.0&nbsp;mm&nbsp;&nbsp;(33.11&nbsp;x&nbsp;46.81&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A1&nbsp;&nbsp;&nbsp;594.0&nbsp;x&nbsp;&nbsp;841.0&nbsp;mm&nbsp;&nbsp;(23.39&nbsp;x&nbsp;33.11&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A2&nbsp;&nbsp;&nbsp;420.0&nbsp;x&nbsp;&nbsp;594.0&nbsp;mm&nbsp;&nbsp;(16.54&nbsp;x&nbsp;23.39&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A3&nbsp;&nbsp;&nbsp;297.0&nbsp;x&nbsp;&nbsp;420.0&nbsp;mm&nbsp;&nbsp;(11.69&nbsp;x&nbsp;16.54&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A4&nbsp;&nbsp;&nbsp;210.0&nbsp;x&nbsp;&nbsp;297.0&nbsp;mm&nbsp;&nbsp;(&nbsp;8.27&nbsp;x&nbsp;11.69&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A5&nbsp;&nbsp;&nbsp;148.0&nbsp;x&nbsp;&nbsp;210.0&nbsp;mm&nbsp;&nbsp;(&nbsp;5.83&nbsp;x&nbsp;&nbsp;8.27&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A6&nbsp;&nbsp;&nbsp;105.0&nbsp;x&nbsp;&nbsp;148.0&nbsp;mm&nbsp;&nbsp;(&nbsp;4.13&nbsp;x&nbsp;&nbsp;5.83&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A7&nbsp;&nbsp;&nbsp;&nbsp;74.0&nbsp;x&nbsp;&nbsp;105.0&nbsp;mm&nbsp;&nbsp;(&nbsp;2.91&nbsp;x&nbsp;&nbsp;4.13&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A8&nbsp;&nbsp;&nbsp;&nbsp;52.0&nbsp;x&nbsp;&nbsp;&nbsp;74.0&nbsp;mm&nbsp;&nbsp;(&nbsp;2.05&nbsp;x&nbsp;&nbsp;2.91&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A9&nbsp;&nbsp;&nbsp;&nbsp;37.0&nbsp;x&nbsp;&nbsp;&nbsp;52.0&nbsp;mm&nbsp;&nbsp;(&nbsp;1.46&nbsp;x&nbsp;&nbsp;2.05&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A10&nbsp;&nbsp;&nbsp;26.0&nbsp;x&nbsp;&nbsp;&nbsp;37.0&nbsp;mm&nbsp;&nbsp;(&nbsp;1.02&nbsp;x&nbsp;&nbsp;1.46&nbsp;in.)
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric&nbsp;ISO&nbsp;B&nbsp;sizes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B0&nbsp;&nbsp;&nbsp;1000.0x&nbsp;1414.0&nbsp;mm&nbsp;&nbsp;(39.37&nbsp;x&nbsp;55.67&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B1&nbsp;&nbsp;&nbsp;707.0&nbsp;x&nbsp;1000.0&nbsp;mm&nbsp;&nbsp;(27.83&nbsp;x&nbsp;39.37&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B2&nbsp;&nbsp;&nbsp;500.0&nbsp;x&nbsp;&nbsp;707.0&nbsp;mm&nbsp;&nbsp;(19.68&nbsp;x&nbsp;27.83&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B3&nbsp;&nbsp;&nbsp;353.0&nbsp;x&nbsp;&nbsp;500.0&nbsp;mm&nbsp;&nbsp;(13.90&nbsp;x&nbsp;19.68&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B4&nbsp;&nbsp;&nbsp;250.0&nbsp;x&nbsp;&nbsp;353.0&nbsp;mm&nbsp;&nbsp;(&nbsp;9.84&nbsp;x&nbsp;13.90&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B5&nbsp;&nbsp;&nbsp;176.0&nbsp;x&nbsp;&nbsp;250.0&nbsp;mm&nbsp;&nbsp;(&nbsp;6.93&nbsp;x&nbsp;&nbsp;9.84&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B6&nbsp;&nbsp;&nbsp;125.0&nbsp;x&nbsp;&nbsp;176.0&nbsp;mm&nbsp;&nbsp;(&nbsp;4.92&nbsp;x&nbsp;&nbsp;6.93&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B7&nbsp;&nbsp;&nbsp;&nbsp;88.0&nbsp;x&nbsp;&nbsp;125.0&nbsp;mm&nbsp;&nbsp;(&nbsp;3.46&nbsp;x&nbsp;&nbsp;4.92&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B8&nbsp;&nbsp;&nbsp;&nbsp;62.0&nbsp;x&nbsp;&nbsp;&nbsp;88.0&nbsp;mm&nbsp;&nbsp;(&nbsp;2.44&nbsp;x&nbsp;&nbsp;3.46&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B9&nbsp;&nbsp;&nbsp;&nbsp;44.0&nbsp;x&nbsp;&nbsp;&nbsp;62.0&nbsp;mm&nbsp;&nbsp;(&nbsp;1.73&nbsp;x&nbsp;&nbsp;2.44&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B10&nbsp;&nbsp;&nbsp;31.0&nbsp;x&nbsp;&nbsp;&nbsp;44.0&nbsp;mm&nbsp;&nbsp;(&nbsp;1.22&nbsp;x&nbsp;&nbsp;1.73&nbsp;in.)
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metric&nbsp;ISO&nbsp;C&nbsp;sizes:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C0&nbsp;&nbsp;&nbsp;914.4&nbsp;x&nbsp;1300.5&nbsp;mm&nbsp;&nbsp;(36.00&nbsp;x&nbsp;51.20&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C1&nbsp;&nbsp;&nbsp;650.2&nbsp;x&nbsp;&nbsp;914.4&nbsp;mm&nbsp;&nbsp;(25.60&nbsp;x&nbsp;36.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C2&nbsp;&nbsp;&nbsp;457.2&nbsp;x&nbsp;&nbsp;650.2&nbsp;mm&nbsp;&nbsp;(18.00&nbsp;x&nbsp;25.60&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C3&nbsp;&nbsp;&nbsp;325.1&nbsp;x&nbsp;&nbsp;457.2&nbsp;mm&nbsp;&nbsp;(12.80&nbsp;x&nbsp;18.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C4&nbsp;&nbsp;&nbsp;228.6&nbsp;x&nbsp;&nbsp;325.1&nbsp;mm&nbsp;&nbsp;(&nbsp;9.00&nbsp;x&nbsp;12.80&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C5&nbsp;&nbsp;&nbsp;162.6&nbsp;x&nbsp;&nbsp;228.6&nbsp;mm&nbsp;&nbsp;(&nbsp;6.40&nbsp;x&nbsp;&nbsp;9.00&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C6&nbsp;&nbsp;&nbsp;114.3&nbsp;x&nbsp;&nbsp;162.6&nbsp;mm&nbsp;&nbsp;(&nbsp;4.50&nbsp;x&nbsp;&nbsp;6.40&nbsp;in.)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C7&nbsp;&nbsp;&nbsp;&nbsp;81.3&nbsp;x&nbsp;&nbsp;114.3&nbsp;mm&nbsp;&nbsp;(&nbsp;3.20&nbsp;x&nbsp;&nbsp;4.50&nbsp;in.)
+<P>
+The default page size is A.
+<DT><B>-Q</B>
+
+<DD>
+Normally, the output plot generation shellscript 
+includes lines which execute
+a program to display the Postscript image on the screen.  
+This option causes those lines to be commented out so
+that executing the shellscript produces a Postscript plot
+but does not attempt to display it on the screen.
+The program
+to be used to display the Postscript is set 
+using <B>mbdefaults</B>;
+the default value can be overridden by setting the environment
+variable $MB_PS_VIEWER. 
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+<I>west, east, south,</I> and <I>north</I> specify the Region of interest.  To specify boundaries
+in degrees and minutes [and seconds], use the dd:mm[:ss] format.  Append <B>r</B> if lower left and upper right
+map coordinates are given instead of wesn.
+You may ask for a larger <I>w/e/s/n</I> region to have more room between the image and the axes.
+A smaller region than specified in the grdfile will result in a subset of the grid [Default is
+region given by the grdfile].
+<DT><B>-S</B>
+
+<DD>
+<I>[color/shade]</I>
+<BR>
+
+This option enables effective histogram equalization of the
+color and/or shading of the gridded data. The equalization is
+not achieved by changing the data values, but rather by
+constructing the color or shading tables so that
+the boundaries in the tables encompass equal fractions of
+the datapoints. This serves to focus color or shading contrasts
+in value ranges corresponding to the bulk of the data values.
+If <B>-S</B> is given alone or with <I>color</I> = 1,
+it enables equalization of the color table used
+for color or gray fill plots,  shaded or unshaded. If the plot
+is to be shaded,  either by synthetic illumination (<B>-G</B><I>2</I>) 
+or using an intensity file (<B>-K</B> and <B>-G</B><I>3</I> options), then
+setting <I>shade</I> = 1 will cause the shading to be equalized.
+Using <B>-S</B><I>0/1</I> will equalize the shading without
+equalizing the color table.
+<DT><B>-U</B>
+
+<DD>
+<I>orientation</I>
+<BR>
+
+Normally the orientation of the plot (portrait or landscape)
+is selected automatically so as to maximize the plot scale.
+The <B>-U</B> option allows the user to set the plot orientation. If
+<I>orientation</I> = 1, a portrait plot will be produced; if
+<I>orientation</I> = 2, a landscape plot will be produced.
+<DT><B>-W</B>
+
+<DD>
+<I>[color_style</I>[<I>/pallette</I>[<I>ncolors</I>]] | cptfile]
+<BR>
+
+This option controls the color scheme used for color
+fill plots. 
+<P>
+If <I>color_style</I> = 1 [default], then
+the color scheme used will be a continuous grading
+of colors. If <I>color_style</I> = 2, the color scheme
+will be a set of discrete color intervals. The color
+pallette used is set using <I>pallette</I>. Seven pallettes
+are available:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;</TT>Haxby&nbsp;colors&nbsp;[default]<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;</TT>high&nbsp;Intensity&nbsp;colors<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;</TT>low&nbsp;Intensity&nbsp;colors<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;</TT>grayscale<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;5:<TT>&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;grayscale<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;6:<TT>&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;black<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>pallette</I>&nbsp;=&nbsp;7:<TT>&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;white<BR>
+<P>
+The RGB definitions of the color pallettes are:
+<P>
+color pallette 1 - Haxby Color Table
+<BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;240&nbsp;205&nbsp;138&nbsp;106&nbsp;&nbsp;50&nbsp;&nbsp;40&nbsp;&nbsp;37
+<BR>&nbsp;&nbsp;green:&nbsp;255&nbsp;186&nbsp;161&nbsp;189&nbsp;236&nbsp;255&nbsp;236&nbsp;235&nbsp;190&nbsp;127&nbsp;&nbsp;57
+<BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;255&nbsp;133&nbsp;&nbsp;68&nbsp;&nbsp;87&nbsp;121&nbsp;162&nbsp;174&nbsp;255&nbsp;255&nbsp;251&nbsp;175
+<P>
+color pallette 2 - High Intensity Colors
+<BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;128&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;128&nbsp;255
+<BR>&nbsp;&nbsp;green:&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;64&nbsp;128&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;128&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255
+<P>
+color pallette 3 - Low Intensity Colors
+<BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;200&nbsp;194&nbsp;179&nbsp;141&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;90&nbsp;141
+<BR>&nbsp;&nbsp;green:&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;49&nbsp;&nbsp;90&nbsp;141&nbsp;179&nbsp;200&nbsp;141&nbsp;&nbsp;90&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;141&nbsp;179&nbsp;200&nbsp;179&nbsp;141
+<P>
+color pallette 4 - Grayscale
+<BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;255&nbsp;230&nbsp;204&nbsp;179&nbsp;153&nbsp;128&nbsp;102&nbsp;&nbsp;77&nbsp;&nbsp;51&nbsp;&nbsp;26&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;green:&nbsp;255&nbsp;230&nbsp;204&nbsp;179&nbsp;153&nbsp;128&nbsp;102&nbsp;&nbsp;77&nbsp;&nbsp;51&nbsp;&nbsp;26&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;255&nbsp;230&nbsp;204&nbsp;179&nbsp;153&nbsp;128&nbsp;102&nbsp;&nbsp;77&nbsp;&nbsp;51&nbsp;&nbsp;26&nbsp;&nbsp;&nbsp;0
+<P>
+color pallette 5 - Uniform Grayscale
+<BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128
+<BR>&nbsp;&nbsp;green:&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128
+<BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128&nbsp;128
+<BR>&nbsp;
+color pallette 6 - Uniform Black
+<BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;green:&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;0
+<P>
+color pallette 7 - Uniform White
+<BR>&nbsp;&nbsp;red:&nbsp;&nbsp;&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255
+<BR>&nbsp;&nbsp;green:&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255
+<BR>&nbsp;&nbsp;blue:&nbsp;&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255&nbsp;255
+<P>
+The Haxby colors have been adapted from a pallette
+developed by Dr. William Haxby of the Lamont-Doherty
+Earth Observatory; this pallette is pleasing to the
+eye and well suited for shading. The high intensity
+colors describe linear paths through RGB space from
+red to blue to green to purple; because the colors are high
+intensity they are not well suited to shading.
+The low intensity colors are similar to the high
+intensity, but muted and thus well suited to shading.
+The grayscale pallette runs linearly from white to
+black and is commonly used for plots of sidescan and amplitude
+data. The uniform grayscale is useful for non-color
+shaded relief plots.
+<BR>&nbsp;
+The <I>ncolors</I> parameter sets the number of color
+values used in plotting, whether the colors are 
+represented in a continuous color scale or a
+stepped, discrete color scale [default is 11].
+<P>
+If the option argument is the path to an existing <B>GMT</B> 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
+<DT><B>-V</B>
+
+<DD>
+Causes <B>mbm_grd3dplot</B> to operate in &quot;verbose&quot; mode 
+so that it outputs
+more information than usual.
+<DT><B>-X</B>
+
+<DD>
+Normally, <B>mbm_grd3dplot</B> creates an executable shellscript and
+then exits.  This option will cause the shellscript to be executed
+in the background before <B>mbm_grd3dplot</B> exits.
+<DT><B>-Y</B>
+
+<DD>
+Normally, <B>mbm_grd3dplot</B> generates nicely rounded numbers
+for the boundaries of the color pallette. Often, the resulting
+color bounds extend well outside the range of the gridded data.
+This option causes
+the color boundaries to be uniformly distributed between the
+minimum and maximum values of the grid.
+<DT><B>-Z</B>
+
+<DD>
+<I>min/max</I>
+<BR>
+
+This option overrides the minimum and maximum values of
+the gridded data, affecting the color pallette and the
+contour interval if those parameters are not specified
+by the user.
+<P>
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose we have obtained two GRD files with dimensions of
+127 by 194, one containing gridded bathymetry
+(grd_sb2112_example_bath) and the other gridded sidescan
+(grd_sb2112_example_ss). In order to generate a shellscript
+which will in turn generate a 3D color shaded relief 
+view of the bathymetry, we use the <B>-G</B><I>2</I> option.
+The grid file is in
+bathymetry (positive down) rather in topography (positive
+up), so the bathymetry needs to be rescaled by multiplying
+by -1 (<B>-MGS</B><I>-1</I>). We choose an illumination magnitude of 0.4
+and an illumination azimuth of 45 degrees (<B>-A</B><I>0.4/45</I>). We 
+also choose a perspective azimuth of 250 degrees and an 
+elevation of 30 degrees (<B>-E</B><I>240/30</I>):
+<BR>&nbsp;
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grd3dplot&nbsp;-Igrd_sb2112_example_bath&nbsp;\<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-G2&nbsp;-A0.4/45&nbsp;-E250/30&nbsp;-MGS-1&nbsp;-X&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-Osb2112_example_bath3d<BR>
+<BR>&nbsp;
+Now, to generate a 3D perspective view of the gridded
+bathymetry shaded using the gridded sidescan data, we
+use the <B>-G</B><I>3</I> and <B>-K</B> options.
+We want the sidescan data to
+be histogram equalized, so we use <B>-S</B><I>0/1</I>. We also want
+the shading to be more prominent than the default
+shading magnitude of 0.2 would produce, so we use <B>-A</B><I>0.5</I>:
+<BR>&nbsp;
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grd3dplot&nbsp;-Igrd_sb2112_example_bath&nbsp;\<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-Kgrd_sb2112_example_ss&nbsp;\<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-G3&nbsp;-A0.5&nbsp;-E250/30&nbsp;-D0/1&nbsp;\<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-S0/1&nbsp;-MGS-1&nbsp;-X&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;-Osb2112_example_bathss3d<BR>
+<BR>&nbsp;
+The first example produces and executes a plot generation
+shellscript called sb2112_example_bath3d.cmd and the second
+produces a shellscript called sb2112_example_bathss3d.cmd.
+As an example, the contents of the plotting shellscript 
+&quot;sb2112_example_bathss3d.cmd&quot; are:
+<BR>&nbsp;
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Shellscript&nbsp;to&nbsp;create&nbsp;Postscript&nbsp;plot&nbsp;of&nbsp;data&nbsp;in&nbsp;grd&nbsp;file
+<BR>&nbsp;#&nbsp;Created&nbsp;by&nbsp;macro&nbsp;mbm_grd3dplot
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;This&nbsp;shellscript&nbsp;created&nbsp;by&nbsp;following&nbsp;command&nbsp;line:
+<BR>&nbsp;#&nbsp;mbm_grd3dplot&nbsp;-Igrd_sb2112_example_bath&nbsp;\
+<BR>&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Kgrd_sb2112_example_ss&nbsp;-G3&nbsp;-A0.5&nbsp;\
+<BR>&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-E250/30&nbsp;-D0/1&nbsp;-S0/1&nbsp;-MGS-1&nbsp;-X&nbsp;-V&nbsp;\
+<BR>&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Osb2112_example_bathss3d
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Save&nbsp;existing&nbsp;GMT&nbsp;defaults
+<BR>&nbsp;echo&nbsp;Saving&nbsp;GMT&nbsp;defaults...
+<BR>&nbsp;gmtdefaults&nbsp;-L&nbsp;&gt;&nbsp;gmtdefaults$$
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Set&nbsp;new&nbsp;GMT&nbsp;defaults
+<BR>&nbsp;echo&nbsp;Setting&nbsp;new&nbsp;GMT&nbsp;defaults...
+<BR>&nbsp;gmtset&nbsp;ANOT_FONT&nbsp;Helvetica
+<BR>&nbsp;gmtset&nbsp;LABEL_FONT&nbsp;Helvetica
+<BR>&nbsp;gmtset&nbsp;HEADER_FONT&nbsp;Helvetica
+<BR>&nbsp;gmtset&nbsp;ANOT_FONT_SIZE&nbsp;8
+<BR>&nbsp;gmtset&nbsp;LABEL_FONT_SIZE&nbsp;8
+<BR>&nbsp;gmtset&nbsp;HEADER_FONT_SIZE&nbsp;10
+<BR>&nbsp;gmtset&nbsp;FRAME_WIDTH&nbsp;0.074999999999999997
+<BR>&nbsp;gmtset&nbsp;TICK_LENGTH&nbsp;0.074999999999999997
+<BR>&nbsp;gmtset&nbsp;PAGE_ORIENTATION&nbsp;LANDSCAPE
+<BR>&nbsp;gmtset&nbsp;COLOR_BACKGROUND&nbsp;0/0/0
+<BR>&nbsp;gmtset&nbsp;COLOR_FOREGROUND&nbsp;255/255/255
+<BR>&nbsp;gmtset&nbsp;COLOR_NAN&nbsp;255/255/255
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Make&nbsp;color&nbsp;pallette&nbsp;table&nbsp;file
+<BR>&nbsp;echo&nbsp;Making&nbsp;color&nbsp;pallette&nbsp;table&nbsp;file...
+<BR>&nbsp;echo&nbsp;&nbsp;-4500&nbsp;&nbsp;37&nbsp;&nbsp;57&nbsp;175&nbsp;&nbsp;-4350&nbsp;&nbsp;40&nbsp;127&nbsp;251&nbsp;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-4350&nbsp;&nbsp;40&nbsp;127&nbsp;251&nbsp;&nbsp;-4200&nbsp;&nbsp;50&nbsp;190&nbsp;255&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-4200&nbsp;&nbsp;50&nbsp;190&nbsp;255&nbsp;&nbsp;-4050&nbsp;106&nbsp;235&nbsp;255&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-4050&nbsp;106&nbsp;235&nbsp;255&nbsp;&nbsp;-3900&nbsp;138&nbsp;236&nbsp;174&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-3900&nbsp;138&nbsp;236&nbsp;174&nbsp;&nbsp;-3750&nbsp;205&nbsp;255&nbsp;162&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-3750&nbsp;205&nbsp;255&nbsp;162&nbsp;&nbsp;-3600&nbsp;240&nbsp;236&nbsp;121&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-3600&nbsp;240&nbsp;236&nbsp;121&nbsp;&nbsp;-3450&nbsp;255&nbsp;189&nbsp;&nbsp;87&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-3450&nbsp;255&nbsp;189&nbsp;&nbsp;87&nbsp;&nbsp;-3300&nbsp;255&nbsp;161&nbsp;&nbsp;68&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-3300&nbsp;255&nbsp;161&nbsp;&nbsp;68&nbsp;&nbsp;-3150&nbsp;255&nbsp;186&nbsp;133&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;echo&nbsp;&nbsp;-3150&nbsp;255&nbsp;186&nbsp;133&nbsp;&nbsp;-3000&nbsp;255&nbsp;255&nbsp;255&nbsp;&gt;&gt;&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sb2112_example_bathss3d.cpt<BR>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Rescale&nbsp;data
+<BR>&nbsp;echo&nbsp;Rescaling&nbsp;data&nbsp;by&nbsp;-1...
+<BR>&nbsp;echo&nbsp;Running&nbsp;grdmath...
+<BR>&nbsp;grdmath&nbsp;grd_sb2112_example_bath&nbsp;-1&nbsp;x&nbsp;=&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grd_sb2112_example_bath.scale<BR>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Get&nbsp;shading&nbsp;array
+<BR>&nbsp;echo&nbsp;Getting&nbsp;shading&nbsp;array...
+<BR>&nbsp;echo&nbsp;Running&nbsp;grdhisteq...
+<BR>&nbsp;grdhisteq&nbsp;grd_sb2112_example_ss&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ggrd_sb2112_example_ss.eq&nbsp;-N<BR>
+<BR>&nbsp;echo&nbsp;Running&nbsp;grdmath...
+<BR>&nbsp;grdmath&nbsp;grd_sb2112_example_ss.eq&nbsp;-0.5&nbsp;x&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>=&nbsp;grd_sb2112_example_ss.int<BR>
+<BR>&nbsp;rm&nbsp;-f&nbsp;grd_sb2112_example_ss.eq
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Make&nbsp;3D&nbsp;view
+<BR>&nbsp;echo&nbsp;Running&nbsp;grdview...
+<BR>&nbsp;grdview&nbsp;grd_sb2112_example_bath.scale&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Jm13.678801784792578&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Jz0.0014760910157720331&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-E250/30&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R114.221/114.421/-31.9001/-31.6377&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Csb2112_example_bathss3d.cpt&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-N-4499.4399999999996/200/200/200&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Igrd_sb2112_example_ss.int&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Qi&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-P&nbsp;-X1.8081565710006675&nbsp;-Y2&nbsp;-K&nbsp;-V&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&gt;&nbsp;sb2112_example_bathss3d.ps<BR>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Make&nbsp;color&nbsp;scale
+<BR>&nbsp;echo&nbsp;Running&nbsp;psscale...
+<BR>&nbsp;psscale&nbsp;-Csb2112_example_bathss3d.cpt&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-D2.4418/-0.5000/4.8837/0.1500h&nbsp;\<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B&quot;:.Data&nbsp;Values:&quot;&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-P&nbsp;-K&nbsp;-O&nbsp;-V&nbsp;&gt;&gt;&nbsp;sb2112_example_bathss3d.ps<BR>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Make&nbsp;basemap
+<BR>&nbsp;echo&nbsp;Running&nbsp;psbasemap...
+<BR>&nbsp;psbasemap&nbsp;-Jm13.678801784792578&nbsp;\
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Jz0.0014760910157720331&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-E250/30&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R114.221/114.421/-31.9001/-31.6377&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-B5m/5m:.&quot;Data&nbsp;File&nbsp;grd_sb2112_example_bath&quot;:WSZ&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-P&nbsp;-O&nbsp;-V&nbsp;&gt;&gt;&nbsp;sb2112_example_bathss3d.ps<BR>
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Delete&nbsp;surplus&nbsp;files
+<BR>&nbsp;echo&nbsp;Deleting&nbsp;surplus&nbsp;files...
+<BR>&nbsp;rm&nbsp;-f&nbsp;sb2112_example_bathss3d.cpt
+<BR>&nbsp;rm&nbsp;-f&nbsp;grd_sb2112_example_bath.scale
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Reset&nbsp;GMT&nbsp;default&nbsp;fonts
+<BR>&nbsp;echo&nbsp;Resetting&nbsp;GMT&nbsp;fonts...
+<BR>&nbsp;mv&nbsp;gmtdefaults$$&nbsp;.gmtdefaults
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;Run&nbsp;xpsview
+<BR>&nbsp;echo&nbsp;Running&nbsp;xpsview&nbsp;in&nbsp;background...
+<BR>&nbsp;xpsview&nbsp;-ps&nbsp;a&nbsp;-maxp&nbsp;4m&nbsp;sb2112_example_bathss3d.ps&nbsp;&amp;
+<BR>&nbsp;#
+<BR>&nbsp;#&nbsp;All&nbsp;done!
+<BR>&nbsp;echo&nbsp;All&nbsp;done!
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="grdimage.html">grdimage</A></B>(l), <B><A HREF="grdcontour.html">grdcontour</A></B>(l), 
+<B><A HREF="mbdefaults.html">mbdefaults</A></B>(l), <B><A HREF="mbgrid.html">mbgrid</A></B>(l), <B><A HREF="mbsystem.html">mbsystem</A></B>(l), 
+<B><A HREF="mbm_grd3dplot.html">mbm_grd3dplot</A></B>(l), <B><A HREF="mbm_plot.html">mbm_plot</A></B>(l),
+<B><A HREF="psbasemap.html">psbasemap</A></B>(l), <B><A HREF="pstext.html">pstext</A></B>(l), <B><A HREF="psxy.html">psxy</A></B>(l)
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>BUGS</H2>
+
+By making this macro more useful, we have also made it
+more complex. 
+<P>
+<P>
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">SIMPLE DESCRIPTION OF BASIC OPTIONS</A><DD>
+<DT><A HREF="#lbAH">COMPLETE DESCRIPTION OF OPTIONS</A><DD>
+<DT><A HREF="#lbAI">EXAMPLES</A><DD>
+<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
+<DT><A HREF="#lbAK">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 13 November 2002</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
