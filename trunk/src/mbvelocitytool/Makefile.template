@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.7 1998-10-05 19:18:58 caress Exp $
+#	$Id: Makefile.template,v 4.8 1999-12-11 04:43:26 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 1997 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		September 14, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.7  1998/10/05  19:18:58  caress
+# MB-System version 4.6beta
+#
 # Revision 4.6  1997/09/12  18:55:07  caress
 # Moved mb_rt.c to src/mbrt directory.
 #
@@ -72,7 +75,7 @@ $(BINDIR)/mbvelocitytool: mbvelocity.o \
 		mbvelocity_creation.o \
 		mbvelocity_bxutils.o \
 		mbvelocity_prog.o \
-		xgraphics.o \
+		$(LIBDIR)/libxgraphics.a \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libmbrt.a \
 		$(LIBDIR)/libgsf.a
@@ -81,7 +84,7 @@ $(BINDIR)/mbvelocitytool: mbvelocity.o \
 		mbvelocity_creation.o \
 		mbvelocity_bxutils.o \
 		mbvelocity_prog.o \
-		xgraphics.o \
+		$(LIBDIR)/libxgraphics.a \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libmbrt.a \
 		$(LIBDIR)/libgsf.a \
@@ -100,8 +103,6 @@ mbvelocity_bxutils.o: mbvelocity_bxutils.c
 mbvelocity_prog.o: mbvelocity_prog.c  $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mbvelocity_prog.c
-xgraphics.o: xgraphics.c
-	$(CC) $(CFLAGS) -c xgraphics.c 
 
 ### copy the man page to the man page directory
 $(MANDIR)/mbvelocitytool.l:	mbvelocitytool.manl

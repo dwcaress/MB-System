@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.17 1999-11-12 21:25:21 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.18 1999-12-11 04:42:03 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1999/11/12  21:25:21  caress
+ * Fixed start date shown below plots
+ *
  * Revision 4.16  1999/07/16  19:22:56  caress
  * Smaller window with new dialogs for Linux.
  *
@@ -161,7 +164,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.17 1999-11-12 21:25:21 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.18 1999-12-11 04:42:03 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -1188,13 +1191,19 @@ int mbnavedit_load_data()
 	current = list[current_id];
 
 	/* reset plotting time span */
-	if (data_show_size > 0 && nlist > 0)
+/*	if (data_show_size > 0 && nlist > 0)
 		{
 		plot_start_time = ping[current_id].file_time_d;
 		plot_end_time = plot_start_time + data_show_size;
 		}
 	else if (nlist > 0)
 		{
+		plot_start_time = ping[0].file_time_d;
+		plot_end_time = ping[nlist-1].file_time_d;
+		}*/
+	if (nlist > 0)
+		{
+		data_show_size = 0;
 		plot_start_time = ping[0].file_time_d;
 		plot_end_time = ping[nlist-1].file_time_d;
 		}

@@ -341,8 +341,8 @@ object textField_output_file : XmTextField widget {
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 201;
-        XmNy = 39;
+        XmNx = 658;
+        XmNy = 374;
         XmNwidth = 614;
         XmNheight = 642;
     };
@@ -462,8 +462,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 352;
-        XmNy = 279;
+        XmNx = 961;
+        XmNy = 574;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -543,8 +543,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 318;
-        XmNy = 317;
+        XmNx = 893;
+        XmNy = 562;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -797,8 +797,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 267;
-        XmNy = 132;
+        XmNx = 791;
+        XmNy = 508;
         XmNwidth = 481;
         XmNheight = 463;
     };
@@ -1812,7 +1812,7 @@ object toggleButton_org_time : XmToggleButton widget {
 object bulletinBoard : XmBulletinBoard widget {
     arguments {
         arguments Style_use;
-        XmNresizePolicy = XmRESIZE_GROW;
+        XmNresizePolicy = XmRESIZE_ANY;
         XmNwidth = 1016;
         XmNheight = 668;
     };
@@ -1882,8 +1882,8 @@ object mainWindow : XmMainWindow widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "MBnavedit";
 !(BX)        XmNiconName = "MBnavedit";
-!(BX)        XmNx = 0;
-!(BX)        XmNy = 26;
+!(BX)        XmNx = 6;
+!(BX)        XmNy = 32;
 !(BX)        XmNwidth = 1016;
 !(BX)        XmNheight = 668;
 !(BX)    };

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 4.3 1999-05-12 23:01:34 caress Exp $
+ *    $Id: xgraphics.c,v 4.4 1999-12-11 04:43:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1999/05/12  23:01:34  caress
+ * Finally added support for TrueColor displays as per Peter Lemmond's mods.
+ *
  * Revision 4.2  1998/10/05  19:18:58  caress
  * MB-System version 4.6beta
  *
@@ -77,7 +80,7 @@ Window	can_xid;
 int	*can_bounds;
 char	*fontname;
 {
-static char rcs_id[]="$Id: xgraphics.c,v 4.3 1999-05-12 23:01:34 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 4.4 1999-12-11 04:43:26 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;
@@ -118,6 +121,26 @@ static char rcs_id[]="$Id: xgraphics.c,v 4.3 1999-05-12 23:01:34 caress Exp $";
 			}
 		graphic->display_type = PseudoColor;
 		graphic->visual = graphic->visinfo.visual;  
+		}
+	else if (graphic->display_depth == 16)
+		{
+		if (XMatchVisualInfo(graphic->dpy, DefaultScreen(graphic->dpy),
+			16,TrueColor,&(graphic->visinfo)) != 0)
+			{
+			graphic->display_type = TrueColor;
+			graphic->visual = graphic->visinfo.visual;  
+			}
+		else if (XMatchVisualInfo(graphic->dpy, DefaultScreen(graphic->dpy),
+			16,PseudoColor,&(graphic->visinfo)) != 0)
+			{
+			graphic->display_type = PseudoColor;
+			graphic->visual = graphic->visinfo.visual;  
+			}
+		else
+			{
+			fprintf(stderr,"Error: Could not Match a 16 bit TrueColor or Pseudocolor plane\n");
+			exit(-1);
+			}
 		}
 	else if (graphic->display_depth == 24)
 		{
