@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.18 1996-04-22 13:20:25 caress Exp $
+ *    $Id: mbswath.c,v 4.19 1996-07-26 21:03:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1996/04/22  13:20:25  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.17  1995/11/28  21:06:16  caress
  * Fixed scaling for meters to feet.
  *
@@ -163,6 +166,9 @@ struct	ping
 	double	speed;
 	double	heading;
 	double	distance;
+	int	beams_bath;
+	int	beams_amp;
+	int	pixels_ss;
 	double	*bath;
 	double	*bathlon;
 	double	*bathlat;
@@ -211,7 +217,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.18 1996-04-22 13:20:25 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.19 1996-07-26 21:03:26 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -833,6 +839,9 @@ char **argv;
 	status = mb_malloc(verbose,sizeof(struct swath),
 			&swath_plot,&error);
 	npings = &swath_plot->npings;
+	swath_plot->beams_bath = beams_bath;
+	swath_plot->beams_amp = beams_amp;
+	swath_plot->pixels_ss = pixels_ss;
 	for (i=0;i<MAXPINGS;i++)
 		{
 		pingcur = &(swath_plot->data[i]);
@@ -910,13 +919,12 @@ char **argv;
 			&(pingcur->pings),pingcur->time_i,&(pingcur->time_d),
 			&(pingcur->navlon),&(pingcur->navlat),&(pingcur->speed),
 			&(pingcur->heading),&(pingcur->distance),
-			&beams_bath,&beams_amp,&pixels_ss,
+			&(pingcur->beams_bath),
+			&(pingcur->beams_amp),
+			&(pingcur->pixels_ss),
 			bath,amp,bathlon,bathlat,
 			ss,sslon,sslat,
 			pingcur->comment,&error);
-		swath_plot->beams_bath = beams_bath;
-		swath_plot->beams_amp = beams_amp;
-		swath_plot->pixels_ss = pixels_ss;
 
 		/* print debug statements */
 		if (verbose >= 2)
@@ -926,11 +934,11 @@ char **argv;
 			fprintf(stderr,"dbg2       kind:           %d\n",
 				pingcur->kind);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",
-				beams_bath);
+				pingcur->beams_bath);
 			fprintf(stderr,"dbg2       beams_amp:      %d\n",
-					beams_amp);
+				pingcur->beams_amp);
 			fprintf(stderr,"dbg2       pixels_ss:      %d\n",
-					pixels_ss);
+				pingcur->pixels_ss);
 			fprintf(stderr,"dbg2       error:          %d\n",
 				error);
 			fprintf(stderr,"dbg2       status:         %d\n",
@@ -951,7 +959,7 @@ char **argv;
 			|| mode == MBSWATH_AMP)
 			&& ampscale_mode > 0)
 			{
-			for (i=0;i<beams_amp;i++)
+			for (i=0;i<pingcur->beams_amp;i++)
 				{
 				if (amp[i] > 0 && ampscale_mode == 1)
 				    {
@@ -986,7 +994,7 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR
 			&& bathy_in_feet == MB_YES)
 			{
-			for (i=0;i<beams_bath;i++)
+			for (i=0;i<pingcur->beams_bath;i++)
 				{
 				bath[i] = 3.2808399 * bath[i];
 				}
@@ -997,7 +1005,7 @@ char **argv;
 			&& mode == MBSWATH_SS
 			&& ampscale_mode > 0)
 			{
-			for (i=0;i<pixels_ss;i++)
+			for (i=0;i<pingcur->pixels_ss;i++)
 				{
 				if (ss[i] > 0 && ampscale_mode == 1)
 				    {
@@ -1264,9 +1272,9 @@ int	*error;
 	for (i=0;i<swath->npings;i++)
 		{
 		pingcur = &swath->data[i];
-		for (j=0;j<swath->beams_bath;j++)
+		for (j=0;j<pingcur->beams_bath;j++)
 			pingcur->bathflag[j] = MB_NO;
-		for (j=0;j<swath->pixels_ss;j++)
+		for (j=0;j<pingcur->pixels_ss;j++)
 			pingcur->ssflag[j] = MB_NO;
 		}
 
@@ -1328,12 +1336,12 @@ int	*error;
 
 	/* take care of just one ping with nonzero center beam */
 	else if (swath->npings == 1 && fp_mode == MBSWATH_FOOTPRINT_FAKE
-		&& swath->data[0].bath[swath->beams_bath/2] > 0.0)
+		&& swath->data[0].bath[pingcur->beams_bath/2] > 0.0)
 	  {
 	  pingcur = &swath->data[0];
 	  headingx = sin(pingcur->heading*DTR);
 	  headingy = cos(pingcur->heading*DTR);
-	  tt = pingcur->bath[swath->beams_bath/2]/750.0; /* in s */
+	  tt = pingcur->bath[pingcur->beams_bath/2]/750.0; /* in s */
 	  r = tt * pingcur->speed * 0.55555556; /* in m */
 	  pingcur->lonaft = -factor*r*headingx*mtodeglon;
 	  pingcur->lataft = -factor*r*headingy*mtodeglat;
@@ -1362,7 +1370,7 @@ int	*error;
 
 		/* do bathymetry */
 		if (dobath == MB_YES)
-		  for (j=1;j<swath->beams_bath-1;j++)
+		  for (j=1;j<pingcur->beams_bath-1;j++)
 		    if (pingcur->bath[j] > 0.0)
 			{
 			x = pingcur->bathlon[j];
@@ -1447,7 +1455,7 @@ int	*error;
 
 		/* do sidescan */
 		if (doss == MB_YES)
-		  for (j=1;j<swath->pixels_ss-1;j++)
+		  for (j=1;j<pingcur->pixels_ss-1;j++)
 		    if (pingcur->ss[j] > 0.0)
 			{
 			x = pingcur->sslon[j];
@@ -1497,9 +1505,9 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
-				if (swath->beams_bath > 0 
-					&& pingcur->bath[swath->beams_bath/2] > 0.0)
-					dddepth = pingcur->bath[swath->beams_bath/2];
+				if (pingcur->beams_bath > 0 
+					&& pingcur->bath[pingcur->beams_bath/2] > 0.0)
+					dddepth = pingcur->bath[pingcur->beams_bath/2];
 				else if (dddepth <= 0.0)
 					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
@@ -1590,7 +1598,7 @@ int	*error;
 			print->x[3] = x + dlon1 + pingcur->lonfor;
 			print->y[3] = y + dlat1 + pingcur->latfor;
 			}
-		  j = swath->beams_bath-1;
+		  j = pingcur->beams_bath-1;
 		  if (pingcur->bath[j] > 0.0 && pingcur->bath[j-1] > 0)
 			{
 			x = pingcur->bathlon[j];
@@ -1673,7 +1681,7 @@ int	*error;
 			print->x[3] = x + dlon1 + pingcur->lonfor;
 			print->y[3] = y + dlat1 + pingcur->latfor;
 			}
-		  j = swath->pixels_ss-1;
+		  j = pingcur->pixels_ss-1;
 		  if (pingcur->ss[j] > 0.0 && pingcur->ss[j-1] > 0)
 			{
 			x = pingcur->sslon[j];
@@ -1694,9 +1702,9 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
-				if (swath->beams_bath > 0 
-					&& pingcur->bath[swath->beams_bath] > 0.0)
-					dddepth = pingcur->bath[swath->beams_bath];
+				if (pingcur->beams_bath > 0 
+					&& pingcur->bath[pingcur->beams_bath] > 0.0)
+					dddepth = pingcur->bath[pingcur->beams_bath];
 				else if (dddepth <= 0.0)
 					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
@@ -1735,7 +1743,7 @@ int	*error;
 			fprintf(stderr,"dbg2\ndbg2       ping:           %d\n",i);
 			pingcur = &swath->data[i];
 			if (dobath == MB_YES)
-			  for (j=0;j<swath->beams_bath;j++)
+			  for (j=0;j<pingcur->beams_bath;j++)
 				{
 				print = &pingcur->bathfoot[j];
 				fprintf(stderr,"dbg2       %d  %d %g %g   ",
@@ -1749,7 +1757,7 @@ int	*error;
 				fprintf(stderr,"\n");
 				}
 			if (doss == MB_YES)
-			  for (j=0;j<swath->pixels_ss;j++)
+			  for (j=0;j<pingcur->pixels_ss;j++)
 				{
 				print = &pingcur->ssfoot[j];
 				fprintf(stderr,"dbg2       %d  %d %g %g   ",
@@ -1843,7 +1851,7 @@ int	*error;
 	    if (i > 0) ping0 = &swath->data[i-1];
 	    ping1 = &swath->data[i];
 	    if (i < swath->npings - 1) ping2 = &swath->data[i+1];
-	    for (j=0;j<swath->beams_bath;j++)
+	    for (j=0;j<ping1->beams_bath;j++)
 	      if (ping1->bath[j] > 0.0)
 		{
 		/* do across track components */
@@ -1853,7 +1861,7 @@ int	*error;
 		dd = 0.0;
 		drvx = 0.0;
 		drvy = 0.0;
-		if (j > 0 && j < swath->beams_bath - 1
+		if (j > 0 && j < ping1->beams_bath - 1
 			&& ping1->bath[j-1] > 0.0
 			&& ping1->bath[j+1] > 0.0)
 			{
@@ -1863,7 +1871,7 @@ int	*error;
 				/mtodeglat;
 			dd = ping1->bath[j+1] - ping1->bath[j-1];
 			}
-		else if (j < swath->beams_bath - 1
+		else if (j < ping1->beams_bath - 1
 			&& ping1->bath[j] > 0.0
 			&& ping1->bath[j+1] > 0.0)
 			{
@@ -1955,7 +1963,7 @@ int	*error;
 	    if (i > 0) ping0 = &swath->data[i-1];
 	    ping1 = &swath->data[i];
 	    if (i < swath->npings - 1) ping2 = &swath->data[i+1];
-	    for (j=0;j<swath->beams_bath;j++)
+	    for (j=0;j<ping1->beams_bath;j++)
 	      if (ping1->bath[j] > 0.0)
 		{
 
@@ -1981,7 +1989,7 @@ int	*error;
 	    if (i > 0) ping0 = &swath->data[i-1];
 	    ping1 = &swath->data[i];
 	    if (i < swath->npings - 1) ping2 = &swath->data[i+1];
-	    for (j=0;j<swath->beams_bath;j++)
+	    for (j=0;j<ping1->beams_bath;j++)
 	      if (ping1->bath[j] > 0.0)
 		{
 
@@ -2031,7 +2039,7 @@ int	*error;
 			{
 			fprintf(stderr,"dbg2\ndbg2       ping:           %d\n",i);
 			ping1 = &swath->data[i];
-			for (j=0;j<swath->beams_bath;j++)
+			for (j=0;j<ping1->beams_bath;j++)
 				{
 				fprintf(stderr,"dbg2       %d  %d  %g  %g\n",
 					j,ping1->bathflag[j],
@@ -2100,7 +2108,7 @@ int	*error;
 		for (i=first;i<first+nplot;i++)
 			{
 			pingcur = &swath->data[i];
-			for (j=0;j<swath->beams_bath;j++)
+			for (j=0;j<pingcur->beams_bath;j++)
 			  if (pingcur->bathflag[j] == MB_YES)
 				{
 				print = &pingcur->bathfoot[j];
@@ -2125,7 +2133,7 @@ int	*error;
 		for (i=first;i<first+nplot;i++)
 			{
 			pingcur = &swath->data[i];
-			for (j=0;j<swath->beams_amp;j++)
+			for (j=0;j<pingcur->beams_amp;j++)
 			  if (pingcur->bathflag[j] == MB_YES)
 				{
 				print = &pingcur->bathfoot[j];
@@ -2145,7 +2153,7 @@ int	*error;
 		for (i=first;i<first+nplot;i++)
 			{
 			pingcur = &swath->data[i];
-			for (j=0;j<swath->pixels_ss;j++)
+			for (j=0;j<pingcur->pixels_ss;j++)
 			  if (pingcur->ssflag[j] == MB_YES)
 				{
 				print = &pingcur->ssfoot[j];
@@ -2217,7 +2225,7 @@ int	*error;
 		for (i=first;i<first+nplot;i++)
 			{
 			pingcur = &swath->data[i];
-			for (j=0;j<swath->beams_bath;j++)
+			for (j=0;j<pingcur->beams_bath;j++)
 			  if (pingcur->bath[j] > 0.0)
 				{
 				geo_to_xy(pingcur->bathlon[j], 
@@ -2240,7 +2248,7 @@ int	*error;
 		for (i=first;i<first+nplot;i++)
 			{
 			pingcur = &swath->data[i];
-			for (j=0;j<swath->beams_amp;j++)
+			for (j=0;j<pingcur->beams_amp;j++)
 			  if (pingcur->amp[j] > 0.0)
 				{
 				geo_to_xy(pingcur->bathlon[j], 
@@ -2258,7 +2266,7 @@ int	*error;
 		for (i=first;i<first+nplot;i++)
 			{
 			pingcur = &swath->data[i];
-			for (j=0;j<swath->pixels_ss;j++)
+			for (j=0;j<pingcur->pixels_ss;j++)
 			  if (pingcur->ss[j] > 0.0)
 				{
 				geo_to_xy(pingcur->sslon[j], 
@@ -2609,7 +2617,7 @@ int	*error;
 	ping1->heading = ping2->heading;
 	ping1->distance = ping2->distance;
 	strcpy(ping1->comment,ping2->comment);
-	for (i=0;i<swath->beams_bath;i++)
+	for (i=0;i<ping1->beams_bath;i++)
 		{
 		ping1->bath[i] = ping2->bath[i];
 		ping1->bathlon[i] = ping2->bathlon[i];
@@ -2621,11 +2629,11 @@ int	*error;
 			ping1->bathfoot[i].y[j] = ping2->bathfoot[i].y[j];
 			}
 		}
-	for (i=0;i<swath->beams_amp;i++)
+	for (i=0;i<ping1->beams_amp;i++)
 		{
 		ping1->amp[i] = ping2->amp[i];
 		}
-	for (i=0;i<swath->pixels_ss;i++)
+	for (i=0;i<ping1->pixels_ss;i++)
 		{
 		ping1->ss[i] = ping2->ss[i];
 		ping1->sslon[i] = ping2->sslon[i];
