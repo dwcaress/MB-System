@@ -4,7 +4,7 @@
  *
  * Builder Xcessory Personal Edition Version 5.0.5.
  *
- * Identification: $Id: mbnavedit.uil,v 5.0 2001-01-22 07:56:52 caress Exp $
+ * Identification: $Id: mbnavedit.uil,v 5.1 2001-07-27 04:07:30 caress Exp $
  */
 module main_uil
 version = 'V1.0'
@@ -1021,7 +1021,7 @@ object label_about_mbpub : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("A Public Domain Software Package" &
+        XmNlabelString = compound_string("An Open Source Software Package" &
  "");
         XmNx = 10;
         XmNy = 160;
