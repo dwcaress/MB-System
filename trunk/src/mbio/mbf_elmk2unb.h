@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_elmk2unb.h	6/6/97
- *	$Id: mbf_elmk2unb.h,v 4.2 2000-09-30 06:29:44 caress Exp $
+ *	$Id: mbf_elmk2unb.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/09/30  06:29:44  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.1  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -170,6 +173,8 @@ struct mbf_elmk2unb_struct
 	int	second;
 	int	hundredth_sec;
 	int	thousandth_sec;
+	int	latitude;		/* 180 deg = 2e9 */
+	int	longitude;		/* 180 deg = 2e9 */
 	int	ping_num;
 	int	sound_vel;		/* 0.1 m/s */
 	int	heading;		/* 0.01 deg */

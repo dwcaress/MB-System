@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_compare.c	11/19/98
- *    $Id: mb_compare.c,v 4.2 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_compare.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	November 19,  1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.1  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *
@@ -30,7 +33,10 @@
  *
  */
 
-static char rcs_id[]="$Id: mb_compare.c,v 4.2 2000-10-11 01:02:30 caress Exp $";
+/* mbio include files */
+#include "../../include/mb_define.h"
+
+static char rcs_id[]="$Id: mb_compare.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_int_compare compares int values. */

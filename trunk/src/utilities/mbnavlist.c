@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 4.4 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbnavlist.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.3  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -61,7 +64,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 4.4 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -81,10 +84,9 @@ main (int argc, char **argv)
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	struct mb_datalist_struct *datalist;
+	char	*datalist;
 	double	file_weight;
 	int	format;
-	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -98,6 +100,11 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
+	
+	/* data record source types */
+	int	nav_source;
+	int	heading_source;
+	int	vru_source;
 
 	/* output format list controls */
 	char	list[MAX_OPTIONS];
@@ -340,9 +347,18 @@ main (int argc, char **argv)
 
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
-	{
-	/* check format */
-	status = mb_format(verbose,&format,&format_num,&error);
+	{		
+	/* check format and get data sources */
+	status = mb_format_source(verbose, &format, 
+			&nav_source, &heading_source, &vru_source, 
+			&error);
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error returned from function <mb_format_source>:\n%s\n",message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
 
 	/* initialize reading the swath file */
 	if ((status = mb_read_init(
@@ -408,7 +424,7 @@ main (int argc, char **argv)
 			
 		/* check for appropriate navigation record */
 		if (error <= MB_ERROR_NO_ERROR
-			&& kind != mb_nav_source[format_num])
+			&& kind != nav_source)
 			{
 			error = MB_ERROR_IGNORE;
 			status = MB_FAILURE;

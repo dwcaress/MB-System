@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.12 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.11  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -97,10 +100,182 @@
 #include "../../include/mb_swap.h"
 #endif
 
+/* essential function prototypes */
+int mbr_info_hsuricen(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error);
+int mbr_alm_hsuricen(int verbose, char *mbio_ptr, int *error);
+int mbr_dem_hsuricen(int verbose, char *mbio_ptr, int *error);
+int mbr_rt_hsuricen(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_wt_hsuricen(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+
+/*--------------------------------------------------------------------*/
+int mbr_info_hsuricen(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error)
+{
+	static char res_id[]="$Id: mbr_hsuricen.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	char	*function_name = "mbr_info_hsuricen";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* set format info parameters */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*system = MB_SYS_HSDS;
+	*beams_bath_max = 59;
+	*beams_amp_max = 0;
+	*pixels_ss_max = 0;
+	strncpy(format_name, "HSURICEN", MB_NAME_LENGTH);
+	strncpy(system_name, "HSDS", MB_NAME_LENGTH);
+	strncpy(format_description, "Format name:          MBF_HSURICEN\nInformal Description: URI Hydrosweep\nAttributes:           Hydrosweep DS, 59 beams, bathymetry, binary, URI.\n", MB_DESCRIPTION_LENGTH);
+	*numfile = 1;
+	*filetype = MB_FILETYPE_NORMAL;
+	*variable_beams = MB_NO;
+	*traveltime = MB_NO;
+	*beam_flagging = MB_YES;
+	*nav_source = MB_DATA_DATA;
+	*heading_source = MB_DATA_DATA;
+	*vru_source = MB_DATA_DATA;
+	*beamwidth_xtrack = 2.0;
+	*beamwidth_ltrack = 2.0;
+
+	/* set format and system specific function pointers */
+	*format_alloc = &mbr_alm_hsuricen;
+	*format_free = &mbr_dem_hsuricen; 
+	*store_alloc = &mbsys_hsds_alloc; 
+	*store_free = &mbsys_hsds_deall; 
+	*read_ping = &mbr_rt_hsuricen; 
+	*write_ping = &mbr_wt_hsuricen; 
+	*extract = &mbsys_hsds_extract; 
+	*insert = &mbsys_hsds_insert; 
+	*extract_nav = &mbsys_hsds_extract_nav; 
+	*insert_nav = &mbsys_hsds_insert_nav; 
+	*altitude = &mbsys_hsds_altitude; 
+	*insert_altitude = NULL; 
+	*ttimes = &mbsys_hsds_ttimes; 
+	*copyrecord = &mbsys_hsds_copy; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",*system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",*pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",*numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",*filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
+		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsuricen(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.12 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -282,12 +457,14 @@ int mbr_rt_hsuricen(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	mb_io_ptr->new_kind = dataplus->kind;
 	mb_io_ptr->new_error = *error;
 
-	/* translate values to current ping variables 
-		in mbio descriptor structure */
-	if (status == MB_SUCCESS 
-		&& dataplus->kind == MB_DATA_DATA)
+	/* translate values to hydrosweep data storage structure */
+	if (status == MB_SUCCESS
+		&& store != NULL)
 		{
-		/* get time */
+		/* type of data record */
+		store->kind = dataplus->kind;
+
+		/* time stamp (all records ) */
 		time_j[0] = data->year;
 		time_j[1] = data->day;
 		time_j[2] = data->min;
@@ -296,153 +473,6 @@ int mbr_rt_hsuricen(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		mb_get_itime(verbose,time_j,mb_io_ptr->new_time_i);
 		mb_get_time(verbose,mb_io_ptr->new_time_i,
 			&(mb_io_ptr->new_time_d));
-
-		/* get navigation */
-		mb_io_ptr->new_lon = 0.0000001*data->lon;
-		mb_io_ptr->new_lat = 0.0000001*data->lat;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (mb_io_ptr->new_lon > 0.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -360.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (mb_io_ptr->new_lon > 180.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -180.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else
-			{
-			if (mb_io_ptr->new_lon > 360.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < 0.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-
-		/* get heading */
-		mb_io_ptr->new_heading = 0.1*data->hdg;
-
-		/* get speed (convert 100Xnm/hr to km/hr) */
-		mb_io_ptr->new_speed = 0.018333333*data->speed;
-
-		/* read distance and depth values into storage arrays */
-		/* switch order of data as it is read into the global arrays */
-		id = mb_io_ptr->beams_bath - 1;
-		if (data->scale > 0)
-			scale = 0.01*data->scale;
-		else 
-			scale = 1.0;
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			if (data->deph[i] > 0)
-			    {
-			    mb_io_ptr->new_beamflag[id-i] = MB_FLAG_NONE;
-			    mb_io_ptr->new_bath[id-i] = scale*data->deph[i];
-			    }
-			else if (data->deph[i] < 0)
-			    {
-			    mb_io_ptr->new_beamflag[id-i] = 
-				MB_FLAG_MANUAL + MB_FLAG_FLAG;
-			    mb_io_ptr->new_bath[id-i] = -scale*data->deph[i];
-			    }
-			else
-			    {
-			    mb_io_ptr->new_beamflag[id-i] = MB_FLAG_NULL;
-			    mb_io_ptr->new_bath[id-i] = scale*data->deph[i];
-			    }
-			mb_io_ptr->new_bath_acrosstrack[id-i] 
-				= scale*data->dist[i];
-			mb_io_ptr->new_bath_alongtrack[id-i] = 0;
-			}
-
-		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  New ping values:\n");
-			fprintf(stderr,"dbg4       error:      %d\n",
-				mb_io_ptr->new_error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				mb_io_ptr->new_time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				mb_io_ptr->new_time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				mb_io_ptr->new_time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				mb_io_ptr->new_time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				mb_io_ptr->new_time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				mb_io_ptr->new_time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				mb_io_ptr->new_time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				mb_io_ptr->new_time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				mb_io_ptr->new_lon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				mb_io_ptr->new_lat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				mb_io_ptr->new_speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				mb_io_ptr->new_heading);
-			fprintf(stderr,"dbg4       beams_bath: %d\n",
-				mb_io_ptr->beams_bath);
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       %d  flag:%d bath: %f  bathdist: %f\n",
-				i,mb_io_ptr->new_beamflag[i],
-				mb_io_ptr->new_bath[i],
-				mb_io_ptr->new_bath_acrosstrack[i]);
-			fprintf(stderr,"dbg4       beams_amp: %d\n",
-				mb_io_ptr->beams_amp);
-			for (i=0;i<mb_io_ptr->beams_amp;i++)
-			  fprintf(stderr,"dbg4       %d  amp: %f  bathdist: %f\n",
-				i,mb_io_ptr->new_amp[i],
-				mb_io_ptr->new_bath_acrosstrack[i]);
-			}
-
-		/* done translating values */
-
-		}
-	else if (status == MB_SUCCESS 
-		&& dataplus->kind == MB_DATA_COMMENT)
-		{
-		/* copy comment */
-		strncpy(mb_io_ptr->new_comment,&datacomment[2],253);
-
-		/* print debug statements */
-		if (verbose >= 4)
-			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  New ping values:\n");
-			fprintf(stderr,"dbg4       error:      %d\n",
-				mb_io_ptr->new_error);
-			fprintf(stderr,"dbg4       comment:    %s\n",
-				mb_io_ptr->new_comment);
-			}
-		}
-
-	/* translate values to hydrosweep data storage structure */
-	if (status == MB_SUCCESS
-		&& store != NULL)
-		{
-		/* type of data record */
-		store->kind = dataplus->kind;
-
-		/* position (all records ) */
-		store->lon = mb_io_ptr->new_lon;
-		store->lat = mb_io_ptr->new_lat;
-		if (store->lon > 180.) 
-			store->lon = store->lon - 360.;
-		else if (store->lon < -180.)
-			store->lon = store->lon + 360.;
-
-		/* time stamp (all records ) */
 		store->year = mb_io_ptr->new_time_i[0];
 		store->month = mb_io_ptr->new_time_i[1];
 		store->day = mb_io_ptr->new_time_i[2];
@@ -452,15 +482,23 @@ int mbr_rt_hsuricen(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		store->alt_minute = 0;
 		store->alt_second = 0;
 
+		/* position (all records ) */
+		store->lon = 0.0000001*data->lon;
+		store->lat = 0.0000001*data->lat;
+		if (store->lon > 180.) 
+			store->lon = store->lon - 360.;
+		else if (store->lon < -180.)
+			store->lon = store->lon + 360.;
+
 		/* additional navigation and depths (ERGNMESS and ERGNEICH) */
-		store->course_true = mb_io_ptr->new_heading;
+		store->course_true = 0.1*data->hdg;
 		store->speed_transverse = 0.0;
 		store->speed = 0.005092593*data->speed;
 		store->speed_reference[0] = data->speed_ref;
 		store->pitch = 0.1*data->pitch;
 		store->track = 0;
 		store->depth_center 
-			= mb_io_ptr->new_bath[mb_io_ptr->beams_bath/2];
+			= data->deph[MBSYS_HSDS_BEAMS/2];
 		store->depth_scale = 0.01*data->scale;
 		store->spare = 1;
 		id = MBSYS_HSDS_BEAMS - 1;
@@ -661,63 +699,6 @@ int mbr_wt_hsuricen(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			{
 			strcpy(datacomment,"cc");
 			strncat(datacomment,store->comment,MBSYS_HSDS_MAXLINE);
-			}
-		}
-
-	/* set kind from current ping */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR)
-		dataplus->kind = mb_io_ptr->new_kind;
-
-	/* check for comment */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_COMMENT)
-		{
-		strcpy(datacomment,"cc");
-		strncat(datacomment,mb_io_ptr->new_comment,
-			mb_io_ptr->data_structure_size-3);
-		}
-
-	/* else translate current ping data to hsuricen data structure */
-	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_DATA)
-		{
-		/* get time */
-		mb_get_jtime(verbose,mb_io_ptr->new_time_i,time_j);
-		data->year = time_j[0];
-		data->day = time_j[1];
-		data->min = time_j[2];
-		data->sec = 100*time_j[3] + 0.0001*time_j[4];
-
-		/* get navigation */
-		if (mb_io_ptr->new_lon < -180.0)
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.0;
-		if (mb_io_ptr->new_lon > 180.0)
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.0;
-		data->lon = (int)(0.5 + 10000000.0*mb_io_ptr->new_lon);
-		data->lat = (int)(0.5 + 10000000.0*mb_io_ptr->new_lat);
-
-		/* get heading */
-		data->hdg = (int)(0.5 + 10.*mb_io_ptr->new_heading);
-
-		/* get speed (convert km/hr to 100Xnm/hr) */
-		data->speed = 54.54545454*mb_io_ptr->new_speed;
-
-		/* put distance and depth values 
-			into hsuricen data structure */
-		/* switch order of data as it is read 
-			into the output arrays */
-		id = mb_io_ptr->beams_bath - 1;
-		if (data->scale > 0)
-			scalefactor = 100.0/data->scale;
-		else
-			scalefactor = 1.0;
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[id-i]))
-			    data->deph[i] = -scalefactor*mb_io_ptr->new_bath[id-i];
-			else
-			    data->deph[i] = scalefactor*mb_io_ptr->new_bath[id-i];
-			data->dist[i] = scalefactor*mb_io_ptr->new_bath_acrosstrack[id-i];
 			}
 		}
 

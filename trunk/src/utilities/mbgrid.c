@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.50 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbgrid.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.50  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.49  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -295,7 +298,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.50 2000-10-11 01:06:15 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -341,7 +344,7 @@ main (int argc, char **argv)
 	/* mbgrid control variables */
 	char	filelist[128];
 	char	fileroot[128];
-	struct mb_datalist_struct *datalist;
+	char	*datalist;
 	double	file_weight;
 	int	xdim = 0;
 	int	ydim = 0;
@@ -552,6 +555,11 @@ main (int argc, char **argv)
 	ydim = 101;
 	gxdim = 0;
 	gydim = 0;
+#ifndef GMT3_0
+	GMT_make_fnan (GMT_f_NaN);
+	GMT_make_dnan (GMT_d_NaN);
+	GMT_grd_in_nan_value = GMT_grd_out_nan_value = GMT_d_NaN;
+#endif
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
@@ -834,7 +842,11 @@ main (int argc, char **argv)
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)
 		{
+#ifdef GMT3_0
 		NaN = zero/zero;
+#else
+		GMT_make_fnan(NaN);
+#endif
 		outclipvalue = NaN;
 		}
 
@@ -2951,7 +2963,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		ymin = symin;
 		ddx = dx;
 		ddy = dy;
-		zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
+		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
 

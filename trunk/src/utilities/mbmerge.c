@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.27 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbmerge.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.27  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.26  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -148,7 +151,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.27 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -169,7 +172,6 @@ main (int argc, char **argv)
 
 	/* MBIO read and write control parameters */
 	int	format = 0;
-	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -221,6 +223,11 @@ main (int argc, char **argv)
 	/* time, user, host variables */
 	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
+	
+	/* data record source types */
+	int	nav_source;
+	int	heading_source;
+	int	vru_source;
 
 	/* navigation handling variables */
 	int	nnav;
@@ -416,8 +423,17 @@ main (int argc, char **argv)
 		exit(error);
 		}
 		
-	/* check format */
-	status = mb_format(verbose,&format,&format_num,&error);
+	/* check format and get data sources */
+	status = mb_format_source(verbose, &format, 
+			&nav_source, &heading_source, &vru_source, 
+			&error);
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error returned from function <mb_format_source>:\n%s\n",message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
 		
 	/* set max number of characters to be read at a time */
 	if (nformat == 8)
@@ -759,8 +775,10 @@ main (int argc, char **argv)
 
 	/* set up spline interpolation of nav points */
 	splineflag = 1.0e30;
-	spline(ntime-1,nlon-1,nnav,splineflag,splineflag,nlonspl-1);
-	spline(ntime-1,nlat-1,nnav,splineflag,splineflag,nlatspl-1);
+	mb_spline_init(verbose, ntime-1, nlon-1, nnav,
+		    splineflag, splineflag, nlonspl-1, &error);
+	mb_spline_init(verbose, ntime-1, nlat-1, nnav,
+		    splineflag, splineflag, nlatspl-1, &error);
 
 	/* get start and finish times of nav */
 	mb_get_date(verbose,ntime[0],stime_i);
@@ -969,17 +987,25 @@ main (int argc, char **argv)
 			    && time_d >= ntime[0] 
 			    && time_d <= ntime[nnav-1])
 			    {
-			    intstat = splint(ntime-1,nlon-1,nlonspl-1,
-				    nnav,time_d,&navlon,&itime);
-			    intstat = splint(ntime-1,nlat-1,nlatspl-1,
-				    nnav,time_d,&navlat,&itime);
+			    intstat = mb_spline_interp(verbose, 
+					ntime-1, nlon-1, nlonspl-1,
+					nnav, time_d, &navlon, &itime, 
+					&error);
+			    intstat = mb_spline_interp(verbose, 
+					ntime-1, nlat-1, nlatspl-1,
+					nnav, time_d, &navlat, &itime, 
+					&error);
 			    }
 			else
 			    {
-			    intstat = linint(ntime-1,nlon-1,
-				    nnav,time_d,&navlon,&itime);
-			    intstat = linint(ntime-1,nlat-1,
-				    nnav,time_d,&navlat,&itime);
+			    intstat = mb_linear_interp(verbose, 
+					ntime-1, nlon-1,
+					nnav, time_d, &navlon, &itime, 
+					&error);
+			    intstat = mb_linear_interp(verbose, 
+					ntime-1, nlat-1,
+					nnav, time_d, &navlat, &itime, 
+					&error);
 			    }
 			}
 
@@ -1033,8 +1059,7 @@ main (int argc, char **argv)
 		/* if format used asynchronous nav and first record
 		   is ping data then force output of nav record first */
 		if (error == MB_ERROR_NO_ERROR
-			&& mb_nav_source[format_num] 
-				== MB_DATA_NAV
+			&& nav_source == MB_DATA_NAV
 			&& kind == MB_DATA_DATA
 			&& onav == 0)
 			{
@@ -1137,110 +1162,5 @@ main (int argc, char **argv)
 
 	/* end it all */
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-/* From Numerical Recipies */
-int spline(double *x, double *y, int n, double yp1, double ypn, double *y2)
-{
-	int i,k;
-	double p,qn,sig,un,*u,*vector();
-	void free_vector();
-
-	u=vector(1,n-1);
-	if (yp1 > 0.99e30)
-		y2[1]=u[1]=0.0;
-	else {
-		y2[1] = -0.5;
-		u[1]=(3.0/(x[2]-x[1]))*((y[2]-y[1])/(x[2]-x[1])-yp1);
-	}
-	for (i=2;i<=n-1;i++) {
-		sig=(x[i]-x[i-1])/(x[i+1]-x[i-1]);
-		p=sig*y2[i-1]+2.0;
-		y2[i]=(sig-1.0)/p;
-		u[i]=(y[i+1]-y[i])/(x[i+1]-x[i]) - (y[i]-y[i-1])/(x[i]-x[i-1]);
-		u[i]=(6.0*u[i]/(x[i+1]-x[i-1])-sig*u[i-1])/p;
-	}
-	if (ypn > 0.99e30)
-		qn=un=0.0;
-	else {
-		qn=0.5;
-		un=(3.0/(x[n]-x[n-1]))*(ypn-(y[n]-y[n-1])/(x[n]-x[n-1]));
-	}
-	y2[n]=(un-qn*u[n-1])/(qn*y2[n-1]+1.0);
-	for (k=n-1;k>=1;k--)
-		y2[k]=y2[k]*y2[k+1]+u[k];
-	free_vector(u,1,n-1);
-	return(0);
-}
-/*--------------------------------------------------------------------*/
-int splint(double *xa, double *ya, double *y2a,
-		int n, double x, double *y, int *i)
-{
-	int klo,khi,k;
-	double h,b,a;
-
-	klo=1;
-	khi=n;
-	while (khi-klo > 1) {
-		k=(khi+klo) >> 1;
-		if (xa[k] > x) khi=k;
-		else klo=k;
-	}
-	if (khi == 1) khi = 2;
-	if (klo == n) klo = n - 1;
-	h=xa[khi]-xa[klo];
-/*	if (h == 0.0) 
-		{
-		fprintf(stderr,"ERROR: interpolation time out of nav bounds\n");
-		return(-1);
-		}
-*/
-	a=(xa[khi]-x)/h;
-	b=(x-xa[klo])/h;
-	*y=a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2a[klo]
-		+(b*b*b-b)*y2a[khi])*(h*h)/6.0;
-	*i=klo;
-	return(0);
-}
-/*--------------------------------------------------------------------*/
-int linint(double *xa, double *ya,
-		int n, double x, double *y, int *i)
-{
-	int klo,khi,k;
-	double h,b;
-
-	klo=1;
-	khi=n;
-	while (khi-klo > 1) {
-		k=(khi+klo) >> 1;
-		if (xa[k] > x) khi=k;
-		else klo=k;
-	}
-	if (khi == 1) khi = 2;
-	if (klo == n) klo = n - 1;
-	h=xa[khi]-xa[klo];
-/*	if (h == 0.0) 
-		{
-		fprintf(stderr,"ERROR: interpolation time out of nav bounds\n");
-		return(-1);
-		}
-*/
-	b = (ya[khi] - ya[klo]) / h;
-	*y = ya[klo] + b * (x - xa[klo]);
-	*i=klo;
-	return(0);
-}
-/*--------------------------------------------------------------------*/
-double *vector(int nl, int nh)
-{
-	double *v;
-	v = (double *) malloc ((unsigned) (nh-nl+1)*sizeof(double));
-	if (!v) fprintf(stderr,"allocation failure in vector()");
-	return v-nl;
-}
-/*--------------------------------------------------------------------*/
-void free_vector(double *v, int nl, int nh)
-{
-	free((char*) (v+nl));
 }
 /*--------------------------------------------------------------------*/

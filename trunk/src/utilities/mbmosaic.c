@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.12 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbmosaic.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.11  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -111,7 +114,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.12 2000-10-11 01:06:15 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -159,7 +162,7 @@ main (int argc, char **argv)
 	/* mbmosaic control variables */
 	char	filelist[128];
 	char	fileroot[128];
-	struct mb_datalist_struct *datalist;
+	char	*datalist;
 	double	file_weight;
 	int	xdim = 0;
 	int	ydim = 0;
@@ -367,6 +370,11 @@ main (int argc, char **argv)
 	ydim = 101;
 	gxdim = 0;
 	gydim = 0;
+#ifndef GMT3_0
+	GMT_make_fnan (GMT_f_NaN);
+	GMT_make_dnan (GMT_d_NaN);
+	GMT_grd_in_nan_value = GMT_grd_out_nan_value = GMT_d_NaN;
+#endif
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:")) != -1)
@@ -651,7 +659,11 @@ main (int argc, char **argv)
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)
 		{
+#ifdef GMT3_0
 		NaN = zero/zero;
+#else
+		GMT_make_fnan(NaN);
+#endif
 		outclipvalue = NaN;
 		}
 
@@ -1911,7 +1923,7 @@ main (int argc, char **argv)
 		ymin = symin;
 		ddx = dx;
 		ddy = dy;
-		zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
+		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
 
@@ -2038,7 +2050,9 @@ main (int argc, char **argv)
 			if (gridkind != MBMOSAIC_ASCII
 				&& gridkind != MBMOSAIC_ARCASCII
 				&& grid[kgrid] == clipvalue)
+				{
 				output[kout] = outclipvalue;
+				}
 			}
 	if (gridkind == MBMOSAIC_ASCII)
 		{

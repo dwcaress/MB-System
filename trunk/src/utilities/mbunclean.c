@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 4.12 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbunclean.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.11  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -70,6 +73,9 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.11  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -137,7 +143,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 4.12 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags swath bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";

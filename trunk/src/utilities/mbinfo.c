@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.21 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbinfo.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.20  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -151,7 +154,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.21 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -173,7 +176,6 @@ main (int argc, char **argv)
 	char	read_file[128];
 	FILE	*fp;
 	int	format;
-	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -554,10 +556,6 @@ main (int argc, char **argv)
 	while (read_data == MB_YES)
 	{
 
-	/* obtain format array location - format id will 
-		be aliased to current id if old format id given */
-	status = mb_format(verbose,&format,&format_num,&error);
-
 	/* initialize reading the swath file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings_get,lonflip,bounds,
@@ -720,7 +718,7 @@ main (int argc, char **argv)
 	/* printf out file and format */
 	if (pass == 0)
 		{
-		mb_format_inf(verbose,format_num,&message);
+		mb_format_description(verbose,&format,&message,&error);
 		fprintf(output,"\nMultibeam Data File:  %s\n",file);
 		fprintf(output,"MBIO Data Format ID:  %d\n",format);
 		fprintf(output,"%s",message);
@@ -754,8 +752,8 @@ main (int argc, char **argv)
 
 			/* increment counters */
 			if (pass == 0 
-				&& error == MB_ERROR_NO_ERROR 
-				|| error == MB_ERROR_TIME_GAP)
+				&& (error == MB_ERROR_NO_ERROR 
+				    || error == MB_ERROR_TIME_GAP))
 				{
 				irec++;
 				nread++;

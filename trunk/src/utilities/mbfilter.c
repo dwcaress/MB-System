@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.18 2000-10-28 00:40:19 caress Exp $
+ *    $Id: mbfilter.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,10 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  2000/10/28  00:40:19  caress
+ * Applied fix from Gordon Keith to calculation of pings to be
+ * updated and dumped.
+ *
  * Revision 4.17  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -104,7 +108,6 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
 
 /* mode defines */
 #define	MBFILTER_BATH			0
@@ -163,7 +166,7 @@ int mb_double_compare();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.18 2000-10-28 00:40:19 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -207,7 +210,6 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* MBIO read control parameters */
 	int	format;
-	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -531,9 +533,10 @@ The default input and output streams are stdin and stdout.\n";
 		}
 
 	/* check for format with amplitude or sidescan data */
-	status = mb_format(verbose,&format,&format_num,&error);
+	status = mb_format_dimensions(verbose,&format,
+			&beams_bath,&beams_amp,&pixels_ss,&error);
 	if (datakind == MBFILTER_BATH 
-		&& beams_bath_table[format_num] <= 0)
+		&& beams_bath <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> is in bathymetry mode.\n",program_name);
 		fprintf(stderr,"Format %d is unacceptable because it does not include sidescan data.\n",format);
@@ -543,7 +546,7 @@ The default input and output streams are stdin and stdout.\n";
 		exit(error);
 		}
 	if (datakind == MBFILTER_SS 
-		&& pixels_ss_table[format_num] <= 0)
+		&& pixels_ss <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> is in sidescan mode.\n",program_name);
 		fprintf(stderr,"Format %d is unacceptable because it does not include sidescan data.\n",format);
@@ -553,7 +556,7 @@ The default input and output streams are stdin and stdout.\n";
 		exit(error);
 		}
 	if (datakind == MBFILTER_AMP 
-		&& beams_amp_table[format_num] <= 0)
+		&& beams_amp <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> is in amplitude mode.\n",program_name);
 		fprintf(stderr,"Format %d is unacceptable because it does not include amplitude data.\n",format);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_gsfgenmb.h	2/27/98
- *	$Id: mbf_gsfgenmb.h,v 4.1 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbf_gsfgenmb.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  1998/10/05  19:16:02  caress
  * MB-System version 4.6beta
  *
@@ -45,6 +48,10 @@
  *      mb_put_all, and the mb_buffer routines are used for
  *      reading and writing.
  */
+ 
+#ifndef __GSF_H__
+#include "../../include/gsf.h"
+#endif
 
 struct mbf_gsfgenmb_struct
 	{

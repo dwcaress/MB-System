@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.16 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbps.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.15  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -137,7 +140,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 4.16 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
@@ -184,7 +187,6 @@ main (int argc, char **argv)
 
 	/* MBIO read control parameters */
 	int	format;
-	int	format_num;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsmdldih.h	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdldih.h,v 4.4 2000-09-30 06:34:20 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdldih.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.3  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 4.8 2000-09-30 07:03:14 caress Exp $
+ *    $Id: mbnavedit.h,v 5.0 2000-12-01 22:56:08 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/09/30  07:03:14  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.7  2000/09/30  07:02:34  caress
  * Snapshot for Dale.
  *

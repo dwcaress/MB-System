@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 4.8 2000-10-11 01:00:12 caress Exp $
+ *    $Id: mb_delaun.c,v 5.0 2000-12-01 22:53:59 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -96,6 +96,9 @@
  * Date:	April, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/10/11  01:00:12  caress
+ * Convert to ANSI C
+ *
  * Revision 4.7  2000/09/30  06:54:58  caress
  * Snapshot for Dale.
  *
@@ -166,7 +169,7 @@ int mb_delaun(
 	int	*kv2, 
 	int	*error)
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 4.8 2000-10-11 01:00:12 caress Exp $";
+  	static char rcs_id[]="$Id: mb_delaun.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];

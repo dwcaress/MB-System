@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.15 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbcopy.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.14  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -117,13 +120,15 @@
 #define	MBCOPY_FULL		1
 #define	MBCOPY_ELACMK2_TO_XSE	2
 #define	MBCOPY_XSE_TO_ELACMK2	3
+#define	MBCOPY_ANY_TO_MBLDEOIH	4
+#define	MBCOPY_ANY_TO_GSF	5
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.15 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -144,7 +149,6 @@ main (int argc, char **argv)
 
 	/* MBIO read control parameters */
 	int	iformat = 0;
-	int	iformat_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -162,7 +166,6 @@ main (int argc, char **argv)
 
 	/* MBIO write control parameters */
 	int	oformat = 0;
-	int	oformat_num;
 	char	ofile[128];
 	int	obeams_bath;
 	int	obeams_amp;
@@ -198,6 +201,10 @@ main (int argc, char **argv)
 	double	*oss = NULL;
 	double	*ossacrosstrack = NULL;
 	double	*ossalongtrack = NULL;
+	double	draft;
+	double	roll;
+	double	pitch;
+	double	heave;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
@@ -411,7 +418,7 @@ main (int argc, char **argv)
 
 	/* obtain format array locations - format ids will 
 		be aliased to current ids if old format ids given */
-	if ((status = mb_format(verbose,&iformat,&iformat_num,&error)) 
+	if ((status = mb_format(verbose,&iformat,&error)) 
 		!= MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
@@ -420,7 +427,7 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	if ((status = mb_format(verbose,&oformat,&oformat_num,&error)) 
+	if ((status = mb_format(verbose,&oformat,&error)) 
 		!= MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
@@ -429,37 +436,6 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-
-	/* determine if full or partial copies will be made */
-	if (pings == 1 
-		&& mb_system_table[iformat_num] != MB_SYS_NONE 
-		&& mb_system_table[iformat_num] == mb_system_table[oformat_num])
-		copymode = MBCOPY_FULL;
-	else if (pings == 1 
-		&& mb_system_table[iformat_num] == MB_SYS_ELACMK2 
-		&& mb_system_table[oformat_num] == MB_SYS_XSE)
-		copymode = MBCOPY_ELACMK2_TO_XSE;
-	else if (pings == 1 
-		&& mb_system_table[iformat_num] == MB_SYS_XSE 
-		&& mb_system_table[oformat_num] == MB_SYS_ELACMK2)
-		copymode = MBCOPY_XSE_TO_ELACMK2;
-	else
-		copymode = MBCOPY_PARTIAL;
-
-	/* print debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  Copy mode set in program <%s>\n",
-			program_name);
-		fprintf(stderr,"dbg2       pings:         %d\n",pings);
-		fprintf(stderr,"dbg2       iformat:       %d\n",iformat);
-		fprintf(stderr,"dbg2       oformat:       %d\n",oformat);
-		fprintf(stderr,"dbg2       isystem:       %d\n",
-			mb_system_table[iformat_num]);
-		fprintf(stderr,"dbg2       osystem:       %d\n",
-			mb_system_table[oformat_num]);
-		fprintf(stderr,"dbg2       copymode:      %d\n",copymode);
-			}
 
 	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
@@ -490,6 +466,37 @@ main (int argc, char **argv)
 		exit(error);
 		}
 	omb_io_ptr = (struct mb_io_struct *) ombio_ptr; 
+
+	/* determine if full or partial copies will be made */
+	if (pings == 1 
+		&& imb_io_ptr->system != MB_SYS_NONE 
+		&& imb_io_ptr->system == omb_io_ptr->system)
+		copymode = MBCOPY_FULL;
+	else if (pings == 1 
+		&& imb_io_ptr->system == MB_SYS_ELACMK2 
+		&& omb_io_ptr->system == MB_SYS_XSE)
+		copymode = MBCOPY_ELACMK2_TO_XSE;
+	else if (pings == 1 
+		&& imb_io_ptr->system == MB_SYS_XSE 
+		&& omb_io_ptr->system == MB_SYS_ELACMK2)
+		copymode = MBCOPY_XSE_TO_ELACMK2;
+	else
+		copymode = MBCOPY_PARTIAL;
+
+	/* print debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Copy mode set in program <%s>\n",
+			program_name);
+		fprintf(stderr,"dbg2       pings:         %d\n",pings);
+		fprintf(stderr,"dbg2       iformat:       %d\n",iformat);
+		fprintf(stderr,"dbg2       oformat:       %d\n",oformat);
+		fprintf(stderr,"dbg2       isystem:       %d\n",
+			imb_io_ptr->system);
+		fprintf(stderr,"dbg2       osystem:       %d\n",
+			omb_io_ptr->system);
+		fprintf(stderr,"dbg2       copymode:      %d\n",copymode);
+		}
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,ibeams_bath*sizeof(char),&ibeamflag,&error);
@@ -528,13 +535,13 @@ main (int argc, char **argv)
 		}
 
 	/* set up transfer rules */
-	if (variable_beams_table[oformat_num] == MB_YES
+	if (omb_io_ptr->variable_beams == MB_YES
 		&& obeams_bath != ibeams_bath)
 		obeams_bath = ibeams_bath;
-	if (variable_beams_table[oformat_num] == MB_YES
+	if (omb_io_ptr->variable_beams == MB_YES
 		&& obeams_amp != ibeams_amp)
 		obeams_amp = ibeams_amp;
-	if (variable_beams_table[oformat_num] == MB_YES
+	if (omb_io_ptr->variable_beams == MB_YES
 		&& opixels_ss != ipixels_ss)
 		opixels_ss = ipixels_ss;
 	setup_transfer_rules(verbose,ibeams_bath,obeams_bath,
@@ -721,7 +728,7 @@ main (int argc, char **argv)
 			&& nbath != ibeams_bath)
 			{
 			ibeams_bath = nbath;
-			if (variable_beams_table[oformat_num] == MB_YES)
+			if (omb_io_ptr->variable_beams == MB_YES)
 				obeams_bath = ibeams_bath;
 			setup_transfer_rules(verbose,ibeams_bath,obeams_bath,
 				&istart_bath,&iend_bath,&offset_bath,&error);
@@ -732,7 +739,7 @@ main (int argc, char **argv)
 			&& namp != ibeams_amp)
 			{
 			ibeams_amp = namp;
-			if (variable_beams_table[oformat_num] == MB_YES)
+			if (omb_io_ptr->variable_beams == MB_YES)
 				obeams_amp = ibeams_amp;
 			setup_transfer_rules(verbose,ibeams_amp,obeams_amp,
 				&istart_amp,&iend_amp,&offset_amp,&error);
@@ -743,7 +750,7 @@ main (int argc, char **argv)
 			&& nss != ipixels_ss)
 			{
 			ipixels_ss = nss;
-			if (variable_beams_table[oformat_num] == MB_YES)
+			if (omb_io_ptr->variable_beams == MB_YES)
 				opixels_ss = ipixels_ss;
 			setup_transfer_rules(verbose,ipixels_ss,opixels_ss,
 				&istart_ss,&iend_ss,&offset_ss,&error);
@@ -884,7 +891,6 @@ main (int argc, char **argv)
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			ostore_ptr = omb_io_ptr->store_data;
-			imb_io_ptr->new_kind = kind;
 			status = mbcopy_elacmk2_to_xse(verbose, 
 				    istore_ptr, ostore_ptr, &error);
 			}
@@ -892,27 +898,42 @@ main (int argc, char **argv)
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			ostore_ptr = omb_io_ptr->store_data;
-			imb_io_ptr->new_kind = kind;
 			status = mbcopy_xse_to_elacmk2(verbose, 
 				    istore_ptr, ostore_ptr, &error);
+			}
+		else if (copymode == MBCOPY_PARTIAL
+			&& error == MB_ERROR_NO_ERROR)
+			{
+			ostore_ptr = omb_io_ptr->store_data;
+			if (kind == MB_DATA_DATA)
+				{
+				mb_extract_nav(verbose, imbio_ptr, istore_ptr, 
+						&kind, time_i, &time_d, 
+						&navlon, &navlat, &speed, &heading, &draft, 
+						&roll, &pitch, &heave, 
+						&error);
+				mb_insert_nav(verbose, ombio_ptr, ostore_ptr, 
+						time_i, time_d, 
+						navlon, navlat, speed, heading, draft, 
+						roll, pitch, heave, 
+						&error);
+				}
+			status = mb_insert(verbose, ombio_ptr, ostore_ptr,
+						kind, time_i, time_d, 
+						navlon, navlat, speed, heading, 
+						obeams_bath,obeams_amp,opixels_ss,
+						obeamflag,obath,oamp,obathacrosstrack,
+						obathalongtrack,
+						oss,ossacrosstrack,ossalongtrack,
+						comment, &error);
 			}
 
 		/* write some data */
 		if ((error == MB_ERROR_NO_ERROR && kind != MB_DATA_COMMENT)
 			|| (kind == MB_DATA_COMMENT && stripcomments == MB_NO))
 			{
-			if (copymode != MBCOPY_PARTIAL)
-				status = mb_put_all(verbose,ombio_ptr,
+			status = mb_put_all(verbose,ombio_ptr,
 					ostore_ptr,MB_NO,kind,
-					time_i,time_d,
-					navlon,navlat,speed,heading,
-					obeams_bath,obeams_amp,opixels_ss,
-					obeamflag,obath,oamp,obathacrosstrack,
-					obathalongtrack,
-					oss,ossacrosstrack,ossalongtrack,
-					comment,&error);
-			else
-				status = mb_put(verbose,ombio_ptr,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					obeams_bath,obeams_amp,opixels_ss,

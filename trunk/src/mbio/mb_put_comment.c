@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_comment.c	7/15/97
- *    $Id: mb_put_comment.c,v 4.3 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_put_comment.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	July 15, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.2  2000/09/30  06:32:11  caress
  * Snapshot for Dale.
  *
@@ -57,6 +60,9 @@ int mb_put_comment(int verbose, char *mbio_ptr, char *comment, int *error)
 	char	*function_name = "mb_put_comment";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
+	int	time_i[7];
+	double	time_d;
+	double	navlon, navlat, speed, heading;
 	int	i;
 
 	/* print input debug statements */
@@ -73,13 +79,18 @@ int mb_put_comment(int verbose, char *mbio_ptr, char *comment, int *error)
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
-	/* transfer values to mb_io_ptr structure */
-	mb_io_ptr->new_error = MB_ERROR_NO_ERROR;
-	mb_io_ptr->new_kind = MB_DATA_COMMENT;
-	strcpy(mb_io_ptr->new_comment,comment);
+	/* insert comment using mb_insert */
+	status = mb_insert(verbose,mbio_ptr,mb_io_ptr->store_data,
+			MB_DATA_COMMENT, 
+			time_i,time_d,navlon,navlat,speed,heading,
+			0,0,0,
+			NULL,NULL,NULL,
+			NULL,NULL,
+			NULL,NULL,NULL,
+			comment,error);
 
 	/* write the data */
-	status = mb_write_ping(verbose,mbio_ptr,NULL,error);
+	status = mb_write_ping(verbose,mbio_ptr,mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

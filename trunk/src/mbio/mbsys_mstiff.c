@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mstiff.c	4/10/98
- *	$Id: mbsys_mstiff.c,v 4.2 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_mstiff.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -34,6 +34,9 @@
  * Author:	D. W. Caress
  * Date:	April 10,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.1  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -69,7 +72,7 @@
 int mbsys_mstiff_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_mstiff.c,v 4.2 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_mstiff.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_mstiff_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -326,7 +329,7 @@ int mbsys_mstiff_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_mstiff_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -339,7 +342,6 @@ int mbsys_mstiff_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mstiff_struct *store;
-	int	kind;
 	int	i;
 
 	/* print input debug statements */
@@ -351,6 +353,10 @@ int mbsys_mstiff_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -363,6 +369,9 @@ int mbsys_mstiff_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
@@ -379,7 +388,11 @@ int mbsys_mstiff_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        ss[%d]: %f    ssdist[%d]: %f\n",
 			i,ss[i],i,ssacrosstrack[i]);
-		fprintf(stderr,"dbg2       comment:    %s\n",comment);
+		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
 		}
 
 	/* get mbio descriptor */
@@ -388,28 +401,31 @@ int mbsys_mstiff_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	/* get data structure pointer */
 	store = (struct mbsys_mstiff_struct *) store_ptr;
 
-	/* insert data in structure */
-	/* get time */
-	store->time_d = time_d;
-
-	/* get navigation */
-	if (navlon < 180.0) navlon = navlon + 360.0;
-	if (navlon > 180.0) navlon = navlon - 360.0;
-	store->lon = navlon;
-	store->lat = navlat;
-
-	/* get heading and speed */
-	store->heading = heading;
-	store->speed = speed;
-
-	/* put sidescan values 
-		into data structure */
-	store->pixels_ss = nss;
-	for (i=0;i<nss;i++)
-	    {
-	    store->ss[i] = ss[i];
-	    store->ssacrosstrack[i] = ssacrosstrack[i];
-	    }
+	/* insert survey data in structure */
+	if (kind == MB_DATA_DATA)
+		{
+		/* get time */
+		store->time_d = time_d;
+	
+		/* get navigation */
+		if (navlon < 180.0) navlon = navlon + 360.0;
+		if (navlon > 180.0) navlon = navlon - 360.0;
+		store->lon = navlon;
+		store->lat = navlat;
+	
+		/* get heading and speed */
+		store->heading = heading;
+		store->speed = speed;
+	
+		/* put sidescan values 
+			into data structure */
+		store->pixels_ss = nss;
+		for (i=0;i<nss;i++)
+		    {
+		    store->ss[i] = ss[i];
+		    store->ssacrosstrack[i] = ssacrosstrack[i];
+		    }
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

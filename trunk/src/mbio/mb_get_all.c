@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 4.12 2000-10-16 21:52:54 caress Exp $
+ *    $Id: mb_get_all.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_get_all.c reads multibeam data from a file
+ * mb_get_all.c reads swath data from a file
  * which has been initialized by mb_read_init(). Crosstrack distances
  * are not mapped into lon and lat.  The data is not averaged, and
  * values are also read into a storage data structure including
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/10/16  21:52:54  caress
+ * No longer initializes some null arrays.
+ *
  * Revision 4.11  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -107,12 +110,11 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 4.12 2000-10-16 21:52:54 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int	i;
-	int	done;
 	double	mtodeglon, mtodeglat;
 	double	dx, dy;
 	double	delta_time;
@@ -131,40 +133,6 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	*store_ptr = mb_io_ptr->store_data;
 
-	/* initialize return values */
-	*kind = MB_DATA_NONE;
-	for (i=0;i<7;i++)
-		time_i[i] = 0;
-	*time_d = 0.0;
-	*navlon = 0.0;
-	*navlat = 0.0;
-	*speed = 0.0;
-	*heading = 0.0;
-	*nbath = 0;
-	*namp = 0;
-	*nss = 0;
-	if (bath != NULL)
-	for (i=0;i<mb_io_ptr->beams_bath;i++)
-		{
-		beamflag[i] = MB_FLAG_NULL;
-		bath[i] = 0.0;
-		bathacrosstrack[i] = 0.0;
-		bathalongtrack[i] = 0.0;
-		}
-	if (amp != NULL)
-	for (i=0;i<mb_io_ptr->beams_amp;i++)
-		{
-		amp[i] = 0.0;
-		}
-	if (ss != NULL)
-	for (i=0;i<mb_io_ptr->pixels_ss;i++)
-		{
-		ss[i] = 0.0;
-		ssacrosstrack[i] = 0.0;
-		ssalongtrack[i] = 0.0;
-		}
-	strcpy(comment,"\0");
-
 	/* print debug statements */
 	if (verbose >= 4)
 		{
@@ -177,7 +145,55 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		}
 
 	/* get next ping */
-	status = mb_read_ping(verbose,mbio_ptr,*store_ptr,error);
+	status = mb_read_ping(verbose,mbio_ptr,*store_ptr,kind,error);
+	
+	/* if survey data read into storage array */
+	if (status == MB_SUCCESS
+		&& (*kind == MB_DATA_DATA
+		    || *kind == MB_DATA_NAV
+		    || *kind == MB_DATA_COMMENT))
+		{
+		/* initialize return values */
+		*kind = MB_DATA_NONE;
+		for (i=0;i<7;i++)
+			time_i[i] = 0;
+		*time_d = 0.0;
+		*navlon = 0.0;
+		*navlat = 0.0;
+		*speed = 0.0;
+		*heading = 0.0;
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		for (i=0;i<mb_io_ptr->beams_bath_max;i++)
+			{
+			beamflag[i] = MB_FLAG_NULL;
+			bath[i] = 0.0;
+			bathacrosstrack[i] = 0.0;
+			bathalongtrack[i] = 0.0;
+			}
+		for (i=0;i<mb_io_ptr->beams_amp_max;i++)
+			{
+			amp[i] = 0.0;
+			}
+		for (i=0;i<mb_io_ptr->pixels_ss_max;i++)
+			{
+			ss[i] = 0.0;
+			ssacrosstrack[i] = 0.0;
+			ssalongtrack[i] = 0.0;
+			}
+		strcpy(comment,"\0");
+
+		/* get the data */
+		status = mb_extract(verbose, 
+			mbio_ptr, *store_ptr, kind,
+			time_i, time_d,
+			navlon, navlat, speed, heading,
+			nbath, namp, nss, 
+			beamflag, bath, amp, bathacrosstrack, bathalongtrack, 
+			ss, ssacrosstrack, ssalongtrack, 
+			comment, error);
+		}
 
 	/* print debug statements */
 	if (verbose >= 4)
@@ -191,9 +207,6 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		fprintf(stderr,"dbg2       kind:          %d\n",
 			mb_io_ptr->new_kind);
 		}
-
-	/* set data kind */
-	*kind = mb_io_ptr->new_kind;	
 
 	/* increment counters */
 	if (status == MB_SUCCESS)
@@ -211,48 +224,9 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		    || *kind == MB_DATA_CALIBRATE)
 		&& mb_io_ptr->ping_count == 1)
 		{
-		mb_io_ptr->old_time_d = mb_io_ptr->new_time_d;
-		mb_io_ptr->old_lon = mb_io_ptr->new_lon;
-		mb_io_ptr->old_lat = mb_io_ptr->new_lat;
-		}
-
-	/* get return values */
-	if (status == MB_SUCCESS && *kind == MB_DATA_COMMENT)
-		{
-		strcpy(comment,mb_io_ptr->new_comment);
-		}
-	else if (status == MB_SUCCESS)
-		{
-		for (i=0;i<7;i++)
-			time_i[i] = mb_io_ptr->new_time_i[i];
-		*time_d = mb_io_ptr->new_time_d;
-		*navlon = mb_io_ptr->new_lon;
-		*navlat = mb_io_ptr->new_lat;
-		*speed = mb_io_ptr->new_speed;
-		*heading = mb_io_ptr->new_heading;
-		}
-	if (status == MB_SUCCESS && *kind == MB_DATA_DATA)
-		{
-		*nbath = mb_io_ptr->beams_bath;
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			beamflag[i] = mb_io_ptr->new_beamflag[i];
-			bath[i] = mb_io_ptr->new_bath[i];
-			bathacrosstrack[i] = mb_io_ptr->new_bath_acrosstrack[i];
-			bathalongtrack[i] = mb_io_ptr->new_bath_alongtrack[i];
-			}
-		*namp = mb_io_ptr->beams_amp;
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			amp[i] = mb_io_ptr->new_amp[i];
-			}
-		*nss = mb_io_ptr->pixels_ss;
-		for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			{
-			ss[i] = mb_io_ptr->new_ss[i];
-			ssacrosstrack[i] = mb_io_ptr->new_ss_acrosstrack[i];
-			ssalongtrack[i] = mb_io_ptr->new_ss_alongtrack[i];
-			}
+		mb_io_ptr->old_time_d = *time_d;
+		mb_io_ptr->old_lon = *navlon;
+		mb_io_ptr->old_lat = *navlat;
 		}
 
 	/* calculate speed and distance */
@@ -437,28 +411,28 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
-		if (verbose >= 3 && mb_io_ptr->beams_bath > 0)
+		if (verbose >= 3 && *nbath > 0)
 		  {
 		  fprintf(stderr,"dbg3       beam   flag  bath  crosstrack alongtrack\n");
-		  for (i=0;i<mb_io_ptr->beams_bath;i++)
+		  for (i=0;i<*nbath;i++)
 		    fprintf(stderr,"dbg3       %4d   %3d   %f    %f     %f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg2       namp:      %d\n",*namp);
-		if (verbose >= 3 && mb_io_ptr->beams_amp > 0)
+		if (verbose >= 3 && *namp > 0)
 		  {
 		  fprintf(stderr,"dbg3       beam   amp  crosstrack alongtrack\n");
-		  for (i=0;i<mb_io_ptr->beams_amp;i++)
+		  for (i=0;i<*namp;i++)
 		    fprintf(stderr,"dbg3       %4d   %f    %f     %f\n",
 			i,amp[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg2       nss:      %d\n",*nss);
-		if (verbose >= 3 && mb_io_ptr->pixels_ss > 0)
+		if (verbose >= 3 && *nss > 0)
 		  {
 		  fprintf(stderr,"dbg3       pixel sidescan crosstrack alongtrack\n");
-		  for (i=0;i<mb_io_ptr->pixels_ss;i++)
+		  for (i=0;i<*nss;i++)
 		    fprintf(stderr,"dbg3       %4d   %f    %f     %f\n",
 			i,ss[i],
 			ssacrosstrack[i],ssalongtrack[i]);

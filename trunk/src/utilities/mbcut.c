@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.11 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbcut.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.10  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -88,7 +91,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.11 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -117,7 +120,9 @@ The default input and output streams are stdin and stdout.";
 
 	/* MBIO read and write control parameters */
 	int	format = 0;
-	int	format_num;
+	int	variable_beams;
+	int	traveltime;
+	int	beam_flagging;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -341,8 +346,18 @@ The default input and output streams are stdin and stdout.";
 		exit(error);
 		}
 
-	/* get format_num */
-	status = mb_format(verbose,&format,&format_num,&error);
+	/* check format and get format flags */
+	if ((status = mb_format_flags(verbose,&format,
+			&variable_beams, &traveltime, &beam_flagging, 
+			&error)) 
+		!= MB_SUCCESS)
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n",format,message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
 
 	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
@@ -568,7 +583,7 @@ The default input and output streams are stdin and stdout.";
 			{
 			if (bathflag[i] == MB_NO 
 			    && mb_beam_ok(beamflag[i])
-			    && mb_no_flag_table[format_num] == MB_NO)
+			    && beam_flagging == MB_YES)
 			    {
 			    beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 			    }
@@ -624,7 +639,7 @@ The default input and output streams are stdin and stdout.";
 			{
 			if (ampflag[i] == MB_NO 
 			    && mb_beam_ok(beamflag[i])
-			    && mb_no_flag_table[format_num] == MB_NO)
+			    && beam_flagging == MB_YES)
 			    {
 			    beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 			    }

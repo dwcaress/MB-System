@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 4.4 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -42,6 +42,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.3  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -71,7 +74,7 @@
 int mbsys_singlebeam_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_singlebeam.c,v 4.4 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_singlebeam.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_singlebeam_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -393,7 +396,7 @@ int mbsys_singlebeam_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -406,7 +409,6 @@ int mbsys_singlebeam_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	int	kind;
 	int	i;
 
 	/* print input debug statements */
@@ -418,6 +420,10 @@ int mbsys_singlebeam_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -445,7 +451,11 @@ int mbsys_singlebeam_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        ss[%d]: %f    ssdist[%d]: %f\n",
 			i,ss[i],i,ssacrosstrack[i]);
-		fprintf(stderr,"dbg2       comment:    %s\n",comment);
+		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
 		}
 
 	/* get mbio descriptor */
@@ -453,6 +463,9 @@ int mbsys_singlebeam_insert(int verbose, char *mbio_ptr, char *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_singlebeam_struct *) store_ptr;
+
+	/* set data kind */
+	store->kind = kind;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)

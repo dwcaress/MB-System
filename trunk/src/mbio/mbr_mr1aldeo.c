@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1aldeo.c	10/24/95
- *	$Id: mbr_mr1aldeo.c,v 1.10 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbr_mr1aldeo.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 24, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 1.9  2000/10/03  21:48:03  caress
  * Snapshot for Dale.
  *
@@ -74,10 +77,182 @@
 #include "../../include/mbsys_mr1.h"
 #include "../../include/mbf_mr1aldeo.h"
 
+/* essential function prototypes */
+int mbr_info_mr1aldeo(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error);
+int mbr_alm_mr1aldeo(int verbose, char *mbio_ptr, int *error);
+int mbr_dem_mr1aldeo(int verbose, char *mbio_ptr, int *error);
+int mbr_rt_mr1aldeo(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_wt_mr1aldeo(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+
+/*--------------------------------------------------------------------*/
+int mbr_info_mr1aldeo(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error)
+{
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	char	*function_name = "mbr_info_mr1aldeo";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* set format info parameters */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*system = MB_SYS_MR1;
+	*beams_bath_max = 3003;
+	*beams_amp_max = 0;
+	*pixels_ss_max = 7003;
+	strncpy(format_name, "MR1ALDEO", MB_NAME_LENGTH);
+	strncpy(system_name, "MR1", MB_NAME_LENGTH);
+	strncpy(format_description, "Format name:          MBF_MR1ALDEO\nInformal Description: L-DEO MR1 post processed format with travel times\nAttributes:           L-DEO MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      L-DEO.\n", MB_DESCRIPTION_LENGTH);
+	*numfile = 1;
+	*filetype = MB_FILETYPE_XDR;
+	*variable_beams = MB_NO;
+	*traveltime = MB_YES;
+	*beam_flagging = MB_YES;
+	*nav_source = MB_DATA_DATA;
+	*heading_source = MB_DATA_DATA;
+	*vru_source = MB_DATA_DATA;
+	*beamwidth_xtrack = 0.0;
+	*beamwidth_ltrack = 2.0;
+
+	/* set format and system specific function pointers */
+	*format_alloc = &mbr_alm_mr1aldeo;
+	*format_free = &mbr_dem_mr1aldeo; 
+	*store_alloc = &mbsys_mr1_alloc; 
+	*store_free = &mbsys_mr1_deall; 
+	*read_ping = &mbr_rt_mr1aldeo; 
+	*write_ping = &mbr_wt_mr1aldeo; 
+	*extract = &mbsys_mr1_extract; 
+	*insert = &mbsys_mr1_insert; 
+	*extract_nav = &mbsys_mr1_extract_nav; 
+	*insert_nav = &mbsys_mr1_insert_nav; 
+	*altitude = &mbsys_mr1_altitude; 
+	*insert_altitude = NULL;
+	*ttimes = &mbsys_mr1_ttimes; 
+	*copyrecord = &mbsys_mr1_copy; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",*system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",*pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",*numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",*filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
+		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1aldeo(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.10 2000-10-11 01:03:21 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbr_alm_mr1aldeo";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -312,276 +487,12 @@ int mbr_rt_mr1aldeo(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	data = (struct mbf_mr1aldeo_struct *) mb_io_ptr->raw_data;
 	store = (struct mbsys_mr1_struct *) store_ptr;
 
-	/* reset values in mb_io_ptr */
-	mb_io_ptr->new_kind = MB_DATA_NONE;
-	mb_io_ptr->new_time_i[0] = 0;
-	mb_io_ptr->new_time_i[1] = 0;
-	mb_io_ptr->new_time_i[2] = 0;
-	mb_io_ptr->new_time_i[3] = 0;
-	mb_io_ptr->new_time_i[4] = 0;
-	mb_io_ptr->new_time_i[5] = 0;
-	mb_io_ptr->new_time_i[6] = 0;
-	mb_io_ptr->new_time_d = 0.0;
-	mb_io_ptr->new_lon = 0.0;
-	mb_io_ptr->new_lat = 0.0;
-	mb_io_ptr->new_heading = 0.0;
-	mb_io_ptr->new_speed = 0.0;
-	for (i=0;i<MBF_MR1ALDEO_BEAMS;i++)
-		{
-		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
-		mb_io_ptr->new_bath[i] = 0.0;
-		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
-		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
-		}
-	for (i=0;i<MBF_MR1ALDEO_PIXELS;i++)
-		{
-		mb_io_ptr->new_ss[i] = 0.0;
-		mb_io_ptr->new_ss_acrosstrack[i] = 0.0;
-		mb_io_ptr->new_ss_alongtrack[i] = 0.0;
-		}
-
 	/* read next data from file */
 	status = mbr_mr1aldeo_rd_data(verbose,mbio_ptr,error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-
-	/* translate time values to current 
-		ping variables in mbio descriptor structure */
-	if (status == MB_SUCCESS
-		&& data->kind == MB_DATA_DATA)
-		{
-		/* get time */
-		mb_io_ptr->new_time_d = data->sec + 0.000001*data->usec;
-		mb_get_date(verbose,mb_io_ptr->new_time_d,
-			mb_io_ptr->new_time_i);
-
-		/* print debug statements */
-		if (verbose >= 4)
-			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  New ping values:\n");
-			fprintf(stderr,"dbg4       error:      %d\n",
-				mb_io_ptr->new_error);
-			fprintf(stderr,"dbg4       kind:       %d\n",
-				mb_io_ptr->new_kind);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				mb_io_ptr->new_time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				mb_io_ptr->new_time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				mb_io_ptr->new_time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				mb_io_ptr->new_time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				mb_io_ptr->new_time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				mb_io_ptr->new_time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				mb_io_ptr->new_time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				mb_io_ptr->new_time_d);
-			}
-
-		/* get navigation */
-		mb_io_ptr->new_lon = data->png_lon;
-		mb_io_ptr->new_lat = data->png_lat;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (mb_io_ptr->new_lon > 0.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -360.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (mb_io_ptr->new_lon > 180.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < -180.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-		else
-			{
-			if (mb_io_ptr->new_lon > 360.) 
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-			else if (mb_io_ptr->new_lon < 0.)
-				mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-			}
-
-		/* get heading */
-		mb_io_ptr->new_heading = data->png_compass;
-		/*mb_io_ptr->new_heading = data->png_course;*/
-
-		/* get speed */
-		mb_io_ptr->new_speed = 0.0;
-
-		/* read beam and pixel values into storage arrays */
-		mb_io_ptr->beams_bath 
-		    = 2 * MAX(data->port_btycount, data->stbd_btycount) + 3;
-		mb_io_ptr->beams_amp = 0;
-		mb_io_ptr->pixels_ss 
-		    = 2 * MAX(data->port_sscount, data->stbd_sscount);
-		if (mb_io_ptr->pixels_ss > 0)
-		    mb_io_ptr->pixels_ss +=3;
-		beam_center = mb_io_ptr->beams_bath/2;
-		pixel_center = mb_io_ptr->pixels_ss/2;
-		for (i=0;i<data->port_btycount;i++)
-			{
-			j = beam_center - i - 2;
-			if (data->bath_port[i] > 0)
-			    {
-			    mb_io_ptr->new_beamflag[j] = MB_FLAG_NONE;
-			    mb_io_ptr->new_bath[j] = data->bath_port[i];
-			    }
-			else if (data->bath_port[i] < 0)
-			    {
-			    mb_io_ptr->new_beamflag[j] = 
-				MB_FLAG_MANUAL + MB_FLAG_FLAG;
-			    mb_io_ptr->new_bath[j] = -data->bath_port[i];
-			    }
-			else
-			    {
-			    mb_io_ptr->new_beamflag[j] = MB_FLAG_NULL;
-			    mb_io_ptr->new_bath[j] = data->bath_port[i];
-			    }
-			mb_io_ptr->new_bath_acrosstrack[j] 
-				= -data->bath_acrosstrack_port[i];
-			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
-			}
-		for (i=0;i<3;i++)
-			{
-			j = beam_center + i - 1;
-			if (j == beam_center)
-				{
-				if (data->png_alt > 0.0)
-				    {
-				    mb_io_ptr->new_beamflag[j] = MB_FLAG_NONE;
-				    mb_io_ptr->new_bath[j] 
-					= data->png_prdepth + data->png_alt;
-				    }
-				else if (data->png_alt < 0.0)
-				    {
-				    mb_io_ptr->new_beamflag[j] = 
-					MB_FLAG_MANUAL + MB_FLAG_FLAG;
-				    mb_io_ptr->new_bath[j] 
-					= data->png_prdepth - data->png_alt;
-				    }
-				else
-				    {
-				    mb_io_ptr->new_beamflag[j] = MB_FLAG_NULL;
-				    mb_io_ptr->new_bath[j] = 0.0;
-				    }
-				}
-			else
-				{
-				mb_io_ptr->new_beamflag[j] = MB_FLAG_NULL;
-				mb_io_ptr->new_bath[j] = 0.0;
-				}
-			mb_io_ptr->new_bath_acrosstrack[j] = 0.0;
-			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
-			}
-		for (i=0;i<data->stbd_btycount;i++)
-			{
-			j = beam_center + 2 + i;
-			if (data->bath_stbd[i] > 0)
-			    {
-			    mb_io_ptr->new_beamflag[j] = MB_FLAG_NONE;
-			    mb_io_ptr->new_bath[j] = data->bath_stbd[i];
-			    }
-			else if (data->bath_stbd[i] < 0)
-			    {
-			    mb_io_ptr->new_beamflag[j] = 
-				MB_FLAG_MANUAL + MB_FLAG_FLAG;
-			    mb_io_ptr->new_bath[j] = -data->bath_stbd[i];
-			    }
-			else
-			    {
-			    mb_io_ptr->new_beamflag[j] = MB_FLAG_NULL;
-			    mb_io_ptr->new_bath[j] = data->bath_stbd[i];
-			    }
-			mb_io_ptr->new_bath_acrosstrack[j] 
-				= data->bath_acrosstrack_stbd[i];
-			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
-			}
-		for (i=0;i<data->port_sscount;i++)
-			{
-			j = pixel_center - i - 2;
-			mb_io_ptr->new_ss[j] 
-				= data->ss_port[i];
-			mb_io_ptr->new_ss_acrosstrack[j] 
-				= -data->port_ssoffset - i*data->png_atssincr;
-			mb_io_ptr->new_ss_alongtrack[j] = 0.0;
-			}
-		for (i=0;i<3;i++)
-			{
-			j = pixel_center + i - 1;
-			mb_io_ptr->new_ss[j] = 0.0;
-			mb_io_ptr->new_ss_acrosstrack[j] = 0.0;
-			mb_io_ptr->new_ss_alongtrack[j] = 0.0;
-			}
-		for (i=0;i<data->stbd_sscount;i++)
-			{
-			j = pixel_center + 2 + i;
-			mb_io_ptr->new_ss[j] 
-				= data->ss_stbd[i];
-			mb_io_ptr->new_ss_acrosstrack[j] 
-				= data->stbd_ssoffset + i*data->png_atssincr;
-			mb_io_ptr->new_ss_alongtrack[j] = 0.0;
-			}
-
-		/* print debug statements */
-		if (verbose >= 4)
-			{
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				mb_io_ptr->new_lon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				mb_io_ptr->new_lat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				mb_io_ptr->new_speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				mb_io_ptr->new_heading);
-			fprintf(stderr,"dbg4       beams_bath: %d\n",
-				mb_io_ptr->beams_bath);
-			fprintf(stderr,"dbg4       beams_amp:  %d\n",
-				mb_io_ptr->beams_amp);
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  flag:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_beamflag[i],
-				mb_io_ptr->new_bath[i],
-				mb_io_ptr->new_bath_acrosstrack[i],
-				mb_io_ptr->new_bath_alongtrack[i]);
-			fprintf(stderr,"dbg4       pixels_ss:  %d\n",
-				mb_io_ptr->pixels_ss);
-			for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			  fprintf(stderr,"dbg4       pixel:%d  ss:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_ss[i],
-				mb_io_ptr->new_ss_acrosstrack[i],
-				mb_io_ptr->new_ss_alongtrack[i]);
-			}
-		}
-
-	/* copy comment to mbio descriptor structure */
-	if (status == MB_SUCCESS
-		&& data->kind == MB_DATA_COMMENT)
-		{
-		/* copy comment */
-		strncpy(mb_io_ptr->new_comment,data->comment,
-			MBF_MR1ALDEO_MAXLINE);
-
-		/* print debug statements */
-		if (verbose >= 4)
-			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  New ping values:\n");
-			fprintf(stderr,"dbg4       error:      %d\n",
-				mb_io_ptr->new_error);
-			fprintf(stderr,"dbg4       comment:    %s\n",
-				mb_io_ptr->new_comment);
-			}
-		}
 
 	/* translate values to sb2100 data storage structure */
 	if (status == MB_SUCCESS
@@ -787,110 +698,6 @@ int mbr_wt_mr1aldeo(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		/* comment */
 		strncpy(data->comment,store->comment,MBF_MR1ALDEO_MAXLINE);
 
-		}
-
-	/* set kind from current ping */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR)
-		data->kind = mb_io_ptr->new_kind;
-
-	/* set times from current ping */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR)
-		{
-		/* get time */
-		data->sec = (int) mb_io_ptr->new_time_d;
-		data->usec = (int) 1000000.0*
-			(mb_io_ptr->new_time_d - data->sec);
-		}
-
-	/* check for comment to be copied from mb_io_ptr */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_COMMENT)
-		{
-		strncpy(data->comment,mb_io_ptr->new_comment,
-			MBF_MR1ALDEO_MAXLINE);
-		}
-
-	/* else check for ping data to be copied from mb_io_ptr */
-	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_DATA)
-		{
-		/* get navigation */
-		data->png_lon = mb_io_ptr->new_lon;
-		data->png_lat = mb_io_ptr->new_lat;
-
-		/* get heading */
-		data->png_compass = mb_io_ptr->new_heading;
-		/*data->png_course = mb_io_ptr->new_heading;*/
-
-		/* get port bathymetry */
-		beam_center = mb_io_ptr->beams_bath/2;
-		data->port_btycount = 0;
-		for (i=beam_center-2;i>-1;i--)
-			{
-			if (mb_io_ptr->new_beamflag[i] != MB_FLAG_NULL)
-				{
-				if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
-				    data->bath_port[data->port_btycount] 
-					= -mb_io_ptr->new_bath[i];
-				else
-				    data->bath_port[data->port_btycount] 
-					= mb_io_ptr->new_bath[i];
-				data->bath_acrosstrack_port[data->port_btycount]
-					= -mb_io_ptr->new_bath_acrosstrack[i];
-				data->port_btycount++;
-				}
-			}
-
-		/* get center beam bathymetry */
-		if (mb_io_ptr->new_beamflag[beam_center] == MB_FLAG_NULL)
-			{
-			data->png_alt = 0.0;
-			}
-		else if (mb_beam_check_flag(mb_io_ptr->new_beamflag[beam_center]))
-			{
-			data->png_alt = -mb_io_ptr->new_bath[beam_center] 
-				+ data->png_prdepth;
-			}
-		else
-			{
-			data->png_alt = mb_io_ptr->new_bath[beam_center] 
-				- data->png_prdepth;
-			}
-
-		/* get starboard bathymetry */
-		data->stbd_btycount = 0;
-		for (i=beam_center+2;i<mb_io_ptr->beams_bath;i++)
-			{
-			if (mb_io_ptr->new_beamflag[i] != MB_FLAG_NULL)
-				{
-				if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
-				    data->bath_stbd[data->stbd_btycount] 
-					= -mb_io_ptr->new_bath[i];
-				else
-				    data->bath_stbd[data->stbd_btycount] 
-					= mb_io_ptr->new_bath[i];
-				data->bath_acrosstrack_stbd[data->stbd_btycount]
-					= mb_io_ptr->new_bath_acrosstrack[i];
-				data->stbd_btycount++;
-				}
-			}
-
-		/* get port sidescan */
-		pixel_center = mb_io_ptr->pixels_ss/2;
-		for (i=0;i<data->port_sscount;i++)
-			{
-			j = pixel_center - 2 - i;
-			data->ss_port[i] 
-				= mb_io_ptr->new_ss[j];
-			}
-
-		/* get starboard sidescan */
-		for (i=0;i<data->stbd_sscount;i++)
-			{
-			j = pixel_center + 2 + i;
-			data->ss_stbd[i] 
-				= mb_io_ptr->new_ss[j];
-			}
 		}
 
 	/* write next data to file */

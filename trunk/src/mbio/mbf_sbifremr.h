@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sbifremr.h	3/29/96
- *	$Id: mbf_sbifremr.h,v 4.2 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbf_sbifremr.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Location:	152 39.061W; 34 09.150S on R/V Ewing
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.1  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -103,4 +106,3 @@ struct mbf_sbifremr_struct
 				/* latitudes of beam values */
 	char	comment[MBF_SBIFREMR_MAXLINE];
 	};
-

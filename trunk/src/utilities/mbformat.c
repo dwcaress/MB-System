@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 4.10 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbformat.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBFORMAT provides a description of the multibeam data format
+ * MBFORMAT provides a description of the swath data format
  * associated with a particular MBIO format identifier.  If
  * no format is specified, MBFORMAT will list descriptions of all
  * the currently supported formats.
@@ -22,6 +22,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.9  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -82,10 +85,10 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 4.10 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBFORMAT";
-	static char help_message[] = "MBFORMAT is an utility which identifies the multibeam data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
-	static char usage_message[] = "mbformat [-A -Fformat -L -V -H]";
+	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
+	static char usage_message[] = "mbformat [-Fformat -L -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -97,9 +100,7 @@ main (int argc, char **argv)
 	int	help;
 	int	verbose;
 	int	format;
-	int	format_num;
 	char	*message;
-	int	list_all;
 	int	list_simple;
 	int	i;
 
@@ -108,17 +109,12 @@ main (int argc, char **argv)
 	help = 0;
 	verbose = 0;
 	format = 0;
-	list_all = MB_NO;
 	list_simple = MB_NO;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaF:f:HhLlVv")) != -1)
+	while ((c = getopt(argc, argv, "F:f:HhLlVv")) != -1)
 	  switch (c) 
 		{
-		case 'A':
-		case 'a':
-			list_all = MB_YES;
-			break;
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
@@ -178,49 +174,36 @@ main (int argc, char **argv)
 	/* print out the info */
 	if (format != 0)
 		{
-		status = mb_format(verbose,&format,&format_num,&error);
-		status = mb_format_inf(verbose,format_num,&message);
+		status = mb_format(verbose,&format,&error);
+		status = mb_format_description(verbose,&format,&message,&error);
 		printf("\nMBIO data format id: %d\n",format);
 		printf("%s",message);
 		}
 	else if (list_simple == MB_NO)
 		{
 		printf("\nSupported MBIO Formats:\n");
-		for (i=1;i<=MB_FORMATS;i++)
+		for (i=10;i<=1000;i++)
 			{
-			if (supported_format_table[i] == MB_YES)
+			if ((status = mb_format_description(verbose,&i,&message,&error)) == MB_SUCCESS)
 				{
-				status = mb_format_inf(verbose,i,&message);
-				printf("\nMBIO Data Format ID:  %d\n",
-					format_table[i]);
+				printf("\nMBIO Data Format ID:  %d\n",i);
 				printf("%s",message);
 				}
 			}
-		if (list_all == MB_YES)
-			{
-			printf("\n\nUnsupported MBIO Formats which will be supported someday:\n");
-			for (i=1;i<=MB_FORMATS;i++)
-				{
-				if (supported_format_table[i] == MB_NO)
-					{
-					status = mb_format_inf(verbose,i,&message);
-					printf("\nMBIO Data Format ID:  %d\n",
-						format_table[i]);
-					printf("%s",message);
-					}
-				}
-			}
+		status = MB_SUCCESS;
+		error = MB_ERROR_NO_ERROR;
 		}
 	else 
 		{
-		for (i=1;i<=MB_FORMATS;i++)
+		for (i=10;i<=1000;i++)
 			{
-			if (supported_format_table[i] == MB_YES
-				|| list_all == MB_YES)
+			if ((status = mb_format(verbose,&i,&error)) == MB_SUCCESS)
 				{
-				printf("%d\n",format_table[i]);
+				printf("%d\n",i);
 				}
 			}
+		status = MB_SUCCESS;
+		error = MB_ERROR_NO_ERROR;
 		}
 
 	/* print output debug statements */

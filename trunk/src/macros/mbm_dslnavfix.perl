@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
-#    $Id: mbm_dslnavfix.perl,v 4.6 2000-10-03 21:42:17 caress Exp $
+#    $Id: mbm_dslnavfix.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
 #
 #    Copyright (c) 1996, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -36,10 +36,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1996
 #
 # Version:
-#   $Id: mbm_dslnavfix.perl,v 4.6 2000-10-03 21:42:17 caress Exp $
+#   $Id: mbm_dslnavfix.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.6  2000/10/03  21:42:17  caress
+# Snapshot for Dale.
+#
 # Revision 4.5  1999/12/29  00:17:55  caress
 # Release 4.6.8
 #

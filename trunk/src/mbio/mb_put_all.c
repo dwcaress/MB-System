@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	2/4/93
- *    $Id: mb_put_all.c,v 4.8 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_put_all.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.7  2000/09/30  06:32:11  caress
  * Snapshot for Dale.
  *
@@ -110,7 +113,7 @@ int mb_put_all(int verbose, char *mbio_ptr, char *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_put_all.c,v 4.8 2000-10-11 01:02:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_put_all.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -132,7 +135,7 @@ int mb_put_all(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       usevalues:  %d\n",usevalues);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
-	if (verbose >= 2 && usevalues == MB_YES && kind != 2)
+	if (verbose >= 2 && usevalues == MB_YES && kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
@@ -147,7 +150,7 @@ int mb_put_all(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
 		}
-	if (verbose >= 2 && usevalues == MB_YES && kind == 1)
+	if (verbose >= 2 && usevalues == MB_YES && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3 && nbath > 0)
@@ -177,7 +180,7 @@ int mb_put_all(int verbose, char *mbio_ptr, char *store_ptr,
 			ssacrosstrack[i],ssalongtrack[i]);
 		  }
 		}
-	if (verbose >= 2 && usevalues == MB_YES && kind == 2)
+	if (verbose >= 2 && usevalues == MB_YES && kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}
@@ -185,55 +188,17 @@ int mb_put_all(int verbose, char *mbio_ptr, char *store_ptr,
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
-	/* check numbers of beams */
-	if (nbath != mb_io_ptr->beams_bath)
-		mb_io_ptr->beams_bath = nbath;
-	if (namp != mb_io_ptr->beams_amp)
-		mb_io_ptr->beams_amp = namp;
-	if (nss != mb_io_ptr->pixels_ss)
-		mb_io_ptr->pixels_ss = nss;
-
-	/* transfer values to mb_io_ptr structure if requested */
-	if (usevalues == MB_YES && kind == MB_DATA_COMMENT)
+	/* insert values into structure if requested */
+	if (usevalues == MB_YES)
 		{
-		mb_io_ptr->new_error = MB_ERROR_NO_ERROR;
-		mb_io_ptr->new_kind = MB_DATA_COMMENT;
-		strcpy(mb_io_ptr->new_comment,comment);
+		status = mb_insert(verbose,mbio_ptr,store_ptr,
+			kind,time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
 		}
-	else if (usevalues == MB_YES)
-		{
-		mb_io_ptr->new_error = MB_ERROR_NO_ERROR;
-		mb_io_ptr->new_kind = kind;
-		if (time_i[0] == 0)
-			mb_get_date(verbose,time_d,mb_io_ptr->new_time_i);
-		else
-			for (i=0;i<7;i++)
-				mb_io_ptr->new_time_i[i] = time_i[i];
-		mb_io_ptr->new_time_d = time_d;
-		mb_io_ptr->new_lon = navlon;
-		mb_io_ptr->new_lat = navlat;
-		mb_io_ptr->new_speed = speed;
-		mb_io_ptr->new_heading = heading;
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-			{
-			mb_io_ptr->new_beamflag[i] = beamflag[i];
-			mb_io_ptr->new_bath[i] = bath[i];
-			mb_io_ptr->new_bath_acrosstrack[i] = bathacrosstrack[i];
-			mb_io_ptr->new_bath_alongtrack[i] = bathalongtrack[i];
-			}
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			mb_io_ptr->new_amp[i] = amp[i];
-			}
-		for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			{
-			mb_io_ptr->new_ss[i] = ss[i];
-			mb_io_ptr->new_ss_acrosstrack[i] = ssacrosstrack[i];
-			mb_io_ptr->new_ss_alongtrack[i] = ssalongtrack[i];
-			}
-		}
-	else
-		mb_io_ptr->new_error = MB_ERROR_IGNORE;
 
 	/* write the data */
 	status = mb_write_ping(verbose,mbio_ptr,store_ptr,error);

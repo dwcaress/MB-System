@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 4.10 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbf_sb2100rw.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.9  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -221,4 +224,3 @@ struct mbf_sb2100rw_struct
 	/* comment (TR) */
 	char	comment[MBF_SB2100RW_MAXLINE ];
 };
-

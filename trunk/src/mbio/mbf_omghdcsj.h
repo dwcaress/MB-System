@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_omghdcsj.h	3/10/99
- *	$Id: mbf_omghdcsj.h,v 4.1 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbf_omghdcsj.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	March 10, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  1999/03/31  18:29:20  caress
  * MB-System 4.6beta7
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.21 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_buffer.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,8 +21,6 @@
  *   mb_buffer_load	- load data from file into buffer
  *   mb_buffer_dump	- dump data from buffer into file
  *   mb_buffer_clear	- clear data from buffer
- *   mb_buffer_info	- get system and kind of specified record 
- *   				in buffer
  *   mb_buffer_get_next_data	- extract navigation and bathymetry/backscatter 
  *   				from next suitable record in buffer
  *   mb_buffer_get_next_nav	- extract navigation and vru 
@@ -36,13 +34,14 @@
  *   				from specified record in buffer
  *   mb_buffer_insert_nav - insert altered navigation into 
  *   				record in buffer
- *   mb_buffer_alloc	- allocate memory in buffer
- *   mb_buffer_deall	- deallocate memory in buffer
  *
  * Author:	D. W. Caress
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.20  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *
@@ -162,7 +161,7 @@
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, char **buff_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.21 2000-10-11 01:02:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -234,7 +233,7 @@ int mb_buffer_close(int verbose, char **buff_ptr, char *mbio_ptr, int *error)
 				fprintf(stderr,"dbg4       Record[%d] pointer: %d\n",i,buff->buffer[i]);
 			}
 		for (i=0;i<buff->nbuffer;i++)
-			status = mb_buffer_deall(verbose,*buff_ptr,mbio_ptr,
+			status = mb_deall(verbose,mbio_ptr,
 				&buff->buffer[i],error);
 		}
 
@@ -266,28 +265,6 @@ int mb_buffer_load(int verbose, char *buff_ptr,char *mbio_ptr,
 	char	*store_ptr;
 	int	nget;
 	int	kind;
-
-	/* mbio dummy read values */
-	int	time_i[7];
-	double	time_d;
-	double	navlon;
-	double	navlat;
-	double	speed;
-	double	heading;
-	double	distance;
-	int	nbath;
-	int	namp;
-	int	nss;
-	char	*beamflag;
-	double	*bath;
-	double	*amp;
-	double	*bathacrosstrack;
-	double	*bathalongtrack;
-	double	*ss;
-	double	*ssacrosstrack;
-	double	*ssalongtrack;
-	char	comment[256];
-
 	int	i;
 
 	/* print input debug statements */
@@ -307,18 +284,7 @@ int mb_buffer_load(int verbose, char *buff_ptr,char *mbio_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-
-	/* coopt binning arrays in mb_io_ptr structure to use
-		for dummy reading arrays - there's no binning
-		when using buffer */
-	beamflag = mb_io_ptr->beamflag;
-	bath = mb_io_ptr->bath;
-	amp = mb_io_ptr->amp;
-	bathacrosstrack = mb_io_ptr->bath_acrosstrack;
-	bathalongtrack = mb_io_ptr->bath_alongtrack;
-	ss = mb_io_ptr->ss;
-	ssacrosstrack = mb_io_ptr->ss_acrosstrack;
-	ssalongtrack = mb_io_ptr->ss_alongtrack;
+	store_ptr = mb_io_ptr->store_data;
 
 	/* can't get more than the buffer will hold */
 	nget = nwant - buff->nbuffer;
@@ -342,14 +308,8 @@ int mb_buffer_load(int verbose, char *buff_ptr,char *mbio_ptr,
 	while (*error <= MB_ERROR_NO_ERROR && *nload < nget)
 		{
 		/* read the next data record */
-		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
-			time_i,&time_d,&navlon,&navlat,&speed,
-			&heading,&distance,
-			&nbath,&namp,&nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
+		status = mb_read_ping(verbose,mbio_ptr,store_ptr,
+					&kind,error);
 
 		/* print debug statements */
 		if (verbose >= 4)
@@ -380,11 +340,11 @@ int mb_buffer_load(int verbose, char *buff_ptr,char *mbio_ptr,
 			{
 
 			/* allocate space and copy the data */
-			status = mb_buffer_alloc(verbose,buff_ptr,mbio_ptr,
+			status = mb_alloc(verbose,mbio_ptr,
 				&buff->buffer[buff->nbuffer],
 				error);
 			if (status == MB_SUCCESS)
-			status = mb_copy_record(verbose,buff_ptr,mbio_ptr,
+			status = mb_copyrecord(verbose,mbio_ptr,
 				store_ptr,
 				buff->buffer[buff->nbuffer],error);
 			if (status == MB_SUCCESS)
@@ -468,27 +428,6 @@ int mb_buffer_dump(int verbose, char *buff_ptr, char *mbio_ptr,
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
 
-	/* mbio dummy write values */
-	int	time_i[7];
-	double	time_d;
-	double	navlon;
-	double	navlat;
-	double	speed;
-	double	heading;
-	double	distance;
-	int	nbath;
-	int	namp;
-	int	nss;
-	char	*beamflag;
-	double	*bath;
-	double	*amp;
-	double	*bathacrosstrack;
-	double	*bathalongtrack;
-	double	*ss;
-	double	*ssacrosstrack;
-	double	*ssalongtrack;
-	char	comment[256];
-
 	int	i;
 
 	/* print input debug statements */
@@ -537,11 +476,6 @@ int mb_buffer_dump(int verbose, char *buff_ptr, char *mbio_ptr,
 			}
 		}
 
-	/* set beam and pixel numbers */
-	nbath = mb_io_ptr->beams_bath;
-	namp = mb_io_ptr->beams_amp;
-	nss = mb_io_ptr->pixels_ss;
-
 	/* dump records from buffer */
 	if (status == MB_SUCCESS)
 		{
@@ -560,16 +494,7 @@ int mb_buffer_dump(int verbose, char *buff_ptr, char *mbio_ptr,
 					buff->buffer_kind[i]);
 				}
 
-			status = mb_put_all(verbose,mbio_ptr,
-				buff->buffer[i],MB_NO,
-				buff->buffer_kind[i],
-				time_i,time_d,
-				navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
+			status = mb_write_ping(verbose,mbio_ptr,buff->buffer[i],error);
 
 			/* print debug statements */
 			if (verbose >= 4)
@@ -584,7 +509,7 @@ int mb_buffer_dump(int verbose, char *buff_ptr, char *mbio_ptr,
 					buff->buffer_kind[i]);
 				}
 
-			status = mb_buffer_deall(verbose,buff_ptr,mbio_ptr,
+			status = mb_deall(verbose,mbio_ptr,
 				&buff->buffer[i],error);
 			buff->buffer[i] = NULL;
 
@@ -758,7 +683,7 @@ int mb_buffer_clear(int verbose, char *buff_ptr, char *mbio_ptr,
 					buff->buffer_kind[i]);
 				}
 
-			status = mb_buffer_deall(verbose,buff_ptr,mbio_ptr,
+			status = mb_deall(verbose,mbio_ptr,
 				&buff->buffer[i],error);
 			buff->buffer[i] = NULL;
 
@@ -852,64 +777,6 @@ int mb_buffer_clear(int verbose, char *buff_ptr, char *mbio_ptr,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mb_buffer_info(int verbose, char *buff_ptr, char *mbio_ptr,
-		    int id, int *system, int *kind, int *error)
-{
-	char	*function_name = "mb_buffer_info";
-	int	status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       id:         %d\n",id);
-		}
-
-	/* get buffer structure */
-	buff = (struct mb_buffer_struct *) buff_ptr;
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-
-	/* get multibeam system id */
-	*system = mb_system_table[mb_io_ptr->format_num];
-
-	/* get record kind */
-	if (id < 0 || id >= buff->nbuffer)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_BUFFER_ID;
-		}
-	else
-		{
-		*kind = buff->buffer_kind[id];
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       system:     %d\n",*system);
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */
@@ -1056,7 +923,6 @@ int mb_buffer_get_next_nav(int verbose, char *buff_ptr, char *mbio_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	char	*store_ptr;
 	int	system;
-	int	nav_record_type;
 	int	kind;
 	char	comment[200];
 	int	found;
@@ -1080,15 +946,12 @@ int mb_buffer_get_next_nav(int verbose, char *buff_ptr, char *mbio_ptr,
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	
-	/* get type of data record required for this format */
-	nav_record_type = mb_nav_source[mb_io_ptr->format_num];
-
 	/* look for next data of the appropriate type */
 	found = MB_NO;
 	for (i=start;i<buff->nbuffer;i++)
 		{
 		if (found == MB_NO 
-			&& buff->buffer_kind[i] == nav_record_type)
+			&& buff->buffer_kind[i] == mb_io_ptr->nav_source)
 			{
 			*id = i;
 			found = MB_YES;
@@ -1201,236 +1064,14 @@ int mb_buffer_extract(int verbose, char *buff_ptr, char *mbio_ptr,
 	/* if no error then proceed */
 	if (status == MB_SUCCESS)
 		{
-
-		/* get multibeam system id */
-		system = mb_system_table[mb_io_ptr->format_num];
-
-		/* call appropriate extraction routine */
-		if (system == MB_SYS_SB)
-			{
-			status = mbsys_sb_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_HSDS)
-			{
-			status = mbsys_hsds_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_SB2000)
-			{
-			status = mbsys_sb2000_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_SB2100)
-			{
-			status = mbsys_sb2100_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_SIMRAD)
-			{
-			status = mbsys_simrad_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_SIMRAD2)
-			{
-			status = mbsys_simrad2_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_MR1)
-			{
-			status = mbsys_mr1_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_MR1B)
-			{
-			status = mbsys_mr1b_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_LDEOIH)
-			{
-			status = mbsys_ldeoih_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_RESON)
-			{
-			status = mbsys_reson_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_ELAC)
-			{
-			status = mbsys_elac_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_ELACMK2)
-			{
-			status = mbsys_elacmk2_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_HSMD)
-			{
-			status = mbsys_hsmd_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_DSL)
-			{
-			status = mbsys_dsl_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_GSF)
-			{
-			status = mbsys_gsf_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_MSTIFF)
-			{
-			status = mbsys_mstiff_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_OIC)
-			{
-			status = mbsys_oic_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_HDCS)
-			{
-			status = mbsys_hdcs_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_SINGLEBEAM)
-			{
-			status = mbsys_singlebeam_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else if (system == MB_SYS_XSE)
-			{
-			status = mbsys_xse_extract(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,speed,heading,
-				nbath,namp,nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
-			}
-		else
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_BAD_SYSTEM;
-			}
+		status = mb_extract(verbose,mbio_ptr,
+			store_ptr,kind,
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
 		}
 
 	/* print output debug statements */
@@ -1553,196 +1194,12 @@ int mb_buffer_extract_nav(int verbose, char *buff_ptr, char *mbio_ptr,
 	/* if no error then proceed */
 	if (status == MB_SUCCESS)
 		{
-
-		/* get multibeam system id */
-		system = mb_system_table[mb_io_ptr->format_num];
-
-		/* call appropriate extraction routine */
-		if (system == MB_SYS_SB)
-			{
-			status = mbsys_sb_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_HSDS)
-			{
-			status = mbsys_hsds_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_SB2000)
-			{
-			status = mbsys_sb2000_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_SB2100)
-			{
-			status = mbsys_sb2100_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_SIMRAD)
-			{
-			status = mbsys_simrad_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_SIMRAD2)
-			{
-			status = mbsys_simrad2_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_MR1)
-			{
-			status = mbsys_mr1_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_MR1B)
-			{
-			status = mbsys_mr1b_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_LDEOIH)
-			{
-			status = mbsys_ldeoih_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_RESON)
-			{
-			status = mbsys_reson_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_ELAC)
-			{
-			status = mbsys_elac_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_ELACMK2)
-			{
-			status = mbsys_elacmk2_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_HSMD)
-			{
-			status = mbsys_hsmd_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_DSL)
-			{
-			status = mbsys_dsl_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_GSF)
-			{
-			status = mbsys_gsf_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_MSTIFF)
-			{
-			status = mbsys_mstiff_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_OIC)
-			{
-			status = mbsys_oic_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_HDCS)
-			{
-			status = mbsys_hdcs_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_SINGLEBEAM)
-			{
-			status = mbsys_singlebeam_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else if (system == MB_SYS_XSE)
-			{
-			status = mbsys_xse_extract_nav(verbose,mbio_ptr,
-				store_ptr,kind,
-				time_i,time_d,navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave, 
-				error);
-			}
-		else
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_BAD_SYSTEM;
-			}
+		status = mb_extract_nav(verbose,mbio_ptr,
+			store_ptr,kind,
+			time_i,time_d,navlon,navlat,
+			speed,heading,draft,
+			roll,pitch,heave, 
+			error);
 		}
 
 	/* print output debug statements */
@@ -1869,215 +1326,14 @@ int mb_buffer_insert(int verbose, char *buff_ptr, char *mbio_ptr,
 		store_ptr = buff->buffer[id];
 		}
 
-	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format_num];
-
-	/* call appropriate insertion routine */
-	if (system == MB_SYS_SB)
-		{
-		status = mbsys_sb_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_HSDS)
-		{
-		status = mbsys_hsds_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_SB2000)
-		{
-		status = mbsys_sb2000_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_SB2100)
-		{
-		status = mbsys_sb2100_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_SIMRAD)
-		{
-		status = mbsys_simrad_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_SIMRAD2)
-		{
-		status = mbsys_simrad2_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_MR1)
-		{
-		status = mbsys_mr1_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_MR1B)
-		{
-		status = mbsys_mr1b_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_LDEOIH)
-		{
-		status = mbsys_ldeoih_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_RESON)
-		{
-		status = mbsys_reson_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_ELAC)
-		{
-		status = mbsys_elac_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_ELACMK2)
-		{
-		status = mbsys_elacmk2_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_HSMD)
-		{
-		status = mbsys_hsmd_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_DSL)
-		{
-		status = mbsys_dsl_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_GSF)
-		{
-		status = mbsys_gsf_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_MSTIFF)
-		{
-		status = mbsys_mstiff_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_OIC)
-		{
-		status = mbsys_oic_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_HDCS)
-		{
-		status = mbsys_hdcs_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_SINGLEBEAM)
-		{
-		status = mbsys_singlebeam_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else if (system == MB_SYS_XSE)
-		{
-		status = mbsys_xse_insert(verbose,mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,speed,heading,
-			nbath,namp,nss,
-			beamflag,bath,amp,
-			bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,error);
-		}
-	else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	status = mb_insert(verbose,mbio_ptr,store_ptr,
+		buff->buffer_kind[id], 
+		time_i,time_d,navlon,navlat,speed,heading,
+		nbath,namp,nss,
+		beamflag,bath,amp,
+		bathacrosstrack,bathalongtrack,
+		ss,ssacrosstrack,ssalongtrack,
+		comment,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2153,195 +1409,12 @@ int mb_buffer_insert_nav(int verbose, char *buff_ptr, char *mbio_ptr,
 		store_ptr = buff->buffer[id];
 		}
 
-	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format_num];
-
-	/* call appropriate insertion routine */
-	if (system == MB_SYS_SB)
-		{
-		status = mbsys_sb_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_HSDS)
-		{
-		status = mbsys_hsds_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_SB2000)
-		{
-		status = mbsys_sb2000_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_SB2100)
-		{
-		status = mbsys_sb2100_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_SIMRAD)
-		{
-		status = mbsys_simrad_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_SIMRAD2)
-		{
-		status = mbsys_simrad2_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_MR1)
-		{
-		status = mbsys_mr1_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_MR1B)
-		{
-		status = mbsys_mr1b_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_LDEOIH)
-		{
-		status = mbsys_ldeoih_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_RESON)
-		{
-		status = mbsys_reson_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_ELAC)
-		{
-		status = mbsys_elac_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_ELACMK2)
-		{
-		status = mbsys_elacmk2_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_HSMD)
-		{
-		status = mbsys_hsmd_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_DSL)
-		{
-		status = mbsys_dsl_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_GSF)
-		{
-		status = mbsys_gsf_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_MSTIFF)
-		{
-		status = mbsys_mstiff_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_OIC)
-		{
-		status = mbsys_oic_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_HDCS)
-		{
-		status = mbsys_hdcs_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_SINGLEBEAM)
-		{
-		status = mbsys_singlebeam_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else if (system == MB_SYS_XSE)
-		{
-		status = mbsys_xse_insert_nav(verbose,
-			mbio_ptr,store_ptr,
-			time_i,time_d,navlon,navlat,
-			speed,heading,draft,
-			roll,pitch,heave, 
-			error);
-		}
-	else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	status = mb_insert_nav(verbose,
+		mbio_ptr,store_ptr,
+		time_i,time_d,navlon,navlat,
+		speed,heading,draft,
+		roll,pitch,heave, 
+		error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2403,420 +1476,6 @@ int mb_buffer_get_ptr(int verbose, char *buff_ptr, char *mbio_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mb_buffer_alloc(int verbose, char *buff_ptr, char *mbio_ptr,
-		    char **store_ptr, int *error)
-{
-	char	*function_name = "mb_buffer_alloc";
-	int	status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	int	system;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		}
-
-	/* get buffer structure */
-	buff = (struct mb_buffer_struct *) buff_ptr;
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-
-	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format_num];
-
-	/* call appropriate memory allocation routine */
-	if (system == MB_SYS_SB)
-		{
-		status = mbsys_sb_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_HSDS)
-		{
-		status = mbsys_hsds_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SB2000)
-		{
-		status = mbsys_sb2000_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SB2100)
-		{
-		status = mbsys_sb2100_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SIMRAD)
-		{
-		status = mbsys_simrad_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SIMRAD2)
-		{
-		status = mbsys_simrad2_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_MR1)
-		{
-		status = mbsys_mr1_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_MR1B)
-		{
-		status = mbsys_mr1b_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_LDEOIH)
-		{
-		status = mbsys_ldeoih_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_RESON)
-		{
-		status = mbsys_reson_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_ELAC)
-		{
-		status = mbsys_elac_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_ELACMK2)
-		{
-		status = mbsys_elacmk2_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_HSMD)
-		{
-		status = mbsys_hsmd_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_DSL)
-		{
-		status = mbsys_dsl_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_GSF)
-		{
-		status = mbsys_gsf_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_MSTIFF)
-		{
-		status = mbsys_mstiff_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_OIC)
-		{
-		status = mbsys_oic_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_HDCS)
-		{
-		status = mbsys_hdcs_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SINGLEBEAM)
-		{
-		status = mbsys_singlebeam_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_XSE)
-		{
-		status = mbsys_xse_alloc(verbose,mbio_ptr,store_ptr,error);
-		}
-	else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mb_buffer_deall(int verbose, char *buff_ptr, char *mbio_ptr,
-			char **store_ptr, int *error)
-{
-	char	*function_name = "mb_buffer_deall";
-	int	status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	int	system;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
-		}
-
-	/* get buffer structure */
-	buff = (struct mb_buffer_struct *) buff_ptr;
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-
-	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format_num];
-
-	/* call appropriate memory deallocation routine */
-	if (system == MB_SYS_SB)
-		{
-		status = mbsys_sb_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_HSDS)
-		{
-		status = mbsys_hsds_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SB2000)
-		{
-		status = mbsys_sb2000_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SB2100)
-		{
-		status = mbsys_sb2100_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SIMRAD)
-		{
-		status = mbsys_simrad_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SIMRAD2)
-		{
-		status = mbsys_simrad2_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_MR1)
-		{
-		status = mbsys_mr1_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_MR1B)
-		{
-		status = mbsys_mr1b_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_LDEOIH)
-		{
-		status = mbsys_ldeoih_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_RESON)
-		{
-		status = mbsys_reson_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_ELAC)
-		{
-		status = mbsys_elac_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_ELACMK2)
-		{
-		status = mbsys_elacmk2_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_HSMD)
-		{
-		status = mbsys_hsmd_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_DSL)
-		{
-		status = mbsys_dsl_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_GSF)
-		{
-		status = mbsys_gsf_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_MSTIFF)
-		{
-		status = mbsys_mstiff_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_OIC)
-		{
-		status = mbsys_oic_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_HDCS)
-		{
-		status = mbsys_hdcs_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_SINGLEBEAM)
-		{
-		status = mbsys_singlebeam_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else if (system == MB_SYS_XSE)
-		{
-		status = mbsys_xse_deall(verbose,mbio_ptr,store_ptr,error);
-		}
-	else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mb_copy_record(int verbose, char *buff_ptr, char *mbio_ptr,
-		    char *store_ptr, char *copy_ptr, int *error)
-{
-	char	*function_name = "mb_copy_record";
-	int	status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	int	system;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %d\n",copy_ptr);
-		}
-
-	/* get buffer structure */
-	buff = (struct mb_buffer_struct *) buff_ptr;
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-
-	/* get multibeam system id */
-	system = mb_system_table[mb_io_ptr->format_num];
-
-	/* call appropriate memory copy routine */
-	if (system == MB_SYS_SB)
-		{
-		status = mbsys_sb_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_HSDS)
-		{
-		status = mbsys_hsds_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_SB2000)
-		{
-		status = mbsys_sb2000_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_SB2100)
-		{
-		status = mbsys_sb2100_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_SIMRAD)
-		{
-		status = mbsys_simrad_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_SIMRAD2)
-		{
-		status = mbsys_simrad2_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_MR1)
-		{
-		status = mbsys_mr1_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_MR1B)
-		{
-		status = mbsys_mr1b_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_LDEOIH)
-		{
-		status = mbsys_ldeoih_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_RESON)
-		{
-		status = mbsys_reson_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_ELAC)
-		{
-		status = mbsys_elac_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_ELACMK2)
-		{
-		status = mbsys_elacmk2_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_HSMD)
-		{
-		status = mbsys_hsmd_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_DSL)
-		{
-		status = mbsys_dsl_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_GSF)
-		{
-		status = mbsys_gsf_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_MSTIFF)
-		{
-		status = mbsys_mstiff_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_OIC)
-		{
-		status = mbsys_oic_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_HDCS)
-		{
-		status = mbsys_hdcs_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_SINGLEBEAM)
-		{
-		status = mbsys_singlebeam_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else if (system == MB_SYS_XSE)
-		{
-		status = mbsys_xse_copy(verbose,mbio_ptr,
-			store_ptr,copy_ptr,error);
-		}
-	else
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

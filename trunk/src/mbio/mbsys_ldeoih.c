@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 4.15 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.14  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -124,7 +127,7 @@
 int mbsys_ldeoih_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_ldeoih.c,v 4.15 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_ldeoih.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_ldeoih_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -163,8 +166,12 @@ int mbsys_ldeoih_alloc(int verbose, char *mbio_ptr, char **store_ptr,
 	store->msec = 0;
 	store->heading = 0;
 	store->speed = 0;
+	store->beams_bath = 0;
 	store->beams_amp = 0;
 	store->pixels_ss = 0;
+	store->beams_bath_alloc = 0;
+	store->beams_amp_alloc = 0;
+	store->pixels_ss_alloc = 0;
 	store->beamflag = NULL;
 	store->bath = NULL;
 	store->bath_acrosstrack = NULL;
@@ -256,7 +263,6 @@ int mbsys_ldeoih_extract(int verbose, char *mbio_ptr, char *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	int	time_j[5];
-	int	id;
 	double	depthscale;
 	double	distscale;
 	int	i;
@@ -324,7 +330,7 @@ int mbsys_ldeoih_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		*heading = store->heading*0.0054932;
 
 		/* set speed to zero */
-		*speed = 0.0;
+		*speed = 0.01 * store->speed;
 
 		/* read distance, depth, and backscatter 
 			values into storage arrays */
@@ -487,7 +493,7 @@ int mbsys_ldeoih_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -500,9 +506,7 @@ int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	int	kind;
 	int	time_j[5];
-	int	id;
 	double	depthscale;
 	double	distscale;
 	int	i;
@@ -516,6 +520,10 @@ int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -528,6 +536,9 @@ int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
 			nbath);
 		if (verbose >= 3) 
@@ -545,7 +556,11 @@ int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
-		fprintf(stderr,"dbg2       comment:    %s\n",comment);
+		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
 		}
 
 	/* get mbio descriptor */
@@ -553,6 +568,9 @@ int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
+
+	/* set data kind */
+	store->kind = kind;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -582,6 +600,7 @@ int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			into data structure */
 		depthscale = 0.001 * store->depth_scale;
 		distscale = 0.001 * store->distance_scale;
+		store->beams_bath = nbath;
 		for (i=0;i<nbath;i++)
 			{
 			store->beamflag[i] = beamflag[i];
@@ -591,10 +610,12 @@ int mbsys_ldeoih_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			store->bath_alongtrack[i] = bathalongtrack[i]
 							/distscale;
 			}
+		store->beams_amp = namp;
 		for (i=0;i<namp;i++)
 			{
 			store->amp[i] = amp[i];
 			}
+		store->pixels_ss = nss;
 		for (i=0;i<nss;i++)
 			{
 			store->ss[i] = ss[i];
@@ -932,7 +953,7 @@ int mbsys_ldeoih_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	int	time_j[5];
-	int	id;
+	double	depthscale;
 	int	i;
 
 	/* print input debug statements */
@@ -998,10 +1019,11 @@ int mbsys_ldeoih_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		*heading = store->heading*0.0054932;
 
 		/* set speed to zero */
-		*speed = 0.0;
+		*speed = 0.01 * store->speed;
 
 		/* set draft to zero */
-		*draft = 0.0;
+		depthscale = 0.001 * store->depth_scale;
+		*draft = depthscale * store->transducer_depth;
 
 		/* get roll pitch and heave */
 		*roll = 0.0;
@@ -1124,7 +1146,7 @@ int mbsys_ldeoih_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	struct mbsys_ldeoih_struct *store;
 	int	kind;
 	int	time_j[5];
-	int	id;
+	double	depthscale;
 	int	i;
 
 	/* print input debug statements */
@@ -1183,6 +1205,13 @@ int mbsys_ldeoih_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 
 		/* get heading (360 degrees = 65536) */
 		store->heading = 182.044444*heading;
+
+		/* get speed */
+		store->speed = 100 * speed;
+
+		/* get draft */
+		depthscale = 0.001 * store->depth_scale;
+		store->transducer_depth = draft / depthscale;
 
 		/* get roll pitch and heave */
 		}

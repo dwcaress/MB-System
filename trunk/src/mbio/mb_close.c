@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 4.12 2000-10-11 01:02:30 caress Exp $
+ *	$Id: mb_close.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.11  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *
@@ -118,7 +121,7 @@
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, char **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 4.12 2000-10-11 01:02:30 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -138,10 +141,10 @@ int mb_close(int verbose, char **mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
 
 	/* deallocate format dependent structures */
-	status = mb_mem_deall(verbose,*mbio_ptr,error);
+	status = (*mb_io_ptr->mb_io_format_free)(verbose,*mbio_ptr,error);
 
 	/* deallocate memory for arrays within the mbio descriptor */
-	if (mb_filetype_table[mb_io_ptr->format_num] == MB_FILETYPE_XDR)
+	if (mb_io_ptr->filetype == MB_FILETYPE_XDR)
 		status = mb_free(verbose,&mb_io_ptr->xdrs,error);
 	if (mb_io_ptr->hdr_comment != NULL)
 		status = mb_free(verbose,&mb_io_ptr->hdr_comment,error);
@@ -166,8 +169,8 @@ int mb_close(int verbose, char **mbio_ptr, int *error)
 	status = mb_free(verbose,&mb_io_ptr->new_ss_alongtrack,error);
 
 	/* close the files if normal */
-	if (mb_filetype_table[mb_io_ptr->format_num] == MB_FILETYPE_NORMAL
-	    || mb_filetype_table[mb_io_ptr->format_num] == MB_FILETYPE_XDR)
+	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL
+	    || mb_io_ptr->filetype == MB_FILETYPE_XDR)
 	    {
 	    if (mb_io_ptr->mbfp != NULL)
 		    fclose(mb_io_ptr->mbfp);
@@ -178,7 +181,7 @@ int mb_close(int verbose, char **mbio_ptr, int *error)
 	    }
 	
 	/* else if gsf then use gsfClose */
-	else if (mb_filetype_table[mb_io_ptr->format_num] == MB_FILETYPE_GSF)
+	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
 	    gsfClose((int) mb_io_ptr->mbfp);
 	    }

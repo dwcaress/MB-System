@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
- *	$Id: mbr_oicgeoda.c,v 4.4 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbr_oicgeoda.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.3  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -62,10 +65,182 @@
 #include "../../include/mb_swap.h"
 #endif
 
+/* essential function prototypes */
+int mbr_info_oicgeoda(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error);
+int mbr_alm_oicgeoda(int verbose, char *mbio_ptr, int *error);
+int mbr_dem_oicgeoda(int verbose, char *mbio_ptr, int *error);
+int mbr_rt_oicgeoda(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_wt_oicgeoda(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+
+/*--------------------------------------------------------------------*/
+int mbr_info_oicgeoda(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int (**format_alloc)(), 
+			int (**format_free)(), 
+			int (**store_alloc)(), 
+			int (**store_free)(), 
+			int (**read_ping)(), 
+			int (**write_ping)(), 
+			int (**extract)(), 
+			int (**insert)(), 
+			int (**extract_nav)(), 
+			int (**insert_nav)(), 
+			int (**altitude)(), 
+			int (**insert_altitude)(), 
+			int (**ttimes)(), 
+			int (**copyrecord)(), 
+			int *error)
+{
+	static char res_id[]="$Id: mbr_oicgeoda.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	char	*function_name = "mbr_info_oicgeoda";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* set format info parameters */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*system = MB_SYS_OIC;
+	*beams_bath_max = 1024;
+	*beams_amp_max = 256;
+	*pixels_ss_max = 2048;
+	strncpy(format_name, "OICGEODA", MB_NAME_LENGTH);
+	strncpy(system_name, "OIC", MB_NAME_LENGTH);
+	strncpy(format_description, "Format name:          MBF_OICGEODA\nInformal Description: OIC swath sonar format\nAttributes:           variable beam bathymetry and\n                      amplitude, variable pixel sidescan, binary,\n		      Oceanic Imaging Consultants\n", MB_DESCRIPTION_LENGTH);
+	*numfile = 1;
+	*filetype = MB_FILETYPE_NORMAL;
+	*variable_beams = MB_YES;
+	*traveltime = MB_YES;
+	*beam_flagging = MB_YES;
+	*nav_source = MB_DATA_DATA;
+	*heading_source = MB_DATA_DATA;
+	*vru_source = MB_DATA_DATA;
+	*beamwidth_xtrack = 0.0;
+	*beamwidth_ltrack = 0.0;
+
+	/* set format and system specific function pointers */
+	*format_alloc = &mbr_alm_oicgeoda;
+	*format_free = &mbr_dem_oicgeoda; 
+	*store_alloc = &mbsys_oic_alloc; 
+	*store_free = &mbsys_oic_deall; 
+	*read_ping = &mbr_rt_oicgeoda; 
+	*write_ping = &mbr_wt_oicgeoda; 
+	*extract = &mbsys_oic_extract; 
+	*insert = &mbsys_oic_insert; 
+	*extract_nav = &mbsys_oic_extract_nav; 
+	*insert_nav = &mbsys_oic_insert_nav; 
+	*altitude = &mbsys_oic_altitude; 
+	*insert_altitude = &mbsys_oic_insert_altitude; 
+	*ttimes = &mbsys_oic_ttimes; 
+	*copyrecord = &mbsys_oic_copy; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",*system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",*pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",*numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",*filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
+		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_oicgeoda(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_oicgeoda.c,v 4.4 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbr_oicgeoda.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbr_alm_oicgeoda";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1121,162 +1296,6 @@ int mbr_rt_oicgeoda(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			data->ssalongtrack[i]);
 		}
 	    }
-	
-	/* translate values to current ping variables 
-		in mbio descriptor structure */
-	if (status == MB_SUCCESS 
-		&& dataplus->kind == MB_DATA_DATA)
-	    {
-	    /* get time */
-	    mb_io_ptr->new_time_d = header->sec + 0.000001 * header->usec;
-	    mb_get_date(verbose,mb_io_ptr->new_time_d,mb_io_ptr->new_time_i);
-
-	    /* get navigation */
-	    if (header->nav_type != OIC_NAV_LONLAT)
-	      {
-	      mb_io_ptr->new_lon = header->ship_x;
-	      mb_io_ptr->new_lat = header->ship_y;
-	      }
-	    else if (header->nav_type == OIC_NAV_LONLAT)
-	      {
-	      mb_io_ptr->new_lon = header->fish_x;
-	      mb_io_ptr->new_lat = header->fish_y;
-	      if (mb_io_ptr->lonflip < 0)
-		{
-		if (mb_io_ptr->new_lon > 0.) 
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-		else if (mb_io_ptr->new_lon < -360.)
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-		}
-	      else if (mb_io_ptr->lonflip == 0)
-		{
-		if (mb_io_ptr->new_lon > 180.) 
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-		else if (mb_io_ptr->new_lon < -180.)
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-		}
-	      else
-		{
-		if (mb_io_ptr->new_lon > 360.) 
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
-		else if (mb_io_ptr->new_lon < 0.)
-			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
-		}
-	      }
-
-	    /* get heading */
-	    mb_io_ptr->new_heading = header->fish_heading;
-
-	    /* get speed */
-	    mb_io_ptr->new_speed = 3.6 * header->ship_speed;
-
-	    /* read depth and beam location values into storage arrays */
-	    mb_io_ptr->beams_bath = header->beams_bath;
-	    for (i=0;i<mb_io_ptr->beams_bath;i++)
-		{
-		if (data->bath[i] < header->fish_depth)
-		    mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
-		else
-		    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
-		mb_io_ptr->new_bath[i] = data->bath[i];
-		mb_io_ptr->new_bath_acrosstrack[i] = 
-			data->bathacrosstrack[i];
-		mb_io_ptr->new_bath_alongtrack[i] = 
-			data->bathalongtrack[i];
-		}
-
-	    /* read amplitude values into storage arrays */
-	    mb_io_ptr->beams_amp = header->beams_amp;
-	    for (i=0;i<mb_io_ptr->beams_amp;i++)
-		{
-		mb_io_ptr->new_amp[i] = data->amp[i];
-		}
-
-	    /* read sidescan and pixel location values into storage arrays */
-	    mb_io_ptr->pixels_ss = header->pixels_ss;
-	    for (i=0;i<mb_io_ptr->pixels_ss;i++)
-		{
-		mb_io_ptr->new_ss[i] = data->ss[i];
-		mb_io_ptr->new_ss_acrosstrack[i] =  data->ssacrosstrack[i];
-		mb_io_ptr->new_ss_alongtrack[i] = data->ssalongtrack[i];
-		}
-
-	    /* print debug statements */
-	    if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg4  New ping values:\n");
-		fprintf(stderr,"dbg4       error:      %d\n",
-			mb_io_ptr->new_error);
-		fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-			mb_io_ptr->new_time_i[0]);
-		fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-			mb_io_ptr->new_time_i[1]);
-		fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-			mb_io_ptr->new_time_i[2]);
-		fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-			mb_io_ptr->new_time_i[3]);
-		fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-			mb_io_ptr->new_time_i[4]);
-		fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-			mb_io_ptr->new_time_i[5]);
-		fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-			mb_io_ptr->new_time_i[6]);
-		fprintf(stderr,"dbg4       time_d:     %f\n",
-			mb_io_ptr->new_time_d);
-		fprintf(stderr,"dbg4       longitude:  %f\n",
-			mb_io_ptr->new_lon);
-		fprintf(stderr,"dbg4       latitude:   %f\n",
-			mb_io_ptr->new_lat);
-		fprintf(stderr,"dbg4       speed:      %f\n",
-			mb_io_ptr->new_speed);
-		fprintf(stderr,"dbg4       heading:    %f\n",
-			mb_io_ptr->new_heading);
-		fprintf(stderr,"dbg4       beams_bath: %d\n",
-			mb_io_ptr->beams_bath);
-		fprintf(stderr,"dbg4       beams_amp:  %d\n",
-			mb_io_ptr->beams_amp);
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
-		  fprintf(stderr,"dbg4       beam:%d  flag:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,mb_io_ptr->new_beamflag[i],
-			mb_io_ptr->new_bath[i],
-			mb_io_ptr->new_bath_acrosstrack[i],
-			mb_io_ptr->new_bath_alongtrack[i]);
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-		  fprintf(stderr,"dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,mb_io_ptr->new_amp[i],
-			mb_io_ptr->new_bath_acrosstrack[i],
-			mb_io_ptr->new_bath_alongtrack[i]);
-		fprintf(stderr,"dbg4       pixels_ss:  %d\n",
-			mb_io_ptr->pixels_ss);
-		  fprintf(stderr,"dbg4       pixel:%d  ss:%f acrosstrack:%f  alongtrack:%f\n",
-			i,mb_io_ptr->new_ss[i],
-			mb_io_ptr->new_ss_acrosstrack[i],
-			mb_io_ptr->new_ss_alongtrack[i]);
-		}
-
-	    /* done translating values */
-
-	    }
-	else if (status == MB_SUCCESS 
-		&& dataplus->kind == MB_DATA_COMMENT)
-	    {
-	    /* copy comment */
-	    strncpy(mb_io_ptr->new_comment,comment,MBF_OICGEODA_MAX_COMMENT);
-
-	    /* print debug statements */
-	    if (verbose >= 4)
-		    {
-		    fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
-			    function_name);
-		    fprintf(stderr,"dbg4  New ping values:\n");
-		    fprintf(stderr,"dbg4       error:      %d\n",
-			    mb_io_ptr->new_error);
-		    fprintf(stderr,"dbg4       comment:    %s\n",
-			    mb_io_ptr->new_comment);
-		    }
-	    }
 
 	/* translate values to data storage structure */
 	if (status == MB_SUCCESS
@@ -1683,125 +1702,6 @@ int mbr_wt_oicgeoda(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	    for (i=0;i<header->client_size;i++)
 		dataplus->client[i] = store->client[i];
 	    }
-
-	/* set kind from current ping */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR)
-		dataplus->kind = mb_io_ptr->new_kind;
-
-	/* check for comment */
-	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-		&& mb_io_ptr->new_kind == MB_DATA_COMMENT)
-	    {
-	    dataplus->kind = MB_DATA_COMMENT;
-
-	    /* copy comment */
-	    strncpy(comment,mb_io_ptr->new_comment,MBF_OICGEODA_MAX_COMMENT);
-	    header->client_size = strlen(comment) + strlen(comment) % 2;
-	    header->type = OIC_ID_COMMENT;
-	    }
-
-	/* else translate current ping data to oicgeoda data structure */
-	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
-	    && mb_io_ptr->new_kind == MB_DATA_DATA)
-	    {
-	    dataplus->kind = MB_DATA_DATA;
-
-	    /* get time */
-	    header->sec = (int) mb_io_ptr->new_time_d;
-	    header->usec = (int) (1000000 * (mb_io_ptr->new_time_d - header->sec));
-
-	    /* get navigation */
-	    header->nav_type = OIC_NAV_LONLAT;
-	    header->fish_x = mb_io_ptr->new_lon;
-	    header->fish_y = mb_io_ptr->new_lat;
-
-	    /* get heading */
-	    header->fish_heading = mb_io_ptr->new_heading;
-
-	    /* get speed */
-	    header->ship_speed = mb_io_ptr->new_speed / 3.6;
-
-	    /* set numbers of beams and sidescan */
-	    header->beams_bath = mb_io_ptr->beams_bath;
-	    header->beams_amp = mb_io_ptr->beams_amp;
-	    header->pixels_ss = mb_io_ptr->pixels_ss;
-
-	    /* depths and sidescan */
-	    if (header->beams_bath > data->beams_bath_alloc
-		|| data->bath == NULL
-		|| data->bathacrosstrack == NULL
-		|| data->bathalongtrack == NULL
-		|| data->tt == NULL
-		|| data->angle == NULL)
-		{
-		data->beams_bath_alloc = header->beams_bath;
-		if (data->bath != NULL)
-		    status = mb_free(verbose, &(data->bath), error);
-		if (data->bathacrosstrack != NULL)
-		    status = mb_free(verbose, &(data->bathacrosstrack), error);
-		if (data->bathalongtrack != NULL)
-		    status = mb_free(verbose, &(data->bathalongtrack), error);
-		if (data->tt != NULL)
-		    status = mb_free(verbose, &(data->tt), error);
-		if (data->angle != NULL)
-		    status = mb_free(verbose, &(data->angle), error);
-		status = mb_malloc(verbose,data->beams_bath_alloc * sizeof(float), 
-				    &(data->bath),error);
-		status = mb_malloc(verbose,data->beams_bath_alloc * sizeof(float), 
-				    &(data->bathacrosstrack),error);
-		status = mb_malloc(verbose,data->beams_bath_alloc * sizeof(float), 
-				    &(data->bathalongtrack),error);
-		status = mb_malloc(verbose,data->beams_bath_alloc * sizeof(float), 
-				    &(data->tt),error);
-		status = mb_malloc(verbose,data->beams_bath_alloc * sizeof(float), 
-				    &(data->angle),error);
-		}
-	    if (header->beams_amp > data->beams_amp_alloc
-		|| data->amp == NULL)
-		{
-		data->beams_amp_alloc = header->beams_amp;
-		if (data->amp != NULL)
-		    status = mb_free(verbose, &(data->amp), error);
-		status = mb_malloc(verbose,data->beams_amp_alloc * sizeof(float), 
-				    &(data->amp),error);
-		}
-	    if (header->pixels_ss > data->pixels_ss_alloc
-		|| data->ss == NULL
-		|| data->ssacrosstrack == NULL
-		|| data->ssalongtrack == NULL)
-		{
-		data->pixels_ss_alloc = header->pixels_ss;
-		if (data->ss != NULL)
-		    status = mb_free(verbose, &(data->ss), error);
-		if (data->ssacrosstrack != NULL)
-		    status = mb_free(verbose, &(data->ssacrosstrack), error);
-		if (data->ssalongtrack != NULL)
-		    status = mb_free(verbose, &(data->ssalongtrack), error);
-		status = mb_malloc(verbose,data->pixels_ss_alloc * sizeof(float), 
-				    &(data->ss),error);
-		status = mb_malloc(verbose,data->pixels_ss_alloc * sizeof(float), 
-				    &(data->ssacrosstrack),error);
-		status = mb_malloc(verbose,data->pixels_ss_alloc * sizeof(float), 
-				    &(data->ssalongtrack),error);
-		}
-	    for (i=0;i<header->beams_bath;i++)
-		{
-		data->bath[i] = mb_io_ptr->new_bath[i];
-		data->bathacrosstrack[i] = mb_io_ptr->new_bath_acrosstrack[i];
-		data->bathalongtrack[i] = mb_io_ptr->new_bath_alongtrack[i];
-		}
-	    for (i=0;i<header->beams_amp;i++)
-		{
-		data->amp[i] = mb_io_ptr->new_amp[i];
-		}
-	    for (i=0;i<header->pixels_ss;i++)
-		{
-		data->ss[i] = mb_io_ptr->new_ss[i];
-		data->ssacrosstrack[i] = mb_io_ptr->new_ss_acrosstrack[i];
-		data->ssalongtrack[i] = mb_io_ptr->new_ss_alongtrack[i];
-		}
-	    }
-
 
 	/* print debug statements */
 	if (verbose >= 5)

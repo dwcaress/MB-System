@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 4.6 2000-10-11 01:06:03 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.0 2000-12-01 22:56:47 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/10/11  01:06:03  caress
+ * Convert to ANSI C
+ *
  * Revision 4.5  2000/09/30  07:05:18  caress
  * Snapshot for Dale.
  *
@@ -147,6 +150,7 @@ double	maxdepth_gui;
 double	velrange_gui;
 double	resrange_gui;
 int	format_gui;
+int	nload;
 
 /* file opening parameters */
 #define	MBVT_IO_NONE			0
@@ -583,10 +587,19 @@ do_mbvelocity_init(int argc, char **argv)
     /* initialize mbvelocitytool proper */
     status = mbvt_init(argc,argv);
     
+    /* set the controls */
     do_set_controls();
+
+    /* initialize some labels */
+    strcpy(message_str, "No display SVPs loaded...");
+    set_label_string(label_status_display, message_str);
+    strcpy(message_str, "No editable SVP loaded...");
+    set_label_string(label_status_edit, message_str);
+    strcpy(message_str, "No swath sonar data loaded...");
+    set_label_string(label_status_mb, message_str);
     
     /* finally allow expose plots */
-    expose_plot_ok = False;
+    expose_plot_ok = True;
 }
 
 /*--------------------------------------------------------------------*/
@@ -796,8 +809,7 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 	    /* reset status message */
 	    if (status == 1)
 	      {
-	      strcpy(message_str, "Opened Display Sound Velocity Profile: ");
-	      strcat(message_str, input_file);
+	      sprintf(message_str, "Loaded display SVP from: %s", input_file);
 	      set_label_string(label_status_display, 
 			message_str);
 	      }
@@ -811,8 +823,7 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 	    /* reset status message */
 	    if (status == 1)
 	      {
-	       strcpy(message_str, "Opened Editable Sound Velocity Profile: ");
-	       strcat(message_str, input_file);
+	       sprintf(message_str, "Loaded editable SVP from: %s", input_file);
 	       set_label_string(label_status_edit, 
 			message_str);
 	      }
@@ -826,8 +837,7 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 	    /* reset status message */
 	    if (status == 1)
 	      {
-	       strcpy(message_str, "Saved Editable Sound Velocity Profile: ");
-	       strcat(message_str, input_file);
+	       sprintf(message_str, "Saved editable SVP to: %s", input_file);
 	       set_label_string(label_status_edit, 
 			message_str);
 	      }
@@ -842,20 +852,22 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 	    sscanf(format_text, "%d", &format_gui);
 
 	    /* open file */
-	    status = mbvt_open_swath_file(input_file,format_gui);
+	    status = mbvt_open_swath_file(input_file,format_gui, &nload);
 
 	    /* reset status message */
 	    if (status == 1)
 	      {
-	       strcpy(message_str, "Opened Swath Sonar Data File: ");
-	       strcat(message_str, input_file);
-	       set_label_string(label_status_mb, 
+	      sprintf(message_str, "Read %d pings from swath file: %s", 
+			    nload, input_file);
+	      set_label_string(label_status_mb, 
 			message_str);
+	      XtVaSetValues(pushButton_save_svpfile, 
+			XmNsensitive, True,
+			NULL);
 	      }
 	    if (status == 1 && edit_gui != 1)
 	      {
-	       strcpy(message_str, "Opened Editable Sound Velocity Profile: ");
-	       strcat(message_str, "no filename");
+	       sprintf(message_str, "Loaded default editable SVP");
 	       set_label_string(label_status_edit, 
 			message_str);
 	      }
@@ -884,9 +896,8 @@ do_new_profile( Widget w, XtPointer client_data, XtPointer call_data)
     /* get new edit velocity profile */
     mbvt_new_edit_profile();
 
-    strcpy(message_str, "Reset default editable Sound Velocity Profile");
-    set_label_string(label_status_edit, 
-			message_str);
+    sprintf(message_str, "Loaded default editable SVP");
+    set_label_string(label_status_edit, message_str);
 
     /* replot everything */
     do_set_controls();
@@ -935,20 +946,20 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
       /* Check for mouse pressed and not pressed and released. */
       if(event->xany.type == ButtonPress)
       {
-	  /* If left mouse button is pushed then pick, erase or restore. */
+	  /* If left mouse button is pushed then move nearest svp node. */
 	  if(event->xbutton.button == 1)
 	  {
 	    x_loc = event->xbutton.x;
 	    y_loc = event->xbutton.y;
     
-	    status = mbvt_action_mouse_down(
+	    status = mbvt_action_select_node(
 			    x_loc,y_loc);
 
 	    doit = True;
 	    ring_bell = False;
 	    while (doit == True)
 		    {
-		    status = mbvt_action_mouse_drag(
+		    status = mbvt_action_drag_node(
 			    x_loc,y_loc);
 		    if (status == 0 && ring_bell == False) 
 			    {
@@ -976,7 +987,39 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 	      /* replot graph */
 	      mbvt_plot();
 
-	    }; /* end of left mouse pressed */
+	    } /* end of left mouse pressed */
+
+	  /* If middle mouse button is pushed then add svp node. */
+	  else if(event->xbutton.button == 2)
+	  {
+	    x_loc = event->xbutton.x;
+	    y_loc = event->xbutton.y;
+    
+	    status = mbvt_action_add_node(
+			    x_loc,y_loc);
+	    if (status != 1)
+		XBell(display,100);
+
+	      /* replot graph */
+	      mbvt_plot();
+
+	    } /* end of middle mouse pressed */
+
+	  /* If right mouse button is pushed then delete nearest svp node. */
+	  else if(event->xbutton.button == 3)
+	  {
+	    x_loc = event->xbutton.x;
+	    y_loc = event->xbutton.y;
+    
+	    status = mbvt_action_delete_node(
+			    x_loc,y_loc);
+	    if (status != 1)
+		XBell(display,100);
+
+	      /* replot graph */
+	      mbvt_plot();
+
+	    }; /* end of right mouse pressed */
 
        }; /* end of button press event */
 
@@ -993,6 +1036,35 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
       }; /* end of button release */
     }; /* end of input to canvas */
 
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_save_swath_svp( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+       if (edit_gui == 1)
+	    {
+	    /* save file */
+	    status = mbvt_save_swath_profile(input_file);
+
+	    /* reset status message */
+	    if (status == 1)
+	      {
+	       strcpy(message_str, "Saved Editable Sound Velocity Profile: ");
+	       strcat(message_str, input_file);
+	       set_label_string(label_status_edit, message_str);
+	      }
+	    }
+
+       if (status != 1)
+	    XBell(display,100);
+
+       /* replot everything */
+       do_set_controls();
+       mbvt_plot();
 }
 
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.14 2000-10-11 01:05:17 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.0 2000-12-01 22:56:08 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  2000/10/11  01:05:17  caress
+ * Convert to ANSI C
+ *
  * Revision 4.13  2000/09/30  07:03:14  caress
  * Snapshot for Dale.
  *

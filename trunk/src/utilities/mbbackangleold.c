@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangleold.c,v 4.12 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbbackangleold.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.11  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -85,7 +88,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.12 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangleold.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a swath sonar data file and generates a table\n\t\
@@ -112,10 +115,9 @@ The results are dumped to stdout.";
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	struct mb_datalist_struct *datalist;
+	char	*datalist;
 	double	file_weight;
 	int	format;
-	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -422,7 +424,7 @@ The results are dumped to stdout.";
 
 	/* obtain format array location - format id will 
 		be aliased to current id if old format id given */
-	status = mb_format(verbose,&format,&format_num,&error);
+	status = mb_format(verbose,&format,&error);
 
 	/* initialize reading the swath sonar file */
 	if ((status = mb_read_init(

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.c	2/26/93
- *	$Id: mbsys_sb.c,v 4.14 2000-10-11 01:03:21 caress Exp $
+ *	$Id: mbsys_sb.c,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -42,6 +42,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  2000/10/11  01:03:21  caress
+ * Convert to ANSI C
+ *
  * Revision 4.13  2000/09/30  06:32:52  caress
  * Snapshot for Dale.
  *
@@ -125,7 +128,7 @@
 int mbsys_sb_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb.c,v 4.14 2000-10-11 01:03:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mbsys_sb_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -283,7 +286,7 @@ int mbsys_sb_extract(int verbose, char *mbio_ptr, char *store_ptr,
 
 		/* read distance and depth values into storage arrays */
 		/* switch order of data as it is read into the global arrays */
-		*nbath = mb_io_ptr->beams_bath;
+		*nbath = mb_io_ptr->beams_bath_max;
 		*namp = 0;
 		*nss = 0;
 		id = *nbath - 1;
@@ -423,7 +426,7 @@ int mbsys_sb_extract(int verbose, char *mbio_ptr, char *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb_insert(int verbose, char *mbio_ptr, char *store_ptr, 
-		int time_i[7], double time_d,
+		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
@@ -436,7 +439,6 @@ int mbsys_sb_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb_struct *store;
-	int	kind;
 	int	time_j[5];
 	int	id;
 	int	i;
@@ -450,6 +452,10 @@ int mbsys_sb_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",kind);
+		}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -462,6 +468,9 @@ int mbsys_sb_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
@@ -477,7 +486,11 @@ int mbsys_sb_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        ss[%d]: %f    ssdist[%d]: %f\n",
 			i,ss[i],i,ssacrosstrack[i]);
-		fprintf(stderr,"dbg2       comment:    %s\n",comment);
+		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			comment);
 		}
 
 	/* get mbio descriptor */
@@ -485,6 +498,9 @@ int mbsys_sb_insert(int verbose, char *mbio_ptr, char *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb_struct *) store_ptr;
+
+	/* set data kind */
+	store->kind = kind;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -588,10 +604,10 @@ int mbsys_sb_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get nbeams */
-		*nbeams = mb_io_ptr->beams_bath;
+		*nbeams = mb_io_ptr->beams_bath_max;
 
 		/* get travel times, angles */
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
+		for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			{
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
@@ -695,12 +711,12 @@ int mbsys_sb_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		bath_best = 0.0;
-		if (store->deph[mb_io_ptr->beams_bath/2] > 0.0)
-		    bath_best = store->deph[mb_io_ptr->beams_bath/2];
+		if (store->deph[mb_io_ptr->beams_bath_max/2] > 0.0)
+		    bath_best = store->deph[mb_io_ptr->beams_bath_max/2];
 		else
 		    {
 		    xtrack_min = 99999999.9;
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			{
 			if (store->deph[i] > 0.0
 			    && fabs(store->dist[i]) < xtrack_min)
@@ -713,7 +729,7 @@ int mbsys_sb_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		if (bath_best <= 0.0)
 		    {
 		    xtrack_min = 99999999.9;
-		    for (i=0;i<mb_io_ptr->beams_bath;i++)
+		    for (i=0;i<mb_io_ptr->beams_bath_max;i++)
 			{
 			if (store->deph[i] < 0.0
 			    && fabs(store->dist[i]) < xtrack_min)

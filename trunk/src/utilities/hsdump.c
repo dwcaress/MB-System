@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 4.11 2000-10-11 01:06:15 caress Exp $
+ *    $Id: hsdump.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.10  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -89,7 +92,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 4.11 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -110,7 +113,6 @@ main (int argc, char **argv)
 
 	/* MBIO read and write control parameters */
 	int	format = 0;
-	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -140,6 +142,7 @@ main (int argc, char **argv)
 	int	nbath;
 	int	namp;
 	int	nss;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
@@ -332,7 +335,7 @@ main (int argc, char **argv)
 		}
 
 	/* if bad format specified then print it and exit */
-	status = mb_format(verbose,&format,&format_num,&error);
+	status = mb_format(verbose,&format,&error);
 	if (format != MBF_HSATLRAW && format != MBF_HSLDEOIH)
 		{
 		fprintf(output,"\nProgram <%s> requires complete Hydrosweep DS data stream\n",program_name);
@@ -359,6 +362,7 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
 				&bathacrosstrack,&error);
@@ -382,7 +386,7 @@ main (int argc, char **argv)
 		}
 
 	/* printf out file and format */
-	mb_format_inf(verbose,format_num,&message);
+	mb_format_description(verbose, &format, &message, &error);
 	fprintf(output,"\nHydrosweep DS Data File:  %s\n",file);
 	fprintf(output,"MBIO Data Format ID:  %d\n",format);
 	fprintf(output,"%s",message);
@@ -397,7 +401,7 @@ main (int argc, char **argv)
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
 				&nbath,&namp,&nss,
-				bath,amp,bathacrosstrack,bathalongtrack,
+				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
@@ -741,6 +745,7 @@ main (int argc, char **argv)
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory for data arrays */
+	mb_free(verbose,&beamflag,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 
 	mb_free(verbose,&bathalongtrack,&error); 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	8/1/99
- *	$Id: mbsys_xse.h,v 4.1 2000-09-30 06:31:19 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	August 1,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:31:19  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  1999/08/08  04:14:35  caress
  * Initial revision.
  *
@@ -238,4 +241,53 @@ struct mbsys_xse_struct
 	int	rawsize;		/* size of unknown frame in bytes */
 	char	raw[MBSYS_XSE_BUFFER_SIZE];
 	};
+
+	
+/* system specific function prototypes */
+int mbsys_xse_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_xse_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+			int *error);
+int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading,
+			int *nbath, int *namp, int *nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+			int kind, int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading,
+			int nbath, int namp, int nss,
+			char *beamflag, double *bath, double *amp, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			char *comment, int *error);
+int mbsys_xse_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int *nbeams,
+			double *ttimes, double *angles, 
+			double *angles_forward, double *angles_null,
+			double *heave, double *alongtrack_offset, 
+			double *draft, double *ssv, int *error);
+int mbsys_xse_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, double *transducer_depth, double *altitude, 
+			int *error);
+int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int *kind, int time_i[7], double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
+			int *error);
+int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+			int time_i[7], double time_d,
+			double navlon, double navlat,
+			double speed, double heading, double draft, 
+			double roll, double pitch, double heave,
+			int *error);
+int mbsys_xse_copy(int verbose, char *mbio_ptr, 
+			char *store_ptr, char *copy_ptr,
+			int *error);
 

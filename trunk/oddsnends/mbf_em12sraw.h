@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12sraw.h	7/8/96
- *	$Id: mbf_em12sraw.h,v 4.7 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbf_em12sraw.h,v 5.0 2000-12-01 22:48:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.6  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *

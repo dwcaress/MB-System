@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.26 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mblist.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.26  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.25  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -183,7 +186,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.26 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V -W]";
@@ -203,7 +206,7 @@ main (int argc, char **argv)
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	struct mb_datalist_struct *datalist;
+	char	*datalist;
 	double	file_weight;
 	int	format;
 	int	pings;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.30 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbbath.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.30  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.29  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -180,7 +183,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.30 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -208,7 +211,9 @@ and stdout.";
 
 	/* MBIO read and write control parameters */
 	int	format = 0;
-	int	format_num;
+	int	variable_beams;
+	int	traveltime;
+	int	beam_flagging; 
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -545,8 +550,10 @@ and stdout.";
 	/* check for format with travel time data */
 	if (use_svp == MB_YES)
 	    {
-	    status = mb_format(verbose,&format,&format_num,&error);
-	    if (mb_traveltime_table[format_num] != MB_YES)
+	    status = mb_format_flags(verbose,&format,
+			&variable_beams, &traveltime, &beam_flagging, 
+			&error);
+	    if (traveltime != MB_YES)
 		{
 		fprintf(stderr,"\nProgram <%s> requires travel time data to recalculate\n",program_name);
 		fprintf(stderr,"bathymetry from travel times and angles.\n");
@@ -1054,16 +1061,17 @@ and stdout.";
 		}
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-
+	strncpy(comment,"\0",256);
 	if (ttscale_mode == MB_YES)
 	    {
-	    fprintf(stderr,"dbg2       tt scale:        %f\n",ttscale);
+	    sprintf(comment,"dbg2       tt scale:        %f",ttscale);
 	    }
 	else
 	    {
-	    fprintf(stderr,"dbg2       tt scale:        OFF\n");
+	    sprintf(comment,"dbg2       tt scale:        OFF");
 	    }
-
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Roll correction file:      %s",rfile);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -1477,8 +1485,7 @@ and stdout.";
 			}
 
 		/* write some data */
-		if (error == MB_ERROR_NO_ERROR
-			|| kind == MB_DATA_COMMENT)
+		if (error == MB_ERROR_NO_ERROR)
 			{
 			status = mb_put_all(verbose,ombio_ptr,
 					store_ptr,MB_YES,kind,
@@ -1498,7 +1505,7 @@ and stdout.";
 			else
 				{
 				mb_error(verbose,error,&message);
-				fprintf(stderr,"\nMBIO Error returned from function <mb_put>:\n%s\n",message);
+				fprintf(stderr,"\nMBIO Error returned from function <mb_put_all>:\n%s\n",message);
 				fprintf(stderr,"\nMultibeam Data Not Written To File <%s>\n",ofile);
 				fprintf(stderr,"Output Record: %d\n",odata+1);
 				fprintf(stderr,"Time: %4d %2d %2d %2d:%2d:%2d.%6d\n",

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.21 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbclean.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.20  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -128,7 +131,6 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
 
 /* local defines */
 #define	MBCLEAN_FLAG_ONE	1
@@ -177,7 +179,7 @@ int mb_double_compare();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.21 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -196,7 +198,9 @@ main (int argc, char **argv)
 
 	/* MBIO read control parameters */
 	int	format;
-	int	format_num;
+	int	variable_beams;
+	int	traveltime;
+	int	beam_flagging; 
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -514,13 +518,14 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
-	/* obtain format array location - format id will 
-		be aliased to current id if old format id given */
-	if ((status = mb_format(verbose,&format,&format_num,&error)) 
+	/* check format and get format flags */
+	if ((status = mb_format_flags(verbose,&format,
+			&variable_beams, &traveltime, &beam_flagging, 
+			&error)) 
 		!= MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_format> regarding input format %d:\n%s\n",format,message);
+		fprintf(stderr,"\nMBIO Error returned from function <mb_format_flags> regarding input format %d:\n%s\n",format,message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -528,7 +533,7 @@ main (int argc, char **argv)
 
 	/* check that clean mode is allowed 
 		for the specified data format */
-	if (mb_no_flag_table[format_num] == MB_YES && mode <= 2)
+	if (beam_flagging == MB_NO && mode <= 2)
 		{
 		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data \nas negative numbers (specified by cleaning mode %d).\n",format,mode);
 		fprintf(stderr,"\nCopy the data to another format or set the cleaning mode to zero \nbad data values (-M3 or -M4).\n");

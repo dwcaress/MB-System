@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.33 2000-10-11 00:53:45 caress Exp $
+ *    $Id: mbswath.c,v 5.0 2000-12-01 22:52:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.33  2000/10/11  00:53:45  caress
+ * Converted to ANSI C
+ *
  * Revision 4.32  2000/09/30  06:52:17  caress
  * Snapshot for Dale.
  *
@@ -270,7 +273,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.33 2000-10-11 00:53:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.0 2000-12-01 22:52:16 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -296,7 +299,8 @@ main (int argc, char **argv)
 	double	file_weight;
 	FILE	*fp;
 	int	format;
-	int	format_num;
+	double	beamwidth_xtrack;
+	double	beamwidth_ltrack;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -308,9 +312,9 @@ main (int argc, char **argv)
 	double	timegap;
 	char	file[128];
 	int	file_in_bounds;
-	int	beams_bath;
-	int	beams_amp;
-	int	pixels_ss;
+	int	beams_bath_max;
+	int	beams_amp_max;
+	int	pixels_ss_max;
 	char	*mbio_ptr = NULL;
 
 	/* mbio read values */
@@ -943,7 +947,7 @@ main (int argc, char **argv)
 		    verbose,file,format,pings,lonflip,bounds,
 		    btime_i,etime_i,speedmin,timegap,
 		    &mbio_ptr,&btime_d,&etime_d,
-		    &beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+		    &beams_bath_max,&beams_amp_max,&pixels_ss_max,&error)) != MB_SUCCESS)
 		    {
 		    mb_error(verbose,error,&message);
 		    fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -954,9 +958,13 @@ main (int argc, char **argv)
 		    }
     
 		/* get fore-aft beam_width */
-		status = mb_format(verbose,&format,&format_num,&error);
+		status = mb_format_beamwidth(verbose, &format, 
+				&beamwidth_xtrack, &beamwidth_ltrack, 
+				&error);
+		if (beamwidth_ltrack <= 0.0)
+			beamwidth_ltrack = 2.0;
 		if (footprint_mode == MBSWATH_FOOTPRINT_REAL)
-		    factor = rawfactor*pings*mb_foreaft_beamwidth_table[format_num];
+		    factor = rawfactor*pings*beamwidth_ltrack;
 		else
 		    factor = rawfactor;
 		    
@@ -971,9 +979,9 @@ main (int argc, char **argv)
 		status = mb_malloc(verbose,sizeof(struct swath),
 				&swath_plot,&error);
 		npings = &swath_plot->npings;
-		swath_plot->beams_bath = beams_bath;
-		swath_plot->beams_amp = beams_amp;
-		swath_plot->pixels_ss = pixels_ss;
+		swath_plot->beams_bath = beams_bath_max;
+		swath_plot->beams_amp = beams_amp_max;
+		swath_plot->pixels_ss = pixels_ss_max;
 		for (i=0;i<MAXPINGS;i++)
 		    {
 		    pingcur = &(swath_plot->data[i]);
@@ -990,33 +998,33 @@ main (int argc, char **argv)
 		    pingcur->ssflag = NULL;
 		    pingcur->ssfoot = NULL;
 		    pingcur->bathshade = NULL;
-		    status = mb_malloc(verbose,beams_bath*sizeof(char),
+		    status = mb_malloc(verbose,beams_bath_max*sizeof(char),
 			    &(pingcur->beamflag),&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+		    status = mb_malloc(verbose,beams_bath_max*sizeof(double),
 			    &(pingcur->bath),&error);
-		    status = mb_malloc(verbose,beams_amp*sizeof(double),
+		    status = mb_malloc(verbose,beams_amp_max*sizeof(double),
 			    &(pingcur->amp),&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+		    status = mb_malloc(verbose,beams_bath_max*sizeof(double),
 			    &(pingcur->bathlon),&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+		    status = mb_malloc(verbose,beams_bath_max*sizeof(double),
 			    &(pingcur->bathlat),&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+		    status = mb_malloc(verbose,pixels_ss_max*sizeof(double),
 			    &(pingcur->ss),&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+		    status = mb_malloc(verbose,pixels_ss_max*sizeof(double),
 			    &(pingcur->sslon),&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+		    status = mb_malloc(verbose,pixels_ss_max*sizeof(double),
 			    &(pingcur->sslat),&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(int),
+		    status = mb_malloc(verbose,beams_bath_max*sizeof(int),
 			    &(pingcur->bathflag),&error);
 		    status = mb_malloc(verbose,
-			    (beams_bath)*sizeof(struct footprint),
+			    (beams_bath_max)*sizeof(struct footprint),
 			    &(pingcur->bathfoot),&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(int),
+		    status = mb_malloc(verbose,pixels_ss_max*sizeof(int),
 			    &(pingcur->ssflag),&error);
 		    status = mb_malloc(verbose,
-			    (pixels_ss)*sizeof(struct footprint),
+			    (pixels_ss_max)*sizeof(struct footprint),
 			    &(pingcur->ssfoot),&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+		    status = mb_malloc(verbose,beams_bath_max*sizeof(double),
 			    &(pingcur->bathshade),&error);
 		    }
     

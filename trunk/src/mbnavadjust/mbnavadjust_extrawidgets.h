@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
- *    $Id: mbnavadjust_extrawidgets.h,v 4.0 2000-09-30 07:00:06 caress Exp $
+ *    $Id: mbnavadjust_extrawidgets.h,v 5.0 2000-12-01 22:55:48 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/09/30  07:00:06  caress
+ * Snapshot for Dale.
+ *
  *
  *
  */

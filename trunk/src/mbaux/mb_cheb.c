@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
- *    $Id: mb_cheb.c,v 4.1 2000-09-30 06:54:58 caress Exp $
+ *    $Id: mb_cheb.c,v 5.0 2000-12-01 22:53:59 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/09/30  06:54:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  2000/09/08  17:19:14  caress
  * Initial version.
  *

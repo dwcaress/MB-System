@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.16 2000-10-11 01:06:15 caress Exp $
+ *    $Id: mbsmooth.c,v 5.0 2000-12-01 22:57:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  2000/10/11  01:06:15  caress
+ * Convert to ANSI C
+ *
  * Revision 4.15  2000/09/30  07:06:28  caress
  * Snapshot for Dale.
  *
@@ -111,7 +114,6 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
-#include "../../include/mb_io.h"
 
 /* MBIO buffer structure pointer */
 #define	MBSMOOTH_BUFFER_DEFAULT	500
@@ -164,7 +166,7 @@ double	width_def = 250.0;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.16 2000-10-11 01:06:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to swath \nbathymetry data in order to \
