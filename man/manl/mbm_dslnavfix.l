@@ -1,4 +1,4 @@
-.TH mbm_dslnavfix l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_dslnavfix l "25 July 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_dslnavfix\fP - Translate WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
@@ -9,7 +9,7 @@ Version 4.5
 .SH SYNOPSIS
 \fBmbm_dslnavfix\fP \fB-I\fP\fIinfile\fP \fB-J\fP\fIutm_zone\fP 
 \fB-O\fP\fIoutfile\fP 
-[\fB-H\fP \fB-V\fP]
+[\fB-E\fP\fIellipsoid\fP \fB-H\fP \fB-V\fP]
 
 .SH DESCRIPTION
 \fBmbm_dslnavfix\fP is a macro to translate 
@@ -70,6 +70,25 @@ Lamont-Doherty Earth Observatory
 Palisades, NY 10964
 
 .SH OPTIONS
+.TP
+.B \fB-E\fIellipsoid\fP
+This option sets the ellipsoid used in the UTM projection.
+The choices are:
+ 	WGS-84		1984 World Geodetic System
+ 	GRS-80		1980 International Geodetic Reference System
+ 	WGS-72		1972 World Geodetic System
+ 	Australian	1965 Used down under
+ 	Krasovsky	1940 Used in the Soviet Union
+ 	International	1924 Worldwide use
+ 	Hayford-1909	1909 Same as the International 1924
+ 	Clarke-1880	1880 Most of Africa, France
+ 	Clarke-1866	1866 North America, the Phillipines
+ 	Airy		1830 Great Britain
+ 	Bessel		1841 Central Europe, Chile, Indonesia
+ 	Everest		1830 India, Burma, Pakistan,  etc.
+ 	Sphere		1980 The mean radius in GRS-80
+.br
+Default: Clarke-1866 as per USGS standard.
 .TP
 .B \fB-H\fP
 This "help" flag cause the program to print out a description
