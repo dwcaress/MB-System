@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_penface.c	5/15/94
- *    $Id: mb_penface.c,v 4.5 1995-02-17 16:03:31 caress Exp $
+ *    $Id: mb_penface.c,v 4.6 1995-02-17 16:48:57 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/02/17  16:03:31  caress
+ * Fixed bug in saving xold and yold values which had caused fits
+ * when plotting the shiptrack.
+ *
  * Revision 4.4  1994/11/10  20:56:46  caress
  * Changed size of esp_geo; now factor of 10 smaller.
  *
@@ -70,7 +74,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_penface.c,v 4.5 1995-02-17 16:03:31 caress Exp $";
+  	static char rcs_id[]="$Id: mb_penface.c,v 4.6 1995-02-17 16:48:57 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -130,7 +134,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_penface.c,v 4.5 1995-02-17 16:03:31 caress Exp $";
+  	static char rcs_id[]="$Id: mb_penface.c,v 4.6 1995-02-17 16:48:57 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -186,10 +190,10 @@ int ipen;
 	double	mag, dx, dy;
 
 	if (eps_geo <= 0.0 || ipen != IDN)
-		printf("plotc %f %f %d\n",x,y,ipen);
+		printf("plot %f %f %d\n",x,y,ipen);
 	else
 		{
-		printf("plotcb %f %f %d\n",x,y,ipen);
+		printf("plot %f %f %d\n",x,y,ipen);
 
 		dx = x - xold;
 		dy = y - yold;
@@ -198,18 +202,18 @@ int ipen;
 			{
 			dx = eps_geo*dx/mag;
 			dy = eps_geo*dy/mag;
-			printf("plotcb %f %f %d\n",xold,yold,IUP);
-			printf("plotcb %f %f %d\n",x,y,IDN);
-			printf("plotcb %f %f %d\n",x+dy,y-dx,IDN);
-			printf("plotcb %f %f %d\n",xold+dy,yold-dx,IDN);
-			printf("plotcb %f %f %d\n",xold-dy,yold+dx,IDN);
-			printf("plotcb %f %f %d\n",x-dy,y+dx,IDN);
-			printf("plotcb %f %f %d\n",xold-dy,yold+dx,IDN);
-			printf("plotcb %f %f %d\n",x+dy,y-dx,IDN);
-			printf("plotcb %f %f %d\n",xold+dy,yold-dx,IDN);
-			printf("plotcb %f %f %d\n",x,y,IDN);
-			printf("plotcb %f %f %d\n",xold,yold,IDN);
-			printf("plotcb %f %f %d\n",x,y,IDN);
+			printf("plot %f %f %d\n",xold,yold,IUP);
+			printf("plot %f %f %d\n",x,y,IDN);
+			printf("plot %f %f %d\n",x+dy,y-dx,IDN);
+			printf("plot %f %f %d\n",xold+dy,yold-dx,IDN);
+			printf("plot %f %f %d\n",xold-dy,yold+dx,IDN);
+			printf("plot %f %f %d\n",x-dy,y+dx,IDN);
+			printf("plot %f %f %d\n",xold-dy,yold+dx,IDN);
+			printf("plot %f %f %d\n",x+dy,y-dx,IDN);
+			printf("plot %f %f %d\n",xold+dy,yold-dx,IDN);
+			printf("plot %f %f %d\n",x,y,IDN);
+			printf("plot %f %f %d\n",xold,yold,IDN);
+			printf("plot %f %f %d\n",x,y,IDN);
 			}	
 		}
 	xold = x;
@@ -222,7 +226,7 @@ int plot_(x,y,ipen)
 float *x,*y;
 int *ipen;
 {
-	printf("plotf %f %f %d\n",((double) *x),((double) *y),*ipen);
+	printf("plot %f %f %d\n",((double) *x),((double) *y),*ipen);
 	xold = (double) *x;
 	yold = (double) *y;
 	return;
