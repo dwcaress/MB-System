@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.8 1995-09-28 18:10:48 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.9 1996-01-26 21:23:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,6 +33,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1995/09/28  18:10:48  caress
+ * Various bug fixes working toward release 4.3.
+ *
  * Revision 4.7  1995/08/17  14:41:09  caress
  * Revision for release 4.3.
  *
@@ -90,7 +93,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.8 1995-09-28 18:10:48 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.9 1996-01-26 21:23:30 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -298,7 +301,14 @@ int	*error;
 			{
 			j = beam_center + i - 1;
 			if (j == beam_center)
-				bath[j] = store->png_prdepth + store->png_alt;
+				{
+				if (store->png_alt > 0.0)
+				    bath[j] = store->png_prdepth + store->png_alt;
+				else if (store->png_alt < 0.0)
+				    bath[j] = -store->png_prdepth + store->png_alt;
+				else
+				    bath[j] = 0.0;
+				}
 			else
 				bath[j] = 0.0;
 			bathacrosstrack[j] = 0.0;
@@ -329,7 +339,7 @@ int	*error;
 		for (i=0;i<store->stbd_sscount;i++)
 			{
 			j = pixel_center + 2 + i;
-			ss[j] = store->ss_port[i];
+			ss[j] = store->ss_stbd[i];
 			ssacrosstrack[j] = store->stbd_ssoffset 
 				+ i*store->png_atssincr;
 			ssalongtrack[j] = 0.0;
@@ -503,7 +513,7 @@ int	*error;
 	struct mbsys_mr1_struct *store;
 	int	kind;
 	int	beam_center, pixel_center;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -569,57 +579,57 @@ int	*error;
 		/* get speed */
 
 		/* get port bathymetry */
-		beam_center = mb_io_ptr->beams_bath/2;
-		store->port_btycount = 0;
-		for (i=beam_center-1;i>-1;i--)
+		beam_center = nbath/2;
+		for (i=0;i<store->port_btycount;i++)
 			{
-			if (bath[i] != 0.0)
-				{
-				store->bath_port[store->port_btycount] 
-					= bath[i];
-				store->bath_acrosstrack_port[store->port_btycount]
-					= -bathacrosstrack[i];
-				store->port_btycount++;
-				}
+			j = beam_center - 2 - i;
+			store->bath_port[i] 
+				= bath[j];
+			store->bath_acrosstrack_port[i] 
+				= -bathacrosstrack[j];
+			}
+
+		/* get center beam bathymetry */
+		if (bath[beam_center] > 0.0)
+			{
+			store->png_alt = bath[beam_center] 
+				- store->png_prdepth;
+			}
+		else if (bath[beam_center] < 0.0)
+			{
+			store->png_alt = bath[beam_center] 
+				+ store->png_prdepth;
+			}
+		else
+			{
+			store->png_alt = 0.0;
 			}
 
 		/* get starboard bathymetry */
-		store->stbd_btycount = 0;
-		for (i=beam_center+1;i<mb_io_ptr->beams_bath;i++)
+		for (i=0;i<store->stbd_btycount;i++)
 			{
-			if (bath[i] != 0.0)
-				{
-				store->bath_stbd[store->stbd_btycount] 
-					= bath[i];
-				store->bath_acrosstrack_stbd[store->stbd_btycount]
-					= bathacrosstrack[i];
-				store->stbd_btycount++;
-				}
+			j = beam_center + 2 + i;
+			store->bath_stbd[i] 
+				= bath[j];
+			store->bath_acrosstrack_stbd[i] 
+				= bathacrosstrack[j];
 			}
 
 		/* get port sidescan */
-		pixel_center = mb_io_ptr->pixels_ss/2;
-		store->port_sscount = 0;
-		for (i=pixel_center-1;i>-1;i--)
+		pixel_center = nss/2;
+		for (i=0;i<store->port_sscount;i++)
 			{
-			if (ss[i] != 0.0)
-				{
-				store->ss_port[store->port_sscount] 
-					= ss[i];
-				store->port_sscount++;
-				}
+			j = pixel_center - 2 - i;
+			store->ss_port[i] 
+				= ss[j];
 			}
 
 		/* get starboard sidescan */
-		store->stbd_sscount = 0;
-		for (i=pixel_center+1;i<mb_io_ptr->pixels_ss;i++)
+		for (i=0;i<store->stbd_sscount;i++)
 			{
-			if (ss[i] != 0.0)
-				{
-				store->ss_stbd[store->stbd_sscount] 
-					= ss[i];
-				store->stbd_sscount++;
-				}
+			j = pixel_center + 2 + i;
+			store->ss_stbd[i] 
+				= ss[j];
 			}
 		}
 
@@ -645,7 +655,8 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_mr1_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,flags,depthadd,error)
+	ttimes,angles,angles_forward,angles_null,flags,
+	depthadd,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -654,16 +665,16 @@ int	*nbeams;
 double	*ttimes;
 double	*angles;
 double	*angles_forward;
+double	*angles_null;
 int	*flags;
 double	*depthadd;
+double	*ssv;
 int	*error;
 {
 	char	*function_name = "mbsys_mr1_ttimes";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1_struct *store;
-	double	depth;
-	double	xtrack;
 	int	beam_center;
 	int	i, j;
 
@@ -679,6 +690,7 @@ int	*error;
 		fprintf(stderr,"dbg2       ttimes:     %d\n",ttimes);
 		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
 		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
@@ -697,25 +709,34 @@ int	*error;
 		/* get depth offset (vehicle pressure depth) */
 		*depthadd = store->png_prdepth;
 
+		/* get sound velocity at transducers */
+		*ssv = 1500.0;
+
 		/* get nbeams */
 		*nbeams = mb_io_ptr->beams_bath;
 		beam_center = mb_io_ptr->beams_bath/2;
 
-		/* get travel times and angles assuming 
-		   bathymetry calculated using simple
-		   1500 m/s water velocity */
+		/* zero data arrays */
+		for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			ttimes[i] = 0.0;
+			angles[i] = 0.0;
+			angles_forward[i] = 0.0;
+			angles_null[i] = 0.0;
+			}
+
+		/* get travel times and angles */
 		for (i=0;i<store->port_btycount;i++)
 			{
 			j = beam_center - i - 2;
-			depth = store->bath_port[i] - *depthadd;
-			xtrack = -store->bath_acrosstrack_port[i];
 			angles_forward[j] = 0.0;
+			angles_null[j] = -MBSYS_MR1_XDUCER_ANGLE;
 			flags[j] = MB_NO;
-			if (fabs(depth) > 0.0)
+			if (fabs(store->bath_port[i]) > 0.0)
 				{
-				ttimes[j] = sqrt(depth*depth + xtrack*xtrack)/750.0;
-				angles[j] = RTD*atan(xtrack/fabs(depth));
-				if (depth < 0.0)
+				ttimes[j] = store->tt_port[i];
+				angles[j] = store->angle_port[i];
+				if (store->bath_port[i] < 0.0)
 					flags[j] = MB_YES;
 				}
 			else
@@ -727,18 +748,14 @@ int	*error;
 		for (i=0;i<3;i++)
 			{
 			j = beam_center + i - 1;
-			if (j == beam_center)
-				depth = store->png_prdepth + store->png_alt;
-			else
-				depth = 0.0;
-			xtrack = 0.0;
 			angles_forward[j] = 0.0;
+			angles_null[j] = 0.0;
 			flags[j] = MB_NO;
-			if (fabs(depth) > 0.0)
+			if (j == beam_center)
 				{
-				ttimes[j] = sqrt(depth*depth + xtrack*xtrack)/750.0;
-				angles[j] = RTD*atan(xtrack/fabs(depth));
-				if (depth < 0.0)
+				ttimes[j] = store->png_tt;
+				angles[j] = 0.0;
+				if (store->png_alt < 0.0)
 					flags[j] = MB_YES;
 				}
 			else
@@ -750,15 +767,14 @@ int	*error;
 		for (i=0;i<store->stbd_btycount;i++)
 			{
 			j = beam_center + 2 + i;
-			depth = store->bath_stbd[i];
-			xtrack = store->bath_acrosstrack_stbd[i];
 			angles_forward[j] = 0.0;
+			angles_null[j] = MBSYS_MR1_XDUCER_ANGLE;
 			flags[j] = MB_NO;
-			if (fabs(depth) > 0.0)
+			if (fabs(store->bath_stbd[i]) > 0.0)
 				{
-				ttimes[j] = sqrt(depth*depth + xtrack*xtrack)/750.0;
-				angles[j] = RTD*atan(xtrack/fabs(depth));
-				if (depth < 0.0)
+				ttimes[j] = store->tt_stbd[i];
+				angles[j] = store->angle_stbd[i];
+				if (store->bath_stbd[i] < 0.0)
 					flags[j] = MB_YES;
 				}
 			else
@@ -803,11 +819,12 @@ int	*error;
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
 		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
+		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  flag:%d\n",
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  flag:%d\n",
 				i,ttimes[i],angles[i],
-				angles_forward[i],flags[i]);
+				angles_forward[i],angles_null[i],flags[i]);
 		}
 	if (verbose >= 2)
 		{

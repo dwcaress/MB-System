@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.3 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbcut.c,v 4.4 1996-01-26 21:25:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.2  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -69,7 +73,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.3 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.4 1996-01-26 21:25:58 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -307,7 +311,7 @@ The default input and output streams are stdin and stdout.";
 		fprintf(stderr,"dbg2       timegap:         %f\n",timegap);
 		fprintf(stderr,"dbg2       input file:      %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:     %s\n",ofile);
-		fprintf(stderr,"dbg2       ncut:            %d\n",ofile);
+		fprintf(stderr,"dbg2       ncut:            %d\n",ncut);
 		for (i=0;i<ncut;i++)
 			fprintf(stderr,"dbg2         kind:%2d mode:%2d min:%f max:%f\n", 
 				gkind[i], gmode[i], gmin[i], gmax[i]);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdaraw.c	2/11/93
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.0 1995-09-28 18:14:11 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.1 1996-01-26 21:23:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	August 11, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/09/28  18:14:11  caress
+ * First cut.
+ *
  * Revision 1.1  1995/09/28  18:10:48  caress
  * Initial revision
  *
@@ -74,7 +77,7 @@ int    verbose;
 char   *mbio_ptr;
 int    *error;
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.0 1995-09-28 18:14:11 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.1 1996-01-26 21:23:30 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdaraw";
 	int	 status = MB_SUCCESS;
 	int	 i;
@@ -649,7 +652,6 @@ int    *error;
 	struct mbf_hsmdaraw_struct *data;
 	char	*data_ptr;
 	struct mbsys_hsmd_struct *store;
-	double scalefactor;
 	int	first;
 	int	i, j;
 
@@ -1036,9 +1038,9 @@ int    *error;
 					speed, then do the simple geometry to
 					calculate depth and cross-track. */
 				if (data->skals)
-					scale = 0.0001;
+					scale = 0.00015;
 				else
-					scale = 0.00001;
+					scale = 0.000015;
 				if (status == MB_SUCCESS)
 				for (i=0; i<MBF_HSMDARAW_BEAMS_PING; i++ )
 		    			{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.6 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbcopy.c,v 4.7 1996-01-26 21:25:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.5  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -68,6 +72,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <unistd.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -80,10 +85,10 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.6 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 4.7 1996-01-26 21:25:58 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input multibeam data file to an output \nmultibeam data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
-	static char usage_message[] = "mbcopy [-Fiformat/oformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Ccommentfile \n\t-N -V -H  -Iinfile -Ooutfile]";
+	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -163,6 +168,12 @@ char **argv;
 	char	commentfile[256];
 	int	stripcomments = MB_NO;
 	int	fullcopy = MB_NO;
+	int	use_sleep = MB_NO;
+	
+	/* sleep variable */
+	double	sleep_factor = 1.0;
+	double	time_d_last;
+	unsigned int	sleep_time;
 
 	/* time, user, host variables */
 	long int	right_now;
@@ -188,44 +199,9 @@ char **argv;
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhNnF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:C:c:I:i:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "B:b:C:c:E:e:F:f:HhI:i:L:l:NnO:o:P:p:Q:q:R:r:S:s:T:t:Vv")) != -1)
 	  switch (c) 
 		{
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'N':
-		case 'n':
-			stripcomments = MB_YES;
-			break;
-		case 'F':
-		case 'f':
-			i = sscanf (optarg,"%d/%d", &iformat,&oformat);
-			if (i == 1)
-				oformat = iformat;
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%d", &pings);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf (optarg,"%d", &lonflip);
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
-			flag++;
-			break;
 		case 'B':
 		case 'b':
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
@@ -234,12 +210,65 @@ char **argv;
 			btime_i[6] = 0;
 			flag++;
 			break;
+		case 'C':
+		case 'c':
+			sscanf (optarg,"%s", commentfile);
+			insertcomments = MB_YES;
+			flag++;
+			break;
 		case 'E':
 		case 'e':
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
 			etime_i[6] = 0;
+			flag++;
+			break;
+		case 'F':
+		case 'f':
+			i = sscanf (optarg,"%d/%d", &iformat,&oformat);
+			if (i == 1)
+				oformat = iformat;
+			flag++;
+			break;
+		case 'H':
+		case 'h':
+			help++;
+			break;
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", ifile);
+			flag++;
+			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			stripcomments = MB_YES;
+			break;
+		case 'O':
+		case 'o':
+			sscanf (optarg,"%s", ofile);
+			flag++;
+			break;
+		case 'P':
+		case 'p':
+			sscanf (optarg,"%d", &pings);
+			flag++;
+			break;
+		case 'Q':
+		case 'q':
+			sscanf (optarg,"%lf", &sleep_factor);
+			use_sleep = MB_YES;
+			flag++;
+			break;
+		case 'R':
+		case 'r':
+			sscanf (optarg,"%lf/%lf/%lf/%lf", 
+				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
 			flag++;
 			break;
 		case 'S':
@@ -252,21 +281,9 @@ char **argv;
 			sscanf (optarg,"%lf", &timegap);
 			flag++;
 			break;
-		case 'C':
-		case 'c':
-			sscanf (optarg,"%s", commentfile);
-			insertcomments = MB_YES;
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf (optarg,"%s", ifile);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf (optarg,"%s", ofile);
-			flag++;
+		case 'V':
+		case 'v':
+			verbose++;
 			break;
 		case '?':
 			errflg++;
@@ -327,8 +344,9 @@ char **argv;
 		fprintf(stderr,"dbg2       output file:    %s\n",ofile);
 		fprintf(stderr,"dbg2       insert comments:%d\n",insertcomments);
 		fprintf(stderr,"dbg2       comment file:   %s\n",commentfile);
-		fprintf(stderr,"dbg2       strip comments: %d\n",stripcomments);		fprintf(stderr,"dbg2       strip comments: %d\n",stripcomments);
-
+		fprintf(stderr,"dbg2       strip comments: %d\n",stripcomments);
+		fprintf(stderr,"dbg2       use sleep:      %d\n",use_sleep);
+		fprintf(stderr,"dbg2       sleep factor:   %f\n",sleep_factor);
 		}
 
 	/* if help desired then print it and exit */
@@ -798,6 +816,25 @@ char **argv;
 			fprintf(stderr,"Last Good Time: %d %d %d %d %d %d %d\n",
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6]);
+			}
+		
+		/* do sleep if required */
+		if (use_sleep == MB_YES
+			&& kind == MB_DATA_DATA
+			&& error <= MB_ERROR_NO_ERROR
+			&& idata == 1)
+			{
+			time_d_last = time_d;
+			}
+		else if (use_sleep == MB_YES
+			&& kind == MB_DATA_DATA
+			&& error <= MB_ERROR_NO_ERROR
+			&& idata > 1)
+			{
+			sleep_time = (unsigned int) 
+				(sleep_factor * (time_d - time_d_last));
+			sleep(sleep_time);
+			time_d_last = time_d;
 			}
 
 		/* process some data */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.4 1995-09-28 18:10:48 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.5 1996-01-26 21:23:30 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/09/28  18:10:48  caress
+ * Various bug fixes working toward release 4.3.
+ *
  * Revision 4.3  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -57,13 +60,16 @@
 #include "../../include/mbsys_mr1.h"
 #include "../../include/mbf_mr1prhig.h"
 
+/* angle conversion define */
+#define RTD (180./M_PI)
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1prhig(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.4 1995-09-28 18:10:48 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.5 1996-01-26 21:23:30 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -284,6 +290,7 @@ int	*error;
 	struct mbf_mr1prhig_struct *data;
 	struct mbsys_mr1_struct *store;
 	int	beam_center, pixel_center;
+	double	xtrack, depth;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -426,8 +433,16 @@ int	*error;
 			{
 			j = beam_center + i - 1;
 			if (j == beam_center)
-				mb_io_ptr->new_bath[j] = 
-					data->png_prdepth + data->png_alt;
+				{
+				if (data->png_alt > 0.0)
+				    mb_io_ptr->new_bath[j] 
+					= data->png_prdepth + data->png_alt;
+				else if (data->png_alt < 0.0)
+				    mb_io_ptr->new_bath[j] 
+					= -data->png_prdepth + data->png_alt;
+				else
+				    mb_io_ptr->new_bath[j] = 0.0;
+				}
 			else
 				mb_io_ptr->new_bath[j] = 0.0;
 			mb_io_ptr->new_bath_acrosstrack[j] = 0.0;
@@ -462,7 +477,7 @@ int	*error;
 			{
 			j = pixel_center + 2 + i;
 			mb_io_ptr->new_ss[j] 
-				= data->ss_port[i];
+				= data->ss_stbd[i];
 			mb_io_ptr->new_ss_acrosstrack[j] 
 				= data->stbd_ssoffset + i*data->png_atssincr;
 			mb_io_ptr->new_ss_alongtrack[j] = 0.0;
@@ -578,6 +593,47 @@ int	*error;
 			store->bath_acrosstrack_stbd[i] 
 				= data->bath_acrosstrack_stbd[i];
 			store->bath_stbd[i] = data->bath_stbd[i];
+			}
+
+		/* get travel times and angles assuming 
+		   bathymetry calculated using simple
+		   1500 m/s water velocity */
+		for (i=0;i<store->port_btycount;i++)
+			{
+			depth = fabs(store->bath_port[i]) - store->png_prdepth;
+			xtrack = -store->bath_acrosstrack_port[i];
+			if (fabs(depth) > 0.0)
+				{
+				store->tt_port[i] 
+					= sqrt(depth*depth 
+					    + xtrack*xtrack)/750.0;
+				store->angle_port[i] 
+					= RTD*atan(xtrack/fabs(depth));
+				}
+			else
+				{
+				store->tt_port[i] = 0.0;
+				store->angle_port[i] = 0.0;
+				}
+			}
+		store->png_tt = fabs(store->png_alt) / 750.0;
+		for (i=0;i<store->stbd_btycount;i++)
+			{
+			depth = fabs(store->bath_stbd[i]) - store->png_prdepth;
+			xtrack = store->bath_acrosstrack_stbd[i];
+			if (fabs(depth) > 0.0)
+				{
+				store->tt_stbd[i] 
+					= sqrt(depth*depth 
+					    + xtrack*xtrack)/750.0;
+				store->angle_stbd[i] 
+					= RTD*atan(xtrack/fabs(depth));
+				}
+			else
+				{
+				store->tt_stbd[i] = 0.0;
+				store->angle_stbd[i] = 0.0;
+				}
 			}
 
 		/* sidescan */
@@ -779,6 +835,22 @@ int	*error;
 					= mb_io_ptr->new_bath_acrosstrack[i];
 				data->stbd_btycount++;
 				}
+			}
+
+		/* get center beam bathymetry */
+		if (mb_io_ptr->new_bath[beam_center] > 0.0)
+			{
+			data->png_alt = mb_io_ptr->new_bath[beam_center] 
+				- data->png_prdepth;
+			}
+		else if (mb_io_ptr->new_bath[beam_center] < 0.0)
+			{
+			data->png_alt = mb_io_ptr->new_bath[beam_center] 
+				+ data->png_prdepth;
+			}
+		else
+			{
+			data->png_alt = 0.0;
 			}
 
 		/* get port sidescan */
@@ -1013,6 +1085,8 @@ int	*error;
 {
 	char	*function_name = "mbr_mr1prhig_rd_ping";
 	int	status = MB_SUCCESS;
+	int	dummy_count;
+	float	dummy;
 	int	i;
 
 	/* print input debug statements */
@@ -1057,26 +1131,111 @@ int	*error;
 	status = xdr_int(xdrs, &data->stbd_btycount);
 	status = xdr_float(xdrs, &data->stbd_ssoffset);
 	status = xdr_int(xdrs, &data->stbd_sscount);
+	
+	/* read bathymetry and sidescan data 
+		- handle more data than allowed by MBIO by
+		  throwing away the excess */
 
-	/* read bathymetry and sidescan data */
+	/* do port bathymetry */
+	if (data->port_btycount > MBF_MR1PRHIG_BEAMS_SIDE)
+		{
+		/* output debug messages */
+		if (verbose > 0)
+			{
+			fprintf(stderr, "Port bathymetry count exceeds MBIO maximum: %d %d\n", 
+				data->port_btycount, MBF_MR1PRHIG_BEAMS_SIDE);
+			}
+		dummy_count = data->port_btycount 
+			- MBF_MR1PRHIG_BEAMS_SIDE;
+		data->port_btycount = MBF_MR1PRHIG_BEAMS_SIDE;
+		}
+	else
+		dummy_count = 0;
 	for (i=0;i<data->port_btycount;i++)
 		{
 		status = xdr_float(xdrs,&data->bath_acrosstrack_port[i]);
 		status = xdr_float(xdrs,&data->bath_port[i]);
 		}
+	for (i=0;i<dummy_count;i++)
+		{
+		status = xdr_float(xdrs,&dummy);
+		status = xdr_float(xdrs,&dummy);
+		}
+
+	/* do port sidescan */
+	if (data->port_sscount > MBF_MR1PRHIG_PIXELS_SIDE)
+		{
+		/* output debug messages */
+		if (verbose > 0)
+			{
+			fprintf(stderr, "Port sidescan count exceeds MBIO maximum: %d %d\n", 
+				data->port_sscount, MBF_MR1PRHIG_PIXELS_SIDE);
+			}
+		dummy_count = data->port_sscount 
+			- MBF_MR1PRHIG_PIXELS_SIDE;
+		data->port_sscount = MBF_MR1PRHIG_PIXELS_SIDE;
+		}
+	else
+		dummy_count = 0;
 	for (i=0;i<data->port_sscount;i++)
 		{
 		status = xdr_float(xdrs,&data->ss_port[i]);
 		}
+	for (i=0;i<dummy_count;i++)
+		{
+		status = xdr_float(xdrs,&dummy);
+		}
+
+	/* do starboard bathymetry */
+	if (data->stbd_btycount > MBF_MR1PRHIG_BEAMS_SIDE)
+		{
+		/* output debug messages */
+		if (verbose > 0)
+			{
+			fprintf(stderr, "Starboard bathymetry count exceeds MBIO maximum: %d %d\n", 
+				data->stbd_btycount, MBF_MR1PRHIG_BEAMS_SIDE);
+			}
+		dummy_count = data->stbd_btycount 
+			- MBF_MR1PRHIG_BEAMS_SIDE;
+		data->stbd_btycount = MBF_MR1PRHIG_BEAMS_SIDE;
+		}
+	else
+		dummy_count = 0;
 	for (i=0;i<data->stbd_btycount;i++)
 		{
 		status = xdr_float(xdrs,&data->bath_acrosstrack_stbd[i]);
 		status = xdr_float(xdrs,&data->bath_stbd[i]);
 		}
+	for (i=0;i<dummy_count;i++)
+		{
+		status = xdr_float(xdrs,&dummy);
+		status = xdr_float(xdrs,&dummy);
+		}
+
+	/* do starboard sidescan */
+	if (data->stbd_sscount > MBF_MR1PRHIG_PIXELS_SIDE)
+		{
+		/* output debug messages */
+		if (verbose > 0)
+			{
+			fprintf(stderr, "Starboard sidescan count exceeds MBIO maximum: %d %d\n", 
+				data->stbd_sscount, MBF_MR1PRHIG_PIXELS_SIDE);
+			}
+		dummy_count = data->stbd_sscount 
+			- MBF_MR1PRHIG_PIXELS_SIDE;
+		data->stbd_sscount = MBF_MR1PRHIG_PIXELS_SIDE;
+		}
+	else
+		dummy_count = 0;
 	for (i=0;i<data->stbd_sscount;i++)
 		{
 		status = xdr_float(xdrs,&data->ss_stbd[i]);
 		}
+	for (i=0;i<dummy_count;i++)
+		{
+		status = xdr_float(xdrs,&dummy);
+		}
+
 	if (status == MB_FAILURE)
 		*error = MB_ERROR_EOF;
 

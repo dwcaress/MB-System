@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.0 1995-09-28 18:14:11 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.1 1996-01-26 21:23:30 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/09/28  18:14:11  caress
+ * First cut.
+ *
  * Revision 1.1  1995/09/28  18:10:48  caress
  * Initial revision
  *
@@ -53,7 +56,7 @@ int    verbose;
 char   *mbio_ptr;
 int    *error;
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.0 1995-09-28 18:14:11 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.1 1996-01-26 21:23:30 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdldih";
 	int	 status = MB_SUCCESS;
 	int	 i;
@@ -628,7 +631,6 @@ int    *error;
 	struct mbf_hsmdldih_struct *data;
 	char	*data_ptr;
 	struct mbsys_hsmd_struct *store;
-	double scalefactor;
 	int	first;
 	int	i, j;
 
@@ -1015,9 +1017,9 @@ int    *error;
 					speed, then do the simple geometry to
 					calculate depth and cross-track. */
 				if (data->skals)
-					scale = 0.0001;
+					scale = 0.00015;
 				else
-					scale = 0.00001;
+					scale = 0.000015;
 				if (status == MB_SUCCESS)
 				for (i=0; i<MBF_HSMDLDIH_BEAMS_PING; i++ )
 		    			{
