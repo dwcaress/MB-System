@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.13 2004-12-18 01:36:40 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.14 2005-03-25 04:35:55 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2004/12/18 01:36:40  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.12  2004/05/21 23:33:03  caress
  * Moved to new version of BX GUI builder
  *
@@ -232,7 +235,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.13 2004-12-18 01:36:40 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.14 2005-03-25 04:35:55 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -3211,6 +3214,248 @@ int mbnavedit_action_interpolate()
 		    {
 		    ping[iping].draft = ping[iafter].draft;
 		    }
+		}
+	    }
+
+	/* recalculate speed-made-good and course-made-good */
+	if (timelonlat_change == MB_YES)
+		for (i=0;i<nbuff;i++)
+			mbnavedit_get_smgcmg(i);
+
+	/* recalculate model */
+	if (speedheading_change == MB_YES
+		&& model_mode == MODEL_MODE_DR)
+		mbnavedit_get_model();
+	}
+	/* if no data then set failure flag */
+	else
+	status = MB_FAILURE;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_action_interpolaterepeats()
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_action_interpolaterepeats";
+	int	status = MB_SUCCESS;
+	int	iplot;
+	int	iping;
+	int	ibefore, iafter;
+	int	timelonlat_change;
+	int	speedheading_change;
+	int	found;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* don't try to do anything if no data */
+	if (nplot > 0)
+	{
+	/* look for position or time changes */
+	timelonlat_change = MB_NO;
+	speedheading_change = MB_NO;
+
+	/* do expected time */
+	for (iping=1;iping<nbuff-1;iping++)
+	    {
+	    if (ping[iping].tint_select == MB_YES
+	    	&& ping[iping].time_d == ping[iping-1].time_d)
+	    	{
+		/* find next changed value */
+		found = MB_NO;
+		ibefore = iping - 1;
+		for (j=iping+1;j<nbuff && found == MB_NO;j++)
+			{
+			if (ping[iping].time_d != ping[j].time_d)
+				{
+				found = MB_YES;
+				iafter = j;
+				}
+			}
+		for (j=iping;j<iafter;j++)
+			{
+			if (ping[j].tint_select == MB_YES)
+				{
+				ping[j].time_d = ping[ibefore].time_d 
+				    + (ping[iafter].time_d - ping[ibefore].time_d)
+				    * ((double)(iping - ibefore))
+			    		/ ((double)(iafter - ibefore));
+				timelonlat_change = MB_YES;
+				}
+			}		
+		}
+	    }
+
+	/* do longitude */
+	for (iping=1;iping<nbuff-1;iping++)
+	    {
+	    if (ping[iping].lon_select == MB_YES
+	    	&& ping[iping].lon == ping[iping-1].lon)
+	    	{
+		/* find next changed value */
+		found = MB_NO;
+		ibefore = iping - 1;
+		for (j=iping+1;j<nbuff && found == MB_NO;j++)
+			{
+			if (ping[iping].lon != ping[j].lon)
+				{
+				found = MB_YES;
+				iafter = j;
+				}
+			}
+		for (j=iping;j<iafter;j++)
+			{
+			if (ping[j].lon_select == MB_YES)
+				{
+				ping[j].lon = ping[ibefore].lon 
+				    + (ping[iafter].lon - ping[ibefore].lon)
+				    *(ping[j].time_d - ping[ibefore].time_d)
+				    /(ping[iafter].time_d - ping[ibefore].time_d);
+				timelonlat_change = MB_YES;
+				}
+			}		
+		}
+	    }
+
+	/* do latitude */
+	for (iping=1;iping<nbuff-1;iping++)
+	    {
+	    if (ping[iping].lat_select == MB_YES
+	    	&& ping[iping].lat == ping[iping-1].lat)
+	    	{
+		/* find next changed value */
+		found = MB_NO;
+		ibefore = iping - 1;
+		for (j=iping+1;j<nbuff && found == MB_NO;j++)
+			{
+			if (ping[iping].lat != ping[j].lat)
+				{
+				found = MB_YES;
+				iafter = j;
+				}
+			}
+		for (j=iping;j<iafter;j++)
+			{
+			if (ping[j].lat_select == MB_YES)
+				{
+				ping[j].lat = ping[ibefore].lat 
+				    + (ping[iafter].lat - ping[ibefore].lat)
+				    *(ping[j].time_d - ping[ibefore].time_d)
+				    /(ping[iafter].time_d - ping[ibefore].time_d);
+				timelonlat_change = MB_YES;
+				}
+			}		
+		}
+	    }
+
+	/* do speed */
+	for (iping=1;iping<nbuff-1;iping++)
+	    {
+	    if (ping[iping].speed_select == MB_YES
+	    	&& ping[iping].speed == ping[iping-1].speed)
+	    	{
+		/* find next changed value */
+		found = MB_NO;
+		ibefore = iping - 1;
+		for (j=iping+1;j<nbuff && found == MB_NO;j++)
+			{
+			if (ping[iping].speed != ping[j].speed)
+				{
+				found = MB_YES;
+				iafter = j;
+				}
+			}
+		for (j=iping;j<iafter;j++)
+			{
+			if (ping[j].speed_select == MB_YES)
+				{
+				ping[j].speed = ping[ibefore].speed 
+				    + (ping[iafter].speed - ping[ibefore].speed)
+				    *(ping[j].time_d - ping[ibefore].time_d)
+				    /(ping[iafter].time_d - ping[ibefore].time_d);
+				speedheading_change = MB_YES;
+				}
+			}		
+		}
+	    }
+
+	/* do heading */
+	for (iping=1;iping<nbuff-1;iping++)
+	    {
+	    if (ping[iping].heading_select == MB_YES
+	    	&& ping[iping].heading == ping[iping-1].heading)
+	    	{
+		/* find next changed value */
+		found = MB_NO;
+		ibefore = iping - 1;
+		for (j=iping+1;j<nbuff && found == MB_NO;j++)
+			{
+			if (ping[iping].heading != ping[j].heading)
+				{
+				found = MB_YES;
+				iafter = j;
+				}
+			}
+		for (j=iping;j<iafter;j++)
+			{
+			if (ping[j].heading_select == MB_YES)
+				{
+				ping[j].heading = ping[ibefore].heading 
+				    + (ping[iafter].heading - ping[ibefore].heading)
+				    *(ping[j].time_d - ping[ibefore].time_d)
+				    /(ping[iafter].time_d - ping[ibefore].time_d);
+				speedheading_change = MB_YES;
+				}
+			}		
+		}
+	    }
+
+	/* do draft */
+	for (iping=1;iping<nbuff-1;iping++)
+	    {
+	    if (ping[iping].draft_select == MB_YES
+	    	&& ping[iping].draft == ping[iping-1].draft)
+	    	{
+		/* find next changed value */
+		found = MB_NO;
+		ibefore = iping - 1;
+		for (j=iping+1;j<nbuff && found == MB_NO;j++)
+			{
+			if (ping[iping].draft != ping[j].draft)
+				{
+				found = MB_YES;
+				iafter = j;
+				}
+			}
+		for (j=iping;j<iafter;j++)
+			{
+			if (ping[j].draft_select == MB_YES)
+				{
+				ping[j].draft = ping[ibefore].draft 
+				    + (ping[iafter].draft - ping[ibefore].draft)
+				    *(ping[j].time_d - ping[ibefore].time_d)
+				    /(ping[iafter].time_d - ping[ibefore].time_d);
+				timelonlat_change = MB_YES;
+				}
+			}		
 		}
 	    }
 
