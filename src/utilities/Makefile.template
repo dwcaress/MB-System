@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.2 2001-06-29 22:50:23 caress Exp $
+#	$Id: Makefile.template,v 5.3 2001-10-12 21:08:10 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.2  2001/06/29  22:50:23  caress
+# Atlas Hydrosweep DS2 raw data and SURF data formats.
+#
 # Revision 5.1  2001/03/22  21:14:16  caress
 # Trying to make release 5.0.beta0.
 #
@@ -125,6 +128,7 @@ MANDIR = ../../man/manl
 all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbformat $(MANDIR)/mbformat.l \
 	$(BINDIR)/mbdefaults $(MANDIR)/mbdefaults.l \
+	$(BINDIR)/mbdatalist $(MANDIR)/mbdatalist.l \
 	$(BINDIR)/mbinfo $(MANDIR)/mbinfo.l \
 	$(BINDIR)/mbcopy $(MANDIR)/mbcopy.l \
 	$(BINDIR)/mblist $(MANDIR)/mblist.l \
@@ -166,6 +170,9 @@ $(BINDIR)/mbformat:	mbformat.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mbdefaults:	mbdefaults.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbdefaults.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mbdefaults
+$(BINDIR)/mbdatalist:	mbdatalist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
+	$(CC) $(CFLAGS) mbdatalist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
+		-o $(BINDIR)/mbdatalist
 $(BINDIR)/mbinfo:	mbinfo.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbinfo.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mbinfo
@@ -262,6 +269,8 @@ mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb
 	$(CC) -c $(CFLAGS) mbformat.c
 mbdefaults.o:	mbdefaults.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbdefaults.c
+mbdatalist.o:	mbdatalist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbdatalist.c
 mbinfo.o:	mbinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbinfo.c
 mbcopy.o:	mbcopy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -332,6 +341,9 @@ $(MANDIR)/mbformat.l:	mbformat.manl
 $(MANDIR)/mbdefaults.l:	mbdefaults.manl
 	cp mbdefaults.manl $(MANDIR)/mbdefaults.l
 	chmod 664 $(MANDIR)/mbdefaults.l
+$(MANDIR)/mbdatalist.l:	mbdatalist.manl
+	cp mbdatalist.manl $(MANDIR)/mbdatalist.l
+	chmod 664 $(MANDIR)/mbdatalist.l
 $(MANDIR)/mbinfo.l:	mbinfo.manl
 	cp mbinfo.manl $(MANDIR)/mbinfo.l
 	chmod 664 $(MANDIR)/mbinfo.l
