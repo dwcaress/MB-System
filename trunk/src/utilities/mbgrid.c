@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.32 1997-02-18 20:39:56 caress Exp $
+ *    $Id: mbgrid.c,v 4.33 1997-02-19 17:58:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.32  1997/02/18  20:39:56  caress
+ * Fixed bugs where error value was not passed to functions as a pointer.
+ *
  * Revision 4.31  1996/09/05  13:07:47  caress
  * Added feature that checks ".inf" files for lon lat bounds.
  *
@@ -224,7 +227,7 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.32 1997-02-18 20:39:56 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.33 1997-02-19 17:58:15 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -1086,9 +1089,9 @@ char **argv;
 	while (fscanf(fp,"%s %d",file,&format) != EOF)
 		{
 		ndatafile = 0;
-
+		
 		/* if format > 0 then input is multibeam file */
-		if (format > 0)
+		if (format > 0 && file[0] != '#')
 		{
 		/* check for mbinfo file - get file bounds if possible */
 		status = mb_check_info(verbose, file, lonflip, wbnd, 
@@ -1552,7 +1555,7 @@ char **argv;
 		} /* end if (format > 0) */
 
 		/* if format == 0 then input is lon,lat,values triples file */
-		else if (format == 0)
+		else if (format == 0 && file[0] != '#')
 		{
 		/* open data file */
 		if ((dfp = fopen(file,"r")) == NULL)
@@ -1752,7 +1755,7 @@ char **argv;
 		ndatafile = 0;
 
 		/* if format > 0 then input is multibeam file */
-		if (format > 0)
+		if (format > 0 && file[0] != '#')
 		{
 		/* check for mbinfo file - get file bounds if possible */
 		status = mb_check_info(verbose, file, lonflip, wbnd, 
@@ -2117,7 +2120,7 @@ char **argv;
 		} /* end if (format > 0) */
 
 		/* if format == 0 then input is lon,lat,values triples file */
-		else if (format == 0)
+		else if (format == 0 && file[0] != '#')
 		{
 		/* open data file */
 		if ((dfp = fopen(file,"r")) == NULL)
