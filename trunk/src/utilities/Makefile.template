@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.3 1994-10-31 20:17:32 caress Exp $
+#	$Id: Makefile.template,v 4.4 1994-10-31 20:24:03 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.3  1994/10/31  20:17:32  caress
+# Change man pages from section 1 to l.
+#
 # Revision 4.2  1994/10/31  18:47:28  caress
 # Changed man pages from section 1 to section l.
 #
@@ -190,7 +193,7 @@ $(MANDIR)/mblevitus.l:	mblevitus.manl
 $(MANDIR)/mbbath.l:	mbbath.manl
 	cp mbbath.manl $(MANDIR)/mbbath.l
 	chmod 664 $(MANDIR)/mbbath.l
-$(MANDIR)/hsbath.l:	$(MANDIR)/mbbath.manl
+$(MANDIR)/hsbath.l:	$(MANDIR)/mbbath.l
 	cd $(MANDIR); pwd; rm -f hsbath.l; ln -s mbbath.l hsbath.l
 $(MANDIR)/hsdump.l:	hsdump.manl
 	cp hsdump.manl $(MANDIR)/hsdump.l
