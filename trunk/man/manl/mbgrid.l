@@ -115,7 +115,7 @@ This is useful only if the data are confined to the central region
 of the grid and a smooth interpolation is done with a large \fIclip\fP
 so that the entire grid is filled.
 
-The output grid will by default contain values of -99999.9 at cells
+The output grid will by default contain values of 99999.9 at cells
 containing no data; if the \fB-N\fP option is used then the flagging
 value used is NaN, or not-a-number.
 
@@ -235,7 +235,7 @@ points in each grid cell.
 .TP
 .B \fB-N\fP
 Causes grid cells with no data and no interpolation to be set to a
-value of NaN instead of the default value of -99999.9.  The NaN value
+value of NaN instead of the default value of 99999.9.  The NaN value
 is expected by \fBGMT\fP programs such \fBgrdview\fP.
 .TP
 .B \fB-P\fIpings\fP
@@ -320,7 +320,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.4 1995-02-22 21:54:25 caress Exp $
+ Version $Id: mbgrid.l,v 4.5 1995-03-15 14:16:25 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -397,7 +397,7 @@ standard deviation values. The following will suffice:
 The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.4 1995-02-22 21:54:25 caress Exp $
+ Version $Id: mbgrid.l,v 4.5 1995-03-15 14:16:25 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
