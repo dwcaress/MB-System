@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.8 2003-04-17 20:43:37 caress Exp $
+ *    $Id: mbswath.c,v 5.9 2004-05-21 23:13:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/04/17 20:43:37  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.7  2002/10/02 23:52:37  caress
  * Release 5.0.beta24
  *
@@ -302,7 +305,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.8 2003-04-17 20:43:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.9 2004-05-21 23:13:35 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -912,19 +915,22 @@ main (int argc, char **argv)
 		gmtdefs.x_origin, gmtdefs.y_origin,
 		gmtdefs.global_x_scale, gmtdefs.global_y_scale, 
 		gmtdefs.n_copies, gmtdefs.dpi, gmtdefs.measure_unit, 
-#ifdef GMT3_0
 		gmtdefs.paper_width, gmtdefs.page_rgb, 
+#ifdef GMT3_0
 		gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
 		timestamp (argc, argv);
 #else
-		gmtdefs.paper_width, gmtdefs.page_rgb, 
+#ifdef GMT4_0
+		gmtdefs.encoding.name, 
+#endif
 		GMT_epsinfo (argv[0]));
 	GMT_echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
 		GMT_timestamp (argc, argv);
 #endif
+
 	/* set clip path */
 #ifdef GMT3_0
 	geo_to_xy(borders_use[0],borders_use[2],&clipx[0],&clipy[0]);
@@ -1443,6 +1449,8 @@ main (int argc, char **argv)
 		{
 #ifdef GMT3_0
 		color_image (0., 0., x_inch, y_inch, bitimage, nx, ny);
+#elif GMT4_0
+		GMT_color_image (0., 0., x_inch, y_inch, bitimage, nx, ny, 24);
 #else
 		GMT_color_image (0., 0., x_inch, y_inch, bitimage, nx, ny);
 #endif
