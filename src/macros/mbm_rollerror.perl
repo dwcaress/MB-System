@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	6/18/93
-#    $Id: mbm_rollerror.perl,v 4.1 1994-10-21 11:36:58 caress Exp $
+#    $Id: mbm_rollerror.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,10 +33,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_rollerror.perl,v 4.1 1994-10-21 11:36:58 caress Exp $
+#   $Id: mbm_rollerror.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1994/10/21  11:36:58  caress
+# Release V4.0
+#
 # Revision 4.0  1994/03/05  23:52:40  caress
 # First cut at version 4.0
 #
@@ -107,6 +110,7 @@ close(FOUT);
 
 # Announce success whether it is deserved or not.
 print "All done!\n";
+exit 0;
 
 #-----------------------------------------------------------------------
 # This should be loaded from the library but the shipboard installation

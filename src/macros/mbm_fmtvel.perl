@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_fmtvel.perl	6/18/93
-#    $Id: mbm_fmtvel.perl,v 4.1 1994-10-21 11:36:58 caress Exp $
+#    $Id: mbm_fmtvel.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -36,10 +36,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 19, 1993
 #
 # Version:
-#   $Id: mbm_fmtvel.perl,v 4.1 1994-10-21 11:36:58 caress Exp $
+#   $Id: mbm_fmtvel.perl,v 4.2 1995-05-12 17:43:23 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1994/10/21  11:36:58  caress
+# Release V4.0
+#
 # Revision 4.0  1994/03/05  23:52:40  caress
 # First cut at version 4.0
 #
@@ -80,7 +83,7 @@ if ($help)
 	print "\n$program_name:\n";
 	print "\nPerl shellscript to generate a list of the C-mean (mean water velocity) \nand C-keel (surface water velocity) used by Hydrosweepin its internal \nprocessing.  This macro executes the programhsdump and then scans the \noutput for the desired values.The only allowed formats are 5 (raw \nHydrosweep data) and 8(L-DEO in-house binary Hydrosweep data).\n";
 	print "\nUsage: $program_name -Fformat -Ifile\n";
-	die "\n";
+	exit 0;
 	}
 
 # check for defined parameters
@@ -135,6 +138,8 @@ while (@hsdump)
 		}
  	}
 
+# end it all
+exit 0;
 
 #-----------------------------------------------------------------------
 # This should be loaded from the library but the shipboard installation
@@ -201,7 +206,7 @@ sub Getopts {
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP
 ;# Modified March 1990, Feb 1991 to properly handle timezones
-;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 4.1 $$Date: 1994-10-21 11:36:58 $
+;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 4.2 $$Date: 1995-05-12 17:43:23 $
 ;#   Marion Hakanson (hakanson@cse.ogi.edu)
 ;#   Oregon Graduate Institute of Science and Technology
 ;#
