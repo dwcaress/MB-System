@@ -1,5 +1,5 @@
 /*
- * $Id: man2html.c,v 5.0 2003-08-07 21:27:58 caress Exp $
+ * $Id: man2html.c,v 5.1 2004-05-21 23:17:08 caress Exp $
  *
 ** This program was written by Richard Verhoeven (NL:5482ZX35)
 ** at the Eindhoven University of Technology. Email: rcb5@win.tue.nl
@@ -900,8 +900,19 @@ add_links(char *c)
 		    t=*e;
 		    *e='\0';
 		    if (dofilter)
-			printf("<A HREF=\"%s.html\">%s</A>",
-			       h, h);
+		    	{
+/*fprintf(stderr,"LINK?: h:%s sec:%c\n",h,sec);*/
+			if ((h[0] == 'm' && h[1] == 'b')
+				|| (strcmp(h,"hsdump") == 0)
+				|| (strcmp(h,"xbt") == 0))
+				{
+				printf("<A HREF=\"%s.html\">%s</A>", h, h);
+				}
+			else
+				{
+				printf("%s", h);
+				}
+			}
 		    else
 		    if (subsec)
 			printf("<A HREF=\""
