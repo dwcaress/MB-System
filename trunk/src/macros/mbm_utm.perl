@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_utm.perl	5/13/2002
-#    $Id: mbm_utm.perl,v 5.1 2002-05-29 23:35:57 caress Exp $
+#    $Id: mbm_utm.perl,v 5.2 2003-03-27 07:58:11 caress Exp $
 #
 #    Copyright (c) 2002 by
 #    D. W. Caress (caress@mbari.org)
@@ -36,10 +36,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 13, 2002
 #
 # Version:
-#   $Id: mbm_utm.perl,v 5.1 2002-05-29 23:35:57 caress Exp $
+#   $Id: mbm_utm.perl,v 5.2 2003-03-27 07:58:11 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2002/05/29 23:35:57  caress
+#   Release 5.0.beta18
+#
 #   Revision 5.0  2002/05/14 18:53:03  caress
 #   Initial revision.
 #
@@ -112,13 +115,14 @@ $bounds = "$org_lon" . "/" . "$org_lat"
 # set gmt defaults
 ($d_format) = `gmtdefaults -L | grep D_FORMAT` =~ /\S+\s+\S+\s+(\S+)/;
 ($ellipsoid) = `gmtdefaults -L | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
+($measure_unit) = `gmtdefaults -L | grep MEASURE_UNIT` =~ /\S+\s+\S+\s+(\S+)/;
 if ($ellipsoid eq "Clarke-1866")
 	{ 
-	`gmtset D_FORMAT %.10lg ELLIPSOID Clarke-1866`;
+	`gmtset D_FORMAT %.10lg ELLIPSOID Clarke-1866 MEASURE_UNIT inch`;
 	}
 else
 	{ 
-	`gmtset D_FORMAT %.10lg ELLIPSOID WGS-84`;
+	`gmtset D_FORMAT %.10lg ELLIPSOID WGS-84 MEASURE_UNIT inch`;
 	}
 
 # set temporary file name
@@ -269,7 +273,9 @@ else
 	}
 
 # reset the gmt defaults
-`gmtset D_FORMAT $d_format ELLIPSOID $ellipsoid`;
+`gmtset D_FORMAT $d_format ELLIPSOID $ellipsoid MEASURE_UNIT $measure_unit`;
+
+exit 0;
 
 
 #-----------------------------------------------------------------------
