@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12draw.c	7/8/96
- *	$Id: mbr_em12draw.c,v 4.3 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_em12draw.c,v 4.4 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.3  1997/04/17  15:07:36  caress
  * MB-System 4.5 Beta Release
  *
@@ -63,7 +66,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em12draw.c,v 4.3 1997-04-21 17:02:07 caress Exp $";
+	static char res_id[]="$Id: mbr_em12draw.c,v 4.4 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbr_alm_em12draw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -644,7 +647,19 @@ int	*error;
 			daloscale  = 0.5;
 			reflscale  = 0.5;
 			}
-		if (data->ss_mode == 3)
+		/* fix problems with some EM12 data */
+		if (data->ss_mode < 1 || data->ss_mode > 5)
+			{
+			if (data->bath_res == 1)
+				data->ss_mode = 1;
+			else
+				data->ss_mode = 2;
+			}
+		if (data->ss_mode == 1)
+			ss_spacing = 0.6;
+		else if (data->ss_mode == 2)
+			ss_spacing = 2.4;
+		else if (data->ss_mode == 3)
 			ss_spacing = 0.3;
 		else if (data->ss_mode == 4)
 			ss_spacing = 0.3;
@@ -1304,6 +1319,9 @@ int	*error;
 		more_ss = MB_NO;
 		}
 
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
 	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
@@ -1658,6 +1676,12 @@ int	*error;
 		fprintf(stderr,"expect:%x\n",expect);
 		fprintf(stderr,"type:%x\n",*type);*/
 		}
+		
+	/* get file position */
+	if (*label_save_flag == MB_YES)
+		mb_io_ptr->file_bytes = ftell(mbfp) - 2;
+	else if (*expect_save_flag != MB_YES)
+		mb_io_ptr->file_bytes = ftell(mbfp);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2467,7 +2491,7 @@ int	*error;
 		/* get binary stuff */
 #ifdef BYTESWAPPED
 		short_ptr = (short int *) &line[14]; data->ping_number = *short_ptr;
-		short_ptr = (short int *) &line[16]; data->sound_vel = *short_ptr;
+/*		short_ptr = (short int *) &line[16]; data->sound_vel = *short_ptr;*/
 		char_ptr = &line[18]; data->ss_mode = (int) *char_ptr;
 		char_ptr = &line[19]; num_datagrams = (int) *char_ptr;
 		char_ptr = &line[20]; datagram = (int) *char_ptr;
@@ -2522,7 +2546,7 @@ int	*error;
 		short_ptr = (short int *) &line[14]; 
 		data->ping_number = (short int) mb_swap_short(*short_ptr);
 		short_ptr = (short int *) &line[16]; 
-		data->sound_vel = (short int) mb_swap_short(*short_ptr);
+/*		data->sound_vel = (short int) mb_swap_short(*short_ptr);*/
 		char_ptr = &line[18]; 
 		data->ss_mode = (int) *char_ptr;
 		char_ptr = &line[19]; 

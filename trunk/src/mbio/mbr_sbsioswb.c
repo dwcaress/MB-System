@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 4.6 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 4.7 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -77,7 +80,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 4.6 1997-04-21 17:02:07 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 4.7 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -208,14 +211,17 @@ int	*error;
 	commentptr = (char *) &data->comment[0];
 
 	/* read next header record from file */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	if ((status = fread(headerptr,1,MB_SBSIOSWB_HEADER_SIZE,
 			mb_io_ptr->mbfp)) == MB_SBSIOSWB_HEADER_SIZE) 
 		{
+		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		}
 	else
 		{
+		mb_io_ptr->file_bytes += status;
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
@@ -297,16 +303,19 @@ int	*error;
 		/* shift bytes by one */
 		for (i=0;i<MB_SBSIOSWB_HEADER_SIZE-1;i++)
 			headerptr[i] = headerptr[i+1];
+		mb_io_ptr->file_pos += 1;
 
 		/* read next byte */
 		if ((status = fread(&headerptr[MB_SBSIOSWB_HEADER_SIZE-1],
 			1,1,mb_io_ptr->mbfp)) == 1) 
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}
 		else
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
@@ -376,6 +385,8 @@ int	*error;
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
 					}
+				mb_io_ptr->file_bytes 
+						+= read_status;
 				}
 			for (i=0;i<data->data_size;i++)
 				{
@@ -385,6 +396,8 @@ int	*error;
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
 					}
+				mb_io_ptr->file_bytes 
+						+= read_status;
 				}
 
 			}
@@ -404,11 +417,13 @@ int	*error;
 		if ((status = fread(sensorptr,1,data->sensor_size,
 			mb_io_ptr->mbfp)) == data->sensor_size) 
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}
 		else
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
@@ -441,11 +456,13 @@ int	*error;
 		if ((status = fread(datarecptr,1,data->data_size,
 			mb_io_ptr->mbfp)) == data->data_size) 
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}
 		else
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
@@ -490,6 +507,7 @@ int	*error;
 		if ((status = fread(commentptr,1,data->data_size,
 			mb_io_ptr->mbfp)) == data->data_size) 
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			for (i=data->data_size;i<MB_SBSIOSWB_COMMENT_LENGTH;i++)
@@ -497,6 +515,7 @@ int	*error;
 			}
 		else
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat9001.c	8/8/94
- *	$Id: mbr_cbat9001.c,v 4.5 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_cbat9001.c,v 4.6 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.4  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -69,7 +72,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_cbat9001.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat9001.c,v 4.6 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbr_alm_cbat9001";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1029,6 +1032,9 @@ int	*error;
 	data_ptr = (char *) data;
 	mbfp = mb_io_ptr->mbfp;
 
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
 	done = MB_NO;
 	type = (short int *) label;
 	first = MB_YES;
@@ -1175,6 +1181,9 @@ int	*error;
 		fprintf(stderr,"done:%d\n",done);
 		fprintf(stderr,"type:%x\n",*type);*/
 		}
+		
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mbfp);
 
 	/* print output debug statements */
 	if (verbose >= 2)

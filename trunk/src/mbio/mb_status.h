@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.7 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_status.h,v 4.8 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.7  1997/04/17  15:07:36  caress
  * MB-System 4.5 Beta Release
  *
@@ -172,3 +175,7 @@ static char *unknown_error_msg[] =
 	"Unknown error identifier"
 	};
 
+/* data flagging defines */
+#define	MB_FLAG_NO_DATA	    0
+#define	MB_FLAG_GOOD_DATA   1
+#define	MB_FLAG_BAD_DATA    2

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 4.6 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 4.7 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -72,7 +75,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.6 1997-04-21 17:02:07 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.7 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1208,6 +1211,9 @@ int	*error;
 	data_ptr = (char *) data;
 	mbfp = mb_io_ptr->mbfp;
 
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
 	done = MB_NO;
 	type = (short int *) label;
 	*error = MB_ERROR_NO_ERROR;
@@ -1317,6 +1323,9 @@ int	*error;
 			done == MB_YES;
 
 		}
+		
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mbfp);
 
 	/* print output debug statements */
 	if (verbose >= 2)

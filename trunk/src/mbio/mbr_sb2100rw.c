@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.24 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.25 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.24  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.24  1997/04/17  15:07:36  caress
  * MB-System 4.5 Beta Release
  *
@@ -138,7 +141,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.24 1997-04-21 17:02:07 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.25 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1198,6 +1201,9 @@ int	*error;
 
 	/* initialize everything to zeros */
 	mbr_zero_sb2100rw(verbose,data_ptr,error);
+	
+	/* get file position at record beginning */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;	
 
 	done = MB_NO;
 	expect = MBF_SB2100RW_NONE;
@@ -1206,18 +1212,26 @@ int	*error;
 
 		/* get next record label */
 		if (line_save_flag == MB_NO)
+			{
+			/* save position in file */
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			
+			/* read the label */
 			status = mbr_sb2100rw_rd_label(verbose,mbfp,
 				raw_line,&type,error);
+			}
 		else
 			line_save_flag = MB_NO;
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == MBF_SB2100RW_NONE)
 			{
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
 			}
 		else if (status == MB_FAILURE && expect != MBF_SB2100RW_NONE)
 			{
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
@@ -1231,6 +1245,7 @@ int	*error;
 		else if (type == MBF_SB2100RW_RAW_LINE)
 			{
 			strcpy(data->comment,raw_line);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
 			data->kind = MB_DATA_RAW_LINE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
@@ -1240,6 +1255,7 @@ int	*error;
 			{
 			status = mbr_sb2100rw_rd_pr(
 				verbose,mbfp,data,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1250,6 +1266,7 @@ int	*error;
 			{
 			status = mbr_sb2100rw_rd_tr(
 				verbose,mbfp,data,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1260,6 +1277,7 @@ int	*error;
 			{
 			status = mbr_sb2100rw_rd_dr(
 				verbose,mbfp,data,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_NO;
@@ -1271,6 +1289,7 @@ int	*error;
 			{
 			status = mbr_sb2100rw_rd_ss(
 				verbose,mbfp,data,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS 
 				&& expect == MBF_SB2100RW_SS)
 				{

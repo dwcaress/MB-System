@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 4.6 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 4.7 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -82,7 +85,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 4.6 1997-04-21 17:02:07 caress Exp $";
+ static char res_id[]="$Id: mbr_mbldeoih.c,v 4.7 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -224,16 +227,21 @@ int	*error;
 	ss = data->ss;
 	ss_acrosstrack = data->ss_acrosstrack;
 	ss_alongtrack = data->ss_alongtrack;
+	
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next header from file */
 	if ((status = fread(header,1,mb_io_ptr->header_structure_size,
 			mb_io_ptr->mbfp)) == mb_io_ptr->header_structure_size) 
 		{
+		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		}
 	else
 		{
+		mb_io_ptr->file_bytes += status;
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
@@ -322,11 +330,13 @@ int	*error;
 		if ((status = fread(comment,1,read_size,mb_io_ptr->mbfp))
 			== read_size) 
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}
 		else
 			{
+			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
@@ -353,18 +363,25 @@ int	*error;
 		/* read bathymetry */
 		read_size = sizeof(short int)*header->beams_bath;
 		status = fread(bath,1,read_size,mb_io_ptr->mbfp);
+		mb_io_ptr->file_bytes += status;
 		status = fread(bath_acrosstrack,1,read_size,mb_io_ptr->mbfp);
+		mb_io_ptr->file_bytes += status;
 		status = fread(bath_alongtrack,1,read_size,mb_io_ptr->mbfp);
+		mb_io_ptr->file_bytes += status;
 
 		/* read amplitudes */
 		read_size = sizeof(short int)*header->beams_amp;
 		status = fread(amp,1,read_size,mb_io_ptr->mbfp);
+		mb_io_ptr->file_bytes += status;
 
 		/* read sidescan */
 		read_size = sizeof(short int)*header->pixels_ss;
 		status = fread(ss,1,read_size,mb_io_ptr->mbfp);
+		mb_io_ptr->file_bytes += status;
 		status = fread(ss_acrosstrack,1,read_size,mb_io_ptr->mbfp);
+		mb_io_ptr->file_bytes += status;
 		status = fread(ss_alongtrack,1,read_size,mb_io_ptr->mbfp);
+		mb_io_ptr->file_bytes += status;
 
 		/* byte swap the data if necessary */
 #ifdef BYTESWAPPED

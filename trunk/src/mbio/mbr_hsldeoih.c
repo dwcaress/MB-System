@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.11 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.12 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.10  1996/04/24  01:14:38  caress
  * Code now keeps any water sound velocity or position offset
  * data encountered in memory.
@@ -105,7 +108,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.11 1997-04-21 17:02:07 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.12 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -971,6 +974,9 @@ int	*error;
 	/* initialize everything to zeros */
 	mbr_zero_hsldeoih(verbose,data_ptr,ZERO_SOME,error);
 
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
 	/* get next record type */
 	if ((status = fread(&label,1,sizeof(int),mbfp)) == sizeof(int)) 
 		{
@@ -1077,6 +1083,9 @@ int	*error;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 		}
+		
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mbfp);
 
 	/* print output debug statements */
 	if (verbose >= 2)
