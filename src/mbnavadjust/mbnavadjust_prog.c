@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.1 2000-12-10 20:29:34 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.2 2000-12-21 00:44:15 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:29:34  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:55:48  caress
  * First cut at Version 5.0.
  *
@@ -83,7 +86,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.1 2000-12-10 20:29:34 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.2 2000-12-21 00:44:15 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -1514,7 +1517,6 @@ int mbnavadjust_import_file(char *path, int format)
 	struct mbsys_ldeoih_struct *ostore;
 	struct mb_io_struct *omb_io_ptr;
 	int	new_pings, new_crossings;
-	int	decimate_count;
 	int	overlap;
 	double	dx1, dy1, dx2, dy2;
 	double	lon1min, lon1max, lat1min, lat1max;
@@ -1666,7 +1668,6 @@ int mbnavadjust_import_file(char *path, int format)
 		nread = 0;
 		new_segment = MB_NO;
 		first = MB_YES;
-		decimate_count = 0;
 		while (error <= MB_ERROR_NO_ERROR)
 			{
 			/* read a ping of data */
@@ -1855,7 +1856,6 @@ section->distance, distance, project.section_length);*/
 					
 				/* initialize new section */
 /*fprintf(stderr,"New section: %d\n",file->num_sections);*/
-				decimate_count = 0;
 				file->num_sections++;
 				section = &file->sections[file->num_sections-1];
 				section->num_pings = 0;
@@ -1947,20 +1947,13 @@ section->distance, distance, project.section_length);*/
 					}			
 				}
 				
-			/* augment decimation count */
-			if (good_bath == MB_YES)
-				{
-				decimate_count++;
-				}
-				
 			/* update section distance for each data ping */
 			if (good_bath == MB_YES
 				&& section->num_pings > 1)
 				section->distance += distance;
 				
 			/* handle good bathymetry when decimation satisfied */
-			if (good_bath == MB_YES
-				&& decimate_count == 1)
+			if (good_bath == MB_YES)
 				{
 				/* get statistics */
 				mb_coor_scale(mbna_verbose,navlat,&mtodeglon,&mtodeglat);
@@ -2084,11 +2077,6 @@ beams_bath,beams_amp,pixels_ss);*/
 						navlon, navlat, heading, speed, 
 						draft, roll, pitch, heave);
 				}
-				
-			/* reset decimation */
-			if (good_bath == MB_YES 
-				&& decimate_count >= project.decimation)
-				decimate_count = 0;
 				
 			/* increment counters */
 			if (error == MB_ERROR_NO_ERROR)
@@ -3880,7 +3868,6 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 			    {
 			    /* read the next ping */
 			    pingraw = &swathraw->pingraws[swathraw->npings];
-			    ping = &swath->pings[swath->npings];
 			    status = mb_get_all(mbna_verbose,imbio_ptr,
 				    &istore_ptr,&kind,
 				    pingraw->time_i, &pingraw->time_d,
@@ -3903,7 +3890,6 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 			    	if (error == MB_ERROR_NO_ERROR)
 				    {
 				    swathraw->npings++;
-				    swath->npings++;
 				    }
 
 				/* extract all nav values */
@@ -3915,39 +3901,10 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 					&roll, &pitch, &heave, 
 					&error);
 
-				/* copy data from swathraw to swath */
-				for (i=0;i<7;i++)
-				    ping->time_i[i] = pingraw->time_i[i];
-				ping->time_d = pingraw->time_d;
-				ping->navlon = pingraw->navlon;
-				ping->navlat = pingraw->navlat;
-				ping->heading = pingraw->heading;
-				mb_coor_scale(mbna_verbose, pingraw->navlat, 
-						&mtodeglon, &mtodeglat);
-				headingx = sin(pingraw->heading * DTR);
-				headingy = cos(pingraw->heading * DTR);
-			    	for (i=0;i<beams_bath;i++)
-				    {
-				    ping->beamflag[i] = pingraw->beamflag[i];
-				    ping->bath[i] = pingraw->bath[i];
-				    ping->bathlon[i] = pingraw->navlon 
-							+ headingy*mtodeglon
-							    *pingraw->bathacrosstrack[i]
-							+ headingx*mtodeglon
-							    *pingraw->bathalongtrack[i];
-				    ping->bathlat[i] = pingraw->navlat 
-							- headingx*mtodeglat
-							    *pingraw->bathacrosstrack[i]
-							+ headingy*mtodeglat
-							    *pingraw->bathalongtrack[i];
-				    }
-
 			    	/* null out any unused beams for formats with
 					variable numbers of beams */
 			    	for (i=beams_bath;i<swathraw->beams_bath;i++)
 				    pingraw->beamflag[i] = MB_FLAG_NULL;
-			    	for (i=beams_bath;i<swath->beams_bath;i++)
-				    ping->beamflag[i] = MB_FLAG_NULL;
 /*fprintf(stderr, "%d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %11.6f %11.6f %d:%d\n",
 status,
 ping->time_i[0],ping->time_i[1],ping->time_i[2],
@@ -4041,11 +3998,12 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
 		swath = (struct swath *) swath_ptr;
 		
 		/* relocate soundings based on heading bias */
-		swath->npings = swathraw->npings;
-		for (iping=0;iping<swathraw->npings;iping++)
+		swath->npings = 0;
+		for (iping=0;iping<swathraw->npings;iping+=project.decimation)
 		    {
+		    swath->npings++;
 		    pingraw = &swathraw->pingraws[iping];
-		    ping = &swath->pings[iping];
+		    ping = &swath->pings[swath->npings - 1];
 		    for (i=0;i<7;i++)
 			ping->time_i[i] = pingraw->time_i[i];
 		    ping->time_d = pingraw->time_d;
@@ -4059,6 +4017,7 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
 		    headingy = cos(ping->heading * DTR);
 		    for (i=0;i<swathraw->beams_bath;i++)
 			{
+			ping->beamflag[i] = pingraw->beamflag[i];
 			if (mb_beam_ok(pingraw->beamflag[i]))
 			    {
 			    /* strip off transducer depth */
@@ -4374,7 +4333,7 @@ i, j, swath1->pings[i].bathlon[j], swath1->pings[i].bathlat[j], x, y, igx, igy);
 					    }
 /*else
 fprintf(stderr, "BAD swath2: %d %d  %f %f  %f %f  %d %d\n",
-i, j, swath2->pings[i].bathlon[j], swath1->pings[i].bathlat[j], x, y, igx, igy);*/					
+i, j, swath2->pings[i].bathlon[j], swath2->pings[i].bathlat[j], x, y, igx, igy);*/					
 	    				}
 	    			}
 	    		}
@@ -4675,12 +4634,12 @@ mbnavadjust_naverr_plot(int plotmode)
 		    iyo = iy;
 		    }	
 		}
-	    ixo = (int)(mbna_plotx_scale * (swath1->pings[0].navlon + mbna_offset_x_old - mbna_plot_lon_min));
-	    iyo = (int)(cont_borders[3] - mbna_ploty_scale * (swath1->pings[0].navlat + mbna_offset_y_old - mbna_plot_lat_min));
-	    for (i=1;i<swath1->npings;i++)
+	    ixo = (int)(mbna_plotx_scale * (swathraw1->pingraws[0].navlon + mbna_offset_x_old - mbna_plot_lon_min));
+	    iyo = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw1->pingraws[0].navlat + mbna_offset_y_old - mbna_plot_lat_min));
+	    for (i=1;i<swathraw1->npings;i++)
 		{
-		ix = (int)(mbna_plotx_scale * (swath1->pings[i].navlon + mbna_offset_x_old - mbna_plot_lon_min));
-		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swath1->pings[i].navlat + mbna_offset_y_old - mbna_plot_lat_min));
+		ix = (int)(mbna_plotx_scale * (swathraw1->pingraws[i].navlon + mbna_offset_x_old - mbna_plot_lon_min));
+		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw1->pingraws[i].navlat + mbna_offset_y_old - mbna_plot_lat_min));
 		xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[0], XG_SOLIDLINE);
 		ixo = ix;
 		iyo = iy;
@@ -4758,12 +4717,12 @@ mbnavadjust_naverr_plot(int plotmode)
 		    iyo = iy;
 		    }	
 		}
-	    ixo = (int)(mbna_plotx_scale * (swath1->pings[0].navlon + mbna_offset_x - mbna_plot_lon_min));
-	    iyo = (int)(cont_borders[3] - mbna_ploty_scale * (swath1->pings[0].navlat + mbna_offset_y - mbna_plot_lat_min));
-	    for (i=1;i<swath1->npings;i++)
+	    ixo = (int)(mbna_plotx_scale * (swathraw1->pingraws[0].navlon + mbna_offset_x - mbna_plot_lon_min));
+	    iyo = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw1->pingraws[0].navlat + mbna_offset_y - mbna_plot_lat_min));
+	    for (i=1;i<swathraw1->npings;i++)
 		{
-		ix = (int)(mbna_plotx_scale * (swath1->pings[i].navlon + mbna_offset_x - mbna_plot_lon_min));
-		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swath1->pings[i].navlat + mbna_offset_y - mbna_plot_lat_min));
+		ix = (int)(mbna_plotx_scale * (swathraw1->pingraws[i].navlon + mbna_offset_x - mbna_plot_lon_min));
+		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw1->pingraws[i].navlat + mbna_offset_y - mbna_plot_lat_min));
 		xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
 		ixo = ix;
 		iyo = iy;
@@ -4792,12 +4751,12 @@ mbnavadjust_naverr_plot(int plotmode)
 		    iyo = iy;
 		    }	
 		}
-	    ixo = (int)(mbna_plotx_scale * (swath2->pings[0].navlon - mbna_plot_lon_min));
-	    iyo = (int)(cont_borders[3] - mbna_ploty_scale * (swath2->pings[0].navlat - mbna_plot_lat_min));
-	    for (i=1;i<swath2->npings;i++)
+	    ixo = (int)(mbna_plotx_scale * (swathraw2->pingraws[0].navlon - mbna_plot_lon_min));
+	    iyo = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw2->pingraws[0].navlat - mbna_plot_lat_min));
+	    for (i=1;i<swathraw2->npings;i++)
 		{
-		ix = (int)(mbna_plotx_scale * (swath2->pings[i].navlon - mbna_plot_lon_min));
-		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swath2->pings[i].navlat - mbna_plot_lat_min));
+		ix = (int)(mbna_plotx_scale * (swathraw2->pingraws[i].navlon - mbna_plot_lon_min));
+		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw2->pingraws[i].navlat - mbna_plot_lat_min));
 		xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
 		ixo = ix;
 		iyo = iy;
