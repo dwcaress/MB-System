@@ -1,35 +1,26 @@
-MB-SYSTEM VERSION 4.3 RELEASE NOTES:
+MB-SYSTEM VERSION 4.4 RELEASE NOTES:
 -----------------------------------
 
-This directory structure contains the version 4.3 release  
+This directory structure contains the version 4.4 release  
 of the MB-System software package for processing and display of 
-multibeam data. Version 4.3 includes significant enhancements
-and bug fixes relative to version 4.2. 
+multibeam data. Version 4.4 includes significant enhancements
+and bug fixes relative to version 4.3. 
 
-Most importantly, MB-System 4.3 works with the new release 
-of the GMT software package (GMT 3.0). MB-System 4.3 IS NOT 
-COMPATIBLE with GMT 2.1.4, so users will need to update 
-their GMT installation at the same time that they install 
-the new MB-System. 
+The primary enhancements for version 4.4 are new i/o
+modules supporting swath data collected using the
+WHOI DSL AMS-120 deep-towed interferometric sonar and
+data collected using Simrad EM-121 and EM12S sonars.
 
-In addition, there is a new interactive tool for editing 
-navigation in swath data files, and the old plotting macros 
-(mbm_plot and mbm_grdplot) have been replaced by four new, 
-completely rewritten macros (mbm_plot, mbm_grdplot, 
-mbm_grd3dplot, mbm_xyplot). See the manual pages for these 
-programs for information about these new capabilities.
+So many users have been clamoring for support of these
+data formats that we felt a new version and release
+was justified.
 
-Finally, the realtime contour pen plotting tools are no 
-longer included in the MB-System distribution. These tools 
-require special calcomp or HPGL driving programs,
-and are of little use to the great majority of MB-System
-users. Users who wish to replicate the realtime pen
-plotting capability of the R/V Ewing can obtain the
-necessary code from us by request.
+Of course, a number of bug fixes are also incorporated
+in the new release.
 
 RELEASE DATE:
 ------------
-January 26, 1996
+August 27, 1996
 
 Authors:
 --------
@@ -45,7 +36,8 @@ East Walpole, MA 02032
 
 Copyright:
 ----------
-Copyright 1993, 1994, 1995 by David W. Caress and Dale N. Chayes
+Copyright 1993, 1994, 1995, 1996 
+by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
 Caveat:
@@ -69,7 +61,7 @@ MB-System utilities (macros) are written in the Perl scripting
 language. The source code for these required software packages
 is available as follows:
 
-	MB-System v 4.3
+	MB-System v 4.4
 	- available from L-DEO via anonymous ftp to
 	  lamont.ldeo.columbia.edu
 	- compressed tar file MB-System4.0.tar.Z
@@ -93,18 +85,18 @@ is available as follows:
 
 MB-System Updates:
 -----------------
-We generally only announce major releases, such as 4.1, 4.2,
-4.3, etc. However, incremental bug fixes and code changes
+We generally only announce major releases, such as 4.2, 4.3,
+4.4, etc. However, incremental bug fixes and code changes
 often occur between the major releases, and these may be
 reflected in the source code archives available via
 anonymous ftp at lamont.ldeo.columbia.edu. When changes are
 made to the distributed source code, this is reflected in
 the names of the compressed tar files in the ftp archive.
-For example, the initial MB-System 4.3 distribution will be
-available in a file called MB-System4.3.tar.Z. After the
+For example, the initial MB-System 4.4 distribution will be
+available in a file called MB-System4.4.tar.Z. After the
 first incremental update, the filename will change to
-MB-System4.3a.tar.Z; subsequent incremental updates will
-be 4.3b, 4.3c, etc.  At all times, a link to the current
+MB-System4.4a.tar.Z; subsequent incremental updates will
+be 4.4b, 4.4c, etc.  At all times, a link to the current
 MB-System distribution file called MB-System.tar.Z will be
 maintained in the ftp archive; this allows the Lamont World
 Wide Web page to always access the current distribution.
@@ -114,8 +106,8 @@ Installing MB-System:
 The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
 
-		% uncompress MB-System4.3.tar.Z
-		% tar xvf MB-System4.3.tar
+		% uncompress MB-System4.4.tar.Z
+		% tar xvf MB-System4.4.tar
 
 This will create a directory structure called mbsystem. 
 In order to configure your installation, you must edit the
@@ -249,6 +241,8 @@ Continued Support:
 -----------------
 We are pleased to have received five years of continued 
 NSF funding for the support and development of MB-System. 
+We are now midway through the second year of this NSF
+project.
 
 SeaBeam Instruments is also actively participating in
 MB-System development, with an obvious emphasis on
@@ -266,8 +260,8 @@ Contributions:
 --------------
 We are actively soliciting contributions for inclusion in the
 MB-System. In particular support for additional data formats in the
-mbio.a library such as EM-12, HS-MD, MR-1, etc would helpful, as would
-new, clever tools for data manipulation and processing.  We thank 
+mbio.a library would be helpful, as would new, clever 
+tools for data manipulation and processing.  We thank 
 those who have already contributed to MB-System.
 
 Suggestions:
@@ -299,10 +293,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.9 1996-01-26 21:32:53 caress Exp $
+RCS ID: $Id: README,v 4.10 1996-08-26 15:38:28 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.9  1996/01/26  21:32:53  caress
+# Revision for real version 4.3 release.
+#
 # Revision 4.8  1995/08/17  16:34:39  caress
 # Revision for release 4.3.
 #
