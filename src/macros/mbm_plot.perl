@@ -24,7 +24,7 @@
 #   The -X option will cause the shellscript to be executed immediately.
 #
 # Usage:
-#   mbm_plot -Fformat -Ifile [-Oroot -Rw/e/s/n -G -S -C -N -X -V -H]
+#   mbm_plot -Fformat -Ifile [-Oroot -Rw/e/s/n -G -S -C -N -X -P -V -H]
 #
 # Author:
 #   David W. Caress
@@ -33,15 +33,18 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 3.0 1993-06-19 01:00:18 caress Exp $
+#   $Id: mbm_plot.perl,v 3.1 1993-06-19 11:50:30 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.0  1993/06/19  01:00:18  caress
+# Initial version.
+#
 #
 $program_name = "mbm_plot";
 
 # Deal with command line arguments
-&Getopts('F:f:I:i:O:o:R:r:GgCcSsNnA:a:XxVvHh');
+&Getopts('F:f:I:i:O:o:R:r:GgCcSsNnA:a:XxPpVvHh');
 $file =    ($opt_I || $opt_i);
 $root =    ($opt_I || $opt_i);
 $format =  ($opt_F || $opt_f);
@@ -52,6 +55,7 @@ $contour = ($opt_C || $opt_c);
 $navigation = ($opt_N || $opt_n);
 $shadecontrol = ($opt_A || $opt_a);
 $execute = ($opt_X || $opt_x);
+$pageview = ($opt_P || $opt_p);
 $help =    ($opt_H || $opt_h);
 $verbose = ($opt_V || $opt_v);
 
@@ -60,7 +64,7 @@ if ($help)
 	{
 	print "\n$program_name:\n";
 	print "\nPerl shellscript to generate a gmt plot of the multibeam data contained \nin the specified file.  The plot will be scaled to fit on an 8.5 X 11 \ninch page.  The plot may be color fill (-G), color shaded relief (-S), or \nfour color contoured (-C).  A gmt shellscript will be created which \ngenerates a postscript image and then displays it using pageview. \nThe -X option will cause the shellscript to be executed immediately.\n";
-	print "\nUsage: $program_name -Fformat -Ifile [-Oroot -Rw/e/s/n -G -S -C -N -X -V -H]\n";
+	print "\nUsage: $program_name -Fformat -Ifile [-Oroot -Rw/e/s/n -G -S -C -N -X -P -V -H]\n";
 	die "\n";
 	}
 
@@ -102,32 +106,79 @@ if ($verbose)
 while (@mbinfo)
 	{
 	$line = shift @mbinfo;
-	if ($verbose)
-		{
-		print "$line";
-		}
 	if ($line =~ /\s+Minimum Lon:\s+(\S+)\s+Maximum Lon:\s+(\S+)/)
 		{
+		print "$line";
 		($xmin,$xmax) = 
 			$line =~ /\s+Minimum Lon:\s+(\S+)\s+Maximum Lon:\s+(\S+)/;
 		}
 	if ($line =~ /\s+Minimum Lat:\s+(\S+)\s+Maximum Lat:\s+(\S+)/)
 		{
+		print "$line";
 		($ymin,$ymax) = 
 			$line =~ /\s+Minimum Lat:\s+(\S+)\s+Maximum Lat:\s+(\S+)/;
 		}
 	if ($line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
 		{
+		print "$line";
 		($zmin,$zmax) = 
 		$line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/;
 		}
 	}
+
+# check that there is data
+if ($xmin >= $xmax || $ymin >= $ymax || $zmin >= $zmax)
+	{
+	die "Does not appear to be any data in the input!\n$program_name aborted.\n"
+	}
+
+# either use specified bounds
 if ($bounds)
 	{
 	$xmin = $rxmin;
 	$xmax = $rxmax;
 	$ymin = $rymin;
 	$ymax = $rymax;
+	if ($verbose)
+		{
+		print "\nUsing specified plot bounds:\n";
+		printf "  Minimum Lon:%11.4f     Maximum Lon:%11.4f\n", 
+			$xmin,$xmax;
+		printf "  Minimum Lat:%11.4f     Maximum Lat:%11.4f\n", 
+			$ymin,$ymax;
+		}
+	}
+# or expand the data limits a bit and ensure a reasonable aspect ratio
+else
+	{
+	$delx = 0.05 * ($xmax - $xmin);
+	$dely = 0.05 * ($ymax - $ymin);
+	$xmin = $xmin - $delx;
+	$xmax = $xmax + $delx;
+	$ymin = $ymin - $dely;
+	$ymax = $ymax + $dely;
+	$dx = $xmax - $xmin;
+	$dy = $ymax - $ymin;
+	if ($dy/$dx > 2.0)
+		{
+		$delx = 0.5 * (0.5 * $dy - $dx);
+		$xmin = $xmin - $delx;
+		$xmax = $xmax + $delx;
+		}
+	elsif ($dx/$dy > 2.0)
+		{
+		$dely = 0.5 * (0.5 * $dx - $dy);
+		$ymin = $ymin - $dely;
+		$ymax = $ymax + $dely;
+		}
+	if ($verbose)
+		{
+		print "\nUsing calculated plot bounds:\n";
+		printf "  Minimum Lon:%11.4f     Maximum Lon:%11.4f\n", 
+			$xmin,$xmax;
+		printf "  Minimum Lat:%11.4f     Maximum Lat:%11.4f\n", 
+			$ymin,$ymax;
+		}
 	}
 
 # now come up with a reasonable plotscale
@@ -156,17 +207,17 @@ while (@projected)
 		$yymax = ($yy > $yymax ? $yy : $yymax);
 		}
 	}
-$dx = $xxmax - $xxmin;
-$dy = $yymax - $yymin;
-$plotscale_landscape = 9.0/$dx;
-if ($plotscale_landscape*$dy > 5.5)
+$dxx = $xxmax - $xxmin;
+$dyy = $yymax - $yymin;
+$plotscale_landscape = 9.0/$dxx;
+if ($plotscale_landscape*$dyy > 5.5)
 	{
-	$plotscale_landscape = 5.5/$dy;
+	$plotscale_landscape = 5.5/$dyy;
 	}
-$plotscale_portrait = 6.5/$dx;
-if ($plotscale_portrait*$dy > 8.0)
+$plotscale_portrait = 6.5/$dxx;
+if ($plotscale_portrait*$dyy > 8.0)
 	{
-	$plotscale_portrait = 8.0/$dy;
+	$plotscale_portrait = 8.0/$dyy;
 	}
 if ($plotscale_landscape > $plotscale_portrait)
 	{
@@ -178,15 +229,27 @@ else
 	$portrait = 1;
 	$plotscale = $plotscale_portrait;
 	}
+if ($verbose)
+	{
+	printf "\nPlot scale: %.3f inches/degree longitude\n", $plotscale;
+	if ($portrait)
+		{
+		print "Using portrait orientation\n";
+		}
+	else
+		{
+		print "Using landscape orientation\n";
+		}
+	}
 
 # figure out where to place the color scale
-$colorscale_width = 0.8*$dx*$plotscale;
+$colorscale_width = 0.8*$dxx*$plotscale;
 $colorscale_height = 0.15;
-$colorscale_offx = 0.5*$dx*$plotscale;
+$colorscale_offx = 0.5*$dxx*$plotscale;
 $colorscale_offy = -0.5;
 
 # figure out some reasonable tick intervals for the basemap
-$base_tick = $dx/5;
+$base_tick = $dxx/5;
 if ($base_tick < 0.017)
 	{
 	$base_tick = 0.017;
@@ -362,10 +425,18 @@ print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
 print FCMD "rm -f $cptfile $listfile $navfile\n";
 
-# display image on screen
+# display image on screen if desired
 print FCMD "#\n# Run pageview\n";
-print FCMD "echo Running pageview in background...\n";
-print FCMD "pageview $psfile &\n";
+if ($pageview)
+	{
+	print FCMD "echo Running pageview in background...\n";
+	print FCMD "pageview $psfile &\n";
+	}
+else
+	{
+	print FCMD "#echo Running pageview in background...\n";
+	print FCMD "#pageview $psfile &\n";
+	}
 
 # claim it's all over
 print FCMD "#\n# All done!\n";
