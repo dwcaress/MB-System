@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100bi.c	12/23/2004
- *	$Id: mbr_sb2100bi.c,v 5.0 2003-12-24 07:00:18 caress Exp $
+ *	$Id: mbr_sb2100bi.c,v 5.1 2004-02-26 22:39:37 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -35,6 +35,9 @@
  *                 mbr_sb2100bi.c)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/12/24 07:00:18  caress
+ * Fixed problem with formats 42 and 43. Combined former files mbr_sb2100b1.c and mbr_sb2100b2.c into new file mbr_sb2100bi.c. Files mbf_sb2100b1.h and mbf_sb2100b2.h are no longer part of the archive.
+ *
  * Revision 5.8  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -494,7 +497,7 @@ char	buffer[4*MBSYS_SB2100_PIXELS];
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.0 2003-12-24 07:00:18 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.1 2004-02-26 22:39:37 caress Exp $";
 	char	*function_name = "mbr_register_sb2100b1";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -628,7 +631,7 @@ int mbr_info_sb2100b1(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.0 2003-12-24 07:00:18 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.1 2004-02-26 22:39:37 caress Exp $";
 	char	*function_name = "mbr_info_sb2100b1";
 	int	status = MB_SUCCESS;
 
@@ -698,7 +701,7 @@ int mbr_info_sb2100b1(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.0 2003-12-24 07:00:18 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.1 2004-02-26 22:39:37 caress Exp $";
 	char	*function_name = "mbr_register_sb2100b2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -832,7 +835,7 @@ int mbr_info_sb2100b2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.0 2003-12-24 07:00:18 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.1 2004-02-26 22:39:37 caress Exp $";
 	char	*function_name = "mbr_info_sb2100b2";
 	int	status = MB_SUCCESS;
 
@@ -903,7 +906,7 @@ int mbr_info_sb2100b2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.0 2003-12-24 07:00:18 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.1 2004-02-26 22:39:37 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100bi";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1625,18 +1628,26 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp,
 			}
 		mb_get_binary_int(MB_NO, &eor_read[0], &checksum_read); 
 
+
 		/* do checksum */
-		if (verbose > 1)
+		if (verbose >= 2)
 		    {
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
     
-		    /* check checksum */
+		    /* check checksum and report */
+		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",
+			function_name);
+		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
+		    fprintf(stderr,"dbg5       checksum calculated: %d\n",checksum);
 		    if (checksum != checksum_read)
 			    {
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_UNINTELLIGIBLE;
+		    	    fprintf(stderr,"dbg5       CHECKSUM ERROR!!\n");
+			    }
+		    else
+			    {
+		    	    fprintf(stderr,"dbg5       checksum ok\n");
 			    }
 		    }
 		}
@@ -1734,18 +1745,26 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp,
 			}
 		mb_get_binary_int(MB_NO, &eor_read[0], &checksum_read); 
 
+
 		/* do checksum */
-		if (verbose > 1)
+		if (verbose >= 2)
 		    {
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
-			    checksum += (unsigned int) store->comment[i];
+			    checksum += (unsigned int) buffer[i];
     
-		    /* check checksum */
+		    /* check checksum and report */
+		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",
+			function_name);
+		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
+		    fprintf(stderr,"dbg5       checksum calculated: %d\n",checksum);
 		    if (checksum != checksum_read)
 			    {
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_UNINTELLIGIBLE;
+		    	    fprintf(stderr,"dbg5       CHECKSUM ERROR!!\n");
+			    }
+		    else
+			    {
+		    	    fprintf(stderr,"dbg5       checksum ok\n");
 			    }
 		    }
 		}
@@ -1797,7 +1816,7 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
-		fprintf(stderr,"dbg2       store:       %d\n",store);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       record_len: %d\n",record_length);
 		}
 
@@ -1862,17 +1881,24 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp,
 		mb_get_binary_int(MB_NO, &eor_read[0], &checksum_read); 
 
 		/* do checksum */
-		if (verbose > 1)
+		if (verbose >= 2)
 		    {
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
     
-		    /* check checksum */
+		    /* check checksum and report */
+		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",
+			function_name);
+		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
+		    fprintf(stderr,"dbg5       checksum calculated: %d\n",checksum);
 		    if (checksum != checksum_read)
 			    {
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_UNINTELLIGIBLE;
+		    	    fprintf(stderr,"dbg5       CHECKSUM ERROR!!\n");
+			    }
+		    else
+			    {
+		    	    fprintf(stderr,"dbg5       checksum ok\n");
 			    }
 		    }
 		}
@@ -2000,18 +2026,26 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp,
 			}
 		mb_get_binary_int(MB_NO, &eor_read[0], &checksum_read); 
 
+
 		/* do checksum */
-		if (verbose > 1)
+		if (verbose >= 2)
 		    {
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
     
-		    /* check checksum */
+		    /* check checksum and report */
+		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",
+			function_name);
+		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
+		    fprintf(stderr,"dbg5       checksum calculated: %d\n",checksum);
 		    if (checksum != checksum_read)
 			    {
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_UNINTELLIGIBLE;
+		    	    fprintf(stderr,"dbg5       CHECKSUM ERROR!!\n");
+			    }
+		    else
+			    {
+		    	    fprintf(stderr,"dbg5       checksum ok\n");
 			    }
 		    }
 		}
@@ -2120,18 +2154,26 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp,
 			}
 		mb_get_binary_int(MB_NO, &eor_read[0], &checksum_read); 
 
+
 		/* do checksum */
-		if (verbose > 1)
+		if (verbose >= 2)
 		    {
 		    checksum = 0;
 		    for (i=0;i<read_length;i++)
 			    checksum += (unsigned int) buffer[i];
     
-		    /* check checksum */
+		    /* check checksum and report */
+		    fprintf(stderr,"\ndbg5  Checksum test done in MBIO function <%s>\n",
+			function_name);
+		    fprintf(stderr,"dbg5       checksum read:       %d\n",checksum_read);
+		    fprintf(stderr,"dbg5       checksum calculated: %d\n",checksum);
 		    if (checksum != checksum_read)
 			    {
-			    status = MB_FAILURE;
-			    *error = MB_ERROR_UNINTELLIGIBLE;
+		    	    fprintf(stderr,"dbg5       CHECKSUM ERROR!!\n");
+			    }
+		    else
+			    {
+		    	    fprintf(stderr,"dbg5       checksum ok\n");
 			    }
 		    }
 		}
@@ -2864,7 +2906,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		write_length += 6;
 		
 		/* write the data */
-		if (fwrite(store->beams, write_length, 
+		if (fwrite(buffer, write_length, 
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
