@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	3.00	2/1/93
- *    $Id: mblist.c,v 3.1 1993-05-17 16:26:06 caress Exp $
+ *    $Id: mblist.c,v 3.2 1993-05-17 16:37:18 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -54,7 +54,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 3.1 1993-05-17 16:26:06 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 3.2 1993-05-17 16:37:18 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Mbath_beam -Nback_beam -Ooptions -Ddumpmode]";
@@ -147,7 +147,7 @@ char **argv;
 	dumpmode = MBLIST_MODE_LIST;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhFf:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:O:o:M:m:N:n:D:d:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:O:o:M:m:N:n:D:d:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
