@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 5.0 2003-08-07 22:36:16 caress Exp $
+#	$Id: Makefile.template,v 5.1 2003-12-05 07:56:24 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 5.0  2003/08/07 22:36:16  caress
+# Updated copyright date.
+#
 # Revision 4.13  2003/03/10 07:38:51  caress
 # Added mr1pr library
 #
@@ -83,6 +86,7 @@ all:
 	cd mbnavedit; make all
 	cd mbnavadjust; make all
 	cd mbvelocitytool; make all
+	cd mbview; make all
 
 clean:
 	- cd gsf; make clean
@@ -100,4 +104,5 @@ clean:
 	- cd mbnavedit; make clean
 	- cd mbnavadjust; make clean
 	- cd mbvelocitytool; make clean
+	- cd mbview; make clean
 
