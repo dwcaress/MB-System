@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile  1/21/93
-#	$Id: Makefile,v 4.2 1994-04-12 20:58:30 caress Exp $
+#	$Id: Makefile,v 4.3 1994-04-19 17:20:12 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.2  1994/04/12  20:58:30  caress
+# Changed for version 4.0beta4
+#
 # Revision 4.1  1994/04/12  17:03:51  caress
 # Added mbbath.
 #
@@ -104,9 +107,9 @@ FWITHCFLAGS = -lF77
 LFLAGS = -lm
 #
 # - For installations under IRIX:
-#CFLAGS = -O2
+#CFLAGS = -O2 -D$(OS)
 #FFLAGS = -O2
-#FWITHCFLAGS = -lF77
+#FWITHCFLAGS = -lF77 -lI77 -lisam -lfgl
 #LFLAGS = -lm -lsun
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
@@ -200,7 +203,7 @@ mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbgrid.c
 mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h
-	echo "	char *ifile = \"$(LEVITUS)\";" > levitus.h
+	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
 zgrid.o:	zgrid.f
 	$(FC) -c $(FFLAGS) zgrid.f
