@@ -1,11 +1,11 @@
-.TH mbm_grd2arc l "5 October 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_grd2arc l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grd2arc\fP - Macro to convert a GMT 
 grid file in the GMT NetCDF grid format 
 to an ArcView ASCII grid. 
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 mbm_grd2arc \fB-I\fP\fIgrdfile\fP \fB-O\fP\fIarcfile\fP [\fB-H\fP \fB-N\fP\fInodata\fP \fB-V\fP]

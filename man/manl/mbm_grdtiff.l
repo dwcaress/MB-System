@@ -1,10 +1,10 @@
-.TH mbm_grdtiff l "6 March 2000" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_grdtiff l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdtiff\fP - Create an executable shellscript which will generate
 a TIFF image of gridded data in a GMT grd file.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbm_grdtiff\fP \fB-I\fP\fIfile\fP 
