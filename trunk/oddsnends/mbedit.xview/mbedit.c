@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit.c,v 4.1 1994-03-12 01:49:07 caress Exp $
+ *    $Id: mbedit.c,v 4.2 1994-04-12 00:46:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,10 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:49:07  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/05  23:54:35  caress
  * First cut at version 4.0
  *
@@ -98,7 +102,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit.c,v 4.1 1994-03-12 01:49:07 caress Exp $";
+static char rcs_id[] = "$Id: mbedit.c,v 4.2 1994-04-12 00:46:38 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -2260,7 +2264,7 @@ int mbedit_close_file()
 		}
 
 	/* close the files */
-	status = mb_buffer_close(verbose,buff_ptr,&error);
+	status = mb_buffer_close(verbose,buff_ptr,imbio_ptr,&error);
 	status = mb_close(verbose,imbio_ptr,&error);
 	status = mb_close(verbose,ombio_ptr,&error);
 	ofile_defined = MB_NO;

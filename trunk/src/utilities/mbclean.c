@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.2 1994-03-25 14:01:31 caress Exp $
+ *    $Id: mbclean.c,v 4.3 1994-04-12 00:42:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/25  14:01:31  caress
+ * Added ability to check that depth values are within a specified
+ * acceptable range.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -101,7 +105,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.2 1994-03-25 14:01:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.3 1994-04-12 00:42:00 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -1226,7 +1230,7 @@ char **argv;
 		}
 
 	/* close the files */
-	status = mb_buffer_close(verbose,buff_ptr,&error);
+	status = mb_buffer_close(verbose,buff_ptr,imbio_ptr,&error);
 	status = mb_close(verbose,imbio_ptr,&error);
 	status = mb_close(verbose,ombio_ptr,&error);
 

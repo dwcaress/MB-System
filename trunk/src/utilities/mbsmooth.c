@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mbsmooth.c,v 4.2 1994-04-12 00:42:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,10 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -107,7 +111,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.2 1994-04-12 00:42:00 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \
@@ -753,7 +757,7 @@ smooth out noise in multibeam \nbathymetry data.";
 		}
 
 	/* close the files */
-	status = mb_buffer_close(verbose,buff_ptr,&error);
+	status = mb_buffer_close(verbose,buff_ptr,imbio_ptr,&error);
 	status = mb_close(verbose,imbio_ptr,&error);
 	status = mb_close(verbose,ombio_ptr,&error);
 
