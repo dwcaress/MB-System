@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.10 2002-03-26 07:43:57 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.11 2002-08-28 01:32:45 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/03/26 07:43:57  caress
+ * Release 5.0.beta15
+ *
  * Revision 5.9  2001/10/19 00:55:42  caress
  * Now tries to use relative paths.
  *
@@ -110,7 +113,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.10 2002-03-26 07:43:57 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.11 2002-08-28 01:32:45 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -5467,11 +5470,11 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 		
 		    /* do message */
 		    sprintf(message, " >   %d %12g %12g %12g %12g\n",
-			    iter, smoothweight, sigma_total, sigma_crossing, 
+			    iter, smoothweight, sigma_total/ mbna_mtodeglat, sigma_crossing/ mbna_mtodeglat, 
 			    (sigma_crossing / sigma_crossing_first));
 		    do_info_add(message, MB_NO);
 fprintf(stderr,"iteration:%3d smooth:%12g sigmatot:%12g sigmacrossing:%12g ratio:%12g\n",
-iter,smoothweight,sigma_total,sigma_crossing,
+iter,smoothweight,sigma_total / mbna_mtodeglat,sigma_crossing / mbna_mtodeglat,
 (sigma_crossing / sigma_crossing_first));
 		    }
 
@@ -5506,7 +5509,7 @@ iter,smoothweight,sigma_total,sigma_crossing,
 		do_message_on(message);
 
 		sprintf(message, " > Final smoothing weight:%12g\n > Final crossing sigma:%12g\n > Final total sigma:%12g\n",
-			smoothweight_best, sigma_crossing_best, sigma_total_best);
+			smoothweight_best, sigma_crossing_best / mbna_mtodeglat, sigma_total_best / mbna_mtodeglat);
 		do_info_add(message, MB_NO);
 		
 		/* get crossing offset results */

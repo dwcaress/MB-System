@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.3 2002-03-26 07:43:57 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.4 2002-08-28 01:32:45 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/03/26 07:43:57  caress
+ * Release 5.0.beta15
+ *
  * Revision 5.2  2001/07/20 00:33:43  caress
  * Release 5.0.beta03
  *
@@ -710,12 +713,28 @@ void do_update_status()
         else
         	strcat(string,":t\"Inversion Performed:                    No\"");
 	set_label_multiline_string(label_status, string);
+	if (mbna_verbose > 0)
+		{
+        	sprintf(string,"Project:                                       %s\nNumber of Files:                           %d\nNumber of Crossings Found:         %d\nNumber of Crossings Analyzed:     %d\nNumber of Ties Set:                     %d\n",
+                	project.name,project.num_files,
+			project.num_crossings,project.num_crossings_analyzed, 
+			project.num_ties);
+        	if (project.inversion == MBNA_INVERSION_CURRENT)
+        		strcat(string,"Inversion Performed:                    Current\n");
+        	else if (project.inversion == MBNA_INVERSION_OLD)
+        		strcat(string,"Inversion Performed:                    Out of Date\n");
+        	else
+        		strcat(string,"Inversion Performed:                    No\n");
+		fprintf(stderr,string);
+		}
 
 	/* set list_data */
 	XmListDeleteAllItems(list_data);
 	if (mbna_view_list == MBNA_VIEW_LIST_FILES)
 		{
 		set_label_string(label_listdata,"Data Files:");
+		if (mbna_verbose > 0)
+			fprintf(stderr,"Data Files:\n");
 		if (project.num_files > 0)
 			{
 			xstr = (XmString *) malloc(project.num_files * sizeof(XmString));
@@ -728,11 +747,13 @@ void do_update_status()
 					    file->heading_bias,file->roll_bias,
 					    file->file);
 				else
-				    sprintf(string,"%4d %4d       %4.1f %4.1f %s",
+				    sprintf(string,"%4d %4d  free %4.1f %4.1f %s",
 					    file->id,file->num_sections,
 					    file->heading_bias,file->roll_bias,
 					    file->file);
     				xstr[i] = XmStringCreateLocalized(string);
+				if (mbna_verbose > 0)
+					fprintf(stderr,"%s\n",string);
  				}
     			XmListAddItems(list_data,xstr,project.num_files,0);
 			for (i=0;i<project.num_files;i++)
@@ -751,6 +772,8 @@ void do_update_status()
  	else if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS)
 		{
 		set_label_string(label_listdata,"Crossings:");
+		if (mbna_verbose > 0)
+			fprintf(stderr,"Crossings:\n");
 		if (project.num_files > 0)
 			{
 			xstr = (XmString *) malloc(project.num_crossings * sizeof(XmString));
@@ -763,7 +786,7 @@ void do_update_status()
 					status_char = '*';
 				else
 					status_char = '-';
-				sprintf(string,"%c %4d %5.5d:%3.3d %5.5d:%3.3d %2d",
+				sprintf(string,"%c %4d %3.3d:%3.3d %3.3d:%3.3d %2d",
 					status_char, i,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -771,6 +794,8 @@ void do_update_status()
 					crossing->section_2,
 					crossing->num_ties);
     				xstr[i] = XmStringCreateLocalized(string);
+				if (mbna_verbose > 0)
+					fprintf(stderr,"%s\n",string);
 				}
     			XmListAddItems(list_data,xstr,project.num_crossings,0);
 			for (i=0;i<project.num_crossings;i++)
@@ -789,6 +814,10 @@ void do_update_status()
  	else if (mbna_view_list == MBNA_VIEW_LIST_TIES)
 		{
 		set_label_string(label_listdata,"Ties:");
+        /*sprintf(string,":::t\"Ties:\":t\" Xing  Tie Fil:Sec:Nv  Fil:Sec:Nv      OffLon      OffLat     dOffLon     dOffLat\"");
+	set_label_multiline_string(label_listdata, string);*/
+		if (mbna_verbose > 0)
+        		fprintf(stderr,"Ties:\n Xing  Tie Fil:Sec:Nv  Fil:Sec:Nv      OffLon      OffLat     dOffLon     dOffLat\n");
 		if (project.num_files > 0)
 			{
 			xstr = (XmString *) malloc(project.num_ties * sizeof(XmString));
@@ -801,7 +830,7 @@ void do_update_status()
 				{
 				tie = (struct mbna_tie *) &crossing->ties[j];
 				if (tie->inversion_status == MBNA_INVERSION_CURRENT)
-				    sprintf(string,"%4d %2d %3.3d:%2.2d:%2.2d %3.3d:%2.2d:%2.2d %8.2f %8.2f %8.2f %8.2f",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f %8.2f",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -814,7 +843,7 @@ void do_update_status()
 					tie->inversion_offset_x_m - tie->offset_x_m,
 					tie->inversion_offset_y_m - tie->offset_y_m);
 				else if (tie->inversion_status == MBNA_INVERSION_OLD)
-				    sprintf(string,"%4d %2d %3.3d:%2.2d:%2.2d %3.3d:%2.2d:%2.2d %8.2f %8.2f %8.2f %8.2f ***",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f %8.2f ***",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -827,7 +856,7 @@ void do_update_status()
 					tie->inversion_offset_x_m - tie->offset_x_m,
 					tie->inversion_offset_y_m - tie->offset_y_m);
 				else
-				    sprintf(string,"%4d %2d %3.3d:%2.2d:%2.2d %3.3d:%2.2d:%2.2d %8.2f %8.2f",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -838,6 +867,8 @@ void do_update_status()
 					tie->offset_x_m,
 					tie->offset_y_m);
     				xstr[k] = XmStringCreateLocalized(string);
+				if (mbna_verbose > 0)
+					fprintf(stderr,"%s\n",string);
 				if (i == mbna_crossing_select
 				    && j == mbna_tie_select)
 				    tie_pos = k;
