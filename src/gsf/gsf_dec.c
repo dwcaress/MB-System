@@ -51,6 +51,10 @@
  * jsb          12/29/98  Added support for Simrad em3000 series sonar systems.
  * wkm          3-30-99   Added DecodeCmpSassSpecific to deal with Compressed SASS data.
  * wkm          8-02-99   Updated DecodeCmpSassSpecific to include lntens (heave) with Compressed SASS data.
+ * bac          10-24-00  Updated DecodeEM3Specific to include data fields from updated
+ *                        EM series runtime parameter datagram.
+ * bac          07-18-01  Removed the useage of C++ reserved words "class" and "operator".
+ * jsb          01-16-02  Added support for Simrad EM120, and removed defitions for unused variables.
  *
  * Classification : Unclassified
  *
@@ -67,7 +71,7 @@
 
 /* rely on the network type definitions of (u_short, and u_long) */
 #include <sys/types.h>
-#ifndef __WINDOWS__
+#ifndef WIN32
 #include <netinet/in.h>
 #else
 #include <winsock.h>
@@ -365,7 +369,6 @@ DecodeBDBSpecific(gsfSBSensorSpecific * sdata, unsigned char *sptr)
 {
     unsigned char  *p = sptr;
     gsfuLong        ltemp;
-    gsfuShort       stemp;
 
     /* The next four byte integer contains the two way travel time */
     memcpy(&ltemp, p, 4);
@@ -377,7 +380,7 @@ DecodeBDBSpecific(gsfSBSensorSpecific * sdata, unsigned char *sptr)
     p += 1;
 
     /* Next byte contains the classification flag */
-    sdata->gsfBDBSpecific.class = (char) *p;
+    sdata->gsfBDBSpecific.classification = (char) *p;
     p += 1;
 
     /* Next byte contains the track adjustment flag */
@@ -468,7 +471,6 @@ gsfDecodeSinglebeam(gsfSingleBeamPing * ping, unsigned char *sptr, GSF_FILE_TABL
     gsfsShort       signed_short;
     gsfsLong        signed_int;
     gsfuShort       stemp;
-    int             ret;
     int             bytes;
     unsigned char  *p = sptr;
 
@@ -1161,7 +1163,12 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC;
                 break;
 
-              default:
+             case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
+                p += DecodeEM3Specific(&ping->sensor_data, p, ft);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC;
+                break;
+
+             default:
                 gsfError = GSF_UNRECOGNIZED_SUBRECORD_ID;
                 if ((((p - sptr) + subrecord_size) == record_size) ||
                     ((record_size - ((p - sptr) + subrecord_size)) > 0))
@@ -2096,24 +2103,6 @@ DecodeEM1000Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
     p += 2;
 
     return (p - sptr);
-}
-
-/********************************************************************
- *
- * Function Name : DecodeEm121Specific
- *
- * Description : This function decodes the simrad em121 specific ping
- *    subrecord from external byte stream form into internal form.
- *
- * Inputs :
- *    sdata = a pointer to the union of sensor specific data to be loaded
- *    sptr = a pointer to an unsigned char buffer containing the byte stream
- *           to read.
- *
- * Returns : This function returns the number of bytes decoded.
- *
- * Error Conditions : none
-    return (0);
 }
 
 /********************************************************************
@@ -3068,27 +3057,69 @@ DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TABLE 
         sdata->gsfEM3Specific.run_time[0].ssv_source = (int) *p;
         p += 1;
 
-        /* The next two byte value contains the maximum swath width */
+        /* The next two byte value contains the maximum port swath width */
         memcpy(&stemp, p, 2);
-        sdata->gsfEM3Specific.run_time[0].swath_width = (int) ntohs(stemp);
+        sdata->gsfEM3Specific.run_time[0].port_swath_width = (int) ntohs(stemp);
         p += 2;
 
         /* The next one byte value contains the beam spacing value */
         sdata->gsfEM3Specific.run_time[0].beam_spacing = (int) *p;
         p += 1;
 
-        /* The next one byte value contains the coverage sector */
-        sdata->gsfEM3Specific.run_time[0].coverage_sector = (int) *p;
+        /* The next one byte value contains the port coverage sector */
+        sdata->gsfEM3Specific.run_time[0].port_coverage_sector = (int) *p;
         p += 1;
 
         /* The next one byte value contains the yaw and pitch stabilization mode */
         sdata->gsfEM3Specific.run_time[0].stabilization = (int) *p;
         p += 1;
 
-        /* The next eight bytes are reserved for future use */
+        /* The next one byte value contains the starboard coverage sector */
+        sdata->gsfEM3Specific.run_time[0].stbd_coverage_sector = (int) *p;
+        p += 1;
+
+        /* The next two byte value contains the maximum starboard swath width */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].stbd_swath_width = (int) ntohs(stemp);
+        p += 2;
+
+        /* The next one byte value contains the HiLo frequency absorption coefficient ratio */
+        sdata->gsfEM3Specific.run_time[0].hilo_freq_absorp_ratio = (int) *p;
+        p += 1;
+
+        /* The next four bytes are reserved for future use */
         sdata->gsfEM3Specific.run_time[0].spare1 = 0;
-        sdata->gsfEM3Specific.run_time[0].spare2 = 0;
-        p += 8;
+        p += 4;
+
+        /* check to see if the starboard swath width is populated, and set the total, port, and starboard
+         * swath widths accordingly. bac, 10-18-00
+         */
+        if (sdata->gsfEM3Specific.run_time[0].stbd_swath_width)
+        {
+            sdata->gsfEM3Specific.run_time[0].swath_width = sdata->gsfEM3Specific.run_time[0].port_swath_width +
+                                                            sdata->gsfEM3Specific.run_time[0].stbd_swath_width;
+        }
+        else
+        {
+            sdata->gsfEM3Specific.run_time[0].swath_width = sdata->gsfEM3Specific.run_time[0].port_swath_width;
+            sdata->gsfEM3Specific.run_time[0].port_swath_width = sdata->gsfEM3Specific.run_time[0].swath_width / 2;
+            sdata->gsfEM3Specific.run_time[0].stbd_swath_width = sdata->gsfEM3Specific.run_time[0].swath_width / 2;
+        }
+
+        /* check to see if the starboard coverage sector is populated, and set the total, port, and starboard
+         * coverage sectors accordingly. bac, 10-18-00
+         */
+        if (sdata->gsfEM3Specific.run_time[0].stbd_coverage_sector)
+        {
+            sdata->gsfEM3Specific.run_time[0].coverage_sector = sdata->gsfEM3Specific.run_time[0].port_coverage_sector +
+                                                                sdata->gsfEM3Specific.run_time[0].stbd_coverage_sector;
+        }
+        else
+        {
+            sdata->gsfEM3Specific.run_time[0].coverage_sector = sdata->gsfEM3Specific.run_time[0].port_coverage_sector;
+            sdata->gsfEM3Specific.run_time[0].port_coverage_sector = sdata->gsfEM3Specific.run_time[0].coverage_sector / 2;
+            sdata->gsfEM3Specific.run_time[0].stbd_coverage_sector = sdata->gsfEM3Specific.run_time[0].coverage_sector / 2;
+        }
 
         /* Since the run-time parameters only exist on the byte stream when they change, we need
          *  to save these to the file table so the'll be available to the caller for each ping.
@@ -3189,27 +3220,68 @@ DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TABLE 
             sdata->gsfEM3Specific.run_time[1].ssv_source = (int) *p;
             p += 1;
 
-            /* The next two byte value contains the maximum swath width */
+            /* The next two byte value contains the maximum port swath width */
             memcpy(&stemp, p, 2);
-            sdata->gsfEM3Specific.run_time[1].swath_width = (int) ntohs(stemp);
+            sdata->gsfEM3Specific.run_time[1].port_swath_width = (int) ntohs(stemp);
             p += 2;
 
             /* The next one byte value contains the beam spacing value */
             sdata->gsfEM3Specific.run_time[1].beam_spacing = (int) *p;
             p += 1;
 
-            /* The next one byte value contains the coverage sector */
-            sdata->gsfEM3Specific.run_time[1].coverage_sector = (int) *p;
+            /* The next one byte value contains the port coverage sector */
+            sdata->gsfEM3Specific.run_time[1].port_coverage_sector = (int) *p;
             p += 1;
 
             /* The next one byte value contains the yaw and pitch stabilization mode */
             sdata->gsfEM3Specific.run_time[1].stabilization = (int) *p;
             p += 1;
 
+            /* The next one byte value contains the starboard coverage sector */
+            sdata->gsfEM3Specific.run_time[1].stbd_coverage_sector = (int) *p;
+            p += 1;
+
+            /* The next two byte value contains the maximum starboard swath width */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].stbd_swath_width = (int) ntohs(stemp);
+            p += 2;
+
+            /* The next one byte value contains the HiLo frequency absorption coefficient ratio */
+            sdata->gsfEM3Specific.run_time[1].hilo_freq_absorp_ratio = (int) *p;
+
             /* The next eight bytes are reserved for future use */
             sdata->gsfEM3Specific.run_time[1].spare1 = 0;
-            sdata->gsfEM3Specific.run_time[1].spare2 = 0;
-            p += 8;
+            p += 4;
+
+            /* check to see if the starboard swath width is populated, and set the total, port, and starboard
+             * swath widths accordingly. bac, 10-18-00
+             */
+            if (sdata->gsfEM3Specific.run_time[1].stbd_swath_width)
+            {
+                sdata->gsfEM3Specific.run_time[1].swath_width = sdata->gsfEM3Specific.run_time[1].port_swath_width +
+                                                                sdata->gsfEM3Specific.run_time[1].stbd_swath_width;
+            }
+            else
+            {
+                sdata->gsfEM3Specific.run_time[1].swath_width = sdata->gsfEM3Specific.run_time[1].port_swath_width;
+                sdata->gsfEM3Specific.run_time[1].port_swath_width = sdata->gsfEM3Specific.run_time[1].swath_width / 2;
+                sdata->gsfEM3Specific.run_time[1].stbd_swath_width = sdata->gsfEM3Specific.run_time[1].swath_width / 2;
+            }
+
+            /* check to see if the starboard coverage sector is populated, and set the total, port, and starboard
+             * coverage sectors accordingly. bac, 10-18-00
+             */
+            if (sdata->gsfEM3Specific.run_time[1].stbd_coverage_sector)
+            {
+                sdata->gsfEM3Specific.run_time[1].coverage_sector = sdata->gsfEM3Specific.run_time[1].port_coverage_sector +
+                                                                    sdata->gsfEM3Specific.run_time[1].stbd_coverage_sector;
+            }
+            else
+            {
+                sdata->gsfEM3Specific.run_time[1].coverage_sector = sdata->gsfEM3Specific.run_time[1].port_coverage_sector;
+                sdata->gsfEM3Specific.run_time[1].port_coverage_sector = sdata->gsfEM3Specific.run_time[1].coverage_sector / 2;
+                sdata->gsfEM3Specific.run_time[1].stbd_coverage_sector = sdata->gsfEM3Specific.run_time[1].coverage_sector / 2;
+            }
 
             /* Since the run-time parameters only exist on the byte stream when they change, we need
              *  to save these to the file table so the'll be available to the caller for each ping.
@@ -3697,8 +3769,8 @@ gsfDecodeHistory(gsfHistory * history, GSF_FILE_TABLE *ft, unsigned char *sptr)
     /* Next len bytes contains the host name */
     if (len < GSF_OPERATOR_LENGTH)
     {
-        memcpy(history->operator, p, len);
-        history->operator[len] = '\0';
+        memcpy(history->operator_name, p, len);
+        history->operator_name[len] = '\0';
         p += len;
     }
     else
@@ -3790,6 +3862,7 @@ gsfDecodeNavigationError(gsfNavigationError * nav_error, unsigned char *sptr)
 {
     unsigned char  *p = sptr;
     gsfuLong        ltemp;
+    gsfsLong        signed_int;
 
     /* First four byte integer contains the seconds portion of the time
     *  of navigation error.
@@ -3815,12 +3888,14 @@ gsfDecodeNavigationError(gsfNavigationError * nav_error, unsigned char *sptr)
     /* Next four byte integer contains the longitude error estimate */
     memcpy(&ltemp, p, 4);
     p += 4;
-    nav_error->longitude_error = ((double) ntohs(ltemp)) / 10.0;
+    signed_int = (signed) ntohl(ltemp);
+    nav_error->longitude_error = ((double) signed_int) / 10.0;
 
     /* Next four byte integer contains the latitude error estimate */
     memcpy(&ltemp, p, 4);
     p += 4;
-    nav_error->latitude_error = ((double) ntohl(ltemp)) / 10.0;
+    signed_int = (signed) ntohl(ltemp);
+    nav_error->latitude_error = ((double) signed_int) / 10.0;
 
     return (p - sptr);
 }
@@ -3849,7 +3924,8 @@ gsfDecodeHVNavigationError(gsfHVNavigationError *hv_nav_error, GSF_FILE_TABLE *f
     int             length;
     unsigned char  *p = sptr;
     gsfsShort       stemp;
-    gsfsLong        ltemp;
+    gsfuLong        ltemp;
+    gsfsLong        signed_int;
 
     /* First four byte integer contains the seconds portion of the time
     *  of navigation error.
@@ -3875,12 +3951,14 @@ gsfDecodeHVNavigationError(gsfHVNavigationError *hv_nav_error, GSF_FILE_TABLE *f
     /* Next four byte integer contains the horizontal error estimate */
     memcpy(&ltemp, p, 4);
     p += 4;
-    hv_nav_error->horizontal_error = ((double) ntohs(ltemp)) / 1000.0;
+    signed_int = (signed) ntohl(ltemp);
+    hv_nav_error->horizontal_error = ((double) signed_int) / 1000.0;
 
     /* Next four byte integer contains the vertical error estimate */
     memcpy(&ltemp, p, 4);
     p += 4;
-    hv_nav_error->vertical_error = ((double) ntohl(ltemp)) / 1000.0;
+    signed_int = (signed) ntohl(ltemp);
+    hv_nav_error->vertical_error = ((double) signed_int) / 1000.0;
 
     /* The next four bytes are reserved for future use */
     hv_nav_error->spare[0] = (char) *p;

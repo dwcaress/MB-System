@@ -76,6 +76,16 @@
  *                a time.  Prior to these updates an application could only open (GSF_MAX_OPEN_FILES-1)
  *                files at a time. Also updated gsfOpen and gsfOpenBuffered to return the correct
  *                error code if a failure occures reading the file header.
+ * bac 07-18-01   Made modifications for use with C++ code.  The typedef for each sensor
+ *                specific structure has been modified to have a different name than the
+ *                element of the SensorSpecific union.  Also removed the useage of C++
+ *                reserved words "class" and "operator".  These modifications will potentially
+ *                require some changes to application code.
+ * jsb 01-21-02   If the fread doesn't complete, rewind the file to the beginning of the current
+ *                record, set gsfError to END_OF_FILE, and return -1.  Removed variables that were
+ *                not used, fixed return code and gsfError for default case block in gsfGetBeamWidths,
+ *                and update strncpy in gsfSetParam and gsfCopyRecords to ensure that the terminating
+ *                NULL is copied to the target pointer.
  *
  * Classification : Unclassified
  *
@@ -96,7 +106,7 @@
 
 /* rely on the network type definitions of (u_short, and u_long) */
 #include <sys/types.h>
-#ifndef __WINDOWS__
+#ifndef WIN32
 #include <netinet/in.h>
 #else
 #include <winsock.h>
@@ -290,7 +300,7 @@ gsfOpen(const char *filename, const int mode, int *handle)
     /* Set the desired buffer size */
     if (setvbuf(fp, NULL, _IOFBF, GSF_STREAM_BUF_SIZE))
     {
-        gsfClose ((const int) *handle);
+        gsfClose ((int) *handle);
         gsfError = GSF_SETVBUF_ERROR;
         return (-1);
     }
@@ -343,17 +353,17 @@ gsfOpen(const char *filename, const int mode, int *handle)
         }
         /* Read the GSF header */
         headerSize = gsfRead(*handle, GSF_NEXT_RECORD, &id, &gsfFileTable[fileTableIndex].rec, NULL, 0);
-	/* JSB 04/05/00 Updated to return correct error code */
+        /* JSB 04/05/00 Updated to return correct error code */
         if (headerSize < 0)
-	{
+        {
             fclose(fp);
             numOpenFiles--;
             *handle = 0;
             gsfFileTable[fileTableIndex].occupied = 0;
             memset(&gsfFileTable[fileTableIndex].rec.header, 0, sizeof(gsfFileTable[fileTableIndex].rec.header));
             return (-1);
-	}
-	/* JSB end of updates from 04/055/00 */
+        }
+        /* JSB end of updates from 04/055/00 */
         if (!strstr(gsfFileTable[fileTableIndex].rec.header.version, "GSF-"))
         {
             fclose(fp);
@@ -610,7 +620,7 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
     /* Set the desired buffer size */
     if (setvbuf(fp, NULL, _IOFBF, buf_size))
     {
-        gsfClose ((const int) *handle);
+        gsfClose ((int) *handle);
         gsfError = GSF_SETVBUF_ERROR;
         return (-1);
     }
@@ -663,17 +673,17 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
         }
         /* Read the GSF header */
         headerSize = gsfRead(*handle, GSF_NEXT_RECORD, &id, &gsfFileTable[fileTableIndex].rec, NULL, 0);
-	/* JSB 04/05/00 Updated to return correct error code */
+        /* JSB 04/05/00 Updated to return correct error code */
         if (headerSize < 0)
-	{
+        {
             fclose(fp);
             numOpenFiles--;
             *handle = 0;
             gsfFileTable[fileTableIndex].occupied = 0;
             memset(&gsfFileTable[fileTableIndex].rec.header, 0, sizeof(gsfFileTable[fileTableIndex].rec.header));
             return (-1);
-	}
-	/* JSB end of updates from 04/055/00 */
+        }
+        /* JSB end of updates from 04/055/00 */
         if (!strstr(gsfFileTable[fileTableIndex].rec.header.version, "GSF-"))
         {
             fclose(fp);
@@ -1136,8 +1146,18 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
         readStat = fread((void *) tmpBuff, GSF_LONG_SIZE, (size_t) 2, gsfFileTable[handle - 1].fp);
         if (readStat != 2)
         {
+            /*
+            fprintf (stderr, "GSF READ ERROR:  Record Id - Expecting [2]  Read [%d]\n",
+                (int) (readStat));
+             */
             if (feof(gsfFileTable[handle - 1].fp))
             {
+                /* wkm 10-19-01: if error reading file and we're at the end of the file,
+                 *               reset file pointer
+                 */
+                fseek (gsfFileTable[handle - 1].fp,
+                       gsfFileTable[handle - 1].previous_record,
+                       SEEK_SET);
                 gsfError = GSF_READ_TO_END_OF_FILE;
                 return (-1);
             }
@@ -1194,6 +1214,7 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
          */
         if (readSize > GSF_MAX_RECORD_SIZE)
         {
+            /* wkm, may have an incomplete record here */
             gsfError = GSF_RECORD_SIZE_ERROR;
             return (-1);
         }
@@ -1212,8 +1233,18 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
             readStat = fread(streamBuff, (size_t) 1, readSize, gsfFileTable[handle - 1].fp);
             if (readStat != readSize)
             {
+                /*
+                fprintf (stderr, "GSF READ ERROR:  Data Record - Expecting [%d] Read [%d]\n",
+                         (int) (readSize), (int) (readStat));
+                 */
                 if (feof(gsfFileTable[handle - 1].fp))
                 {
+                     /* wkm 10-19-01: if error reading file and we're at the end of the file,
+                      *               reset file pointer
+                      */
+                     fseek (gsfFileTable[handle - 1].fp,
+                           gsfFileTable[handle - 1].previous_record,
+                           SEEK_SET);
                     gsfError = GSF_READ_TO_END_OF_FILE;
                     return (-1);
                 }
@@ -1470,6 +1501,7 @@ gsfSeekRecord(int handle, gsfDataID *id)
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
+
     ret = fread(&index_rec, sizeof(INDEX_REC), 1, gsfFileTable[handle - 1].index_data.fp);
     if (ret != 1)
     {
@@ -1975,8 +2007,6 @@ gsfLoadScaleFactor(gsfScaleFactors *sf, int subrecordID, char c_flag, double pre
 int
 gsfGetScaleFactor(int handle, int subrecordID, unsigned char *c_flag, double *multiplier, double *offset)
 {
-    unsigned long   itemp;
-    double          mult;
 
     if ((subrecordID < 1) || (subrecordID > GSF_MAX_PING_ARRAY_SUBRECORDS))
     {
@@ -2541,6 +2571,7 @@ gsfIndexTime(int handle, int record_type, int record_number, time_t * sec, long 
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
+
     if (fread(&index_rec, sizeof(INDEX_REC), 1, gsfFileTable[handle - 1].index_data.fp) != 1)
     {
         gsfError = GSF_INDEX_FILE_READ_ERROR;
@@ -3241,7 +3272,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return(-1);
             }
-            strncpy (target->process_parameters.param[i], source->process_parameters.param[i], source->process_parameters.param_size[i]);
+            strncpy (target->process_parameters.param[i], source->process_parameters.param[i], source->process_parameters.param_size[i] + 1);
             target->process_parameters.param_size[i] = source->process_parameters.param_size[i];
         }
         else if (target->process_parameters.param_size[i] < source->process_parameters.param_size[i])
@@ -3252,7 +3283,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return(-1);
             }
-            strncpy (target->process_parameters.param[i], source->process_parameters.param[i], source->process_parameters.param_size[i]);
+            strncpy (target->process_parameters.param[i], source->process_parameters.param[i], source->process_parameters.param_size[i] + 1);
             target->process_parameters.param_size[i] = source->process_parameters.param_size[i];
         }
     }
@@ -3270,7 +3301,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return(-1);
             }
-            strncpy (target->sensor_parameters.param[i], source->sensor_parameters.param[i], source->sensor_parameters.param_size[i]);
+            strncpy (target->sensor_parameters.param[i], source->sensor_parameters.param[i], source->sensor_parameters.param_size[i] + 1);
             target->sensor_parameters.param_size[i] = source->sensor_parameters.param_size[i];
         }
         else if (target->sensor_parameters.param_size[i] < source->sensor_parameters.param_size[i])
@@ -3281,7 +3312,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return(-1);
             }
-            strncpy (target->sensor_parameters.param[i], source->sensor_parameters.param[i], source->sensor_parameters.param_size[i]);
+            strncpy (target->sensor_parameters.param[i], source->sensor_parameters.param[i], source->sensor_parameters.param_size[i] + 1);
             target->sensor_parameters.param_size[i] = source->sensor_parameters.param_size[i];
         }
     }
@@ -3299,7 +3330,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return(-1);
             }
-            strncpy (target->comment.comment, source->comment.comment, source->comment.comment_length);
+            strncpy (target->comment.comment, source->comment.comment, source->comment.comment_length + 1);
             target->comment.comment_length = source->comment.comment_length;
         }
         else if (target->comment.comment_length < source->comment.comment_length)
@@ -3310,7 +3341,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return(-1);
             }
-            strncpy (target->comment.comment, source->comment.comment, source->comment.comment_length);
+            strncpy (target->comment.comment, source->comment.comment, source->comment.comment_length + 1);
             target->comment.comment_length = source->comment.comment_length;
         }
     }
@@ -3318,7 +3349,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
     /* Copy the history record from the source to the target */
     target->history.history_time = source->history.history_time;
     strncpy(target->history.host_name, source->history.host_name, GSF_HOST_NAME_LENGTH);
-    strncpy(target->history.operator, source->history.operator, GSF_OPERATOR_LENGTH);
+    strncpy(target->history.operator_name, source->history.operator_name, GSF_OPERATOR_LENGTH);
 
     if (target->history.command_line != (char *) NULL)
     {
@@ -3332,7 +3363,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return(-1);
         }
-        strncpy(target->history.command_line, source->history.command_line, strlen (source->history.command_line));
+        strncpy(target->history.command_line, source->history.command_line, strlen (source->history.command_line) + 1);
     }
 
     if (target->history.comment != (char *) NULL)
@@ -3347,7 +3378,7 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return(-1);
         }
-        strncpy(target->history.comment, source->history.comment, strlen (source->history.comment));
+        strncpy(target->history.comment, source->history.comment, strlen (source->history.comment) + 1);
     }
 
     /* Copy the navigation error record from the source to the target */
@@ -3420,7 +3451,7 @@ gsfSetParam(int handle, int index, char *val, gsfRecords *rec)
     gsfFileTable[handle-1].rec.process_parameters.param_size[index] = len;
     rec->process_parameters.param[index] = ptr;
     rec->process_parameters.param_size[index] = len;
-    strncpy(rec->process_parameters.param[index], val, len);
+    strncpy(rec->process_parameters.param[index], val, len + 1);
 
     return(0);
 }
@@ -4207,7 +4238,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     }
 
     /* The TIDAL_DATUM paremeter defines the reference datum for tide
-     * corrections.
+     * corrections. See gsf.h for definitions.
      */
     switch (p->vertical_datum)
     {
@@ -4218,6 +4249,46 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         case (GSF_V_DATUM_MLW):
             sprintf(temp, "TIDAL_DATUM=MLW    ");
             break;
+
+        case (GSF_V_DATUM_ALAT):
+             sprintf(temp, "TIDAL_DATUM=ALAT  ");
+             break;
+
+        case (GSF_V_DATUM_ESLW):
+             sprintf(temp, "TIDAL_DATUM=ESLW  ");
+             break;
+
+        case (GSF_V_DATUM_ISLW):
+             sprintf(temp, "TIDAL_DATUM=ISLW  ");
+             break;
+
+        case (GSF_V_DATUM_LAT):
+             sprintf(temp, "TIDAL_DATUM=LAT   ");
+             break;
+
+        case (GSF_V_DATUM_LLW):
+             sprintf(temp, "TIDAL_DATUM=LLW   ");
+             break;
+
+        case (GSF_V_DATUM_LNLW):
+             sprintf(temp, "TIDAL_DATUM=LNLW  ");
+             break;
+
+        case (GSF_V_DATUM_LWD):
+             sprintf(temp, "TIDAL_DATUM=LWD   ");
+             break;
+
+        case (GSF_V_DATUM_MLHW):
+             sprintf(temp, "TIDAL_DATUM=MLHW  ");
+             break;
+
+        case (GSF_V_DATUM_MLLWS):
+             sprintf(temp, "TIDAL_DATUM=MLLWS ");
+             break;
+
+        case (GSF_V_DATUM_MLWN):
+             sprintf(temp, "TIDAL_DATUM=MLWN  ");
+             break;
 
         default:
             sprintf(temp, "TIDAL_DATUM=UNKNOWN");
@@ -4563,6 +4634,46 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             {
                 p->vertical_datum = GSF_V_DATUM_MLW;
             }
+            else if (strstr(str, "ALAT"))
+            {
+                p->vertical_datum = GSF_V_DATUM_ALAT;
+            }
+            else if (strstr(str, "ESLW"))
+            {
+                p->vertical_datum = GSF_V_DATUM_ESLW;
+            }
+            else if (strstr(str, "ISLW"))
+            {
+                p->vertical_datum = GSF_V_DATUM_ISLW;
+            }
+            else if (strstr(str, "LAT"))
+            {
+                p->vertical_datum = GSF_V_DATUM_LAT;
+            }
+            else if (strstr(str, "LLW"))
+            {
+                p->vertical_datum = GSF_V_DATUM_LLW;
+            }
+            else if (strstr(str, "LNLW"))
+            {
+                p->vertical_datum = GSF_V_DATUM_LNLW;
+            }
+            else if (strstr(str, "LWD"))
+            {
+                p->vertical_datum = GSF_V_DATUM_LWD;
+            }
+            else if (strstr(str, "MLHW"))
+            {
+                p->vertical_datum = GSF_V_DATUM_MLHW;
+            }
+            else if (strstr(str, "MLLWS"))
+            {
+                p->vertical_datum = GSF_V_DATUM_MLLWS;
+            }
+            else if (strstr(str, "MLWN"))
+            {
+                p->vertical_datum = GSF_V_DATUM_MLWN;
+            }
             else
             {
                 p->vertical_datum = GSF_V_DATUM_UNKNOWN;
@@ -4611,7 +4722,7 @@ gsfNumberParams(char *param)
         number = 1;
     }
 
-    while (p=strtok(NULL, ","))
+    while ((p = strtok(NULL, ",")) != (char *) NULL)
     {
         number++;
     }
@@ -4774,10 +4885,10 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             }
             break;
 
-         default:
-        {
-            ret -1;
-        }
+        default:
+            gsfError = GSF_UNRECOGNIZED_SENSOR_ID;
+            ret = -1;
+            break;
     }
     return(ret);
 }
@@ -4894,8 +5005,6 @@ gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, int subrecordID, int 
     double          next_layer;
     double          corrector;
     double          layer_interval = 100.0;
-    double          min_scaled_depth;
-    double          max_scaled_depth;
     double          max_depth_threshold = 400.0;
     double          max_depth_hysteresis = 30.0;
     double          increasing_threshold;
