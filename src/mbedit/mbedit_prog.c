@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.1 1994-11-24 01:52:07 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.2 1995-02-14 19:16:04 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
+ *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -13,17 +13,20 @@
 /*
  * MBEDIT is an interactive beam editor for multibeam bathymetry data.
  * It can work with any data format supported by the MBIO library.
- * This version uses the XVIEW toolkit and has been developed using
- * the DEVGUIDE package.  A future version will employ the MOTIF
- * toolkit for greater portability.  This file contains
- * the code that does not directly depend on the XVIEW interface - the 
- * companion file mbedit_stubs.c contains the user interface related 
+ * This version uses the MOTIF toolkit and has been developed using
+ * the DEVGUIDE package.  This file contains
+ * the code that does not directly depend on the MOTIF interface - the 
+ * companion file mbedit.c contains the user interface related 
  * code.
  *
  * Author:	D. W. Caress
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/11/24  01:52:07  caress
+ * Now centers profiles based on bathymetry median value
+ * rather than mean.
+ *
  * Revision 4.0  1994/10/21  11:55:41  caress
  * Release V4.0
  *
@@ -83,6 +86,10 @@
 #include "mb_status.h"
 #include "mb_io.h"
 
+/* output mode defines */
+#define	MBEDIT_OUTPUT_OUTPUT 0
+#define	MBEDIT_OUTPUT_BROWSE 1
+
 /* ping structure definition */
 struct mbedit_ping_struct 
 	{
@@ -106,7 +113,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.1 1994-11-24 01:52:07 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.2 1995-02-14 19:16:04 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -135,6 +142,7 @@ char	ofile[128];
 int	ofile_defined = MB_NO;
 char	*imbio_ptr = NULL;
 char	*ombio_ptr = NULL;
+int	output_mode = MBEDIT_OUTPUT_OUTPUT;
 
 /* mbio read and write values */
 char	*store_ptr = NULL;
@@ -189,9 +197,13 @@ int	plot_size = MBEDIT_MAX_PINGS/2;
 int	nplot = 0;
 int	mbedit_xgid;
 int	borders[4];
-int	scale_max = 5000;
-int	xscale = 1000;
-int	yscale = 1000;
+int	margin;
+int	xmin, xmax;
+int	ymin, ymax;
+int	exager = 100;
+int	plot_width = 5000;
+int	xscale;
+int	yscale;
 int	x_interval = 1000;
 int	y_interval = 250;
 int	beam_save = MB_NO;
@@ -264,7 +276,7 @@ int	*startup_file;
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhBbF:f:I:i:O:o:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -274,6 +286,11 @@ int	*startup_file;
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'B':
+		case 'b':
+			output_mode = MBEDIT_OUTPUT_BROWSE;
+			flag++;
 			break;
 		case 'F':
 		case 'f':
@@ -349,10 +366,13 @@ int	*startup_file;
 	/* if file specified then use it */
 	if (fileflag > 0)
 		{
-		status = mbedit_action_open(ifile,format,hold_size_default,
+		status = mbedit_action_open(ifile,format,output_mode, 
+				hold_size_default,
 				buffer_size_default,
-				xscale,yscale,x_interval,y_interval,plot_size,
-				&ndump,&nload,&nbuff,&nlist,&current_id,&nplot);
+				plot_width,exager,
+				x_interval,y_interval,plot_size,
+				&ndump,&nload,&nbuff,
+				&nlist,&current_id,&nplot);
 		if (status = MB_SUCCESS)
 			*startup_file = MB_YES;
 		}
@@ -414,6 +434,15 @@ int	*pixels;
 	for (i=0;i<ncolors;i++)
 		pixel_values[i] = pixels[i];
 
+	/* set scaling */
+	margin = (borders[1] - borders[0])/15;
+	xmin = 5*margin;
+	xmax = borders[1] - margin;
+	ymin = margin;
+	ymax = borders[3] - margin;
+	xscale = 100*plot_width/(xmax - xmin);
+	yscale = (xscale*exager)/100;
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -430,19 +459,19 @@ int	*pixels;
 /*--------------------------------------------------------------------*/
 int mbedit_get_defaults(plt_size_max,plt_size,
 	buffer_size_max,buffer_size,hold_size,form,
-	sclmx,xscl,yscl,xntrvl,yntrvl,ttime_i)
+	plwd,exgr,xntrvl,yntrvl,ttime_i,outmode)
 int	*plt_size_max;
 int	*plt_size;
 int	*buffer_size_max;
 int	*buffer_size;
 int	*hold_size;
 int	*form;
-int	*sclmx;
-int	*xscl;
-int	*yscl;
+int	*plwd;
+int	*exgr;
 int	*xntrvl;
 int	*yntrvl;
 int	*ttime_i;
+int	*outmode;
 {
 	/* local variables */
 	char	*function_name = "mbedit_get_defaults";
@@ -471,9 +500,8 @@ int	*ttime_i;
 	*form = format;
 
 	/* get scaling */
-	*sclmx = scale_max;
-	*xscl = xscale;
-	*yscl = yscale;
+	*plwd = plot_width;
+	*exgr = exager;
 
 	/* get tick intervals */
 	*xntrvl = x_interval;
@@ -498,6 +526,9 @@ int	*ttime_i;
 		for (i=0;i<7;i++)
 			ttime_i[i] = btime_i[i];
 
+	/* get output mode */
+	*outmode = output_mode;
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -510,13 +541,14 @@ int	*ttime_i;
 		fprintf(stderr,"dbg2       buffer_size: %d\n",*buffer_size);
 		fprintf(stderr,"dbg2       hold_size:   %d\n",*hold_size);
 		fprintf(stderr,"dbg2       format:      %d\n",*form);
-		fprintf(stderr,"dbg2       xscale:      %d\n",*xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",*yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",*plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",*exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",*xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",*yntrvl);
 		for (i=0;i<7;i++)
 			fprintf(stderr,"dbg2       ttime[%d]:    %d\n",
 				ttime_i[i]);
+		fprintf(stderr,"dbg2       outmode:     %d\n",*outmode);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
@@ -525,15 +557,16 @@ int	*ttime_i;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_open(file,form,hold_size,buffer_size,
-	xscl,yscl,xntrvl,yntrvl,plt_size,
+int mbedit_action_open(file,form,outmode,hold_size,buffer_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,
 	ndumped,nloaded,nbuffer,ngood,icurrent,nplt)
 char	*file;
 int	form;
+int	outmode;
 int	hold_size;
 int	buffer_size;
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -556,14 +589,18 @@ int	*nplt;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file:        %s\n",file);
 		fprintf(stderr,"dbg2       format:      %d\n",form);
+		fprintf(stderr,"dbg2       outmode:     %d\n",outmode);
 		fprintf(stderr,"dbg2       hold_size:   %d\n",hold_size);
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
 		}
+
+	/* set the output mode */
+	output_mode = outmode;
 
 	/* clear the screen */
 	status = mbedit_clear_screen();
@@ -590,7 +627,7 @@ int	*nplt;
 	/* set up plotting */
 	if (*ngood > 0)
 		{
-		status = mbedit_plot_all(xscl,yscl,xntrvl,yntrvl,plt_size,nplt);
+		status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
 		}
 
 	/* reset beam_save */
@@ -618,12 +655,12 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_next_buffer(hold_size,buffer_size,
-	xscl,yscl,xntrvl,yntrvl,plt_size,ndumped,
+	plwd,exgr,xntrvl,yntrvl,plt_size,ndumped,
 	nloaded,nbuffer,ngood,icurrent,nplt)
 int	hold_size;
 int	buffer_size;
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -647,8 +684,8 @@ int	*nplt;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       hold_size:   %d\n",hold_size);
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -687,7 +724,7 @@ int	*nplt;
 		/* else set up plotting */
 		else
 			{
-			status = mbedit_plot_all(xscl,yscl,xntrvl,yntrvl,plt_size,nplt);
+			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
 			}
 		}
 
@@ -881,11 +918,11 @@ int	*icurrent;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_step(step,xscl,yscl,xntrvl,yntrvl,plt_size,
+int mbedit_action_step(step,plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
 int	step;
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -906,8 +943,8 @@ int	*nplt;
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       step:        %d\n",step);
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -935,7 +972,7 @@ int	*nplt;
 		/* set the plotting list */
 		if (*ngood > 0)
 			{
-			status = mbedit_plot_all(xscl,yscl,xntrvl,yntrvl,plt_size,nplt);
+			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
 			}
 
 		/* set failure flag if no step was made */
@@ -976,10 +1013,10 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_plot(xscl,yscl,xntrvl,yntrvl,plt_size,
+int mbedit_action_plot(plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -999,8 +1036,8 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -1019,7 +1056,7 @@ int	*nplt;
 		/* set the plotting list */
 		if (*ngood > 0)
 			{
-			status = mbedit_plot_all(xscl,yscl,xntrvl,yntrvl,plt_size,nplt);
+			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
 			}
 		}
 
@@ -1055,12 +1092,12 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_pick(x_loc,y_loc,
-	xscl,yscl,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
 int	x_loc;
 int	y_loc;
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -1086,8 +1123,8 @@ int	*nplt;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       x_loc:       %d\n",x_loc);
 		fprintf(stderr,"dbg2       y_loc:       %d\n",y_loc);
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -1217,12 +1254,12 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_erase(x_loc,y_loc,
-	xscl,yscl,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
 int	x_loc;
 int	y_loc;
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -1247,8 +1284,8 @@ int	*nplt;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       x_loc:       %d\n",x_loc);
 		fprintf(stderr,"dbg2       y_loc:       %d\n",y_loc);
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -1357,12 +1394,12 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_restore(x_loc,y_loc,
-	xscl,yscl,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
 int	x_loc;
 int	y_loc;
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -1387,8 +1424,8 @@ int	*nplt;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       x_loc:       %d\n",x_loc);
 		fprintf(stderr,"dbg2       y_loc:       %d\n",y_loc);
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -1498,10 +1535,10 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_bad_ping(
-	xscl,yscl,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -1522,8 +1559,8 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -1606,10 +1643,10 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_good_ping(
-	xscl,yscl,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -1630,8 +1667,8 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -1715,10 +1752,10 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_left_ping(
-	xscl,yscl,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -1739,8 +1776,8 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -1824,10 +1861,10 @@ int	*nplt;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_right_ping(
-	xscl,yscl,xntrvl,yntrvl,plt_size,
+	plwd,exgr,xntrvl,yntrvl,plt_size,
 	nbuffer,ngood,icurrent,nplt)
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -1848,8 +1885,8 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -2002,7 +2039,8 @@ int	form;
 
 	/* get filenames */
 	strcpy(ifile,file);
-	if (ofile_defined == MB_NO)
+	if (ofile_defined == MB_NO 
+		&& output_mode == MBEDIT_OUTPUT_OUTPUT)
 		{
 		len = 0;
 		if ((suffix = strstr(ifile,".mb")) != NULL)
@@ -2037,16 +2075,22 @@ int	form;
 		}
 
 	/* initialize writing the output multibeam file */
-	if ((status = mb_write_init(
-		verbose,ofile,format,&ombio_ptr,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+	if (output_mode == MBEDIT_OUTPUT_OUTPUT)
 		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
-		status = MB_FAILURE;
-		return(status);
+		if ((status = mb_write_init(
+			verbose,ofile,format,&ombio_ptr,
+			&beams_bath,&beams_amp,
+			&pixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
+			fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
+			status = MB_FAILURE;
+			return(status);
+			}
 		}
+	else
+		ombio_ptr = NULL;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
@@ -2108,101 +2152,105 @@ int	form;
 	nbuff = 0;
 
 	/* write comments to beginning of output file */
-	kind = MB_DATA_COMMENT;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"Bathymetry data edited interactively using program %s version %s",
-		program_name,rcs_id);
-	status = mb_put(verbose,ombio_ptr,kind,
+	if (output_mode == MBEDIT_OUTPUT_OUTPUT)
+		{
+		kind = MB_DATA_COMMENT;
+		strncpy(comment,"\0",256);
+		sprintf(comment,"Bathymetry data edited interactively using program %s version %s",
+			program_name,rcs_id);
+		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
 			beams_bath,beams_amp,pixels_ss,
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"MB-system Version %s",MB_VERSION);
-	status = mb_put(verbose,ombio_ptr,kind,
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		strncpy(comment,"\0",256);
+		sprintf(comment,"MB-system Version %s",MB_VERSION);
+		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
 			beams_bath,beams_amp,pixels_ss,
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	right_now = time((long *)0);
-	strncpy(date,"\0",25);
-	right_now = time((long *)0);
-	strncpy(date,ctime(&right_now),24);
-	strcpy(user,getenv("USER"));
-	gethostname(host,128);
-	strncpy(comment,"\0",256);
-	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
-		user,host,date);
-	status = mb_put(verbose,ombio_ptr,kind,
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		right_now = time((long *)0);
+		strncpy(date,"\0",25);
+		right_now = time((long *)0);
+		strncpy(date,ctime(&right_now),24);
+		strcpy(user,getenv("USER"));
+		gethostname(host,128);
+		strncpy(comment,"\0",256);
+		sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
+			user,host,date);
+		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
 			beams_bath,beams_amp,pixels_ss,
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"Control Parameters:");
-	status = mb_put(verbose,ombio_ptr,kind,
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		strncpy(comment,"\0",256);
+		sprintf(comment,"Control Parameters:");
+		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
 			beams_bath,beams_amp,pixels_ss,
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  MBIO data format:   %d",format);
-	status = mb_put(verbose,ombio_ptr,kind,
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  MBIO data format:   %d",format);
+		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
 			beams_bath,beams_amp,pixels_ss,
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  Input file:         %s",ifile);
-	status = mb_put(verbose,ombio_ptr,kind,
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Input file:         %s",ifile);
+		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
 			beams_bath,beams_amp,pixels_ss,
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  Output file:        %s",ofile);
-	status = mb_put(verbose,ombio_ptr,kind,
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Output file:        %s",ofile);
+		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
 			beams_bath,beams_amp,pixels_ss,
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
-	sprintf(comment," ");
-	status = mb_put(verbose,ombio_ptr,kind,
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		strncpy(comment,"\0",256);
+		sprintf(comment," ");
+		status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
 			beams_bath,beams_amp,pixels_ss,
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
-	if (error == MB_ERROR_NO_ERROR) ocomment++;
+		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		}
 
 	/* if we got here we must have succeeded */
 	if (verbose >= 1)
 		{
 		fprintf(stderr,"\nMultibeam File <%s> initialized for reading\n",ifile);
-		fprintf(stderr,"Multibeam File <%s> initialized for writing\n",ofile);
+		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
+			fprintf(stderr,"Multibeam File <%s> initialized for writing\n",ofile);
 		fprintf(stderr,"Multibeam Data Format ID: %d\n",format);
 		}
 	file_open = MB_YES;
@@ -2239,7 +2287,8 @@ int mbedit_close_file()
 	/* close the files */
 	status = mb_buffer_close(verbose,&buff_ptr,imbio_ptr,&error);
 	status = mb_close(verbose,&imbio_ptr,&error);
-	status = mb_close(verbose,&ombio_ptr,&error);
+	if (ombio_ptr != NULL)
+		status = mb_close(verbose,&ombio_ptr,&error);
 	ofile_defined = MB_NO;
 
 	/* deallocate memory for data arrays */
@@ -2272,7 +2321,8 @@ int mbedit_close_file()
 	if (verbose >= 1)
 		{
 		fprintf(stderr,"\nMultibeam Input File <%s> closed\n",ifile);
-		fprintf(stderr,"Multibeam Output File <%s> closed\n",ofile);
+		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
+			fprintf(stderr,"Multibeam Output File <%s> closed\n",ofile);
 		fprintf(stderr,"%d data records loaded\n",nload_total);
 		fprintf(stderr,"%d data records dumped\n",ndump_total);
 		
@@ -2314,12 +2364,20 @@ int	*nbuffer;
 		fprintf(stderr,"dbg2       hold_size:   %d\n",hold_size);
 		}
 
-	/* dump data from the buffer */
+	/* dump or clear data from the buffer */
 	ndump = 0;
 	if (nbuff > 0)
 		{
-		status = mb_buffer_dump(verbose,buff_ptr,ombio_ptr,
-			hold_size,&ndump,&nbuff,&error);
+		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
+			status = mb_buffer_dump(verbose,
+					buff_ptr,ombio_ptr,
+					hold_size,&ndump,&nbuff,
+					&error);
+		else
+			status = mb_buffer_clear(verbose,
+					buff_ptr,imbio_ptr,
+					hold_size,&ndump,&nbuff,
+					&error);
 		}
 	*ndumped = ndump;
 	ndump_total += ndump;
@@ -2339,8 +2397,12 @@ int	*nbuffer;
 	/* print out information */
 	if (verbose >= 1)
 		{
-		fprintf(stderr,"\n%d data records dumped to output file <%s>\n",
-			*ndumped,ofile);
+		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
+			fprintf(stderr,"\n%d data records dumped to output file <%s>\n",
+				*ndumped,ofile);
+		else
+			fprintf(stderr,"\n%d data records dumped from buffer\n",
+				*ndumped);
 		fprintf(stderr,"%d data records remain in buffer\n",*nbuffer);
 		}
 
@@ -2510,9 +2572,9 @@ int mbedit_clear_screen()
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_plot_all(xscl,yscl,xntrvl,yntrvl,plt_size,nplt)
-int	xscl;
-int	yscl;
+int mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt)
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -2526,9 +2588,6 @@ int	*nplt;
 	int	nbathsum,  nbathlist;
 	double	bathsum, bathmean, bathmedian;
 	double	dxscale, dyscale;
-	double	exager;
-	int	xmin, xmax, ymin, ymax;
-	int	margin;
 	double	dx_width, dy_height;
 	int	nx_int, ny_int;
 	int	x_int, y_int;
@@ -2544,8 +2603,8 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -2553,8 +2612,8 @@ int	*nplt;
 		}
 
 	/* set scales and tick intervals */
-	xscale = xscl;
-	yscale = yscl;
+	plot_width = plwd;
+	exager = exgr;
 	x_interval = xntrvl;
 	y_interval = yntrvl;
 
@@ -2629,24 +2688,20 @@ int	*nplt;
 		pixel_values[WHITE],XG_SOLIDLINE);
 
 	/* set scaling */
-	margin = (borders[1] - borders[0])/15;
-	xmin = 5*margin;
-	xmax = borders[1] - margin;
-	ymin = margin;
-	ymax = borders[3] - margin;
 	xcen = xmin + (xmax - xmin)/2;
 	dy = (ymax - ymin)/plot_size;
+	xscale = 100*plot_width/(xmax - xmin);
+	yscale = (xscale*100)/exager;
 	dxscale = 100.0/xscale;
 	dyscale = 100.0/yscale;
 
 	/* plot top label */
-	exager = dyscale/dxscale;
-	sprintf(string,"Vertical Exageration: %4.2f",exager);
+	sprintf(string,"Vertical Exageration: %4.2f",(exager/100.));
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,xcen-swidth/2,
 		ymin-margin/2-sascent,string,pixel_values[BLACK],XG_SOLIDLINE);
-	sprintf(string,"Crosstrack Distances and Depths in Meters",exager);
+	sprintf(string,"Crosstrack Distances and Depths in Meters");
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,xcen-swidth/2,
@@ -2984,13 +3039,13 @@ int	iping;
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_goto(ttime_i,hold_size,buffer_size,
-	xscl,yscl,xntrvl,yntrvl,plt_size,ndumped,
+	plwd,exgr,xntrvl,yntrvl,plt_size,ndumped,
 	nloaded,nbuffer,ngood,icurrent,nplt)
 int	ttime_i[7];
 int	hold_size;
 int	buffer_size;
-int	xscl;
-int	yscl;
+int	plwd;
+int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
@@ -3023,8 +3078,8 @@ int	*nplt;
 		fprintf(stderr,"dbg2       time_i[6]:   %d\n",ttime_i[6]);
 		fprintf(stderr,"dbg2       hold_size:   %d\n",hold_size);
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
-		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
-		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
 		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
@@ -3137,7 +3192,7 @@ int	*nplt;
 	/* set up plotting */
 	if (*ngood > 0)
 		{
-		status = mbedit_plot_all(xscl,yscl,xntrvl,yntrvl,plt_size,nplt);
+		status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
 		}
 
 	/* let the world know... */

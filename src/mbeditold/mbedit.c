@@ -59,6 +59,13 @@
 
 #define EV_MASK (ButtonPressMask | KeyPressMask | ExposureMask )
 
+/* Mode value defines */
+#define	MODE_PICK	0
+#define	MODE_ERASE	1
+#define	MODE_RESTORE	2
+#define	OUTPUT_MODE_OUTPUT	0
+#define	OUTPUT_MODE_BROWSE	1
+
 /************************************************************/
 /* GLOBAL VARIABLES                                         */
 /************************************************************/
@@ -96,13 +103,12 @@ int	nbuffer;
 int	ngood;
 int	icurrent;
 int	mnplot;
-int	mscale_max;
-int	exager;
-int	mxscale;
-int	myscale;
+int	mexager;
+int	mplot_width;
 int	mx_interval;
 int	my_interval;
-int	mode_pick = 0;
+int	mode_pick = MODE_PICK;
+int	mode_output = OUTPUT_MODE_OUTPUT;
 int	ttime_i[7];
 int	status;
 
@@ -110,11 +116,6 @@ int	status;
 int	startup_file = 0;
 int	open_files_count = 0;
 struct direct **open_files;
-
-/* Values set when "MODE" is selected */
-#define	MODE_PICK	0
-#define	MODE_ERASE	1
-#define	MODE_RESTORE	2
 
 int screen_num, can_screen_num;
 int theDepth;
@@ -184,12 +185,14 @@ static void set_number_step();
 static void set_mode_pick();
 static void set_mode_erase();
 static void set_mode_restore();
+static void set_output_output();
+static void set_output_browse();
 static void apply_goto_button();
 static void cancel_goto_button();
 static void do_x_interval();
 static void do_y_interval();
 static void do_event();
-static void grab_file();
+static void get_file_selection();
 int xg_init();
 void xg_free();
 void xg_getpixelvalue();
@@ -226,12 +229,14 @@ static MrmRegisterArg reglist[] =
 	  {"set_mode_pick",		(caddr_t) set_mode_pick},
 	  {"set_mode_erase",		(caddr_t) set_mode_erase},
 	  {"set_mode_restore",		(caddr_t) set_mode_restore},
+	  {"set_output_output",		(caddr_t) set_output_output},
+	  {"set_output_browse",		(caddr_t) set_output_browse},
+	  {"get_file_selection",	(caddr_t) get_file_selection},
 	  {"apply_goto_button",		(caddr_t) apply_goto_button},
 	  {"cancel_goto_button",	(caddr_t) cancel_goto_button},
 	  {"do_x_interval",		(caddr_t) do_x_interval},
 	  {"do_y_interval",		(caddr_t) do_y_interval},
 	  {"do_event",			(caddr_t) do_event},
-	  {"grab_file",			(caddr_t) grab_file},
 	  {"display_menu",		(caddr_t) display_menu}
 	};
 
@@ -365,7 +370,7 @@ unsigned int main(argc, argv)
 /* INITIALIZED BY OTHER PROCESSES EVEN IF THEY HAD NOT BEEN */
 /* USED PREVIOUSLY.                                         */
 /************************************************************/
-
+	/* get widgets from main controls */
 	if(widget_array[k_mb_main] == NULL)
 	{
 	  if(MrmFetchWidget(s_MrmHierarchy,
@@ -378,8 +383,44 @@ unsigned int main(argc, argv)
 		  s_error("CAN'T FETCH B BOARD");
 		}
 	  XtManageChild(widget_array[k_mb_main]);
-
 	}
+
+	/* get widgets from goto controls */
+	if(widget_array[k_goto_menu] == NULL)
+	{
+          if(MrmFetchWidget(s_MrmHierarchy,
+                            "goto_menu",
+                            toplevel_widget,
+                            &widget_array[k_goto_menu],
+                            &dummy_class)
+                !=MrmSUCCESS)
+                {
+                  s_error("CAN'T FETCH GOTO MENU");
+                }
+	}
+
+	/* get widgets from file open dialog */
+	if(widget_array[k_file_menu] == NULL)
+        {
+              if(MrmFetchWidget(s_MrmHierarchy,
+                            "controls_load",
+                            toplevel_widget,
+                            &widget_array[k_file_menu],
+                            &dummy_class)
+                !=MrmSUCCESS)
+                {
+                  s_error("CAN'T FETCH FILE MENU");
+                }
+         }
+	 widget_array[k_filelist_list] =
+	    XmFileSelectionBoxGetChild(widget_array[k_file_sel_box], 
+					XmDIALOG_LIST);
+	 widget_array[k_selection_text] =
+	    XmFileSelectionBoxGetChild(widget_array[k_file_sel_box], 
+					XmDIALOG_TEXT);
+	 XtAddCallback(widget_array[k_filelist_list], 
+		XmNbrowseSelectionCallback, 
+		get_file_selection, NULL);
 
 /**************************************************************/
 /* SET UP DISPLAYS SCREENS FONTS AND CURSORS FOR THIS DISPLAY */
@@ -537,42 +578,100 @@ static void init_data()
 /************************************************************/
 static void setup_data()
 {
-	char time_text[10];
+	char value_text[10];
 
 	/* get some default values from mbedit */
 	status = mbedit_get_defaults(&plot_size_max,&mplot_size,
 			&buffer_size_max,&buffer_size,
 			&hold_size,&mformat,
-			&mscale_max,&mxscale,&myscale,
-			&mx_interval,&my_interval,ttime_i);
-	exager = 100*mxscale/myscale;
+			&mplot_width,&mexager,
+			&mx_interval,&my_interval,
+			ttime_i,&mode_output);
 
-	/* set values in widgets */
-/*	sprintf(time_text,"%4.4d",ttime_i[0]);
-	fprintf(stderr,"time_text: %s\n",time_text);
-	XmTextSetString(widget_array[k_glf_year], time_text);
+	/* set values of number of pings slider */
+	XtVaSetValues(widget_array[k_num_pings], 
+			XmNminimum, 1, 
+			XmNmaximum, plot_size_max, 
+			XmNvalue, mplot_size, 
+			NULL);
 
-	sprintf(time_text,"%2.2d",ttime_i[1]);
-	fprintf(stderr,"time_text: %s\n",time_text);
-	XmTextSetString(widget_array[k_glf_month], time_text);
+	/* set values of buffer size slider */
+	XtVaSetValues(widget_array[k_buff_size], 
+			XmNminimum, 1, 
+			XmNmaximum, buffer_size_max, 
+			XmNvalue, buffer_size, 
+			NULL);
 
-	sprintf(time_text,"%2.2d",ttime_i[2]);
-	fprintf(stderr,"time_text: %s\n",time_text);
-	XmTextSetString(widget_array[k_glf_day], time_text);
+	/* set values of buffer hold size slider */
+	XtVaSetValues(widget_array[k_buff_retain_size], 
+			XmNminimum, 1, 
+			XmNmaximum, buffer_size_max, 
+			XmNvalue, hold_size, 
+			NULL);
 
-	sprintf(time_text,"%2.2d",ttime_i[3]);
-	fprintf(stderr,"time_text: %s\n",time_text);
-	XmTextSetString(widget_array[k_glf_hour], time_text);
+	/* set values of plot width slider */
+	XtVaSetValues(widget_array[k_x_scale], 
+			XmNminimum, 1, 
+			XmNvalue, mplot_width, 
+			NULL);
 
-	sprintf(time_text,"%2.2d",ttime_i[4]);
-	fprintf(stderr,"time_text: %s\n",time_text);
-	XmTextSetString(widget_array[k_glf_min], time_text);
+	/* set values of vertical exageration slider */
+	XtVaSetValues(widget_array[k_vert_exag], 
+			XmNdecimalPoints, 2, 
+			XmNvalue, mexager, 
+			NULL);
 
-	sprintf(time_text,"%2.2d",ttime_i[5]);
-	fprintf(stderr,"time_text: %s\n",time_text);
-	XmTextSetString(widget_array[k_glf_sec], time_text);
-*/
+	/* set values of x interval slider */
+	XtVaSetValues(widget_array[k_x_tick_marks], 
+			XmNvalue, mx_interval, 
+			NULL);
 
+	/* set values of y interval slider */
+	XtVaSetValues(widget_array[k_y_tick_marks], 
+			XmNvalue, my_interval, 
+			NULL);
+
+	/* set starting values in go to time widgets */
+	sprintf(value_text,"%4.4d",ttime_i[0]);
+	XmTextFieldSetString(widget_array[k_glf_year], value_text);
+
+	sprintf(value_text,"%2.2d",ttime_i[1]);
+	XmTextFieldSetString(widget_array[k_glf_month], value_text);
+
+	sprintf(value_text,"%2.2d",ttime_i[2]);
+	XmTextFieldSetString(widget_array[k_glf_day], value_text);
+
+	sprintf(value_text,"%2.2d",ttime_i[3]);
+	XmTextFieldSetString(widget_array[k_glf_hour], value_text);
+
+	sprintf(value_text,"%2.2d",ttime_i[4]);
+	XmTextFieldSetString(widget_array[k_glf_min], value_text);
+
+	sprintf(value_text,"%2.2d",ttime_i[5]);
+	XmTextFieldSetString(widget_array[k_glf_sec], value_text);
+
+	sprintf(value_text,"%2.2d",mformat);
+	XmTextFieldSetString(widget_array[k_mbio_format], value_text);
+
+	/* set value of format text item */
+	sprintf(value_text,"%2.2d",mformat);
+	XmTextFieldSetString(widget_array[k_mbio_format], value_text);
+
+	/* set the output mode */
+	if (mode_output == OUTPUT_MODE_OUTPUT)
+	    {
+	    XmToggleButtonSetState(widget_array[k_output_button], 
+			TRUE, TRUE);
+	    XtManageChild(widget_array[k_output_file]);
+	    XtManageChild(widget_array[k_output_file_lab]);
+	    }
+	else
+	    {
+	    XmToggleButtonSetState(widget_array[k_browse_button],  
+			TRUE, TRUE);
+	    XtUnmanageChild(widget_array[k_output_file]);
+	    XtUnmanageChild(widget_array[k_output_file_lab]);
+	    }
 }
 
 
@@ -621,7 +720,7 @@ static void create_proc(w, tag, reason)
 		XmToggleButtonSetState(widget_array[k_restore_button], 0, FALSE);
 	     }
 	  break;
-	defualt:
+	default:
 	  break;
 	  }
 }
@@ -726,11 +825,14 @@ static void set_number_pings(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
+	int	max;
+	char	label[10];
 
 	/* Read the value of the slider bar for number of pings displayed */
 	mplot_size = scale->value;
 
-	status = mbedit_action_plot(mxscale,myscale,
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width,mexager,
 		mx_interval,my_interval,mplot_size,&nbuffer,
 		&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
@@ -759,10 +861,34 @@ static void set_scale_x(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
-	mxscale = scale->value;
-	myscale = mxscale/(0.01*exager);
+	int	max;
+	char	label[10];
 
-	status = mbedit_action_plot(mxscale,myscale,
+	mplot_width = scale->value;
+
+	/* if slider set to minimum value, half the value range;
+		if slider set to maximum value,  double the range */
+	XtVaGetValues(widget_array[k_x_scale], 
+			XmNmaximum, &max, 
+			NULL);
+	if (mplot_width == 1 || mplot_width == max)
+		{
+		if (mplot_width == 1)
+			max = max/2;
+		else
+			max = 2*max;
+		XtVaSetValues(widget_array[k_x_scale], 
+			XmNmaximum, max, 
+			NULL);
+		sprintf(label, "%d", max);
+		XtVaSetValues(widget_array[k_x_scale_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, label, (strlen(label) + 1), 
+			NULL);	
+		}
+
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width,mexager,
 		mx_interval,my_interval,mplot_size,&nbuffer,
 		&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
@@ -796,10 +922,34 @@ static void set_scale_y(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
-	exager = scale->value;
-	myscale = mxscale/(0.01*exager);
-	
-	status = mbedit_action_plot(mxscale,myscale,
+	int	max;
+	char	label[10];
+
+	mexager = scale->value;
+
+	/* if slider set to minimum value, half the value range;
+		if slider set to maximum value,  double the range */
+	XtVaGetValues(widget_array[k_vert_exag], 
+			XmNmaximum, &max, 
+			NULL);
+	if (mexager == 1 || mexager == max)
+		{
+		if (mexager == 1)
+			max = max/2;
+		else
+			max = 2*max;
+		XtVaSetValues(widget_array[k_vert_exag], 
+			XmNmaximum, max, 
+			NULL);
+		sprintf(label, "%.2f", (double)(max/100.));
+		XtVaSetValues(widget_array[k_vert_exag_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, label, (strlen(label) + 1), 
+			NULL);	
+		}
+
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width,mexager,
 		mx_interval,my_interval,mplot_size,&nbuffer,
 		&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
@@ -816,9 +966,10 @@ static void set_number_step(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
+	int	max;
+	char	label[10];
 
 	step = scale->value;
-
 }
 
  
@@ -833,6 +984,11 @@ static void cancel_file_sel(fs, client_data, cbs)
 	XmFileSelectionBoxCallbackStruct *cbs;
 {
 	XtUnmanageChild(widget_array[k_file_bb_box]);
+
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width,mexager,
+		mx_interval,my_interval,mplot_size,&nbuffer,
+		&ngood,&icurrent,&mnplot);
 }
 
 /********************************************************************/
@@ -859,6 +1015,7 @@ static void do_load_ok(fs, client_data, cbs)
 	char	*suffix;
 	int	len;
 	static  char *format_text;
+	static  char *output_text;
 
 	len = 0;
 
@@ -870,37 +1027,26 @@ static void do_load_ok(fs, client_data, cbs)
 /* new edited data into output_file.                             */
 /*****************************************************************/
 
+	/* read the input file name */
 	if(!XmStringGetLtoR(cbs->value,charset, &input_file))
-	{
-		fprintf(stderr,"\n%s input file name\n",input_file);
+		{
 		selected = 0;
-	}
+		}
 	else
-	{
-		if ((suffix = strstr(input_file,".mb")) != NULL)
-			len = strlen(suffix);
-		if (len >= 4 && len <= 5)
-			{
-			strncpy(output_file,"\0",128);
-			strncpy(output_file,input_file,strlen(input_file)-len);
-			strcat(output_file,"e");
-			strcat(output_file,suffix);
-			}
-		else
-			{
-			strcpy(output_file,input_file);
-			strcat(output_file,".ed");
-			}
+		{
 		selected = 1;
-	}
-
-	/* read the mbio format number from the screen */
-	format_text = XmTextGetString(widget_array[k_mbio_format]);
-	sscanf(format_text, "%d", &mformat);
-
+		}
 
 	if (selected > 0)
 		{
+		/* read the mbio format number from the screen */
+		format_text = XmTextGetString(widget_array[k_mbio_format]);
+		sscanf(format_text, "%d", &mformat);
+
+		/* read the output file name */
+		output_text = XmTextGetString(widget_array[k_output_file]);
+		strcpy(output_file, output_text);
+
 		/* remove the file selection menu screen */
 		XtUnmanageChild(widget_array[k_file_bb_box]);
 
@@ -908,16 +1054,16 @@ static void do_load_ok(fs, client_data, cbs)
 		status = mbedit_set_output_file(output_file);
 
 		/* process input file name */
-		status = mbedit_action_open(input_file,
-				mformat,hold_size,buffer_size,
-				mxscale,myscale,mx_interval,
+		status = mbedit_action_open(input_file,mformat,
+				mode_output,hold_size,buffer_size,
+				mplot_width,mexager,mx_interval,
 				my_interval,mplot_size,
 				&ndumped,&nloaded,&nbuffer,
 				&ngood,&icurrent,&mnplot);
 		if (status == 0) XBell(theDisplay,100);
 
 		/* display data from chosen file */
-		status = mbedit_action_plot(mxscale,myscale,
+		status = mbedit_action_plot(mplot_width,mexager,
 		         mx_interval,my_interval,mplot_size,&nbuffer,
 		         &ngood,&icurrent,&mnplot);
 		if (status == 0) XBell(theDisplay,100);
@@ -930,71 +1076,6 @@ static void do_load_ok(fs, client_data, cbs)
 		{
 		fprintf(stderr,"\nno input multibeam file selected\n");
 		}
-}
-
-/********************************************************************/
-/* grab_file                                                        */
-/*                                                                  */
-/* Called by:                                                       */
-/*           k_grab_file_button - 'OK' at bottom of the file        */
-/*                                selection menu.                   */
-/*                                                                  */
-/* Functions called:                                                */
-/*                  mbedit_set_output_file                          */
-/*                  mbedit_action_open                              */
-/*                                                                  */
-/* Called by the "OK" at the bottom of the file selection widget.   */
-/* This function reads the input file name, the output file name    */
-/* and the mbio format text. It then loads the input file selected  */
-/* and removes itself.                                              */
-/*                                                                  */
-/********************************************************************/
- 
-static void grab_file(w, tag, list)
-	Widget w;
-	int *tag;
-	XmListCallbackStruct *list;
-{
-	/* local definitions */
-	static  char *format_text;
-
-	/* read the mbio format number from the screen */
-	format_text = XmTextGetString(widget_array[k_mbio_format]);
-	sscanf(format_text, "%d", &mformat);
-
-
-	if (selected > 0)
-		{
-		/* remove the file selection menu screen */
-		XtUnmanageChild(widget_array[k_file_bb_box]);
-
-		/* process the output file name */
-		status = mbedit_set_output_file(output_file);
-
-		/* process input file name */
-		status = mbedit_action_open(input_file,
-				mformat,hold_size,buffer_size,
-				mxscale,myscale,mx_interval,
-				my_interval,mplot_size,
-				&ndumped,&nloaded,&nbuffer,
-				&ngood,&icurrent,&mnplot);
-		if (status == 0) XBell(theDisplay,100);
-
-		/* display data from chosen file */
-		status = mbedit_action_plot(mxscale,myscale,
-		         mx_interval,my_interval,mplot_size,&nbuffer,
-		         &ngood,&icurrent,&mnplot);
-		if (status == 0) XBell(theDisplay,100);
-
-		/* set widget values */
-		setup_data();
-
-		}
-	else
-		{
-		fprintf(stderr,"\nno input multibeam file selected\n");
-		}
-
 }
 
 
@@ -1009,7 +1090,8 @@ static void do_next_buffer(w, tag, list)
 {
 	/* get next buffer */
 	status = mbedit_action_next_buffer(hold_size,buffer_size,
-			mxscale,myscale,mx_interval,my_interval,mplot_size,
+			mplot_width,mexager,
+			mx_interval,my_interval,mplot_size,
 			&ndumped,&nloaded,&nbuffer,
 			&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
@@ -1029,7 +1111,7 @@ static void do_forward(w, tag, list)
 	XmListCallbackStruct *list;
 {
 
-	status = mbedit_action_step(step,mxscale,myscale,mx_interval,
+	status = mbedit_action_step(step,mplot_width,mexager,mx_interval,
 				    my_interval,mplot_size,&nbuffer,
 				    &ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
@@ -1045,7 +1127,7 @@ static void do_reverse(w, tag, list)
 	int *tag;
 	XmListCallbackStruct *list;
 {
-	status = mbedit_action_step(-step,mxscale,myscale,
+	status = mbedit_action_step(-step,mplot_width,mexager,
 		mx_interval,my_interval,mplot_size,&nbuffer,
 		&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
@@ -1079,7 +1161,7 @@ static void do_buffer_hold(w, tag, scale)
 }
 
 /********************************************************************/
-/* Notify callback function for `textfield_x_interval'.             */
+/* Notify callback function for `slider_x_interval'.                */
 /********************************************************************/
  
 static void do_x_interval(w, tag, scale)
@@ -1087,19 +1169,41 @@ static void do_x_interval(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
+	int	max;
+	char	label[10];
+
 	mx_interval = scale->value;
 
-	if(mx_interval > 0 && mx_interval < 10000)
-	{
-	status = mbedit_action_plot(mxscale,myscale,
+	/* if slider set to minimum value, half the value range;
+		if slider set to maximum value,  double the range */
+	XtVaGetValues(widget_array[k_x_tick_marks], 
+			XmNmaximum, &max, 
+			NULL);
+	if (mx_interval == 1 || mx_interval == max)
+		{
+		if (mx_interval == 1)
+			max = max/2;
+		else
+			max = 2*max;
+		XtVaSetValues(widget_array[k_x_tick_marks], 
+			XmNmaximum, max, 
+			NULL);
+		sprintf(label, "%d", max);
+		XtVaSetValues(widget_array[k_x_tick_marks_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, label, (strlen(label) + 1), 
+			NULL);	
+		}
+
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width,mexager,
 		mx_interval,my_interval,mplot_size,&nbuffer,
 		&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
-	}	
 }
 
 /********************************************************************/
-/* Notify callback function for `textfield_y_interval'.             */
+/* Notify callback function for `slider_y_interval'.                */
 /********************************************************************/
  
 static void do_y_interval(w, tag, scale)
@@ -1107,16 +1211,37 @@ static void do_y_interval(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
+	int	max;
+	char	label[10];
+
 	my_interval = scale->value;
 
-	if(my_interval > 0 && my_interval < 1000)
-	{
-	status = mbedit_action_plot(mxscale,myscale,
+	/* if slider set to minimum value, half the value range;
+		if slider set to maximum value,  double the range */
+	XtVaGetValues(widget_array[k_y_tick_marks], 
+			XmNmaximum, &max, 
+			NULL);
+	if (my_interval == 1 || my_interval == max)
+		{
+		if (my_interval == 1)
+			max = max/2;
+		else
+			max = 2*max;
+		XtVaSetValues(widget_array[k_y_tick_marks], 
+			XmNmaximum, max, 
+			NULL);
+		sprintf(label, "%d", max);
+		XtVaSetValues(widget_array[k_y_tick_marks_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, label, (strlen(label) + 1), 
+			NULL);	
+		}
+
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width,mexager,
 		mx_interval,my_interval,mplot_size,&nbuffer,
 		&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
-	}	
-
 }
 
 /********************************************************************/
@@ -1145,7 +1270,7 @@ static void do_event(w, data, cbs)
 	if (startup_file)
 		{
 		startup_file = 0;
-		status = mbedit_action_plot(mxscale,myscale,
+		status = mbedit_action_plot(mplot_width,mexager,
 			mx_interval,my_interval,mplot_size,&nbuffer,
 			&ngood,&icurrent,&mnplot);
 		if (status == 0) XBell(theDisplay,100);
@@ -1168,11 +1293,11 @@ static void do_event(w, data, cbs)
 		case 'z':
 			status = mbedit_action_mouse_pick(
 				x_loc, y_loc,
-				mxscale,myscale,
+				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 			status = mbedit_action_bad_ping(
-				mxscale,myscale,
+				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 			break;
@@ -1181,7 +1306,7 @@ static void do_event(w, data, cbs)
 		case 'S':
 		case 's':
 			status = mbedit_action_good_ping(
-				mxscale,myscale,
+				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 			break;
@@ -1190,7 +1315,7 @@ static void do_event(w, data, cbs)
 		case 'A':
 		case 'a':
 			status = mbedit_action_left_ping(
-				mxscale,myscale,
+				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 			break;
@@ -1199,7 +1324,7 @@ static void do_event(w, data, cbs)
 		case 'D':
 		case 'd':
 			status = mbedit_action_right_ping(
-				mxscale,myscale,
+				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 			break;
@@ -1275,19 +1400,19 @@ static void do_event(w, data, cbs)
 	            if(mode_pick == MODE_PICK)
 			status = mbedit_action_mouse_pick(
 				x_loc, y_loc,
-				mxscale,myscale,
+				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 		    else if (mode_pick == MODE_ERASE) 
 			status = mbedit_action_mouse_erase(
 				x_loc, y_loc,
-				mxscale,myscale,
+				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 		    else if (mode_pick == MODE_RESTORE) 
 			status = mbedit_action_mouse_restore(
 				x_loc, y_loc,
-				mxscale,myscale,
+				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 		if (status == 0) XBell(theDisplay,100);
@@ -1310,7 +1435,7 @@ static void do_event(w, data, cbs)
 		/* If middle mouse button is pushed then scroll in reverse. */
 		if(event->xbutton.button == 2)
 		{
-			status = mbedit_action_step(-step,mxscale,myscale,
+			status = mbedit_action_step(-step,mplot_width,mexager,
 					mx_interval,my_interval,
 					mplot_size,&nbuffer,
 					&ngood,&icurrent,&mnplot);
@@ -1320,7 +1445,7 @@ static void do_event(w, data, cbs)
 		/* If right mouse button is pushed then scroll forward. */
 		if(event->xbutton.button == 3)
 		{
-			status = mbedit_action_step(step,mxscale,myscale,
+			status = mbedit_action_step(step,mplot_width,mexager,
 					mx_interval,my_interval,
 					mplot_size,&nbuffer,
 					&ngood,&icurrent,&mnplot);
@@ -1424,7 +1549,8 @@ static void apply_goto_button(w, tag, list)
 		ttime_i[0],ttime_i[1],ttime_i[2],ttime_i[3],
 		ttime_i[4],ttime_i[5],ttime_i[6]);
 	status = mbedit_action_goto(ttime_i,hold_size,buffer_size,
-			mxscale,myscale,mx_interval,my_interval,mplot_size,
+			mplot_width,mexager,
+			mx_interval,my_interval,mplot_size,
 			&ndumped,&nloaded,&nbuffer,
 			&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
@@ -1443,6 +1569,108 @@ static void cancel_goto_button(w, tag, list)
 	XmListCallbackStruct *list;
 {
 		XtUnmanageChild(widget_array[k_goto_menu]);
+
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width,mexager,
+		mx_interval,my_interval,mplot_size,&nbuffer,
+		&ngood,&icurrent,&mnplot);
+}
+
+/********************************************************************/
+/* User-defined action for `setting_output'.                        */
+/********************************************************************/
+ 
+static void set_output_output(w, which, cbs)
+	Widget w;
+	int which;
+	XmToggleButtonCallbackStruct *cbs;
+{
+	/* set values if needed */
+	if (cbs->reason == XmCR_VALUE_CHANGED && cbs->set)
+		{
+		mode_output = OUTPUT_MODE_OUTPUT;
+		XtManageChild(widget_array[k_output_file]);
+		XtManageChild(widget_array[k_output_file_lab]);
+		}
+}
+
+/********************************************************************/
+/* User-defined action for `setting_output'.                        */
+/********************************************************************/
+ 
+static void set_output_browse(w, which, cbs)
+	Widget w;
+	int which;
+	XmToggleButtonCallbackStruct *cbs;
+{
+	/* set values if needed */
+	if (cbs->reason == XmCR_VALUE_CHANGED && cbs->set)
+		{
+		mode_output = OUTPUT_MODE_BROWSE;
+		XtUnmanageChild(widget_array[k_output_file]);
+		XtUnmanageChild(widget_array[k_output_file_lab]);
+		}
+}
+
+/********************************************************************/
+/* User-defined action for file selection list.                     */
+/********************************************************************/
+ 
+static void get_file_selection(w, tag, list)
+	Widget w;
+	int *tag;
+	XmListCallbackStruct *list;
+{
+	static char *selection_text;
+	char	*suffix;
+	int	len;
+	int	form;
+	char	value_text[10];
+
+	/* get selected text */
+	selection_text = XmTextGetString(widget_array[k_selection_text]);
+
+	/* get output file */
+	if(strlen(selection_text) > 0)
+		{
+		/* look for MB suffix convention */
+		if ((suffix = strstr(selection_text,".mb")) != NULL)
+			len = strlen(suffix);
+
+		/* if MB suffix convention used keep it */
+		if (len >= 4 && len <= 5)
+			{
+			/* get the output filename */
+			strncpy(output_file,"\0",128);
+			strncpy(output_file,selection_text,
+				strlen(selection_text)-len);
+			strcat(output_file,"e");
+			strcat(output_file,suffix);
+
+			/* get the file format and set the widget */
+			if (sscanf(&suffix[3], "%d", &form) == 1)
+				{
+				mformat = form;
+				sprintf(value_text,"%2.2d",mformat);
+				XmTextFieldSetString(
+				    widget_array[k_mbio_format], 
+				    value_text);
+				}
+			}
+
+		/* else just at ".ed" to file name */
+		else
+			{
+			strcpy(output_file,selection_text);
+			strcat(output_file,".ed");
+			}
+
+		/* now set the output filename text widget */
+		XmTextFieldSetString(widget_array[k_output_file], 
+			output_file);
+		XmTextFieldSetCursorPosition(widget_array[k_output_file], 
+			strlen(output_file));
+	}
 }
 
 /********************************************************************/

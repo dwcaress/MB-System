@@ -15,6 +15,9 @@
 *         ENGLEWOOD, CO.                              *
 *                                                     *
 * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  11:55:41  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/07/14  21:16:33  brockda
  * Initial revision
  *                                               *
@@ -58,14 +61,26 @@
 #define k_glf_sec		29
 #define k_file_sel_box		30
 #define k_cancel_file_sel	31
-#define k_apply_button		32	
-#define k_file_bb_box		33	
-#define k_output_file		34	
-#define k_goto_cancel_button	35	
-#define k_grab_file_button	36	
-#define k_display_goto_menu	37	
+#define k_apply_button		32
+#define k_file_bb_box		33
+#define k_output_file		34
+#define k_output_file_lab	35
+#define k_goto_cancel_button	36
+#define k_display_goto_menu	37
+#define k_x_scale_lab		38
+#define k_vert_exag_lab		39
+#define k_num_pings_lab		40
+#define k_pings_to_step_lab	41
+#define k_x_tick_marks_lab	42
+#define k_y_tick_marks_lab	43
+#define k_buff_size_lab		44
+#define k_buff_retain_size_lab	45
+#define k_browse_button		46
+#define k_output_button		47
+#define k_filelist_list		48
+#define k_selection_text	49
 
-#define k_max_widget		37	
+#define k_max_widget		49	
 
 
 /*******************************************************/
