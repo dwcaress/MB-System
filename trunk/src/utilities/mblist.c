@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.6 2001-10-26 17:14:21 caress Exp $
+ *    $Id: mblist.c,v 5.7 2001-10-29 20:12:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,10 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/10/26  17:14:21  caress
+ * Fixed bug in binary sidescan output. The program
+ * was sticking tab characters into the binary output.
+ *
  * Revision 5.5  2001/09/17  23:21:14  caress
  * Fixed calculation of lon and lat values.
  *
@@ -253,7 +257,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 5.6 2001-10-26 17:14:21 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 5.7 2001-10-29 20:12:40 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W -Zsegment]";
@@ -2066,7 +2070,13 @@ main (int argc, char **argv)
 					    }
 					break;
 				case '#': /* pixel number */
-					printf("%6d",j);
+					if (ascii == MB_YES)
+					    printf("%6d",j);
+					else
+					    {
+					    b = j;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				default:
 					printf("<Invalid Option: %c>",
