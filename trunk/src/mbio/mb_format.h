@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.13 1996-08-05 15:25:43 caress Exp $
+ *    $Id: mb_format.h,v 4.14 1996-08-26 17:24:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1996/08/05  15:25:43  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.12  1996/04/22  10:59:01  caress
  * Added SBIFREMR format.
  *
@@ -110,9 +113,10 @@
 #define	MB_SYS_RESON	10
 #define	MB_SYS_ELAC	11
 #define MB_SYS_HSMD     12
+#define MB_SYS_DSL      13
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	32
+#define	MB_FORMATS	34
 
 /* Data formats supported by MBIO */
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
@@ -210,6 +214,12 @@
 #define MBF_HSMDLDIH    102     /* Hydroseep MD multibeam in-house format, 
 					40 beam bathymetry, 160 pixel sidescan,
 					binary, L-DEO. */
+#define MBF_DSL120PF    111     /* WHOI DSL AMS-120 deep-tow, 
+					2048 beam bathymetry, 2048 pixel sidescan,
+					binary, parallel files, WHOI DSL. */
+#define MBF_DSL120SF    112     /* WHOI DSL AMS-120 deep-tow, 
+					2048 beam bathymetry, 2048 pixel sidescan,
+					binary, single files, WHOI DSL. */
  
 
 /* Translation table of the format id's */
@@ -248,6 +258,8 @@ static int format_table[] =
 	91,	/* MBF_BCHRTUNB */
 	101,    /* MBF_HSMDARAW */
 	102,    /* MBF_HSMDLDIH */
+	111,    /* MBF_DSL120PF */
+	112,    /* MBF_DSL120SF */
 	};
 
 /* Table of which formats are really supported */
@@ -286,6 +298,8 @@ static int supported_format_table[] =
 	1,	/* MBF_BCHRTUNB */
 	1,	/* MBF_HSMDARAW */
 	1,	/* MBF_HSMDLDIH */
+	1,      /* MBF_DSL120PF */
+	1,      /* MBF_DSL120SF */
 	};
 
 /* Alias table for old (pre-version 4.0) format id's */
@@ -338,7 +352,9 @@ static char *format_description[] =
 	"Format name:          MBF_CBAT9001\nInformal Description: Reson SeaBat 9001 shallow water multibeam\nAttributes:           60 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
 	"Format name:          MBF_BCHRTUNB\nInformal Description: Elac BottomChart shallow water multibeam\nAttributes:           56 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
 	"Format name:          MBF_HSMDARAW\nInformal Description: Atlas HSMD medium depth multibeam raw format\nAttributes:           40 beam bathymetry, 160 pixel sidescan,\n                      XDR (binary), STN Atlas Elektronik.\n",
-	"Format name:          MBF_HSMDLDIH\nInformal Description: Atlas HSMD medium depth multibeam process format\nAttributes:           40 beam bathymetry, 160 pixel sidescan,\n                      XDR (binary), L-DEO.\n",
+	"Format name:          MBF_HSMDLDIH\nInformal Description: Atlas HSMD medium depth multibeam processed format\nAttributes:           40 beam bathymetry, 160 pixel sidescan,\n                      XDR (binary), L-DEO.\n",
+	"Format name:          MBF_DSL120PF\nInformal Description: WHOI DSL AMS-120 processed format\nAttributes:           2048 beam bathymetry, 2048 pixel sidescan,\n                      binary, parallel bathymetry and amplitude files, WHOI DSL.\n",
+	"Format name:          MBF_DSL120SF\nInformal Description: WHOI DSL AMS-120 processed format\nAttributes:           2048 beam bathymetry, 2048 pixel sidescan,\n                      binary, single files, WHOI DSL.\n",
 	};
 
 /* Table of which multibeam system each data format 
@@ -378,6 +394,48 @@ static int mb_system_table[] =
 	MB_SYS_ELAC,	/* MBF_BCHRTUNB */
 	MB_SYS_HSMD,    /* MBF_HSMDARAW */
 	MB_SYS_HSMD,    /* MBF_HSMDLDIH */
+	MB_SYS_DSL,     /* MBF_DSL120PF */
+	MB_SYS_DSL,     /* MBF_DSL120SF */
+	};
+
+/* Table of the number of parallel files required for i/o */
+static int mb_numfile_table[] = 
+	{
+	1,		/* NULL */
+	1,		/* MBF_SBSIOMRG */
+	1,		/* MBF_SBSIOCEN */
+	1,		/* MBF_SBSIOLSI */
+	1,		/* MBF_SBURICEN */
+	1,		/* MBF_SBURIVAX */
+	1,		/* MBF_SBSIOSWB */
+	1,		/* MBF_SBIFREMR */
+	1,		/* MBF_HSATLRAW */
+	1,		/* MBF_HSLDEDMB */
+	1,		/* MBF_HSURICEN */
+	1,		/* MBF_HSLDEOIH */
+	1,		/* MBF_HSURIVAX */
+	1,		/* MBF_HSSIOSWB */
+	1,		/* MBF_SB2000RW */
+	1,		/* MBF_SB2000SB */
+	1,		/* MBF_SB2000SS */
+	1,		/* MBF_SB2100RW */
+	1,		/* MBF_SB2100IH */
+	1,		/* MBF_EM1000RW */
+	1,		/* MBF_EM12SRAW */
+	1,		/* MBF_EM12DRAW */
+	1,		/* MBF_EM12DARW */
+	1,		/* MBF_EM121RAW */
+	1,		/* MBF_EM3000RW */
+	1,		/* MBF_MR1PRHIG */
+	1,		/* MBF_MR1ALDEO */
+	1,		/* MBF_MR1BLDEO */
+	1,		/* MBF_MBLDEOIH */
+	1,		/* MBF_CBAT9001 */
+	1,		/* MBF_BCHRTUNB */
+	1,              /* MBF_HSMDARAW */
+	1,              /* MBF_HSMDLDIH */
+	2,		/* MBF_DSL120PF */
+	1,		/* MBF_DSL120SF */
 	};
 
 /* Table of which multibeam data formats require the XDR
@@ -417,6 +475,8 @@ static int mb_xdr_table[] =
 	0,		/* MBF_BCHRTUNB */
 	1,              /* MBF_HSMDARAW */
 	1,              /* MBF_HSMDLDIH */
+	0,		/* MBF_DSL120PF */
+	0,		/* MBF_DSL120SF */
 	};
 
 /* Table of the maximum number of bathymetry beams for each format */
@@ -455,6 +515,8 @@ static int beams_bath_table[] =
 	56,	/* MBF_BCHRTUNB */
 	79,     /* MBF_HSMDARAW */
 	79,     /* MBF_HSMDLDIH */
+	2048,   /* MBF_DSL120PF */
+	2048,   /* MBF_DSL120SF */
 	};
 
 /* Table of the maximum number of amplitude beams for each format */
@@ -493,6 +555,8 @@ static int beams_amp_table[] =
 	56,	/* MBF_BCHRTUNB */
 	0,    	/* MBF_HSMDARAW */
 	0,    	/* MBF_HSMDLDIH */
+	0,      /* MBF_DSL120PF */
+	0,      /* MBF_DSL120SF */
 	};
 
 /* Table of the maximum number of sidescan pixels for each format */
@@ -531,6 +595,8 @@ static int pixels_ss_table[] =
 	0,	/* MBF_BCHRTUNB */
 	319,	/* MBF_HSMDARAW */
 	319,	/* MBF_HSMDARAW */
+	2048,   /* MBF_DSL120PF */
+	2048,   /* MBF_DSL120SF */
 	};
 
 /* Table of which data formats have variable numbers of beams */
@@ -569,6 +635,8 @@ static int variable_beams_table[] =
 	1,	/* MBF_BCHRTUNB */
 	0,      /* MBF_HSMDARAW */
 	0,      /* MBF_HSMDLDIH */
+	0,      /* MBF_DSL120PF */
+	0,      /* MBF_DSL120SF */
 	};
 
 /* Table of which multibeam data formats include 
@@ -608,6 +676,8 @@ static int mb_traveltime_table[] =
 	1,	/* MBF_BCHRTUNB */
 	1,	/* MBF_HSMDARAW */
 	1,	/* MBF_HSMDLDIH */
+	0,      /* MBF_DSL120PF */
+	0,      /* MBF_DSL120SF */
 	};
 
 /* Table of which multibeam data formats cannot support 
@@ -647,6 +717,8 @@ static int mb_bath_flag_table[] =
 	0,	/* MBF_BCHRTUNB */
 	0,	/* MBF_HSMDARAW */
 	0,	/* MBF_HSMDLDIH */
+	0,      /* MBF_DSL120PF */
+	0,      /* MBF_DSL120SF */
 	};
 
 /* Table of which multibeam data formats cannot support 
@@ -686,6 +758,8 @@ static int mb_amp_flag_table[] =
 	0,	/* MBF_BCHRTUNB */
 	0,	/* MBF_HSMDARAW */
 	0,	/* MBF_HSMDLDIH */
+	0,      /* MBF_DSL120PF */
+	0,      /* MBF_DSL120SF */
 	};
 
 /* Table of which multibeam data formats cannot support 
@@ -725,6 +799,8 @@ static int mb_ss_flag_table[] =
 	0,	/* MBF_BCHRTUNB */
 	0,	/* MBF_HSMDARAW */
 	0,	/* MBF_HSMDLDIH */
+	0,      /* MBF_DSL120PF */
+	0,      /* MBF_DSL120SF */
 	};
 
 /* Table of the fore-aft beamwidths */
@@ -763,6 +839,8 @@ static float mb_foreaft_beamwidth_table[] =
 	6.00,	/* MBF_BCHRTUNB */
 	1.70,   /* MBF_HSMDARAW */
 	1.70,   /* MBF_HSMDLDIH */
+	2.00,   /* MBF_DSL120PF */
+	2.00,   /* MBF_DSL120SF */
 	};
 
 /* names of formats for use in button or label names */
@@ -801,6 +879,8 @@ static char *mb_button_name[] =
         " BCHRTUNB ",
 	" HSMDARAW ",
 	" HSMDLDIH ",
+	" DSL120PF ", 
+	" DSL120SF ", 
         };
 
 

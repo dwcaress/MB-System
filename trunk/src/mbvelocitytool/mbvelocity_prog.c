@@ -1,99 +1,102 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.14 1996-04-22 13:22:47 caress Exp $
+ *    The MB-system:    mbvelocitytool.c        6/6/93
+ *    $Id: mbvelocity_prog.c,v 4.15 1996-08-26 17:34:23 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    D. W. Caress (caress@lamont.ldgo.columbia.edu) 
+ *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu) 
  *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
- *
+ *    Palisades, NY  10964 
+ * 
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBVELOCITYTOOL is an interactive water velocity profile editor
- * used to examine multiple water velocity profiles and to create
- * new water velocity profiles which can be used for the processing
- * of multibeam sonar data.  In general, this tool is used to examine
- * water velocity profiles obtained from XBTs, CTDs, or databases,
- * and to construct new profiles consistent with these various
- * sources of information.
- *
- * Author:	D. W. Caress
- * Date:	June 6, 1993
- *
- * $Log: not supported by cvs2svn $
- * Revision 4.13  1996/02/16  18:27:11  caress
- * Changed labels from Water Velocity to Water Sound Velocity.
- *
- * Revision 4.12  1996/02/12  18:09:25  caress
- * Added command line arguments to specify input files at startup time.
- *
- * Revision 4.11  1996/01/26  21:25:34  caress
- * Version 4.3 distribution.
- *
- * Revision 4.10  1995/10/02  22:25:20  caress
- * Added -D option.
- *
- * Revision 4.9  1995/09/28  18:03:58  caress
- * Improved handling of .mbxxx file suffix convention.
- *
- * Revision 4.8  1995/06/06  12:57:17  caress
- * Fixed mb_close() call.
- *
- * Revision 4.7  1995/05/12  17:27:40  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.6  1995/03/17  15:23:00  caress
- * Changed size of new editable profiles to
- * 30 nodes.
- *
- * Revision 4.5  1995/03/06  19:41:22  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.4  1995/02/14  18:26:46  caress
- * Moved the widgets around, made the format defaults work, and made
- * the program recognize the MB-System file suffix convention.
- *
- * Revision 4.3  1994/11/24  01:54:08  caress
- * Some fixes related to gradient raytracing version.
- *
- * Revision 4.2  1994/11/18  18:58:19  caress
- * First gradient raytracing version.
- *
- * Revision 4.1  1994/11/10  01:16:07  caress
- * Set program to do raytracing for every ping rather than once at beginning.
- *
- * Revision 4.0  1994/10/21  12:43:44  caress
- * Release V4.0
- *
- * Revision 4.2  1994/04/12  01:13:24  caress
- * First cut at translation from hsvelocitytool. The new program
- * mbvelocitytool will deal with all supported multibeam data
- * including travel time observations.
- *
- * Revision 4.1  1994/03/12  01:50:30  caress
- * Added declarations of ctime and/or getenv for compatability
- * with SGI compilers.
- *
- * Revision 4.0  1994/03/05  23:49:05  caress
- * First cut at version 4.0
- *
- * Revision 4.1  1994/03/03  03:53:26  caress
- * Fixed copyright message.
- *
- * Revision 4.0  1994/02/27  00:17:23  caress
- * First cut at new version.
- *
- * Revision 1.2  1993/11/05  16:21:57  caress
- * The graphical representation of the editable velocity profile
- * now shows the layered model actually used for the raytracing.
- *
- * Revision 1.1  1993/08/16  23:28:30  caress
- * Initial revision
- *
- *
+ * MBVELOCITYTOOL is an interactive water velocity profile editor 
+ * used to examine multiple water velocity profiles and to create 
+ * new water velocity profiles which can be used for the processing 
+ * of multibeam sonar data.  In general, this tool is used to examine 
+ * water velocity profiles obtained from XBTs, CTDs, or databases, 
+ * and to construct new profiles consistent with these various 
+ * sources of information.  
+ * 
+ * Author:      D. W. Caress 
+ * Date:        June 6, 1993 
+ * 
+ * $Log: not supported by cvs2svn $ 
+ * Revision 4.14  1996/04/22 13:22:47  caress 
+ * Now have DTR and MIN/MAX defines in mb_define.h 
+ * 
+ * Revision 4.13  1996/02/16  18:27:11  caress 
+ * Changed labels from Water Velocity to Water Sound Velocity.  
+ * 
+ * Revision 4.12 1996/02/12  18:09:25  caress 
+ * Added command line arguments to specify input files at startup time.  
+ * 
+ * Revision 4.11  1996/01/26  21:25:34 caress 
+ * Version 4.3 distribution.  
+ * 
+ * Revision 4.10  1995/10/02 22:25:20  caress 
+ * Added -D option.  
+ * 
+ * Revision 4.9  1995/09/28 18:03:58  caress 
+ * Improved handling of .mbxxx file suffix convention.  
+ * 
+ * Revision 4.8  1995/06/06  12:57:17  caress 
+ * Fixed mb_close() call.  
+ * 
+ * Revision 4.7  1995/05/12  17:27:40  caress 
+ * Made exit status values consistent with Unix convention.  
+ * 0: ok nonzero: error 
+ * 
+ * Revision 4.6  1995/03/17  15:23:00  caress 
+ * Changed size of new editable profiles to 
+ * 30 nodes.  
+ * 
+ * Revision 4.5  1995/03/06  19:41:22  caress 
+ * Changed include strings.h to string.h for POSIX compliance.  
+ * 
+ * Revision 4.4  1995/02/14 18:26:46  caress 
+ * Moved the widgets around, made the format defaults work, and made 
+ * the program recognize the MB-System file suffix convention.  
+ * 
+ * Revision 4.3  1994/11/24  01:54:08  caress 
+ * Some fixes related to gradient raytracing version.  
+ * 
+ * Revision 4.2 1994/11/18  18:58:19  caress 
+ * First gradient raytracing version.  
+ * 
+ * Revision 4.1  1994/11/10  01:16:07  caress 
+ * Set program to do raytracing for every ping rather than once at beginning.  
+ * 
+ * Revision 4.0  1994/10/21  12:43:44  caress 
+ * Release V4.0 
+ * 
+ * Revision 4.2 1994/04/12  01:13:24  caress 
+ * First cut at translation from hsvelocitytool. The new program 
+ * mbvelocitytool will deal with all supported multibeam data 
+ * including travel time observations.  
+ * 
+ * Revision 4.1  1994/03/12  01:50:30  caress 
+ * Added declarations of ctime and/or getenv for compatability 
+ * with SGI compilers.  
+ * 
+ * Revision 4.0  1994/03/05  23:49:05  caress 
+ * First cut at version 4.0 
+ * 
+ * Revision 4.1  1994/03/03  03:53:26  caress 
+ * Fixed copyright message.  
+ * 
+ * Revision 4.0  1994/02/27  00:17:23  caress 
+ * First cut at new version.  
+ * 
+ * Revision 1.2  1993/11/05  16:21:57  caress 
+ * The graphical representation of the editable velocity profile 
+ * now shows the layered model actually used for the raytracing.  
+ * 
+ * Revision 1.1 1993/08/16  23:28:30  caress 
+ * Initial revision 
+ * 
+ * 
  */
 
 /*--------------------------------------------------------------------*/
@@ -119,7 +122,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.14 1996-04-22 13:22:47 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.15 1996-08-26 17:34:23 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Ddraft -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -145,6 +148,7 @@ int	maxdepth = 3000;
 int	velrange = 500;
 int	resrange = 200;
 double	draft = 0.0;
+double	ssv_start = 0.0;
 
 /* plotting variables */
 int	xmin, xmax, ymin, ymax;
@@ -1944,7 +1948,10 @@ int	form;
 	char	*function_name = "mbvt_open_multibeam_file";
 	int	status = MB_SUCCESS;
 	int	format_num;
-	int	i;
+	struct mb_buffer_struct *buff;
+	double	depth_offset;
+	double	ssv;
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2055,6 +2062,33 @@ int	form;
 	/* load data into buffer */
 	status = mb_buffer_load(verbose,buff_ptr,mbio_ptr,buffer_size,
 			&nload,&nbuffer,&error);
+
+	/* get buffer structure */
+	buff = (struct mb_buffer_struct *) buff_ptr;
+
+	/* loop over the data records to find the first surface velocity */
+	ssv_start = 0.0;
+	k = 0;
+	do
+		{
+		if (buff->buffer_kind[k] == MB_DATA_DATA)
+			{
+			/* extract travel times and current depths */
+			status = mb_ttimes(verbose,mbio_ptr,
+				buff->buffer[k],&kind,&nbeams,
+				ttimes,angles,
+				angles_forward,angles_null,flags,
+				&depth_offset,&ssv,&error);
+			
+			/* check for first nonzero ssv */
+			if (ssv > 0.0)
+				ssv_start = ssv;
+			}
+		k++;
+		}
+	while (k < nbuffer && ssv_start <= 0.0);
+	if (ssv_start <= 0.0)
+		ssv_start = 1500.0;
 
 	/* output info */
 	if (verbose >= 0)
@@ -2198,6 +2232,12 @@ int mbvt_process_multibeam()
 
 			/* add user specified ship draft */
 			depth_offset = depth_offset + draft;
+			
+			/* set surface sound speed to default if needed */
+			if (ssv <= 0.0)
+				ssv = ssv_start;
+			else
+				ssv_start = ssv;
 
 			/* check depth_offset */
 			if (depth_offset < 0.0)
@@ -2220,15 +2260,26 @@ int mbvt_process_multibeam()
 		    if (flags[i] == 0)
 			{
 			if (first == MB_NO)
-			status = mb_rt(verbose, 
+			    {
+			    /* call raytracing without keeping
+				plotting list */
+			    status = mb_rt(verbose, 
 				    rt_svp, depth_offset, 
 				    angles[i], 0.5*ttimes[i],
 				    ssv, angles_null[i], 
 				    0, NULL, NULL, NULL, 
 				    &acrosstrack[i], &depth[i], 
 				    &ttime, &ray_stat, &error);
+
+			    /* reset acrosstrack distances */
+			    if (angles_forward[i] > 90.0)
+				acrosstrack[i] = -acrosstrack[i];
+			    }
 			else
-			status = mb_rt(verbose, 
+			    {
+			    /* call raytracing keeping
+				plotting list */
+			    status = mb_rt(verbose, 
 				    rt_svp, depth_offset, 
 				    angles[i], 0.5*ttimes[i],
 				    ssv, angles_null[i], 
@@ -2237,9 +2288,14 @@ int mbvt_process_multibeam()
 				    &acrosstrack[i], &depth[i], 
 				    &ttime, &ray_stat, &error);
 
-			/* reset acrosstrack distances */
-			if (angles[i] < 0.0)
-			    acrosstrack[i] = -acrosstrack[i];
+			    /* reset acrosstrack distances */
+			    if (angles_forward[i] > 90.0)
+				{
+				acrosstrack[i] = -acrosstrack[i];
+				for (j=0;j<nraypath[i];j++)
+				    raypathx[i][j] = -raypathx[i][j];
+				}
+			    }
 
 			/* add to depth if needed */
 			depth[i] = depth[i] + depth_add;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_dsl120pf.h	8/5/96
- *	$Id: mbf_dsl120pf.h,v 1.1 1996-08-26 17:24:56 caress Exp $
+ *	$Id: mbf_dsl120pf.h,v 4.0 1996-08-26 17:29:56 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	August 5, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1996/08/26  17:24:56  caress
+ * Initial revision
+ *
  *
  */
 /*

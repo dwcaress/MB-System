@@ -1,18 +1,18 @@
-.TH mbio l "14 February 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbio l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
-\fBmbio\fP - Format independent input/output library for multibeam sonar data.
+\fBmbio\fP - Format independent input/output library for swath mapping sonar data.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH DESCRIPTION
 \fBMBIO\fP (\fBM\fPulti\fBB\fPeam \fBI\fPnput/\fBO\fPutput) is a library
-of functions used for reading and writing multibeam sonar 
+of functions used for reading and writing swath mapping sonar 
 data files.  \fBMBIO\fP supports a large number of data
 formats associated with different institutions and different sonar systems.
 The purpose of \fBMBIO\fP is to allow users to write processing and display
 programs which are independent of particular data formats and to provide
-a standard approach to multibeam data i/o.
+a standard approach to swath mapping sonar data i/o.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,7 +37,7 @@ the discrete values of bathymetry and
 amplitude are referred to as "beams", and the discrete values of
 sidescan are referred to as "pixels".
 
-\fBMBIO\fP opens and initializes multibeam data files for reading
+\fBMBIO\fP opens and initializes sonar data files for reading
 and writing using the functions \fBmb_read_init\fP and \fBmb_write_init\fP,
 respectively.  These functions return a pointer to a data structure
 including all relevent information about the opened file, the
@@ -50,27 +50,31 @@ at any given time in a program.  Data files are closed using the
 function \fBmb_close\fP.
 
 \fBMBIO\fP has three levels of i/o functionality:
- 	1	Simple reading and writing with the positions of individual
- 		beams given in longitude and latitude (\fBmb_read\fP and 
- 		\fBmb_write\fP) or crosstrack distances (\fBmb_get\fP and 
- 		\fBmb_put\fP). Only a limited set of navigation information
- 		is passed. These functions can be used without any special 
- 		include files or any knowledge of the actual data structures
- 		used by the data formats or \fBMBIO\fP. The primary functions 
- 		are:
+ 	1	Simple reading and writing with the positions
+ 		of individual beams given in longitude and 
+ 		latitude (\fBmb_read\fP and \fBmb_write\fP) or 
+ 		crosstrack distances (\fBmb_get\fP and 
+ 		\fBmb_put\fP). Only a limited set of navigation 
+ 		information is passed. These functions can be 
+ 		used without any special include files or any 
+ 		knowledge of the actual data structures used
+ 		by the data formats or \fBMBIO\fP. The primary 
+ 		functions are:
  			\fBmb_read\fP
  			\fBmb_write\fP
  			\fBmb_get\fP
  			\fBmb_put\fP
- 	2	Complete reading and writing of data structures containing
- 		all of the available information. Special include files are   
- 		required to make sense of the data structures passed by
+ 	2	Complete reading and writing of data structures 
+ 		containing all of the available information.   
+ 		Special include files are required to make 
+ 		sense of the data structures passed by
  		these functions. The primary functions are:
  			\fBmb_get_all\fP
  			\fBmb_put_all\fP
- 	3	Buffered reading and writing of data structures containing
- 		all of the available information. Special include files are 
- 		required to make sense of the data structures passed by 
+ 	3	Buffered reading and writing of data structures 
+ 		containing all of the available information. 
+ 		Special include files are required to make 
+ 		sense of the data structures passed by 
  		these functions. The primary functions are:
  			\fBmb_buffer_init\fP
  			\fBmb_buffer_close\fP
@@ -85,7 +89,7 @@ function \fBmb_close\fP.
  			\fBmb_buffer_insert_nav\fP
 
 The level 1 \fBMBIO\fP functions allow users to read 
-and write multibeam data independent of format, with the limitation that 
+and write sonar data independent of format, with the limitation that 
 only a limited set of navigation information is passed.  Thus, some of the
 information contained in certain data formats (e.g. the "heave" value
 in Hydrosweep DS data) is not passed by \fBmb_read\fP or \fBmb_get\fP.  
@@ -94,7 +98,7 @@ such as graphics which require only the navigation and the depth
 and/or backscatter values. The level 2 functions (\fBmb_get_all\fP and
 \fBmb_put_all\fP) read and write the 
 complete data structures, translate the data to internal data structures
-associated with each of the supported multibeam sonar systems, and 
+associated with each of the supported sonar systems, and 
 pass pointers to these internal data structures.  The level 3 functions
 provide buffered reading and writing which is useful for applications
 which need access to multiple pings at a time.  In addition to reading
@@ -110,8 +114,8 @@ values). A number of other \fBMBIO\fP functions dealing with default values for
 important parameters, error messages, memory management, and time conversions
 also exist and are discussed below.
 
-.SH SUPPORTED MULTIBEAM SYSTEMS
-Each multibeam sonar system outputs a data stream which includes some values
+.SH SUPPORTED SWATH SONAR SYSTEMS
+Each swath mapping sonar system outputs a data stream which includes some values
 or parameters unique to that system.  In general, a number of different data
 formats have come into use for data from each of the sonar systems; many of
 these formats include only a subset of the original data stream.  Internally,
@@ -119,17 +123,18 @@ these formats include only a subset of the original data stream.  Internally,
 with and uses a data structure including the complete data stream for that
 sonar.  Consequently, it is possible to read and write the complete 
 data stream when using the level 2 or 3 \fBMBIO\fP functions.
-At present, formats associated with the following multibeam systems are
+At present, formats associated with the following sonars are
 supported:
  	Sea Beam "classic" 16 beam multibeam sonar 
- 	Hydrosweep DS 59 beam sonar 
- 	Hydrosweep MD 40 beam mid-depth sonar 
+ 	Hydrosweep DS 59 beam multibeam sonar 
+ 	Hydrosweep MD 40 beam mid-depth multibeam sonar 
  	Sea Beam 2000 multibeam sonar 
  	Sea Beam 2100 series multibeam sonars
-	Simrad EM12 and EM1000 multibeam sonars
-	Hawaii MR-1 shallow tow sonar
-	ELAC Bottomchart shallow water multibeam sonar
-	Reson Seabat 9001 and 9002 shallow water multibeam sonars
+ 	Simrad EM12 and EM1000 multibeam sonars
+ 	Hawaii MR-1 shallow tow interferometric sonar
+ 	ELAC Bottomchart shallow water multibeam sonar
+ 	Reson Seabat 9001/9002 shallow water multibeam sonars
+ 	WHOI DSL AMS-120 deep tow interferometric sonar
 	
 .SH SUPPORTED FORMATS
 With the introduction of \fBMB-System\fP version 4.00, the data format
@@ -141,7 +146,7 @@ without modification.  However, we recommend that the new format id's
 be used in the future.  Perpetual support for the old format id's is
 not guarenteed.
 
-The following multibeam data formats are supported in this version of 
+The following swath mapping sonar data formats are supported in this version of 
 \fBMBIO\fP:
 
     MBIO Data Format ID:  11
@@ -180,6 +185,12 @@ The following multibeam data formats are supported in this version of
     Informal Description: SIO Swath-bathy SeaBeam
     Attributes:           Sea Beam, bathymetry, 19 beams,
                           binary, centered, SIO.
+
+    MBIO Data Format ID:  17
+    Format name:          MBF_SBIFREMR
+    Informal Description: IFREMER Archive SeaBeam
+    Attributes:           Sea Beam, bathymetry, 19 beams, 
+                          ascii, centered, IFREMER.
 
     MBIO Data Format ID:  21
     Format name:          MBF_HSATLRAW
@@ -244,12 +255,28 @@ The following multibeam data formats are supported in this version of
                           variable pixels, ascii + binary,
                           Simrad.
 
+    MBIO Data Format ID:  52
+    Format name:          MBF_EM12SRAW
+    Informal Description: Simrad EM12S vendor format
+    Attributes:           Simrad EM12S, bathymetry, 
+                          amplitude, and sidescan,
+                          81 beams, variable pixels, 
+                          ascii + binary, Simrad.
+
     MBIO Data Format ID:  54
     Format name:          MBF_EM12DARW
     Informal Description: Simrad EM12S RRS Darwin format
     Attributes:           Simrad EM12S, bathymetry and 
                           amplitude, 81 beams, binary,
                           Oxford University.
+
+    MBIO Data Format ID:  55
+    Format name:          MBF_EM121RAW
+    Informal Description: Simrad EM121 vendor format
+    Attributes:           Simrad EM121, bathymetry, 
+                          amplitude, and sidescan,
+                          121 beams, variable pixels, 
+                          ascii + binary, Simrad.
 
     MBIO Data Format ID:  61
     Format name:          MBF_MR1PRHIG
@@ -260,17 +287,19 @@ The following multibeam data formats are supported in this version of
 
     MBIO data format id: 62
     Format name:          MBF_MR1ALDEO
-    Informal Description: L-DEO MR1 post processed format with travel times
-    Attributes:           L-DEO MR1, bathymetry and sidescan,
-                          variable beams and pixels, xdr binary, 
-                          L-DEO.
+    Informal Description: L-DEO MR1 post processed format 
+                          with travel times
+    Attributes:           L-DEO MR1, bathymetry and 
+                          sidescan, variable beams and 
+                          pixels, xdr binary, L-DEO.
 
     MBIO data format id: 63
     Format name:          MBF_MR1BLDEO
-    Informal Description: L-DEO small MR1 post processed format with travel times
-    Attributes:           L-DEO MR1, bathymetry and sidescan,
-                          variable beams and pixels, xdr binary, 
-                          L-DEO.
+    Informal Description: L-DEO small MR1 post processed 
+                          format with travel times
+    Attributes:           L-DEO MR1, bathymetry and 
+                          sidescan, variable beams  
+                          and pixels, xdr binary, L-DEO.
 
     MBIO Data Format ID:  71
     Format name:          MBF_MBLDEOIH
@@ -295,24 +324,46 @@ The following multibeam data formats are supported in this version of
 
     MBIO Data Format ID:  101
     Format name:          MBF_HSMDARAW
-    Informal Description: Atlas HSMD medium depth multibeam raw format
-    Attributes:           40 beam bathymetry, 160 pixel sidescan,
-                          XDR (binary), STN Atlas Elektronik.
+    Informal Description: Atlas HSMD medium depth multibeam 
+                          raw format
+    Attributes:           40 beam bathymetry, 160 pixel 
+                          sidescan, XDR (binary), 
+                          STN Atlas Elektronik.
 
     MBIO Data Format ID:  102
     Format name:          MBF_HSMDLDIH
-    Informal Description: Atlas HSMD medium depth multibeam process format
-    Attributes:           40 beam bathymetry, 160 pixel sidescan,
-                          XDR (binary), L-DEO.
+    Informal Description: Atlas HSMD medium depth multibeam 
+                          process format
+    Attributes:           40 beam bathymetry, 160 pixel 
+                          sidescan, XDR (binary), L-DEO.
+
+    MBIO Data Format ID:  111
+    Format name:          MBF_DSL120PF
+    Informal Description: WHOI DSL AMS-120 processed format
+    Attributes:           2048 beam bathymetry, 2048 pixel 
+                          sidescan, binary, parallel 
+                          bathymetry and amplitude files, 
+                          WHOI DSL.
+
+    MBIO Data Format ID:  112
+    Format name:          MBF_DSL120SF
+    Informal Description: WHOI DSL AMS-120 processed format
+    Attributes:           2048 beam bathymetry, 2048 pixel 
+                          sidescan, binary, single files,
+                          WHOI DSL.
 
 
 The institutional acronyms used above have the following meanings:
- 	SIO	Scripps Institution of Oceanography
  	L-DEO	Lamont-Doherty Earth Observatory
+ 	SIO	Scripps Institution of Oceanography
+ 	WHOI	Woods Hole Oceanographic Institution
  	URI	University of Rhode Island
  	NRL	Naval Research Laboratory
  	UNB	University of New Brunswick
  	UH	University of Hawaii
+ 	IFREMER	French government agency responsible
+ 		for operation of French oceanographic
+ 		research fleet.
 
 .SH FUNCTION STATUS AND ERROR CODES
 All of the \fBMBIO\fP functions return an integer status value with the 
@@ -323,13 +374,15 @@ convention that:
 All \fBMBIO\fP functions also pass an error value argument which gives
 somewhat more information about problems than the status value.  The
 full suite of possible error values and the associated error messages are:
-  	error = 0:		"No error",
+  	error = 0:	"No error",
   	error = -1:	"Time gap in data",
-  	error = -2:	"Data outside specified location bounds",
+  	error = -2:	"Data outside specified location 
+ 			bounds",
   	error = -3:	"Data outside specified time interval",
   	error = -4:	"Ship speed too small",
   	error = -5:	"Comment record",
-  	error = -6:	"Neither a data record nor a comment record",
+  	error = -6:	"Neither a data record nor a comment 
+ 			record",
   	error = -7:	"Unintelligible data record",
   	error = -8:	"Ignore this data",
   	error = -9:	"No data requested for buffer load",
@@ -338,10 +391,14 @@ full suite of possible error values and the associated error messages are:
   	error = -12:	"Data buffer is empty",
   	error = -13:	"No data was dumped from the buffer"
   	error = -14:	"No more survey data records in buffer"
-  	error = -15:	"Data inconsistencies prevented inserting data into storage structure"
-  	error = 1:	"Unable to allocate memory, initialization failed",
-  	error = 2:	"Unable to open file, initialization failed",
-  	error = 3:	"Illegal format identifier, initialization failed",
+  	error = -15:	"Data inconsistencies prevented 
+ 			inserting data into storage structure"
+  	error = 1:	"Unable to allocate memory, 
+ 			initialization failed",
+  	error = 2:	"Unable to open file, 
+ 			initialization failed",
+  	error = 3:	"Illegal format identifier, 
+ 			initialization failed",
   	error = 4:	"Read error, probably end-of-file",
   	error = 5:	"Write error",
   	error = 6:	"No data in specified location bounds",
@@ -350,10 +407,13 @@ full suite of possible error values and the associated error messages are:
   	error = 9:	"Inconsistent usage of MBIO descriptor",
   	error = 10:	"No pings binned but no fatal error 
  			- this should not happen!",
-  	error = 11:	"Invalid data record type specified for writing",
-  	error = 12:	"Invalid control parameter specified by user",
+  	error = 11:	"Invalid data record type specified 
+ 			for writing",
+  	error = 12:	"Invalid control parameter specified 
+ 			by user",
   	error = 13:	"Invalid buffer id",
-  	error = 14:	"Invalid system id - this should not happen!"
+  	error = 14:	"Invalid system id - this should 
+ 			not happen!"
 .br
 In general, programs should treat negative error values as non-fatal
 (reading and writing can continue) and positive error values as fatal (the data
@@ -659,7 +719,7 @@ char \fIcomment\fP[256];
 .br
 int *\fIerror\fP;
 .RS 10
-The function \fBmb_read\fP reads, processes, and returns multibeam
+The function \fBmb_read\fP reads, processes, and returns sonar
 data according to the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
@@ -759,7 +819,7 @@ char \fIcomment\fP[256];
 .br
 int \fIerror\fP;
 .RS 10
-The function \fBmb_write\fP writes multibeam data to the file listed
+The function \fBmb_write\fP writes sonar data to the file listed
 in the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
@@ -859,7 +919,7 @@ char \fIcomment\fP[256];
 .br
 int *\fIerror\fP;
 .RS 10
-The function \fBmb_get\fP reads, processes, and returns multibeam
+The function \fBmb_get\fP reads, processes, and returns sonar
 data according to the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
@@ -960,7 +1020,7 @@ char \fIcomment\fP[256];
 .br
 int *\fIerror\fP;
 .RS 10
-The function \fBmb_put\fP writes multibeam data to the file listed
+The function \fBmb_put\fP writes sonar data to the file listed
 in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
@@ -1064,14 +1124,14 @@ char \fIcomment\fP[256];
 .br
 int *\fIerror\fP;
 .RS 10
-The function \fBmb_get_all\fP reads and returns multibeam
+The function \fBmb_get_all\fP reads and returns sonar
 data according to the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
 The data is returned one record at a time; no averaging is performed.
 A pointer to a data structure containing all of the data read is returned
 as \fIstore_ptr\fP; the form of the data structure is determined by the
-multibeam sonar system associated with the format of the data being read.
+sonar system associated with the format of the data being read.
 Data is also returned in the forms of bathymetry, amplitude, and sidescan
 survey data
 and comment strings when the data record \fIkind\fP is survey data or
@@ -1179,13 +1239,13 @@ char \fIcomment\fP[256];
 .br
 int *\fIerror\fP;
 .RS 10
-The function \fBmb_put_all\fP writes multibeam data to the file listed
+The function \fBmb_put_all\fP writes sonar data to the file listed
 in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
 A pointer to a data structure containing all of the data read is passed
 as \fIstore_ptr\fP; the form of the data structure is determined by the
-multibeam sonar system associated with the format of the data being written.
+sonar system associated with the format of the data being written.
 Data is also passed in the forms of bathymetry and backscatter survey data
 and comment strings when the data record \fIkind\fP is survey data or
 comment data, respectively.  If the \fIusevalues\fP flag is set to 1,
@@ -2052,6 +2112,6 @@ status value signals success if \fIformat\fP is valid and failure otherwise.
 \fBmbsystem\fP(l), \fBmbformat\fP(l)
 
 .SH BUGS
-What could go wrong in a mere 55,000 lines of code?
+What could go wrong in a mere 90,000 lines of code?
 .br
 Let us know...

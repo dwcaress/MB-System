@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 4.9 1996-08-05 15:21:58 caress Exp $
+ *    $Id: mb_write_init.c,v 4.10 1996-08-26 17:24:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.8  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -111,7 +114,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 4.9 1996-08-05 15:21:58 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 4.10 1996-08-26 17:24:56 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	int	format_num;
@@ -316,11 +319,29 @@ int	*error;
 		return(status);
 		}
 
-	/* open the file */
+	/* open the first file */
 	if (strncmp(file,stdout_string,6) == 0)
 		mb_io_ptr->mbfp = stdout;
 	else
-		if ((mb_io_ptr->mbfp = fopen(file, "w")) == NULL) 
+		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "w")) == NULL) 
+			{
+			*error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			}
+
+	/* open the second file if required */
+	if (status == MB_SUCCESS 
+		&& mb_numfile_table[format_num] >= 2)
+		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "w")) == NULL) 
+			{
+			*error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			}
+
+	/* open the third file if required */
+	if (status == MB_SUCCESS 
+		&& mb_numfile_table[format_num] >= 3)
+		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "w")) == NULL) 
 			{
 			*error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;

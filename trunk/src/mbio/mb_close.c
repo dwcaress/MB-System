@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 4.7 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mb_close.c,v 4.8 1996-08-26 17:24:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 25, 1993
  *	$Log: not supported by cvs2svn $
+ * Revision 4.7  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.6  1995/03/22  19:14:25  caress
  * Added #ifdef's for HPUX.
  *
@@ -94,7 +97,7 @@ int	verbose;
 char	**mbio_ptr;
 int	*error;
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 4.7 1996-04-22 13:21:19 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 4.8 1996-08-26 17:24:56 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -139,8 +142,13 @@ int	*error;
 	status = mb_free(verbose,&mb_io_ptr->new_ss_acrosstrack,error);
 	status = mb_free(verbose,&mb_io_ptr->new_ss_alongtrack,error);
 
-	/* close the file */
-	fclose(mb_io_ptr->mbfp);
+	/* close the files */
+	if (mb_io_ptr->mbfp != NULL)
+		fclose(mb_io_ptr->mbfp);
+	if (mb_io_ptr->mbfp2 != NULL)
+		fclose(mb_io_ptr->mbfp2);
+	if (mb_io_ptr->mbfp3 != NULL)
+		fclose(mb_io_ptr->mbfp3);
 
 	/* deallocate the mbio descriptor */
 	status = mb_free(verbose,mbio_ptr,error);

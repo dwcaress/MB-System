@@ -1,12 +1,14 @@
-.TH mbnavedit l "17 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbnavedit l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for multibeam swath data.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
-\fBmbnavedit\fP [\fB-B\fP \fB-F\fIformat \fB-I\fIinfile \fB-I\fIoutfile \fB-V -H\fP]
+\fBmbnavedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
+\fB-D\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
+\fB-F\fIformat \fB-I\fIinfile \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbnavedit\fP is an interactive editor used to identify and fix 
@@ -35,12 +37,21 @@ Lamont-Doherty Earth Observatory
 Palisades, NY 10964
 
 .SH OPTIONS
+.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-B\fP
+.B \fB-D\fP
 Starts up the program in "browse" mode. If a file is opened
 in browse mode (either at startup or later), none
 of the edited data will be output to a file. The default
 is to output the edited data to a file.
+.TP
+.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \fB-F\fIformat\fP
 Sets the format at startup for the input and output multibeam data using 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.6 1996-04-22 13:22:24 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.7 1996-08-26 17:33:15 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1996/04/22  13:22:24  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.5  1996/04/05  20:07:02  caress
  * Added GUI mode so done means quit for real. Also changed done and
  * quit handling in browse mode so that the program doesn't read the
@@ -118,7 +121,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.6 1996-04-22 13:22:24 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.7 1996-08-26 17:33:15 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -255,6 +258,7 @@ int mbnavedit_init_globals()
 	if (plot_lat == MB_YES)	    number_plots++;
 	if (plot_speed == MB_YES)   number_plots++;
 	if (plot_heading == MB_YES) number_plots++;
+	time_fix = MB_NO;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -321,7 +325,7 @@ int	*startup_file;
 	strcpy(ofile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:O:o:Tt")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -373,6 +377,11 @@ int	*startup_file;
 		case 'o':
 			sscanf (optarg,"%s", ofile);
 			ofile_defined = MB_YES;
+			flag++;
+			break;
+		case 'T':
+		case 't':
+			time_fix = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -916,7 +925,8 @@ int	hold;
 		if (ping[iping].lon != ping[iping].lon_org
 			|| ping[iping].lat != ping[iping].lat_org
 			|| ping[iping].speed != ping[iping].speed_org
-			|| ping[iping].heading != ping[iping].heading_org)
+			|| ping[iping].heading != ping[iping].heading_org
+			|| time_fix == MB_YES)
 			{
 			status = mb_buffer_insert_nav(verbose,
 				buff_ptr,imbio_ptr,ping[iping].id,
@@ -1074,6 +1084,10 @@ int mbnavedit_load_data()
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		}
+		
+	/* if requested fix time stamp repeats */
+	if (time_fix == MB_YES)
+		mbnavedit_action_fixtime();
 
 	/* calculate speed-made-good and course-made-good */
 	for (i=0;i<nlist;i++)
@@ -2791,6 +2805,67 @@ int mbnavedit_action_revert()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbnavedit_action_fixtime()
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_action_fixtime";
+	int	status = MB_SUCCESS;
+	int	iplot;
+	int	active_plot;
+	int	istart, iend;
+	double	start_time_d, end_time_d;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* loop over the data */
+	for (i=0;i<nlist;i++)
+		{
+		if (i == 0)
+			{
+			istart = i;
+			start_time_d = ping[i].time_d;
+			}
+		else if (ping[i].time_d > start_time_d)
+			{
+			iend = i;
+			end_time_d = ping[i].time_d;
+			for (j=istart+1;j<iend;j++)
+				{
+				ping[j].time_d = start_time_d
+				    + (j - istart)
+				    * (end_time_d - start_time_d)
+				    / (iend - istart);
+				mb_get_date(verbose, 
+					ping[j].time_d, 
+					ping[j].time_i);
+				}
+			istart = i;
+			start_time_d = ping[i].time_d;
+			}
+		    
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbnavedit_action_showall()
 {
 	/* local variables */
@@ -3118,17 +3193,17 @@ int mbnavedit_plot_all()
 		}
 
 	/* make sure min max values aren't too small */
-	if ((lon_max - lon_min) < 0.1)
+	if ((lon_max - lon_min) < 0.01)
 		{
 		center = 0.5*(lon_min + lon_max);
-		lon_min = center - 0.05;
-		lon_max = center + 0.05;
+		lon_min = center - 0.005;
+		lon_max = center + 0.005;
 		}
-	if ((lat_max - lat_min) < 0.1)
+	if ((lat_max - lat_min) < 0.01)
 		{
 		center = 0.5*(lat_min + lat_max);
-		lat_min = center - 0.05;
-		lat_max = center + 0.05;
+		lat_min = center - 0.005;
+		lat_max = center + 0.005;
 		}
 	if (speed_max < 10.0)
 		speed_max = 10.0;

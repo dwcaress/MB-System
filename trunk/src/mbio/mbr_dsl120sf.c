@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_dsl120sf.c	8/6/96
- *	$Id: mbr_dsl120sf.c,v 1.1 1996-08-26 17:24:56 caress Exp $
+ *	$Id: mbr_dsl120sf.c,v 4.0 1996-08-26 17:29:56 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 6, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1996/08/26  17:24:56  caress
+ * Initial revision
+ *
  *
  *
  */
@@ -48,7 +51,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_dsl120sf.c,v 1.1 1996-08-26 17:24:56 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120sf.c,v 4.0 1996-08-26 17:29:56 caress Exp $";
 	char	*function_name = "mbr_alm_dsl120sf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

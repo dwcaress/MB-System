@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.9 1996-08-05 15:21:58 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.10 1996-08-26 17:24:56 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -181,6 +181,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.8  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -246,7 +249,7 @@ double	*depthadd;
 double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.9 1996-08-05 15:21:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.10 1996-08-26 17:24:56 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -343,6 +346,13 @@ int	*error;
 	else if (system == MB_SYS_HSMD)
 		{
 		status = mbsys_hsmd_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
+		}
+	else if (system == MB_SYS_DSL)
+		{
+		status = mbsys_dsl_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
 				flags,depthadd,ssv,error);

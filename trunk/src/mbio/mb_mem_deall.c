@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_deall.c	2/3/93
- *    $Id: mb_mem_deall.c,v 4.9 1996-08-05 15:21:58 caress Exp $
+ *    $Id: mb_mem_deall.c,v 4.10 1996-08-26 17:24:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.8  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -85,7 +88,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem_deall.c,v 4.9 1996-08-05 15:21:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem_deall.c,v 4.10 1996-08-26 17:24:56 caress Exp $";
 	char	*function_name = "mb_mem_deall";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -215,6 +218,14 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_HSMDLDIH)
 		{
 		status = mbr_dem_hsmdldih(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_DSL120PF)
+		{
+		status = mbr_dem_dsl120pf(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_DSL120SF)
+		{
+		status = mbr_dem_dsl120sf(verbose,mbio_ptr,error);
 		}
 	else
 		{
