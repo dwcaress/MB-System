@@ -1,4 +1,4 @@
-.TH MBSWATH 1 "14 October 1994"
+.TH MBSWATH 1 "25 October 1994"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -7,7 +7,7 @@ swath plots of multibeam data using Postscript.
 Version 4.00
 
 .SH SYNOPSIS
-\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor \fB-B\fItickinfo \fB-D\fImode/scale/min/max \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
+\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor \fB-B\fItickinfo \fB-b\fIyr/mo/da/hr/mn/sc \fB-D\fImode/scale/min/max \fB-E\fIyr/mo/da/hr/mn/sc \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbswath\fP is an utility for plotting multibeam swath data in color fill
@@ -45,6 +45,11 @@ Default: \fIfactor\fP = 1.
 .B \fB-B\fItickinfo\fP
 Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
 .TP
+.B \fB-b\fIyr/mo/da/hr/mn/sc\fP
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
+.TP
 .B \fB-C\fP
 Sets the color palette file which controls the color of the plot.
 See documentation of the GMT package for a complete description
@@ -66,6 +71,14 @@ if it is greater than \fImax\fP; this clipping happens prior to the
 multiplication by \fIscale\fP. Default: \fImode\fP = 1, \fIscale\fP = 1.0,
 \fImin\fP = 0.0, \fImax\fP = 1.0.
 .TP
+.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
+.TP
+.B \fB-F\fIred/green/blue\fP
+Sets the color used for Frame and annotation. [Default is black]
+.TP
 .B \fB-f\fIformat\fP
 Sets the data format used if the input is read from stdin
 (the default, which can be overridden with the \fB-I\fP option).
@@ -73,9 +86,6 @@ This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
-.TP
-.B \fB-F\fIred/green/blue\fP
-Sets the color used for Frame and annotation. [Default is black]
 .TP
 .B \fB-G\fImagnitude/azimuth\fP
 .B \fB-G\fImagnitude/median\fP
