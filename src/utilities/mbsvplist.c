@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsvplist.c	1/3/2001
- *    $Id: mbsvplist.c,v 5.3 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbsvplist.c,v 5.4 2003-07-02 18:14:19 caress Exp $
  *
  *    Copyright (c) 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	January 3,  2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -60,7 +63,7 @@ char	*getenv();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsvplist.c,v 5.3 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbsvplist.c,v 5.4 2003-07-02 18:14:19 caress Exp $";
 	static char program_name[] = "mbsvplist";
 	static char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
 	static char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -V -Z]";
@@ -121,6 +124,12 @@ main (int argc, char **argv)
 	double	*ssalongtrack = NULL;
 	char	comment[256];
 	int	icomment = 0;
+	
+	/* data record source types */
+	int	nav_source;
+	int	heading_source;
+	int	vru_source;
+	int	svp_source;
 	
 	/* SVP values */
 	int	svp_loaded = MB_NO;
@@ -307,6 +316,19 @@ main (int argc, char **argv)
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 	{		
+	/* check format and get data sources */
+	if ((status = mb_format_source(verbose, &format, 
+			&nav_source, &heading_source, 
+			&vru_source, &svp_source, 
+			&error)) == MB_FAILURE)
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error returned from function <mb_format_source>:\n%s\n",message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+		
 	/* initialize reading the swath file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings,lonflip,bounds,
@@ -383,7 +405,8 @@ main (int argc, char **argv)
 			
 		/* if svp then extract data */
 		if (error <= MB_ERROR_NO_ERROR
-			&& kind == MB_DATA_VELOCITY_PROFILE)
+			&& kind == svp_source
+			&& svp_source != MB_DATA_NONE)
 			{
 			/* extract svp */
 			status = mb_extract_svp(verbose, mbio_ptr, store_ptr,

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 5.4 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbmerge.c,v 5.5 2003-07-02 18:14:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.3  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -163,7 +166,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 5.4 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 5.5 2003-07-02 18:14:19 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -242,6 +245,7 @@ main (int argc, char **argv)
 	int	nav_source;
 	int	heading_source;
 	int	vru_source;
+	int	svp_source;
 
 	/* navigation handling variables */
 	int	nnav;
@@ -443,7 +447,8 @@ main (int argc, char **argv)
 
 	/* check format and get data sources */
 	if ((status = mb_format_source(verbose, &format, 
-			&nav_source, &heading_source, &vru_source, 
+			&nav_source, &heading_source, 
+			&vru_source, &svp_source, 
 			&error)) == MB_FAILURE)
 		{
 		mb_error(verbose,error,&message);

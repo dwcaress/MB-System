@@ -53,8 +53,20 @@
  * wkm          8-02-99   Updated DecodeCmpSassSpecific to include lntens (heave) with Compressed SASS data.
  * bac          10-24-00  Updated DecodeEM3Specific to include data fields from updated
  *                        EM series runtime parameter datagram.
- * bac          07-18-01  Removed the useage of C++ reserved words "class" and "operator".
+ * bac          07-18-01  Added support for the Reson 8100 series of sonars.  Also removed the useage
+ *                        of C++ reserved words "class" and "operator".
+ * bac          10-12-01  Added a new attitude record definition.  The attitude record provides
+ *                        a method for logging full time-series attitude measurements in the GSF
+ *                        file, instead of attitude samples only at ping time.  Each attitude
+ *                        record contains arrays of attitude measurements for time, roll, pitch,
+ *                        heave and heading.  The number of measurements is user-definable, but
+ *                        because of the way in which measurement times are stored, a single
+ *                        attitude record should never contain more than sixty seconds worth of
+ *                        data.
  * jsb          01-16-02  Added support for Simrad EM120, and removed defitions for unused variables.
+ * bac          06-19-03  Added support for bathymetric receive beam time series intensity data (i.e., Simrad
+ *                        "Seabed image" and Reson "snippets").  Inlcluded RWL updates of 12-19-02 for adding
+ *                        sensor-specific singlebeam information to the MB sensor specific subrecords.
  *
  * Classification : Unclassified
  *
@@ -92,6 +104,9 @@
 /* Arrays have last number beams stored at [fileHandle][index=record ID-1] */
 static short    arraySize[GSF_MAX_OPEN_FILES][GSF_MAX_PING_ARRAY_SUBRECORDS];
 
+/* Arrays have last number samples per beam stored at [fileHandle][index=record ID-1] */
+static short   *samplesArraySize[GSF_MAX_OPEN_FILES];
+
 /* Global external data defined in this module */
 extern int      gsfError;                               /* defined in gsf.c */
 
@@ -103,6 +118,7 @@ static int      DecodeByteArray(double **array, unsigned char *ptr, int num_beam
 static int      DecodeSignedByteArray(double **array, char *ptr, int num_beams, gsfScaleFactors * sf, int id, int handle);
 static int      DecodeBeamFlagsArray(unsigned char **array, unsigned char *ptr, int num_beams, int handle);
 static int      DecodeQualityFlagsArray(unsigned char **array, unsigned char *ptr, int num_beams, int handle);
+static int      DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *ptr, int num_beams, int sensor_id, int handle);
 static int      DecodeSeabeamSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeEM12Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeEM100Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
@@ -131,6 +147,11 @@ static int      DecodeSeaBat8101Specific(gsfSensorSpecific * sdata, unsigned cha
 static int      DecodeSeaBeam2112Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeElacMkIISpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TABLE *ft);
+static int      DecodeReson8100Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
+static int      DecodeSBEchotracSpecific(t_gsfSBEchotracSpecific * sdata, unsigned char *sptr);
+static int      DecodeSBMGD77Specific(t_gsfSBMGD77Specific * sdata, unsigned char *sptr);
+static int      DecodeSBBDBSpecific(t_gsfSBBDBSpecific * sdata, unsigned char *sptr);
+static int      DecodeSBNOSHDBSpecific(t_gsfSBNOSHDBSpecific * sdata, unsigned char *sptr);
 
 /********************************************************************
  *
@@ -231,13 +252,13 @@ gsfDecodeSwathBathySummary(gsfSwathBathySummary *sum, unsigned char *sptr)
     p += 4;
 
     /* Next four bytes contains the minimum depth */
-    memcpy(&ltemp, p, 4);
-    sum->min_depth = ntohl(ltemp) / 100.0;
+    memcpy(&signed_int, p, 4);
+    sum->min_depth = (signed long)ntohl(signed_int) / 100.0;
     p += 4;
 
     /* Next four bytes contains the maximum depth */
-    memcpy(&ltemp, p, 4);
-    sum->max_depth = ntohl(ltemp) / 100.0;
+    memcpy(&signed_int, p, 4);
+    sum->max_depth = ntohl(signed_int) / 100.0;
     p += 4;
 
     return (p - sptr);
@@ -772,6 +793,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
     ping->beam_angle_forward = (double *) NULL;
     ping->vertical_error = (double *) NULL;
     ping->horizontal_error = (double *) NULL;
+    ping->brb_inten = (gsfBRBIntensity *) NULL;
 
     /* Clear the flag which indicates that we've read scale factors */
     ft->scales_read = 0;
@@ -1168,7 +1190,60 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC;
                 break;
 
-             default:
+            case (GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC):
+                p += DecodeReson8100Specific(&ping->sensor_data, p);
+                ping->sensor_id = subrecord_id;
+                break;
+
+            /* 12/20/2002 RWL added SB types, made Echotrac version dependent */
+
+            case (GSF_SWATH_BATHY_SB_SUBRECORD_ECHOTRAC_SPECIFIC):
+                p += DecodeSBEchotracSpecific(&ping->sensor_data.gsfSBEchotracSpecific, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SB_SUBRECORD_ECHOTRAC_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SB_SUBRECORD_BATHY2000_SPECIFIC):
+                p += DecodeSBEchotracSpecific(&ping->sensor_data.gsfSBEchotracSpecific, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SB_SUBRECORD_BATHY2000_SPECIFIC;
+
+                break;
+
+            case (GSF_SWATH_BATHY_SB_SUBRECORD_MGD77_SPECIFIC):
+                p += DecodeSBMGD77Specific (&ping->sensor_data.gsfSBMGD77Specific, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SB_SUBRECORD_MGD77_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SB_SUBRECORD_BDB_SPECIFIC):
+                p += DecodeSBBDBSpecific (&ping->sensor_data.gsfSBBDBSpecific, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SB_SUBRECORD_BDB_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SB_SUBRECORD_NOSHDB_SPECIFIC):
+                p += DecodeSBNOSHDBSpecific (&ping->sensor_data.gsfSBNOSHDBSpecific, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SB_SUBRECORD_NOSHDB_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC):
+                p += DecodeSBEchotracSpecific(&ping->sensor_data.gsfSBPDDSpecific, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_INTENSITY_SERIES_ARRAY):
+                ret = DecodeBRBIntensity(&ft->rec.mb_ping.brb_inten, p, ping->number_beams, ping->sensor_id, handle);
+                if (ret < 0)
+                {
+                    return (-1);
+                }
+                p += ret;
+                ping->brb_inten = ft->rec.mb_ping.brb_inten;
+                break;
+
+            default:
                 gsfError = GSF_UNRECOGNIZED_SUBRECORD_ID;
                 if ((((p - sptr) + subrecord_size) == record_size) ||
                     ((record_size - ((p - sptr) + subrecord_size)) > 0))
@@ -2375,12 +2450,12 @@ DecodeTypeIIISeaBeamSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
 
     /* Next two byte integer contains the ping number */
     memcpy(&stemp, p, 2);
-    sdata->gsfTypeIIISeaBeamSpecific.nav_mode = (int) ntohs(stemp);
+    sdata->gsfTypeIIISeaBeamSpecific.ping_number = (int) ntohs(stemp);
     p += 2;
 
     /* Next two byte integer contains the mission number */
     memcpy(&stemp, p, 2);
-    sdata->gsfTypeIIISeaBeamSpecific.nav_mode = (int) ntohs(stemp);
+    sdata->gsfTypeIIISeaBeamSpecific.mission_number = (int) ntohs(stemp);
     p += 2;
 
     return (p - sptr);
@@ -2559,7 +2634,7 @@ DecodeSBAmpSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
 
     /* Next two byte integer contains the average gate depth */
     memcpy(&stemp, p, 2);
-    sdata->gsfSBAmpSpecific.avg_gate_depth = (int) ntohl(stemp);
+    sdata->gsfSBAmpSpecific.avg_gate_depth = (int) ntohs(stemp);
     p += 2;
 
     return (p - sptr);
@@ -3305,6 +3380,712 @@ DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TABLE 
 
 /********************************************************************
  *
+ * Function Name : DecodeReson8100Specific
+ *
+ * Description : This function decodes the Reson SeaBat 8101 sensor specific
+ *    information from the GSF byte stream.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes enocoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeReson8100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+    gsfuLong        ltemp;
+
+    /* First two byte integer contains the sonar latency */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.latency = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next four byte integer contains the ping number */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfReson8100Specific.ping_number = (int) ntohl(ltemp);
+    p += 4;
+
+    /* Next four byte integer contains the sonar id */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfReson8100Specific.sonar_id = (int) ntohl(ltemp);
+    p += 4;
+
+    /* Next two byte integer contains the sonar model */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.sonar_model = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the sonar frequency */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.frequency = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the sea surface sound speed * 10 */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.surface_velocity = ((double) ntohs(stemp)) / 10.0;
+    p += 2;
+
+    /* Next two byte integer contains the sample rate */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.sample_rate = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the ping rate */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.ping_rate = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the sonar mode of operation */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.mode = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the range setting */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.range = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the power setting */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.power = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the gain setting */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.gain = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the transmit pulse width */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.pulse_width = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next byte contains the tvg spreading coefficient */
+    sdata->gsfReson8100Specific.tvg_spreading = (int) *p;
+    p += 1;
+
+    /* Next byte contains the tvg absorption coefficient */
+    sdata->gsfReson8100Specific.tvg_absorption = (int) *p;
+    p += 1;
+
+    /* Next byte contains the fore/aft beamwidth */
+    sdata->gsfReson8100Specific.fore_aft_bw = ((double) *p) / 10.0;
+    p += 1;
+
+    /* Next byte contains the athwartships beamwidth */
+    sdata->gsfReson8100Specific.athwart_bw = ((double) *p) / 10.0;
+    p += 1;
+
+    /* Next byte contains the projector type */
+    sdata->gsfReson8100Specific.projector_type = (int) *p;
+    p += 1;
+
+    /* Next two byte integer contains the projector angle, in deg C * 100 */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.projector_angle = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the range filter minimum value */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.range_filt_min = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the range filter maximum value */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.range_filt_max = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the depth filter minimum value */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.depth_filt_min = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the depth filter maximum value */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.depth_filt_max = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next byte contains the filters active flags*/
+    sdata->gsfReson8100Specific.filters_active = (int) *p;
+    p += 1;
+
+    /* Next two byte integer contains the temperature at the sonar head */
+    memcpy(&stemp, p, 2);
+    sdata->gsfReson8100Specific.temperature = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next four bytes are reserved for future growth */
+    sdata->gsfReson8100Specific.spare[0] = (char) *p;
+    p += 1;
+    sdata->gsfReson8100Specific.spare[1] = (char) *p;
+    p += 1;
+    sdata->gsfReson8100Specific.spare[2] = (char) *p;
+    p += 1;
+    sdata->gsfReson8100Specific.spare[3] = (char) *p;
+    p += 1;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
+ * Function Name : DecodeSBEchotracSpecific
+ *
+ * Description :
+ *  This function decodes the Bathy2000 and Echotrac sensor specific
+ *  data.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *    major_version - GSF major version of the file being read.
+ *    minor_version - GSF minor version of the file being read.
+ *
+ * Returns : This function returns the number of bytes decoded.
+ *
+ * Error Conditions : none
+ *
+ * History: 12/20/2002 - RWL modified for structure change in version 2.02
+ *
+ ********************************************************************/
+
+static int
+DecodeSBEchotracSpecific(t_gsfSBEchotracSpecific * sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+    gsfsShort       signed_short;
+
+    /* First two byte integer contains the navigation error */
+    memcpy(&stemp, p, 2);
+    sdata->navigation_error = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next byte contains the most probable position source navigation */
+    sdata->mpp_source = (int) *p;
+    p += 1;
+
+    /* Next byte contains the tide source */
+    sdata->tide_source = (int) *p;
+    p += 1;
+
+    /* Next two byte integer contains the dynamic_draft */
+    memcpy(&stemp, p, 2);
+    signed_short = (signed) ntohs(stemp);
+    sdata->dynamic_draft = ((double) signed_short) / 100.0;
+    p += 2;
+
+    /* decode the spare bytes */
+    memcpy(sdata->spare, p, 4);
+    p += 4;
+
+    return (p - sptr);
+}
+
+
+/********************************************************************
+ *
+ * Function Name : DecodeSBMGD77Specific
+ *
+ * Description :
+ *  This function decodes the MGD77 fields.  The MGD77 is essentially
+ *  survey trackline data, and actual survey data can be retrieved
+ *  from the source.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes decoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeSBMGD77Specific(t_gsfSBMGD77Specific * sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuLong        ltemp;
+    gsfuShort       stemp;
+
+    /* First two byte integer contains the time zone correction */
+    memcpy(&stemp, p, 2);
+    sdata->time_zone_corr = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two byte integer contains how the navigation was obtained */
+    memcpy(&stemp, p, 2);
+    sdata->position_type_code = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two byte integer contains how the sound velocity
+       correction was made */
+    memcpy(&stemp, p, 2);
+    sdata->correction_code = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two byte integer contains how the bathymetry was obtained */
+    memcpy(&stemp, p, 2);
+    sdata->bathy_type_code = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two byte integer contains the quality code for nav */
+    memcpy(&stemp, p, 2);
+    sdata->quality_code = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next four byte integer contains the two way travel time */
+    memcpy(&ltemp, p, 4);
+    sdata->travel_time = (double) (ntohl(ltemp)) / 10000.0;
+    p += 4;
+
+    /* decode the spare bytes */
+    memcpy(sdata->spare, p, 4);
+    p += 4;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
+ * Function Name : DecodeSBBDBSpecific
+ *
+ * Description :
+ *  This function decodes the BDB fields.  The BDB is essentially
+ *  survey trackline data.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes decoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeSBBDBSpecific(t_gsfSBBDBSpecific * sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuLong        ltemp;
+
+    /* The next four byte integer contains the two way travel time */
+    memcpy(&ltemp, p, 4);
+    sdata->doc_no = (int) (ntohl(ltemp));
+    p += 4;
+
+    /* Next byte contains the evaluation flag */
+    sdata->eval = (char) *p;
+    p += 1;
+
+    /* Next byte contains the classification flag */
+    sdata->classification = (char) *p;
+    p += 1;
+
+    /* Next byte contains the track adjustment flag */
+    sdata->track_adj_flag = (char) *p;
+    p += 1;
+
+    /* Next byte contains the source flag */
+    sdata->source_flag = (char) *p;
+    p += 1;
+
+    /* Next byte contains the discrete point or track line flag */
+    sdata->pt_or_track_ln = (char) *p;
+    p += 1;
+
+    /* Next byte contains the datum flag */
+    sdata->datum_flag = (char) *p;
+    p += 1;
+
+    /* decode the spare bytes */
+    memcpy(sdata->spare, p, 4);
+    p += 4;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
+ * Function Name : DecodeSBNOSHDBSpecific
+ *
+ * Description :
+ *  This function decodes the NOSHDB fields.  The NOSHDB is essentially
+ *  survey trackline data.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes decoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeSBNOSHDBSpecific(t_gsfSBNOSHDBSpecific * sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+
+    /* First two byte integer contains the depth type code */
+    memcpy(&stemp, p, 2);
+    sdata->type_code = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two byte integer contains the cartographic code */
+    memcpy(&stemp, p, 2);
+    sdata->carto_code = (int) ntohs(stemp);
+    p += 2;
+
+    /* decode the spare bytes */
+    memcpy(sdata->spare, p, 4);
+    p += 4;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
+ * Function Name : DecodeEM3ImagerySpecific
+ *
+ * Description : This function decodes the Simrad EM3000 series sensor
+ *    specific imagery information from the GSF byte stream.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific imagery data
+              to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes enocoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeEM3ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr)
+{
+    unsigned char   *p = sptr;
+    gsfuShort       stemp;
+
+    /* Next two bytes contain the range to normal incidence to correct amplitudes */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3ImagerySpecific.range_norm = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two bytes contain the start range sample of TVG ramp */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3ImagerySpecific.start_tvg_ramp = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next two bytes contain the stop range sample of TVG ramp */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3ImagerySpecific.stop_tvg_ramp = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next byte contains the normal incidence BS in dB */
+    sdata->gsfEM3ImagerySpecific.bsn = ((int) *p);
+    p += 1;
+
+    /* Next byte contains the oblique BS in dB */
+    sdata->gsfEM3ImagerySpecific.bso = ((int) *p);
+    p += 1;
+
+    /* The next two byte value contains the absorption coefficient */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3ImagerySpecific.mean_absorption = ((double) ntohs(stemp)) / 100.0;
+    p += 2;
+
+    /* decode the spare header bytes */
+    memcpy(sdata->gsfEM3ImagerySpecific.spare, p, 8);
+    p += 8;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
+ * Function Name : DecodeReson8100Specific
+ *
+ * Description : This function decodes the Reson 8100 series sensor
+ *    specific imagery information from the GSF byte stream.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific imagery data
+              to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes enocoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeReson8100ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr)
+{
+    unsigned char   *p = sptr;
+
+    /* decode the spare header bytes */
+    memcpy(sdata->gsfReson8100ImagerySpecific.spare, p, 8);
+    p += 8;
+
+    return (p - sptr);
+}
+
+
+/********************************************************************
+ *
+ * Function Name : DecodeBRBIntensity
+ *
+ * Description : This function decodes the Bathymetric Receive Beam
+ *    time series intensity information from the GSF byte stream.
+ *
+ * Inputs :
+ *    idata = a pointer to the gsfBRBIntensity structure to be loaded with
+ *            imagery data
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *    num_beams = an integer containing the number of beams which is used to
+ *                dimension the array of gsfTimeSeries intensity structures
+ *    sensor_id = the integer id for the sensor specific subrecord, which
+ *                to decode the sensor specific imagery information
+ *    handle = the integer handle for the data file being read, which is used
+ *             to store the current number of beams
+ *
+ * Returns : This function returns the number of bytes enocoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams, int sensor_id, int handle)
+{
+    unsigned char  *ptr = sptr;
+    gsfuShort       stemp;
+    gsfuLong        ltemp;
+    int             i, j;
+    int             id = GSF_SWATH_BATHY_SUBRECORD_INTENSITY_SERIES_ARRAY;
+    int             sensor_size;
+    int             bytes_per_sample;
+    unsigned char   bytes_to_unpack[4];
+
+    /* Allocate memory for the structure if none has been allocated yet */
+    if (*idata == (gsfBRBIntensity *) NULL)
+    {
+        *idata = (gsfBRBIntensity *) calloc(1, sizeof(gsfBRBIntensity));
+
+        if (*idata == (gsfBRBIntensity *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+    }
+
+    /* Allocate memory for the array if none has been allocated yet */
+    if ((*idata)->time_series == (gsfTimeSeriesIntensity *) NULL)
+    {
+        if (num_beams <= 0)
+        {
+            gsfError = GSF_INVALID_NUM_BEAMS;
+            return(-1);
+        }
+
+        (*idata)->time_series = (gsfTimeSeriesIntensity *) calloc(num_beams, sizeof(gsfTimeSeriesIntensity));
+
+        if ((*idata)->time_series == (gsfTimeSeriesIntensity *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+        arraySize[handle - 1][id - 1] = num_beams;
+
+        /* allocate memory for array of sample counts */
+        samplesArraySize[handle - 1] = calloc (num_beams, sizeof (short));
+    }
+
+    /* Make sure there memory allocated for the array is sufficient, some
+    *  system have a different number of beams depending on depth
+    */
+    if (num_beams > arraySize[handle - 1][id - 1])
+    {
+        (*idata)->time_series = (gsfTimeSeriesIntensity *) realloc((void *) (*idata)->time_series, num_beams * sizeof(gsfTimeSeriesIntensity));
+
+        if ((*idata)->time_series == (gsfTimeSeriesIntensity *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+        memset((*idata)->time_series, 0, num_beams * sizeof(gsfTimeSeriesIntensity));
+
+        arraySize[handle - 1][id - 1] = num_beams;
+
+        /* re-allocate memory for array of sample counts */
+        samplesArraySize[handle - 1] = realloc ((void *) samplesArraySize[handle - 1], num_beams * sizeof (short));
+        memset (samplesArraySize[handle - 1], 0, num_beams * sizeof (short));
+    }
+
+    /* decode the bits per sample */
+    (*idata)->bits_per_sample = *ptr;
+    ptr += 1;
+
+    /* decode the sample applied corrections description */
+    memcpy(&ltemp, ptr, 4);
+    (*idata)->applied_corrections = (unsigned long) ntohl(ltemp);
+    ptr += 4;
+
+    /* decode the spare header bytes */
+    memcpy((*idata)->spare, ptr, 16);
+    ptr += 16;
+
+    /* read the sensor specific imagery info */
+    switch (sensor_id)
+    {
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
+            sensor_size = DecodeEM3ImagerySpecific(&(*idata)->sensor_imagery, ptr);
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC):
+            sensor_size = DecodeReson8100ImagerySpecific(&(*idata)->sensor_imagery, ptr);
+            break;
+
+        default:
+            sensor_size = 0;
+            break;
+    }
+    ptr += sensor_size;
+
+    bytes_per_sample = (*idata)->bits_per_sample / 8;
+    /* loop for the number of beams, allocating memory for the array of samples, and
+    * loading each sample value from the byte stream into internal form
+    */
+    for (i = 0; i < num_beams; i++)
+    {
+
+        /* First two byte integer contains the number of samples for this beam */
+        memcpy(&stemp, ptr, 2);
+        (*idata)->time_series[i].sample_count = (unsigned short) ntohs(stemp);
+        ptr += 2;
+
+        /* Next two byte integer contains the index to the bottom detect sample for this beam */
+        memcpy(&stemp, ptr, 2);
+        (*idata)->time_series[i].detect_sample = (unsigned short) ntohs(stemp);
+        ptr += 2;
+
+        memcpy((*idata)->time_series[i].spare, ptr, 8);
+        ptr += 8;
+
+        /* Allocate memory for the array of samples if none has been allocated yet. */
+        if ((*idata)->time_series[i].samples == (unsigned long *) NULL)
+        {
+            (*idata)->time_series[i].samples = (unsigned long *) calloc((*idata)->time_series[i].sample_count, sizeof(unsigned long));
+
+            if ((*idata)->time_series[i].samples == (unsigned long *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return (-1);
+            }
+
+            samplesArraySize[handle - 1][i] = (*idata)->time_series[i].sample_count;
+        }
+
+        if ((*idata)->time_series[i].sample_count > samplesArraySize[handle - 1][i])
+        {
+            (*idata)->time_series[i].samples = (unsigned long *) realloc((void *) (*idata)->time_series[i].samples, (*idata)->time_series[i].sample_count * sizeof(unsigned long));
+
+            if ((*idata)->time_series[i].samples == (unsigned long *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return (-1);
+            }
+
+            memset ((*idata)->time_series[i].samples, 0, (*idata)->time_series[i].sample_count * sizeof(unsigned long));
+
+            samplesArraySize[handle - 1][i] = (*idata)->time_series[i].sample_count;
+        }
+
+        if ((*idata)->bits_per_sample == 12)
+        {
+            for (j = 0; j < (*idata)->time_series[i].sample_count; j+=2)
+            {
+                /* unpack 3 bytes into 2 samples */
+
+                /* unpack the first sample */
+                memset (bytes_to_unpack, 0, 4);
+                bytes_to_unpack[2] = ptr[0];
+                bytes_to_unpack[3] = ptr[1] & 0xF0;
+                memcpy (&ltemp, bytes_to_unpack, 4);
+                (*idata)->time_series[i].samples[j] = (unsigned long) ntohl(ltemp);
+
+                if (j+1 < (*idata)->time_series[i].sample_count)
+                {
+                    /* unpack the second sample */
+                    memset (bytes_to_unpack, 0, 4);
+                    bytes_to_unpack[2] = ptr[1] << 4;
+                    bytes_to_unpack[2] |= ptr[2] >> 4;
+                    bytes_to_unpack[3] = ptr[2] << 4;
+                    memcpy (&ltemp, bytes_to_unpack, 4);
+                    (*idata)->time_series[i].samples[j+1] = (unsigned long) ntohl(ltemp);
+                }
+                ptr += 3;
+            }
+        }
+        else
+        {
+            for (j = 0; j < (*idata)->time_series[i].sample_count; j++)
+            {
+                if (bytes_per_sample == 2)
+                {
+                    memcpy(&stemp, ptr, 2);
+                    (*idata)->time_series[i].samples[j] = (unsigned short) ntohs(stemp);
+                    ptr += 2;
+                }
+                else if (bytes_per_sample == 4)
+                {
+                    memcpy(&ltemp, ptr, 4);
+                    (*idata)->time_series[i].samples[j] = (unsigned long) ntohl(ltemp);
+                    ptr += 4;
+                }
+                else
+                {
+                    memcpy(&(*idata)->time_series[i].samples[j], ptr, bytes_per_sample);
+                    ptr+=bytes_per_sample;
+                }
+            }
+        }
+    }
+    return (ptr - sptr);
+}
+
+/********************************************************************
+ *
  * Function Name : gsfDecodeSoundVelocityProfile
  *
  * Description : This function decodes a gsf sound velocity profile record
@@ -3996,6 +4777,265 @@ gsfDecodeHVNavigationError(gsfHVNavigationError *hv_nav_error, GSF_FILE_TABLE *f
     hv_nav_error->position_type = ft->rec.hv_nav_error.position_type;
     hv_nav_error->position_type[length] = '\0';
     p += length;
+
+    return (p - sptr);
+}
+
+static void LocalAddTimes (struct gsfTimespec *base_time, double delta_time, struct gsfTimespec *sum_time)
+{
+    double fraction = 0.0;
+    double tmp      = 0.0;
+
+    /* checks for bounds too large, negative before addition */
+    sum_time->tv_sec = base_time->tv_sec + (int)(delta_time);
+    fraction         = delta_time - (int)delta_time;
+    tmp              = (((double)base_time->tv_nsec)/1.0e9)
+                       + fraction;
+
+    if      (tmp >= 1.0) {
+        sum_time->tv_sec += 1;
+        fraction         -= 1.0;
+    }
+    else if (tmp < 0.0) {
+        sum_time->tv_sec -= 1;
+        fraction         += 1.0;
+    }
+
+    sum_time->tv_nsec = base_time->tv_nsec + fraction*1.0e9;
+}
+
+/********************************************************************
+ *
+ * Function Name : gsfDecodeAttitude
+
+ * Description : This function decodes a gsf attitude record
+ *  from external byte stream form into internal form.  Memory for the
+ *  pitch/roll/heave arrays is allocated (or reallocted) each time this
+ *  record is encountered since the number of points in the profile can
+ *  change.
+ *
+ * Inputs :
+ *    attitude = a pointer to the gsfAtttiude structure to load
+ *    ft = a pointer to the GSF_FILE_TABLE entry for the data file being decoded
+ *    sptr = a pointer to the unsigned char buffer to read from
+ *
+ * Returns :
+ *  This function returns the number of bytes decoded if successful, or
+ *  -1 if an error occured.
+ *
+ * Error Conditions :
+ *    GSF_MEMORY_ALLOCATION_FAILED
+ *
+ ********************************************************************/
+int
+gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuLong        ltemp;
+    gsfuShort       stemp;
+    gsfsShort       signed_short;
+    int             i;
+    struct gsfTimespec basetime;
+    double          time_offset;
+
+    /* First four byte integer contains the observation time seconds */
+    memcpy(&ltemp, p, 4);
+    p += 4;
+    basetime.tv_sec = ntohl(ltemp);
+
+    /* Next four byte integer contains the observation time nanoseconds */
+    memcpy(&ltemp, p, 4);
+    p += 4;
+    basetime.tv_nsec = ntohl(ltemp);
+
+    /* Next two byte integer contains the number of measurements in the record */
+    memcpy(&stemp, p, 2);
+    p += 2;
+    attitude->num_measurements = ntohs(stemp);
+
+    /* NULL out caller's memory pointers in case memory allocation fails */
+    attitude->attitude_time = (struct gsfTimespec *) NULL;
+    attitude->pitch = (double *) NULL;
+    attitude->roll = (double *) NULL;
+    attitude->heave = (double *) NULL;
+    attitude->heading = (double *) NULL;
+
+    /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.attitude_time == (struct gsfTimespec *) NULL)
+    {
+        ft->rec.attitude.attitude_time = (struct gsfTimespec *) calloc(attitude->num_measurements, sizeof(struct gsfTimespec));
+
+        if (ft->rec.attitude.attitude_time == (struct gsfTimespec *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+    }
+    /* Re-allocate the dynamic memory if the number of measurements in the record
+     * is greater this time than it was last time.
+     */
+    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        ft->rec.attitude.attitude_time = (struct gsfTimespec *) realloc(ft->rec.attitude.attitude_time, attitude->num_measurements * sizeof(struct gsfTimespec));
+
+        if (ft->rec.attitude.attitude_time == (struct gsfTimespec *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+        memset(ft->rec.attitude.attitude_time, 0, attitude->num_measurements * sizeof(struct gsfTimespec));
+    }
+    /* Set the caller's pointer to this dynamic memory */
+    attitude->attitude_time = ft->rec.attitude.attitude_time;
+
+    /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.pitch == (double *) NULL)
+    {
+        ft->rec.attitude.pitch = (double *) calloc(attitude->num_measurements, sizeof(double));
+
+        if (ft->rec.attitude.pitch == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+    }
+    /* Re-allocate the dynamic memory if the number of measurements in the record
+     * is greater this time than it was last time.
+     */
+    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        ft->rec.attitude.pitch = (double *) realloc(ft->rec.attitude.pitch, attitude->num_measurements * sizeof(double));
+
+        if (ft->rec.attitude.pitch == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+        memset(ft->rec.attitude.pitch, 0, attitude->num_measurements * sizeof(double));
+    }
+    /* Set the caller's pointer to this dynamic memory */
+    attitude->pitch = ft->rec.attitude.pitch;
+
+    /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.roll == (double *) NULL)
+    {
+        ft->rec.attitude.roll = (double *) calloc(attitude->num_measurements, sizeof(double));
+
+        if (ft->rec.attitude.roll == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+    }
+    /* Re-allocate the dynamic memory if the number of measurements in the record
+     * is greater this time than it was last time.
+     */
+    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        ft->rec.attitude.roll = (double *) realloc(ft->rec.attitude.roll, attitude->num_measurements * sizeof(double));
+
+        if (ft->rec.attitude.roll == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+        memset(ft->rec.attitude.roll, 0, attitude->num_measurements * sizeof(double));
+    }
+    /* Set the caller's pointer to this dynamic memory */
+    attitude->roll = ft->rec.attitude.roll;
+
+    /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.heave == (double *) NULL)
+    {
+        ft->rec.attitude.heave = (double *) calloc(attitude->num_measurements, sizeof(double));
+
+        if (ft->rec.attitude.heave == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+    }
+    /* Re-allocate the dynamic memory if the number of measurements in the record
+     * is greater this time than it was last time.
+     */
+    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        ft->rec.attitude.heave = (double *) realloc(ft->rec.attitude.heave, attitude->num_measurements * sizeof(double));
+
+        if (ft->rec.attitude.heave == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+        memset(ft->rec.attitude.heave, 0, attitude->num_measurements * sizeof(double));
+    }
+    /* Set the caller's pointer to this dynamic memory */
+    attitude->heave = ft->rec.attitude.heave;
+
+    /* make sure we have memory for the attitude measurements */
+    if (ft->rec.attitude.heading == (double *) NULL)
+    {
+        ft->rec.attitude.heading = (double *) calloc(attitude->num_measurements, sizeof(double));
+
+        if (ft->rec.attitude.heading == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+    }
+    /* Re-allocate the dynamic memory if the number of measurements in the record
+     * is greater this time than it was last time.
+     */
+    else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
+    {
+        ft->rec.attitude.heading = (double *) realloc(ft->rec.attitude.heading, attitude->num_measurements * sizeof(double));
+
+        if (ft->rec.attitude.heading == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return (-1);
+        }
+        memset(ft->rec.attitude.heading, 0, attitude->num_measurements * sizeof(double));
+    }
+    /* Set the caller's pointer to this dynamic memory */
+    attitude->heading = ft->rec.attitude.heading;
+
+    /* Save the number of points in this profile in the library's file table */
+    ft->rec.attitude.num_measurements = attitude->num_measurements;
+
+    /* Now loop to decode the attitude measurements */
+    for (i = 0; i < attitude->num_measurements; i++)
+    {
+        /* Next two byte integer contains the time offset */
+        memcpy(&stemp, p, 2);
+        time_offset = ((double) ntohs (stemp)) / 1000.0;
+        p += 2;
+
+        LocalAddTimes (&basetime, time_offset, &attitude->attitude_time[i]);
+
+        /* Next two byte integer contains the pitch */
+        memcpy(&stemp, p, 2);
+        signed_short = (signed) ntohs(stemp);
+        attitude->pitch[i] = ((double) signed_short) / 100.0;
+        p += 2;
+
+        /* Next two byte integer contains the roll */
+        memcpy(&stemp, p, 2);
+        signed_short = (signed) ntohs(stemp);
+        attitude->roll[i] = ((double) signed_short) / 100.0;
+        p += 2;
+
+        /* Next two byte integer contains the heave */
+        memcpy(&stemp, p, 2);
+        signed_short = (signed) ntohs(stemp);
+        attitude->heave[i] = ((double) signed_short) / 100.0;
+        p += 2;
+
+        /* Next two byte integer contains the heading */
+        memcpy(&stemp, p, 2);
+        attitude->heading[i] = ((double) ntohs(stemp)) / 100.0;
+        p += 2;
+    }
 
     return (p - sptr);
 }

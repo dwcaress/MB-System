@@ -9,8 +9,8 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
- * who	when	  what
- * ---	----	  ----
+ * who  when      what
+ * ---  ----      ----
  * hem  08/20/96  Added gsfEncodeSinglebeam.
  * jsb  09/28/98  Added gsfEncodeHVNavigationError.
  *
@@ -38,5 +38,6 @@
    int OPTLK gsfEncodeNavigationError(unsigned char *sptr, gsfNavigationError *nav_error);
    int OPTLK gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_error);
    int OPTLK gsfEncodeSinglebeam (unsigned char *sptr, gsfSingleBeamPing * ping);
+   int OPTLK gsfEncodeAttitude(unsigned char *sptr, gsfAttitude * attitude);
 
 #endif

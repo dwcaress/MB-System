@@ -80,12 +80,25 @@
  *                specific structure has been modified to have a different name than the
  *                element of the SensorSpecific union.  Also removed the useage of C++
  *                reserved words "class" and "operator".  These modifications will potentially
- *                require some changes to application code.
+ *                require some changes to application code. Added support for the Reson 8100 series of sonars.
+ * bac 10-12-01   Added a new attitude record definition.  The attitude record provides a method for
+ *                logging full time-series attitude measurements in the GSF file, instead of attitude
+ *                samples only at ping time.  Each attitude record contains arrays of attitude
+ *                measurements for time, roll, pitch, heave and heading.  The number of measurements
+ *                is user-definable, but because of the way in which measurement times are stored, a
+ *                single attitude record should never contain more than sixty seconds worth of
+ *                data.
+ * bac 11-09-01   Added motion sensor offsets to the gsfMBOffsets structure.  Added support for these
+ *                new offsets in the gsfPutMBParams and gsfGetMBParams functions, so these offsets are
+ *                encoded in the process_parameters record.
  * jsb 01-21-02   If the fread doesn't complete, rewind the file to the beginning of the current
  *                record, set gsfError to END_OF_FILE, and return -1.  Removed variables that were
  *                not used, fixed return code and gsfError for default case block in gsfGetBeamWidths,
  *                and update strncpy in gsfSetParam and gsfCopyRecords to ensure that the terminating
  *                NULL is copied to the target pointer.
+ * bac 06-19-03   Added support for bathymetric receive beam time series intensity data (i.e., Simrad
+ *                "Seabed image" and Reson "snippets").  Inlcluded RWL updates of 12-19-02 for adding
+ *                sensor-specific singlebeam information to the MB sensor specific subrecords.
  *
  * Classification : Unclassified
  *
@@ -1146,10 +1159,6 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
         readStat = fread((void *) tmpBuff, GSF_LONG_SIZE, (size_t) 2, gsfFileTable[handle - 1].fp);
         if (readStat != 2)
         {
-            /*
-            fprintf (stderr, "GSF READ ERROR:  Record Id - Expecting [2]  Read [%d]\n",
-                (int) (readStat));
-             */
             if (feof(gsfFileTable[handle - 1].fp))
             {
                 /* wkm 10-19-01: if error reading file and we're at the end of the file,
@@ -1233,18 +1242,14 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
             readStat = fread(streamBuff, (size_t) 1, readSize, gsfFileTable[handle - 1].fp);
             if (readStat != readSize)
             {
-                /*
-                fprintf (stderr, "GSF READ ERROR:  Data Record - Expecting [%d] Read [%d]\n",
-                         (int) (readSize), (int) (readStat));
-                 */
                 if (feof(gsfFileTable[handle - 1].fp))
                 {
-                     /* wkm 10-19-01: if error reading file and we're at the end of the file,
-                      *               reset file pointer
-                      */
-                     fseek (gsfFileTable[handle - 1].fp,
-                           gsfFileTable[handle - 1].previous_record,
-                           SEEK_SET);
+                    /* wkm 10-19-01: if error reading file and we're at the end of the file,
+                     *               reset file pointer
+                     */
+                    fseek (gsfFileTable[handle - 1].fp,
+                          gsfFileTable[handle - 1].previous_record,
+                          SEEK_SET);
                     gsfError = GSF_READ_TO_END_OF_FILE;
                     return (-1);
                 }
@@ -1395,6 +1400,15 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
             }
             break;
 
+        case (GSF_RECORD_ATTITUDE):
+            ret = gsfDecodeAttitude(&rptr->attitude, &gsfFileTable[handle - 1], dptr);
+            if (ret < 0)
+            {
+                gsfError = GSF_ATTITUDE_RECORD_DECODE_FAILED;
+                return (-1);
+            }
+            break;
+
 
         default:
             gsfError = GSF_UNRECOGNIZED_RECORD_ID;
@@ -1501,7 +1515,6 @@ gsfSeekRecord(int handle, gsfDataID *id)
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
-
     ret = fread(&index_rec, sizeof(INDEX_REC), 1, gsfFileTable[handle - 1].index_data.fp);
     if (ret != 1)
     {
@@ -1774,6 +1787,15 @@ gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr)
             if (ret < 0)
             {
                 gsfError = GSF_HV_NAV_ERROR_RECORD_ENCODE_FAILED;
+                return (-1);
+            }
+            break;
+
+        case (GSF_RECORD_ATTITUDE):
+            ret = gsfEncodeAttitude(ucptr, &rptr->attitude);
+            if (ret < 0)
+            {
+                gsfError = GSF_ATTITUDE_RECORD_ENCODE_FAILED;
                 return (-1);
             }
             break;
@@ -2164,6 +2186,26 @@ gsfFree (gsfRecords *rec)
         rec->mb_ping.beam_angle_forward = (double *) NULL;
     }
 
+    /* we have an array of number_beams gsfIntensitySeries structures */
+    if (rec->mb_ping.brb_inten != (gsfBRBIntensity *) NULL)
+    {
+        if (rec->mb_ping.brb_inten->time_series != (gsfTimeSeriesIntensity *) NULL)
+        {
+            for (i = 0; i < rec->mb_ping.number_beams; i++)
+            {
+                if (rec->mb_ping.brb_inten->time_series[i].samples != (unsigned long *) NULL)
+                {
+                    free (rec->mb_ping.brb_inten->time_series[i].samples);
+                    rec->mb_ping.brb_inten->time_series[i].samples = NULL;
+                }
+            }
+            free (rec->mb_ping.brb_inten->time_series);
+            rec->mb_ping.brb_inten->time_series = NULL;
+        }
+        free (rec->mb_ping.brb_inten->time_series);
+        rec->mb_ping.brb_inten = (gsfBRBIntensity *) NULL;
+    }
+
     /* Free the dynamically allocated memory from the svp record */
     if (rec->svp.depth != (double *) NULL)
     {
@@ -2217,6 +2259,37 @@ gsfFree (gsfRecords *rec)
     {
         free (rec->history.comment);
         rec->history.comment = (char *) NULL;
+    }
+
+    /* Free the dynamically allocated memory from the attitude record */
+    if (rec->attitude.attitude_time != (struct gsfTimespec *) NULL)
+    {
+        free (rec->attitude.attitude_time);
+        rec->attitude.attitude_time = (struct gsfTimespec *) NULL;
+    }
+
+    if (rec->attitude.pitch != (double *) NULL)
+    {
+        free (rec->attitude.pitch);
+        rec->attitude.pitch = (double *) NULL;
+    }
+
+    if (rec->attitude.roll != (double *) NULL)
+    {
+        free (rec->attitude.roll);
+        rec->attitude.roll = (double *) NULL;
+    }
+
+    if (rec->attitude.heave != (double *) NULL)
+    {
+        free (rec->attitude.heave);
+        rec->attitude.heave = (double *) NULL;
+    }
+
+    if (rec->attitude.heading != (double *) NULL)
+    {
+        free (rec->attitude.heading);
+        rec->attitude.heading = (double *) NULL;
     }
 
     /* Now clear all the data from the gsf Records structure */
@@ -2400,6 +2473,10 @@ gsfStringError(void)
             ptr = "GSF Error decoding latitude/longitude navigation error record";
             break;
 
+        case GSF_ATTITUDE_RECORD_DECODE_FAILED:
+            ptr = "GSF Error decoding attitude record";
+            break;
+
         /* jsb 10/11/98; These macro names are too long to be unique, when compiled under HP-UX 10.20
          *  This needs to be scheduled for resolution in a future release.
         case (GSF_HEADER_RECORD_ENCODE_FAILED):
@@ -2571,7 +2648,6 @@ gsfIndexTime(int handle, int record_type, int record_number, time_t * sec, long 
         gsfError = GSF_FILE_SEEK_ERROR;
         return (-1);
     }
-
     if (fread(&index_rec, sizeof(INDEX_REC), 1, gsfFileTable[handle - 1].index_data.fp) != 1)
     {
         gsfError = GSF_INDEX_FILE_READ_ERROR;
@@ -3187,6 +3263,74 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
         memcpy (target->mb_ping.beam_angle_forward, source->mb_ping.beam_angle_forward, sizeof(double) * source->mb_ping.number_beams);
     }
 
+    if (source->mb_ping.brb_inten != (gsfBRBIntensity *) NULL)
+    {
+        if (target->mb_ping.brb_inten == (gsfBRBIntensity *) NULL)
+        {
+            target->mb_ping.brb_inten = (gsfBRBIntensity *) calloc (sizeof(gsfBRBIntensity), 1);
+            if (target->mb_ping.brb_inten == (gsfBRBIntensity *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+
+        target->mb_ping.brb_inten->bits_per_sample     = source->mb_ping.brb_inten->bits_per_sample;
+        target->mb_ping.brb_inten->applied_corrections = source->mb_ping.brb_inten->applied_corrections;
+        target->mb_ping.brb_inten->sensor_imagery      = source->mb_ping.brb_inten->sensor_imagery;
+        memcpy (&target->mb_ping.brb_inten->spare, &source->mb_ping.brb_inten->spare, 16);
+
+        if (source->mb_ping.brb_inten->time_series != (gsfTimeSeriesIntensity *) NULL)
+        {
+            if (target->mb_ping.brb_inten->time_series == (gsfTimeSeriesIntensity *) NULL)
+            {
+                target->mb_ping.brb_inten->time_series = (gsfTimeSeriesIntensity *) calloc (sizeof(gsfTimeSeriesIntensity), source->mb_ping.number_beams);
+                if (target->mb_ping.brb_inten->time_series == (gsfTimeSeriesIntensity *) NULL)
+                {
+                    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                    return(-1);
+                }
+            }
+            else if (target->mb_ping.number_beams < source->mb_ping.number_beams)
+            {
+                target->mb_ping.brb_inten->time_series = (gsfTimeSeriesIntensity *) realloc (target->mb_ping.brb_inten->time_series, sizeof(gsfTimeSeriesIntensity) * source->mb_ping.number_beams);
+                if (target->mb_ping.brb_inten->time_series == (gsfTimeSeriesIntensity *) NULL)
+                {
+                    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                    return(-1);
+                }
+            }
+
+            for (i = 0; i < source->mb_ping.number_beams; i++)
+            {
+                if (source->mb_ping.brb_inten->time_series[i].samples != (unsigned long *) NULL)
+                {
+                    if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned long *) NULL)
+                    {
+                        target->mb_ping.brb_inten->time_series[i].samples = (unsigned long *) calloc (sizeof(unsigned long), source->mb_ping.brb_inten->time_series[i].sample_count);
+                        if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned long *) NULL)
+                        {
+                            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                            return(-1);
+                        }
+                    }
+                    else if (target->mb_ping.brb_inten->time_series[i].sample_count < source->mb_ping.brb_inten->time_series[i].sample_count)
+                    {
+                        target->mb_ping.brb_inten->time_series[i].samples = (unsigned long *) realloc (target->mb_ping.brb_inten->time_series[i].samples, sizeof(unsigned long) * source->mb_ping.brb_inten->time_series[i].sample_count);
+                        if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned long *) NULL)
+                        {
+                            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                            return(-1);
+                        }
+                    }
+                    memcpy (target->mb_ping.brb_inten->time_series[i].samples, source->mb_ping.brb_inten->time_series[i].samples, sizeof(unsigned long) * source->mb_ping.brb_inten->time_series[i].sample_count);
+                    target->mb_ping.brb_inten->time_series[i].sample_count = source->mb_ping.brb_inten->time_series[i].sample_count;
+                    target->mb_ping.brb_inten->time_series[i].detect_sample = source->mb_ping.brb_inten->time_series[i].detect_sample;
+                }
+            }
+        }
+    }
+
     /* Copy the swath bathymetry ping record over to the target by moving
      * the data over one item at a time so we don't overwrite the arrays.
      */
@@ -3384,6 +3528,115 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
     /* Copy the navigation error record from the source to the target */
     target->nav_error = source->nav_error;
 
+    /* Now hande the attitude record dynamic memory */
+    if (target->attitude.attitude_time == (struct gsfTimespec *) NULL)
+    {
+        target->attitude.attitude_time = (struct gsfTimespec *) calloc (sizeof(struct gsfTimespec), source->attitude.num_measurements);
+        if (target->attitude.attitude_time == (struct gsfTimespec *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.attitude_time, source->attitude.attitude_time, sizeof(struct gsfTimespec) * source->attitude.num_measurements);
+    }
+    else if (target->attitude.num_measurements < source->attitude.num_measurements)
+    {
+        target->attitude.attitude_time = (struct gsfTimespec *) realloc (target->attitude.attitude_time, sizeof(struct gsfTimespec) * source->attitude.num_measurements);
+        if (target->attitude.attitude_time == (struct gsfTimespec *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.attitude_time, source->attitude.attitude_time, sizeof(struct gsfTimespec) * source->attitude.num_measurements);
+    }
+
+    if (target->attitude.roll == (double *) NULL)
+    {
+        target->attitude.roll = (double *) calloc (sizeof(double), source->attitude.num_measurements);
+        if (target->attitude.roll == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.roll, source->attitude.roll, sizeof(double) * source->attitude.num_measurements);
+    }
+    else if (target->attitude.num_measurements < source->attitude.num_measurements)
+    {
+        target->attitude.roll = (double *) realloc (target->attitude.roll, sizeof(double) * source->attitude.num_measurements);
+        if (target->attitude.roll == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.roll, source->attitude.roll, sizeof(double) * source->attitude.num_measurements);
+    }
+
+    if (target->attitude.pitch == (double *) NULL)
+    {
+        target->attitude.pitch = (double *) calloc (sizeof(double), source->attitude.num_measurements);
+        if (target->attitude.pitch == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.pitch, source->attitude.pitch, sizeof(double) * source->attitude.num_measurements);
+    }
+    else if (target->attitude.num_measurements < source->attitude.num_measurements)
+    {
+        target->attitude.pitch = (double *) realloc (target->attitude.pitch, sizeof(double) * source->attitude.num_measurements);
+        if (target->attitude.pitch == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.pitch, source->attitude.pitch, sizeof(double) * source->attitude.num_measurements);
+    }
+
+    if (target->attitude.heave == (double *) NULL)
+    {
+        target->attitude.heave = (double *) calloc (sizeof(double), source->attitude.num_measurements);
+        if (target->attitude.heave == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.heave, source->attitude.heave, sizeof(double) * source->attitude.num_measurements);
+    }
+    else if (target->attitude.num_measurements < source->attitude.num_measurements)
+    {
+        target->attitude.heave = (double *) realloc (target->attitude.heave, sizeof(double) * source->attitude.num_measurements);
+        if (target->attitude.heave == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.heave, source->attitude.heave, sizeof(double) * source->attitude.num_measurements);
+    }
+
+    if (target->attitude.heading == (double *) NULL)
+    {
+        target->attitude.heading = (double *) calloc (sizeof(double), source->attitude.num_measurements);
+        if (target->attitude.heading == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.heading, source->attitude.heading, sizeof(double) * source->attitude.num_measurements);
+    }
+    else if (target->attitude.num_measurements < source->attitude.num_measurements)
+    {
+        target->attitude.heading = (double *) realloc (target->attitude.heading, sizeof(double) * source->attitude.num_measurements);
+        if (target->attitude.heading == (double *) NULL)
+        {
+            gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            return(-1);
+        }
+        memcpy (target->attitude.heading, source->attitude.heading, sizeof(double) * source->attitude.num_measurements);
+    }
+
+    /* Copy the sound velocity profile record from the source to the target */
+    target->attitude.num_measurements    = source->attitude.num_measurements;
+
     return(0);
 }
 
@@ -3451,7 +3704,7 @@ gsfSetParam(int handle, int index, char *val, gsfRecords *rec)
     gsfFileTable[handle-1].rec.process_parameters.param_size[index] = len;
     rec->process_parameters.param[index] = ptr;
     rec->process_parameters.param_size[index] = len;
-    strncpy(rec->process_parameters.param[index], val, len + 1);
+    strncpy(rec->process_parameters.param[index], val, len+1);
 
     return(0);
 }
@@ -3492,10 +3745,11 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     char            temp[256];
     char            temp2[64];
     int             ret;
+    int             number_parameters = 0;
 
     /* Load the text descriptor for the start of time epoch */
     sprintf(temp, "REFERENCE TIME=1970/001 00:00:00");
-    ret = gsfSetParam(handle, 0, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3510,7 +3764,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         sprintf(temp, "ROLL_COMPENSATED=NO ");
     }
-    ret = gsfSetParam(handle, 1, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3525,7 +3779,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         sprintf(temp, "PITCH_COMPENSATED=NO ");
     }
-    ret = gsfSetParam(handle, 2, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3540,7 +3794,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         sprintf(temp, "HEAVE_COMPENSATED=NO ");
     }
-    ret = gsfSetParam(handle, 3, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3555,7 +3809,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         sprintf(temp, "TIDE_COMPENSATED=NO ");
     }
-    ret = gsfSetParam(handle, 4, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3580,7 +3834,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         sprintf(temp, "DEPTH_CALCULATION=UNKNOWN");
     }
-    ret = gsfSetParam(handle, 5, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3597,7 +3851,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         sprintf(temp, "RAY_TRACING=NO");
     }
-    ret = gsfSetParam(handle, 6, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3634,7 +3888,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->to_apply.draft[1]);
         }
     }
-    ret = gsfSetParam(handle, 7, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3671,7 +3925,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->to_apply.pitch_bias[1]);
         }
     }
-    ret = gsfSetParam(handle, 8, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3708,7 +3962,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->to_apply.roll_bias[1]);
         }
     }
-    ret = gsfSetParam(handle, 9, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3745,7 +3999,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->to_apply.gyro_bias[1]);
         }
     }
-    ret = gsfSetParam(handle, 10, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3787,7 +4041,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
             p->to_apply.position_z_offset);
     }
     strcat(temp, temp2);
-    ret = gsfSetParam(handle, 11, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3902,10 +4156,158 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         }
         strcat(temp, temp2);
     }
-    ret = gsfSetParam(handle, 12, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
+    }
+
+    if (rec->process_parameters.number_parameters != 21)
+    {
+        /* The MRU_PITCH_TO_APPLY parameter is place holder for a motion
+         * sensor pitch bias value which is known but not yet applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->to_apply.mru_pitch_bias == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "MRU_PITCH_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "MRU_PITCH_TO_APPLY=%+06.2f",
+                p->to_apply.mru_pitch_bias);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+
+        /* The MRU_ROLL_TO_APPLY parameter is place holder for a motion
+         * sensor roll bias value which is known but not yet applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->to_apply.mru_roll_bias == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "MRU_ROLL_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "MRU_ROLL_TO_APPLY=%+06.2f",
+                p->to_apply.mru_roll_bias);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The MRU_HEADING_TO_APPLY parameter is place holder for a motion
+         * sensor heading bias value which is known but not yet applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->to_apply.mru_heading_bias == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "MRU_HEADING_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "MRU_HEADING_TO_APPLY=%+06.2f",
+                p->to_apply.mru_heading_bias);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The MRU_OFFSET_TO_APPLY parameter is place holder for a mru
+         *  offset which is known, but not yet applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        sprintf(temp, "MRU_OFFSET_TO_APPLY=");
+        if (p->to_apply.mru_x_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s,",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f,",
+                p->to_apply.mru_x_offset);
+        }
+        strcat(temp, temp2);
+        if (p->to_apply.mru_y_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s,", GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f,",
+                p->to_apply.mru_y_offset);
+        }
+        strcat(temp, temp2);
+        if (p->to_apply.mru_z_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s", GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f",
+                p->to_apply.mru_z_offset);
+        }
+        strcat(temp, temp2);
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The CENTER_OF_ROTATION_OFFSET_TO_APPLY parameter is place holder for a mru
+         *  offset which is known, but not yet applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        sprintf(temp, "CENTER_OF_ROTATION_OFFSET_TO_APPLY=");
+        if (p->to_apply.center_of_rotation_x_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s,",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f,",
+                p->to_apply.center_of_rotation_x_offset);
+        }
+        strcat(temp, temp2);
+        if (p->to_apply.center_of_rotation_y_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s,", GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f,",
+                p->to_apply.center_of_rotation_y_offset);
+        }
+        strcat(temp, temp2);
+        if (p->to_apply.center_of_rotation_z_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s", GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f",
+                p->to_apply.center_of_rotation_z_offset);
+        }
+        strcat(temp, temp2);
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
     }
 
     /* The APPLIED_DRAFT parameter defines the transducer draft value
@@ -3939,7 +4341,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->applied.draft[1]);
         }
     }
-    ret = gsfSetParam(handle, 13, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -3976,7 +4378,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->applied.pitch_bias[1]);
         }
     }
-    ret = gsfSetParam(handle, 14, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -4013,7 +4415,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->applied.roll_bias[1]);
         }
     }
-    ret = gsfSetParam(handle, 15, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -4050,7 +4452,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->applied.gyro_bias[1]);
         }
     }
-    ret = gsfSetParam(handle, 16, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -4094,7 +4496,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
             p->applied.position_z_offset);
     }
     strcat(temp, temp2);
-    ret = gsfSetParam(handle, 17, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -4211,10 +4613,160 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         }
         strcat(temp, temp2);
     }
-    ret = gsfSetParam(handle, 18, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
+    }
+
+    if (rec->process_parameters.number_parameters != 21)
+    {
+        /* The APPLIED_MRU_PITCH parameter defines the pitch bias previously
+         * applied to the data.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->applied.mru_pitch_bias == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_MRU_PITCH=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_MRU_PITCH=%+06.2f",
+                p->applied.mru_pitch_bias);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+
+        /* The APPLIED_MRU_ROLL parameter defines the roll bias previously
+         * applied to the data.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->applied.mru_roll_bias == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_MRU_ROLL=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_MRU_ROLL=%+06.2f",
+                p->applied.mru_roll_bias);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The APPLIED_MRU_HEADING parameter defines the heading bias previously
+         * applied to the data.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->applied.mru_heading_bias == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_MRU_HEADING=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_MRU_HEADING=%+06.2f",
+                p->applied.mru_heading_bias);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The APPLIED_MRU_OFFSET parameter defines the x,y,z offsets
+         * in ship coordinates to which have been used to calculate a heave
+         * difference between the motion sensor and the ship reference point.
+         */
+        memset(temp, 0, sizeof(temp));
+        sprintf(temp, "APPLIED_MRU_OFFSET=");
+        if (p->applied.mru_x_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s,",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f,",
+                p->applied.mru_x_offset);
+        }
+        strcat(temp, temp2);
+        if (p->applied.mru_y_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s,", GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f,",
+                p->applied.mru_y_offset);
+        }
+        strcat(temp, temp2);
+        if (p->applied.mru_z_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s", GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f",
+                p->applied.mru_z_offset);
+        }
+        strcat(temp, temp2);
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The APPLIED_CENTER_OF_ROTATION_OFFSET parameter defines the x,y,z offsets
+         * in ship coordinates to which have been used to calculate a heave
+         * difference between the motion sensor and the ship reference point.
+         */
+        memset(temp, 0, sizeof(temp));
+        sprintf(temp, "APPLIED_CENTER_OF_ROTATION_OFFSET=");
+        if (p->applied.center_of_rotation_x_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s,",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f,",
+                p->applied.center_of_rotation_x_offset);
+        }
+        strcat(temp, temp2);
+        if (p->applied.center_of_rotation_y_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s,", GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f,",
+                p->applied.center_of_rotation_y_offset);
+        }
+        strcat(temp, temp2);
+        if (p->applied.center_of_rotation_z_offset == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp2, "%s", GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp2, "%+06.2f",
+                p->applied.center_of_rotation_z_offset);
+        }
+        strcat(temp, temp2);
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
     }
 
     /* The horizontal datum parameter defines the elipsoid to which the
@@ -4231,7 +4783,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
             break;
 
     }
-    ret = gsfSetParam(handle, 19, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
@@ -4294,13 +4846,13 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
             sprintf(temp, "TIDAL_DATUM=UNKNOWN");
             break;
     }
-    ret = gsfSetParam(handle, 20, temp, rec);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
     {
         return(-1);
     }
 
-    rec->process_parameters.number_parameters = 21;
+    rec->process_parameters.number_parameters = number_parameters;
 
     return(0);
 }
@@ -4511,6 +5063,59 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.transducer_z_offset[1]);
             }
         }
+        else if (strstr(rec->process_parameters.param[i], "MRU_PITCH_TO_APPLY"))
+        {
+            p->to_apply.mru_pitch_bias = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "MRU_PITCH_TO_APPLY=%lf",
+                    &p->to_apply.mru_pitch_bias);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "MRU_ROLL_TO_APPLY"))
+        {
+            p->to_apply.mru_roll_bias = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "MRU_ROLL_TO_APPLY=%lf",
+                    &p->to_apply.mru_roll_bias);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "MRU_HEADING_TO_APPLY"))
+        {
+            p->to_apply.mru_heading_bias = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "MRU_HEADING_TO_APPLY=%lf",
+                    &p->to_apply.mru_heading_bias);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "MRU_OFFSET_TO_APPLY"))
+        {
+            p->to_apply.mru_x_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.mru_y_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.mru_z_offset = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "MRU_OFFSET_TO_APPLY=%lf,%lf,%lf",
+                    &p->to_apply.mru_x_offset,
+                    &p->to_apply.mru_y_offset,
+                    &p->to_apply.mru_z_offset);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "CENTER_OF_ROTATION_OFFSET_TO_APPLY"))
+        {
+            p->to_apply.center_of_rotation_x_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.center_of_rotation_y_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.center_of_rotation_z_offset = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "CENTER_OF_ROTATION_OFFSET_TO_APPLY=%lf,%lf,%lf",
+                    &p->to_apply.center_of_rotation_x_offset,
+                    &p->to_apply.center_of_rotation_y_offset,
+                    &p->to_apply.center_of_rotation_z_offset);
+            }
+        }
         else if (strstr(rec->process_parameters.param[i], "APPLIED_DRAFT"))
         {
             p->applied.draft[0] = GSF_UNKNOWN_PARAM_VALUE;
@@ -4600,6 +5205,59 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.transducer_x_offset[1],
                     &p->applied.transducer_y_offset[1],
                     &p->applied.transducer_z_offset[1]);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "APPLIED_MRU_PITCH"))
+        {
+            p->applied.mru_pitch_bias = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_MRU_PITCH=%lf",
+                    &p->applied.mru_pitch_bias);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "APPLIED_MRU_ROLL"))
+        {
+            p->applied.mru_roll_bias = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_MRU_ROLL=%lf",
+                    &p->applied.mru_roll_bias);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "APPLIED_MRU_HEADING"))
+        {
+            p->applied.mru_heading_bias = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_MRU_HEADING=%lf",
+                    &p->applied.mru_heading_bias);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "APPLIED_MRU_OFFSET"))
+        {
+            p->applied.mru_x_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->applied.mru_y_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->applied.mru_z_offset = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_MRU_OFFSET=%lf,%lf,%lf",
+                    &p->applied.mru_x_offset,
+                    &p->applied.mru_y_offset,
+                    &p->applied.mru_z_offset);
+            }
+        }
+        else if (strstr(rec->process_parameters.param[i], "APPLIED_CENTER_OF_ROTATION_OFFSET"))
+        {
+            p->applied.center_of_rotation_x_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->applied.center_of_rotation_y_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->applied.center_of_rotation_z_offset = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_CENTER_OF_ROTATION_OFFSET=%lf,%lf,%lf",
+                    &p->applied.center_of_rotation_x_offset,
+                    &p->applied.center_of_rotation_y_offset,
+                    &p->applied.center_of_rotation_z_offset);
             }
         }
         /* The horizontal datum parameter defines the elipsoid to which
@@ -4873,6 +5531,7 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
         case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
             *fore_aft = 1.5;
             *athwartship = 1.5;
             if (data->mb_ping.sensor_data.gsfEM3Specific.run_time[0].transmit_beam_width != 0.0)
@@ -4885,7 +5544,17 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             }
             break;
 
-        default:
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC):
+            *fore_aft = data->mb_ping.sensor_data.gsfReson8100Specific.fore_aft_bw;
+            *athwartship = data->mb_ping.sensor_data.gsfReson8100Specific.athwart_bw;
+            break;
+
+         default:
             gsfError = GSF_UNRECOGNIZED_SENSOR_ID;
             ret = -1;
             break;

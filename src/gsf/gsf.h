@@ -89,12 +89,26 @@
  * bac 10-24-00  Updated gsfEM3RunTime structure to include data fields from updated
  *               EM series runtime parameter datagram.  Also added an additional check
  *               for the LINUX define of timespec.
- * bac 07-18-01  Made modifications for use with C++ code.  The typedef for each sensor specific
- *               structure has been modified to have a different name than the element of the
- *               SensorSpecific union.  Also removed the useage of C++ reserved words "class"
- *               and "operator".  These modifications will potentially require some changes
- *               to application code.
- * jsb 01-16-02  Added support for Simrad EM120, and reserved sub-record IDs for latest Reson family.
+ * bac 07-18-01  Added a sensor specific subrecord for the Reson 8100 series of sonars.  Also
+ *               made modifications for use with C++ code.  The typedef for each sensor specific
+ *               structure has been modfied to have a different name than the element of the SensorSpecific
+ *               union.  Also removed the useage of C++ reserved words "class" and "operator".  These
+ *               modifications will potentially require some changes to application code.
+ * bac 10-12-01  Added a new attitude record definition.  The attitude record provides a method for
+ *               logging full time-series attitude measurements in the GSF file, instead of attitude
+ *               samples only at ping time.  Each attitude record contains arrays of attitude
+ *               measurements for time, roll, pitch, heave and heading.  The number of measurements
+ *               is user-definable, but because of the way in which measurement times are stored, a
+ *               single attitude record should never contain more than sixty seconds worth of
+ *               data.
+ * bac 11-09-01  Added motion sensor offsets to the gsfMBOffsets structure.  Added support for these
+ *               new offsets in the gsfPutMBParams and gsfGetMBParams functions, so these offsets are
+ *               encoded in the process_parameters record.
+ * jsb 01-16-02  Added support for Simrad EM120.
+ * bac 06-19-03  Added support for bathymetric receive beam time series intensity data (i.e., Simrad
+ *               "Seabed image" and Reson "snippets").  Inlcluded RWL updates of 12-19-02 for adding
+ *               sensor-specific singlebeam information to the MB sensor specific subrecords.
+ *
  *
  * Classification : Unclassified
  *
@@ -130,10 +144,10 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v02.00"
+#define GSF_VERSION       "GSF-v02.02"
 
 /* Define largest ever expected record size */
-#define GSF_MAX_RECORD_SIZE    32768
+#define GSF_MAX_RECORD_SIZE    262144
 
 /* Define the maximum number of files which may be open at once */
 #define GSF_MAX_OPEN_FILES     4
@@ -196,11 +210,12 @@ gsfDataID;
 #define GSF_RECORD_SWATH_BATHY_SUMMARY                      (unsigned)9
 #define GSF_RECORD_SINGLE_BEAM_PING                         (unsigned)10
 #define GSF_RECORD_HV_NAVIGATION_ERROR                      (unsigned)11 /* This record replaces GSF_RECORD_NAVIGATION_ERROR */
+#define GSF_RECORD_ATTITUDE                                 (unsigned)12
 
 /* Number of currently defined record data types (including 0 which is used
  *  in the indexing for ping records which contain scale factor subrecords).
  */
-#define             NUM_REC_TYPES  12
+#define             NUM_REC_TYPES  13
 
 /* Put a ceiling on the maximum number of swath bathymetry ping array
  * subrecords allowed in a gsf file.  This define dimensions the scale
@@ -232,6 +247,7 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY     (unsigned)18
 #define GSF_SWATH_BATHY_SUBRECORD_VERTICAL_ERROR_ARRAY         (unsigned)19 /* This record replaces DEPTH_ERROR_ARRAY */
 #define GSF_SWATH_BATHY_SUBRECORD_HORIZONTAL_ERROR_ARRAY       (unsigned)20 /* This record replaces ACROSS_TRACK_ERROR_ARRAY and ALONG_TRACK_ERROR_ARRAY */
+#define GSF_SWATH_BATHY_SUBRECORD_INTENSITY_SERIES_ARRAY       (unsigned)21
 
 /* Define the additional swath bathymetry subrecords, to which the scale
  * factors do not apply.
@@ -258,13 +274,19 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC           (unsigned)119
 #define GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC            (unsigned)120
 #define GSF_SWATH_BATHY_SUBRECORD_CMP_SASS_SPECIFIC         (unsigned)121
-#define GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC       (unsigned)122  /* Reserved for future use - 8101 */
-#define GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC       (unsigned)123  /* Reserved for future use - 8111 */
-#define GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC       (unsigned)124  /* Reserved for future use - 8124 */
-#define GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC       (unsigned)125  /* Reserved for future use - 8125 */
-#define GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC       (unsigned)126  /* Reserved for future use - 8150 */
-#define GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC       (unsigned)127  /* Reserved for future use - 8160 */
+#define GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC       (unsigned)122
+#define GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC       (unsigned)123
+#define GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC       (unsigned)124
+#define GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC       (unsigned)125
+#define GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC       (unsigned)126
+#define GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC       (unsigned)127
 #define GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC            (unsigned)128
+#define GSF_SWATH_BATHY_SB_SUBRECORD_ECHOTRAC_SPECIFIC      (unsigned)271
+#define GSF_SWATH_BATHY_SB_SUBRECORD_BATHY2000_SPECIFIC     (unsigned)272
+#define GSF_SWATH_BATHY_SB_SUBRECORD_MGD77_SPECIFIC         (unsigned)273
+#define GSF_SWATH_BATHY_SB_SUBRECORD_BDB_SPECIFIC           (unsigned)274
+#define GSF_SWATH_BATHY_SB_SUBRECORD_NOSHDB_SPECIFIC        (unsigned)275
+#define GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC           (unsigned)276
 
 #define GSF_SINGLE_BEAM_SUBRECORD_UNKNOWN                   (unsigned)  0
 #define GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC         (unsigned)201
@@ -319,6 +341,21 @@ gsfDataID;
         time_t          tv_sec;
         long            tv_nsec;
     };
+
+/* define Posix.4 proposed structure for internal storage of time */
+/*#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined))
+#define _STRUCT_TIMESPEC_
+#define _TIMESPEC_T
+#define _STRUCT_TIMESPEC
+#define _SYS_TIMESPEC_H
+#define __timespec_defined
+    struct timespec
+    {
+        time_t          tv_sec;
+        long            tv_nsec;
+    };
+#endif
+*/
 
 /* Define a structure for the gsf header record */
 #define GSF_VERSION_SIZE 12
@@ -630,6 +667,107 @@ typedef struct t_gsfEM3Specific
 }
 t_gsfEM3Specific;
 
+/* Define the Reson 8100 specific data structure */
+typedef struct t_gsfReson8100Specific
+{
+    int             latency;                /* time from ping to output (milliseconds) */
+    int             ping_number;            /* 4 byte ping number */
+    int             sonar_id;               /* least significant 4 bytes of ethernet address */
+    int             sonar_model;            /*  */
+    int             frequency;              /* KHz */
+    double          surface_velocity;       /* meters/second */
+    int             sample_rate;            /* A/D samples per second */
+    int             ping_rate;              /* pings per second * 1000 */
+    int             mode;                   /* bit mapped, see macros below */
+    int             range;                  /* meters */
+    int             power;                  /* 0-8 + status bits */
+    int             gain;                   /* 1-45 + status bits */
+    int             pulse_width;            /* in microseconds */
+    int             tvg_spreading;          /* tvg spreading coefficient * 4 */
+    int             tvg_absorption;         /* tvg absorption coefficient */
+    double          fore_aft_bw;            /* fore/aft beam width in degrees */
+    double          athwart_bw;             /* athwartships beam width in degrees */
+    int             projector_type;         /* projector type */
+    int             projector_angle;        /* projector pitch steering angle (degrees * 100) */
+    double          range_filt_min;         /* range filter, minimum value, meters */
+    double          range_filt_max;         /* range filter, maximum value, meters */
+    double          depth_filt_min;         /* depth filter, minimum value, meters */
+    double          depth_filt_max;         /* depth filter, maximum value, meters */
+    int             filters_active;         /* bit 0 - range filter, bit 1 - depth filter */
+    int             temperature;            /* temperature at sonar head (deg C * 10) */
+    char            spare[8];               /* Eight bytes of spare space, for future use */
+}
+t_gsfReson8100Specific;
+
+/* Macro definitions for the SeaBat8100Specific mode field */
+#define GSF_8100_WIDE_MODE         0x01   /* set if transmit on receiver */
+#define GSF_8100_TWO_HEADS         0x02   /* set if two sonar heads */
+#define GSF_8100_STBD_HEAD         0x04   /* set if starboard ping (seabat head 2) */
+#define GSF_8100_AMPLITUDE         0x08   /* set if beam amplitude is available (RITHETA packet) */
+#define GSF_8100_PITCH_STAB        0x10   /* set if pitch stabilized */
+#define GSF_8100_ROLL_STAB         0x20   /* set if roll stabilized */
+
+/* Define the Echotrac Single-Beam sensor specific data structure. */
+
+#define GSF_SB_MPP_SOURCE_UNKNOWN               0x00 /* Unknown MPP source */
+#define GSF_SB_MPP_SOURCE_GPS_3S                0x01 /* GPS 3S */
+#define GSF_SB_MPP_SOURCE_GPS_TASMAN    0x02 /* GPS Tasman */
+#define GSF_SB_MPP_SOURCE_DGPS_TRIMBLE  0x03 /* DGPS Trimble */
+#define GSF_SB_MPP_SOURCE_DGPS_TASMAN   0x04 /* DGPS Tasman */
+#define GSF_SB_MPP_SOURCE_DGPS_MAG      0x05 /* DGPS MagMPPox */
+#define GSF_SB_MPP_SOURCE_RANGE_MFIX    0x06 /* Range/Azimauth - Microfix */
+#define GSF_SB_MPP_SOURCE_RANGE_TRIS    0x07 /* Range/Azimauth - Trisponder */
+#define GSF_SB_MPP_SOURCE_RANGE_OTHER   0x08 /* Range/Azimauth - Other */
+
+typedef struct t_gsfSBEchotracSpecific
+{
+    int             navigation_error;
+    unsigned short  mpp_source;     /* Flag To determine mpp source - See above */
+    unsigned short  tide_source;    /* in GSF Version 2.02+ this is in ping flags */
+    double          dynamic_draft;  /* speed induced draft im meters */
+    char            spare[4];       /* four bytes of reserved space */
+
+}
+t_gsfSBEchotracSpecific;
+
+/* Define the MGD77 Single-Beam sensor specific data structure. */
+typedef struct t_gsfSBMGD77Specific
+{
+    unsigned short  time_zone_corr;
+    unsigned short  position_type_code;
+    unsigned short  correction_code;
+    unsigned short  bathy_type_code;
+    unsigned short  quality_code;
+    double          travel_time;
+    char            spare[4];                  /* four bytes of reserved space */
+}
+t_gsfSBMGD77Specific;
+
+/* Define the BDB sensor specific data structure */
+typedef struct t_gsfSBBDBSpecific
+{
+    int   doc_no;         /* Document number (5 digits) */
+    char  eval;           /* Evaluation (1-best, 4-worst) */
+    char  classification; /* Classification ((U)nclass, (C)onfidential,
+                                             (S)ecret, (P)roprietary/Unclass,
+                                             (Q)Proprietary/Class) */
+    char  track_adj_flag; /* Track Adjustment Flag (Y,N) */
+    char  source_flag;    /* Source Flag ((S)urvey, (R)andom, (O)cean Survey) */
+    char  pt_or_track_ln; /* Discrete Point (D) or Track Line (T) Flag */
+    char  datum_flag;     /* Datum Flag ((W)GS84, (D)atumless) */
+    char  spare[4];       /* four bytes of reserved space */
+}
+t_gsfSBBDBSpecific;
+
+/* Define the NOS HDB sensor specific data structure */
+typedef struct t_gsfSBNOSHDBSpecific
+{
+    unsigned short  type_code;    /*  Depth type code  */
+    unsigned short  carto_code;   /*  Cartographic code  */
+    char            spare[4];     /* four bytes of reserved space */
+}
+t_gsfSBNOSHDBSpecific;
+
 /* Define a union of the known sensor specific ping subrecords */
 typedef union t_gsfSensorSpecific
 {
@@ -656,6 +794,15 @@ typedef union t_gsfSensorSpecific
     t_gsfSeaBeam2112Specific  gsfSeaBeam2112Specific;
     t_gsfElacMkIISpecific     gsfElacMkIISpecific;
     t_gsfEM3Specific          gsfEM3Specific;          /* used for EM120, EM300, EM1002, EM3000 */
+    t_gsfReson8100Specific    gsfReson8100Specific;
+
+        /* Single beam sensors added */
+    t_gsfSBEchotracSpecific   gsfSBEchotracSpecific;
+    t_gsfSBEchotracSpecific   gsfSBBathy2000Specific;
+    t_gsfSBMGD77Specific      gsfSBMGD77Specific;
+    t_gsfSBBDBSpecific        gsfSBBDBSpecific;
+    t_gsfSBNOSHDBSpecific     gsfSBNOSHDBSpecific;
+    t_gsfSBEchotracSpecific   gsfSBPDDSpecific;
 } gsfSensorSpecific;
 
 /* Define the Echotrac Single-Beam sensor specific data structure. */
@@ -777,47 +924,92 @@ typedef struct t_gsfScaleFactors
     gsfScaleInfo    scaleTable[GSF_MAX_PING_ARRAY_SUBRECORDS];
 } gsfScaleFactors;
 
+typedef struct t_gsfEM3ImagerySpecific
+{
+    unsigned short range_norm;          /* range to normal incidence used to correct sample amplitudes (in samples) */
+    unsigned short start_tvg_ramp;      /* start range sample of TVG ramp if not enough dynamic range (0 else) */
+    unsigned short stop_tvg_ramp;       /* stop range sample of TVG ramp if not enough dynamic range (0 else) */
+    char           bsn;                 /* normal incidence BS in dB */
+    char           bso;                 /* oblique BS in dB */
+    double         mean_absorption;     /* mean absorption coeffiecien in dB/km, resolution of 0.01 dB/km) */
+    unsigned char  spare[8];            /* spare sensor specific subrecord space, reserved for future expansion */
+} t_gsfEM3ImagerySpecific;
+
+typedef struct t_gsfReson8100ImagerySpecific
+{
+    unsigned char  spare[8];            /* spare sensor specific subrecord space, reserved for future expansion */
+} t_gsfReson8100ImagerySpecific;
+
+typedef union t_gsfSensorImagery
+{
+    t_gsfEM3ImagerySpecific         gsfEM3ImagerySpecific;          /* used for EM120, EM300, EM1002, EM3000 */
+    t_gsfReson8100ImagerySpecific   gsfReson8100ImagerySpecific;    /* For Reson 81P "snippet" imagery */
+} gsfSensorImagery;
+
+typedef struct gsfTimeSeriesIntensity
+{
+    unsigned short sample_count;       /* number of amplitude samples ber beam */
+    unsigned short detect_sample;      /* index of bottom detection sample for the beam */
+    unsigned char  spare[8];           /* for future use */
+    unsigned long *samples;            /* Array of per-beam time series intensity samples  */
+} gsfTimeSeriesIntensity;
+
+#define GSF_INTENSITY_LINEAR     (unsigned)0x01
+#define GSF_INTENSITY_CALIBRATED (unsigned)0x02
+#define GSF_INTENSITY_POWER      (unsigned)0x04
+#define GSF_INTENSITY_GAIN       (unsigned)0x08
+
+typedef struct t_gsfBRBIntensity
+{
+    unsigned char           bits_per_sample;       /* bits per intensity sample */
+    unsigned long           applied_corrections;   /* flags to describe corrections applied to intensity values */
+    unsigned char           spare[16];             /* spare header space */
+    gsfSensorImagery        sensor_imagery;        /* sensor specific per-ping imagery information */
+    gsfTimeSeriesIntensity *time_series;           /* array of per-beam time series intenstites records */
+} gsfBRBIntensity;
+
 /* Define the data structure for a ping from a swath bathymetric system */
 typedef struct t_gsfSwathBathyPing
 {
-    struct gsfTimespec ping_time;          /* seconds and nanoseconds */
-    double          latitude;           /* in degrees */
-    double          longitude;          /* in degrees */
-    short           number_beams;       /* in this ping */
-    short           center_beam;        /* offset into array (0 = portmost outer) */
-    unsigned short  ping_flags;         /* flags to mark status of this ping */
-    short           reserved;           /* for future use */
-    double          tide_corrector;     /* in meters */
-    double          depth_corrector;    /* in meters */
-    double          heading;            /* in degrees */
-    double          pitch;              /* in degrees */
-    double          roll;               /* in degrees */
-    double          heave;              /* in meters    */
-    double          course;             /* in degrees */
-    double          speed;              /* in knots */
-    gsfScaleFactors scaleFactors;       /* The array scale factors for this data */
-    double         *depth;              /* depth array (meters) */
-    double         *nominal_depth;      /* Array of depth relative to 1500 m/s */
-    double         *across_track;       /* across track array (meters) */
-    double         *along_track;        /* along track array (meters) */
-    double         *travel_time;        /* roundtrip travel time array (seconds) */
-    double         *beam_angle;         /* beam angle array (degrees from vertical) */
-    double         *mc_amplitude;       /* mean, calibrated beam amplitude array (dB re 1V/micro pascal at 1 meter) */
-    double         *mr_amplitude;       /* mean, relative beam amplitude array (dB re 1V/micro pascal at 1 meter) */
-    double         *echo_width;         /* echo width array (seconds) */
-    double         *quality_factor;     /* quality factor array (dimensionless) */
-    double         *receive_heave;      /* Array of heave data (meters) */
-    double         *depth_error;        /* Array of estimated vertical error (meters) */
-    double         *across_track_error; /* Array of estimated across track error (meters) */
-    double         *along_track_error;  /* Array of estimated along track error (meters) */
-    unsigned char  *quality_flags;      /* Two bit beam detection flags provided by Reson sonar */
-    unsigned char  *beam_flags;         /* Array of beam status flags */
-    double         *signal_to_noise;    /* signal to noise ratio (dB) */
-    double         *beam_angle_forward; /* beam angle forward array (degrees counterclockwise from stbd.) */
-    double         *vertical_error;     /* Array of estimated vertical error (meters, at 95% confidence) */
-    double         *horizontal_error;   /* Array of estimated horizontal error (meters, at 95% confidence) */
-    int             sensor_id;          /* a definition which specifies the sensor */
-    gsfSensorSpecific sensor_data;      /* union of known sensor specific data */
+    struct gsfTimespec    ping_time;          /* seconds and nanoseconds */
+    double             latitude;           /* in degrees */
+    double             longitude;          /* in degrees */
+    short              number_beams;       /* in this ping */
+    short              center_beam;        /* offset into array (0 = portmost outer) */
+    unsigned short     ping_flags;         /* flags to mark status of this ping */
+    short              reserved;           /* for future use */
+    double             tide_corrector;     /* in meters */
+    double             depth_corrector;    /* in meters */
+    double             heading;            /* in degrees */
+    double             pitch;              /* in degrees */
+    double             roll;               /* in degrees */
+    double             heave;              /* in meters    */
+    double             course;             /* in degrees */
+    double             speed;              /* in knots */
+    gsfScaleFactors    scaleFactors;       /* The array scale factors for this data */
+    double            *depth;              /* depth array (meters) */
+    double            *nominal_depth;      /* Array of depth relative to 1500 m/s */
+    double            *across_track;       /* across track array (meters) */
+    double            *along_track;        /* along track array (meters) */
+    double            *travel_time;        /* roundtrip travel time array (seconds) */
+    double            *beam_angle;         /* beam angle array (degrees from vertical) */
+    double            *mc_amplitude;       /* mean, calibrated beam amplitude array (dB re 1V/micro pascal at 1 meter) */
+    double            *mr_amplitude;       /* mean, relative beam amplitude array (dB re 1V/micro pascal at 1 meter) */
+    double            *echo_width;         /* echo width array (seconds) */
+    double            *quality_factor;     /* quality factor array (dimensionless) */
+    double            *receive_heave;      /* Array of heave data (meters) */
+    double            *depth_error;        /* Array of estimated vertical error (meters) */
+    double            *across_track_error; /* Array of estimated across track error (meters) */
+    double            *along_track_error;  /* Array of estimated along track error (meters) */
+    unsigned char     *quality_flags;      /* Two bit beam detection flags provided by Reson sonar */
+    unsigned char     *beam_flags;         /* Array of beam status flags */
+    double            *signal_to_noise;    /* signal to noise ratio (dB) */
+    double            *beam_angle_forward; /* beam angle forward array (degrees counterclockwise from stbd.) */
+    double            *vertical_error;     /* Array of estimated vertical error (meters, at 95% confidence) */
+    double            *horizontal_error;   /* Array of estimated horizontal error (meters, at 95% confidence) */
+    int                sensor_id;          /* a definition which specifies the sensor */
+    gsfSensorSpecific  sensor_data;        /* union of known sensor specific data */
+    gsfBRBIntensity   *brb_inten;          /* Structure containing bathymetric receive beam time series intensities */
 }
 gsfSwathBathyPing;
 
@@ -937,6 +1129,18 @@ gsfHVNavigationError;
 #define GSF_POS_TYPE_SPSK "SPSK"               /* Standard positioning service - kinematic */
 #define GSF_POS_TYPE_SPSS "SPSS"               /* Standard positioning service - standalone */
 
+/* Define the data structure for a ping from a swath bathymetric system */
+typedef struct t_gsfAttitude
+{
+    short            num_measurements;      /* number of attitude measurements in this record */
+    struct gsfTimespec *attitude_time;         /* seconds and nanoseconds */
+    double          *pitch;                 /* in degrees */
+    double          *roll;                  /* in degrees */
+    double          *heave;                 /* in meters */
+    double          *heading;               /* in degrees */
+}
+gsfAttitude;
+
 /* Define a structure to encapsulate the known gsf records, this
  * simplifies the number of arguments to gsfRead, and gsfWrite.
  */
@@ -953,6 +1157,7 @@ typedef struct t_gsfRecords
     gsfHistory              history;
     gsfNavigationError      nav_error;
     gsfHVNavigationError    hv_nav_error;
+    gsfAttitude             attitude;
 } gsfRecords;
 
 /* Define a data structure to hold offsets needed to correct multibeam
@@ -981,6 +1186,15 @@ typedef struct t_gsfMBOffsets
     double           transducer_x_offset[GSF_MAX_OFFSETS];   /* meters */
     double           transducer_y_offset[GSF_MAX_OFFSETS];   /* meters */
     double           transducer_z_offset[GSF_MAX_OFFSETS];   /* meters */
+    double           mru_roll_bias;                          /* degrees */
+    double           mru_pitch_bias;                         /* degrees */
+    double           mru_heading_bias;                       /* degrees */
+    double           mru_x_offset;                           /* meters */
+    double           mru_y_offset;                           /* meters */
+    double           mru_z_offset;                           /* meters */
+    double           center_of_rotation_x_offset;            /* meters */
+    double           center_of_rotation_y_offset;            /* meters */
+    double           center_of_rotation_z_offset;            /* meters */
 } gsfMBOffsets;
 
 /* Define a data structure to hold multibeam sonar processing parameters */
@@ -1146,6 +1360,8 @@ typedef struct t_gsfMBParams
 #define GSF_SINGLE_BEAM_ENCODE_FAILED            -46
 #define GSF_HV_NAV_ERROR_RECORD_ENCODE_FAILED    -47
 #define GSF_HV_NAV_ERROR_RECORD_DECODE_FAILED    -48
+#define GSF_ATTITUDE_RECORD_ENCODE_FAILED        -49
+#define GSF_ATTITUDE_RECORD_DECODE_FAILED        -50
 
 
 /* The following are the function protoytpes for all functions intended

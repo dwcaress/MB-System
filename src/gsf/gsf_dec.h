@@ -9,8 +9,8 @@
  * Restrictions/Limitations :
  *
  * Change Descriptions :
- * who	when	  what
- * ---	----	  ----
+ * who  when      what
+ * ---  ----      ----
  * hem  08/20/96  Added gsfDecodeSinglebeam.
  * jsb  09/28/98  Added gsfDecodeHVNavigationError.
  *
@@ -39,5 +39,6 @@
    int OPTLK gsfDecodeNavigationError(gsfNavigationError *nav_error, unsigned char *sptr);
    int OPTLK gsfDecodeHVNavigationError(gsfHVNavigationError *hv_nav_error, GSF_FILE_TABLE *ft, unsigned char *sptr);
    int OPTLK gsfDecodeSinglebeam(gsfSingleBeamPing * ping, unsigned char *sptr, GSF_FILE_TABLE *ft, int handle, int record_size);
+   int OPTLK gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, unsigned char *sptr);
 
 #endif

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdinfo.perl	4/26/01
-#    $Id: mbm_grdinfo.perl,v 1.2 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_grdinfo.perl,v 1.3 2003-07-02 18:12:33 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -40,10 +40,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward coast of Oahu)
 ##
 # Version:
-#   $Id: mbm_grdinfo.perl,v 1.2 2003-04-17 20:42:48 caress Exp $
+#   $Id: mbm_grdinfo.perl,v 1.3 2003-07-02 18:12:33 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 1.2  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 1.1  2001/06/03 06:59:24  caress
 #   Initial revision
 #
@@ -103,6 +106,11 @@ elsif (! -r $file_input)
 	print "\a";
 	die "\nSpecified input file $file_data cannot be opened!\n$program_name aborted\n";
 	}
+
+# Save old GMT default double format and set new format
+$line = `gmtdefaults -L | grep D_FORMAT`;
+($dformatsave) = $line =~ /D_FORMAT\s+=\s+(\S+)/;
+`gmtset D_FORMAT %.15lg`;
 
 # get limits of file using grdinfo
 if ($bounds)
@@ -170,6 +178,12 @@ if ($bounds)
 		@grdcut = `mbm_grdcut -I$file_input -O$file_grd -R$xmin/$xmax/$ymin/$ymax -V`;
 		@grdinfo = `grdinfo $file_grd`;
 		@rminfo = `rm -f $file_grd`;
+		
+		# if it doesn't work just grdinfo the whole file
+		if (!@grdinfo)
+			{
+			@grdinfo = `grdinfo $file_input`;
+			}
 		}
 	else
 		{
@@ -188,6 +202,9 @@ while (@grdinfo)
 	$line = shift @grdinfo;
 	print $line;
 	}
+
+# reset the GMT default double format
+`gmtset D_FORMAT $dformatsave`;
 
 exit 0;
 

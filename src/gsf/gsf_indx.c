@@ -48,6 +48,15 @@
  *                 This change made in support of CRs: 98-001, and 98-002.
  * jsb  04/05/00  Updated for consistent use of swap field to ensure that index
  *                 files are portable between big and little endian machines.
+ * bac  10-12-01  Added a new attitude record definition.  The attitude record
+ *                 provides a method for logging full time-series attitude
+ *                 measurements in the GSF file, instead of attitude samples
+ *                 only at ping time.  Each attitude record contains arrays of
+ *                 attitude measurements for time, roll, pitch, heave and heading.
+ *                 The number of measurements is user-definable, but because of
+ *                 the way in which measurement times are stored, a single attitude
+ *                 record should never contain more than sixty seconds worth of
+ *                 data.
  * jsb  01/15/02  Update for Windows.
  *
  *
@@ -255,6 +264,20 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
             return(-1);
         }
         return(0);
+    }
+    else if (index_header.gsfFileSize > ft->file_size)
+    {
+        /* if the indexed file size is greater than the current gsf file
+         *  size, then the file has gotten smaller and the index file is
+         *  invalid.  delete it and create it again.  bac, 05-06-03
+         */
+         remove (ndx_file);
+         ret = gsfCreateIndexFile(ndx_file, handle, ft);
+         if (ret)
+         {
+             return(-1);
+         }
+         return(0);
     }
 
     /* If we get here, then the index file that exists is ready to use. */
@@ -681,6 +704,27 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
                     index_rec.sec = records.hv_nav_error.nav_error_time.tv_sec;
                     index_rec.nsec = records.hv_nav_error.nav_error_time.tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
+
+                    break;
+
+                case GSF_RECORD_ATTITUDE:
+
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
+
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
+
+                    /*  Load the index record structure and write to the
+                        temp file.  */
+
+                    index_rec.sec = records.attitude.attitude_time[0].tv_sec;
+                    index_rec.nsec = records.attitude.attitude_time[0].tv_nsec;
                     fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
                     ft->index_data.number_of_records[id]++;
 
@@ -1323,6 +1367,27 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
                     break;
 
+                case GSF_RECORD_ATTITUDE:
+
+                    /*  If this is the first record of this type open the
+                        temp file and increment the number of types.    */
+
+                    if (temp[id] == NULL)
+                    {
+                        temp[id] = open_temp_file(id);
+                        index_header.number_record_types++;
+                    }
+
+                    /*  Load the index record structure and write to the
+                        temp file.  */
+
+                    index_rec.sec = records.attitude.attitude_time[0].tv_sec;
+                    index_rec.nsec = records.attitude.attitude_time[0].tv_nsec;
+                    fwrite(&index_rec, sizeof(INDEX_REC), 1, temp[id]);
+                    ft->index_data.number_of_records[id]++;
+
+                    break;
+
                 default:
 
                     fprintf(stderr, "Unknown record ID %d\n", id);
@@ -1565,17 +1630,21 @@ open_temp_file(int type)
     memset (&dir, 0, sizeof (dir));
 
 #if defined(OS2) || defined(WIN32)
-    if (getenv ("GSFTMPDIR") == NULL)
+    if ( (getenv ("TEMP") == NULL) && (getenv ("GSFTMPDIR") == NULL) )
         strcpy (dir, "\\tmp");
-    else
+    else if (getenv ("GSFTMPDIR") != NULL)
         strcpy (dir, getenv ("GSFTMPDIR"));
+    else
+        strcpy (dir, getenv ("TEMP"));
 
     sprintf(file, "%s\\%05d%02d.ndx", dir, _getpid(), type);
 #else
-    if (getenv ("GSFTMPDIR") == NULL)
+    if ( (getenv ("TEMP") == NULL) && (getenv ("GSFTMPDIR") == NULL) )
         strcpy (dir, "/tmp");
-    else
+    else if (getenv ("GSFTMPDIR") != NULL)
         strcpy (dir, getenv ("GSFTMPDIR"));
+    else
+        strcpy (dir, getenv ("TEMP"));
 
     sprintf(file, "%s/%05d%02d.ndx", dir, getpid(), type);
 #endif

@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA31 README FILE:
+MB-SYSTEM VERSION 5.0.0 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta31 release of the MB-System software package for 
+5.0.0 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -25,6 +25,10 @@ editing navigation, modeling bathymetry calculation, and
 adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
+-----------------------------------------
+Version 5.0.0          July 5, 2003
+
+MB-SYSTEM VERSION 5 BETA RELEASE DATES:
 -----------------------------------------
 Version 5.0.beta31     April 29, 2003
 Version 5.0.beta30     April 25, 2003
@@ -114,544 +118,8 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
-MB-SYSTEM VERSION 5.0.BETA31 RELEASE NOTES:
 
-The version 5.0.beta31 release of MB-System includes
-one significant bug fix:
-  - A conflict due to multiple definitions of a variable 
-    called "error" in src/mbaux/mb_surface.c
-    has been fixed.
-
-MB-SYSTEM VERSION 5.0.BETA30 RELEASE NOTES:
-
-The version 5.0.beta30 release of MB-System includes
-some significant bug fixes and new features:
-  - An option (-K) has been added to mbgrid that underlays
-    bathymetry/topography grids with global or regional datasets
-    accessed through the GMT program grdraster.
-  - This -K option has also been added to the macro mbm_grid.
-  - The interpolation capability of mbgrid has been made
-    more flexible. Now the -C option has two parameters
-    (-Cclip/mode). If mode=1 (the default) the interpolation
-    is used to fill data gaps of two times clip cells or
-    less. If mode=2 the interpolation is used to fill all 
-    undefined cells within clip cells of swath data. The latter
-    option tends to add a band of interpolation around the
-    edges of a survey. If clip is greater than both of the
-    grid dimensions, or mode = 3, then the interpolation will
-    fill all undefined cells in the grid.
-  - Added ability to drape imagery over the bathymetry in
-    mbm_grd2geovrml.
-  - A bug has been fixed in mbprocess in which the program
-    bus faulted at mb_rt_init() when it was processing 
-    multiple files and a file not being raytraced followed
-    one that was being raytraced.
-  - Memory management bugs have been fixed in mbgrid.
-  - The SURF format i/o module has been improved, including
-    now handling SVP information (Thanks to Reinhard Holtkamp
-    of the New Zealand Defence Force).
-  - A set of problems in the format 56 and 57 i/o modules
-    relating to handling of secondary navigation has been
-    fixed (Thanks to Rolf Arne Ueland of Blom Maritime in 
-    Norway).
-  - The mbm_utm macro now saves and restores GMT environment
-    parameters so that it will work for users who use metric
-    page size units.
-  - A new program called mbareaclean has been added. 
-    MBareaclean identifies and flags artifacts in 
-    swath sonar bathymetry data within a specified 
-    area of interest. The input data are one swath 
-    file or a datalist referencing multiple swath files. 
-    An area is specified in longitude and latitude 
-    bounds, along with a bin size in meters. The area 
-    is divided into a grid with square cells of the 
-    specified bin size. As the data are read, each of
-    the soundings that fall within one of the bins is 
-    stored. Once all of data are read, one or more 
-    statistical tests are performed on the soundings
-    within each bin, providing there are a sufficient 
-    number of soundings. The edit events are output 
-    to edit save files which can be applied to the 
-    data by the program mbprocess.
-  - Features have been added to mbprocess and mbsvplist
-    to handle SVPs that have a nonzero first depth. Now
-    mbprocess will automatically add a depth & sound speed
-    pair with zero depth if needed, and mbsvplist has
-    an option (-Z) that forces it to output SVPs with
-    zero first depths.
-  - A bug has been fixed in the i/o module for current
-    Simrad multibeam data that failed to insert negative 
-    sonar depth values correctly.
-
-MB-SYSTEM VERSION 5.0.BETA29 RELEASE NOTES:
-
-The version 5.0.beta29 release of MB-System includes
-some significant bug fixes and new features:
-  - An error in the i/o module for the HSDS2RAW format have 
-    been fixed. This problem prevented the code from compiling
-    successfully with gcc on many platforms.
-  - The new HMRG MR1 format is supported as format 64. This
-    allows support of recent and future data from the MR-1,
-    from other HMRG sonars, and from the WHOI DSL 120 sonar..
-  - A new macro named mbm_copy has been added for translating 
-    groups of files between formats.
-
-MB-SYSTEM VERSION 5.0.BETA28 RELEASE NOTES:
-
-The version 5.0.beta28 release of MB-System includes
-some significant bug fixes:
-  - Errors in the i/o module for the HYPC8101 format (Coastal 
-    Oceanographics HYPACK multibeam data format) have been
-    fixed. Previously sonar position offsets and transducer 
-    depth values were misscaled.
-  - The i/o module for the MSTIFFSS format (Marine Sonic  
-    Technology MSTIFF sidescan data format) has been updated
-    to support data from the current Marine Sonic sonars.
-  - The lever arm correction code used by mbprocess and by 
-    some i/o modules has been corrected and isolated in a
-    function called mb_lever() in the mbio/mb_angle.c source
-    file.
-
-MB-SYSTEM VERSION 5.0.BETA27 RELEASE NOTES:
-
-The version 5.0.beta27 release of MB-System includes
-some significant bug fixes:
-  - A function mb_memory_clear() has been added to explicitly 
-    clear all memory allocated using mb_malloc() and mb_realloc(). 
-    This is now used in mbgrid and mbmosaic to release all 
-    allocated memory when exiting due to an error.
-  - Memory allocated for projections in mbgrid and mbmosaic is
-    now deallocated properly.
-  - The program mbgrdtiff can now generate proper GeoTIFF images
-    in projected coordinate systems, as well as in geographic
-    coordinates. These can be directly imported into ArcView, 
-    ArcGIS, GRASS, and other GIS software.
-  - The availability of projected coordinate systems to mbgrid
-    and mbmosaic has now been documented in the respective manual
-    pages.
-
-MB-SYSTEM VERSION 5.0.BETA26 RELEASE NOTES:
-
-The version 5.0.beta26 release of MB-System includes
-one significant bug fix:
-  - Fixed a memory leak associated the use of projected
-    coordinates in mbgrid and mbmosaic.
-
-MB-SYSTEM VERSION 5.0.BETA25 RELEASE NOTES:
-
-The version 5.0.beta25 release of MB-System includes
-one significant bug fix:
-  - A problem with the SeaBeam Classic formats (11-16)
-    that caused core dumps in mbgrid has been fixed.
-
-MB-SYSTEM VERSION 5.0.BETA24 RELEASE NOTES:
-
-The version 5.0.beta24 release of MB-System includes
-some significant bug fixes:
-  - MB-System programs will now operate properly when
-    the HOME environment variable is not set.
-  - The program mbprocess now properly applies the 
-    angle mode specified in the parameter file when
-    calculating bathymetry by raytracing.
-  - The old DSL120 formats (111 and 112) work properly
-    once again.
-  - Some problems with the application of the lonflip
-    parameter have been fixed.
-
-MB-SYSTEM VERSION 5.0.BETA23 RELEASE NOTES:
-
-The version 5.0.beta23 release of MB-System includes
-some significant new features and bug fixes:
-  - MB-System is now set to support arbitrary projected
-    coordinate systems. In addition to the PROJ4 library
-    that appeared in 5.0.beta22, MB-System now includes
-    a list of dozens of common projected coordinate
-    systems (e.g. UTM) in the file 
-         mbsystem/share/Projections.dat
-    This file specifies projections using the same
-    syntax as in PROJ4 initialization files. The projections
-    specified so far include UTM for all zones using both
-    the WGS84 and the WGS72 ellipsoid, all state plane 
-    projections in both the NAD83 and NAD27 datums, and
-    over 1400 global projection systems defined by the
-    EPSG.
-  - Grids and mosaics produced by mbgrid and mbmosaic
-    may be registered in any of the projected coordinate 
-    systems specified in Projections.dat. The mechanism
-    for producing projected grids is to use 
-         -J Projection
-    where Projection is one of the projection id tags in
-    the Projections.dat file. For example, if one wants
-    to produce a grid in UTM eastings and northings in 
-    northern hemisphere zone 15, the command -JUTM15N
-    will work.
-  - A very crude mechanism for inverse projecting navigation
-    in swath files has been implemented. The issue is 
-    that some swath files have navigation in projected
-    eastings and northings, but MB-System only works with 
-    "real" navigation (longitude and latitude). In order
-    to automatically apply an inverse projection to the
-    navigation of a swath file named "mydata.mb131" as it 
-    is read, place a file named "mydata.mb131.prj" in the
-    same directory. This text file should contain only one 
-    line with the relevant projection id tag (e.g. UTM15N).
-    This approach will be augmented and perhaps replaced
-    by command line arguments to some or all MB-System
-    programs.
-  - The NGDC binary hydrographic sounding format 
-    (binary HYDRO93) is now supported as format 164.
-  - The behavior of the optional spline interpolation
-    in mbgrid and mbmosaic has changed. The interpolation
-    now is applied only to cells within data gaps, that
-    is, in locations with data on two sides withing the
-    clipping distance. Cells are no longer interpolated
-    (extrapolated really) around the edges of surveys.
-  - A problem with the Simrad multibeam i/o modules
-    that caused occasional segmentation faults when
-    compiled with gcc has been fixed.
-  - A problem that caused segmentation faults in
-    mbedit has been fixed.
-
-MB-SYSTEM VERSION 5.0.BETA22 RELEASE NOTES:
-
-The version 5.0.beta22 release of MB-System includes
-some significant new features and fixes:
-  - The program mbedit can now show time series style
-    plots of a variety of parameters to the left of
-    the primary bathymetry profile plot. The values
-    that can be displayed in this vertical wiggle
-    plot are:
-         Ping Interval
-         Longitude
-         Latitude
-         Heading
-         Speed
-         Center Beam Depth
-         Sonar Altitude
-         Sonar Depth
-         Roll
-         Pitch
-         Heave
-  - The programs mbgrid and mbmosaic can now produce
-    grids and mosaics in UTM eastings and northings.
-  - The code from Gerald Evenden's PROJ library is now
-    embedded in MB-System. This will in principle allow
-    mbgrid and mbmosaic to generate outputs in a wide
-    variety of projected coordinate systems.
-  - The mbm_grdplot macro now handles UTM grids produced
-    using mbgrid and mbmosaic.
-  - Some minor bugs with mbvelocitytool have been fixed.
-  - The i/o module for MGD77 data has been altered to 
-    handle data in a not-quite-standard form generated
-    at L-DEO.
-
-MB-SYSTEM VERSION 5.0.BETA21 RELEASE NOTES:
-
-The version 5.0.beta21 release of MB-System includes
-some significant new features and fixes:
-  - The program mbbackangle has been altered to produce
-    multiple tables of amplitude vs. grazing angle for
-    sidescan or amplitude spaced at regular intervals
-    in the data. These tables are output to a single
-    file named using the swath filename plus a ".sga"
-    (sidescan) or ".aga" (amplitude). The program
-    mbprocess can correct the sidescan and/or amplitude
-    data by interpolating the amplitude vs. grazing 
-    function for each ping. The parameter file is altered
-    to enable sidescan or amplitude correction using
-    the ".sga" or ".aga" file.
-  - The old program mbbackangle used in the serial 
-    processing model has been renamed mbbackangleold.
-  - The behavior of grid weights in datalists has changed.
-    Previously the first grid weight encountered had
-    precedence over weights encountered further down the
-    datalist tree. Now, the default behavior is for local
-    grid weights to take precedence. This default behavior
-    may be overridden by placing a $NOLOCALWEIGHT tag in an
-    upper datalist. For all files and datalists encountered
-    recursively below the tag, the first grid weight defined
-    will be reported.
-  - A bug in mbm_plot was fixed. Previously, default lonflip 
-    settings other than 0 would cause plotting failure for 
-    data outside the implied longitude bounds.
-
-MB-SYSTEM VERSION 5.0.BETA20 RELEASE NOTES:
-
-The version 5.0.beta20 release of MB-System includes
-some significant new features and fixes:
-  - Addition of read-only support for the Atlas
-    SURF data format (id 181). The ability to
-    write data read in SURF format will be added
-    later (perhaps directly to SURF format, perhaps
-    to another format).
-  - The code for the SURF library is now part of
-    the MB-System release.
-  - The code for the PROJ library for geographic
-    projections is now part of the MB-System release.
-  - Sidescan correction for amplitude vs grazing 
-    angle has been added to mbprocess.
-  - The program mbbackangle now generates ".sga"
-    files containing multiple tables of amplitude
-    vs grazing angle for sidescan data. These files
-    are used by mbprocess.
-  - The old mbbackangle is now mbbackangleold.
-
-MB-SYSTEM VERSION 5.0.BETA18 RELEASE NOTES:
-
-The version 5.0.beta18 release of MB-System includes
-some significant new features and fixes:
-  - Addition of support for the French IFREMER
-    MBB data format (id: 75). This is the current
-    IFREMER multibeam archive format.
-  - Fix for handling old Simrad multibeam data 
-    (format 51). For eight years we have been 
-    using the highest bit in the depth values 
-    of old Simrad vendor format data for beam
-    flagging. We have now been provided with a
-    data sample in which the original depth values
-    use that bit. Consequently, beam flagging is
-    no longer supported in format 51 (EM100, EM1000,
-    EM12 vendor format) data. Instead, beams
-    flagged using mbedit or mbclean will be nulled.
-    We recommend that any format 51 data be
-    translated to the processing format 57 using
-    mbcopy before editing or other processing is
-    done.
-  - MBinfo now has an option (-N) that will cause 
-    it to generate "notices" in addition to the
-    usual statistics. These notices include counts
-    for all data record types in a file, counts of
-    all nonfatal error messages generated reading 
-    the file, and counts of data problems (e.g.
-    obviously bad navigation or depth values)
-    found in a file.
-  - MB-System now allows identification and use of
-    secondary navigation channels. Sometimes data
-    loggers record more than one navigation stream,
-    with one designated as the active or primary
-    navigation. Normally all secondary navigation 
-    channels are ignored. However, the -N option of
-    mbinfo will now show when these navigation records
-    (MB_DATA_NAV1, MB_DATA_NAV2, and/or MB_DATA_NAV3) 
-    are present. MBnavlist can now be set to read from
-    and output navigation from secondary channels using
-    its -Nchannel option.
-  - A variety of small fixes to the datalist parsing
-    functions.
-
-MB-SYSTEM VERSION 5.0.BETA16 RELEASE NOTES:
-
-The version 5.0.beta16 release of MB-System includes
-some significant new fixes and features:
-  - Addition of "fast bathymetry" or "fbt" files
-    to those generated by mbdatalist and mbprocess.
-    If an "fbt" files exists, then mbgrid, 
-    mbswath, and mbcontour will read it in lieu
-    of the more voluminous and slow full data 
-    files. This speeds gridding and mapmaking in
-    the context of the overall mbprocess system.
-  - Addition of "fast navigation" or "fnv" files
-    to those generated by mbdatalist and mbprocess.
-    If an "fnv" files exists, then mbcontour
-    will read it in lieu of the more voluminous 
-    and slow full data files. This speeds the 
-    generation of trackplots in the context of 
-    the overall mbprocess system.
-  - Real support for tide corrections using mbset
-    and mbprocess.
-  - Static beam bathymetry corrections using
-    mbprocess.
-  - MBvelocitytool can now export bathymetry
-    residuals as static bathymetry corrections
-    applied by mbprocess. This allows one to
-    correct bathymetry for certain classes of
-    persistent artifacts.
-  - MBvelocitytool will now attempt to estimate
-    travel times and angles for bathymetry data
-    that does not include travel times and 
-    angles. This allows bad SVP artifacts in
-    bathymetry without travel times to be modeled
-    as bathymetry residuals, which in turn 
-    can be applied to the bathymetry as static
-    corrections using mbprocess.
-  - Once again a fix for handling of SeaBeam 
-    2120 multibeam data in the xse format.
-    Maybe this time the sidescan will really
-    stay the right way around!!
-
-MB-SYSTEM VERSION 5.0.BETA15 RELEASE NOTES:
-
-The version 5.0.beta15 release of MB-System includes
-fixes to handling of SeaBeam 2120 data in the XSE
-format 94 (the acrosstrack distance was flipped) and 
-to the handling of Hydrosweep DS data in the URI
-formats 23 and 25. The manual page for the MBIO 
-library has finally been updated as well. The defining
-and selection of tie points in mbnavadjust has been
-made easier.
-
-MB-SYSTEM VERSION 5.0.BETA14 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta14 release of MB-System includes 
-fixes to handling of format 33 data (SeaBeam 2000
-sidescan). Some format 33 files contain junk between
-valid records, and the i/o module has to gracefully
-skip the useless bytes. This release also contains
-fixes to handling of comment records for a number
-of data formats, particularly old SeaBeam Classic
-formats.
-
-MB-SYSTEM VERSION 5.0.BETA12 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta12 release of MB-System includes 
-additional fixes to the i/o module handling SeaBeam 2120 
-and ELAC Bottomchart MkII data in the XSE format.
-
-MB-SYSTEM VERSION 5.0.BETA11 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta11 release of MB-System includes 
-a new feature in mbprocess allowing a traveltime bias
-problem in early Hydrosweep DS2 data to be fixed. This
-correction is enabled using the KLUGE001 command. 
-Version 5.0.beta11 also includes fixes to the i/o
-module handling SeaBeam 2120 and ELAC Bottomchart MkII
-data in the XSE format.
-
-MB-SYSTEM VERSION 5.0.BETA10 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta10 release of MB-System includes 
-new features for mbedit and mbset, fixes to mbprocess,
-mbvelocitytool, and mbinfo, and changes to the
-handling of default control parameters. 
-
-The interactive bathymetry editor mbedit now includes 
-an "info" mode that allows users to access timetag 
-and navigation information about selected soundings. 
-
-The program mbset, used to modify or create mbprocess 
-parameter files, will now accept datalists as input. 
-
-Prior to this release, the MB-System defaults set by
-mbdefaults included the format id, a control for ping
-averaging, longitude and latitude bounds for windowing by
-area, and begin and end times for windowing in time. These
-values are no longer set in the .mbio_defaults file or
-controlled by mbdefaults. In MB-System 5.0 the format id is
-automatically identified from the filename when possible.
-When filenames do not match one of the recognized
-structures, users must specify the format using the relevant
-programs -Fformat option.  The controls for ping averaging
-and windowing in time and space are rarely used, and must
-now be explicitly set in command line arguments.
-
-This release also includes significant bug fixes:
-  - Handling of datalists in mbprocess
-  - Specifying input swath files from the command
-    line in mbvelocitytool
-  - Using the -C option in mbinfo to print out both
-    metadata tags and comments.
-
-MB-SYSTEM VERSION 5.0.BETA09 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta09 release of MB-System includes 
-fixes to the handling of bathymetry recalculation
-by mbprocess. Earlier problems failed to document
-or implement the angle handling modes used in
-mbvelocitytool. The ANGLEMODE parameter can now
-be set with mbset or mbvelocitytool, and will be
-used by mbprocess.
-
-MB-SYSTEM VERSION 5.0.BETA08 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta08 release of MB-System includes 
-major fixes to the creation and handling of mbprocess
-parameter files. Earlier versions set full or absolute
-output file paths in the parameter files. The
-consequence was that both processing and datalist
-parsing could be broken if data files were moved.
-All of the relevant programs now set and use relative
-pathnames. Also, an option has been provided in
-mbset to correct existing parameter files (see the
--L option in the mbset manual page).
-
-MB-SYSTEM VERSION 5.0.BETA07 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta07 release of MB-System includes 
-a number of small fixes related to processing of
-EM120 data from the R/V Revelle.
-
-MB-SYSTEM VERSION 5.0.BETA06 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta06 release of MB-System includes 
-fixes to problems with the support for Elac Bottomchart
-sonars in the XSE format (format 94) and SeaBeam 2100
-sonars. Two new automatic filters have been added to
-mbedit (flagging within specified ranges of beam numbers
-or acrosstrack distances). Data cutting capability has
-also been added to mbprocess, with parameter control
-through mbset.
-
-MB-SYSTEM VERSION 5.0.BETA04 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta04 release of MB-System includes 
-one fix of a bug introduced into mbvelocitytool by
-5.0.beta03 (the number of records read reported by the
-program were incorrect). 
-
-MB-SYSTEM VERSION 5.0.BETA03 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta03 release of MB-System includes 
-bug fixes and incremental improvements relative to
-the 5.0.beta01 release. In particular:
-    - We now support reading of raw STN Atlas Hydrosweep DS2
-      multibeam data as format 182. We also support processing
-      of Hydrosweep DS2 data with format 183. These two
-      i/o modules provide initial support for the upgraded
-      multibeam on the R/V Maurice Ewing.
-    - The program mbprocess now works with datalists. It
-      descend through recursive datalists, processing only
-      data files found to be out of date relative to the
-      processing control files.
-    - The programs mbedit and mbnavedit now behave properly
-      when an input file is specified on the command line.
-    - Many minor problems with the code that produced compiler
-      warnings were identified and fixed.
-
-There is a known major bug in this release:
-    - The program mbvelocitytool exits with a segment fault
-      when shutting down after processing data in format 94.
-
-MB-SYSTEM VERSION 5.0.BETA01 RELEASE NOTES:
-------------------------------------------
-
-The version 5.0.beta01 release of MB-System includes 
-bug fixes and incremental improvements relative to
-the 5.0.beta00 release. In particular, the i/o modules
-for data formats 56 (Simrad multibeam vendor format),
-57 (Simrad multibeam processing format), and 94
-(L3 Communications XSE vendor format for Elac Bottomchart
-and SeaBeam multibeam sonars) contain important bug
-fixes. Some additional features have been added to
-mbprocess and mbset, including:
-    - Insertion of formal metadata into processed files.
-    - Application of time lag during navigation merging.
-    - Application of lever arm correction to heave
-      during recalculation of bathymetry (we are
-      still testing this feature).
-    - More flexible translation of bathymetry from
-      "corrected" to "uncorrected" and vice versa.
-
-MB-SYSTEM VERSION 5.0.BETA00 RELEASE NOTES:
+MB-SYSTEM VERSION 5.0.0 RELEASE NOTES:
 ------------------------------------------
 
 The version 5.0 release of MB-System includes a number of
@@ -702,6 +170,65 @@ New tools.
 - mbset. 
     This new tool allows users to create and modify the
     parameter files used to control the operation of mbprocess.
+- mbdatalist. 
+    This new tool allows users to list the files referenced by 
+    a recursive datalist structure. It can also be used to create 
+    the ancillary ".inf", ".fbt", and ".fnv" files for all of the 
+    data files referenced in a recursive datalist structure. 
+- mbsvplist. 
+    This new tool lists water sound velocity profiles embedded in 
+    swath data files, creating secondary files that  can be read 
+    into MBvelocitytool.
+- mbareaclean. 
+    This new tool identifies and flags artifacts in swath sonar 
+    bathymetry data within a specified area of interest. The area 
+    is divided into a grid with square cells or bins, and the 
+    data are grouped according to these bins. Once all of  data  
+    are read, statistical tests are applied  to the soundings 
+    within each bin.
+
+Improved bathymetry and navigation editors.
+- MBedit and MBnavedit now swallow data files whole rather than 
+    reading in limited size buffers.
+- MBedit now outputs beam edit events rather than an entire swath 
+    file. The edits are applied by MBprocess.
+- MBnavedit now outputs the edited navigation rather than an entire 
+    swath file. The edited navigation is merged using MBprocess.
+- Both editors show the position of the currently displayed data 
+    within the entire data file.
+- MBnavedit has two navigation modeling modes relevant to swath 
+    data collected using poorly navigated ROVs and towfishes. One 
+    mode applies a dead reckoning model with interactively set drifts, 
+    and the other involves inverting for an optimally smooth 
+    navigation by penalizing speed and acceleration.
+ 
+Support for Projected Coordinate Systems
+- MB-System now incorporates the source code for the PROJ.4 
+    Cartographic Projections library, providing support for 
+   (apparently) all commonly used geodetic coordinate systems.  
+    PROJ.4 was developed by Gerald Evenden (then of the USGS), 
+    and was obtained from the www.remotesensing.org website.
+- A large number of commonly used projected coordinate systems 
+    (e.g. UTM) are defined in a file (mbsystem/share/projections.dat) 
+    distributed with MB-System. These include all of the standard 
+    UTM zones, all of the standard state plate coordinate systems, 
+    and most of the European Petroleum Survey Group (EPSG) 
+    coordinate systems (also including UTM).
+- MB-System can now handle swath data that is navigated in a supported 
+    projected coordinate system. In particular, data files that are 
+    navigated with UTM eastings and northings instead of longitude and  
+    latitude can now be plotted and processed with MB-System.
+- The programs mbgrid and mbmosaic can now output grids and mosaics 
+    in any of the projected coordinate systems specified in 
+    mbsystem/share/projections.dat.
+- The TIFF  images generated with mbm_grdtiff and mbgrdtiff 
+    now fully conform to the GeoTIFF standard, providing that the 
+    source grids or mosaics were generated using mbgrid or mbmosaic  
+    in either Geographic coordinates, UTM coordinates, or any of the 
+    EPSG coordinate systems specified in the projections.dat file. 
+    This means, for instance, that GeoTIFF images generated  with 
+    mbgrdtiff will be properly georeferenced when they are 
+    imported into ESRI ArcGIS or other GIS packages.
 
 Restructuring the code.
 - All of the C code now conforms to the ANSI C standard.
@@ -726,6 +253,45 @@ Handling of old Simrad multibeam data.
     both bathymetry beam flags and processed sidescan. Format 57
     is also used for processing data from the current Simrad
     multibeam sonars.
+
+Streamlining of MB-System Default Parameters.
+- Prior to version 5.0, the MB-System defaults set by mbdefaults 
+    included the format id, a control for ping averaging, 
+    longitude and latitude bounds for windowing by area, and 
+    begin and end times for windowing in time. These values are 
+    no longer set in the .mbio_defaults file or controlled by 
+    mbdefaults. As noted above, the format id is automatically 
+    identified from the filename when possible. When filenames 
+    do not match one of the recognized structures, users must 
+    specify the format using the relevant programs -Fformat option. 
+    The controls for ping averaging and windowing in time and 
+    space are rarely used, and must now be explicitly set in 
+    command line arguments.
+
+New Data Formats
+- Furuno HS10 multibeam bathymetry is supported as format 171.
+- SeaBeam 2120 multibeam data in the L3 Communications XSE format 
+    are supported as format 94 (already used to support Elac 
+    Bottomchart MkII XSE data).
+- Raw STN Atlas multibeam data generated by the upgraded 
+    Hydrosweep DS2 multibeam on the R/V Ewing are supported by 
+    read-only format 182. Processing is supported using the 
+    augmented read-write format 183.
+- The IFREMER netCDF multibeam archiving data format is supported 
+    as format 75. Similarly, the IFREMER netCDF navigation  
+    archiving data format is supported as format 167.
+- The STN Atlas processing data format SURF is supported as 
+    format 181. At present, SURF is supported as a read-only 
+    format. This allows plotting and gridding of the SURF data, 
+    but not processing. Writing or translating the SURF data to 
+    allow processing will be supported in a later version. 
+- The Hawaii Mapping Research Group's new MR1 format is supported 
+    as format 64. This format is used to disseminate data from 
+    both the HMRG interferometric sonars (e.g. MR1) and the 
+    WHOI DSL 120 deep-towed inteferometric sonar. This format has 
+    been supported by including the code for the HMRG library 
+    libmr1pr in the MB-System library. Thanks to Roger Davis and 
+    HMRG for making the code available under the GPL.
 
 -------------------------------------------
 THE NEW VERSION 5 DATA PROCESSING STRUCTURE
@@ -1022,7 +588,7 @@ The important parameters to be set in install_makefiles are:
      BYTESWAPPED - If set to "YES" will enable byte swapping of input and output binary
      data. Otherwise byte swapping is disabled. Byte swapping needs to be enabled when
      installing on "little endian" machines such as PCs or VAXs. 
-     CC - C compiler to be used (optional). 
+     CC - C compiler to be used (usually either cc or gcc) 
      CFLAGS - Compile flags for C source files. 
      LFLAGS - Load flags for all object files. 
      GRAPHICAL - If set to "YES" will enable the installation of the Motif based graphical
@@ -1138,10 +704,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.36 2003-04-29 20:31:08 caress Exp $
+RCS ID: $Id: README,v 5.37 2003-07-02 18:10:47 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.36  2003/04/29 20:31:08  caress
+Release 5.0.beta31
+
 Revision 5.35  2003/04/25 23:18:57  caress
 Release 5.0.beta30
 
