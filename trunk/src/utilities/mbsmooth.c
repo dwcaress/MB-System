@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.12 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbsmooth.c,v 4.13 1997-10-03 18:59:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.11  1997/07/25  14:28:10  caress
  * Version 4.5beta2
  *
@@ -150,7 +153,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.12 1997-09-15 19:11:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.13 1997-10-03 18:59:04 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \
@@ -749,45 +752,5 @@ smooth out noise in multibeam \nbathymetry data.";
 
 	/* end it all */
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-/* 	function sort sorts the data.  
- *	Uses the shell method from Numerical Recipes.
- */
-#define ALN2I 1.442695022
-#define TINY 1.0e-5
-int sort(n,r)
-int	n;
-int *r;
-{
-	int	status = MB_SUCCESS;
-	int	nn, m, j, i, lognb2;
-	int	tr;
-
-	if (n <= 0) 
-		{
-		status = MB_FAILURE;
-		return(status);
-		}
-
-	lognb2 = (log((double) n)*ALN2I + TINY);
-	m = n;
-	for (nn=1;nn<=lognb2;nn++)
-		{
-		m >>= 1;
-		for (j=m+1;j<=n;j++)
-			{
-			i = j - m;
-			tr = r[j];
-			while (i >= 1 && r[i] > tr)
-				{
-				r[i+m] = r[i];
-				i -= m;
-				}
-			r[i+m] = tr;
-			}
-		}
-
-	return(status);
 }
 /*--------------------------------------------------------------------*/
