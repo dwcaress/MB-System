@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.15 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbmosaic.c,v 5.16 2003-12-12 01:39:06 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.14  2002/11/14 03:52:25  caress
  * Release 5.0.beta27
  *
@@ -160,7 +163,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.15 2003-04-17 21:18:57 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.16 2003-12-12 01:39:06 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -533,8 +536,11 @@ main (int argc, char **argv)
 			errflg++;
 		}
 
-	/* set output stream to stderr */
-	outfp = stderr;
+	/* set output stream to stdout or stderr */
+	if (verbose >= 2)
+	    outfp = stderr;
+	else
+	    outfp = stdout;
 
 	/* if error flagged then print it and exit */
 	if (errflg)
