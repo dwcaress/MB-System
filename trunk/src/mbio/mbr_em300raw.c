@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 4.0 1998-12-17 22:59:14 caress Exp $
+ *	$Id: mbr_em300raw.c,v 4.1 1999-01-01 23:41:06 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/12/17  22:59:14  caress
+ * MB-System version 4.6beta4
+ *
  *
  *
  */
@@ -53,7 +56,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 4.0 1998-12-17 22:59:14 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 4.1 1999-01-01 23:41:06 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -862,7 +865,8 @@ int	*error;
 		   sidescan then zero sidescan,  if sidescan
 		   newer than bath then set error,  if ok then
 		   check that beam ids are the same */
-		if (bath_time_d > ss_time_d)
+		if (data->png_ss_date == 0
+			|| bath_time_d > ss_time_d)
 		    {
 		    status = mbr_zero_ss_em300raw(verbose,mb_io_ptr->raw_data,error);
 		    }
@@ -2367,7 +2371,7 @@ int	*error;
 	int	read_len;
 	int	i;
 	
-/*#define MBR_EM300RAW_DEBUG 1*/
+/* #define MBR_EM300RAW_DEBUG 1 */
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2608,7 +2612,7 @@ int	*error;
 	fprintf(stderr,"call mbr_em300raw_rd_heading type %x\n",*type);
 #endif
 			status = mbr_em300raw_rd_heading(
-				5,mbfp,data,*sonar,error);
+				verbose,mbfp,data,*sonar,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -2683,15 +2687,16 @@ int	*error;
 				}
 			}
 		else if (*type == EM2_BATH 
-			&& expect != EM2_NONE 
-			&& expect != EM2_BATH)
+			&& expect == EM2_SS)
 			{
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
 #endif
 			done = MB_YES;
 			expect = EM2_NONE;
+			*type = first_type;
 			*label_save_flag = MB_YES;
+			data->kind = MB_DATA_DATA;
 			}
 		else if (*type == EM2_BATH)
 			{
@@ -2715,17 +2720,6 @@ int	*error;
 					expect = EM2_NONE;
 					}
 				}
-			}
-		else if (*type == EM2_SS 
-			&& expect != EM2_NONE 
-			&& expect != EM2_SS)
-			{
-#ifdef MBR_EM300RAW_DEBUG
-	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
-#endif
-			done = MB_YES;
-			expect = EM2_NONE;
-			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM2_SS)
 			{

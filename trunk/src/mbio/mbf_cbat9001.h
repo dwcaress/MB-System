@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_cbat9001.h	8/21/94
- *	$Id: mbf_cbat9001.h,v 4.2 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbf_cbat9001.h,v 4.3 1999-01-01 23:41:06 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 21, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1998/10/05 17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.1  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -37,27 +40,60 @@
  */
 /*
  * Notes on the MBF_CBAT9001 data format:
- *   1. Reson multibeam systems output binary data telegrams.
- *   2. Reson SeaBat 9001 systems output both bathymetry
+ *   1. Reson SeaBat products are high frequency, 
+ *      shallow water multibeam sonars.
+ *      Reson SeaBat 9001 systems output both bathymetry
  *      and amplitude information for 60 beams.
- *   3. Each telegram is preceded by a two byte start code and
+ *      Reson SeaBat 8101 systems output both bathymetry
+ *      and amplitude information for up to 128 beams.
+ *      These sonars use fixed, analog beamforming followed
+ *      by a combination of amplitude and phase bottom
+ *      detection.
+ *   2. Reson multibeam systems output raw range and amplitude
+ *      data in a binary format. The data acquisition systems 
+ *      associated with the sonars calculate bathymetry using 
+ *      a water sound velocity, roll, pitch, and heave data.
+ *   3. Generally, Reson data acquisition systems record 
+ *      navigation asynchronously in the data stream, without
+ *      providing speed information. This means that the
+ *      navigation must be interpolated on the fly as the
+ *      data is read.
+ *   4. The navigation is frequently provided in projected
+ *      coordinates (eastings and northings) rather than in
+ *      longitude and latitude. Since MB-System operates solely
+ *      in longitude and latitude, the original navigation must
+ *      be unprojected.
+ *   5. The Reson data formats supported by MB-System include:
+ *        MBF_CBAT9001 - a binary format designed by John Hughes Clarke
+ *           of the University of New Brunswick. Parameter and
+ *           sound velocity profile records are included.
+ *        MBF_CBAT8101 - a clone of the above format supporting
+ *           Reson 8101 data.
+ *        MBF_HYPC8101 - the ASCII format used by the HYPACK system
+ *           of Coastal Oceanographics in conjunction with
+ *           Reson 8101 data. This format is supported as read-only 
+ *           by MB-System.
+ *        MBF_GSFGENMB - the generic sensor format of SAIC which
+ *           supports data from a large number of sonars, including
+ *           Reson sonars. MB-System handles GSF separately from
+ *           other formats.
+ *   6. For the UNB-style formats MBF_CBAT9001 and MBF_CBAT8101, 
+ *      each data telegram is preceded by a two byte start code and
  *      followed by a three byte end code consisting of 0x03
  *      followed by two bytes representing the checksum for
  *      the data bytes.  MB-System does not calculate checksums
  *      and puts 0's in the checksum bytes.
- *   4. The relevent telegram start codes, types, and sizes are:
- *         0x0240: Comment (Defined only for MB-System)   200 data bytes
+ *      The relevent telegram start codes, types, and sizes are:
+ *         0x0240: Comment***                             200 data bytes
  *         0x0241: Position                                36 data bytes
  *         0x0242: Parameter                               44 data bytes
  *         0x0243: Sound velocity profile                2016 data bytes
  *         0x0244: SeaBat 9001 bathymetry                 752 data bytes
- *   5. Reson systems record navigation fixes using the position 
- *      telegram; navigation is not always included in the per ping data.
- *      Since speed is not recorded, it is impossible to extrapolate
- *      position from the last navigation fix when processing the
- *      data serially, as MBIO does.  It may thus be necessary to extract
- *      the navigation from the position telegrams and remerge it with
- *      the ping telegrams using the program mbmerge.
+ *         0x0245: Short sound velocity profile           816 data bytes
+ *         0x0246: SeaBat 8101 bathymetry***             1244 data bytes
+ *         0x0247: Heading***                             752 data bytes
+ *         0x0248: Attitude***                            752 data bytes
+ *            *** Defined only for MB-System
  *
  */
 

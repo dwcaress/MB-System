@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_ping.c	2/3/93
- *    $Id: mb_read_ping.c,v 4.15 1998-12-17 23:01:15 caress Exp $
+ *    $Id: mb_read_ping.c,v 4.16 1999-01-01 23:41:06 caress Exp $
 
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1998/12/17  23:01:15  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.14  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -113,7 +116,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_read_ping.c,v 4.15 1998-12-17 23:01:15 caress Exp $";
+  static char rcs_id[]="$Id: mb_read_ping.c,v 4.16 1999-01-01 23:41:06 caress Exp $";
 	char	*function_name = "mb_read_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -247,6 +250,14 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_CBAT9001)
 		{
 		status = mbr_rt_cbat9001(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_CBAT8101)
+		{
+		status = mbr_rt_cbat8101(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_HYPC8101)
+		{
+		status = mbr_rt_hypc8101(verbose,mbio_ptr,store_ptr,error);
 		}
 	else if (mb_io_ptr->format == MBF_BCHRTUNB)
 		{

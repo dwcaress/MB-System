@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.13 1998-12-17 22:56:15 caress Exp $
+#	$Id: Makefile.template,v 4.14 1999-01-01 23:41:06 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.13  1998/12/17  22:56:15  caress
+# MB-System version 4.6beta4
+#
 # Revision 4.12  1998/10/05  17:46:15  caress
 # MB-System version 4.6beta
 #
@@ -100,6 +103,7 @@ all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mbf_mr1prhig.h $(INCDIR)/mbf_mr1aldeo.h \
 	$(INCDIR)/mbf_mr1bldeo.h \
 	$(INCDIR)/mbf_mbldeoih.h $(INCDIR)/mbf_cbat9001.h \
+	$(INCDIR)/mbf_cbat8101.h $(INCDIR)/mbf_hypc8101.h \
 	$(INCDIR)/mbf_bchrtunb.h $(INCDIR)/mbf_elmk2unb.h \
 	$(INCDIR)/mbf_bchrxunb.h $(INCDIR)/mbf_sbsioswb.h \
 	$(INCDIR)/mbf_sb2000sb.h $(INCDIR)/mbf_sb2000ss.h \
@@ -119,7 +123,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
 		mb_mem_init.o mb_mem_deall.o mb_mem.o \
 		mb_coor_scale.o mb_check_info.o \
-		mb_time.o mb_get_value.o mb_defaults.o \
+		mb_time.o mb_angle.o \
+		mb_get_value.o mb_defaults.o \
 		mb_get.o mb_put.o mb_put_comment.o \
 		mb_get_all.o mb_put_all.o \
 		mb_read.o mb_write.o mb_buffer.o \
@@ -147,6 +152,7 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mbr_mr1prhig.o mbr_mr1aldeo.o \
 		mbr_mr1bldeo.o \
 		mbr_mbldeoih.o mbr_cbat9001.o \
+		mbr_cbat8101.o mbr_hypc8101.o \
 		mbr_bchrtunb.o mbr_elmk2unb.o \
 		mbr_bchrxunb.o mbr_sbsioswb.o \
 		mbr_sb2000sb.o mbr_sb2000ss.o \
@@ -159,7 +165,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
 		mb_mem_init.o mb_mem_deall.o mb_mem.o \
 		mb_coor_scale.o mb_check_info.o\
-		mb_time.o mb_get_value.o mb_defaults.o \
+		mb_time.o mb_angle.o \
+		mb_get_value.o mb_defaults.o \
 		mb_get.o mb_put.o mb_put_comment.o \
 		mb_get_all.o mb_put_all.o \
 		mb_read.o mb_write.o mb_buffer.o \
@@ -186,6 +193,7 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mbr_mr1prhig.o mbr_mr1aldeo.o \
 		mbr_mr1bldeo.o \
 		mbr_mbldeoih.o mbr_cbat9001.o \
+		mbr_cbat8101.o mbr_hypc8101.o \
 		mbr_bchrtunb.o mbr_elmk2unb.o \
 		mbr_bchrxunb.o mbr_sbsioswb.o \
 		mbr_sb2000sb.o mbr_sb2000ss.o \
@@ -223,6 +231,8 @@ mb_check_info.o:	mb_check_info.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_check_info.c
 mb_time.o:	mb_time.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_time.c
+mb_angle.o:	mb_angle.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_angle.c
 mb_get_value.o:	mb_get_value.c
 	$(CC) -c $(CFLAGS) mb_get_value.c
 mb_defaults.o:	mb_defaults.c $(INCDIR)/mb_status.h
@@ -335,6 +345,10 @@ mbr_mbldeoih.o: mbr_mbldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_mbldeoih.c
 mbr_cbat9001.o: mbr_cbat9001.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_cbat9001.h
 	$(CC) -c $(CFLAGS) mbr_cbat9001.c
+mbr_cbat8101.o: mbr_cbat8101.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_cbat8101.h
+	$(CC) -c $(CFLAGS) mbr_cbat8101.c
+mbr_hypc8101.o: mbr_hypc8101.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_hypc8101.h
+	$(CC) -c $(CFLAGS) mbr_hypc8101.c
 mbr_bchrtunb.o: mbr_bchrtunb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_bchrtunb.h
 	$(CC) -c $(CFLAGS) mbr_bchrtunb.c
 mbr_elmk2unb.o: mbr_elmk2unb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_elmk2unb.h
@@ -501,6 +515,12 @@ $(INCDIR)/mbf_mbldeoih.h:	mbf_mbldeoih.h
 $(INCDIR)/mbf_cbat9001.h:	mbf_cbat9001.h
 	cp mbf_cbat9001.h $(INCDIR)/mbf_cbat9001.h
 	chmod 664 $(INCDIR)/mbf_cbat9001.h
+$(INCDIR)/mbf_cbat8101.h:	mbf_cbat8101.h
+	cp mbf_cbat8101.h $(INCDIR)/mbf_cbat8101.h
+	chmod 664 $(INCDIR)/mbf_cbat8101.h
+$(INCDIR)/mbf_hypc8101.h:	mbf_hypc8101.h
+	cp mbf_hypc8101.h $(INCDIR)/mbf_hypc8101.h
+	chmod 664 $(INCDIR)/mbf_hypc8101.h
 $(INCDIR)/mbf_bchrtunb.h:	mbf_bchrtunb.h
 	cp mbf_bchrtunb.h $(INCDIR)/mbf_bchrtunb.h
 	chmod 664 $(INCDIR)/mbf_bchrtunb.h

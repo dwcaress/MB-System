@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 4.12 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbsys_reson.c,v 4.13 1999-01-01 23:41:06 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -12,11 +12,12 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_reson.c contains the functions for handling the data structure
- * used by MBIO functions to store data from Reson SEABAT 9001
- * multibeam sonar systems.
- * The data formats which are commonly used to store EM-12
+ * used by MBIO functions to store data from Reson SEABAT multibeam 
+ * sonar systems, including the 9001, 9002, and 8101 sonars.
+ * The data formats which are commonly used to store Reson SeaBat
  * data in files include
- *      MBF_CBAT9001 : MBIO ID 81
+ *      MBF_CBAT9001/9002 : MBIO ID 81
+ *      MBF_CBAT8101 : MBIO ID 82/83
  *
  * These functions include:
  *   mbsys_reson_alloc	  - allocate memory for mbsys_reson_struct structure
@@ -37,6 +38,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1998/10/05 17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.11  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -104,7 +108,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_reson.c,v 4.12 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 4.13 1999-01-01 23:41:06 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -357,6 +361,8 @@ int	*error;
 		{
 		/* get time */
 		time_i[0] = store->year + 1900;
+		if (store->year < 62) 
+		    time_i[0] += 100;
 		time_i[1] = store->month;
 		time_i[2] = store->day;
 		time_i[3] = store->hour;
@@ -479,6 +485,98 @@ int	*error;
 			for (i=0;i<*namp;i++)
 			  fprintf(stderr,"dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract nav from structure */
+	else if (*kind == MB_DATA_NAV)
+		{
+		/* get time */
+		time_i[0] = store->pos_year + 1900;
+		if (store->pos_year < 62) 
+		    time_i[0] += 100;
+		time_i[1] = store->pos_month;
+		time_i[2] = store->pos_day;
+		time_i[3] = store->pos_hour;
+		time_i[4] = store->pos_minute;
+		time_i[5] = store->pos_second;
+		time_i[6] = 10000*store->pos_hundredth_sec 
+			+ 100*store->pos_thousandth_sec;
+		mb_get_time(verbose,time_i,time_d);
+
+		/* get navigation */
+		*navlon = store->pos_longitude*0.00000009;
+		*navlat = store->pos_latitude*0.00000009;
+		if (mb_io_ptr->lonflip < 0)
+			{
+			if (*navlon > 0.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -360.)
+				*navlon = *navlon + 360.;
+			}
+		else if (mb_io_ptr->lonflip == 0)
+			{
+			if (*navlon > 180.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -180.)
+				*navlon = *navlon + 360.;
+			}
+		else
+			{
+			if (*navlon > 360.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < 0.)
+				*navlon = *navlon + 360.;
+			}
+
+		/* get heading */
+		*heading = 0.01*store->heading;
+
+		/* get speed  */
+		*speed = 0.0;
+
+		/* read distance and depth values into storage arrays */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
 			}
 
 		/* done translating values */
@@ -642,7 +740,7 @@ int	*error;
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->year = time_i[0] - 1900;
+		store->year = time_i[0] % 100;
 		store->month = time_i[1];
 		store->day = time_i[2];
 		store->hour = time_i[3];
@@ -694,6 +792,28 @@ int	*error;
 			}
 		}
 
+	/* insert nav in structure */
+	else if (store->kind == MB_DATA_NAV)
+		{
+		/* get time */
+		store->pos_year = time_i[0] % 100;
+		store->pos_month = time_i[1];
+		store->pos_day = time_i[2];
+		store->pos_hour = time_i[3];
+		store->pos_minute = time_i[4];
+		store->pos_second = time_i[5];
+		store->pos_hundredth_sec = time_i[6]/10000;
+		store->pos_thousandth_sec = 
+			(time_i[6] - 10000*store->pos_hundredth_sec)/100;
+
+		/*get navigation */
+		store->pos_longitude = (int) (navlon/0.00000009);
+		store->pos_latitude = (int) (navlat/0.00000009);
+
+		/* get heading */
+		store->heading = (int) (heading * 100);
+		}
+
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT)
 		{
@@ -739,6 +859,7 @@ int	*error;
 	struct mbsys_reson_struct *store;
 	double	ttscale, angscale;
 	double	heave_use;
+	double	angle, pitch;
 	int	i;
 
 	/* print input debug statements */
@@ -774,24 +895,22 @@ int	*error;
 		*nbeams = mb_io_ptr->beams_bath;
 
 		/* get depth offset (heave + transducer_depth) */
-		heave_use = 1000.0*store->heave;
-		*draft = 1000.0*store->transducer_depth;
+		heave_use = 0.001 * store->heave;
+		*draft = 0.001 * store->transducer_depth;
 		*ssv = 0.1 * store->sound_vel;
 
 		/* get travel times, angles */
-		ttscale = 0.00005;
+		ttscale = 0.00001;
 		angscale = 0.005;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			ttimes[i] = ttscale*store->tt[i];
-			angles[i] = angscale*store->angle[i];
-			if (angles[i] < 0.0)
-				{
-				angles[i] = -angles[i];
-				angles_forward[i] = 180.0;
-				}
-			else
-				angles_forward[i] = 0.0;
+			ttimes[i] = ttscale * store->tt[i];
+			angle = 90.0 - angscale * store->angle[i];
+			pitch = angscale * store->pitch;
+			mb_rollpitch_to_takeoff(
+				verbose, pitch, angle, 
+				&angles[i], 
+				&angles_forward[i], error);
 			angles_null[i] = angles[i];
 			heave[i] = heave_use;
 			alongtrack_offset[i] = 0.0;
@@ -929,8 +1048,8 @@ int	*error;
 			    }
 			}		
 		    }
-		*transducer_depth = 1000.0*store->transducer_depth
-				    + 1000.0*store->heave;
+		*transducer_depth = 0.001 * store->transducer_depth
+				    + 0.001 * store->heave;
 		*altitude = bath_best - *transducer_depth;
 
 		/* set status */
@@ -1068,7 +1187,7 @@ int	*error;
 		/* get roll pitch and heave */
 		*roll = 0.005*store->roll;
 		*pitch = 0.005*store->pitch;
-		*heave = 0.005*store->heave;
+		*heave = 0.001*store->heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1110,6 +1229,93 @@ int	*error;
 				*pitch);
 			fprintf(stderr,"dbg4       heave:      %f\n",
 				*heave);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract nav from structure */
+	else if (*kind == MB_DATA_NAV)
+		{
+		/* get time */
+		time_i[0] = store->pos_year + 1900;
+		if (store->pos_year < 62) 
+		    time_i[0] += 100;
+		time_i[1] = store->pos_month;
+		time_i[2] = store->pos_day;
+		time_i[3] = store->pos_hour;
+		time_i[4] = store->pos_minute;
+		time_i[5] = store->pos_second;
+		time_i[6] = 10000*store->pos_hundredth_sec 
+			+ 100*store->pos_thousandth_sec;
+		mb_get_time(verbose,time_i,time_d);
+
+		/* get navigation */
+		*navlon = store->pos_longitude*0.00000009;
+		*navlat = store->pos_latitude*0.00000009;
+		if (mb_io_ptr->lonflip < 0)
+			{
+			if (*navlon > 0.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -360.)
+				*navlon = *navlon + 360.;
+			}
+		else if (mb_io_ptr->lonflip == 0)
+			{
+			if (*navlon > 180.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -180.)
+				*navlon = *navlon + 360.;
+			}
+		else
+			{
+			if (*navlon > 360.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < 0.)
+				*navlon = *navlon + 360.;
+			}
+
+		/* get heading */
+		*heading = 0.01*store->heading;
+
+		/* get speed  */
+		*speed = 0.0;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
 			}
 
 		/* done translating values */
@@ -1253,6 +1459,28 @@ int	*error;
 		store->roll = roll*200.0;
 		store->pitch = pitch*200.0;
 		store->heave = heave*200.0;
+		}
+
+	/* insert nav in structure */
+	else if (store->kind == MB_DATA_NAV)
+		{
+		/* get time */
+		store->pos_year = time_i[0] % 100;
+		store->pos_month = time_i[1];
+		store->pos_day = time_i[2];
+		store->pos_hour = time_i[3];
+		store->pos_minute = time_i[4];
+		store->pos_second = time_i[5];
+		store->pos_hundredth_sec = time_i[6]/10000;
+		store->pos_thousandth_sec = 
+			(time_i[6] - 10000*store->pos_hundredth_sec)/100;
+
+		/*get navigation */
+		store->pos_longitude = (int) (navlon/0.00000009);
+		store->pos_latitude = (int) (navlat/0.00000009);
+
+		/* get heading */
+		store->heading = (int) (heading * 100);
 		}
 
 	/* print output debug statements */

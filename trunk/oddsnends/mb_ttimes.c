@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.14 1998-12-17 23:01:15 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.15 1999-01-01 23:41:06 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -94,7 +94,7 @@
  * The three parameters are r, alpha, and beta, where
  * r is the distance from the origin, alpha is the angle 
  * forward (effectively pitch angle), and beta is the
- * angle from vertical down in the x-z plane (effectively
+ * angle from horizontal in the x-z plane (effectively
  * roll angle). Applying a roll or pitch correction is 
  * simple in these coordinates because pitch is just alpha 
  * and roll is just beta. However, raytracing is complicated 
@@ -104,9 +104,9 @@
  * 	-PI/2 <= alpha <= PI/2
  * 	0 <= beta <= PI
  * 	
- * 	x = r * COS(alpha) * SIN(beta) 
+ * 	x = r * COS(alpha) * COS(beta) 
  * 	y = r * SIN(alpha)
- * 	z = r * COS(alpha) * COS(beta) 
+ * 	z = r * COS(alpha) * SIN(beta) 
  * 	
  * 	alpha = -PI/2 ---> horizontal, in x-y plane with y negative
  * 	alpha = 0     ---> ship level, zero pitch, in x-z plane
@@ -181,6 +181,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1998/12/17  23:01:15  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.13  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -266,7 +269,7 @@ double	*draft;
 double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.14 1998-12-17 23:01:15 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.15 1999-01-01 23:41:06 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
