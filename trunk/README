@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA28 README FILE:
+MB-SYSTEM VERSION 5.0.BETA29 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.betaf28 release of the MB-System software package for 
+5.0.betaf29 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta29     March 10, 2003
 Version 5.0.beta28     January 14, 2003
 Version 5.0.beta27     November 13, 2002
 Version 5.0.beta26     November 3, 2002
@@ -110,6 +111,19 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA29 RELEASE NOTES:
+
+The version 5.0.beta28 release of MB-System includes
+some significant bug fixes and new features:
+  - An error in the i/o module for the HSDS2RAW format have 
+    been fixed. This problem prevented the code from compiling
+    successfully with gcc on many platforms.
+  - The new HMRG MR1 format is supported as format 64. This
+    allows support of recent and future data from the MR-1,
+    from other HMRG sonars, and from the WHOI DSL 120 sonar..
+  - A new macro named mbm_copy has been added for translating 
+    groups of files between formats.
 
 MB-SYSTEM VERSION 5.0.BETA28 RELEASE NOTES:
 
@@ -1053,10 +1067,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.32 2003-01-15 21:15:01 caress Exp $
+RCS ID: $Id: README,v 5.33 2003-03-10 22:42:28 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.32  2003/01/15 21:15:01  caress
+Release 5.0.beta28
+
 Revision 5.31  2002/11/04 19:15:01  caress
 Release 5.0.beta26
 
