@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.2 1994-10-21 11:34:20 caress Exp $
+ *    $Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -77,7 +77,7 @@ double	date_annot_int;
 double	time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.2 1994-10-21 11:34:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -333,7 +333,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.2 1994-10-21 11:34:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -468,7 +468,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.2 1994-10-21 11:34:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -826,7 +826,8 @@ int	*error;
 				}
 
 			/* set label if needed */
-			if (!closed && data->ed[isidestart][itristart] != 0)
+			if (label && !closed 
+				&& data->ed[isidestart][itristart] != 0)
 				{
 				data->xlabel[data->nlabel] = data->xsave[0];
 				data->ylabel[data->nlabel] = data->ysave[0];
@@ -839,7 +840,8 @@ int	*error;
 				if (check_label(data,data->nlabel))
 					data->nlabel++;
 				}
-			if (!closed && data->ed[isideend][itriend] != 0)
+			if (label && !closed 
+				&& data->ed[isideend][itriend] != 0)
 				{
 				data->xlabel[data->nlabel] 
 					= data->xsave[data->nsave-1];
@@ -1153,7 +1155,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.2 1994-10-21 11:34:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.3 1994-11-29 18:03:29 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
