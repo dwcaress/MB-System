@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.9 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.10 1996-04-24 01:14:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.8  1995/07/26  14:45:39  caress
  * Fixed problems related to shallow water data.
  *
@@ -84,13 +87,17 @@
 #include "../../include/mb_swap.h"
 #endif
 
+/* local defines */
+#define ZERO_ALL    0
+#define ZERO_SOME   1
+
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldeoih(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.9 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.10 1996-04-24 01:14:38 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -128,7 +135,7 @@ int	*error;
 	data_ptr = (char *) data;
 
 	/* initialize everything to zeros */
-	mbr_zero_hsldeoih(verbose,data_ptr,error);
+	mbr_zero_hsldeoih(verbose,data_ptr,ZERO_ALL,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -186,9 +193,10 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_hsldeoih(verbose,data_ptr,error)
+int mbr_zero_hsldeoih(verbose,data_ptr,mode,error)
 int	verbose;
 char	*data_ptr;
+int	mode;
 int	*error;
 {
 	char	*function_name = "mbr_zero_hsldeoih";
@@ -204,12 +212,13 @@ int	*error;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       mode:       %d\n",mode);
 		}
 
 	/* get pointer to data descriptor */
 	data = (struct mbf_hsldeoih_struct *) data_ptr;
 
-	/* initialize everything to zeros */
+	/* initialize almost everything to zeros */
 	if (data != NULL)
 		{
 		/* type of data record */
@@ -289,24 +298,32 @@ int	*error;
 			data->echo_duration[i] = 0;
 			}
 
-		/* mean velocity (ERGNHYDI) */
-		data->draught = 0.0;
-		data->vel_mean = 0.0;
-		data->vel_keel = 0.0;
-		data->tide = 0.0;
-
-		/* water velocity profile */
-		data->num_vel = 0;
-		for (i=0;i<MBF_HSLDEOIH_MAXVEL;i++)
+		/* these values zeroed only when structure
+			is first allocated - this allows
+			these values to be remembered internally 
+			once one of these occasional data 
+			records is encountered */
+		if (mode == ZERO_ALL)
 			{
-			data->depth[i] = 0;
-			data->velocity[i] = 0;
-			}
+			/* mean velocity (ERGNHYDI) */
+			data->draught = 0.0;
+			data->vel_mean = 0.0;
+			data->vel_keel = 0.0;
+			data->tide = 0.0;
 
-		/* navigation source (ERGNPOSI) */
-		data->pos_corr_x = 0.0;
-		data->pos_corr_y = 0.0;
-		strncpy(data->sensors,"POS",9);
+			/* water velocity profile */
+			data->num_vel = 0;
+			for (i=0;i<MBF_HSLDEOIH_MAXVEL;i++)
+				{
+				data->depth[i] = 0;
+				data->velocity[i] = 0;
+				}
+
+			/* navigation source (ERGNPOSI) */
+			data->pos_corr_x = 0.0;
+			data->pos_corr_y = 0.0;
+			strncpy(data->sensors,"POS",9);
+			}
 
 		/* comment (LDEOCOMM) */
 		strncpy(data->comment,"\0",MBF_HSLDEOIH_MAXLINE);
@@ -944,7 +961,7 @@ int	*error;
 	mbfp = mb_io_ptr->mbfp;
 
 	/* initialize everything to zeros */
-	mbr_zero_hsldeoih(verbose,data_ptr,error);
+	mbr_zero_hsldeoih(verbose,data_ptr,ZERO_SOME,error);
 
 	/* get next record type */
 	if ((status = fread(&label,1,sizeof(int),mbfp)) == sizeof(int)) 
