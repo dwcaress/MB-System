@@ -150,6 +150,44 @@ The 5.0.6 release mistakenly left the code in mbr_em300raw.c
 in debug mode, causing copious stderr output when reading
 raw Simrad data (format 56). This has been corrected.
 
+Problems with the output in debug mode of mbr_em300raw.c and
+mbr_em300mba.c have been fixed.
+
+The handling of the tickinfo string in the plot macros 
+mbm_plot, mbm_grdplot, mbm_grd3dplot, and mbm_xyplot have
+been fixed.
+
+The orientation of the filename annotation by mbcontour
+has been fixed, and control over that orientation has been
+added to mbcontour and mbm_plot.
+
+Sonar depth merging has been added to mbprocess and mbset.
+This is controlled by the SONARDEPTHMODE, SONARDEPTHFILE,
+and SONARDEPTHFORMAT mbprocess parameters.
+
+Fixed problem of uninitialized data in mbr_mbpronav.c.
+
+Fixed problem with occasional incorrect scaling of sonar 
+depth in mbldeoih format (71) data.
+
+Fixed problem in which sonar depth could be calculated
+from implausible pressure values in some single beam
+or navigation formats.
+
+Improved handling of interpolated asynchronous data, 
+especially sonar depth, in Reson 7k data (format 88).
+
+A capability to interpolate over repeated values was added
+to mbnavedit.
+
+Fixed a problem with the beam footprint gridding algorithm
+in mbgrid that caused beam footprints to be miscalculated
+for submerged sonars.
+
+Fixed MBgrdviz crashes related to route data by fixing
+problem with allocation and deallocation of route
+arrays in the mbview library.
+
 MB-SYSTEM VERSION 5.0.6 RELEASE NOTES:
 ------------------------------------------
 
@@ -965,10 +1003,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.58 2005-03-25 04:01:01 caress Exp $
+RCS ID: $Id: README,v 5.59 2005-03-25 04:51:21 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.58  2005/03/25 04:01:01  caress
+Fixes to 5.0.6.
+
 Revision 5.57  2005/02/19 07:09:22  caress
 Release 5.0.6
 
