@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	3.00	2/1/93
- *    $Id: mblist.c,v 3.2 1993-05-17 16:37:18 caress Exp $
+ *    $Id: mblist.c,v 3.3 1993-06-09 11:47:44 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.2  1993/05/17  16:37:18  caress
+ * Fixed problem where program crashed if -F was used.
+ *
  * Revision 3.0  1993/05/04  22:20:17  dale
  * Initial version
  *
@@ -54,7 +57,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 3.2 1993-05-17 16:37:18 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 3.3 1993-06-09 11:47:44 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Mbath_beam -Nback_beam -Ooptions -Ddumpmode]";
@@ -566,7 +569,7 @@ char **argv;
 					break;
 				case 'u': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_tm.tm_year = time_i[0] - 1900;
-					time_tm.tm_mon = time_i[1];
+					time_tm.tm_mon = time_i[1] - 1;
 					time_tm.tm_mday = time_i[2];
 					time_tm.tm_hour = time_i[3];
 					time_tm.tm_min = time_i[4];
