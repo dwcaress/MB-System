@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.13 2003-04-22 21:10:12 caress Exp $
+#    $Id: mbm_plot.perl,v 5.14 2004-09-16 19:11:48 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.13 2003-04-22 21:10:12 caress Exp $
+#   $Id: mbm_plot.perl,v 5.14 2004-09-16 19:11:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.13  2003/04/22 21:10:12  caress
+#   Made datalist.mb-1 default input file.
+#
 #   Revision 5.12  2003/04/17 20:42:48  caress
 #   Release 5.0.beta30
 #
@@ -2580,6 +2583,17 @@ elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
 	elsif ($landscape)
 		{
 		$view_pageflag = "-landscape -media BBox";
+		}
+	}
+elsif ($ps_viewer eq "ggv")
+	{
+	if ($portrait)
+		{
+		$view_pageflag = "--geometry=portrait";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "--geometry=landscape";
 		}
 	}
 if ($no_view_ps)
