@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA07 README FILE:
+MB-SYSTEM VERSION 5.0.BETA08 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta07 release of the MB-System software package for 
+5.0.beta08 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta07     October 19, 2001
 Version 5.0.beta07     August 10, 2001
 Version 5.0.beta06     July 30, 2001
 Version 5.0.beta05     July 23, 2001
@@ -90,6 +91,20 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA08 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.beta08 release of MB-System includes 
+major fixes to the creation and handling of mbprocess
+parameter files. Earlier versions set full or absolute
+output file paths in the parameter files. The
+consequence was that both processing and datalist
+parsing could be broken if data files were moved.
+All of the relevant programs now set and use relative
+pathnames. Also, an option has been provided in
+mbset to correct existing parameter files (see the
+-L option in the mbset manual page).
 
 MB-SYSTEM VERSION 5.0.BETA07 RELEASE NOTES:
 ------------------------------------------
@@ -585,10 +600,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.7 2001-08-10 23:10:08 dcaress Exp $
+RCS ID: $Id: README,v 5.8 2001-10-19 19:49:08 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 5.7  2001/08/10  23:10:08  dcaress
+# Release 5.0.beta07
+#
 Revision 5.6  2001-07-30 17:51:15-07  caress
 Release 5.0.beta06
 
