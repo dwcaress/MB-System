@@ -1,0 +1,246 @@
+#! /usr/local/bin/perl 
+#--------------------------------------------------------------------
+#    The MB-system:	install_makefiles	5/20/94
+#    $Id: install_makefiles,v 4.0 1994-05-24 20:40:50 caress Exp $
+#
+#    Copyright (c) 1993, 1994 by 
+#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#    Lamont-Doherty Earth Observatory
+#    Palisades, NY  10964
+#
+#    See README file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Command:
+#   install_makefiles
+#
+# Purpose:
+#   Perl shellscript to create makefiles appropriate to a particular
+#   MB-System installation.  Before running this script, the
+#   installer should edit the variable declarations below (where
+#   indicated) so that these values are appropriate for the system
+#   on which MB-System is being installed.  At execution the script 
+#   will read template makefiles in the MB-System source directories 
+#   and create makefiles with the correct attributes.
+#   This enables users to install MB-System without having to edit
+#   the makefiles.  Instead of editing the makefiles directly, the
+#   installer should edit this script so that the locations of
+#   important libraries and include files are accurate and so that
+#   the compile and link flags are correct.
+#
+# Usage:
+#   install_makefiles
+#
+# Author:
+#   David W. Caress
+#   Lamont-Doherty Earth Observatory
+#   Palisades, NY  10964
+#   May 20, 1994
+#
+# Version:
+#   $Id: install_makefiles,v 4.0 1994-05-24 20:40:50 caress Exp $
+#
+# Revisions:
+#   $Log: not supported by cvs2svn $
+#
+#
+#
+# The important parameters to be set are:
+#	OS		Operating system (e.g. SUN or IRIX).
+#	CFLAGS		Compile flags for C source files.
+#	FFLAGS		Compile flags for F77 source files.
+#	LFLAGS		Load flags for all object files.
+#	FWITHCFLAGS	Load flags for C and F77 object files together.
+#	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
+#	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
+#				and pslib.h
+#	NETCDFDIR	Location of NetCDF library libnetcdf.a
+#	LEVITUS		Path for Levitus data file annual.
+#	REALTIME	If set to 1, enables installation of realtime
+#			pen plotting programs (0 disables installation).
+#	GRPHLIBDIR	Location of L-DEO shipboard graphics 
+#				library libgraphics.a
+#	GRPHINCDIR	Location of L-DEO shipboard graphics 
+#				include file graphics.h
+#
+# Example for installing on L-DEO Sun workstations:
+#	OS = SUN
+#	CFLAGS = -O2 -D$OS
+#	FFLAGS = -O2
+#	LFLAGS = -lm
+#	FWITHCFLAGS = -lF77
+#	GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
+#	GMTINCDIR = /ocean/mgg/gmt2/src
+#	NETCDFDIR = /ocean/mgg/netcdf/sun4/lib
+#	LEVITUS = /ocean/mgg/levitus/annual
+#	REALTIME = 1
+#	GRPHLIBDIR = /otter/home/graphics/lib
+#	GRPHINCDIR = /otter/home/graphics/lib
+#
+# Example for installing on R/V Ewing Sun workstations:
+#	OS = SUN
+#	CFLAGS = -O2 -D$OS
+#	FFLAGS = -O2
+#	LFLAGS = -lm
+#	FWITHCFLAGS = -lF77
+#	GMTLIBDIR = /net/heezen/packages/gmt2/bin
+#	GMTINCDIR = /net/heezen/packages/gmt2/src
+#	NETCDFDIR = /net/heezen/packages/netcdf/lib
+#	LEVITUS = /net/heezen/packages/levitus/annual
+#	REALTIME = 1
+#	GRPHLIBDIR = /otter/home/graphics/lib
+#	GRPHINCDIR = /otter/home/graphics/lib
+#
+# Example for installing on SeaBeam Instruments SGI IRIX workstations:
+#	OS = IRIX
+#	CFLAGS = -O2 -D$OS
+#	FFLAGS = -O2
+#	LFLAGS = -lm -lsun
+#	FWITHCFLAGS = -lF77 -lU77 -lI77 -lisam -lfgl
+#	GMTLIBDIR = /usr/local/gmt/src
+#	GMTINCDIR = /usr/local/gmt/src
+#	NETCDFDIR = /usr/local/netcdf/lib
+#	LEVITUS = /usr/local/levitus/annual
+#	REALTIME = 1
+#	GRPHLIBDIR = /usr/local/lamont_graphics/graphics/src
+#	GRPHINCDIR = /usr/local/lamont_graphics/graphics/src
+#
+# **** EDIT THE PARAMETERS HERE ****
+# Set the environment parameters:
+$OS =	   "SUN";
+$CFLAGS =  "-O2 -D$OS";
+$FFLAGS =  "-O2";
+$LFLAGS =  "-lm";
+$FWITHCFLAGS = "-lF77";
+$GMTLIBDIR =  "/ocean/mgg/gmt2/sun4/lib";
+$GMTINCDIR =  "/ocean/mgg/gmt2/src";
+$NETCDFDIR =  "/ocean/mgg/netcdf/sun4/lib";
+$LEVITUS = "/ocean/mgg/levitus/annual";
+$REALTIME = 1;
+$GRPHLIBDIR = "/otter/home/graphics/lib";
+$GRPHINCDIR = "/otter/home/graphics/lib";
+#
+# **** LEAVE EVERYTHING ELSE BELOW ALONE ****
+
+# Program Name:
+$program_name = "install_makefiles";
+
+# outputting attributes:
+print "\nParameters defined for Makefiles:\n";
+print "Operating System:          $OS\n";
+print "C Compile Flags:           $CFLAGS\n";
+print "F77 Compile Flags:         $FFLAGS\n";
+print "Load Flags:                $LFLAGS\n";
+print "F77 with C Load Flags:     $FWITHCFLAGS\n";
+print "GMT Library Location:      $GMTLIBDIR\n";
+print "GMT Include Location:      $GMTINCDIR\n";
+print "NetCDF Library Location:   $NETCDFDIR\n";
+print "Levitus Data Location:     $LEVITUS\n";
+print "Realtime Enable Flag:      $REALTIME\n";
+print "Graphics Library Location: $GRPHLIBDIR\n";
+print "Graphics Include Location: $GRPHINCDIR\n";
+
+# get filenames
+@files = `ls Makefile.template src/Makefile.template src/*/Makefile.template`;
+while (@files)
+	{
+	# get files
+	$template = shift @files;
+	chop($template);
+	print "\nMakefile Template: $template\n";
+	$pos = 0;
+	while (($tpos = index($template,"/",$pos)) >= 0)
+		{
+		$pos = $tpos + 1;
+		}
+	$path = substr($template,0,$pos);
+	chop($path);
+	if (length($path) == 0)
+		{
+		$path = ".";
+		}
+	$makefile = "$path/Makefile";
+	print "Output Makefile:   $makefile\n";
+
+	# open files
+	open(TMP,"<$template") || die "Cannot open template Makefile $template\nMacro $program_name aborted.\n";
+	open(MAK,">$makefile") || die "Cannot open output Makefile $makefile\nMacro $program_name aborted.\n";
+
+	# loop through the file
+	while (<TMP>)
+		{
+		if (index($_,"OS",0) == 0)
+			{
+			print MAK "OS = $OS\n";
+			}
+		elsif (index($_,"CFLAGS",0) == 0)
+			{
+			print MAK "CFLAGS = $CFLAGS\n";
+			}
+		elsif (index($_,"FFLAGS",0) == 0)
+			{
+			print MAK "FFLAGS = $FFLAGS\n";
+			}
+		elsif (index($_,"LFLAGS",0) == 0)
+			{
+			print MAK "LFLAGS = $LFLAGS\n";
+			}
+		elsif (index($_,"FWITHCFLAGS",0) == 0)
+			{
+			print MAK "FWITHCFLAGS = $FWITHCFLAGS\n";
+			}
+		elsif (index($_,"GMTLIBDIR",0) == 0)
+			{
+			print MAK "GMTLIBDIR = $GMTLIBDIR\n";
+			}
+		elsif (index($_,"GMTINCDIR",0) == 0)
+			{
+			print MAK "GMTINCDIR = $GMTINCDIR\n";
+			}
+		elsif (index($_,"NETCDFDIR",0) == 0)
+			{
+			print MAK "NETCDFDIR = $NETCDFDIR\n";
+			}
+		elsif (index($_,"GRPHLIBDIR",0) == 0)
+			{
+			print MAK "GRPHLIBDIR = $GRPHLIBDIR\n";
+			}
+		elsif (index($_,"GRPHINCDIR",0) == 0)
+			{
+			print MAK "GRPHINCDIR = $GRPHINCDIR\n";
+			}
+		elsif (index($_,"LEVITUS",0) == 0)
+			{
+			print MAK "LEVITUS = $LEVITUS\n";
+			}
+		elsif (index($_,"ranlib",0) >= 0 && $OS ne "SUN")
+			{
+			}
+		elsif (index($_,"catman",0) >= 0 && $OS ne "SUN")
+			{
+			}
+		elsif (index($_,"cd mbedit",0) >= 0 && $OS ne "SUN")
+			{
+			}
+		elsif (index($_,"cd mbvelocitytool",0) >= 0 && $OS ne "SUN")
+			{
+			}
+		elsif (index($_,"cd realtime",0) >= 0 && $REALTIME == 0)
+			{
+			}
+		else
+			{
+			print MAK "$_";
+			}
+		}
+
+	# close files
+	close TMP;
+	close MAK;
+
+	}
+
+
+die "\nAll done!\n";
+
