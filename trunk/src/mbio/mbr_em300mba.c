@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 4.4 2000-02-07 22:59:47 caress Exp $
+ *	$Id: mbr_em300mba.c,v 4.5 2000-07-17 23:36:24 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/02/07  22:59:47  caress
+ * Fixed problem with depth_offset_multiplier
+ *
  * Revision 4.3  1999/04/21  05:45:32  caress
  * Fixed handling of bad sidescan data.
  *
@@ -65,7 +68,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 4.4 2000-02-07 22:59:47 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 4.5 2000-07-17 23:36:24 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2177,6 +2180,14 @@ int	*error;
 				if (data->png_distance_res == 0)
 				    data->png_distance_res = 10; /* kluge */
 				}
+			else if (mb_io_ptr->beams_bath <= 191)
+				{
+				data->sonar = MBSYS_SIMRAD2_EM120;
+				if (data->png_depth_res == 0)
+				    data->png_depth_res = 10; /* kluge */
+				if (data->png_distance_res == 0)
+				    data->png_distance_res = 10; /* kluge */
+				}
 			else if (mb_io_ptr->beams_bath <= 254)
 				{
 				store->sonar = MBSYS_SIMRAD2_EM3000D_2;
@@ -2196,7 +2207,9 @@ int	*error;
 				+ 655.36 * data->png_offset_multiplier;
 		dacrscale  = 0.01 * data->png_distance_res;
 		daloscale  = 0.01 * data->png_distance_res;
-		if (data->sonar == 300 || data->sonar == 3000)
+		if (data->sonar == EM2_EM120 
+			|| data->sonar == EM2_EM300 
+			|| data->sonar == EM2_EM3000)
 		    ttscale = 0.5 / data->png_sample_rate;
 		else
 		    ttscale = 0.5 / 14000;
@@ -2794,7 +2807,8 @@ short	sonar;
 		}
 		
 	/* check for valid sonar model */
-	if (sonar != EM2_EM300
+	if (sonar != EM2_EM120
+		&& sonar != EM2_EM300
 		&& sonar != EM2_EM3000
 		&& sonar != EM2_EM3000D_1
 		&& sonar != EM2_EM3000D_2
@@ -4563,7 +4577,8 @@ int	*error;
 			status = MB_SUCCESS;
 #ifdef BYTESWAPPED
 			short_ptr = (short *) &line[0];
-			if (data->sonar == 300)
+			if (data->sonar == EM2_EM120
+				|| data->sonar == EM2_EM300)
 			    data->png_depth[i] = (unsigned short) mb_swap_short(*short_ptr);
 			else
 			    data->png_depth[i] = (short) mb_swap_short(*short_ptr);
@@ -4585,7 +4600,8 @@ int	*error;
 			data->png_beamflag[i] = (char) line[17];
 #else
 			short_ptr = (short *) &line[0];
-			if (data->sonar == 300)
+			if (data->sonar == EM2_EM120
+				|| data->sonar == EM2_EM300)
 			    data->png_depth[i] = (unsigned short) *short_ptr;
 			else
 			    data->png_depth[i] = (short) *short_ptr;
@@ -5355,7 +5371,7 @@ int	*error;
 	    
 	/* if sonar not set use EM300 */
 	if (data->sonar == 0)
-	    data->sonar = 300;
+	    data->sonar = EM2_EM300;
 		
 	/* set up start of output buffer - we handle this
 	   record differently because of the ascii data */
@@ -7668,7 +7684,8 @@ int	*error;
 		{
 #ifdef BYTESWAPPED
 		short_ptr = (short *) &line[0];
-		if (data->sonar == 300)
+		if (data->sonar == EM2_EM120
+			|| data->sonar == EM2_EM300)
 		    *short_ptr = (unsigned short) mb_swap_short(data->png_depth[i]);
 		else
 		    *short_ptr = (short) mb_swap_short(data->png_depth[i]);
@@ -7690,7 +7707,8 @@ int	*error;
 		line[17] = (char) data->png_beamflag[i];
 #else
 		short_ptr = (short *) &line[0];
-		if (data->sonar == 300)
+		if (data->sonar == EM2_EM120
+			|| data->sonar == EM2_EM300)
 		    *short_ptr = (unsigned short) data->png_depth[i];
 		else
 		    *short_ptr = (short) data->png_depth[i];
