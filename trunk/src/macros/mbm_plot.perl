@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.16 1998-10-05 17:00:15 caress Exp $
+#    $Id: mbm_plot.perl,v 4.17 1998-10-13 18:08:37 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.16 1998-10-05 17:00:15 caress Exp $
+#   $Id: mbm_plot.perl,v 4.17 1998-10-13 18:08:37 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.16  1998/10/05  17:00:15  caress
+# MB-System version 4.6beta
+#
 # Revision 4.15  1997/04/21  16:54:41  caress
 # MB-System 4.5 Beta Release.
 #
@@ -786,7 +789,7 @@ foreach $file_mb (@files_data)
 	# use .inf file if it exists and no time or space bounds applied
 	$use_inf = 0;
 	$file_inf = $file_mb . ".inf";
-	if (-r $file_inf && !$mb_btime && !$mb_etime && !bounds_info)
+	if (-r $file_inf && !$mb_btime && !$mb_etime && !$bounds_info)
 		{
 		if ($verbose) 
 			{

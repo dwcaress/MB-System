@@ -585,9 +585,9 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 \fB-MMN\fP\fInplot\fP
 Sets the number of pings to be read in before each contouring
-episode. See the description of the \fB-Z\fP\fIalgorithm\fP option
+episode. See the description of the \fB-MMZ\fP\fIalgorithm\fP option
 for advice on reasonable values
-Default: \fInplot\fP = 50 unless \fB-Z\fP\fI1\fP is specified,
+Default: \fInplot\fP = 50 unless \fB-MMZ\fP\fI1\fP is specified,
 in which case the default is \fInplot\fP = 5.
 .TP
 .B \-MMP\
@@ -966,7 +966,7 @@ minimum and maximum values of the grid.
 \fImin/max\fP
 .br
 This option overrides the minimum and maximum values of
-the gridded data, affecting the color pallette and the
+bathymetry data, affecting the color pallette and the
 contour interval if those parameters are not specified
 by the user.
 
