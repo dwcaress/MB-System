@@ -99,9 +99,10 @@ Default: Clarke-1866 as per USGS standard.
 .B \-F
 \fInavformat\fP
 .br
-Sets the input navigation format to either the old,
-pre-OIC format (\fB-F\fP\fI1\fP) or to the new, OIC
-associated format(\fB-F\fP\fI2\fP). 
+Sets the input navigation format. The available formats
+include the old, pre-OIC format (\fB-F\fP\fI1\fP), the new, OIC
+associated formats (\fB-F\fP\fI2\fP), and navigation obtained
+using \fBmblist\fP with the \fB-OtXY\fP option.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
