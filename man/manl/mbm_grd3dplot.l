@@ -1,4 +1,4 @@
-.TH mbm_grd3dplot l "14 August 1995"
+.TH mbm_grd3dplot l "1 November 1995"
 .SH NAME
 \fBmbm_grd3dplot\fP - Create an executable shellscript which will generate
 a GMT 3D perspective plot of gridded data in a GMT grd file.
@@ -556,13 +556,15 @@ fill plots. If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
-pallette used is set using \fIpallette\fP. Five pallettes
+pallette used is set using \fIpallette\fP. Seven pallettes
 are available:
  	\fIpallette\fP = 1:	Haxby colors [default]
  	\fIpallette\fP = 2:	high Intensity colors
  	\fIpallette\fP = 3:	low Intensity colors
  	\fIpallette\fP = 4:	grayscale
  	\fIpallette\fP = 5:	uniform grayscale
+ 	\fIpallette\fP = 6:	uniform black
+ 	\fIpallette\fP = 7:	uniform white
 
 The RGB definitions of the color pallettes are:
 
@@ -591,6 +593,16 @@ color pallette 5 - Uniform Grayscale
   green: 128 128 128 128 128 128 128 128 128 128 128
   blue:  128 128 128 128 128 128 128 128 128 128 128
  
+color pallette 6 - Uniform Black
+  red:     0   0   0   0   0   0   0   0   0   0   0
+  green:   0   0   0   0   0   0   0   0   0   0   0
+  blue:    0   0   0   0   0   0   0   0   0   0   0
+
+color pallette 7 - Uniform White
+  red:   255 255 255 255 255 255 255 255 255 255 255
+  green: 255 255 255 255 255 255 255 255 255 255 255
+  blue:  255 255 255 255 255 255 255 255 255 255 255
+
 The Haxby colors have been adapted from a pallette
 developed by Dr. William Haxby of the Lamont-Doherty
 Earth Observatory; this pallette is pleasing to the

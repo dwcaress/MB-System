@@ -1,4 +1,4 @@
-.TH mbm_plot l "14 August 1995"
+.TH mbm_plot l "1 November 1995"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of multibeam swath data.
@@ -504,6 +504,9 @@ depth value in meters used in the footprint calculations.
 If \fImode\fP = 2, then the along-track dimension of the beam
 or pixel footprints is just the along-track distance between
 pings multiplied by the \fIfactor\fP value.
+If mode = 3, then each data point is
+plotted as a point, and the factor and depth parameters
+are ignored. 
 Default: \fIfactor\fP = 1.0, \fImode\fP = 1, \fIdepth\fP = 3000.0.
 .TP
 \fB-MMB\fP\fIyr/mo/da/hr/mn/sc\fP
@@ -797,13 +800,15 @@ fill plots. If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
-pallette used is set using \fIpallette\fP. Five pallettes
+pallette used is set using \fIpallette\fP. Seven pallettes
 are available:
  	\fIpallette\fP = 1:	Haxby colors [default]
  	\fIpallette\fP = 2:	high Intensity colors
  	\fIpallette\fP = 3:	low Intensity colors
  	\fIpallette\fP = 4:	grayscale
  	\fIpallette\fP = 5:	uniform grayscale
+ 	\fIpallette\fP = 6:	uniform black
+ 	\fIpallette\fP = 7:	uniform white
 
 The RGB definitions of the color pallettes are:
 
@@ -831,6 +836,16 @@ color pallette 5 - Uniform Grayscale
   red:   128 128 128 128 128 128 128 128 128 128 128
   green: 128 128 128 128 128 128 128 128 128 128 128
   blue:  128 128 128 128 128 128 128 128 128 128 128
+
+color pallette 6 - Uniform Black
+  red:     0   0   0   0   0   0   0   0   0   0   0
+  green:   0   0   0   0   0   0   0   0   0   0   0
+  blue:    0   0   0   0   0   0   0   0   0   0   0
+
+color pallette 7 - Uniform White
+  red:   255 255 255 255 255 255 255 255 255 255 255
+  green: 255 255 255 255 255 255 255 255 255 255 255
+  blue:  255 255 255 255 255 255 255 255 255 255 255
  
 The Haxby colors have been adapted from a pallette
 developed by Dr. William Haxby of the Lamont-Doherty

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.4 1995-09-28 18:05:43 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.5 1995-11-22 22:46:40 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.4 1995-09-28 18:05:43 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.5 1995-11-22 22:46:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.4  1995/09/28  18:05:43  caress
+# Various bug fixes working toward release 4.3.
+#
 # Revision 4.3  1995/08/17  14:52:53  caress
 # Revision for release 4.3.
 #
@@ -156,7 +159,9 @@ $ncpt = 11;
 			    "High Intensity Colors", 
 			    "Low Intensity Colors", 
 			    "Grayscale", 
-			    "Uniform Gray");
+			    "Uniform Gray",
+			    "Uniform Black",
+			    "Uniform White");
 
 # original Haxby color pallette
 #	$ncolors = 15;
@@ -189,6 +194,16 @@ $ncpt = 11;
 	@cptbr5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbg5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
 	@cptbb5 = (128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128);
+
+# color pallette 6 - Uniform Black
+	@cptbr6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+	@cptbg6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+	@cptbb6 = (  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0);
+
+# color pallette 7 - Uniform White
+	@cptbr7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
+	@cptbg7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
+	@cptbb7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 
 # Deal with command line arguments
 $command_line = "@ARGV";
@@ -497,11 +512,8 @@ if ($color_control)
 		{
 		($color_style, $color_pallette, $ncolors) 
 			= $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
-		if ($color_pallette != 1 
-			&& $color_pallette != 2
-			&& $color_pallette != 3
-			&& $color_pallette != 4
-			&& $color_pallette != 5)
+		if ($color_pallette < 1 
+			|| $color_pallette > 7)
 			{
 			$color_pallette = 1;
 			}
@@ -514,11 +526,8 @@ if ($color_control)
 		{
 		($color_style, $color_pallette) = $color_control
 			=~  /(\S+)\/(\S+)/;
-		if ($color_pallette != 1 
-			&& $color_pallette != 2
-			&& $color_pallette != 3
-			&& $color_pallette != 4
-			&& $color_pallette != 5)
+		if ($color_pallette < 1 
+			|| $color_pallette > 7)
 			{
 			$color_pallette = 1;
 			}
@@ -1673,7 +1682,7 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 	}
 
 # do psscale plot
-if ($color_mode && $color_pallette != 5)
+if ($color_mode && $color_pallette < 5)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
@@ -1808,7 +1817,7 @@ if ($verbose)
 		{
 		print "    XY Plots of ", scalar(@xyfiles), " Datasets\n";
 		}
-	if ($color_mode && $color_pallette != 5)
+	if ($color_mode && $color_pallette < 5)
 		{
 		if ($colorscale_vh eq "v")
 			{
