@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.7 2001-07-20 00:34:00 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.8 2001-08-02 01:51:39 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/07/20  00:34:00  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.6  2001/06/30 17:41:04  caress
  * Release 5.0.beta01
  *
@@ -214,7 +217,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.7 2001-07-20 00:34:00 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.8 2001-08-02 01:51:39 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -948,6 +951,7 @@ int mbnavedit_close_file()
 			MBP_NAV_ON, nfile, 9, 
 			MBP_NAV_ON, MBP_NAV_ON, MBP_NAV_ON, 
 			MBP_NAV_LINEAR, 
+			(double) 0.0, 
 			&error);
 			
 	    /* run mbprocess if desired */
