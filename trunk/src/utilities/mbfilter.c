@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.11 1998-12-17 22:50:20 caress Exp $
+ *    $Id: mbfilter.c,v 4.12 1998-12-18 19:44:23 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1998/12/17  22:50:20  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.10  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -137,7 +140,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.11 1998-12-17 22:50:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.12 1998-12-18 19:44:23 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -234,7 +237,7 @@ The default input and output streams are stdin and stdout.\n";
 	int	hipass_xdim = 10;
 	int	hipass_ldim = 3;
 	int	hipass_iter = 1;
-	double	hipass_offset = 10000.0;
+	double	hipass_offset = 1000.0;
 	int	smooth_mode = MBFILTER_SMOOTH_NONE;
 	int	smooth_xdim = 3;
 	int	smooth_ldim = 3;
