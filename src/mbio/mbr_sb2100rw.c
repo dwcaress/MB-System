@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 5.2 2001-01-23 01:16:54 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -234,7 +237,7 @@ int mbr_info_sb2100rw(int verbose,
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.2 2001-01-23 01:16:54 caress Exp $";
 	char	*function_name = "mbr_info_sb2100rw";
 	int	status = MB_SUCCESS;
 
@@ -338,7 +341,7 @@ int mbr_info_sb2100rw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.2 2001-01-23 01:16:54 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1726,7 +1729,8 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
 		data->frequency[0] = line[47];
 		data->frequency[1] = line[48];
 		mb_get_int(&(data->heave),                 line+49,  6);
-		data->range_scale = line[55];
+		if (line[55] != ' ')
+		    data->range_scale = line[55];
 		data->spare_ss = line[56];
 		data->pixel_size_scale = line[57];
 		data->pixel_algorithm = line[58];
