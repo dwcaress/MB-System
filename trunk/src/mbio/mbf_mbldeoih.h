@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbldeoih.h	1/20/93
- *	$Id: mbf_mbldeoih.h,v 5.3 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_mbldeoih.h,v 5.4 2004-09-16 18:59:42 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,12 +14,14 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_mbldeoih.h defines the data structures used by MBIO functions
- * to store swath data read from the MBF_MBLDEOIH format (MBIO id 61)
- * or the MBF_MBLDEOBT format (MBIO id 62).  
+ * to store swath data read from the MBF_MBLDEOIH format (MBIO id 71).  
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/04/06 02:43:39  caress
  * Release 5.0.beta16
  *
@@ -65,20 +67,14 @@
  *
  */
 /*
- * Notes on the MBF_MBLDEOIH and MBF_MBLDEOBT data formats:
- *   1. These data formats are used to store swath bathymetry
+ * Notes on the MBF_MBLDEOIH data format:
+ *   1. This data format is used to store swath bathymetry
  *      and/or backscatter data with arbitrary numbers of beams
- *      and pixels. These formats were created by the 
+ *      and pixels. This format was created by the 
  *      Lamont-Doherty Earth Observatory and the Monterey Bay  
  *      Aquarium Research Institute to serve as general  
  *      purpose archive formats for processed swath data.
- *   2. The original format (MBF_MBLDEOIH) stores bathymetry, 
- *      amplitude, and sidescan data. The newer format 
- *      (MBF_MBLDEOBT) is identical to MBF_MBLDEOIH when reading, 
- *      but only bathymetry can be written. This provides an
- *      easy means to strip bathymetry out of more voluminous
- *      swath data and to store it in a relatively compressed
- *      form that is fast to read.
+ *   2. The format stores bathymetry, amplitude, and sidescan data.
  *   3. Each data record has a header section and a data section.
  *      The beginning of each header is a two byte identifier.
  *      The size of the header depends on the identifier:
@@ -104,10 +100,10 @@
  *	entirely in 2-byte integers.
  *   6. All data arrays are centered.
  *
- * The kind value in the mbf_mbldeoih_struct indicates whether the
- * mbf_sbsiocen_data_struct structure holds data (kind = 1) or an
+ * The kind value in the mbsys_ldeoih_struct indicates whether the
+ * structure holds data (kind = 1) or an
  * ascii comment record (kind = 0).
  *
- * These two structures are direct representations of the binary data 
- * structures used in the MBF_MBLDEOIH format.
+ * The structures used to represent the binary data in the MBF_MBLDEOIH format
+ * are documented in the mbsys_ldeoih.h file.
  */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 5.8 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 5.9 2004-09-16 18:59:42 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -106,20 +109,14 @@
  *
  */
 /*
- * Notes on the MBF_MBLDEOIH and MBF_MBLDEOBT data formats:
- *   1. These data formats are used to store swath bathymetry
+ * Notes on the MBF_MBLDEOIH data format:
+ *   1. This data format is used to store swath bathymetry
  *      and/or backscatter data with arbitrary numbers of beams
- *      and pixels. These formats were created by the 
+ *      and pixels. This format was created by the 
  *      Lamont-Doherty Earth Observatory and the Monterey Bay  
  *      Aquarium Research Institute to serve as general  
  *      purpose archive formats for processed swath data.
- *   2. The original format (MBF_MBLDEOIH) stores bathymetry, 
- *      amplitude, and sidescan data. The newer format 
- *      (MBF_MBLDEOBT) is identical to MBF_MBLDEOIH when reading, 
- *      but only bathymetry can be written. This provides an
- *      easy means to strip bathymetry out of more voluminous
- *      swath data and to store it in a relatively compressed
- *      form that is fast to read.
+ *   2. The format stores bathymetry, amplitude, and sidescan data.
  *   3. Each data record has a header section and a data section.
  *      The beginning of each header is a two byte identifier.
  *      The size of the header depends on the identifier:
@@ -145,12 +142,12 @@
  *	entirely in 2-byte integers.
  *   6. All data arrays are centered.
  *
- * The kind value in the mbf_mbldeoih_struct indicates whether the
- * mbf_sbsiocen_data_struct structure holds data (kind = 1) or an
+ * The kind value in the mbsys_ldeoih_struct indicates whether the
+ * structure holds data (kind = 1) or an
  * ascii comment record (kind = 0).
  *
- * These two structures are direct representations of the binary data 
- * structures used in the MBF_MBLDEOIH format.
+ * The structures used to represent the binary data in the MBF_MBLDEOIH format
+ * are documented in the mbsys_ldeoih.h file.
  */
 
 /* standard include files */
@@ -207,7 +204,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_OLDHEADERSIZE	38
 #define	MBF_MBLDEOIH_NEWHEADERSIZE	44
 
-static char res_id[]="$Id: mbr_mbldeoih.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
+static char res_id[]="$Id: mbr_mbldeoih.c,v 5.9 2004-09-16 18:59:42 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
