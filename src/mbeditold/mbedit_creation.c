@@ -1764,7 +1764,7 @@ Createwindow_mbedit(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNtitle, "About MBedit"); ac++;
+    XtSetArg(args[ac], XmNtitle, "About MBeditold"); ac++;
     XtSetArg(args[ac], XmNdeleteResponse, XmUNMAP); ac++;
     XtSetArg(args[ac], XmNwidth, 473); ac++;
     XtSetArg(args[ac], XmNheight, 457); ac++;
@@ -1963,7 +1963,7 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "One Component of the", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "One Obsolete Component of the", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -2083,7 +2083,7 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "MBedit", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "MBeditold", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -2163,7 +2163,7 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_message, "MBedit is loading data...", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_message, "MBeditold is loading data...", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;

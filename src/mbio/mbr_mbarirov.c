@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarirov.c	5/20/99
- *	$Id: mbr_mbarirov.c,v 5.1 2000-12-10 20:26:50 caress Exp $
+ *	$Id: mbr_mbarirov.c,v 5.2 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 20, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:26:50  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -88,8 +91,10 @@ int mbr_info_mbarirov(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error);
@@ -97,6 +102,8 @@ int mbr_alm_mbarirov(int verbose, char *mbio_ptr, int *error);
 int mbr_dem_mbarirov(int verbose, char *mbio_ptr, int *error);
 int mbr_rt_mbarirov(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 int mbr_wt_mbarirov(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+
+static char header[] = "Year,Day,Time,Usec,Lat,Lon,East,North,Pres,Head,Alti,Pitch,Roll,PosFlag,PresFlag,HeadFlag,AltiFlag,AttitFlag\n";
 
 /*--------------------------------------------------------------------*/
 int mbr_info_mbarirov(int verbose, 
@@ -127,13 +134,15 @@ int mbr_info_mbarirov(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbarirov.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+	static char res_id[]="$Id: mbr_mbarirov.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_info_mbarirov";
 	int	status = MB_SUCCESS;
 
@@ -178,8 +187,10 @@ int mbr_info_mbarirov(int verbose,
 	*insert = &mbsys_singlebeam_insert; 
 	*extract_nav = &mbsys_singlebeam_extract_nav; 
 	*insert_nav = &mbsys_singlebeam_insert_nav; 
-	*altitude = &mbsys_singlebeam_altitude; 
-	*insert_altitude = NULL;
+	*extract_altitude = &mbsys_singlebeam_extract_altitude; 
+	*insert_altitude = NULL; 
+	*extract_svp = NULL; 
+	*insert_svp = NULL; 
 	*ttimes = &mbsys_singlebeam_ttimes; 
 	*copyrecord = &mbsys_singlebeam_copy; 
 
@@ -217,8 +228,10 @@ int mbr_info_mbarirov(int verbose,
 		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
 		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
 		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -234,7 +247,7 @@ int mbr_info_mbarirov(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbarirov(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbarirov.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+ static char res_id[]="$Id: mbr_mbarirov.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_alm_mbarirov";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -271,7 +284,7 @@ int mbr_alm_mbarirov(int verbose, char *mbio_ptr, int *error)
 	data = (struct mbf_mbarirov_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
 	
-	/* set number of header records read to zero */
+	/* set number of records read or written to zero */
 	mb_io_ptr->save1 = 0;
 
 	/* initialize everything to zeros */
@@ -556,7 +569,7 @@ int mbr_mbarirov_rd_data(int verbose, char *mbio_ptr, int *error)
 	data = (struct mbf_mbarirov_struct *) mb_io_ptr->raw_data;
 
 	/* initialize everything to zeros */
-	mbr_zero_mbarirov(verbose,data,error);
+	mbr_zero_mbarirov(verbose,mb_io_ptr->raw_data,error);
 
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
@@ -566,9 +579,28 @@ int mbr_mbarirov_rd_data(int verbose, char *mbio_ptr, int *error)
 	if ((line_ptr = fgets(line, MBF_MBARIROV_MAXLINE, 
 			mb_io_ptr->mbfp)) != NULL) 
 		{
+		/* set status */
 		mb_io_ptr->file_bytes += strlen(line);
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
+		
+		/* if header found, read another line */
+		if (strncmp(line, header, 25) == 0)
+		    {
+		    if ((line_ptr = fgets(line, MBF_MBARIROV_MAXLINE, 
+				    mb_io_ptr->mbfp)) != NULL) 
+			{
+			/* set status */
+			mb_io_ptr->file_bytes += strlen(line);
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		    else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		    }
 		}
 	else
 		{
@@ -583,6 +615,8 @@ int mbr_mbarirov_rd_data(int verbose, char *mbio_ptr, int *error)
 	    {
 	    data->kind = MB_DATA_COMMENT;
             strncpy(data->comment,&line[1],MBF_MBARIROV_MAXLINE);
+	    if (data->comment[strlen(data->comment)-1] == '\n')
+		data->comment[strlen(data->comment)-1] = '\0';
 	    }
 	else if (status == MB_SUCCESS)
 	    {
@@ -694,6 +728,7 @@ int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 	char	*line_ptr;
 	int	time_j[6],year,jday,timetag;
 	int	len;
+	int	*write_count;
 	int	i;
 
 	/* print input debug statements */
@@ -712,6 +747,9 @@ int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_mbarirov_struct *) data_ptr;
+	
+	/* get pointer to write counter */
+	write_count = (int *) &mb_io_ptr->save1;
 
 	/* handle the data */
 	if (data->kind == MB_DATA_COMMENT)
@@ -719,8 +757,11 @@ int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 	    line[0] = '#';
             strncpy(&line[1],data->comment,MBF_MBARIROV_MAXLINE-2);
             len = strlen(line);
-            line[len] = '\n';
-            line[len+1] = '\0';
+	    if (line[len-1] != '\n')
+		{
+		line[len] = '\n';
+		line[len+1] = '\0';
+		}
 	    }
 	else if (data->kind == MB_DATA_DATA)
 	    {
@@ -758,7 +799,7 @@ int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 	    		+ 100 * data->time_i[4]
 	    		+ data->time_i[5];
             sprintf(line,
-			"%4.4d,%3.3d,%6.6d,%9.0f,%10.6f,%11.6f,%7.0f,%7.0f,%7.2f,%5.1f,%6.2f,%4.1f,%4.1f\r\n",
+			"%4.4d,%3.3d,%6.6d,%9.0f,%10.6f,%11.6f,%7.0f,%7.0f,%7.2f,%5.1f,%6.2f,%4.1f,%4.1f\n",
 			year,
 			jday,
 			timetag,
@@ -773,7 +814,23 @@ int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 			data->rov_pitch,
 			data->rov_roll);
 	    }
+	
+	/* write file header if needed */
+	if (*write_count == 0)
+	    {
+	    if (fputs(header,mb_io_ptr->mbfp) == EOF)
+		{
+		*error = MB_ERROR_WRITE_FAIL;
+		status = MB_FAILURE;
+		}
+	    else
+		{
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+		}
+	    }
 
+	/* write data */
 	if (fputs(line,mb_io_ptr->mbfp) == EOF)
 		{
 		*error = MB_ERROR_WRITE_FAIL;
@@ -781,6 +838,7 @@ int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 		}
 	else
 		{
+		(*write_count)++;
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.1 2000-12-10 20:26:50 caress Exp $
+ *    $Id: mb_io.h,v 5.2 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:26:50  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -274,6 +277,7 @@ struct mb_io_struct
 	int	save13;
 	int	save14;
 	double	saved1;
+	double	saved2;
 
 	/* function pointers for allocating and deallocating format
 		specific structures */
@@ -321,12 +325,21 @@ struct mb_io_struct
 		double speed, double heading, double draft, 
 		double roll, double pitch, double heave, 
 		int *error);
-	int (*mb_io_altitude)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_extract_altitude)(int verbose, char *mbio_ptr, char *store_ptr,
 		int *kind,
 		double *transducer_depth, double *altitude,
 		int *error);
 	int (*mb_io_insert_altitude)(int verbose, char *mbio_ptr, char *store_ptr,
 		double transducer_depth, double altitude,
+		int *error);
+	int (*mb_io_extract_svp)(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind,
+		int *nsvp,
+		double *depth, double *velocity,
+		int *error);
+	int (*mb_io_insert_svp)(int verbose, char *mbio_ptr, char *store_ptr,
+		int nsvp,
+		double *depth, double *velocity,
 		int *error);
 	int (*mb_io_ttimes)(int verbose, char *mbio_ptr, char *store_ptr,
 		int *kind, int *nbeams,

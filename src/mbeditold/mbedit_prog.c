@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.0 2000-12-01 22:54:58 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.1 2001-01-22 07:42:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:54:58  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.31  2000/10/11  01:02:07  caress
  * Convert to ANSI C
  *
@@ -248,12 +251,12 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.0 2000-12-01 22:54:58 caress Exp $";
-static char program_name[] = "MBedit";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.1 2001-01-22 07:42:13 caress Exp $";
+static char program_name[] = "MBeditold";
 static char help_message[] =  
-"MBedit is an interactive editor used to identify and flag\n\
+"MBeditold is an interactive editor used to identify and flag\n\
 artifacts in swath sonar bathymetry data. Once a file has\n\
-been read in, MBedit displays the bathymetry profiles from\n\
+been read in, MBeditold displays the bathymetry profiles from\n\
 several pings, allowing the user to identify and flag\n\
 anomalous beams. Flagging is handled internally by setting\n\
 depth values negative, so that no information is lost.";
@@ -391,7 +394,6 @@ int	pixel_values[256];
 /* system function declarations */
 char	*ctime();
 char	*getenv();
-char	*strstr();
 
 /* compare function for qsort */
 int mb_double_compare();
@@ -1073,7 +1075,7 @@ int mbedit_action_next_buffer(
 		
 			/* if quitting let the world know... */
 			if (*quit == MB_YES && verbose >= 1)
-				fprintf(stderr,"\nQuitting MBedit\nBye Bye...\n");
+				fprintf(stderr,"\nQuitting MBeditold\nBye Bye...\n");
 			}
 
 		/* else set up plotting */
@@ -1263,7 +1265,7 @@ int mbedit_action_done(
 
 	/* if quitting let the world know... */
 	if (*quit == MB_YES && verbose >= 1)
-		fprintf(stderr,"\nShutting MBedit down without further ado...\n");
+		fprintf(stderr,"\nShutting MBeditold down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
@@ -1272,7 +1274,7 @@ int mbedit_action_done(
 
 	/* if quitting let the world know... */
 	if (*quit == MB_YES && verbose >= 1)
-		fprintf(stderr,"\nQuitting MBedit\nBye Bye...\n");
+		fprintf(stderr,"\nQuitting MBeditold\nBye Bye...\n");
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1320,7 +1322,7 @@ int mbedit_action_quit(
 
 	/* let the world know... */
 	if (verbose >= 1)
-		fprintf(stderr,"\nShutting MBedit down without further ado...\n");
+		fprintf(stderr,"\nShutting MBeditold down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
@@ -1329,7 +1331,7 @@ int mbedit_action_quit(
 
 	/* let the world know... */
 	if (verbose >= 1)
-		fprintf(stderr,"\nQuitting MBedit\nBye Bye...\n");
+		fprintf(stderr,"\nQuitting MBeditold\nBye Bye...\n");
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -3387,7 +3389,7 @@ int mbedit_action_filter_all(
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
 		{
-		do_message_on("MBedit is applying bathymetry filters...");
+		do_message_on("MBeditold is applying bathymetry filters...");
 		/* filter all pings in buffer */
 		for (i=current_id;i<nlist;i++)
 		    {
@@ -3795,7 +3797,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 		}
 
 	/* reset message */
-	do_message_on("MBedit is opening a data file...");	
+	do_message_on("MBeditold is opening a data file...");	
 
 	/* get filenames */
 	strcpy(ifile,file);
@@ -4009,7 +4011,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 		    else if (neditsave > 0)
 		    	{
 			/* reset message */
-			sprintf(notice, "MBedit is sorting %d old edits...", neditsave);
+			sprintf(notice, "MBeditold is sorting %d old edits...", neditsave);
 			do_message_on(notice);	
 
 	    	  	error = MB_ERROR_NO_ERROR;
@@ -4019,7 +4021,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 			    /* reset message */
 			    if ((i+1)%10000 == 0)
 				{
-				sprintf(notice, "MBedit has sorted %d of %d old edits...", i+1, neditsave);
+				sprintf(notice, "MBeditold has sorted %d of %d old edits...", i+1, neditsave);
 				do_message_on(notice);
 				}
 
@@ -4250,7 +4252,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
 			{
 			/* turn message on */
-			do_message_on("MBedit is dumping data...");
+			do_message_on("MBeditold is dumping data...");
 
 			status = mb_buffer_dump(verbose,
 					buff_ptr,ombio_ptr,
@@ -4260,7 +4262,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 		else
 			{
 			/* turn message on */
-			do_message_on("MBedit is clearing data...");
+			do_message_on("MBeditold is clearing data...");
 
 			status = mb_buffer_clear(verbose,
 					buff_ptr,imbio_ptr,
@@ -4337,7 +4339,7 @@ int mbedit_load_data(int buffer_size,
 		}
 		
 	/* turn message on */
-	do_message_on("MBedit is loading data...");
+	do_message_on("MBeditold is loading data...");
 
 	/* load data into buffer */
 	status = mb_buffer_load(verbose,buff_ptr,imbio_ptr,buffer_size,
@@ -4403,7 +4405,7 @@ int mbedit_load_data(int buffer_size,
 	if (neditsave > 0)
 		{
 		/* reset message */
-		do_message_on("MBedit is applying saved edits...");
+		do_message_on("MBeditold is applying saved edits...");
 		
 		/* loop over each data record, checking each edit */
 		firstedit = 0;
@@ -4501,7 +4503,7 @@ int mbedit_load_data(int buffer_size,
 		|| filter_wrongside == MB_YES)
 		{
 		/* reset message */
-		do_message_on("MBedit is applying bathymetry filters...");
+		do_message_on("MBeditold is applying bathymetry filters...");
 		
 		/* loop over each data record, checking each edit */
 		for (i = 0; i < nlist; i++)

@@ -1,19 +1,28 @@
-.TH mbedit l "6 March 2000" "MB-System 4.6" "MB-System 4.6"
+.TH mbeditold l "16 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
+\fBmbeditold\fP - Old interactive editor used to flag bad 
+bathymetry values in swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
-\fBmbedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
+\fBmbeditold\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
 \fB-D\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fIformat\fP \fB -G -I\fIinfile\fP \fB-O\fIoutfile\fP \fB-S -V -H\fP]
 
 .SH DESCRIPTION
-\fBMBedit\fP is an interactive editor used to identify and flag 
-artifacts in swath sonar bathymetry data. Once a file has been
-read in, \fBMBedit\fP displays the bathymetry profiles
+\fBMBeditold\fP is the old version of 
+an interactive editor used to identify and flag 
+artifacts in swath sonar bathymetry data. The current
+version of \fBmbedit\fP works in conjunction with
+the \fBmbprocess\fP utility and uses a different i/o scheme.
+This version has been retained for compatibility with 
+previous releases of \fBMB-System\fP, but may be dropped
+from future releases.
+
+Once a file has been
+read in, \fBMBeditold\fP displays the bathymetry profiles
 from several pings, allowing the user to identify and flag anomalous
 beams. In extreme circumstances,
 pings may be zeroed (see "KEYBOARD ACTIONS"). In the default mode
@@ -67,7 +76,7 @@ The middle and right mouse buttons allow the user to step forward
 and backward, respectively, through the data file. The \fBForward\fP
 and \fBReverse\fP buttons provide a duplicate stepping capability. 
 
-\fBMBedit\fP can hold up to 5000 data records at a time in memory.
+\fBMBeditold\fP can hold up to 5000 data records at a time in memory.
 Many data formats include data
 records in addition to those containing bathymetry data (e.g.
 comment, sonar parameter, or navigation records). Thus, the number
@@ -76,7 +85,7 @@ the total number of records loaded. Also, the record id numbers
 shown on the ping labels may not be sequential. In the case that
 a data file contains more data records than can be held in memory,
 users will find it necessary to step through multiple buffers of
-data. The \fBNext Buffer\fP button will cause \fBMBedit\fP to
+data. The \fBNext Buffer\fP button will cause \fBMBeditold\fP to
 dump the current buffer contents and read in a new set of data.
 The handling of buffered data is set 
 using the \fBBuffer Controls\fP dialog accessed by pulling down the
@@ -89,7 +98,7 @@ maximum buffer size to a smaller number using the
 slider sets the number of data records
 retained from the old buffer when more data are loaded. Clicking on
 the \fBDone\fP button rather than the \fBNext Buffer\fP button will
-cause \fBMBedit\fP to dump the rest of the input data file directly
+cause \fBMBeditold\fP to dump the rest of the input data file directly
 to the output file without making the bathymetry available for editing.
 The output data file always contains all of the data records in the
 input file, regardless of whether all the data was actually edited.
@@ -100,12 +109,12 @@ by pulling down the \fBGo to a specified time...\fP menu item from the
 allows the user to specify the time of a particular ping to be viewed.
 The first ping with a time tag later than or equal to the specified time
 is then displayed, providing such a ping is available. If an appropriate
-ping is not available in the current buffer, \fBMBedit\fP will dump
+ping is not available in the current buffer, \fBMBeditold\fP will dump
 and load buffers of data until such a ping is found or the end of the
 file is reached. Thus, specifying an incorrect "go to" time may cause
-\fBMBedit\fP to close the file. Caution is advised in using this feature.
+\fBMBeditold\fP to close the file. Caution is advised in using this feature.
 
-\fBMBedit\fP creates "edit save" files containing a list of each
+\fBMBeditold\fP creates "edit save" files containing a list of each
 edit command executed during an editing session. These files are
 given names consisting of the input filename appended with ".mbesf".
 In the event that a computer or program crash interrupts an edit,
@@ -113,7 +122,7 @@ the edit save files contain all information required to recover the
 potentially lost work. If a user seeks to open a swath sonar data 
 file and an associated edit save file already exists, the user is
 given an option to apply the saved edits to the data as it is loaded.
-If the saved edits are to be applied, \fBMBedit\fP copies the edit
+If the saved edits are to be applied, \fBMBeditold\fP copies the edit
 save file to a file named "mbedit_tmp.mbesf" and reads the saved
 edits from that second file.
 If the user chooses not to apply the saved edits, those edits will
@@ -165,7 +174,7 @@ Default: \fIformat\fP = 11.
 .B \-G
 This flag causes the program to treat the \fBDone\fP button as
 equivalent to the \fBQuit\fP button. This option is used when
-\fBMBedit\fP is started automatically by some other process and
+\fBMBeditold\fP is started automatically by some other process and
 only a single file is to edited.
 .TP
 .B \-H
@@ -176,7 +185,7 @@ of its operation and then exit immediately.
 \fIinfile\fP
 .br
 Sets the data file from which the input data will be read at startup.
-This option is usually used only when \fBMBedit\fP is started
+This option is usually used only when \fBMBeditold\fP is started
 automatically from some other process. The \fB-F\fP option should
 also be used to set the data format id. If the \fB-B\fP option is
 not used to specify browse mode and the \fB-O\fP option is
@@ -191,7 +200,7 @@ be \fIinfile\fP with ".ed" appended.
 \fIoutfile\fP
 .br
 Sets the output data file to be used at startup. 
-This option is usually used only when \fBMBedit\fP is started
+This option is usually used only when \fBMBeditold\fP is started
 automatically from some other process and the \fB-I\fP option is
 used to specify a startup input data file.
 .TP
@@ -202,9 +211,9 @@ read at startup, as specified with the \fB-I\fP option. If the
 startup input data file, the edit save file will be used. 
 .TP
 .B \-V
-Normally, \fBMBedit\fP outputs information to the stderr stream
+Normally, \fBMBeditold\fP outputs information to the stderr stream
 regarding the number of records loaded and dumped.  If the
-\fB-V\fP flag is given, then \fBMBedit\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBMBeditold\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages, 
 and a large amount of other information including all of the
 beams flagged or zeroed.
@@ -244,10 +253,10 @@ the same name. These dialogs are discussed below.
 This menu item brings up a dialog which allows the user to
 specify the time of a particular ping to be displayed.  Once the
 year, month, day, hour, minute, and second values are entered, clicking
-the \fBApply\fP button causes \fBmbedit\fP to seek the specified
+the \fBApply\fP button causes \fBMBeditold\fP to seek the specified
 target time.  If the current data buffer begins after the target
 time, an error is returned.  If the target time is later than the
-end of the current data buffer, then \fBmbedit\fP will dump and
+end of the current data buffer, then \fBMBeditold\fP will dump and
 load buffers until the target time is reached or the data file ends.
 If the end of the file is reached during the search, the file will
 be closed.
@@ -461,10 +470,10 @@ while the left mouse button is held down to be unflagged.
 The edit mode can also be set using the \fBMode\fP button.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbclean\fP(l), 
+\fBmbsystem\fP(l), \fBmbedit\fP(l), \fBmbclean\fP(l), 
 \fBmbunclean\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
-This program is only fun when the data are good. The main
-window for \fBmbedit\fP is too large for use on screens
-smaller than 1024 X 768 pixels.
+This version of the program is a memory hog because it
+stores everything, and it will probably be dropped from
+future releases of \fBMB-System\fP.

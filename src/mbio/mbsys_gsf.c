@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_gsf.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,25 +20,13 @@
  * data in files include
  *      MBF_ELUNB : MBIO ID 92
  *
- * These functions include:
- *   mbsys_gsf_alloc	  - allocate memory for mbsys_gsf_struct structure
- *   mbsys_gsf_deall	  - deallocate memory for mbsys_gsf_struct structure
- *   mbsys_gsf_extract - extract basic data from mbsys_gsf_struct 
- *				structure
- *   mbsys_gsf_insert  - insert basic data into mbsys_gsf_struct structure
- *   mbsys_gsf_ttimes  - extract travel time data from
- *				mbsys_gsf_struct structure
- *   mbsys_gsf_extract_nav - extract navigation data from
- *                          mbsys_gsf_struct structure
- *   mbsys_gsf_insert_nav - insert navigation data into
- *                          mbsys_gsf_struct structure
- *   mbsys_gsf_copy	  - copy data in one mbsys_gsf_struct structure
- *   				into another mbsys_gsf_struct structure
- *
  * Author:	D. W. Caress
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.6  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -72,6 +60,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -87,7 +76,7 @@
 int mbsys_gsf_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -977,11 +966,11 @@ int mbsys_gsf_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_gsf_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_gsf_altitude";
+	char	*function_name = "mbsys_gsf_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
@@ -1466,6 +1455,171 @@ int mbsys_gsf_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		mb_ping->roll = roll;
 		mb_ping->pitch = pitch;
 		mb_ping->heave = heave;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_gsf_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind, int *nsvp,
+		double *depth, double *velocity,
+		int *error)
+{
+	char	*function_name = "mbsys_gsf_extract_svp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSVP		    *svp;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	records = &(store->records);
+	dataID = &(store->dataID);
+	svp = &(records->svp);
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_VELOCITY_PROFILE)
+		{
+		/* get number of depth-velocity pairs */
+		*nsvp = svp->number_points;
+		
+		/* get profile */
+		for (i=0;i<*nsvp;i++)
+			{
+			depth[i] = svp->depth[i];
+			velocity[i] = svp->sound_speed[i];
+			}
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
+		fprintf(stderr,"dbg2       nsvp:              %d\n",*nsvp);
+		for (i=0;i<*nsvp;i++)
+		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_gsf_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+		int nsvp,
+		double *depth, double *velocity,
+		int *error)
+{
+	char	*function_name = "mbsys_gsf_insert_svp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSVP		    *svp;
+	int	kind;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       nsvp:       %d\n",nsvp);
+		for (i=0;i<nsvp;i++)
+		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	records = &(store->records);
+	dataID = &(store->dataID);
+	svp = &(records->svp);
+
+	/* insert data in structure */
+	if (store->kind == MB_DATA_VELOCITY_PROFILE)
+		{
+		/* allocate memory if required */
+		if (nsvp > svp->number_points
+		    || svp->depth == NULL
+		    || svp->sound_speed == NULL)
+		    {
+		    svp->depth = (double *) realloc(svp->depth, nsvp * sizeof(double));
+		    svp->sound_speed = (double *) realloc(svp->sound_speed, nsvp * sizeof(double));
+		    }
+
+		/* get number of depth-velocity pairs */
+		svp->number_points = nsvp;
+		
+		/* get profile */
+		for (i=0;i<svp->number_points;i++)
+			{
+			svp->depth[i] = depth[i];
+			svp->sound_speed[i] = velocity[i];
+			}
 		}
 
 	/* print output debug statements */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_write_init.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.16  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -142,7 +145,7 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -203,8 +206,10 @@ int mb_write_init(int verbose,
 					&mb_io_ptr->mb_io_insert, 
 					&mb_io_ptr->mb_io_extract_nav, 
 					&mb_io_ptr->mb_io_insert_nav, 
-					&mb_io_ptr->mb_io_altitude, 
+					&mb_io_ptr->mb_io_extract_altitude, 
 					&mb_io_ptr->mb_io_insert_altitude, 
+					&mb_io_ptr->mb_io_extract_svp, 
+					&mb_io_ptr->mb_io_insert_svp, 
 					&mb_io_ptr->mb_io_ttimes, 
 					&mb_io_ptr->mb_io_copyrecord, 
 					error); 

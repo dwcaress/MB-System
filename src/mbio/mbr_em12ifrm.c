@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.0 2000-12-10 20:24:25 caress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/10  20:24:25  caress
+ * Initial revision.
+ *
  *
  */
 
@@ -81,8 +84,10 @@ int mbr_info_em12ifrm(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error);
@@ -120,13 +125,15 @@ int mbr_info_em12ifrm(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.0 2000-12-10 20:24:25 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -171,8 +178,10 @@ int mbr_info_em12ifrm(int verbose,
 	*insert = &mbsys_simrad_insert; 
 	*extract_nav = &mbsys_simrad_extract_nav; 
 	*insert_nav = &mbsys_simrad_insert_nav; 
-	*altitude = &mbsys_simrad_altitude; 
-	*insert_altitude = NULL;
+	*extract_altitude = &mbsys_simrad_extract_altitude; 
+	*insert_altitude = NULL; 
+	*extract_svp = NULL; 
+	*insert_svp = NULL; 
 	*ttimes = &mbsys_simrad_ttimes; 
 	*copyrecord = &mbsys_simrad_copy; 
 
@@ -210,8 +219,10 @@ int mbr_info_em12ifrm(int verbose,
 		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
 		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
 		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -227,7 +238,7 @@ int mbr_info_em12ifrm(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.0 2000-12-10 20:24:25 caress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

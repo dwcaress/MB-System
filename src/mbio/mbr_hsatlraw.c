@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.17  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -157,8 +160,10 @@ int mbr_info_hsatlraw(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error);
@@ -196,13 +201,15 @@ int mbr_info_hsatlraw(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsatlraw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_hsatlraw.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_info_hsatlraw";
 	int	status = MB_SUCCESS;
 
@@ -247,8 +254,10 @@ int mbr_info_hsatlraw(int verbose,
 	*insert = &mbsys_hsds_insert; 
 	*extract_nav = &mbsys_hsds_extract_nav; 
 	*insert_nav = &mbsys_hsds_insert_nav; 
-	*altitude = &mbsys_hsds_altitude; 
+	*extract_altitude = &mbsys_hsds_extract_altitude; 
 	*insert_altitude = NULL; 
+	*extract_svp = &mbsys_hsds_extract_svp; 
+	*insert_svp = &mbsys_hsds_insert_svp; 
 	*ttimes = &mbsys_hsds_ttimes; 
 	*copyrecord = &mbsys_hsds_copy; 
 
@@ -286,8 +295,10 @@ int mbr_info_hsatlraw(int verbose,
 		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
 		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
 		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -303,7 +314,7 @@ int mbr_info_hsatlraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsatlraw(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -2021,7 +2032,7 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp,
 		mb_get_int(    &(data->hour),       line+32+shift,  2);
 		mb_get_int(    &(data->minute),     line+34+shift,  2);
 		mb_get_int(    &(data->second),     line+36+shift,  2);
-		mb_get_double( &(data->num_vel),    line+38+shift,  2);
+		mb_get_int(    &(data->num_vel),    line+38+shift,  2);
 		}
 
 	if (status == MB_SUCCESS)
@@ -2449,7 +2460,7 @@ int mbr_hsatlraw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_wr_label(int verbose, char *mbfp, char type, int *error)
+int	mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_label";
 	int	status = MB_SUCCESS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,27 +21,13 @@
  *      MBF_EM300RAW : MBIO ID 56
  *      MBF_EM300MBA : MBIO ID 57
  *
- * These functions include:
- *   mbsys_simrad2_alloc       - allocate memory for mbsys_simrad2_struct structure
- *   mbsys_simrad2_deall       - deallocate memory for mbsys_simrad2_struct structure
- *   mbsys_simrad2_extract     - extract basic data from mbsys_simrad2_struct 
- *				 structure
- *   mbsys_simrad2_insert      - insert basic data into mbsys_simrad2_struct structure
- *   mbsys_simrad2_ttimes      - extract travel time data from
- *				 mbsys_simrad2_struct structure
- *   mbsys_simrad2_altitude    - extract transducer depth and altitude from
- *				 mbsys_simrad2_struct structure
- *   mbsys_simrad2_extract_nav - extract navigation data from
- *                               mbsys_simrad2_struct structure
- *   mbsys_simrad2_insert_nav  - insert navigation data into
- *                               mbsys_simrad2_struct structure
- *   mbsys_simrad2_copy	       - copy data in one mbsys_simrad2_struct structure
- *   				 into another mbsys_simrad2_struct structure
- *
  * Author:	D. W. Caress
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -76,7 +62,7 @@
 int mbsys_simrad2_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -391,7 +377,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -439,11 +425,11 @@ int mbsys_simrad2_survey_alloc(int verbose,
 				/* sequential counter or input identifier */
 		ping->png_serial = 0;	
 				/* system 1 or system 2 serial number */
-		ping->png_latitude = 0;
+		ping->png_latitude = EM2_INVALID_INT;
 				/* latitude in decimal degrees * 20000000
 				    (negative in southern hemisphere) 
 				    if valid, invalid = 0x7FFFFFFF */
-		ping->png_longitude = 0;
+		ping->png_longitude = EM2_INVALID_INT;
 				/* longitude in decimal degrees * 10000000
 				    (negative in western hemisphere) 
 				    if valid, invalid = 0x7FFFFFFF */
@@ -617,7 +603,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -705,7 +691,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -893,8 +879,14 @@ int mbsys_simrad2_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = 0.0000001 * ping->png_longitude;
-		*navlat = 0.00000005 * ping->png_latitude;
+		if (ping->png_longitude != EM2_INVALID_INT)
+		    *navlon = 0.0000001 * ping->png_longitude;
+		else
+		    *navlon = 0.0;
+		if (ping->png_latitude != EM2_INVALID_INT)
+		    *navlat = 0.00000005 * ping->png_latitude;
+		else
+		    *navlat = 0.0;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -1041,8 +1033,14 @@ int mbsys_simrad2_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = 0.0000001 * store->pos_longitude;
-		*navlat = 0.00000005 * store->pos_latitude;
+		if (store->pos_longitude != EM2_INVALID_INT)
+		    *navlon = 0.0000001 * store->pos_longitude;
+		else
+		    *navlon = 0.0;
+		if (store->pos_latitude != EM2_INVALID_INT)
+		    *navlat = 0.00000005 * store->pos_latitude;
+		else
+		    *navlat = 0.0;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -1620,11 +1618,11 @@ int mbsys_simrad2_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_simrad2_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_simrad2_altitude";
+	char	*function_name = "mbsys_simrad2_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
@@ -1793,8 +1791,14 @@ int mbsys_simrad2_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = 0.0000001 * ping->png_longitude;
-		*navlat = 0.00000005 * ping->png_latitude;
+		if (ping->png_longitude != EM2_INVALID_INT)
+		    *navlon = 0.0000001 * ping->png_longitude;
+		else
+		    *navlon = 0.0;
+		if (ping->png_latitude != EM2_INVALID_INT)
+		    *navlat = 0.00000005 * ping->png_latitude;
+		else
+		    *navlat = 0.0;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -1901,8 +1905,14 @@ int mbsys_simrad2_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = 0.0000001 * store->pos_longitude;
-		*navlat = 0.00000005 * store->pos_latitude;
+		if (store->pos_longitude != EM2_INVALID_INT)
+		    *navlon = 0.0000001 * store->pos_longitude;
+		else
+		    *navlon = 0.0;
+		if (store->pos_latitude != EM2_INVALID_INT)
+		    *navlat = 0.00000005 * store->pos_latitude;
+		else
+		    *navlat = 0.0;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -2188,6 +2198,151 @@ int mbsys_simrad2_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_simrad2_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind, int *nsvp,
+		double *depth, double *velocity,
+		int *error)
+{
+	char	*function_name = "mbsys_simrad2_extract_svp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_VELOCITY_PROFILE)
+		{
+		/* get number of depth-velocity pairs */
+		*nsvp = store->svp_num;
+		
+		/* get profile */
+		for (i=0;i<*nsvp;i++)
+			{
+			depth[i] = 0.01 * store->svp_depth_res * store->svp_depth[i];
+			velocity[i] = 0.1 * store->svp_vel[i];
+			}
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
+		fprintf(stderr,"dbg2       nsvp:              %d\n",*nsvp);
+		for (i=0;i<*nsvp;i++)
+		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad2_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+		int nsvp,
+		double *depth, double *velocity,
+		int *error)
+{
+	char	*function_name = "mbsys_simrad2_insert_svp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	int	kind;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       nsvp:       %d\n",nsvp);
+		for (i=0;i<nsvp;i++)
+		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* insert data in structure */
+	if (store->kind == MB_DATA_VELOCITY_PROFILE)
+		{
+		/* get number of depth-velocity pairs */
+		store->svp_num = MIN(nsvp, MBSYS_SIMRAD2_MAXSVP);
+		store->svp_depth_res = 1;
+		
+		/* get profile */
+		for (i=0;i<store->svp_num;i++)
+			{
+			store->svp_depth[i] = (int) (100 * depth[i] / store->svp_depth_res);
+			store->svp_vel[i] = (int) (10 * velocity[i]);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_simrad2_copy(int verbose, char *mbio_ptr, 
 			char *store_ptr, char *copy_ptr,
 			int *error)
@@ -2320,6 +2475,316 @@ int mbsys_simrad2_copy(int verbose, char *mbio_ptr,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad2_makess(int verbose, char *mbio_ptr, char *store_ptr,
+		int pixel_size_set, double *pixel_size, 
+		int swath_width_set, double *swath_width, 
+		int pixel_int, 
+		int *error)
+{
+	char	*function_name = "mbsys_simrad2_makess";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_ping_struct *ping;
+	double	ss[MBSYS_SIMRAD2_MAXPIXELS];
+	int	ss_cnt[MBSYS_SIMRAD2_MAXPIXELS];
+	double	ssacrosstrack[MBSYS_SIMRAD2_MAXPIXELS];
+	double	ssalongtrack[MBSYS_SIMRAD2_MAXPIXELS];
+	mb_s_char *beam_ss;
+	int	nbathsort;
+	double	bathsort[MBSYS_SIMRAD2_MAXBEAMS];
+	double	depthscale, depthoffset;
+	double	dacrscale, daloscale;
+	double	reflscale;
+	double	ssoffset;
+	double  pixel_size_calc;
+	double	ss_spacing;
+	int	pixel_int_use;
+	double	xtrack;
+	int	first, last, k1, k2;
+	int	i, j, k, jj, kk, l, m;
+
+	/* compare function for qsort */
+	int mb_double_compare();
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:        %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:       %d\n",store_ptr);
+		fprintf(stderr,"dbg2       pixel_size_set:  %d\n",pixel_size_set);
+		fprintf(stderr,"dbg2       pixel_size:      %f\n",*pixel_size);
+		fprintf(stderr,"dbg2       swath_width_set: %d\n",swath_width_set);
+		fprintf(stderr,"dbg2       swath_width:     %f\n",*swath_width);
+		fprintf(stderr,"dbg2       pixel_int:       %d\n",pixel_int);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* insert data in structure */
+	if (store->kind == MB_DATA_DATA)
+		{
+		/* get pointer to raw data structure */
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+
+		/* zero the sidescan */
+		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
+			{
+			ss[i] = 0.0;
+			ssacrosstrack[i] = 0.0;
+			ssalongtrack[i] = 0.0;
+			ss_cnt[i] = 0;
+			}
+
+		/* set scaling parameters */
+		depthscale = 0.01 * ping->png_depth_res;
+		depthoffset = 0.01 * ping->png_xducer_depth
+				+ 655.36 * ping->png_offset_multiplier;
+		dacrscale  = 0.01 * ping->png_distance_res;
+		daloscale  = 0.01 * ping->png_distance_res;
+		reflscale  = 0.5;
+		ssoffset = 64.0;
+		if (store->run_mode == 4)
+		    {
+		    if (depthscale * ping->png_depth[ping->png_nbeams/2] > 3500.0
+			&& ping->png_max_range > 19000
+			&& ping->png_bsn + ping->png_bso < -60)
+			{
+			ssoffset = 64.0 - 0.6 * (ping->png_bsn + ping->png_bso + 60);
+			}
+		    }
+
+		/* get median depth */
+		nbathsort = 0;
+		for (i=0;i<ping->png_nbeams;i++)
+		    {
+		    if (mb_beam_ok(ping->png_beamflag[i]))
+			{
+			bathsort[nbathsort] = depthscale 
+				* ping->png_depth[i]
+				    + depthoffset;
+			nbathsort++;
+			}
+		    }
+	
+		/* get sidescan pixel size */
+		if (swath_width_set == MB_NO
+		    && nbathsort > 0)
+		    {
+		    (*swath_width) = 2.5 + MAX(90.0 - 0.01 * ping->png_depression[0], 
+				    90.0 - 0.01 * ping->png_depression[ping->png_nbeams-1]);
+		    (*swath_width) = MAX((*swath_width), 60.0);
+		    }
+		if (pixel_size_set == MB_NO
+		    && nbathsort > 0)
+		    {
+		    qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
+		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2] 
+					/ MBSYS_SIMRAD2_MAXPIXELS;
+		    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
+		    if ((*pixel_size) <= 0.0)
+			(*pixel_size) = pixel_size_calc;
+		    else if (0.95 * (*pixel_size) > pixel_size_calc)
+			(*pixel_size) = 0.95 * (*pixel_size);
+		    else if (1.05 * (*pixel_size) < pixel_size_calc)
+			(*pixel_size) = 1.05 * (*pixel_size);
+		    else
+			(*pixel_size) = pixel_size_calc;
+		    }
+
+		/* get raw pixel size */
+		if (store->sonar == 300 || store->sonar == 3000)
+		    ss_spacing = 750.0 / ping->png_sample_rate;
+		else
+		    ss_spacing = 750.0 / 14000;
+		    
+		/* get pixel interpolation */
+		pixel_int_use = pixel_int + 1;
+
+		/* loop over raw sidescan, putting each raw pixel into
+			the binning arrays */
+		for (i=0;i<ping->png_nbeams_ss;i++)
+			{
+			beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
+			j = ping->png_beam_num[i] - 1;
+			if (mb_beam_ok(ping->png_beamflag[i]))
+			    for (k=0;k<ping->png_beam_samples[i];k++)
+				{
+				if (beam_ss[k] != EM2_INVALID_AMP)
+					{
+					/* interpolate based on range */
+					if (k == ping->png_center_sample[i])
+					    {
+					    xtrack = dacrscale * ping->png_acrosstrack[i];
+					    }
+					else if (i == ping->png_nbeams_ss - 1 
+					    || (k <= ping->png_center_sample[i]
+						&& i != 0))
+					    {
+					    if (ping->png_range[i] != ping->png_range[i-1])
+						{
+						jj = ping->png_beam_num[i-1] - 1;
+						xtrack = dacrscale * ping->png_acrosstrack[i]
+						    + (dacrscale * ping->png_acrosstrack[i]
+							- dacrscale * ping->png_acrosstrack[i-1])
+						    * 2 *((double)(k - ping->png_center_sample[i]))
+						    / fabs((double)(ping->png_range[i] - ping->png_range[i-1]));
+						}
+					    else
+						{
+						xtrack = dacrscale * ping->png_acrosstrack[i]
+						    + ss_spacing * (k - ping->png_center_sample[i]);
+						}
+					    }
+					else
+					    {
+					    if (ping->png_range[i] != ping->png_range[i+1])
+						{
+						jj = ping->png_beam_num[i+1] - 1;
+						    
+						xtrack = dacrscale * ping->png_acrosstrack[i]
+						    + (dacrscale * ping->png_acrosstrack[i+1]
+							- dacrscale * ping->png_acrosstrack[i])
+						    * 2 *((double)(k - ping->png_center_sample[i]))
+						    / fabs((double)(ping->png_range[i+1] - ping->png_range[i]));
+						}
+					    else
+						{
+						xtrack = dacrscale * ping->png_acrosstrack[i]
+						    + ss_spacing * (k - ping->png_center_sample[i]);
+						}
+					    }
+					kk = MBSYS_SIMRAD2_MAXPIXELS / 2 
+					    + (int)(xtrack / (*pixel_size));
+					if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
+					    {
+					    ss[kk]  += reflscale*((double)beam_ss[k]) + ssoffset;
+					    ssalongtrack[kk] 
+						    += daloscale * ping->png_alongtrack[i];
+					    ss_cnt[kk]++;
+					    }
+					}
+				}
+			}
+			
+		/* average the sidescan */
+		first = MBSYS_SIMRAD2_MAXPIXELS;
+		last = -1;
+		for (k=0;k<MBSYS_SIMRAD2_MAXPIXELS;k++)
+			{
+			if (ss_cnt[k] > 0)
+				{
+				ss[k] /= ss_cnt[k];
+				ssalongtrack[k] /= ss_cnt[k];
+				ssacrosstrack[k] 
+					= (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
+						* (*pixel_size);
+				first = MIN(first, k);
+				last = k;
+				}
+			}
+			
+		/* interpolate the sidescan */
+		k1 = first;
+		k2 = first;
+		for (k=first+1;k<last;k++)
+		    {
+		    if (ss_cnt[k] <= 0)
+			{
+			if (k2 <= k)
+			    {
+			    k2 = k+1;
+			    while (ss_cnt[k2] <= 0 && k2 < last)
+				k2++;
+			    }
+			if (k2 - k1 <= pixel_int_use)
+			    {
+			    ss[k] = ss[k1]
+				+ (ss[k2] - ss[k1])
+				    * ((double)(k - k1)) / ((double)(k2 - k1));
+			    ssacrosstrack[k] 
+				    = (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
+					    * (*pixel_size);
+			    ssalongtrack[k] = ssalongtrack[k1]
+				+ (ssalongtrack[k2] - ssalongtrack[k1])
+				    * ((double)(k - k1)) / ((double)(k2 - k1));
+			    }
+			}
+		    else
+			{
+			k1 = k;
+			}
+		    }
+			
+		/* insert the new sidescan into store */
+		ping->png_pixel_size = (int) (100 * (*pixel_size));
+		if (last > first)
+		    ping->png_pixels_ss = 2 * MAX(MBSYS_SIMRAD2_MAXPIXELS/2 - first, 
+					last - MBSYS_SIMRAD2_MAXPIXELS/2);
+		else 
+		    ping->png_pixels_ss = 0;
+		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
+		    {
+		    ping->png_ss[i] = (short)(100 * ss[i]);
+		    ping->png_ssalongtrack[i] 
+			    = (short)(ssalongtrack[i] / daloscale);
+		    }
+
+		/* print debug statements */
+		if (verbose >= 2)
+			{
+			fprintf(stderr,"\ndbg2  Sidescan regenerated in <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg2       png_nbeams_ss: %d\n",
+				ping->png_nbeams_ss);
+			for (i=0;i<ping->png_nbeams_ss;i++)
+			  fprintf(stderr,"dbg2       beam:%d  flag:%3d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+				ping->png_beam_num[i],
+				ping->png_beamflag[i],
+				ping->png_depth[i],
+				ping->png_amp[i],
+				ping->png_acrosstrack[i],
+				ping->png_alongtrack[i]);
+			fprintf(stderr,"dbg2       pixels_ss:  %d\n",
+				MBSYS_SIMRAD2_MAXPIXELS);
+			for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
+			  fprintf(stderr,"dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n",
+				i,ss_cnt[i],ss[i],
+				ssacrosstrack[i],
+				ssalongtrack[i]);
+			fprintf(stderr,"dbg2       pixels_ss:  %d\n",
+				ping->png_pixels_ss);
+			for (i=0;i<ping->png_pixels_ss;i++)
+			  fprintf(stderr,"dbg2       pixel:%4d  ss:%8d  ltrack:%8d\n",
+				i,ping->png_ss[i],ping->png_ssalongtrack[i]);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       pixel_size:      %f\n",*pixel_size);
+		fprintf(stderr,"dbg2       swath_width:     %f\n",*swath_width);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
 		}
 
 	/* return status */

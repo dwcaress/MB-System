@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hs10.c	12/4/00
- *	$Id: mbsys_hs10.c,v 5.0 2000-12-10 20:24:25 caress Exp $
+ *	$Id: mbsys_hs10.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,23 +19,13 @@
  * The data formats which are commonly used to store HS-10
  * data in files include
  *      MBF_HS10JAMS : MBIO ID 171
- * These functions include:
- *   mbsys_hs10_alloc	- allocate memory for mbsys_hs10_struct structure
- *   mbsys_hs10_deall	- deallocate memory for mbsys_hs10_struct structure
- *   mbsys_hs10_extract	- extract basic data from mbsys_hs10_struct structure
- *   mbsys_hs10_insert	- insert basic data into mbsys_hs10_struct structure
- *   mbsys_hs10_ttimes  - extract travel time and beam angle data from
- *                        mbsys_hs10_struct structure
- *   mbsys_hs10_extract_nav - extract navigation data from
- *                          mbsys_hs10_struct structure
- *   mbsys_hs10_insert_nav - insert navigation data into
- *                          mbsys_hs10_struct structure
- *   mbsys_hs10_copy	- copy data in one mbsys_hs10_struct structure
- *   				into another mbsys_hs10_struct structure
  *
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/10  20:24:25  caress
+ * Initial revision.
+ *
  *
  */
 
@@ -55,7 +45,7 @@
 int mbsys_hs10_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hs10.c,v 5.0 2000-12-10 20:24:25 caress Exp $";
+ static char res_id[]="$Id: mbsys_hs10.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_hs10_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -644,11 +634,11 @@ int mbsys_hs10_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hs10_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hs10_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_hs10_altitude";
+	char	*function_name = "mbsys_hs10_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.2 2000-12-21 00:44:15 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.3 2001-01-22 07:45:59 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2000/12/21  00:44:15  caress
+ * Changed decimation from import parameter to contouring/gridding parameter.
+ *
  * Revision 5.1  2000/12/10  20:29:34  caress
  * Version 5.0.alpha02
  *
@@ -86,20 +89,21 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.2 2000-12-21 00:44:15 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.3 2001-01-22 07:45:59 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
+char	*error_message;
 char	message[STRING_MAX];
 char	error1[STRING_MAX];
 char	error2[STRING_MAX];
 char	error3[STRING_MAX];
 
 /* data file parameters */
-struct mb_datalist_struct *datalist;
+char	*datalist;
 int	format;
 
 /* MBIO control parameters */
@@ -198,7 +202,6 @@ int	*gridnm = NULL;
 /* system function declarations */
 char	*ctime();
 char	*getenv();
-char	*strstr();
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_init_globals()
@@ -1509,7 +1512,6 @@ int mbnavadjust_import_file(char *path, int format)
 	double	headingx, headingy, mtodeglon, mtodeglat;
 	double	lon, lat, depth;
 	double	navlon_old, navlat_old;
-	char	*error_message;
 	FILE	*nfp;
 	struct mbna_file *file, *cfile;
 	struct mbna_crossing *crossing;
@@ -1645,9 +1647,9 @@ int mbnavadjust_import_file(char *path, int format)
 		/* if error initializing memory then don't read the file */
 		if (error != MB_ERROR_NO_ERROR)
 			{
-			mb_error(mbna_verbose,error,&message);
+			mb_error(mbna_verbose,error,&error_message);
 			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-				message);
+				error_message);
 			}
  		}
 
@@ -1934,9 +1936,9 @@ section->distance, distance, project.section_length);*/
 					/* if error initializing memory then don't write the file */
 					if (error != MB_ERROR_NO_ERROR)
 						{
-						mb_error(mbna_verbose,error,&message);
+						mb_error(mbna_verbose,error,&error_message);
 						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-							message);
+							error_message);
 						status = mb_free(mbna_verbose,&ostore->beamflag,&error);
 						status = mb_free(mbna_verbose,&ostore->bath,&error);
 						status = mb_free(mbna_verbose,&ostore->bath_acrosstrack,&error);
@@ -2177,9 +2179,9 @@ beams_bath,beams_amp,pixels_ss);*/
 				    /* if error initializing memory then don't read the file */
 				    if (error != MB_ERROR_NO_ERROR)
 					{
-					mb_error(mbna_verbose,error,&message);
+					mb_error(mbna_verbose,error,&error_message);
 					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-						message);
+						error_message);
 					}
 				    }
 				    
@@ -3445,7 +3447,6 @@ int mbnavadjust_crossing_load()
 	struct mbna_section *section1, *section2;
 	char	path1[STRING_MAX], path2[STRING_MAX];
 	int	done, pings_read;
-	char	*error_message;
    	int	i;
 
  	/* print input debug statements */
@@ -3524,8 +3525,8 @@ int mbnavadjust_crossing_load()
 				&mbna_mtodeglon,&mbna_mtodeglat);
 			
 		/* load sections */
-		status = mbnavadjust_section_load(path1, &swathraw1, &swath1, section1->num_pings);
-		status = mbnavadjust_section_load(path2, &swathraw2, &swath2, section2->num_pings);
+		status = mbnavadjust_section_load(path1, (void **) &swathraw1, &swath1, section1->num_pings);
+		status = mbnavadjust_section_load(path2, (void **) &swathraw2, &swath2, section2->num_pings);
 			
 		/* get lon lat positions for soundings */
 		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1);
@@ -3706,7 +3707,6 @@ int mbnavadjust_crossing_replot()
 	struct mbna_section *section1, *section2;
 	char	path1[STRING_MAX], path2[STRING_MAX];
 	int	done, pings_read;
-	char	*error_message;
    	int	i;
 
  	/* print input debug statements */
@@ -3762,7 +3762,6 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 	double	tick_len_map, label_hgt_map;
 	int	done, pings_read;
 	double	mtodeglon, mtodeglat, headingx, headingy;
-	char	*error_message;
    	int	i;
 
  	/* print input debug statements */
@@ -3852,8 +3851,8 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR)
 				{
-				mb_error(mbna_verbose,error,&message);
-				fprintf(stderr,"\nMBIO Error allocating contour control structure:\n%s\n",message);
+				mb_error(mbna_verbose,error,&error_message);
+				fprintf(stderr,"\nMBIO Error allocating contour control structure:\n%s\n",error_message);
 				fprintf(stderr,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
@@ -5069,9 +5068,9 @@ mbnavadjust_invertnav()
 		/* if error initializing memory then don't invert */
 		if (error != MB_ERROR_NO_ERROR)
 			{
-			mb_error(mbna_verbose,error,&message);
+			mb_error(mbna_verbose,error,&error_message);
 			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-				message);
+				error_message);
 			}
 		}
 		

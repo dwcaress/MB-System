@@ -1,28 +1,74 @@
-.TH mbnavedit l "16 July 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbnavedit l "18 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbnavedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
 \fB-D\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat \fB-I\fIinfile \fB-P -V -H\fP]
+\fB-F\fIformat \fB-G\fP \fB-I\fIinfile \fB-N -P -T -X -V -H\fP]
 
 .SH DESCRIPTION
-\fBmbnavedit\fP is an interactive editor used to identify and fix 
-problems with the navigation of swath sonar data. Once a file has been
-read in, \fBmbnavedit\fP displays autoscaled plots of the longitude,
-latitude, speed, and heading time series, along with a plot of
-the time interval between navigation values. 
-The user may select
+\fBMBnavedit\fP is an interactive editor used to identify and fix 
+problems with the navigation of swath sonar data. 
+
+In the default mode the edited navigation is output to 
+a file with the suffix ".nve" appended to the input swath
+data filename. The program can also be operated 
+in a "browse" mode where no navigation is output.
+If saved, the edited navigation can be merged 
+with the swath data using the program \fBmbprocess\fP, which
+outputs a processed swath data file. 
+The \fBmbprocess\fP program is also used to apply
+bathymetry edits, recalculate bathymetry, and apply
+other corrections to swath bathymetry data. Users
+may cause \fBmbprocess\fP to be run automatically by
+specifying the \fB-X\fP option when starting \fBMBnavedit\fP.
+
+In previous  versions of \fBMB-System\fP 
+(version 4.6.10 or earlier), \fBMBnavedit\fP
+produced output swath data files directly by reading and
+storing all of the swath data information in memory (including
+non-survey data records). This approach limited the 
+amount of data that could be handled
+at once, frequently requiring users to process files in
+small pieces. The current version only stores 
+and outputs the navigation data.
+The previous form of \fBMBnavedit\fP is now distributed
+as \fBMBnaveditold\fP. The old version will continue to
+be supported for \fBMB-System\fP version 5.0. However,
+no improvements will be made to the old program, and
+it may be dropped from later \fBMB-System\fP distributions.
+
+Once the navigation
+from a swath data file has been
+read in, \fBMBnavedit\fP displays autoscaled plots of the longitude,
+latitude, speed, heading, and sonar depth time series, along with a plot of
+the time interval between navigation values. The user may select
 outliers and interpolate over them or, in the case of heading or
 speed data, replace the erroneous values with estimates derived 
 from "course-made-good" or "speed-made-good", respectively.
 Data can only be selected and altered in a single 
-plot at a time (this avoids
-confusion and prevents mistakes).
+plot at a time (this avoids confusion and prevents mistakes).
+
+Two algorithms for obtaining and using smooth navigation models are
+available. Replacing the original navigation with a smoothed
+version can be advantageous in some cases of very noisy 
+navigation (typically from sonars on towed platforms or 
+submerged vehicles). The first approach is simple dead reckoning 
+from the initial position using the current (possibly edited)
+heading and speed values. The dead reckoning navigation can also
+incorporate user-specified longitude and latitude drift rates.
+The second algorithm is an inversion for a smooth 
+navigation that minimizes
+speed and acceleration while fitting the original navigation
+in a least squares sense. The inversion weighting against 
+speed and acceleration are user specified, and only unaltered
+navigation values are used in the inversion (this means that
+longitude and latitude values that have previously been selected and
+interpolated are not used to generate the smooth model).
 
 The nature of the navigation data being edited depends upon the
 data format. Some data formats include the navigation in the
@@ -35,9 +81,9 @@ separate navigation records with different time stamps. This
 asynchronous navigation requires that MBIO interpolate or 
 extrapolate the navigation as the survey data records are read.
 For data formats with synchronous navigation, the navigation
-values edited using \fBmbnavedit\fP are those in the survey data
+values edited using \fBMBnavedit\fP are those in the survey data
 records. For data formats with only asynchronous navigation, 
-\fBmbnavedit\fP displays and operates on the values from the
+\fBMBnavedit\fP displays and operates on the values from the
 navigation records. The \fBMBIO\fP manual page includes a listing
 of which type of navigation is used by the supported data formats.
 
@@ -73,10 +119,10 @@ were working properly.
 
 One special case which has been encountered is a problem with
 the time stamps of survey records in data using a format with
-asynchronous navigation. In order to use \fBmbnavedit\fP to
+asynchronous navigation. In order to use \fBMBnavedit\fP to
 fix the time stamps of the survey data, one may invoke 
 the \fB-P\fP option at the command line. This forces 
-\fBmbnavedit\fP to work with interpolated synchronous navigation
+\fBMBnavedit\fP to work with interpolated synchronous navigation
 rather than the asynchronous navigation records.
 In this case, any changes made to the navigation values  will be
 lost, but changes made to the time stamps will be applied to
@@ -127,6 +173,12 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
 .TP
+.B \-G
+This flag causes \fBMBnavedit\fP to treat the \fBDone\fP button as
+equivalent to the \fBQuit\fP button. This option is used when
+\fBMBnavedit\fP is started automatically by some other process and
+only a single file is to edited.
+.TP
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
@@ -141,57 +193,165 @@ corresponds to the \fBMBIO\fP format id), then the output file name
 will have an "e.mbXX" suffix. Otherwise, the output file will
 be \fIinfile\fP with ".ed" appended.
 .TP
-.B \-I
+.B \-N
+Normally, all \fBMB-System\fP processing
+programs embed comment records describing the processing actions
+and parameters into output swath data files.
+This flag, when used in conjunction with the \fB-X\fP flag,
+causes \fBMBnavedit\fP to invoke \fBmbprocess\fP with it's
+\fB-N\fP option. In turn, this causes \fBmbprocess\fP to
+generate an output, processed swath data file without any
+comment records. 
+.TP
+.B \-O
 \fIoutfile\fP
 .br
 Sets the output data file, overriding the file naming conventions
 discussed above in the \fB-I\fP option.
 .TP
 .B \-P
-Causes \fBmbnavedit\fP to load and work with navigation from 
+Causes \fBMBnavedit\fP to load and work with navigation from 
 survey data records even if the data format uses asynchronous
 navigation records. In this case, the only edits which will
 actually be applied to the output data are changes to the
 time stamps of the survey records.
 .TP
 .B \-V
-Normally, \fBmbnavedit\fP outputs information to the stderr stream
+Normally, \fBMBnavedit\fP outputs information to the stderr stream
 regarding the number of records loaded and dumped.  If the
-\fB-V\fP flag is given, then \fBmbnavedit\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBMBnavedit\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages, 
 and a large amount of other information including all of the
 beams flagged or zeroed.
+.TP
+.B \-X
+This option causes \fBmbprocess\fP to run automatically
+on an input swath data file when the \fBMBnavedit\fP editing session
+is completed. The \fB-X\fP option effectively means that the
+corresponding processed swath data is generated or updated immediately.
+The program \fBmbprocess\fP will not be invoked if the
+editing session is in the browse mode.
 
 .SH INTERACTIVE CONTROLS
 .TP
 .B File
 This menu brings up a popup window which allows the user to
 specify the input swath sonar data file, its \fBMBIO\fP
-format id, the output mode, and the output filename. 
+format id, the output mode, and the output navigation file name. 
 This program uses the \fBMBIO\fP library and 
-will read or write any swath sonar 
+will read any swath sonar 
 format supported by \fBMBIO\fP. A list of the swath sonar data
 formats currently supported by \fBMBIO\fP and their
 identifier values is given in the \fBMBIO\fP manual page. 
 If the swath sonar data file is named using the \fBMB-System\fP
 suffix convention (format 11 files end with ".mb11", format
 41 files end with ".mb41", etc.), then the program will
-automatically use the appropriate format id and the default
-output filename will have an "e.mbXX" suffix; otherwise the
-format must be set by the user and the default output filename
-will be \fIinfile\fP with ".ed" appended.
+automatically use the appropriate format id; otherwise the
+format must be set by the user. The default output navigation filename
+will be \fIinfile\fP with ".nve" appended. Under most circumstances,
+users should use the default output filename because \fBmbprocess\fP
+expects this form.
 The popup window also allows the output mode to be set to "browse"
-so that no data is output. 
+so that the edited navigation data are not written to a file. 
 When a valid file is specified and the \fBOK\fP button
 is clicked, as much data as will fit
-into the data buffer is read and the navigition times series
+into the data buffer (25000 navigation points) 
+is read and the navigition times series
 plots are displayed.
+.TP
+.B Controls
+This button activates a pulldown menu with three buttons:
+\fBTime Stepping\fP, \fBNav Modeling\fP, and \fBTime Interpolation\fP. Each
+of these buttons brings up a dialog window containing widgets
+that set parameters or perform actions.
+.TP
+.B Controls->Time Stepping->Time Span Shown
+This slider sets the number of seconds of data shown at a time. 
+This value is also set by the \fBShow Entire Buffer\fP button (sets
+time shown to all available data) and the \fBPick Time Interval\fP
+function (sets time shown to an interactively specified interval).
+.TP
+.B Controls->Time Stepping->Time Step
+This slider sets the number of seconds to step when the \fBForward\fP
+or \fBReverse\fP buttons are pushed.
+.TP
+.B Controls->Navigation Modeling->Off
+This toggle button turns navigation modeling off.
+.TP
+.B Controls->Navigation Modeling->Dead Reckoning
+This toggle button enables dead reckoning navigation calculation.
+When this toggle button is highlighted, a dead reckoning 
+navigation model is calculated from the initial position
+using the current heading and speed data and displayed
+as a blue line in both the longitude and latitude plots.
+The \fBShow Dead Reckoning\fP toggle buttons also appear (already enabled)
+for both the longitude and latitude plots
+among the plot display toggles on the left side of the main
+\fBMBnavedit\fP window.
+.TP
+.B Controls->Navigation Modeling->Smooth Inversion
+This toggle button enables inversion for a smooth navigation 
+model which fits the original positions in a least squares
+sense while minimizing speed and acceleration.
+When this toggle button is highlighted, a smooth 
+navigation model is calculated and displayed
+as a blue line in both the longitude and latitude plots.
+The \fBShow Smooth Inversion\fP toggle buttons 
+also appear (already enabled)
+for both the longitude and latitude plots
+among the plot display toggles on the left side of the main
+\fBMBnavedit\fP window.
+.TP
+.B Controls->Navigation Modeling->Dead Reckoning Longitude Drift
+This slider sets the longitude drift rate in degrees/hour
+applied to the dead reckoning navigation calculation. If
+dead reckoning is enabled, changes
+to this slider cause the dead reckoning calculation to be
+redone and the results shown on the longitude and latitude plots.
+.TP
+.B Controls->Navigation Modeling->Dead Reckoning Latitude Drift
+This slider sets the latitude drift rate in degrees/hour
+applied to the dead reckoning navigation calculation. If
+dead reckoning is enabled, changes
+to this slider cause the dead reckoning calculation to be
+redone and the results shown on the longitude and latitude plots.
+.TP
+.B Controls->Navigation Modeling->Speed Deviation
+This text entry sets the penalty weighting against speed
+applied in the inversion for a smooth navigation. Higher values
+result in a smoother model; lower values result in a model
+that more closely follows the original navigation. The
+default value is 100. This value is not actually set until
+the \fBApply\fP button to the left is clicked.
+.TP
+.B Controls->Navigation Modeling->Acceleration
+This text entry sets the penalty weighting against accleration
+applied in the inversion for a smooth navigation. Higher values
+result in a smoother model; lower values result in a model
+that more closely follows the original navigation. The
+default value is 100. This value is not actually set until
+the \fBApply\fP button to the left is clicked.
+.TP
+.B Controls->Navigation Modeling->Apply
+This button causes the values in the \fBSpeed Deviation\fP and
+\fBAcceleration\fP text entries to its right to be applied. If
+smooth inversion is enabled, then clicking this button
+will cause the inversion to be recalculated and the results
+displayed in the longitude and latitude plots.
+.TP
+.B Controls->Navigation Modeling->Dismiss
+This button causes the \fBNavigation Modeling\fP dialog
+to disappear.
 .TP
 .B Next Buffer
 This button causes the program to write out the data from the
 current buffer and then read in and display the next buffer.
 If there is no more data to be read in after the current buffer
 has been written out, then the input and output files are closed.
+.TP
+.B Done
+This button causes the program to write out all of the data from the
+input file and then close the input and output files.
 .TP
 .B Forward
 This button causes the set of displayed pings to step \fInstep\fP 
@@ -203,14 +363,57 @@ This button causes the set of displayed pings to step \fInstep\fP
 pings backward in the current buffer.  The middle mouse button causes
 the same action.
 .TP
-.B Done
-This button causes the program to write out all of the data from the
-input file and then close the input and output files.
-.TP
 .B Quit
 This button causes the program to exit gracefully.  If a data file
 has been read, all of the data will be written to the output file
 before exiting.
+.TP
+.B About
+This button causes a dialog to appear showing some information
+about the program.
+.TP
+.B Show Entire Buffer
+This button causes the plots to expand to show all of the data
+in the current buffer.
+.TP
+.B Pick Time Interval
+This button allows users to focus the plots on a particular
+time interval. Once the button is pushed, the left mouse button
+is used to select the left edge of the time selection. Similarly,
+the middle mouse button selects the right edge of the time selection.
+Both ends of the time selection can be adjusted multiple times.
+Once the time interval of interest is selected to the users
+satisfaction, pressing the right mouse button will cause the
+plots to be redrawn with the selected beginning and ending
+times.
+.TP
+.B Use Solution
+This button causes any selected longitude or latitude values
+to be replaced by values from navigation modeling. Either
+dead reckoning or smooth inversion navigation modeling
+must be enabled. The longitude and latitude values are 
+replaced in pairs (if a longitude value is selected, the
+corresponding latitude value will also be replaced, and
+vice versa). The typical sequence is to:
+    1) adjust the modeling until an acceptable solution 
+       is achieved.
+    2) click on the \fBSelect All\fP toggle button
+    3) click in either the longitude or latitude plot 
+       so that all values in that window are selected
+    4) click on the \fBUse Solution\fP button so that the 
+       navigation model is adopted for all longitude
+       and latitude values
+.TP
+.B Interpolate
+This button causes the selected data to be 
+replaced by linear interpolation
+of the surrounding unselected data. If the selection extends to the
+edge of the data, the selected data will be replaced by the first
+unselected datum on the other side.
+.TP
+.B Revert Selection
+This button causes the selected data to revert to their
+original values.
 .TP
 .B Pick
 Clicking on this toggle button sets the edit mode to "pick". In
@@ -238,38 +441,6 @@ Clicking on this toggle button sets the edit mode to "select all". In
 this case, clicking in any of the editable plots will cause all
 of the data in that plot to be unselected. 
 .TP
-.B Time Span Shown
-This slider sets the number of seconds shown at a time.
-.TP
-.B Time Step
-This slider sets the number of seconds to step when the \fBForward\fP
-or \fBReverse\fP buttons are pushed.
-.TP
-.B Interpolate Selection
-This button causes the selected data to be replaced by linear interpolation
-of the surrounding unselected data. If the selection extends to the
-edge of the data, the selected data will be replaced by the first
-unselected datum on the other side.
-.TP
-.B Revert Selection
-This button causes the selected data to revert to their
-original values.
-.TP
-.B Show Entire Buffer
-This button causes the plots to expand to show all of the data
-in the current buffer.
-.TP
-.B Pick Time Interval
-This button allows users to focus the plots on a particular
-time interval. Once the button is pushed, the left mouse button
-is used to select the left edge of the time selection. Similarly,
-the middle mouse button selects the right edge of the time selection.
-Both ends of the time selection can be adjusted multiple times.
-Once the time interval of interest is selected to the users
-satisfaction, pressing the right mouse button will cause the
-plots to be redrawn with the selected beginning and ending
-times.
-.TP
 .B Time Interval Plot
 This toggle button turns the time interval plot on and off.
 .TP
@@ -284,12 +455,28 @@ This toggle button turns the longitude plot on and off.
 When this toggle button is on, the longitude plot includes a
 green line representing the original longitude values.
 .TP
+.B Show Dead Reckoning (Longitude Plot)
+When this toggle button is on, the longitude plot includes a
+blue line representing the dead reckoning longitude values.
+.TP
+.B Show Smooth Inversion (Longitude Plot)
+When this toggle button is on, the longitude plot includes a
+blue line representing the smooth inversion longitude values.
+.TP
 .B Latitude Plot
 This toggle button turns the latitude plot on and off.
 .TP
 .B Show Original Data (Latitude Plot)
 When this toggle button is on, the latitude plot includes a
 green line representing the original latitude values.
+.TP
+.B Show Dead Reckoning (Latitude Plot)
+When this toggle button is on, the latitude plot includes a
+blue line representing the dead reckoning latitude values.
+.TP
+.B Show Smooth Inversion (Latitude Plot)
+When this toggle button is on, the latitude plot includes a
+blue line representing the smooth inversion latitude values.
 .TP
 .B Speed Plot
 This toggle button turns the speed plot on and off.
@@ -362,5 +549,5 @@ the same action.
 .SH BUGS
 This program doesn't handle the roll, pitch, and
 heave data in a general way. The main
-window for \fBmbnavedit\fP is too large for use on screens
+window for \fBMBnavedit\fP is too large for use on screens
 smaller than 1024 X 768 pixels.

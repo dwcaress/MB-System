@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.c	3.00	8/5/96
- *	$Id: mbsys_dsl.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_dsl.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,25 +21,13 @@
  *      MBF_DSL120PF : MBIO ID 111
  *      MBF_DSL120SF : MBIO ID 112
  *
- * These functions include:
- *   mbsys_dsl_alloc	  - allocate memory for mbsys_dsl_struct structure
- *   mbsys_dsl_deall	  - deallocate memory for mbsys_dsl_struct structure
- *   mbsys_dsl_extract - extract basic data from mbsys_dsl_struct 
- *				structure
- *   mbsys_dsl_insert  - insert basic data into mbsys_dsl_struct structure
- *   mbsys_dsl_ttimes  - extract travel time data from
- *				mbsys_dsl_struct structure
- *   mbsys_dsl_extract_nav - extract navigation data from
- *                          mbsys_dsl_struct structure
- *   mbsys_dsl_insert_nav - insert navigation data into
- *                          mbsys_dsl_struct structure
- *   mbsys_dsl_copy	  - copy data in one mbsys_dsl_struct structure
- *   				into another mbsys_dsl_struct structure
- *
  * Author:	D. W. Caress
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.5  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -89,7 +77,7 @@
 int mbsys_dsl_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_dsl.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_dsl.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_dsl_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -752,11 +740,11 @@ int mbsys_dsl_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_dsl_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_dsl_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_dsl_altitude";
+	char	*function_name = "mbsys_dsl_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_dsl_struct *store;

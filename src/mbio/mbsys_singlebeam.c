@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,24 +24,13 @@
  *      MBF_MBARIROV : MBIO ID 165
  *      MBF_MBPRONAV : MBIO ID 166
  *
- * These functions include:
- *   mbsys_singlebeam_alloc	- allocate memory for mbsys_singlebeam_struct structure
- *   mbsys_singlebeam_deall	- deallocate memory for mbsys_singlebeam_struct structure
- *   mbsys_singlebeam_extract	- extract basic data from mbsys_singlebeam_struct structure
- *   mbsys_singlebeam_insert	- insert basic data into mbsys_singlebeam_struct structure
- *   mbsys_singlebeam_ttimes    - would extract travel time and beam angle data from
- *                        mbsys_singlebeam_struct structure if there were any
- *   mbsys_singlebeam_extract_nav - extract navigation data from
- *                          mbsys_singlebeam_struct structure
- *   mbsys_singlebeam_insert_nav - insert navigation data into
- *                          mbsys_singlebeam_struct structure
- *   mbsys_singlebeam_copy	- copy data in one mbsys_singlebeam_struct structure
- *   				into another mbsys_singlebeam_struct structure
- *
  * Author:	D. W. Caress
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -74,7 +63,7 @@
 int mbsys_singlebeam_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_singlebeam.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_singlebeam.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_singlebeam_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -631,11 +620,11 @@ int mbsys_singlebeam_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_singlebeam_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_singlebeam_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_singlebeam_altitude";
+	char	*function_name = "mbsys_singlebeam_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;

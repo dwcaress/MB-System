@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -18,29 +18,13 @@
  * in UNB OMG HDCS formats:
  *      MBF_OMGHDCSJ : MBIO ID 151
  *
- * These functions include:
- *   mbsys_hdcs_alloc		- allocate memory for mbsys_hdcs_struct 
- *					structure
- *   mbsys_hdcs_deall		- deallocate memory for mbsys_hdcs_struct 
- *					structure
- *   mbsys_hdcs_extract		- extract basic data from mbsys_hdcs_struct 
- *					structure
- *   mbsys_hdcs_insert		- insert basic data into mbsys_hdcs_struct 
- *					structure
- *   mbsys_hdcs_ttimes		- would extract travel time and beam angle data from
- *					mbsys_hdcs_struct structure if there were any
- *   mbsys_hdcs_extract_nav	- extract navigation data from
- *					mbsys_hdcs_struct structure
- *   mbsys_hdcs_insert_nav	- insert navigation data into
- *					mbsys_hdcs_struct structure
- *   mbsys_hdcs_copy		- copy data in one mbsys_hdcs_struct 
- *					structure into another 
- *					mbsys_hdcs_struct structure
- *
  * Author:	D. W. Caress
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.3  2000/10/11  01:03:21  caress
  * Convert to ANSI C
  *
@@ -75,7 +59,7 @@
 int mbsys_hdcs_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -796,11 +780,11 @@ int mbsys_hdcs_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hdcs_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
-	char	*function_name = "mbsys_hdcs_altitude";
+	char	*function_name = "mbsys_hdcs_extract_altitude";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hdcs_struct *store;

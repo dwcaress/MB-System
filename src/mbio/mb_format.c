@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $
+ *    $Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:26:50  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -105,7 +108,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_format.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_info(int verbose, 
@@ -137,8 +140,10 @@ int mb_format_info(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error)
@@ -193,7 +198,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -211,7 +217,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -229,7 +236,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -247,7 +255,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -265,7 +274,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -283,7 +293,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -301,7 +312,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -319,7 +331,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -337,7 +350,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -355,7 +369,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -373,7 +388,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -391,7 +407,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -409,7 +426,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -427,7 +445,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -445,7 +464,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -463,7 +483,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -481,7 +502,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -499,7 +521,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -517,7 +540,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -535,7 +559,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -553,7 +578,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -571,7 +597,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -589,7 +616,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -607,7 +635,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -625,7 +654,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -643,7 +673,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -661,7 +692,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -679,7 +711,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -697,7 +730,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -715,7 +749,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -733,7 +768,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -751,7 +787,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -769,7 +806,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -787,7 +825,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -805,7 +844,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -823,7 +863,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -841,7 +882,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -859,7 +901,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -877,7 +920,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -895,7 +939,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -913,7 +958,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -931,7 +977,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -949,7 +996,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -967,7 +1015,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -985,7 +1034,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -1003,7 +1053,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -1021,7 +1072,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -1039,7 +1091,8 @@ int mb_format_info(int verbose,
 			read_ping, write_ping, 
 			extract, insert, 
 			extract_nav, insert_nav, 
-			altitude, insert_altitude, 
+			extract_altitude, insert_altitude, 
+			extract_svp, insert_svp, 
 			ttimes, copyrecord, 
 			error);
 		}
@@ -1084,8 +1137,10 @@ int mb_format_info(int verbose,
 		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
 		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
 		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -1138,8 +1193,10 @@ int mb_format(int verbose, int *format, int *error)
 	int (*insert)();
 	int (*extract_nav)();
 	int (*insert_nav)();
-	int (*altitude)();
+	int (*extract_altitude)();
 	int (*insert_altitude)();
+	int (*extract_svp)();
+	int (*insert_svp)();
 	int (*ttimes)();
 	int (*copyrecord)();
 
@@ -1166,7 +1223,8 @@ int mb_format(int verbose, int *format, int *error)
 			&read_ping, &write_ping, 
 			&extract, &insert, 
 			&extract_nav, &insert_nav, 
-			&altitude, &insert_altitude, 
+			&extract_altitude, &insert_altitude, 
+			&extract_svp, &insert_svp, 
 			&ttimes, &copyrecord, 
 			error);
 
@@ -1188,7 +1246,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1227,8 +1285,10 @@ int mb_format_system(int verbose, int *format, int *system, int *error)
 	int (*insert)();
 	int (*extract_nav)();
 	int (*insert_nav)();
-	int (*altitude)();
+	int (*extract_altitude)();
 	int (*insert_altitude)();
+	int (*extract_svp)();
+	int (*insert_svp)();
 	int (*ttimes)();
 	int (*copyrecord)();
 
@@ -1255,7 +1315,8 @@ int mb_format_system(int verbose, int *format, int *system, int *error)
 			&read_ping, &write_ping, 
 			&extract, &insert, 
 			&extract_nav, &insert_nav, 
-			&altitude, &insert_altitude, 
+			&extract_altitude, &insert_altitude, 
+			&extract_svp, &insert_svp, 
 			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
@@ -1284,7 +1345,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1320,8 +1381,10 @@ int mb_format_dimensions(int verbose, int *format,
 	int (*insert)();
 	int (*extract_nav)();
 	int (*insert_nav)();
-	int (*altitude)();
+	int (*extract_altitude)();
 	int (*insert_altitude)();
+	int (*extract_svp)();
+	int (*insert_svp)();
 	int (*ttimes)();
 	int (*copyrecord)();
 
@@ -1348,7 +1411,8 @@ int mb_format_dimensions(int verbose, int *format,
 			&read_ping, &write_ping, 
 			&extract, &insert, 
 			&extract_nav, &insert_nav, 
-			&altitude, &insert_altitude, 
+			&extract_altitude, &insert_altitude, 
+			&extract_svp, &insert_svp, 
 			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
@@ -1379,7 +1443,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char **description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1419,8 +1483,10 @@ int mb_format_description(int verbose, int *format, char **description, int *err
 	int (*insert)();
 	int (*extract_nav)();
 	int (*insert_nav)();
-	int (*altitude)();
+	int (*extract_altitude)();
 	int (*insert_altitude)();
+	int (*extract_svp)();
+	int (*insert_svp)();
 	int (*ttimes)();
 	int (*copyrecord)();
 
@@ -1447,7 +1513,8 @@ int mb_format_description(int verbose, int *format, char **description, int *err
 			&read_ping, &write_ping, 
 			&extract, &insert, 
 			&extract_nav, &insert_nav, 
-			&altitude, &insert_altitude, 
+			&extract_altitude, &insert_altitude, 
+			&extract_svp, &insert_svp, 
 			&ttimes, &copyrecord, 
 			error);
 	*description = format_description;
@@ -1473,7 +1540,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1510,8 +1577,10 @@ int mb_format_flags(int verbose, int *format,
 	int (*insert)();
 	int (*extract_nav)();
 	int (*insert_nav)();
-	int (*altitude)();
+	int (*extract_altitude)();
 	int (*insert_altitude)();
+	int (*extract_svp)();
+	int (*insert_svp)();
 	int (*ttimes)();
 	int (*copyrecord)();
 
@@ -1538,7 +1607,8 @@ int mb_format_flags(int verbose, int *format,
 			&read_ping, &write_ping, 
 			&extract, &insert, 
 			&extract_nav, &insert_nav, 
-			&altitude, &insert_altitude, 
+			&extract_altitude, &insert_altitude, 
+			&extract_svp, &insert_svp, 
 			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
@@ -1571,7 +1641,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1608,8 +1678,10 @@ int mb_format_source(int verbose, int *format,
 	int (*insert)();
 	int (*extract_nav)();
 	int (*insert_nav)();
-	int (*altitude)();
+	int (*extract_altitude)();
 	int (*insert_altitude)();
+	int (*extract_svp)();
+	int (*insert_svp)();
 	int (*ttimes)();
 	int (*copyrecord)();
 
@@ -1636,7 +1708,8 @@ int mb_format_source(int verbose, int *format,
 			&read_ping, &write_ping, 
 			&extract, &insert, 
 			&extract_nav, &insert_nav, 
-			&altitude, &insert_altitude, 
+			&extract_altitude, &insert_altitude, 
+			&extract_svp, &insert_svp, 
 			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
@@ -1669,7 +1742,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.1 2000-12-10 20:26:50 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1707,8 +1780,10 @@ int mb_format_beamwidth(int verbose, int *format,
 	int (*insert)();
 	int (*extract_nav)();
 	int (*insert_nav)();
-	int (*altitude)();
+	int (*extract_altitude)();
 	int (*insert_altitude)();
+	int (*extract_svp)();
+	int (*insert_svp)();
 	int (*ttimes)();
 	int (*copyrecord)();
 
@@ -1735,7 +1810,8 @@ int mb_format_beamwidth(int verbose, int *format,
 			&read_ping, &write_ping, 
 			&extract, &insert, 
 			&extract_nav, &insert_nav, 
-			&altitude, &insert_altitude, 
+			&extract_altitude, &insert_altitude, 
+			&extract_svp, &insert_svp, 
 			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
@@ -1880,6 +1956,32 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    *format = MBF_OMGHDCSJ;
 		    found = MB_YES;
 		    }
+		}
+	    }
+
+	/* look for MBARI format suffix convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 18)
+		i = strlen(filename) - 8;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],"tibr.txt")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],"vnta.txt")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],"ptlo.txt")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],"wfly.txt")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		fileroot[strlen(filename)-suffix_len] = '\0';
+		*format = MBF_MBARIROV;
+		found = MB_YES;
 		}
 	    }
 
@@ -2119,7 +2221,7 @@ int mb_datalist_read(int verbose,
 							&& datalist_ptr->recursion < MB_DATALIST_RECURSION_MAX)
 							{
 					                if (status = mb_datalist_open(verbose,
-					                		&(datalist_ptr->datalist), path, error)
+					                		(char *)&(datalist_ptr->datalist), path, error)
 					                	== MB_SUCCESS)
 					                	{
 								datalist2_ptr = (struct mb_datalist_struct *) datalist_ptr->datalist;
@@ -2147,7 +2249,7 @@ int mb_datalist_read(int verbose,
 					{
 					/* recursively call mb_read_datalist */
 					status = mb_datalist_read(verbose,
-							datalist_ptr->datalist,
+							(char *)datalist_ptr->datalist,
 							path,
 							format,
 							weight,
@@ -2156,7 +2258,9 @@ int mb_datalist_read(int verbose,
 					/* if datalist read fails close it */
 					if (status == MB_FAILURE)
 						{
-						status = mb_datalist_close(verbose,&(datalist_ptr->datalist),error);
+						status = mb_datalist_close(verbose,
+							    (char *)&(datalist_ptr->datalist),
+							    error);
 						}
 					else
 						{

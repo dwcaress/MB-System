@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mstiff.h	4/10/98
- *	$Id: mbsys_mstiff.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbsys_mstiff.h,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	April 10, 1988
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.1  2000/09/30  06:31:19  caress
  * Snapshot for Dale.
  *
@@ -115,7 +118,7 @@ int mbsys_mstiff_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_mstiff_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_mstiff_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
 int mbsys_mstiff_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,

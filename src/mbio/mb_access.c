@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $
 
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  *
  */
 
@@ -141,7 +144,7 @@ int mb_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_extract";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -252,7 +255,7 @@ int mb_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_insert";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -354,7 +357,7 @@ int mb_extract_nav(int verbose, char *mbio_ptr, char *store_ptr, int *kind,
 	double *roll, double *pitch, double *heave, 
 	int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_extract_nav";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -429,7 +432,7 @@ int mb_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	double roll, double pitch, double heave, 
 	int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_insert_nav";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -496,13 +499,13 @@ int mb_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		int *kind,
 		double *transducer_depth, double *altitude,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
-	char	*function_name = "mb_altitude";
+	static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	char	*function_name = "mb_extract_altitude";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
 
@@ -521,9 +524,9 @@ int mb_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_altitude != NULL)
+	if (mb_io_ptr->mb_io_extract_altitude != NULL)
 		{
-		status = (*mb_io_ptr->mb_io_altitude)
+		status = (*mb_io_ptr->mb_io_extract_altitude)
 				(verbose,mbio_ptr,store_ptr,
 				kind,transducer_depth,altitude,error);
 		}
@@ -555,7 +558,7 @@ int mb_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		double transducer_depth, double altitude,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_insert_altitude";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -582,6 +585,120 @@ int mb_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 		status = (*mb_io_ptr->mb_io_insert_altitude)
 				(verbose,mbio_ptr,store_ptr,
 				transducer_depth,altitude,error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+		int *kind,
+		int *nsvp,
+		double *depth, double *velocity,
+		int *error)
+{
+	static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	char	*function_name = "mb_extract_svp";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_extract_svp != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_extract_svp)
+				(verbose,mbio_ptr,store_ptr,
+				kind,nsvp,depth,velocity,error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
+		fprintf(stderr,"dbg2       nsvp:              %d\n",*nsvp);
+		for (i=0;i<*nsvp;i++)
+		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+		int nsvp,
+		double *depth, double *velocity,
+		int *error)
+{
+	static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+	char	*function_name = "mb_insert_svp";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:            %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:         %d\n",store_ptr);
+		fprintf(stderr,"dbg2       nsvp:              %d\n",nsvp);
+		for (i=0;i<nsvp;i++)
+		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ insertion routine */
+	if (mb_io_ptr->mb_io_insert_svp != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_insert_svp)
+				(verbose,mbio_ptr,store_ptr,
+				nsvp,depth,velocity,error);
 		}
 	else
 		{
@@ -780,7 +897,7 @@ int mb_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	double *heave, double *alongtrack_offset, 
 	double *draft, double *ssv, int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_access.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_process.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -15,12 +15,16 @@
 /*
  * mb_process.c contains functions for reading and writing
  * mbprocess parameter files. The mb_process structure is defined
- * in mb_process.h
+ * in mb_process.h. A description of mbprocess parameters and 
+ * parameter file keywords is found in mb_process.h
  *
  * Author:	D. W. Caress
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.2  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -48,7 +52,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -63,6 +67,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	int	stat_status;
 	struct stat statbuf;
 	int	status = MB_SUCCESS;
+	int	explicit;
 	int	i;
 
 	/* print input debug statements */
@@ -82,35 +87,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	strcat(parfile, ".par");
 	
 	/* initialize process parameter structure */
+
+	/* general parameters */
+	explicit = MB_NO;
 	process->mbp_ifile_specified = MB_NO;
 	process->mbp_ifile[0] = '\0';
 	process->mbp_ofile_specified = MB_NO;
 	process->mbp_ofile[0] = '\0';
 	process->mbp_format_specified = MB_NO;
 	process->mbp_format = 0;
-	process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
-	process->mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
-	process->mbp_rollbias = 0.0;
-	process->mbp_rollbias_port = 0.0;
-	process->mbp_rollbias_stbd = 0.0;
-	process->mbp_pitchbias_mode = MBP_PITCHBIAS_OFF;
-	process->mbp_pitchbias = 0.0;
-	process->mbp_draft_mode = MBP_DRAFT_OFF;
-	process->mbp_draft = 0.0;
-	process->mbp_draft_mult = 1.0;
-	process->mbp_heave_mode = MBP_HEAVE_OFF;
-	process->mbp_heave = 0.0;
-	process->mbp_heave_mult = 1.0;
-	process->mbp_tt_mode = MBP_TT_OFF;
-	process->mbp_tt_mult = 1.0;
-	process->mbp_ssv_mode = MBP_SSV_OFF;
-	process->mbp_ssv = 0.0;
-	process->mbp_svp_mode = MBP_SVP_OFF;
-	process->mbp_svpfile[0] = '\0';
-	process->mbp_uncorrected = MB_NO;
-	process->mbp_navadj_mode = MBP_NAV_OFF;
-	process->mbp_navadjfile[0] = '\0';
-	process->mbp_navadj_algorithm = MBP_NAV_LINEAR;
+	
+	/* navigation merging */
 	process->mbp_nav_mode = MBP_NAV_OFF;
 	process->mbp_navfile[0] = '\0';
 	process->mbp_nav_format = 0;
@@ -118,12 +105,56 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_nav_speed = MBP_NAV_OFF;
 	process->mbp_nav_draft = MBP_NAV_OFF;
 	process->mbp_nav_algorithm = MBP_NAV_LINEAR;
-	process->mbp_heading_mode = MBP_HEADING_OFF;
-	process->mbp_headingbias = 0.0;
+	
+	/* adjusted navigation merging */
+	process->mbp_navadj_mode = MBP_NAV_OFF;
+	process->mbp_navadjfile[0] = '\0';
+	process->mbp_navadj_algorithm = MBP_NAV_LINEAR;
+	
+	/* bathymetry editing */
 	process->mbp_edit_mode = MBP_EDIT_OFF;
 	process->mbp_editfile[0] = '\0';
-	process->mbp_mask_mode = MBP_MASK_OFF;
-	process->mbp_maskfile[0] = '\0';
+	
+	/* bathymetry recalculation */
+	process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
+	process->mbp_svp_mode = MBP_SVP_OFF;
+	process->mbp_svpfile[0] = '\0';
+	process->mbp_ssv_mode = MBP_SSV_OFF;
+	process->mbp_ssv = 0.0;
+	process->mbp_corrected = MB_YES;
+	process->mbp_tt_mode = MBP_TT_OFF;
+	process->mbp_tt_mult = 1.0;
+	
+	/* draft correction */
+	process->mbp_draft_mode = MBP_DRAFT_OFF;
+	process->mbp_draft = 0.0;
+	process->mbp_draft_offset = 0.0;
+	process->mbp_draft_mult = 1.0;
+	
+	/* heave correction */
+	process->mbp_heave_mode = MBP_HEAVE_OFF;
+	process->mbp_heave = 0.0;
+	process->mbp_heave_mult = 1.0;
+	
+	/* roll correction */
+	process->mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
+	process->mbp_rollbias = 0.0;
+	process->mbp_rollbias_port = 0.0;
+	process->mbp_rollbias_stbd = 0.0;
+	
+	/* pitch correction */
+	process->mbp_pitchbias_mode = MBP_PITCHBIAS_OFF;
+	process->mbp_pitchbias = 0.0;
+	
+	/* heading correction */
+	process->mbp_heading_mode = MBP_HEADING_OFF;
+	process->mbp_headingbias = 0.0;
+	
+	/* sidescan recalculation */
+	process->mbp_ssrecalc_mode = MBP_SSRECALC_OFF;
+	process->mbp_ssrecalc_pixelsize = 0.0;
+	process->mbp_ssrecalc_swathwidth = 0.0;
+	process->mbp_ssrecalc_interpolate = 0;
 
 	/* open and read parameter file */
 	if ((fp = fopen(parfile, "r")) != NULL) 
@@ -132,7 +163,12 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		{
 		if (buffer[0] != '#')
 		    {
-		    if (strncmp(buffer, "INFILE", 6) == 0
+		    /* general parameters */
+		    if (strncmp(buffer, "EXPLICIT", 8) == 0)
+			{
+			explicit = MB_YES;
+			}
+		    else if (strncmp(buffer, "INFILE", 6) == 0
 			&& process->mbp_ifile_specified == MB_NO)
 			{
 			sscanf(buffer, "%s %s", dummy, process->mbp_ifile);
@@ -150,90 +186,22 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			sscanf(buffer, "%s %d", dummy, &process->mbp_format);
 			process->mbp_format_specified = MB_YES;
 			}
-		    else if (strncmp(buffer, "DRAFTOFFSET", 11) == 0)
+			
+		    /* navigation merging */
+		    else if (strncmp(buffer, "NAVMODE", 7) == 0)
 			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_draft);
-			if (process->mbp_draft_mode == MBP_DRAFT_OFF)
-				process->mbp_draft_mode = MBP_DRAFT_OFFSET;
-			else if (process->mbp_draft_mode == MBP_DRAFT_MULTIPLY)
-				process->mbp_draft_mode = MBP_DRAFT_MULTIPLYOFFSET;
+			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_mode);
 			}
-		    else if (strncmp(buffer, "DRAFTMULTIPLY", 13) == 0)
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_draft_mult);
-			if (process->mbp_draft_mode == MBP_DRAFT_OFF)
-				process->mbp_draft_mode = MBP_DRAFT_MULTIPLY;
-			else if (process->mbp_draft_mode == MBP_DRAFT_OFFSET)
-				process->mbp_draft_mode = MBP_DRAFT_MULTIPLYOFFSET;
-			}
-		    else if (strncmp(buffer, "DRAFT", 5) == 0
-			&& process->mbp_draft_mode == MBP_DRAFT_OFF)
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_draft);
-			process->mbp_draft_mode = MBP_DRAFT_SET;
-			}
-		    else if (strncmp(buffer, "HEAVEOFFSET", 11) == 0)
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_heave);
-			if (process->mbp_heave_mode == MBP_HEAVE_OFF)
-				process->mbp_heave_mode = MBP_HEAVE_OFFSET;
-			else if (process->mbp_heave_mode == MBP_HEAVE_MULTIPLY)
-				process->mbp_heave_mode = MBP_HEAVE_MULTIPLYOFFSET;
-			}
-		    else if (strncmp(buffer, "HEAVEMULTIPLY", 13) == 0)
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_heave_mult);
-			if (process->mbp_heave_mode == MBP_HEAVE_OFF)
-				process->mbp_heave_mode = MBP_HEAVE_MULTIPLY;
-			else if (process->mbp_heave_mode == MBP_HEAVE_OFFSET)
-				process->mbp_heave_mode = MBP_HEAVE_MULTIPLYOFFSET;
-			}
-		    else if (strncmp(buffer, "TTMULTIPLY", 10) == 0)
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_tt_mult);
-			process->mbp_tt_mode = MBP_TT_MULTIPLY;
-			}
-		    else if (strncmp(buffer, "ROLLBIASPORT", 12) == 0
-			&& (process->mbp_rollbias_mode == MBP_ROLLBIAS_OFF
-			    || process->mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE))
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_rollbias_port);
-			process->mbp_rollbias_mode = MBP_ROLLBIAS_DOUBLE;
-			}
-		    else if (strncmp(buffer, "ROLLBIASSTBD", 12) == 0
-			&& (process->mbp_rollbias_mode == MBP_ROLLBIAS_OFF
-			    || process->mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE))
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_rollbias_stbd);
-			process->mbp_rollbias_mode = MBP_ROLLBIAS_DOUBLE;
-			}
-		    else if (strncmp(buffer, "ROLLBIAS", 8) == 0
-			&& process->mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_rollbias);
-			process->mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
-			}
-		    else if (strncmp(buffer, "PITCHBIAS", 9) == 0
-			&& process->mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
-			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_pitchbias);
-			process->mbp_pitchbias_mode = MBP_PITCHBIAS_ON;
-			}
-		    else if (strncmp(buffer, "NAVADJFILE", 10) == 0
-			&& process->mbp_navadj_mode == MBP_NAV_OFF)
-			{
-			sscanf(buffer, "%s %s", dummy, process->mbp_navadjfile);
-			process->mbp_navadj_mode = MBP_NAV_ON;
-			}
-		    else if (strncmp(buffer, "NAVADJSPLINE", 12) == 0)
-			{
-			process->mbp_navadj_algorithm = MBP_NAV_SPLINE;
-			}
-		    else if (strncmp(buffer, "NAVFILE", 7) == 0
-			&& process->mbp_nav_mode == MBP_NAV_OFF)
+		    else if (strncmp(buffer, "NAVFILE", 7) == 0)
 			{
 			sscanf(buffer, "%s %s", dummy, process->mbp_navfile);
-			process->mbp_nav_mode = MBP_NAV_ON;
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_nav_mode = MBP_NAV_ON;
+			    process->mbp_nav_heading = MBP_NAV_ON;
+			    process->mbp_nav_speed = MBP_NAV_ON;
+			    process->mbp_nav_draft = MBP_NAV_ON;
+			    }
 			}
 		    else if (strncmp(buffer, "NAVFORMAT", 9) == 0)
 			{
@@ -241,71 +209,176 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			}
 		    else if (strncmp(buffer, "NAVHEADING", 10) == 0)
 			{
-			process->mbp_nav_heading = MBP_NAV_ON;
+			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_heading);
 			}
 		    else if (strncmp(buffer, "NAVSPEED", 8) == 0)
 			{
-			process->mbp_nav_speed = MBP_NAV_ON;
+			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_speed);
 			}
 		    else if (strncmp(buffer, "NAVDRAFT", 8) == 0)
 			{
-			process->mbp_nav_draft = MBP_NAV_ON;
+			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_draft);
 			}
-		    else if (strncmp(buffer, "NAVSPLINE", 9) == 0)
+		    else if (strncmp(buffer, "NAVINTERP", 9) == 0)
 			{
-			process->mbp_nav_algorithm = MBP_NAV_SPLINE;
+			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_algorithm);
+			}
+
+		    /* adjusted navigation merging */
+		    else if (strncmp(buffer, "NAVADJMODE", 10) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_navadj_mode);
+			}
+		    else if (strncmp(buffer, "NAVADJFILE", 10) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_navadjfile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_navadj_mode = MBP_NAV_ON;
+			    }
+			}
+		    else if (strncmp(buffer, "NAVADJINTERP", 12) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_navadj_algorithm);
+			}
+	
+		    /* bathymetry editing */
+		    else if (strncmp(buffer, "EDITSAVEMODE", 12) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_edit_mode);
+			}
+		    else if (strncmp(buffer, "EDITSAVEFILE", 12) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_editfile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_edit_mode = MBP_EDIT_ON;
+			    }
+			}
+	
+		    /* bathymetry recalculation */
+		    else if (strncmp(buffer, "RAYTRACE", 8) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_svp_mode);
+			}
+		    else if (strncmp(buffer, "SVPFILE", 7) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_svpfile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_svp_mode = MBP_SVP_ON;
+			    }
+			}
+		    else if (strncmp(buffer, "SSVMODE", 7) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_ssv_mode);
+			}
+		    else if (strncmp(buffer, "SSV", 3) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_ssv);
+			}
+		    else if (strncmp(buffer, "TTMULTIPLY", 10) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_tt_mult);
+			}
+		    else if (strncmp(buffer, "CORRECTED", 9) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_corrected);
+			}
+	
+		    /* draft correction */
+		    else if (strncmp(buffer, "DRAFTMODE", 9) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_draft_mode);
+			}
+		    else if (strncmp(buffer, "DRAFTOFFSET", 11) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_draft_offset);
+			}
+		    else if (strncmp(buffer, "DRAFTMULTIPLY", 13) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_draft_mult);
+			}
+		    else if (strncmp(buffer, "DRAFT", 5) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_draft);
+			}
+	
+		    /* heave correction */
+		    else if (strncmp(buffer, "HEAVEMODE", 9) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_heave_mode);
+			}
+		    else if (strncmp(buffer, "HEAVEOFFSET", 11) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_heave);
+			}
+		    else if (strncmp(buffer, "HEAVEMULTIPLY", 13) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_heave_mult);
+			}
+	
+		    /* roll correction */
+		    else if (strncmp(buffer, "ROLLBIASMODE", 12) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_rollbias_mode);
+			}
+		    else if (strncmp(buffer, "ROLLBIASPORT", 12) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_rollbias_port);
+			}
+		    else if (strncmp(buffer, "ROLLBIASSTBD", 12) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_rollbias_stbd);
+			}
+		    else if (strncmp(buffer, "ROLLBIAS", 8) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_rollbias);
+			}
+	
+		    /* pitch correction */
+		    else if (strncmp(buffer, "PITCHBIASMODE", 13) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_pitchbias_mode);
+			}
+		    else if (strncmp(buffer, "PITCHBIAS", 9) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_pitchbias);
+			}
+	
+		    /* heading correction */
+		    else if (strncmp(buffer, "HEADINGMODE", 11) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_heading_mode);
 			}
 		    else if (strncmp(buffer, "HEADINGOFFSET", 13) == 0)
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_headingbias);
-			if (process->mbp_heading_mode == MBP_HEADING_CALC)
-			    process->mbp_heading_mode = MBP_HEADING_CALCOFFSET;
-			else
-			    process->mbp_heading_mode = MBP_HEADING_OFFSET;
 			}
-		    else if (strncmp(buffer, "HEADING", 7) == 0)
+	
+		    /* sidescan recalculation */
+		    else if (strncmp(buffer, "SSRECALCMODE", 12) == 0)
 			{
-			if (process->mbp_heading_mode == MBP_HEADING_OFFSET)
-			    process->mbp_heading_mode = MBP_HEADING_CALCOFFSET;
-			else
-			    process->mbp_heading_mode = MBP_HEADING_CALC;
+			sscanf(buffer, "%s %d", dummy, &process->mbp_ssrecalc_mode);
 			}
-		    else if (strncmp(buffer, "SSVOFFSET", 11) == 0
-			&& process->mbp_ssv_mode == MBP_SSV_OFF)
+		    else if (strncmp(buffer, "SSPIXELSIZE", 11) == 0)
 			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_ssv);
-			process->mbp_ssv_mode = MBP_SSV_OFFSET;
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_ssrecalc_pixelsize);
 			}
-		    else if (strncmp(buffer, "SSV", 5) == 0
-			&& process->mbp_ssv_mode == MBP_SSV_OFF)
+		    else if (strncmp(buffer, "SSSWATHWIDTH", 11) == 0)
 			{
-			sscanf(buffer, "%s %lf", dummy, &process->mbp_ssv);
-			process->mbp_ssv_mode = MBP_SSV_SET;
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_ssrecalc_swathwidth);
 			}
-		    else if (strncmp(buffer, "SVP", 3) == 0
-			&& process->mbp_svp_mode == MBP_SVP_OFF)
+		    else if (strncmp(buffer, "SSINTERPOLATE", 11) == 0)
 			{
-			sscanf(buffer, "%s %s", dummy, process->mbp_svpfile);
-			process->mbp_svp_mode = MBP_SVP_ON;
+			sscanf(buffer, "%s %d", dummy, &process->mbp_ssrecalc_interpolate);
 			}
-		    else if (strncmp(buffer, "UNCORRECTED", 3) == 0
-			&& process->mbp_uncorrected == MB_NO)
+	
+		    /* processing kluges */
+		    else if (strncmp(buffer, "KLUGE001", 8) == 0)
 			{
-			process->mbp_uncorrected = MB_YES;
 			}
-		    else if (strncmp(buffer, "EDITSAVEFILE", 12) == 0
-			&& process->mbp_edit_mode == MBP_EDIT_OFF)
-			{
-			sscanf(buffer, "%s %s", dummy, process->mbp_editfile);
-			process->mbp_edit_mode = MBP_EDIT_ON;
-			}
-		    else if (strncmp(buffer, "EDITMASKFILE", 12) == 0
-			&& process->mbp_mask_mode == MBP_MASK_OFF)
-			{
-			sscanf(buffer, "%s %s", dummy, process->mbp_maskfile);
-			process->mbp_mask_mode = MBP_MASK_ON;
-			}
-    
+			
 		    }
 		}
 		
@@ -426,6 +499,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_pitchbias:          %f\n",process->mbp_pitchbias);
 		fprintf(stderr,"dbg2       mbp_draft_mode:         %d\n",process->mbp_draft_mode);
 		fprintf(stderr,"dbg2       mbp_draft:              %f\n",process->mbp_draft);
+		fprintf(stderr,"dbg2       mbp_draft_offset:       %f\n",process->mbp_draft_offset);
 		fprintf(stderr,"dbg2       mbp_draft_mult:         %f\n",process->mbp_draft_mult);
 		fprintf(stderr,"dbg2       mbp_heave_mode:         %d\n",process->mbp_heave_mode);
 		fprintf(stderr,"dbg2       mbp_heave:              %f\n",process->mbp_heave);
@@ -434,7 +508,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_ssv:                %f\n",process->mbp_ssv);
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:            %s\n",process->mbp_svpfile);
-		fprintf(stderr,"dbg2       mbp_uncorrected:        %d\n",process->mbp_uncorrected);
+		fprintf(stderr,"dbg2       mbp_corrected:          %d\n",process->mbp_corrected);
 		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_nav_mode);
 		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
 		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
@@ -449,8 +523,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_headingbias:        %f\n",process->mbp_headingbias);
 		fprintf(stderr,"dbg2       mbp_edit_mode:          %d\n",process->mbp_edit_mode);
 		fprintf(stderr,"dbg2       mbp_editfile:           %s\n",process->mbp_editfile);
-		fprintf(stderr,"dbg2       mbp_mask_mode:          %d\n",process->mbp_mask_mode);
-		fprintf(stderr,"dbg2       mbp_maskfile:           %s\n",process->mbp_maskfile);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:      %d\n",process->mbp_ssrecalc_mode);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_interp    :%d\n",process->mbp_ssrecalc_interpolate);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -495,6 +571,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_pitchbias:          %f\n",process->mbp_pitchbias);
 		fprintf(stderr,"dbg2       mbp_draft_mode:         %d\n",process->mbp_draft_mode);
 		fprintf(stderr,"dbg2       mbp_draft:              %f\n",process->mbp_draft);
+		fprintf(stderr,"dbg2       mbp_draft_offset:       %f\n",process->mbp_draft_offset);
 		fprintf(stderr,"dbg2       mbp_draft_mult:         %f\n",process->mbp_draft_mult);
 		fprintf(stderr,"dbg2       mbp_heave_mode:         %d\n",process->mbp_heave_mode);
 		fprintf(stderr,"dbg2       mbp_heave:              %f\n",process->mbp_heave);
@@ -505,7 +582,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_ssv:                %f\n",process->mbp_ssv);
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:            %s\n",process->mbp_svpfile);
-		fprintf(stderr,"dbg2       mbp_uncorrected:        %d\n",process->mbp_uncorrected);
+		fprintf(stderr,"dbg2       mbp_corrected:          %d\n",process->mbp_corrected);
 		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_nav_mode);
 		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
 		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
@@ -520,8 +597,10 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_headingbias:        %f\n",process->mbp_headingbias);
 		fprintf(stderr,"dbg2       mbp_edit_mode:          %d\n",process->mbp_edit_mode);
 		fprintf(stderr,"dbg2       mbp_editfile:           %s\n",process->mbp_editfile);
-		fprintf(stderr,"dbg2       mbp_mask_mode:          %d\n",process->mbp_mask_mode);
-		fprintf(stderr,"dbg2       mbp_maskfile:           %s\n",process->mbp_maskfile);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:      %d\n",process->mbp_ssrecalc_mode);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_interp    :%d\n",process->mbp_ssrecalc_interpolate);
 		}
 
 	/* get expected process parameter file name */
@@ -547,26 +626,10 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp,"## Generated by user <%s> on cpu <%s> at <%s>\n##\n",
 		    user,host,date);
 
-
-
-	    if (process->mbp_ifile_specified == MB_YES)
-		{
-		fprintf(fp, "INFILE %s\n", process->mbp_ifile);
-		}
-	    else
-		{
-		fprintf(fp, "## INFILE infile\n");
-		}
-		
-	    if (process->mbp_ofile_specified == MB_YES)
-		{
-		fprintf(fp, "OUTFILE %s\n", process->mbp_ofile);
-		}
-	    else
-		{
-		fprintf(fp, "## OUTFILE outfile\n");
-		}
-
+	    /* general parameters */
+	    fprintf(fp, "##\n## Forces explicit reading of parameter modes.\n");
+	    fprintf(fp, "EXPLICIT\n");
+	    fprintf(fp, "##\n## General Parameters:\n");
 	    if (process->mbp_format_specified == MB_YES)
 		{
 		fprintf(fp, "FORMAT %d\n", process->mbp_format);
@@ -575,227 +638,89 @@ int mb_pr_writepar(int verbose, char *file,
 		{
 		fprintf(fp, "## FORMAT format\n");
 		}
-
-	    if (process->mbp_draft_mode == MBP_DRAFT_SET)
+	    if (process->mbp_ifile_specified == MB_YES)
 		{
-		fprintf(fp, "DRAFT %f\n", process->mbp_draft);
+		fprintf(fp, "INFILE %s\n", process->mbp_ifile);
 		}
 	    else
 		{
-		fprintf(fp, "## DRAFT draft\n");
+		fprintf(fp, "## INFILE infile\n");
 		}
-	    if (process->mbp_draft_mode == MBP_DRAFT_OFFSET
-		|| process->mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
+	    if (process->mbp_ofile_specified == MB_YES)
 		{
-		fprintf(fp, "DRAFTOFFSET %f\n", process->mbp_draft);
+		fprintf(fp, "OUTFILE %s\n", process->mbp_ofile);
 		}
 	    else
 		{
-		fprintf(fp, "## DRAFTOFFSET offset\n");
+		fprintf(fp, "## OUTFILE outfile\n");
 		}
-
-	    if (process->mbp_draft_mode == MBP_DRAFT_MULTIPLY
-		|| process->mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
-		{
-		fprintf(fp, "DRAFTMULTIPLY %f\n", process->mbp_draft_mult);
-		}
-	    else
-		{
-		fprintf(fp, "## DRAFTMULTIPLY multiplier\n");
-		}
-
-	    if (process->mbp_heave_mode == MBP_HEAVE_OFFSET
-		|| process->mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET)
-		{
-		fprintf(fp, "HEAVEOFFSET %f\n", process->mbp_heave);
-		}
-	    else
-		{
-		fprintf(fp, "## HEAVEOFFSET offset\n");
-		}
-
-	    if (process->mbp_heave_mode == MBP_HEAVE_MULTIPLY
-		|| process->mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET)
-		{
-		fprintf(fp, "HEAVEMULTIPLY %f\n", process->mbp_heave_mult);
-		}
-	    else
-		{
-		fprintf(fp, "## HEAVEMULTIPLY multiplier\n");
-		}
-
-	    if (process->mbp_tt_mode == MBP_TT_MULTIPLY)
-		{
-		fprintf(fp, "TTMULTIPLY %f\n", process->mbp_tt_mult);
-		}
-	    else
-		{
-		fprintf(fp, "## TTMULTIPLY multiplier\n");
-		}
-
-	    if (process->mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-		{
-		fprintf(fp, "ROLLBIASPORT %f\n", process->mbp_rollbias_port);
-		fprintf(fp, "ROLLBIASSTBD %f\n", process->mbp_rollbias_stbd);
-		}
-	    else
-		{
-		fprintf(fp, "## ROLLBIASPORT bias\n");
-		fprintf(fp, "## ROLLBIASSTBD bias\n");
-		}
-
-	    if (process->mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-		{
-		fprintf(fp, "ROLLBIAS %f\n", process->mbp_rollbias);
-		}
-	    else
-		{
-		fprintf(fp, "## ROLLBIAS bias\n");
-		}
-
-	    if (process->mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-		{
-		fprintf(fp, "PITCHBIAS %f\n", process->mbp_pitchbias);
-		}
-	    else
-		{
-		fprintf(fp, "## PITCHBIAS bias\n");
-		}
-
-	    if (process->mbp_navadj_mode == MBP_NAV_ON)
-		{
-		fprintf(fp, "NAVADJFILE %s\n", process->mbp_navadjfile);
-		}
-	    else
-		{
-		fprintf(fp, "## NAVADJFILE navadjfile\n");
-		}
-
-	    if (process->mbp_navadj_algorithm == MBP_NAV_SPLINE)
-		{
-		fprintf(fp, "NAVADJSPLINE\n");
-		}
-	    else
-		{
-		fprintf(fp, "## NAVADJSPLINE\n");
-		}
-
-	    if (process->mbp_nav_mode == MBP_NAV_ON)
-		{
-		fprintf(fp, "NAVFILE %s\n", process->mbp_navfile);
-		fprintf(fp, "NAVFORMAT %d\n", process->mbp_nav_format);
-		}
-	    else
-		{
-		fprintf(fp, "## NAVFILE navfile\n");
-		fprintf(fp, "## NAVFORMAT format\n");
-		}
-
-	    if (process->mbp_nav_heading == MBP_NAV_ON)
-		{
-		fprintf(fp, "NAVHEADING\n");
-		}
-	    else
-		{
-		fprintf(fp, "## NAVHEADING\n");
-		}
-
-	    if (process->mbp_nav_speed == MBP_NAV_ON)
-		{
-		fprintf(fp, "NAVSPEED\n");
-		}
-	    else
-		{
-		fprintf(fp, "## NAVSPEED\n");
-		}
-
-	    if (process->mbp_nav_draft == MBP_NAV_ON)
-		{
-		fprintf(fp, "NAVDRAFT\n");
-		}
-	    else
-		{
-		fprintf(fp, "## NAVDRAFT\n");
-		}
-
-	    if (process->mbp_nav_algorithm == MBP_NAV_SPLINE)
-		{
-		fprintf(fp, "NAVSPLINE\n");
-		}
-	    else
-		{
-		fprintf(fp, "## NAVSPLINE\n");
-		}
-
-	    if (process->mbp_heading_mode == MBP_HEADING_CALC
-		|| process->mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-		{
-		fprintf(fp, "HEADING\n");
-		}
-	    else
-		{
-		fprintf(fp, "## HEADING\n");
-		}
-
-	    if (process->mbp_heading_mode == MBP_HEADING_OFFSET
-		|| process->mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-		{
-		fprintf(fp, "HEADINGOFFSET %f\n", process->mbp_headingbias);
-		}
-	    else
-		{
-		fprintf(fp, "## HEADINGOFFSET offset\n");
-		}
-
-	    if (process->mbp_ssv_mode == MBP_SSV_OFFSET)
-		{
-		fprintf(fp, "SSVOFFSET %f\n", process->mbp_ssv);
-		}
-	    else
-		{
-		fprintf(fp, "## SSVOFFSET offset\n");
-		}
-
-	    if (process->mbp_ssv_mode == MBP_SSV_SET)
-		{
-		fprintf(fp, "SSV %f\n", process->mbp_ssv);
-		}
-	    else
-		{
-		fprintf(fp, "## SSV ssv\n");
-		}
-
-	    if (process->mbp_svp_mode == MBP_SVP_ON)
-		{
-		fprintf(fp, "SVP %s\n", process->mbp_svpfile);
-		}
-	    else
-		{
-		fprintf(fp, "## SVP svpfile\n");
-		}
-
-	    if (process->mbp_uncorrected == MB_YES)
-		{
-		fprintf(fp, "UNCORRECTED\n");
-		}
-	    else
-		{
-		fprintf(fp, "## UNCORRECTED\n");
-		}
-
-	    if (process->mbp_edit_mode == MBP_EDIT_ON)
-		{
-		fprintf(fp, "EDITSAVEFILE %s\n", process->mbp_editfile);
-		}
-	    else
-		{
-		fprintf(fp, "## EDITSAVEFILE editsavefile\n");
-		}
-
-	    if (process->mbp_mask_mode == MBP_MASK_ON)
-		{
-		fprintf(fp, "EDITMASKFILE %s\n", process->mbp_maskfile);
-		}
+	    
+	    /* navigation merging */
+	    fprintf(fp, "##\n## Navigation Merging:\n");
+	    fprintf(fp, "NAVMODE %d\n", process->mbp_nav_mode);
+	    fprintf(fp, "NAVFILE %s\n", process->mbp_navfile);
+	    fprintf(fp, "NAVFORMAT %d\n", process->mbp_nav_format);
+	    fprintf(fp, "NAVHEADING %d\n", process->mbp_nav_heading);
+	    fprintf(fp, "NAVSPEED %d\n", process->mbp_nav_speed);
+	    fprintf(fp, "NAVDRAFT %d\n", process->mbp_nav_draft);
+	    fprintf(fp, "NAVINTERP %d\n", process->mbp_nav_algorithm);
+	    
+	    /* adjusted navigation merging */
+	    fprintf(fp, "##\n## Adjusted Navigation Merging:\n");
+	    fprintf(fp, "NAVADJMODE %d\n", process->mbp_navadj_mode);
+	    fprintf(fp, "NAVADJFILE %s\n", process->mbp_navadjfile);
+	    fprintf(fp, "NAVADJINTERP %d\n", process->mbp_navadj_algorithm);
+	    
+	    /* bathymetry editing */
+	    fprintf(fp, "##\n## Bathymetry Flagging:\n");
+	    fprintf(fp, "EDITSAVEMODE %d\n", process->mbp_edit_mode);
+	    fprintf(fp, "EDITSAVEFILE %s\n", process->mbp_editfile);
+	    
+	    /* bathymetry recalculation */
+	    fprintf(fp, "##\n## Bathymetry Recalculation:\n");
+	    fprintf(fp, "RAYTRACE %d\n", process->mbp_svp_mode);
+	    fprintf(fp, "SVPFILE %s\n", process->mbp_svpfile);
+	    fprintf(fp, "SSVMODE %d\n", process->mbp_ssv_mode);
+	    fprintf(fp, "SSV %f\n", process->mbp_ssv);
+	    fprintf(fp, "TTMULTIPLY %f\n", process->mbp_tt_mult);
+	    fprintf(fp, "CORRECTED %d\n", process->mbp_corrected);
+	    
+	    /* draft correction */
+	    fprintf(fp, "##\n## Draft Correction:\n");
+	    fprintf(fp, "DRAFTMODE %d\n", process->mbp_draft_mode);
+	    fprintf(fp, "DRAFT %f\n", process->mbp_draft);
+	    fprintf(fp, "DRAFTOFFSET %f\n", process->mbp_draft_offset);
+	    fprintf(fp, "DRAFTMULTIPLY %f\n", process->mbp_draft_mult);
+	    
+	    /* heave correction */
+	    fprintf(fp, "##\n## Heave Correction:\n");
+	    fprintf(fp, "HEAVEMODE %f\n", process->mbp_heave_mode);
+	    fprintf(fp, "HEAVEOFFSET %f\n", process->mbp_heave);
+	    fprintf(fp, "HEAVEMULTIPLY %f\n", process->mbp_heave_mult);
+	    
+	    /* roll correction */
+	    fprintf(fp, "##\n## Roll Correction:\n");
+	    fprintf(fp, "ROLLBIASMODE %d\n", process->mbp_rollbias_mode);
+	    fprintf(fp, "ROLLBIAS %f\n", process->mbp_rollbias);
+	    fprintf(fp, "ROLLBIASPORT %f\n", process->mbp_rollbias_port);
+	    fprintf(fp, "ROLLBIASSTBD %f\n", process->mbp_rollbias_stbd);
+	    
+	    /* pitch correction */
+	    fprintf(fp, "##\n## Pitch Correction:\n");
+	    fprintf(fp, "PITCHBIASMODE %d\n", process->mbp_pitchbias_mode);
+	    fprintf(fp, "PITCHBIAS %f\n", process->mbp_pitchbias);
+	    
+	    /* heading correction */
+	    fprintf(fp, "##\n## Heading Correction:\n");
+	    fprintf(fp, "HEADINGMODE %d\n", process->mbp_heading_mode);
+	    fprintf(fp, "HEADINGOFFSET %f\n", process->mbp_headingbias);
+	    
+	    /* sidescan recalculation */
+	    fprintf(fp, "##\n## Sidescan Recalculation:\n");
+	    fprintf(fp, "SSRECALCMODE %d\n", process->mbp_ssrecalc_mode);
+	    fprintf(fp, "SSPIXELSIZE %f\n", process->mbp_ssrecalc_pixelsize);
+	    fprintf(fp, "SSSWATHWIDTH %f\n", process->mbp_ssrecalc_swathwidth);
+	    fprintf(fp, "SSINTERPOLATE %f\n", process->mbp_ssrecalc_interpolate);
 	
 	    /* close file */
 	    fclose(fp);
@@ -1075,6 +1000,7 @@ int mb_pr_update_pitchbias(int verbose, char *file,
 int mb_pr_update_draft(int verbose, char *file, 
 			int	mbp_draft_mode, 
 			double	mbp_draft, 
+			double	mbp_draft_offset, 
 			double	mbp_draft_mult, 
 			int *error)
 {
@@ -1092,6 +1018,7 @@ int mb_pr_update_draft(int verbose, char *file,
 		fprintf(stderr,"dbg2       file:              %s\n",file);
 		fprintf(stderr,"dbg2       mbp_draft_mode:    %d\n",mbp_draft_mode);
 		fprintf(stderr,"dbg2       mbp_draft:         %f\n",mbp_draft);
+		fprintf(stderr,"dbg2       mbp_draft_offset:  %f\n",mbp_draft_offset);
 		fprintf(stderr,"dbg2       mbp_draft_mult:    %f\n",mbp_draft_mult);
 		}
 
@@ -1101,6 +1028,7 @@ int mb_pr_update_draft(int verbose, char *file,
 	/* set draft values */
 	process.mbp_draft_mode = mbp_draft_mode;
 	process.mbp_draft = mbp_draft;
+	process.mbp_draft_offset = mbp_draft_offset;
 	process.mbp_draft_mult = mbp_draft_mult;
 	    
 	/* update bathymetry recalculation mode */
@@ -1277,7 +1205,7 @@ int mb_pr_update_ssv(int verbose, char *file,
 int mb_pr_update_svp(int verbose, char *file, 
 			int	mbp_svp_mode, 
 			char	*mbp_svpfile, 
-			int	mbp_uncorrected, 
+			int	mbp_corrected, 
 			int *error)
 {
 	char	*function_name = "mb_pr_update_svp";
@@ -1294,7 +1222,7 @@ int mb_pr_update_svp(int verbose, char *file,
 		fprintf(stderr,"dbg2       file:              %s\n",file);
 		fprintf(stderr,"dbg2       mbp_svp_mode:      %d\n",mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:       %s\n",mbp_svpfile);
-		fprintf(stderr,"dbg2       mbp_uncorrected:   %d\n",mbp_uncorrected);
+		fprintf(stderr,"dbg2       mbp_corrected:     %d\n",mbp_corrected);
 		}
 
 	/* get known process parameters */
@@ -1304,7 +1232,7 @@ int mb_pr_update_svp(int verbose, char *file,
 	process.mbp_svp_mode = mbp_svp_mode;
 	if (mbp_svpfile != NULL)
 	    strcpy(process.mbp_svpfile, mbp_svpfile);
-	process.mbp_uncorrected = mbp_uncorrected;
+	process.mbp_corrected = mbp_corrected;
 	    
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
@@ -1532,12 +1460,14 @@ int mb_pr_update_edit(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_mask(int verbose, char *file, 
-			int	mbp_mask_mode, 
-			char	*mbp_maskfile, 
+int mb_pr_update_ssrecalc(int verbose, char *file, 
+			int		mbp_ssrecalc_mode,
+			double	mbp_ssrecalc_pixelsize,
+			double	mbp_ssrecalc_swathwidth,
+			int		mbp_ssrecalc_interpolate,
 			int *error)
 {
-	char	*function_name = "mb_pr_update_mask";
+	char	*function_name = "mb_pr_update_ssrecalc";
 	struct mb_process_struct process;
 	int	status = MB_SUCCESS;
 
@@ -1547,19 +1477,22 @@ int mb_pr_update_mask(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       file:              %s\n",file);
-		fprintf(stderr,"dbg2       mbp_mask_mode:     %d\n",mbp_mask_mode);
-		fprintf(stderr,"dbg2       mbp_maskfile:      %s\n",mbp_maskfile);
+		fprintf(stderr,"dbg2       verbose:                  %d\n",verbose);
+		fprintf(stderr,"dbg2       file:                     %s\n",file);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:        %d\n",mbp_ssrecalc_mode);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize:   %f\n",mbp_ssrecalc_pixelsize);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:  %f\n",mbp_ssrecalc_swathwidth);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_interpolate: %d\n",mbp_ssrecalc_interpolate);
 		}
 
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set mask values */
-	process.mbp_mask_mode = mbp_mask_mode;
-	if (mbp_maskfile != NULL)
-	    strcpy(process.mbp_maskfile, mbp_maskfile);
+	/* set ssrecalc values */
+	process.mbp_ssrecalc_mode = mbp_ssrecalc_mode;
+	process.mbp_ssrecalc_pixelsize = mbp_ssrecalc_pixelsize;
+	process.mbp_ssrecalc_swathwidth = mbp_ssrecalc_swathwidth;
+	process.mbp_ssrecalc_interpolate = mbp_ssrecalc_interpolate;
 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
@@ -1570,9 +1503,9 @@ int mb_pr_update_mask(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
 		}
 
 	/* return status */
@@ -1768,6 +1701,7 @@ int mb_pr_get_pitchbias(int verbose, char *file,
 int mb_pr_get_draft(int verbose, char *file, 
 			int	*mbp_draft_mode, 
 			double	*mbp_draft, 
+			double	*mbp_draft_offset, 
 			double	*mbp_draft_mult, 
 			int *error)
 {
@@ -1791,6 +1725,7 @@ int mb_pr_get_draft(int verbose, char *file,
 	/* set draft values */
 	*mbp_draft_mode = process.mbp_draft_mode;
 	*mbp_draft = process.mbp_draft;
+	*mbp_draft_offset = process.mbp_draft_offset;
 	*mbp_draft_mult = process.mbp_draft_mult;
 
 	/* print output debug statements */
@@ -1801,6 +1736,7 @@ int mb_pr_get_draft(int verbose, char *file,
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       mbp_draft_mode:    %d\n",*mbp_draft_mode);
 		fprintf(stderr,"dbg2       mbp_draft:         %f\n",*mbp_draft);
+		fprintf(stderr,"dbg2       mbp_draft_offset:  %f\n",*mbp_draft_offset);
 		fprintf(stderr,"dbg2       mbp_draft_mult:    %f\n",*mbp_draft_mult);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1946,7 +1882,7 @@ int mb_pr_get_ssv(int verbose, char *file,
 int mb_pr_get_svp(int verbose, char *file, 
 			int	*mbp_svp_mode, 
 			char	*mbp_svpfile, 
-			int	*mbp_uncorrected, 
+			int	*mbp_corrected, 
 			int *error)
 {
 	char	*function_name = "mb_pr_get_svp";
@@ -1970,7 +1906,7 @@ int mb_pr_get_svp(int verbose, char *file,
 	*mbp_svp_mode = process.mbp_svp_mode;
 	if (mbp_svpfile != NULL)
 	    strcpy(mbp_svpfile, process.mbp_svpfile);
-	*mbp_uncorrected = process.mbp_uncorrected;
+	*mbp_corrected = process.mbp_corrected;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1980,7 +1916,7 @@ int mb_pr_get_svp(int verbose, char *file,
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       mbp_svp_mode:      %d\n",*mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:       %s\n",mbp_svpfile);
-		fprintf(stderr,"dbg2       mbp_uncorrected:   %d\n",*mbp_uncorrected);
+		fprintf(stderr,"dbg2       mbp_corrected:     %d\n",*mbp_corrected);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -2186,12 +2122,14 @@ int mb_pr_get_edit(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_mask(int verbose, char *file, 
-			int	*mbp_mask_mode, 
-			char	*mbp_maskfile, 
+int mb_pr_get_ssrecalc(int verbose, char *file, 
+			int	*mbp_ssrecalc_mode,
+			double	*mbp_ssrecalc_pixelsize,
+			double	*mbp_ssrecalc_swathwidth,
+			int	*mbp_ssrecalc_interpolate,
 			int *error)
 {
-	char	*function_name = "mb_pr_get_mask";
+	char	*function_name = "mb_pr_get_ssrecalc";
 	struct mb_process_struct process;
 	int	status = MB_SUCCESS;
 
@@ -2208,10 +2146,11 @@ int mb_pr_get_mask(int verbose, char *file,
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set mask values */
-	*mbp_mask_mode = process.mbp_mask_mode;
-	if (mbp_maskfile != NULL)
-	    strcpy(mbp_maskfile, process.mbp_maskfile);
+	/* set ssrecalc values */
+	*mbp_ssrecalc_mode = process.mbp_ssrecalc_mode;
+	*mbp_ssrecalc_pixelsize = process.mbp_ssrecalc_pixelsize;
+	*mbp_ssrecalc_swathwidth = process.mbp_ssrecalc_swathwidth;
+	*mbp_ssrecalc_interpolate = process.mbp_ssrecalc_interpolate;
 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
@@ -2222,14 +2161,17 @@ int mb_pr_get_mask(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       mbp_mask_mode:     %d\n",*mbp_mask_mode);
-		fprintf(stderr,"dbg2       mbp_maskfile:      %s\n",mbp_maskfile);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:        %d\n",*mbp_ssrecalc_mode);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize:   %f\n",*mbp_ssrecalc_pixelsize);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:  %f\n",*mbp_ssrecalc_swathwidth);
+		fprintf(stderr,"dbg2       mbp_ssrecalc_interpolate: %d\n",*mbp_ssrecalc_interpolate);
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
 		}
 
 	/* return status */
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+

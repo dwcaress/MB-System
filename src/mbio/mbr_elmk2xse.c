@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2xse.c	3/27/99
- *	$Id: mbr_elmk2xse.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbr_elmk2xse.c,v 5.1 2001-01-22 07:43:34 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 27, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.2  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -101,8 +104,10 @@ int mbr_info_elmk2xse(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error);
@@ -140,13 +145,15 @@ int mbr_info_elmk2xse(int verbose,
 			int (**insert)(), 
 			int (**extract_nav)(), 
 			int (**insert_nav)(), 
-			int (**altitude)(), 
+			int (**extract_altitude)(), 
 			int (**insert_altitude)(), 
+			int (**extract_svp)(), 
+			int (**insert_svp)(), 
 			int (**ttimes)(), 
 			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_info_elmk2xse";
 	int	status = MB_SUCCESS;
 
@@ -191,8 +198,10 @@ int mbr_info_elmk2xse(int verbose,
 	*insert = &mbsys_xse_insert; 
 	*extract_nav = &mbsys_xse_extract_nav; 
 	*insert_nav = &mbsys_xse_insert_nav; 
-	*altitude = &mbsys_xse_altitude; 
+	*extract_altitude = &mbsys_xse_extract_altitude; 
 	*insert_altitude = NULL; 
+	*extract_svp = &mbsys_xse_extract_svp; 
+	*insert_svp = &mbsys_xse_insert_svp; 
 	*ttimes = &mbsys_xse_ttimes; 
 	*copyrecord = &mbsys_xse_copy; 
 
@@ -230,8 +239,10 @@ int mbr_info_elmk2xse(int verbose,
 		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
 		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       altitude:           %d\n",*altitude);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
 		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -247,7 +258,7 @@ int mbr_info_elmk2xse(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_elmk2xse(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2xse";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
