@@ -126,7 +126,7 @@ main(int argc, char *argv[])
             memset(&st, 0, sizeof(st));
             sscanf(argv[i+1], "%d/%d/%d %d:%d:%d",
                    &st.tm_mon, &st.tm_mday, &st.tm_year, &st.tm_hour, &st.tm_min, &st.tm_sec);
-            if (st.tm_year < 69 ) st.tm_year += 100;     /* Y2K mapping */       
+            if (st.tm_year < 69 ) st.tm_year += 100;     /* Y2K mapping */
             st.tm_mon -= 1;
             putenv("TZ=GMT");
             tzset();
@@ -294,10 +294,11 @@ printMBPing(int rec_number)
     char            str[132];
     char            tstr[80];
     char           *ptr;
-    int             i;
+    int             i, j;
     int             ret;
     int             line;
     struct tm      *t;
+    unsigned long   max_intensity_sample;
 
     fprintf(stdout, "%05d GSF MB Ping:\n", rec_number);
     t = gmtime(&gsfRec.mb_ping.ping_time.tv_sec);
@@ -363,6 +364,12 @@ printMBPing(int rec_number)
     {
         sprintf(str, "%s   Heave", str);
     }
+    if (gsfRec.mb_ping.brb_inten != NULL)
+    {
+        sprintf(str, "%s Samples", str);  /* number of intensity samples in the beam */
+        sprintf(str, "%s BotSmpl", str);  /* index to the bottom detect sample */
+        sprintf(str, "%s MaxInt.", str);  /* max intensity value for the beam */
+    }
 
     fprintf(stdout, "%s\n", str);
 
@@ -419,6 +426,20 @@ printMBPing(int rec_number)
         if (gsfRec.mb_ping.receive_heave != NULL)
         {
             sprintf(str, "%s %0.7f", str, gsfRec.mb_ping.receive_heave[i]);
+        }
+        if (gsfRec.mb_ping.brb_inten != NULL)
+        {
+            sprintf(str, "%s %7d", str, gsfRec.mb_ping.brb_inten->time_series[i].sample_count);
+            sprintf(str, "%s %7d", str, gsfRec.mb_ping.brb_inten->time_series[i].detect_sample);
+            max_intensity_sample = 0;
+            for (j = 0; j < gsfRec.mb_ping.brb_inten->time_series[i].sample_count; j++)
+            {
+                if (gsfRec.mb_ping.brb_inten->time_series[i].samples[j] > max_intensity_sample)
+                {
+                    max_intensity_sample = gsfRec.mb_ping.brb_inten->time_series[i].samples[j];
+                }
+            }
+            sprintf(str, "%s %07X", str, max_intensity_sample);
         }
         fprintf(stdout, "%s\n", str);
         if (line > 20)

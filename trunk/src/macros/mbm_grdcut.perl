@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/23/01
-#    $Id: mbm_grdcut.perl,v 5.2 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_grdcut.perl,v 5.3 2003-07-02 18:12:33 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -40,10 +40,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the Kohala coast of Hawaii)
 #
 # Version:
-#   $Id: mbm_grdcut.perl,v 5.2 2003-04-17 20:42:48 caress Exp $
+#   $Id: mbm_grdcut.perl,v 5.3 2003-07-02 18:12:33 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.2  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 5.1  2001/06/03 06:59:24  caress
 #   Release 5.0.beta01
 #
@@ -75,6 +78,7 @@ $ofile =    ($opt_O || $opt_o);
 $help =     ($opt_H || $opt_h);
 $bounds =   ($opt_R || $opt_r);
 $verbose =  ($opt_V || $opt_v);
+$verbose += 1;
 
 #--------------------------------------------------------------------
 
@@ -125,11 +129,10 @@ if ($bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
 	$ymaxr = &GetDecimalDegrees($ymax_raw);
 	}
 
-
 # Save old GMT default double format and set new format
 $line = `gmtdefaults -L | grep D_FORMAT`;
 ($dformatsave) = $line =~ /D_FORMAT\s+=\s+(\S+)/;
-`gmtset D_FORMAT %.10lg`;
+`gmtset D_FORMAT %.15lg`;
 
 # get limits of files using grdinfo
 @grdinfo = `grdinfo $ifile`;
@@ -148,9 +151,6 @@ while (@grdinfo)
 				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:.+ny:\s+(\S+)/;
 		}
 	}
-
-# reset the GMT default double format
-`gmtset D_FORMAT $dformatsave`;
 
 # calculate acceptable output bounds
 $diffx = ($xminr - $xmin) / $xinc;
@@ -184,6 +184,9 @@ if ($verbose)
 	print "\nRunning grdcut...\n$cmd\n";
 	}
 `$cmd`;
+
+# reset the GMT default double format
+`gmtset D_FORMAT $dformatsave`;
 
 exit 0;
 

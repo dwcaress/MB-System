@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.4 2002-05-29 21:06:33 caress Exp $
+#    $Id: install_makefiles,v 5.5 2003-07-02 18:08:43 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001 by 
+#    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.4 2002-05-29 21:06:33 caress Exp $
+#   $Id: install_makefiles,v 5.5 2003-07-02 18:08:43 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.4  2002/05/29 21:06:33  caress
+#   Release 5.0.beta18
+#
 #   Revision 5.3  2002/04/06 03:15:17  caress
 #   Release 5.0.beta16
 #
@@ -141,8 +144,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #				when installing on "little endian"
 #				machines such as PCs or VAXs.
 #	CC		C compiler to be used (optional).
-#	CFLAGS		Compile flags for C source files.
-#	LFLAGS		Load flags for all object files.
 #	GRAPHICAL	If set to "YES" will enable the installation
 #			of the Motif based graphical utilities mbedit,
 #			mbnavedit, and mbvelocitytool. If Motif 
@@ -159,7 +160,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #				and pslib.h
 #	NETCDFLIBDIR	Location of NetCDF library libnetcdf.a
 #	NETCDFINCDIR	Location of NetCDF include file netcdf.h
-#	LEVITUS		Path for Levitus data file annual.
+#	LEVITUS		Path for Levitus data file annual
+#                       This is usually $MBSYSTEM_HOME/share/annual.
+#	CFLAGS		Compile flags for C source files.
+#	LFLAGS		Load flags for all object files.
 #
 # Example for installing on L-DEO Sun workstations running SunOs 4.1.x:
 #	$MBSYSTEM_HOME = "/home/hs/caress/dev/mbsystem";
@@ -175,6 +179,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$NETCDFLIBDIR = "/ocean/mgg/netcdf/sun4/lib";
 #	$NETCDFINCDIR = "/ocean/mgg/netcdf/include";
 #	$LEVITUS = "/ocean/mgg/levitus/annual";
+#	$CFLAGS = "-O2";
+#	$LFLAGS = "-lm";
 #
 # Example for installing on R/V Ewing Sun workstations:
 #	$MBSYSTEM_HOME = "/net/heezen/packages/mbsystem";
@@ -303,44 +309,46 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$LEVITUS = "/usr/local/levitus/annual";
 #
 # Example for installing on Apple Macintosh Computers
-# running MacOS X version 10.1 or later. Here I am
-# using the XFree86 4.2 distribution that comes with
-# XDarwin (www.xdarwin.org) and the LessTif (www.lesstif.org)
-# port provided by Fink (www.fink.org). As of May, 2002,
-# I am unable to get mbnavedit to work under MacOs 10.1.3.
-# I do succeed in building and running mbedit, mbvelocitytool,
-# and mbnavadjust:
+# running MacOS X version 10.2.6. Here I am using the 
+# Apple X11 distribution and the LessTif (www.lesstif.org)
+# port provided by Fink (www.fink.org). 
+# The "-force_flat_namespace" linker flag is no longer
+# required with 10.2.6 but was needed in $LFLAGS previously.
 #	$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
 #	$OS = "DARWIN";
+#	$CC = "cc";
 #	$BYTESWAPPED = "NO";
 #	$GRAPHICAL = "YES";
-#	$MOTIFINCDIR = "/sw/include/Xm";
+#	$MOTIFINCDIR = "/sw/include";
 #	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 #	$GMTVERSION = "3.4";
-#	$GMTLIBDIR = "/usr/local/gmt/src";
-#	$GMTINCDIR = "/usr/local/gmt/src";
-#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
-#	$NETCDFINCDIR = "/usr/local/netcdf/include";
-#	$LEVITUS = "/usr/local/levitus/annual";
-#	$CFLAGS = "-g -I/usr/include/X11R6";
-#	$LFLAGS = "-Wl -force_flat_namespace -lm -L$NETCDFLIBDIR -lnetcdf";
+#	$GMTLIBDIR = "/sw/lib";
+#	$GMTINCDIR = "/sw/include";
+#	$NETCDFLIBDIR = "/sw/lib";
+#	$NETCDFINCDIR = "/sw/include";
+#	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$CFLAGS = "-g -I/usr/X11R6/include";
+#	$LFLAGS = "-Wl -lm";
 #
 # **** EDIT THE PARAMETERS HERE ****
 # Set the environment parameters:
-$MBSYSTEM_HOME = "/usr/people/caress/dev/mbsystem";
-$OS = "IRIX64";
+$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
+$OS = "DARWIN";
+$CC = "cc";
 $BYTESWAPPED = "NO";
 $GRAPHICAL = "YES";
-$MOTIFINCDIR = "/usr/include/Xm";
-$MOTIFLIBS = "-lXm -lXt -lX11";
+$MOTIFINCDIR = "/sw/include";
+$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 $GMTVERSION = "3.4";
-$GMTLIBDIR = "/usr/local/gmt/src";
-$GMTINCDIR = "/usr/local/gmt/src";
-$NETCDFLIBDIR = "/usr/local/netcdf/lib";
-$NETCDFINCDIR = "/usr/local/netcdf/include";
-$LEVITUS = "/usr/local/levitus/annual";
-$CFLAGS = "-g";
-$LFLAGS = "-lm";
+$GMTLIBDIR = "/sw/lib";
+$GMTINCDIR = "/sw/include";
+$NETCDFLIBDIR = "/sw/lib";
+$NETCDFINCDIR = "/sw/include";
+$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+$CFLAGS = "-g -I/usr/X11R6/include";
+$LFLAGS = "-Wl -lm";
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
 
@@ -350,14 +358,16 @@ $program_name = "install_makefiles";
 # add operating system to CFLAGS
 $CFLAGS = "$CFLAGS -D$OS";
 
+# add netcdf libraries to LFLAGS
+$LFLAGS = "$LFLAGS -L$NETCDFLIBDIR -lnetcdf";
+
 # add byte swapping to CFLAGS if necessary
 if ($BYTESWAPPED eq "YES")
 	{
 	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
 	}
 
-# use earlier versions of GMT if desired
-# - note that GMT 3.4 is equivalent to 3.3 (API didn't change)
+# use GMT 3.0 instead of GMT 3.1 if desired
 if ($GMTVERSION eq "3.0")
 	{
 	$CFLAGS = "$CFLAGS -DGMT3_0";
@@ -374,9 +384,6 @@ else
 	{
 	$CFLAGS = "$CFLAGS -DGMT3_3";
 	}
-
-# add netcdf library to LFLAGS
-$LFLAGS = "$LFLAGS -L$NETCDFLIBDIR -lnetcdf";
 
 # set archiver 
 if ($OS eq "LYNX")
@@ -443,6 +450,7 @@ print "GMT Include Location:      $GMTINCDIR\n";
 print "NetCDF Library Location:   $NETCDFLIBDIR\n";
 print "NetCDF Include Location:   $NETCDFINCDIR\n";
 print "Levitus Data Location:     $LEVITUS\n";
+print "Projections Data Location: $PROJECTIONS\n";
 
 # get filenames
 @files = `ls Makefile.template src/Makefile.template src/*/Makefile.template`;
@@ -527,6 +535,10 @@ while (@files)
 		elsif (index($_,"LEVITUS",0) == 0)
 			{
 			print MAK "LEVITUS = $LEVITUS\n";
+			}
+		elsif (index($_,"PROJECTIONS",0) == 0)
+			{
+			print MAK "PROJECTIONS = $PROJECTIONS\n";
 			}
 		elsif (index($_,"ARCHIVE",0) == 0)
 			{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.6 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbnavlist.c,v 5.7 2003-07-02 18:14:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.5  2002/05/29 23:43:09  caress
  * Release 5.0.beta18
  *
@@ -91,7 +94,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.6 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.7 2003-07-02 18:14:19 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
@@ -133,6 +136,7 @@ main (int argc, char **argv)
 	int	nav_source;
 	int	heading_source;
 	int	vru_source;
+	int	svp_source;
 	int	aux_nav_channel = -1;
 
 	/* output format list controls */
@@ -401,7 +405,8 @@ main (int argc, char **argv)
 	{		
 	/* check format and get data sources */
 	if ((status = mb_format_source(verbose, &format, 
-			&nav_source, &heading_source, &vru_source, 
+			&nav_source, &heading_source, 
+			&vru_source, &svp_source, 
 			&error)) == MB_FAILURE)
 		{
 		mb_error(verbose,error,&message);
