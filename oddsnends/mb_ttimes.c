@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 1.1 1994-04-11 23:34:41 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.0 1994-04-11 23:37:14 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1994/04/11  23:34:41  caress
+ * Initial revision
+ *
  *
  *
  */
@@ -46,7 +49,7 @@ double	*angles;
 int	*flags;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 1.1 1994-04-11 23:34:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.0 1994-04-11 23:37:14 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
