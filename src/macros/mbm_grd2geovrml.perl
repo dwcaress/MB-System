@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:     mbm_grd2geovrml.perl              11/7/2001
-$ver = '$Id: mbm_grd2geovrml.perl,v 5.0 2002-08-10 06:42:59 caress Exp $';
+$ver = '$Id: mbm_grd2geovrml.perl,v 5.1 2003-03-19 22:29:29 caress Exp $';
 #
-#    Copyright (c) 2001 by
+#    Copyright (c) 2003 by
 #    Mike McCann (mccann@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -33,10 +33,10 @@ $ver = '$Id: mbm_grd2geovrml.perl,v 5.0 2002-08-10 06:42:59 caress Exp $';
 #
 # Basic Usage: 
 #  mbm_grd2geovrml <base_name> --tvdir <dir> --vrmldir <dir> 
-#                  -olat <latitude> -olon <longitude>
+#                  -olat <latitude> -olon <longitude> 
 #
 #   Where <base_name> is the bathymetry grid filename without the .grd.gz
-#    extensions.
+#    or .grd extensions.
 #
 #   E.G.:
 #
@@ -46,6 +46,9 @@ $ver = '$Id: mbm_grd2geovrml.perl,v 5.0 2002-08-10 06:42:59 caress Exp $';
 #   --olat 21 --olon -157
 #
 # Additional Options:
+#  [ --nowrz --pallette <pal> --newimage [<type>] --white 
+#    --zmax <maxclip> --zmin <minclip> 
+#    --elevscale <vert_exag> --noview --vrmlurl <base_addr> ]
 #
 # Author:
 #   Mike McCann
@@ -54,11 +57,15 @@ $ver = '$Id: mbm_grd2geovrml.perl,v 5.0 2002-08-10 06:42:59 caress Exp $';
 #   November 7, 2001
 #
 # Version:
-#   $Id: mbm_grd2geovrml.perl,v 5.0 2002-08-10 06:42:59 caress Exp $
+#   $Id: mbm_grd2geovrml.perl,v 5.1 2003-03-19 22:29:29 caress Exp $
 #
 # Revisions:
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.12  2003/03/18 20:31:57  mccann
+# Added -newimage <type> and -basename options.  Can now drape other images
+# over the bathymetry.
+#
 # Revision 1.11  2002/08/08 21:09:36  mccann
 # Change to using the make_geovrml in the search path, not mccann's.
 #
@@ -120,40 +127,76 @@ sub usage {
 	print <<EOF;
 
     Usage: $0 <grd_file> --tvdir <tvdir> --vrmldir <vrmldir>
-           -olat <lat> -olon <lon> 
-           [ --nowrz --pallette <pal> --newimage --white 
-             --zmax <maxclip> --zmin <minclip> 
-             --elevscale <vert_exag> --noview --vrmlurl <base_addr> ]
+           --olat <lat> --olon <lon> --vrmlurl <base_addr>
+           [ --nowrz --pallette <pal> --newimage [<type>] --basename <string>
+             --white --zmax <maxclip> --zmin <minclip> 
+             --elevscale <vert_exag> --noview ]
     
     Where: <grd_file>:  the full name of the GMT grd file to be converted
            <tvdir>:     the location of TerraVision tile set to be created
            <vrmldir>:   the location of geoVRML tile set to be created
            <lat>:       latitude of geoOrigin in decimal degrees
            <lon>:       longitude of geoOrigin in decimal degrees
+           <base_addr>: explicit base web address for childurls & images
            (A directory that is the base name of the grd file will be created
             in <tvdir> and <vrmldir>.  <tvdir> and <vrmldir> will be created
-            if they do not exist.)
+            if they do not exist.  Specifiy --basename to override this and
+            give it your own name, useful with the --newimage <type> option.)
 
-    Optional parameters:
-      --nowrz:      write geoVRML .wrl files instead of gzipped .wrz
-      <pal>:        number of Color Lookup Table (1:Haxby,2:High,3:Low,4:Gray)
-      --newimage:   force creation of new image, otherwise uses one in $TMPDIR
-      --white:      create image with white background instead of black
-      <maxclip>:    clip grid at this maximum elevation - adjusts CLT
-      <minclip>:    clip grid at this minumum elevation - adjusts CLT
+    Optional mbm_grd2geovrml parameters:
+      --nowrz:      Write geoVRML .wrl files instead of gzipped .wrz
+      --pallette:   Number of Color Lookup Table (1:Haxby,2:High,3:Low,4:Gray)
+           <pal>:  
+      --newimage    Force creation of new image, otherwise uses one in $TMPDIR.
+          <type>:   <type> may be a number 1..5 to pass on to the mbm_grdtiff
+                    -G option.  The default is 2: synthetic illumination, use
+                    5 for slope shaded.  If <type> is an image file name then
+                    that image is assumed to be orthorectified and coincident
+                    with the DEM.  This can be used to drape a side-scan image
+                    over the terrain model.  
+      --basename    Append <string> to <grd_file> for the directories that
+      <string>:     will be created in <tvdir> and <vrmldir>.  Should use
+                    if a <type> option is given to --newimage, e.g. _ss.
+      --white:      Create image with white background instead of black
+      --zmax        Clip grid at this maximum elevation - adjusts the
+      <maxclip>:    color lookup table.
+      --zmin        Clip grid at this minumum elevation - adjusts the
+      <minclip>:    color lookup table.
 
     Optional make_geovrml(1) parameters:
-      <vert_exag>:  vertical exaggeration for geoVRML (default is 1)
-      --noview:     do not include viewpoints for each tile in geoVRML
-      <base_addr>:  explicit base web address for childurls & images
+      --elevscale   Vertical exaggeration for geoVRML (default is 1)
+      <vert_exag>:  
+      --noview:     Do not include viewpoints for each tile in geoVRML
 
-    E.G.:
+  Examples:
+
+   default synthetic illumination:
 
     $0 /hosts/menard/vol2/EM300_GRIDS/hawaii/PapauA_bath \\
-    --olat 21 --olon -157 \\
-    --tvdir ~/TileSets/Pyramids/hawaii \\
-    --vrmldir ~/TileSets/geoVRML/hawaii \\
-    --vrmlurl http://menard.mbari.org/vrml/terrain/hawaii/PapauA_bath
+      --olat 21 --olon -157 \\
+      --tvdir ~/TileSets/Pyramids/hawaii \\
+      --vrmldir ~/TileSets/geoVRML/hawaii \\
+      --vrmlurl http://menard.mbari.org/vrml/terrain/hawaii/PapauA_bath
+
+   drape the side-scan tif file over the elevation data:
+
+    $0 /hosts/menard/vol2/EM300_GRIDS/hawaii/PapauA_bath \\
+      --olat 21 --olon -157 \\
+      --tvdir ~/TileSets/Pyramids/hawaii \\
+      --vrmldir ~/TileSets/geoVRML/hawaii \\
+      --vrmlurl http://menard.mbari.org/vrml/terrain/hawaii/PapauA_ssdtl \\
+      --newimage /hosts/menard/vol2/EM300_GRIDS/hawaii/PapauA_ssdtl.tif \\
+      --basename PapauA_ssdtl
+
+   slope-shaded:
+
+    $0 /hosts/menard/vol2/EM300_GRIDS/hawaii/PapauA_bath \\
+      --olat 21 --olon -157 \\
+      --tvdir ~/TileSets/Pyramids/hawaii \\
+      --vrmldir ~/TileSets/geoVRML/hawaii \\
+      --vrmlurl http://menard.mbari.org/vrml/terrain/hawaii/PapauA_slope \\
+      --newimage 5 \\
+      --basename PapauA_slope
 
 EOF
 	exit(1);
@@ -180,9 +223,9 @@ if ( ! GetOptions ( 'tvdir=s' => \$tvdir, 'vrmldir=s' => \$vrmldir,
 					'olat=f' => \$olat, 'olon=f' => \$olon,
                     'elevscale=f' => \$elevscale, 'nowrz' => \$nowrzFlag,
                     'noview' => \$noviewFlag, 'pallette=i' => \$pallette,
-					'newimage' => \$newimageFlag, 'white' => \$whiteFlag,
+					'newimage=s' => \$newimage, 'white' => \$whiteFlag,
 					'zmax=f' => \$clipmax, 'zmin=f' => \$clipmin,
-					'vrmlurl=s' => \$vrmlurl ) ) {
+					'vrmlurl=s' => \$vrmlurl,'basename=s' => \$basename ) ) {
 	print "\nFailed to read options.\n\n";
 	usage;
 }
@@ -212,6 +255,26 @@ if ( ! $olon ) {
 }
 
 #
+# Set color mbm_grdtiff color_mode or image file name if --newimage specified
+#
+if ( $newimage eq '' ) {
+	$color_mode = 2;
+	$newimageFlag = 1;
+}
+elsif ( $newimage =~ /[1-2,4-5]/ ) {
+	$color_mode = $newimage;
+	$newimageFlag = 1;
+}
+elsif ( $newimage =~ /\.tif/ && -f $newimage ) {
+	$newimageFlag = 1;
+}
+else {
+	print "\n*** Option '$newimage' not valid for --newimage.\n\n";
+    usage;
+}
+	
+
+#
 # Check that $zmin < $zmax ( I wasted 40 minutes with this user mistake!)
 #
 if ( $clipmin > $clipmax ) {
@@ -223,8 +286,9 @@ if ( $clipmin > $clipmax ) {
 # Set up file names
 #
 ($baseFile, $origPath, undef) = fileparse($ARGV[0]);
-$baseFile =~ s/\.grd//;		# Remove '.grd' if supplied
-$origPath =~ s#\/$##;		# Remove trailing slash
+$baseFile =~ s/\.grd//;				# Remove '.grd' if supplied
+$baseFile =~ s/\.grd.gz//;			# Remove '.grd.gz' if supplied
+$origPath =~ s#\/$##;				# Remove trailing slash
 
 if ( $origPath eq "." ) {	# If short name then set to current dir
 	$origPath = `pwd`;
@@ -234,6 +298,11 @@ if ( $origPath eq "." ) {	# If short name then set to current dir
 $gzGrdFile = "$baseFile.grd.gz";
 $grdFile = $gzGrdFile;
 $grdFile =~ s/\.gz$//;
+
+#
+# Now that we got grd file name, replace $baseFile with $basename if specified
+#
+$baseFile = $basename if $basename; 
 
 #
 # Temporary grid files (get removed upon successful completion)
@@ -432,6 +501,14 @@ if ( -s "$baseFile.tif" && ! $newimageFlag ) {
 	print "Skipping image generation\n";
 	goto TerraVision;
 }
+if ( $newimageFlag && -f $newimage ) {
+	print "Image $newimage provided.\n";
+	print "Copying to $baseFile.tif\n";
+    execute("cp $newimage $baseFile.tif", "Copying provided image");
+    print "Skipping image generation\n";
+    goto mogrify;
+}
+
 
 image:
 #========================= Image generation ========================
@@ -440,9 +517,16 @@ image:
 # - edit in place the .cmd file to set black NAN
 # - execute the script
 #
-##$cmd = "mbm_grdtiff -I $grdFile -O$baseFile -W bath.cpt -G2 -A0.25/280/15 -Q -V";
-$cmd = "mbm_grdtiff -I $grdFile -O$baseFile -W1/${pallette} -G2 -A0.25/280/15 -Q -V";
-execute($cmd, "Create script to create black NANed shaded tiff from original grid file");
+$DOption = '';
+if ( $color_mode == 1 ) { $imgType = "Color/gray fill"; }
+elsif ( $color_mode == 2 ) { $imgType = "synthetic illumination shaded"; }
+elsif ( $color_mode == 4 ) { $imgType = "fill of slope magnitude"; }
+elsif ( $color_mode == 5 ) { 
+	$imgType = "shaded by slope magnitude";
+	$DOption = "-D0/1";		# Flips shaping
+}
+$cmd = "mbm_grdtiff -I $grdFile -O$baseFile -W1/${pallette} -G${color_mode} -A0.25/280/15 ${DOption} -Q -V";
+execute($cmd, "Create script to create black NANed $imgType tiff from original grid file");
 
 if ( ! $whiteFlag ) {
 	# Create black NANed shaded tiff from original grid file
@@ -463,11 +547,50 @@ if ( ! $whiteFlag ) {
 execute("csh ./${baseFile}_tiff.cmd && ls -l $baseFile.tif", "Run the script to create the .tiff");
 unlink "${baseFile}.grd.int";
 
+mogrify:
 #
 # Increase image size to get more geometry, needs lots of swap & time for this!
 #
-##execute("/bin/cp $baseFile.tif ${baseFile}_orig.tif", "Save a copy of original image");	# For debugging
-execute("mogrify -interlace none -geometry 400% $baseFile.tif && identify $baseFile.tif", "Quadruple image size");
+if ( $newimageFlag && -f $newimage ) {
+
+	#
+	# Get dimensions of newimage to be draped
+	#
+	$identImage = `identify "$baseFile.tif"`;
+	# File.tif TIFF 2188x2918 PseudoClass 256c 8-bit 6235kb 3.3u 0:17
+	foreach ( split('\n', $identImage) ) {
+		if ( /(\d+)x(\d+)/ ) {
+			$x_dim = $1;
+			$y_dim = $2;
+			last;
+		}
+	} 
+	print "Image $baseFile.tif: x_dim = $x_dim, y_dim = $y_dim\n"; 
+
+	#
+	# Many EM300 coverages have side scanned data moasiced to twice the bath res
+	# mogrify is faster with a 200% -geometry than with a large forced res
+	#
+	if ( abs(2 * $nx - $x_dim) < 5 || abs(2 * $ny - $y_dim) < 5 ) {
+		execute("identify $baseFile.tif", "Original image size is about twice bathy grid size in at least one dimension.");
+		$geomStr = ${nx} * 2 . "x" . $ny * 2 . "!";
+		execute("mogrify -interlace none -geometry $geomStr $baseFile.tif && identify $baseFile.tif", "Make _ss.tif exactly twice size of _bath.tif");
+		execute("mogrify -interlace none -geometry 200% $baseFile.tif && identify $baseFile.tif", "Double image size (for most _ss.tif files?)");
+	}
+	elsif ( $x_dim != $nx || $y_dim != $ny ) {
+		execute("identify $baseFile.tif", "Original image size is not the same size as the bathy grid.");
+        $geomStr = ${nx}  . "x" . $ny  . "!";
+        execute("mogrify -interlace none -geometry $geomStr $baseFile.tif && identify $baseFile.tif", "Make $baseFile.tif exactly the size of _bath.tif");
+        execute("mogrify -interlace none -geometry 400% $baseFile.tif && identify $baseFile.tif", "Quadruple image size");
+	}
+	else {
+		execute("identify $baseFile.tif", "Original image size is the same size as the bathy grid.");
+		execute("mogrify -interlace none -geometry 400% $baseFile.tif && identify $baseFile.tif", "Quadruple image size");
+	}
+}
+else {
+	execute("mogrify -interlace none -geometry 400% $baseFile.tif && identify $baseFile.tif", "Quadruple image size");
+}
 
 TerraVision:
 #=================== TerraVision Pyramid generation ====================
@@ -568,4 +691,3 @@ sub execute {
 	##die "\nReturn value > 0. See above for any error message.\n" unless $ret <= 0;
 }
 
-
