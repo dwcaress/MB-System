@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.2 2004-06-18 05:22:32 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.3 2004-07-15 19:25:04 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/06/18 05:22:32  caress
+ * Working on adding support for segy i/o and for Reson 7k format 88.
+ *
  * Revision 5.1  2004/05/21 23:44:49  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
@@ -52,7 +55,7 @@
 /* turn on debug statements here */
 /*#define MSYS_RESON7KR_DEBUG 1*/
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.2 2004-06-18 05:22:32 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.3 2004-07-15 19:25:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -2981,6 +2984,20 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			ssalongtrack[i] = survey->sslow_alongtrack[i];
 			}
 
+		/* get depth from vehicle depth and altitude in case where
+			no bathymetry data are available */
+		if (*nbath <= 0 
+			&& survey->sonar_depth > 0.0 
+			&& survey->sonar_altitude> 0.0)
+			{
+			*nbath = 1;
+			bath[0] = survey->sonar_depth + survey->sonar_altitude;
+			beamflag[0] = MB_FLAG_NONE;
+			bathacrosstrack[0] = 0.0;
+			bathalongtrack[0] = 0.0;
+			amp[0] = 0.0;
+			}
+
 		/* print debug statements */
 		if (verbose >= 5)
 			{
@@ -3406,7 +3423,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	s7kr_attitude *attitude;
 	s7kr_ctd *ctd;
 	s7kr_reference *reference;
-	double	heave_use;
+	double	heave_use, roll, pitch;
 	int	i, j;
 
 	/* print input debug statements */
@@ -3432,6 +3449,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
+	survey = (s7kr_survey *) &store->survey;
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
 	depth = (s7kr_depth *) &store->depth;
 	attitude = (s7kr_attitude *) &store->attitude;
@@ -3450,17 +3468,21 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			*ssv = ctd->sound_velocity[0];
 		else
 			*ssv = 1500.0;
-		if (depth->descriptor == 0)
+		if (survey->sonar_depth > 0.0)
 			{
-			*draft = depth->depth;
-			heave_use = 0.0;
+			*draft = survey->sonar_depth;
+			}
+		else if (reference->water_z > 0.0)
+			{
+			*draft = reference->water_z;
 			}
 		else
 			{
-			*draft = reference->water_z;
-			if (attitude->n > 0)
-				heave_use = attitude->heave[0];
+			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+				    draft, error);
 			}
+		mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+				    &heave_use, &roll, &pitch, error);
 
 		/* get travel times, angles */
 		*nbeams = bathymetry->number_beams;
@@ -3634,6 +3656,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	s7kr_altitude *altitude;
 	s7kr_attitude *attitude;
 	s7kr_reference *reference;
+	double	heave, roll, pitch;
 	int	i;
 
 	/* print input debug statements */
@@ -3666,17 +3689,35 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get transducer depth and altitude */
-		if (depth->descriptor == 0)
+		if (survey->sonar_depth > 0.0)
 			{
-			*transducer_depth = depth->depth;
+			*transducer_depth = survey->sonar_depth;
+			}
+		else if (reference->water_z > 0.0)
+			{
+			*transducer_depth = reference->water_z;
+			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+				    &heave, &roll, &pitch, error);
+			*transducer_depth += heave;
 			}
 		else
 			{
-			*transducer_depth = reference->water_z;
-			if (attitude->n > 0)
-				*transducer_depth += attitude->heave[0];
+			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+				    transducer_depth, error);
 			}
-		*altitudev += altitude->altitude;
+		if (survey->sonar_altitude > 0.0)
+			{
+			*altitudev = survey->sonar_altitude;
+			}
+		else if(altitude->altitude > 0.0)
+			{
+			*altitudev = altitude->altitude;
+			}
+		else
+			{
+			mb_altint_interp(verbose, mbio_ptr, store->time_d,  
+				    altitudev, error);
+			}
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -3784,9 +3825,9 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*speed = 0.036 * survey->speed;
 
 		/* get draft  */
-		if (depth->descriptor == 0)
+		if (survey->sonar_depth > 0.0)
 			{
-			*draft = depth->depth;
+			*draft = survey->sonar_depth;
 			}
 		else
 			{
@@ -3796,9 +3837,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get roll pitch and heave */
 		if (attitude->n > 0)
 			{
-			*heave = attitude->heave[0];
-			*pitch = attitude->pitch[0];
-			*roll = attitude->roll[0];
+			mb_attint_interp(verbose, mbio_ptr, *time_d,  
+				    heave, roll, pitch, error);
 			}
 
 		/* print debug statements */
@@ -4316,14 +4356,17 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
 	s7k_header *header;
 	s7kr_survey *survey;
+	s7kr_bluefin *bluefin;
 	s7kr_fsdwsb *fsdwsb;
 	s7k_fsdwchannel *fsdwchannel;
 	s7k_fsdwsegyheader *fsdwsegyheader;
 	s7kr_ctd *ctd;
-	int	sonardepth;
-	int	waterdepth;
+	double	dsonardepth, dsonaraltitude, dwaterdepth;
+	int	sonardepth, sonaraltitude, waterdepth;
 	int	watersoundspeed;
 	float	fwatertime;
+	double	longitude, latitude;
+	double	speed;
 	int	time_j[5];
 	int	i;
 
@@ -4356,6 +4399,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		/* get relevant structures */
 		mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segytraceheader_ptr;
 		survey = &(store->survey);
+		bluefin = &(store->bluefin);
 		ctd = &(store->ctd);
 		fsdwsb = &(store->fsdwsb);
 		header = &(fsdwsb->header);
@@ -4363,13 +4407,29 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		fsdwsegyheader = &(fsdwsb->segyheader);
 		
 		/* get needed values */
-		sonardepth = (int) (100 * survey->sonar_depth);
-		waterdepth = (int) (100 * survey->beam_depth[survey->number_beams / 2]);
+		mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+				    &dsonardepth, error);
+		mb_altint_interp(verbose, mbio_ptr, store->time_d,  
+				    &dsonaraltitude, error);
+		dwaterdepth = dsonardepth + dsonaraltitude;
+		sonardepth = (int) (100 * dsonardepth);
+		waterdepth = (int) (100 * dwaterdepth);
 		if (ctd->n > 0)
 			watersoundspeed = (int) (ctd->sound_velocity[ctd->n-1]);
+		else if (bluefin->environmental[0].sound_speed > 0.0)
+			watersoundspeed = (int) (bluefin->environmental[0].sound_speed);
 		else
 			watersoundspeed = 1500;
-		fwatertime = 2.0 * 0.01 * ((double) waterdepth) / ((double) watersoundspeed);
+		fwatertime = 2.0 * dwaterdepth / ((double) watersoundspeed);
+		
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, survey->heading, speed, 
+				    &longitude, &latitude, &speed, error);
+		if (longitude == 0.0 && latitude == 0.0
+			&& survey->longitude != 0.0 && survey->latitude != 0.0)
+			{
+			longitude = survey->longitude;
+			latitude = survey->latitude;
+			}
 		mb_get_jtime(verbose, store->time_i, time_j);
 			
 		/* extract the data */
@@ -4395,10 +4455,10 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		mb_segytraceheader_ptr->elev_scalar	= -100; 	/* 0.01 m precision for depths */
 		mb_segytraceheader_ptr->coord_scalar	= -100;		/* 0.01 arc second precision for position
 									= 0.3 m precision at equator */
-		mb_segytraceheader_ptr->src_long	= (int)(survey->longitude * 360000.0);
-		mb_segytraceheader_ptr->src_lat	= (int)(survey->latitude * 360000.0);
-		mb_segytraceheader_ptr->grp_long	= (int)(survey->longitude * 360000.0);
-		mb_segytraceheader_ptr->grp_lat	= (int)(survey->latitude * 360000.0);
+		mb_segytraceheader_ptr->src_long	= (int)(longitude * 360000.0);
+		mb_segytraceheader_ptr->src_lat	= (int)(latitude * 360000.0);
+		mb_segytraceheader_ptr->grp_long	= (int)(longitude * 360000.0);
+		mb_segytraceheader_ptr->grp_lat	= (int)(latitude * 360000.0);
 		mb_segytraceheader_ptr->coord_units	= 2;
 		mb_segytraceheader_ptr->wvel		= watersoundspeed;
 		mb_segytraceheader_ptr->sbvel	= 0;

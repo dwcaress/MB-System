@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.17 2004-06-18 03:07:16 caress Exp $
+ *    $Id: mb_io.h,v 5.18 2004-07-15 19:25:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2004/06/18 03:07:16  caress
+ * Adding support for segy i/o and working on support for Reson 7k format 88.
+ *
  * Revision 5.16  2004/04/27 01:46:12  caress
  * Various updates of April 26, 2004.
  *
@@ -333,6 +336,20 @@ struct mb_io_struct
 	int nheading;
 	double heading_time_d[MB_ASYNCH_SAVE_MAX];
 	double heading_heading[MB_ASYNCH_SAVE_MAX];
+
+	/* variables for interpolating/extrapolating sonar depth
+		for formats containing sonar depth as asynchronous
+		data records separate from ping data */
+	int nsonardepth;
+	double sonardepth_time_d[MB_ASYNCH_SAVE_MAX];
+	double sonardepth_sonardepth[MB_ASYNCH_SAVE_MAX];
+
+	/* variables for interpolating/extrapolating altitude
+		for formats containing altitude as asynchronous
+		data records separate from ping data */
+	int naltitude;
+	double altitude_time_d[MB_ASYNCH_SAVE_MAX];
+	double altitude_altitude[MB_ASYNCH_SAVE_MAX];
 	
 	/* variables for accumulating MBIO notices */
 	int	notice_list[MB_NOTICE_MAX];

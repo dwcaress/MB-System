@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.2 2004-06-18 05:22:33 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.3 2004-07-15 19:25:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/06/18 05:22:33  caress
+ * Working on adding support for segy i/o and for Reson 7k format 88.
+ *
  * Revision 5.1  2004/05/21 23:44:50  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
@@ -76,7 +79,7 @@
 #define R7KRECID_FSDWsidescanLo				0
 #define R7KRECID_FSDWsidescanHi				1
 #define R7KRECID_FSDWsubbottom				3001
-#define R7KRECID_Bluefin			3100
+#define R7KRECID_Bluefin				3100
 #define R7KRECID_BluefinNav				0
 #define R7KRECID_BluefinEnvironmental			1
 
@@ -816,8 +819,8 @@ typedef struct s7k_bluefin_environmental_struct
 	float		sound_speed;		/* Sound speed (m/sec) */
 	float		conductivity;		/* Conductivity (S/m) */
 	float		temperature;		/* Temperature (deg C) */
-	float		pressure;		/* Temperature (deg C) */
-	float		salinity;		/* Temperature (deg C) */
+	float		pressure;		/* Pressure (?) */
+	float		salinity;		/* Salinity (?) */
 	double		ctd_time;		/* CTD sample time (unix sec) */
 	double		temperature_time;	/* Temperature sample time (unix sec) */
 	char		reserved2[56];

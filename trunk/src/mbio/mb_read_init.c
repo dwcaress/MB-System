@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.15 2004-04-27 01:46:13 caress Exp $
+ *    $Id: mb_read_init.c,v 5.16 2004-07-15 19:25:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2004/04/27 01:46:13  caress
+ * Various updates of April 26, 2004.
+ *
  * Revision 5.14  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -211,7 +214,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.15 2004-04-27 01:46:13 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.16 2004-07-15 19:25:04 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -767,6 +770,8 @@ int mb_read_init(int verbose, char *file,
 	mb_io_ptr->nfix = 0;
 	mb_io_ptr->nattitude = 0;
 	mb_io_ptr->nheading = 0;
+	mb_io_ptr->nsonardepth = 0;
+	mb_io_ptr->naltitude = 0;
 	for (i=0;i<MB_ASYNCH_SAVE_MAX;i++)
 		{
 		mb_io_ptr->fix_time_d[i] = 0.0;
@@ -778,6 +783,10 @@ int mb_read_init(int verbose, char *file,
 		mb_io_ptr->attitude_pitch[i] = 0.0;
 		mb_io_ptr->heading_time_d[i] = 0.0;
 		mb_io_ptr->heading_heading[i] = 0.0;
+		mb_io_ptr->sonardepth_time_d[i] = 0.0;
+		mb_io_ptr->sonardepth_sonardepth[i] = 0.0;
+		mb_io_ptr->altitude_time_d[i] = 0.0;
+		mb_io_ptr->altitude_altitude[i] = 0.0;
 		}
 		
 	/* initialize notices */

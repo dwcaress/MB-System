@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.2 2004-06-18 05:22:32 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.3 2004-07-15 19:25:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/06/18 05:22:32  caress
+ * Working on adding support for segy i/o and for Reson 7k format 88.
+ *
  * Revision 5.1  2004/05/21 23:44:49  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
@@ -141,7 +144,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, char *buffer, void *store_ptr, int 
 int mbr_reson7kr_wr_systemevent(int verbose, char *buffer, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_fileheader(int verbose, char *buffer, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.2 2004-06-18 05:22:32 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.3 2004-07-15 19:25:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -516,7 +519,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	s7kr_attitude 	*attitude;
 	s7kr_survey	*survey;
 	s7kr_bluefin	*bluefin;
-	double		speed;
+	double		speed, heading;
+	double		sonar_depth, sonar_altitude;
 	int	i;
 
 	/* print input debug statements */
@@ -566,19 +570,27 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<bluefin->number_frames;i++)
 			{
 			mb_navint_add(verbose, mbio_ptr, 
-					(double)(bluefin->nav[i].position_time), 
+					(double)(bluefin->nav[i].position_time - 32.0), 
 					(double)(RTD * bluefin->nav[i].longitude), 
 					(double)(RTD * bluefin->nav[i].latitude), 
 					error);
 			mb_attint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].position_time), 
+					(double)(bluefin->nav[i].position_time - 32.0), 
 					(double)(0.0), 
 					(double)(RTD * bluefin->nav[i].roll), 
 					(double)(RTD * bluefin->nav[i].pitch), 
 					error);
 			mb_hedint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].position_time), 
+					(double)(bluefin->nav[i].position_time - 32.0), 
 					(double)(RTD * bluefin->nav[i].yaw), 
+					error);
+			mb_depint_add(verbose, mbio_ptr,
+					(double)(bluefin->nav[i].position_time - 32.0), 
+					(double)(bluefin->nav[i].depth), 
+					error);
+			mb_altint_add(verbose, mbio_ptr,
+					(double)(bluefin->nav[i].altitude_time - 32.0), 
+					(double)(bluefin->nav[i].altitude), 
 					error);
 			}
 		}
@@ -594,13 +606,13 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<attitude->n;i++)
 			{
 			mb_attint_add(verbose, mbio_ptr,
-				(double)(store->time_d + ((double)i) / attitude->frequency),
+				(double)(store->time_d + ((double)i) / attitude->frequency - 32.0),
 				(double)(attitude->heave[i]),
 				(double)(attitude->roll[i]),
 				(double)(attitude->pitch[i]),
 				error);
 			mb_hedint_add(verbose, mbio_ptr,
-				(double)(store->time_d + ((double)i) / attitude->frequency),
+				(double)(store->time_d + ((double)i) / attitude->frequency - 32.0),
 				(double)(attitude->heading[i]),
 				error);
 			}
@@ -616,6 +628,15 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		mb_navint_interp(verbose, mbio_ptr, store->time_d, survey->heading, speed, 
 				    &survey->longitude, &survey->latitude, &speed, error);
 		survey->speed = speed;
+		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+				    &heading, error);
+		survey->heading = heading;
+		mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+				    &sonar_depth, error);
+		survey->sonar_depth = sonar_depth;
+		mb_altint_interp(verbose, mbio_ptr, store->time_d,  
+				    &sonar_altitude, error);
+		survey->sonar_altitude = sonar_altitude;
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -846,14 +867,6 @@ Have a nice day...\n");
 			}
 
 #ifdef MBR_RESON7KR_DEBUG
-	fprintf(stderr,"\nready to parse RESON7KR record:\n");
-	fprintf(stderr,"skip:%d recordid:%x %d deviceid:%x %d subsystemid:%x %d size:%d done:%d\n",
-		skip, *recordid, *recordid, 
-		*deviceid, *deviceid, 
-		*subsystemid, *subsystemid, 
-		*size, done);
-#else
-if (verbose == 1)
 fprintf(stderr,"RESON7KR record:skip:%d recordid:%x %d deviceid:%x %d subsystemid:%x %d size:%d done:%d\n",
 skip, *recordid, *recordid, 
 *deviceid, *deviceid, 
@@ -880,7 +893,7 @@ skip, *recordid, *recordid,
 				done = MB_YES;
 
 /* kluge to set bogus background navigation */
-klugelon = -121.0;
+/*klugelon = -121.0;
 klugelat = 36.0;		
 mb_navint_add(verbose, mbio_ptr, 
 		store->time_d, 
@@ -893,7 +906,7 @@ mb_navint_add(verbose, mbio_ptr,
 		store->time_d + 86400.0, 
 		klugelon, 
 		klugelat, 
-		error);
+		error);*/
 				}
 			else if (*recordid == R7KRECID_ReferencePoint)
 				{
@@ -981,6 +994,11 @@ mb_navint_add(verbose, mbio_ptr,
 				status = mbr_reson7kr_rd_bluefin(verbose, buffer, store_ptr, error);
 				done = MB_YES;
 				}
+			else if (*recordid == R7KRECID_7kSystemEvent)
+				{
+				status = mbr_reson7kr_rd_systemevent(verbose, buffer, store_ptr, error);
+				done = MB_YES;
+				}
 			else
 				{
 				
@@ -994,7 +1012,6 @@ mb_navint_add(verbose, mbio_ptr,
 		/* bail out if there is a parsing error */
 		if (status == MB_FAILURE)
 			done = MB_YES;
-
 #ifdef MBR_RESON7KR_DEBUG
 	fprintf(stderr,"done:%d recordid:%x size:%d status:%d error:%d\n", 
 		done, *recordid, *size, status, *error);
@@ -2731,12 +2748,14 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 	s7k_fsdwchannel *fsdwchannel;
 	s7k_fsdwssheader *fsdwssheader;
 	s7kr_survey *survey;
+	s7kr_bluefin *bluefin;
 	double	bin[MBSYS_RESON7K_MAX_PIXELS];
 	int	nbin[MBSYS_RESON7K_MAX_PIXELS];
 	int	index;
 	int	time_j[5];
 	int 	bottompick;
-	double	range, sign;
+	double	range, sign, sound_speed, half_sound_speed;
+	double	tracemax;
 	double	xtrack;
 	double	pixelsize;
 	double	pickvalue, value;
@@ -2762,6 +2781,7 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 	fsdwsslo = &(store->fsdwsslo);
 	header = &(fsdwsslo->header);
 	survey = &(store->survey);
+	bluefin = &(store->bluefin);
 	
 	/* extract the header */
 	index = 0;
@@ -2840,52 +2860,70 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 }
 #endif
 
-	/* get first arrival and treat as altitude */
-	bottompick = fsdwchannel->number_samples;
-	for (i=0;i<2;i++)
+	/* get sonar_depth and altitude if possible */
+	if (bluefin->nav[0].depth > 0.0)
+		survey->sonar_depth = bluefin->nav[0].depth;
+	if (bluefin->nav[0].altitude > 0.0)
+		survey->sonar_altitude = bluefin->nav[0].altitude;
+	if (bluefin->environmental[0].sound_speed > 0.0)
+		sound_speed = bluefin->environmental[0].sound_speed;
+	else
+		sound_speed = 1500.0;
+	half_sound_speed = 0.5 * sound_speed;
+
+	/* if necessary get first arrival and treat as altitude */
+	if (survey->sonar_altitude == 0.0)
 		{
-		fsdwchannel = &(fsdwsslo->channel[i]);
-		shortptr = (short *) fsdwchannel->data;
-		ushortptr = (unsigned short *) fsdwchannel->data;
-		if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_ENVELOPE)
-			pickvalue = (double) ushortptr[0];
-		else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_ANALYTIC)
-			pickvalue = sqrt((double) (shortptr[0] * shortptr[0] + shortptr[1] * shortptr[1]));
-		else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_RAW)
-			pickvalue = fabs((double) ushortptr[0]);
-		else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_REALANALYTIC)
-			pickvalue = fabs((double) ushortptr[0]);
-		else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_PIXEL)
-			pickvalue = (double) ushortptr[0];
-		pickvalue = MAX(4 * pickvalue, 40.0);
-		for (j=0;j<fsdwchannel->number_samples;j++)
+		bottompick = fsdwchannel->number_samples;
+		for (i=0;i<2;i++)
 			{
+			fsdwchannel = &(fsdwsslo->channel[i]);
+			shortptr = (short *) fsdwchannel->data;
+			ushortptr = (unsigned short *) fsdwchannel->data;
 			if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_ENVELOPE)
-				value = (double) ushortptr[j];
+				pickvalue = (double) ushortptr[0];
 			else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_ANALYTIC)
-				value = sqrt((double) (shortptr[2*j] * shortptr[2*j] + shortptr[2*j+1] * shortptr[2*j+1]));
+				pickvalue = sqrt((double) (shortptr[0] * shortptr[0] + shortptr[1] * shortptr[1]));
 			else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_RAW)
-				value = (double) ushortptr[j];
+				pickvalue = fabs((double) ushortptr[0]);
 			else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_REALANALYTIC)
-				value = (double) ushortptr[j];
+				pickvalue = fabs((double) ushortptr[0]);
 			else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_PIXEL)
-				value = (double) ushortptr[j];
-			if (bottompick > j && fabs(value) > pickvalue)
+				pickvalue = (double) ushortptr[0];
+			pickvalue = MAX(40 * pickvalue, 80.0);
+			for (j=0;j<fsdwchannel->number_samples;j++)
 				{
-				bottompick = j;
-				survey->sonar_altitude = 750.00 * bottompick * 0.000001 * fsdwchannel->sample_interval;
+				if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_ENVELOPE)
+					value = (double) ushortptr[j];
+				else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_ANALYTIC)
+					value = sqrt((double) (shortptr[2*j] * shortptr[2*j] + shortptr[2*j+1] * shortptr[2*j+1]));
+				else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_RAW)
+					value = (double) ushortptr[j];
+				else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_REALANALYTIC)
+					value = (double) ushortptr[j];
+				else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_PIXEL)
+					value = (double) ushortptr[j];
+				if (bottompick > j && fabs(value) > pickvalue)
+					{
+					bottompick = j;
+					survey->sonar_altitude = half_sound_speed * bottompick * 0.000001 * fsdwchannel->sample_interval;
+					}
 				}
 			}
 		}
+	else
+		{
+		bottompick = survey->sonar_altitude / (half_sound_speed * 0.000001 * fsdwchannel->sample_interval);
+		}
 
 	/* insert sslo data into survey structure */
+tracemax = 0.0;
 	pixelsize = (fsdwsslo->channel[0].range + fsdwsslo->channel[1].range) / 1024;
 	for (j=0;j<1024;j++)
 		{
 		bin[j] = 0.0;
 		nbin[j] = 0;
 		}
-/*fprintf(stderr,"bottompick:%d altitude:%f pixelsize:%f\n",bottompick,survey->sonar_altitude,pixelsize);*/
 	for (i=0;i<2;i++)
 		{
 		fsdwchannel = &(fsdwsslo->channel[i]);
@@ -2914,7 +2952,8 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 				value = (double) ushortptr[j];
 			else if (fsdwsslo->data_format == EDGETECH_TRACEFORMAT_PIXEL)
 				value = (double) ushortptr[j];
-			range = 750.00 * j * 0.000001 * fsdwchannel->sample_interval;
+tracemax = MAX(tracemax, value);
+			range = half_sound_speed * j * 0.000001 * fsdwchannel->sample_interval;
 			xtrack = sign * sqrt(fabs(range * range 
 						- survey->sonar_altitude * survey->sonar_altitude));
 			k = (xtrack / pixelsize) + 512;
@@ -2933,6 +2972,24 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 		survey->sslow_acrosstrack[j] = pixelsize * (j - 512);;
 		survey->sslow_alongtrack[j] = 0.0;
 		}
+
+/*fprintf(stderr,"altitude:%f depth:%f sv:%f heading:%f bottompick:%d weight:%d ADCGain:%d ADCMax:%d max:%f\n",
+survey->sonar_altitude,survey->sonar_depth,sound_speed,survey->heading,bottompick,
+fsdwssheader->weightingFactor,fsdwssheader->ADCGain,fsdwssheader->ADCMax,tracemax);
+fprintf(stderr,"\n\nbottompick:%d altitude:%f pixelsize:%f\n",bottompick,survey->sonar_altitude,pixelsize);
+for (j=0;j<fsdwchannel->number_samples;j++)
+{
+fsdwchannel = &(fsdwsslo->channel[0]);
+ushortptr = (unsigned short *) fsdwchannel->data;
+value = (double) ushortptr[j];
+fprintf(stderr,"SSL[%5d]: %10.0f",j,value);
+fsdwchannel = &(fsdwsslo->channel[1]);
+ushortptr = (unsigned short *) fsdwchannel->data;
+value = (double) ushortptr[j];
+fprintf(stderr," %10.0f",value);
+if (j == bottompick) fprintf(stderr," BOTTOMPICK");
+fprintf(stderr,"\n");
+}*/
 	
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -3534,7 +3591,7 @@ int mbr_reson7kr_rd_systemevent(int verbose, char *buffer, void *store_ptr, int 
 		{
 		/* set kind */
 		store->kind = MB_DATA_COMMENT;
-		store->type = R7KHDRSIZE_7kSystemEvent;
+		store->type = R7KRECID_7kSystemEvent;
 		
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
@@ -3756,7 +3813,7 @@ fprintf(stderr,"Done writing FileHeader: %d %d status:%d\n", write_len, size, st
 	/* call appropriate writing routine */
 	if (status == MB_SUCCESS && store->type != R7KRECID_7kFileHeader)
 		{
-fprintf(stderr,"Writing Record:  kind:%d %d type:%x ", store->kind, mb_io_ptr->new_kind, store->type);
+fprintf(stderr,"Writing Record:  kind:%d %d type:%x \n", store->kind, mb_io_ptr->new_kind, store->type);
 		if (store->type == R7KRECID_ReferencePoint)
 			{
 			status = mbr_reson7kr_wr_reference(verbose, buffer, store_ptr, &size, error);
@@ -3820,6 +3877,10 @@ fprintf(stderr,"Writing Record:  kind:%d %d type:%x ", store->kind, mb_io_ptr->n
 		else if (store->type == R7KRECID_FSDWsubbottom)
 			{
 			status = mbr_reson7kr_wr_fsdwsb(verbose, buffer, store_ptr, &size, error);
+			}
+		else if (store->type == R7KRECID_Bluefin)
+			{
+			status = mbr_reson7kr_wr_bluefin(verbose, buffer, store_ptr, &size, error);
 			}
 		else if (store->type == R7KRECID_7kSystemEvent)
 			{
@@ -3898,6 +3959,9 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 	header->Reserved2 = 0;
 	
 	/* print out the data to be output */
+#ifndef MBR_RESON7KR_DEBUG
+	if (verbose >= 2)
+#endif
 	mbsys_reson7k_print_header(verbose, header, error);
   
 	/* insert the header */
@@ -4934,6 +4998,9 @@ unsigned short *urptr,*usptr;
 		}
 	
 	/* print out the data to be output */
+#ifndef MBR_RESON7KR_DEBUG
+	if (verbose >= 2)
+#endif
 	mbsys_reson7k_print_fsdwchannel(verbose, data_format, fsdwchannel, error);
 	
 	/* insert the channel header */
@@ -5047,6 +5114,9 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 		}
 	
 	/* print out the data to be output */
+#ifndef MBR_RESON7KR_DEBUG
+	if (verbose >= 2)
+#endif
 	mbsys_reson7k_print_fsdwssheader(verbose, fsdwssheader, error);
 	
 	/* insert the Edgetech sidescan header */
@@ -5124,6 +5194,9 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index,
 		}
 	
 	/* print out the data to be output */
+#ifndef MBR_RESON7KR_DEBUG
+	if (verbose >= 2)
+#endif
 	mbsys_reson7k_print_fsdwsegyheader(verbose, fsdwsegyheader, error);
 	
 	/* insert the Edgetech segy header */
@@ -5704,11 +5777,11 @@ int mbr_reson7kr_wr_fileheader(int verbose, char *buffer, void *store_ptr, int *
 #ifndef MBR_RESON7KR_DEBUG
 	if (verbose >= 2)
 #endif
+	mbsys_reson7k_print_fileheader(verbose, fileheader, error);
 	
 	/* insert the header */
 	index = 0;
 	status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
-	mbsys_reson7k_print_fileheader(verbose, fileheader, error);
 		
 	/* insert the data */
 	for (i=0;i<16;i++)

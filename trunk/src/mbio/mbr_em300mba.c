@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.19 2004-02-24 22:29:02 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.20 2004-07-15 19:25:04 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2004/02/24 22:29:02  caress
+ * Fixed errors in handling Simrad datagrams and edit save files on byteswapped machines (e.g. Intel or AMD processors).
+ *
  * Revision 5.18  2003/11/24 20:44:51  caress
  * Fixes to more gracefully handle unsupported datagrams.
  *
@@ -245,7 +248,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.19 2004-02-24 22:29:02 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.20 2004-07-15 19:25:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -1623,6 +1626,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 			|| sonar == MBSYS_SIMRAD2_EM3000D_5
 			|| sonar == MBSYS_SIMRAD2_EM3000D_6
 			|| sonar == MBSYS_SIMRAD2_EM3000D_7
+			|| sonar == MBSYS_SIMRAD2_EM3000D_8
 			|| sonar == MBSYS_SIMRAD2_EM12S
 			|| sonar == MBSYS_SIMRAD2_EM12D
 			|| sonar == MBSYS_SIMRAD2_EM121
@@ -1649,6 +1653,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 		&& sonar != MBSYS_SIMRAD2_EM3000D_5
 		&& sonar != MBSYS_SIMRAD2_EM3000D_6
 		&& sonar != MBSYS_SIMRAD2_EM3000D_7
+		&& sonar != MBSYS_SIMRAD2_EM3000D_8
 		&& sonar != MBSYS_SIMRAD2_EM12S
 		&& sonar != MBSYS_SIMRAD2_EM12D
 		&& sonar != MBSYS_SIMRAD2_EM121
