@@ -3,7 +3,7 @@
 \fBmbclean\fP - Identifies and flags bad beams in swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
@@ -249,7 +249,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.13 1998-10-05 19:47:23 caress Exp $
+ 	Version $Id: mbclean.l,v 4.14 1998-10-05 22:20:21 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

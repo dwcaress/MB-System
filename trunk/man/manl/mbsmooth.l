@@ -3,7 +3,7 @@
 \fBmbsmooth\fP - Smooths swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbsmooth\fP [\fB-F\fIformat\fP \fB-G\fIwidth\fP \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-N\fIbuffersize\fP \fB-O\fIoutfile\fP \fB-W\fIfilterfile\fP \fB-V -H\fP]

@@ -3,7 +3,7 @@
 \fBxbt\fP - Overview of \fBxbt\fP proceedures on the R/V Ewing.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH DESCRIPTION
 On the R/V Ewing, \fIxbt\fP (eXpendable BathyThermograph) probes are used

@@ -5,7 +5,7 @@ from a swath sonar file.  The noise in this time series largely reflects
 noise in the vertical reference used by the sonar.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbm_vrefcheck\fP \fB-F\fIformat \fB-I\fIfile \fP[\fB-S\fIscale \fB-X\fIxaxis \fB-A\fIxmin \fB-B\fIxmax\fP]

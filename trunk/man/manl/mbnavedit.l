@@ -3,7 +3,7 @@
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbnavedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 

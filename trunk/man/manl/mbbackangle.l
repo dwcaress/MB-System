@@ -5,7 +5,7 @@ sidescan values in swath sonar data as a function of
 the grazing angle with the seafloor.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbbackangle\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc 

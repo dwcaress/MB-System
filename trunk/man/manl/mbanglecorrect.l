@@ -4,7 +4,7 @@
 amplitude or sidescan data in swath sonar data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbanglecorrect\fP [\fB-A\fIkind/scale\fP \fB-B\fIyr/mo/da/hr/mn/sc 

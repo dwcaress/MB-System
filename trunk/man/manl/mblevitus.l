@@ -5,7 +5,7 @@ of the mean annual water column for a specified 1 degree by 1 degree
 region.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmblevitus\fP [\fB-R\fIlon/lat \fB-O\fIoutfile \fB-V -H\fP]

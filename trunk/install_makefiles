@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.15 1997-09-18 13:29:15 caress Exp $
+#    $Id: install_makefiles,v 4.16 1998-10-05 22:12:48 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.15 1997-09-18 13:29:15 caress Exp $
+#   $Id: install_makefiles,v 4.16 1998-10-05 22:12:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.15  1997/09/18  13:29:15  caress
+# Removed references to realtime stuff.
+#
 # Revision 4.14  1997/09/15  19:02:15  caress
 # Real Version 4.5
 #
@@ -256,8 +259,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 # **** EDIT THE PARAMETERS HERE ****
 # Set the environment parameters:
-$MBSYSTEM_HOME = "/SB3/caress/dev/mbsystem";
-$OS = "IRIX";
+$MBSYSTEM_HOME = "/usr/people/caress/dev/mbsystem";
+$OS = "IRIX64";
 $BYTESWAPPED = "NO";
 $CFLAGS = "-g";
 $LFLAGS = "-lm";

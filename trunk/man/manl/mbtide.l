@@ -3,7 +3,7 @@
 \fBmbtide\fP - MBTIDE corrects swath sonar bathymetry data for tides.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbtide\fP [\fB-F\fIformat \fB-I\fIinfile \fB-O\fIoutfile 

@@ -1,94 +1,74 @@
-MB-SYSTEM VERSION 4.5 RELEASE NOTES:
+MB-SYSTEM VERSION 4.6 RELEASE NOTES:
 -----------------------------------
 
-This directory structure contains the version 4.5 release  
+This directory structure contains the version 4.6 release  
 of the MB-System software package for processing and display of 
-swath sonar data. Version 4.5 includes significant enhancements
-and bug fixes relative to version 4.4. 
+swath sonar data. Version 4.6 includes significant enhancements
+relative to version 4.5. 
 
-The primary enhancements for version 4.5 include a new
-program, called mbmosaic, for mosaicing of sidescan
-and amplitude data, improvements to the graphical tools
-mbedit, mbnavedit, and mbvelocitytool, support for
-two new fully binary SeaBeam 2100 data formats, and an
-initial version of html-based MB-System documentation.
+The primary enhancements for version 4.6 include support
+for two new data formats and a large number of bug fixes.
 
-MBmosaic allows users to prioritize sidescan data according to
-the associated grazing angle and according to look azimuth.
-Individual mosaic bin values can be either the value of the
-highest priority sample in the bin or the Gaussian weighted
-mean of the highest priority samples in the neighborhood of
-the bin (the samples used here are those with priorities
-within a specified range of the highest priority sample
-found). Users can thus construct mosaics which are
-dominantly from a particular part of the swath (e.g.
-prioritize the outer swath higher than the inner swath) or
-which are dominantly from a particular look azimuth (e.g.
-construct an east-looking mosaic by specifying a preferred
-look azimuth of 90 degrees).
+The first newly supported format is the Generic Sensor 
+Format (GSF) developed by Science Applications International 
+Corporation (SAIC) and used by SAIC, the U.S. Navy, and other
+SAIC customers. This format itself supports data from a
+number of different sonars.
 
-The improvements to the graphical tools are mostly
-style, but with some substance for mbedit and mbvelocitytool.
-In particular, see the mbedit man page for a description
-of the new edit save facility and the new facility
-for easily flagging errant soundings which are plotted
-outside the standard view (such soundings were easily
-missed when working with prior versions of mbedit).
+The second new format is MSTIFF, a TIFF file variant used
+in conjunction with PC Sea Scan towed sidescan sonars.
 
-The new SeaBeam 2100 data formats speed up processing
-considerably over the original partly ASCII format.
-The second binary format stores bathymetry only,
-allowing users to substantially reduce file size
-when sidescan data are not required.
+Minor enhancements and bug fixes include:
 
-The html documentation consists of a number of html
-documents and images in the directory mbsystem/html.
-This documentation will also comprise the MB-System
-web page available from the Lamont home page at:
-	http://www.ldeo.columbia.edu
-Users can access the documentation in their own MB-System
-installation by using a web browser and accessing the file:
-	file:/usr/local/mbsystem/html/mbsystem_home.html
-(here it is assumed that MB-System has been installed
-in /usr/local). Currently, the documentation includes some
-general information about MB-System (e.g. who wrote, how to
-get it, how to install it) and a complete set of manual
-pages. In the future we will add increasing amounts of 
-information including examples of using MB-System.
+All MB-System programs now print out the MB-System version
+number when run with the -h option.
 
-Of course, a number of bug fixes are also incorporated
-in the new release. In particular, problems with 
-mbfilter and with handling of DSL AMS-120 data 
-have been fixed.
+The programs mbgrid and mbmosaic now handle longitude and
+latitude bounding values given in dd:mm:ss as well as in
+decimal degrees. This means that the -R option for these
+programs is fully compatible with GMT conventions.
 
-Users should note that the install_makefiles script
-(see below) has changed somewhat. Thus, when installing
-MB-System users should edit the install_makefiles that
-comes with version 4.5 rather than copy over an 
-install_makefiles script from a previous installation
-of MB-System.
+The program mbclean once again works properly with large
+data files.
+
+The program mbbath, which is used to recalculate swath
+bathymetry data, has been improved. This program now handles 
+the surface sound velocity in a more flexible (and in some
+cases more realistic) fashion. Users can also now use
+mbbath to apply changes to the roll and pitch bias values 
+without recalculating the bathymetry from travel times by
+raytracing. This allows users to correct roll bias problems
+in bathymetry data which does not include travel times and
+angles (e.g. SeaBeam 2000 data).
+
+The plotting macros (mbm_plot, mbm_grdplot, mbm_grd3dplot,
+and mbm_xyplot) now generate plotting shellscripts which
+have the major parameters defined at the beginning as 
+environment variables. This makes editing of the scripts
+easier.
+
+Of course, a larger number of minor bug fixes are also 
+incorporated in the new release.
 
 RELEASE DATE:
 ------------
-September 18, 1997
+October 6, 1998
 
 Authors:
 --------
-David W. Caress* (caress@ldeo.columbia.edu)
-                 (caress@seabeam.com)
+David W. Caress (caress@mbari.org)
+Monterey Bay Aquarium Research Institute
+P.O. Box 628
+Moss Landing, CA 95039-0628
+
 Dale N. Chayes (dale@ldeo.columbia.edu)
 Lamont-Doherty Earth Observatory of Columbia University
 Rte 9W
 Palisades, NY 10964
 
-*Also at: 
-SeaBeam Instruments
-141 Washington St.
-East Walpole, MA 02032
-
 Copyright:
 ----------
-MB-System Copyright 1993-1997
+MB-System Copyright 1993-1998
 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
@@ -98,7 +78,8 @@ The MB-System does not come with any warranties, nor is it
 guarenteed to work on your computer or to do anything useful.  The
 user assumes full responsibility for the use of this system.  In
 particular, David W.  Caress, Dale N. Chayes, the Lamont-Doherty 
-Earth Observatory of Columbia University, SeaBeam Instruments Inc.,  
+Earth Observatory of Columbia University, the Monterey Bay 
+Aquarium Research Institute, SeaBeam Instruments Inc.,  
 or any other individuals or organizations involved in the design 
 and maintenance of the MB-System software package are NOT 
 responsible for any damage that may follow from correct or 
@@ -113,13 +94,13 @@ MB-System utilities (macros) are written in the Perl scripting
 language. The source code for these required software packages
 is available as follows:
 
-	MB-System v 4.5
+	MB-System v 4.6
 	- available from L-DEO via anonymous ftp to
 	  lamont.ldeo.columbia.edu
-	- compressed tar file MB-System4.5.tar.Z
+	- compressed tar file MB-System4.6.tar.Z
 	  in directory pub/swath_data
 
-	GMT v 3.0 or later
+	GMT v 3.0
 	- available from SOEST (U. Hawaii) via anonymous ftp to
 	  kiawe.soest.hawaii.edu
 	- compressed tar files in directory pub/gmt
@@ -144,11 +125,11 @@ reflected in the source code archives available via
 anonymous ftp at lamont.ldeo.columbia.edu. When changes are
 made to the distributed source code, this is reflected in
 the names of the compressed tar files in the ftp archive.
-For example, the initial MB-System 4.5 distribution will be
-available in a file called MB-System4.5.tar.Z. After the
+For example, the initial MB-System 4.6 distribution will be
+available in a file called MB-System4.6.tar.Z. After the
 first incremental update, the filename will change to
-MB-System4.5a.tar.Z; subsequent incremental updates will
-be 4.5b, 4.5c, etc.  At all times, a link to the current
+MB-System4.6a.tar.Z; subsequent incremental updates will
+be 4.6b, 4.6c, etc.  At all times, a link to the current
 MB-System distribution file called MB-System.tar.Z will be
 maintained in the ftp archive; this allows the Lamont World
 Wide Web page to always access the current distribution.
@@ -158,8 +139,8 @@ Installing MB-System:
 The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
 
-		% uncompress MB-System4.5.tar.Z
-		% tar xvf MB-System4.5.tar
+		% uncompress MB-System4.6.tar.Z
+		% tar xvf MB-System4.6.tar
 
 This will create a directory structure called mbsystem. 
 In order to configure your installation, you must edit the
@@ -256,7 +237,7 @@ included in the MB-System tarfile.  It is in the 'annual.Z' file which
 is available by anonymous ftp from lamont.ldgo.columbia.edu in the
 pub/swath_data subdirectory.
 
-PORTING:
+Porting:
 --------
 MB-System is not tightly coupled to any particular OS. 
 We hope to make future releases portable and would be quite 
@@ -272,23 +253,30 @@ now use the Motif widget set rather than the XVIEW widget
 set used prior to version 4.0.  Motif libraries are required 
 to successfully link and install these programs. 
  
+Web Based Documentation:
+--------------------------
+The html documentation consists of a number of html
+documents and images in the directory mbsystem/html.
+This documentation also comprises the MB-System
+web page available from the Lamont home page at:
+	http://www.ldeo.columbia.edu
+Users can access the documentation in their own MB-System
+installation by using a web browser and accessing the file:
+	file:/usr/local/mbsystem/html/mbsystem_home.html
+(here it is assumed that MB-System has been installed
+in /usr/local). Currently, the documentation includes some
+general information about MB-System (e.g. who wrote, how to
+get it, how to install it) and a complete set of manual
+pages. In the future we will add increasing amounts of 
+information including examples of using MB-System.
+
 Continued Support:
 -----------------
 We are pleased to have received five years of continued 
 NSF funding for the support and development of MB-System. 
-We are now early the third year of this NSF project.
-
-SeaBeam Instruments is also actively participating in
-MB-System development, with an obvious emphasis on
-support for data from SeaBeam products. Although SeaBeam
-is also developing proprietary software tools for use
-with SeaBeam sonars, the core MB-System capabilities will
-continue to be distributed in the public domain, regardless
-of whether the work was paid for by NSF, SeaBeam, or other
-sources of support. For example, the development of the
-sidescan processing tools mbbackangle, mbanglecorrect, and
-mbfilter was sponsored by SeaBeam, and these tools are 
-included in the public domain MB-System distribution.
+We are now early the fourth year of this NSF project. 
+This project is also supported by the Monterey Bay Aquarium
+Research Institute.
 
 Contributions: 
 --------------
@@ -316,7 +304,9 @@ A number of people have made contributions to the code
 included in MB-System.  These include:
 	Suzanne O'Hara (Lamont-Doherty Earth Observatory) 
 	Daniel Scheirer (Brown University) 
-	Peter Lemmond (Woods Hole Oceanographic Institution) 
+	Paul Cohen (SeaBeam Instruments) 
+	Steve Dzurenko (SeaBeam Instruments)
+ 	Peter Lemmond (Woods Hole Oceanographic Institution) 
 	David Brock (formerly with Antarctic Support Associates) 
 	Alberto Malinverno (Schlumberger-Doll) 
 	Russ Alexander (formerly with UCSB) 
@@ -324,17 +314,20 @@ included in MB-System.  These include:
 Numerous users and vendors have provided information regarding 
 data file formats and sonar system specific characteristics.
 
-Good Luck!!
+Good mapping!!
 
-Dave Caress caress@ldeo.columbia.edu 
+Dave Caress caress@mbari.org
 Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.14 1997-09-15 21:33:33 caress Exp $
+RCS ID: $Id: README,v 4.15 1998-10-05 22:12:48 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.14  1997/09/15  21:33:33  caress
+# Fixed typo.
+#
 # Revision 4.13  1997/09/15  19:02:15  caress
 # Real Version 4.5
 #
