@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 5.1 2003-04-17 20:47:15 caress Exp $
+ *    $Id: mb_contour.h,v 5.2 2004-12-18 01:26:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2003/04/17 20:47:15  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.0  2000/12/01 22:52:16  caress
  * First cut at Version 5.0.
  *
@@ -73,6 +76,7 @@ struct swath
 	int	plot_contours;
 	int	plot_triangles;
 	int	plot_track;
+	int	plot_name;
 
 	/* contour control parameters */
 	double	contour_int;
@@ -94,6 +98,7 @@ struct swath
 	double	time_annot_int;
 	double	date_annot_int;
 	double	time_tick_len;
+	double	name_hgt;
 
 	/* triangle network */
 	int	npts;

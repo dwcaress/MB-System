@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.7 2003-04-17 20:43:37 caress Exp $
+ *    $Id: mbcontour.c,v 5.8 2004-12-18 01:26:43 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 20:43:37  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2002/10/02 23:52:37  caress
  * Release 5.0.beta24
  *
@@ -182,11 +185,14 @@
 /* GMT argument handling define */
 #define MBCONTOUR_GMT_ARG_MAX 128
 
+/* label and contour line length */
+#define MBCONTOUR_LABEL_LEN 128
+
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.7 2003-04-17 20:43:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.8 2004-12-18 01:26:43 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -213,7 +219,7 @@ main (int argc, char **argv)
 	char	*message = NULL;
 
 	/* MBIO read control parameters */
-	char	read_file[128];
+	char	read_file[MBCONTOUR_LABEL_LEN];
         int     read_datalist;
 	int	read_data;
 	void	*datalist;
@@ -232,7 +238,7 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	file[128];
+	char	file[MB_PATH_MAXLINE];
 	int	file_in_bounds;
 	int	beams_bath;
 	int	beams_amp;
@@ -265,7 +271,7 @@ main (int argc, char **argv)
 
 	/* plot control variables */
 	int	contour_algorithm;
-	char	contourfile[128];
+	char	contourfile[MB_PATH_MAXLINE];
 	int	plot;
 	int	done;
 	int	flush;
@@ -286,12 +292,16 @@ main (int argc, char **argv)
 	double	tick_len_map;
 	double	label_hgt_map;
 	double	label_spacing_map;
+	int 	plot_name;
+	int	plotted_name;
 	int	plot_track;
 	double	time_tick_int;
 	double	time_annot_int;
 	double	date_annot_int;
 	double	time_tick_len;
 	double	time_tick_len_map;
+	double	name_hgt;
+	double	name_hgt_map;
 	double	scale;
 	int	bathy_in_feet;
 
@@ -309,8 +319,8 @@ main (int argc, char **argv)
 	double	inchtolon;
 
 	/* other variables */
-	char	line[128];
-	char	labelstr[128], tickstr[128];
+	char	line[MBCONTOUR_LABEL_LEN];
+	char	labelstr[MBCONTOUR_LABEL_LEN], tickstr[MBCONTOUR_LABEL_LEN];
 	int	count;
 	int	setcolors;
 	double	navlon_old;
@@ -345,11 +355,13 @@ main (int argc, char **argv)
 	label_hgt = 0.1;
 	label_spacing = 0.0;
 	tick_len = 0.05;
+	plot_name = MB_NO;
 	plot_track = MB_NO;
 	time_tick_int = 0.25;
 	time_annot_int = 1.0;
 	date_annot_int = 4.0;
 	time_tick_len = 0.1;
+	name_hgt = 0.1;
 	ncolor = 4;
 	nlevel = 0;
 	plot_contours = MB_NO;
@@ -396,7 +408,7 @@ main (int argc, char **argv)
 	  }
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:I:i:J:j:KkL:l:N:n:OoPp:QqR:r:S:s:T:t:UuWwX:x:Y:y:Z:z:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:I:i:J:j:KkL:l:N:n:OoPp:QqR:r:S:s:T:t:UuWwX:x:Y:y:Z:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -448,6 +460,13 @@ main (int argc, char **argv)
                 case 'f':
                         sscanf (optarg, "%d",&format);
                         break;
+		case 'G':
+		case 'g':
+			sscanf (optarg, "%lf", &name_hgt);
+			plot_name = MB_YES;
+			if (plot_track == MB_NO)
+			    plot_track = MB_YES;
+			break;
 		case 'H':
 		case 'h':
 			help++;
@@ -612,14 +631,11 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       bounds[1]:        %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:        %f\n",bounds[2]);
 		fprintf(stderr,"dbg2       bounds[3]:        %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       contour algorithm:%d\n",
-			contour_algorithm);
-		fprintf(stderr,"dbg2       plot contours:    %d\n",
-			plot_contours);
-		fprintf(stderr,"dbg2       plot triangles:   %d\n",
-			plot_triangles);
-		fprintf(stderr,"dbg2       plot track:       %d\n",
-			plot_track);
+		fprintf(stderr,"dbg2       contour algorithm:%d\n",contour_algorithm);
+		fprintf(stderr,"dbg2       plot contours:    %d\n",plot_contours);
+		fprintf(stderr,"dbg2       plot triangles:   %d\n",plot_triangles);
+		fprintf(stderr,"dbg2       plot track:       %d\n",plot_track);
+		fprintf(stderr,"dbg2       plot name:        %d\n",plot_name);
 		fprintf(stderr,"dbg2       contour interval: %f\n",cont_int);
 		fprintf(stderr,"dbg2       color interval:   %f\n",col_int);
 		fprintf(stderr,"dbg2       tick interval:    %f\n",tick_int);
@@ -628,14 +644,11 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       label height:     %f\n",label_hgt);
 		fprintf(stderr,"dbg2       label spacing:    %f\n",label_spacing);
 		fprintf(stderr,"dbg2       number contoured: %d\n",nplot);
-		fprintf(stderr,"dbg2       time tick int:    %f\n",
-			time_tick_int);
-		fprintf(stderr,"dbg2       time interval:    %f\n",
-			time_annot_int);
-		fprintf(stderr,"dbg2       date interval:    %f\n",
-			date_annot_int);
-		fprintf(stderr,"dbg2       time tick length: %f\n\n",
-			time_tick_len);
+		fprintf(stderr,"dbg2       time tick int:    %f\n",time_tick_int);
+		fprintf(stderr,"dbg2       time interval:    %f\n",time_annot_int);
+		fprintf(stderr,"dbg2       date interval:    %f\n",date_annot_int);
+		fprintf(stderr,"dbg2       time tick length: %f\n\n",time_tick_len);
+		fprintf(stderr,"dbg2       name height:      %f\n\n",name_hgt);
 		fprintf(stderr,"dbg2       bathy_in_feet:    %d\n",bathy_in_feet);
 		}
 
@@ -651,10 +664,11 @@ main (int argc, char **argv)
 		}
 
 	/* scale label and tick sizes */
-	label_hgt_map = inchtolon*label_hgt;
-	label_spacing_map = inchtolon*label_spacing;
-	tick_len_map = inchtolon*tick_len;
-	time_tick_len_map = inchtolon*time_tick_len;
+	label_hgt_map = inchtolon * label_hgt;
+	label_spacing_map = inchtolon * label_spacing;
+	tick_len_map = inchtolon * tick_len;
+	time_tick_len_map = inchtolon * time_tick_len;
+	name_hgt_map = inchtolon * name_hgt;
 
 	/* read contours from file */
 	if (set_contours == MB_YES)
@@ -672,7 +686,7 @@ main (int argc, char **argv)
 
 		/* count lines in file */
 		nlevel = 0;
-		while (fgets(line,128,fp) != NULL)
+		while (fgets(line,MBCONTOUR_LABEL_LEN,fp) != NULL)
 			nlevel++;
 		fclose(fp);
 
@@ -700,7 +714,7 @@ main (int argc, char **argv)
 
 		/* read contour levels from file */
 		nlevel = 0;
-		while (fgets(line,128,fp) != NULL)
+		while (fgets(line,MBCONTOUR_LABEL_LEN,fp) != NULL)
 			{
 			count = sscanf(line,"%lf %s %s %d %d %d",
 				&level[nlevel],labelstr,tickstr,
@@ -872,15 +886,17 @@ main (int argc, char **argv)
 		/* initialize contour controls */
 		status = mb_contour_init(verbose,&swath_plot,nplot,beams_bath,
 				    contour_algorithm,
-				    plot_contours,plot_triangles,plot_track,
+				    plot_contours,plot_triangles,
+				    plot_track,plot_name,
 				    cont_int,col_int,tick_int,label_int,
 				    tick_len_map,label_hgt_map,label_spacing_map,
 				    ncolor,nlevel,level,label,tick,
 				    time_tick_int,time_annot_int,
 				    date_annot_int,time_tick_len_map,
+				    name_hgt_map,
 				    &error);
 		swath_plot->beams_bath = beams_bath;
-    
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -901,6 +917,7 @@ main (int argc, char **argv)
 		npings = &swath_plot->npings;
 		*npings = 0;
 		done = MB_NO;
+		plotted_name = MB_NO;
 		while (done == MB_NO)
 		    {
 		    /* read the next ping */
@@ -1036,6 +1053,12 @@ main (int argc, char **argv)
 			    if (plot_track == MB_YES)
 				    mb_track(verbose,swath_plot,&error);
     
+			    if (plot_name == MB_YES && plotted_name == MB_NO) 
+			    	    {
+				    mb_trackname(verbose,swath_plot,file,&error);
+				    plotted_name = MB_YES;
+				    }
+			      
 			    /* reorganize data */
 			    if (flush == MB_YES && save_new == MB_YES)
 				    {
