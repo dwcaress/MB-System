@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.9 1996-01-26 21:23:30 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.10 1996-04-22 11:16:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,6 +33,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/01/26  21:23:30  caress
+ * Version 4.3 distribution
+ *
  * Revision 4.8  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *
@@ -83,9 +86,6 @@
 #include "../../include/mb_io.h"
 #include "../../include/mbsys_mr1.h"
 
-/* angle conversion define */
-#define RTD (180./M_PI)
-
 /*--------------------------------------------------------------------*/
 int mbsys_mr1_alloc(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
@@ -93,7 +93,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.9 1996-01-26 21:23:30 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.10 1996-04-22 11:16:30 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
