@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	3.00	4/8/93
- *    $Id: mbedit.c,v 3.0 1993-04-22 18:49:44 dale Exp $
+ *    $Id: mbedit.c,v 3.1 1993-05-14 23:28:56 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/22  18:49:44  dale
+ * Initial version
+ *
  */
 
 /*--------------------------------------------------------------------*/
@@ -67,7 +70,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id";
+static char rcs_id[] = "$Id: mbedit.c,v 3.1 1993-05-14 23:28:56 sohara Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "hsbath [-Fformat -V -H -Ifile]";
