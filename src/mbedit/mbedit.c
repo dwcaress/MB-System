@@ -133,6 +133,11 @@ Cursor myCursor;
 XColor closest[2];
 XColor exact[2];
 
+int key_z_down = 0;
+int key_s_down = 0;
+int key_a_down = 0;
+int key_d_down = 0;
+
 /* Set the colors used for this program here. */
 #define NCOLORS 6
 XColor colors[NCOLORS];
@@ -591,8 +596,13 @@ static void setup_data()
 	/* set values of number of pings slider */
 	XtVaSetValues(widget_array[k_num_pings], 
 			XmNminimum, 1, 
-			XmNmaximum, plot_size_max, 
 			XmNvalue, mplot_size, 
+			NULL);
+
+	/* set values of number of pings to step slider */
+	XtVaSetValues(widget_array[k_pings_to_step], 
+			XmNminimum, 1, 
+			XmNvalue, step, 
 			NULL);
 
 	/* set values of buffer size slider */
@@ -796,10 +806,6 @@ static void display_menu(w, tag, list)
 /********************************************************************/
 }
 
-/************************************************************/
-/* CODE FROM "mbedit_stubs.c"                               */
-/************************************************************/
-
 /********************************************************************/
 /* File selector routine called by scandir().                       */
 /* Return TRUE if filename is not "." or "..".                      */
@@ -830,6 +836,31 @@ static void set_number_pings(w, tag, scale)
 
 	/* Read the value of the slider bar for number of pings displayed */
 	mplot_size = scale->value;
+
+	/* if slider set to minimum value, half the value range;
+		if slider set to maximum value,  double the range */
+	XtVaGetValues(widget_array[k_num_pings], 
+			XmNmaximum, &max, 
+			NULL);
+	if (mplot_size == 1 || mplot_size == max)
+		{
+		if (mplot_size == 1)
+			max = max/2;
+		else
+			max = 2*max;
+		if (max > plot_size_max)
+			max = plot_size_max;
+		if (max < 2)
+			max = 2;
+		XtVaSetValues(widget_array[k_num_pings], 
+			XmNmaximum, max, 
+			NULL);
+		sprintf(label, "%d", max);
+		XtVaSetValues(widget_array[k_num_pings_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, label, (strlen(label) + 1), 
+			NULL);	
+		}
 
 	/* replot the data */
 	status = mbedit_action_plot(mplot_width,mexager,
@@ -877,6 +908,8 @@ static void set_scale_x(w, tag, scale)
 			max = max/2;
 		else
 			max = 2*max;
+		if (max < 2)
+			max = 2;
 		XtVaSetValues(widget_array[k_x_scale], 
 			XmNmaximum, max, 
 			NULL);
@@ -938,6 +971,8 @@ static void set_scale_y(w, tag, scale)
 			max = max/2;
 		else
 			max = 2*max;
+		if (max < 2)
+			max = 2;
 		XtVaSetValues(widget_array[k_vert_exag], 
 			XmNmaximum, max, 
 			NULL);
@@ -970,6 +1005,29 @@ static void set_number_step(w, tag, scale)
 	char	label[10];
 
 	step = scale->value;
+
+	/* if slider set to minimum value, half the value range;
+		if slider set to maximum value,  double the range */
+	XtVaGetValues(widget_array[k_pings_to_step], 
+			XmNmaximum, &max, 
+			NULL);
+	if (step == 1 || step == max)
+		{
+		if (step == 1)
+			max = max/2;
+		else
+			max = 2*max;
+		if (max < 2)
+			max = 2;
+		XtVaSetValues(widget_array[k_pings_to_step], 
+			XmNmaximum, max, 
+			NULL);
+		sprintf(label, "%d", max);
+		XtVaSetValues(widget_array[k_pings_to_step_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, label, (strlen(label) + 1), 
+			NULL);	
+		}
 }
 
  
@@ -1185,6 +1243,8 @@ static void do_x_interval(w, tag, scale)
 			max = max/2;
 		else
 			max = 2*max;
+		if (max < 2)
+			max = 2;
 		XtVaSetValues(widget_array[k_x_tick_marks], 
 			XmNmaximum, max, 
 			NULL);
@@ -1227,6 +1287,8 @@ static void do_y_interval(w, tag, scale)
 			max = max/2;
 		else
 			max = 2*max;
+		if (max < 2)
+			max = 2;
 		XtVaSetValues(widget_array[k_y_tick_marks], 
 			XmNmaximum, max, 
 			NULL);
@@ -1265,6 +1327,7 @@ static void do_event(w, data, cbs)
 	int *x, *y;
 	int root_x_return, root_y_return,win_x,win_y;
 	unsigned int mask_return;
+	int doit;
 
 	/* check for data file loaded at startup */
 	if (startup_file)
@@ -1279,10 +1342,12 @@ static void do_event(w, data, cbs)
 	/* If there is input in the drawing area */
 	if (cbs->reason == XmCR_INPUT)
 	{
+	  /* Deal with KeyPress events */
 	  if(event->xany.type == KeyPress)
 	  {
 	  /* Get key pressed - buffer[0] */
-	  actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+	  actual = XLookupString((XKeyEvent *)event, 
+			buffer, 1, &keysym, NULL);
 
 	  /* process events */
 	  switch (buffer[0])
@@ -1300,6 +1365,10 @@ static void do_event(w, data, cbs)
 				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
+			key_z_down = 1;
+			key_s_down = 0;
+			key_a_down = 0;
+			key_d_down = 0;
 			break;
 		case 'K':
 		case 'k':
@@ -1309,6 +1378,10 @@ static void do_event(w, data, cbs)
 				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
+			key_z_down = 0;
+			key_s_down = 1;
+			key_a_down = 0;
+			key_d_down = 0;
 			break;
 		case 'J':
 		case 'j':
@@ -1318,12 +1391,26 @@ static void do_event(w, data, cbs)
 				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
+			key_z_down = 0;
+			key_s_down = 0;
+			key_a_down = 1;
+			key_d_down = 0;
 			break;
 		case 'L':
 		case 'l':
 		case 'D':
 		case 'd':
 			status = mbedit_action_right_ping(
+				mplot_width,mexager,
+				mx_interval,my_interval,mplot_size,
+				&nbuffer,&ngood,&icurrent,&mnplot);
+			key_z_down = 0;
+			key_s_down = 0;
+			key_a_down = 0;
+			key_d_down = 1;
+			break;
+		case '!':
+			status = mbedit_action_zero_ping(
 				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
@@ -1385,6 +1472,45 @@ static void do_event(w, data, cbs)
 
 	   } /* end of key press events */
 
+	  /* Deal with KeyRelease events */
+	  if(event->xany.type == KeyRelease)
+	  {
+	  /* Get key pressed - buffer[0] */
+	  actual = XLookupString((XKeyEvent *)event, 
+			buffer, 1, &keysym, NULL);
+
+	  /* process events */
+	  switch (buffer[0])
+		{
+		case 'M':
+		case 'm':
+		case 'Z':
+		case 'z':
+			key_z_down = 0;
+			break;
+		case 'K':
+		case 'k':
+		case 'S':
+		case 's':
+			key_s_down = 0;
+			break;
+		case 'J':
+		case 'j':
+		case 'A':
+		case 'a':
+			key_a_down = 0;
+			break;
+		case 'L':
+		case 'l':
+		case 'D':
+		case 'd':
+			key_d_down = 0;
+			break;
+		default:
+			break;
+	      } /* end of key switch */
+
+	   } /* end of key release events */
 
 	  /* Check for mouse pressed and not pressed and released. */
 	  if(event->xany.type == ButtonPress)
@@ -1394,8 +1520,10 @@ static void do_event(w, data, cbs)
 	      {
 		x_loc = event->xbutton.x;
 		y_loc = event->xbutton.y;
-	
-	again:
+
+		doit = 1;
+		while (doit)
+		    {
 
 	            if(mode_pick == MODE_PICK)
 			status = mbedit_action_mouse_pick(
@@ -1415,7 +1543,36 @@ static void do_event(w, data, cbs)
 				mplot_width,mexager,
 				mx_interval,my_interval,mplot_size,
 				&nbuffer,&ngood,&icurrent,&mnplot);
-		if (status == 0) XBell(theDisplay,100);
+		    if (status == 0) 
+			    XBell(theDisplay,100);
+		    else if (key_z_down)
+			{
+			status = mbedit_action_bad_ping(
+				mplot_width,mexager,
+				mx_interval,my_interval,mplot_size,
+				&nbuffer,&ngood,&icurrent,&mnplot);
+			}
+		    else if (key_s_down)
+			{
+			status = mbedit_action_good_ping(
+				mplot_width,mexager,
+				mx_interval,my_interval,mplot_size,
+				&nbuffer,&ngood,&icurrent,&mnplot);
+			}
+		    else if (key_a_down)
+			{
+			status = mbedit_action_left_ping(
+				mplot_width,mexager,
+				mx_interval,my_interval,mplot_size,
+				&nbuffer,&ngood,&icurrent,&mnplot);
+			}
+		    else if (key_d_down)
+			{
+			status = mbedit_action_right_ping(
+				mplot_width,mexager,
+				mx_interval,my_interval,mplot_size,
+				&nbuffer,&ngood,&icurrent,&mnplot);
+			}
 
 			status = XQueryPointer(theDisplay,can_xid,
 				&root_return,&child_return,&root_x_return,
@@ -1427,8 +1584,10 @@ static void do_event(w, data, cbs)
 			/* If the button is still pressed then read the location */
 			/* of the pointer and run the action mouse function again */
 			if(mask_return == 256 && mode_pick != MODE_PICK)
-			   goto again;
-
+			   doit = 1;
+			else
+			   doit = 0;
+		    }
 
 		} /* end of left button events */
 
@@ -1545,9 +1704,6 @@ static void apply_goto_button(w, tag, list)
 	sscanf(time5_text, "%d", &ttime_i[5]);
 	ttime_i[6] = 0;
 
-	fprintf(stderr,"goto time: %d %d %d %d %d %d %d\n",
-		ttime_i[0],ttime_i[1],ttime_i[2],ttime_i[3],
-		ttime_i[4],ttime_i[5],ttime_i[6]);
 	status = mbedit_action_goto(ttime_i,hold_size,buffer_size,
 			mplot_width,mexager,
 			mx_interval,my_interval,mplot_size,
@@ -1674,7 +1830,7 @@ static void get_file_selection(w, tag, list)
 }
 
 /********************************************************************/
-/* END OF "mbedit_stubs.c".                                         */
+/*                                                                  */
 /********************************************************************/
 
 

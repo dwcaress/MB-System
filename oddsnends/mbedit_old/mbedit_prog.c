@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.3 1995-03-06 19:40:49 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.4 1995-03-15 14:12:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:40:49  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1995/02/14  19:16:04  caress
  * Improved widget handling, uses swath width rather than plot scale,
  * now handles default values properly.
@@ -117,7 +120,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.3 1995-03-06 19:40:49 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.4 1995-03-15 14:12:23 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -192,12 +195,12 @@ int	ndump_total = 0;
 char	last_ping[128];
 
 /* ping drawing control variables */
-#define	MBEDIT_MAX_PINGS	20
+#define	MBEDIT_MAX_PINGS	100
 #define	MBEDIT_PICK_DISTANCE	50
 #define	MBEDIT_ERASE_DISTANCE	15
 struct mbedit_ping_struct	ping[MBEDIT_MAX_PINGS];
 int	list[MBEDIT_BUFFER_SIZE];
-int	plot_size = MBEDIT_MAX_PINGS/2;
+int	plot_size = 10;
 int	nplot = 0;
 int	mbedit_xgid;
 int	borders[4];
@@ -491,7 +494,7 @@ int	*outmode;
 
 	/* get maximum number of pings to plot */
 	*plt_size_max = MBEDIT_MAX_PINGS;
-	*plt_size = MBEDIT_MAX_PINGS/2;
+	*plt_size = plot_size;
 
 	/* get maximum and starting buffer sizes */
 	*buffer_size_max = MBEDIT_BUFFER_SIZE;
@@ -1973,6 +1976,118 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbedit_action_zero_ping(
+	plwd,exgr,xntrvl,yntrvl,plt_size,
+	nbuffer,ngood,icurrent,nplt)
+int	plwd;
+int	exgr;
+int	xntrvl;
+int	yntrvl;
+int	plt_size;
+int	*nbuffer;
+int	*ngood;
+int	*icurrent;
+int	*nplt;
+{
+	/* local variables */
+	char	*function_name = "mbedit_action_zero_ping";
+	int	status = MB_SUCCESS;
+	char	comment[128];
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
+		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
+		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
+		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		}
+
+	/* check if a file has been opened 
+		and a beam has been picked and saved */
+	if (file_open == MB_YES && beam_save == MB_YES)
+		{
+		/* unplot the affected beam and ping */
+		status = mbedit_unplot_ping(iping_save);
+		for (j=0;j<beams_bath;j++)
+			status = mbedit_unplot_beam(iping_save,j);
+
+		/* zero beams in bad ping */
+		for (j=0;j<beams_bath;j++)
+			{
+			ping[iping_save].bath[j] = 0.0;
+			ping[iping_save].bathacrosstrack[j] = 0.0;
+			ping[iping_save].bathalongtrack[j] = 0.0;
+			}
+		for (j=0;j<beams_amp;j++)
+			ping[iping_save].amp[j] = 0.0;
+		status = mb_buffer_insert(verbose,
+				buff_ptr,imbio_ptr,ping[iping_save].id,
+				ping[iping_save].time_i,ping[iping_save].time_d,
+				ping[iping_save].navlon,ping[iping_save].navlat,
+				ping[iping_save].speed,ping[iping_save].heading,
+				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].bath,
+				ping[iping_save].amp,
+				ping[iping_save].bathacrosstrack,
+				ping[iping_save].bathalongtrack,
+				ping[iping_save].ss,
+				ping[iping_save].ssacrosstrack,
+				ping[iping_save].ssalongtrack,
+				comment,
+				&error);
+		if (verbose >= 1)
+			fprintf(stderr,"\nbeams in ping: %d zeroed\n",
+				iping_save);
+
+		/* set some return values */
+		*nbuffer = nbuff;
+		*ngood = nlist;
+		*icurrent = current_id;
+		current = list[current_id];
+
+		/* replot the affected beam and ping */
+		status = mbedit_plot_ping(iping_save);
+		for (j=0;j<beams_bath;j++)
+			status = mbedit_plot_beam(iping_save,j);
+		}
+
+	/* if no file open or beam saved set failure status */
+	else
+		{
+		status = MB_FAILURE;
+		*nbuffer = nbuff;
+		*nbuffer = nbuff;
+		*ngood = nlist;
+		current_id = 0;
+		*icurrent = current_id;
+		current = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
+		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
+		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
+		fprintf(stderr,"dbg2       nplt:        %d\n",*nplt);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbedit_set_output_file(output_file)
 char	*output_file;
 {
@@ -2250,7 +2365,7 @@ int	form;
 		}
 
 	/* if we got here we must have succeeded */
-	if (verbose >= 1)
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\nMultibeam File <%s> initialized for reading\n",ifile);
 		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
@@ -2322,7 +2437,7 @@ int mbedit_close_file()
 		status = mb_memory_list(verbose,&error);
 
 	/* if we got here we must have succeeded */
-	if (verbose >= 1)
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\nMultibeam Input File <%s> closed\n",ifile);
 		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
@@ -2399,7 +2514,7 @@ int	*nbuffer;
 	nlist = 0;
 
 	/* print out information */
-	if (verbose >= 1)
+	if (verbose >= 0)
 		{
 		if (output_mode == MBEDIT_OUTPUT_OUTPUT)
 			fprintf(stderr,"\n%d data records dumped to output file <%s>\n",
@@ -2510,7 +2625,7 @@ int	*icurrent;
 	current = list[current_id];
 
 	/* print out information */
-	if (verbose >= 1)
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\n%d data records loaded from input file <%s>\n",
 			*nloaded,ifile);
@@ -3200,7 +3315,7 @@ int	*nplt;
 		}
 
 	/* let the world know... */
-	if (verbose >= 1 && found == MB_YES)
+	if (verbose >= 0 && found == MB_YES)
 		{
 		fprintf(stderr,"\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n",
 			ttime_i[0],ttime_i[1],ttime_i[2],
@@ -3217,8 +3332,13 @@ int	*nplt;
 		fprintf(stderr,"Current global data record: %d\n",
 			list[current_id] + ndump_total);
 		}
-	else if (verbose >= 1)
+	else if (verbose >= 0)
+		{
+		fprintf(stderr,"\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n",
+			ttime_i[0],ttime_i[1],ttime_i[2],
+			ttime_i[3],ttime_i[4],ttime_i[5],ttime_i[6]);
 		fprintf(stderr,"\n>> Unable to go to target time...\n");
+		}
 
 	/* reset beam_save */
 	beam_save = MB_NO;

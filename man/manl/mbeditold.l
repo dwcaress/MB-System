@@ -13,7 +13,10 @@ Version 4.2
 artifacts in multibeam bathymetry data. Once a file has been
 read in, \fBMBEDIT\fP displays the bathymetry profiles
 from several pings, allowing the user to identify and flag anomalous
-beams. The edited is usually output to a file, but the program
+beams. Flagging is handled internally by setting depth values
+negative, so that no information is lost. In extreme circumstances,
+pings may be zeroed (see "KEYBOARD ACTIONS"). 
+The edited is usually output to a file, but the program
 can be operated in a "browse" mode where no data is output.
 
 .SH AUTHORSHIP
@@ -67,11 +70,12 @@ will have an "e.mbXX" suffix. Otherwise, the output file will
 be \fIinfile\fP with ".ed" appended.
 .TP
 .B \fB-V\fP
-Normally, \fBMBEDIT\fP works "silently" without outputting
-anything to the stderr stream.  If the
+Normally, \fBMBEDIT\fP outputs information to the stderr stream
+regarding the number of records loaded and dumped.  If the
 \fB-V\fP flag is given, then \fBMBEDIT\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages, 
-and a large amount of other information.
+and a large amount of other information including all of the
+beams flagged or zeroed.
 
 .SH INTERACTIVE CONTROLS
 .TP
@@ -239,6 +243,13 @@ the left of the last picked beam to be flagged as bad.
 .B Right:
 Pressing one of these keys causes all of the beams including and to 
 the right of the last picked beam to be flagged as bad.
+.TP
+.B '!'
+.B Zero Ping:
+Pressing this key causes all of the beams in the ping 
+associated with the last picked beam to be zeroed. This
+should be used only for completely ridiculous values, as
+the values are not recoverable.
 .TP
 .B 'Q', 'q', 'U', or 'u'
 .B Pick Mode:
