@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 4.1 1999-05-05 22:48:29 caress Exp $
+ *	$Id: mbr_gsfgenmb.c,v 4.2 2000-07-19 03:51:38 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/05/05  22:48:29  caress
+ * Disabled handling of ping flags in GSF data.
+ *
  * Revision 4.0  1998/10/05  18:30:03  caress
  * MB-System version 4.6beta
  *
@@ -54,7 +57,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_gsfgenmb.c,v 4.1 1999-05-05 22:48:29 caress Exp $";
+ static char res_id[]="$Id: mbr_gsfgenmb.c,v 4.2 2000-07-19 03:51:38 caress Exp $";
 	char	*function_name = "mbr_alm_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -324,6 +327,8 @@ int	*error;
 		mb_io_ptr->pixels_ss = 0;
 
 		/* read depth and beam location values into storage arrays */
+/*fprintf(stderr, "%15f   heave:%15f draft:%15f\n", 
+mb_io_ptr->new_time_d, mb_ping->heave, mb_ping->depth_corrector);*/
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			/* set null beam flag if required */
@@ -339,12 +344,14 @@ int	*error;
 			}
 
 		/* set beamflags if ping flag set */
-/*		if (mb_ping->ping_flags != 0)
+		if (mb_ping->ping_flags != 0)
+		    {
 		    for (i=0;i<mb_io_ptr->beams_bath;i++)
 			if (mb_beam_ok(mb_io_ptr->new_beamflag[i]))
 			    mb_io_ptr->new_beamflag[i] 
 				= mb_beam_set_flag_manual(mb_io_ptr->new_beamflag[i]);
-*/
+		    }
+
 		/* read amplitude values into storage arrays */
 		if (mb_ping->mc_amplitude != NULL)
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
@@ -646,11 +653,13 @@ int	*error;
 		/* if ping flag set check for any unset
 		    beam flags - unset ping flag if any
 		    good beams found */
-/*		if (mb_ping->ping_flags != 0)
+		if (mb_ping->ping_flags != 0)
+		    {
 		    for (i=0;i<mb_io_ptr->beams_bath;i++)
 			if (mb_beam_ok(mb_io_ptr->new_beamflag[i]))
 			    mb_ping->ping_flags = 0;
-*/
+		    }
+
 		/* read depth and beam location values into storage arrays */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{

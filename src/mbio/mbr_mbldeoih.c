@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 4.9 1999-03-31 18:11:35 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 4.10 2000-07-19 03:51:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.8  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -92,10 +95,14 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 4.9 1999-03-31 18:11:35 caress Exp $";
+ static char res_id[]="$Id: mbr_mbldeoih.c,v 4.10 2000-07-19 03:51:38 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	struct mbf_mbldeoih_struct *dataplus;
+	struct mbf_mbldeoih_header_struct *header;
+	struct mbf_mbldeoih_data_struct *data;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -121,6 +128,46 @@ int	*error;
 				&mb_io_ptr->raw_data,error);
 	status = mbsys_ldeoih_alloc(verbose,mbio_ptr,
 		&mb_io_ptr->store_data,error);
+
+	/* get pointer to raw data structure */
+	dataplus = (struct mbf_mbldeoih_struct *) mb_io_ptr->raw_data;
+	header = &(dataplus->header);
+	data = &(dataplus->data);
+
+	/* initialize values in structure */
+	dataplus->kind = MB_DATA_NONE;
+	header->lon2u = 0;
+	header->lon2b = 0;
+	header->lat2u = 0;
+	header->lat2b = 0;
+	header->year = 0;
+	header->day = 0;
+	header->min = 0;
+	header->sec = 0;
+	header->msec = 0;
+	header->heading = 0;
+	header->speed = 0;
+	header->beams_amp = 0;
+	header->pixels_ss = 0;
+	header->depth_scale = 0;
+	header->distance_scale = 0;
+	header->transducer_depth = 0;
+	header->altitude = 0;
+	for (i=0;i<MBF_MBLDEOIH_MAX_BEAMS;i++)
+	    {
+	    data->beamflag[i] = 0;
+	    data->bath[i] = 0;
+	    data->bath_acrosstrack[i] = 0;
+	    data->bath_alongtrack[i] = 0;
+	    data->amp[i] = 0;
+	    }
+	for (i=0;i<MBF_MBLDEOIH_MAX_PIXELS;i++)
+	    {
+	    data->ss[i] = 0;
+	    data->ss_acrosstrack[i] = 0;
+	    data->ss_alongtrack[i] = 0;
+	    }
+	memset(dataplus->comment, 0, 128);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -735,9 +782,10 @@ int	*error;
 			}
 		}
 
-	/* translate values to data storage structure */
+	/* translate data values to data storage structure */
 	if (status == MB_SUCCESS
-		&& store != NULL)
+		&& store != NULL
+		&& dataplus->kind == MB_DATA_DATA)
 		{
 		/* type of data record */
 		store->kind = dataplus->kind;
@@ -788,6 +836,15 @@ int	*error;
 			store->ss_acrosstrack[i] = data->ss_acrosstrack[i];
 			store->ss_alongtrack[i] = data->ss_alongtrack[i];
 			}
+		}
+
+	/* translate comment to data storage structure */
+	else if (status == MB_SUCCESS
+		&& store != NULL
+		&& dataplus->kind == MB_DATA_COMMENT)
+		{
+		/* type of data record */
+		store->kind = dataplus->kind;
 
 		/* comment */
 		strcpy(store->comment,comment);
@@ -1016,14 +1073,14 @@ int	*error;
 			}
 		    depthscale = MAX(0.001, depthmax / 32000);
 		    header->depth_scale = 1000 * depthscale + 1;
-		    depthscale = 0.001 * header->depth_scale;
 		    distscale = MAX(0.001, distmax / 32000);
 		    header->distance_scale = 1000 * distscale + 1;
-		    distscale = 0.001 * header->distance_scale;
 		    }
 
 		/* put depth and beam location values 
 			into mbldeoih data structure */
+		depthscale = 0.001 * header->depth_scale;
+		distscale = 0.001 * header->distance_scale;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			beamflag[i] = mb_io_ptr->new_beamflag[i];
