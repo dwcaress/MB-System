@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.1 1994-10-21 12:20:01 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.2 1994-11-23 23:16:34 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/10/21  12:20:01  caress
+ * Release V4.0
+ *
  * Revision 4.0  1994/07/29  18:59:33  caress
  * Initial Revision.
  *
@@ -51,7 +54,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.1 1994-10-21 12:20:01 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.2 1994-11-23 23:16:34 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -182,8 +185,7 @@ int	*error;
 		/* file header info */
 		data->mf_magic = 6666;
 		data->mf_count = 0;
-		if (data->mf_log != NULL)
-			strcpy(data->mf_log,"\0");
+		if (data->mf_log == NULL)
 
 		/* ping header */
 		data->sec = 0;
@@ -393,7 +395,8 @@ int	*error;
 			}
 
 		/* get heading */
-		mb_io_ptr->new_heading = data->png_compass;
+		/*mb_io_ptr->new_heading = data->png_compass;*/
+		mb_io_ptr->new_heading = data->png_course;
 
 		/* get speed */
 		mb_io_ptr->new_speed = 0.0;
@@ -737,7 +740,8 @@ int	*error;
 		data->png_lat = mb_io_ptr->new_lat;
 
 		/* get heading */
-		data->png_compass = mb_io_ptr->new_heading;
+		/*data->png_compass = mb_io_ptr->new_heading;*/
+		data->png_course = mb_io_ptr->new_heading;
 
 		/* get port bathymetry */
 		beam_center = mb_io_ptr->beams_bath/2;
