@@ -1200,7 +1200,7 @@ Createwindow_mbedit(Widget parent)
     XtAddCallback(canvas_mbedit, XmNexposeCallback, do_expose, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNtitle, "Open Swath Sonar Data File"); ac++;
+    XtSetArg(args[ac], XmNtitle, "Open Source Swath Sonar Data File"); ac++;
     XtSetArg(args[ac], XmNdeleteResponse, XmUNMAP); ac++;
     XtSetArg(args[ac], XmNwidth, 541); ac++;
     XtSetArg(args[ac], XmNheight, 489); ac++;
@@ -1871,7 +1871,7 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "An Open Software Package", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "An Open Source Software Package", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 

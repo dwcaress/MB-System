@@ -1425,7 +1425,7 @@ object label_about_mbpub : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("An Open Software Package");
+        XmNlabelString = compound_string("An Open Source Software Package");
         XmNx = 10;
         XmNy = 160;
         XmNwidth = 450;
@@ -2197,7 +2197,7 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
 !(BX)object xmDialogShell_file : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNtitle = "Open Swath Sonar Data File";
+!(BX)        XmNtitle = "Open Source Swath Sonar Data File";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 541;
 !(BX)        XmNheight = 489;
