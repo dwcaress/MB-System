@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  6/1/2002
-#	$Id: Makefile.template,v 5.1 2002-07-20 20:56:37 caress Exp $
+#	$Id: Makefile.template,v 5.2 2003-07-27 20:50:25 caress Exp $
 #
-#     Copyright (c) 2002 by
+#     Copyright (c) 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		June 1, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.1  2002/07/20 20:56:37  caress
+# Release 5.0.beta20
+#
 # Revision 5.0  2002/06/02 01:35:51  caress
 # Initial revision.
 #
@@ -35,7 +38,6 @@ ARCHIVE = ar rcv
 
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/manl
 
 ### make all makes the sapi library, man page, and associated include files
 all:	$(LIBDIR)/libsapi.a \

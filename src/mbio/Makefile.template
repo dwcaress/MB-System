@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.14 2003-04-16 16:47:41 caress Exp $
+#	$Id: Makefile.template,v 5.15 2003-07-27 20:49:30 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2002 by
+#     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.14  2003/04/16 16:47:41  caress
+# Release 5.0.beta30
+#
 # Revision 5.13  2003/03/10 20:02:29  caress
 # Added mr1pr library.
 #
@@ -149,7 +152,6 @@ ARCHIVE = ar rcv
 
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/manl
 
 ### make all makes the mbio library, man page, and associated include files
 all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
@@ -191,7 +193,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbf_omghdcsj.h \
 	$(INCDIR)/mbf_mgd77dat.h $(INCDIR)/mbf_mbarirov.h \
 	$(INCDIR)/mbf_mbpronav.h $(INCDIR)/mbf_xtfr8101.h \
-	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l
+	$(LIBDIR)/libmbio.a
 
 ### make clean removes the object files
 clean:
@@ -537,11 +539,6 @@ mbr_nvnetcdf.o: mbr_nvnetcdf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_nvnetcdf.c
 mbr_samesurf.o: mbr_samesurf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_surf.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_samesurf.c
-
-### copy the man page to the man page directory
-$(MANDIR)/mbio.l:	mbio.manl
-	cp mbio.manl $(MANDIR)/mbio.l
-	chmod 664 $(MANDIR)/mbio.l
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h

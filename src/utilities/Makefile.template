@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.10 2003-03-10 20:01:59 caress Exp $
+#	$Id: Makefile.template,v 5.11 2003-07-27 20:50:28 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2002 by
+#     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.10  2003/03/10 20:01:59  caress
+# Added mr1pr library.
+#
 # Revision 5.9  2002/09/19 00:28:12  caress
 # Release 5.0.beta23
 #
@@ -142,45 +145,43 @@ BIGFLAG = -Olimit 2000
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/manl
 
 ### make all makes the MB-system utilites and man pages
-all:	$(MANDIR)/mbsystem.l \
-	$(BINDIR)/mbformat $(MANDIR)/mbformat.l \
-	$(BINDIR)/mbdefaults $(MANDIR)/mbdefaults.l \
-	$(BINDIR)/mbdatalist $(MANDIR)/mbdatalist.l \
-	$(BINDIR)/mbinfo $(MANDIR)/mbinfo.l \
-	$(BINDIR)/mbset $(MANDIR)/mbset.l \
-	$(BINDIR)/mbprocess $(MANDIR)/mbprocess.l \
-	$(BINDIR)/mbcopy $(MANDIR)/mbcopy.l \
-	$(BINDIR)/mblist $(MANDIR)/mblist.l \
-	$(BINDIR)/mbnavlist $(MANDIR)/mbnavlist.l \
-	$(BINDIR)/mbsvplist $(MANDIR)/mbsvplist.l \
-	$(BINDIR)/mbbackangle $(MANDIR)/mbbackangle.l \
-	$(BINDIR)/mbclean $(MANDIR)/mbclean.l \
-	$(BINDIR)/mbareaclean $(MANDIR)/mbareaclean.l \
-	$(BINDIR)/mbhistogram $(MANDIR)/mbhistogram.l \
-	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.l \
-	$(BINDIR)/mbmosaic $(MANDIR)/mbmosaic.l \
-	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.l \
-	$(BINDIR)/mbgetesf $(MANDIR)/mbgetesf.l \
-	$(BINDIR)/mbps $(MANDIR)/mbps.l \
-	$(BINDIR)/mbstripnan $(MANDIR)/mbstripnan.l \
-	$(BINDIR)/mbmerge $(MANDIR)/mbmerge.l \
-	$(BINDIR)/mbcleanold $(MANDIR)/mbcleanold.l \
-	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.l \
-	$(BINDIR)/mbbath $(MANDIR)/mbbath.l \
-	$(BINDIR)/hsdump $(MANDIR)/hsdump.l \
-	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.l \
-	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.l \
-	$(BINDIR)/mbmask $(MANDIR)/mbmask.l \
-	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.l \
-	$(BINDIR)/mbbackangleold $(MANDIR)/mbbackangleold.l \
-	$(BINDIR)/mbanglecorrect $(MANDIR)/mbanglecorrect.l \
-	$(BINDIR)/mbfilter $(MANDIR)/mbfilter.l \
-	$(BINDIR)/mbcut $(MANDIR)/mbcut.l \
-	$(BINDIR)/mbtide $(MANDIR)/mbtide.l \
-	$(BINDIR)/mbsimradmakess $(MANDIR)/mbsimradmakess.l
+all:	$(BINDIR)/mbformat \
+	$(BINDIR)/mbdefaults \
+	$(BINDIR)/mbdatalist \
+	$(BINDIR)/mbinfo \
+	$(BINDIR)/mbset \
+	$(BINDIR)/mbprocess \
+	$(BINDIR)/mbcopy \
+	$(BINDIR)/mblist \
+	$(BINDIR)/mbnavlist \
+	$(BINDIR)/mbsvplist \
+	$(BINDIR)/mbbackangle \
+	$(BINDIR)/mbclean \
+	$(BINDIR)/mbareaclean \
+	$(BINDIR)/mbhistogram \
+	$(BINDIR)/mbgrid \
+	$(BINDIR)/mbmosaic \
+	$(BINDIR)/mblevitus \
+	$(BINDIR)/mbgetesf \
+	$(BINDIR)/mbps \
+	$(BINDIR)/mbstripnan \
+	$(BINDIR)/mbmerge \
+	$(BINDIR)/mbcleanold \
+	$(BINDIR)/mbunclean \
+	$(BINDIR)/mbbath \
+	$(BINDIR)/hsdump \
+	$(BINDIR)/mbrollbias \
+	$(BINDIR)/mbgetmask \
+	$(BINDIR)/mbmask \
+	$(BINDIR)/mbsmooth \
+	$(BINDIR)/mbbackangleold \
+	$(BINDIR)/mbanglecorrect \
+	$(BINDIR)/mbfilter \
+	$(BINDIR)/mbcut \
+	$(BINDIR)/mbtide \
+	$(BINDIR)/mbsimradmakess
 
 ### make clean removes the object files
 clean:
@@ -367,113 +368,3 @@ mbset.o:	mbset.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_defin
 	$(CC) -c $(CFLAGS) mbset.c
 mbprocess.o:	mbprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbprocess.c
-
-### copy the man pages to the man page directory
-$(MANDIR)/mbsystem.l:	mbsystem.manl
-	cp mbsystem.manl $(MANDIR)/mbsystem.l
-	chmod 664 $(MANDIR)/mbsystem.l
-$(MANDIR)/mbformat.l:	mbformat.manl
-	cp mbformat.manl $(MANDIR)/mbformat.l
-	chmod 664 $(MANDIR)/mbformat.l
-$(MANDIR)/mbdefaults.l:	mbdefaults.manl
-	cp mbdefaults.manl $(MANDIR)/mbdefaults.l
-	chmod 664 $(MANDIR)/mbdefaults.l
-$(MANDIR)/mbdatalist.l:	mbdatalist.manl
-	cp mbdatalist.manl $(MANDIR)/mbdatalist.l
-	chmod 664 $(MANDIR)/mbdatalist.l
-$(MANDIR)/mbinfo.l:	mbinfo.manl
-	cp mbinfo.manl $(MANDIR)/mbinfo.l
-	chmod 664 $(MANDIR)/mbinfo.l
-$(MANDIR)/mbcopy.l:	mbcopy.manl
-	cp mbcopy.manl $(MANDIR)/mbcopy.l
-	chmod 664 $(MANDIR)/mbcopy.l
-$(MANDIR)/mblist.l:	mblist.manl
-	cp mblist.manl $(MANDIR)/mblist.l
-	chmod 664 $(MANDIR)/mblist.l
-$(MANDIR)/mbmerge.l:	mbmerge.manl
-	cp mbmerge.manl $(MANDIR)/mbmerge.l
-	chmod 664 $(MANDIR)/mbmerge.l
-$(MANDIR)/mbclean.l:	mbclean.manl
-	cp mbclean.manl $(MANDIR)/mbclean.l
-	chmod 664 $(MANDIR)/mbclean.l
-$(MANDIR)/mbareaclean.l:	mbareaclean.manl
-	cp mbareaclean.manl $(MANDIR)/mbareaclean.l
-	chmod 664 $(MANDIR)/mbareaclean.l
-$(MANDIR)/mbcleanold.l:	mbcleanold.manl
-	cp mbcleanold.manl $(MANDIR)/mbcleanold.l
-	chmod 664 $(MANDIR)/mbcleanold.l
-$(MANDIR)/mbunclean.l:	mbunclean.manl
-	cp mbunclean.manl $(MANDIR)/mbunclean.l
-	chmod 664 $(MANDIR)/mbunclean.l
-$(MANDIR)/mbgrid.l:	mbgrid.manl
-	cp mbgrid.manl $(MANDIR)/mbgrid.l
-	chmod 664 $(MANDIR)/mbgrid.l
-$(MANDIR)/mbmosaic.l:	mbmosaic.manl
-	cp mbmosaic.manl $(MANDIR)/mbmosaic.l
-	chmod 664 $(MANDIR)/mbmosaic.l
-$(MANDIR)/mblevitus.l:	mblevitus.manl
-	cp mblevitus.manl $(MANDIR)/mblevitus.l
-	chmod 664 $(MANDIR)/mblevitus.l
-$(MANDIR)/mbbath.l:	mbbath.manl
-	cp mbbath.manl $(MANDIR)/mbbath.l
-	chmod 664 $(MANDIR)/mbbath.l
-$(MANDIR)/hsdump.l:	hsdump.manl
-	cp hsdump.manl $(MANDIR)/hsdump.l
-	chmod 664 $(MANDIR)/hsdump.l
-$(MANDIR)/mbrollbias.l:	mbrollbias.manl
-	cp mbrollbias.manl $(MANDIR)/mbrollbias.l
-	chmod 664 $(MANDIR)/mbrollbias.l
-$(MANDIR)/mbgetmask.l:	mbmask.manl
-	cp mbmask.manl $(MANDIR)/mbgetmask.l
-	chmod 664 $(MANDIR)/mbgetmask.l
-$(MANDIR)/mbgetesf.l:	mbmask.manl
-	cp mbgetesf.manl $(MANDIR)/mbgetesf.l
-	chmod 664 $(MANDIR)/mbgetesf.l
-$(MANDIR)/mbmask.l:	mbmask.manl
-	cp mbmask.manl $(MANDIR)/mbmask.l
-	chmod 664 $(MANDIR)/mbmask.l
-$(MANDIR)/mbsmooth.l:	mbsmooth.manl
-	cp mbsmooth.manl $(MANDIR)/mbsmooth.l
-	chmod 664 $(MANDIR)/mbsmooth.l
-$(MANDIR)/mbps.l:	mbps.manl
-	cp mbps.manl $(MANDIR)/mbps.l
-	chmod 664 $(MANDIR)/mbps.l
-$(MANDIR)/mbstripnan.l:	mbstripnan.manl
-	cp mbstripnan.manl $(MANDIR)/mbstripnan.l
-	chmod 664 $(MANDIR)/mbstripnan.l
-$(MANDIR)/mbhistogram.l:	mbhistogram.manl
-	cp mbhistogram.manl $(MANDIR)/mbhistogram.l
-	chmod 664 $(MANDIR)/mbhistogram.l
-$(MANDIR)/mbbackangle.l:	mbbackangle.manl
-	cp mbbackangle.manl $(MANDIR)/mbbackangle.l
-	chmod 664 $(MANDIR)/mbbackangle.l
-$(MANDIR)/mbbackangleold.l:	mbbackangleold.manl
-	cp mbbackangleold.manl $(MANDIR)/mbbackangleold.l
-	chmod 664 $(MANDIR)/mbbackangleold.l
-$(MANDIR)/mbanglecorrect.l:	mbanglecorrect.manl
-	cp mbanglecorrect.manl $(MANDIR)/mbanglecorrect.l
-	chmod 664 $(MANDIR)/mbanglecorrect.l
-$(MANDIR)/mbfilter.l:	mbfilter.manl
-	cp mbfilter.manl $(MANDIR)/mbfilter.l
-	chmod 664 $(MANDIR)/mbfilter.l
-$(MANDIR)/mbcut.l:	mbcut.manl
-	cp mbcut.manl $(MANDIR)/mbcut.l
-	chmod 664 $(MANDIR)/mbcut.l
-$(MANDIR)/mbtide.l:	mbtide.manl
-	cp mbtide.manl $(MANDIR)/mbtide.l
-	chmod 664 $(MANDIR)/mbtide.l
-$(MANDIR)/mbsimradmakess.l:	mbsimradmakess.manl
-	cp mbsimradmakess.manl $(MANDIR)/mbsimradmakess.l
-	chmod 664 $(MANDIR)/mbsimradmakess.l
-$(MANDIR)/mbnavlist.l:	mbnavlist.manl
-	cp mbnavlist.manl $(MANDIR)/mbnavlist.l
-	chmod 664 $(MANDIR)/mbnavlist.l
-$(MANDIR)/mbsvplist.l:	mbsvplist.manl
-	cp mbsvplist.manl $(MANDIR)/mbsvplist.l
-	chmod 664 $(MANDIR)/mbsvplist.l
-$(MANDIR)/mbset.l:	mbset.manl
-	cp mbset.manl $(MANDIR)/mbset.l
-	chmod 664 $(MANDIR)/mbset.l
-$(MANDIR)/mbprocess.l:	mbprocess.manl
-	cp mbprocess.manl $(MANDIR)/mbprocess.l
-	chmod 664 $(MANDIR)/mbprocess.l

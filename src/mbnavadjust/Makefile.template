@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 5.3 2003-03-10 20:01:31 caress Exp $
+#	$Id: Makefile.template,v 5.4 2003-07-27 20:49:38 caress Exp $
 #
-#     Copyright (c) 2000 by 
+#     Copyright (c) 2000, 2003 by 
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		September 7, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2003/03/10 20:01:31  caress
+# Added mr1pr library.
+#
 # Revision 5.2  2002/07/20 20:45:56  caress
 # Release 5.0.beta20
 #
@@ -50,10 +53,9 @@ LFLAGS =  -lmalloc -lm -lsun -g
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/manl
 
 ### make all makes the executable and man page
-all: $(BINDIR)/mbnavadjust $(MANDIR)/mbnavadjust.l
+all: $(BINDIR)/mbnavadjust
 
 ### link the executable
 $(BINDIR)/mbnavadjust: mbnavadjust.o \
@@ -101,11 +103,6 @@ mbnavadjust_prog.o: mbnavadjust_prog.c mbnavadjust.h  $(INCDIR)/mb_format.h \
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mbnavadjust_prog.c
 cheb.o: cheb.c  
 	$(CC) $(CFLAGS) -I$(INCDIR) -c cheb.c
-
-### copy the man page to the man page directory
-$(MANDIR)/mbnavadjust.l:	mbnavadjust.manl
-	cp mbnavadjust.manl $(MANDIR)/mbnavadjust.l
-	chmod 664 $(MANDIR)/mbnavadjust.l
 
 clean: 
 	rm -f core *.o

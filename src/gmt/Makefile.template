@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.17 2003-03-10 07:39:29 caress Exp $
+#	$Id: Makefile.template,v 5.0 2003-07-27 20:52:44 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000 by 
+#     Copyright (c) 1993, 1994, 2000, 2003 by 
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.17  2003/03/10 07:39:29  caress
+# Added mr1pr library.
+#
 # Revision 4.16  2002/07/20 20:44:07  caress
 # Release 5.0.beta20
 #
@@ -90,12 +93,11 @@ LFLAGS = -lm
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/manl
 
 ### make all makes the MB-system macros and man pages
-all:	$(BINDIR)/mbcontour $(MANDIR)/mbcontour.l \
-	$(BINDIR)/mbswath $(MANDIR)/mbswath.l \
-	$(BINDIR)/mbgrdtiff $(MANDIR)/mbgrdtiff.l
+all:	$(BINDIR)/mbcontour \
+	$(BINDIR)/mbswath \
+	$(BINDIR)/mbgrdtiff 
 
 ### make clean removes the object files
 clean:
@@ -151,15 +153,4 @@ mbswath.o:	mbswath.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_fo
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbswath.c
 mbgrdtiff.o:	mbgrdtiff.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_format.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbgrdtiff.c
-
-### copy the man pages to the man page directory
-$(MANDIR)/mbcontour.l:	mbcontour.manl
-	cp mbcontour.manl $(MANDIR)/mbcontour.l
-	chmod 664 $(MANDIR)/mbcontour.l
-$(MANDIR)/mbswath.l:	mbswath.manl
-	cp mbswath.manl $(MANDIR)/mbswath.l
-	chmod 664 $(MANDIR)/mbswath.l
-$(MANDIR)/mbgrdtiff.l:	mbgrdtiff.manl
-	cp mbgrdtiff.manl $(MANDIR)/mbgrdtiff.l
-	chmod 664 $(MANDIR)/mbgrdtiff.l
 
