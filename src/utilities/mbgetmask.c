@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 4.10 1999-03-31 18:33:06 caress Exp $
+ *    $Id: mbgetmask.c,v 4.11 1999-08-08 04:17:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1999/03/31  18:33:06  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.9  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -89,7 +92,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 4.10 1999-03-31 18:33:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetmask.c,v 4.11 1999-08-08 04:17:40 caress Exp $";
 	static char program_name[] = "MBGETMASK";
 	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
 	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";
@@ -435,6 +438,20 @@ char **argv;
 			error = MB_ERROR_NO_ERROR;
 			}
 
+		/* time bounds do not matter to mbgetmask */
+		if (error == MB_ERROR_OUT_TIME)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* space bounds do not matter to mbgetmask */
+		if (error == MB_ERROR_OUT_BOUNDS)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
 		/* output error messages */
 		if (verbose >= 1 && error < MB_ERROR_NO_ERROR
 			&& error >= MB_ERROR_OTHER
@@ -473,10 +490,15 @@ char **argv;
 		    
 		/* count the flags */
 		for (i=0;i<nbath;i++)
+		    {
 		    if (mb_beam_ok(beamflag[i]))
+			{
 			beam_ok++;
+			}
 		    else if (mb_beam_check_flag_null(beamflag[i]))
+			{
 			beam_null++;
+			}
 		    else
 			{
 			beam_flag++;
@@ -487,6 +509,7 @@ char **argv;
 			if (mb_beam_check_flag_sonar(beamflag[i]))
 			    beam_flag_sonar++;
 			}
+		    }
 
 		/* write some flags */
 		if (kind == MB_DATA_DATA
@@ -519,14 +542,16 @@ char **argv;
 	/* give the statistics */
 	if (verbose >= 1)
 		{
-		fprintf(stderr,"\n%d input data records\n",idata);
-		fprintf(stderr,"%d output mask records\n",omask);
-		fprintf(stderr,"%d beams ok\n",beam_ok);
-		fprintf(stderr,"%d beams null\n",beam_null);
-		fprintf(stderr,"%d beams flagged\n",beam_flag);
-		fprintf(stderr,"%d beams flagged manually\n",beam_flag_manual);
-		fprintf(stderr,"%d beams flagged by filter\n",beam_flag_filter);
-		fprintf(stderr,"%d beams flagged by sonar\n",beam_flag_sonar);
+		fprintf(stderr,"\nData records:\n");
+		fprintf(stderr,"\t%d input data records\n",idata);
+		fprintf(stderr,"\t%d output mask records\n",omask);
+		fprintf(stderr,"\nBeam flag totals:\n");
+		fprintf(stderr,"\t%d beams ok\n",beam_ok);
+		fprintf(stderr,"\t%d beams null\n",beam_null);
+		fprintf(stderr,"\t%d beams flagged\n",beam_flag);
+		fprintf(stderr,"\t%d beams flagged manually\n",beam_flag_manual);
+		fprintf(stderr,"\t%d beams flagged by filter\n",beam_flag_filter);
+		fprintf(stderr,"\t%d beams flagged by sonar\n",beam_flag_sonar);
 		}
 
 	/* end it all */

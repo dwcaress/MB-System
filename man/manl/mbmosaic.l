@@ -1,4 +1,4 @@
-.TH mbmosaic l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbmosaic l "2 August 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -10,7 +10,7 @@ Version 4.6
 \fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
-\fB-E\fIdx/dy/units\fP \fB-F\fIpriority_range\fP \fB-G\fIgridkind\fP 
+\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range\fP \fB-G\fIgridkind\fP 
 \fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP 
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP 
@@ -205,7 +205,7 @@ if the user specifies the grid spacing with the \fB-E\fP option.
 Default:  \fIxdim\fP = \fIydim\fP = 101.
 .TP
 .B \-E
-\fIdx/dy/units\fP
+\fIdx/dy/units[!]\fP
 .br
 Sets the grid cell spacing to \fIdx\fP in longitude and \fIdy\fP
 in latitude. If \fIunits\fP is not specified, the \fIdx\fP 
@@ -217,7 +217,10 @@ uses the \fB-E\fP option to set the grid spacing, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacing values are usually required to keep
-the grid bounds as specified.
+the grid bounds as specified. Appending an ! to the end of 
+the \fB-E\fP arguments forces \fBmbgrid\fP to use the
+exact grid spacing values specified by adjusting the 
+grid bounds.
 .TP
 .B \-F
 \fIpriority_range\fP
@@ -236,9 +239,10 @@ value of the highest priority sample in that bin.
 \fIgridkind\fP
 .br
 Sets the format of the output grid file.
- 	\fIgridkind\fP = 1:	Ascii table
+ 	\fIgridkind\fP = 1:	ASCII table
  	\fIgridkind\fP = 2:	binary file (GMT version 1 GRD file)
  	\fIgridkind\fP = 3:	netCDF file (GMT version 2 GRD file)
+ 	\fIgridkind\fP = 4:	Arc/Info ASCII grid
 .br
 If \fIgridkind\fP = 3, \fBmbmosaic\fP also outputs shellscripts 
 which run GMT version 3 programs to provide preliminary color
@@ -481,7 +485,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 4.5 1998-12-17 22:50:20 caress Exp $
+ Version $Id: mbmosaic.l,v 4.6 1999-08-08 04:17:40 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:
