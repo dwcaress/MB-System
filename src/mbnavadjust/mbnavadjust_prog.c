@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.14 2004-12-02 06:34:27 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.15 2004-12-18 01:35:42 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2004/12/02 06:34:27  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.13  2004/05/21 23:31:27  caress
  * Moved to new version of BX GUI builder
  *
@@ -122,7 +125,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.14 2004-12-02 06:34:27 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.15 2004-12-18 01:35:42 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -218,6 +221,7 @@ struct ping *ping = NULL;
 int	grid_nx = 0;
 int	grid_ny = 0;
 int	grid_nxy = 0;
+int	grid_nxyeq = 0;
 double	grid_dx = 0.0;
 double	grid_dy = 0.0;
 double	grid_olon = 0.0;
@@ -229,9 +233,13 @@ int	gridm_nxy = 0;
 double	*grid1 = NULL;
 double	*grid2 = NULL;
 double	*gridm = NULL;
+double	*gridmeq = NULL;
 int	*gridn1 = NULL;
 int	*gridn2 = NULL;
 int	*gridnm = NULL;
+#define NINTERVALS_MISFIT 80
+int	nmisfit_intervals = NINTERVALS_MISFIT;
+double	misfit_intervals[NINTERVALS_MISFIT];
 
 /* system function declarations */
 char	*ctime();
@@ -265,6 +273,10 @@ int mbnavadjust_init_globals()
  	project.section_length = 10.0;
  	project.section_soundings = 20000;
  	project.decimation = 1;
+	mbna_file_id_1 = -1;
+	mbna_section_1 = -1;
+	mbna_file_id_2 = -1;
+	mbna_section_2 = -1;
  	mbna_current_crossing = -1;
  	mbna_current_tie = -1;
 	mbna_total_num_pings = 0;
@@ -278,7 +290,7 @@ int mbnavadjust_init_globals()
 	project.label_int = 100000.;
 	mbna_contour_algorithm = MB_CONTOUR_OLD;
 	/*mbna_contour_algorithm = MB_CONTOUR_TRIANGLES;*/
-	mbna_ncolor = 4;
+	mbna_ncolor = 10;
 	mbna_contour = NULL;
 	mbna_contour1.nvector = 0;
 	mbna_contour1.nvector_alloc = 0;
@@ -1274,7 +1286,7 @@ int mbnavadjust_read_project()
 					status = MB_FAILURE;
 fprintf(stderr, "read failed on section: %s\n", buffer);
 					}
-				if (nscan == 14)
+				if (nscan < 15)
 					section->contoursuptodate = MB_NO;
 				for (k=MBNA_MASK_DIM-1;k>=0;k--)
 				    {
@@ -1558,6 +1570,7 @@ int mbnavadjust_import_file(char *path, int iformat)
 	char	mb_suffix[STRING_MAX];
 	char	npath[STRING_MAX];
 	char	opath[STRING_MAX];
+	char	*root;
 	int	output_id, found;
 	int	obeams_bath,obeams_amp,opixels_ss;
 	int	iform;
@@ -1649,7 +1662,10 @@ int mbnavadjust_import_file(char *path, int iformat)
 	    }
 		
 	/* turn on message */
-	sprintf(message,"Importing data in format %d from %s",iformat,ipath);
+	root = (char *) strrchr(ipath, '/');
+	if (root == NULL)
+		root = ipath;
+	sprintf(message,"Importing format %d data from %s",iformat,root);
 	do_message_on(message);
 	output_open = MB_NO;
 	project.inversion = MBNA_INVERSION_NONE;
@@ -3800,6 +3816,7 @@ int mbnavadjust_crossing_unload()
 		grid_nx = 0;
 		grid_ny = 0;
 		grid_nxy = 0;
+		grid_nxyeq = 0;
 		gridm_nx = 0;
 		gridm_ny = 0;
 		gridm_nxy = 0;
@@ -3814,6 +3831,10 @@ int mbnavadjust_crossing_unload()
 		if (gridm != NULL)
 		    {
 		    free(gridm);
+		    }
+		if (gridmeq != NULL)
+		    {
+		    free(gridmeq);
 		    }
 		if (gridn1 != NULL)
 		    {
@@ -3830,6 +3851,7 @@ int mbnavadjust_crossing_unload()
 		grid1 = NULL;
 		grid2 = NULL;
 		gridm = NULL;
+		gridmeq = NULL;
 		gridn1 = NULL;
 		gridn2 = NULL;
 		gridnm = NULL;
@@ -3982,12 +4004,12 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 					    num_pings,
 					    beams_bath,
 					    mbna_contour_algorithm,
-					    MB_YES,MB_NO,MB_NO,
+					    MB_YES,MB_NO,MB_NO,MB_NO,
 					    project.cont_int, project.col_int,
 					    project.tick_int, project.label_int,
 					    tick_len_map, label_hgt_map, 0.0, 
 					    mbna_ncolor, 0, NULL, NULL, NULL,
-					    0.0, 0.0, 0.0, 0.0,
+					    0.0, 0.0, 0.0, 0.0, 0.0,
 					    &error);
 			swath = (struct swath *) *swath_ptr;
 			swath->beams_bath = beams_bath;
@@ -4398,7 +4420,7 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
 	int	i;
 
  	/* print input debug statements */
-	if (mbna_verbose >= 0)
+	if (mbna_verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -4504,11 +4526,12 @@ int mbnavadjust_get_misfit()
 	char	*function_name = "mbnavadjust_get_misfit";
 	int	status = MB_SUCCESS;
 	double	x, y;
+	double	dinterval;
 	int	igx, igy;
 	int	ic, jc, kc;
 	int	ioff, joff, istart, iend, jstart, jend;
 	int	i1, i2, j1, j2, k1, k2;
-	int	i, j, k;
+	int	i, j, k, kk;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -4573,12 +4596,14 @@ mbna_lon_min, mbna_lon_max, mbna_lat_min, mbna_lat_max);*/
 		grid1 = (double *) realloc(grid1, sizeof(double) * (grid_nxy));
 		grid2 = (double *) realloc(grid2, sizeof(double) * (grid_nxy));
 		gridm = (double *) realloc(gridm, sizeof(double) * (gridm_nxy));
+		gridmeq = (double *) realloc(gridmeq, sizeof(double) * (gridm_nxy));
 		gridn1 = (int *) realloc(gridn1, sizeof(int) * (grid_nxy));
 		gridn2 = (int *) realloc(gridn2, sizeof(int) * (grid_nxy));
 		gridnm = (int *) realloc(gridnm, sizeof(int) * (gridm_nxy));
 		memset(grid1, 0, sizeof(double) * (grid_nxy));
 		memset(grid2, 0, sizeof(double) * (grid_nxy));
 		memset(gridm, 0, sizeof(double) * (gridm_nxy));
+		memset(gridmeq, 0, sizeof(double) * (gridm_nxy));
 		memset(gridn1, 0, sizeof(int) * (grid_nxy));
 		memset(gridn2, 0, sizeof(int) * (grid_nxy));
 		memset(gridnm, 0, sizeof(int) * (gridm_nxy));
@@ -4705,6 +4730,43 @@ ic, jc, gridnm[kc], grid1[kc], grid2[kc], gridm[kc]);*/
 			}
 		misfit_min = 0.99 * misfit_min;
 		misfit_max = 1.01 * misfit_max;
+
+    		/* set message on */
+    		if (mbna_verbose > 1)
+			fprintf(stderr,"Histogram equalizing misfit grid for crossing %d\n",mbna_current_crossing);
+		sprintf(message,"Histogram equalizing misfit grid for crossing %d\n",mbna_current_crossing);
+		do_message_on(message);
+		
+		/* sort the misfit to get histogram equalization */
+		grid_nxyeq = 0;
+		for (k=0;k<gridm_nxy;k++)
+		    {
+		    if (gridm[k] > 0.0)
+			{
+			gridmeq[grid_nxyeq] = gridm[k];
+			grid_nxyeq++;
+			}
+		    }
+		qsort((char *)gridmeq,grid_nxyeq,sizeof(double),
+				mb_double_compare);
+		dinterval = ((double) grid_nxyeq) / ((double)(nmisfit_intervals-1));
+		if (dinterval < 1.0)
+			{
+			for (k=0;k<grid_nxyeq;k++)
+				misfit_intervals[k] = gridmeq[k];
+			for (k=grid_nxyeq;k<nmisfit_intervals;k++)
+				misfit_intervals[k] = gridmeq[grid_nxyeq-1];
+			}
+		else
+			{
+			misfit_intervals[0] = misfit_min;
+			misfit_intervals[nmisfit_intervals-1] = misfit_max;
+			for (k=1;k<nmisfit_intervals-1;k++)
+				{
+				kk = (int)(k * dinterval);
+				misfit_intervals[k] = gridmeq[kk];
+				}
+			}
 		
 		do_message_off();
  		}
@@ -4799,6 +4861,7 @@ void newpen(int icolor)
 	    v = &mbna_contour->vector[mbna_contour->nvector];
  	    v->command = MBNA_PEN_COLOR;
 	    v->color = pixel_values[icolor + 1];
+	    v->color = pixel_values[icolor * 8 + 7];
 	    mbna_contour->nvector++;
 	    }
 	
@@ -4848,7 +4911,8 @@ mbnavadjust_naverr_plot(int plotmode)
 	static int 	pixel, ipixel;
 	int	snav_1, snav_2;
 	double	dmisfit;
-	int		fill;
+	int		fill, found;
+	int		kk;
 	int	    	i, j, k;
 
  	/* print input debug statements */
@@ -5134,11 +5198,33 @@ mbnavadjust_naverr_plot(int plotmode)
 			idy = iyo - (int)(mbna_misfit_scale * grid_dy
 					    * (j - gridm_ny / 2 - 0.5))
 				    - iy;
-			ipixel = 7 + log10(gridm[k] - misfit_min)/dmisfit;
+				    
+			/* old coloring scheme */
+/*			ipixel = 7 + log10(gridm[k] - misfit_min)/dmisfit;
 			if (ipixel < 7) ipixel = 7;
-			else if (ipixel > 86) ipixel = 86;
-    /*fprintf(stderr, "%d %d %f %f %f   %f %d\n",
-    i, j, misfit_min, misfit_max, dmisfit, gridm[k], ipixel);  */
+			else if (ipixel > 86) ipixel = 86;*/
+    
+    			/* histogram equalized coloring */
+			if (gridm[k] <= misfit_intervals[0])
+				ipixel = 7;
+			else if (gridm[k] >= misfit_intervals[nmisfit_intervals-1])
+				ipixel = 7 + nmisfit_intervals - 1;
+			else
+				{
+				found = MB_NO;
+				for (kk=0;kk<nmisfit_intervals && found == MB_NO;kk++)
+					{
+					if (gridm[k] > misfit_intervals[kk]
+						&& gridm[k] <= misfit_intervals[kk+1])
+						{
+						ipixel = 7 + kk;
+						found = MB_YES;
+						}
+					}
+				}
+/*fprintf(stderr, "%d %d %f %f %f   %f %d\n",
+    i, j, misfit_min, misfit_max, dmisfit, gridm[k], ipixel);*/
+    
 			xg_fillrectangle(pcorr_xgid,
 				    ix, iy, idx, idy,
 				    pixel_values[ipixel], XG_SOLIDLINE);
@@ -5349,7 +5435,7 @@ mbnavadjust_invertnav()
 	/* invert if there is a project and all crossings have been analyzed */
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
-		&& project.num_crossings_analyzed == project.num_crossings)
+		&& project.num_crossings_analyzed >= project.num_crossings / 2)
     		{
      		/* retrieve crossing parameters */
 		/* count up the unknowns and constraints to get size of
@@ -5370,6 +5456,8 @@ mbnavadjust_invertnav()
 		avg_dtime_d = 0.0;
 		for (i=0;i<project.num_files;i++)
 		    {
+sprintf(message,"Processing file %d of %d...", i, project.num_files);
+do_message_on(message);
 		    file = &project.files[i];
 		    for (j=0;j<file->num_sections;j++)
 			{
@@ -5450,7 +5538,7 @@ mbnavadjust_invertnav()
 	/* proceed with construction of inverse problems */
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
-		&& project.num_crossings_analyzed == project.num_crossings
+		&& project.num_crossings_analyzed >= project.num_crossings / 2
 		&& error == MB_ERROR_NO_ERROR)
     		{
 		/* add info text */
@@ -5512,6 +5600,8 @@ mbnavadjust_invertnav()
 		nseq = 0;
 		for (ifile=0;ifile<project.num_files;ifile++)
 		    {
+sprintf(message,"Applying derivatives to file %d of %d...", ifile, project.num_files);
+do_message_on(message);
 		    file = &project.files[ifile];
 		    for (isection=0;isection<file->num_sections;isection++)
 			{
@@ -5615,6 +5705,8 @@ mbnavadjust_invertnav()
 		    }
 		
 		/* apply crossing offset constraints */
+sprintf(message,"Applying %d crossing constraints...", project.num_crossings);
+do_message_on(message);
 		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
 		    {
 		    crossing = &project.crossings[icrossing];
@@ -5774,13 +5866,13 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 		    if (first == MB_YES)
 			{
 			first = MB_NO;
-			sigma_crossing_first = MAX(sigma_crossing,1e-5);
+			sigma_crossing_first = MAX(sigma_crossing,1e-9);
 			smoothweight_old = smoothweight;
 			smoothmin = smoothweight;
 			}
 		    else if (sigma_crossing >= 1.005 * sigma_crossing_first
 			    && sigma_crossing <= 1.01 * sigma_crossing_first
-			    && sigma_crossing > 0.0000001)
+			    && sigma_crossing > 0.0)
 			{
 			done = MB_YES;
 			smoothweight_best = smoothweight;
@@ -5800,7 +5892,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			smoothweight_old = smoothweight;
 			}
 		    else if (sigma_crossing > 1.01 * sigma_crossing_first
-			    && sigma_crossing > 0.0000001)
+			    && sigma_crossing > 0.0)
 			{
 			if (smoothweight < smoothmax || smoothmax < 0.0)
 			    {
@@ -5814,14 +5906,18 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			{
 			smoothweight_old = smoothweight;
 			}
+fprintf(stderr,"smoothing: min:%f max:%f current:%f\n",
+smoothmin,smoothmax,smoothweight_old);
 		
 		    /* do message */
 		    sprintf(message, " >   %d %12g %12g %12g %12g\n",
-			    iter, smoothweight, sigma_total/ mbna_mtodeglat, sigma_crossing/ mbna_mtodeglat, 
+			    iter, smoothweight, sigma_total/ mbna_mtodeglat, 
+			    sigma_crossing/ mbna_mtodeglat, 
 			    (sigma_crossing / sigma_crossing_first));
 		    do_info_add(message, MB_NO);
 fprintf(stderr,"iteration:%3d smooth:%12g sigmatot:%12g sigmacrossing:%12g ratio:%12g\n",
-iter,smoothweight,sigma_total / mbna_mtodeglat,sigma_crossing / mbna_mtodeglat,
+iter,smoothweight,sigma_total / mbna_mtodeglat, 
+sigma_crossing / mbna_mtodeglat,
 (sigma_crossing / sigma_crossing_first));
 		    }
 
@@ -5847,7 +5943,7 @@ iter,smoothweight,sigma_total / mbna_mtodeglat,sigma_crossing / mbna_mtodeglat,
 	/* output results from navigation solution */
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
-		&& project.num_crossings_analyzed == project.num_crossings
+		&& project.num_crossings_analyzed >= project.num_crossings / 2
 		&& error == MB_ERROR_NO_ERROR)
     		{
 		

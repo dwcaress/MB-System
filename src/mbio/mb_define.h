@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.26 2004-12-02 06:33:30 caress Exp $
+ *    $Id: mb_define.h,v 5.27 2004-12-18 01:34:43 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2004/12/02 06:33:30  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.25  2004/11/06 03:55:17  caress
  * Working to support the Reson 7k format.
  *
@@ -260,6 +263,9 @@ int mb_get_relative_path(int verbose,
 		char *pwd,
 		int *error);
 int mb_get_shortest_path(int verbose,
+		char *path,
+		int *error);
+int mb_get_basename(int verbose,
 		char *path,
 		int *error);
 int mb_check_info(int verbose, char *file, int lonflip, 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.29 2004-12-02 06:33:30 caress Exp $
+ *    $Id: mb_process.c,v 5.30 2004-12-18 01:34:43 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2004/12/02 06:33:30  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.28  2004/10/06 19:04:24  caress
  * Release 5.0.5 update.
  *
@@ -137,7 +140,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.29 2004-12-02 06:33:30 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.30 2004-12-18 01:34:43 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -1115,6 +1118,46 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		strcpy(dummy, &(lastslash[1]));
 		strcpy(process->mbp_editfile, dummy);
 		}
+
+	    /* reset static file */
+	    if ((lastslash = strrchr(process->mbp_staticfile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_staticfile, dummy);
+		}
+
+	    /* reset attitude file */
+	    if ((lastslash = strrchr(process->mbp_attitudefile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_attitudefile, dummy);
+		}
+
+	    /* reset tide file */
+	    if ((lastslash = strrchr(process->mbp_tidefile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_tidefile, dummy);
+		}
+
+	    /* reset ampcorr file */
+	    if ((lastslash = strrchr(process->mbp_ampcorrfile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_ampcorrfile, dummy);
+		}
+
+	    /* reset sscorr file */
+	    if ((lastslash = strrchr(process->mbp_sscorrfile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_sscorrfile, dummy);
+		}
 	    }
 	    
 	/* Now make filenames global if local */
@@ -1375,6 +1418,7 @@ int mb_pr_writepar(int verbose, char *file,
 	char	*function_name = "mb_pr_writepar";
 	char	parfile[MBP_FILENAMESIZE];
 	char	pwd[MBP_FILENAMESIZE];
+	char	relative_path[MBP_FILENAMESIZE];
 	char	*lastslash;
 	FILE	*fp;
 	int	status = MB_SUCCESS;
@@ -1576,7 +1620,9 @@ int mb_pr_writepar(int verbose, char *file,
 		}
 	    if (process->mbp_ifile_specified == MB_YES)
 		{
-		fprintf(fp, "INFILE %s\n", process->mbp_ifile);
+		strcpy(relative_path, process->mbp_ifile);
+		status = mb_get_relative_path(verbose, relative_path, pwd, error);
+		fprintf(fp, "INFILE %s\n", relative_path);
 		}
 	    else
 		{
@@ -1584,7 +1630,9 @@ int mb_pr_writepar(int verbose, char *file,
 		}
 	    if (process->mbp_ofile_specified == MB_YES)
 		{
-		fprintf(fp, "OUTFILE %s\n", process->mbp_ofile);
+		strcpy(relative_path, process->mbp_ofile);
+		status = mb_get_relative_path(verbose, relative_path, pwd, error);
+		fprintf(fp, "OUTFILE %s\n", relative_path);
 		}
 	    else
 		{
@@ -1594,7 +1642,9 @@ int mb_pr_writepar(int verbose, char *file,
 	    /* navigation merging */
 	    fprintf(fp, "##\n## Navigation Merging:\n");
 	    fprintf(fp, "NAVMODE %d\n", process->mbp_nav_mode);
-	    fprintf(fp, "NAVFILE %s\n", process->mbp_navfile);
+	    strcpy(relative_path, process->mbp_navfile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "NAVFILE %s\n", relative_path);
 	    fprintf(fp, "NAVFORMAT %d\n", process->mbp_nav_format);
 	    fprintf(fp, "NAVHEADING %d\n", process->mbp_nav_heading);
 	    fprintf(fp, "NAVSPEED %d\n", process->mbp_nav_speed);
@@ -1610,13 +1660,17 @@ int mb_pr_writepar(int verbose, char *file,
 	    /* adjusted navigation merging */
 	    fprintf(fp, "##\n## Adjusted Navigation Merging:\n");
 	    fprintf(fp, "NAVADJMODE %d\n", process->mbp_navadj_mode);
-	    fprintf(fp, "NAVADJFILE %s\n", process->mbp_navadjfile);
+	    strcpy(relative_path, process->mbp_navadjfile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "NAVADJFILE %s\n", relative_path);
 	    fprintf(fp, "NAVADJINTERP %d\n", process->mbp_navadj_algorithm);
 	    
 	    /* attitude merging */
 	    fprintf(fp, "##\n## Attitude Merging:\n");
 	    fprintf(fp, "ATTITUDEMODE %d\n", process->mbp_attitude_mode);
-	    fprintf(fp, "ATTITUDEFILE %s\n", process->mbp_attitudefile);
+	    strcpy(relative_path, process->mbp_attitudefile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "ATTITUDEFILE %s\n", relative_path);
 	    fprintf(fp, "ATTITUDEFORMAT %d\n", process->mbp_attitude_format);
 
 	    /* data cutting */
@@ -1636,12 +1690,16 @@ int mb_pr_writepar(int verbose, char *file,
 	    /* bathymetry editing */
 	    fprintf(fp, "##\n## Bathymetry Flagging:\n");
 	    fprintf(fp, "EDITSAVEMODE %d\n", process->mbp_edit_mode);
-	    fprintf(fp, "EDITSAVEFILE %s\n", process->mbp_editfile);
+	    strcpy(relative_path, process->mbp_editfile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "EDITSAVEFILE %s\n", relative_path);
 	    
 	    /* bathymetry recalculation */
 	    fprintf(fp, "##\n## Bathymetry Recalculation:\n");
 	    fprintf(fp, "SVPMODE %d\n", process->mbp_svp_mode);
-	    fprintf(fp, "SVPFILE %s\n", process->mbp_svpfile);
+	    strcpy(relative_path, process->mbp_svpfile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "SVPFILE %s\n", relative_path);
 	    fprintf(fp, "SSVMODE %d\n", process->mbp_ssv_mode);
 	    fprintf(fp, "SSV %f\n", process->mbp_ssv);
 	    fprintf(fp, "TTMODE %d\n", process->mbp_tt_mode);
@@ -1649,7 +1707,9 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "ANGLEMODE %d\n", process->mbp_angle_mode);
 	    fprintf(fp, "SOUNDSPEEDREF %d\n", process->mbp_corrected);
 	    fprintf(fp, "STATICMODE %d\n", process->mbp_static_mode);
-	    fprintf(fp, "STATICFILE %s\n", process->mbp_staticfile);
+	    strcpy(relative_path, process->mbp_staticfile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "STATICFILE %s\n", relative_path);
 	    
 	    /* draft correction */
 	    fprintf(fp, "##\n## Draft Correction:\n");
@@ -1694,13 +1754,17 @@ int mb_pr_writepar(int verbose, char *file,
 	    /* tide correction */
 	    fprintf(fp, "##\n## Tide Correction:\n");
 	    fprintf(fp, "TIDEMODE %d\n", process->mbp_tide_mode);
-	    fprintf(fp, "TIDEFILE %s\n", process->mbp_tidefile);
+	    strcpy(relative_path, process->mbp_tidefile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "TIDEFILE %s\n", relative_path);
 	    fprintf(fp, "TIDEFORMAT %d\n", process->mbp_tide_format);
 	    
 	    /* amplitude correction */
 	    fprintf(fp, "##\n## Amplitude Correction:\n");
 	    fprintf(fp, "AMPCORRMODE %d\n", process->mbp_ampcorr_mode);
-	    fprintf(fp, "AMPCORRFILE %s\n", process->mbp_ampcorrfile);
+	    strcpy(relative_path, process->mbp_ampcorrfile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "AMPCORRFILE %s\n", relative_path);
 	    fprintf(fp, "AMPCORRTYPE %d\n", process->mbp_ampcorr_type);
 	    fprintf(fp, "AMPCORRSYMMETRY %d\n", process->mbp_ampcorr_symmetry);
 	    fprintf(fp, "AMPCORRANGLE %f\n", process->mbp_ampcorr_angle);
@@ -1709,7 +1773,9 @@ int mb_pr_writepar(int verbose, char *file,
 	    /* sidescan correction */
 	    fprintf(fp, "##\n## Sidescan Correction:\n");
 	    fprintf(fp, "SSCORRMODE %d\n", process->mbp_sscorr_mode);
-	    fprintf(fp, "SSCORRFILE %s\n", process->mbp_sscorrfile);
+	    strcpy(relative_path, process->mbp_sscorrfile);
+	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+	    fprintf(fp, "SSCORRFILE %s\n", relative_path);
 	    fprintf(fp, "SSCORRTYPE %d\n", process->mbp_sscorr_type);
 	    fprintf(fp, "SSCORRSYMMETRY %d\n", process->mbp_sscorr_symmetry);
 	    fprintf(fp, "SSCORRANGLE %f\n", process->mbp_sscorr_angle);
@@ -3212,13 +3278,7 @@ int mb_pr_update_edit(int verbose, char *file,
 	/* set edit values */
 	process.mbp_edit_mode = mbp_edit_mode;
 	if (mbp_editfile != NULL)
-		{
-		if ((lastslash = strrchr(mbp_editfile,'/')) != NULL
-			&& strlen(lastslash) > 1)
-			strcpy(process.mbp_editfile, &(lastslash[1]));
-		else
-			strcpy(process.mbp_editfile, mbp_editfile);
-		}
+		strcpy(process.mbp_editfile, mbp_editfile);
 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
