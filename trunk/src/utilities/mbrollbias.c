@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbrollbias.c	3.00	5/16/93
- *    $Id: mbrollbias.c,v 1.1 1993-05-25 04:57:15 caress Exp $
+ *    The MB-system:	mbrollbias.c	5/16/93
+ *    $Id: mbrollbias.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    and S. O'Hara (sohara@lamont.ldgo.columbia.edu)
@@ -31,6 +31,14 @@
  * Date:	May 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 1.1  1993/05/25  04:57:15  caress
+ * Initial revision
+ *
  *
  */
 
@@ -63,9 +71,9 @@ struct bathptr
 	};
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbrollbias.c,v 1.1 1993-05-25 04:57:15 caress Exp $";
+static char rcs_id[] = "$Id: mbrollbias.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 static char program_name[] = "MBROLLBIAS";
-static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of multibeam \nsonar systems using data from two swaths covering the same  \nseafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the multibeam system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
+static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of multibeam \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the multibeam system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
 static char usage_message[] = "mbrollbias -Dxdim/ydim -Rw/e/s/n  -Llonflip -V -H -Ifile1 -Jfile2]";
 
 /*--------------------------------------------------------------------*/
@@ -99,7 +107,8 @@ char **argv;
 	double	speedmin;
 	double	timegap;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	char	file[128];
 	char	*mbio_ptr;
 
@@ -122,13 +131,15 @@ char **argv;
 	double	heading;
 	double	distance;
 	int	nbath;
+	int	namp;
+	int	nss;
 	double	*bath;
 	double	*bathlon;
 	double	*bathlat;
-	int	nback;
-	double	*back;
-	double	*backlon;
-	double	*backlat;
+	double	*amp;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
 	char	comment[256];
 
 	/* grid variables */
@@ -382,7 +393,7 @@ char **argv;
 		verbose,ifile,iformat,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -396,9 +407,10 @@ char **argv;
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&backlon,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&backlat,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -417,8 +429,9 @@ char **argv;
 		status = mb_read(verbose,mbio_ptr,&kind,
 			&rpings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
-			&beams_bath,bath,bathlon,bathlat,
-			&beams_back,back,backlon,backlat,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathlon,bathlat,
+			ss,sslon,sslat,
 			comment,&error);
 
 		/* time gaps are not a problem here */
@@ -434,7 +447,8 @@ char **argv;
 			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
 			fprintf(stderr,"dbg2       kind:           %d\n",kind);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
-			fprintf(stderr,"dbg2       beams_back:     %d\n",beams_back);
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       status:         %d\n",status);
 			}
@@ -457,12 +471,13 @@ char **argv;
 			}
 		}
 	status = mb_close(verbose,mbio_ptr,&error);
-	mb_free(verbose,bath,&error);
-	mb_free(verbose,bathlon,&error);
-	mb_free(verbose,bathlat,&error);
-	mb_free(verbose,back,&error);
-	mb_free(verbose,backlon,&error);
-	mb_free(verbose,backlat,&error);
+	mb_free(verbose,bath,&error); 
+	mb_free(verbose,bathlon,&error); 
+	mb_free(verbose,bathlat,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,sslon,&error); 
+	mb_free(verbose,sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -478,7 +493,7 @@ char **argv;
 		verbose,jfile,jformat,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -492,9 +507,10 @@ char **argv;
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&backlon,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&backlat,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -513,8 +529,9 @@ char **argv;
 		status = mb_read(verbose,mbio_ptr,&kind,
 			&rpings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
-			&beams_bath,bath,bathlon,bathlat,
-			&beams_back,back,backlon,backlat,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathlon,bathlat,
+			ss,sslon,sslat,
 			comment,&error);
 
 		/* time gaps are not a problem here */
@@ -530,7 +547,8 @@ char **argv;
 			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
 			fprintf(stderr,"dbg2       kind:           %d\n",kind);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
-			fprintf(stderr,"dbg2       beams_back:     %d\n",beams_back);
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       status:         %d\n",status);
 			}
@@ -553,12 +571,13 @@ char **argv;
 			}
 		}
 	status = mb_close(verbose,mbio_ptr,&error);
-	mb_free(verbose,bath,&error);
-	mb_free(verbose,bathlon,&error);
-	mb_free(verbose,bathlat,&error);
-	mb_free(verbose,back,&error);
-	mb_free(verbose,backlon,&error);
-	mb_free(verbose,backlat,&error);
+	mb_free(verbose,bath,&error); 
+	mb_free(verbose,bathlon,&error); 
+	mb_free(verbose,bathlat,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,sslon,&error); 
+	mb_free(verbose,sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -611,7 +630,7 @@ char **argv;
 		verbose,ifile,iformat,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -625,9 +644,10 @@ char **argv;
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&backlon,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&backlat,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -646,8 +666,9 @@ char **argv;
 		status = mb_read(verbose,mbio_ptr,&kind,
 			&rpings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
-			&beams_bath,bath,bathlon,bathlat,
-			&beams_back,back,backlon,backlat,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathlon,bathlat,
+			ss,sslon,sslat,
 			comment,&error);
 
 		/* time gaps are not a problem here */
@@ -663,7 +684,8 @@ char **argv;
 			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
 			fprintf(stderr,"dbg2       kind:           %d\n",kind);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
-			fprintf(stderr,"dbg2       beams_back:     %d\n",beams_back);
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       status:         %d\n",status);
 			}
@@ -696,12 +718,13 @@ char **argv;
 			}
 		}
 	status = mb_close(verbose,mbio_ptr,&error);
-	mb_free(verbose,bath,&error);
-	mb_free(verbose,bathlon,&error);
-	mb_free(verbose,bathlat,&error);
-	mb_free(verbose,back,&error);
-	mb_free(verbose,backlon,&error);
-	mb_free(verbose,backlat,&error);
+	mb_free(verbose,bath,&error); 
+	mb_free(verbose,bathlon,&error); 
+	mb_free(verbose,bathlat,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,sslon,&error); 
+	mb_free(verbose,sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -717,7 +740,7 @@ char **argv;
 		verbose,jfile,jformat,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -731,9 +754,10 @@ char **argv;
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&backlon,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(double),&backlat,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -752,8 +776,9 @@ char **argv;
 		status = mb_read(verbose,mbio_ptr,&kind,
 			&rpings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
-			&beams_bath,bath,bathlon,bathlat,
-			&beams_back,back,backlon,backlat,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathlon,bathlat,
+			ss,sslon,sslat,
 			comment,&error);
 
 		/* time gaps are not a problem here */
@@ -769,7 +794,8 @@ char **argv;
 			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
 			fprintf(stderr,"dbg2       kind:           %d\n",kind);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
-			fprintf(stderr,"dbg2       beams_back:     %d\n",beams_back);
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       status:         %d\n",status);
 			}
@@ -802,12 +828,13 @@ char **argv;
 			}
 		}
 	status = mb_close(verbose,mbio_ptr,&error);
-	mb_free(verbose,bath,&error);
-	mb_free(verbose,bathlon,&error);
-	mb_free(verbose,bathlat,&error);
-	mb_free(verbose,back,&error);
-	mb_free(verbose,backlon,&error);
-	mb_free(verbose,backlat,&error);
+	mb_free(verbose,bath,&error); 
+	mb_free(verbose,bathlon,&error); 
+	mb_free(verbose,bathlat,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,sslon,&error); 
+	mb_free(verbose,sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 

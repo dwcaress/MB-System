@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbunclean.c	3.00	3/10/93
- *    $Id: mbunclean.c,v 3.1 1993-05-14 23:49:32 sohara Exp $
+ *    The MB-system:	mbunclean.c	3/10/93
+ *    $Id: mbunclean.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -11,7 +11,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBUNCLEAN unflags multibeam bathymetry and backscatter data 
+ * MBUNCLEAN unflags multibeam bathymetry and amplitude data 
  * which has been flagged as bad by being set negative.
  * The default input and output streams are stdin and stdout.
  *
@@ -19,6 +19,19 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 3.1  1993/05/14  23:49:32  sohara
+ * fixed $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ * message
+ *
  *
  */
 
@@ -38,9 +51,9 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 3.1 1993-05-14 23:49:32 sohara Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
-	static char help_message[] =  "MBUNCLEAN unflags multibeam bathymetry and backscatter data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
+	static char help_message[] =  "MBUNCLEAN unflags multibeam bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
 
 	/* parsing variables */
@@ -70,7 +83,8 @@ char **argv;
 	double	timegap;
 	char	ifile[128];
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	char	*imbio_ptr;
 
 	/* MBIO write control parameters */
@@ -88,9 +102,12 @@ char **argv;
 	double	heading;
 	double	distance;
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
@@ -234,7 +251,7 @@ char **argv;
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -247,7 +264,7 @@ char **argv;
 	/* initialize writing the output multibeam file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
@@ -259,9 +276,16 @@ char **argv;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathdist,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&backdist,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathacrosstrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathalongtrack,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ssacrosstrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -281,8 +305,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -290,8 +315,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	right_now = time((long *)0);
@@ -306,8 +332,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -315,8 +342,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -324,8 +352,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -333,8 +362,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -342,8 +372,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -351,8 +382,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -360,8 +392,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
@@ -374,8 +407,9 @@ char **argv;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
 			time_i,&time_d,&navlon,&navlat,&speed,
 			&heading,&distance,
-			&beams_bath,bath,bathdist,
-			&beams_back,back,backdist,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 
 		/* increment counter */
@@ -438,10 +472,10 @@ char **argv;
 					data_use = MB_YES;
 					unflag++;
 					}
-			for (i=0;i<beams_back;i++)
-				if (back[i] < 0)
+			for (i=0;i<beams_amp;i++)
+				if (amp[i] < 0)
 					{
-					back[i] = -back[i];
+					amp[i] = -amp[i];
 					data_use = MB_YES;
 					unflag++;
 					}
@@ -455,8 +489,9 @@ char **argv;
 					store_ptr,data_use,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
-					beams_bath,bath,bathdist,
-					beams_back,back,backdist,
+					beams_bath,beams_amp,pixels_ss,
+					bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			if (status == MB_SUCCESS)
 				{
@@ -487,9 +522,12 @@ char **argv;
 
 	/* deallocate memory for data arrays */
 	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathdist,&error); 
-	mb_free(verbose,back,&error); 
-	mb_free(verbose,backdist,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,bathacrosstrack,&error); 
+	mb_free(verbose,bathalongtrack,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,ssacrosstrack,&error); 
+	mb_free(verbose,ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

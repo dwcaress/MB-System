@@ -1,9 +1,9 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
-#    The MB-system:	mbm_calcomp_plot.perl	3.00	8/21/93
-#    $Id  $
+#    The MB-system:	mbm_calcomp_plot.perl	8/21/93
+#    $Id: mbm_calcomp_plot.perl,v 4.0 1994-03-06 00:09:08 caress Exp $
 #
-#    Copyright (c) 1993 by 
+#    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -51,10 +51,16 @@
 #   in Perl (this script).
 #
 # Version:
-#   $Id: mbm_calcomp_plot.perl,v 3.1 1993-08-27 22:04:49 caress Exp $
+#   $Id: mbm_calcomp_plot.perl,v 4.0 1994-03-06 00:09:08 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/01  20:54:10  caress
+# First cut at new version.
+#
+# Revision 3.1  1993/08/27  22:04:49  caress
+# Added contour and shiptrack annotation control.
+#
 # Revision 3.0  1993/08/26  01:09:11  caress
 # Initial version.
 #

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbcontourfilter.c.c	3.00	8/13/93
- *    $Id  $
+ *    The MB-system:	mbcontourfilter.c	8/13/93
+ *    $Id: mbcontourfilter.c,v 4.0 1994-03-06 00:09:08 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
   *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -30,6 +30,12 @@
  * Date:	August 13, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  20:50:45  caress
+ * First cut at new version.
+ *
+ * Revision 3.0  1993/08/26  00:59:59  caress
+ * Initial version.
+ *
  *
  *
  */
@@ -61,18 +67,20 @@ struct	ping
 	double	heading;
 	double	distance;
 	double	*bath;
+	double	*amp;
 	double	*bathlon;
 	double	*bathlat;
-	double	*back;
-	double	*backlon;
-	double	*backlat;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
 	char	comment[256];
 	};
 struct swath
 	{
 	int	npings;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	struct ping data[MAXPINGS];
 	};
 
@@ -94,7 +102,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontourfilter.c,v 3.0 1993-08-26 00:59:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontourfilter.c,v 4.0 1994-03-06 00:09:08 caress Exp $";
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a swath contouring utility designed for use with \nan old fashioned pen plotter. The output consists of ascii pen plotting \ncalls in geographic (longitude and latitude) coordinates.  These plot \ncalls can be piped to a filter which translates them to calls which \ncan be handled by a plotter.  The primary use of this utility is as \npart of a shipboard realtime plotting package using four color pen \nplotters. The contour levels and colors are controlled using contour \nand color change intervals. Contours can also be set to have ticks \npointing downhill.";
 	static char usage_message[] = "mbcontourfilter.c -Fformat -Iinfile -Rwest/east/south/north \n\t[-Atime_tick/time_annot/date_annot/time_tick_len -Byr/mo/da/hr/mn/sc \n\t-Ccontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Eyr/mo/da/hr/mn/sc -Jscale -Llonflip -Nnplot \n\t-Ppings -Sspeed -Ttimegap -V -H]";
@@ -125,18 +133,20 @@ char **argv;
 	double	timegap;
 	char	file[128];
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	char	*mbio_ptr;
 
 	/* mbio read values */
 	struct swath *swath_plot;
 	struct ping *pingcur;
 	double	*bath;
+	double	*amp;
 	double	*bathlon;
 	double	*bathlat;
-	double	*back;
-	double	*backlon;
-	double	*backlat;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
 
 	/* gmt control variables */
 	int	doplot;
@@ -398,7 +408,7 @@ char **argv;
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -417,16 +427,18 @@ char **argv;
 		pingcur = &(swath_plot->data[i]);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&(pingcur->bath),&error);
+		status = mb_malloc(verbose,beams_amp*sizeof(double),
+			&(pingcur->amp),&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&(pingcur->bathlon),&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&(pingcur->bathlat),&error);
-		status = mb_malloc(verbose,beams_back*sizeof(double),
-			&(pingcur->back),&error);
-		status = mb_malloc(verbose,beams_back*sizeof(double),
-			&(pingcur->backlon),&error);
-		status = mb_malloc(verbose,beams_back*sizeof(double),
-			&(pingcur->backlat),&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&(pingcur->ss),&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&(pingcur->sslon),&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&(pingcur->sslat),&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -476,23 +488,26 @@ char **argv;
 	nping_read = 0;
 	nping_plot = 0;
 	swath_plot->beams_bath = beams_bath;
-	swath_plot->beams_back = beams_back;
+	swath_plot->beams_amp = beams_amp;
+	swath_plot->pixels_ss = pixels_ss;
 	done = MB_NO;
 	while (done == MB_NO)
 		{
 		pingcur = &swath_plot->data[*npings];
 		bath = pingcur->bath;
+		amp = pingcur->amp;
 		bathlon = pingcur->bathlon;
 		bathlat = pingcur->bathlat;
-		back = pingcur->back;
-		backlon = pingcur->backlon;
-		backlat = pingcur->backlat;
+		ss = pingcur->ss;
+		sslon = pingcur->sslon;
+		sslat = pingcur->sslat;
 		status = mb_read(verbose,mbio_ptr,&(pingcur->kind),
 			&(pingcur->pings),pingcur->time_i,&(pingcur->time_d),
 			&(pingcur->navlon),&(pingcur->navlat),&(pingcur->speed),
 			&(pingcur->heading),&(pingcur->distance),
-			&beams_bath,bath,bathlon,bathlat,
-			&beams_back,back,backlon,backlat,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathlon,bathlat,
+			ss,sslon,sslat,
 			pingcur->comment,&error);
 
 		/* print debug statements */
@@ -504,8 +519,10 @@ char **argv;
 				pingcur->kind);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",
 				beams_bath);
-			fprintf(stderr,"dbg2       beams_back:     %d\n",
-				beams_back);
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",
+				beams_amp);
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",
+				pixels_ss);
 			fprintf(stderr,"dbg2       error:          %d\n",
 				error);
 			fprintf(stderr,"dbg2       status:         %d\n",
@@ -620,11 +637,12 @@ char **argv;
 		{
 		pingcur = &swath_plot->data[i];
 		mb_free(verbose,pingcur->bath,&error);
+		mb_free(verbose,pingcur->amp,&error);
 		mb_free(verbose,pingcur->bathlon,&error);
 		mb_free(verbose,pingcur->bathlat,&error);
-		mb_free(verbose,pingcur->back,&error);
-		mb_free(verbose,pingcur->backlon,&error);
-		mb_free(verbose,pingcur->backlat,&error);
+		mb_free(verbose,pingcur->ss,&error);
+		mb_free(verbose,pingcur->sslon,&error);
+		mb_free(verbose,pingcur->sslat,&error);
 		}
 	mb_free(verbose,swath_plot,&error);
 
@@ -702,11 +720,15 @@ int	*error;
 		ping1->bathlon[i] = ping2->bathlon[i];
 		ping1->bathlat[i] = ping2->bathlat[i];
 		}
-	for (i=0;i<swath->beams_back;i++)
+	for (i=0;i<swath->beams_amp;i++)
 		{
-		ping1->back[i] = ping2->back[i];
-		ping1->backlon[i] = ping2->backlon[i];
-		ping1->backlat[i] = ping2->backlat[i];
+		ping1->amp[i] = ping2->amp[i];
+		}
+	for (i=0;i<swath->pixels_ss;i++)
+		{
+		ping1->ss[i] = ping2->ss[i];
+		ping1->sslon[i] = ping2->sslon[i];
+		ping1->sslat[i] = ping2->sslat[i];
 		}
 
 	/* assume success */

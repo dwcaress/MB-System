@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbinfo.c	3.00	2/1/93
- *    $Id: mbinfo.c,v 3.3 1993-06-29 23:57:14 caress Exp $
+ *    The MB-system:	mbinfo.c	2/1/93
+ *    $Id: mbinfo.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -16,13 +16,28 @@
  * MBINFO estimates the variance for each of the multibeam 
  * bathymetry beams by reading a set number of pings (>2) and then finding 
  * the variance of the detrended values for each beam. The variances
- * for the multibeam backscatter beams are calculated without detrending.
+ * for the multibeam amplitude beams and sidescan values are 
+ * calculated without detrending.
  * The results are dumped to stdout.
  *
  * Author:	D. W. Caress
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/02  22:45:03  caress
+ * Fixed calculations of mean and variance values for
+ * amplitude and sidescan data.
+ *
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 3.3  1993/06/29  23:57:14  caress
+ * Made NOT printing out comments the default, with -C
+ * instead of -N now the comment printing toggle.
+ * Added julian day to the begin and end time strings.
+ *
  * Revision 3.2  1993/06/17  16:14:13  caress
  * Initialized several variables so that the programs does
  * not print out trash if no data is found.
@@ -50,18 +65,21 @@
 struct ping
 	{
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
+	int	*amp;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	};
 
 main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 3.3 1993-06-29 23:57:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBINFO";
-	static char help_message[] =  "MBINFO reads a multibeam bathymetry data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
+	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
 	extern char *optarg;
 	extern int optkind;
@@ -78,6 +96,7 @@ char **argv;
 
 	/* MBIO read control parameters */
 	int	format;
+	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -91,7 +110,8 @@ char **argv;
 	int	pings_get = 1;
 	int	pings_read = 1;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 
 	/* MBIO read values */
 	char	*mbio_ptr;
@@ -106,9 +126,12 @@ char **argv;
 	double	heading;
 	double	distance;
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
+	int	*amp;
+	int	*bath_acrosstrack;
+	int	*bath_alongtrack;
+	int	*ss;
+	int	*ss_acrosstrack;
+	int	*ss_alongtrack;
 	char	comment[256];
 	int	icomment = 0;
 	int	comments = MB_NO;
@@ -120,8 +143,10 @@ char **argv;
 	double	latmax = 0.0;
 	double	bathmin = 0.0;
 	double	bathmax = 0.0;
-	double	backmin = 0.0;
-	double	backmax = 0.0;
+	double	ampmin = 0.0;
+	double	ampmax = 0.0;
+	double	ssmin = 0.0;
+	double	ssmax = 0.0;
 	double	bathbeg = 0.0;
 	double	lonbeg = 0.0;
 	double	latbeg = 0.0;
@@ -145,22 +170,32 @@ char **argv;
 	int	ngdbeams = 0;
 	int	nzdbeams = 0;
 	int	nfdbeams = 0;
-	int	ngbbeams = 0;
-	int	nzbbeams = 0;
-	int	nfbbeams = 0;
-	int	begin = 0;
+	int	ngabeams = 0;
+	int	nzabeams = 0;
+	int	nfabeams = 0;
+	int	ngsbeams = 0;
+	int	nzsbeams = 0;
+	int	nfsbeams = 0;
+	int	beginbath = 0;
+	int	beginamp = 0;
+	int	beginss = 0;
 	int	nread = 0;
 
 	/* variance finding variables */
 	int	nbath;
-	int	nback;
-	double	sumx, sumxx, sumy, sumxy, delta, a, b, dev, variance;
+	int	namp;
+	int	nss;
+	double	sumx, sumxx, sumy, sumxy, delta;
+	double	a, b, dev, mean, variance;
 	double	*bathmean;
 	double	*bathvar;
 	int	*nbathvar;
-	double	*backmean;
-	double	*backvar;
-	int	*nbackvar;
+	double	*ampmean;
+	double	*ampvar;
+	int	*nampvar;
+	double	*ssmean;
+	double	*ssvar;
+	int	*nssvar;
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
@@ -321,12 +356,16 @@ char **argv;
 		exit(MB_ERROR_NO_ERROR);
 		}
 
+	/* obtain format array location - format id will 
+		be aliased to current id if old format id given */
+	status = mb_format(verbose,&format,&format_num,&error);
+
 	/* initialize reading the multibeam file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings_get,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(output,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -339,38 +378,59 @@ char **argv;
 	/* allocate memory for data arrays */
 	for (i=0;i<pings_read;i++)
 		{
-		if ((data[i] = (struct ping *) 
-			calloc(pings_read,sizeof(struct ping))) == NULL) 
-			error = MB_ERROR_MEMORY_FAIL;
+		status = mb_malloc(verbose,pings_read*sizeof(struct ping),
+				&data[i],&error);
 		if (error == MB_ERROR_NO_ERROR)
-			{
 			datacur = data[i];
-			if ((datacur->bath = (int *) 
-				calloc(beams_bath,sizeof(int))) == NULL) 
-				error = MB_ERROR_MEMORY_FAIL;
-			if ((datacur->bathdist = (int *) 
-				calloc(beams_bath,sizeof(int))) == NULL)
-				error = MB_ERROR_MEMORY_FAIL;
-			if ((datacur->back = (int *) 
-				calloc(beams_back,sizeof(int))) == NULL) 
-				error = MB_ERROR_MEMORY_FAIL;
-			if ((datacur->backdist = (int *) 
-				calloc(beams_back,sizeof(int))) == NULL)
-				error = MB_ERROR_MEMORY_FAIL;
-			}
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_bath*sizeof(int),
+					&datacur->bath,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_amp*sizeof(int),
+					&datacur->amp,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_bath*sizeof(int),
+					&datacur->bathacrosstrack,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_bath*sizeof(int),
+					&datacur->bathalongtrack,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+					&datacur->ss,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+					&datacur->ssacrosstrack,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+					&datacur->ssalongtrack,&error);
 		}
-	if ((bathmean = (double *) calloc(beams_bath,sizeof(double))) == NULL) 
-		error = MB_ERROR_MEMORY_FAIL;
-	if ((bathvar = (double *) calloc(beams_bath,sizeof(double))) == NULL) 
-		error = MB_ERROR_MEMORY_FAIL;
-	if ((nbathvar = (int *) calloc(beams_bath,sizeof(int))) == NULL) 
-		error = MB_ERROR_MEMORY_FAIL;
-	if ((backmean = (double *) calloc(beams_back,sizeof(double))) == NULL) 
-		error = MB_ERROR_MEMORY_FAIL;
-	if ((backvar = (double *) calloc(beams_back,sizeof(double))) == NULL) 
-		error = MB_ERROR_MEMORY_FAIL;
-	if ((nbackvar = (int *) calloc(beams_back,sizeof(int))) == NULL) 
-		error = MB_ERROR_MEMORY_FAIL;
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+				&bathmean,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+				&bathvar,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_bath*sizeof(int),
+				&nbathvar,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_amp*sizeof(double),
+				&ampmean,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_amp*sizeof(double),
+				&ampvar,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_amp*sizeof(int),
+				&nampvar,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				&ssmean,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				&ssvar,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+				&nssvar,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -383,7 +443,7 @@ char **argv;
 		}
 
 	/* printf out file and format */
-	mb_format_inf(verbose,format,&message);
+	mb_format_inf(verbose,format_num,&message);
 	fprintf(output,"\nMultibeam Data File:  %s\n",file);
 	fprintf(output,"MBIO Data Format ID:  %d\n",format);
 	fprintf(output,"%s",message);
@@ -395,11 +455,17 @@ char **argv;
 		bathvar[i] = 0.0;
 		nbathvar[i] = 0;
 		}
-	for (i=0;i<beams_back;i++)
+	for (i=0;i<beams_amp;i++)
 		{
-		backmean[i] = 0.0;
-		backvar[i] = 0.0;
-		nbackvar[i] = 0;
+		ampmean[i] = 0.0;
+		ampvar[i] = 0.0;
+		nampvar[i] = 0;
+		}
+	for (i=0;i<pixels_ss;i++)
+		{
+		ssmean[i] = 0.0;
+		ssvar[i] = 0.0;
+		nssvar[i] = 0;
 		}
 
 	/* read and process data */
@@ -413,14 +479,18 @@ char **argv;
 			/* read a ping of data */
 			datacur = data[nread];
 			bath = datacur->bath;
-			bathdist = datacur->bathdist;
-			back = datacur->back;
-			backdist = datacur->backdist;
+			amp = datacur->amp;
+			bath_acrosstrack = datacur->bathacrosstrack;
+			bath_alongtrack = datacur->bathalongtrack;
+			ss = datacur->ss;
+			ss_acrosstrack = datacur->ssacrosstrack;
+			ss_alongtrack = datacur->ssalongtrack;
 			status = mb_get(verbose,mbio_ptr,&kind,&pings,
 				time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
-				&beams_bath,bath,bathdist,
-				&beams_back,back,backdist,
+				&beams_bath,&beams_amp,&pixels_ss,
+				bath,amp,bath_acrosstrack,bath_alongtrack,
+				ss,ss_acrosstrack,ss_alongtrack,
 				comment,&error);
 
 			/* increment counters */
@@ -496,13 +566,29 @@ char **argv;
 					}
 				if (irec == 2 && spdbeg <= 0.0)
 					spdbeg = speed;
-				if (begin == 0)
+				if (beginbath == 0 && beams_bath > 0)
 					for (i=0;i<beams_bath;i++)
 						if (bath[i] > 0)
 							{
 							bathmin = (double) bath[i];
 							bathmax = (double) bath[i];
-							begin = 1;
+							beginbath = 1;
+							}
+				if (beginamp == 0 && beams_amp > 0)
+					for (i=0;i<beams_amp;i++)
+						if (amp[i] > 0)
+							{
+							ampmin = (double) amp[i];
+							ampmax = (double) amp[i];
+							beginamp = 1;
+							}
+				if (beginss == 0 && pixels_ss > 0)
+					for (i=0;i<pixels_ss;i++)
+						if (ss[i] > 0)
+							{
+							ssmin = (double) ss[i];
+							ssmax = (double) ss[i];
+							beginss = 1;
 							}
 				if (navlon < lonmin) lonmin = navlon;
 				if (navlon > lonmax) lonmax = navlon;
@@ -520,6 +606,32 @@ char **argv;
 						nzdbeams++;
 					else
 						nfdbeams++;
+					}
+				for (i=0;i<beams_amp;i++)
+					{
+					if (amp[i] > 0)
+						{
+						if (amp[i] < (int) ampmin) ampmin = (double) amp[i];
+						if (amp[i] > (int) ampmax) ampmax = (double) amp[i];
+						ngabeams++;
+						}
+					else if (amp[i] == 0)
+						nzabeams++;
+					else
+						nfabeams++;
+					}
+				for (i=0;i<pixels_ss;i++)
+					{
+					if (ss[i] > 0)
+						{
+						if (ss[i] < (int) ssmin) ssmin = (double) ss[i];
+						if (ss[i] > (int) ssmax) ssmax = (double) ss[i];
+						ngsbeams++;
+						}
+					else if (ss[i] == 0)
+						nzsbeams++;
+					else
+						nfsbeams++;
 					}
 				distot = distot + distance;
 				bathend = (double) bath[beams_bath/2];
@@ -596,39 +708,77 @@ char **argv;
 					}
 				}
 
-			/* do the backscatter */
-			for (i=0;i<beams_back;i++)
+			/* do the amplitude */
+			for (i=0;i<beams_amp;i++)
 				{
 
-				/* get mean backscatter */
-				nback  = 0;
-				backmean[i]  = 0.0;
+				/* get mean sidescan */
+				namp  = 0;
+				mean  = 0.0;
 				variance = 0.0;
 				for (j=0;j<nread;j++)
 					{
 					datacur = data[j];
-					back = datacur->back;
-					if (back[i] > 0)
+					amp = datacur->amp;
+					if (amp[i] > 0)
 					  {
-					  nback++;
-					  backmean[i]  = backmean[i] + back[i];
+					  namp++;
+					  mean  = mean + amp[i];
 					  }
 					}
-				if (nback == pings_read)
+				if (namp == pings_read)
 					{
-					backmean[i] = backmean[i]/nback;
+					mean = mean/namp;
 					for (j=0;j<nread;j++)
 					  {
 					  datacur = data[j];
-					  back = datacur->back;
-					  if (back[i] > 0)
+					  amp = datacur->amp;
+					  if (amp[i] > 0)
 					    {
-					    dev = back[i] - backmean[i];
+					    dev = amp[i] - mean;
 					    variance = variance + dev*dev;
 					    }
 					  }
-					backvar[i] = backvar[i] + variance;
-					nbackvar[i] = nbackvar[i] + nback;
+					ampmean[i] = ampmean[i] + namp*mean;
+					ampvar[i] = ampvar[i] + variance;
+					nampvar[i] = nampvar[i] + namp;
+					}
+				}
+
+			/* do the sidescan */
+			for (i=0;i<pixels_ss;i++)
+				{
+
+				/* get mean sidescan */
+				nss  = 0;
+				mean  = 0.0;
+				variance = 0.0;
+				for (j=0;j<nread;j++)
+					{
+					datacur = data[j];
+					ss = datacur->ss;
+					if (ss[i] > 0)
+					  {
+					  nss++;
+					  mean  = mean + ss[i];
+					  }
+					}
+				if (nss == pings_read)
+					{
+					mean = mean/nss;
+					for (j=0;j<nread;j++)
+					  {
+					  datacur = data[j];
+					  ss = datacur->ss;
+					  if (ss[i] > 0)
+					    {
+					    dev = ss[i] - mean;
+					    variance = variance + dev*dev;
+					    }
+					  }
+					ssmean[i] = ssmean[i] + nss*mean;
+					ssvar[i] = ssvar[i] + variance;
+					nssvar[i] = nssvar[i] + nss;
 					}
 				}
 
@@ -658,11 +808,17 @@ char **argv;
 				bathmean[i] = bathmean[i]/nbathvar[i];
 				bathvar[i] = bathvar[i]/nbathvar[i];
 				}
-		for (i=0;i<beams_back;i++)
-			if (nbackvar[i] > 0)
+		for (i=0;i<beams_amp;i++)
+			if (nampvar[i] > 0)
 				{
-				backmean[i] = backmean[i]/nbackvar[i];
-				backvar[i] = backvar[i]/nbackvar[i];
+				ampmean[i] = ampmean[i]/nampvar[i];
+				ampvar[i] = ampvar[i]/nampvar[i];
+				}
+		for (i=0;i<pixels_ss;i++)
+			if (nssvar[i] > 0)
+				{
+				ssmean[i] = ssmean[i]/nssvar[i];
+				ssvar[i] = ssvar[i]/nssvar[i];
 				}
 		}
 
@@ -674,17 +830,22 @@ char **argv;
 	mb_get_jtime(verbose,timbeg_i,timbeg_j);
 	mb_get_jtime(verbose,timend_i,timend_j);
 	fprintf(output,"\nData Totals:\n");
-	fprintf(output,"Number of Records:        %8d\n",irec);
-	fprintf(output,"Bathymetry Data:\n");
-	fprintf(output,"  Number of Beams:        %8d\n",(irec*beams_bath));
-	fprintf(output,"  Number of Good Beams:   %8d\n",ngdbeams);
-	fprintf(output,"  Number of Zero Beams:   %8d\n",nzdbeams);
-	fprintf(output,"  Number of flagged beams:%8d\n",nfdbeams);
-	fprintf(output,"Backscatter Data:\n");
-	fprintf(output,"  Number of Beams:        %8d\n",(irec*beams_back));
-	fprintf(output,"  Number of Good Beams:   %8d\n",ngbbeams);
-	fprintf(output,"  Number of Zero Beams:   %8d\n",nzbbeams);
-	fprintf(output,"  Number of flagged beams:%8d\n",nfbbeams);
+	fprintf(output,"Number of Records:         %8d\n",irec);
+	fprintf(output,"Bathymetry Data (%d beams):\n",beams_bath);
+	fprintf(output,"  Number of Beams:         %8d\n",(irec*beams_bath));
+	fprintf(output,"  Number of Good Beams:    %8d\n",ngdbeams);
+	fprintf(output,"  Number of Zero Beams:    %8d\n",nzdbeams);
+	fprintf(output,"  Number of Flagged Beams: %8d\n",nfdbeams);
+	fprintf(output,"Amplitude Data (%d beams):\n",beams_amp);
+	fprintf(output,"  Number of Beams:         %8d\n",(irec*beams_amp));
+	fprintf(output,"  Number of Good Beams:    %8d\n",ngabeams);
+	fprintf(output,"  Number of Zero Beams:    %8d\n",nzabeams);
+	fprintf(output,"  Number of Flagged Beams: %8d\n",nfabeams);
+	fprintf(output,"Sidescan Data (%d pixels):\n",pixels_ss);
+	fprintf(output,"  Number of Pixels:        %8d\n",(irec*pixels_ss));
+	fprintf(output,"  Number of Good Pixels:   %8d\n",ngsbeams);
+	fprintf(output,"  Number of Zero Pixels:   %8d\n",nzsbeams);
+	fprintf(output,"  Number of Flagged Pixels:%8d\n",nfsbeams);
 	fprintf(output,"\nNavigation Totals:\n");
 	fprintf(output,"Total Time:         %10.4f hours\n",timtot);
 	fprintf(output,"Total Track Length: %10.4f km\n",distot);
@@ -704,10 +865,19 @@ char **argv;
 		lonend,latend,bathend);
 	fprintf(output,"Speed:%8.4f  Heading:%9.4f\n",spdend,hdgend);
 	fprintf(output,"\nLimits:\n");
-	fprintf(output,"  Minimum Lon: %10.4f     Maximum Lon: %10.4f\n",lonmin,lonmax);
-	fprintf(output,"  Minimum Lat: %10.4f     Maximum Lat: %10.4f\n",latmin,latmax);
-        fprintf(output,"Minimum Depth: %10.4f   Maximum Depth: %10.4f\n",bathmin,bathmax);
-	if (pings_read > 2 && beams_bath > 0)
+	fprintf(output,"Minimum Longitude: %10.4f   Maximum Longitude: %10.4f\n",lonmin,lonmax);
+	fprintf(output,"Minimum Latitude:  %10.4f   Maximum Latitude:  %10.4f\n",latmin,latmax);
+	if (ngdbeams > 0 || verbose >= 1)
+		fprintf(output,"Minimum Depth:     %10.4f   Maximum Depth:     %10.4f\n",
+			bathmin,bathmax);
+	if (ngabeams > 0 || verbose >= 1)
+		fprintf(output,"Minimum Amplitude: %10.4f   Maximum Amplitude: %10.4f\n",
+			ampmin,ampmax);
+	if (ngsbeams > 0 || verbose >= 1)
+		fprintf(output,"Minimum Sidescan:  %10.4f   Maximum Sidescan:  %10.4f\n",
+			ssmin,ssmax);
+	if (pings_read > 2 && beams_bath > 0 
+		&& (ngdbeams > 0 || verbose >= 1))
 		{
 		fprintf(output,"\nBeam Bathymetry Variances:\n");
 		fprintf(output,"Pings Averaged: %d\n",pings_read);
@@ -719,32 +889,54 @@ char **argv;
 				bathvar[i],sqrt(bathvar[i]));
 		fprintf(output,"\n");
 		}
-	if (pings_read > 2 && beams_back > 0)
+	if (pings_read > 2 && beams_amp > 0 
+		&& (ngabeams > 0 || verbose >= 1))
 		{
-		fprintf(output,"\nBeam Backscatter Variances:\n");
+		fprintf(output,"\nBeam Amplitude Variances:\n");
 		fprintf(output,"Pings Averaged: %d\n",pings_read);
 		fprintf(output," Beam     N      Mean     Variance    Sigma\n");
 		fprintf(output," ----     -      ----     --------    -----\n");
-		for (i=0;i<beams_back;i++)
+		for (i=0;i<beams_amp;i++)
 			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
-				i,nbackvar[i],backmean[i],
-				backvar[i],sqrt(backvar[i]));
+				i,nampvar[i],ampmean[i],
+				ampvar[i],sqrt(ampvar[i]));
+		fprintf(output,"\n");
+		}
+	if (pings_read > 2 && pixels_ss > 0 
+		&& (ngsbeams > 0 || verbose >= 1))
+		{
+		fprintf(output,"\nPixel Sidescan Variances:\n");
+		fprintf(output,"Pings Averaged: %d\n",pings_read);
+		fprintf(output," Beam     N      Mean     Variance    Sigma\n");
+		fprintf(output," ----     -      ----     --------    -----\n");
+		for (i=0;i<pixels_ss;i++)
+			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
+				i,nssvar[i],ssmean[i],
+				ssvar[i],sqrt(ssvar[i]));
 		fprintf(output,"\n");
 		}
 
 	/* deallocate memory used for data arrays */
 	for (i=0;i<pings_read;i++)
 		{
-		free(data[i]->bath);
-		free(data[i]->bathdist);
-		free(data[i]->back);
-		free(data[i]->backdist);
-		free(data[i]);
+		mb_free(verbose,data[i]->bath,&error);
+		mb_free(verbose,data[i]->amp,&error);
+		mb_free(verbose,data[i]->bathacrosstrack,&error);
+		mb_free(verbose,data[i]->bathalongtrack,&error);
+		mb_free(verbose,data[i]->ss,&error);
+		mb_free(verbose,data[i]->ssacrosstrack,&error);
+		mb_free(verbose,data[i]->ssalongtrack,&error);
+		mb_free(verbose,data[i],&error);
 		}
-	free(bathmean);
-	free(bathvar);
-	free(backmean);
-	free(backvar);
+	mb_free(verbose,bathmean,&error);
+	mb_free(verbose,bathvar,&error);
+	mb_free(verbose,nbathvar,&error);
+	mb_free(verbose,ampmean,&error);
+	mb_free(verbose,ampvar,&error);
+	mb_free(verbose,nampvar,&error);
+	mb_free(verbose,ssmean,&error);
+	mb_free(verbose,ssvar,&error);
+	mb_free(verbose,nssvar,&error);
 
 	/* set program status */
 	status = MB_SUCCESS;

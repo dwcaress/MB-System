@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbmask.c	3.00	6/15/93
- *    $Id: mbmask.c,v 1.2 1993-08-26 23:52:22 caress Exp $
+ *    The MB-system:	mbmask.c	6/15/93
+ *    $Id: mbmask.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993,1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -25,6 +25,15 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 1.2  1993/08/26  23:52:22  caress
+ * Fixed bug that left it in an infinite loop when the end of
+ * the mask file was reached.
+ *
  * Revision 1.1  1993/06/21  01:19:27  caress
  * Initial revision
  *
@@ -48,7 +57,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 1.2 1993-08-26 23:52:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -80,7 +89,8 @@ char **argv;
 	double	timegap;
 	char	ifile[128];
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	char	*imbio_ptr;
 
 	/* MBIO write control parameters */
@@ -98,9 +108,12 @@ char **argv;
 	double	heading;
 	double	distance;
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
@@ -113,11 +126,11 @@ char **argv;
 	char	mfile[128];
 	int	nmask;
 	int	beams_bath_mask;
-	int	beams_back_mask;
+	int	beams_amp_mask;
 	int	mask_time_i[6];
 	double	mask_time_d;
 	int	*bath_mask;
-	int	*back_mask;
+	int	*amp_mask;
 	int	mask_done;
 	double	eps = 0.02;
 
@@ -282,7 +295,7 @@ char **argv;
 		if (line1[0] != '#')
 			{
 			sscanf(line1,"%d %d",
-				&beams_bath_mask,&beams_back_mask);
+				&beams_bath_mask,&beams_amp_mask);
 			ready = MB_YES;
 			}
 		}
@@ -291,8 +304,8 @@ char **argv;
 	/* allocate memory for the flagging mask arrays */
 	status = mb_malloc(verbose,beams_bath_mask*sizeof(int),
 			&bath_mask,&error);
-	status = mb_malloc(verbose,beams_back_mask*sizeof(int),
-			&back_mask,&error);
+	status = mb_malloc(verbose,beams_amp_mask*sizeof(int),
+			&amp_mask,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -305,8 +318,8 @@ char **argv;
 		}
 
 	/* read the first mask record */
-	status = read_mask(verbose,beams_bath_mask,beams_back_mask,fp,
-			&nmask,mask_time_i,&mask_time_d,bath_mask,back_mask,
+	status = read_mask(verbose,beams_bath_mask,beams_amp_mask,fp,
+			&nmask,mask_time_i,&mask_time_d,bath_mask,amp_mask,
 			&error);
 
 	/* if error reading first mask then quit */
@@ -326,7 +339,7 @@ char **argv;
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -339,7 +352,7 @@ char **argv;
 	/* initialize writing the output multibeam file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
@@ -351,9 +364,16 @@ char **argv;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathdist,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&backdist,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathacrosstrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathalongtrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ssacrosstrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -373,8 +393,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -382,8 +403,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -391,8 +413,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	right_now = time((long *)0);
@@ -407,8 +430,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -416,8 +440,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -425,8 +450,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -434,8 +460,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -443,8 +470,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -452,8 +480,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -461,8 +490,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
@@ -473,11 +503,12 @@ char **argv;
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
-			time_i,&time_d,&navlon,&navlat,&speed,
-			&heading,&distance,
-			&beams_bath,bath,bathdist,
-			&beams_back,back,backdist,
-			comment,&error);
+				time_i,&time_d,&navlon,&navlat,&speed,
+				&heading,&distance,
+				&beams_bath,&beams_amp,&pixels_ss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,&error);
 
 		/* increment counter */
 		if (error <= MB_ERROR_NO_ERROR 
@@ -534,10 +565,10 @@ char **argv;
 			while (mask_time_d < time_d - eps && mask_done == MB_NO)
 				{
 				status = read_mask(verbose,beams_bath_mask,
-						beams_back_mask,fp,
+						beams_amp_mask,fp,
 						&nmask,mask_time_i,
 						&mask_time_d,
-						bath_mask,back_mask,
+						bath_mask,amp_mask,
 						&error);
 				if (status == MB_FAILURE)
 					{
@@ -562,11 +593,11 @@ char **argv;
 						flagged++;
 						data_use = MB_YES;
 						}
-				for (j=0;j<beams_back;j++)
-					if (back_mask[j] == 0
-						&& back[j] > 0)
+				for (j=0;j<beams_amp;j++)
+					if (amp_mask[j] == 0
+						&& amp[j] > 0)
 						{
-						back[j] = -back[j];
+						amp[j] = -amp[j];
 						flagged++;
 						data_use = MB_YES;
 						}
@@ -581,8 +612,9 @@ char **argv;
 					store_ptr,data_use,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
-					beams_bath,bath,bathdist,
-					beams_back,back,backdist,
+					beams_bath,beams_amp,pixels_ss,
+					bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			if (status == MB_SUCCESS)
 				{
@@ -614,11 +646,14 @@ char **argv;
 
 	/* deallocate memory for data arrays */
 	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathdist,&error); 
-	mb_free(verbose,back,&error); 
-	mb_free(verbose,backdist,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,bathacrosstrack,&error); 
+	mb_free(verbose,bathalongtrack,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,ssacrosstrack,&error); 
+	mb_free(verbose,ssalongtrack,&error); 
 	mb_free(verbose,bath_mask,&error);
-	mb_free(verbose,back_mask,&error);
+	mb_free(verbose,amp_mask,&error);
 
 	/* check memory */
 	if (verbose >= 4)
@@ -638,17 +673,17 @@ char **argv;
 	exit(status);
 }
 /*--------------------------------------------------------------------*/
-int read_mask(verbose,beams_bath,beams_back,fp,
-	nmask,time_i,time_d,mask_bath,mask_back,error)
+int read_mask(verbose,beams_bath,beams_amp,fp,
+	nmask,time_i,time_d,mask_bath,mask_amp,error)
 int	verbose;
 int	beams_bath;
-int	beams_back;
+int	beams_amp;
 FILE	*fp;
 int	*nmask;
 int	time_i[6];
 double	*time_d;
 int	*mask_bath;
-int	*mask_back;
+int	*mask_amp;
 int	*error;
 {
 	char	*function_name = "read_mask";
@@ -668,7 +703,7 @@ int	*error;
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       fp:         %d\n",fp);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",beams_bath);
-		fprintf(stderr,"dbg2       beams_back: %d\n",beams_back);
+		fprintf(stderr,"dbg2       beams_amp:  %d\n",beams_amp);
 		}
 
 	/* read the first flagging mask record */
@@ -699,13 +734,13 @@ int	*error;
 			else
 				mask_bath[i] = 1;
 		len = strlen(line3);
-		if (len > beams_back)
-			len = beams_back;
+		if (len > beams_amp)
+			len = beams_amp;
 		for (i=0;i<len;i++)
 			if (line2[i] == '0')
-				mask_back[i] = 0;
+				mask_amp[i] = 0;
 			else
-				mask_back[i] = 1;
+				mask_amp[i] = 1;
 		nmask++;
 		}
 
@@ -732,9 +767,9 @@ int	*error;
 		fprintf(stderr,"dbg2       mask_bath:\ndbg2       ");
 		for (i=0;i<beams_bath;i++)
 			fprintf(stderr,"%d",mask_bath[i]);
-		fprintf(stderr,"\ndbg2       mask_back:\ndbg2       ");
-		for (i=0;i<beams_back;i++)
-			fprintf(stderr,"%d",mask_back[i]);
+		fprintf(stderr,"\ndbg2       mask_amp:\ndbg2       ");
+		for (i=0;i<beams_amp;i++)
+			fprintf(stderr,"%d",mask_amp[i]);
 		fprintf(stderr,"\n");
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

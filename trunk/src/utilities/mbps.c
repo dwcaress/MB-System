@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbps.c	3.00	11/4/93
- *    $Id: mbps.c,v 1.2 1993-11-04 19:32:28 caress Exp $
+ *    The MB-system:	mbps.c	11/4/93
+ *    $Id: mbps.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -21,6 +21,16 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 1.2  1993/11/04  19:32:28  caress
+ * Fixed some details.  PSLIB calls now correct for GMT v 2.1.4
+ * and gmtdefs now used in part.  Will need some more cleaning
+ * up later.
+ *
  * Revision 1.1  1993/11/04  18:09:06  caress
  * Initial revision
  *
@@ -67,9 +77,12 @@ char *progname;
 struct ping
 	{
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	};
 
 main (argc, argv)
@@ -101,7 +114,7 @@ char **argv;
 
 
 /* MBINFO.C definitions */
-	static char rcs_id[] = "$Id: mbps.c,v 1.2 1993-11-04 19:32:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
@@ -132,7 +145,8 @@ char **argv;
 	int	pings_get = 1;
 	int	pings = 1;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 
 	/* MBIO read values */
 	char	*mbio_ptr;
@@ -147,9 +161,12 @@ char **argv;
 	double	heading;
 	double	distance;
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	char	comment[256];
 	int	icomment = 0;
 	int	comments = MB_NO;
@@ -389,7 +406,7 @@ char **argv;
 		verbose,file,format,pings_get,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS) {
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS) {
 		mb_error(verbose,error,&message);
 		fprintf(output,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
 		fprintf(output,"\nMultibeam File <%s> not initialized for reading\n",file);
@@ -399,25 +416,26 @@ char **argv;
 	}
 
 
-		/* allocate memory for data arrays */
+	/* allocate memory for data arrays */
 	for (i=0;i<pings;i++) {
-		if ((data[i] = (struct ping *) 
-			calloc(pings,sizeof(struct ping))) == NULL) 
-			error = MB_ERROR_MEMORY_FAIL;
+		status = mb_malloc(verbose,pings*sizeof(struct ping),
+					&data[i],&error);
 		if (error == MB_ERROR_NO_ERROR) {
 			datacur = data[i];
-			if ((datacur->bath = (int *) 
-				calloc(beams_bath,sizeof(int))) == NULL) 
-				error = MB_ERROR_MEMORY_FAIL;
-			if ((datacur->bathdist = (int *) 
-				calloc(beams_bath,sizeof(int))) == NULL)
-				error = MB_ERROR_MEMORY_FAIL;
-			if ((datacur->back = (int *) 
-				calloc(beams_back,sizeof(int))) == NULL) 
-				error = MB_ERROR_MEMORY_FAIL;
-			if ((datacur->backdist = (int *) 
-				calloc(beams_back,sizeof(int))) == NULL)
-				error = MB_ERROR_MEMORY_FAIL;
+			status = mb_malloc(verbose,beams_bath*sizeof(int),
+					&datacur->bath,&error);
+			status = mb_malloc(verbose,beams_amp*sizeof(int),
+					&datacur->amp,&error);
+			status = mb_malloc(verbose,beams_bath*sizeof(int),
+					&datacur->bathacrosstrack,&error);
+			status = mb_malloc(verbose,beams_bath*sizeof(int),
+					&datacur->bathalongtrack,&error);
+			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+					&datacur->ss,&error);
+			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+					&datacur->ssacrosstrack,&error);
+			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+					&datacur->ssalongtrack,&error);
 		} /* if data[i] */
 	} 	 /* for i */	  
 
@@ -449,14 +467,19 @@ char **argv;
 			/* read a ping of data */
 			datacur = data[nread];
 			bath = datacur->bath;
-			bathdist = datacur->bathdist;
-			back = datacur->back;
-			backdist = datacur->backdist;
+			bathacrosstrack = datacur->bathacrosstrack;
+			bathalongtrack = datacur->bathalongtrack;
+			amp = datacur->amp;
+			ss = datacur->ss;
+			ssacrosstrack = datacur->ssacrosstrack;
+			ssalongtrack = datacur->ssalongtrack;
 			status = mb_get(verbose,mbio_ptr,&kind,&pings,
 				time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
-				&beams_bath,bath,bathdist,
-				&beams_back,back,backdist,
+				&beams_bath,&beams_amp,&pixels_ss,
+				bath,amp,bathacrosstrack,
+				bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
 			/* increment counters */
@@ -527,19 +550,19 @@ char **argv;
 					if (bath[j]>0) {
 					/* bath[] > 0 for unflagged data */
 					    if (viewdir=='S' || viewdir=='s') {
-						xp[irec-1][j]=distot+bathdist[j]*
+						xp[irec-1][j]=distot+bathacrosstrack[j]*
 							sin_eta*cos_alpha;
 						yp[irec-1][j]= (-bath[j]*cos_eta*ve)-
-							bathdist[j]*sin_eta*sin_alpha;
+							bathacrosstrack[j]*sin_eta*sin_alpha;
 					    }
 					    else if (viewdir=='P' || viewdir=='p') {
-						xp[irec-1][j]= -distot-bathdist[j]*
+						xp[irec-1][j]= -distot-bathacrosstrack[j]*
 							sin_eta*cos_alpha;
 						yp[irec-1][j]= (-bath[j]*cos_eta*ve)+
-							bathdist[j]*sin_eta*sin_alpha;
+							bathacrosstrack[j]*sin_eta*sin_alpha;
 					    }
 					    else if (viewdir=='B' || viewdir=='b') {
-						xp[irec-1][j]= bathdist[j]+distot*
+						xp[irec-1][j]= bathacrosstrack[j]+distot*
 							sin_eta*cos_alpha;
 						yp[irec-1][j]= (-bath[j]*cos_eta*ve)+
 							distot*sin_eta*sin_alpha;
@@ -846,11 +869,20 @@ char **argv;
 	status = mb_close(verbose,mbio_ptr,&error);
 
 	/* deallocate memory */
-	free(datacur->bath);
-	free(datacur->bathdist);
-	free(datacur->back);
-	free(datacur->backdist);
-
+	for (i=0;i<pings;i++) {
+		if (error == MB_ERROR_NO_ERROR) {
+			datacur = data[i];
+			mb_free(verbose,&datacur->bath,&error);
+			mb_free(verbose,&datacur->amp,&error);
+			mb_free(verbose,&datacur->bathacrosstrack,&error);
+			mb_free(verbose,&datacur->bathalongtrack,&error);
+			mb_free(verbose,&datacur->ss,&error);
+			mb_free(verbose,&datacur->ssacrosstrack,&error);
+			mb_free(verbose,&datacur->ssalongtrack,&error);
+		} /* if data[i] */
+		mb_free(verbose,pings*sizeof(struct ping),
+					&data[i],&error);
+	} 	 /* for i */	  
 
 }	/* main */
 

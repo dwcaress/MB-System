@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mblist.c	3.00	2/1/93
- *    $Id: mblist.c,v 3.6 1993-09-11 15:44:30 caress Exp $
+ *    The MB-system:	mblist.c	2/1/93
+ *    $Id: mblist.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -26,6 +26,15 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 3.6  1993/09/11  15:44:30  caress
+ * Fixed bug so that mblist no longer checks for a valid depth
+ * even if it is not outputting depth.
+ *
  * Revision 3.5  1993/06/13  07:47:20  caress
  * Added new time output options "m" and "u" and changed
  * old options "U" to "M" and "u" to "U
@@ -76,7 +85,8 @@
 #define	MAX_OPTIONS			25
 #define	MBLIST_MODE_LIST		1
 #define	MBLIST_MODE_DUMP_BATHYMETRY	2
-#define	MBLIST_MODE_DUMP_BACKSCATTER	3
+#define	MBLIST_MODE_DUMP_AMPLITUDE	3
+#define	MBLIST_MODE_DUMP_SIDESCAN	3
 
 /*--------------------------------------------------------------------*/
 
@@ -84,10 +94,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 3.6 1993-09-11 15:44:30 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Mbath_beam -Nback_beam -Ooptions -Ddumpmode]";
+	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Lbath_beam -Mamp_beam -Nss_pixel -Ooptions -Ddumpmode]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -114,22 +124,26 @@ char **argv;
 	double	timegap;
 	char	file[128];
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 
 	/* output format list controls */
 	int	dumpmode;
 	char	list[MAX_OPTIONS];
 	int	n_list;
 	int	ibeam_list_bath = -1;
-	int	ibeam_list_back = -1;
+	int	ibeam_list_amp = -1;
+	int	ipixel_list_ss = -1;
 	int	beam_list_bath = -1;
-	int	beam_list_back = -1;
+	int	beam_list_amp = -1;
+	int	pixel_list_ss = -1;
 	double	distance_total;
 	int	nread;
 	int	beam_status = MB_SUCCESS;
 	int	time_j[4];
 	int	bathcheck = 0;
-	int	backcheck = 0;
+	int	ampcheck = 0;
+	int	sscheck = 0;
 
 	/* MBIO read values */
 	char	*mbio_ptr;
@@ -142,15 +156,19 @@ char **argv;
 	double	heading;
 	double	distance;
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
-	double	*depth;
-	double	*depthlon;
-	double	*depthlat;
-	double	*scatter;
-	double	*scatterlon;
-	double	*scatterlat;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
+	double	*dbath;
+	double	*dbathlon;
+	double	*dbathlat;
+	double	*damp;
+	double	*dss;
+	double	*dsslon;
+	double	*dsslat;
 	char	comment[256];
 	int	icomment = 0;
 
@@ -200,27 +218,6 @@ char **argv;
 		case 'v':
 			verbose++;
 			break;
-		case 'F':
-		case 'f':
-			sscanf (optarg,"%d", &format);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%d", &pings);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf (optarg,"%d", &lonflip);
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
-			flag++;
-			break;
 		case 'B':
 		case 'b':
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
@@ -228,11 +225,62 @@ char **argv;
 				&btime_i[3],&btime_i[4],&btime_i[5]);
 			flag++;
 			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg,"%d", &dumpmode);
+			flag++;
+			break;
 		case 'E':
 		case 'e':
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			flag++;
+			break;
+		case 'F':
+		case 'f':
+			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", file);
+			flag++;
+			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			sscanf (optarg,"%d", &ibeam_list_bath);
+			flag++;
+			break;
+		case 'N':
+			sscanf (optarg,"%d", &ibeam_list_amp);
+			flag++;
+			break;
+		case 'n':
+			sscanf (optarg,"%d", &ipixel_list_ss);
+			flag++;
+			break;
+		case 'O':
+		case 'o':
+			for(j=0,n_list=0;j<strlen(optarg);j++,n_list++)
+				if (n_list<MAX_OPTIONS)
+					list[n_list] = optarg[j];
+			flag++;
+			break;
+		case 'P':
+		case 'p':
+			sscanf (optarg,"%d", &pings);
+			flag++;
+			break;
+		case 'R':
+		case 'r':
+			sscanf (optarg,"%lf/%lf/%lf/%lf", 
+				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
 			flag++;
 			break;
 		case 'S':
@@ -243,33 +291,6 @@ char **argv;
 		case 'T':
 		case 't':
 			sscanf (optarg,"%lf", &timegap);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf (optarg,"%s", file);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			for(j=0,n_list=0;j<strlen(optarg);j++,n_list++)
-				if (n_list<MAX_OPTIONS)
-					list[n_list] = optarg[j];
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf (optarg,"%d", &ibeam_list_bath);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf (optarg,"%d", &ibeam_list_back);
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			sscanf (optarg,"%d", &dumpmode);
 			flag++;
 			break;
 		case '?':
@@ -327,8 +348,10 @@ char **argv;
 		fprintf(stderr,"dbg2       mode:           %d\n",dumpmode);
 		fprintf(stderr,"dbg2       beam_list_bath: %d\n",
 						ibeam_list_bath);
-		fprintf(stderr,"dbg2       beam_list_back: %d\n",
-						ibeam_list_back);
+		fprintf(stderr,"dbg2       beam_list_amp:  %d\n",
+						ibeam_list_amp);
+		fprintf(stderr,"dbg2       pixel_list_ss:   %d\n",
+						ipixel_list_ss);
 		fprintf(stderr,"dbg2       n_list:         %d\n",n_list);
 		for (i=0;i<n_list;i++)
 			fprintf(stderr,"dbg2         list[%d]:      %c\n",
@@ -348,7 +371,7 @@ char **argv;
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -358,13 +381,15 @@ char **argv;
 		exit(error);
 		}
 
-	/* check if depth or backscatter needs to be checked */
+	/* check which data types need to be checked */
 	for (i=0; i<n_list; i++) 
 		{
 		if (list[i] == 'Z' || list[i] == 'z')
 			bathcheck = 1;
-		if (list[i] == 'B' || list[i] == 'b')
-			backcheck = 1;
+		if (list[i] == 'B')
+			ampcheck = 1;
+		if (list[i] == 'b')
+			sscheck = 1;
 		}
 
 	/* set the beam to be output (default = centerbeam) */
@@ -380,18 +405,30 @@ char **argv;
 		}
 	else if (ibeam_list_bath >= 0)
 		beam_list_bath = ibeam_list_bath;
-	if (ibeam_list_back < 0 && beams_back > 0)
-		ibeam_list_back = beams_back/2;
-	else if (ibeam_list_back >= beams_back)
+	if (ibeam_list_amp < 0 && beams_amp > 0)
+		ibeam_list_amp = beams_amp/2;
+	else if (ibeam_list_amp >= beams_amp)
 		{
-		fprintf(stderr,"\nRequested backscatter beam %d does not exist \n- there are only %d backscatter beams available in format %d)\n",
-			ibeam_list_back,beams_back,format);
+		fprintf(stderr,"\nRequested amplitude beam %d does not exist \n- there are only %d amplitude beams available in format %d)\n",
+			ibeam_list_amp,beams_amp,format);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(MB_FAILURE);
 		}
-	else if (ibeam_list_back >= 0)
-		beam_list_back = ibeam_list_back;
+	else if (ibeam_list_amp >= 0)
+		beam_list_amp = ibeam_list_amp;
+	if (ipixel_list_ss < 0 && pixels_ss > 0)
+		ipixel_list_ss = pixels_ss/2;
+	else if (ipixel_list_ss >= pixels_ss)
+		{
+		fprintf(stderr,"\nRequested sidescan beam %d does not exist \n- there are only %d sidescan beams available in format %d)\n",
+			ipixel_list_ss,pixels_ss,format);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(MB_FAILURE);
+		}
+	else if (ipixel_list_ss >= 0)
+		pixel_list_ss = ipixel_list_ss;
 
 	/* print debug statements */
 	if (verbose >= 2 && dumpmode == MBLIST_MODE_LIST)
@@ -402,8 +439,10 @@ char **argv;
 		fprintf(stderr,"dbg2       error:          %d\n",error);
 		fprintf(stderr,"dbg2       beam_list_bath: %d\n",
 					beam_list_bath);
-		fprintf(stderr,"dbg2       beam_list_back: %d\n",
-					beam_list_back);
+		fprintf(stderr,"dbg2       beam_list_amp:  %d\n",
+					beam_list_amp);
+		fprintf(stderr,"dbg2       pixel_list_ss:   %d\n",
+					pixel_list_ss);
 		}
 
 	/* print debug statements */
@@ -414,48 +453,50 @@ char **argv;
 		}
 
 	/* print debug statements */
-	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_BACKSCATTER)
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_AMPLITUDE)
 		{
-		fprintf(stderr,"\ndbg2  All nonzero backscatter beams will be output as \n(lon lat backscatter) triples in <%s>\n",
+		fprintf(stderr,"\ndbg2  All nonzero amplitude beams will be output as \n(lon lat amplitude) triples in <%s>\n",
+			program_name);
+		}
+
+	/* print debug statements */
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_SIDESCAN)
+		{
+		fprintf(stderr,"\ndbg2  All nonzero sidescan pixels will be output as \n(lon lat sidescan) triples in <%s>\n",
 			program_name);
 		}
 
 	/* allocate memory for data arrays */
 	if (dumpmode == MBLIST_MODE_LIST)
 		{
-		if ((bath = (int *) 
-			calloc(beams_bath,sizeof(int))) == NULL) 
-			error = MB_ERROR_MEMORY_FAIL;
-		if ((bathdist = (int *) 
-			calloc(beams_bath,sizeof(int))) == NULL)
-			error = MB_ERROR_MEMORY_FAIL;
-		if ((back = (int *) 
-			calloc(beams_back,sizeof(int))) == NULL) 
-			error = MB_ERROR_MEMORY_FAIL;
-		if ((backdist = (int *) 
-			calloc(beams_back,sizeof(int))) == NULL)
-			error = MB_ERROR_MEMORY_FAIL;
+		status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(int),
+				&bathacrosstrack,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(int),
+				&bathalongtrack,&error);
+		status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssacrosstrack,
+				&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssalongtrack,
+				&error);
 		}
 	else
 		{
-		if ((depth = (double *) 
-			calloc(beams_bath,sizeof(double))) == NULL) 
-			error = MB_ERROR_MEMORY_FAIL;
-		if ((depthlon = (double *) 
-			calloc(beams_bath,sizeof(double))) == NULL)
-			error = MB_ERROR_MEMORY_FAIL;
-		if ((depthlat = (double *) 
-			calloc(beams_bath,sizeof(double))) == NULL)
-			error = MB_ERROR_MEMORY_FAIL;
-		if ((scatter = (double *) 
-			calloc(beams_bath,sizeof(double))) == NULL) 
-			error = MB_ERROR_MEMORY_FAIL;
-		if ((scatterlon = (double *) 
-			calloc(beams_bath,sizeof(double))) == NULL)
-			error = MB_ERROR_MEMORY_FAIL;
-		if ((scatterlat = (double *) 
-			calloc(beams_bath,sizeof(double))) == NULL)
-			error = MB_ERROR_MEMORY_FAIL;
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+				&dbath,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+				&dbathlon,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+				&dbathlat,&error);
+		status = mb_malloc(verbose,beams_amp*sizeof(double),
+				&damp,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				&dss,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				&dsslon,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+				&dsslat,&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -479,8 +520,9 @@ char **argv;
 		/* read a ping of data */
 		status = mb_get(verbose,mbio_ptr,&kind,&pings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
-			&beams_bath,bath,bathdist,
-			&beams_back,back,backdist,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 
 		/* time gaps are not a problem here */
@@ -503,21 +545,29 @@ char **argv;
 		if (ibeam_list_bath < 0 
 			&& variable_beams_table[format] == MB_YES)
 			beam_list_bath = beams_bath/2;
-		if (ibeam_list_back < 0 
+		if (ibeam_list_amp < 0 
 			&& variable_beams_table[format] == MB_YES)
-			beam_list_back = beams_back/2;
+			beam_list_amp = beams_amp/2;
+		if (ipixel_list_ss < 0 
+			&& variable_beams_table[format] == MB_YES)
+			pixel_list_ss = pixels_ss/2;
 
-		/* zero pings are no good if bathymetry or backscatter
-			is being output */
+		/* zero pings are no good if bathymetry, amplitude, or
+			sidescan is being output */
 		beam_status = status;
 		if (bathcheck && beams_bath > 0 && beam_list_bath >= 0)
 			{
 			if (bath[beam_list_bath] <= 0)
 				beam_status = MB_FAILURE;
 			}
-		if (backcheck && beams_back > 0 && beam_list_back >= 0)
+		if (ampcheck && beams_amp > 0 && beam_list_amp >= 0)
 			{
-			if (back[beam_list_back] <= 0)
+			if (amp[beam_list_amp] <= 0)
+				beam_status = MB_FAILURE;
+			}
+		if (sscheck && pixels_ss > 0 && pixel_list_ss >= 0)
+			{
+			if (ss[pixel_list_ss] <= 0)
 				beam_status = MB_FAILURE;
 			}
 
@@ -536,14 +586,23 @@ char **argv;
 				fprintf(stderr,"dbg2       bath:           %d\n",
 						bath[beam_list_bath]);
 				}
-			fprintf(stderr,"dbg2       beams_back:     %d\n",
-					beams_back);
-			if (beams_back > 0)
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",
+					beams_amp);
+			if (beams_amp > 0)
 				{
-				fprintf(stderr,"dbg2       beam_list_back: %d\n",
-						beam_list_back);
-				fprintf(stderr,"dbg2       back:           %d\n",
-						back[beam_list_back]);
+				fprintf(stderr,"dbg2       beam_list_amp:  %d\n",
+						beam_list_amp);
+				fprintf(stderr,"dbg2       amp:            %d\n",
+						amp[beam_list_amp]);
+				}
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",
+					pixels_ss);
+			if (pixels_ss > 0)
+				{
+				fprintf(stderr,"dbg2       pixel_list_ss:   %d\n",
+						pixel_list_ss);
+				fprintf(stderr,"dbg2       ss:             %d\n",
+						ss[pixel_list_ss]);
 				}
 			fprintf(stderr,"dbg2       kind:           %d\n",kind);
 			fprintf(stderr,"dbg2       error:          %d\n",error);
@@ -570,48 +629,68 @@ char **argv;
 			{
 			switch (list[i]) 
 				{
-				case 'X': /* longitude */
-					printf("%11.6f",navlon);
+				case 'A': /* Seafloor crosstrack slope */
+				case 'a':
+					ns = 0;
+					sx = 0.0;
+					sy = 0.0;
+					sxx = 0.0;
+					sxy = 0.0;
+					for (j=0;j<beams_bath;j++)
+					  if (bath[j] > 0)
+					    {
+					    sx += bathacrosstrack[j];
+					    sy += bath[j];
+					    sxx += bathacrosstrack[j]
+						*bathacrosstrack[j];
+					    sxy += bathacrosstrack[j]*bath[j];
+					    ns++;
+					    }
+					if (ns > 0)
+					  {
+					  delta = ns*sxx - sx*sx;
+					  a = (sxx*sy - sx*sxy)/delta;
+					  b = (ns*sxy - sx*sy)/delta;
+					  slope = atan(b)/DTR;
+					  }
+					else
+					  slope = 0.0;
+					printf("%.4f",slope);
 					break;
-				case 'Y': /* latitude */
-					printf("%10.6f",navlat);	
+				case 'B': /* amplitude */
+					printf("%6d",amp[beam_list_amp]);
 					break;
-				case 'L': /* along-track dist. */
-					printf("%7.3f",distance_total);
+				case 'b': /* sidescan */
+					printf("%6d",ss[pixel_list_ss]);
 					break;
-				case 'Z': /* depth */
-					printf("%6d",-bath[beam_list_bath]);
+				case 'D': /* bathymetry acrosstrack dist. */
+					printf("%5d",
+					bathacrosstrack[beam_list_bath]);
 					break;
-				case 'z': /* depth */
-					printf("%6d",bath[beam_list_bath]);
+				case 'd': /* sidescan acrosstrack dist. */
+					printf("%5d",
+					ssacrosstrack[pixel_list_ss]);
 					break;
-				case 'B': /* backscatter */
-				case 'b':
-					printf("%6d",back[beam_list_back]);
+				case 'E': /* bathymetry alongtrack dist. */
+					printf("%5d",
+					bathacrosstrack[beam_list_bath]);
 					break;
-				case 'D': /* bathymetry across-track dist. */
-					printf("%5d",bathdist[beam_list_bath]);
-					break;
-				case 'd': /* backscatter across-track dist. */
-					printf("%5d",backdist[beam_list_back]);
+				case 'e': /* sidescan alongtrack dist. */
+					printf("%5d",
+					ssacrosstrack[pixel_list_ss]);
 					break;
 				case 'H': /* heading */
 					printf("%5.1f",heading);
 					break;
-				case 'S': /* speed */
-					printf("%5.2f",speed);
-					break;
-				case 'T': /* time string */
+				case 'J': /* time string */
+					mb_get_jtime(verbose,time_i,time_j);
 					printf(
-					"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d",
-					time_i[0],time_i[1],time_i[2],
+					"%.4d %.3d %.2d %.2d %.2d",
+					time_j[0],time_j[1],
 					time_i[3],time_i[4],time_i[5]);
 					break;
-				case 't': /* time string */
-					printf(
-					"%.4d %.2d %.2d %.2d %.2d %.2d",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+				case 'L': /* along-track dist. */
+					printf("%7.3f",distance_total);
 					break;
 				case 'M': /* MBIO time in minutes since 1/1/81 00:00:00 */
 					printf("%.3f",time_d);
@@ -623,6 +702,24 @@ char **argv;
 						first_m = MB_NO;
 						}
 					printf("%.3f",time_d - time_d_ref);
+					break;
+				case 'N': /* ping counter */
+					printf("%6d",nread);
+					break;
+				case 'S': /* speed */
+					printf("%5.2f",speed);
+					break;
+				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
+					printf(
+					"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5]);
+					break;
+				case 't': /* yyyy mm dd hh mm ss time string */
+					printf(
+					"%.4d %.2d %.2d %.2d %.2d %.2d",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5]);
 					break;
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_tm.tm_year = time_i[0] - 1900;
@@ -649,41 +746,17 @@ char **argv;
 						}
 					printf("%d",time_u - time_u_ref);
 					break;
-				case 'J': /* time string */
-					mb_get_jtime(verbose,time_i,time_j);
-					printf(
-					"%.4d %.3d %.2d %.2d %.2d",
-					time_j[0],time_j[1],
-					time_i[3],time_i[4],time_i[5]);
+				case 'X': /* longitude */
+					printf("%11.6f",navlon);
 					break;
-				case 'N': /* ping counter */
-					printf("%6d",nread);
+				case 'Y': /* latitude */
+					printf("%10.6f",navlat);	
 					break;
-				case 'A': /* Seafloor crosstrack slope */
-					ns = 0;
-					sx = 0.0;
-					sy = 0.0;
-					sxx = 0.0;
-					sxy = 0.0;
-					for (j=0;j<beams_bath;j++)
-					  if (bath[j] > 0)
-					    {
-					    sx += bathdist[j];
-					    sy += bath[j];
-					    sxx += bathdist[j]*bathdist[j];
-					    sxy += bathdist[j]*bath[j];
-					    ns++;
-					    }
-					if (ns > 0)
-					  {
-					  delta = ns*sxx - sx*sx;
-					  a = (sxx*sy - sx*sxy)/delta;
-					  b = (ns*sxy - sx*sy)/delta;
-					  slope = atan(b)/DTR;
-					  }
-					else
-					  slope = 0.0;
-					printf("%.4f",slope);
+				case 'Z': /* depth */
+					printf("%6d",-bath[beam_list_bath]);
+					break;
+				case 'z': /* depth */
+					printf("%6d",bath[beam_list_bath]);
 					break;
 				default:
 					printf("<Invalid Option: %c>",
@@ -707,8 +780,9 @@ char **argv;
 		/* read a ping of data */
 		status = mb_read(verbose,mbio_ptr,&kind,&pings,time_i,&time_d,
 			&navlon,&navlat,&speed,&heading,&distance,
-			&beams_bath,depth,depthlon,depthlat,
-			&beams_back,scatter,scatterlon,scatterlat,
+			&beams_bath,&beams_amp,&pixels_ss,
+			dbath,damp,dbathlon,dbathlat,
+			dss,dsslon,dsslat,
 			comment,&error);
 
 		/* time gaps are not a problem here */
@@ -734,8 +808,10 @@ char **argv;
 			fprintf(stderr,"dbg2       kind:           %d\n",kind);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",
 					beams_bath);
-			fprintf(stderr,"dbg2       beams_back:     %d\n",
-					beams_back);
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",
+					beams_amp);
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",
+					pixels_ss);
 			fprintf(stderr,"dbg2       kind:           %d\n",kind);
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       beam status:    %d\n",						beam_status);
@@ -758,21 +834,31 @@ char **argv;
 			&& dumpmode == MBLIST_MODE_DUMP_BATHYMETRY)
 			{
 			for (i=0;i<beams_bath;i++)
-				if (depth[i] > 0.0)
+				if (dbath[i] > 0.0)
 					printf("%f\t%f\t%f\n",
-						depthlon[i],
-						depthlat[i],
-						depth[i]);
+						dbathlon[i],
+						dbathlat[i],
+						dbath[i]);
 			}
 		if (error == MB_ERROR_NO_ERROR 
-			&& dumpmode == MBLIST_MODE_DUMP_BACKSCATTER)
+			&& dumpmode == MBLIST_MODE_DUMP_AMPLITUDE)
 			{
-			for (i=0;i<beams_back;i++)
-				if (scatter[i] > 0.0)
+			for (i=0;i<beams_amp;i++)
+				if (damp[i] > 0.0)
 					printf("%f\t%f\t%f\n",
-						scatterlon[i],
-						scatterlat[i],
-						scatter[i]);
+						dbathlon[i],
+						dbathlat[i],
+						damp[i]);
+			}
+		if (error == MB_ERROR_NO_ERROR 
+			&& dumpmode == MBLIST_MODE_DUMP_SIDESCAN)
+			{
+			for (i=0;i<pixels_ss;i++)
+				if (dss[i] > 0.0)
+					printf("%f\t%f\t%f\n",
+						dsslon[i],
+						dsslat[i],
+						dss[i]);
 			}
 		}
 	}
@@ -781,16 +867,20 @@ char **argv;
 	status = mb_close(verbose,mbio_ptr,&error);
 
 	/* deallocate memory used for data arrays */
-	free(bath);
-	free(bathdist);
-	free(back);
-	free(backdist);
-	free(depth);
-	free(depthlon);
-	free(depthlat);
-	free(scatter);
-	free(scatterlon);
-	free(scatterlat);
+	mb_free(verbose,bath,&error); 
+	mb_free(verbose,bathacrosstrack,&error); 
+	mb_free(verbose,bathalongtrack,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,ssacrosstrack,&error); 
+	mb_free(verbose,ssalongtrack,&error); 
+	mb_free(verbose,dbath,&error); 
+	mb_free(verbose,dbathlon,&error); 
+	mb_free(verbose,dbathlat,&error); 
+	mb_free(verbose,damp,&error); 
+	mb_free(verbose,dss,&error); 
+	mb_free(verbose,dsslon,&error); 
+	mb_free(verbose,dsslat,&error); 
 
 	/* check memory */
 	if (verbose >= 4)
@@ -808,35 +898,3 @@ char **argv;
 	/* end it all */
 	exit(status);
 }
-
-/*
-err_exit(message)
-char message[];
-{
-	fprintf(stderr,"%s: %s\n",progname,message);
-	fprintf(stderr,"Usage (defaults in parentheses):\n");
-	fprintf(stderr,"-Iinput_file (stdin)\n");
-	fprintf(stderr,"-Finput_file_format (7)\n");
-	fprintf(stderr,"-Sspeed_min, in km/hr (0.0)\n");
-	fprintf(stderr,"-Ttime_gap, in minutes (1.0)\n");
-	fprintf(stderr,"-Ppings, pings to be averaged (1)\n");
-	fprintf(stderr,"-Rregion as W/E/S/N (-360/360/-90/90)\n");
-	fprintf(stderr,"-Bbegin_time (1970/01/01/00/00/00)\n");
-	fprintf(stderr,"-Eend_time   (1999/01/01/00/00/00)\n");
-	fprintf(stderr,"-Llon_flip (-1)\n");
-	fprintf(stderr,"-#beam_to_be_listed (centerbeam)\n");
-	fprintf(stderr,"-Ooutput_format (YXLZ)\n");
-	fprintf(stderr,"output_format is a string composed of :\n");
-	fprintf(stderr,"\tY for latitude\n");
-	fprintf(stderr,"\tX for longitude\n");
-	fprintf(stderr,"\tL for cumulative along-track distance\n");
-	fprintf(stderr,"\tD for across-track distance\n");
-	fprintf(stderr,"\tT for a time string yyyy/mm/dd/hh/mm/ss\n");
-	fprintf(stderr,"\tt for a time string yyyy mm dd hh mm ss\n");
-	fprintf(stderr,"\tJ for a time string yyyy jjj hh mm ss\n");
-	fprintf(stderr,"\tH for heading\n");
-	fprintf(stderr,"\tS for speed\n");
-	fprintf(stderr,"\tZ for depth\n");
-	exit (-1);
-}
-*/

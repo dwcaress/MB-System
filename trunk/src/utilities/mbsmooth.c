@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsmooth.c	3.00	6/12/93
- *    $Id: mbsmooth.c,v 3.1 1993-11-26 19:30:33 caress Exp $
+ *    The MB-system:	mbsmooth.c	6/12/93
+ *    $Id: mbsmooth.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -29,6 +29,14 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 3.1  1993/11/26  19:30:33  caress
+ * Removed annoying print statement.
+ *
  * Revision 3.0  1993/11/05  18:11:43  caress
  * Initial version.
  *
@@ -68,9 +76,12 @@ struct mbsmooth_ping_struct
 	double	speed;
 	double	heading;
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	double	*bathx;
 	double	*bathy;
 	int	*bathsmooth;
@@ -93,7 +104,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 3.1 1993-11-26 19:30:33 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \
@@ -125,7 +136,8 @@ smooth out noise in multibeam \nbathymetry data.";
 	double	speedmin;
 	double	timegap;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	char	ifile[128];
 	char	*imbio_ptr;
 
@@ -305,7 +317,7 @@ smooth out noise in multibeam \nbathymetry data.";
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -318,7 +330,7 @@ smooth out noise in multibeam \nbathymetry data.";
 	/* initialize writing the output multibeam file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
@@ -333,12 +345,18 @@ smooth out noise in multibeam \nbathymetry data.";
 		{
 		status = mb_malloc(verbose,beams_bath*sizeof(int),
 			&ping[i].bath,&error);
+		status = mb_malloc(verbose,beams_amp*sizeof(int),
+			&ping[i].amp,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(int),
-			&ping[i].bathdist,&error);
-		status = mb_malloc(verbose,beams_back*sizeof(int),
-			&ping[i].back,&error);
-		status = mb_malloc(verbose,beams_back*sizeof(int),
-			&ping[i].backdist,&error);
+			&ping[i].bathacrosstrack,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&ping[i].bathalongtrack,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ping[i].ss,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ping[i].ssacrosstrack,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ping[i].ssalongtrack,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&ping[i].bathx,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -405,8 +423,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Version %s",rcs_id);
@@ -414,8 +435,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
@@ -423,8 +447,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	right_now = time((long *)0);
 	strncpy(date,"\0",25);
@@ -439,8 +466,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Control Parameters:");
@@ -448,8 +478,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  MBIO data format:   %d",format);
@@ -457,8 +490,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Input file:         %s",ifile);
@@ -466,8 +502,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Output file:        %s",ofile);
@@ -475,8 +514,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Longitude flip:     %d",lonflip);
@@ -484,8 +526,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Filter widths file:   %s",wfile);
@@ -493,8 +538,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
 	strncpy(comment,"\0",256);
@@ -503,8 +551,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 	for (i=0;i<beams_bath;i++)
 		{
@@ -514,8 +565,11 @@ smooth out noise in multibeam \nbathymetry data.";
 				ping[0].time_i,ping[0].time_d,
 				ping[0].navlon,ping[0].navlat,
 				ping[0].speed,ping[0].heading,
-				beams_bath,ping[0].bath,ping[0].bathdist,
-				beams_back,ping[0].back,ping[0].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[0].bath,ping[0].amp,
+				ping[0].bathacrosstrack,ping[0].bathalongtrack,
+				ping[0].ss,ping[0].ssacrosstrack,
+				ping[0].ssalongtrack,
 				comment,&error);
 		}
 	sprintf(comment," ");
@@ -523,8 +577,11 @@ smooth out noise in multibeam \nbathymetry data.";
 			ping[0].time_i,ping[0].time_d,
 			ping[0].navlon,ping[0].navlat,
 			ping[0].speed,ping[0].heading,
-			beams_bath,ping[0].bath,ping[0].bathdist,
-			beams_back,ping[0].back,ping[0].backdist,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
 			comment,&error);
 
 	/* initialize the buffer */
@@ -566,10 +623,13 @@ smooth out noise in multibeam \nbathymetry data.";
 				ping[ndata].time_i,&ping[ndata].time_d,
 				&ping[ndata].navlon,&ping[ndata].navlat,
 				&ping[ndata].speed,&ping[ndata].heading,
-				&beams_bath,
-				ping[ndata].bath,ping[ndata].bathdist,
-				&beams_back,
-				ping[ndata].back,ping[ndata].backdist,
+				&beams_bath,&beams_amp,&pixels_ss,
+				ping[ndata].bath,ping[ndata].amp,
+				ping[ndata].bathacrosstrack,
+				ping[ndata].bathalongtrack,
+				ping[ndata].ss,
+				ping[2].ssacrosstrack,
+				ping[ndata].ssalongtrack,
 				&error);
 			if (status == MB_SUCCESS)
 				{
@@ -593,10 +653,10 @@ smooth out noise in multibeam \nbathymetry data.";
 				{
 				ping[j].bathx[i] = (ping[j].navlon 
 					- ping[0].navlon)/mtodeglon 
-					+ headingy*ping[j].bathdist[i];
+					+ headingy*ping[j].bathacrosstrack[i];
 				ping[j].bathy[i] = (ping[j].navlat 
 					- ping[0].navlat)/mtodeglat 
-					- headingx*ping[j].bathdist[i];
+					- headingx*ping[j].bathacrosstrack[i];
 				}
 			}
 
@@ -648,8 +708,12 @@ smooth out noise in multibeam \nbathymetry data.";
 				ping[j].time_i,ping[j].time_d,
 				ping[j].navlon,ping[j].navlat,
 				ping[j].speed,ping[j].heading,
-				beams_bath,ping[j].bathsmooth,ping[j].bathdist,
-				beams_back,ping[j].back,ping[j].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[j].bath,ping[j].amp,
+				ping[j].bathacrosstrack,
+				ping[j].bathalongtrack,
+				ping[j].ss,ping[j].ssacrosstrack,
+				ping[j].ssalongtrack,
 				comment,&error);
 		  }
 
@@ -691,9 +755,12 @@ smooth out noise in multibeam \nbathymetry data.";
 	for (j=0;j<3;j++)
 		{
 		mb_free(verbose,ping[j].bath,&error); 
-		mb_free(verbose,ping[j].bathdist,&error); 
-		mb_free(verbose,ping[j].back,&error); 
-		mb_free(verbose,ping[j].backdist,&error); 
+		mb_free(verbose,ping[j].bathacrosstrack,&error); 
+		mb_free(verbose,ping[j].bathalongtrack,&error); 
+		mb_free(verbose,ping[j].amp,&error); 
+		mb_free(verbose,ping[j].ss,&error); 
+		mb_free(verbose,ping[j].ssacrosstrack,&error); 
+		mb_free(verbose,ping[j].ssalongtrack,&error); 
 		mb_free(verbose,ping[j].bathx,&error); 
 		mb_free(verbose,ping[j].bathy,&error); 
 		mb_free(verbose,ping[j].bathsmooth,&error); 

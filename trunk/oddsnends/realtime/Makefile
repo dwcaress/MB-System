@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  8/12/93
-#	$Id: Makefile,v 1.1 1993-11-05 18:56:23 caress Exp $
+#	$Id: Makefile,v 4.0 1994-03-06 00:12:00 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		August 12, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.1  1993/11/05  18:56:23  caress
+# Initial revision
+#
 #
 #
 

@@ -1,5 +1,5 @@
-#     The MB-system:	Makefile	3.00  1/21/93
-#	$Id: Makefile,v 1.11 1993-11-08 03:58:16 caress Exp $
+#     The MB-system:	Makefile  1/21/93
+#	$Id: Makefile,v 4.0 1994-03-06 00:13:22 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,12 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/01  18:53:57  caress
+# First cut at new version.
+#
+# Revision 1.11  1993/11/08  03:58:16  caress
+# Reset location of Levitus annual file to /ocean/mgg/multibeam/levitus.
+#
 # Revision 1.10  1993/11/05  18:10:34  caress
 # Added mbsmooth.1 man page.
 #

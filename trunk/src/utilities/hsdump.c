@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	hsdump.c	3.00	6/16/93
- *    $Id: hsdump.c,v 3.1 1993-06-30 21:51:31 caress Exp $
+ *    The MB-system:	hsdump.c	6/16/93
+ *    $Id: hsdump.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -19,6 +19,14 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 3.1  1993/06/30  21:51:31  caress
+ * Fixed some debug messages.
+ *
  * Revision 3.0  1993/06/16  23:07:10  caress
  * Initial version derived from old program hsveldump.
  *
@@ -42,7 +50,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 3.1 1993-06-30 21:51:31 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -73,7 +81,8 @@ char **argv;
 	double	speedmin;
 	double	timegap;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	char	file[128];
 	char	*mbio_ptr;
 
@@ -89,11 +98,15 @@ char **argv;
 	double	heading;
 	double	distance;
 	int	nbath;
+	int	namp;
+	int	nss;
 	int	*bath;
-	int	*bathdist;
-	int	nback;
-	int	*back;
-	int	*backdist;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	char	comment[256];
 
 	/* dump control parameters */
@@ -290,7 +303,7 @@ char **argv;
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(output,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -302,9 +315,14 @@ char **argv;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathdist,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&backdist,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathacrosstrack,
+				&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathalongtrack,
+				&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssacrosstrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -331,8 +349,9 @@ char **argv;
 		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
-				&nbath,bath,bathdist,
-				&nback,back,backdist,
+				&nbath,&namp,&nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
 		/* get data structure pointer */
@@ -676,9 +695,12 @@ char **argv;
 
 	/* deallocate memory for data arrays */
 	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathdist,&error); 
-	mb_free(verbose,back,&error); 
-	mb_free(verbose,backdist,&error); 
+	mb_free(verbose,bathacrosstrack,&error); 
+	mb_free(verbose,bathalongtrack,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,ssacrosstrack,&error); 
+	mb_free(verbose,ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)
