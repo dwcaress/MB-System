@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.19 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.20 2003-11-24 20:44:51 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.18  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -252,7 +255,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.19 2003-05-20 18:05:32 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.20 2003-11-24 20:44:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -910,6 +913,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	match;
 	int	read_len;
 	int	skip = 0;
+	char	junk;
 	int	i;
 
 	/* print input debug statements */
@@ -1142,26 +1146,33 @@ Have a nice day...\n");
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-		else if (*type != EM2_START
-			&& *type != EM2_STOP
-			&& *type != EM2_STOP2
+		else if (*type !=  EM2_STOP2
 			&& *type != EM2_OFF
 			&& *type != EM2_ON
-			&& *type != EM2_RUN_PARAMETER
-			&& *type != EM2_CLOCK
-			&& *type != EM2_TIDE
-			&& *type != EM2_HEIGHT
-			&& *type != EM2_HEADING
-			&& *type != EM2_SSV
-			&& *type != EM2_TILT
 			&& *type != EM2_ATTITUDE
+			&& *type != EM2_CLOCK
+			&& *type != EM2_BATH
+			&& *type != EM2_SBDEPTH
+			&& *type != EM2_RAWBEAM
+			&& *type != EM2_SSV
+			&& *type != EM2_HEADING
+			&& *type != EM2_START
+			&& *type != EM2_TILT
+			&& *type != EM2_CBECHO
 			&& *type != EM2_POS
+			&& *type != EM2_RUN_PARAMETER
+			&& *type != EM2_SS
+			&& *type != EM2_TIDE
 			&& *type != EM2_SVP2
 			&& *type != EM2_SVP
-			&& *type != EM2_BATH
-			&& *type != EM2_RAWBEAM
+			&& *type != EM2_SSPINPUT
 			&& *type != EM2_RAWBEAM2
-			&& *type != EM2_SS)
+			&& *type != EM2_HEIGHT
+			&& *type != EM2_STOP
+			&& *type != EM2_REMOTE
+			&& *type != EM2_SSP
+			&& *type != EM2_BATH_MBA
+			&& *type != EM2_SS_MBA)
 			{
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"call nothing, try again\n");
@@ -1544,6 +1555,34 @@ Have a nice day...\n");
 				}
 			    }
 			}
+		else if (*type == EM2_SBDEPTH
+			|| *type == EM2_CBECHO
+			|| *type == EM2_SSPINPUT
+			|| *type == EM2_REMOTE
+			|| *type == EM2_SSP)
+			{
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr,"skip over %d bytes of unsupported datagram type %x\n",
+			record_size_save, *type);
+#endif
+			for (i=0;i<record_size_save-4;i++)
+				{
+				if ((read_len = fread(&junk,
+					1,1,mb_io_ptr->mbfp)) != 1)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					expect = EM2_NONE;
+					}
+				}
+			if (status == MB_SUCCESS)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				done = MB_YES;
+				expect = EM2_NONE;
+				}
+			}
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
@@ -1620,26 +1659,33 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 #endif
 
 	/* check for valid label */
-	if (type != EM2_START
-		&& type != EM2_STOP
-		&& type != EM2_STOP2
+	if (type !=  EM2_STOP2
 		&& type != EM2_OFF
 		&& type != EM2_ON
-		&& type != EM2_RUN_PARAMETER
-		&& type != EM2_CLOCK
-		&& type != EM2_TIDE
-		&& type != EM2_HEIGHT
-		&& type != EM2_HEADING
-		&& type != EM2_SSV
-		&& type != EM2_TILT
 		&& type != EM2_ATTITUDE
-		&& type != EM2_POS
-		&& type != EM2_SVP
-		&& type != EM2_SVP2
+		&& type != EM2_CLOCK
 		&& type != EM2_BATH
+		&& type != EM2_SBDEPTH
 		&& type != EM2_RAWBEAM
+		&& type != EM2_SSV
+		&& type != EM2_HEADING
+		&& type != EM2_START
+		&& type != EM2_TILT
+		&& type != EM2_CBECHO
+		&& type != EM2_POS
+		&& type != EM2_RUN_PARAMETER
+		&& type != EM2_SS
+		&& type != EM2_TIDE
+		&& type != EM2_SVP2
+		&& type != EM2_SVP
+		&& type != EM2_SSPINPUT
 		&& type != EM2_RAWBEAM2
-		&& type != EM2_SS)
+		&& type != EM2_HEIGHT
+		&& type != EM2_STOP
+		&& type != EM2_REMOTE
+		&& type != EM2_SSP
+		&& type != EM2_BATH_MBA
+		&& type != EM2_SS_MBA)
 		{
 		status = MB_FAILURE;
 		if (startid == 2
