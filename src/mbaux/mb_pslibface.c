@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.12 2000-09-30 06:54:58 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.13 2000-10-11 01:00:12 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/09/30  06:54:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.11  1999/04/16  01:24:27  caress
  * Final version 4.6 release?
  *
@@ -92,16 +95,15 @@ int	rgb[3];
 
 /*--------------------------------------------------------------------------*/
 /* 	function plot_init initializes the GMT plotting. */
-int plot_init(verbose,argc,argv,bounds_use,scale,inch2lon,error)
-int	verbose;
-int	argc;
-char	**argv;
-double	*bounds_use;
-double	*scale;
-double	*inch2lon;
-int	*error;
+int plot_init(	int	verbose, 
+		int	argc, 
+		char	**argv, 
+		double	*bounds_use, 
+		double	*scale, 
+		double	*inch2lon, 
+		int	*error);
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.12 2000-09-30 06:54:58 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.13 2000-10-11 01:00:12 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -275,11 +277,9 @@ int	*error;
 }
 /*--------------------------------------------------------------------------*/
 /* 	function plot_end ends the GMT plotting. */
-int plot_end(verbose,error)
-int	verbose;
-int	*error;
+int plot_end(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.12 2000-09-30 06:54:58 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.13 2000-10-11 01:00:12 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -340,9 +340,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int plot_exit(argc,argv)
-int	argc;
-char	**argv;
+int plot_exit(int argc, char **argv)
 {
 	char	*function_name = "plot_exit";
 	int	status = MB_SUCCESS;
@@ -357,11 +355,7 @@ char	**argv;
 }
 
 /*--------------------------------------------------------------------*/
-void set_colors(ncol,rd,gn,bl)
-int	ncol;
-int	*rd;
-int	*gn;
-int	*bl;
+void set_colors(int ncol, int *rd, int *gn, int *bl)
 {
 	ncolor = ncol;
 	red = rd;
@@ -371,9 +365,7 @@ int	*bl;
 }
 
 /*--------------------------------------------------------------------*/
-void plot(x,y,ipen)
-double x,y;
-int ipen;
+void plot(double x, double y, int ipen)
 {
 	double	xx, yy;
 #ifdef GMT3_0
@@ -385,15 +377,13 @@ int ipen;
 	return;
 }
 /*--------------------------------------------------------------------*/
-void setline(linewidth)
-int linewidth;
+void setline(int linewidth)
 {
         ps_setline(linewidth);
         return;
 }
 /*--------------------------------------------------------------------*/
-void newpen(ipen)
-int ipen;
+void newpen(int ipen)
 {
 	if (ipen > -1 && ipen < ncolor)
 		{
@@ -409,10 +399,7 @@ int ipen;
 	return;
 }
 /*--------------------------------------------------------------------*/
-void justify_string(height,string,s)
-double	height;
-char	*string;
-double	*s;
+void justify_string(double height, char *string, double *s)
 {
 	int	len;
 
@@ -425,12 +412,7 @@ double	*s;
 	return;
 }
 /*--------------------------------------------------------------------*/
-void plot_string(x,y,hgt,angle,label)
-double	x;
-double	y;
-double	hgt;
-double	angle;
-char	*label;
+void plot_string(double x, double y, double hgt, double angle, char *label)
 {
 	int	point;
 	double	height;
