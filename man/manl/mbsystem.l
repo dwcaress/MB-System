@@ -71,6 +71,9 @@ These are the current MB-system programs:
  		beams from a multibeam data file.
  \fBmbgrid\fP:  Grid bathymetry, amplitude, and sidescan 
  		data from multibeam data files. 
+ \fBmbhistogram\fP:  Obtain histogram of bathymetry, 
+ 		amplitude, or sidescan data from
+  		multibeam data files.
  \fBmbinfo\fP:  Output some basic statistics of 
  		multibeam data files. 
  \fBmblevitus\fP:  Create a water velocity profile 
