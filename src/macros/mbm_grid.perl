@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 4.0 1999-06-25 17:53:53 caress Exp $
+#    $Id: mbm_grid.perl,v 4.1 1999-10-21 20:42:32 caress Exp $
 #
 #    Copyright (c) 1999 by
 #    D. W. Caress (caress@mbari.org)
@@ -53,10 +53,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 4.0 1999-06-25 17:53:53 caress Exp $
+#   $Id: mbm_grid.perl,v 4.1 1999-10-21 20:42:32 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1999/06/25  17:53:53  caress
+# Initial version.
+#
 #
 $program_name = "mbm_grid";
 
@@ -473,6 +476,10 @@ if ($datatype > 2)
  		{
  		printf FCMD "\t-Z$bathdef \\\n";
  		}	
+	}
+if ($verbose)
+	{
+	printf FCMD "\t-V \\\n";
 	}
 
 # claim it's all over
