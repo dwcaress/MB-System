@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hydrob93.c	9/19/2002
- *	$Id: mbr_hydrob93.c,v 5.0 2002-09-19 22:18:06 caress Exp $
+ *	$Id: mbr_hydrob93.c,v 5.1 2002-09-20 17:45:43 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,11 @@
  * Date:	September 19, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2002/09/19 22:18:06  caress
+ * Initial Revision
+ * l.
+ * l
+ *
  *
  *
  *
@@ -73,7 +78,7 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hydrob93.c,v 5.0 2002-09-19 22:18:06 caress Exp $";
+static char res_id[]="$Id: mbr_hydrob93.c,v 5.1 2002-09-20 17:45:43 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error)
@@ -237,8 +242,8 @@ int mbr_info_hydrob93(int verbose,
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
-	*beamwidth_xtrack = 4.0;
-	*beamwidth_ltrack = 4.0;
+	*beamwidth_xtrack = 5.0;
+	*beamwidth_ltrack = 5.0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
