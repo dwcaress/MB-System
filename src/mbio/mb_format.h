@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.13 2003-03-10 20:04:45 caress Exp $
+ *    $Id: mb_format.h,v 5.14 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2001, 2002 by
+ *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2003/03/10 20:04:45  caress
+ * Added mr1pr library.
+ *
  * Revision 5.12  2002/09/19 22:19:00  caress
  * Release 5.0.beta23
  *
@@ -202,7 +205,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2003-03-10 20:04:45 $ $Revision: 5.13 $";
+static char mb_format_updatedate[] = "$Date: 2003-04-17 21:05:23 $ $Revision: 5.14 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0

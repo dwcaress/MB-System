@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.h	4/8/2002
- *	$Id: mbsys_netcdf.h,v 5.1 2002-05-29 23:41:49 caress Exp $
+ *	$Id: mbsys_netcdf.h,v 5.2 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	April 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/05/29 23:41:49  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.0  2002/05/02 03:56:34  caress
  * Release 5.0.beta17
  *

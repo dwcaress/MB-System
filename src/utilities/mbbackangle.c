@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.6 2002-09-19 00:28:12 caress Exp $
+ *    $Id: mbbackangle.c,v 5.7 2003-04-17 21:17:10 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2002 by
+ *    Copyright (c) 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/19 00:28:12  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.5  2002/09/07 04:49:23  caress
  * Added slope mode option to mb_process.
  *
@@ -121,7 +124,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.6 2002-09-19 00:28:12 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.7 2003-04-17 21:17:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hypc8101.c	8/8/94
- *	$Id: mbr_hypc8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $
+ *	$Id: mbr_hypc8101.c,v 5.7 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1998, 2000, 2002 by
+ *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/01/15 20:51:48  caress
+ * Release 5.0.beta28
+ *
  * Revision 5.5  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -104,7 +107,7 @@ int mbr_wt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_register_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -234,7 +237,7 @@ int mbr_info_hypc8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_info_hypc8101";
 	int	status = MB_SUCCESS;
 
@@ -303,7 +306,7 @@ int mbr_info_hypc8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hypc8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_alm_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

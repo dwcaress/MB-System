@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 5.5 2002-08-21 00:51:54 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.6 2003-04-17 21:11:18 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
+ *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/08/21 00:51:54  caress
+ * Fixed label displays for command line loading.
+ *
  * Revision 5.4  2002/04/06 02:53:15  caress
  * Release 5.0.beta16
  *

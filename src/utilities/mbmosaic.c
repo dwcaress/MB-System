@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.14 2002-11-14 03:52:25 caress Exp $
+ *    $Id: mbmosaic.c,v 5.15 2003-04-17 21:18:57 caress Exp $
  *
- *    Copyright (c) 1997, 2000, 2002 by
+ *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2002/11/14 03:52:25  caress
+ * Release 5.0.beta27
+ *
  * Revision 5.13  2002/11/12 07:23:58  caress
  * Added mb_memory_clear() calls.
  *
@@ -157,7 +160,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.14 2002-11-14 03:52:25 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.15 2003-04-17 21:18:57 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -1408,8 +1411,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
 
 			      /* process if in region of interest */
 			      if (ix >= 0 
@@ -1478,8 +1481,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    if (ss[ib] > 0.0)
 			      {
 			      /* get position in grid */
-			      ix = (sslon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (sslat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (sslon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (sslat[ib] - wbnd[2] + 0.5*dy)/dy;
 			      
 			      /* process if in region of interest */
 			      if (ix >= 0 
@@ -1739,8 +1742,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
 
 			      /* process if in region of interest */
 			      if (ix >= 0 
@@ -1823,8 +1826,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    if (ss[ib] > 0.0)
 			      {
 			      /* get position in grid */
-			      ix = (sslon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (sslat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (sslon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (sslat[ib] - wbnd[2] + 0.5*dy)/dy;
 			      
 			      /* process if in region of interest */
 			      if (ix >= 0 

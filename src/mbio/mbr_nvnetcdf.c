@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_nvnetcdf.c	5/4/02
- *	$Id: mbr_nvnetcdf.c,v 5.0 2002-05-29 23:39:23 caress Exp $
+ *	$Id: mbr_nvnetcdf.c,v 5.1 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	May 4, 2002
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2002/05/29 23:39:23  caress
+ * Release 5.0.beta18
+ *
  *
  *
  */
@@ -72,7 +75,7 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_nvnetcdf.c,v 5.0 2002-05-29 23:39:23 caress Exp $";
+static char res_id[]="$Id: mbr_nvnetcdf.c,v 5.1 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.28 2003-04-05 14:56:11 caress Exp $
+ *    $Id: mbprocess.c,v 5.29 2003-04-17 21:18:57 caress Exp $
  *
- *    Copyright (c) 2000, 2002 by
+ *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -36,6 +36,10 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.28  2003/04/05 14:56:11  caress
+ * Fixed bug where program bus faulted at mb_rt_init if it encountered a file not undergoing
+ * raytracing after raytracing has been applied.
+ *
  * Revision 5.27  2003/02/27 04:45:15  caress
  * Fixed handling of beam edits.
  *
@@ -192,7 +196,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.28 2003-04-05 14:56:11 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.29 2003-04-17 21:18:57 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -368,7 +372,14 @@ and mbedit edit save files.\n";
 	double	*velocity_sum = NULL;
 	char	*rt_svp;
 	double	ssv;
-	int	nedit = 0;
+
+	/* edit save file control variables */
+	int	esffile_open = MB_NO;
+	struct mb_esf_struct esf;
+	char	esffile[MB_PATH_MAXLINE];
+	char	notice[MB_PATH_MAXLINE];
+	
+	/*int	nedit = 0;
 	double	*edit_time_d = NULL;
 	int	*edit_beam = NULL;
 	int	*edit_action = NULL;
@@ -377,7 +388,8 @@ and mbedit edit save files.\n";
 	int	sbeam;
 	int	saction;
 	double	last_time_d;
-	int	insert, firstedit, lastedit;
+	int	insert, firstedit, lastedit;*/
+	
 	double	draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
 	double	ttime, range;
 	double	xx, zz, rr, vsum, vavg;
@@ -1207,7 +1219,7 @@ and mbedit edit save files.\n";
 	    /* allocate arrays for svp */
 	    if (nsvp > 1)
 		{
-		size = (nsvp+1)*sizeof(double);
+		size = (nsvp+2) * sizeof(double);
 		status = mb_malloc(verbose,size,&depth,&error);
 		if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,size,&velocity,&error);
@@ -1249,17 +1261,39 @@ and mbedit edit save files.\n";
 		{
 		if (buffer[0] != '#')
 		    {
+		    /* read the depth & sound speed pair */
 		    mm = sscanf(buffer,"%lf %lf",&depth[nsvp],&velocity[nsvp]);
 		
 		    /* output some debug values */
 		    if (verbose >= 5 && mm == 2)
-			    {
-			    fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
-			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-				    nsvp,depth[nsvp],nsvp,velocity[nsvp]);
-			    }
+			{
+			fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
+			    nsvp,depth[nsvp],nsvp,velocity[nsvp]);
+			}
+			
+		    /* update counter */
 		    if (mm == 2)
 			nsvp++;
+			
+		    /* check for nonzero initial depth & fix it if found */
+		    if (mm == 2 && nsvp == 1 && depth[0] != 0.0)
+		    	{
+			depth[1] = depth[0];
+			velocity[1] = velocity[0];
+			depth[0] = 0.0;
+			nsvp++;
+		
+			/* output some debug values */
+			if (verbose >= 5)
+			    {
+			    fprintf(stderr,"\ndbg5  Nonzero initial SVP depth fixed in program <%s>\n",program_name);
+			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
+				0,depth[0],0,velocity[0]);
+			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
+				1,depth[1],1,velocity[1]);
+			    }
+			}
 		    }
 		}
 	    fclose(tfp);
@@ -2086,130 +2120,21 @@ and mbedit edit save files.\n";
 	/* get edits */
 	if (process.mbp_edit_mode == MBP_EDIT_ON)
 	    {
-	    /* count the data points in the edit file */
-	    nedit = 0;
-	    firstedit = 0;
-	    fstat = stat(process.mbp_editfile, &file_status);
-	    if (fstat == 0 
-		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+	    status = mb_esf_open(verbose, process.mbp_editfile, 
+			    MB_YES, MB_NO, &esf, &error);
+	    if (status == MB_FAILURE) 
 		{
-		nedit = file_status.st_size 
-			/ (sizeof(double) + 2 * sizeof(int));
-		}
-	    
-	    /* allocate arrays for edit */
-	    if (nedit > 0)
-		{
-		status = mb_malloc(verbose, nedit *sizeof(double), &edit_time_d, &error);
-		status = mb_malloc(verbose, nedit *sizeof(int), &edit_beam, &error);
-		status = mb_malloc(verbose, nedit *sizeof(int), &edit_action, &error);
-		status = mb_malloc(verbose, nedit *sizeof(int), &edit_use, &error);
-		memset(edit_time_d, 0, nedit *sizeof(double));
-		memset(edit_beam, 0, nedit *sizeof(int));
-		memset(edit_action, 0, nedit *sizeof(int));
-		memset(edit_use, 0, nedit *sizeof(int));
-	
-		/* if error initializing memory then quit */
-		if (error != MB_ERROR_NO_ERROR)
-		    {
-		    mb_error(verbose,error,&message);
-		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-		    fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-		    exit(error);
-		    }		    
-		}
-	    }
-		
-	if (process.mbp_edit_mode == MBP_EDIT_ON
-	    && nedit > 0)
-	    {
-	    /* read the data points in the edit file */
-	    if ((tfp = fopen(process.mbp_editfile, "r")) == NULL) 
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to Open Edit Save File <%s> for reading\n",process.mbp_editfile);
+		fprintf(stderr,"\nUnable to resd from Edit Save File <%s>\n",process.mbp_editfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
 		}
 
-	    error = MB_ERROR_NO_ERROR;
-	    insert = 0;
-	    for (i=0;i<nedit && error == MB_ERROR_NO_ERROR;i++)
-		{
-		/* reset message */
-		if (verbose == 1 && (i+1) == 25000)
-		    fprintf(stderr, "\nSorted %d of %d old edits...\n", i+1, nedit);
-		else if (verbose == 1 && (i+1)%25000 == 0)
-		    fprintf(stderr, "Sorted %d of %d old edits...\n", i+1, nedit);
-
-		if (fread(&stime_d, sizeof(double), 1, tfp) != 1
-		    || fread(&sbeam, sizeof(int), 1, tfp) != 1
-		    || fread(&saction, sizeof(int), 1, tfp) != 1)
-		    {
-		    status = MB_FAILURE;
-		    error = MB_ERROR_EOF;
-		    }
-#ifdef BYTESWAPPED
-		else
-		    {
-		    mb_swap_double(&stime_d);
-		    sbeam = mb_swap_int(sbeam);
-		    saction = mb_swap_int(saction);
-		    }
-#endif
-    
-		/* insert into sorted array */
-		if (i > 0)
-		    {
-/*for (ii=0;ii<=i;ii++)
-fprintf(stderr,"          %d edit: %f %d %d\n",
-ii,edit_time_d[ii],edit_beam[ii],edit_action[ii]);*/
-		    if (insert > 0 && stime_d < edit_time_d[insert])
-			{
-			for (j = insert; j > 0 && stime_d < edit_time_d[j-1]; j--)
-			    insert--;
-			}
-		    else if (stime_d >= edit_time_d[insert])
-			{
-			for (j = insert; j < i && stime_d >= edit_time_d[j]; j++)
-			    insert++;
-			}
-		    if (insert < i)
-			{
-			memmove(&edit_time_d[insert+1], 
-				&edit_time_d[insert], 
-				sizeof(double) * (i - insert));
-			memmove(&edit_beam[insert+1], 
-				&edit_beam[insert], 
-				sizeof(int) * (i - insert));
-			memmove(&edit_action[insert+1], 
-				&edit_action[insert], 
-				sizeof(int) * (i - insert));
-			}
-		    }
-		edit_time_d[insert] = stime_d;
-		edit_beam[insert] = sbeam;
-		edit_action[insert] = saction;
-/*fprintf(stderr,"INSERT:%d i:%d edit: %f %d %d\n",
-insert, i,edit_time_d[insert],edit_beam[insert],edit_action[insert]);*/
-		}
-	    fclose(tfp);
-
-/*for (i=0;i<nedit;i++)
-fprintf(stderr,"i:%d edit: %f %d %d\n",
-i,edit_time_d[i],edit_beam[i],edit_action[i]);*/
-		
-	    /* set some beam editing starting values */
-	    firstedit = 0;
-	    lastedit = -1;
-	    last_time_d = 0.0;
     
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
-		    fprintf(stderr,"\n%d bathymetry edits read\n",nedit);
+		    fprintf(stderr,"\n%d bathymetry edits read\n",esf.nedit);
 		    }
 	    }
 
@@ -4175,74 +4100,14 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			
 		/* apply the saved edits */
 		if (process.mbp_edit_mode == MBP_EDIT_ON
-		    && nedit > 0
+		    && esf.nedit > 0
 		    && error == MB_ERROR_NO_ERROR
 		    && kind == MB_DATA_DATA)
 		    {			    
-		    /* find first and last edits for this ping */
-		    if (time_d <= last_time_d)
-			{
-			if (verbose > 0)
-			    fprintf(stderr, "\tEncountered duplicate or reverse ping times: beam flag search reset.\n");
-			firstedit = 0;
-			lastedit = -1;
-			}
-		    else
-			lastedit = firstedit - 1;
-		    last_time_d = time_d;
-		    for (j = firstedit; j < nedit && time_d >= edit_time_d[j]; j++)
-			{
-			if (edit_time_d[j] == time_d)
-			    {
-			    if (lastedit < firstedit)
-				firstedit = j;
-			    lastedit = j;
-			    }
-			}
-/*fprintf(stderr, "time_d:%f  edits: %d %d\n", 
-time_d, firstedit, lastedit);
-*/
-			
-		    /* apply edits */
-		    for (j=firstedit;j<=lastedit;j++)
-			{
-			if (edit_beam[j] >= 0 
-			    && edit_beam[j] < nbath)
-			    {
-			    /* apply edit */
-			    if (edit_action[j] == MBP_EDIT_FLAG
-				&& mb_beam_ok(beamflag[edit_beam[j]]))
-				{
-				beamflag[edit_beam[j]] 
-				    = MB_FLAG_FLAG + MB_FLAG_MANUAL;
-				edit_use[j]++;
-				}
-			    else if (edit_action[j] == MBP_EDIT_FILTER
-				&& mb_beam_ok(beamflag[edit_beam[j]]))
-				{
-				beamflag[edit_beam[j]] 
-				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
-				edit_use[j]++;
-				}
-			    else if (edit_action[j] == MBP_EDIT_UNFLAG
-				&& !mb_beam_ok(beamflag[edit_beam[j]]))
-				{
-				beamflag[edit_beam[j]] = MB_FLAG_NONE;
-				edit_use[j]++;
-				}
-			    else if (edit_action[j] == MBP_EDIT_ZERO)
-				{
-				beamflag[edit_beam[j]] = MB_FLAG_NULL;
-				edit_use[j]++;
-				}
-			    else
-				{
-				edit_use[j] += 100;
-				}
-			    }
-			else
-			    edit_use[j] += 1000;
-			}
+		    /* apply edits for this ping */
+		    status = mb_esf_apply(verbose, &esf, 
+		    		time_d, nbath, 
+				beamflag, &error);
 		    }
 
 		/* apply data cutting to bathymetry if specified */
@@ -4705,11 +4570,20 @@ j, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
 				}
 			}
 		}
-for (i=0;i<nedit;i++)
+for (i=0;i<esf.nedit;i++)
 {
-if (edit_use[i] != 1)
-fprintf(stderr,"i:%d edit: %f %d %d   %d\n",
-i,edit_time_d[i],edit_beam[i],edit_action[i],edit_use[i]);
+if (esf.edit_use[i] == 1000)
+fprintf(stderr,"BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n",
+i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
+else if (esf.edit_use[i] == 100)
+fprintf(stderr,"DUPLICATE BEAM FLAG:         i:%d edit: %f %d %d   %d\n",
+i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
+else if (esf.edit_use[i] != 1)
+fprintf(stderr,"BEAM FLAG NOT USED:          i:%d edit: %f %d %d   %d\n",
+i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
+/*else if (esf.edit_use[i] == 1)
+fprintf(stderr,"BEAM FLAG USED:              i:%d edit: %f %d %d   %d\n",
+i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);*/
 }
 
 	/* close the files */
@@ -4760,12 +4634,9 @@ i,edit_time_d[i],edit_beam[i],edit_action[i],edit_use[i]);
 		}
 
 	/* deallocate arrays for beam edits */
-	if (nedit > 0)
+	if (esf.nedit > 0)
 		{
-		mb_free(verbose,&(edit_time_d),&error);
-		mb_free(verbose,&(edit_beam),&error);
-		mb_free(verbose,&(edit_action),&error);
-		mb_free(verbose,&(edit_use),&error);
+		mb_esf_close(verbose,&esf,&error);
 		}
 
 	/* deallocate memory for data arrays */

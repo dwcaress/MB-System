@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.4 2002-08-28 01:32:45 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.5 2003-04-17 21:07:49 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/08/28 01:32:45  caress
+ * Finished first cut at man page.
+ *
  * Revision 5.3  2002/03/26 07:43:57  caress
  * Release 5.0.beta15
  *

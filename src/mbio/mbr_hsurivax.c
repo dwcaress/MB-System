@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsurivax.c	2/2/93
- *	$Id: mbr_hsurivax.c,v 5.6 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_hsurivax.c,v 5.7 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.5  2002/03/26 07:43:25  caress
  * Release 5.0.beta15
  *
@@ -135,7 +138,7 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsurivax(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsurivax.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_hsurivax.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_register_hsurivax";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -265,7 +268,7 @@ int mbr_info_hsurivax(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsurivax.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_hsurivax.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_info_hsurivax";
 	int	status = MB_SUCCESS;
 
@@ -334,7 +337,7 @@ int mbr_info_hsurivax(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsurivax(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsurivax.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbr_hsurivax.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_alm_hsurivax";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

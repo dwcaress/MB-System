@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.16 2003-04-16 16:47:41 caress Exp $
+ *    $Id: mb_process.h,v 5.17 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2000, 2002 by
+ *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -406,6 +406,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2003/04/16 16:47:41  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.15  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *

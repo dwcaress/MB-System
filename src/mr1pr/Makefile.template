@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  3/7/2003
-#	$Id: Makefile.template,v 5.0 2003-03-11 19:09:14 caress Exp $
+#	$Id: Makefile.template,v 5.1 2003-04-17 21:12:03 caress Exp $
 #
 #     Copyright (c) 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
 # Date:		March 7, 2003
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.0  2003/03/11 19:09:14  caress
+# Initial version.
+#
 #
 #
 #
@@ -52,15 +55,13 @@ clean:
 $(LIBDIR)/libmr1pr.a:	\
 		io.o \
 		iov1.o \
-		memalloc.o \
 		misc.o \
-		swapbytes.o 
+		memalloc.o  
 	$(ARCHIVE) $(LIBDIR)/libmr1pr.a \
 		io.o \
 		iov1.o \
-		memalloc.o \
 		misc.o \
-		swapbytes.o 
+		memalloc.o  
 	ranlib $(LIBDIR)/libmr1pr.a
 
 ### compile the source files
@@ -68,15 +69,18 @@ io.o:	io.c $(INCDIR)/mr1pr_defines.h
 	$(CC) -c $(CFLAGS) io.c
 iov1.o:	iov1.c $(INCDIR)/mr1pr_defines.h
 	$(CC) -c $(CFLAGS) iov1.c
-memalloc.o:	memalloc.c $(INCDIR)/mr1pr_defines.h
+misc.o:	misc.c $(INCDIR)/mr1pr_defines.h $(INCDIR)/mem.h
+	$(CC) -c $(CFLAGS) misc.c
+memalloc.o:	misc.c $(INCDIR)/mr1pr_defines.h $(INCDIR)/mem.h
 	$(CC) -c $(CFLAGS) memalloc.c
-swapbytes.o:	swapbytes.c $(INCDIR)/mr1pr_defines.h
-	$(CC) -c $(CFLAGS) swapbytes.c
 
 ### copy the include files to the include file directory
+$(INCDIR)/mem.h:	mem.h
+	cp mem.h $(INCDIR)/mem.h
+	chmod 664 $(INCDIR)/mem.h
 $(INCDIR)/mr1pr.h:	mr1pr.h
 	cp mr1pr.h $(INCDIR)/mr1pr.h
 	chmod 664 $(INCDIR)/mr1pr.h
-$(INCDIR)/mr1pr_defines.h:	mr1pr_defines.h
+$(INCDIR)/mr1pr_defines.h:	mr1pr_defines.h mr1pr.h
 	cp mr1pr_defines.h $(INCDIR)/mr1pr_defines.h
 	chmod 664 $(INCDIR)/mr1pr_defines.h

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_deall.c	2/3/93
- *    $Id: mb_mem_deall.c,v 5.2 2003-03-10 20:02:29 caress Exp $
+ *    $Id: mb_mem_deall.c,v 5.3 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/03/10 20:02:29  caress
+ * Added mr1pr library.
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -136,7 +139,7 @@
 /*--------------------------------------------------------------------*/
 int mb_mem_deall(int verbose, char *mbio_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_mem_deall.c,v 5.2 2003-03-10 20:02:29 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem_deall.c,v 5.3 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mb_mem_deall";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	1/21/93
- *    $Id: mb_coor_scale.c,v 5.1 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_coor_scale.c,v 5.2 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.0  2000/12/01 22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -103,7 +106,7 @@
 int mb_coor_scale(int verbose, double latitude, 
 			double *mtodeglon, double *mtodeglat)
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 5.1 2002-09-18 23:32:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 5.2 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_compare.c	11/19/98
- *    $Id: mb_compare.c,v 5.2 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_compare.c,v 5.3 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	November 19,  1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.1  2001/07/20 00:31:11  caress
  * Release 5.0.beta03
  *
@@ -42,7 +45,7 @@
 /* mbio include files */
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_compare.c,v 5.2 2002-09-18 23:32:59 caress Exp $";
+static char rcs_id[]="$Id: mb_compare.c,v 5.3 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_int_compare compares int values. */

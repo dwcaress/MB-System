@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hydrob93.c	9/19/2002
- *	$Id: mbr_hydrob93.c,v 5.1 2002-09-20 17:45:43 caress Exp $
+ *	$Id: mbr_hydrob93.c,v 5.2 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,9 @@
  * Date:	September 19, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/09/20 17:45:43  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.0  2002/09/19 22:18:06  caress
  * Initial Revision
  * l.
@@ -78,7 +81,7 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hydrob93.c,v 5.1 2002-09-20 17:45:43 caress Exp $";
+static char res_id[]="$Id: mbr_hydrob93.c,v 5.2 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error)

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbstripNaN.c        8/8/02
- *    $Id: mbstripnan.c,v 5.1 2002-08-21 00:57:11 caress Exp $
+ *    $Id: mbstripnan.c,v 5.2 2003-04-17 21:18:57 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    Mike McCann (mccann@mbari.org)
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -23,6 +23,9 @@
  * MBARI
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/08/21 00:57:11  caress
+ * Release 5.0.beta22
+ *
  * Revision 5.0  2002/08/10 07:00:21  caress
  * First version from Mike McCann.
  *

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_rsn8kmba.c,v 5.1 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_rsn8kmba.c,v 5.2 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2001, 2002 by
+ *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -77,7 +77,7 @@ int mbr_wt_rsn8kmba(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_rsn8kmba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_rsn8kmba.c,v 5.1 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_rsn8kmba.c,v 5.2 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_register_rsn8kmba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -207,7 +207,7 @@ int mbr_info_rsn8kmba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_rsn8kmba.c,v 5.1 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_rsn8kmba.c,v 5.2 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_info_rsn8kmba";
 	int	status = MB_SUCCESS;
 
@@ -276,7 +276,7 @@ int mbr_info_rsn8kmba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_rsn8kmba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_rsn8kmba.c,v 5.1 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_rsn8kmba.c,v 5.2 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_alm_rsn8kmba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

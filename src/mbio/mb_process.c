@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.24 2003-04-16 16:47:41 caress Exp $
+ *    $Id: mb_process.c,v 5.25 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2000, 2002 by
+ *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2003/04/16 16:47:41  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.23  2002/09/07 04:48:34  caress
  * Added slope mode option to mb_process.
  *
@@ -122,7 +125,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.24 2003-04-16 16:47:41 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.25 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.11 2002-08-28 01:32:45 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.12 2003-04-17 21:07:49 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/08/28 01:32:45  caress
+ * Finished first cut at man page.
+ *
  * Revision 5.10  2002/03/26 07:43:57  caress
  * Release 5.0.beta15
  *
@@ -113,7 +116,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.11 2002-08-28 01:32:45 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.12 2003-04-17 21:07:49 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";

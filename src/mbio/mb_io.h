@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.13 2002-10-15 18:34:58 caress Exp $
+ *    $Id: mb_io.h,v 5.14 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2002/10/15 18:34:58  caress
+ * Release 5.0.beta25
+ *
  * Revision 5.12  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *

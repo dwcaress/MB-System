@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.6 2002-10-02 23:56:06 caress Exp $
+ *    $Id: mbclean.c,v 5.7 2003-04-17 21:17:10 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2001 by
+ *    Copyright (c) 1993, 1994, 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -54,6 +54,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/10/02 23:56:06  caress
+ * Release 5.0.beta24
+ *
  * Revision 5.5  2002/08/21 00:57:11  caress
  * Release 5.0.beta22
  *
@@ -228,7 +231,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.6 2002-10-02 23:56:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.7 2003-04-17 21:17:10 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -249,10 +252,12 @@ main (int argc, char **argv)
 	int	read_datalist = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
 	char	swathfile[MB_PATH_MAXLINE];
+	char	swathfileread[MB_PATH_MAXLINE];
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
+	int	formatread;
 	int	variable_beams;
 	int	traveltime;
 	int	beam_flagging; 
@@ -282,6 +287,7 @@ main (int argc, char **argv)
 	int	kind;
 	struct mbclean_ping_struct ping[3];
 	int	nrec, irec;
+	int	pingsread;
 	struct bad_struct bad[2];
 	int	find_bad;
 	int	nfiletot = 0;
@@ -360,26 +366,9 @@ main (int argc, char **argv)
 	double	slope;
 
 	/* save file control variables */
-	int	sofile_open = MB_NO;
-	char	sifile[MB_PATH_MAXLINE];
-	char	sofile[MB_PATH_MAXLINE];
-	FILE	*sifp;
-	FILE	*sofp;
-	struct stat file_status;
-	int	fstat;
-	char	command[MB_PATH_MAXLINE];
-	double	stime_d;
-	int	sbeam;
-	int	saction;
-	int	neditsave;
-	double	*editsave_time_d;
-	int	*editsave_beam;
-	int	*editsave_action;
-	int	*editcount;
-	int	insert;
-	char	notice[MB_PATH_MAXLINE];
-	int	apply;
-	int	firstedit, lastedit;
+	int	esffile_open = MB_NO;
+	char	esffile[MB_PATH_MAXLINE];
+	struct mb_esf_struct esf;
 
 	/* processing variables */
 	int	read_data;
@@ -412,6 +401,7 @@ main (int argc, char **argv)
 	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
+	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:QqU:u:X:x:")) != -1)
@@ -643,10 +633,14 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
+	/* check for "fast bathymetry" or "fbt" file */
+	strcpy(swathfileread, swathfile);
+	formatread = format;
+	mb_get_fbt(verbose, swathfileread, &formatread, &error);
 
 	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
-		verbose,swathfile,format,pings,lonflip,bounds,
+		verbose,swathfileread,formatread,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
@@ -678,7 +672,7 @@ main (int argc, char **argv)
 	/* give the statistics */
 	if (verbose >= 0)
 		{
-		fprintf(stderr,"\nProcessing %s\n",swathfile);
+		fprintf(stderr,"\nProcessing %s\n",swathfileread);
 		}
 
 	/* allocate memory for data arrays */
@@ -707,7 +701,6 @@ main (int argc, char **argv)
 	ss = NULL;
 	ssacrosstrack = NULL;
 	ssalongtrack = NULL;
-	editcount = NULL;
 	status = mb_malloc(verbose,beams_amp*sizeof(double),
 			&amp,&error);
 	status = mb_malloc(verbose,pixels_ss*sizeof(double),
@@ -718,8 +711,6 @@ main (int argc, char **argv)
 			&ssalongtrack,&error);
 	status = mb_malloc(verbose,4*beams_bath*sizeof(double),
 			&list,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
-			&editcount,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -734,139 +725,30 @@ main (int argc, char **argv)
 	/* now deal with old edit save file */
 	if (status == MB_SUCCESS)
 	    {
-	    /* check if old edit save file exists */
-	    sprintf(sofile, "%s.esf", swathfile);
-	    fstat = stat(sofile, &file_status);
-	    if (fstat != 0
-		|| (file_status.st_mode & S_IFMT) == S_IFDIR)
-		{
-		sprintf(sofile, "%s.mbesf", swathfile);
-		fstat = stat(sofile, &file_status);
-		}
-	    if (fstat == 0
-		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
-		{
-		/* get temporary file name */
-		sprintf(sifile, "%s.esf.tmp", swathfile);
+	    /* reset message */
+	    fprintf(stderr, "Sorting old edits...\n");
 
-		/* copy old edit save file to tmp file */
-		sprintf(command, "cp %s %s\n", 
-		    sofile, sifile);
-		system(command);
-    
-		/* get number of old edits */
-		neditsave = file_status.st_size
-			     / (sizeof(double) + 2 * sizeof(int));
-    
-		/* allocate arrays for old edits */
-		if (neditsave > 0)
+	    /* handle esf edits */
+	    status = mb_esf_load(verbose, swathfile, 
+			    MB_YES, MB_YES, esffile, &esf, &error);
+	    if (status == MB_SUCCESS
+		    && esf.esffp != NULL)
+		    esffile_open = MB_YES;
+	    if (status == MB_FAILURE 
+		    && error == MB_ERROR_OPEN_FAIL)
 		    {
-		    status = mb_malloc(verbose,neditsave *sizeof(double),&editsave_time_d,&error);
-		    status = mb_malloc(verbose,neditsave *sizeof(int),&editsave_beam,&error);
-		    status = mb_malloc(verbose,neditsave *sizeof(int),&editsave_action,&error);
-    
-		    /* if error initializing memory then quit */
-		    if (error != MB_ERROR_NO_ERROR)
-			{
-			error = MB_ERROR_NO_ERROR;
-			fprintf(stderr, "\nUnable to allocate memory for %d old edit saves\n",
-			    neditsave);
-			neditsave = 0;
-			}	
-		    }	
-	    
-		/* open and read the old edit file */
-		if (neditsave > 0
-		    && (sifp = fopen(sifile,"r")) == NULL)
-		    {
-		    neditsave = 0;
-		    fprintf(stderr, "\nUnable to copy and open old edit save file %s\n",
-			sifile);
+		    esffile_open = MB_NO;
+		    fprintf(stderr, "\nUnable to open new edit save file %s\n", 
+			esf.esffile);
 		    }
-		else if (neditsave > 0)
+	    else if (status == MB_FAILURE 
+		    && error == MB_ERROR_MEMORY_FAIL)
 		    {
-		    /* reset message */
-		    fprintf(stderr, "Sorting %d old edits...\n", neditsave);
-
-		    error = MB_ERROR_NO_ERROR;
-		    insert = 0;
-		    for (i=0;i<neditsave && error == MB_ERROR_NO_ERROR;i++)
-			{
-			/* reset message */
-			if ((i+1)%10000 == 0)
-			    {
-			    fprintf(stderr, "%d of %d old edits sorted...\n", i+1, neditsave);
-			    }
-
-			if (fread(&stime_d, sizeof(double), 1, sifp) != 1
-			    || fread(&sbeam, sizeof(int), 1, sifp) != 1
-			    || fread(&saction, sizeof(int), 1, sifp) != 1)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_EOF;
-			    }
-#ifdef BYTESWAPPED
-			else
-			    {
-			    mb_swap_double(&stime_d);
-			    sbeam = mb_swap_int(sbeam);
-			    saction = mb_swap_int(saction);
-			    }
-#endif
-
-			/* insert into sorted array */
-			if (i > 0)
-			    {
-			    if (stime_d < editsave_time_d[insert - 1])
-				{
-				for (j = insert - 1; j >= 0 && stime_d < editsave_time_d[j]; j--)
-				    insert--;
-				}
-			    else if (stime_d >= editsave_time_d[insert - 1])
-				{
-				for (j = insert; j < i && stime_d >= editsave_time_d[j]; j++)
-				    insert++;
-				}
-			    if (insert < i)
-				{
-				memmove(&editsave_time_d[insert+1], 
-					&editsave_time_d[insert], 
-					sizeof(double) * (i - insert));
-				memmove(&editsave_beam[insert+1], 
-					&editsave_beam[insert], 
-					sizeof(int) * (i - insert));
-				memmove(&editsave_action[insert+1], 
-					&editsave_action[insert], 
-					sizeof(int) * (i - insert));
-				}
-			    }
-			editsave_time_d[insert] = stime_d;
-			editsave_beam[insert] = sbeam;
-			editsave_action[insert] = saction;
-			}
-		    fclose(sifp);
+		    esffile_open = MB_NO;
+		    fprintf(stderr, "\nUnable to allocate memory for edits in esf file %s\n", esf.esffile);
 		    }
-		}
 	    }
-		
-	/* now deal with new edit save file */
-	sofile_open = MB_NO;
-	if (status == MB_SUCCESS)
-	    {
-	    /* get edit save file exists */
-	    sprintf(sofile, "%s.esf", swathfile);
-		
-	    /* open the edit save file */
-	    if ((sofp = fopen(sofile,"w")) != NULL)
-		sofile_open = MB_YES;
-	    else
-		{
-		sofile_open = MB_NO;
-		fprintf(stderr, "\nUnable to open new edit save file %s\n", 
-		    sofile);
-		}
-	    }
-
+ 
 	/* read */
 	done = MB_NO;
 	start = 0;
@@ -878,7 +760,7 @@ main (int argc, char **argv)
 	    /* read next record */
 	    error = MB_ERROR_NO_ERROR;
 	    status = mb_get(verbose,
-			    mbio_ptr,&kind,&pings,
+			    mbio_ptr,&kind,&pingsread,
 			    ping[nrec].time_i,&ping[nrec].time_d,
 			    &ping[nrec].navlon,&ping[nrec].navlat,
 			    &ping[nrec].speed,&ping[nrec].heading,
@@ -938,86 +820,9 @@ main (int argc, char **argv)
 		    }
 		    
 		/* apply saved edits */
-		if (neditsave > 0)
-			{
-		    	/* find first and last edits for this ping */
-			firstedit = 0;
-		    	lastedit = firstedit - 1;
-		    	for (j = firstedit; j < neditsave && ping[nrec].time_d >= editsave_time_d[j]; j++)
-				{
-				if (editsave_time_d[j] == ping[nrec].time_d)
-				    {
-				    if (lastedit < firstedit)
-					firstedit = j;
-				    lastedit = j;
-				    }
-				}
-			
-		    	/* apply relevant edits, if any, to this ping */
-		    	if (lastedit > -1)
-				{
-				for (k=0;k<ping[nrec].beams_bath;k++)
-				    editcount[k] = MBCLEAN_NOACTION;
-				for (j=firstedit;j<=lastedit;j++)
-				    {
-				    editcount[editsave_beam[j]] = editsave_action[j];
-				    }
-				for (k=0;k<ping[nrec].beams_bath;k++)
-				    {
-				    /* apply edit */
-				    apply = MB_NO;
-				    if (editcount[k] == MBP_EDIT_FLAG
-					&& mb_beam_ok(ping[nrec].beamflag[k]))
-					{
-					ping[nrec].beamflag[k] 
-					    = MB_FLAG_FLAG + MB_FLAG_MANUAL;
-					apply = MB_YES;
-					}
-			    	    else if (editcount[k] == MBP_EDIT_FILTER
-					&& mb_beam_ok(ping[nrec].beamflag[k]))
-					{
-					ping[nrec].beamflag[k]
-					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
-					apply = MB_YES;
-					}
-			    	    else if (editcount[k] == MBP_EDIT_UNFLAG
-					&& !mb_beam_ok(ping[nrec].beamflag[k]))
-					{
-					ping[nrec].beamflag[k] = MB_FLAG_NONE;
-					apply = MB_YES;
-					}
-				    else if (editcount[k] == MBP_EDIT_ZERO
-					&& ping[nrec].beamflag[k] != MB_FLAG_NULL)
-					{
-					ping[nrec].beamflag[k] = MB_FLAG_NULL;
-					apply = MB_YES;
-					}
-				
-				    /* write saved edit to current edit save file */
-				    if (apply == MB_YES)
-				    	{
-					if (editcount[k] == MBP_EDIT_FLAG
-						|| editcount[k] == MBP_EDIT_FILTER)
-						{
-						nflagesf++;
-						nflag++;
-						}
-					else if (editcount[k] == MBP_EDIT_UNFLAG)
-						{
-						nunflagesf++;
-						nunflag++;
-						}
-					else if (editcount[k] == MBP_EDIT_ZERO)
-						{
-						nzeroesf++;
-						nzero++;
-						}
-					mbclean_save_edit(verbose, sofp, ping[nrec].time_d, k, editcount[k], &error);
-					}
-				    }
-				}
-			}
-		
+		status = mb_esf_apply(verbose, &esf, 
+		    		ping[nrec].time_d, ping[nrec].beams_bath, 
+				ping[nrec].beamflag, &error);
 
 		/* update counters */
 		ndata++;
@@ -1064,14 +869,14 @@ main (int argc, char **argv)
 					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nouter++;
 				nflag++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
 				}
 			    else
 				{
 				ping[irec].beamflag[i] = MB_FLAG_NULL;
 				nouter++;
 				nzero++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
 				}
 			    }
 			j = ping[irec].beams_bath - i - 1;
@@ -1094,14 +899,14 @@ main (int argc, char **argv)
 				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nouter++;
 				nflag++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, j, MBP_EDIT_FILTER, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, j, MBP_EDIT_FILTER, &error);
 				}
 			    else
 				{
 				ping[irec].beamflag[j] = MB_FLAG_NULL;
 				nouter++;
 				nzero++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, j, MBP_EDIT_ZERO, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, j, MBP_EDIT_ZERO, &error);
 				}
 			    }
 			}
@@ -1133,14 +938,14 @@ main (int argc, char **argv)
 					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nrange++;
 				nflag++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
 				}
 			    else
 				{
 				ping[irec].beamflag[i] = MB_FLAG_NULL;
 				nrange++;
 				nzero++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
 				}
 			    }
 			}
@@ -1205,7 +1010,8 @@ main (int argc, char **argv)
 				    ping[irec].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				    nrail++;
 				    nflag++;
-				    mbclean_save_edit(verbose, sofp, ping[irec].time_d, j, MBP_EDIT_FILTER, &error);
+fprintf(stderr,"EDIT SAVED: %f %d %d\n",ping[irec].time_d, i, MBP_EDIT_FILTER);
+				    mb_esf_save(verbose, &esf, ping[irec].time_d, j, MBP_EDIT_FILTER, &error);
 				    }
 				}
 			    else
@@ -1215,7 +1021,7 @@ main (int argc, char **argv)
 				    ping[irec].beamflag[j] = MB_FLAG_NULL;
 				    nrail++;
 				    nzero++;
-				    mbclean_save_edit(verbose, sofp, ping[irec].time_d, j, MBP_EDIT_ZERO, &error);
+				    mb_esf_save(verbose, &esf, ping[irec].time_d, j, MBP_EDIT_ZERO, &error);
 				    }
 				}
 			    }
@@ -1242,7 +1048,7 @@ main (int argc, char **argv)
 				    ping[irec].beamflag[k] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				    nrail++;
 				    nflag++;
-				    mbclean_save_edit(verbose, sofp, ping[irec].time_d, k, MBP_EDIT_FILTER, &error);
+				    mb_esf_save(verbose, &esf, ping[irec].time_d, k, MBP_EDIT_FILTER, &error);
 				    }
 				}
 			    else
@@ -1252,7 +1058,7 @@ main (int argc, char **argv)
 				    ping[irec].beamflag[k] = MB_FLAG_NULL;
 				    nrail++;
 				    nzero++;
-				    mbclean_save_edit(verbose, sofp, ping[irec].time_d, k, MBP_EDIT_FILTER, &error);
+				    mb_esf_save(verbose, &esf, ping[irec].time_d, k, MBP_EDIT_FILTER, &error);
 				    }
 				}
 			    }
@@ -1328,14 +1134,14 @@ main (int argc, char **argv)
 					ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 					nfraction++;
 					nflag++;
-					mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+					mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
 					}
 				    else
 					{
 					ping[irec].beamflag[i] = MB_FLAG_NULL;
 					nfraction++;
 					nzero++;
-					mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+					mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
 					}
 				    }
 				}
@@ -1362,14 +1168,14 @@ main (int argc, char **argv)
 					ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 					ndeviation++;
 					nflag++;
-					mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+					mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
 					}
 				    else
 					{
 					ping[irec].beamflag[i] = MB_FLAG_NULL;
 					ndeviation++;
 					nzero++;
-					mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+					mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
 					}
 				    }
 				}
@@ -1419,8 +1225,8 @@ main (int argc, char **argv)
 							MB_FLAG_FLAG + MB_FLAG_FILTER;
 						nbad++;
 						nflag = nflag + 2;
-						mbclean_save_edit(verbose, sofp, ping[j].time_d, k, MBP_EDIT_FILTER, &error);
-						mbclean_save_edit(verbose, sofp, ping[1].time_d, i, MBP_EDIT_FILTER, &error);
+						mb_esf_save(verbose, &esf, ping[j].time_d, k, MBP_EDIT_FILTER, &error);
+						mb_esf_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_FILTER, &error);
 						}
 					    else if (mode == MBCLEAN_FLAG_ONE)
 						{
@@ -1434,7 +1240,7 @@ main (int argc, char **argv)
 						    bad[1].flag = MB_NO;
 						    ping[j].beamflag[k] 
 							= MB_FLAG_FLAG + MB_FLAG_FILTER;
-						    mbclean_save_edit(verbose, sofp, ping[j].time_d, k, MBP_EDIT_FILTER, &error);
+						    mb_esf_save(verbose, &esf, ping[j].time_d, k, MBP_EDIT_FILTER, &error);
 						    }
 						else
 						    {
@@ -1445,7 +1251,7 @@ main (int argc, char **argv)
 						    bad[1].flag = MB_NO;
 						    ping[1].beamflag[i] 
 							= MB_FLAG_FLAG + MB_FLAG_FILTER;
-						    mbclean_save_edit(verbose, sofp, ping[1].time_d, i, MBP_EDIT_FILTER, &error);
+						    mb_esf_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_FILTER, &error);
 						    }
 						nbad++;
 						nflag++;
@@ -1464,8 +1270,8 @@ main (int argc, char **argv)
 						ping[1].beamflag[i] = MB_FLAG_NULL;
 						nbad++;
 						nzero = nzero + 2;
-						mbclean_save_edit(verbose, sofp, ping[j].time_d, k, MBP_EDIT_ZERO, &error);
-						mbclean_save_edit(verbose, sofp, ping[1].time_d, i, MBP_EDIT_ZERO, &error);
+						mb_esf_save(verbose, &esf, ping[j].time_d, k, MBP_EDIT_ZERO, &error);
+						mb_esf_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_ZERO, &error);
 						}
 					    else if (mode == MBCLEAN_ZERO_ONE)
 						{
@@ -1478,7 +1284,7 @@ main (int argc, char **argv)
 						    bad[0].bath = ping[j].bath[k];
 						    bad[1].flag = MB_NO;
 						    ping[j].beamflag[k] = MB_FLAG_NULL;
-						    mbclean_save_edit(verbose, sofp, ping[j].time_d, k, MBP_EDIT_ZERO, &error);
+						    mb_esf_save(verbose, &esf, ping[j].time_d, k, MBP_EDIT_ZERO, &error);
 						    }
 						else
 						    {
@@ -1489,7 +1295,7 @@ main (int argc, char **argv)
 						    bad[1].flag = MB_NO;
     
 						    ping[1].beamflag[i] = MB_FLAG_NULL;
-						    mbclean_save_edit(verbose, sofp, ping[1].time_d, i, MBP_EDIT_ZERO, &error);
+						    mb_esf_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_ZERO, &error);
 						    }
 						nbad++;
 						nzero++;
@@ -1572,7 +1378,7 @@ main (int argc, char **argv)
 				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nmin++;
 				nflag++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
 				}
 			    else if (mb_beam_ok(ping[irec].beamflag[i]))
 				{
@@ -1590,7 +1396,7 @@ main (int argc, char **argv)
 				ping[irec].beamflag[i] = MB_FLAG_NULL;
 				nmin++;
 				nzero++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
 				}
 			    }
 			}
@@ -1624,7 +1430,7 @@ main (int argc, char **argv)
 				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nmin++;
 				nflag++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
 				}
 			    else if (mb_beam_ok(ping[irec].beamflag[i]))
 				{
@@ -1642,7 +1448,7 @@ main (int argc, char **argv)
 				ping[irec].beamflag[i] = MB_FLAG_NULL;
 				nmin++;
 				nzero++;
-				mbclean_save_edit(verbose, sofp, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+				mb_esf_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
 				}
 			    }
 			}
@@ -1681,28 +1487,39 @@ main (int argc, char **argv)
 
 	/* close the files */
 	status = mb_close(verbose,&mbio_ptr,&error);
-	if (sofile_open == MB_YES)
+
+/*for (i=0;i<esf.nedit;i++)
+{
+if (esf.edit_use[i] == 1000)
+fprintf(stderr,"BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n",
+i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
+else if (esf.edit_use[i] == 100)
+fprintf(stderr,"DUPLICATE BEAM FLAG: i:%d edit: %f %d %d   %d\n",
+i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
+else if (esf.edit_use[i] == 1)
+fprintf(stderr,"BEAM FLAG USED:      i:%d edit: %f %d %d   %d\n",
+i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
+else if (esf.edit_use[i] != 1)
+fprintf(stderr,"BEAM FLAG NOT USED:  i:%d edit: %f %d %d   %d\n",
+i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
+}*/
+
+	/* close edit save file */
+	status = mb_esf_close(verbose, &esf, &error);
+	
+	/* update mbprocess parameter file */
+	if (esffile_open == MB_YES)
 	    {
-	    /* close edit save file */
-	    fclose(sofp);
-	    sofile_open = MB_NO;
-	    
 	    /* update mbprocess parameter file */
 	    status = mb_pr_update_format(verbose, swathfile, 
 			MB_YES, format, 
 			&error);
 	    status = mb_pr_update_edit(verbose, swathfile, 
-			MBP_EDIT_ON, sofile, 
+			MBP_EDIT_ON, esffile, 
 			&error);
 	    }
 
 	/* free the memory */
-	if (neditsave > 0)
-	    {
-	    mb_free(verbose,&editsave_time_d,&error);
-	    mb_free(verbose,&editsave_beam,&error);
-	    mb_free(verbose,&editsave_action,&error);
-	    }
 	for (j=0;j<3;j++)
 		{
 		mb_free(verbose,&ping[j].beamflag,&error); 
@@ -1717,7 +1534,6 @@ main (int argc, char **argv)
 	mb_free(verbose,&ssacrosstrack,&error); 
 	mb_free(verbose,&ssalongtrack,&error); 
 	mb_free(verbose,&list,&error); 
-	mb_free(verbose,&editcount,&error); 
 
 	/* check memory */
 	if (verbose >= 4)
@@ -1744,7 +1560,7 @@ main (int argc, char **argv)
 	if (verbose >= 0)
 		{
 		fprintf(stderr,"%d bathymetry data records processed\n",ndata);
-		if (neditsave > 0)
+		if (esf.nedit > 0)
 			{
 			fprintf(stderr,"%d beams flagged in old esf file\n",nflagesf);
 			fprintf(stderr,"%d beams unflagged in old esf file\n",nunflagesf);
@@ -1842,8 +1658,8 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 		fprintf(stderr,"dbg2       beam:            %d\n",beam);
 		fprintf(stderr,"dbg2       action:          %d\n",action);
 		}
-		
 	/* write out the edit */
+fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);
 	if (sofp != NULL)
 	    {		
 #ifdef BYTESWAPPED

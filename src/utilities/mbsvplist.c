@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsvplist.c	1/3/2001
- *    $Id: mbsvplist.c,v 5.2 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbsvplist.c,v 5.3 2003-04-17 21:18:57 caress Exp $
  *
- *    Copyright (c) 2001 by
+ *    Copyright (c) 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -29,6 +29,9 @@
  * Date:	January 3,  2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/03/22 21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -57,10 +60,10 @@ char	*getenv();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsvplist.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbsvplist.c,v 5.3 2003-04-17 21:18:57 caress Exp $";
 	static char program_name[] = "mbsvplist";
 	static char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
-	static char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -V]";
+	static char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -V -Z]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -123,6 +126,7 @@ main (int argc, char **argv)
 	int	svp_loaded = MB_NO;
 	int	svp_new = MB_NO;
 	int	svp_duplicate;
+	int	svp_force_zero;
 	int	svp_file_output;
 	int	svp_count = 0;
 	double	svp_time_d;
@@ -137,6 +141,8 @@ main (int argc, char **argv)
 	FILE	*svp_fp;
 	int	svp_read, svp_read_tot;
 	int	svp_written, svp_written_tot;
+	int	svp_depthzero_reset;
+	double	svp_depthzero;
 
 	time_t	right_now;
 	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -154,17 +160,18 @@ main (int argc, char **argv)
 	bounds[3] = 90.0;
 	svp_duplicate = MB_NO;
 	svp_file_output = MB_NO;
+	svp_force_zero = MB_NO;
 	svp_count = 0;
 	svp_read = 0;
 	svp_written = 0;
 	svp_read_tot = 0;
 	svp_written_tot = 0;
 
-	/* set default input to stdin */
-	strcpy (read_file, "stdin");
+	/* set default input to datalist.mb-1 */
+	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "DdF:f:I:i:OoVvHh")) != -1)
+	while ((c = getopt(argc, argv, "DdF:f:I:i:OoZzVvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -192,6 +199,10 @@ main (int argc, char **argv)
 		case 'O':
 		case 'o':
 			svp_file_output = MB_YES;
+			break;
+		case 'Z':
+		case 'z':
+			svp_force_zero = MB_YES;
 			break;
 		case '?':
 			errflg++;
@@ -380,6 +391,18 @@ main (int argc, char **argv)
 						svp_depth, svp_velocity, 
 						&error);
 						
+			/* force zero depth if requested */
+			svp_depthzero_reset = MB_NO;
+			if (status == MB_SUCCESS
+				&& nsvp > 0
+				&& svp_force_zero == MB_YES
+				&& svp_depth[0] != 0.0)
+				{
+				svp_depthzero = svp_depth[0];
+				svp_depth[0] = 0.0;
+				svp_depthzero_reset = MB_YES;
+				}
+						
 			/* check if svp is a duplicate */
 			if (status == MB_SUCCESS
 				&& svp_duplicate == MB_YES)
@@ -482,6 +505,14 @@ main (int argc, char **argv)
 						    svp_time_i[4], svp_time_i[5], 
 						    svp_time_i[6]);
 				fprintf(svp_fp, "## SVP Count: %d\n", svp_count); 
+				if (svp_depthzero_reset == MB_YES)
+					{
+					fprintf(svp_fp, "## Initial depth reset from %f to 0.0 meters\n", svp_depthzero);
+					}
+				if (verbose >= 1 && svp_depthzero_reset == MB_YES)
+				    {
+				    fprintf(stderr, "Initial depth reset from %f to 0.0 meters\n", svp_depthzero);
+				    }
 				fprintf(svp_fp, "## Number of SVP Points: %d\n",nsvp); 
 				for (i=0;i<nsvp;i++)
 					fprintf(svp_fp, "%8.2f\t%7.2f\n", 

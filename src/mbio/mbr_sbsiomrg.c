@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiomrg.c	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 5.6 2002-10-15 18:34:58 caress Exp $
+ *	$Id: mbr_sbsiomrg.c,v 5.7 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/10/15 18:34:58  caress
+ * Release 5.0.beta25
+ *
  * Revision 5.5  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -149,7 +152,7 @@ int mbr_dem_sbsiomrg(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sbsiomrg.c,v 5.6 2002-10-15 18:34:58 caress Exp $";
+static char res_id[]="$Id: mbr_sbsiomrg.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error)
