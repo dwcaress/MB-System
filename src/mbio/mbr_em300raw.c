@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 4.4 1999-04-21 05:45:32 caress Exp $
+ *	$Id: mbr_em300raw.c,v 4.5 2000-02-07 22:59:47 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1999/04/21  05:45:32  caress
+ * Fixed handling of bad sidescan data.
+ *
  * Revision 4.3  1999/04/07  20:38:24  caress
  * Fixes related to building under Linux.
  *
@@ -68,7 +71,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 4.4 1999-04-21 05:45:32 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 4.5 2000-02-07 22:59:47 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -878,6 +881,7 @@ int	*error;
 		   newer than bath then set error,  if ok then
 		   check that beam ids are the same */
 		if (data->png_ss_date == 0
+			|| data->png_nbeams_ss == 0
 			|| bath_time_d > ss_time_d)
 		    {
 		    status = mbr_zero_ss_em300raw(verbose,mb_io_ptr->raw_data,error);
@@ -1064,6 +1068,23 @@ int	*error;
 	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_DATA)
 		{
+/*fprintf(stderr, "mode:%d absorption:%d tran_pulse:%d tran_beam:%d tran_pow:%d rec_beam:%d rec_band:%d rec_gain:%d tvg_cross:%d\n", 
+data->run_mode, data->run_absorption, 
+data->run_tran_pulse, data->run_tran_pow, 
+data->run_rec_beam, data->run_rec_band, 
+data->run_rec_gain, data->run_tvg_cross);
+fprintf(stderr, "max_range:%d r_zero:%d r_zero_corr:%d tvg_start:%d tvg_stop:%d bsn:%d bso:%d tx:%d tvg_crossover:%d\n", 
+data->png_max_range, data->png_r_zero, 
+data->png_r_zero_corr, data->png_tvg_start, 
+data->png_tvg_stop, data->png_bsn, 
+data->png_bso, data->png_tx, 
+data->png_tvg_crossover);
+fprintf(stderr, "mode:%d depth:%11f max_range:%d r_zero:%d r_zero_corr:%d bsn:%d bso:%d\n", 
+data->run_mode, 
+0.01 * data->png_depth_res * data->png_depth[data->png_nbeams/2], 
+data->png_max_range, data->png_r_zero, 
+data->png_r_zero_corr, data->png_bsn, 
+data->png_bso);*/
 
 		/* interpolate from saved nav if possible */
 		if (mb_io_ptr->nfix > 1)
@@ -1332,13 +1353,15 @@ int	*error;
 					    }
 					kk = MBSYS_SIMRAD2_MAXPIXELS / 2 
 					    + (int)(xtrack / *pixel_size);
-if (verbose > 2)
+/*if (verbose > 2)
 fprintf(stderr, "i:%d kk:%d xtrack:%f pixel_size:%f\n", 
-i, kk, xtrack, *pixel_size);
+i, kk, xtrack, *pixel_size);*/
 					if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
 					    {
 					    mb_io_ptr->new_ss[kk] 
-						    += reflscale*((double)beam_ss[k]) + 64.0;
+						    += reflscale*((double)beam_ss[k]) + 64.0; 
+							/*+ 34.0
+							- 0.5 * (data->png_bsn + data->png_bso);*/
 					    mb_io_ptr->new_ss_alongtrack[kk] 
 						    += mb_io_ptr->new_bath_alongtrack[j];
 					    ss_cnt[kk]++;
@@ -4680,7 +4703,7 @@ int	*error;
 		if (read_len == 4)
 			{
 			status = MB_SUCCESS;
-			data->png_offset_multiplier = (mb_u_char) line[0];
+			data->png_offset_multiplier = (mb_s_char) line[0];
 			}
 		else
 			{
@@ -5073,7 +5096,6 @@ data->png_npixels, MBF_EM300RAW_MAXRAWPIXELS);
 				data->png_azimuth[i], data->png_range[i], 
 				data->png_quality[i], data->png_window[i], 
 				data->png_amp[i], data->png_beam_num[i]);
-
 		fprintf(stderr,"dbg5       png_max_range:   %d\n",data->png_max_range);
 		fprintf(stderr,"dbg5       png_r_zero:      %d\n",data->png_r_zero);
 		fprintf(stderr,"dbg5       png_r_zero_corr: %d\n",data->png_r_zero_corr);
@@ -5098,7 +5120,7 @@ data->png_npixels, MBF_EM300RAW_MAXRAWPIXELS);
 			fprintf(stderr,"dbg5        %d %d\n",
 				i, data->png_ssraw[i]);
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -7715,7 +7737,7 @@ int	*error;
 	/* output end of record */
 	if (status == MB_SUCCESS)
 		{
-		line[0] = (mb_u_char) data->png_offset_multiplier;
+		line[0] = (mb_s_char) data->png_offset_multiplier;
 		line[1] = 0x03;
 		
 		/* compute checksum */
