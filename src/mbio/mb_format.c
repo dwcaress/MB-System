@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 4.7 2000-01-25 01:45:10 caress Exp $
+ *    $Id: mb_format.c,v 4.8 2000-04-19 20:51:58 caress Exp $
  *
- *    Copyright (c) 1993, 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+ *    Copyright (c) 1993, 1994, 2000 by 
+ *    D. W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY  10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  2000/01/25  01:45:10  caress
+ * Null terminate fileroot strings.
+ *
  * Revision 4.6  2000/01/20  00:09:23  caress
  * Added function mb_get_format().
  *
@@ -86,14 +91,10 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 4.7 2000-01-25 01:45:10 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 4.8 2000-04-19 20:51:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
-int mb_format(verbose,format,format_num,error)
-int	verbose;
-int	*format;
-int	*format_num;
-int	*error;
+int mb_format(int verbose, int *format, int *format_num, int *error)
 {
 	char	*function_name = "mb_format";
 	int	status;
@@ -169,12 +170,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_get_format(verbose,filename,fileroot,format,error)
-int	verbose;
-char	*filename;
-char	*fileroot;
-int	*format;
-int	*error;
+int mb_get_format(int verbose, char *filename, char *fileroot, 
+		    int *format, int *error)
 {
 	char	*function_name = "mb_get_format";
 	int	status = MB_SUCCESS;
@@ -278,6 +275,234 @@ int	*error;
 		}
 
 	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_datalist_open(int verbose,
+		struct mb_datalist_struct **datalist,
+		char *path, int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_datalist_open";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       datalist:      %d\n",*datalist);
+		fprintf(stderr,"dbg2       path:          %s\n",path);
+		}
+
+	/* allocate memory for datalist structure */
+	if (status = mb_malloc(verbose,sizeof(struct mb_datalist_struct),
+				datalist,error) == MB_SUCCESS)
+		{
+		if (((*datalist)->fp = fopen(path,"r")) == NULL)
+			{
+			mb_free(verbose,datalist,error);
+			status = MB_FAILURE;
+			*error = MB_ERROR_OPEN_FAIL;
+			}
+		else
+			{
+			strcpy((*datalist)->path,path);
+			(*datalist)->open = MB_YES;
+			(*datalist)->recursion = 0;
+			(*datalist)->datalist = NULL;
+			}
+		
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       datalist:      %d\n",*datalist);
+		if (*datalist != NULL)
+			{
+			fprintf(stderr,"dbg2       datalist->open:       %d\n",(*datalist)->open);
+			fprintf(stderr,"dbg2       datalist->fp:         %d\n",(*datalist)->fp);
+			fprintf(stderr,"dbg2       datalist->recursion:  %d\n",(*datalist)->recursion);
+			fprintf(stderr,"dbg2       datalist->path:       %s\n",(*datalist)->path);
+			fprintf(stderr,"dbg2       datalist->datalist:   %d\n",(*datalist)->datalist);
+			}
+		fprintf(stderr,"dbg2       error:         %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:        %d\n",status);
+		}
+
+	return(status);
+}
+		
+/*--------------------------------------------------------------------*/
+int mb_datalist_close(int verbose,
+		struct mb_datalist_struct **datalist, int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_datalist_close";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       datalist:      %d\n",*datalist);
+		}
+
+	/* close file */
+	if ((*datalist) != NULL && (*datalist)->open == MB_YES)
+		{
+		fclose((*datalist)->fp);
+		}
+
+	/* deallocate structure */
+	if ((*datalist) != NULL)
+		{
+		status = mb_free(verbose,datalist,error);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       datalist:      %d\n",*datalist);
+		fprintf(stderr,"dbg2       error:         %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:        %d\n",status);
+		}
+
+	return(status);
+}
+		
+/*--------------------------------------------------------------------*/
+int mb_datalist_read(int verbose,
+		struct mb_datalist_struct *datalist,
+		char *path, int *format, double *weight,
+		int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_datalist_read";
+	int	status = MB_SUCCESS;
+	char	buffer[MB_PATH_MAXLINE];
+	char	*buffer_ptr;
+	int	nscan, done, rdone;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       datalist:      %d\n",datalist);
+		fprintf(stderr,"dbg2       datalist->open:       %d\n",datalist->open);
+		fprintf(stderr,"dbg2       datalist->fp:         %d\n",datalist->fp);
+		fprintf(stderr,"dbg2       datalist->recursion:  %d\n",datalist->recursion);
+		fprintf(stderr,"dbg2       datalist->path:       %s\n",datalist->path);
+		fprintf(stderr,"dbg2       datalist->datalist:   %d\n",datalist->datalist);
+		}
+		
+	/* loop over reading from datalist */
+	done = MB_NO;
+	if (datalist->open == MB_YES
+		&& done == MB_NO)
+		{
+		while (done == MB_NO)
+			{
+			/* if recursive datalist closed read current datalist */
+			if (datalist->datalist == NULL)
+				{
+				rdone = MB_NO;
+				while (rdone == MB_NO)
+					{
+					buffer_ptr = fgets(buffer,MB_PATH_MAXLINE,datalist->fp);
+ 					if (buffer_ptr != buffer)
+ 						{
+ 						rdone = MB_YES;
+ 						done = MB_YES;
+ 						status = MB_FAILURE;
+ 						*error = MB_ERROR_EOF;
+ 						}
+					else if (buffer[0] != '#')
+						{
+						nscan = sscanf(buffer,"%s %d %lf",path,format,weight);
+						if (nscan >= 2 && *format > 0)
+							{
+							if (*weight <= 0.0)
+								*weight = 1.0;
+							done = MB_YES;
+							rdone = MB_YES;
+							}
+						else if (nscan >= 2 && *format == -1
+							&& datalist->recursion < MB_DATALIST_RECURSION_MAX)
+							{
+					                if (status = mb_datalist_open(verbose,
+					                		&(datalist->datalist), path, error)
+					                	== MB_SUCCESS)
+					                	{
+					                	datalist->datalist->recursion =
+					                		datalist->recursion + 1;
+					                	rdone = MB_YES;
+					                	}
+					                else
+					                	{
+					                	status = MB_SUCCESS;
+					                	*error = MB_ERROR_NO_ERROR;
+					                	}
+							}
+						}
+					}
+ 				}
+			
+			/* if open read next entry from recursive datalist */
+			if (done == MB_NO
+				&& datalist->open == MB_YES
+				&& datalist->datalist != NULL
+				&& datalist->datalist->open == MB_YES)
+				{
+				/* recursively call mb_read_datalist */
+				status = mb_datalist_read(verbose,
+						datalist->datalist,
+						path,
+						format,
+						weight,
+						error);
+				
+				/* if datalist read fails close it */
+				if (status == MB_FAILURE)
+					{
+					status = mb_datalist_close(verbose,&(datalist->datalist),error);
+					}
+				else
+					{
+					done = MB_YES;
+					}
+				}
+		       	}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       path:        %s\n",path);
+		fprintf(stderr,"dbg2       format:      %d\n",*format);
+		fprintf(stderr,"dbg2       weight:      %f\n",*weight);
+		fprintf(stderr,"dbg2       error:       %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
 	return(status);
 }
 /*--------------------------------------------------------------------*/
