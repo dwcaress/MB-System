@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.26 1995-11-28 21:03:36 caress Exp $
+ *    $Id: mbgrid.c,v 4.27 1995-12-29 22:18:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Rerewrite:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.26  1995/11/28  21:03:36  caress
+ * Fixed scaling for meters to feet.
+ *
  * Revision 4.25  1995/11/22  22:21:36  caress
  * Now handles bathymetry in feet with -Q option.
  *
@@ -193,6 +196,11 @@
 
 /* flag for no data in grid */
 #define	NO_DATA_FLAG	99999.9
+
+/* number of data to be allocated at a time */
+#define	REALLOC_STEP_SIZE	25
+
+/* min max macros */
 #define	min(A, B)	((A) < (B) ? (A) : (B))
 #define	max(A, B)	((A) > (B) ? (A) : (B))
 
@@ -200,7 +208,7 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.26 1995-11-28 21:03:36 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.27 1995-12-29 22:18:07 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -265,6 +273,7 @@ char **argv;
 	double	extend = 0.0;
 	double	tension = 1e10;
 	int	check_time = MB_NO;
+	int	first_in_stays = MB_YES;
 	double	timediff = 300.0;
 	char	ifile[128];
 	char	ofile[128];
@@ -417,7 +426,6 @@ char **argv;
 
 	/* set default input and output */
 	strcpy (filelist, "data.list");
-	strcpy (ofile, "stdout");
 
 	/* initialize some values */
 	strcpy(fileroot,"grid");
@@ -431,7 +439,7 @@ char **argv;
 	gydim = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -533,6 +541,11 @@ char **argv;
 			sscanf (optarg,"%lf", &timediff);
 			timediff = 60*timediff;
 			check_time = MB_YES;
+			if (timediff < 0.0)
+				{
+				timediff = fabs(timediff);
+				first_in_stays = MB_NO;
+				}
 			flag++;
 			break;
 		case 'V':
@@ -602,7 +615,7 @@ char **argv;
 		fprintf(outfp,"dbg2       speedmin:         %f\n",speedmin);
 		fprintf(outfp,"dbg2       timegap:          %f\n",timegap);
 		fprintf(outfp,"dbg2       file list:        %s\n",ifile);
-		fprintf(outfp,"dbg2       output file root: %s\n",ofile);
+		fprintf(outfp,"dbg2       output file root: %s\n",fileroot);
 		fprintf(outfp,"dbg2       grid x dimension: %d\n",xdim);
 		fprintf(outfp,"dbg2       grid y dimension: %d\n",ydim);
 		fprintf(outfp,"dbg2       grid x spacing:   %f\n",dx);
@@ -635,8 +648,7 @@ char **argv;
 		}
 
 	/* if bounds not specified then quit */
-	if (gbnd[0] >= gbnd[1] || gbnd[2] >= gbnd[3]
-		|| gbnd[2] <= -90.0 || gbnd[3] >= 90.0)
+	if (gbnd[0] >= gbnd[1] || gbnd[2] >= gbnd[3])
 		{
 		fprintf(outfp,"\nGrid bounds not properly specified:\n\t%f %f %f %f\n",gbnd[0],gbnd[1],gbnd[2],gbnd[3]);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
@@ -644,6 +656,13 @@ char **argv;
 		error = MB_ERROR_BAD_PARAMETER;
 		exit(error);
 		}
+
+	/* more option not available with minimum 
+		or maximum filter algorithms */
+	if (more == MB_YES 
+		&& (grid_mode == MBGRID_MINIMUM_FILTER
+		    || grid_mode == MBGRID_MAXIMUM_FILTER))
+		more == MB_NO;
 
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)
@@ -685,7 +704,7 @@ char **argv;
 		offx = (int) (extend*xdim);
 		offy = (int) (extend*ydim);
 		}
-	xtradim = scale + 1;
+	xtradim = scale + 2;
 	gxdim = xdim + 2*offx;
 	gydim = ydim + 2*offy;
 	wbnd[0] = gbnd[0] - offx*dx;
@@ -701,7 +720,9 @@ char **argv;
 		topofactor = -1.0;
 	else
 		topofactor = 1.0;
-	if (bathy_in_feet == MB_YES)
+	if (bathy_in_feet == MB_YES 
+		&& (datatype == MBGRID_DATA_TOPOGRAPHY
+		|| datatype == MBGRID_DATA_BATHYMETRY))
 		topofactor = topofactor / 0.3048;
 
 	/* output info */
@@ -763,6 +784,10 @@ char **argv;
 		if (grid_mode != MBGRID_MEDIAN_FILTER)
 			fprintf(outfp,"Gaussian filter 1/e length: %f km\n",
 				sqrt((1.0/factor)));
+		if (check_time == MB_YES && first_in_stays == MB_NO)
+			fprintf(outfp,"Swath overlap handling:       Last data used\n");
+		if (check_time == MB_YES && first_in_stays == MB_YES)
+			fprintf(outfp,"Swath overlap handling:       First data used\n");
 		if (check_time == MB_YES)
 			fprintf(outfp,"Swath overlap time threshold: %f minutes\n", 
 				timediff/60.);
@@ -801,6 +826,7 @@ char **argv;
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&sigma,&error);
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&firsttime,&error);
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&cnt,&error);
+	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&num,&error);
 	status = mb_malloc(verbose,xdim*ydim*sizeof(float),&output,&error);
 
 	/* if error initializing memory then quit */
@@ -815,12 +841,11 @@ char **argv;
 		}
 
 	/***** do weighted mean gridding *****/
-	if (grid_mode == MBGRID_WEIGHTED_MEAN)
+	if (grid_mode != MBGRID_MEDIAN_FILTER)
 	{
 
 	/* allocate memory for additional arrays */
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&norm,&error);
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&num,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -968,7 +993,22 @@ char **argv;
 				    }
 				  else if (fabs(time_d - firsttime[kgrid]) 
 				    > timediff)
-				    time_ok = MB_NO;
+				    {
+				    if (first_in_stays == MB_YES)
+					time_ok = MB_NO;
+				    else
+					{
+					time_ok = MB_YES;
+					firsttime[kgrid] = time_d;
+					ndata = ndata - cnt[kgrid];
+					ndatafile = ndatafile - cnt[kgrid];
+					norm[kgrid] = 0.0;
+					grid[kgrid] = 0.0;
+					sigma[kgrid] = 0.0;
+					num[kgrid] = 0;
+					cnt[kgrid] = 0;
+					}
+				    }
 			          else
 				    time_ok = MB_YES;
 				  }
@@ -979,7 +1019,8 @@ char **argv;
 				time_ok = MB_YES;
 
 			      /* process if in region of interest */
-			      if (ix >= -xtradim 
+			      if (grid_mode == MBGRID_WEIGHTED_MEAN
+			        && ix >= -xtradim 
 				&& ix < gxdim + xtradim 
 				&& iy >= -xtradim 
 				&& iy < gydim + xtradim 
@@ -1002,11 +1043,37 @@ char **argv;
 				   grid[kgrid] = grid[kgrid] 
 					+ weight*topofactor*bath[ib];
 				   sigma[kgrid] = sigma[kgrid] 
-					+ weight*bath[ib]*bath[ib];
+					+ weight*topofactor*topofactor
+					*bath[ib]*bath[ib];
 				   num[kgrid]++;
 				   if (ii == ix && jj == iy)
 					cnt[kgrid]++;
 				   }
+				ndata++;
+				ndatafile++;
+				}
+			      else if (ix >= 0 
+				&& ix < gxdim 
+				&& iy >= 0 
+				&& iy < gydim 
+				&& time_ok == MB_YES)
+			        {
+				kgrid = ix*gydim + iy;
+				if ((num[kgrid] > 0 
+				  && grid_mode == MBGRID_MINIMUM_FILTER
+				  && grid[kgrid] > topofactor*bath[ib])
+				  || (num[kgrid] > 0 
+				  && grid_mode == MBGRID_MAXIMUM_FILTER
+				  && grid[kgrid] < topofactor*bath[ib])
+				  || num[kgrid] <= 0)
+				  {
+				  norm[kgrid] = 1.0;
+				  grid[kgrid] = topofactor*bath[ib];
+				  sigma[kgrid] = topofactor*topofactor
+					    *bath[ib]*bath[ib];
+				  num[kgrid] = 1;
+				  cnt[kgrid] = 1;
+				  }
 				ndata++;
 				ndatafile++;
 				}
@@ -1038,7 +1105,22 @@ char **argv;
 				    }
 				  else if (fabs(time_d - firsttime[kgrid]) 
 				    > timediff)
-				    time_ok = MB_NO;
+				    {
+				    if (first_in_stays == MB_YES)
+					time_ok = MB_NO;
+				    else
+					{
+					time_ok = MB_YES;
+					firsttime[kgrid] = time_d;
+					ndata = ndata - cnt[kgrid];
+					ndatafile = ndatafile - cnt[kgrid];
+					norm[kgrid] = 0.0;
+					grid[kgrid] = 0.0;
+					sigma[kgrid] = 0.0;
+					num[kgrid] = 0;
+					cnt[kgrid] = 0;
+					}
+				    }
 			          else
 				    time_ok = MB_YES;
 				  }
@@ -1049,7 +1131,8 @@ char **argv;
 				time_ok = MB_YES;
 
 			      /* process if in region of interest */
-			      if (ix >= -xtradim 
+			      if (grid_mode == MBGRID_WEIGHTED_MEAN
+			        && ix >= -xtradim 
 				&& ix < gxdim + xtradim 
 				&& iy >= -xtradim 
 				&& iy < gydim + xtradim 
@@ -1076,6 +1159,30 @@ char **argv;
 				   if (ii == ix && jj == iy)
 					cnt[kgrid]++;
 				   }
+				ndata++;
+				ndatafile++;
+				}
+			      else if (ix >= 0 
+				&& ix < gxdim 
+				&& iy >= 0 
+				&& iy < gydim 
+				&& time_ok == MB_YES)
+			        {
+				kgrid = ix*gydim + iy;
+				if ((num[kgrid] > 0 
+				  && grid_mode == MBGRID_MINIMUM_FILTER
+				  && grid[kgrid] > amp[ib])
+				  || (num[kgrid] > 0 
+				  && grid_mode == MBGRID_MAXIMUM_FILTER
+				  && grid[kgrid] < amp[ib])
+				  || num[kgrid] <= 0)
+				  {
+				  norm[kgrid] = 1.0;
+				  grid[kgrid] = amp[ib];
+				  sigma[kgrid] = amp[ib]*amp[ib];
+				  num[kgrid] = 1;
+				  cnt[kgrid] = 1;
+				  }
 				ndata++;
 				ndatafile++;
 				}
@@ -1107,7 +1214,22 @@ char **argv;
 				    }
 				  else if (fabs(time_d - firsttime[kgrid]) 
 				    > timediff)
-				    time_ok = MB_NO;
+				    {
+				    if (first_in_stays == MB_YES)
+					time_ok = MB_NO;
+				    else
+					{
+					time_ok = MB_YES;
+					firsttime[kgrid] = time_d;
+					ndata = ndata - cnt[kgrid];
+					ndatafile = ndatafile - cnt[kgrid];
+					norm[kgrid] = 0.0;
+					grid[kgrid] = 0.0;
+					sigma[kgrid] = 0.0;
+					num[kgrid] = 0;
+					cnt[kgrid] = 0;
+					}
+				    }
 			          else
 				    time_ok = MB_YES;
 				  }
@@ -1118,7 +1240,8 @@ char **argv;
 				time_ok = MB_YES;
 			      
 			      /* process if in region of interest */
-			      if (ix >= -xtradim 
+			      if (grid_mode == MBGRID_WEIGHTED_MEAN
+			        && ix >= -xtradim 
 				&& ix < gxdim + xtradim 
 				&& iy >= -xtradim 
 				&& iy < gydim + xtradim 
@@ -1145,6 +1268,30 @@ char **argv;
 				   if (ii == ix && jj == iy)
 					cnt[kgrid]++;
 				   }
+				ndata++;
+				ndatafile++;
+				}
+			      else if (ix >= 0 
+				&& ix < gxdim 
+				&& iy >= 0 
+				&& iy < gydim 
+				&& time_ok == MB_YES)
+			        {
+				kgrid = ix*gydim + iy;
+				if ((num[kgrid] > 0 
+				  && grid_mode == MBGRID_MINIMUM_FILTER
+				  && grid[kgrid] > ss[ib])
+				  || (num[kgrid] > 0 
+				  && grid_mode == MBGRID_MAXIMUM_FILTER
+				  && grid[kgrid] < ss[ib])
+				  || num[kgrid] <= 0)
+				  {
+				  norm[kgrid] = 1.0;
+				  grid[kgrid] = ss[ib];
+				  sigma[kgrid] = ss[ib]*ss[ib];
+				  num[kgrid] = 1;
+				  cnt[kgrid] = 1;
+				  }
 				ndata++;
 				ndatafile++;
 				}
@@ -1213,7 +1360,8 @@ char **argv;
 				time_ok = MB_YES;
 
 			      /* process the data */
-			      if (ix >= -xtradim 
+			      if (grid_mode == MBGRID_WEIGHTED_MEAN
+			        && ix >= -xtradim 
 				&& ix < gxdim + xtradim 
 				&& iy >= -xtradim 
 				&& iy < gydim + xtradim
@@ -1236,11 +1384,37 @@ char **argv;
 				   grid[kgrid] = grid[kgrid] 
 					+ weight*topofactor*tvalue;
 				   sigma[kgrid] = sigma[kgrid] 
-					+ weight*tvalue*tvalue;
+					+ weight*topofactor*topofactor
+					*tvalue*tvalue;
 				   num[kgrid]++;
 				   if (ii == ix && jj == iy)
 					cnt[kgrid]++;
 				   }
+				ndata++;
+				ndatafile++;
+				}
+			      else if (ix >= 0 
+				&& ix < gxdim 
+				&& iy >= 0 
+				&& iy < gydim 
+				&& time_ok == MB_YES)
+			        {
+				kgrid = ix*gydim + iy;
+				if ((num[kgrid] > 0 
+				  && grid_mode == MBGRID_MINIMUM_FILTER
+				  && grid[kgrid] > topofactor*tvalue)
+				  || (num[kgrid] > 0 
+				  && grid_mode == MBGRID_MAXIMUM_FILTER
+				  && grid[kgrid] < topofactor*tvalue)
+				  || num[kgrid] <= 0)
+				  {
+				  norm[kgrid] = 1.0;
+				  grid[kgrid] = topofactor*tvalue;
+				  sigma[kgrid] = topofactor*topofactor
+					    *tvalue*tvalue;
+				  num[kgrid] = 1;
+				  cnt[kgrid] = 1;
+				  }
 				ndata++;
 				ndatafile++;
 				}
@@ -1294,7 +1468,7 @@ char **argv;
 	}
 
 	/***** else do median filtering gridding *****/
-	else if (grid_mode != MBGRID_WEIGHTED_MEAN)
+	else if (grid_mode == MBGRID_MEDIAN_FILTER)
 	{
 
 	/* allocate memory for additional arrays */
@@ -1324,249 +1498,11 @@ char **argv;
 			sigma[kgrid] = 0.0;
 			firsttime[kgrid] = 0.0;
 			cnt[kgrid] = 0;
+			num[kgrid] = 0;
+			data[kgrid] = NULL;
 			}
 
-	/* count data */
-	ndata = 0;
-	if ((fp = fopen(filelist,"r")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(outfp,"\nUnable to open data list file: %s\n",
-			filelist);
-		fprintf(outfp,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-	while (fscanf(fp,"%s %d",file,&format) != EOF)
-		{
-
-		/* if format > 0 then input is multibeam file */
-		if (format > 0)
-		{
-
-		/* initialize the multibeam file */
-		ndatafile = 0;
-		if ((status = mb_read_init(
-			verbose,file,format,pings,lonflip,bounds,
-			btime_i,etime_i,speedmin,timegap,
-			&mbio_ptr,&btime_d,&etime_d,
-			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
-			{
-			mb_error(verbose,error,&message);
-			fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",file);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			exit(error);
-			}
-
-		/* allocate memory for reading data arrays */
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bath,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathlon,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathlat,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-				&amp,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&sslon,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&sslat,&error);
-
-		/* if error initializing memory then quit */
-		if (error != MB_ERROR_NO_ERROR)
-			{
-			mb_error(verbose,error,&message);
-			fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
-				message);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			exit(error);
-			}
-
-		/* loop over reading */
-		while (error <= MB_ERROR_NO_ERROR)
-			{
-			status = mb_read(verbose,mbio_ptr,&kind,
-				&rpings,time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
-				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bathlon,bathlat,
-				ss,sslon,sslat,
-				comment,&error);
-
-			/* time gaps are not a problem here */
-			if (error == MB_ERROR_TIME_GAP)
-				{
-				error = MB_ERROR_NO_ERROR;
-				status = MB_SUCCESS;
-				}
-
-			/* print debug statements */
-			if (verbose >= 2)
-				{
-				fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",program_name);
-				fprintf(stderr,"dbg2       kind:           %d\n",kind);
-				fprintf(stderr,"dbg2       beams_bath:     %d\n",beams_bath);
-				fprintf(stderr,"dbg2       beams_amp:      %d\n",beams_amp);
-				fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
-				fprintf(stderr,"dbg2       error:          %d\n",error);
-				fprintf(stderr,"dbg2       status:         %d\n",status);
-				}
-
-			if ((datatype == MBGRID_DATA_BATHYMETRY
-				|| datatype == MBGRID_DATA_TOPOGRAPHY)
-				&& error == MB_ERROR_NO_ERROR)
-			  {
-			  for (ib=0;ib<beams_bath;ib++) 
-			    if (bath[ib] > 0.0)
-			      {
-			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
-			      if (ix >= 0 && ix < gxdim 
-				&& iy >= 0 && iy < gydim)
-			        {
-				kgrid = ix*gydim + iy;
-				cnt[kgrid]++;
-				ndata++;
-				ndatafile++;
-				}
-			      }
-			  }
-			else if (datatype == MBGRID_DATA_AMPLITUDE
-				&& error == MB_ERROR_NO_ERROR)
-			  {
-			  for (ib=0;ib<beams_bath;ib++) 
-			    if (amp[ib] > 0.0)
-			      {
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
-			      if (ix >= 0 && ix < gxdim 
-				&& iy >= 0 && iy < gydim)
-			        {
-				kgrid = ix*gydim + iy;
-				cnt[kgrid]++;
-				ndata++;
-				ndatafile++;
-				}
-			      }
-			  }
-			else if (datatype == MBGRID_DATA_SIDESCAN
-				&& error == MB_ERROR_NO_ERROR)
-			  {
-			  for (ib=0;ib<pixels_ss;ib++) 
-			    if (ss[ib] > 0.0)
-			      {
-			      ix = (sslon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (sslat[ib] - wbnd[2] - 0.5*dy)/dy;
-			      if (ix >= 0 && ix < gxdim 
-				&& iy >= 0 && iy < gydim)
-			        {
-				kgrid = ix*gydim + iy;
-				cnt[kgrid]++;
-				ndata++;
-				ndatafile++;
-				}
-			      }
-			  }
-			}
-		status = mb_close(verbose,&mbio_ptr,&error);
-		mb_free(verbose,&bath,&error); 
-		mb_free(verbose,&bathlon,&error); 
-		mb_free(verbose,&bathlat,&error); 
-		mb_free(verbose,&amp,&error); 
-		mb_free(verbose,&ss,&error); 
-		mb_free(verbose,&sslon,&error); 
-		mb_free(verbose,&sslat,&error); 
-		status = MB_SUCCESS;
-		error = MB_ERROR_NO_ERROR;
-		if (verbose >= 2) 
-			fprintf(outfp,"\n");
-		if (verbose > 0)
-			fprintf(outfp,"%d data points counted in %s\n",
-				ndatafile,file);
-		} /* end if (format > 0) */
-
-		/* if format == 0 then input is lon,lat,values triples file */
-		else if (format == 0)
-		{
-		/* open data file */
-		if ((dfp = fopen(file,"r")) == NULL)
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(outfp,"\nUnable to open lon,lat,value triples data file: %s\n",
-				file);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			exit(error);
-			}
-
-		/* loop over reading */
-		ndatafile = 0;
-		while (fscanf(dfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
-			{
-			if (tvalue > 0.0)
-			      {
-			      ix = (tlon - wbnd[0] - 0.5*dx)/dx;
-			      iy = (tlat - wbnd[2] - 0.5*dy)/dy;
-			      if (ix >= 0 && ix < gxdim 
-				&& iy >= 0 && iy < gydim)
-			        {
-				kgrid = ix*gydim + iy;
-				cnt[kgrid]++;
-				ndata++;
-				ndatafile++;
-				}
-			      }
-			}
-		fclose(dfp);
-		status = MB_SUCCESS;
-		error = MB_ERROR_NO_ERROR;
-		if (verbose >= 2) 
-			fprintf(outfp,"\n");
-		if (verbose > 0)
-			fprintf(outfp,"%d data points counted in %s\n",
-				ndatafile,file);
-		} /* end if (format == 0) */
-
-		}
-	fclose(fp);
-
-	/* now allocate space for the data */
-	for (i=0;i<gxdim;i++)
-		for (j=0;j<gydim;j++)
-			{
-			kgrid = i*gydim + j;
-			if (cnt[kgrid] > 0)
-				{
-				if ((data[kgrid] = (double *) 
-					calloc(cnt[kgrid],sizeof(double))) 
-					== NULL)
-					error = MB_ERROR_MEMORY_FAIL;
-				cnt[kgrid] = 0;
-				}
-			}
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
-			message);
-		fprintf(outfp,"The weighted mean algorithm uses much less\n");
-		fprintf(outfp,"memory than the median filter algorithm.\n");
-		fprintf(outfp,"You could also try using ping averaging to\n");
-		fprintf(outfp,"reduce the number of data points to be gridded.\n");
-		fprintf(outfp,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* read in data */
+	/* read in and process data */
 	ndata = 0;
 	if ((fp = fopen(filelist,"r")) == NULL)
 		{
@@ -1682,9 +1618,43 @@ char **argv;
 				    }
 				  else if (fabs(time_d - firsttime[kgrid]) 
 				    > timediff)
-				    time_ok = MB_NO;
+				    {
+				    if (first_in_stays == MB_YES)
+					time_ok = MB_NO;
+				    else
+					{
+					time_ok = MB_YES;
+					firsttime[kgrid] = time_d;
+					ndata = ndata - cnt[kgrid];
+					ndatafile = ndatafile - cnt[kgrid];
+					cnt[kgrid] = 0;
+					}
+				    }
 			          else
 				    time_ok = MB_YES;
+				  }
+
+				/* make sure there is space for the data */
+				if (time_ok == MB_YES
+				  && cnt[kgrid] >= num[kgrid])
+				  {
+				  num[kgrid] += REALLOC_STEP_SIZE;
+				  if ((data[kgrid] = (double *) 
+					realloc(data[kgrid], num[kgrid]*sizeof(double))) 
+					== NULL)
+					{
+					error = MB_ERROR_MEMORY_FAIL;
+					mb_error(verbose,error,&message);
+					fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+					    message);
+					fprintf(outfp,"The weighted mean algorithm uses much less\n");
+					fprintf(outfp,"memory than the median filter algorithm.\n");
+					fprintf(outfp,"You could also try using ping averaging to\n");
+					fprintf(outfp,"reduce the number of data points to be gridded.\n");
+					fprintf(outfp,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}
 				  }
 
 				/* process it */
@@ -1723,9 +1693,43 @@ char **argv;
 				    }
 				  else if (fabs(time_d - firsttime[kgrid]) 
 				    > timediff)
-				    time_ok = MB_NO;
+				    {
+				    if (first_in_stays == MB_YES)
+					time_ok = MB_NO;
+				    else
+					{
+					time_ok = MB_YES;
+					firsttime[kgrid] = time_d;
+					ndata = ndata - cnt[kgrid];
+					ndatafile = ndatafile - cnt[kgrid];
+					cnt[kgrid] = 0;
+					}
+				    }
 			          else
 				    time_ok = MB_YES;
+				  }
+
+				/* make sure there is space for the data */
+				if (time_ok == MB_YES
+				  && cnt[kgrid] >= num[kgrid])
+				  {
+				  num[kgrid] += REALLOC_STEP_SIZE;
+				  if ((data[kgrid] = (double *) 
+					realloc(data[kgrid], cnt[kgrid]*sizeof(double))) 
+					== NULL)
+					{
+					error = MB_ERROR_MEMORY_FAIL;
+					mb_error(verbose,error,&message);
+					fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+					    message);
+					fprintf(outfp,"The weighted mean algorithm uses much less\n");
+					fprintf(outfp,"memory than the median filter algorithm.\n");
+					fprintf(outfp,"You could also try using ping averaging to\n");
+					fprintf(outfp,"reduce the number of data points to be gridded.\n");
+					fprintf(outfp,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}
 				  }
 
 				/* process it */
@@ -1764,9 +1768,43 @@ char **argv;
 				    }
 				  else if (fabs(time_d - firsttime[kgrid]) 
 				    > timediff)
-				    time_ok = MB_NO;
+				    {
+				    if (first_in_stays == MB_YES)
+					time_ok = MB_NO;
+				    else
+					{
+					time_ok = MB_YES;
+					firsttime[kgrid] = time_d;
+					ndata = ndata - cnt[kgrid];
+					ndatafile = ndatafile - cnt[kgrid];
+					cnt[kgrid] = 0;
+					}
+				    }
 			          else
 				    time_ok = MB_YES;
+				  }
+
+				/* make sure there is space for the data */
+				if (time_ok == MB_YES
+				  && cnt[kgrid] >= num[kgrid])
+				  {
+				  num[kgrid] += REALLOC_STEP_SIZE;
+				  if ((data[kgrid] = (double *) 
+					realloc(data[kgrid], cnt[kgrid]*sizeof(double))) 
+					== NULL)
+					{
+					error = MB_ERROR_MEMORY_FAIL;
+					mb_error(verbose,error,&message);
+					fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+					    message);
+					fprintf(outfp,"The weighted mean algorithm uses much less\n");
+					fprintf(outfp,"memory than the median filter algorithm.\n");
+					fprintf(outfp,"You could also try using ping averaging to\n");
+					fprintf(outfp,"reduce the number of data points to be gridded.\n");
+					fprintf(outfp,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}
 				  }
 
 				/* process it */
@@ -1834,6 +1872,29 @@ char **argv;
 				    time_ok = MB_NO;
 			          else
 				    time_ok = MB_YES;
+				  }
+
+				/* make sure there is space for the data */
+				if (time_ok == MB_YES
+				  && cnt[kgrid] >= num[kgrid])
+				  {
+				  num[kgrid] += REALLOC_STEP_SIZE;
+				  if ((data[kgrid] = (double *) 
+					realloc(data[kgrid], cnt[kgrid]*sizeof(double))) 
+					== NULL)
+					{
+					error = MB_ERROR_MEMORY_FAIL;
+					mb_error(verbose,error,&message);
+					fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+					    message);
+					fprintf(outfp,"The weighted mean algorithm uses much less\n");
+					fprintf(outfp,"memory than the median filter algorithm.\n");
+					fprintf(outfp,"You could also try using ping averaging to\n");
+					fprintf(outfp,"reduce the number of data points to be gridded.\n");
+					fprintf(outfp,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}
 				  }
 
 				/* process it */
@@ -2174,23 +2235,23 @@ char **argv;
 			}
 	if (gridkind == MBGRID_ASCII)
 		{
-		strcpy(ofile,"asc_");
-		strcat(ofile,fileroot);
+		strcpy(ofile,fileroot);
+		strcat(ofile,".asc");
 		status = write_ascii(verbose,ofile,output,xdim,ydim,
 			gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 			dx,dy,&error);
 		}
 	else if (gridkind == MBGRID_OLDGRD)
 		{
-		strcpy(ofile,"grd1_");
-		strcat(ofile,fileroot);
+		strcpy(ofile,fileroot);
+		strcat(ofile,".grd1");
 		status = write_oldgrd(verbose,ofile,output,xdim,ydim,
 			gbnd[0],gbnd[1],gbnd[2],gbnd[3],dx,dy,&error);
 		}
 	else if (gridkind == MBGRID_CDFGRD)
 		{
-		strcpy(ofile,"grd_");
-		strcat(ofile,fileroot);
+		strcpy(ofile,fileroot);
+		strcat(ofile,".grd");
 		status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
 			gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 			zmin,zmax,dx,dy,
@@ -2200,23 +2261,23 @@ char **argv;
 		/* execute mbm_grdplot */
 		if (datatype == MBGRID_DATA_BATHYMETRY)
 			{
-			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -C -D -V -L\"File grd_%s - %s:%s\"", 
-				fileroot, fileroot, title, zlabel);
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -C -D -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
 			}
 		else if (datatype == MBGRID_DATA_TOPOGRAPHY)
 			{
-			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -C -V -L\"File grd_%s - %s:%s\"", 
-				fileroot, fileroot, title, zlabel);
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -C -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
 			}
 		else if (datatype == MBGRID_DATA_AMPLITUDE)
 			{
-			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -W1/4 -S -V -L\"File grd_%s - %s:%s\"", 
-				fileroot, fileroot, title, zlabel);
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
 			}
 		else
 			{
-			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s -G1 -W1/4 -S -V -L\"File grd_%s - %s:%s\"", 
-				fileroot, fileroot, title, zlabel);
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/4 -S -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, zlabel);
 			}
 		if (verbose)
 			{
@@ -2226,7 +2287,7 @@ char **argv;
 		plot_status = system(plot_cmd);
 		if (plot_status == -1)
 			{
-			fprintf(stderr, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+			fprintf(stderr, "\nError executing mbm_grdplot on output file %s\n", ofile);
 			}
 		}
 	if (status != MB_SUCCESS)
@@ -2256,27 +2317,24 @@ char **argv;
 				}
 		if (gridkind == MBGRID_ASCII)
 			{
-			strcpy(ofile,"asc_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_num");
+			strcpy(ofile,fileroot);
+			strcat(ofile,"_num.asc");
 			status = write_ascii(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				dx,dy,&error);
 			}
 		else if (gridkind == MBGRID_OLDGRD)
 			{
-			strcpy(ofile,"grd1_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_num");
+			strcpy(ofile,fileroot);
+			strcat(ofile,"_num.grd1");
 			status = write_oldgrd(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				dx,dy,&error);
 			}
 		else if (gridkind == MBGRID_CDFGRD)
 			{
-			strcpy(ofile,"grd_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_num");
+			strcpy(ofile,fileroot);
+			strcat(ofile,"_num.grd");
 			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				zmin,zmax,dx,dy,
@@ -2284,8 +2342,8 @@ char **argv;
 				argc,argv,&error);
 
 			/* execute mbm_grdplot */
-			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s_num -G1 -W1/2 -V -L\"File grd_%s - %s:%s\"", 
-				fileroot, fileroot, title, nlabel);
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, nlabel);
 			if (verbose)
 				{
 				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
@@ -2322,27 +2380,24 @@ char **argv;
 				}
 		if (gridkind == MBGRID_ASCII)
 			{
-			strcpy(ofile,"asc_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_sd");
+			strcpy(ofile,fileroot);
+			strcat(ofile,"_sd.asc");
 			status = write_ascii(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				dx,dy,&error);
 			}
 		else if (gridkind == MBGRID_OLDGRD)
 			{
-			strcpy(ofile,"grd1_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_sd");
+			strcpy(ofile,fileroot);
+			strcat(ofile,"_sd.grd1");
 			status = write_oldgrd(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				dx,dy,&error);
 			}
 		else if (gridkind == MBGRID_CDFGRD)
 			{
-			strcpy(ofile,"grd_");
-			strcat(ofile,fileroot);
-			strcat(ofile,"_sd");
+			strcpy(ofile,fileroot);
+			strcat(ofile,"_sd.grd");
 			status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				zmin,zmax,dx,dy,
@@ -2350,8 +2405,8 @@ char **argv;
 				argc,argv,&error);
 
 			/* execute mbm_grdplot */
-			sprintf(plot_cmd, "mbm_grdplot -Igrd_%s_sd -G1 -W1/2 -V -L\"File grd_%s - %s:%s\"", 
-				fileroot, fileroot, title, sdlabel);
+			sprintf(plot_cmd, "mbm_grdplot -I%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", 
+				ofile, ofile, title, sdlabel);
 			if (verbose)
 				{
 				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 

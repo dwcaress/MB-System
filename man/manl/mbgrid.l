@@ -1,4 +1,4 @@
-.TH mbgrid l "22 November 1995"
+.TH mbgrid l "29 December 1995"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from multibeam data files.
@@ -100,7 +100,9 @@ usually fine, but averaging imagery data (beam amplitude or sidescan)
 derived from different swaths is usually undesirable. The \fB-U\fP
 option allows the user to force \fBmbgrid\fP to ignore data which
 overlies regions already covered by previous data (as defined by
-a time lag criterea). This option works best with the median
+a time lag criterea). Alternatively, the user can force the program
+to use only the last data in a region, again as defined by a time
+lage. This option works best with the median
 filter scheme. 
 
 If the \fB-C\fP option is used to set clipping to a value > 0, then a
@@ -127,20 +129,22 @@ value used is NaN, or not-a-number.
 The names of the output files are based on the root character string
 specified using the \fB-O\fP option.  If the grid is output as a GMT 
 version 2 GRD format file (netCDF) or a GMT version 1 GRD format file  
-(binary), then its filename is "grd_root".   If the
+(binary), then its filename is "root.grd".   If the
 \fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
-output grid filename will be "asc_root". If the output grid is
+output grid filename will be "root.asc". If the output grid is
 in the GMT version 2 GRD format, a shellscript
 which will allow the contents of the grid to viewed using GMT programs
-is also output with the filename "grd_root.cmd".
+is also output with the filename "root.grd.cmd".
 
 The \fB-M\fP option causes \fBmbgrid\fP to output two additional
-grids, the first ("grd_root_num") being the number of data 
-points located within each bin, and the second ("grd_root_sd") 
+grids, the first ("root_num.grd") being the number of data 
+points located within each bin, and the second ("root_sd.grd") 
 being the standard deviation of the
-data points located within each bin. Plotting shellscripts
-called "grd_root_num.cmd" and "grd_root_sd.cmd" are also output
-if the grids are in the GMT version 2 GRD format.
+data points located within each bin.  Plotting shellscripts
+called "root_num.grd.cmd" and "root_sd.grd.cmd" are also output
+if the grids are in the GMT version 2 GRD format. The \fB-M\fP
+option is ignored when the minimum or maximum filter gridding
+algorithms are used.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -245,12 +249,27 @@ Default: \fIlonflip\fP = 0.
 Causes two additional grids to be output. One is a grid containing
 the standard deviation of the data within each grid cell relative
 to the grid value, the other contains the number of data 
-points in each grid cell.
+points in each grid cell. This option is ignored when the minimum
+or maximum filter gridding algorithms are used (see the \fP-F\fP option).
 .TP
 .B \fB-N\fP
 Causes grid cells with no data and no interpolation to be set to a
 value of NaN instead of the default value of 99999.9.  The NaN value
 is expected by \fBGMT\fP programs such \fBgrdview\fP.
+.TP
+.B \fB-O\fIroot\fP
+Sets the character string to be used as the root of the
+output filenames. For example, if the grid is output as a GMT 
+version 2 GRD format (netCDF) file (the default), 
+then its filename is "root.grd". If the
+\fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
+output grid filename will be "root.asc". If the
+\fB-G\fP\fI2\fP option is used to specify a version 1 GRD 
+format (binary) grid, then the
+output grid filename will be "root.grd1". If the output grid is
+in the GMT version 2 GRD format, a shellscript
+which will allow the contents of the grid to viewed using GMT programs
+is also output with the filename "root.grd.cmd".
 .TP
 .B \fB-P\fIpings\fP
 Sets the ping averaging of the input data. If \fIpings\fP > 0, then
@@ -294,7 +313,9 @@ ignoring the data from later swaths. "Later" data is identified
 using the \fItime\fP value. The time of the first data point
 is saved for each bin in the grid; any other data points which
 are more than \fItime\fP minutes before or after the initial
-data point in the relevent bin are ignored.
+data point in the relevent bin are ignored. If \fItime\fP is
+negative, the last data in a bin (within the time lag criterea)
+will be saved and used instead of the first data.
 .TP
 .B \fB-V\fP
 Normally, \fBmbgrid\fP prints out information regarding its
@@ -333,18 +354,19 @@ data filenames followed by the appropriate format identifier:
  	d131e.mb24 24
 
 Then, run \fBmbgrid\fP as follows:
- 	mbgrid -R220.1/220.35/-9.7/-9.45 -D251/251 -L1 -C251 
+ 	mbgrid -R220.1/220.35/-9.7/-9.45 -D251/251 \\
+ 		-L1 -C251  -N \\
  		-Idatalist -Ourville_int -V
 
 By specifying a clipping dimension of 251 we insure that the grid
 will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
-
- Program mbgrid
- Version $Id: mbgrid.l,v 4.9 1995-11-22 22:21:36 caress Exp $
- MB-system Version 4.00
-
- mbgrid Parameters:
+ 
+ Program MBGRID
+ Version $Id: mbgrid.l,v 4.10 1995-12-29 22:18:07 caress Exp $
+ MB-system Version 4.3
+ 
+ MBGRID Parameters:
  List of input files: datalist
  Output fileroot:     urville_int
  Input Data Type:     Bathymetry
@@ -360,132 +382,128 @@ not covered by data. The output looks like:
  Input data bounds:
    Longitude:  219.8500  220.6000
    Latitude:    -9.9500   -9.2000
- Longitude interval: 0.001000 degrees or 0.109779 km
- Latitude interval:  0.001000 degrees or 0.110605 km
+ Longitude interval: 0.001000 degrees or 109.778801 m
+ Latitude interval:  0.001000 degrees or 110.605002 m
  Gaussian filter 1/e length: 0.055096 km
  Spline interpolation applied with clipping dimension: 251
- Spline tension (range 0.0 to infinity): 10000000000.000000
+ Spline tension (range 0.0 to 1.0): 10000000000.000000
  Grid format 3:  GMT version 2 grd (netCDF)
- Real value of 99999.900000 used to flag regions with no data
+ NaN values used to flag regions with no data
  MBIO parameters:
    Ping averaging:       1
    Longitude flipping:   1
    Speed minimum:       0.0 km/hr
-
- 28795 data points processed in d123e.mb8
+  
+ 29075 data points processed in d123e.mb8
  0 data points processed in d125e.mb8
- 97200 data points processed in d126e.mb8
- 67237 data points processed in d128e.mb8
- 20438 data points processed in d129e.mb8
- 80122 data points processed in d130e.mb8
- 55385 data points processed in d131e.mb8
-
- 349177 total data points processed
-
+ 98175 data points processed in d126e.mb8
+ 68637 data points processed in d128e.mb8
+ 20703 data points processed in d129e.mb8
+ 80372 data points processed in d130e.mb8
+ 55620 data points processed in d131e.mb8
+ 
+ 352582 total data points processed
+ 
  Making raw grid...
-
- Doing minimum curvature interpolation with 53516 data points...
-
- Spline interpolation fit information:
- Data points   nodes    mean error     rms error     curvature
-     53516     63001   -1.44419e-08   9.3621e-05     1373.21
-
+ 
+ Doing spline interpolation with 53513 data points...
+ 
  Total number of bins:            63001
- Bins set using data:             53516
- Bins set using interpolation:    9485
+ Bins set using data:             53513
+ Bins set using interpolation:    9488
  Bins not set:                    0
  Maximum number of data in a bin: 65
  Minimum value:     504.93   Maximum value:    3405.75
- Minimum sigma:    0.00924   Maximum sigma:  171.70297
-
+ Minimum sigma:    0.14060   Maximum sigma:  275.53399
+ 
  Outputting results...
-
+ 
+ executing mbm_grdplot...
+ mbm_grdplot -Iurville_int.grd -G1 -C -D -V -L"File urville_int.grd - Bathymetry Grid:Depth (m)"
+ 
+ Program Status:
+ --------------
+ 
+   Plot Style:
+     Color Fill
+     Contours
+     Horizontal Color Scale
+ 
+   Input Files:
+     Data GRD File:            urville_int.grd
+     Intensity GRD List File:   
+ 
+   Output Files:
+     Output plot name root:    urville_int.grd
+     Color pallette table:     urville_int.grd.cpt
+     Plotting shellscript:     urville_int.grd.cmd
+     Plot file:                urville_int.grd.ps
+ 
+   Plot Attributes:
+     Plot width:               6.5000
+     Plot height:              6.5489
+     Page size:                a
+     Page width:               8.5
+     Page height:              11
+     Projection:               -Jm26
+     Axes annotation:          5m/5m:."File urville_int.grd - Bathymetry Grid":
+     Orientation:              portrait
+      Number of colors:         11
+     Color Pallette:           Haxby Colors
+     Colors reversed
+ 
+   Grid Data Attributes:
+     Longitude min max:         220.1000   220.3500
+     Latitude min max:           -9.7000    -9.4500
+     Data min max:                 504.9       3406
+ 
+   Primary Grid Plotting Controls:
+     Contour control:          100
+     Color start datum:        350.000000
+     Color end datum:          3850.000000
+     Color datum interval:     350.000000
+ 
+   GMT Default Values Reset in Script:
+     PAPER_WIDTH               8.5
+     ANOT_FONT                 Helvetica
+     LABEL_FONT                Helvetica
+     HEADER_FONT               Helvetica
+     ANOT_FONT_SIZE            8
+     LABEL_FONT_SIZE           8
+     HEADER_FONT_SIZE          10
+     FRAME_WIDTH               0.074999999999999997
+     TICK_LENGTH               0.074999999999999997
+     PAGE_ORIENTATION          LANDSCAPE
+     COLOR_BACKGROUND          0/0/0
+     COLOR_FOREGROUND          255/255/255
+     COLOR_NAN                 255/255/255
+ 
+ --------------
+ 
+ Plot generation shellscript <urville_int.grd.cmd> created.
+ 
+ Instructions:
+   Execute <urville_int.grd.cmd> to generate Postscript plot <urville_int.grd.ps>.
+   Executing <urville_int.grd.cmd> also invokes xpsview to view the plot on the screen.
+ 
+ --------------
+ 
+ 
  Done.
 
 The names of the output files are based on the root character string
 specified using the \fB-O\fP option.  Since the grid is output as a netCDF
-GRD format file, its filename is "grd_urville_int"; a shellscript
+GRD format file, its filename is "urville_int.grd"; a shellscript
 which will allow the contents of the grid to viewed using GMT programs
-is also output with the filename "grd_urville_int.cmd".
+is also output with the filename "urville_int.grd.cmd".
 
 Suppose that one wants to grid the same data considered above using
 the median filtering scheme instead of the default Gaussian weighted
 mean scheme and also outputting grids of the data density and 
 standard deviation values. The following will suffice:
- 	mbgrid -R220.1/220.35/-9.7/-9.45 -D251/251 -L1 -C251 
- 		-Idatalist -Ourville_int -F -M -V
-
-The output looks like:
-
- Program mbgrid
- Version $Id: mbgrid.l,v 4.9 1995-11-22 22:21:36 caress Exp $
- MB-system Version 4.00
-
- mbgrid Parameters:
- List of input files: datalist
- Output fileroot:     urville_int
- Input Data Type:     Bathymetry
- Gridding algorithm:  Median Filter
- Grid dimensions: 251 251
- Grid bounds:
-   Longitude:  220.1000  220.3500
-   Latitude:    -9.7000   -9.4500
- Working grid dimensions: 251 251
- Working Grid bounds:
-   Longitude:  220.1000  220.3500
-   Latitude:    -9.7000   -9.4500
- Input data bounds:
-   Longitude:  219.8500  220.6000
-   Latitude:    -9.9500   -9.2000
- Longitude interval: 0.001000 degrees or 0.109779 km
- Latitude interval:  0.001000 degrees or 0.110605 km
- Gaussian filter 1/e length: 0.055096 km
- Spline interpolation applied with clipping dimension: 251
- Spline tension (range 0.0 to infinity): 10000000000.000000
- Grid format 3:  GMT version 2 grd (netCDF)
- Real value of 99999.900000 used to flag regions with no data
- Data density and sigma grids also created
- MBIO parameters:
-   Ping averaging:       1
-   Longitude flipping:   1
-   Speed minimum:       0.0 km/hr
-
- 28249 data points counted in d123e.mb8
- 0 data points counted in d125e.mb8
- 95449 data points counted in d126e.mb8
- 64790 data points counted in d128e.mb8
- 19977 data points counted in d129e.mb8
- 79055 data points counted in d130e.mb8
- 54527 data points counted in d131e.mb8
- 28249 data points processed in d123e.mb8
- 0 data points processed in d125e.mb8
- 95449 data points processed in d126e.mb8
- 64790 data points processed in d128e.mb8
- 19977 data points processed in d129e.mb8
- 79055 data points processed in d130e.mb8
- 54527 data points processed in d131e.mb8
-
- 342047 total data points processed
-
- Making raw grid...
-
- Doing minimum curvature interpolation with 53516 data points...
-
- Spline interpolation fit information:
- Data points   nodes    mean error     rms error     curvature
-     53516     63001   -2.8406e-08   0.000159107     1549.36
-
- Total number of bins:            63001
- Bins set using data:             53516
- Bins set using interpolation:    9485
- Bins not set:                    0
- Maximum number of data in a bin: 65
- Minimum value:     492.60   Maximum value:    3423.00
- Minimum sigma:    7.00000   Maximum sigma:  259.35433
-
- Outputting results...
-
- Done.
+ 	mbgrid -R220.1/220.35/-9.7/-9.45 -D251/251 \\
+ 		-L1 -C251 -N \\
+ 		-Idatalist -Ourville_int -F2 -M -V
 
 .SH SEE ALSO
 \fBmbsystem\fP(l)
