@@ -47,7 +47,6 @@ cool colors for low grid values to hot colors for high grid values.
 This option reverses the color table so that cool colors correspond
 to high values and hot colors to low values.
 .TP
-.TP
 .B \fB-E\fIazimuth/elevation\fP
 Sets the azimuth and elevation in degrees of the viewpoint for 3D
 perspective views.  An \fIazimuth\fP
