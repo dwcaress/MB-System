@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.15 2004-10-18 03:32:55 caress Exp $
+#    $Id: install_makefiles,v 5.16 2005-02-20 07:25:08 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003 by 
+#    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -43,6 +43,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #				- assumes use of Apple's X11
 #				- assumes netCDF, GMT, and OpenMotif installe
 #					using fink
+#       irixusrlocal - install manually on SGI IRIX 
+#				- assumes installation in /usr/local/mbsystem
+#				- assumes netCDF and GMT installs in /usr/local
 #
 # Usage:
 #   install_makefiles
@@ -54,10 +57,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.15 2004-10-18 03:32:55 caress Exp $
+#   $Id: install_makefiles,v 5.16 2005-02-20 07:25:08 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.15  2004/10/18 03:32:55  caress
+#   Added -P preset option.
+#
 #   Revision 5.14  2004/10/06 22:06:32  caress
 #   Release 5.0.5
 #
@@ -195,7 +201,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #			(optional, default is "YES")
 #       MOTIFINCDIR	Location of Motif include files.
 #       MOTIFLIBS	X and Motif libraries required for graphical tools.
-#       OPENGLLIBS	OpenGL libraries required for future graphical tools.
+#       OPENGLLIBS	OpenGL libraries required for new graphical tools,
+#.                              including MBgrdviz. If this parameter is 
+#                               not set, 
 #       GMTVERSION	Version of GMT to be used and linked with. GMT 
 #                       versions prior to 4.0 are no longer supported, so
 #                       under most circumstances this parameter need not
