@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.13 1997-07-25 14:19:53 caress Exp $
+ *    $Id: mb_buffer.c,v 4.14 1997-07-28 15:10:28 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,10 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.12  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -132,7 +136,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.13 1997-07-25 14:19:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.14 1997-07-28 15:10:28 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -406,17 +410,17 @@ int	*error;
 		}
 	else if (nwant <= 0)
 		{
-		status == MB_FAILURE;
+		status = MB_FAILURE;
 		*error = MB_ERROR_NO_DATA_REQUESTED;
 		}
 	else if (nget <= 0)
 		{
-		status == MB_FAILURE;
+		status = MB_FAILURE;
 		*error = MB_ERROR_BUFFER_FULL;
 		}
 	else if (*nload <= 0 && *error <= MB_ERROR_NO_ERROR)
 		{
-		status == MB_FAILURE;
+		status = MB_FAILURE;
 		*error = MB_ERROR_NO_DATA_LOADED;
 		}
 
