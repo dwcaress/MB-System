@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.30 2003-07-26 18:01:22 caress Exp $
+ *    $Id: mbprocess.c,v 5.31 2003-07-30 16:43:59 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.30  2003/07/26 18:01:22  caress
+ * Changed beamflag handling code.
+ *
  * Revision 5.29  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -199,7 +202,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.30 2003-07-26 18:01:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.31 2003-07-30 16:43:59 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -2596,6 +2599,27 @@ and mbedit edit save files.\n";
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
+		
+		/* time gaps do not matter to mbprocess */
+		if (error == MB_ERROR_TIME_GAP)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* out of bounds do not matter to mbprocess */
+		if (error == MB_ERROR_OUT_BOUNDS)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* non-survey data do not matter to mbprocess */
+		if (error == MB_ERROR_OTHER)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
 				
 		if (kind == MB_DATA_DATA 
 			&& error <= MB_ERROR_NO_ERROR)
@@ -3323,7 +3347,7 @@ and mbedit edit save files.\n";
 		else if (process.mbp_kluge003 == MB_YES)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Processing Kluge003 applied (undefined)");
+			sprintf(comment,"  Processing Kluge003 applied (roll correction for USCG Healy SB2112 data)");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -3393,19 +3417,6 @@ and mbedit edit save files.\n";
 				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
-
-		/* increment counter */
-		if (error <= MB_ERROR_NO_ERROR 
-			&& kind == MB_DATA_DATA)
-			idata++;
-		else if (error <= MB_ERROR_NO_ERROR 
-			&& kind == MB_DATA_NAV)
-			inav++;
-		else if (error <= MB_ERROR_NO_ERROR 
-			&& kind == MB_DATA_COMMENT)
-			icomment++;
-		else if (error <= MB_ERROR_NO_ERROR)
-			iother++;
 		
 		/* time gaps do not matter to mbprocess */
 		if (error == MB_ERROR_TIME_GAP)
@@ -3427,6 +3438,19 @@ and mbedit edit save files.\n";
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 			}
+
+		/* increment counter */
+		if (error <= MB_ERROR_NO_ERROR 
+			&& kind == MB_DATA_DATA)
+			idata++;
+		else if (error <= MB_ERROR_NO_ERROR 
+			&& kind == MB_DATA_NAV)
+			inav++;
+		else if (error <= MB_ERROR_NO_ERROR 
+			&& kind == MB_DATA_COMMENT)
+			icomment++;
+		else if (error <= MB_ERROR_NO_ERROR)
+			iother++;
 
 		/* output error messages */
 		if (verbose >= 1 && error == MB_ERROR_COMMENT)
@@ -3803,13 +3827,16 @@ alpha, beta, lever_heave);*/
 					coordinates, apply roll and pitch
 					corrections, and translate back */
 				if (process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF 
-					|| process.mbp_pitchbias == MBP_PITCHBIAS_ON)
+					|| process.mbp_pitchbias == MBP_PITCHBIAS_ON
+					|| process.mbp_kluge003 == MB_YES)
 					{
 					mb_takeoff_to_rollpitch(
 						verbose,
 						angles[i], angles_forward[i], 
 						&alpha, &beta, 
 						&error);
+					if (process.mbp_kluge003 == MB_YES)
+						beta -= 0.25*roll;
 					if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
 			    			alpha += process.mbp_pitchbias;
 			    		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
