@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#    $Id: mbm_grid.perl,v 5.2 2001-10-30 00:17:55 caress Exp $
 #
 #    Copyright (c) 1999, 2000 by
 #    D. W. Caress (caress@mbari.org)
@@ -53,10 +53,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#   $Id: mbm_grid.perl,v 5.2 2001-10-30 00:17:55 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.1  2001/03/22  21:05:45  caress
+# Trying to make release 5.0.beta0
+#
 # Revision 5.0  2000/12/01  22:58:01  caress
 # First cut at Version 5.0.
 #
@@ -174,7 +177,21 @@ if ($format > 0)
 	}
 else
 	{
-	MBparsedatalist($file_data);
+	# we used to use this perl function
+	# 	MBparsedatalist($file_data);
+	# but now we use the program mbdatalist
+	@mbdatalist = `mbdatalist -F-1 -I$file_data`;
+	while (@mbdatalist)
+		{
+		$line = shift @mbdatalist;
+		if ($line =~ /(\S+)\s+(\S+)/)
+			{
+			($file_mb,$format_mb) = 
+				$line =~ /(\S+)\s+(\S+)/;
+			push(@files_data, $file_mb);
+			push(@formats, $format_mb);
+			}
+		}
 	}
 
 $cnt = -1;
@@ -219,9 +236,15 @@ foreach $file_mb (@files_data)
 		}
 
 	# now parse the mbinfo input 
+	$nrec_f = 0;
 	while (@mbinfo)
 		{
 		$line = shift @mbinfo;
+		if ($line =~ /Number of Records:\s+(\S+)/)
+			{
+			($nrec_f) = 
+				$line =~ /Number of Records:\s+(\S+)/;
+			}
 		if ($line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 			{
 			($xmin_f,$xmax_f) = 
@@ -254,7 +277,7 @@ foreach $file_mb (@files_data)
 			}
 		}
 
-	if (!$first_mb)
+	if (!$first_mb && $nrec_f > 0)
 		{
 		$first_mb = 1;
 		$xmin_data = $xmin_f;
@@ -268,7 +291,7 @@ foreach $file_mb (@files_data)
 		$smin_data = $smin_f;
 		$smax_data = $smax_f;
 		}
-	else
+	elsif ($nrec_f > 0)
 		{
 		$xmin_data = &min($xmin_data, $xmin_f);
 		$xmax_data = &max($xmax_data, $xmax_f);
@@ -506,7 +529,11 @@ if ($datatype > 2)
 	}
 if ($verbose)
 	{
-	printf FCMD "\t-V \\\n";
+	printf FCMD "\t-V \n";
+	}
+else
+	{
+	printf FCMD "\n";
 	}
 
 # claim it's all over
