@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta26     November 3, 2002
 Version 5.0.beta25     October 15, 2002
 Version 5.0.beta24     October 4, 2002
 Version 5.0.beta23     September 20, 2002
@@ -107,6 +108,13 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA26 RELEASE NOTES:
+
+The version 5.0.beta26 release of MB-System includes
+one significant bug fix:
+  - Fixed a memory leak associated the use of projected
+    coordinates in mbgrid and mbmosaic.
 
 MB-SYSTEM VERSION 5.0.BETA25 RELEASE NOTES:
 
@@ -1010,10 +1018,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.30 2002-10-15 19:22:24 caress Exp $
+RCS ID: $Id: README,v 5.31 2002-11-04 19:15:01 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.30  2002/10/15 19:22:24  caress
+Release 5.0.beta25
+
 Revision 5.29  2002/10/04 21:29:40  caress
 Release 5.0.beta24
 
