@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.2 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_io.h,v 4.3 1995-03-22 18:59:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -81,6 +84,12 @@ struct mb_io_struct
 	char	*hdr_comment;	/* placeholder for long comment strings
 					for formats using a single
 					comment string in a file header */
+	int	irecord_count;	/* counting variable used for VMS derived
+					data formats to remove extra 
+					bytes (e.g. sburivax format) */
+	int	orecord_count;	/* counting variable used for VMS derived
+					data formats to insert extra 
+					bytes (e.g. sburivax format) */
 
 	/* pointer to structure containing raw data (could be any format) */
 	int	structure_size;
