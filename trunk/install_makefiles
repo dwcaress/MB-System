@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.2 2002-01-24 02:12:31 caress Exp $
+#    $Id: install_makefiles,v 5.3 2002-04-06 03:15:17 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.2 2002-01-24 02:12:31 caress Exp $
+#   $Id: install_makefiles,v 5.3 2002-04-06 03:15:17 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.2  2002/01/24 02:12:31  caress
+#   Added DARWIN
+#
 # Revision 5.0  2001/01/22  05:02:30  caress
 # Version 5.0.0
 #
@@ -318,17 +321,17 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 $MBSYSTEM_HOME = "/usr/people/caress/dev/mbsystem";
 $OS = "IRIX64";
 $BYTESWAPPED = "NO";
-$CFLAGS = "-g";
-$LFLAGS = "-lm";
 $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11";
-$GMTVERSION = "3.3";
+$GMTVERSION = "3.4";
 $GMTLIBDIR = "/usr/local/gmt/src";
 $GMTINCDIR = "/usr/local/gmt/src";
 $NETCDFLIBDIR = "/usr/local/netcdf/lib";
 $NETCDFINCDIR = "/usr/local/netcdf/include";
 $LEVITUS = "/usr/local/levitus/annual";
+$CFLAGS = "-g";
+$LFLAGS = "-lm";
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
 
@@ -344,7 +347,8 @@ if ($BYTESWAPPED eq "YES")
 	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
 	}
 
-# use GMT 3.0 instead of GMT 3.1 if desired
+# use earlier versions of GMT if desired
+# - note that GMT 3.4 is equivalent to 3.3 (API didn't change)
 if ($GMTVERSION eq "3.0")
 	{
 	$CFLAGS = "$CFLAGS -DGMT3_0";
@@ -361,6 +365,9 @@ else
 	{
 	$CFLAGS = "$CFLAGS -DGMT3_3";
 	}
+
+# add netcdf library to LFLAGS
+$LFLAGS = "$LFLAGS -L$NETCDFLIBDIR -lnetcdf";
 
 # set archiver 
 if ($OS eq "LYNX")
