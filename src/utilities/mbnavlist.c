@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.3 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbnavlist.c,v 5.4 2001-07-24 17:40:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -82,7 +85,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.3 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.4 2001-07-24 17:40:54 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
@@ -439,7 +442,7 @@ main (int argc, char **argv)
 	/* output separator for GMT style segment file output */
 	if (segment == MB_YES && ascii == MB_YES)
 		{
-		printf("%c\n", segment_tag);
+		printf("%s\n", segment_tag);
 		}
 
 	/* read and print data */
