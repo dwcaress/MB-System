@@ -1,9 +1,9 @@
-.TH mbvelocitytool l "12 February 1996" "MB-System 4.3" "MB-System 4.3"
+.TH mbvelocitytool l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbvelocitytool\fP [\fB-D\fIdraft\fP \fB-V -H\fP]

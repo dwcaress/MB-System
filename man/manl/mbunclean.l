@@ -1,9 +1,9 @@
-.TH mbunclean l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbunclean l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbunclean\fP - Unflags edited beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbunclean\fP [\fB-B\fIlow/high \fB-F\fIformat \fB-L\fIlonflip\fP 

@@ -1,10 +1,10 @@
-.TH mbcontour l "22 November 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbcontour l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbcontour\fP \fB-J\fIparameters\fP \fB-R\fIwest/east/south/north 

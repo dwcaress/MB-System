@@ -1,10 +1,10 @@
-.TH mbswath l "22 November 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbswath l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbswath\fP \fB-C\fIcptfile\fP \fB-J\fIparameters\fP 

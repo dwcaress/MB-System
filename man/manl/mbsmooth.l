@@ -1,9 +1,9 @@
-.TH mbsmooth l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbsmooth l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbsmooth\fP - Smooths multibeam bathymetry data.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbsmooth\fP [\fB-F\fIformat\fP \fB-G\fIwidth\fP \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP \fB-W\fIfilterfile\fP \fB-V -H\fP]

@@ -1,9 +1,9 @@
-.TH mbbath l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbbath l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbbath\fP - Generates bathymetry from travel times in multibeam data.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbbath\fP [\fB-A\fIangle\fP \fB-B\fIroll_bias\fP \fB-D\fIdraught\fP 

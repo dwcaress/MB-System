@@ -1,10 +1,10 @@
-.TH mbsystem l "27 December 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbsystem l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and processing multibeam
 bathymetry data.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH INTRODUCTION
 The \fBMB-System\fP is a software package consisting of programs which 
@@ -134,6 +134,11 @@ tasks easily.  These are the current MB-system macros:
  		the mean water velocity and surface 
  		water velocity values used in 
  		processing that data.
+ \fBmbm_dslnavfix\fP:  Reads a WHOI DSL AMS-120 processed
+ 		navigation file containing UTM northings
+ 		and eastings and outputs a navigation file
+ 		containing longitude and latitude which is
+ 		suitable for use with \fBmbmerge\fP.
  \fBmbm_grdplot\fP:  Reads a GMT GRD grid file and 
  		writes a shellscript which will 
  		generate a GMT map of the data.
@@ -160,7 +165,8 @@ tasks easily.  These are the current MB-system macros:
  		file which can be used to process 
  		multibeam data.
 
-.SH EXAMPLE APPROACH TO PROCESSING SEABEAM 2100 DATA
+.SH PROCESSING SEABEAM 2100 DATA
+
 The following data processing stream is recommended for
 data obtained with SeaBeam 2100 series multibeam sonars. 
 SeaBeam 2112 sonars are currently in use on the R/V Knorr 
@@ -520,7 +526,8 @@ shading magnitude of 0.2 would produce, so we use -A0.5:
 
  	sb2112_example_bathss3d.cmd
 
-.SH EXAMPLE APPROACH TO PROCESSING HYDROSWEEP DS DATA
+.SH PROCESSING HYDROSWEEP DS DATA
+
 The following data processing stream is recommended for Hydrosweep DS
 data. Hydrosweep DS sonars are currently in use on the R/V Maurice
 Ewing (operated by the Lamont-Doherty Earth Observatory 
@@ -634,7 +641,8 @@ macro \fBmbm_grdplot\fP or in 3D perspective
 views using the macro \fBmbm_grd3dplot\fP. See 
 the appropriate manual pages for examples.
 
-.SH EXAMPLE APPROACH TO PROCESSING HYDROSWEEP MD DATA
+.SH PROCESSING HYDROSWEEP MD DATA
+
 Processing Hydrosweep MD data is similar to processing
 Hydrosweep DS data. In particular, recalculating 
 bathymetry from the travel times is necessary because
@@ -672,6 +680,84 @@ that are not supported by the Atlas software. For example:
 
   	mbcopy -F102/101 -Iys9409040607.mb102 \\
  		-Oys9409040607.R -N
+
+.SH PROCESSING WHOI DSL AMS-120 DATA
+
+The WHOI DSL group typically provides processed AMS-120
+data as a set of parallel files. An example of the filenames
+used is:
+.br
+ 	DSL120.940630_1100.amp.dat 	(sidescan)
+ 	DSL120.940630_1100.bat.dat 	(bathymetry)
+ 	DSL120.940630_1100.nav 		(navigation)
+.br
+The sidescan and bathymetry files contain navigation, but it
+is generally poor. The processed navigation resides in the
+*.nav file, but it is sampled less frequently than the sonar
+pings, and is reported in UTM easting and northing meters.
+The \fBmbm_dslnavfix\fP macro is used to translate the
+eastings and northings into the geographic coordinates
+(longitude and latitude) used by MB-System programs. The
+program \fBmbmerge\fP can be used to merge the translated
+navigation in with the bathymetry and sidescan.
+
+The parallel files listed above are supported as format 111
+by \fBMB-System\fP; a similar single-file format is supported
+as format 112. We recommend converting the data to format 112
+before proceeding with processing to simplify data management.
+However, all relevent \fBMB-System\fP programs will work with format
+111 files. In either case, the data is voluminous (~75 MB/hour)
+and processing will be slow relative to data from multibeam
+sonars.
+
+We recommend the following initial procedure when
+processing WHOI DSL AMS-120 data with MB-System:
+
+\fBStep 1\fP: Concatenate all of the processed navigation
+files into a single file.
+
+ 	cat *.nav > cruise.rnav
+
+\fBStep 2\fP: Translate the DSL UTM navigation into geographic
+coordinates. Note that you must know the UTM zone
+used - here we assume the zone is +27.
+
+ 	mbm_dslnavfix -Icruise.rnav \\
+ 		-Ocruise.mrg2 -J27 -V
+
+\fBStep 3\fP: Copy the bathymetry and sidescan data in each
+file from format 111 to format 112.
+
+ 	mbcopy -F111/112 \\
+ 		-IDSL120.940630_1100.bat.dat \\
+ 		-ODSL120.940630_1100.mb112
+
+\fBStep 4\fP: Merge the translated navigation with each of the 
+format 112 data files. Note that \fBmbm_dslnavfix\fP
+produces navigation in \fBmbmerge\fP format 2
+so that the \fB-M\fP\fI2\fP option is used.
+
+ 	mbmerge -F112 \\
+ 		-IDSL120.940630_1100.mb112 \\
+ 		-ODSL120.940630_1100_n.mb112 \\
+ 		-M2 -Ncruise.mrg2 -V
+
+At present, there is no capability for recalculating 
+bathymetry using different water sound velocity models
+than that used originally. Adding such a capability would
+require defining a new data format and seems 
+unnecessary for any of the data we have examined.
+
+The large number of bathymetry values (2048) per ping and
+the high (> 1/second) ping rate make interactive editing
+of the bathymetry extremely time consuming. It is 
+probably more realistic to use auto-editing (e.g. \fBmbclean\fP)
+to clean up the worst artifacts. One may also find it
+necessary to use median filtering rather than weighted
+mean filtering in the gridding process (\fBmbgrid\fP).
+Other than the above, the generation of grids and maps 
+can proceed in the same
+fashion as outlined above for SeaBeam 2112 data.
 
 .SH SEE ALSO
 \fBmbio\fP(l)
