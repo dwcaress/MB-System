@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.1 1994-10-31 18:30:17 caress Exp $
+#	$Id: Makefile.template,v 4.2 1994-10-31 20:06:09 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,10 @@
 # Date:		September 14, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.1  1994/10/31  18:30:17  caress
+# y
+# Changed man pages from section 1 to section l.
+#
 # Revision 4.0  1994/10/21  12:43:44  caress
 # Release V4.0
 #
@@ -71,8 +75,8 @@ $(BINDIR)/mbvelocity.uid: mbvelocity.uil mbvelocity_define.uil mbvelocity_init.u
 		 -o $(BINDIR)/mbvelocity.uid
 
 ### copy the man page to the man page directory
-$(MANDIR)/mbvelocitytool.l:	mbvelocitytool.l
-	cp mbvelocitytool.l $(MANDIR)/mbvelocitytool.l
+$(MANDIR)/mbvelocitytool.l:	mbvelocitytool.manl
+	cp mbvelocitytool.manl $(MANDIR)/mbvelocitytool.l
 	chmod 664 $(MANDIR)/mbvelocitytool.l
 
 clean: 

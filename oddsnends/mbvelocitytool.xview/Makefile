@@ -62,8 +62,8 @@ targets: $(SOURCES) $(TARGETS)
 $(EXEC): $(PROGRAM)
 	cp $(PROGRAM) $(EXEC)
 
-$(MANPAGE): $(PROGRAM).l
-	cp $(PROGRAM).l $(MANPAGE)
+$(MANPAGE): $(PROGRAM).manl
+	cp $(PROGRAM).manl $(MANPAGE)
 	chmod 664 $(MANPAGE)
 
 $(PROGRAM): $(SOURCES.c) $(TARGETS.c) $(TARGETS.h) $(OBJECTS)

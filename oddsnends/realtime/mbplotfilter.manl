@@ -1,0 +1,82 @@
+.TH mbplotfilter 1 "1 March 1994"
+.SH NAME
+mbplotfilter - Produce L-DGO metafile graphics from output 
+of mbcontourfilter.
+
+.SH VERSION
+Version 4.00
+
+.SH SYNOPSIS
+\fBmbplotfilter\fP \fB-R\fIwest/east/south/north [-Wwidth -V]
+
+.SH DESCRIPTION
+\fBmbplotfilter\fP reads ascii plot calls from stdin and
+outputs L-DGO metafile graphics to stdout. It is intended to
+be used with mbcontourfilter to plot real-time Hydrosweep data
+on board the R/V Maurice Ewing. See the manual pages for 
+\fBmbcontourfilter\fP and \fBmbm_calcomp_plot\fP.
+
+.SH AUTHORSHIP
+David W. Caress (caress@lamont.ldeo.columbia.edu)
+.br
+Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+.br
+Lamont-Doherty Earth Observatory
+.br
+Palisades, NY 10964
+
+.SH OPTIONS
+.TP
+.B \fB-R\fIwest/east/south/north\fP
+Sets the longitude and latitude bounds of the plotting.  A mercator
+projection is used.
+.TP
+.B \fB-V\fIverbose\fP
+Causes status messages to be printed to stderr as the program runs.
+.TP
+.B \fB-W\fIwidth\fP
+Sets the width in inches of the plot.  A mercator projection is used
+to interprete the longitude and latitude values input in the
+plot calls.
+
+.SH EXAMPLES
+On the R/V Maurice Ewing, the real-time hydrosweep data 
+is logged in a file which changes each day.  In order to make a 
+contour pen plot of the real time data in a file called
+/net/moray/logger/data/9305hs.d237 the following approach can
+be used:
+ 	tail -0f /net/moray/logger/data/9305hs.d237 | mbcontourfilter 
+ 		-F5 -R-43.0/-42.0/10.08333/10.916667 -J30 
+ 		-C50/200/200/200/.02/.07 -A0.25/1.0/4.0 | mbplotfilter 
+ 		 -R-43.0/-42.0/10.08333/10.916667 -W30 | ccgr -d /dev/ttyb
+.br
+As invoked, the tail command will read through the input file until it
+reaches the end and then enter an infinite loop, reading new 
+data as it is added to the end of the file.  The data is piped to 
+\fBmbcontourfilter\fP, which generates contours, shiptracks, and 
+annotations as ascii plot calls printed to stdout.  The ascii plot calls
+are piped to \fBmbplotfilter\fP, which interprets them in terms of
+Lamont metafile graphics calls.  The metafile graphics are piped to
+a program called ccgr, which translates them to Calcomp pen
+plotter commands and sends those commands to a serial port.  Assuming
+that the plotter is connected to the port used, the plotter then
+draws the contours on paper.
+
+In order to use this system for pen plotting in other environments or
+with other pen plotters, the user would need to replace mbplotfilter and
+ccgr with one or more programs to translate the ascii plot calls to
+the required plot call format.
+
+The format of the plot calls understood by \fBmbplotfilter\fP is
+simple.  Four calls are understood:
+ 	init
+ 	newp ipen
+ 	plot x y penup
+ 	stop
+.br
+Here ipen is the pen number to be used (usually 1-4), x and y are the plot
+coordinates in longitude and latitude, and penup indicates whether
+the pen is up (penup=3) or down (penup=2) during the pen move.
+
+.SH BUGS
+\fBmbplotfilter\fP works only with plot calls from \fBmbcontourfilter\fP.

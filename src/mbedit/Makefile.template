@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.1 1994-10-31 18:24:28 caress Exp $
+#	$Id: Makefile.template,v 4.2 1994-10-31 19:56:57 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		August 2, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.1  1994/10/31  18:24:28  caress
+# Changed man pages from section 1 to section l.
+#
 # Revision 4.0  1994/10/21  11:55:41  caress
 # Release V4.0
 #
@@ -71,8 +74,8 @@ $(BINDIR)/mbedit.uid: mbedit.uil mbedit_define.uil mbedit_init.uil Makefile
 		 -o $(BINDIR)/mbedit.uid
 
 ### copy the man page to the man page directory
-$(MANDIR)/mbedit.l:	mbedit.l
-	cp mbedit.l $(MANDIR)/mbedit.l
+$(MANDIR)/mbedit.l:	mbedit.manl
+	cp mbedit.manl $(MANDIR)/mbedit.l
 	chmod 664 $(MANDIR)/mbedit.l
 
 clean: 

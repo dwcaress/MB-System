@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile  5/25/93
-#	$Id: Makefile,v 4.2 1994-10-31 18:26:17 caress Exp $
+#	$Id: Makefile,v 4.3 1994-10-31 20:00:55 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.2  1994/10/31  18:26:17  caress
+# Changed man pages from section 1 to section l.
+#
 # Revision 4.1  1994/10/21  12:01:43  caress
 # Release V4.0
 #
@@ -102,8 +105,8 @@ targets: $(SOURCES) $(TARGETS)
 $(EXEC): $(PROGRAM)
 	cp $(PROGRAM) $(EXEC)
 
-$(MANPAGE): $(PROGRAM).l
-	cp $(PROGRAM).l $(MANPAGE)
+$(MANPAGE): $(PROGRAM).manl
+	cp $(PROGRAM).manl $(MANPAGE)
 	chmod 664 $(MANPAGE)
 
 $(PROGRAM): $(SOURCES.c) $(TARGETS.c) $(TARGETS.h) $(OBJECTS)
