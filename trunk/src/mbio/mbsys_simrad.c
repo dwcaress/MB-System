@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.9 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.10 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1994, 2000, 2002 by
+ *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.8  2002/08/21 00:55:46  caress
  * Release 5.0.beta22
  *
@@ -149,7 +152,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.9 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.10 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

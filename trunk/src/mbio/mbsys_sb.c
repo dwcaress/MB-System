@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.c	2/26/93
- *	$Id: mbsys_sb.c,v 5.4 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_sb.c,v 5.5 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -29,6 +29,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.3  2001/08/25 00:54:13  caress
  * Adding beamwidth values to extract functions.
  *
@@ -127,7 +130,7 @@
 int mbsys_sb_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb.c,v 5.5 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbsys_sb_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

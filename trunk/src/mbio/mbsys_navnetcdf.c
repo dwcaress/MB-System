@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_navnetcdf.c	4/11/2002
- *	$Id: mbsys_navnetcdf.c,v 5.1 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_navnetcdf.c,v 5.2 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	April 11, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.0  2002/05/29 23:40:15  caress
  * Release 5.0.beta18
  *
@@ -40,7 +43,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_navnetcdf.h"
 
-static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.1 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.2 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

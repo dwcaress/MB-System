@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.6 2002-05-29 23:43:09 caress Exp $
+ *    $Id: mbdatalist.c,v 5.7 2003-04-17 21:17:10 caress Exp $
  *
- *    Copyright (c) 2001, 2002 by
+ *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/05/29 23:43:09  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.5  2002/04/08 21:01:04  caress
  * Release 5.0.beta17
  *
@@ -58,7 +61,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.6 2002-05-29 23:43:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.7 2003-04-17 21:17:10 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -V -H]";

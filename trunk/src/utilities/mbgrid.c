@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.20 2003-03-22 03:09:09 caress Exp $
+ *    $Id: mbgrid.c,v 5.21 2003-04-17 21:17:10 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2003/03/22 03:09:09  caress
+ * Added mode parameter to -C option.
+ *
  * Revision 5.19  2003/03/16 18:05:40  caress
  * Added -K option for underlaying background data on grids.
  *
@@ -361,7 +364,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.20 2003-03-22 03:09:09 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.21 2003-04-17 21:17:10 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1671,8 +1674,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
 /*fprintf(stderr, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n", 
 ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 
@@ -2108,8 +2111,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
+/*fprintf(stderr, "ib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   dx:%f dy:%f  origin: lon:%f lat:%f\n", 
+ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 			      /* check if within allowed time */
 			      if (check_time == MB_YES)
@@ -2231,8 +2236,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
 
 			      /* check if within allowed time */
 			      if (check_time == MB_YES)
@@ -2351,8 +2356,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			    if (ss[ib] > 0.0)
 			      {
 			      /* get position in grid */
-			      ix = (sslon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (sslat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (sslon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (sslat[ib] - wbnd[2] + 0.5*dy)/dy;
 
 			      /* check if within allowed time */
 			      if (check_time == MB_YES)
@@ -2460,6 +2465,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		    mb_free(verbose,&amp,&error); 
 		    mb_free(verbose,&ss,&error); 
 		    mb_free(verbose,&sslon,&error); 
+		    mb_free(verbose,&sslat,&error); 
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
 		    }
@@ -2496,8 +2502,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 						&error);
 
 			  /* get position in grid */
-			  ix = (tlon - wbnd[0] - 0.5*dx)/dx;
-			  iy = (tlat - wbnd[2] - 0.5*dy)/dy;
+			  ix = (tlon - wbnd[0] + 0.5*dx)/dx;
+			  iy = (tlat - wbnd[2] + 0.5*dy)/dy;
 
 			  /* check if overwriting */
 			  if (check_time == MB_YES)
@@ -2804,8 +2810,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			  for (ib=0;ib<beams_bath;ib++) 
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
 			      if (ix >= 0 && ix < gxdim 
 				&& iy >= 0 && iy < gydim)
 			        {
@@ -2893,8 +2899,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			  for (ib=0;ib<beams_bath;ib++) 
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
-			      ix = (bathlon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
 			      if (ix >= 0 && ix < gxdim 
 				&& iy >= 0 && iy < gydim)
 			        {
@@ -2982,8 +2988,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			  for (ib=0;ib<pixels_ss;ib++) 
 			    if (ss[ib] > 0.0)
 			      {
-			      ix = (sslon[ib] - wbnd[0] - 0.5*dx)/dx;
-			      iy = (sslat[ib] - wbnd[2] - 0.5*dy)/dy;
+			      ix = (sslon[ib] - wbnd[0] + 0.5*dx)/dx;
+			      iy = (sslat[ib] - wbnd[2] + 0.5*dy)/dy;
 			      if (ix >= 0 && ix < gxdim 
 				&& iy >= 0 && iy < gydim)
 			        {
@@ -3098,8 +3104,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 						&error);
 
 			  /* get position in grid */
-			  ix = (tlon - wbnd[0] - 0.5*dx)/dx;
-			  iy = (tlat - wbnd[2] - 0.5*dy)/dy;
+			  ix = (tlon - wbnd[0] + 0.5*dx)/dx;
+			  iy = (tlat - wbnd[2] + 0.5*dy)/dy;
 			  if (ix >= 0 && ix < gxdim 
 			    && iy >= 0 && iy < gydim)
 			    {

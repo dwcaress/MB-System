@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 5.4 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_buffer.c,v 5.5 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -39,6 +39,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.3  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -173,7 +176,7 @@
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 5.5 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;

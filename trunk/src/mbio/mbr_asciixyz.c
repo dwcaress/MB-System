@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_asciixyz.c	5/8/2002
- *	$Id: mbr_asciixyz.c,v 5.0 2002-05-29 23:37:38 caress Exp $
+ *	$Id: mbr_asciixyz.c,v 5.1 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  * Date:	May 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2002/05/29 23:37:38  caress
+ * Release 5.0.beta18
+ *
  *
  *
  */
@@ -71,7 +74,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_asciixyz.c,v 5.0 2002-05-29 23:37:38 caress Exp $";
+static char res_id[]="$Id: mbr_asciixyz.c,v 5.1 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error)

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 5.2 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbanglecorrect.c,v 5.3 2003-04-17 21:17:10 caress Exp $
  *
- *    Copyright (c) 1995, 2000 by
+ *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -47,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/03/22 21:14:16  caress
  * Trying to make release 5.0.beta0.
  *
@@ -172,7 +175,7 @@ struct mbanglecorrect_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.3 2003-04-17 21:17:10 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\

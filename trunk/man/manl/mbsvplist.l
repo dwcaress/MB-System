@@ -1,4 +1,4 @@
-.TH mbsvplist l "4 January 2000" "MB-System 5.0" "MB-System 5.0"
+.TH mbsvplist l "17 April 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsvplist\fP - List water sound velocity profiles in swath sonar data files.
 
@@ -6,7 +6,7 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsvplist\fP [\fB-D \fB-F\fIformat \fB-H \fB-I\fIfile \fB-O -V\fP]
+\fBmbsvplist\fP [\fB-D \fB-F\fIformat \fB-H \fB-I\fIfile \fB-O -V -Z\fP]
 
 .SH DESCRIPTION
 This program, \fBmbsvplist\fP, lists all water 
@@ -75,7 +75,7 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIfile\fP = "stdin".
+is given in the \fBMBIO\fP manual page. Default: \fIfile\fP = "datalist.mb-1".
 .TP
 .B \-O
 .br
@@ -90,6 +90,15 @@ Normally, \fBmbsvplist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
+.TP
+.B \-Z
+Normally, \fBmbsvplist\fP faithfully outputs the SVP data just
+as it is stored in the swath files. Rarely, sonars may store SVP
+data with a nonzero depth for the first sound speed value, a
+circumstance that causes problems with bathymetry recalculation
+using \fBmbprocess\fP. The \fB-Z\fP option causes \fBmbsvplist\fP
+to replace the first depth value with zero before outputting the
+SVP.
 
 .SH EXAMPLES
 Suppose one wishes to obtain an SVP list from a Simrad EM300 data file
@@ -101,14 +110,14 @@ obtain a listing to stdout, the following will suffice:
 The output will be as follows:
 
  Program mbsvplist
- Version $Id: mbsvplist.l,v 5.0 2001-01-04 21:43:50 caress Exp $
+ Version $Id: mbsvplist.l,v 5.1 2003-04-17 21:18:57 caress Exp $
  MB-system Version 5.0
 
  Searching mbari_1998_526_msn.mb57 for SVP records
  Outputting SVP to file: 
  ## Water Sound Velocity Profile (SVP)
  ## Output by Program mbsvplist
- ## Program Version $Id: mbsvplist.l,v 5.0 2001-01-04 21:43:50 caress Exp $
+ ## Program Version $Id: mbsvplist.l,v 5.1 2003-04-17 21:18:57 caress Exp $
  ## MB-System Version 5.0.alpha01
  ## Run by user <caress> on cpu <menard> at <Thu Jan  4 13:36:44 2001>
  ## Swath File: mbari_1998_526_msn.mb57

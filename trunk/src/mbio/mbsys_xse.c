@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.14 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.15 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2000, 2001, 2002 by 
+ *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.13  2002/04/02 00:33:50  caress
  * Fixed sidescan flipping (when bathymetry recalculated).
  *
@@ -99,7 +102,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.14 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.15 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_oicgeoda.h	1/8/99
- *	$Id: mbf_oicgeoda.h,v 5.1 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbf_oicgeoda.h,v 5.2 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002 by
+ *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	January 8, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.0  2000/12/01 22:48:41  caress
  * First cut at Version 5.0.
  *

@@ -36,7 +36,6 @@ pj_open_lib(char *name, char *mode) {
 	FILE *fid;
 	int n = 0;
 
-fprintf(stderr,"mode:%s name:%s\n", mode, name);
 	/* check if ~/name */
 	if (*name == '~' && name[1] == DIR_CHAR)
 		if (sysname = getenv("HOME")) {

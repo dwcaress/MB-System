@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.c	3.00	8/5/96
- *	$Id: mbsys_dsl.c,v 5.6 2002-09-25 20:41:04 caress Exp $
+ *	$Id: mbsys_dsl.c,v 5.7 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1996, 2000, 2002 by
+ *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/25 20:41:04  caress
+ * Fixed old DSL120 format.
+ *
  * Revision 5.5  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -92,7 +95,7 @@
 int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_dsl.c,v 5.6 2002-09-25 20:41:04 caress Exp $";
+ static char res_id[]="$Id: mbsys_dsl.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbsys_dsl_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

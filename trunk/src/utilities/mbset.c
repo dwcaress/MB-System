@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.21 2003-01-15 20:52:13 caress Exp $
+ *    $Id: mbset.c,v 5.22 2003-04-17 21:18:57 caress Exp $
  *
- *    Copyright (c) 2000, 2002 by
+ *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2003/01/15 20:52:13  caress
+ * Release 5.0.beta28
+ *
  * Revision 5.20  2002/10/02 23:56:06  caress
  * Release 5.0.beta24
  *
@@ -120,7 +123,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.21 2003-01-15 20:52:13 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.22 2003-04-17 21:18:57 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -345,6 +348,26 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "NAVINTERP:%d", &process.mbp_nav_algorithm);
 		    }
+		else if (strncmp(pargv[i], "NAVTIMESHIFT", 12) == 0)
+		    {
+		    sscanf(pargv[i], "NAVTIMESHIFT:%lf", &process.mbp_nav_timeshift);
+		    }
+		else if (strncmp(pargv[i], "NAVSHIFT", 8) == 0)
+		    {
+		    sscanf(pargv[i], "NAVSHIFT:%d", &process.mbp_nav_shift);
+		    }
+		else if (strncmp(pargv[i], "NAVOFFSETX", 10) == 0)
+		    {
+		    sscanf(pargv[i], "NAVOFFSETX:%lf", &process.mbp_nav_offsetx);
+		    }
+		else if (strncmp(pargv[i], "NAVOFFSETY", 10) == 0)
+		    {
+		    sscanf(pargv[i], "NAVOFFSETY:%lf", &process.mbp_nav_offsety);
+		    }
+		else if (strncmp(pargv[i], "NAVOFFSETZ", 10) == 0)
+		    {
+		    sscanf(pargv[i], "NAVOFFSETZ:%lf", &process.mbp_nav_offsetz);
+		    }
 
 		/* adjusted navigation merging */
 		else if (strncmp(pargv[i], "NAVADJMODE", 10) == 0)
@@ -490,7 +513,6 @@ the manual pages for mbprocess and mbset. \n\n";
 				}
 			}
 	
-
 		/* bathymetry editing */
 		else if (strncmp(pargv[i], "EDITSAVEMODE", 12) == 0)
 		    {
@@ -1016,14 +1038,24 @@ the manual pages for mbprocess and mbset. \n\n";
 		    fprintf(stderr,"  Draft merged from navigation file.\n");
 		else
 		    fprintf(stderr,"  Draft not merged from navigation file.\n");
+		fprintf(stderr,"  Navigation file:               %s\n", process.mbp_navfile);
+		if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
+		    fprintf(stderr,"  Navigation algorithm:          linear interpolation\n");
+		else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
+		    fprintf(stderr,"  Navigation algorithm:          spline interpolation\n");
+	    	fprintf(stderr,"  Navigation time shift:         %f\n", process.mbp_nav_timeshift);
+	    	if (process.mbp_nav_shift == MBP_NAV_ON)
+			{
+			fprintf(stderr,"  Navigation positions shifted.\n");
+			fprintf(stderr,"  Navigation offset x:       %f\n", process.mbp_nav_offsetx);
+			fprintf(stderr,"  Navigation offset y:       %f\n", process.mbp_nav_offsety);
+			fprintf(stderr,"  Navigation offset z:       %f\n", process.mbp_nav_offsetz);
+			}
+	    	else 
+			fprintf(stderr,"  Navigation positions not shifted.\n");
 		}
 	    else
 		fprintf(stderr,"  Navigation not merged from navigation file.\n");
-	    fprintf(stderr,"  Navigation file:               %s\n", process.mbp_navfile);
-	    if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
-		fprintf(stderr,"  Navigation algorithm:          linear interpolation\n");
-	    else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
-		fprintf(stderr,"  Navigation algorithm:          spline interpolation\n");
 
 	    fprintf(stderr,"\nAdjusted Navigation Merging:\n");
 	    if (process.mbp_navadj_mode == MBP_NAV_ON)

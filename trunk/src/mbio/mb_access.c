@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.6 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_access.c,v 5.7 2003-04-17 21:05:23 caress Exp $
 
- *    Copyright (c) 2000, 2002 by
+ *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.5  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -52,7 +55,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,

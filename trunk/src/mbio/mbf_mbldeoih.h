@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbldeoih.h	1/20/93
- *	$Id: mbf_mbldeoih.h,v 5.2 2002-04-06 02:43:39 caress Exp $
+ *	$Id: mbf_mbldeoih.h,v 5.3 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.1  2000/12/10 20:26:50  caress
  * Version 5.0.alpha02
  *

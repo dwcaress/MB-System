@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.13 2003-02-27 04:33:33 caress Exp $
+ *    $Id: mb_read_init.c,v 5.14 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2003/02/27 04:33:33  caress
+ * Fixed handling of SURF format data.
+ *
  * Revision 5.12  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -205,7 +208,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.13 2003-02-27 04:33:33 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.14 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c,v 5.2 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_proj.c,v 5.3 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2002 by
+ *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -31,6 +31,9 @@
  * Date:	July 16, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.1  2002/08/02 01:01:10  caress
  * 5.0.beta22
  *

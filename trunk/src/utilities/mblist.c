@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.10 2002-05-29 23:43:09 caress Exp $
+ *    $Id: mblist.c,v 5.11 2003-04-17 21:18:57 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/05/29 23:43:09  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.9  2002/04/06 02:53:45  caress
  * Release 5.0.beta16
  *
@@ -262,7 +265,7 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.10 2002-05-29 23:43:09 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.11 2003-04-17 21:18:57 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_emoldraw.c	3/4/2001
- *	$Id: mbr_emoldraw.c,v 5.5 2002-10-02 23:55:42 caress Exp $
+ *	$Id: mbr_emoldraw.c,v 5.6 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2001, 2002 by
+ *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	March 4, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/10/02 23:55:42  caress
+ * Release 5.0.beta24
+ *
  * Revision 5.4  2002/08/21 00:55:46  caress
  * Release 5.0.beta22
  *
@@ -93,7 +96,7 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type);
 /*--------------------------------------------------------------------*/
 int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.5 2002-10-02 23:55:42 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_register_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -224,7 +227,7 @@ int mbr_info_emoldraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.5 2002-10-02 23:55:42 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_info_emoldraw";
 	int	status = MB_SUCCESS;
 
@@ -293,7 +296,7 @@ int mbr_info_emoldraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.5 2002-10-02 23:55:42 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_alm_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

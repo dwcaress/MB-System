@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.9 2003-01-15 20:54:46 caress Exp $
+ *    $Id: mb_check_info.c,v 5.10 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2003/01/15 20:54:46  caress
+ * Release 5.0.beta28
+ *
  * Revision 5.8  2002/09/20 17:45:43  caress
  * Release 5.0.beta23
  *
@@ -90,7 +93,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.9 2003-01-15 20:54:46 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.10 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];

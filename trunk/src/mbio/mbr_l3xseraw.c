@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.11 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.12 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2000, 2001, 2002 by 
+ *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.10  2001/12/30 20:32:12  caress
  * Fixed array overflows in handling XSE data.
  *
@@ -120,7 +123,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.11 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.12 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -250,7 +253,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.11 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.12 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -319,7 +322,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.11 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.12 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

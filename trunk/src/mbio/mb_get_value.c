@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 5.2 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_get_value.c,v 5.3 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.1  2001/03/22 20:45:56  caress
  * Trying to make 5.0.beta0...
  *
@@ -97,7 +100,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 5.2 2002-09-18 23:32:59 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 5.3 2003-04-17 21:05:23 caress Exp $";
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/

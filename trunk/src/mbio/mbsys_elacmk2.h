@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elacmk2.h	6/10/97
- *	$Id: mbsys_elacmk2.h,v 5.5 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_elacmk2.h,v 5.6 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1997, 2000, 2002 by
+ *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.4  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *

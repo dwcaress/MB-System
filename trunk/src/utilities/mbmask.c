@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 5.2 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbmask.c,v 5.3 2003-04-17 21:18:57 caress Exp $
  *
- *    Copyright (c) 1993,1994, 2000 by
+ *    Copyright (c) 1993,1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -27,6 +27,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/03/22 21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -118,7 +121,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 5.3 2003-04-17 21:18:57 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";

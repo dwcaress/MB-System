@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.2 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbfilter.c,v 5.3 2003-04-17 21:17:10 caress Exp $
  *
- *    Copyright (c) 1995, 2000 by
+ *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/03/22 21:14:16  caress
  * Trying to make release 5.0.beta0.
  *
@@ -169,7 +172,7 @@ struct mbfilter_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.3 2003-04-17 21:17:10 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\

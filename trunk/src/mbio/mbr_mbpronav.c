@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 5.5 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 5.6 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002 by
+ *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.4  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -98,7 +101,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_register_mbpronav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -228,7 +231,7 @@ int mbr_info_mbpronav(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_info_mbpronav";
 	int	status = MB_SUCCESS;
 
@@ -297,7 +300,7 @@ int mbr_info_mbpronav(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;

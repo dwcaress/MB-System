@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.6 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.7 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002 by
+ *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.5  2002/02/22 09:03:43  caress
  * Release 5.0.beta13
  *
@@ -74,7 +77,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_singlebeam.h"
 
-static char res_id[]="$Id: mbsys_singlebeam.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+static char res_id[]="$Id: mbsys_singlebeam.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

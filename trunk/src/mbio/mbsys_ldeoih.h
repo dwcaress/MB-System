@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.h	3/2/93
- *	$Id: mbsys_ldeoih.h,v 5.3 2002-04-06 02:43:39 caress Exp $
+ *	$Id: mbsys_ldeoih.h,v 5.4 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	March 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.2  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *

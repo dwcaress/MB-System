@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.7 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.8 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 2000, 2001, 2002 by 
+ *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.6  2001/12/30 20:36:13  caress
  * Fixed array overflows in handling XSE data.
  *

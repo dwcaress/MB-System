@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hypc8101.h	8/21/94
- *	$Id: mbf_hypc8101.h,v 5.2 2003-01-15 20:51:48 caress Exp $
+ *	$Id: mbf_hypc8101.h,v 5.3 2003-04-17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1994, 2000, 2002 by
+ *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	August 21, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/01/15 20:51:48  caress
+ * Release 5.0.beta28
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 5.2 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbhistogram.c,v 5.3 2003-04-17 21:18:57 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/03/22 21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -92,7 +95,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 5.3 2003-04-17 21:18:57 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
