@@ -2,8 +2,11 @@ April 16, 1993
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 3.0  1993/04/22  16:04:29  dale
+# *** empty log message ***
+#
 
-RCS ID: $Id: README,v 3.0 1993-04-22 16:04:29 dale Exp $
+RCS ID: $Id: README,v 3.1 1993-04-22 16:09:21 dale Exp $
 
 MBSYSTEM 3.00 PRELIMINARY (ALPHA--) RELEASE
 
@@ -13,19 +16,25 @@ of multibeam data.  There are undoubtably numerous bugs
 in this software - the user should beware (and let us
 know about it!).
 
-This software is being distributed for two purposes:
+This software is being distributed (as an ALPHA release) at this time
+for three purposes:
 	1. So that future Hydrosweep users on the
-		R/V Ewing can become familiar with the
-		software they will use on the ship.
-	2. So that users desperately needing to process
-		existing Hydrosweep data will be able
-		to use the new functionality of the
-		MBSYSTEM version 3.
+	   R/V Ewing can become familiar with the
+	   software they will use on the ship.
 
-The program mbedit should not be made from scratch unless
-the user has access to the development tool Devguide
-(sold by Sun Microsystems) - an executable has been left
-in the src/mbedit directory.
+	2. So that users desperately needing to process
+           existing Hydrosweep data will be able
+	   to use the new functionality of the
+	   MBSYSTEM version 3.
+
+	3. So that we can get early feed-back from users to make 
+	   sure that problems are caught early and to open a dialog
+	   with real users.
+
+The program mbedit should not be made from scratch unless the user has
+access to the development tool Devguide (sold by Sun Microsystems or
+SunSoft?) - an executable (for Sun Sparc) has been left in the
+src/mbedit directory.
 
 The program mblevitus depends on a 16 MByte data file that
 is not included in this tarfile.  If users really need to
@@ -37,4 +46,6 @@ Good Luck!!
 
 Dave Caress
 caress@lamont.ldeo.columbia.edu
+Dale Chayes
+dale@ldeo.columbia.edu
 
