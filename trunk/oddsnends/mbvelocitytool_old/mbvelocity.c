@@ -12,7 +12,7 @@
 /*                                                          */
 /************************************************************/
 /*    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocity.c,v 4.3 1995-02-14 18:26:46 caress Exp $
+ *    $Id: mbvelocity.c,v 4.4 1995-04-04 22:19:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,10 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/02/14  18:26:46  caress
+ * Moved the widgets around, made the format defaults work, and made
+ * the program recognize the MB-System file suffix convention.
+ *
  * Revision 4.2  1994/11/18  18:58:19  caress
  * First gradient raytracing version.
  *
@@ -110,7 +114,7 @@
 #define MAX_WIDGETS (k_max_widget + 1)
 #define ERROR (-1)
 
-#define font1 "-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1"
+#define font1 "*-helvetica-bold-r-normal--*-100-*"
 
 #define charset XmSTRING_DEFAULT_CHARSET
 
@@ -187,7 +191,7 @@ int	open_type;
 /* Set these to the dimensions of your canvas drawing */
 /* area, minus 1, located in mbvelocity.uil.              */
 static int borders[4] =
-	{ 0, 1098, 0, 649 };
+	{ 0, 1019, 0, 550 };
 
 
 /************************************************************/
