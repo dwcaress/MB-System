@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.11 1995-08-17 16:39:53 caress Exp $
+#    $Id: install_makefiles,v 4.12 1996-09-09 15:17:50 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.11 1995-08-17 16:39:53 caress Exp $
+#   $Id: install_makefiles,v 4.12 1996-09-09 15:17:50 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.11  1995/08/17  16:39:53  caress
+# Revision for release 4.3.
+#
 # Revision 4.10  1995/08/07  17:25:26  caress
 # Moved to GMT V3.
 #
@@ -498,6 +501,9 @@ while (@files)
 			{
 			}
 		elsif (index($_,"cd mbvelocitytool",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbnavedit",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
 		elsif (index($_,"cd realtime",0) >= 0 && $REALTIME == 0)
