@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 4.4 1994-10-28 03:10:24 caress Exp $
+ *    $Id: mb_mem.c,v 4.5 1994-10-28 03:52:18 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -76,7 +76,7 @@ int	size;
 char	**ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 4.4 1994-10-28 03:10:24 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem.c,v 4.5 1994-10-28 03:52:18 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
 	int	iptr;
@@ -95,22 +95,10 @@ int	*error;
 		}
 
 	/* allocate memory */
-	if (size > 0 && *ptr == NULL)
+	*ptr = NULL;
+	if (size > 0)
 		{
 		if ((*ptr = (char *) malloc(size)) == NULL)
-			{
-			*error = MB_ERROR_MEMORY_FAIL;
-			status = MB_FAILURE;
-			}
-		else
-			{
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-			}
-		}
-	else if (size > 0)
-		{
-		if ((*ptr = (char *) realloc(*ptr, size)) == NULL)
 			{
 			*error = MB_ERROR_MEMORY_FAIL;
 			status = MB_FAILURE;
