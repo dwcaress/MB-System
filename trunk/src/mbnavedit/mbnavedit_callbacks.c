@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.8 1999-04-09 22:34:08 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.9 1999-04-14 04:33:10 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1999/04/09  22:34:08  caress
+ * Added time interval plot.
+ *
  * Revision 4.7  1998/10/05  19:17:39  caress
  * MB-System version 4.6beta
  *
@@ -770,6 +773,8 @@ void do_set_controls()
 
 	/* get and set size of canvas */
 	number_plots = 0;
+	if (plot_tint == MB_YES)
+		number_plots++;
 	if (plot_lon == MB_YES)
 		number_plots++;
 	if (plot_lat == MB_YES)
@@ -777,6 +782,12 @@ void do_set_controls()
 	if (plot_speed == MB_YES)
 		number_plots++;
 	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_roll == MB_YES)
+		number_plots++;
+	if (plot_pitch == MB_YES)
+		number_plots++;
+	if (plot_heave == MB_YES)
 		number_plots++;
 	XtVaSetValues(drawingArea, 
 			XmNwidth, plot_width, 
@@ -1268,6 +1279,12 @@ XtPointer call;
 		number_plots++;
 	if (plot_heading == MB_YES)
 		number_plots++;
+	if (plot_roll == MB_YES)
+		number_plots++;
+	if (plot_pitch == MB_YES)
+		number_plots++;
+	if (plot_heave == MB_YES)
+		number_plots++;
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
 		screen_height = plot_height;
@@ -1303,6 +1320,8 @@ XtPointer call;
 
 	/* get and set size of canvas */
 	number_plots = 0;
+	if (plot_tint == MB_YES)
+		number_plots++;
 	if (plot_lon == MB_YES)
 		number_plots++;
 	if (plot_lat == MB_YES)
@@ -1310,6 +1329,12 @@ XtPointer call;
 	if (plot_speed == MB_YES)
 		number_plots++;
 	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_roll == MB_YES)
+		number_plots++;
+	if (plot_pitch == MB_YES)
+		number_plots++;
+	if (plot_heave == MB_YES)
 		number_plots++;
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
@@ -1346,6 +1371,8 @@ XtPointer call;
 
 	/* get and set size of canvas */
 	number_plots = 0;
+	if (plot_tint == MB_YES)
+		number_plots++;
 	if (plot_lon == MB_YES)
 		number_plots++;
 	if (plot_lat == MB_YES)
@@ -1353,6 +1380,12 @@ XtPointer call;
 	if (plot_speed == MB_YES)
 		number_plots++;
 	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_roll == MB_YES)
+		number_plots++;
+	if (plot_pitch == MB_YES)
+		number_plots++;
+	if (plot_heave == MB_YES)
 		number_plots++;
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
@@ -1395,6 +1428,8 @@ XtPointer call;
 
 	/* get and set size of canvas */
 	number_plots = 0;
+	if (plot_tint == MB_YES)
+		number_plots++;
 	if (plot_lon == MB_YES)
 		number_plots++;
 	if (plot_lat == MB_YES)
@@ -1402,6 +1437,12 @@ XtPointer call;
 	if (plot_speed == MB_YES)
 		number_plots++;
 	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_roll == MB_YES)
+		number_plots++;
+	if (plot_pitch == MB_YES)
+		number_plots++;
+	if (plot_heave == MB_YES)
 		number_plots++;
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
@@ -1444,6 +1485,9 @@ XtPointer call;
 
 	/* get and set size of canvas */
 	number_plots = 0;
+	number_plots = 0;
+	if (plot_tint == MB_YES)
+		number_plots++;
 	if (plot_lon == MB_YES)
 		number_plots++;
 	if (plot_lat == MB_YES)
@@ -1451,6 +1495,12 @@ XtPointer call;
 	if (plot_speed == MB_YES)
 		number_plots++;
 	if (plot_heading == MB_YES)
+		number_plots++;
+	if (plot_roll == MB_YES)
+		number_plots++;
+	if (plot_pitch == MB_YES)
+		number_plots++;
+	if (plot_heave == MB_YES)
 		number_plots++;
 	screen_height = number_plots*plot_height;
 	if (screen_height <= 0)
@@ -2081,6 +2131,8 @@ do_toggle_vru(w, client_data, call_data)
 
 	/* get and set size of canvas */
 	number_plots = 0;
+	if (plot_tint == MB_YES)
+		number_plots++;
 	if (plot_lon == MB_YES)
 		number_plots++;
 	if (plot_lat == MB_YES)

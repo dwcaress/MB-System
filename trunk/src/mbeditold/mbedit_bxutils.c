@@ -589,7 +589,6 @@ static Boolean extractSegment
     Boolean		sep;
     int			dir;
     Boolean		done;
-    int			*lenUp;
     Boolean		checkDir;
     wchar_t		*commonWChars;
     wchar_t		emptyStrWcs[1];
@@ -606,7 +605,6 @@ static Boolean extractSegment
     dir = XmSTRING_DIRECTION_L_TO_R;
     sep = False;
     done = False;
-    lenUp = NULL;
     commonWChars = CStrCommonWideCharsGet();
 
     /*
@@ -1047,8 +1045,7 @@ static wchar_t *CStrCommonWideCharsGet()
 /*
  * Function:
  *	CONVERTER CvtStringToXmString
- *           and
- *	XmStringCvtDestroy
+ *
  * Description:
  *	Convert a string to an XmString. This allows a string contained in
  *	resource file to contain multiple fonts. The syntax for the string
@@ -1125,27 +1122,16 @@ static Boolean CvtStringToXmString
     }
     return(True);
 }
-static void XmStringCvtDestroy
-    ARGLIST((app, to, data, args, num_args))
-        UARG(XtAppContext, app)
-        ARG(XrmValue *, to)
-        UARG(XtPointer, data)
-        UARG(XrmValue *, args)
-        GRAU(Cardinal *, num_args)
-{
-    XmStringFree(*(XmString*)(to->addr));
-}
 
 /*
  * Function:
  *      CONVERTER CvtStringToXmStringTable
- *          and
- *      XmStringTableCvtDestroy
  *
  * Description:
- *	Convert a string to an XmString table. This allows a string contained in
- *	resource file to contain multiple fonts. The syntax for the string
- *	is:
+ *	Convert a string to an XmString table. This allows a string
+ *	contained in resource file to contain multiple fonts. The syntax
+ *	for the string is:
+ *
  *	   compound_string = [#[font-tag]]"string"[#[font-tag]"string"] ...
  *	   compound_string_table = [compound_string][,compound_string] ...
  *
@@ -1283,22 +1269,6 @@ static Boolean CvtStringToXmStringTable
     }
     return(True);
 }
-static void XmStringTableCvtDestroy
-    ARGLIST((app, to, data, args, num_args))
-        UARG(XtAppContext, app)
-        ARG(XrmValue *, to)
-        UARG(XtPointer, data)
-        UARG(XrmValue *, args)
-        GRAU(Cardinal *, num_args)
-{
-    XmString	*tblPtr = *(XmString**)(to->addr);
-
-    while (*tblPtr)
-    {
-	XmStringFree(*tblPtr);
-    }
-    XtFree((char*)(*(XmString**)(to->addr)));
-}    
 
 /*****************************************************************************
  *	GLOBAL CODE
@@ -1323,11 +1293,11 @@ void RegisterBxConverters
 {
     XtAppSetTypeConverter(appContext, XmRString, XmRXmString,
 			  (XtTypeConverter)CvtStringToXmString,
-			  NULL, 0, XtCacheNone, XmStringCvtDestroy);
+			  NULL, 0, XtCacheNone, NULL);
 
     XtAppSetTypeConverter(appContext, XmRString, XmRXmStringTable,
 			  (XtTypeConverter)CvtStringToXmStringTable,
-			  NULL, 0, XtCacheNone, XmStringTableCvtDestroy);
+			  NULL, 0, XtCacheNone, NULL);
 }
 
 /*
@@ -1345,19 +1315,17 @@ void RegisterBxConverters
  *      None
  */
 #ifndef IGNORE_CONVERT
-XtPointer CONVERT
+XtPointer BX_CONVERT
     ARGLIST((w, from_string, to_type, to_size, success))
         ARG(Widget, w)
         ARG(char *, from_string)
         ARG(char *, to_type)
-        ARG(int, to_size)
+        UARG(int, to_size)
         GRA(Boolean *, success)
 {
     XrmValue		fromVal, toVal;	/* resource holders		*/
     Boolean		convResult;	/* return value			*/
     XtPointer		val;		/* Pointer size return value    */
-
-    to_size = 0;
 
     /*
      * We will assume that the conversion is going to fail and change this
@@ -1463,7 +1431,20 @@ XtPointer CONVERT
     /*SUPPRESS 80*/
     return(val);
 }
-#endif
+
+#ifdef DEFINE_OLD_BXUTILS
+XtPointer CONVERT
+    ARGLIST((w, from_string, to_type, to_size, success))
+        ARG(Widget, w)
+        ARG(char *, from_string)
+        ARG(char *, to_type)
+        ARG(int, to_size)
+        GRA(Boolean *, success)
+{
+    return(BX_CONVERT(w, from_string, to_type, to_size, success));
+}
+#endif /* DEFINE_OLD_BXUTILS */
+#endif /* !IGNORE_CONVERT */
 
 /*
  * Function:
@@ -1480,8 +1461,7 @@ XtPointer CONVERT
  */
 
 #ifndef IGNORE_MENU_POST
-
-void MENU_POST
+void BX_MENU_POST
     ARGLIST((p, mw, ev, dispatch))
         UARG(Widget, p)
         ARG(XtPointer, mw)
@@ -1502,7 +1482,19 @@ void MENU_POST
     XmMenuPosition(m, e);
     XtManageChild(m);
 }
-#endif
+
+#ifdef DEFINE_OLD_BXUTILS
+void MENU_POST
+    ARGLIST((p, mw, ev, dispatch))
+        UARG(Widget, p)
+        ARG(XtPointer, mw)
+        ARG(XEvent *, ev)
+        GRAU(Boolean *, dispatch)
+{
+    BX_MENU_POST(p, mw, ev, dispatch);
+}
+#endif /* DEFINE_OLD_BXUTILS */
+#endif /* !IGNORE_MENU_POST */
 
 /*
  * Function:
@@ -1524,8 +1516,7 @@ void MENU_POST
  *          only when doing a set values, shadow colors are automatically
  *          calculated at creation time.
  */
-
-void SET_BACKGROUND_COLOR
+void BX_SET_BACKGROUND_COLOR
     ARGLIST((w, args, argcnt, bg_color))
         ARG(Widget, w)
         ARG(ArgList, args)
@@ -1619,6 +1610,18 @@ void SET_BACKGROUND_COLOR
 
     XtSetArg(args[*argcnt], XmNbackground, bg_color); (*argcnt)++;
 }
+
+#ifdef DEFINE_OLD_BXUTILS
+void SET_BACKGROUND_COLOR
+    ARGLIST((w, args, argcnt, bg_color))
+        ARG(Widget, w)
+        ARG(ArgList, args)
+        ARG(Cardinal *, argcnt)
+        GRA(Pixel, bg_color)
+{
+    BX_SET_BACKGROUND_COLOR(w, args, argcnt, bg_color);
+}
+#endif /* DEFINE_OLD_BXUTILS */
 
 /*
  * Function:
@@ -1789,7 +1792,7 @@ Cannot find widget %s\n", cbName, widget);
 }
 #endif /* _BX_WIDGETIDS_FROM_NAMES */
 
-XtPointer SINGLE
+XtPointer BX_SINGLE
     ARGLIST((val))
     GRA(float, val)
 {
@@ -1800,7 +1803,16 @@ XtPointer SINGLE
     return(pointer);
 }
 
-XtPointer DOUBLE
+#ifdef DEFINE_OLD_BXUTILS
+XtPointer SINGLE
+    ARGLIST((val))
+    GRA(float, val)
+{
+    return(BX_SINGLE(val));
+}
+#endif /* DEFINE_OLD_BXUTILS */
+
+XtPointer BX_DOUBLE
     ARGLIST((val))
     GRA(double, val)
 {
@@ -1810,6 +1822,15 @@ XtPointer DOUBLE
     if ( pointer != NULL ) *((double *)pointer) = val;
     return(pointer);
 }
+
+#ifdef DEFINE_OLD_BXUTILS
+XtPointer DOUBLE
+    ARGLIST((val))
+    GRA(double, val)
+{
+    return(BX_DOUBLE(val));
+}
+#endif /* DEFINE_OLD_BXUTILS */
 
 
 /****************************************************************************
@@ -1932,30 +1953,20 @@ typedef struct {
 /*
  * functions declarations
  */
+LFUNC(BxXpmCreatePixmapFromData, int, (Display * display,
+				       Drawable d,
+				       char **data,
+				       Pixmap * pixmap_return,
+				       Pixmap * shapemask_return,
+				       BxXpmAttributes * attributes));
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+LFUNC(BxXpmCreateImageFromData, int, (Display * display,
+				      char **data,
+				      XImage ** image_return,
+				      XImage ** shapemask_return,
+				      BxXpmAttributes * attributes));
 
-LFUNC(XpmCreatePixmapFromData, int, (Display * display,
-				     Drawable d,
-				     char **data,
-				     Pixmap * pixmap_return,
-				     Pixmap * shapemask_return,
-				     BxXpmAttributes * attributes));
-
-LFUNC(XpmCreateImageFromData, int, (Display * display,
-				    char **data,
-				    XImage ** image_return,
-				    XImage ** shapemask_return,
-				    BxXpmAttributes * attributes));
-
-LFUNC(XpmFreeAttributes, void, (BxXpmAttributes * attributes));
-
-#ifdef __cplusplus
-}                                       /* for C++ V2.0 */
-#endif
-
+LFUNC(BxXpmFreeAttributes, void, (BxXpmAttributes * attributes));
 
 typedef struct {
     unsigned int type;
@@ -2162,7 +2173,7 @@ GRA(unsigned int *, ui_return)
         return 0;
 }
 
-static int XpmCreatePixmapFromData
+static int BxXpmCreatePixmapFromData
 ARGLIST((display, d, data, pixmap_return, shapemask_return, attributes))
 ARG(Display *, display)
 ARG(Drawable, d)
@@ -2192,7 +2203,7 @@ GRA(BxXpmAttributes *,attributes)
     /*
      * create the images
      */
-    ErrorStatus = XpmCreateImageFromData(display, data, imageptr,
+    ErrorStatus = BxXpmCreateImageFromData(display, data, imageptr,
                                          shapeimageptr, attributes);
     if (ErrorStatus < 0)
         return (ErrorStatus);
@@ -2229,7 +2240,7 @@ GRA(BxXpmAttributes *,attributes)
 }
 
 
-static int XpmCreateImageFromData
+static int BxXpmCreateImageFromData
 ARGLIST((display, data, image_return, shapeimage_return, attributes))
 ARG(Display *,display)
 ARG(char **, data)
@@ -2263,7 +2274,7 @@ GRA(BxXpmAttributes *, attributes)
     if (ErrorStatus >= 0)
         xpmSetAttributes(&attrib, attributes);
     else if (attributes)
-        XpmFreeAttributes(attributes);
+        BxXpmFreeAttributes(attributes);
 
     xpmFreeInternAttrib(&attrib);
     XpmDataClose(&mdata);
@@ -3252,7 +3263,7 @@ GRA(BxXpmAttributes *, attributes)
  * but the structure itself
  */
 
-static void XpmFreeAttributes
+static void BxXpmFreeAttributes
 ARGLIST((attributes))
 GRA(BxXpmAttributes *, attributes)
 {
@@ -3585,27 +3596,31 @@ GRA(int, ncolors)
 
 #include <xpm.h>
 
-#define BxXpmColorError    XpmColorError
-#define BxXpmSuccess       XpmSuccess
-#define BxXpmOpenFailed    XpmOpenFailed
-#define BxXpmFileInvalid   XpmFileInvalid
-#define BxXpmNoMemory      XpmNoMemory
-#define BxXpmColorFailed   XpmColorFailed
+#define BxXpmColorError    		XpmColorError
+#define BxXpmSuccess       		XpmSuccess
+#define BxXpmOpenFailed    		XpmOpenFailed
+#define BxXpmFileInvalid   		XpmFileInvalid
+#define BxXpmNoMemory      		XpmNoMemory
+#define BxXpmColorFailed   		XpmColorFailed
 
-#define BxXpmVisual        XpmVisual
-#define BxXpmColormap      XpmColormap
-#define BxXpmDepth         XpmDepth
-#define BxXpmSize          XpmSize
-#define BxXpmHotspot       XpmHotspot
-#define BxXpmCharsPerPixel XpmCharsPerPixel
-#define BxXpmColorSymbols  XpmColorSymbols
-#define BxXpmRgbFilename   XpmRgbFilename
-#define BxXpmInfos         XpmInfos
+#define BxXpmVisual        		XpmVisual
+#define BxXpmColormap      		XpmColormap
+#define BxXpmDepth         		XpmDepth
+#define BxXpmSize          		XpmSize
+#define BxXpmHotspot       		XpmHotspot
+#define BxXpmCharsPerPixel 		XpmCharsPerPixel
+#define BxXpmColorSymbols  		XpmColorSymbols
+#define BxXpmRgbFilename   		XpmRgbFilename
+#define BxXpmInfos         		XpmInfos
 
-#define BxXpmReturnPixels  XpmReturnPixels
-#define BxXpmReturnInfos   XpmReturnInfos
+#define BxXpmReturnPixels  		XpmReturnPixels
+#define BxXpmReturnInfos   		XpmReturnInfos
 
-typedef XpmAttributes      BxXpmAttributes;
+#define BxXpmCreatePixmapFromData	XpmCreatePixmapFromData
+#define BxXpmCreateImageFromData	XpmCreateImageFromData
+#define BxXpmFreeAttributes		XpmFreeAttributes
+
+typedef XpmAttributes      		BxXpmAttributes;
 
 #endif /* USE_XPM_LIBRARY */
     
@@ -3630,7 +3645,7 @@ GRA(char **, pixmapName)
 				      DefaultScreen(XtDisplay(w)));
     attributes.valuemask = (BxXpmDepth | BxXpmColormap | BxXpmVisual);
     
-    returnValue = XpmCreatePixmapFromData(XtDisplay(w),
+    returnValue = BxXpmCreatePixmapFromData(XtDisplay(w),
 					  DefaultRootWindow(XtDisplay(w)),
 					  pixmapName, &pixmap, &shape,
 					  &attributes);
@@ -3715,7 +3730,7 @@ ARG(Widget, parent)
 GRA(UIAppDefault *, defs)
 {
     XrmQuark		cQuark;
-    XrmQuark		rsc[6];
+    XrmQuark		rsc[10];
     XrmRepresentation	rep;
     XrmValue		val;
     XrmDatabase		rdb;
@@ -3761,14 +3776,14 @@ GRA(UIAppDefault *, defs)
 		 * a simple widget name, but a sub specification so
 		 * we need to split this into several quarks.
 		 */
-		char *copy = strdup(defs->wName), *ptr;
+		char *copy = XtNewString(defs->wName), *ptr;
 
 		for( ptr = strtok(copy, "."); ptr != NULL;
 		     ptr = strtok(NULL, ".") )
 		{
 		    rsc[rscIdx++] = XrmStringToQuark(ptr);
 		}
-		free(copy);
+		XtFree(copy);
 	    }
 	}
 
@@ -3782,7 +3797,7 @@ GRA(UIAppDefault *, defs)
 
 	if (XrmQGetResource(rdb, rsc, rsc, &rep, &val))
 	{
-	    defs->value = strdup((char*)val.addr);
+	    defs->value = XtNewString((char*)val.addr);
 	}
 	defs++;
     }
@@ -3795,18 +3810,18 @@ GRA(UIAppDefault *, defs)
  * resource line (use .).
  */
 void
-SetAppDefaults ARGLIST((w, defs, inst_name))
+SetAppDefaults ARGLIST((w, defs, inst_name, override_inst))
 ARG(Widget,w)
 ARG(UIAppDefault*, defs)
-GRA(char*, inst_name)
+ARG(char*, inst_name)
+GRA(Boolean, override_inst)
 {
    Display*		dpy = XtDisplay ( w );	/*  Retrieve the display */
    XrmDatabase		rdb = NULL;		/* A resource data base */
    char			lineage[1000];
    char			buf[1000];
    Widget       	parent;
-   char*		wName;
-   
+
    /* Protect ourselves */
    
    if (inst_name == NULL) return;
@@ -3833,25 +3848,27 @@ GRA(char*, inst_name)
    }
 
    /*  Add the Component resources, prepending the name of the component */
-
    while (defs->wName != NULL)
    {
-       if ( !strcmp(defs->wName, "" ) ) wName = inst_name;
-       else wName = (char *)(defs->wName);
-
+       int name_length;
        /*
-	* See if we need to deal with this record.
-	*  (1) If we've been passed an instance name (meaning we're
-	*      creating a nested instance of a class), then make sure
-	*      we're dealing with the proper nested instance.
-	*  (2) If we're not creating a nested instance, then
-	*      ignore resources for nested instances.
-	*  (3) We didn't find a default value in the app-defaults
+        * We don't deal with the resource if it isn't found in the
+	* Xrm database at class initializtion time (in initAppDefaults).
+	* Special handling of class instances.
 	*/
-
-       if ((inst_name && strcmp(inst_name, wName)) ||		/* (1) */
-	   (!inst_name && defs->cInstName) ||			/* (2) */
-	   (defs->value == NULL))				/* (3) */
+       if (strchr(defs->wName, '.'))
+       {
+	   name_length = strlen(defs->wName) - 
+		strlen(strchr(defs->wName, '.'));
+       }
+       else
+       {
+	   name_length = strlen(defs->wName) > strlen(inst_name) ?
+	       strlen(defs->wName) : strlen(inst_name);
+       }
+       if (defs->value == NULL ||
+	   override_inst && strncmp(inst_name, defs->wName, name_length) ||
+	   ! override_inst && defs->cInstName != NULL)
        {
 	   defs++;
 	   continue;
@@ -3865,14 +3882,15 @@ GRA(char*, inst_name)
 
 	   if (*defs->cInstName != '\0')
 	   {
-	       sprintf(buf, "%s.%s*%s.%s: %s",
-		       lineage, wName, defs->cInstName, defs->wRsc,
-		       defs->value);
+	       sprintf(buf, "%s*%s*%s.%s: %s",
+		       lineage, defs->wName, defs->cInstName, 
+			defs->wRsc, defs->value);
 	   }
 	   else
 	   {
-	       sprintf(buf, "%s.%s.%s: %s",
-		       lineage, wName, defs->wRsc, defs->value);
+	       sprintf(buf, "%s*%s.%s: %s",
+		       lineage, defs->wName, defs->wRsc, 
+			defs->value);
 	   }
        }
        else if (*defs->wName != '\0')
@@ -3883,7 +3901,7 @@ GRA(char*, inst_name)
        else
        {
 	   sprintf(buf, "%s*%s.%s: %s", 
-		   lineage, inst_name, defs->wRsc, defs->value);
+		   lineage, inst_name,defs->wRsc, defs->value);
        }
 
        XrmPutLineResource( &rdb, buf );
