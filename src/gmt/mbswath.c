@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.15 1995-11-15 22:32:55 caress Exp $
+ *    $Id: mbswath.c,v 4.16 1995-11-22 22:13:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,10 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1995/11/15  22:32:55  caress
+ * Now handles non-region bounds (lower left point
+ * + upper right point) properly.
+ *
  * Revision 4.14  1995/08/17  14:49:26  caress
  * Revision for release 4.3.
  *
@@ -210,10 +214,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.15 1995-11-15 22:32:55 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.16 1995-11-22 22:13:02 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
-	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
+	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
 
 	extern char *optarg;
 	extern int optkind;
@@ -285,6 +289,7 @@ char **argv;
 	double	factor;
 	double	default_depth = 3000.0;
 	int	mode = MBSWATH_BATH;
+	int	bathy_in_feet = MB_NO;
 	int	start;
 	int	plot;
 	int	done;
@@ -392,7 +397,7 @@ char **argv;
 		}
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:KL:l:MN:n:OPp:Q:R:S:s:T:t:UVvX:x:Y:y:Z:z:012")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:KL:l:MN:n:OPp:Q:R:S:s:T:t:UVvWwX:x:Y:y:Z:z:012")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -467,6 +472,10 @@ char **argv;
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'W':
+		case 'w':
+			bathy_in_feet = MB_YES;
 			break;
 		case 'Z':
 		case 'z':
@@ -564,6 +573,7 @@ char **argv;
 		fprintf(stderr,"dbg2       footprint factor: %f\n",factor);
 		fprintf(stderr,"dbg2       default depth:    %f\n",default_depth);
 		fprintf(stderr,"dbg2       mode:             %d\n",mode);
+		fprintf(stderr,"dbg2       bathy_in_feet:    %d\n",bathy_in_feet);
 		}
 
 	/* if help desired then print it and exit */
@@ -972,6 +982,16 @@ char **argv;
 				    amp[i] = ampscale*(amplog - ampmin)
 					   /(ampmax - ampmin);
 				    }
+				}
+			}
+
+		/* scale bathymetry if necessary */
+		if (error == MB_ERROR_NO_ERROR
+			&& bathy_in_feet == MB_YES)
+			{
+			for (i=0;i<beams_bath;i++)
+				{
+				bath[i] = 0.3048 * bath[i];
 				}
 			}
 
