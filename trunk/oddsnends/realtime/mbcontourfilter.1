@@ -1,0 +1,176 @@
+.TH mbcontourfilter 1 "25 August 1993"
+.SH NAME
+mbcontourfilter - Read multibeam bathymetry data and generate
+a contoured swath plot using generic ascii plot calls which
+can be interpreted by other programs.
+
+.SH VERSION
+Version 3.00
+
+.SH SYNOPSIS
+\fBmbcontourfilter\fP \fB-F\fIformat \fB-R\fIwest/east/south/north \fP[\fB-A\fItime_tick/time_annot/date_annot/time_tick_len \fB-B\fIyr/mo/da/hr/mn/sc \fB-C\fIcontour/color/tick/label/ticklen/labelhgt \fB-E\fIyr/mo/da/hr/mn/sc \fB-J\fIscale \fB-L\fIlonflip \fB-N\fInumcont \fB-P\fIpings \fB-S\fIspeed \fB-T\fItimegap \fB-V -H\fP]
+
+.SH DESCRIPTION
+\fBmbcontourfilter\fP reads multibeam bathymetry data from stdin and
+outputs annotated contours and shiptracks in ascii plot call format to stdout.
+This program uses the mbio multibeam bathymetry i/o library
+for reading and the mb_contour library for contouring.
+The data input may be averaged or windowed in time and space
+before it is contoured.  The primary purpose of \fBmbcontourfilter\fP
+is to serve as part of a real-time plotting system. Real-time data
+is piped into \fBmbcontourfilter\fP, which in turn pipes contours
+in the form of ascii plot calls to a plotting filter specific to the
+local plotting hardware. See the manual pages for \fBmbplotfilter\fP and
+\fBmbm_calcomp_plot\fP for a description of realtime pen plotting on
+the R/V Maurice Ewing.
+
+.SH AUTHORSHIP
+David W. Caress (caress@lamont.ldeo.columbia.edu)
+.br
+Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+.br
+Lamont-Doherty Earth Observatory
+.br
+Palisades, NY 10964
+
+.SH OPTIONS
+.TP
+.B \fB-F\fIformat\fP
+Sets the format for the input multibeam data using 
+\fBMBIO\fP integer format identifiers. 
+This program uses the \fBMBIO\fP library and will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+.TP
+.B \fB-R\fIwest/east/south/north\fP
+Sets the longitude and latitude bounds of the plotting.  A mercator
+projection is used.
+.TP
+.B \fB-A\fItime_tick/time_annot/date_annot/time_tick_len\fP
+Sets the parameters governing the annotation of the shiptrack.  
+Time marks are made with "X" marks along the shiptrack; annotated
+time marks show the time in HH:MM format next to the time mark
+and annotated date marks show the time and julian day in
+HH:MM/DDD format.  The "X" marks are
+twice \fItime_tick_len\fP inches high for normal time marks and 
+three times \fItime_tick_len\fP inches high for annotated time or date
+marks.  The interval of time ticks, annotated time ticks, and 
+annotated date ticks are given in hours by 
+\fItime_tick\fP, \fItime_annot\fP, and \fIdate_annot\fP, respectively.
+Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; 
+\fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1.
+.TP
+.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored. 
+Default = 1962/2/21/0/0/0.
+.TP
+.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored. 
+Default = 2062/2/21/0/0/0.
+.TP
+.B \fB-C\fIcontour/color/tick/label/ticklen/labelhgt\fP
+Sets the basic contouring parameters, including the contour
+interval \fIcontour\fP, the color change interval \fIcolor \fP,
+the tickmarked contour interval \fItick\fP, the contour label
+interval \fIlabel\fP, the tickmark length \fItick\fP, and the
+label height \fIlabelhgt\fP.  NOTE: \fBmbcontfilter\fI
+works in total ignorance of the scale at which the contours
+will be plotted and produces those contours in longitude and 
+latitude.  Similarly, the tickmark length and the
+label height are specified in degrees of longitude. Values 
+of \fIticklen\fP=0.001 and \fIlabelhgt\fP=0.003 work well for
+24 inch per degree longitude plots.
+Default \fIcontour\fP=25, \fIcolor\fP=100, \fItick\fP=100, 
+\fIlabel\fP=100, \fIticklen\fP=0.001, \fIlabelhgt\fP=0.003.
+.TP
+.B \fB-J\fIscale\fP
+Sets the scale of the Mercator projection used in inches
+per degree longitude.
+Default: \fIscale\fP = 4.
+.TP
+.B \fB-L\fIlonflip\fP
+Sets the range of the longitude values returned.
+If \fIlonflip\fP=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If \fIlonflip\fP=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If \fIlonflip\fP=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: \fIlonflip\fP = 0.
+.TP
+.B \fB-N\fInumcont\fP
+Sets the number of averaged pings to be read in before contouring.
+After each contouring event involving \fInumcont\fP pings, the values
+of the last ping are set to the first ping of the next set so that
+the contours are continuous.  Can be as small as 2 or as large as
+is desired.  Default \fInumcont\fP=5.
+.TP
+.B \fB-P\fIpings\fP
+Sets the ping averaging of the input data. If \fIpings\fP = 1, then
+no ping averaging is performed. If \fIpings\fP > 0, then
+that number of input pings will be averaged to produce one output
+ping.  If \fIpings\fP = 0, then the ping averaging will automatically
+be done so that the along-track ping spacing is equal to the across-track
+beam spacing.
+Default: \fIpings\fP = 1 (no ping averaging).
+.TP
+.B \fB-S\fIspeed\fP
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+the input data; pings associated with a smaller ship speed will not be
+read. Default: \fIspeed\fP = 0.
+.TP
+.B \fB-T\fItimegap\fP
+Sets the maximum time gap in minutes between adjacent pings allowed before
+the data is considered to have a gap. Default: \fItimegap\fP = 1.
+.TP
+.B \fB-V\fIverbose\fP
+Causes status messages to be printed to stderr as the program runs.
+.TP
+.B \fB-H\fP
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+
+.SH EXAMPLES
+On the R/V Maurice Ewing, the real-time hydrosweep data 
+is logged in a file which changes each day.  In order to make a 
+contour pen plot of the real time data in a file called
+/net/moray/logger/data/9305hs.d237 the following approach can
+be used:
+ 	tail -0f /net/moray/logger/data/9305hs.d237 | mbcontourfilter 
+ 		-F5 -R-43.0/-42.0/10.08333/10.916667 -J30 
+ 		-C50/200/200/200/.02/.07 -A0.25/1.0/4.0 | mbplotfilter 
+ 		 -R-43.0/-42.0/10.08333/10.916667 -W30 | ccgr -d /dev/ttyb
+.br
+As invoked, the tail command will read through the input file until it
+reaches the end and then enter an infinite loop, reading new 
+data as it is added to the end of the file.  The data is piped to 
+\fBmbcontourfilter\fP, which generates contours, shiptracks, and 
+annotations as ascii plot calls printed to stdout.  The ascii plot calls
+are piped to \fBmbplotfilter\fP, which interprets them in terms of
+Lamont metafile graphics calls.  The metafile graphics are piped to
+a program called ccgr, which translates them to Calcomp pen
+plotter commands and sends those commands to a serial port.  Assuming
+that the plotter is connected to the port used, the plotter then
+draws the contours on paper.
+
+In order to use this system for pen plotting in other environments or
+with other pen plotters, the user would need to replace mbplotfilter and
+ccgr with one or more programs to translate the ascii plot calls to
+the required plot call format.
+
+The format of the plot calls generated by \fBmbcontourfilter\fP is
+simple.  Four calls are understood:
+ 	init
+ 	newp ipen
+ 	plot x y penup
+ 	stop
+.br
+Here ipen is the pen number to be used (usually 1-4), x and y are the plot
+coordinates in longitude and latitude, and penup indicates whether
+the pen is up (penup=3) or down (penup=2) during the pen move.
+
+.SH BUGS
+Many but hopefully minor.
