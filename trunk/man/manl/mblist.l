@@ -167,7 +167,7 @@ Default: \fIlonflip\fP = 0.
 \fIstart_beam/end_beam\fP or \fIA\fP
 .br
 Determines the range of bathymetry beams for which records will be output.
-If \fB-N\fP\fIA\fP is given, then a record
+If \fB-M\fP\fIA\fP is given, then a record
 will be output for each valid beam. If \fIstart_beam/end_beam\fP
 is specified, then records will be output only for beams in this
 range. Beam numbers start with zero on the port side. 
