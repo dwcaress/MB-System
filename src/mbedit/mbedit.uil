@@ -765,10 +765,10 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 314;
-        XmNy = 631;
+        XmNx = 336;
+        XmNy = 284;
         XmNwidth = 426;
-        XmNheight = 300;
+        XmNheight = 344;
     };
     controls {
          managed XmScrolledWindow scrolledWindow_filters;
@@ -788,7 +788,7 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "Filters";
 !(BX)        XmNwidth = 426;
-!(BX)        XmNheight = 300;
+!(BX)        XmNheight = 344;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_filters;
@@ -978,10 +978,10 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 259;
-        XmNy = 714;
+        XmNx = 281;
+        XmNy = 367;
         XmNwidth = 536;
-        XmNheight = 135;
+        XmNheight = 179;
     };
     controls {
          managed XmPushButton pushButton_annotation_dismiss;
@@ -999,7 +999,7 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
 !(BX)object dialogShell_annotation : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        XmNwidth = 536;
-!(BX)        XmNheight = 135;
+!(BX)        XmNheight = 179;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_annotation;
@@ -1190,10 +1190,10 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 259;
-        XmNy = 710;
+        XmNx = 172;
+        XmNy = 599;
         XmNwidth = 536;
-        XmNheight = 142;
+        XmNheight = 186;
     };
     controls {
          managed XmPushButton pushButton_buffer_dismiss;
@@ -1212,7 +1212,7 @@ object bulletinBoard_buffer : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "Buffer Controls";
 !(BX)        XmNwidth = 536;
-!(BX)        XmNheight = 142;
+!(BX)        XmNheight = 186;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_buffer;
@@ -1308,10 +1308,10 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 371;
-        XmNy = 701;
+        XmNx = 393;
+        XmNy = 354;
         XmNwidth = 311;
-        XmNheight = 161;
+        XmNheight = 205;
     };
     controls {
          managed XmLabel label_error_two;
@@ -1332,7 +1332,7 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "Error";
 !(BX)        XmNwidth = 311;
-!(BX)        XmNheight = 161;
+!(BX)        XmNheight = 205;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_error;
@@ -1428,10 +1428,10 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 311;
-        XmNy = 715;
+        XmNx = 333;
+        XmNy = 368;
         XmNwidth = 431;
-        XmNheight = 133;
+        XmNheight = 177;
     };
     controls {
          managed XmLabel label_editsave_one;
@@ -1454,7 +1454,7 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
 !(BX)        XmNtitle = "Use MBedit edit save file?";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 431;
-!(BX)        XmNheight = 133;
+!(BX)        XmNheight = 177;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_editsave;
@@ -1472,9 +1472,10 @@ object label_message : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("MBedit is loading data...");
+        XmNrecomputeSize = false;
         XmNx = 10;
         XmNy = 10;
-        XmNwidth = 360;
+        XmNwidth = 480;
         XmNheight = 20;
     };
     controls {
@@ -1514,10 +1515,10 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 337;
-        XmNy = 738;
-        XmNwidth = 379;
-        XmNheight = 86;
+        XmNx = 159;
+        XmNy = 206;
+        XmNwidth = 496;
+        XmNheight = 112;
     };
     controls {
          managed XmLabel label_pleasewait;
@@ -1538,8 +1539,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
 !(BX)        XmNtitle = "Please Wait...";
 !(BX)        XmNmwmInputMode = MWM_INPUT_MODELESS;
 !(BX)        XmNdeleteResponse = XmUNMAP;
-!(BX)        XmNwidth = 379;
-!(BX)        XmNheight = 86;
+!(BX)        XmNwidth = 496;
+!(BX)        XmNheight = 112;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_message;
@@ -1784,10 +1785,10 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 553;
+        XmNx = 206;
+        XmNy = 569;
         XmNwidth = 473;
-        XmNheight = 457;
+        XmNheight = 501;
     };
     controls {
          managed XmLabel label_about_create1;
@@ -1814,7 +1815,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
 !(BX)        XmNtitle = "About MBedit";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 473;
-!(BX)        XmNheight = 457;
+!(BX)        XmNheight = 501;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_about;
@@ -2099,10 +2100,10 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 429;
-        XmNy = 630;
+        XmNx = 451;
+        XmNy = 283;
         XmNwidth = 196;
-        XmNheight = 302;
+        XmNheight = 346;
     };
     controls {
          managed XmTextField textfield_day;
@@ -2134,7 +2135,7 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
 !(BX)        XmNtitle = "Go To Specified Time";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 196;
-!(BX)        XmNheight = 302;
+!(BX)        XmNheight = 346;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_goto;
@@ -2420,10 +2421,10 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 256;
-        XmNy = 527;
+        XmNx = 67;
+        XmNy = 589;
         XmNwidth = 541;
-        XmNheight = 489;
+        XmNheight = 533;
     };
     controls {
          managed XmFileSelectionBox fileSelectionBox;
@@ -2447,7 +2448,7 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
 !(BX) "e";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 541;
-!(BX)        XmNheight = 489;
+!(BX)        XmNheight = 533;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_file;
@@ -3678,7 +3679,7 @@ object mbedit_bboard : XmBulletinBoard widget {
         XmNmarginWidth = 0;
         XmNresizePolicy = XmRESIZE_ANY;
         XmNwidth = 1014;
-        XmNheight = 665;
+        XmNheight = 709;
     };
     controls {
          managed XmBulletinBoard controls_mbedit;
@@ -3695,10 +3696,10 @@ object mbedit_bboard : XmBulletinBoard widget {
 object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 20;
-        XmNy = 351;
+        XmNx = 42;
+        XmNy = 69;
         XmNwidth = 1014;
-        XmNheight = 665;
+        XmNheight = 709;
     };
     controls {
         Xm_Separator1 {
@@ -3761,10 +3762,10 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        XmNiconName = "MBedit";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
-!(BX)        XmNx = 20;
-!(BX)        XmNy = 449;
+!(BX)        XmNx = 42;
+!(BX)        XmNy = 69;
 !(BX)        XmNwidth = 1014;
-!(BX)        XmNheight = 665;
+!(BX)        XmNheight = 709;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmMainWindow window_mbedit;
