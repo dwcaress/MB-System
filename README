@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA24 README FILE:
+MB-SYSTEM VERSION 5.0.BETA25 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta24 release of the MB-System software package for 
+5.0.beta25 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta25     October 15, 2002
 Version 5.0.beta24     October 4, 2002
 Version 5.0.beta23     September 20, 2002
 Version 5.0.beta22     August 30, 2002
@@ -106,6 +107,13 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA25 RELEASE NOTES:
+
+The version 5.0.beta25 release of MB-System includes
+one significant bug fix:
+  - A problem with the SeaBeam Classic formats (11-16)
+    that caused core dumps in mbgrid has been fixed.
 
 MB-SYSTEM VERSION 5.0.BETA24 RELEASE NOTES:
 
@@ -1002,10 +1010,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.29 2002-10-04 21:29:40 caress Exp $
+RCS ID: $Id: README,v 5.30 2002-10-15 19:22:24 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.29  2002/10/04 21:29:40  caress
+Release 5.0.beta24
+
 Revision 5.28  2002/10/02 23:51:50  caress
 Release 5.0.beta24
 
