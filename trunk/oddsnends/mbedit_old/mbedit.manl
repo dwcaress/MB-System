@@ -1,19 +1,20 @@
-.TH mbedit l "31 October 1994"
+.TH mbedit l "14 February 1995"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
-\fBmbedit\fP [\fB-F\fIformat \fB-I\fIinfile \fB-V -H\fP]
+\fBmbedit\fP [\fB-B\fP \fB-F\fIformat \fB-I\fIinfile \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBMBEDIT\fP is an interactive editor used to identify and flag 
 artifacts in multibeam bathymetry data. Once a file has been
 read in, \fBMBEDIT\fP displays the bathymetry profiles
 from several pings, allowing the user to identify and flag anomalous
-beams.  The output filename is the input filename with ".ed" appended.
+beams. The edited is usually output to a file, but the program
+can be operated in a "browse" mode where no data is output.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -25,9 +26,9 @@ Lamont-Doherty Earth Observatory
 Palisades, NY 10964
 .br
 .br
-Rod McCabe (mccabe@iris-2.asa.org)
+Rod McCabe (mccabe@endeavor.asa.org)
 .br
-David Brock (brockda@iris-2.asa.org)
+David Brock (brockda@endeavor.asa.org)
 .br
 Antarctic Support Associates
 .br
@@ -36,6 +37,12 @@ Antarctic Support Associates
 Englewood, CO
 
 .SH OPTIONS
+.TP
+.B \fB-B\fP
+Starts up the program in "browse" mode. If a file is opened
+in browse mode (either at startup or later), none
+of the edited data will be output to a file. The default
+is to output the edited data to a file.
 .TP
 .B \fB-F\fIformat\fP
 Sets the format at startup for the input and output multibeam data using 
@@ -70,8 +77,24 @@ and a large amount of other information.
 .TP
 .B \fBFile\fP
 This button brings up a popup window which allows the user to
-specify the input multibeam bathymetry data file and its \fBMBIO\fP
-format id.  When a valid file is specified, as much data as will fit
+specify the input multibeam bathymetry data file, its \fBMBIO\fP
+format id, the output mode, and the output filename. 
+This program uses the \fBMBIO\fP library and 
+will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data
+formats currently supported by \fBMBIO\fP and their
+identifier values is given in the \fBMBIO\fP manual page. 
+If the multibeam data file is named using the \fBMB-System\fP
+suffix convention (format 11 files end with ".mb11", format
+41 files end with ".mb41", etc.), then the program will
+automatically use the appropriate format id and the default
+output filename will have an "e.mbXX" suffix; otherwise the
+format must be set by the user and the default output filename
+will be \fIinfile\fP with ".ed" appended.
+The popup window also allows the output mode to be set to "browse"
+so that no data is output. 
+When a valid file is specified and the \fBOK\fP button
+is clicked, as much data as will fit
 into the data buffer is read and several pings are displayed as 
 stacked bathymetry profiles.
 .TP
@@ -115,12 +138,22 @@ key macros (see the keyboard action section):
  	Restore:		'E', 'e', 'O', 'o' 
 .TP
 .B \fBX Scale\fP
-This slider sets the cross track distance scale in m/100 pixels.
-.TP
+This slider sets the width of the plot in meters; in general this
+value should be slightly larger than the swath width of the data
+being edited. If a particular value is desired which cannot be
+obtained by dragging the slider (e.g., the user wants a plot
+width of 10 meters but the slider jumps from 1 to 47), the slider
+can be changed by increments of 1 by clicking with the left button
+inside the slider area, but not on the slider itself.
+ .TP
 .B \fBVertical Exageration\fP
 This slider sets the depth scale in terms of vertical exageration.
 The depth scale will change as the cross track distance scale is
 changed to maintain the same vertical exageration.
+If a particular value is desired which cannot be
+obtained by dragging the slider, the slider
+can be changed by increments of 0.01 by clicking with the left button
+inside the slider area, but not on the slider itself.
 .TP
 .B \fBNumber of pings shown\fP
 This slider sets the number of pings shown at a time.
@@ -142,10 +175,19 @@ If the end of the file is reached during the search, the file will
 be closed.
 .TP
 .B \fBX Axis Tick Interval\fP
-This textitem sets the tick interval in m for the cross track distance axis.
+This textitem sets the tick interval in m for the cross track 
+distance axis.
+If a particular value is desired which cannot be
+obtained by dragging the slider, the slider
+can be changed by increments of 1 by clicking with the left button
+inside the slider area, but not on the slider itself.
 .TP
 .B \fBY Axis Tick Interval\fP
 This textitem sets the tick interval in m for the depth axis.
+If a particular value is desired which cannot be
+obtained by dragging the slider, the slider
+can be changed by increments of 1 by clicking with the left button
+inside the slider area, but not on the slider itself.
 .TP
 .B \fBData Buffer Size\fP
 This slider sets the number of data records which can be held 
@@ -225,7 +267,4 @@ The edit mode can also be set using the \fBMode\fP button.
 \fBmbunclean\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
-It might be better to define the cross track distance scale
-in terms of the swath width that is desired rather than in m/100 pixels.
-User defined default values such as the default data format id
-are not used.
+Much fewer than before.

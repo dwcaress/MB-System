@@ -1,6 +1,6 @@
 /*********************************************************
 *                                                        *
-* $Id: mbedit.uil,v 4.0 1994-10-21 11:55:41 caress Exp $                                                   *
+* $Id: mbedit.uil,v 4.1 1995-02-14 19:16:04 caress Exp $                                                   *
 *                                                        *
 * WRITTEN FOR ANTARCTIC SUPPORT ASSOCIATES BY Rod McCabe *
 *                                                        *
@@ -15,6 +15,9 @@
 * Operating system : UNIX                                *
 *                                                        *
 * $Log: not supported by cvs2svn $
+# Revision 4.0  1994/10/21  11:55:41  caress
+# Release V4.0
+#
 # Revision 1.1  1994/07/14  21:15:08  brockda
 # Initial revision
 #                                                  *
@@ -52,6 +55,8 @@ procedure
         set_mode_pick		(integer);
         set_mode_erase		(integer);
         set_mode_restore	(integer);
+        set_output_output	(integer);
+        set_output_browse	(integer);
         apply_goto_button	(integer);
         cancel_goto_button	(integer);
 	do_x_interval		(integer);
@@ -338,7 +343,7 @@ object slider_scale_x_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("X Scale (m/100 pixels):  1");
+        XmNlabelString = compound_string("Acrosstrack Plot width (m):  1");
 	XmNfontList = k_menu_font;
         XmNx = 5;
         XmNy = 15;
@@ -349,14 +354,15 @@ object slider_scale_x : XmScale widget
 {
     arguments 
     {
-        XmNmaximum = 4200;
+        XmNmaximum = 20000;
         XmNminimum = 1;
         XmNorientation = XmHORIZONTAL;
         XmNshowValue = true;
+	XmNscaleMultiple = 1;
         XmNscaleHeight = 15;
         XmNx = 200;
         XmNy = 0;
-        XmNwidth = 200;
+        XmNwidth = 275;
         XmNheight = 31;
         XmNvalue = 1000;
     };
@@ -371,13 +377,17 @@ object slider_scale_x_max_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("4200");
+        XmNlabelString = compound_string("20000");
 	XmNfontList = k_menu_font;
         XmNrecomputeSize = false;
-        XmNx = 390;
+        XmNx = 465;
         XmNy = 15;
         XmNwidth = 65;
         XmNheight = 15;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_x_scale_lab);
     };
 };
 
@@ -389,7 +399,7 @@ object slider_scale_y_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("Vert. Exag. (X 0.01):    1");
+        XmNlabelString = compound_string("Vertical Exaggeration: 0.01");
 	XmNfontList = k_menu_font;
         XmNx = 5;
         XmNy = 50;
@@ -400,14 +410,16 @@ object slider_scale_y : XmScale widget
 {
     arguments 
     {
-        XmNmaximum = 5000;
+        XmNmaximum = 2000;
         XmNminimum = 1;
         XmNorientation = XmHORIZONTAL;
         XmNshowValue = true;
+        XmNdecimalPoints = 2;
+	XmNscaleMultiple = 1;
         XmNscaleHeight = 15;
         XmNx = 200;
         XmNy = 35;
-        XmNwidth = 200;
+        XmNwidth = 275;
         XmNheight = 31;
         XmNvalue = 100;
     };
@@ -422,13 +434,17 @@ object slider_scale_y_max_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("5000");
+        XmNlabelString = compound_string("20.00");
         XmNrecomputeSize = false;
 	XmNfontList = k_menu_font;
-        XmNx = 390;
+        XmNx = 465;
         XmNy = 50;
         XmNwidth = 65;
         XmNheight = 15;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_vert_exag_lab);
     };
 };
 
@@ -457,9 +473,10 @@ object slider_number_pings : XmScale widget
         XmNorientation = XmHORIZONTAL;
         XmNshowValue = true;
         XmNscaleHeight = 15;
+	XmNscaleMultiple = 1;
         XmNx = 200;
         XmNy = 70;
-        XmNwidth = 200;
+        XmNwidth = 275;
         XmNheight = 31;
         XmNvalue = 10;
     };
@@ -478,10 +495,14 @@ object slider_num_pings_max_label : XmLabel widget
         XmNlabelString = compound_string("20");
         XmNrecomputeSize = false;
 	XmNfontList = k_menu_font;
-        XmNx = 390;
+        XmNx = 465;
         XmNy = 85;
         XmNwidth = 65;
         XmNheight = 15;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_num_pings_lab);
     };
 };
 
@@ -495,7 +516,7 @@ object slider_number_step_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("Number of pings to step: 2");
+        XmNlabelString = compound_string("Number of pings to step: 1");
 	XmNfontList = k_menu_font;
         XmNx = 5;
         XmNy = 120;
@@ -511,9 +532,10 @@ object slider_number_step : XmScale widget
         XmNorientation = XmHORIZONTAL;
         XmNshowValue = true;
         XmNscaleHeight = 15;
+	XmNscaleMultiple = 1;
         XmNx = 200;
         XmNy = 105;
-        XmNwidth = 200;
+        XmNwidth = 275;
         XmNheight = 31;
         XmNvalue = 5;
     };
@@ -530,10 +552,15 @@ object nu_pings_max_step_label : XmLabel widget
     {
         XmNlabelString = compound_string("20");
 	XmNfontList = k_menu_font;
-        XmNx = 390;
+        XmNrecomputeSize = false;
+        XmNx = 465;
         XmNy = 120;
         XmNwidth = 65;
         XmNheight = 15;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_pings_to_step_lab);
     };
 };
 
@@ -548,7 +575,7 @@ object slider_x_interval_label : XmLabel widget
     {
         XmNlabelString = compound_string("X Axis Tick Interval (m): 1");
 	XmNfontList = k_menu_font;
-        XmNx = 500;
+        XmNx = 550;
         XmNy = 15;
     };
 };
@@ -558,14 +585,15 @@ object slider_x_interval : XmScale widget
 {
     arguments 
     {
-        XmNmaximum = 10000;
+        XmNmaximum = 5000;
         XmNminimum = 1;
         XmNorientation = XmHORIZONTAL;
         XmNshowValue = true;
         XmNscaleHeight = 15;
-        XmNx = 700;
+	XmNscaleMultiple = 1;
+        XmNx = 750;
         XmNy = 0;
-        XmNwidth = 200;
+        XmNwidth = 276;
         XmNheight = 31;
         XmNvalue = 1000;
     };
@@ -580,12 +608,17 @@ object slider_x_max_interval_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("10000");
+        XmNlabelString = compound_string("5000");
 	XmNfontList = k_menu_font;
-        XmNx = 890;
+        XmNrecomputeSize = false;
+        XmNx = 1015;
         XmNy = 15;
         XmNwidth = 65;
         XmNheight = 15;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_x_tick_marks_lab);
     };
 };
 
@@ -601,7 +634,7 @@ object slider_y_interval_label : XmLabel widget
     {
         XmNlabelString = compound_string("Y Axis Tick Interval (m): 1");
 	XmNfontList = k_menu_font;
-        XmNx = 500;
+        XmNx = 550;
         XmNy = 50;
     };
 };
@@ -616,9 +649,10 @@ object slider_y_interval : XmScale widget
         XmNorientation = XmHORIZONTAL;
         XmNshowValue = true;
         XmNscaleHeight = 15;
-        XmNx = 700;
+	XmNscaleMultiple = 1;
+        XmNx = 750;
         XmNy = 35;
-        XmNwidth = 200;
+        XmNwidth = 275;
         XmNheight = 31;
         XmNvalue = 250;
     };
@@ -635,10 +669,15 @@ object slider_y_max_interval_label : XmLabel widget
     {
         XmNlabelString = compound_string("1000");
 	XmNfontList = k_menu_font;
-        XmNx = 890;
+        XmNrecomputeSize = false;
+        XmNx = 1015;
         XmNy = 50;
         XmNwidth = 65;
         XmNheight = 15;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_y_tick_marks_lab);
     };
 };
 
@@ -651,9 +690,9 @@ object slider_buffer_size_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("Data Buffer Size:         0");
+        XmNlabelString = compound_string("Data Buffer Size:         1");
 	XmNfontList = k_menu_font;
-        XmNx = 500;
+        XmNx = 550;
         XmNy = 85;
     };
 };
@@ -663,14 +702,15 @@ object slider_buffer_size : XmScale widget
     arguments 
     {
         XmNmaximum = 5000;
-        XmNminimum = 0;
+        XmNminimum = 1;
         XmNvalue = 5000;
         XmNorientation = XmHORIZONTAL;
         XmNshowValue = true;
         XmNscaleHeight = 15;
-        XmNx = 700;
+	XmNscaleMultiple = 1;
+        XmNx = 750;
         XmNy = 70;
-        XmNwidth = 200;
+        XmNwidth = 275;
         XmNheight = 31;
     };
     callbacks 
@@ -687,10 +727,15 @@ object slider_buffer_size_max_label : XmLabel widget
     {
         XmNlabelString = compound_string("5000");
 	XmNfontList = k_menu_font;
-        XmNx = 890;
+        XmNrecomputeSize = false;
+        XmNx = 1015;
         XmNy = 85;
         XmNwidth = 65;
         XmNheight = 15;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_buff_size_lab);
     };
 };
 
@@ -702,9 +747,9 @@ object slider_buffer_hold_label : XmLabel widget
 {
     arguments 
     {
-        XmNlabelString = compound_string("Buffer Retain Size:       0");
+        XmNlabelString = compound_string("Buffer Retain Size:       1");
 	XmNfontList = k_menu_font;
-        XmNx = 500;
+        XmNx = 550;
         XmNy = 120;
     };
 };
@@ -714,14 +759,15 @@ object slider_buffer_hold : XmScale widget
     arguments 
     {
         XmNmaximum = 5000;
-        XmNminimum = 0;
+        XmNminimum = 1;
         XmNvalue = 100;
         XmNorientation = XmHORIZONTAL;
         XmNshowValue = true;
         XmNscaleHeight = 15;
-        XmNx = 700;
+	XmNscaleMultiple = 1;
+        XmNx = 750;
         XmNy = 105;
-        XmNwidth = 200;
+        XmNwidth = 275;
         XmNheight = 31;
     };
     callbacks 
@@ -737,10 +783,15 @@ object slider_buffer_hold_max_label : XmLabel widget
     {
         XmNlabelString = compound_string("5000");
 	XmNfontList = k_menu_font;
-        XmNx = 890;
+        XmNrecomputeSize = false;
+        XmNx = 1015;
         XmNy = 120;
         XmNwidth = 65;
         XmNheight = 15;
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_buff_retain_size_lab);
     };
 };
 
@@ -1136,13 +1187,17 @@ object controls_load : XmBulletinBoardDialog widget
         XmNx = 361;
         XmNy = 244;
         XmNwidth = 550;
-        XmNheight = 500;
+        XmNheight = 600;
     };
     controls 
     {
        XmFileSelectionBox 	file_load;
        XmLabel 			textfield_format_label;
        XmTextField 		textfield_format;
+       XmLabel			setting_output_label;
+       XmRowColumn		setting_output;
+       XmLabel			output_file_label;
+       XmTextField		output_file_text;
     };
     callbacks 
     {
@@ -1180,17 +1235,20 @@ object file_load : XmFileSelectionBox widget
 };
 
 /***************************************************************/
-/* THIS WIDGET ALLOWS YOU TO SELECT THE FORMAT THAT THE FILE   */
-/* YOU ARE SELECTING IS IN.                                    */
+/* THIS WIDGET ALLOWS YOU TO SELECT THE OUTPUT FILENAME        */
 /***************************************************************/
 object output_file_label : XmLabel widget 
 {
     arguments 
     {
         XmNx = 16;
-        XmNy = 412;
+        XmNy = 500;
 	XmNfontList = k_menu_bar_font;
         XmNlabelString = compound_string("Output file name:");
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_output_file_lab);
     };
 };
 
@@ -1199,7 +1257,7 @@ object output_file_text : XmTextField widget
     arguments 
     {
         XmNx = 16;
-        XmNy = 435;
+        XmNy = 520;
         XmNcolumns = 40;
         XmNmaxLength = 130;
 	XmNvalue = "./testeee.mb21";
@@ -1207,55 +1265,6 @@ object output_file_text : XmTextField widget
     callbacks 
     {
 	MrmNcreateCallback = procedure create_proc (k_output_file);
-    };
-};
-
-/***************************************************************/
-/* YOU SELECT THIS PUSH BUTTON TO CHANGE THE OUTPUT NAME TO    */
-/* THE NAME IN THE SELECTION BOX ABOVE PLUS AN "e" BEFORE THE  */
-/* ".".                                                        */
-/***************************************************************/
-object ok_file_sel_button : XmPushButton widget 
-{
-    arguments 
-    {
-        XmNlabelString = compound_string(" OK ");
-	XmNfontList = k_menu_bar_font;
-        XmNx = 16;
-        XmNy = 485;
-	XmNwidth = 50;
-	XmNheight = 40;
-	XmNborderWidth = 1;
-    };
-    callbacks 
-    {
-	MrmNcreateCallback = procedure create_proc (k_grab_file_button);
-        XmNactivateCallback = procedure grab_file (k_grab_file_button);
-    };
-};
-
-
-/***************************************************************/
-/* YOU SELECT THIS PUSH BUTTON TO CHANGE THE OUTPUT NAME TO    */
-/* THE NAME IN THE SELECTION BOX ABOVE PLUS AN "e" BEFORE THE  */
-/* ".".                                                        */
-/***************************************************************/
-object cancel_file_sel_button : XmPushButton widget 
-{
-    arguments 
-    {
-        XmNlabelString = compound_string(" CANCEL ");
-	XmNfontList = k_menu_bar_font;
-        XmNx = 50;
-        XmNy = 485;
-	XmNwidth = 50;
-	XmNheight = 40;
-	XmNborderWidth = 1;
-    };
-    callbacks 
-    {
-	MrmNcreateCallback = procedure create_proc (k_grab_file_button);
-        XmNactivateCallback = procedure grab_file (k_grab_file_button);
     };
 };
 
@@ -1281,7 +1290,7 @@ object textfield_format : XmTextField widget
     {
         XmNx = 140;
         XmNy = 430;
-        XmNvalue = '21';
+        XmNvalue = '41';
         XmNcolumns = 2;
         XmNmaxLength = 2;
     };
@@ -1290,6 +1299,79 @@ object textfield_format : XmTextField widget
 	MrmNcreateCallback = procedure create_proc (k_mbio_format);
     };
 };
+
+
+/***************************************************************/
+/* THIS WIDGET ALLOWS YOU TO SET WHETHER THE EDITED DATA IS    */
+/* OUTPUT OR NOT                                               */
+/***************************************************************/
+
+object setting_output : XmRowColumn widget 
+{
+    arguments 
+    {
+        XmNorientation = XmVERTICAL;
+        XmNx = 250;
+        XmNy = 435;
+        XmNspacing = 0;
+        XmNpacking = XmPACK_COLUMN;
+        XmNnumColumns = 1;
+        XmNradioBehavior = true;
+        XmNwidth = 207;
+        XmNheight = 31;
+    };
+    controls 
+    {
+       XmToggleButton setting_output_toggle_output;
+       XmToggleButton setting_output_toggle_browse;
+    };
+};
+
+
+object setting_output_toggle_output : XmToggleButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Output Edited Data");
+    };
+    controls 
+    {
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_output_button);
+	XmNvalueChangedCallback = procedure set_output_output(k_output_button);
+    };
+};
+
+object setting_output_toggle_browse : XmToggleButton widget 
+{
+    arguments 
+    {
+        XmNlabelString = compound_string("Browse Only");
+    };
+    controls 
+    {
+    };
+    callbacks 
+    {
+	MrmNcreateCallback = procedure create_proc (k_browse_button);
+	XmNvalueChangedCallback = procedure set_output_browse(k_browse_button);
+    };
+};
+
+object setting_output_label : XmLabel widget 
+{
+    arguments 
+    {
+        XmNmarginWidth = 0;
+        XmNlabelString = compound_string("Output Mode:");
+	XmNfontList = k_menu_bar_font;
+        XmNx = 250;
+        XmNy = 415;
+    };
+};
+
 
 /***************************************************************/
 /* END OF "mbedit.uil" MODULE.                                 */
