@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_time.c,v 4.1 1994-04-27 23:37:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -52,11 +55,11 @@
 #define MININSECOND 0.0166667
 #define SECONDINMIN 60.0
 int	jday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.1 1994-04-27 23:37:06 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of minutes from
- * 	1/1/81 00:00:00 calculated from (yy/mm/dd/hr/mi/sc). */
+ * 	1/1/71 00:00:00 calculated from (yy/mm/dd/hr/mi/sc). */
 int mb_get_time(verbose,time_i,time_d)
 int verbose;
 int time_i[6];
@@ -85,8 +88,8 @@ double *time_d;
 	/* get time */
 	julday = jday[time_i[1]-1];
 	if (((time_i[0]%4) == 0) && (time_i[1] > 2)) julday++;
-	leapday = (time_i[0] - 1981)/4;
-	*time_d = (time_i[0] - 1981)*MININYEAR + (julday + leapday + time_i[2])*MININDAY 
+	leapday = (time_i[0] - 1971)/4;
+	*time_d = (time_i[0] - 1971)*MININYEAR + (julday + leapday + time_i[2])*MININDAY 
 		+ time_i[3]*MININHOUR + time_i[4] + time_i[5]/SECONDINMIN;
 
 	/* assume success */
@@ -108,7 +111,7 @@ double *time_d;
 }
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_date returns yy/mm/dd/hr/mi/sc calculated
- * 	from the number of minutes after 1/1/81 00:00:0 */
+ * 	from the number of minutes after 1/1/71 00:00:0 */
 int mb_get_date(verbose,time_d,time_i)
 double time_d;
 int time_i[6];
@@ -136,9 +139,9 @@ int time_i[6];
 	time_i[3] = (int) ((time_d - daytotal*MININDAY)/MININHOUR);
 	time_i[4] = (int) (time_d - daytotal*MININDAY - time_i[3]*MININHOUR);
 	time_i[5] = (time_d - ((int) time_d))*SECONDINMIN;
-	time_i[0] = (int) (time_d/MININYEAR) + 1981;
-	leapday = (time_i[0] - 1981)/4;
-	julday = daytotal - 365*(time_i[0] - 1981) - leapday;
+	time_i[0] = (int) (time_d/MININYEAR) + 1971;
+	leapday = (time_i[0] - 1971)/4;
+	julday = daytotal - 365*(time_i[0] - 1971) - leapday;
 	leapday = 0;
 	if ((time_i[0]%4) == 0 && julday > jday[2]) leapday = 1;
 	for (i=0;i<12;i++)

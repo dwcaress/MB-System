@@ -416,8 +416,8 @@ and thus have no need to check for time gaps.
 
 The returned values are:
  	\fImbio_ptr\fP:	pointer to an \fBMBIO\fP descriptor structure
- 	\fIbtime_d\fP:		desired beginning time in minutes since 1/1/81 00:00:0
- 	\fIetime_d\fP:		desired ending time in minutes since 1/1/81 00:00:0
+ 	\fIbtime_d\fP:		desired beginning time in minutes since 1/1/71 00:00:0
+ 	\fIetime_d\fP:		desired ending time in minutes since 1/1/71 00:00:0
  	\fIbeams_bath\fP:	maximum number of bathymetry beams
  	\fIbeams_amp\fP:	maximum number of amplitude beams
  	\fIpixels_ss\fP:	maximum number of sidescan pixels
@@ -437,7 +437,7 @@ provide pointers to arrays large enough to hold \fIbeams_bath\fP bathymetry
 values, \fIbeams_amp\fP amplitude values, and \fIpixels_ss\fP sidescan
 values. The values \fIbtime_d\fP
 and \fIetime_d\fP give the desired beginning and end times of the data
-converted to minutes since 00:00:00 on January 1, 1981;
+converted to minutes since 00:00:00 on January 1, 1971;
 \fBMBIO\fP uses these units to calculate time internally.
 A status value indicating success or failure is returned; an error value
 argument passes more detailed information about initialization failures. 
@@ -585,7 +585,7 @@ The return values are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
- 	\fItime_d\fP:		time of current ping in minutes since 1/1/81 00:00:00
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
@@ -682,7 +682,7 @@ The values to be output are:
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
  	\fItime_d\fP:		time of current ping in minutes since 
- 			1/1/81 00:00:00 (used if \fItime_i\fP[0] = 0)
+ 			1/1/71 00:00:00 (used if \fItime_i\fP[0] = 0)
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
@@ -784,7 +784,7 @@ The return values are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
- 	\fItime_d\fP:		time of current ping in minutes since 1/1/81 00:00:00
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
@@ -882,7 +882,7 @@ The values to be output are:
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
  	\fItime_d\fP:		time of current ping in minutes since 
- 			1/1/81 00:00:00 (used if \fItime_i\fP[0] = 0)
+ 			1/1/71 00:00:00 (used if \fItime_i\fP[0] = 0)
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
@@ -996,7 +996,7 @@ The return values are:
  			\fItime_i\fP[3]: hour
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
- 	\fItime_d\fP:		time of current ping in minutes since 1/1/81 00:00:00
+ 	\fItime_d\fP:		time of current ping in minutes since 1/1/71 00:00:00
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
@@ -1118,7 +1118,7 @@ The values to be output are:
  			\fItime_i\fP[4]: minute
  			\fItime_i\fP[5]: second
  	\fItime_d\fP:		time of current ping in minutes since 
- 				1/1/81 00:00:00 (used if \fItime_i\fP[0] = 0)
+ 				1/1/71 00:00:00 (used if \fItime_i\fP[0] = 0)
  	\fInavlon\fP:		longitude
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
