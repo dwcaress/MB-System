@@ -29,7 +29,7 @@ necessary code from us by request.
 
 RELEASE DATE:
 ------------
-August 25, 1995
+January 26, 1996
 
 Authors:
 --------
@@ -180,14 +180,6 @@ and copying executables and manual pages to the appropriate
 directories.  The executables will be placed in mbsystem/bin, the
 libraries in mbsystem/lib, and the manual pages in mbsystem/man/man1.
 
-The src/realtime directory contains source code used for
-running "realtime" plots on Calcomp 965A pen plotters on board
-the R/V Maurice Ewing.  This code is included in the distribution
-as an example for users who might wish to implement similar
-capabilities elsewhere.  The realtime code is not compiled during 
-general "make all" calls in the mbsystem directory because it depends
-on Calcomp related libraries not distributed with the MB-System.
-
 Naturally, in order for users to use the MB-System utilities,
 the directory containing the executables must be included in their
 path (usually this is done by editing the .cshrc file in the user's
@@ -209,7 +201,7 @@ ghostview.
 Current versions of MB-System have been successfully
 installed on Silicon Graphics (SGI) single and multiple
 processor platforms running under the IRIS operating system
-(versions 5.2, 5.3, and 6.0), on Sun workstations running
+(versions 5.2, 5.3, 6.0, and 6.2), on Sun workstations running
 under the SunOS 4.1 and Solaris operating systems, on
 Hewlett Packard workstations, on IBM workstations, and on
 486 PC's running under LynxOS (a realtime Unix variant).
@@ -307,10 +299,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.8 1995-08-17 16:34:39 caress Exp $
+RCS ID: $Id: README,v 4.9 1996-01-26 21:32:53 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.8  1995/08/17  16:34:39  caress
+# Revision for release 4.3.
+#
 # Revision 4.7  1995/02/14  22:25:56  caress
 # Version 4.2 Release
 #
