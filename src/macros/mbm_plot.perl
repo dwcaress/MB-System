@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.2 1994-10-21 11:36:58 caress Exp $
+#    $Id: mbm_plot.perl,v 4.3 1994-10-21 13:54:57 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,10 +39,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.2 1994-10-21 11:36:58 caress Exp $
+#   $Id: mbm_plot.perl,v 4.3 1994-10-21 13:54:57 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.2  1994/10/21  11:36:58  caress
+# Release V4.0
+#
 # Revision 4.1  1994/05/02  00:19:44  caress
 # Added 2 significant digits to basemap tick intervals.
 #
@@ -133,6 +136,10 @@ if (!$format)
 if (!$color && !$contour && !$navigation)
 	{
 	$navigation = 1;
+	}
+if ($color && $color == 0)
+	{
+	$color = 1;
 	}
 
 # get postscript viewer
