@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 4.7 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_get_all.c,v 4.8 1999-08-08 04:12:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.6  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -111,7 +114,7 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 4.7 1998-10-05 17:46:15 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 4.8 1999-08-08 04:12:45 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -149,23 +152,20 @@ int	*error;
 	*nss = 0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
-		mb_io_ptr->beamflag[i] = MB_FLAG_NULL;
-		mb_io_ptr->bath[i] = 0.0;
-		mb_io_ptr->bath_acrosstrack[i] = 0.0;
-		mb_io_ptr->bath_alongtrack[i] = 0.0;
-		mb_io_ptr->bath_num[i] = 0;
+		beamflag[i] = MB_FLAG_NULL;
+		bath[i] = 0.0;
+		bathacrosstrack[i] = 0.0;
+		bathalongtrack[i] = 0.0;
 		}
 	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
-		mb_io_ptr->amp[i] = 0.0;
-		mb_io_ptr->amp_num[i] = 0;
+		amp[i] = 0.0;
 		}
 	for (i=0;i<mb_io_ptr->pixels_ss;i++)
 		{
-		mb_io_ptr->ss[i] = 0.0;
-		mb_io_ptr->ss_acrosstrack[i] = 0.0;
-		mb_io_ptr->ss_alongtrack[i] = 0.0;
-		mb_io_ptr->ss_num[i] = 0;
+		ss[i] = 0.0;
+		ssacrosstrack[i] = 0.0;
+		ssalongtrack[i] = 0.0;
 		}
 	strcpy(comment,"\0");
 
@@ -197,7 +197,7 @@ int	*error;
 		}
 
 	/* set data kind */
-	*kind = mb_io_ptr->new_kind;
+	*kind = mb_io_ptr->new_kind;	
 
 	/* increment counters */
 	if (status == MB_SUCCESS)

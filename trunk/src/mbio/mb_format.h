@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.24 1999-07-16 19:24:15 caress Exp $
+ *    $Id: mb_format.h,v 4.25 1999-08-08 04:16:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.24  1999/07/16 19:24:15  caress
+ * Yet another version.
+ *
  * Revision 4.23  1999/04/02  00:54:32  caress
  * Changed nav record type for Elac data.
  *
@@ -163,6 +166,7 @@
 #define MB_SYS_OIC		17
 #define MB_SYS_HDCS		18
 #define MB_SYS_SINGLEBEAM	19
+#define MB_SYS_XSE		20
 
 /* Table of the swath sonar system miniumum frequencies */
 static int frequency_table[] = 
@@ -187,10 +191,11 @@ static int frequency_table[] =
 	120,	/* MB_SYS_OIC */
 	12,	/* MB_SYS_HDCS */
 	12,	/* MB_SYS_SINGLEBEAM */
+	50,	/* MB_SYS_XSE */
 	};
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	48
+#define	MB_FORMATS	49
 
 /* Data formats supported by MBIO */
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
@@ -303,6 +308,9 @@ static int frequency_table[] =
 #define	MBF_BCHRXUNB	93	/* Elac BottomChart multibeam, 56 beams
  					bathymetry and amplitude,
  					binary, University of New Brunswick. */
+#define	MBF_ELMK2XSE	94	/* ELAC and SeaBeam multibeam, 126 beams
+ 					bathymetry and amplitude, 2000 pixels sidescan, 
+ 					binary, L-3 Communications ELAC Nautik. */
 #define MBF_HSMDARAW    101     /* Hydroseep MD multibeam raw format, 40 beam 
 					bathymetry, 160 pixel sidescan,
 					xdr binary, Atlas Electronik. */
@@ -376,6 +384,7 @@ static int format_table[] =
 	91,	/* MBF_BCHRTUNB */
 	92,	/* MBF_ELMK2UNB */
 	93,	/* MBF_BCHRXUNB */
+	94,	/* MBF_ELMK2XSE */
 	101,    /* MBF_HSMDARAW */
 	102,    /* MBF_HSMDLDIH */
 	111,    /* MBF_DSL120PF */
@@ -429,6 +438,7 @@ static int supported_format_table[] =
 	1,	/* MBF_BCHRTUNB */
 	1,	/* MBF_ELMK2UNB */
 	1,	/* MBF_BCHRXUNB */
+	1,	/* MBF_ELMK2XSE */
 	1,	/* MBF_HSMDARAW */
 	1,	/* MBF_HSMDLDIH */
 	1,      /* MBF_DSL120PF */
@@ -497,6 +507,7 @@ static char *format_description[] =
 	"Format name:          MBF_BCHRTUNB\nInformal Description: Elac BottomChart shallow water multibeam\nAttributes:           56 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
 	"Format name:          MBF_ELMK2UNB\nInformal Description: Elac BottomChart MkII shallow water multibeam\nAttributes:           126 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
 	"Format name:          MBF_BCHRXUNB\nInformal Description: Elac BottomChart shallow water multibeam\nAttributes:           56 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
+	"Format name:          MBF_ELMK2XSE\nInformal Description: ELAC and SeaBeam multibeam\nAttributes:           151 beam bathymetry and amplitude,\n                      2000 pixels sidescan, \n                      binary, L-3 Communications ELAC Nautik.\n",
 	"Format name:          MBF_HSMDARAW\nInformal Description: Atlas HSMD medium depth multibeam raw format\nAttributes:           40 beam bathymetry, 160 pixel sidescan,\n                      XDR (binary), STN Atlas Elektronik.\n",
 	"Format name:          MBF_HSMDLDIH\nInformal Description: Atlas HSMD medium depth multibeam processed format\nAttributes:           40 beam bathymetry, 160 pixel sidescan,\n                      XDR (binary), L-DEO.\n",
 	"Format name:          MBF_DSL120PF\nInformal Description: WHOI DSL AMS-120 processed format\nAttributes:           2048 beam bathymetry, 8192 pixel sidescan,\n                      binary, parallel bathymetry and amplitude files, WHOI DSL.\n",
@@ -551,6 +562,7 @@ static int mb_system_table[] =
 	MB_SYS_ELAC,	/* MBF_BCHRTUNB */
 	MB_SYS_ELACMK2,	/* MBF_ELMK2UNB */
 	MB_SYS_ELAC,	/* MBF_BCHRXUNB */
+	MB_SYS_XSE,	/* MBF_ELMK2XSE */
 	MB_SYS_HSMD,    /* MBF_HSMDARAW */
 	MB_SYS_HSMD,    /* MBF_HSMDLDIH */
 	MB_SYS_DSL,     /* MBF_DSL120PF */
@@ -604,6 +616,7 @@ static int mb_numfile_table[] =
 	1,		/* MBF_BCHRTUNB */
 	1,		/* MBF_ELMK2UNB */
 	1,		/* MBF_BCHRXUNB */
+	1,		/* MBF_ELMK2XSE */
 	1,              /* MBF_HSMDARAW */
 	1,              /* MBF_HSMDLDIH */
 	2,		/* MBF_DSL120PF */
@@ -660,6 +673,7 @@ static int mb_filetype_table[] =
 	MB_FILETYPE_NORMAL,	/* MBF_BCHRTUNB */
 	MB_FILETYPE_NORMAL,	/* MBF_ELMK2UNB */
 	MB_FILETYPE_NORMAL,	/* MBF_BCHRXUNB */
+	MB_FILETYPE_NORMAL,	/* MBF_ELMK2XSE */
 	MB_FILETYPE_XDR,	/* MBF_HSMDARAW */
 	MB_FILETYPE_XDR,	/* MBF_HSMDLDIH */
 	MB_FILETYPE_NORMAL,	/* MBF_DSL120PF */
@@ -713,6 +727,7 @@ static int beams_bath_table[] =
 	56,	/* MBF_BCHRTUNB */
 	126,	/* MBF_ELMK2UNB */
 	56,	/* MBF_BCHRXUNB */
+	126,	/* MBF_ELMK2XSE */
 	79,     /* MBF_HSMDARAW */
 	79,     /* MBF_HSMDLDIH */
 	2048,   /* MBF_DSL120PF */
@@ -766,6 +781,7 @@ static int beams_amp_table[] =
 	56,	/* MBF_BCHRTUNB */
 	126,	/* MBF_ELMK2UNB */
 	56,	/* MBF_BCHRXUNB */
+	126,	/* MBF_ELMK2XSE */
 	0,    	/* MBF_HSMDARAW */
 	0,    	/* MBF_HSMDLDIH */
 	0,      /* MBF_DSL120PF */
@@ -819,6 +835,7 @@ static int pixels_ss_table[] =
 	0,	/* MBF_BCHRTUNB */
 	0,	/* MBF_ELMK2UNB */
 	0,	/* MBF_BCHRXUNB */
+	2000,	/* MBF_ELMK2XSE */
 	319,	/* MBF_HSMDARAW */
 	319,	/* MBF_HSMDARAW */
 	8192,   /* MBF_DSL120PF */
@@ -872,6 +889,7 @@ static int variable_beams_table[] =
 	1,	/* MBF_BCHRTUNB */
 	1,	/* MBF_ELMK2UNB */
 	1,	/* MBF_BCHRXUNB */
+	1,	/* MBF_ELMK2XSE */
 	0,      /* MBF_HSMDARAW */
 	0,      /* MBF_HSMDLDIH */
 	0,      /* MBF_DSL120PF */
@@ -926,6 +944,7 @@ static int mb_traveltime_table[] =
 	1,	/* MBF_BCHRTUNB */
 	1,	/* MBF_ELMK2UNB */
 	1,	/* MBF_BCHRXUNB */
+	1,	/* MBF_ELMK2XSE */
 	1,	/* MBF_HSMDARAW */
 	1,	/* MBF_HSMDLDIH */
 	0,      /* MBF_DSL120PF */
@@ -980,6 +999,7 @@ static int mb_no_flag_table[] =
 	0,	/* MBF_BCHRTUNB */
 	0,	/* MBF_ELMK2UNB */
 	0,	/* MBF_BCHRXUNB */
+	0,	/* MBF_ELMK2XSE */
 	0,	/* MBF_HSMDARAW */
 	0,	/* MBF_HSMDLDIH */
 	0,      /* MBF_DSL120PF */
@@ -1033,6 +1053,7 @@ static float mb_nav_source[] =
 	MB_DATA_NAV,	/* MBF_BCHRTUNB */
 	MB_DATA_NAV,	/* MBF_ELMK2UNB */
 	MB_DATA_NAV,	/* MBF_BCHRXUNB */
+	MB_DATA_NAV,	/* MBF_ELMK2XSE */
 	MB_DATA_DATA,   /* MBF_HSMDARAW */
 	MB_DATA_DATA,   /* MBF_HSMDLDIH */
 	MB_DATA_DATA,   /* MBF_DSL120PF */
@@ -1086,6 +1107,7 @@ static float mb_heading_source[] =
 	MB_DATA_DATA,	/* MBF_BCHRTUNB */
 	MB_DATA_DATA,	/* MBF_ELMK2UNB */
 	MB_DATA_DATA,	/* MBF_BCHRXUNB */
+	MB_DATA_DATA,	/* MBF_ELMK2XSE */
 	MB_DATA_DATA,   /* MBF_HSMDARAW */
 	MB_DATA_DATA,   /* MBF_HSMDLDIH */
 	MB_DATA_DATA,   /* MBF_DSL120PF */
@@ -1139,6 +1161,7 @@ static float mb_vru_source[] =
 	MB_DATA_DATA,	/* MBF_BCHRTUNB */
 	MB_DATA_DATA,	/* MBF_ELMK2UNB */
 	MB_DATA_DATA,	/* MBF_BCHRXUNB */
+	MB_DATA_DATA,	/* MBF_ELMK2XSE */
 	MB_DATA_DATA,   /* MBF_HSMDARAW */
 	MB_DATA_DATA,   /* MBF_HSMDLDIH */
 	MB_DATA_DATA,   /* MBF_DSL120PF */
@@ -1192,6 +1215,7 @@ static float mb_foreaft_beamwidth_table[] =
 	6.00,	/* MBF_BCHRTUNB */
 	3.00,	/* MBF_ELMK2UNB */
 	6.00,	/* MBF_BCHRXUNB */
+	2.00,	/* MBF_ELMK2XSE */
 	1.70,   /* MBF_HSMDARAW */
 	1.70,   /* MBF_HSMDLDIH */
 	2.00,   /* MBF_DSL120PF */
@@ -1243,6 +1267,8 @@ static char *mb_button_name[] =
         " HYPC8101 ",
         " BCHRTUNB ",
         " ELMK2UNB ",
+        " BCHRXUNB ",
+        " ELMK2XSE ",
 	" HSMDARAW ",
 	" HSMDLDIH ",
 	" DSL120PF ", 

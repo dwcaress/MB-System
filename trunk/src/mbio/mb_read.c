@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 4.10 1998-11-06 23:05:33 caress Exp $
+ *    $Id: mb_read.c,v 4.11 1999-08-08 04:12:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1998/11/06  23:05:33  caress
+ * Fixed problem with calculation of sslon and sslat.
+ *
  * Revision 4.9  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -141,10 +144,11 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 4.10 1998-11-06 23:05:33 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 4.11 1999-08-08 04:12:45 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
+	char	*store_ptr;
 	int	i;
 	int	done;
 	int	reset_last;
@@ -166,6 +170,7 @@ int	*error;
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	store_ptr = (char *) mb_io_ptr->store_data;
 
 	/* initialize binning values */
 	mb_io_ptr->pings_read = 0;
@@ -221,7 +226,7 @@ int	*error;
 		/* get next ping */
 		if (mb_io_ptr->need_new_ping)
 			{
-			status = mb_read_ping(verbose,mbio_ptr,NULL,error);
+			status = mb_read_ping(verbose,mbio_ptr,store_ptr,error);
 
 			/* set errors if not bathymetry or backscatter data */
 			if (status == MB_SUCCESS)

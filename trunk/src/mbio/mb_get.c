@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	1/26/93
- *    $Id: mb_get.c,v 4.8 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_get.c,v 4.9 1999-08-08 04:12:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.7  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -122,10 +125,11 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get.c,v 4.8 1998-10-05 17:46:15 caress Exp $";
+  static char rcs_id[]="$Id: mb_get.c,v 4.9 1999-08-08 04:12:45 caress Exp $";
 	char	*function_name = "mb_get";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
+	char	*store_ptr;
 	int	i;
 	int	done;
 	int	reset_last;
@@ -147,6 +151,7 @@ int	*error;
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	store_ptr = (char *) mb_io_ptr->store_data;
 
 	/* initialize binning values */
 	mb_io_ptr->pings_read = 0;
@@ -202,7 +207,7 @@ int	*error;
 		/* get next ping */
 		if (mb_io_ptr->need_new_ping)
 			{
-			status = mb_read_ping(verbose,mbio_ptr,NULL,error);
+			status = mb_read_ping(verbose,mbio_ptr,store_ptr,error);
 
 			/* set errors if not survey data */
 			if (status == MB_SUCCESS)

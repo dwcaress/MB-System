@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_altitude.c	4/28/98
- *    $Id: mb_altitude.c,v 4.3 1999-07-16 19:24:15 caress Exp $
+ *    $Id: mb_altitude.c,v 4.4 1999-08-08 04:12:45 caress Exp $
 
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	April 28, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1999/07/16  19:24:15  caress
+ * Yet another version.
+ *
  * Revision 4.2  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -66,7 +69,7 @@ double	*transducer_depth;
 double	*altitude;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_altitude.c,v 4.3 1999-07-16 19:24:15 caress Exp $";
+	static char rcs_id[]="$Id: mb_altitude.c,v 4.4 1999-08-08 04:12:45 caress Exp $";
 	char	*function_name = "mb_altitude";
 	int	status;
 	int	system;
@@ -185,6 +188,11 @@ int	*error;
 		status = mbsys_singlebeam_altitude(verbose,mbio_ptr,store_ptr,
 				kind,transducer_depth,altitude,error);
 		}
+	else if (system == MB_SYS_XSE)
+		{
+		status = mbsys_xse_altitude(verbose,mbio_ptr,store_ptr,
+				kind,transducer_depth,altitude,error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -218,7 +226,7 @@ double	transducer_depth;
 double	altitude;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_altitude.c,v 4.3 1999-07-16 19:24:15 caress Exp $";
+	static char rcs_id[]="$Id: mb_altitude.c,v 4.4 1999-08-08 04:12:45 caress Exp $";
 	char	*function_name = "mb_insert_altitude";
 	int	status;
 	int	system;
@@ -309,6 +317,11 @@ int	*error;
 	else if (system == MB_SYS_SINGLEBEAM)
 		{
 		status = mbsys_singlebeam_insert_altitude(verbose,mbio_ptr,store_ptr,
+				transducer_depth,altitude,error);
+		}
+	else if (system == MB_SYS_XSE)
+		{
+		status = mbsys_xse_insert_altitude(verbose,mbio_ptr,store_ptr,
 				transducer_depth,altitude,error);
 		}
 	else
