@@ -48,6 +48,9 @@
  * jsb          09/28/98  Added gsfDecodeHVNavigationError. This addresses CRs:
  *                        98-001 and 98-002. In responce to NAVO CR: 98-003, added
  *                        support for horizontal_error ping array subrecord.
+ * jsb          12/29/98  Added support for Simrad em3000 series sonar systems.
+ * wkm          3-30-99   Added DecodeCmpSassSpecific to deal with Compressed SASS data.
+ * wkm          8-02-99   Updated DecodeCmpSassSpecific to include lntens (heave) with Compressed SASS data.
  *
  * Classification : Unclassified
  *
@@ -99,8 +102,15 @@ static int      DecodeEM950Specific(gsfSensorSpecific * sdata, unsigned char *sp
 static int      DecodeEM1000Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeEM121ASpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeEM121Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
-static int      DecodeSASSSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
+
+#if 1
+/* 3-30-99 wkm: obsolete */
 static int      DecodeTypeIIISeaBeamSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
+static int      DecodeSASSSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
+#endif
+
+static int      DecodeCmpSassSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
+
 static int      DecodeSeaMapSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeSeaBatSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeEchotracSpecific(gsfSBSensorSpecific * sdata, unsigned char *sptr);
@@ -112,6 +122,7 @@ static int      DecodeSeaBatIISpecific(gsfSensorSpecific * sdata, unsigned char 
 static int      DecodeSeaBat8101Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeSeaBeam2112Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeElacMkIISpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
+static int      DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TABLE *ft);
 
 /********************************************************************
  *
@@ -1008,7 +1019,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY):
-                ret = DecodeSignedTwoByteArray(&ft->rec.mb_ping.beam_angle_forward, (char *)p, ping->number_beams,
+                ret = DecodeTwoByteArray(&ft->rec.mb_ping.beam_angle_forward, p, ping->number_beams,
                     &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY, handle);
                 if (ret < 0)
                 {
@@ -1041,7 +1052,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 ping->horizontal_error =  ft->rec.mb_ping.horizontal_error;
                 p += ret;
                 break;
- 
+
             case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC):
                 p += DecodeSeabeamSpecific(&ping->sensor_data, p);
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC;
@@ -1092,11 +1103,14 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC;
                 break;
 
+                #if 1
+                /* 3-30-99 wkm: obsolete */
             case (GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC):
                 p += DecodeTypeIIISeaBeamSpecific(&ping->sensor_data, p);
                 ping->sensor_id =
                   GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC;
                 break;
+                #endif
 
             case (GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC):
                 p += DecodeSBAmpSpecific(&ping->sensor_data, p);
@@ -1123,7 +1137,27 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC;
                 break;
 
-            default:
+            case (GSF_SWATH_BATHY_SUBRECORD_CMP_SASS_SPECIFIC):
+                p += DecodeCmpSassSpecific(&ping->sensor_data, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_CMP_SASS_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
+                p += DecodeEM3Specific(&ping->sensor_data, p, ft);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
+                p += DecodeEM3Specific(&ping->sensor_data, p, ft);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC;
+                break;
+
+             case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
+                p += DecodeEM3Specific(&ping->sensor_data, p, ft);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC;
+                break;
+
+              default:
                 gsfError = GSF_UNRECOGNIZED_SUBRECORD_ID;
                 if ((((p - sptr) + subrecord_size) == record_size) ||
                     ((record_size - ((p - sptr) + subrecord_size)) > 0))
@@ -2210,9 +2244,48 @@ DecodeEM121Specific(gsfSensorSpecific *sdata, unsigned char *sptr)
 
 /********************************************************************
  *
- * Function Name : DecodeSASSSpecific
+ * Function Name : DecodeCmpSassSpecific
  *
- * Description : not implimented yet
+ * Description : This function decodes the Compressed SASS specific ping
+ *    subrecord from external byte stream form into internal form.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes enocoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeCmpSassSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+
+    memcpy(&stemp, p, 2);
+    sdata->gsfCmpSassSpecific.lfreq = ((double) ntohs(stemp)) / 10.0;
+    p += 2;
+
+    memcpy(&stemp, p, 2);
+    sdata->gsfCmpSassSpecific.lntens = ((double) ntohs(stemp)) / 10.0;
+    p += 2;
+
+    return (p - sptr);
+}
+
+
+#if 1
+/* 3-30-99: obsolete */
+/********************************************************************
+ *
+ * Function Name : DecodeSassSpecific
+ *
+ * Description : This function decodes the Typeiii SASS specific ping
+ *    subrecord from external byte stream form into internal form.
  *
  * Inputs :
  *    sdata = a pointer to the union of sensor specific data to be loaded
@@ -2319,6 +2392,7 @@ DecodeTypeIIISeaBeamSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
 
     return (p - sptr);
 }
+#endif
 
 /********************************************************************
  *
@@ -2820,6 +2894,338 @@ DecodeElacMkIISpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
     return (p - sptr);
 }
 
+/********************************************************************
+ *
+ * Function Name : DecodeEM3Specific
+ *
+ * Description : This function decodes the Simrad EM3000 series sensor
+ *    specific information from the GSF byte stream.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes enocoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TABLE *ft)
+{
+    unsigned char   *p = sptr;
+    gsfuShort       stemp;
+    gsfsShort       signed_short;
+    gsfuLong        ltemp;
+    int             run_time_id;
+
+    /* The next two bytes contain the model number */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3Specific.model_number = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two bytes contain the ping number */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3Specific.ping_number = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two bytes contain the system 1 or 2 serial number */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3Specific.serial_number = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two bytes contain the surface velocity */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3Specific.surface_velocity = ((double) ntohs(stemp)) / 10.0;
+    p += 2;
+
+    /* The next two bytes contain the transmit depth */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3Specific.transducer_depth = ((double) ntohs(stemp)) / 100.0;
+    p += 2;
+
+    /* The next two bytes contain the maximum number of beams */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3Specific.valid_beams = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two bytes contain the sample rate */
+    memcpy(&stemp, p, 2);
+    sdata->gsfEM3Specific.sample_rate = (int) ntohs(stemp);
+    p += 2;
+
+    /* The next two bytes contain the depth difference between sonar heads in an em3000D configuration */
+    memcpy(&stemp, p, 2);
+    signed_short = (signed) ntohs(stemp);
+    sdata->gsfEM3Specific.depth_difference = ((double) signed_short) / 100.0;
+    p += 2;
+
+    /* Next byte contains the transducer depth offset multiplier */
+    sdata->gsfEM3Specific.offset_multiplier = (signed int) *p;
+    p += 1;
+
+    /* The next four byte value specifies the existance of the run-time data strucutre */
+    memcpy(&ltemp, p, 4);
+    run_time_id = ntohl(ltemp);
+    p += 4;
+
+    /* If the first bit is set then this subrecord contains a new set of run-time parameters,
+     *  otherwise the run-time parameters have not changed.
+     */
+    if (run_time_id & 0x00000001)
+    {
+        /* The next two byte value contains the model number from the run-time parameters datagram */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].model_number = (int) ntohs(stemp);
+        p += 2;
+
+        /* The next 8 bytes contain the time-tag for the run-time parameters datagram. */
+        memcpy(&ltemp, p, 4);
+        sdata->gsfEM3Specific.run_time[0].dg_time.tv_sec = ntohl(ltemp);
+        p += 4;
+
+        memcpy(&ltemp, p, 4);
+        sdata->gsfEM3Specific.run_time[0].dg_time.tv_nsec = ntohl(ltemp);
+        p += 4;
+
+        /* The next two byte value contains the sequential ping number */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].ping_number = (int) ntohs(stemp);
+        p += 2;
+
+        /* The next two byte value contains the sonar head serial number */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].serial_number = (int) ntohs(stemp);
+        p += 2;
+
+        /* The next four byte value contains the system status */
+        memcpy(&ltemp, p, 4);
+        sdata->gsfEM3Specific.run_time[0].system_status = (int) ntohl(ltemp);
+        p += 4;
+
+        /* The next one byte value contains the mode identifier */
+        sdata->gsfEM3Specific.run_time[0].mode = (int) *p;
+        p += 1;
+
+        /* The next one byte value contains the filter identifier */
+        sdata->gsfEM3Specific.run_time[0].filter_id = (int) *p;
+        p += 1;
+
+        /* The next two byte value contains the minimum depth */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].min_depth = (double) ntohs(stemp);
+        p += 2;
+
+        /* The next two byte value contains the maximum depth */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].max_depth = (double) ntohs(stemp);
+        p += 2;
+
+        /* The next two byte value contains the absorption coefficient */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].absorption = ((double) ntohs(stemp)) / 100.0;
+        p += 2;
+
+        /* The next two byte value contains the transmit pulse length */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].pulse_length = (double) ntohs(stemp);
+        p += 2;
+
+        /* The next two byte value contains the transmit beam width */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].transmit_beam_width = ((double) ntohs(stemp)) / 10.0;
+        p += 2;
+
+        /* The next one byte value contains the transmit power reduction */
+        sdata->gsfEM3Specific.run_time[0].power_reduction = (int) *p;
+        p += 1;
+
+        /* The next one byte value contains the receive beam width */
+        sdata->gsfEM3Specific.run_time[0].receive_beam_width = ((double) *p) / 10.0;
+        p += 1;
+
+        /* The next one byte value contains the receive band width. This value is provided
+         *  by the sonar with a precision of 50 Hz.
+         */
+        sdata->gsfEM3Specific.run_time[0].receive_bandwidth = ((int) (*p)) * 50;
+        p += 1;
+
+        /* The next one byte value contains the receive gain */
+        sdata->gsfEM3Specific.run_time[0].receive_gain = (int) *p;
+        p += 1;
+
+        /* The next one byte value contains the TVG law cross-over angle */
+        sdata->gsfEM3Specific.run_time[0].cross_over_angle = (int) *p;
+        p += 1;
+
+        /* The next one byte value contains the source of the surface sound speed value */
+        sdata->gsfEM3Specific.run_time[0].ssv_source = (int) *p;
+        p += 1;
+
+        /* The next two byte value contains the maximum swath width */
+        memcpy(&stemp, p, 2);
+        sdata->gsfEM3Specific.run_time[0].swath_width = (int) ntohs(stemp);
+        p += 2;
+
+        /* The next one byte value contains the beam spacing value */
+        sdata->gsfEM3Specific.run_time[0].beam_spacing = (int) *p;
+        p += 1;
+
+        /* The next one byte value contains the coverage sector */
+        sdata->gsfEM3Specific.run_time[0].coverage_sector = (int) *p;
+        p += 1;
+
+        /* The next one byte value contains the yaw and pitch stabilization mode */
+        sdata->gsfEM3Specific.run_time[0].stabilization = (int) *p;
+        p += 1;
+
+        /* The next eight bytes are reserved for future use */
+        sdata->gsfEM3Specific.run_time[0].spare1 = 0;
+        sdata->gsfEM3Specific.run_time[0].spare2 = 0;
+        p += 8;
+
+        /* Since the run-time parameters only exist on the byte stream when they change, we need
+         *  to save these to the file table so the'll be available to the caller for each ping.
+         *
+         * memcpy (&ft->rec.mb_ping.sensor_data.gsfEM3Specific.run_time[0], &sdata->gsfEM3Specific.run_time[0], sizeof(gsfEM3RunTime));
+         */
+
+        /* If the second bit is set then this subrecord contains a second set of new run-time
+         *  for an em3000d series sonar system.
+         */
+        if (run_time_id & 0x00000002)
+        {
+            /* The next two byte value contains the model number from the run-time parameters datagram */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].model_number = (int) ntohs(stemp);
+            p += 2;
+
+            /* The next 8 bytes contain the time-tag for the run-time parameters datagram. */
+            memcpy(&ltemp, p, 4);
+            sdata->gsfEM3Specific.run_time[1].dg_time.tv_sec = ntohl(ltemp);
+            p += 4;
+
+            memcpy(&ltemp, p, 4);
+            sdata->gsfEM3Specific.run_time[1].dg_time.tv_nsec = ntohl(ltemp);
+            p += 4;
+
+            /* The next two byte value contains the sequential ping number */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].ping_number = (int) ntohs(stemp);
+            p += 2;
+
+            /* The next two byte value contains the sonar head serial number */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].serial_number = (int) ntohs(stemp);
+            p += 2;
+
+            /* The next four byte value contains the system status */
+            memcpy(&ltemp, p, 4);
+            sdata->gsfEM3Specific.run_time[1].system_status = (int) ntohl(ltemp);
+            p += 4;
+
+            /* The next one byte value contains the mode identifier */
+            sdata->gsfEM3Specific.run_time[1].mode = (int) *p;
+            p += 1;
+
+            /* The next one byte value contains the filter identifier */
+            sdata->gsfEM3Specific.run_time[1].filter_id = (int) *p;
+            p += 1;
+
+            /* The next two byte value contains the minimum depth */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].min_depth = (double) ntohs(stemp);
+            p += 2;
+
+            /* The next two byte value contains the maximum depth */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].max_depth = (double) ntohs(stemp);
+            p += 2;
+
+            /* The next two byte value contains the absorption coefficient */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].absorption = ((double) ntohs(stemp)) / 100.0;
+            p += 2;
+
+            /* The next two byte value contains the transmit pulse length */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].pulse_length = (double) ntohs(stemp);
+            p += 2;
+
+            /* The next two byte value contains the transmit beam width */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].transmit_beam_width = ((double) ntohs(stemp)) / 10.0;
+            p += 2;
+
+            /* The next one byte value contains the transmit power reduction */
+            sdata->gsfEM3Specific.run_time[1].power_reduction = (int) *p;
+            p += 1;
+
+            /* The next one byte value contains the receive beam width */
+            sdata->gsfEM3Specific.run_time[1].receive_beam_width = ((double) *p) / 10.0;
+            p += 1;
+
+            /* The next one byte value contains the receive band width. This value is provided
+             *  by the sonar with a precision of 50 Hz.
+             */
+            sdata->gsfEM3Specific.run_time[1].receive_bandwidth = ((int) (*p)) * 50;
+            p += 1;
+
+            /* The next one byte value contains the receive gain */
+            sdata->gsfEM3Specific.run_time[1].receive_gain = (int) *p;
+            p += 1;
+
+            /* The next one byte value contains the TVG law cross-over angle */
+            sdata->gsfEM3Specific.run_time[1].cross_over_angle = (int) *p;
+            p += 1;
+
+            /* The next one byte value contains the source of the surface sound speed value */
+            sdata->gsfEM3Specific.run_time[1].ssv_source = (int) *p;
+            p += 1;
+
+            /* The next two byte value contains the maximum swath width */
+            memcpy(&stemp, p, 2);
+            sdata->gsfEM3Specific.run_time[1].swath_width = (int) ntohs(stemp);
+            p += 2;
+
+            /* The next one byte value contains the beam spacing value */
+            sdata->gsfEM3Specific.run_time[1].beam_spacing = (int) *p;
+            p += 1;
+
+            /* The next one byte value contains the coverage sector */
+            sdata->gsfEM3Specific.run_time[1].coverage_sector = (int) *p;
+            p += 1;
+
+            /* The next one byte value contains the yaw and pitch stabilization mode */
+            sdata->gsfEM3Specific.run_time[1].stabilization = (int) *p;
+            p += 1;
+
+            /* The next eight bytes are reserved for future use */
+            sdata->gsfEM3Specific.run_time[1].spare1 = 0;
+            sdata->gsfEM3Specific.run_time[1].spare2 = 0;
+            p += 8;
+
+            /* Since the run-time parameters only exist on the byte stream when they change, we need
+             *  to save these to the file table so the'll be available to the caller for each ping.
+             *
+             * memcpy (&ft->rec.mb_ping.sensor_data.gsfEM3Specific.run_time[1], &sdata->gsfEM3Specific.run_time[1], sizeof(gsfEM3RunTime));
+             */
+        }
+    }
+
+    /* jsb 3/31/99 Commented this code block out.  No need to do this until we encode this subrecord only when
+     *   the values have changed. Refer to comments in gsfEncodeEM3Specific.
+     *
+     * else
+     * {
+     *     memcpy (&sdata->gsfEM3Specific.run_time[0], &ft->rec.mb_ping.sensor_data.gsfEM3Specific.run_time[0], sizeof(gsfEM3RunTime));
+     *     memcpy (&sdata->gsfEM3Specific.run_time[1], &ft->rec.mb_ping.sensor_data.gsfEM3Specific.run_time[1], sizeof(gsfEM3RunTime));
+     * }
+     */
+    return (p - sptr);
+}
 
 /********************************************************************
  *
