@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.5 1994-10-25 12:32:41 caress Exp $
+ *    $Id: mbswath.c,v 4.6 1994-12-21 20:23:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/10/25  12:32:41  caress
+ * Fixed memory overwrite that causing early exits.
+ *
  * Revision 4.4  1994/10/21  16:08:22  caress
  * Release V4.0
  *
@@ -168,7 +171,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.5 1994-10-25 12:32:41 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.6 1994-12-21 20:23:30 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -1014,6 +1017,7 @@ int	*error;
 	int	dobath, doss;
 	double	headingx, headingy;
 	double	dx, dy, r, dlon1, dlon2, dlat1, dlat2, tt, x, y;
+	double	ddlonx, ddlaty, rfactor;
 	int	setprint;
 	int	i, j, k;
 
@@ -1025,6 +1029,7 @@ int	*error;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mode:       %d\n",mode);
+		fprintf(stderr,"dbg2       factor:     %f\n",factor);
 		fprintf(stderr,"dbg2       swath:      %d\n",swath);
 		fprintf(stderr,"dbg2       mtodeglon:  %f\n",mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat:  %f\n",mtodeglat);
@@ -1054,7 +1059,7 @@ int	*error;
 		}
 
 	/* get fore-aft components of beam footprints */
-	if (swath->npings > 1)
+	if (swath->npings > 1 && factor >= 0.0)
 	  {
 	  for (i=0;i<swath->npings;i++)
 		{
@@ -1110,25 +1115,38 @@ int	*error;
 	  }
 
 	/* take care of just one ping with nonzero center beam */
-	else if (swath->npings == 1
+	else if (swath->npings == 1 && factor >= 0.0
 		&& swath->data[0].bath[swath->beams_bath/2] > 0.0)
-		{
-		pingcur = &swath->data[0];
-		headingx = sin(pingcur->heading*DTR);
-		headingy = cos(pingcur->heading*DTR);
-		tt = pingcur->bath[swath->beams_bath/2]/750.0; /* in s */
-		r = tt * pingcur->speed * 0.55555556; /* in m */
-		pingcur->lonaft = -factor*r*headingx*mtodeglon;
-		pingcur->lataft = -factor*r*headingy*mtodeglat;
-		pingcur->lonfor = factor*r*headingx*mtodeglon;
-		pingcur->latfor = factor*r*headingy*mtodeglat;
-		}
+	  {
+	  pingcur = &swath->data[0];
+	  headingx = sin(pingcur->heading*DTR);
+	  headingy = cos(pingcur->heading*DTR);
+	  tt = pingcur->bath[swath->beams_bath/2]/750.0; /* in s */
+	  r = tt * pingcur->speed * 0.55555556; /* in m */
+	  pingcur->lonaft = -factor*r*headingx*mtodeglon;
+	  pingcur->lataft = -factor*r*headingy*mtodeglat;
+	  pingcur->lonfor = factor*r*headingx*mtodeglon;
+	  pingcur->latfor = factor*r*headingy*mtodeglat;
+	  }
+
+	/* else get rfactor if using fore-aft beam width */
+	else if (factor < 0.0)
+	  {
+	  rfactor = sin(-DTR*factor);
+	  }
 
 	/* loop over the inner beams and get 
 		the obvious footprint boundaries */
 	for (i=0;i<swath->npings;i++)
 		{
 		pingcur = &swath->data[i];
+
+		/* get heading if using fore-aft beam width */
+		if (factor < 0.0)
+			{
+			headingx = sin(pingcur->heading*DTR);
+			headingy = cos(pingcur->heading*DTR);
+			}
 
 		/* do bathymetry */
 		if (dobath == MB_YES)
@@ -1171,7 +1189,35 @@ int	*error;
 				dlon1 = -dlon2;
 				dlat1 = -dlat2;
 				}
-			if (setprint == MB_YES)
+
+			/* do it using fore-aft beam width */
+			if (setprint == MB_YES && factor < 0.0)
+				{
+				print = &pingcur->bathfoot[j];
+				pingcur->bathflag[j] = MB_YES;
+				ddlonx = (pingcur->bathlon[j] 
+					- pingcur->navlon)/mtodeglon;
+				ddlaty = (pingcur->bathlat[j] 
+					- pingcur->navlat)/mtodeglat;
+				r = rfactor*sqrt(ddlonx*ddlonx 
+					+ ddlaty*ddlaty 
+					+ pingcur->bath[j]*pingcur->bath[j]);
+				pingcur->lonaft = -r*headingx*mtodeglon;
+				pingcur->lataft = -r*headingy*mtodeglat;
+				pingcur->lonfor = r*headingx*mtodeglon;
+				pingcur->latfor = r*headingy*mtodeglat;
+				print->x[0] = x + dlon1 + pingcur->lonaft;
+				print->y[0] = y + dlat1 + pingcur->lataft;
+				print->x[1] = x + dlon2 + pingcur->lonaft;
+				print->y[1] = y + dlat2 + pingcur->lataft;
+				print->x[2] = x + dlon2 + pingcur->lonfor;
+				print->y[2] = y + dlat2 + pingcur->latfor;
+				print->x[3] = x + dlon1 + pingcur->lonfor;
+				print->y[3] = y + dlat1 + pingcur->latfor;
+				}
+
+			/* do it using ping nav separation */
+			else if (setprint == MB_YES)
 				{
 				print = &pingcur->bathfoot[j];
 				pingcur->bathflag[j] = MB_YES;
@@ -1227,7 +1273,35 @@ int	*error;
 				dlon1 = -dlon2;
 				dlat1 = -dlat2;
 				}
-			if (setprint == MB_YES)
+
+			/* do it using fore-aft beam width */
+			if (setprint == MB_YES && factor < 0.0)
+				{
+				print = &pingcur->ssfoot[j];
+				pingcur->ssflag[j] = MB_YES;
+				ddlonx = (pingcur->sslon[j] 
+					- pingcur->navlon)/mtodeglon;
+				ddlaty = (pingcur->sslat[j] 
+					- pingcur->navlat)/mtodeglat;
+				r = rfactor*sqrt(ddlonx*ddlonx 
+					+ ddlaty*ddlaty 
+					+ pingcur->ss[j]*pingcur->ss[j]);
+				pingcur->lonaft = -r*headingx*mtodeglon;
+				pingcur->lataft = -r*headingy*mtodeglat;
+				pingcur->lonfor = r*headingx*mtodeglon;
+				pingcur->latfor = r*headingy*mtodeglat;
+				print->x[0] = x + dlon1 + pingcur->lonaft;
+				print->y[0] = y + dlat1 + pingcur->lataft;
+				print->x[1] = x + dlon2 + pingcur->lonaft;
+				print->y[1] = y + dlat2 + pingcur->lataft;
+				print->x[2] = x + dlon2 + pingcur->lonfor;
+				print->y[2] = y + dlat2 + pingcur->latfor;
+				print->x[3] = x + dlon1 + pingcur->lonfor;
+				print->y[3] = y + dlat1 + pingcur->latfor;
+				}
+
+			/* do it using ping nav separation */
+			else if (setprint == MB_YES)
 				{
 				print = &pingcur->ssfoot[j];
 				pingcur->ssflag[j] = MB_YES;
@@ -1249,6 +1323,13 @@ int	*error;
 		{
 		pingcur = &swath->data[i];
 
+		/* get heading if using fore-aft beam width */
+		if (factor < 0.0)
+			{
+			headingx = sin(pingcur->heading*DTR);
+			headingy = cos(pingcur->heading*DTR);
+			}
+
 		/* do bathymetry */
 		if (dobath == MB_YES)
 		  {
@@ -1265,6 +1346,23 @@ int	*error;
 			dlat1 = -dlat2;
 			print = &pingcur->bathfoot[j];
 			pingcur->bathflag[j] = MB_YES;
+
+			/* using fore-aft beam width */
+			if (factor < 0.0)
+				{
+				ddlonx = (pingcur->bathlon[j] 
+					- pingcur->navlon)/mtodeglon;
+				ddlaty = (pingcur->bathlat[j] 
+					- pingcur->navlat)/mtodeglat;
+				r = rfactor*sqrt(ddlonx*ddlonx 
+					+ ddlaty*ddlaty 
+					+ pingcur->bath[j]*pingcur->bath[j]);
+				pingcur->lonaft = -r*headingx*mtodeglon;
+				pingcur->lataft = -r*headingy*mtodeglat;
+				pingcur->lonfor = r*headingx*mtodeglon;
+				pingcur->latfor = r*headingy*mtodeglat;
+				}
+
 			print->x[0] = x + dlon1 + pingcur->lonaft;
 			print->y[0] = y + dlat1 + pingcur->lataft;
 			print->x[1] = x + dlon2 + pingcur->lonaft;
@@ -1287,6 +1385,23 @@ int	*error;
 			dlat2 = -dlat2;
 			print = &pingcur->bathfoot[j];
 			pingcur->bathflag[j] = MB_YES;
+
+			/* using fore-aft beam width */
+			if (factor < 0.0)
+				{
+				ddlonx = (pingcur->bathlon[j] 
+					- pingcur->navlon)/mtodeglon;
+				ddlaty = (pingcur->bathlat[j] 
+					- pingcur->navlat)/mtodeglat;
+				r = rfactor*sqrt(ddlonx*ddlonx 
+					+ ddlaty*ddlaty 
+					+ pingcur->bath[j]*pingcur->bath[j]);
+				pingcur->lonaft = -r*headingx*mtodeglon;
+				pingcur->lataft = -r*headingy*mtodeglat;
+				pingcur->lonfor = r*headingx*mtodeglon;
+				pingcur->latfor = r*headingy*mtodeglat;
+				}
+
 			print->x[0] = x + dlon1 + pingcur->lonaft;
 			print->y[0] = y + dlat1 + pingcur->lataft;
 			print->x[1] = x + dlon2 + pingcur->lonaft;
@@ -1314,6 +1429,23 @@ int	*error;
 			dlat1 = -dlat2;
 			print = &pingcur->ssfoot[j];
 			pingcur->ssflag[j] = MB_YES;
+
+			/* using fore-aft beam width */
+			if (factor < 0.0)
+				{
+				ddlonx = (pingcur->sslon[j] 
+					- pingcur->navlon)/mtodeglon;
+				ddlaty = (pingcur->sslat[j] 
+					- pingcur->navlat)/mtodeglat;
+				r = rfactor*sqrt(ddlonx*ddlonx 
+					+ ddlaty*ddlaty 
+					+ pingcur->ss[j]*pingcur->ss[j]);
+				pingcur->lonaft = -r*headingx*mtodeglon;
+				pingcur->lataft = -r*headingy*mtodeglat;
+				pingcur->lonfor = r*headingx*mtodeglon;
+				pingcur->latfor = r*headingy*mtodeglat;
+				}
+
 			print->x[0] = x + dlon1 + pingcur->lonaft;
 			print->y[0] = y + dlat1 + pingcur->lataft;
 			print->x[1] = x + dlon2 + pingcur->lonaft;
@@ -1336,6 +1468,23 @@ int	*error;
 			dlat2 = -dlat2;
 			print = &pingcur->ssfoot[j];
 			pingcur->ssflag[j] = MB_YES;
+
+			/* using fore-aft beam width */
+			if (factor < 0.0)
+				{
+				ddlonx = (pingcur->sslon[j] 
+					- pingcur->navlon)/mtodeglon;
+				ddlaty = (pingcur->sslat[j] 
+					- pingcur->navlat)/mtodeglat;
+				r = rfactor*sqrt(ddlonx*ddlonx 
+					+ ddlaty*ddlaty 
+					+ pingcur->ss[j]*pingcur->ss[j]);
+				pingcur->lonaft = -r*headingx*mtodeglon;
+				pingcur->lataft = -r*headingy*mtodeglat;
+				pingcur->lonfor = r*headingx*mtodeglon;
+				pingcur->latfor = r*headingy*mtodeglat;
+				}
+
 			print->x[0] = x + dlon1 + pingcur->lonaft;
 			print->y[0] = y + dlat1 + pingcur->lataft;
 			print->x[1] = x + dlon2 + pingcur->lonaft;
