@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 5.5 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 5.6 2003-12-24 06:56:34 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.4  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -118,6 +121,107 @@
  *   6. The data structure defined below includes all of the values
  *      which are passed in SeaBeam 2100 records.
  */
+/*
+ * Notes on the MBF_SB2100B1 data format:
+ *   1. SeaBeam 2100 multibeam sonars currently generate 
+ *      raw data in an hybrid ascii/binary format (41). 
+ *      This is a replacement fully binary (excepting file header) 
+ *      format which has significantly faster i/o during processing.
+ *   2. The SeaBeam 2100 sonars output up to 151 beams of bathymetry 
+ *      and 2000 pixels of sidescan measurements, along with a plethora 
+ *      of other information.
+ *   3. The record types are:
+ *        SB21BIFH:  file header with data format description 
+ *                   (beginning of file only)
+ *        SB21BIPR:  sonar parameter record 
+ *                   (roll bias, pitch bias, sound velocity profile)
+ *        SB21BITR:  sonar text record (comments)
+ *        SB21BIDH:  sonar data header (one for each ping)
+ *        SB21BIBR:  bathymetry data record (one for each ping)
+ *        SB21BISR:  sidescan data record (one for each ping)
+ *   4. The file header record occurs at the beginning of each file.
+ *      this is a fully ASCII record with line feeds and null
+ *      termination so that uninformed users can figure out the
+ *      contents of the file without additional documentation.
+ *      There is no analog to this header in format 41.
+ *   5. The parameter record should be generated at the beginning of
+ *      every file (after the header); new files with new parameter
+ *      records should be generated any time the roll bias, pitch
+ *      bias, or sound velocity profile values change. 
+ *      The existing SeaBeam 2100 sonars output parameter records when
+ *      the sonar begins logging and every 30 minutes thereafter,
+ *      regardless of where it appears in files.
+ *      The parameter also includes values for navigation offsets
+ *      due to the offset between the transducers and the GPS antenna.
+ *      SeaBeam sonars do not presently make use of such parameters.
+ *   6. Individual comment records are limited to lengths of
+ *      1920 characters.
+ *      Each file should begin with comment records stating
+ *      the sonar and sonar control software version used to
+ *      generate the data. This does not occur at present.
+ *   7. Each ping generates three data records in the following
+ *      order:
+ *        SB21BIDH:  sonar data header
+ *        SB21BIBR:  bathymetry data record
+ *        SB21BISR:  sidescan data record
+ *   8. The data structure defined below includes all of the values
+ *      which are passed in SeaBeam 2100 records.
+ * 
+ * 
+ */
+/*
+ * Notes on the MBF_SB2100B2 data format:
+ *   1. SeaBeam 2100 multibeam sonars currently generate 
+ *      raw data in an hybrid ascii/binary format (41). 
+ *      Format 42 is a replacement fully binary (excepting file header) 
+ *      format which has significantly faster i/o during processing.
+ *      This format is a bathymetry-only variant of format 42 which, 
+ *      due to the lack of sidescan data, has much smaller data files
+ *      and much faster i/o. 
+ *   2. The SeaBeam 2100 sonars output up to 151 beams of bathymetry 
+ *      and 2000 pixels of sidescan measurements, along with a plethora 
+ *      of other information.
+ *   3. The record types are:
+ *        SB21BIFH:  file header with data format description 
+ *                   (beginning of file only)
+ *        SB21BIPR:  sonar parameter record 
+ *                   (roll bias, pitch bias, sound velocity profile)
+ *        SB21BITR:  sonar text record (comments)
+ *        SB21BIDH:  sonar data header (one for each ping)
+ *        SB21BIBR:  bathymetry data record (one for each ping)
+ *        SB21BISR:  sidescan data record (one for each ping)
+ *   4. The file header record occurs at the beginning of each file.
+ *      this is a fully ASCII record with line feeds and null
+ *      termination so that uninformed users can figure out the
+ *      contents of the file without additional documentation.
+ *      There is no analog to this header in format 41.
+ *   5. The parameter record should be generated at the beginning of
+ *      every file (after the header); new files with new parameter
+ *      records should be generated any time the roll bias, pitch
+ *      bias, or sound velocity profile values change. 
+ *      The existing SeaBeam 2100 sonars output parameter records when
+ *      the sonar begins logging and every 30 minutes thereafter,
+ *      regardless of where it appears in files.
+ *      The parameter also includes values for navigation offsets
+ *      due to the offset between the transducers and the GPS antenna.
+ *      SeaBeam sonars do not presently make use of such parameters.
+ *   6. Individual comment records are limited to lengths of
+ *      1920 characters.
+ *      Each file should begin with comment records stating
+ *      the sonar and sonar control software version used to
+ *      generate the data. This does not occur at present.
+ *   7. Each ping generates three data records in the following
+ *      order:
+ *        SB21BIDH:  sonar data header
+ *        SB21BIBR:  bathymetry data record
+ *        SB21BISR:  sidescan data record
+ *      The sidescan records are present in format 43, but contain
+ *      no pixels. This allows format 43 files to be read as
+ *      format 42 without breaking anything.
+ *   8. The data structure defined below includes all of the values
+ *      which are passed in SeaBeam 2100 records.
+ * 
+ */
 
 /* maximum number of depth-velocity pairs */
 #define MBSYS_SB2100_MAXVEL 30
@@ -183,6 +287,8 @@ struct mbsys_sb2100_struct
 	short	minute;
 	short	sec;
 	short	msec;
+	short	spare1;
+	short	spare2;
 	double	longitude;		/* degrees */
 	double	latitude;		/* degrees */
 	float	heading;		/* degrees */
@@ -206,8 +312,6 @@ struct mbsys_sb2100_struct
 	float	pixel_size;		/* m */
 	int	nbeams;			/* up to 151 */
 	int	npixels;		/* up to 2000 */
-	short	spare1;
-	short	spare2;
 	short	spare3;
 	short	spare4;
 	short	spare5;

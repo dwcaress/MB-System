@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.15 2003-07-27 20:49:30 caress Exp $
+#	$Id: Makefile.template,v 5.16 2003-12-24 06:57:37 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.15  2003/07/27 20:49:30  caress
+# Release 5.0.0
+#
 # Revision 5.14  2003/04/16 16:47:41  caress
 # Release 5.0.beta30
 #
@@ -176,8 +179,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
 	$(INCDIR)/mbf_hsldedmb.h $(INCDIR)/mbf_hsuricen.h \
 	$(INCDIR)/mbf_hsldeoih.h \
-	$(INCDIR)/mbf_sb2100rw.h $(INCDIR)/mbf_sb2100b1.h \
-	$(INCDIR)/mbf_sb2100b2.h \
+	$(INCDIR)/mbf_sb2100rw.h \
 	$(INCDIR)/mbf_em12darw.h $(INCDIR)/mbf_em12ifrm.h \
 	$(INCDIR)/mbf_mr1prhig.h $(INCDIR)/mbf_mr1aldeo.h \
 	$(INCDIR)/mbf_mr1bldeo.h \
@@ -233,8 +235,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_hsatlraw.o mbr_hsldedmb.o \
 		mbr_hsuricen.o mbr_hsurivax.o \
 		mbr_hsldeoih.o \
-		mbr_sb2100rw.o mbr_sb2100b1.o \
-		mbr_sb2100b2.o \
+		mbr_sb2100rw.o mbr_sb2100bi.o \
 		mbr_emoldraw.o mbr_em12darw.o \
 		mbr_em12ifrm.o \
 		mbr_em300raw.o mbr_em300mba.o \
@@ -292,8 +293,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_hsatlraw.o mbr_hsldedmb.o \
 		mbr_hsuricen.o mbr_hsurivax.o \
 		mbr_hsldeoih.o \
-		mbr_sb2100rw.o mbr_sb2100b1.o \
-		mbr_sb2100b2.o \
+		mbr_sb2100rw.o mbr_sb2100bi.o \
 		mbr_emoldraw.o mbr_em12darw.o \
 		mbr_em12ifrm.o \
 		mbr_em300raw.o mbr_em300mba.o \
@@ -453,10 +453,8 @@ mbr_hsldeoih.o: mbr_hsldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_hsldeoih.c
 mbr_sb2100rw.o: mbr_sb2100rw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100rw.h $(INCDIR)/mbsys_sb2100.h
 	$(CC) -c $(CFLAGS) mbr_sb2100rw.c
-mbr_sb2100b1.o: mbr_sb2100b1.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100b1.h $(INCDIR)/mbsys_sb2100.h
-	$(CC) -c $(CFLAGS) mbr_sb2100b1.c
-mbr_sb2100b2.o: mbr_sb2100b2.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100b2.h $(INCDIR)/mbsys_sb2100.h
-	$(CC) -c $(CFLAGS) mbr_sb2100b2.c
+mbr_sb2100bi.o: mbr_sb2100bi.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100b1.h $(INCDIR)/mbsys_sb2100.h
+	$(CC) -c $(CFLAGS) mbr_sb2100bi.c
 mbr_emoldraw.o: mbr_emoldraw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_simrad.h
 	$(CC) -c $(CFLAGS) mbr_emoldraw.c
 mbr_em12darw.o: mbr_em12darw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_em12darw.h $(INCDIR)/mbsys_simrad.h
