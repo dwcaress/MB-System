@@ -1,14 +1,18 @@
-MB-SYSTEM VERSION 4.1 RELEASE NOTES:
+MB-SYSTEM VERSION 4.2 RELEASE NOTES:
 -----------------------------------
 
-This directory structure contains the version 4.1 release  
+This directory structure contains the version 4.2 release  
 of the MB-System software package for processing and display of 
-multibeam data. Version 4.1 includes significant bug fixes
-relative to version 4.0.
+multibeam data. Version 4.2 includes significant enhancements
+and bug fixes relative to version 4.1. In particular, there
+are four new utilities (mbbackangle, mbanglecorrect, mbfilter,
+and mbcut) which are useful for processing sidescan data.
+See the manual pages for these programs for information about
+these new capabilities.
 
 RELEASE DATE:
 ------------
-November 1, 1994
+February 17, 1995
 
 Authors:
 --------
@@ -19,7 +23,7 @@ Palisades, NY 10964
 
 Copyright:
 ----------
-Copyright 1993, 1994 by David W. Caress and Dale N. Chayes
+Copyright 1993, 1994,1995 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
 Caveat:
@@ -43,7 +47,7 @@ language. Some L-DEO extensions to GMT for handling underway data
 are also used. The source code for these required software packages
 is available as follows:
 
-	MB-System v 4.1
+	MB-System v 4.2
 	- available from L-DEO via anonymous ftp to
 	  lamont.ldgo.columbia.edu
 	- compressed tar file MB-System4.0.tar.Z
@@ -70,8 +74,8 @@ Installing MB-System:
 --------------------
 	The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
-		% uncompress MB-System4.1.tar.Z
-		% tar xvf MB-System4.1.tar
+		% uncompress MB-System4.2.tar.Z
+		% tar xvf MB-System4.2.tar
 	This will create a directory structure called mbsystem. 
 In order to configure your installation, you must edit the
 shellscript mbsystem/install_makefiles.  This is perl script
@@ -157,17 +161,14 @@ ghostview.
 
 "Supported" Platforms:
 ----------------------
-        We are currently running MB-System on Sun 10/30s on the
-Ewing (as well as IPX, SS-I and SS-II) under SunOS 4.1X and at Lamont.
-We have yet not attempted to port to Solaris yet, but probably will
-after it is thought to be stable. Since Lamont has a huge collection
-of (mostly SPARC) Suns, its a fair bet that we will be using Suns in
-the forseeable future. We are also running MB-System on a variety of
-Silicon Graphics (SGI) single and multiple processor platforms under
-the IRIX 5.2 operating system. We have also successfully ported
-MB-System to run on 486 PC's running under LynxOS (a realtime Unix
-variant). Its also a fair bet that if you provide us with
-a really cool (ie. FAST) computer of your choice, we might be inclined
+        Current versions of MB-System have been successfully
+installed on Silicon Graphics (SGI) single and multiple
+processor platforms running under the IRIS operating system
+(versions 5.2, 5.3, and 6.0), on Sun workstations running
+under the SunOS 4.1 and Solaris operating systems, and on
+486 PC's running under LynxOS (a realtime Unix variant).
+Its a fair bet that if you provide us with a really cool 
+(ie. FAST) computer of your choice, we might be inclined
 to try making MB-System run on it.
 
 PORTING:
@@ -182,18 +183,18 @@ the evolution of GUIs and WIMPS.
 Xview/Motif:
 --------------------------
         The graphical tools mbedit and mbvelocitytool now use the
-Motif widget set rather than the XVIEW widget set used in previous
-versions.  Motif libraries are required to successfully link
+Motif widget set rather than the XVIEW widget set used prior
+to version 4.0.  Motif libraries are required to successfully link
 and install these programs.  If users are running Sun workstations
-under SunOS 4.1.X without Motif, then they may wish to obtain the
-XVIEW versions of these programs.  Compressed tarfiles containing
-both the source code and the fully linked executables of the
-XVIEW versions of mbedit and mbvelocitytool are available via
-anonymous ftp in the same manner as the standard MB-System distribution.
-Note that the XVIEW versions of these programs cannot be made from
-scratch unless the user has access to the development tool Devguide
-(sold by Sun Microsystems).
+under SunOS 4.1.X without Motif, then they may wish to obtain copies
+of executables which have been static linked on Sun SPARC
+workstations (executables which do not require any particular
+run-time libraries). Static linked Sun executables of mbedit and
+mbvelocitytool are available via anonymous ftp in the same 
+manner as the standard MB-System distribution.
 
+Levitus Database:
+--------------------------
 	The program mblevitus depends on a 16 MByte data file that is not
 included in the MB-System tarfile.  It is in the 'annual.Z' file which
 is available by anonymous ftp from lamont.ldgo.columbia.edu in the
@@ -209,9 +210,11 @@ those who have already contributed to MB-System.
 
 Suggestions:
 ------------
-	We have obtained support from NSF to continue work on the
-MB-System in 1994. Our primary efforts will be in the direction of
-enhanced usability through easier user interfaces, more documentation,
+	Our original NSF grant is just about used up, but we
+have a renewal proposal pending which will hopefully provide
+continuing support for MB-System development. Our primary efforts 
+in the future will be in the direction of enhanced usability 
+through easier user interfaces, more documentation,
 cookbook examples, etc. We are interested in your suggestions.
 
 Bugs:
@@ -239,13 +242,15 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.6 1994-11-18 16:37:15 caress Exp $
+RCS ID: $Id: README,v 4.7 1995-02-14 22:25:56 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.6  1994/11/18  16:37:15  caress
+# *** empty log message ***
+#
 # Revision 4.5  1994/10/21  21:54:24  caress
 # Release V4.0
-# quit
 #
 # Revision 4.4  1994/10/21  17:42:43  caress
 # Release V4.0
