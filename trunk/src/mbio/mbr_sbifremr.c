@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbifremr.c	3/29/96
- *	$Id: mbr_sbifremr.c,v 4.3 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_sbifremr.c,v 4.4 1997-07-28 15:04:13 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,10 @@
  * Location:	152 39.061W; 34 09.150S on R/V Ewing
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.2  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -65,7 +69,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbifremr.c,v 4.3 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_sbifremr.c,v 4.4 1997-07-28 15:04:13 caress Exp $";
 	char	*function_name = "mbr_alm_sbifremr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -546,7 +550,7 @@ int	*error;
 	int	ping_num;
 	int	beam_num;
 	int	day, month, year, hour, minute, second, tsecond;
-	int	time_i[7], time_j[4];
+	int	time_i[7], time_j[5];
 	static double	heading_save = 0.0;
 	int	center;
 	double	mtodeglon, mtodeglat;
@@ -850,7 +854,7 @@ int	*error;
 	int	ping_num;
 	int	beam_num;
 	int	day, month, year, hour, minute, second, tsecond;
-	int	time_i[7], time_j[4];
+	int	time_i[7], time_j[5];
 	static double	heading_save;
 	int	center;
 	double	mtodeglon, mtodeglat;
