@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.6 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.7 2003-11-25 21:25:43 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.6 2003-04-17 20:42:48 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.7 2003-11-25 21:25:43 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.6  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 5.5  2002/04/06 02:51:54  caress
 #   Release 5.0.beta16
 #
@@ -207,8 +210,10 @@ while (@grdinfo)
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('B:b:G:g:HhI+i+J:j:L:l:M+m+NnO:o:P:p:QqR:r:S:s:TtU:u:VvW:w:Xx');
+&MBGetopts('B:b:C:c:D:d::G:g:HhI+i+J:j:L:l:M+m+NnO:o:P:p:QqR:r:S:s:TtU:u:VvW:w:Xx');
 $tick_info = 		($opt_B || $opt_b);
+$columns = 		($opt_C || $opt_c);
+$delimiter = 		($opt_D || $opt_d);
 $xyfill = 		($opt_G || $opt_g);
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
@@ -446,6 +451,9 @@ foreach $xyfile_raw (@data_file_list) {
 	$xyfill_f = $xyfill;
 	$xypen_f = $xypen;
 	$xysegment_f = $xysegment;
+	$delimiter = "\s+";
+	$xmath_f='c#[0]';
+	$ymath_f='c#[1]';
 
 	# figure out how many parameters to set for each file
 	@filearg = split(/:/, $xyfile_raw);
@@ -466,7 +474,26 @@ foreach $xyfile_raw (@data_file_list) {
 			{
 			$xysegment_f = "Y";
 			}
-	}
+		if ($filearg[$i] =~ /N/)
+			{
+			$xysegment_f = "Y";
+			}
+		if ($filearg[$i]=~ /D/)
+		{
+		    ($delimiter_f) = $filearg[$i] =~ /D(\S+)/;
+		}
+		if ($filearg[$i]=~ /C/)
+		{
+		    ($xmath_f,$ymath_f) = $filearg[$i] =~ /C(\S+)_(\S+)/;
+		    $xmath_f =~ s/c\#/\$line/g;
+		    $ymath_f =~ s/c\#/\$line/g;
+		    $xmath_f =~ s/\#/\$linecnt/g;
+                    $ymath_f =~ s/\#/\$linecnt/g;
+
+
+		}
+
+	    }
 
 	# set filename
 	push(@xysymbols, $xysymbol_f);
@@ -474,6 +501,10 @@ foreach $xyfile_raw (@data_file_list) {
 	push(@xypens, $xypen_f);
 	push(@xysegments, $xysegment_f);
 	push(@xyfiles, $filearg[$#filearg]);
+	push(@delimiters, $delimiter_f);
+	     push(@xmath, $xmath_f);
+	     push(@ymath, $ymath_f);
+
 }
 
 # check that files are ok
@@ -482,6 +513,7 @@ if (scalar(@xyfiles) <= 0)
 	print "\a";
 	die "\nNo input file specified!\n$program_name aborted\n";
 	}
+
 foreach $xyfile (@xyfiles) {
 	if (! -e $xyfile)
 		{
@@ -492,45 +524,57 @@ foreach $xyfile (@xyfiles) {
 
 # set output root if needed
 if (!$root)
-	{
-	$root = $xyfiles[0];
-	}
+{
+    $root = $xyfiles[0];
+}
 
-# get limits of files using minmax
+# Manually extract the data from a larger file.
+$i=0;
+foreach $xyfile(@xyfiles){
+    $INFILE="<$xyfile";
+    $OUTFILE=">$xyfile$i.tmp";
+    open INFILE or die "Cannot open $xyfile: $'";
+    open OUTFILE or die "Cannot open temporary file: $'";
+    $linecnt=1;
+    while (<INFILE>) {
+	chomp;
+	@line=split /$delimiters[$i]/, $_;
+
+	# Evaluate the perl/math expressions but quit if there's an error.
+	$xval=eval $xmath[$i];
+	if(!$xval) {
+	    die "\nAn error occurred evaluating\n$xmath[$i].\nThis is likely a syntax error, but if this error occurred in the middle\nof processing it may be a divide by zero error. \nAborting...\n";
+	}
+	$yval=eval $ymath[$i];
+	if(!$yval) {
+	    die "\nAn error occurred evaluating:\n$ymath[$i].\nThis is likely a syntax error, but if this error occurred in the middle\nof processing it may be a divide by zero error. \nAborting...\n";
+	}
+    
+	push(@xvalues, $xval);
+	push(@yvalues, $yval);
+
+	print(OUTFILE "$xval\t$yval\n");
+	$linecnt+=1;
+    }
+    $i+=1;
+    close INFILE;
+    close OUTFILE;
+    # Reset the file names to the new temporarily files.
+    $OUTFILE =~ s/^>//;
+    $xyfile="$OUTFILE";
+}
+
+
+# get limits of files by sorting all the data.
 if (!$bounds)
 	{
-	foreach $xyfile (@xyfiles) {
-		@minmax = `minmax $xyfile`;
-		$line = shift @minmax;
-		if ($line =~ /.*\<\S+\/\S+\>.*\<\S+\/\S+\>.*/)
-			{
-			($xmin_f, $xmax_f, $ymin_f, $ymax_f) = 
-				$line =~ /.*\<(\S+)\/(\S+)\>.*\<(\S+)\/(\S+)\>.*/;
-			}
-			
-		if (!$first_minmax)
-			{
-			$first_minmax = 1;
-			$xmin = $xmin_f;
-			$xmax = $xmax_f;
-			$ymin = $ymin_f;
-			$ymax = $ymax_f;
-			}
-		else
-			{
-			$xmin = &min($xmin, $xmin_f);
-			$xmax = &max($xmax, $xmax_f);
-			$ymin = &min($ymin, $ymin_f);
-			$ymax = &max($ymax, $ymax_f);
-			}
-		}
+	    @sorted_xvalues = sort {$a <=> $b} @xvalues;
+	    @sorted_yvalues = sort {$a <=> $b} @yvalues;
+	    $xmin = $sorted_xvalues[0];
+	    $xmax = $sorted_xvalues[$#sorted_xvalues];
+	    $ymin = $sorted_yvalues[0];
+	    $ymax = $sorted_yvalues[$#sorted_yvalues];
 
-	# check that there is data
-	if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f)
-		{
-		print "\a";
-		die "The program minmax does not appear to have worked \nproperly with file $file_grd!\n$program_name aborted.\n"
-		}
 	}
 
 # use user defined bounds
@@ -572,12 +616,14 @@ if (!$bounds_plot)
 		$xmin, $xmax, $ymin, $ymax);
 	}
 
+## This checking no longer makes sense when the data could be for an xy plot
+## with one variable not changing. ie min=max.
 # check that there is data
-if ($xmin >= $xmax || $ymin >= $ymax)
-	{
-	print "\a";
-	die "Improper data limits: x: $xmin $xmax  y: $ymin $ymax\n$program_name aborted.\n"
-	}
+#if ($xmin >= $xmax || $ymin >= $ymax)
+#	{
+#	print "\a";
+#	die "Improper data limits: x: $xmin $xmax  y: $ymin $ymax\n$program_name aborted.\n"
+#	}
 
 # set the relevent page width and height
 &GetPageSize;
@@ -615,26 +661,28 @@ else
 `echo $xmin $ymax >> tmp$$.dat`;
 @projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
 `/bin/rm -f tmp$$.dat`;
+
+
 while (@projected)
-	{
-	$line = shift @projected;
-	if (!$xxmin)
-		{
-		($xxmin,$yymin) = $line =~ /(\S+)\s+(\S+)/;
-		$xxmax = $xxmin;
-		$yymax = $yymin;
-		}
-	else
-		{
-		($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
-		$xxmin = ($xx < $xxmin ? $xx : $xxmin);
-		$xxmax = ($xx > $xxmax ? $xx : $xxmax);
-		$yymin = ($yy < $yymin ? $yy : $yymin);
-		$yymax = ($yy > $yymax ? $yy : $yymax);
-		}
-	}
+{
+    $line = shift @projected;
+    if(!$xxmin){
+	($xxmin,$yymin) = $line =~ /(\S+)\s+(\S+)/;
+	$xxmax = $xxmin;
+	$yymax = $yymin;
+    }
+    else
+    {
+	($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
+	$xxmin = ($xx < $xxmin ? $xx : $xxmin);
+	$xxmax = ($xx > $xxmax ? $xx : $xxmax);
+	$yymin = ($yy < $yymin ? $yy : $yymin);
+	$yymax = ($yy > $yymax ? $yy : $yymax);
+    }    
+}
 $dxx = $xxmax - $xxmin;
 $dyy = $yymax - $yymin;
+
 
 # check for valid scaling
 if ($dxx == 0.0 && $dyy == 0.0)
@@ -644,6 +692,7 @@ if ($dxx == 0.0 && $dyy == 0.0)
 	}
 
 # figure out scaling issues
+
 if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 	{
 	$plot_width = $dxx;
@@ -760,9 +809,20 @@ elsif ($use_scale && $projection =~ /^x.*/ && !$geographic)
 	$plot_height = $dyy * $plot_scale_y;
 
 	# construct plot scale parameters
-	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = sprintf ("$projection_pars$separator%1.5g", 
-					$plot_scale);
+
+	## These lines break things. $projection_pars was already properly
+	## defined and $map_scale may not yet be defined. Moreover, 
+	## $projection_pars should now contain JUST the scale values
+	## with no leading projection type.  The single line added
+	## is all that is required. 
+	## Val Schmidt LDEO/Columbia OCTOBER 2003
+	
+
+	#($projection_pars) = $map_scale =~ /^$projection(\S+)/;
+	#    $projection_pars = sprintf ("$projection_pars$separator%1.5g", 
+	#				$plot_scale);
+	$projection_pars="$plot_scale";
+
 	}
 elsif ($use_width && $projection =~ /^X.*/ && !$geographic)
 	{
@@ -791,9 +851,18 @@ elsif ($use_width && $projection =~ /^X.*/ && !$geographic)
 	$plot_scale_y = $plot_height / $dyy;
 
 	# construct plot scale parameters
-	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = sprintf ("$projection_pars$separator%1.5g", 
-					$plot_width);
+
+	## These lines break things. $projection_pars was already properly
+	## defined and $map_scale may not yet be defined. Moreover, 
+	## $projection_pars should now contain JUST the scale values
+	## with no leading projection type.  The single line added
+	## is all that is required. 
+	## Val Schmidt LDEO/Columbia OCTOBER 2003
+	
+	#($projection_pars) = $map_scale =~ /^$projection(\S+)/;
+	#$projection_pars = sprintf ("$projection_pars$separator%1.5g", 
+	#				$plot_width);
+	$projection_pars="$plot_width";
 	}
 elsif ($use_scale)
 	{
@@ -1538,8 +1607,7 @@ sub GetDecimalDegrees {
 		else
 			{
 			$dec_degrees = $degrees + $minutes / 60.0;
-			}
-		}
+			}		}
 
 	# value already in decimal units of some sort
 	else
@@ -1556,7 +1624,7 @@ sub GetPageSize {
 # get space around edge of plot
 	$space_top =    1.25 * $page_height_in{$pagesize} 
 			    / $page_height_in{"a"};
-	$space_bottom = 0.50 * $page_height_in{$pagesize} 
+	$space_bottom = 1.50 * $page_height_in{$pagesize} 
 			    / $page_height_in{"a"};
 	$space_left =   1.00 * $page_height_in{$pagesize} 
 			    / $page_height_in{"a"};
