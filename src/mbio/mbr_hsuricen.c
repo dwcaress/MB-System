@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 4.1 1994-05-21 02:23:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -53,7 +56,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 4.1 1994-05-21 02:23:29 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -267,18 +270,21 @@ int	*error;
 			scale = 0.01*data->scale;
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
 				{
-				mb_io_ptr->new_bath_acrosstrack[id-i] 
-					= scale*data->dist[i];
 				mb_io_ptr->new_bath[id-i] 
 					= scale*data->deph[i];
+				mb_io_ptr->new_bath_acrosstrack[id-i] 
+					= scale*data->dist[i];
+				mb_io_ptr->new_bath_alongtrack[id-i] = 0;
 				}
 			}
 		else
 			{
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
 				{
-				mb_io_ptr->new_bath_acrosstrack[id-i] = data->dist[i];
 				mb_io_ptr->new_bath[id-i] = data->deph[i];
+				mb_io_ptr->new_bath_acrosstrack[id-i] 
+					= data->dist[i];
+				mb_io_ptr->new_bath_alongtrack[id-i] = 0;
 				}
 			}
 

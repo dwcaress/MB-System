@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.1 1994-05-21 02:23:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.2  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -56,7 +59,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.1 1994-05-21 02:23:29 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -348,6 +351,7 @@ int	*error;
 		{
 		mb_io_ptr->new_bath[i] = 0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0;
+		mb_io_ptr->new_bath_alongtrack[i] = 0;
 		}
 	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
@@ -467,6 +471,7 @@ int	*error;
 				= data->depth_scale*data->depth[i];
 			mb_io_ptr->new_bath_acrosstrack[i] 
 				= data->depth_scale*data->distance[i];
+			mb_io_ptr->new_bath_alongtrack[i] = 0;
 			}
 
 		/* read processded amplitude values into storage arrays */
