@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.7 2001-07-27 19:07:16 caress Exp $
+ *    $Id: mb_process.c,v 5.8 2001-07-31 00:40:52 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/07/27  19:07:16  caress
+ * Added data cutting.
+ *
  * Revision 5.6  2001/07/20 00:31:11  caress
  * Release 5.0.beta03
  *
@@ -71,7 +74,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.7 2001-07-27 19:07:16 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.8 2001-07-31 00:40:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -329,7 +332,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			process->mbp_cut_num = 0;
 			}
-		    else if (strncmp(buffer, "DATACUT", 12) == 0)
+		    else if (strncmp(buffer, "DATACUT", 7) == 0)
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
@@ -791,10 +794,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		for (i=0;i<process->mbp_cut_num;i++)
 			{
 			fprintf(stderr,"dbg2           cut %d:\n",i);
-			fprintf(stderr,"dbg2           mbp_cut_kind[%d]:     %d\n",process->mbp_cut_kind[i]);
-			fprintf(stderr,"dbg2           mbp_cut_mode[%d]:     %d\n",process->mbp_cut_mode[i]);
-			fprintf(stderr,"dbg2           mbp_cut_min[%d]:      %d\n",process->mbp_cut_min[i]);
-			fprintf(stderr,"dbg2           mbp_cut_max[%d]:      %d\n",process->mbp_cut_max[i]);
+			fprintf(stderr,"dbg2           mbp_cut_kind[%d]:     %d\n", i, process->mbp_cut_kind[i]);
+			fprintf(stderr,"dbg2           mbp_cut_mode[%d]:     %d\n", i, process->mbp_cut_mode[i]);
+			fprintf(stderr,"dbg2           mbp_cut_min[%d]:      %f\n", i, process->mbp_cut_min[i]);
+			fprintf(stderr,"dbg2           mbp_cut_max[%d]:      %f\n", i, process->mbp_cut_max[i]);
 			}
 		fprintf(stderr,"dbg2       mbp_bathrecalc_mode:    %d\n",process->mbp_bathrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias_mode:      %d\n",process->mbp_rollbias_mode);
@@ -893,10 +896,10 @@ int mb_pr_writepar(int verbose, char *file,
 		for (i=0;i<process->mbp_cut_num;i++)
 			{
 			fprintf(stderr,"dbg2           cut %d:\n",i);
-			fprintf(stderr,"dbg2           mbp_cut_kind[%d]:     %d\n",process->mbp_cut_kind[i]);
-			fprintf(stderr,"dbg2           mbp_cut_mode[%d]:     %d\n",process->mbp_cut_mode[i]);
-			fprintf(stderr,"dbg2           mbp_cut_min[%d]:      %d\n",process->mbp_cut_min[i]);
-			fprintf(stderr,"dbg2           mbp_cut_max[%d]:      %d\n",process->mbp_cut_max[i]);
+			fprintf(stderr,"dbg2           mbp_cut_kind[%d]:     %d\n", i, process->mbp_cut_kind[i]);
+			fprintf(stderr,"dbg2           mbp_cut_mode[%d]:     %d\n", i, process->mbp_cut_mode[i]);
+			fprintf(stderr,"dbg2           mbp_cut_min[%d]:      %f\n", i, process->mbp_cut_min[i]);
+			fprintf(stderr,"dbg2           mbp_cut_max[%d]:      %f\n", i, process->mbp_cut_max[i]);
 			}
 		fprintf(stderr,"dbg2       mbp_bathrecalc_mode:    %d\n",process->mbp_bathrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias_mode:      %d\n",process->mbp_rollbias_mode);
