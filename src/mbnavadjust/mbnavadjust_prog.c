@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.8 2001-08-04 01:02:24 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.9 2001-10-19 00:55:42 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/08/04  01:02:24  caress
+ * Fixed small bugs.
+ *
  * Revision 5.7  2001/08/02  01:48:30  caress
  * Fixed call to mb_pr_get_heading() and mb_pr_get_rollbias().
  *
@@ -104,7 +107,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.8 2001-08-04 01:02:24 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.9 2001-10-19 00:55:42 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -1078,22 +1081,22 @@ int mbnavadjust_read_project()
 			status = MB_FAILURE;
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-				|| (nscan = sscanf(buffer,"%s %s",label,project.name)) != 2
+				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"NAME") != 0))
 			status = MB_FAILURE;
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-				|| (nscan = sscanf(buffer,"%s %s",label,project.path)) != 2
+				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"PATH") != 0))
 			status = MB_FAILURE;
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-				|| (nscan = sscanf(buffer,"%s %s",label,project.home)) != 2
+				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"HOME") != 0))
 			status = MB_FAILURE;
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-				|| (nscan = sscanf(buffer,"%s %s",label,project.datadir)) != 2
+				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"DATADIR") != 0))
 			status = MB_FAILURE;
 		if (status == MB_SUCCESS
@@ -1189,6 +1192,19 @@ int mbnavadjust_read_project()
 					&(file->output_id),
 					file->file)) != 11))
 				status = MB_FAILURE;
+				
+			/* set file->path as absolute path 
+			    - file->file may be a relative path */
+			if (status == MB_SUCCESS)
+				{
+				if (file->file[0] == '/')
+				    strcpy(file->path, file->file);
+				else
+				    {
+				    strcpy(file->path, project.path);
+				    strcat(file->path, file->file);
+				    }
+				}
 			
 			/* read section info */
 			if (file->num_sections > 0)
@@ -1590,7 +1606,7 @@ int mbnavadjust_import_file(char *path, int iformat)
 	    
 	/* now look for existing mbnavadjust output files
 	 * - increment output id so this mbnavadjust project outputs
-	 *   a unique nav file file for this input file */
+	 *   a unique nav file for this input file */
 	output_id = 0;
 	found = MB_NO;
 	while (found == MB_NO)
@@ -1742,7 +1758,12 @@ int mbnavadjust_import_file(char *path, int iformat)
 				file->status = MBNA_FILE_OK;
 				file->id = project.num_files;
 				file->output_id = output_id;
+				strcpy(file->path,path);
 				strcpy(file->file,path);
+				mb_get_relative_path(mbna_verbose, 
+							file->file, 
+							project.path, 
+							&error);
 				file->format = iformat;
 				file->heading_bias = 0.0;
 				file->roll_bias = 0.0;
@@ -1754,11 +1775,11 @@ int mbnavadjust_import_file(char *path, int iformat)
 				first = MB_NO;
 				
 				/* get bias values */
-				mb_pr_get_heading(mbna_verbose, file->file, 
+				mb_pr_get_heading(mbna_verbose, file->path, 
 						    &mbp_heading_mode, 
 						    &mbp_headingbias, 
 						    &error);
-				mb_pr_get_rollbias(mbna_verbose, file->file, 
+				mb_pr_get_rollbias(mbna_verbose, file->path, 
 						    &mbp_rollbias_mode, 
 						    &mbp_rollbias, 
 						    &mbp_rollbias_port, 
@@ -5591,7 +5612,7 @@ iter,smoothweight,sigma_total,sigma_crossing,
 			    project.datadir,i);
 		    	sprintf(apath,"%s/nvs_%4.4d.na%d",
 			    project.datadir,i,file->output_id);
-		    	sprintf(opath,"%s.na%d", file->file, file->output_id);
+		    	sprintf(opath,"%s.na%d", file->path, file->output_id);
 		    	if ((nfp = fopen(npath,"r")) == NULL)
 			    {
 			    status = MB_FAILURE;
@@ -5705,11 +5726,11 @@ navlon, navlat, heading, speed);*/
 			    fclose(ofp);
 			    
 			    /* get bias values */
-			    mb_pr_get_heading(mbna_verbose, file->file, 
+			    mb_pr_get_heading(mbna_verbose, file->path, 
 						&mbp_heading_mode, 
 						&mbp_headingbias, 
 						&error);
-			    mb_pr_get_rollbias(mbna_verbose, file->file, 
+			    mb_pr_get_rollbias(mbna_verbose, file->path, 
 						&mbp_rollbias_mode, 
 						&mbp_rollbias, 
 						&mbp_rollbias_port, 
@@ -5717,7 +5738,7 @@ navlon, navlat, heading, speed);*/
 						&error);
 	    
 			    /* update output file in mbprocess parameter file */
-			    status = mb_pr_update_navadj(mbna_verbose, file->file, 
+			    status = mb_pr_update_navadj(mbna_verbose, file->path, 
 					MBP_NAV_ON, opath, 
 					MBP_NAV_LINEAR, 
 					&error);
@@ -5742,7 +5763,7 @@ navlon, navlat, heading, speed);*/
 				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
 				    mbp_heading_mode = MBP_HEADING_CALCOFFSET;
 				}
-			    status = mb_pr_update_heading(mbna_verbose, file->file, 
+			    status = mb_pr_update_heading(mbna_verbose, file->path, 
 					mbp_heading_mode, mbp_headingbias, 
 					&error);
 
@@ -5774,7 +5795,7 @@ navlon, navlat, heading, speed);*/
 				    mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
 				    }
 				}
-			    status = mb_pr_update_rollbias(mbna_verbose, file->file, 
+			    status = mb_pr_update_rollbias(mbna_verbose, file->path, 
 					mbp_rollbias_mode, mbp_rollbias, 
 					mbp_rollbias_port, mbp_rollbias_stbd, 
 					&error);

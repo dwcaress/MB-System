@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.1 2001-07-20 00:33:43 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.2 2001-10-19 00:55:42 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/07/20  00:33:43  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.0  2000/12/01  22:55:48  caress
  * First cut at Version 5.0.
  *
@@ -35,6 +38,10 @@
 
 /*--------------------------------------------------------------------*/
 
+#ifndef MB_DEFINE_DEF
+#include "mb_define.h"
+#endif
+
 #ifndef MB_YES
 #include "mb_status.h"
 #endif
@@ -46,7 +53,7 @@
 #endif
 
 /* mbnavadjust global defines */
-#define STRING_MAX 			512
+#define STRING_MAX 			MB_PATH_MAXLINE
 #define BUFFER_MAX 			1024
 #define ALLOC_NUM			10
 #define MBNA_SNAV_NUM			11
@@ -112,6 +119,7 @@ struct mbna_file {
 	int	id;
 	int	output_id;
 	char 	file[STRING_MAX];
+	char 	path[STRING_MAX];
 	int	format;
 	double	heading_bias_import;
 	double	roll_bias_import;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.8 2001-10-12 21:10:41 caress Exp $
+ *    $Id: mb_define.h,v 5.9 2001-10-19 00:54:37 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/10/12  21:10:41  caress
+ * Added interpolation of attitude data.
+ *
  * Revision 5.7  2001/09/17 23:25:13  caress
  * Added format 84
  *
@@ -184,6 +187,10 @@ int mb_datalist_read(int verbose,
 		int *error);
 int mb_datalist_close(int verbose,
 		void **datalist, int *error);
+int mb_get_relative_path(int verbose,
+		char *path,
+		char *pwd,
+		int *error);
 int mb_read_init(int verbose, char *file, 
 		int format, int pings, int lonflip, double bounds[4],
 		int btime_i[7], int etime_i[7], 

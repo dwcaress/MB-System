@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.10 2001-08-10 22:42:50 dcaress Exp $
+ *    $Id: mbprocess.c,v 5.11 2001-10-19 00:56:17 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2001/08/10  22:42:50  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.9  2001-08-03 18:01:07-07  caress
  * Added cut by speed.
  *
@@ -101,7 +104,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.10 2001-08-10 22:42:50 dcaress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.11 2001-10-19 00:56:17 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -833,7 +836,7 @@ and mbedit edit save files.\n";
 	    if (process.mbp_corrected == MB_YES)
 		fprintf(stderr,"  Output bathymetry reference:   CORRECTED\n");
 	    else if (process.mbp_corrected == MB_NO)
-		fprintf(stderr,"  Bathymetry reference:          UNCORRECTED\n");
+		fprintf(stderr,"  Output bathymetry reference:   UNCORRECTED\n");
 	    if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF)
 		{
 		if (process.mbp_corrected == MB_YES)
@@ -2265,13 +2268,13 @@ and mbedit edit save files.\n";
 		    if (process.mbp_corrected == MB_YES)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"Output bathymetry reference:   CORRECTED");
+			sprintf(comment,"  Output bathymetry reference:   CORRECTED");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		    else if (process.mbp_corrected == MB_NO)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"Output bathymetry reference:   UNCORRECTED");
+			sprintf(comment,"  Output bathymetry reference:   UNCORRECTED");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		    }		    
@@ -2280,13 +2283,13 @@ and mbedit edit save files.\n";
 		    if (process.mbp_corrected == MB_YES)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"Depths modified from uncorrected to corrected.");
+			sprintf(comment,"  Depths modified from uncorrected to corrected.");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}		    
 		    else
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"Depths modified from corrected to uncorrected.");
+			sprintf(comment,"  Depths modified from corrected to uncorrected.");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		    }
@@ -2294,14 +2297,14 @@ and mbedit edit save files.\n";
 		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  roll bias:       OFF");
+		    sprintf(comment,"  Roll bias:       OFF");
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    }
 		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  roll bias:       %f degrees (starboard: -, port: +)", 
+		    sprintf(comment,"  Roll bias:       %f degrees (starboard: -, port: +)", 
 			    process.mbp_rollbias);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
@@ -2309,12 +2312,12 @@ and mbedit edit save files.\n";
 		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  port roll bias:  %f degrees (starboard: -, port: +)", 
+		    sprintf(comment,"  Port roll bias:  %f degrees (starboard: -, port: +)", 
 			    process.mbp_rollbias_port);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  port roll stbd:  %f degrees (starboard: -, port: +)", 
+		    sprintf(comment,"  Starboard roll bias:  %f degrees (starboard: -, port: +)", 
 			    process.mbp_rollbias_stbd);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
@@ -2322,14 +2325,14 @@ and mbedit edit save files.\n";
 		if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  pitch bias:      OFF");
+		    sprintf(comment,"  Pitch bias:      OFF");
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
 		    }
 		else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
 		    {
 		    strncpy(comment,"\0",MBP_FILENAMESIZE);
-		    sprintf(comment,"  pitch bias:      %f degrees (aft: -, forward: +)", 
+		    sprintf(comment,"  Pitch bias:      %f degrees (aft: -, forward: +)", 
 			    process.mbp_pitchbias);
 		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		    if (error == MB_ERROR_NO_ERROR) ocomment++;
@@ -2338,7 +2341,7 @@ and mbedit edit save files.\n";
 		if (process.mbp_draft_mode == MBP_DRAFT_SET)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Draft set:    %f meters",
+			sprintf(comment,"  Draft set:      %f meters",
 				process.mbp_draft);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
@@ -2346,7 +2349,7 @@ and mbedit edit save files.\n";
 		else if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Draft offset: %f meters",
+			sprintf(comment,"  Draft offset:    %f meters",
 				process.mbp_draft_offset);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
@@ -2362,7 +2365,7 @@ and mbedit edit save files.\n";
 		else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Draft offset: %f meters",
+			sprintf(comment,"  Draft offset:    %f meters",
 				process.mbp_draft_offset);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
@@ -2375,7 +2378,7 @@ and mbedit edit save files.\n";
 		else if (process.mbp_draft_mode == MBP_DRAFT_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Draft:        not modified");
+			sprintf(comment,"  Draft:           not modified");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -2411,7 +2414,7 @@ and mbedit edit save files.\n";
 		else if (process.mbp_heave_mode == MBP_HEAVE_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Heave:        not modified");
+			sprintf(comment,"  Heave:           not modified");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -2432,49 +2435,49 @@ and mbedit edit save files.\n";
 			}
 	    	if (process.mbp_lever_mode == MBP_LEVER_OFF)
 			{
-			sprintf(comment,"  Lever calculation off.\n");
+			sprintf(comment,"  Lever calculation off.");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
 	    	else
 			{
-			sprintf(comment,"  Lever calculation used to calculate heave correction.\n");
+			sprintf(comment,"  Lever calculation used to calculate heave correction.");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		sprintf(comment,"  VRU offset x:                  %f m\n", process.mbp_vru_offsetx);
+	    		sprintf(comment,"  VRU offset x:                  %f m", process.mbp_vru_offsetx);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		sprintf(comment,"  VRU offset y:                  %f m\n", process.mbp_vru_offsety);
+	    		sprintf(comment,"  VRU offset y:                  %f m", process.mbp_vru_offsety);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		sprintf(comment,"  VRU offset z:                  %f m\n", process.mbp_vru_offsetz);
+	    		sprintf(comment,"  VRU offset z:                  %f m", process.mbp_vru_offsetz);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		sprintf(comment,"  Sonar offset x:                %f m\n", process.mbp_sonar_offsetx);
+	    		sprintf(comment,"  Sonar offset x:                %f m", process.mbp_sonar_offsetx);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		sprintf(comment,"  Sonar offset y:                %f m\n", process.mbp_sonar_offsety);
+	    		sprintf(comment,"  Sonar offset y:                %f m", process.mbp_sonar_offsety);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		sprintf(comment,"  Sonar offset z:                %f m\n", process.mbp_sonar_offsetz);
+	    		sprintf(comment,"  Sonar offset z:                %f m", process.mbp_sonar_offsetz);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
 	    	if (process.mbp_tide_mode == MBP_TIDE_OFF)
 			{
-			sprintf(comment,"  Tide calculation off.\n");
+			sprintf(comment,"  Tide calculation off.");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
 	    	else
 			{
-			sprintf(comment,"  Tide correction applied to bathymetry.\n");
+			sprintf(comment,"  Tide correction applied to bathymetry.");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		sprintf(comment,"  Tide file:                     %s m\n", process.mbp_tidefile);
+	    		sprintf(comment,"  Tide file:                     %s m", process.mbp_tidefile);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		sprintf(comment,"  Tide format:                   %d m\n", process.mbp_tide_format);
+	    		sprintf(comment,"  Tide format:                   %d m", process.mbp_tide_format);
  			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -2502,61 +2505,61 @@ and mbedit edit save files.\n";
 		if (process.mbp_nav_mode == MBP_NAV_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Merge edited navigation:     OFF");
+			sprintf(comment,"  Merge edited navigation:   OFF");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
 		else if (process.mbp_nav_mode == MBP_NAV_ON)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Edited navigation file:      %s", process.mbp_navfile);
+			sprintf(comment,"  Edited navigation file:    %s", process.mbp_navfile);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 	
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Edited navigation format:    %d", process.mbp_nav_format);
+			sprintf(comment,"  Edited navigation format:  %d", process.mbp_nav_format);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 	
 			if (process.mbp_nav_heading == MBP_NAV_ON)
 			    {
 			    strncpy(comment,"\0",MBP_FILENAMESIZE);
-			    sprintf(comment,"  Heading merge:    ON");
+			    sprintf(comment,"  Heading merge:         ON");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
 			else
 			    {
 			    strncpy(comment,"\0",MBP_FILENAMESIZE);
-			    sprintf(comment,"  Heading merge:    OFF");
+			    sprintf(comment,"  Heading merge:         OFF");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
 			if (process.mbp_nav_speed == MBP_NAV_ON)
 			    {
 			    strncpy(comment,"\0",MBP_FILENAMESIZE);
-			    sprintf(comment,"  Speed merge:      ON");
+			    sprintf(comment,"  Speed merge:           ON");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
 			else
 			    {
 			    strncpy(comment,"\0",MBP_FILENAMESIZE);
-			    sprintf(comment,"  Speed merge:      OFF");
+			    sprintf(comment,"  Speed merge:           OFF");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
 			if (process.mbp_nav_draft == MBP_NAV_ON)
 			    {
 			    strncpy(comment,"\0",MBP_FILENAMESIZE);
-			    sprintf(comment,"  Draft merge:      ON");
+			    sprintf(comment,"  Draft merge:           ON");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
 			else
 			    {
 			    strncpy(comment,"\0",MBP_FILENAMESIZE);
-			    sprintf(comment,"  Draft merge:      OFF");
+			    sprintf(comment,"  Draft merge:           OFF");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
@@ -2574,27 +2577,27 @@ and mbedit edit save files.\n";
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
-	    		sprintf(comment,"  Navigation time shift:         %f\n", process.mbp_nav_timeshift);
+	    		sprintf(comment,"  Navigation time shift:         %f", process.mbp_nav_timeshift);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 	    		if (process.mbp_nav_shift == MBP_NAV_ON)
 				{
-				sprintf(comment,"  Navigation positions shifted.\n");
+				sprintf(comment,"  Navigation positions shifted.");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
-				sprintf(comment,"  Navigation offset x:       %f\n", process.mbp_nav_offsetx);
+				sprintf(comment,"  Navigation offset x:       %f", process.mbp_nav_offsetx);
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
-				sprintf(comment,"  Navigation offset y:       %f\n", process.mbp_nav_offsety);
+				sprintf(comment,"  Navigation offset y:       %f", process.mbp_nav_offsety);
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
-				sprintf(comment,"  Navigation offset z:       %f\n", process.mbp_nav_offsetz);
+				sprintf(comment,"  Navigation offset z:       %f", process.mbp_nav_offsetz);
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 				}
 	    		else 
 				{
-				sprintf(comment,"  Navigation positions not shifted.\n");
+				sprintf(comment,"  Navigation positions not shifted.");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 				}
@@ -2625,9 +2628,9 @@ and mbedit edit save files.\n";
 
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
 		if (process.mbp_cut_num > 0)
-			sprintf(comment,"  Data cutting enabled (%d commands).\n", process.mbp_cut_num);
+			sprintf(comment,"  Data cutting enabled (%d commands).", process.mbp_cut_num);
 		else
-			sprintf(comment,"  Data cutting disabled.\n");
+			sprintf(comment,"  Data cutting disabled.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		for (i=0;i<process.mbp_cut_num;i++)
@@ -2644,7 +2647,7 @@ and mbedit edit save files.\n";
 		if (process.mbp_edit_mode == MBP_EDIT_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Herge bath edit:      OFF");
+			sprintf(comment,"  Merge bath edit:      OFF");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
