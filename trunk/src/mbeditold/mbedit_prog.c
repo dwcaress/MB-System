@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.26 2000-01-25 01:46:20 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.27 2000-01-26 03:02:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.26  2000/01/25  01:46:20  caress
+ * Altered handling of filenames and edit save files.
+ *
  * Revision 4.25  2000/01/20  00:05:38  caress
  * Added pick mode and two unflag buttons.
  *
@@ -224,7 +227,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.26 2000-01-25 01:46:20 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.27 2000-01-26 03:02:05 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -3360,7 +3363,7 @@ int	*form;
 				    &tform, &error))
 				    == MB_SUCCESS)
 	    {
-	    if (strstr(ofile, "_") != NULL)
+	    if (strstr(file2, "_") != NULL)
 		    strcat(file2, "e");
 	    else
 		    strcat(file2,"_e");
