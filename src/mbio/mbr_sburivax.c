@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburivax.c	2/2/93
- *	$Id: mbr_sburivax.c,v 4.2 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_sburivax.c,v 4.3 1995-03-22 18:58:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.1  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -61,7 +64,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sburivax.c,v 4.2 1995-03-06 19:38:54 caress Exp $";
+ static char res_id[]="$Id: mbr_sburivax.c,v 4.3 1995-03-22 18:58:09 caress Exp $";
 	char	*function_name = "mbr_alm_sburivax";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -90,6 +93,10 @@ int	*error;
 				&mb_io_ptr->raw_data,error);
 	status = mb_malloc(verbose,sizeof(struct mbsys_sb_struct),
 				&mb_io_ptr->store_data,error);
+
+	/* set record counters to zero */
+	mb_io_ptr->irecord_count = 0;
+	mb_io_ptr->orecord_count = 0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -161,6 +168,7 @@ int	*error;
 	struct mbsys_sb_struct *store;
 	char	*datacomment;
 	int	time_j[5];
+	short	dummy;
 	int	i, j, k;
 	int	id;
 
@@ -191,11 +199,20 @@ int	*error;
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
+		mb_io_ptr->irecord_count++;
 		}
 	else
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
+		}
+
+	/* if needed read the extra two bytes that occur
+		every five records */
+	if (status == MB_SUCCESS && mb_io_ptr->irecord_count >= 5)
+		{
+		mb_io_ptr->irecord_count = 0;
+		fread(&dummy, 1, sizeof(short), mb_io_ptr->mbfp);
 		}
 
 	/* byte swap the data if necessary */
@@ -433,6 +450,7 @@ int	*error;
 	char	*datacomment;
 	int	time_j[5];
 	double	lon, lat;
+	short	dummy = 0;
 	int	i, j;
 	int	id;
 
@@ -599,11 +617,20 @@ int	*error;
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
+			mb_io_ptr->orecord_count++;
 			}
 		else
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
+			}
+
+		/* if needed write the extra two bytes that occur
+			every five records */
+		if (status == MB_SUCCESS && mb_io_ptr->orecord_count >= 5)
+			{
+			mb_io_ptr->orecord_count = 0;
+			fwrite(&dummy, 1, sizeof(short), mb_io_ptr->mbfp);
 			}
 		}
 	else
