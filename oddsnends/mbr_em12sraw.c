@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12sraw.c	7/8/96
- *	$Id: mbr_em12sraw.c,v 5.2 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbr_em12sraw.c,v 5.3 2001-03-22 20:45:56 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2000/12/10  20:26:50  caress
  * Version 5.0.alpha02
  *
@@ -91,6 +94,8 @@
 #include "../../include/mb_swap.h"
 
 /* essential function prototypes */
+int mbr_register_em12sraw(int verbose, char *mbio_ptr, 
+		int *error);
 int mbr_info_em12sraw(int verbose, 
 			int *system, 
 			int *beams_bath_max, 
@@ -109,27 +114,123 @@ int mbr_info_em12sraw(int verbose,
 			int *vru_source, 
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
-			int (**format_alloc)(), 
-			int (**format_free)(), 
-			int (**store_alloc)(), 
-			int (**store_free)(), 
-			int (**read_ping)(), 
-			int (**write_ping)(), 
-			int (**extract)(), 
-			int (**insert)(), 
-			int (**extract_nav)(), 
-			int (**insert_nav)(), 
-			int (**extract_altitude)(), 
-			int (**insert_altitude)(), 
-			int (**extract_svp)(), 
-			int (**insert_svp)(), 
-			int (**ttimes)(), 
-			int (**copyrecord)(), 
 			int *error);
 int mbr_alm_em12sraw(int verbose, char *mbio_ptr, int *error);
 int mbr_dem_em12sraw(int verbose, char *mbio_ptr, int *error);
 int mbr_rt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 int mbr_wt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+
+/*--------------------------------------------------------------------*/
+int mbr_register_em12sraw(int verbose, char *mbio_ptr, int *error)
+{
+	static char res_id[]="$Id: mbr_em12sraw.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+	char	*function_name = "mbr_register_em12sraw";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* get mb_io_ptr */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* set format info parameters */
+	status = mbr_info_em12sraw(verbose, 
+			&mb_io_ptr->system, 
+			&mb_io_ptr->beams_bath_max, 
+			&mb_io_ptr->beams_amp_max, 
+			&mb_io_ptr->pixels_ss_max, 
+			&mb_io_ptr->format_name, 
+			&mb_io_ptr->system_name, 
+			&mb_io_ptr->format_description, 
+			&mb_io_ptr->numfile, 
+			&mb_io_ptr->filetype, 
+			&mb_io_ptr->variable_beams, 
+			&mb_io_ptr->traveltime, 
+			&mb_io_ptr->beam_flagging, 
+			&mb_io_ptr->nav_source, 
+			&mb_io_ptr->heading_source, 
+			&mb_io_ptr->vru_source, 
+			&mb_io_ptr->beamwidth_xtrack, 
+			&mb_io_ptr->beamwidth_ltrack, 
+			error);
+
+	/* set format and system specific function pointers */
+	mb_io_ptr->mb_io_format_alloc = &mbr_alm_em12sraw;
+	mb_io_ptr->mb_io_format_free = &mbr_dem_em12sraw; 
+	mb_io_ptr->mb_io_store_alloc = &mbsys_simrad_alloc; 
+	mb_io_ptr->mb_io_store_free = &mbsys_simrad_deall; 
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_em12sraw; 
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_em12sraw; 
+	mb_io_ptr->mb_io_extract = &mbsys_simrad_extract; 
+	mb_io_ptr->mb_io_insert = &mbsys_simrad_insert; 
+	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad_extract_nav; 
+	mb_io_ptr->mb_io_insert_nav = &mbsys_simrad_insert_nav; 
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_simrad_extract_altitude; 
+	mb_io_ptr->mb_io_insert_altitude = NULL; 
+	mb_io_ptr->mb_io_extract_svp = &mbsys_simrad_extract_svp; 
+	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad_insert_svp; 
+	mb_io_ptr->mb_io_ttimes = &mbsys_simrad_ttimes; 
+	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad_copy; 
+	mb_io_ptr->mb_io_extract_rawss = NULL; 
+	mb_io_ptr->mb_io_insert_rawss = NULL; 
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",mb_io_ptr->pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",mb_io_ptr->format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",mb_io_ptr->system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",mb_io_ptr->format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",mb_io_ptr->numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",mb_io_ptr->filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
 
 /*--------------------------------------------------------------------*/
 int mbr_info_em12sraw(int verbose, 
@@ -150,25 +251,9 @@ int mbr_info_em12sraw(int verbose,
 			int *vru_source, 
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
-			int (**format_alloc)(), 
-			int (**format_free)(), 
-			int (**store_alloc)(), 
-			int (**store_free)(), 
-			int (**read_ping)(), 
-			int (**write_ping)(), 
-			int (**extract)(), 
-			int (**insert)(), 
-			int (**extract_nav)(), 
-			int (**insert_nav)(), 
-			int (**extract_altitude)(), 
-			int (**insert_altitude)(), 
-			int (**extract_svp)(), 
-			int (**insert_svp)(), 
-			int (**ttimes)(), 
-			int (**copyrecord)(), 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12sraw.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+	static char res_id[]="$Id: mbr_em12sraw.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mbr_info_em12sraw";
 	int	status = MB_SUCCESS;
 
@@ -185,9 +270,9 @@ int mbr_info_em12sraw(int verbose,
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SIMRAD;
-	*beams_bath_max = 81;
-	*beams_amp_max = 81;
-	*pixels_ss_max = 4050;
+	*beams_bath_max = MBF_EM12SRAW_MAXBEAMS;
+	*beams_amp_max = MBF_EM12SRAW_MAXBEAMS;
+	*pixels_ss_max = MBF_EM12SRAW_MAXPIXELS;
 	strncpy(format_name, "EM12SRAW", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_EM12SRAW\nInformal Description: Simrad EM12 vendor format\nAttributes:           Simrad EM12S and EM12D, bathymetry, amplitude, and sidescan,\n                      81 beams, variable pixels, ascii + binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
@@ -201,24 +286,6 @@ int mbr_info_em12sraw(int verbose,
 	*vru_source = MB_DATA_DATA;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
-
-	/* set format and system specific function pointers */
-	*format_alloc = &mbr_alm_em12sraw;
-	*format_free = &mbr_dem_em12sraw; 
-	*store_alloc = &mbsys_simrad_alloc; 
-	*store_free = &mbsys_simrad_deall; 
-	*read_ping = &mbr_rt_em12sraw; 
-	*write_ping = &mbr_wt_em12sraw; 
-	*extract = &mbsys_simrad_extract; 
-	*insert = &mbsys_simrad_insert; 
-	*extract_nav = &mbsys_simrad_extract_nav; 
-	*insert_nav = &mbsys_simrad_insert_nav; 
-	*extract_altitude = &mbsys_simrad_extract_altitude; 
-	*insert_altitude = NULL; 
-	*extract_svp = &mbsys_simrad_extract_svp; 
-	*insert_svp = &mbsys_simrad_insert_svp; 
-	*ttimes = &mbsys_simrad_ttimes; 
-	*copyrecord = &mbsys_simrad_copy; 
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -244,22 +311,6 @@ int mbr_info_em12sraw(int verbose,
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -268,15 +319,16 @@ int mbr_info_em12sraw(int verbose,
 	/* return status */
 	return(status);
 }
-
-
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12sraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12sraw.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+	static char res_id[]="$Id: mbr_em12sraw.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mbr_alm_em12sraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	int	*wrapper;
+	double	*pixel_size;
+	double	*swath_width;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -305,6 +357,12 @@ int mbr_alm_em12sraw(int verbose, char *mbio_ptr, int *error)
 
 	/* initialize everything to zeros */
 	mbr_zero_em12sraw(verbose,mb_io_ptr->raw_data,error);
+	wrapper = &mb_io_ptr->save5;
+	pixel_size = &mb_io_ptr->saved1;
+	swath_width = &mb_io_ptr->saved2;
+	*wrapper = -1;
+	*pixel_size = 0.0;
+	*swath_width = 0.0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -476,7 +534,7 @@ int mbr_zero_em12sraw(int verbose, char *data_ptr, int *error)
 		data->xducer_pitch = 0;
 		data->ping_heave = 0;
 		data->sound_vel = 0;
-		data->pixels_ss = 0;
+		data->pixels_ssraw = 0;
 		data->ss_mode = 0;
 		for (i=0;i<MBF_EM12SRAW_MAXBEAMS;i++)
 			{
@@ -492,10 +550,17 @@ int mbr_zero_em12sraw(int verbose, char *data_ptr, int *error)
 			data->beam_center_sample[i] = 0;
 			data->beam_start_sample[i] = 0;
 			}
+		for (i=0;i<MBF_EM12SRAW_MAXRAWPIXELS;i++)
+			{
+			data->ssraw[i] = 0;
+			data->ssp[i] = 0;
+			}
+		data->pixel_size = 0.0;
+		data->pixels_ss = 0;			
 		for (i=0;i<MBF_EM12SRAW_MAXPIXELS;i++)
 			{
-			data->ss[i] = 0;
-			data->ssp[i] = 0;
+			data->ss[i] = 0.0;
+			data->ssalongtrack[i] = 0.0;
 			}
 		}
 
@@ -526,11 +591,6 @@ int mbr_rt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	struct mbf_em12sraw_struct *data;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
-	mb_s_char *data_ss;
-	mb_s_char *store_ss;
-	short int *data_ssp;
-	short int *store_ssp;
-	double	ss_spacing;
 	int	ntime_i[7];
 	double	ntime_d;
 	int	ptime_i[7];
@@ -539,7 +599,7 @@ int mbr_rt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	double	dd, dt, dx, dy;
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
-	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
+	double	*pixel_size, *swath_width;
 	int	ifix;
 	int	i, j, k;
 
@@ -558,6 +618,8 @@ int mbr_rt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	data = (struct mbf_em12sraw_struct *) mb_io_ptr->raw_data;
 	store = (struct mbsys_simrad_struct *) store_ptr;
+	pixel_size = (double *) &mb_io_ptr->saved1;
+	swath_width = (double *) &mb_io_ptr->saved2;
 
 	/* read next data from file */
 	status = mbr_em12sraw_rd_data(verbose,mbio_ptr,error);
@@ -892,7 +954,7 @@ int mbr_rt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			ping->xducer_pitch = data->xducer_pitch;
 			ping->ping_heave = data->ping_heave;
 			ping->sound_vel = data->sound_vel;
-			ping->pixels_ss = data->pixels_ss;
+			ping->pixels_ssraw = data->pixels_ssraw;
 			ping->ss_mode = data->ss_mode;
 			for (i=0;i<ping->beams_bath;i++)
 				{
@@ -909,19 +971,22 @@ int mbr_rt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 					= data->beam_center_sample[i];
 				ping->beam_start_sample[i] 
 					= data->beam_start_sample[i];
-				if (ping->beam_samples[i] > 0)
-					{
-					store_ss = (mb_s_char *) &ping->ss[data->beam_start_sample[i]];
-					data_ss = (mb_s_char *) &data->ss[data->beam_start_sample[i]];
-					store_ssp = &ping->ssp[data->beam_start_sample[i]];
-					data_ssp = &data->ssp[data->beam_start_sample[i]];
-					for (j=0;j<ping->beam_samples[i];j++)
-						{
-						store_ss[j] = data_ss[j];
-						store_ssp[j] = data_ssp[j];
-						}
-					}
 				}
+			for (i=0;i<ping->pixels_ssraw;i++)
+				{
+				ping->ssraw[i] = data->ssraw[i];
+				ping->ssp[i] = data->ssp[i];
+				}
+
+			/* generate sidescan */
+			ping->pixel_size = 0.0;
+			ping->pixels_ss = 0;			
+			status = mbsys_simrad_makess(verbose,
+					mbio_ptr, store_ptr,
+					MB_NO, pixel_size, 
+					MB_NO, swath_width, 
+					0, 
+					error);
 			}
 		}
 
@@ -949,14 +1014,6 @@ int mbr_wt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	char	*data_ptr;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
-	double	scalefactor;
-	int	time_j[5];
-	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
-	int	iss;
-	mb_s_char *data_ss;
-	mb_s_char *store_ss;
-	short int *data_ssp;
-	short int *store_ssp;
 	int	i, j;
 
 	/* print input debug statements */
@@ -1077,7 +1134,7 @@ int mbr_wt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			data->xducer_pitch = ping->xducer_pitch;
 			data->ping_heave = ping->ping_heave;
 			data->sound_vel = ping->sound_vel;
-			data->pixels_ss = ping->pixels_ss;
+			data->pixels_ssraw = ping->pixels_ssraw;
 			data->ss_mode = ping->ss_mode;
 			for (i=0;i<data->beams_bath;i++)
 				{
@@ -1094,18 +1151,11 @@ int mbr_wt_em12sraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 					= ping->beam_center_sample[i];
 				data->beam_start_sample[i] 
 					= ping->beam_start_sample[i];
-				if (data->beam_samples[i] > 0)
-					{
-					data_ss = (mb_s_char *) &data->ss[data->beam_start_sample[i]];
-					store_ss = (mb_s_char *) &ping->ss[ping->beam_start_sample[i]];
-					data_ssp = &data->ssp[data->beam_start_sample[i]];
-					store_ssp = &ping->ssp[ping->beam_start_sample[i]];
-					for (j=0;j<data->beam_samples[i];j++)
-						{
-						data_ss[j] = store_ss[j];
-						data_ssp[j] = store_ssp[j];
-						}
-					}
+				}
+			for (i=0;i<data->pixels_ssraw;i++)
+				{
+				data->ssraw[i] = ping->ssraw[i];
+				data->ssp[i] = ping->ssp[i];
 				}
 			}
 		}
@@ -1137,6 +1187,7 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 	char	*data_ptr;
 	FILE	*mbfp;
 	int	done;
+	int	*wrapper;
 	char	*label;
 	int	*label_save_flag;
 	short int expect;
@@ -1144,12 +1195,16 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 	short int first_type;
 	int	first_ss;
 	int	more_ss;
-
 	short int *expect_save;
 	int	*expect_save_flag;
 	short int *first_type_save;
 	int	*first_ss_save;
 	int	*more_ss_save;
+	int	read_len;
+	int	skip = 0;
+	int	i;
+	
+/* #define MBR_EM12SRAW_DEBUG 1 */
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1170,6 +1225,7 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 	mbfp = mb_io_ptr->mbfp;
 	
 	/* get saved values */
+	wrapper = (int *) &mb_io_ptr->save5;
 	label = (char *) mb_io_ptr->save_label;
 	type = (short int *) mb_io_ptr->save_label;
 	label_save_flag = (int *) &mb_io_ptr->save_label_flag;
@@ -1205,18 +1261,52 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 		/* if no label saved get next record label */
 		if (*label_save_flag == MB_NO)
 			{
-			if ((status = fread(&label[0],
-				1,1,mb_io_ptr->mbfp)) != 1)
+			/* read four byte wrapper if data stream is known
+				to have wrappers */
+			if (*wrapper == MB_YES)
+				{
+				if ((read_len = fread(label,
+					1,4,mb_io_ptr->mbfp)) != 4)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					}
+				}
+				
+			/* look for label */
+			if (status == MB_SUCCESS
+				&& (read_len = fread(label,
+					1,2,mb_io_ptr->mbfp)) != 2)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
-			if (label[0] == 0x02)
-			    if ((status = fread(&label[1],
+
+			/* check label - if not a good label read a byte 
+				at a time until a good label is found */
+			skip = 0;
+			while (status == MB_SUCCESS
+				&& mbr_em12sraw_chk_label(verbose, 
+					mbio_ptr, *type) != MB_SUCCESS)
+			    {
+			    /* get next byte */
+			    label[0] = label[1];
+			    if ((read_len = fread(&label[1],
 				    1,1,mb_io_ptr->mbfp)) != 1)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					}
+			    skip++;
+			    }
+
+			/* set wrapper status if needed */
+			if (*wrapper < 0)
 				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
+				if (skip == 0) 
+					*wrapper = MB_NO;
+				else if (skip == 4)
+					*wrapper = MB_YES;
 				}
 			}
 		
@@ -1229,23 +1319,31 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 		*type = (short int) mb_swap_short(*type);
 #endif
 
-		/*fprintf(stderr,"\nstart of mbr_em12sraw_rd_data loop:\n");
-		fprintf(stderr,"done:%d\n",done);
-		fprintf(stderr,"expect:%x\n",expect);
-		fprintf(stderr,"type:%x\n",*type);
-		fprintf(stderr,"first_type:%x\n",first_type);
-		fprintf(stderr,"first_ss:%d\n",first_ss);
-		fprintf(stderr,"more_ss:%d\n",more_ss);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"\nstart of mbr_em12sraw_rd_data loop:\n");
+	fprintf(stderr,"done:%d\n",done);
+	fprintf(stderr,"wrapper:%d\n",*wrapper);
+	fprintf(stderr,"skip:%d\n",skip);
+	fprintf(stderr,"expect:%x\n",expect);
+	fprintf(stderr,"type:%x\n",*type);
+	fprintf(stderr,"first_type:%x\n",first_type);
+	fprintf(stderr,"first_ss:%d\n",first_ss);
+	fprintf(stderr,"more_ss:%d\n",more_ss);
+#endif
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == EM_NONE)
 			{
-	/*fprintf(stderr,"call nothing, read failure, no expect\n");
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, read failure, no expect\n");
+#endif
 			done = MB_YES;
 			}
 		else if (status == MB_FAILURE && expect != EM_NONE)
 			{
-	/*fprintf(stderr,"call nothing, read failure, expect %x\n",expect);
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, read failure, expect %x\n",expect);
+#endif
 			done = MB_YES;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
@@ -1262,12 +1360,16 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& *type != EM_12DP_SSP
 			&& *type != EM_12DS_SSP)
 			{
-	/*fprintf(stderr,"call nothing, try again\n");
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, try again\n");
+#endif
 			done = MB_NO;
 			}
 		else if (*type == EM_START)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_start type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_start type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_start(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
@@ -1288,7 +1390,9 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			}
 		else if (*type == EM_STOP)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_stop type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_stop type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_stop(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
@@ -1309,7 +1413,9 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			}
 		else if (*type == EM_PARAMETER)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_parameter type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_parameter type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_parameter(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
@@ -1330,7 +1436,9 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			}
 		else if (*type == EM_POS)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_pos type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_pos type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_pos(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
@@ -1351,7 +1459,9 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			}
 		else if (*type == EM_SVP)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_svp type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_svp type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_svp(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
@@ -1374,14 +1484,18 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& expect != EM_NONE 
 			&& expect != EM_12S_BATH)
 			{
-	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
+#endif
 			done = MB_YES;
 			expect = EM_NONE;
 			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM_12S_BATH)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_bath(
 				verbose,mbfp,data,
 				EM_SWATH_CENTER,error);
@@ -1405,14 +1519,18 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& expect != EM_NONE 
 			&& expect != EM_12S_SSP)
 			{
-	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
+#endif
 			done = MB_YES;
 			expect = EM_NONE;
 			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM_12S_SSP)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_ss(
 				verbose,mbfp,data,
 				EM_SWATH_CENTER,
@@ -1460,14 +1578,18 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& expect != EM_NONE 
 			&& expect != EM_12DP_BATH)
 			{
-	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
+#endif
 			done = MB_YES;
 			expect = EM_NONE;
 			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM_12DP_BATH)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_bath(
 				verbose,mbfp,data,
 				EM_SWATH_PORT,error);
@@ -1491,14 +1613,18 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& expect != EM_NONE 
 			&& expect != EM_12DP_SSP)
 			{
-	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
+#endif
 			done = MB_YES;
 			expect = EM_NONE;
 			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM_12DP_SSP)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_ss(
 				verbose,mbfp,data,
 				EM_SWATH_PORT,
@@ -1547,14 +1673,18 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& expect != EM_NONE 
 			&& expect != EM_12DS_BATH)
 			{
-	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
+#endif
 			done = MB_YES;
 			expect = EM_NONE;
 			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM_12DS_BATH)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_bath type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_bath(
 				verbose,mbfp,data,
 				EM_SWATH_STARBOARD,error);
@@ -1578,14 +1708,18 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			&& expect != EM_NONE 
 			&& expect != EM_12DS_SSP)
 			{
-	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);
+#endif
 			done = MB_YES;
 			expect = EM_NONE;
 			*label_save_flag = MB_YES;
 			}
 		else if (*type == EM_12DS_SSP)
 			{
-	/*fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"call mbr_em12sraw_rd_ss type %x\n",*type);
+#endif
 			status = mbr_em12sraw_rd_ss(
 				verbose,mbfp,data,
 				EM_SWATH_STARBOARD,
@@ -1634,10 +1768,13 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 		if (status == MB_FAILURE)
 			done = MB_YES;
 
-		/*fprintf(stderr,"end of mbr_em12sraw_rd_data loop:\n");
-		fprintf(stderr,"done:%d\n",done);
-		fprintf(stderr,"expect:%x\n",expect);
-		fprintf(stderr,"type:%x\n",*type);*/
+#ifdef MBR_EM12SRAW_DEBUG
+	fprintf(stderr,"end of mbr_em12sraw_rd_data loop:\n");
+	fprintf(stderr,"status:%d error:%d\n",status, *error);
+	fprintf(stderr,"done:%d\n",done);
+	fprintf(stderr,"expect:%x\n",expect);
+	fprintf(stderr,"type:%x\n",*type);
+#endif
 		}
 		
 	/* get file position */
@@ -1646,6 +1783,13 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 	else if (*expect_save_flag != MB_YES)
 		mb_io_ptr->file_bytes = ftell(mbfp);
 
+	/* swap label if saved and byteswapped */
+#ifdef BYTESWAPPED
+	if (*label_save_flag == MB_YES)
+		*type = (short int) mb_swap_short(*type);
+#endif
+
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -1653,6 +1797,77 @@ int mbr_em12sraw_rd_data(int verbose, char *mbio_ptr, int *error)
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em12sraw_chk_label(int verbose, char *mbio_ptr, short type)
+{
+	char	*function_name = "mbr_em12sraw_chk_label";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	char	*startid;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       type:       %d\n",type);
+		}
+
+	/* get pointer to mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+		/* swap bytes if necessary */
+#ifdef BYTESWAPPED
+		type = (short) mb_swap_short(type);
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2  Input values byte swapped:\n");
+		fprintf(stderr,"dbg2       type:       %d\n",type);
+		}
+#endif
+
+	/* check for valid label */
+	if (type != EM_START
+		&& type != EM_STOP
+		&& type != EM_STOP
+		&& type != EM_PARAMETER
+		&& type != EM_POS
+		&& type != EM_SVP
+		&& type != EM_12DS_BATH
+		&& type != EM_12DP_BATH
+		&& type != EM_12S_BATH
+		&& type != EM_121_BATH
+		&& type != EM_1000_BATH
+		&& type != EM_12DP_SS
+		&& type != EM_12DS_SS
+		&& type != EM_12S_SS
+		&& type != EM_12DP_SSP
+		&& type != EM_12DS_SSP
+		&& type != EM_12S_SSP)
+		{
+		status = MB_FAILURE;
+		startid = (char *) &type;
+		if (verbose >= 1 && *startid == 2)
+			{
+			fprintf(stderr, "Bad datagram type: %d %x\n", type, type);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -2392,7 +2607,7 @@ int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp,
 	/* if first call for current ping, initialize */
 	if (first == MB_YES)
 		{
-		data->pixels_ss = 0;
+		data->pixels_ssraw = 0;
 		for (i=0;i<data->beams_bath;i++)
 			{
 			data->beam_samples[i] = 0;
@@ -2435,6 +2650,16 @@ int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp,
 		char_ptr = &line[19]; num_datagrams = (int) *char_ptr;
 		char_ptr = &line[20]; datagram = (int) *char_ptr;
 		char_ptr = &line[21]; num_beams = (int) *char_ptr;
+		
+		/* check for good values */
+		if (num_datagrams < 1 || num_datagrams > 255
+		    || datagram < 1 || datagram > 255
+		    || num_beams < 1 || num_beams > MBF_EM12SRAW_MAXBEAMS)
+		    {
+		    num_beams = 0;			
+		    }
+		
+		/* get number of pixels */
 		npixelsum = 0;
 		for (i=0;i<num_beams;i++)
 			{
@@ -2462,30 +2687,30 @@ int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp,
 		for (i=0;i<num_beams;i++)
 			{
 			/* do not ever load more data than we can store */
-			if (data->pixels_ss + data->beam_samples[beamlist[i]]
-				> MBF_EM12SRAW_MAXPIXELS)
+			if (data->pixels_ssraw + data->beam_samples[beamlist[i]]
+				> MBF_EM12SRAW_MAXRAWPIXELS)
 				data->beam_samples[beamlist[i]] = 0;
 			
 			/* get the sidescan */
-			data->beam_start_sample[beamlist[i]] = data->pixels_ss;
+			data->beam_start_sample[beamlist[i]] = data->pixels_ssraw;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{
-				data->ss[data->pixels_ss] = (mb_s_char) line[ioffset];
+				data->ssraw[data->pixels_ssraw] = (mb_s_char) line[ioffset];
 				ioffset++;
-				char_ptr1 = (char *) &data->ssp[data->pixels_ss];
+				char_ptr1 = (char *) &data->ssp[data->pixels_ssraw];
 				char_ptr2 = char_ptr1 + 1;
 				*char_ptr1 = line[ioffset];
 				ioffset++;
 				*char_ptr2 = line[ioffset];
 				ioffset++;
-				data->pixels_ss++;
+				data->pixels_ssraw++;
 				}
 			}
 #else
 		short_ptr = (short int *) &line[14]; 
 		data->ping_number = (short int) mb_swap_short(*short_ptr);
-/*		short_ptr = (short int *) &line[16]; 
-		data->sound_vel = (short int) mb_swap_short(*short_ptr);*/
+/*		short_ptr = (short int *) &line[16];
+		data->sound_vel = (short int) mb_swap_short(*short_ptr); */
 		char_ptr = &line[18]; 
 		data->ss_mode = (int) *char_ptr;
 		char_ptr = &line[19]; 
@@ -2494,6 +2719,16 @@ int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp,
 		datagram = (int) *char_ptr;
 		char_ptr = &line[21]; 
 		num_beams = (int) *char_ptr;
+		
+		/* check for good values */
+		if (num_datagrams < 1 || num_datagrams > 255
+		    || datagram < 1 || datagram > 255
+		    || num_beams < 1 || num_beams > MBF_EM12SRAW_MAXBEAMS)
+		    {
+		    num_beams = 0;			
+		    }
+		
+		/* get number of pixels */
 		npixelsum = 0;
 		for (i=0;i<num_beams;i++)
 			{
@@ -2524,23 +2759,23 @@ int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp,
 		for (i=0;i<num_beams;i++)
 			{
 			/* do not ever load more data than we can store */
-			if (data->pixels_ss + data->beam_samples[beamlist[i]]
-				> MBF_EM12SRAW_MAXPIXELS)
+			if (data->pixels_ssraw + data->beam_samples[beamlist[i]]
+				> MBF_EM12SRAW_MAXRAWPIXELS)
 				data->beam_samples[beamlist[i]] = 0;
 			
 			/* get the sidescan */
-			data->beam_start_sample[beamlist[i]] = data->pixels_ss;
+			data->beam_start_sample[beamlist[i]] = data->pixels_ssraw;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{
-				data->ss[data->pixels_ss] = (mb_s_char) line[ioffset];
+				data->ssraw[data->pixels_ssraw] = (mb_s_char) line[ioffset];
 				ioffset++;
-				char_ptr1 = (char *) &data->ssp[data->pixels_ss];
+				char_ptr1 = (char *) &data->ssp[data->pixels_ssraw];
 				char_ptr2 = char_ptr1 + 1;
 				*char_ptr2 = line[ioffset];
 				ioffset++;
 				*char_ptr1 = line[ioffset];
 				ioffset++;
-				data->pixels_ss++;
+				data->pixels_ssraw++;
 				}
 			}
 #endif
@@ -2579,7 +2814,7 @@ int mbr_em12sraw_rd_ss(int verbose, FILE *mbfp,
 				data->beam_start_sample[beamlist[i]]);
 		for (i=0;i<num_beams;i++)
 			{
-			beam_ss = &data->ss[data->beam_start_sample[beamlist[i]]];
+			beam_ss = &data->ssraw[data->beam_start_sample[beamlist[i]]];
 			beam_ssp = &data->ssp[data->beam_start_sample[beamlist[i]]];
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				fprintf(stderr,"dbg5       beam:%d pixel:%d  amp:%d phase:%d\n",
@@ -2631,7 +2866,6 @@ int mbr_em12sraw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 
 	if (data->kind == MB_DATA_COMMENT)
 		{
-fprintf(stderr, "write comment\n");
 		status = mbr_em12sraw_wr_parameter(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_START)
@@ -2644,7 +2878,6 @@ fprintf(stderr, "write comment\n");
 		}
 	else if (data->kind == MB_DATA_NAV)
 		{
-fprintf(stderr, "write pos\n");
 		status = mbr_em12sraw_wr_pos(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_VELOCITY_PROFILE)
@@ -2653,7 +2886,6 @@ fprintf(stderr, "write pos\n");
 		}
 	else if (data->kind == MB_DATA_DATA)
 		{
-fprintf(stderr, "write bath\n");
 		status = mbr_em12sraw_wr_bath(verbose,mbfp,data,error);
 		status = mbr_em12sraw_wr_ss(verbose,mbfp,data,error);
 		}
@@ -3623,7 +3855,7 @@ int mbr_em12sraw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 				data->beam_start_sample[i]);
 		for (i=0;i<MBF_EM12SRAW_MAXBEAMS;i++)
 			{
-			beam_ss = &data->ss[data->beam_start_sample[i]];
+			beam_ss = &data->ssraw[data->beam_start_sample[i]];
 			beam_ssp = &data->ssp[data->beam_start_sample[i]];
 			for (j=0;j<data->beam_samples[i];j++)
 				fprintf(stderr,"dbg5       beam:%d pixel:%d  amp:%d phase:%d\n",
@@ -3732,7 +3964,7 @@ int mbr_em12sraw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 				data->beam_start_sample[i]);
 		for (i=datagram_start[datagram];i<=datagram_end[datagram];i++)
 			{
-			beam_ss = &data->ss[data->beam_start_sample[i]];
+			beam_ss = &data->ssraw[data->beam_start_sample[i]];
 			beam_ssp = &data->ssp[data->beam_start_sample[i]];
 			for (j=0;j<data->beam_samples[i];j++)
 				fprintf(stderr,"dbg5       beam:%d pixel:%d  amp:%d phase:%d\n",
@@ -3797,7 +4029,7 @@ int mbr_em12sraw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		ioffset = 22 + 6*num_beams;
 		for (i=datagram_start[datagram];i<=datagram_end[datagram];i++)
 			{
-			beam_ss = &data->ss[data->beam_start_sample[i]];
+			beam_ss = &data->ssraw[data->beam_start_sample[i]];
 			beam_ssp = &data->ssp[data->beam_start_sample[i]];
 			for (j=0;j<data->beam_samples[i];j++)
 				{
@@ -3853,7 +4085,7 @@ int mbr_em12sraw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		ioffset = 22 + 6*num_beams;
 		for (i=datagram_start[datagram];i<=datagram_end[datagram];i++)
 			{
-			beam_ss = &data->ss[data->beam_start_sample[i]];
+			beam_ss = &data->ssraw[data->beam_start_sample[i]];
 			beam_ssp = &data->ssp[data->beam_start_sample[i]];
 			for (j=0;j<data->beam_samples[i];j++)
 				{

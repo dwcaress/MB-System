@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_get_all.c,v 5.1 2001-03-22 20:45:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.12  2000/10/16  21:52:54  caress
  * No longer initializes some null arrays.
  *
@@ -102,15 +105,16 @@
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, double *speed, 
-		double *heading, double *distance,
+		double *navlon, double *navlat, 
+		double *speed, double *heading, 
+		double *distance, double *altitude, double *sonardepth,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 5.1 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -193,6 +197,16 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 			beamflag, bath, amp, bathacrosstrack, bathalongtrack, 
 			ss, ssacrosstrack, ssalongtrack, 
 			comment, error);
+		if (status == MB_SUCCESS
+			&& *kind == MB_DATA_DATA)
+			{
+			status = mb_extract_altitude(verbose, 
+				mbio_ptr, *store_ptr, 
+				kind,
+				sonardepth, 
+				altitude, 
+				error);
+			}
 		}
 
 	/* print debug statements */
@@ -283,6 +297,10 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 					mb_io_ptr->old_lat);
 			fprintf(stderr,"dbg4       distance:     %f\n",
 					*distance);
+			fprintf(stderr,"dbg4       altitude:     %f\n",
+					*altitude);
+			fprintf(stderr,"dbg4       sonardepth:   %f\n",
+					*sonardepth);
 			fprintf(stderr,"dbg4       delta_time:   %f\n",
 					delta_time);
 			fprintf(stderr,"dbg4       raw speed:    %f\n",
@@ -308,8 +326,16 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 			status = MB_FAILURE;
 			*error = MB_ERROR_OUT_BOUNDS;
 			}
-		else if (*time_d > mb_io_ptr->etime_d 
-			|| *time_d < mb_io_ptr->btime_d)
+		else if (mb_io_ptr->etime_d > mb_io_ptr->btime_d
+			&& (*time_d > mb_io_ptr->etime_d 
+				|| *time_d < mb_io_ptr->btime_d))
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_OUT_TIME;
+			}
+		else if (mb_io_ptr->etime_d < mb_io_ptr->btime_d
+			&& (*time_d > mb_io_ptr->etime_d 
+				&& *time_d < mb_io_ptr->btime_d))
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_OUT_TIME;
@@ -406,6 +432,9 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       distance:      %f\n",*distance);
+		fprintf(stderr,"dbg2       altitude:      %f\n",*altitude);
+		fprintf(stderr,"dbg2       sonardepth:    %f\n",*sonardepth);
 		}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
 		&& *kind == MB_DATA_DATA)

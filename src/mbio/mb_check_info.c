@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_check_info.c,v 5.1 2001-03-22 20:45:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -59,7 +62,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.1 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
@@ -67,8 +70,14 @@ int mb_check_info(int verbose, char *file, int lonflip,
 	int	nrecords;
 	double	lon_min, lon_max;
 	double	lat_min, lat_max;
+	int	mask_nx, mask_ny;
+	double	mask_dx, mask_dy;
+	double	lonwest, loneast, latsouth, latnorth;
+	int	*mask = NULL;
+	char	*startptr, *endptr;
 	FILE	*fp;
 	char	*stdin_string = "stdin";
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -113,6 +122,8 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    lon_max = 0.0;
 		    lat_min = 0.0;
 		    lat_max = 0.0;
+		    mask_nx = 0;
+		    mask_ny = 0;
 		    
 		    /* read the inf file */
 		    while (fgets(line, 128, fp) != NULL)
@@ -126,6 +137,25 @@ int mb_check_info(int verbose, char *file, int lonflip,
 			else if (strncmp(line, "Minimum Latitude:", 17) == 0)
 			    sscanf(line, "Minimum Latitude: %lf Maximum Latitude: %lf", 
 				    &lat_min, &lat_max);
+			else if (strncmp(line, "CM dimensions:", 14) == 0)
+			    {
+			    sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
+			    status = mb_malloc(verbose,mask_nx*mask_ny*sizeof(int),
+							&mask,error);
+			    for (j=0;j<mask_ny;j++)
+				{
+				if ((startptr = fgets(line, 128, fp)) != NULL)
+				    {
+				    startptr = &line[6];
+				    for (i=0;i<mask_nx;i++)
+					{
+					k = i + j * mask_nx;
+					mask[k] = strtol(startptr, &endptr, 0);
+					startptr = endptr;
+					}
+				    }
+				}
+			    }
 			}
 			
 		    /* check bounds if there is data */
@@ -161,7 +191,29 @@ int mb_check_info(int verbose, char *file, int lonflip,
 			if (lon_min >= lon_max || lat_min >= lat_max)
 			    *file_in_bounds = MB_YES;
 			    
-			/* else check against desired input bounds */
+			/* else check mask against desired input bounds */
+			else if (mask_nx > 0 && mask_ny > 0)
+			    {
+			    *file_in_bounds = MB_NO;
+			    mask_dx = (lon_max - lon_min) / mask_nx;
+			    mask_dy = (lat_max - lat_min) / mask_ny;
+			    for (i=0; i<mask_nx && *file_in_bounds == MB_NO; i++)
+				for (j=0; j<mask_ny && *file_in_bounds == MB_NO; j++)
+				    {
+				    k = i + j * mask_nx;
+				    lonwest = lon_min + i * mask_dx;
+				    loneast = lonwest + mask_dx;
+				    latsouth = lat_min + j * mask_dy;
+				    latnorth = latsouth + mask_dy;
+				    if (mask[k] == 1
+					&& lonwest < bounds[1] && loneast > bounds[0]
+					&& latsouth < bounds[3] && latnorth > bounds[2])
+					*file_in_bounds = MB_YES;
+				    }
+			    mb_free(verbose, &mask, error);
+			    }
+			    
+			/* else check whole file against desired input bounds */
 			else
 			    {
 			    if (lon_min < bounds[1] && lon_max > bounds[0]

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $
+ *    $Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_format.c contains two functions.
+ * mb_format.c contains several functions.
  * mb_format() finds the internal format array location associated 
  *     with an MBIO format id.  If the format id is invalid, 
  *     0 is returned.
@@ -24,6 +24,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2000/12/10  20:26:50  caress
  * Version 5.0.alpha02
  *
@@ -101,15 +104,311 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <sys/stat.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_swap.h"
 #include "../../include/mb_format.h"
+#include "../../include/mbsys_simrad.h"
+#include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 
+/*--------------------------------------------------------------------*/
+int mb_format_register(int verbose, 
+			int *format, 
+			char *mbio_ptr, 
+			int *error)
+{
+	char	*function_name = "mb_format_register";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:  %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       format:    %d\n",*format);
+		}
+		
+	/* get mb_io_ptr */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* check for old format id and provide alias if needed */
+	if (*format > 0 && *format < 10)
+		{
+		/* find current format value */
+		i = format_alias_table[*format];
+
+		/* print output debug statements */
+		if (verbose >= 2)
+			{
+			fprintf(stderr,"\ndbg2  Old format id aliased to current value in MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg2  Old format value:\n");
+			fprintf(stderr,"dbg2       format:     %d\n",*format);
+			fprintf(stderr,"dbg2  Current format value:\n");
+			fprintf(stderr,"dbg2       format:     %d\n",i);
+			}
+
+		/* set new format value */
+		*format = i;
+		}
+	/* handle old Simrad EM12 and EM121 formats */
+	else if (*format == 52 || *format == 55)
+		*format = 51;
+		
+	/* set format value */
+	mb_io_ptr->format = *format;
+
+	/* look for a corresponding format */
+	if (*format == MBF_SBSIOMRG)
+		{
+		status = mbr_register_sbsiomrg(verbose, mbio_ptr, error);
+		}
+	else if (*format == MBF_SBSIOCEN)
+		{
+		status = mbr_register_sbsiocen(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SBSIOLSI)
+		{
+		status = mbr_register_sbsiolsi(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SBURICEN)
+		{
+		status = mbr_register_sburicen(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SBURIVAX)
+		{
+		status = mbr_register_sburivax(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SBSIOSWB)
+		{
+		status = mbr_register_sbsioswb(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SBIFREMR)
+		{
+		status = mbr_register_sbifremr(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HSLDEDMB)
+		{
+		status = mbr_register_hsldedmb(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HSURICEN)
+		{
+		status = mbr_register_hsuricen(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HSATLRAW)
+		{
+		status = mbr_register_hsatlraw(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HSLDEOIH)
+		{
+		status = mbr_register_hsldeoih(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HSURIVAX)
+		{
+		status = mbr_register_hsurivax(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SB2000SB)
+		{
+		status = mbr_register_sb2000sb(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SB2000SS)
+		{
+		status = mbr_register_sb2000ss(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SB2100RW)
+		{
+		status = mbr_register_sb2100rw(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SB2100B1)
+		{
+		status = mbr_register_sb2100b1(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_SB2100B2)
+		{
+		status = mbr_register_sb2100b2(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_EMOLDRAW)
+		{
+		status = mbr_register_emoldraw(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_EM12IFRM)
+		{
+		status = mbr_register_em12ifrm(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_EM12DARW)
+		{
+		status = mbr_register_em12darw(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_EM300RAW)
+		{
+		status = mbr_register_em300raw(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_EM300MBA)
+		{
+		status = mbr_register_em300mba(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_MR1PRHIG)
+		{
+		status = mbr_register_mr1prhig(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_MR1ALDEO)
+		{
+		status = mbr_register_mr1aldeo(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_MR1BLDEO)
+		{
+		status = mbr_register_mr1bldeo(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_MBLDEOIH)
+		{
+		status = mbr_register_mbldeoih(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_CBAT9001)
+		{
+		status = mbr_register_cbat9001(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_CBAT8101)
+		{
+		status = mbr_register_cbat8101(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HYPC8101)
+		{
+		status = mbr_register_hypc8101(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_BCHRTUNB)
+		{
+		status = mbr_register_bchrtunb(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_ELMK2UNB)
+		{
+		status = mbr_register_elmk2unb(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_BCHRXUNB)
+		{
+		status = mbr_register_bchrxunb(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HSMDARAW)
+		{
+		status = mbr_register_hsmdaraw(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HSMDLDIH)
+		{
+		status = mbr_register_hsmdldih(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_DSL120PF)
+		{
+		status = mbr_register_dsl120pf(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_DSL120SF)
+		{
+		status = mbr_register_dsl120sf(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_GSFGENMB)
+		{
+		status = mbr_register_gsfgenmb(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_MSTIFFSS)
+		{
+		status = mbr_register_mstiffss(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_OICGEODA)
+		{
+		status = mbr_register_oicgeoda(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_OICMBARI)
+		{
+		status = mbr_register_oicmbari(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_OMGHDCSJ)
+		{
+		status = mbr_register_omghdcsj(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_MGD77DAT)
+		{
+		status = mbr_register_mgd77dat(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_MBARIROV)
+		{
+		status = mbr_register_mbarirov(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_MBPRONAV)
+		{
+		status = mbr_register_mbpronav(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_ELMK2XSE)
+		{
+		status = mbr_register_elmk2xse(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HS10JAMS)
+		{
+		status = mbr_register_hs10jams(verbose, mbio_ptr, error); 
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_FORMAT;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       format:             %d\n",*format);
+		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
+		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
+		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
+		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",mb_io_ptr->pixels_ss_max);
+		fprintf(stderr,"dbg2       format_name:        %s\n",mb_io_ptr->format_name);
+		fprintf(stderr,"dbg2       system_name:        %s\n",mb_io_ptr->system_name);
+		fprintf(stderr,"dbg2       format_description: %s\n",mb_io_ptr->format_description);
+		fprintf(stderr,"dbg2       numfile:            %d\n",mb_io_ptr->numfile);
+		fprintf(stderr,"dbg2       filetype:           %d\n",mb_io_ptr->filetype);
+		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
+		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
+		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
+		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:             %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
 /*--------------------------------------------------------------------*/
 int mb_format_info(int verbose, 
 			int *format, 
@@ -130,22 +429,6 @@ int mb_format_info(int verbose,
 			int *vru_source, 
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
-			int (**format_alloc)(), 
-			int (**format_free)(), 
-			int (**store_alloc)(), 
-			int (**store_free)(), 
-			int (**read_ping)(), 
-			int (**write_ping)(), 
-			int (**extract)(), 
-			int (**insert)(), 
-			int (**extract_nav)(), 
-			int (**insert_nav)(), 
-			int (**extract_altitude)(), 
-			int (**insert_altitude)(), 
-			int (**extract_svp)(), 
-			int (**insert_svp)(), 
-			int (**ttimes)(), 
-			int (**copyrecord)(), 
 			int *error)
 {
 	char	*function_name = "mb_format_info";
@@ -182,6 +465,9 @@ int mb_format_info(int verbose,
 		/* set new format value */
 		*format = i;
 		}
+	/* handle old Simrad EM12 and EM121 formats */
+	else if (*format == 52 || *format == 55)
+		*format = 51;
 
 	/* look for a corresponding format */
 	if (*format == MBF_SBSIOMRG)
@@ -193,14 +479,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SBSIOCEN)
@@ -212,14 +490,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SBSIOLSI)
@@ -231,14 +501,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SBURICEN)
@@ -250,14 +512,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SBURIVAX)
@@ -269,14 +523,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SBSIOSWB)
@@ -288,14 +534,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SBIFREMR)
@@ -307,14 +545,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HSLDEDMB)
@@ -326,14 +556,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HSURICEN)
@@ -345,14 +567,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HSATLRAW)
@@ -364,14 +578,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HSLDEOIH)
@@ -383,14 +589,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HSURIVAX)
@@ -402,14 +600,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SB2000SB)
@@ -421,14 +611,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SB2000SS)
@@ -440,14 +622,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SB2100RW)
@@ -459,14 +633,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SB2100B1)
@@ -478,14 +644,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_SB2100B2)
@@ -497,52 +655,17 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
-	else if (*format == MBF_EM1000RW)
+	else if (*format == MBF_EMOLDRAW)
 		{
-		status = mbr_info_em1000rw(verbose, system, 
+		status = mbr_info_emoldraw(verbose, system, 
 			beams_bath_max, beams_amp_max, pixels_ss_max, 
 			format_name, system_name, format_description, 
 			numfile, filetype, 
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
-			error);
-		}
-	else if (*format == MBF_EM12SRAW)
-		{
-		status = mbr_info_em12sraw(verbose, system, 
-			beams_bath_max, beams_amp_max, pixels_ss_max, 
-			format_name, system_name, format_description, 
-			numfile, filetype, 
-			variable_beams, traveltime, beam_flagging, 
-			nav_source, heading_source, vru_source, 
-			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_EM12IFRM)
@@ -554,14 +677,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_EM12DARW)
@@ -573,33 +688,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
-			error);
-		}
-	else if (*format == MBF_EM121RAW)
-		{
-		status = mbr_info_em121raw(verbose, system, 
-			beams_bath_max, beams_amp_max, pixels_ss_max, 
-			format_name, system_name, format_description, 
-			numfile, filetype, 
-			variable_beams, traveltime, beam_flagging, 
-			nav_source, heading_source, vru_source, 
-			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_EM300RAW)
@@ -611,14 +699,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_EM300MBA)
@@ -630,14 +710,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_MR1PRHIG)
@@ -649,14 +721,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_MR1ALDEO)
@@ -668,14 +732,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_MR1BLDEO)
@@ -687,14 +743,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_MBLDEOIH)
@@ -706,14 +754,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_CBAT9001)
@@ -725,14 +765,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_CBAT8101)
@@ -744,14 +776,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HYPC8101)
@@ -763,14 +787,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_BCHRTUNB)
@@ -782,14 +798,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_ELMK2UNB)
@@ -801,14 +809,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_BCHRXUNB)
@@ -820,14 +820,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HSMDARAW)
@@ -839,14 +831,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HSMDLDIH)
@@ -858,14 +842,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_DSL120PF)
@@ -877,14 +853,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_DSL120SF)
@@ -896,14 +864,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_GSFGENMB)
@@ -915,14 +875,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_MSTIFFSS)
@@ -934,14 +886,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_OICGEODA)
@@ -953,14 +897,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_OICMBARI)
@@ -972,14 +908,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_OMGHDCSJ)
@@ -991,14 +919,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_MGD77DAT)
@@ -1010,14 +930,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_MBARIROV)
@@ -1029,14 +941,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_MBPRONAV)
@@ -1048,14 +952,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_ELMK2XSE)
@@ -1067,14 +963,6 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
 		}
 	else if (*format == MBF_HS10JAMS)
@@ -1086,18 +974,52 @@ int mb_format_info(int verbose,
 			variable_beams, traveltime, beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			format_alloc, format_free, 
-			store_alloc, store_free, 
-			read_ping, write_ping, 
-			extract, insert, 
-			extract_nav, insert_nav, 
-			extract_altitude, insert_altitude, 
-			extract_svp, insert_svp, 
-			ttimes, copyrecord, 
 			error);
+		}
+	else if (*format == MBF_DATALIST)
+		{
+		*format = MBF_DATALIST;
+		*system = MB_SYS_NONE;
+		*beams_bath_max = 0;
+		*beams_amp_max = 0;
+		*pixels_ss_max = 0;
+		strcpy(format_name,"MBF_DATALIST");
+		strcpy(system_name,"MB_SYS_DATALIST");
+		strcpy(format_description,"MBF_DATALIST");
+		strncpy(format_description, "Format name:          MBF_DATALIST\nInformal Description: Datalist\nAttributes:           List of swath data files, each filename \n\tfollowed by MB-System format id.\n", MB_DESCRIPTION_LENGTH);
+		*numfile = 0;
+		*filetype = 0;
+		*variable_beams = MB_NO;
+		*traveltime = MB_NO;
+		*beam_flagging = MB_NO;
+		*nav_source = MB_DATA_NONE;
+		*heading_source = MB_DATA_NONE;
+		*vru_source = MB_DATA_NONE;
+		*beamwidth_xtrack = 0.0;
+		*beamwidth_ltrack = 0.0;
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_FORMAT;
 		}
 	else
 		{
+		*format = MBF_NONE;
+		*system = MB_SYS_NONE;
+		*beams_bath_max = 0;
+		*beams_amp_max = 0;
+		*pixels_ss_max = 0;
+		format_name[0] = '\0';
+		system_name[0] = '\0';
+		format_description[0] = '\0';
+		*numfile = 0;
+		*filetype = 0;
+		*variable_beams = MB_NO;
+		*traveltime = MB_NO;
+		*beam_flagging = MB_NO;
+		*nav_source = MB_DATA_NONE;
+		*heading_source = MB_DATA_NONE;
+		*vru_source = MB_DATA_NONE;
+		*beamwidth_xtrack = 0.0;
+		*beamwidth_ltrack = 0.0;
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_FORMAT;
 		}
@@ -1127,22 +1049,6 @@ int mb_format_info(int verbose,
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",*format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",*format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",*store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",*store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",*read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",*write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",*extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",*insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",*extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",*insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",*extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",*insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",*extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",*insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",*ttimes);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",*copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:             %d\n",status);
@@ -1177,29 +1083,6 @@ int mb_format(int verbose, int *format, int *error)
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
 
-	/* function pointers for allocating and deallocating format
-		specific structures */
-	int (*format_alloc)();
-	int (*format_free)();
-	int (*store_alloc)();
-	int (*store_free)();
-	
-	/* function pointers for reading and writing records */
-	int (*read_ping)();
-	int (*write_ping)();
-		
-	/* function pointers for extracting and inserting data */
-	int (*extract)();
-	int (*insert)();
-	int (*extract_nav)();
-	int (*insert_nav)();
-	int (*extract_altitude)();
-	int (*insert_altitude)();
-	int (*extract_svp)();
-	int (*insert_svp)();
-	int (*ttimes)();
-	int (*copyrecord)();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1218,14 +1101,6 @@ int mb_format(int verbose, int *format, int *error)
 			&variable_beams, &traveltime, &beam_flagging, 
 			&nav_source, &heading_source, &vru_source, 
 			&beamwidth_xtrack, &beamwidth_ltrack, 
-			&format_alloc, &format_free, 
-			&store_alloc, &store_free, 
-			&read_ping, &write_ping, 
-			&extract, &insert, 
-			&extract_nav, &insert_nav, 
-			&extract_altitude, &insert_altitude, 
-			&extract_svp, &insert_svp, 
-			&ttimes, &copyrecord, 
 			error);
 
 	/* print output debug statements */
@@ -1246,7 +1121,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1269,29 +1144,6 @@ int mb_format_system(int verbose, int *format, int *system, int *error)
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
 
-	/* function pointers for allocating and deallocating format
-		specific structures */
-	int (*format_alloc)();
-	int (*format_free)();
-	int (*store_alloc)();
-	int (*store_free)();
-	
-	/* function pointers for reading and writing records */
-	int (*read_ping)();
-	int (*write_ping)();
-		
-	/* function pointers for extracting and inserting data */
-	int (*extract)();
-	int (*insert)();
-	int (*extract_nav)();
-	int (*insert_nav)();
-	int (*extract_altitude)();
-	int (*insert_altitude)();
-	int (*extract_svp)();
-	int (*insert_svp)();
-	int (*ttimes)();
-	int (*copyrecord)();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1310,14 +1162,6 @@ int mb_format_system(int verbose, int *format, int *system, int *error)
 			&variable_beams, &traveltime, &beam_flagging, 
 			&nav_source, &heading_source, &vru_source, 
 			&beamwidth_xtrack, &beamwidth_ltrack, 
-			&format_alloc, &format_free, 
-			&store_alloc, &store_free, 
-			&read_ping, &write_ping, 
-			&extract, &insert, 
-			&extract_nav, &insert_nav, 
-			&extract_altitude, &insert_altitude, 
-			&extract_svp, &insert_svp, 
-			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
 		{
@@ -1345,7 +1189,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1365,29 +1209,6 @@ int mb_format_dimensions(int verbose, int *format,
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
 
-	/* function pointers for allocating and deallocating format
-		specific structures */
-	int (*format_alloc)();
-	int (*format_free)();
-	int (*store_alloc)();
-	int (*store_free)();
-	
-	/* function pointers for reading and writing records */
-	int (*read_ping)();
-	int (*write_ping)();
-		
-	/* function pointers for extracting and inserting data */
-	int (*extract)();
-	int (*insert)();
-	int (*extract_nav)();
-	int (*insert_nav)();
-	int (*extract_altitude)();
-	int (*insert_altitude)();
-	int (*extract_svp)();
-	int (*insert_svp)();
-	int (*ttimes)();
-	int (*copyrecord)();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1406,14 +1227,6 @@ int mb_format_dimensions(int verbose, int *format,
 			&variable_beams, &traveltime, &beam_flagging, 
 			&nav_source, &heading_source, &vru_source, 
 			&beamwidth_xtrack, &beamwidth_ltrack, 
-			&format_alloc, &format_free, 
-			&store_alloc, &store_free, 
-			&read_ping, &write_ping, 
-			&extract, &insert, 
-			&extract_nav, &insert_nav, 
-			&extract_altitude, &insert_altitude, 
-			&extract_svp, &insert_svp, 
-			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
 		{
@@ -1441,9 +1254,9 @@ int mb_format_dimensions(int verbose, int *format,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_format_description(int verbose, int *format, char **description, int *error)
+int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1455,7 +1268,6 @@ int mb_format_description(int verbose, int *format, char **description, int *err
 	int	pixels_ss_max;	/* maximum number of sidescan pixels */
 	char	format_name[MB_NAME_LENGTH];
 	char	system_name[MB_NAME_LENGTH];
-	char	format_description[MB_DESCRIPTION_LENGTH];
 	int	numfile;	/* the number of parallel files required for i/o */
 	int	filetype;	/* type of files used (normal, xdr, or gsf) */
 	int	variable_beams; /* if true then number of beams variable */
@@ -1466,29 +1278,6 @@ int mb_format_description(int verbose, int *format, char **description, int *err
 	int	vru_source;	/* data record types containing the primary vru */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
-
-	/* function pointers for allocating and deallocating format
-		specific structures */
-	int (*format_alloc)();
-	int (*format_free)();
-	int (*store_alloc)();
-	int (*store_free)();
-	
-	/* function pointers for reading and writing records */
-	int (*read_ping)();
-	int (*write_ping)();
-		
-	/* function pointers for extracting and inserting data */
-	int (*extract)();
-	int (*insert)();
-	int (*extract_nav)();
-	int (*insert_nav)();
-	int (*extract_altitude)();
-	int (*insert_altitude)();
-	int (*extract_svp)();
-	int (*insert_svp)();
-	int (*ttimes)();
-	int (*copyrecord)();
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1503,21 +1292,12 @@ int mb_format_description(int verbose, int *format, char **description, int *err
 	/* set the message and status */
 	status = mb_format_info(verbose, format, &system, 
 			&beams_bath_max, &beams_amp_max, &pixels_ss_max, 
-			format_name, system_name, format_description, 
+			format_name, system_name, description, 
 			&numfile, &filetype, 
 			&variable_beams, &traveltime, &beam_flagging, 
 			&nav_source, &heading_source, &vru_source, 
 			&beamwidth_xtrack, &beamwidth_ltrack, 
-			&format_alloc, &format_free, 
-			&store_alloc, &store_free, 
-			&read_ping, &write_ping, 
-			&extract, &insert, 
-			&extract_nav, &insert_nav, 
-			&extract_altitude, &insert_altitude, 
-			&extract_svp, &insert_svp, 
-			&ttimes, &copyrecord, 
 			error);
-	*description = format_description;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1526,7 +1306,7 @@ int mb_format_description(int verbose, int *format, char **description, int *err
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       format:      %d\n",*format);
-		fprintf(stderr,"dbg2       description: %s\n",*description);
+		fprintf(stderr,"dbg2       description: %s\n",description);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
 		fprintf(stderr,"dbg2       error:       %d\n",*error);
@@ -1540,7 +1320,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1561,29 +1341,6 @@ int mb_format_flags(int verbose, int *format,
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
 
-	/* function pointers for allocating and deallocating format
-		specific structures */
-	int (*format_alloc)();
-	int (*format_free)();
-	int (*store_alloc)();
-	int (*store_free)();
-	
-	/* function pointers for reading and writing records */
-	int (*read_ping)();
-	int (*write_ping)();
-		
-	/* function pointers for extracting and inserting data */
-	int (*extract)();
-	int (*insert)();
-	int (*extract_nav)();
-	int (*insert_nav)();
-	int (*extract_altitude)();
-	int (*insert_altitude)();
-	int (*extract_svp)();
-	int (*insert_svp)();
-	int (*ttimes)();
-	int (*copyrecord)();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1602,14 +1359,6 @@ int mb_format_flags(int verbose, int *format,
 			variable_beams, traveltime, beam_flagging, 
 			&nav_source, &heading_source, &vru_source, 
 			&beamwidth_xtrack, &beamwidth_ltrack, 
-			&format_alloc, &format_free, 
-			&store_alloc, &store_free, 
-			&read_ping, &write_ping, 
-			&extract, &insert, 
-			&extract_nav, &insert_nav, 
-			&extract_altitude, &insert_altitude, 
-			&extract_svp, &insert_svp, 
-			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
 		{
@@ -1641,7 +1390,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1662,29 +1411,6 @@ int mb_format_source(int verbose, int *format,
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
 
-	/* function pointers for allocating and deallocating format
-		specific structures */
-	int (*format_alloc)();
-	int (*format_free)();
-	int (*store_alloc)();
-	int (*store_free)();
-	
-	/* function pointers for reading and writing records */
-	int (*read_ping)();
-	int (*write_ping)();
-		
-	/* function pointers for extracting and inserting data */
-	int (*extract)();
-	int (*insert)();
-	int (*extract_nav)();
-	int (*insert_nav)();
-	int (*extract_altitude)();
-	int (*insert_altitude)();
-	int (*extract_svp)();
-	int (*insert_svp)();
-	int (*ttimes)();
-	int (*copyrecord)();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1703,14 +1429,6 @@ int mb_format_source(int verbose, int *format,
 			&variable_beams, &traveltime, &beam_flagging, 
 			nav_source, heading_source, vru_source, 
 			&beamwidth_xtrack, &beamwidth_ltrack, 
-			&format_alloc, &format_free, 
-			&store_alloc, &store_free, 
-			&read_ping, &write_ping, 
-			&extract, &insert, 
-			&extract_nav, &insert_nav, 
-			&extract_altitude, &insert_altitude, 
-			&extract_svp, &insert_svp, 
-			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
 		{
@@ -1742,7 +1460,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1764,29 +1482,6 @@ int mb_format_beamwidth(int verbose, int *format,
         int     heading_source;	/* data record types containing the primary heading */
         int     vru_source;	/* data record types containing the primary vru */
 
-	/* function pointers for allocating and deallocating format
-		specific structures */
-	int (*format_alloc)();
-	int (*format_free)();
-	int (*store_alloc)();
-	int (*store_free)();
-	
-	/* function pointers for reading and writing records */
-	int (*read_ping)();
-	int (*write_ping)();
-		
-	/* function pointers for extracting and inserting data */
-	int (*extract)();
-	int (*insert)();
-	int (*extract_nav)();
-	int (*insert_nav)();
-	int (*extract_altitude)();
-	int (*insert_altitude)();
-	int (*extract_svp)();
-	int (*insert_svp)();
-	int (*ttimes)();
-	int (*copyrecord)();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1805,14 +1500,6 @@ int mb_format_beamwidth(int verbose, int *format,
 			&variable_beams, &traveltime, &beam_flagging, 
 			&nav_source, &heading_source, &vru_source, 
 			beamwidth_xtrack, beamwidth_ltrack, 
-			&format_alloc, &format_free, 
-			&store_alloc, &store_free, 
-			&read_ping, &write_ping, 
-			&extract, &insert, 
-			&extract_nav, &insert_nav, 
-			&extract_altitude, &insert_altitude, 
-			&extract_svp, &insert_svp, 
-			&ttimes, &copyrecord, 
 			error);
 	if (status == MB_FAILURE)
 		{
@@ -1846,6 +1533,9 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	int	found = MB_NO;
 	char	*suffix;
 	int	suffix_len;
+	FILE	*checkfp;
+	char	buffer[6];
+	short	*type1, *type2;
 	int	i;
 
 	/* print input debug statements */
@@ -1872,8 +1562,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    suffix_len = strlen(suffix);
 	    if (suffix_len >= 4 && suffix_len <= 6)
 		{
-		strncpy(fileroot, filename, strlen(filename)-suffix_len);
-		fileroot[strlen(filename)-suffix_len] = '\0';
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
 		sscanf(suffix, ".mb%d", format);
 		found = MB_YES;
 		}
@@ -1891,8 +1584,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
 		    {
-		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
-		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
 		    *format = MBF_MBPRONAV;
 		    found = MB_YES;
 		    }
@@ -1911,8 +1607,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
 		    {
-		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
-		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
 		    *format = -1;
 		    found = MB_YES;
 		    }
@@ -1931,9 +1630,75 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
 		    {
-		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
-		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
 		    *format = MBF_SB2100RW;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for Simrad Mermaid suffix convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 8)
+		i = strlen(filename) - 8;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],"_raw.all")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 8)
+		    {
+		    /* examine the first datagram to determine
+			whether data is old or new Simrad format */
+		    if ((checkfp = fopen(filename,"r")) != NULL)
+			{
+			type1 = (short *) &buffer[0];
+			type2 = (short *) &buffer[4];
+			if (fread(buffer,1,6,checkfp) == 6)
+			    {
+#ifdef BYTESWAPPED
+			    *type1 = (short) mb_swap_short(*type1);
+			    *type2 = (short) mb_swap_short(*type2);
+#endif
+			    if (*type2 == EM_START
+				|| *type2 == EM_STOP
+				|| *type2 == EM_PARAMETER)
+				*format = MBF_EMOLDRAW;
+			    else if (*type2 == EM2_START
+				|| *type2 == EM2_STOP
+				|| *type1 == EM2_STOP2
+				|| *type1 == EM2_OFF
+				|| *type1 == EM2_ON
+				|| *type2 == EM2_RUN_PARAMETER)
+				*format = MBF_EM300RAW;
+			    else if (*type1 == EM_START
+				|| *type1 == EM_STOP
+				|| *type1 == EM_PARAMETER)
+				*format = MBF_EMOLDRAW;
+			    else if (*type1 == EM2_START
+				|| *type1 == EM2_STOP
+				|| *type1 == EM2_STOP2
+				|| *type1 == EM2_OFF
+				|| *type1 == EM2_ON
+				|| *type1 == EM2_RUN_PARAMETER)
+				*format = MBF_EM300RAW;
+			    else
+				*format = MBF_EM300RAW;
+			    }
+			fclose(checkfp);
+			}
+		    else
+			*format = MBF_EM300RAW;
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
 		    found = MB_YES;
 		    }
 		}
@@ -1951,8 +1716,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		suffix_len = strlen(suffix);
 		if (suffix_len == 7)
 		    {
-		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
-		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
 		    *format = MBF_OMGHDCSJ;
 		    found = MB_YES;
 		    }
@@ -1978,8 +1746,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		suffix_len = 0;
 	    if (suffix_len == 4)
 		{
-		strncpy(fileroot, filename, strlen(filename)-suffix_len);
-		fileroot[strlen(filename)-suffix_len] = '\0';
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
 		*format = MBF_MBARIROV;
 		found = MB_YES;
 		}
@@ -2012,7 +1783,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    *error = MB_ERROR_BAD_FORMAT;
 	    status = MB_FAILURE;
 	    *format = 0;
-	    strcpy(fileroot, filename);
+	    if (fileroot != NULL)
+		    strcpy(fileroot, filename);
 	    }
 
 	/* print output debug statements */
@@ -2021,7 +1793,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       fileroot:   %s\n",fileroot);
+		if (fileroot != NULL)
+		    fprintf(stderr,"dbg2       fileroot:   %s\n",fileroot);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -2034,7 +1807,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 /*--------------------------------------------------------------------*/
 int mb_datalist_open(int verbose,
 		char **datalist,
-		char *path, int *error)
+		char *path, 
+		int look_processed, int *error)
 {
 	/* local variables */
 	char	*function_name = "mb_datalist_open";
@@ -2049,6 +1823,7 @@ int mb_datalist_open(int verbose,
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       datalist:      %d\n",*datalist);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
+		fprintf(stderr,"dbg2       look_processed:%s\n",look_processed);
 		}
 
 	/* allocate memory for datalist structure */
@@ -2069,6 +1844,9 @@ int mb_datalist_open(int verbose,
 			strcpy(datalist_ptr->path,path);
 			datalist_ptr->open = MB_YES;
 			datalist_ptr->recursion = 0;
+			datalist_ptr->look_processed = look_processed;
+			datalist_ptr->weight_set = MB_NO;
+			datalist_ptr->weight = 0.0;
 			datalist_ptr->datalist = NULL;
 			}
 		
@@ -2161,8 +1939,16 @@ int mb_datalist_read(int verbose,
 	struct mb_datalist_struct *datalist_ptr;
 	struct mb_datalist_struct *datalist2_ptr;
 	char	buffer[MB_PATH_MAXLINE];
+	char	root[MB_PATH_MAXLINE];
+	char	tmpstr[MB_PATH_MAXLINE];
+	char	pfile[MB_PATH_MAXLINE];
+	int	pfile_specified;
 	char	*buffer_ptr;
+	int	len;
 	int	nscan, done, rdone;
+	int	pformat;
+	struct stat file_status;
+	int	fstat, file_ok;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2192,83 +1978,195 @@ int mb_datalist_read(int verbose,
 		&& done == MB_NO)
 		{
 		while (done == MB_NO)
+		    {
+		    /* if recursive datalist closed read current datalist */
+		    if (datalist_ptr->datalist == NULL)
 			{
-			/* if recursive datalist closed read current datalist */
-			if (datalist_ptr->datalist == NULL)
+			rdone = MB_NO;
+			while (rdone == MB_NO)
+			    {
+			    buffer_ptr = fgets(buffer,MB_PATH_MAXLINE,datalist_ptr->fp);
+			    if (buffer_ptr != buffer)
 				{
-				rdone = MB_NO;
-				while (rdone == MB_NO)
-					{
-					buffer_ptr = fgets(buffer,MB_PATH_MAXLINE,datalist_ptr->fp);
- 					if (buffer_ptr != buffer)
- 						{
- 						rdone = MB_YES;
- 						done = MB_YES;
- 						status = MB_FAILURE;
- 						*error = MB_ERROR_EOF;
- 						}
-					else if (buffer[0] != '#')
-						{
-						nscan = sscanf(buffer,"%s %d %lf",path,format,weight);
-						if (nscan >= 2 && *format >= 0)
-							{
-							if (nscan != 3 || *weight <= 0.0)
-								*weight = 1.0;
-							done = MB_YES;
-							rdone = MB_YES;
-							}
-						else if (nscan >= 2 && *format == -1
-							&& datalist_ptr->recursion < MB_DATALIST_RECURSION_MAX)
-							{
-					                if (status = mb_datalist_open(verbose,
-					                		(char *)&(datalist_ptr->datalist), path, error)
-					                	== MB_SUCCESS)
-					                	{
-								datalist2_ptr = (struct mb_datalist_struct *) datalist_ptr->datalist;
-					                	datalist2_ptr->recursion =
-					                		datalist_ptr->recursion + 1;
-					                	rdone = MB_YES;
-					                	}
-					                else
-					                	{
-					                	status = MB_SUCCESS;
-					                	*error = MB_ERROR_NO_ERROR;
-					                	}
-							}
-						}
-					}
- 				}
-			
-			/* if open read next entry from recursive datalist */
-			if (done == MB_NO
-				&& datalist_ptr->open == MB_YES
-				&& datalist_ptr->datalist != NULL)
-				{
-				datalist2_ptr = (struct mb_datalist_struct *) datalist_ptr->datalist;
-				if (datalist2_ptr->open == MB_YES)
-					{
-					/* recursively call mb_read_datalist */
-					status = mb_datalist_read(verbose,
-							(char *)datalist_ptr->datalist,
-							path,
-							format,
-							weight,
-							error);
-					
-					/* if datalist read fails close it */
-					if (status == MB_FAILURE)
-						{
-						status = mb_datalist_close(verbose,
-							    (char *)&(datalist_ptr->datalist),
-							    error);
-						}
-					else
-						{
-						done = MB_YES;
-						}
-					}
+				rdone = MB_YES;
+				done = MB_YES;
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
 				}
-		       	}
+				/* look for special command */
+				else if (strncmp(buffer,"$PROCESSED",10) == 0)
+				{
+				if (datalist_ptr->look_processed 
+						== MB_DATALIST_LOOK_UNSET)
+						datalist_ptr->look_processed = MB_DATALIST_LOOK_YES;
+				}
+				else if (strncmp(buffer,"$RAW",4) == 0)
+				{
+				if (datalist_ptr->look_processed 
+						== MB_DATALIST_LOOK_UNSET)
+						datalist_ptr->look_processed = MB_DATALIST_LOOK_NO;
+				}
+			    else if (buffer[0] != '#')
+				{
+				/* read datalist item */
+				nscan = sscanf(buffer,"%s %d %lf",path,format,weight);
+
+				/* get path */
+				if (nscan >= 1 && path[0] != '/'
+					&& (len = strrchr(datalist_ptr->path,'/') 
+						    - datalist_ptr->path + 1) > 1)
+				    {
+				    strcpy(tmpstr,path);
+				    strncpy(path,datalist_ptr->path,len);
+				    path[len] = '\0';
+				    strcat(path,tmpstr);
+				    }
+				    
+				/* guess format if no format specified */
+				if (nscan == 1)
+				    {
+				    fstat = mb_get_format(verbose, path, root, &pformat, error);
+				    
+				    /* if no format specified set it */
+				    if (nscan == 1 && pformat != 0)
+					    {
+					    nscan = 2;
+					    *format = pformat;
+					    }
+				    }
+
+				/* check for processed file if requested */
+				if (datalist_ptr->look_processed 
+					== MB_DATALIST_LOOK_YES)
+				    {
+				    mb_pr_get_ofile(verbose, path, 
+					    &pfile_specified, pfile, error);
+
+				    if (pfile_specified == MB_YES)
+					{
+					if ((fstat = stat(pfile, &file_status)) == 0
+					    && (file_status.st_mode & S_IFMT) != S_IFDIR
+					    && file_status.st_size > 0)
+					    strcpy(path,pfile);
+					}
+				    }
+				
+				/* check if file or datalist can be opened */
+				if (nscan >= 2)
+				    {
+				    fstat = stat(path, &file_status);
+				    if (fstat == 0
+						&& (file_status.st_mode & S_IFMT) != S_IFDIR
+						&& file_status.st_size > 0)
+						file_ok = MB_YES;
+				    else
+						{
+						file_ok = MB_NO;
+						/* print warning if verbose > 0 */
+						if (verbose > 0)
+					    	{
+					    	fprintf(stderr, "MBIO Warning: Datalist entry skipped because it could not be opened!\n");
+					    	fprintf(stderr, "\tFile:     %s\n\tDatalist: %s\n", path, datalist_ptr->path);					    
+					    	}
+						}
+				    }
+				    
+				/* set weight value - recursive weight from above
+				   overrides local weight */
+				if (nscan >= 2 && file_ok == MB_YES)
+				    {
+				    /* use recursive weight from above */
+				    if (datalist_ptr->weight_set == MB_YES)
+					*weight = datalist_ptr->weight;
+
+				    /* else if weight not locally specified set to 1.0 */
+				    else if (nscan != 3)
+					    *weight = 1.0;
+				    }
+
+				/* deal with file */
+				if (nscan >= 2 && file_ok == MB_YES && *format >= 0)
+				    {
+				    /* set done */
+				    done = MB_YES;
+				    rdone = MB_YES;
+				    }
+				    
+				/* deal with recursive datalist */
+				else if (nscan >= 2 && file_ok == MB_YES && *format == -1
+					&& datalist_ptr->recursion < MB_DATALIST_RECURSION_MAX)
+				    {
+				    if (status = mb_datalist_open(verbose,
+						    (char *)&(datalist_ptr->datalist), path,
+							datalist_ptr->look_processed, error)
+					    == MB_SUCCESS)
+					{
+					datalist2_ptr = (struct mb_datalist_struct *) datalist_ptr->datalist;
+					datalist2_ptr->recursion =
+						datalist_ptr->recursion + 1;
+					rdone = MB_YES;
+					
+					/* set weight to recursive value if available */
+					if (datalist_ptr->weight_set == MB_YES)
+					    {
+					    datalist2_ptr->weight_set = MB_YES;
+					    datalist2_ptr->weight = datalist_ptr->weight;
+					    }
+					
+					/* else set weight to local value if available */
+					else if (nscan >= 3)
+					    {
+					    datalist2_ptr->weight_set = MB_YES;
+					    datalist2_ptr->weight = *weight;
+					    }
+					
+					/* else do not set weight */
+					else
+					    {
+					    datalist2_ptr->weight_set = MB_NO;
+					    datalist2_ptr->weight = 0.0;
+					    }
+					}
+				    else
+					{
+					status = MB_SUCCESS;
+					*error = MB_ERROR_NO_ERROR;
+					}
+				    }
+				}
+			    }
+			}
+		    
+		    /* if open read next entry from recursive datalist */
+		    if (done == MB_NO
+			&& datalist_ptr->open == MB_YES
+			&& datalist_ptr->datalist != NULL)
+			{
+			datalist2_ptr = (struct mb_datalist_struct *) datalist_ptr->datalist;
+			if (datalist2_ptr->open == MB_YES)
+			    {
+			    /* recursively call mb_read_datalist */
+			    status = mb_datalist_read(verbose,
+					    (char *)datalist_ptr->datalist,
+					    path,
+					    format,
+					    weight,
+					    error);
+			    
+			    /* if datalist read fails close it */
+			    if (status == MB_FAILURE)
+				{
+				status = mb_datalist_close(verbose,
+					    (char *)&(datalist_ptr->datalist),
+					    error);
+				}
+			    else
+				{
+				done = MB_YES;
+				}
+			    }
+			}
+		    }
 		}
 
 	/* print output debug statements */
