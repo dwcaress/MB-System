@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.14 1995-06-06 13:31:48 caress Exp $
+ *    $Id: mblist.c,v 4.15 1995-07-13 20:13:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1995/06/06  13:31:48  caress
+ * Fixed warnings under Solaris by explicit casting of strlen result.
+ *
  * Revision 4.13  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -132,6 +135,7 @@
 #define	M_PI	3.14159265358979323846
 #endif
 #define DTR	(M_PI/180.)
+#define RTD	(180./M_PI)
 
 /* local options */
 #define	MAX_OPTIONS	25
@@ -147,7 +151,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.14 1995-06-06 13:31:48 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.15 1995-07-13 20:13:36 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -237,8 +241,16 @@ char **argv;
 	double	sx, sy, sxx, sxy;
 	int	ns;
 	double	delta, a, b, theta;
-	double	dlon, dlat;
+	double	dlon, dlat, minutes;
+	int	degrees;
+	char	hemi;
 	double	headingx, headingy, mtodeglon, mtodeglat;
+
+	/* course calculation variables */
+	int	use_course = MB_NO;
+	double	course, course_old;
+	double	navlon_old, navlat_old;
+	double	dx, dy, dist;
 
 	int	i, j, k;
 
@@ -462,6 +474,8 @@ char **argv;
 				use_amp = MB_YES;
 			if (list[i] == 'b')
 				use_ss = MB_YES;
+			if (list[i] == 'h')
+				use_course = MB_YES;
 			}
 	if (check_values == MB_YES)
 		{
@@ -547,9 +561,6 @@ char **argv;
 		/* set output beams and pixels */
 		if (error == MB_ERROR_NO_ERROR && first == MB_YES)
 			{
-			/* reset first flag */
-			first = MB_NO;
-
 			/* set and/or check beams and pixels to be output */
 			status = set_output(verbose,
 				beams_bath,beams_amp,pixels_ss,
@@ -609,6 +620,40 @@ char **argv;
 			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 			headingx = sin(DTR*heading);
 			headingy = cos(DTR*heading);
+			}
+
+		/* calculate course made good */
+		if (error == MB_ERROR_NO_ERROR 
+			&& use_course == MB_YES)
+			{
+			if (first == MB_YES)
+				{
+				course = heading;
+				}
+			else
+				{
+				dx = (navlon - navlon_old)/mtodeglon;
+				dy = (navlat - navlat_old)/mtodeglat;
+				dist = sqrt(dx*dx + dy*dy);
+				if (dist > 0.0)
+					{
+					course = RTD*atan2(dx/dist,dy/dist);
+					course_old = course;
+					}
+				else
+					course = course_old;
+				if (course < 0.0)
+					course = course + 360.0;
+				}
+			navlon_old = navlon;
+			navlat_old = navlat;
+			course_old = course;
+			}
+
+		/* reset first flag */
+		if (error == MB_ERROR_NO_ERROR && first == MB_YES)
+			{
+			first = MB_NO;
 			}
 
 		/* now loop over beams */
@@ -681,6 +726,9 @@ char **argv;
 				case 'H': /* heading */
 					printf("%5.1f",heading);
 					break;
+				case 'h': /* course */
+					printf("%5.1f",course);
+					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
 					printf(
@@ -745,8 +793,7 @@ char **argv;
 						}
 					printf("%d",time_u - time_u_ref);
 					break;
-				case 'X': /* longitude */
-				case 'x':
+				case 'X': /* longitude decimal degrees */
 					if (j == beams_bath/2)
 						printf("%11.6f",navlon);
 					else
@@ -759,8 +806,30 @@ char **argv;
 						printf("%11.6f",dlon);
 						}
 					break;
-				case 'Y': /* latitude */
-				case 'y':
+				case 'x': /* longitude degress + decimal minutes */
+					if (j == beams_bath/2)
+						dlon = navlon;
+					else
+						{
+						dlon = navlon 
+						+ headingy*mtodeglon
+							*bathacrosstrack[j]
+						+ headingx*mtodeglon
+							*bathalongtrack[j];
+						}
+					if (dlon < 0.0)
+						{
+						hemi = 'W';
+						dlon = -dlon;
+						}
+					else
+						hemi = 'E';
+					degrees = (int) dlon;
+					minutes = 60.0*(dlon - degrees);
+					printf("%3d %8.5f%c",
+						degrees, minutes, hemi);
+					break;
+				case 'Y': /* latitude decimal degrees */
 					if (j == beams_bath/2)
 						printf("%11.6f",navlat);	
 					else
@@ -772,6 +841,29 @@ char **argv;
 							*bathalongtrack[j];
 						printf("%11.6f",dlat);
 						}
+					break;
+				case 'y': /* latitude degrees + decimal minutes */
+					if (j == beams_bath/2)
+						dlat = navlat;	
+					else
+						{
+						dlat = navlat 
+						- headingx*mtodeglat
+							*bathacrosstrack[j]
+						+ headingy*mtodeglat
+							*bathalongtrack[j];
+						}
+					if (dlat < 0.0)
+						{
+						hemi = 'S';
+						dlat = -dlat;
+						}
+					else
+						hemi = 'N';
+					degrees = (int) dlat;
+					minutes = 60.0*(dlat - degrees);
+					printf("%3d %8.5f%c",
+						degrees, minutes, hemi);
 					break;
 				case 'Z': /* topography */
 					printf("%.3f",-bath[j]);
@@ -866,6 +958,9 @@ char **argv;
 				case 'H': /* heading */
 					printf("%5.1f",heading);
 					break;
+				case 'h': /* course */
+					printf("%5.1f",course);
+					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
 					printf(
@@ -925,8 +1020,7 @@ char **argv;
 						}
 					printf("%d",time_u - time_u_ref);
 					break;
-				case 'X': /* longitude */
-				case 'x':
+				case 'X': /* longitude decimal degrees */
 					if (j == pixels_ss/2)
 						printf("%11.6f",navlon);
 					else
@@ -934,13 +1028,35 @@ char **argv;
 						dlon = navlon 
 						+ headingy*mtodeglon
 							*ssacrosstrack[j]
-						+ headingy*mtodeglon
+						+ headingx*mtodeglon
 							*ssalongtrack[j];
 						printf("%11.6f",dlon);
 						}
 					break;
-				case 'Y': /* latitude */
-				case 'y':
+				case 'x': /* longitude degress + decimal minutes */
+					if (j == pixels_ss/2)
+						dlon = navlon;
+					else
+						{
+						dlon = navlon 
+						+ headingy*mtodeglon
+							*ssacrosstrack[j]
+						+ headingx*mtodeglon
+							*ssalongtrack[j];
+						}
+					if (dlon < 0.0)
+						{
+						hemi = 'W';
+						dlon = -dlon;
+						}
+					else
+						hemi = 'E';
+					degrees = (int) dlon;
+					minutes = 60.0*(dlon - degrees);
+					printf("%3d %8.5f%c",
+						degrees, minutes, hemi);
+					break;
+				case 'Y': /* latitude decimal degrees */
 					if (j == pixels_ss/2)
 						printf("%11.6f",navlat);	
 					else
@@ -948,10 +1064,33 @@ char **argv;
 						dlat = navlat 
 						- headingx*mtodeglat
 							*ssacrosstrack[j]
-						- headingx*mtodeglat
+						+ headingy*mtodeglat
 							*ssalongtrack[j];
 						printf("%11.6f",dlat);
 						}
+					break;
+				case 'y': /* latitude degrees + decimal minutes */
+					if (j == pixels_ss/2)
+						dlat = navlat;	
+					else
+						{
+						dlat = navlat 
+						- headingx*mtodeglat
+							*ssacrosstrack[j]
+						+ headingy*mtodeglat
+							*ssalongtrack[j];
+						}
+					if (dlat < 0.0)
+						{
+						hemi = 'S';
+						dlat = -dlat;
+						}
+					else
+						hemi = 'N';
+					degrees = (int) dlat;
+					minutes = 60.0*(dlat - degrees);
+					printf("%3d %8.5f%c",
+						degrees, minutes, hemi);
 					break;
 				case 'Z': /* topography */
 					printf("%.3f",-bath[beams_bath/2]);

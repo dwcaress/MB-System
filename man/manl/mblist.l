@@ -138,8 +138,10 @@ of one or more of the following characters:
  	\fBt\fP  for a time string (yyyy mm dd hh mm ss)
  	\fBU\fP  for unix time in integer seconds since 1/1/70 00:00:00
  	\fBu\fP  for time in integer seconds since first record
- 	\fBX\fP  for center beam longitude (decimal degrees)
- 	\fBY\fP  for center beam latitude (decimal degrees)
+ 	\fBX\fP  for longitude (decimal degrees)
+ 	\fBx\fP  for longitude (degrees + decimal minutes + E/W)
+ 	\fBY\fP  for latitude (decimal degrees)
+ 	\fBy\fP  for latitude (degrees + decimal minutes + N/S)
  	\fBZ\fP  for topography (positive upwards) (m)
  	\fBz\fP  for depth (positive downwards) (m)
  	\fB#\fP  for beam or pixel number
