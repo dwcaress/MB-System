@@ -66,6 +66,12 @@
  * bac  03/15/98  Added an array subrecord for beam angle forward.
  * jsb  09/28/98  Added support for new navigation error record. Modified gsfPrintError
  *                 to use gsfStringError.
+ * wkm  04/01/99  Added case for CmpSass (Compressed SASS) data to set beam widths to 1.0.
+ * jsb  04/02/99  Added support for EM3000 series sonar systems.
+ * jsb  07/20/99  Completed work on GSF version 1.08.  Added new functions gsfGetSwathBathyArrayMinMax,
+ *                and gsfLoadDepthScaleFactorAutoOffset in support of signed depth.
+ *                This release addresses the following CRs: GSF-99-002, GSF-99-006, GSF-99-007,
+ *                GSF-99-008, GSF-99-009, GSF-99-010, GSF-99-011, GSF-99-012,
  *
  * Classification : Unclassified
  *
@@ -81,6 +87,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
+#include <math.h>
 #include <sys/stat.h>
 
 /* rely on the network type definitions of (u_short, and u_long) */
@@ -101,6 +108,16 @@
 #define GSF_FILL_SIZE_CHECKSUM 12         /* gsf packaging with checksum */
 #define GSF_STREAM_BUF_SIZE 8192          /* gsf default stream buffer size */
 #define GSF_UNKNOWN_PARAM_TEXT "UNKNWN"   /* Flag value for unknown parameter value */
+
+/* JSB 07/15/99 Added these macros to support new gsfGetSwathBathyArrayMinMax function */
+#define GSF_U_SHORT_MIN      (0)
+#define GSF_U_SHORT_MAX  (65535)
+#define GSF_S_SHORT_MIN (-32768)
+#define GSF_S_SHORT_MAX  (32767)
+#define GSF_U_CHAR_MIN       (0)
+#define GSF_U_CHAR_MAX     (255)
+#define GSF_S_CHAR_MIN    (-128)
+#define GSF_S_CHAR_MAX    (+127)
 
 /* Static Global data for this module */
 static unsigned char streamBuff[GSF_MAX_RECORD_SIZE];
@@ -4152,9 +4169,9 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     }
 
     /* The TIDAL_DATUM paremeter defines the reference datum for tide
-     * corrections
+     * corrections.
      */
-    switch (p->horizontal_datum)
+    switch (p->vertical_datum)
     {
         case (GSF_V_DATUM_MLLW):
             sprintf(temp, "TIDAL_DATUM=MLLW   ");
@@ -4644,9 +4661,12 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             *athwartship = data->mb_ping.sensor_data.gsfEM121Specific.beam_width;
             break;
 
+#if 1
+/* 04-01-99 wkm/dbj: obsolete */
         case GSF_SWATH_BATHY_SUBRECORD_SASS_SPECIFIC:
             ret = -1;
             break;
+#endif
 
         case GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC:
             ret = -1;
@@ -4696,7 +4716,27 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             *athwartship = 2.0;
             break;
 
-        default:
+        case GSF_SWATH_BATHY_SUBRECORD_CMP_SASS_SPECIFIC:
+            *fore_aft    = 1.0;
+            *athwartship = 1.0;
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
+            *fore_aft = 1.5;
+            *athwartship = 1.5;
+            if (data->mb_ping.sensor_data.gsfEM3Specific.run_time[0].transmit_beam_width != 0.0)
+            {
+                *fore_aft = data->mb_ping.sensor_data.gsfEM3Specific.run_time[0].transmit_beam_width;
+            }
+            if (data->mb_ping.sensor_data.gsfEM3Specific.run_time[0].receive_beam_width != 0.0)
+            {
+                *athwartship = data->mb_ping.sensor_data.gsfEM3Specific.run_time[0].receive_beam_width;
+            }
+            break;
+
+         default:
         {
             ret -1;
         }
@@ -4756,6 +4796,347 @@ gsfIsStarboardPing(gsfRecords *data)
             break;
     }
 
-
     return(ret);
+}
+
+/********************************************************************
+ *
+ * Function Name : gsfLoadDepthScaleFactorAutoOffset
+ *
+ * Description : gsfLoadDepthScaleFactorAutoOffset may be used to load
+ *  the scale factors for the depth subrecords of the swath bathymetry ping
+ *  record scale factor structure. The approach uses the tide and depth
+ *  correction fields to help establish the offset component of the scale
+ *  factor such that negative depth values may be supported.  Negative
+ *  depth values may be encountered when surveying above the tidal datum.
+ *  In addition, this function may be used for systems mounted on subsea
+ *  platforms where high depth precision may be supported even in deep
+ *  water.
+ *
+ * Inputs :
+ *  ping = A pointer to the gsfSwathBathyPing which contains the depht
+ *      and tide correction values, and the scale factors data structure.
+ *  subrecordID = the subrecord id for the beam array data.  This must be
+ *      either GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY, or
+ *      GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY
+ *  reset = An integer value which will cause the internal logic to be
+ *      refreshed when the value is non-zero.  The first call to this function
+ *      should use a non-zero reset, from then on, this value may be passed
+ *      as zero.
+ *  min_depth = A double value which should be set to the minimum depth value
+ *      contained in the depth array specified by subrecordID.  This argument
+ *      exists for completeness, but is currently not used.
+ *  max_depth = A double value which should be set to the maximum depth value
+ *      contained in the depth array specified by subrecordID.  When a depth
+ *      threshold is exceeded, the offset used to support "signed depth" is
+ *      no longer required and will no longer be used.  This approach is
+ *      necessary to avoid an integer overflow when the array data are scaled.
+ *  last_corrector = The address of a double value stored as permanent memory.
+ *      Successive calls to this function must pass the same address for this
+ *      argument.  This function will take care of setting the value at this
+ *      address, but the caller is responsible for ensuring that the same
+ *      permanent memory address is used for each call to this function.
+ *  c_flag = The compression flag for the beam array
+ *  precision = The presision to which the beam array data are to be stored
+ *      (a value of 0.1 would indicate decimeter precision for depth)
+ *
+ * Returns :
+ *  This function returns zero if successful, or -1 if an error occured.
+ *
+ * Error Conditions :
+ *    GSF_TOO_MANY_ARRAY_SUBRECORDS
+ *
+ ********************************************************************/
+int
+gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, int subrecordID, int reset, double min_depth, double max_depth, double *last_corrector, char c_flag, double precision)
+{
+    double          offset;
+    double          fraction;
+    double          layer;
+    double          next_layer;
+    double          corrector;
+    double          layer_interval = 100.0;
+    double          min_scaled_depth;
+    double          max_scaled_depth;
+    double          max_depth_threshold = 400.0;
+    double          max_depth_hysteresis = 30.0;
+    double          increasing_threshold;
+    double          decreasing_threshold;
+    int             dc_offset;
+    int             percent;
+    int             ret_code = 0;
+
+    /* Test for valid subrecordID, we only supported automated establishement of the DC offset for the depth subrecords */
+    if ((subrecordID != GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY) && (subrecordID != GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY))
+    {
+        gsfError = GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID;
+        return(-1);
+    }
+
+    /* Get the current offset scaling factor from the ping data structure */
+    offset    = ping->scaleFactors.scaleTable[subrecordID - 1].offset;
+
+    /* Break the total correction value into integer and fractional components based on the layering interval */
+    corrector = ping->depth_corrector + ping->tide_corrector;
+    fraction = modf (corrector / layer_interval, &layer);
+    layer = layer * layer_interval;
+
+    /* Handle the startup and/or reset situation */
+    if (reset)
+    {
+        if (layer < layer_interval)
+        {
+            offset = -1.0 * (layer - layer_interval);
+        }
+        else
+        {
+            offset = -1.0 * layer;
+        }
+        *last_corrector = 0.0;
+    }
+
+    /* Set the corrector layer trip thresholds based on the sign of the current layer */
+    if (fraction < 0.0)
+    {
+        percent = (int) (fraction * layer_interval);
+        increasing_threshold = -70.0;
+        decreasing_threshold = -90.0;
+        next_layer = layer - layer_interval;
+    }
+    else
+    {
+        percent = (int) (fraction * layer_interval);
+        increasing_threshold = 30.0;
+        decreasing_threshold = 10.0;
+        next_layer = layer;
+    }
+
+    /* The transition from one corrector layer to the next occurs if the
+     * total corrector is increasing and passes through one threshold, or
+     * if the total corrector is decreasing and passed through another
+     * threshold.
+     */
+    if (*last_corrector < corrector)
+    {
+        /* If the depth is greater than 400 meters then there is no need to
+         *  use a positive DC offset for signed depth.  This check is necessary
+         *  to avoid a potential integer overflow that may exist for sonar
+         *  systems which do not decrease the precision as the depth increases.
+         */
+        if ((fabs(corrector) < layer_interval) && (max_depth > (max_depth_threshold - max_depth_hysteresis)))
+        {
+            if (max_depth > (max_depth_threshold + max_depth_hysteresis))
+            {
+                offset = 0.0;
+            }
+        }
+
+        /* If corrector is increasing, change offset to next deeper
+         * depth layer when we pass through the threshold.
+         */
+        else if (percent > increasing_threshold)
+        {
+            offset = -1.0 * next_layer;
+        }
+    }
+    else
+    {
+        /* If the depth is greater than 400 meters then there is no need to
+         *  use a positive DC offset for signed depth.  This check is necessary
+         *  to avoid a potential integer overflow that may exist for sonar
+         *  systems which do not decrease the precision as the depth increases.
+         */
+        if ((fabs(corrector) < layer_interval) && (max_depth > (max_depth_threshold - max_depth_hysteresis)))
+        {
+            if (max_depth > (max_depth_threshold + max_depth_hysteresis))
+            {
+                offset = 0.0;
+            }
+        }
+
+        /* If corrector is decreasing, change offset to next shallower
+         *  depth layer when we pass through the threshold.
+         */
+        else if (percent < decreasing_threshold)
+        {
+            offset = -1.0 * (next_layer - layer_interval);
+        }
+    }
+
+    /* Round to the nearest whole integer */
+    if (offset < 0.0)
+    {
+        dc_offset = (int) (offset - 0.5);
+    }
+    else
+    {
+        dc_offset = (int) (offset + 0.5);
+    }
+
+    /* Call the load scale factors function to set the computed DC offset and
+     *  the c_flag and precision arguments.
+     */
+    if (gsfLoadScaleFactor(&ping->scaleFactors, subrecordID, c_flag, precision, dc_offset) != 0)
+    {
+        return (-1);
+    }
+
+    if (corrector != *last_corrector)
+    {
+        *last_corrector = corrector;
+    }
+
+    return (ret_code);
+}
+
+/********************************************************************
+ *
+ * Function Name : gsfGetSwathBathyArrayMinMax
+ *
+ * Description : This function may be used to obtain the minimum and maximum
+ *  supportable values for each of the swath bathymetry arrays.  The minimum
+ *  and maximum values are determined based on the scale factors and the array
+ *  type.
+ *
+ * Inputs :
+ *  ping = A pointer to the gsfSwathBathyPing which contains the depht
+ *      and tide correction values, and the scale factors data structure.
+ *  subrecordID = The subrecord id for the beam array data.  This must be
+ *      either GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY, or
+ *      GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY
+ *  min_value = The address of a double value allocated by the caller into
+ *      which will be placed the minimum value which may be represented for
+ *      this array type.
+ *  max_value = The address of a double value allocated by the caller into
+ *      which will be placed the maximum value which may be represented for
+ *      this array type.
+ *
+ * Returns :
+ *  This function returns zero if successful, or -1 if an error occured.
+ *
+ * Error Conditions :
+ *    GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID
+ *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
+ *
+ ********************************************************************/
+int
+gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *min_value, double *max_value)
+{
+    double          minimum;
+    double          maximum;
+    double          multiplier;
+    double          offset;
+    int             ret_code = 0;
+
+    /* Make sure that we received a valid subrecordID */
+    if ((subrecordID < 1) || (subrecordID > GSF_MAX_PING_ARRAY_SUBRECORDS))
+    {
+        gsfError = GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID;
+        return(-1);
+    }
+
+    /* Make sure scale factors have been established for this array */
+    if (ping->scaleFactors.scaleTable[subrecordID - 1].multiplier == 0.0)
+    {
+        gsfError = GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER;
+        return (-1);
+    }
+
+    multiplier = ping->scaleFactors.scaleTable[subrecordID - 1].multiplier;
+    offset     = ping->scaleFactors.scaleTable[subrecordID - 1].offset;
+    switch (subrecordID)
+    {
+        case (GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY):
+            minimum = GSF_S_SHORT_MIN;
+            maximum = GSF_S_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY):
+            minimum = GSF_S_SHORT_MIN;
+            maximum = GSF_S_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_ARRAY):
+            minimum = GSF_S_SHORT_MIN;
+            maximum = GSF_S_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY):
+            minimum = GSF_S_CHAR_MIN;
+            maximum = GSF_S_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_ECHO_WIDTH_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_QUALITY_FACTOR_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_RECEIVE_HEAVE_ARRAY):
+            minimum = GSF_S_CHAR_MIN;
+            maximum = GSF_S_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_DEPTH_ERROR_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ERROR_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ERROR_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_QUALITY_FLAGS_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_BEAM_FLAGS_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_SIGNAL_TO_NOISE_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_VERTICAL_ERROR_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_HORIZONTAL_ERROR_ARRAY):
+            minimum = GSF_U_SHORT_MIN;
+            maximum = GSF_U_SHORT_MAX;
+            break;
+        default:
+            gsfError = GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID;
+            ret_code = -1;
+            break;
+    }
+
+    if (ret_code == 0)
+    {
+        *min_value = ((minimum / multiplier) - offset);
+        *max_value = ((maximum / multiplier) - offset);
+    }
+
+    return (ret_code);
 }
