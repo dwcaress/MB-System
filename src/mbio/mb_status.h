@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.51 2004-11-06 03:55:17 caress Exp $
+ *    $Id: mb_status.h,v 5.52 2005-02-08 23:00:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.51  2004/11/06 03:55:17  caress
+ * Working to support the Reson 7k format.
+ *
  * Revision 5.50  2004/10/06 19:04:24  caress
  * Release 5.0.5 update.
  *
@@ -264,8 +267,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.0.5"
-#define	MB_BUILD_DATE	"October 6, 2004"
+#define	MB_VERSION	"5.0.6"
+#define	MB_BUILD_DATE	"February 9, 2005"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
