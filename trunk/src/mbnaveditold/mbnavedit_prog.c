@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.19 2000-08-28 22:45:11 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.20 2000-09-07 20:54:10 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  2000/08/28  22:45:11  caress
+ * About to kick off new version.
+ *
  * Revision 4.18  1999/12/11 04:42:03  caress
  * Moved xgraphics.c to src/xgraphics
  *
@@ -117,6 +120,7 @@ struct mbnavedit_ping_struct
 	double	lat;
 	double	speed;
 	double	heading;
+	double	draft;
 	double	roll;
 	double	pitch;
 	double	heave;
@@ -169,7 +173,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.19 2000-08-28 22:45:11 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.20 2000-09-07 20:54:10 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -204,6 +208,7 @@ double	navlon;
 double	navlat;
 double	speed;
 double	heading;
+double	draft;
 double	distance;
 int	nbath;
 int	namp;
@@ -1035,6 +1040,7 @@ int	hold;
 				ping[iping].time_i,ping[iping].time_d,
 				ping[iping].lon,ping[iping].lat,
 				ping[iping].speed,ping[iping].heading,
+				ping[iping].draft,
 				ping[iping].roll,ping[iping].pitch, 
 				ping[iping].heave, 
 				&error);
@@ -1163,6 +1169,7 @@ int mbnavedit_load_data()
 			ping[nlist].time_i,&ping[nlist].time_d,
 			&ping[nlist].lon,&ping[nlist].lat,
 			&ping[nlist].speed,&ping[nlist].heading,
+			&ping[nlist].draft,
 			&ping[nlist].roll,&ping[nlist].pitch,
 			&ping[nlist].heave,
 			&error);
@@ -1178,10 +1185,15 @@ int mbnavedit_load_data()
 			bathacrosstrack,bathalongtrack, 
 			ss,ssacrosstrack,ssalongtrack,
 			&error);
-		    ping[nlist].heading = 0.0;
-		    ping[nlist].roll = 0.0;
-		    ping[nlist].pitch = 0.0;
-		    ping[nlist].heave = 0.0;
+		    status = mb_buffer_extract_nav(verbose,
+			buff_ptr,imbio_ptr,ping[nlist].id,&kind,
+			ping[nlist].time_i,&ping[nlist].time_d,
+			&ping[nlist].lon,&ping[nlist].lat,
+			&ping[nlist].speed,&ping[nlist].heading,
+			&ping[nlist].draft,
+			&ping[nlist].roll,&ping[nlist].pitch,
+			&ping[nlist].heave,
+			&error);
 		    }
 		if (status == MB_SUCCESS)
 			{
