@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 4.0 1995-02-14 21:17:15 caress Exp $
+ *    $Id: mbbackangle.c,v 4.1 1995-02-27 14:43:18 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/02/14  21:17:15  caress
+ * Version 4.2
+ *
  */
 
 /* standard include files */
@@ -49,7 +52,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 4.0 1995-02-14 21:17:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangle.c,v 4.1 1995-02-27 14:43:18 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a multibeam data file and generates a table\n\t\
@@ -608,7 +611,8 @@ The results are dumped to stdout.";
 
 	/* end loop over files in list */
 	}
-	fclose (fp);
+        if (read_datalist == MB_YES)
+		fclose (fp);
 
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)

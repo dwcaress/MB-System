@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.9 1995-02-14 21:18:41 caress Exp $
+ *    $Id: mbbath.c,v 4.10 1995-02-27 14:43:18 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1995/02/14  21:18:41  caress
+ * Version 4.2
+ *
  * Revision 4.8  1994/11/29  00:42:55  caress
  * Fixed errors in data comments and verbose messages.
  *
@@ -110,7 +113,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.9 1995-02-14 21:18:41 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.10 1995-02-27 14:43:18 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -498,6 +501,7 @@ and stdout.";
 			}
 		  strncpy(buffer,"\0",sizeof(buffer));
 		  }
+		fclose(vfp);
 		}
 	/* else assume a 1500 m/s half space */
 	else

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 4.1 1995-01-06 00:06:41 caress Exp $
+ *    $Id: mbhistogram.c,v 4.2 1995-02-27 14:43:18 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/01/06  00:06:41  caress
+ * Can now read from either single data files or from multiple
+ * data files specified in a datalist.
+ *
  *
  */
 
@@ -47,7 +51,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 4.1 1995-01-06 00:06:41 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 4.2 1995-02-27 14:43:18 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a multibeam data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -501,7 +505,8 @@ char **argv;
 
 	/* end loop over files in list */
 	}
-	fclose (fp);
+	if (read_datalist == MB_YES)
+		fclose (fp);
 
 	/* calculate intervals if required */
 	if (nintervals > 0)
