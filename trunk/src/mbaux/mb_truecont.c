@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $
+ *    $Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -73,7 +73,7 @@ double	date_annot_int;
 double	time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -132,9 +132,12 @@ int	*error;
 	for (i=0;i<npings_max;i++)
 		{
 		ping = &dataptr->pings[i];
+		ping->beamflag = NULL;
 		ping->bath = NULL;
 		ping->bathlon = NULL;
 		ping->bathlat = NULL;
+		status = mb_malloc(verbose,beams_bath*sizeof(char),
+				&(ping->beamflag),error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 				&(ping->bath),error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -329,7 +332,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -349,6 +352,7 @@ int	*error;
 	for (i=0;i<data->npings_max;i++)
 		{
 		ping = &data->pings[i];
+		status = mb_free(verbose,&ping->beamflag,error);
 		status = mb_free(verbose,&ping->bath,error);
 		status = mb_free(verbose,&ping->bathlon,error);
 		status = mb_free(verbose,&ping->bathlat,error);
@@ -464,7 +468,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -506,14 +510,14 @@ int	*error;
 	  right = left;
 	  for (j=0;j<data->beams_bath;j++)
 		{
-		if (ping->bath[j] > 0 && j < left) left = j;
-		if (ping->bath[j] > 0 && j > right) right = j;
+		if (mb_beam_ok(ping->beamflag[j]) && j < left) left = j;
+		if (mb_beam_ok(ping->beamflag[j]) && j > right) right = j;
 		}
 
 	  /* deal with data */
 	  for (j=0;j<data->beams_bath;j++)
 		{
-		if (extreme_start == MB_NO && ping->bath[j] > 0)
+		if (extreme_start == MB_NO && mb_beam_ok(ping->beamflag[j]))
 			{
 			bathmin = ping->bath[j];
 			bathmax = ping->bath[j];
@@ -523,7 +527,7 @@ int	*error;
 			ymax = ymin;
 			extreme_start = MB_YES;
 			}
-		if (ping->bath[j] > 0)
+		if (mb_beam_ok(ping->beamflag[j]))
 			{
 			data->x[data->npts] = ping->bathlon[j];
 			data->y[data->npts] = ping->bathlat[j];
@@ -1151,12 +1155,13 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.8 1998-10-04 04:18:07 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
 	int	extreme_start;
 	int	left, right;
+	char	*beamflag1, *beamflag2;
 	double	*bath1, *bath2;
 	double	bathmin, bathmax;
 	int	ibeg, jbeg, kbeg, dbeg;
@@ -1202,13 +1207,13 @@ int	*error;
 	  ping = &data->pings[i];
 	  for (j=0;j<data->beams_bath;j++)
 		{
-		if (extreme_start == MB_NO && ping->bath[j] > 0)
+		if (extreme_start == MB_NO && mb_beam_ok(ping->beamflag[j]))
 			{
 			bathmin = ping->bath[j];
 			bathmax = ping->bath[j];
 			extreme_start = MB_YES;
 			}
-		if (ping->bath[j] > 0)
+		if (mb_beam_ok(ping->beamflag[j]))
 			{
 			bathmin = MIN(bathmin, ping->bath[j]);
 			bathmax = MAX(bathmax, ping->bath[j]);
@@ -1312,20 +1317,25 @@ int	*error;
 		/* flag all grid sides crossed by the current contour */
 		for (i=0;i<data->npings;i++)
 			{
+			beamflag1 = data->pings[i].beamflag;
 			bath1 = data->pings[i].bath;
-			if (i<data->npings-1) bath2 = data->pings[i+1].bath;
+			if (i<data->npings-1) 
+			    {
+			    beamflag2 = data->pings[i+1].beamflag;
+			    bath2 = data->pings[i+1].bath;
+			    }
 			for (j=0;j<data->beams_bath;j++)
 				{
 				/* check for across track intersection */
 				if (j < data->beams_bath-1)
-					if ((bath1[j]>0.0 && bath1[j+1] > 0.0) 
+					if ((mb_beam_ok(beamflag1[j]) && mb_beam_ok(beamflag1[j+1])) 
 					&& ((bath1[j]<value && bath1[j+1]>value)
 					|| (bath1[j]>value && bath1[j+1]<value)))
 						data->pings[i].bflag[0][j] = 1;
 
 				/* check for along track intersection */
 				if (i < data->npings-1)
-					if ((bath1[j]>0.0 && bath2[j] > 0.0) 
+					if ((mb_beam_ok(beamflag1[j]) && mb_beam_ok(beamflag2[j])) 
 					&& ((bath1[j]<value && bath2[j]>value) 
 					|| (bath1[j]>value && bath2[j]<value)))
 						data->pings[i].bflag[1][j] = 1;
@@ -1439,7 +1449,7 @@ int	*error;
 				right = data->beams_bath/2;
 				for (jj=0;jj<data->beams_bath;jj++)
 					{
-					if (data->pings[data->isave[0]].bath[jj] > 0.0)
+					if (mb_beam_ok(data->pings[data->isave[0]].beamflag[jj]))
 						{
 						if (jj < left) left = jj;
 						if (jj > right) right = jj;
@@ -1473,7 +1483,7 @@ int	*error;
 				right = data->beams_bath/2;
 				for (jj=0;jj<data->beams_bath;jj++)
 					{
-					if (data->pings[data->isave[data->nsave-1]].bath[jj] > 0.0)
+					if (mb_beam_ok(data->pings[data->isave[data->nsave-1]].beamflag[jj]))
 						{
 						if (jj < left) left = jj;
 						if (jj > right) right = jj;

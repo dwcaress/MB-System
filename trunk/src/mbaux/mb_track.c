@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 4.5 1997-04-21 16:53:56 caress Exp $
+ *    $Id: mb_track.c,v 4.6 1998-10-04 04:18:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,12 +11,15 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_track.c plots the shiptrack of multibeam bathymetry data.
+ * mb_track.c plots the shiptrack of swath sonar data.
  *
  * Author:	D. W. Caress
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/21  16:53:56  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.4  1996/04/22  13:18:44  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -70,7 +73,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 4.5 1997-04-21 16:53:56 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 4.6 1998-10-04 04:18:07 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;

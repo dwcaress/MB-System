@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.8 1997-09-16 13:23:50 caress Exp $
+#	$Id: Makefile.template,v 4.9 1998-10-04 04:18:07 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.8  1997/09/16  13:23:50  caress
+# Fixed typos.
+#
 # Revision 4.7  1996/04/22  13:18:44  caress
 # Now have DTR and MIN/MAX defines in mb_define.h
 #
@@ -74,14 +77,18 @@ clean:
 	rm -f *.o
 
 ### link or copy the executables
-$(BINDIR)/mbcontour: mbcontour.o mb_truecont.o mb_delaun.o mb_track.o mb_pslibface.o ../../lib/libmbio.a
+$(BINDIR)/mbcontour: mbcontour.o mb_truecont.o mb_delaun.o \
+			mb_track.o mb_pslibface.o \
+			$(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbcontour.o mb_truecont.o mb_delaun.o \
-		mb_track.o mb_pslibface.o ../../lib/libmbio.a \
+		mb_track.o mb_pslibface.o \
+		$(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmt.a \
 		$(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbcontour
-$(BINDIR)/mbswath: mbswath.o ../../lib/libmbio.a
-	$(CC) $(CFLAGS) mbswath.o ../../lib/libmbio.a \
+$(BINDIR)/mbswath: mbswath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
+	$(CC) $(CFLAGS) mbswath.o \
+		$(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmt.a \
 		$(NETCDFLIBDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbswath

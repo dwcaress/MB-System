@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.19 1997-10-07 20:10:51 caress Exp $
+ *    $Id: mbcontour.c,v 4.20 1998-10-04 04:18:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1997/10/07  20:10:51  caress
+ * Fixed tick flag for contours read from file.
+ *
  * Revision 4.18  1997/04/21  16:53:56  caress
  * MB-System 4.5 Beta Release.
  *
@@ -143,7 +146,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.19 1997-10-07 20:10:51 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.20 1998-10-04 04:18:07 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -202,6 +205,7 @@ char **argv;
 	double	speed;
 	double	*heading = NULL;
 	double	distance;
+	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathlon = NULL;
 	double	*bathlat = NULL;
@@ -441,7 +445,7 @@ char **argv;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -771,6 +775,7 @@ char **argv;
 		    navlon = &pingcur->navlon;
 		    navlat = &pingcur->navlat;
 		    heading = &pingcur->heading;
+		    beamflag = pingcur->beamflag;
 		    bath = pingcur->bath;
 		    bathlon = pingcur->bathlon;
 		    bathlat = pingcur->bathlat;
@@ -779,7 +784,7 @@ char **argv;
 			    navlon,navlat,&speed,
 			    heading,&distance,
 			    &beams_bath,&beams_amp,&pixels_ss,
-			    bath,amp,bathlon,bathlat,
+			    beamflag,bath,amp,bathlon,bathlat,
 			    ss,sslon,sslat,
 			    comment,&error);
 		    swath_plot->beams_bath = beams_bath;
@@ -1011,6 +1016,7 @@ int	*error;
 	ping1->heading = ping2->heading;
 	for (i=0;i<swath->beams_bath;i++)
 		{
+		ping1->beamflag[i] = ping2->beamflag[i];
 		ping1->bath[i] = ping2->bath[i];
 		ping1->bathlon[i] = ping2->bathlon[i];
 		ping1->bathlat[i] = ping2->bathlat[i];

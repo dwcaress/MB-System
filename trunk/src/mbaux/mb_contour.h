@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 4.1 1994-10-21 11:34:20 caress Exp $
+ *    $Id: mb_contour.h,v 4.2 1998-10-04 04:18:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/10/21  11:34:20  caress
+ * Release V4.0
+ *
  * Revision 4.0  1994/05/16  22:12:46  caress
  * First cut at new contouring scheme.
  *
@@ -37,6 +40,7 @@ struct	ping
 	double	navlon;
 	double	navlat;
 	double	heading;
+	char	*beamflag;
 	double	*bath;
 	double	*bathlon;
 	double	*bathlat;
