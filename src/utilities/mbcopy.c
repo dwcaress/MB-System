@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.6 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbcopy.c,v 5.7 2001-08-25 00:58:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/20  00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.5  2001/06/30  17:42:04  caress
  * Release 5.0.beta02
  *
@@ -186,7 +189,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.6 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.7 2001-08-25 00:58:08 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -1809,10 +1812,22 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		ostore->run_absorption = 0;	/* absorption coefficient (0.01 dB/km) */
 	
 		ostore->run_tran_pulse = 0;	/* transmit pulse length (usec) */
-		ostore->run_tran_beam = 0;	/* transmit beamwidth (0.1 deg) */
+		if (istore->sonar == MBSYS_SIMRAD_EM12S
+		    || istore->sonar == MBSYS_SIMRAD_EM12D)
+		    ostore->run_tran_beam = 17;	/* transmit beamwidth (0.1 deg) */
+		else if (istore->sonar == MBSYS_SIMRAD_EM1000)
+		    ostore->run_tran_beam = 33;	/* transmit beamwidth (0.1 deg) */
+		else if (istore->sonar == MBSYS_SIMRAD_EM121)
+		    ostore->run_tran_beam = 10;	/* transmit beamwidth (0.1 deg) */
 		ostore->run_tran_pow = 0;	/* transmit power reduction (dB) */
-		ostore->run_rec_beam = 0;	/* receiver beamwidth (0.1 deg) */
-		ostore->run_rec_beam = 0;	/* receiver bandwidth (50 hz) */
+		if (istore->sonar == MBSYS_SIMRAD_EM12S
+		    || istore->sonar == MBSYS_SIMRAD_EM12D)
+		    ostore->run_rec_beam = 35;	/* receiver beamwidth (0.1 deg) */
+		else if (istore->sonar == MBSYS_SIMRAD_EM1000)
+		    ostore->run_rec_beam = 33;	/* receiver beamwidth (0.1 deg) */
+		else if (istore->sonar == MBSYS_SIMRAD_EM121)
+		    ostore->run_rec_beam = 10;	/* transmit beamwidth (0.1 deg) */
+		ostore->run_rec_band = 0;	/* receiver bandwidth (50 hz) */
 		ostore->run_rec_gain = 0;	/* receiver fixed gain (dB) */
 		ostore->run_tvg_cross = 0;	/* TVG law crossover angle (deg) */
 		ostore->run_ssv_source = 0;	/* source of sound speed at transducer:
@@ -1966,6 +1981,26 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			/* get data structure pointer */
 			iping = (struct mbsys_simrad_survey_struct *) istore->ping;
 			oping = (struct mbsys_simrad2_ping_struct *) ostore->ping;
+
+			/* set beam widths for EM121 */
+			if (istore->sonar == MBSYS_SIMRAD_EM121)
+			    {
+			    if (iping->bath_mode == 3)
+				{
+				ostore->run_tran_beam = 40;	/* transmit beamwidth (0.1 deg) */
+				ostore->run_rec_beam = 40;	/* transmit beamwidth (0.1 deg) */
+				}
+			    else if (iping->bath_mode == 2)
+				{
+				ostore->run_tran_beam = 20;	/* transmit beamwidth (0.1 deg) */
+				ostore->run_rec_beam = 20;	/* transmit beamwidth (0.1 deg) */
+				}
+			    else
+				{
+				ostore->run_tran_beam = 10;	/* transmit beamwidth (0.1 deg) */
+				ostore->run_rec_beam = 10;	/* transmit beamwidth (0.1 deg) */
+				}
+			    }
 
 			/* initialize everything */
 			oping->png_date = ostore->date;	
@@ -2340,7 +2375,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			    oping->png_tx = 10 * iping->beam_width;	
 			else if (ostore->sonar == MBSYS_SIMRAD2_EM12S
 				    || ostore->sonar == MBSYS_SIMRAD2_EM12D)
-			    oping->png_tx = 20;	
+			    oping->png_tx = 17;	
 			else if (ostore->sonar == MBSYS_SIMRAD2_EM1000)
 			    oping->png_tx = 33;	
 					/* Tx beamwidth in 0.1 degree */
