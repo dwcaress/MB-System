@@ -164,6 +164,10 @@ is also output with the filename "root.grd.cmd".  If the
 output grid filename will be "root.asc", but no plotting shellscript 
 will be created. 
 
+A datalist file containing references to all of the swath files actually 
+contibuting to the grid is also created. This file is named by adding 
+a ".mb-1" suffix to the root string.
+
 The \fB-M\fP option causes \fBmbmosaic\fP to output two additional
 grids, the first ("root_num.grd") being the number of high priority
 data points used within each bin, and the second ("root_sd.grd") 
@@ -625,7 +629,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.5 2002-11-14 03:52:25 caress Exp $
+ Version $Id: mbmosaic.l,v 5.6 2003-11-28 19:19:14 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

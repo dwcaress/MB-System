@@ -1,4 +1,4 @@
-.TH mbgrid l "21 March 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "28 November 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -208,6 +208,10 @@ is also output with the filename "root.grd.cmd".  If the
 \fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
 output grid filename will be "root.asc", but no plotting shellscript 
 will be created. 
+
+A datalist file containing references to all of the swath files actually 
+contibuting to the grid is also created. This file is named by adding 
+a ".mb-1" suffix to the root string.
 
 The \fB-M\fP option causes \fBmbgrid\fP to output two additional
 grids, the first ("root_num.grd") being the number of data 
@@ -632,7 +636,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.8 2003-03-22 03:09:09 caress Exp $
+ Version $Id: mbgrid.l,v 5.9 2003-11-28 19:17:54 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:
