@@ -6,25 +6,78 @@ of the MB-System software package for processing and display of
 swath sonar data. Version 4.6 includes significant enhancements
 relative to version 4.5. 
 
-The primary enhancements for version 4.6 include support
-for four new data formats and a large number of bug fixes.
+The enhancements for version 4.6 include support
+for several new data formats, additional features added
+to several programs, one new program, and a large number 
+of bug fixes.
 
 The first newly supported format is the Generic Sensor 
 Format (GSF) developed by Science Applications International 
 Corporation (SAIC) and used by SAIC, the U.S. Navy, and other
-SAIC customers. This format itself supports data from a
-number of different sonars.
+SAIC customers. This format (121) itself supports data from a
+number of different sonars. The code for libgsf version 1.07
+has been incorporated into MB-System.
 
-The second new format is MSTIFF, a TIFF file variant used
+The second new format (131) is MSTIFF, a TIFF file variant used
 in conjunction with PC Sea Scan towed sidescan sonars.
 
-The two additional new formats involve data from Simrad
+Two additional new formats involve data from Simrad
 EM300 and EM3000 sonars. The raw vendor format for the
 current generation of Simrad sonars is supported as MBIO 
 format 56. A similar, but enhanced processing/archiving format
 is supported as MBIO format 57.
 
-Minor enhancements and bug fixes include:
+The OIC processed ping format developed by Oceanic Imaging
+Consultants (OIC) has been supported as MBIO format 141.
+A similar, but enhanced processing format is supported as
+MBIO format 142. Data from a number of sonars (mostly
+interferometry or sidescan sonars) are supported by the
+OIC format. In particular, The WHOI DSL group is using the
+OIC format for data collected using its AMS-120 sonar
+on the Jason vehicle.
+
+The HDCS format developed by Dr. John Hughes Clarke of the
+University of New Brunswick has also been supported as MBIO
+format 151. Like the GSF and OIC formats, HDCS is a "super-format"
+encompassing data from a variety of sonars. Dr. Clarke's
+data processing software is now used by a number of academic
+and government research groups, and it works exclusively 
+with the HDCS format.
+
+The program mbsimradmakess is a new utility for regenerating 
+sidescan imagery from the raw amplitude samples contained in 
+data from  Simrad EM300 and EM3000 multibeam sonars. This 
+program ignores amplitude data associated with flagged 
+(bad) bathymetry data, thus removing one important source 
+of noise in the sidescan data.
+
+The program mbnavedit now includes a plot of the time interval
+between data points and enables users to fix some time
+tag problems. This program now operates on the asynchronous
+navigation data records in Simrad vendor formats
+(MBIO formats 51, 52, 53, 55, and 56), allowing
+the navigation to actually be edited.
+
+MB-System is now Y2K compliant. Surprisingly, a number of
+data formats associated with current commercial products
+still use two digits to represent the year. The internal
+handling of these years is as follows:
+        if (year_2d >= 62)
+            year_4d = year_2d + 1900;
+        else
+            year_4d = year_2d + 2000;
+        if (year_4d < 2000)
+            year_2d = year_4d - 1900;
+        else
+            year_2d = year_4d - 2000;
+The use of 1962 derives from the invention of the multibeam
+sonar in that year - there are no digital swath mapping
+data available from an earlier time.
+
+MB-System is compatible with versions 3.0, 3.1, and 3.2
+of the GMT package. The use of a GMT version prior to
+3.2 is set in the install_makefiles script described
+in the "Installing MB-System" section below.
 
 All MB-System programs now print out the MB-System version
 number when run with the -h option.
@@ -53,17 +106,12 @@ have the major parameters defined at the beginning as
 environment variables. This makes editing of the scripts
 easier.
 
-The program mbnavedit now operates on the asynchronous
-navigation data records in Simrad vendor formats
-(MBIO formats 51, 52, 53, 55, and 56), allowing
-the navigation to actually be edited.
-
-Of course, a larger number of minor bug fixes are also 
+Of course, a large number of minor bug fixes are also 
 incorporated in the new release.
 
 RELEASE DATE:
 ------------
-December 17, 1998
+April 14, 1999
 
 Authors:
 --------
@@ -111,7 +159,7 @@ is available as follows:
 	- compressed tar file MB-System4.6.tar.Z
 	  in directory pub/swath_data
 
-	GMT v 3.0
+	GMT v 3.0 or later (v 3.2 strongly recommended)
 	- available from SOEST (U. Hawaii) via anonymous ftp to
 	  kiawe.soest.hawaii.edu
 	- compressed tar files in directory pub/gmt
@@ -186,6 +234,8 @@ The important parameters to be set in install_makefiles are:
 			default is "YES").
         MOTIFINCDIR	Location of Motif include files.
         MOTIFLIBS	X and Motif libraries required for graphical tools.
+ 	GMTVERSION	GMT version with which MB-System will be linked.
+				Options are: "3.0", "3.1", "3.2".
  	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
  	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
  				and pslib.h
@@ -233,10 +283,10 @@ ghostview.
 Current versions of MB-System have been successfully
 installed on Silicon Graphics (SGI) single and multiple
 processor platforms running under the IRIS operating system
-(versions 5.2, 5.3, 6.0, and 6.2), on Sun workstations running
-under the SunOS 4.1 and Solaris operating systems, on
-Hewlett Packard workstations, on IBM workstations, and on
-486 PC's running under LynxOS (a realtime Unix variant).
+(versions 5.2, 5.3, 6.0, 6.2, and 6.4), on Sun workstations running
+under the SunOS 4.1 and Solaris operating systems, on Hewlett 
+Packard workstations, on IBM workstations, on PC's running Red Hat 
+Linux, and on PC's running under LynxOS (a realtime Unix variant).
 Its a fair bet that if you provide us with a really cool 
 (ie. FAST) computer of your choice, we might be inclined
 to try making MB-System run on it.
@@ -260,8 +310,8 @@ the evolution of GUIs and WIMPS.
 Motif:
 --------------------------
 The graphical tools mbedit, mbnavedit, and mbvelocitytool 
-now use the Motif widget set rather than the XVIEW widget 
-set used prior to version 4.0.  Motif libraries are required 
+now use the Motif widget set for their graphical user
+interface.  Motif libraries are required 
 to successfully link and install these programs. 
  
 Web Based Documentation:
@@ -285,7 +335,7 @@ Continued Support:
 -----------------
 We are pleased to have received five years of continued 
 NSF funding for the support and development of MB-System. 
-We are now early the fourth year of this NSF project. 
+We are now towards the end of the fourth year of this NSF project. 
 This project is also supported by the Monterey Bay Aquarium
 Research Institute.
 
@@ -332,10 +382,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.16 1998-12-17 23:09:42 caress Exp $
+RCS ID: $Id: README,v 4.17 1999-04-16 00:26:05 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.16  1998/12/17  23:09:42  caress
+# MB-System version 4.6beta4
+#
 # Revision 4.15  1998/10/05  22:12:48  caress
 # MB-System version 4.6beta
 #
