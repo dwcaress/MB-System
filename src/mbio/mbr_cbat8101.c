@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat8101.c	8/8/94
- *	$Id: mbr_cbat8101.c,v 4.0 1999-01-01 23:38:01 caress Exp $
+ *	$Id: mbr_cbat8101.c,v 4.1 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/01/01  23:38:01  caress
+ * MB-System version 4.6beta6
+ *
  *
  */
 
@@ -50,7 +53,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_cbat8101.c,v 4.0 1999-01-01 23:38:01 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat8101.c,v 4.1 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbr_alm_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -371,9 +374,8 @@ int	*error;
 		/* get time */
 		if (data->kind == MB_DATA_DATA)
 			{
-			mb_io_ptr->new_time_i[0] = data->year + 1900;
-			if (data->year < 62) 
-			    mb_io_ptr->new_time_i[0] += 100;
+			mb_fix_y2k(verbose, data->year, 
+				    &mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->month;
 			mb_io_ptr->new_time_i[2] = data->day;
 			mb_io_ptr->new_time_i[3] = data->hour;
@@ -384,9 +386,8 @@ int	*error;
 			}
 		else if (data->kind == MB_DATA_PARAMETER)
 			{
-			mb_io_ptr->new_time_i[0] = data->par_year + 1900;
-			if (data->par_year < 62) 
-			    mb_io_ptr->new_time_i[0] += 100;
+			mb_fix_y2k(verbose, data->par_year, 
+				    &mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->par_month;
 			mb_io_ptr->new_time_i[2] = data->par_day;
 			mb_io_ptr->new_time_i[3] = data->par_hour;
@@ -397,9 +398,8 @@ int	*error;
 			}
 		else if (data->kind == MB_DATA_VELOCITY_PROFILE)
 			{
-			mb_io_ptr->new_time_i[0] = data->svp_year + 1900;
-			if (data->svp_year < 62) 
-			    mb_io_ptr->new_time_i[0] += 100;
+			mb_fix_y2k(verbose, data->svp_year, 
+				    &mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->svp_month;
 			mb_io_ptr->new_time_i[2] = data->svp_day;
 			mb_io_ptr->new_time_i[3] = data->svp_hour;
@@ -410,9 +410,8 @@ int	*error;
 			}
 		else if (data->kind == MB_DATA_NAV)
 			{
-			mb_io_ptr->new_time_i[0] = data->pos_year + 1900;
-			if (data->pos_year < 62) 
-			    mb_io_ptr->new_time_i[0] += 100;
+			mb_fix_y2k(verbose, data->pos_year, 
+				    &mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->pos_month;
 			mb_io_ptr->new_time_i[2] = data->pos_day;
 			mb_io_ptr->new_time_i[3] = data->pos_hour;
@@ -938,7 +937,8 @@ int	*error;
 	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR)
 		{
 		/* get time */
-		data->year = mb_io_ptr->new_time_i[0] % 100;
+		mb_unfix_y2k(verbose, mb_io_ptr->new_time_i[0], 
+			    &data->year);
 		data->month = mb_io_ptr->new_time_i[1];
 		data->day = mb_io_ptr->new_time_i[2];
 		data->hour = mb_io_ptr->new_time_i[3];

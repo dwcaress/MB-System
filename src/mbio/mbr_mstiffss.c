@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mstiffss.c	4/7/98
- *	$Id: mbr_mstiffss.c,v 4.0 1998-10-05 19:16:02 caress Exp $
+ *	$Id: mbr_mstiffss.c,v 4.1 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	April 7, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/10/05  19:16:02  caress
+ * MB-System version 4.6beta
+ *
  * Revision 1.1  1998/10/05  18:32:27  caress
  * Initial revision
  *
@@ -58,7 +61,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mstiffss.c,v 4.0 1998-10-05 19:16:02 caress Exp $";
+ static char res_id[]="$Id: mbr_mstiffss.c,v 4.1 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbr_alm_mstiffss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -383,7 +386,8 @@ int	*error;
 			    corr_time[i] = mb_swap_short(corr_time[i]);
 			    }
 #endif
-			corr_time_i[0] = corr_time[5] + 1900;
+			mb_fix_y2k(verbose,(int)corr_time[5],
+				    &corr_time_i[0]);
 			corr_time_i[1] = corr_time[4] + 1;
 			corr_time_i[2] = corr_time[3];
 			corr_time_i[3] = corr_time[2];

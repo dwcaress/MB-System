@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.11 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_em12darw.c,v 4.12 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.10  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *
@@ -92,7 +95,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.11 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.12 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -399,7 +402,8 @@ int	*error;
 		&& data_kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_j[0] = data->year + 1900;
+		mb_fix_y2k(verbose, (int)data->year, 
+				&time_j[0]);
 		time_j[1] = data->jday;
 		time_j[2] = data->minute;
 		time_j[3] = data->secs/100;
@@ -567,7 +571,8 @@ int	*error;
 		store->sonar = MBSYS_SIMRAD_EM12S;
 
 		/* time */
-		time_j[0] = data->year + 1900;
+		mb_fix_y2k(verbose, (int)data->year, 
+				&time_j[0]);
 		time_j[1] = data->jday;
 		time_j[2] = data->minute;
 		time_j[3] = data->secs/100;
@@ -694,6 +699,7 @@ int	*error;
 	char	*datacomment;
 	int	time_i[7];
 	int	time_j[5];
+	int	year;
 	double	lon, lat;
 	double	depthscale, dacrscale,daloscale,rangescale,reflscale;
 	short	func;
@@ -749,7 +755,8 @@ int	*error;
 			time_i[5] = store->second;
 			time_i[6] = store->centisecond;
 			mb_get_jtime(verbose,time_i,time_j);
-			data->year = time_j[0]-1900;
+			mb_unfix_y2k(verbose, time_j[0], &year);
+			data->year = (short)year;
 			data->jday = time_j[1];
 			data->minute = time_j[2];
 			data->secs = 100*time_j[3] + 0.0001*time_j[4];
@@ -837,7 +844,8 @@ int	*error;
 
 		/* get time */
 		mb_get_jtime(verbose,mb_io_ptr->new_time_i,time_j);
-		data->year = time_j[0]-1900;
+		mb_unfix_y2k(verbose, time_j[0], &year);
+		data->year = (short)year;
 		data->jday = time_j[1];
 		data->minute = time_j[2];
 		data->secs = 100*time_j[3] + 0.0001*time_j[4];

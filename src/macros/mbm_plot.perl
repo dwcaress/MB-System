@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.18 1999-02-04 23:39:54 caress Exp $
+#    $Id: mbm_plot.perl,v 4.19 1999-03-31 18:09:36 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.18 1999-02-04 23:39:54 caress Exp $
+#   $Id: mbm_plot.perl,v 4.19 1999-03-31 18:09:36 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.18  1999/02/04  23:39:54  caress
+# MB-System version 4.6beta7
+#
 # Revision 4.17  1998/10/13  18:08:37  caress
 # Fixed typos.
 #
@@ -304,7 +307,6 @@ if ($line =~
 	($gmt_version) = $line =~ 
 		/grdinfo\s+(\S+)\s+\S+/;
 	}
-print "GMT VERSION: $gmt_version\n";
 
 # Deal with command line arguments
 $command_line = "@ARGV";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.18 1998-12-18 20:49:54 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.19 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -44,6 +44,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1998/12/18  20:49:54  caress
+ * MB-System version 4.6beta5
+ *
  * Revision 4.17  1998/12/18  01:39:32  caress
  * MB-System version 4.6beta5
  *
@@ -979,7 +982,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.18 1998-12-18 20:49:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.19 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1113,7 +1116,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.18 1998-12-18 20:49:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.19 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1331,7 +1334,7 @@ int	*error;
 		ping = (struct mbsys_simrad_survey_struct *) store->ping;
 		
 		/* get time */
-		time_i[0] = store->year + 1900;
+		mb_fix_y2k(verbose, store->year, &time_i[0]);
 		time_i[1] = store->month;
 		time_i[2] = store->day;
 		time_i[3] = store->hour;
@@ -1341,7 +1344,7 @@ int	*error;
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		ntime_i[0] = store->pos_year + 1900;
+		mb_fix_y2k(verbose, store->pos_year, &ntime_i[0]);
 		ntime_i[1] = store->pos_month;
 		ntime_i[2] = store->pos_day;
 		ntime_i[3] = store->pos_hour;
@@ -1576,7 +1579,7 @@ int	*error;
 		ping = (struct mbsys_simrad_survey_struct *) store->ping;
 
 		/* get time */
-		time_i[0] = store->pos_year + 1900;
+		mb_fix_y2k(verbose, store->pos_year, &time_i[0]);
 		time_i[1] = store->pos_month;
 		time_i[2] = store->pos_day;
 		time_i[3] = store->pos_hour;
@@ -1840,7 +1843,7 @@ int	*error;
 		ping = (struct mbsys_simrad_survey_struct *) store->ping;
 		
 		/* get time */
-		store->year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->year);
 		store->month = time_i[1];
 		store->day = time_i[2];
 		store->hour = time_i[3];
@@ -1986,7 +1989,7 @@ int	*error;
 	else if (store->kind == MB_DATA_NAV)
 		{
 		/* get time */
-		store->pos_year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->pos_year);
 		store->pos_month = time_i[1];
 		store->pos_day = time_i[2];
 		store->pos_hour = time_i[3];
@@ -2458,7 +2461,7 @@ int	*error;
 		ping = (struct mbsys_simrad_survey_struct *) store->ping;
 
 		/* get time */
-		time_i[0] = store->year + 1900;
+		mb_fix_y2k(verbose, store->year, &time_i[0]);
 		time_i[1] = store->month;
 		time_i[2] = store->day;
 		time_i[3] = store->hour;
@@ -2468,7 +2471,7 @@ int	*error;
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		ntime_i[0] = store->pos_year + 1900;
+		mb_fix_y2k(verbose, store->pos_year, &ntime_i[0]);
 		ntime_i[1] = store->pos_month;
 		ntime_i[2] = store->pos_day;
 		ntime_i[3] = store->pos_hour;
@@ -2568,7 +2571,7 @@ int	*error;
 	else if (*kind == MB_DATA_NAV)
 		{
 		/* get time */
-		time_i[0] = store->pos_year + 1900;
+		mb_fix_y2k(verbose, store->pos_year, &time_i[0]);
 		time_i[1] = store->pos_month;
 		time_i[2] = store->pos_day;
 		time_i[3] = store->pos_hour;
@@ -2775,7 +2778,7 @@ int	*error;
 		ping = (struct mbsys_simrad_survey_struct *) store->ping;
 
 		/* get time */
-		store->year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->year);
 		store->month = time_i[1];
 		store->day = time_i[2];
 		store->hour = time_i[3];
@@ -2802,7 +2805,7 @@ int	*error;
 	else if (store->kind == MB_DATA_NAV)
 		{
 		/* get time */
-		store->pos_year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->pos_year);
 		store->pos_month = time_i[1];
 		store->pos_day = time_i[2];
 		store->pos_hour = time_i[3];

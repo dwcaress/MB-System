@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_altitude.c	4/28/98
- *    $Id: mb_altitude.c,v 4.1 1998-12-17 22:56:15 caress Exp $
+ *    $Id: mb_altitude.c,v 4.2 1999-03-31 18:11:35 caress Exp $
 
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	April 28, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1998/12/17  22:56:15  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.0  1998/10/05  19:16:02  caress
  * MB-System version 4.6beta
  *
@@ -60,7 +63,7 @@ double	*transducer_depth;
 double	*altitude;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_altitude.c,v 4.1 1998-12-17 22:56:15 caress Exp $";
+	static char rcs_id[]="$Id: mb_altitude.c,v 4.2 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mb_altitude";
 	int	status;
 	int	system;
@@ -107,6 +110,11 @@ int	*error;
 	else if (system == MB_SYS_SIMRAD)
 		{
 		status = mbsys_simrad_altitude(verbose,mbio_ptr,store_ptr,
+				kind,transducer_depth,altitude,error);
+		}
+	else if (system == MB_SYS_SIMRAD2)
+		{
+		status = mbsys_simrad2_altitude(verbose,mbio_ptr,store_ptr,
 				kind,transducer_depth,altitude,error);
 		}
 	else if (system == MB_SYS_MR1)
@@ -159,9 +167,14 @@ int	*error;
 		status = mbsys_mstiff_altitude(verbose,mbio_ptr,store_ptr,
 				kind,transducer_depth,altitude,error);
 		}
-	else if (system == MB_SYS_SIMRAD2)
+	else if (system == MB_SYS_OIC)
 		{
-		status = mbsys_simrad2_altitude(verbose,mbio_ptr,store_ptr,
+		status = mbsys_oic_altitude(verbose,mbio_ptr,store_ptr,
+				kind,transducer_depth,altitude,error);
+		}
+	else if (system == MB_SYS_HDCS)
+		{
+		status = mbsys_hdcs_altitude(verbose,mbio_ptr,store_ptr,
 				kind,transducer_depth,altitude,error);
 		}
 	else
@@ -197,7 +210,7 @@ double	transducer_depth;
 double	altitude;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_altitude.c,v 4.1 1998-12-17 22:56:15 caress Exp $";
+	static char rcs_id[]="$Id: mb_altitude.c,v 4.2 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mb_insert_altitude";
 	int	status;
 	int	system;
@@ -238,6 +251,9 @@ int	*error;
 	else if (system == MB_SYS_SIMRAD)
 		{
 		}
+	else if (system == MB_SYS_SIMRAD2)
+		{
+		}
 	else if (system == MB_SYS_MR1)
 		{
 		}
@@ -272,8 +288,15 @@ int	*error;
 	else if (system == MB_SYS_MSTIFF)
 		{
 		}
-	else if (system == MB_SYS_SIMRAD2)
+	else if (system == MB_SYS_OIC)
 		{
+		status = mbsys_oic_insert_altitude(verbose,mbio_ptr,store_ptr,
+				transducer_depth,altitude,error);
+		}
+	else if (system == MB_SYS_HDCS)
+		{
+		status = mbsys_hdcs_insert_altitude(verbose,mbio_ptr,store_ptr,
+				transducer_depth,altitude,error);
 		}
 	else
 		{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.13 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.14 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.12  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *
@@ -107,7 +110,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.13 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.14 1999-03-31 18:11:35 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -363,7 +366,7 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_i[0] = store->profile[0].year + 1900;
+		mb_fix_y2k(verbose, store->profile[0].year, &time_i[0]);
 		time_i[1] = store->profile[0].month;
 		time_i[2] = store->profile[0].day;
 		time_i[3] = store->profile[0].hour;
@@ -652,7 +655,7 @@ int	*error;
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->profile[0].year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->profile[0].year);
 		store->profile[0].month = time_i[1];
 		store->profile[0].day = time_i[2];
 		store->profile[0].hour = time_i[3];
@@ -1061,7 +1064,7 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_i[0] = store->profile[0].year + 1900;
+		mb_fix_y2k(verbose, store->profile[0].year, &time_i[0]);
 		time_i[1] = store->profile[0].month;
 		time_i[2] = store->profile[0].day;
 		time_i[3] = store->profile[0].hour;
@@ -1268,7 +1271,7 @@ int	*error;
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->profile[0].year = time_i[0] - 1900;
+		mb_unfix_y2k(verbose, time_i[0], &store->profile[0].year);
 		store->profile[0].month = time_i[1];
 		store->profile[0].day = time_i[2];
 		store->profile[0].hour = time_i[3];

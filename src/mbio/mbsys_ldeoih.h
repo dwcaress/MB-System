@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_hsds.h	3/2/93
- *	$Id: mbsys_ldeoih.h,v 4.3 1998-10-05 17:46:15 caress Exp $
+ *    The MB-system:	mbsys_ldeoih.h	3/2/93
+ *	$Id: mbsys_ldeoih.h,v 4.4 1999-03-31 18:11:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,13 +11,17 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_hsds.h defines the data structure used by MBIO functions
+ * mbsys_ldeoih.h defines the data structure used by MBIO functions
  * to store multibeam data in a general purpose archive format:
- *      MBF_HSLDEOIH : MBIO ID 9
+ *      MBF_HSLDEOIH : MBIO ID 71
  *
  * Author:	D. W. Caress
  * Date:	March 2, 1993
+ *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.2  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
