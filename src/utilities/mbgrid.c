@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.22 2003-08-28 18:36:49 caress Exp $
+ *    $Id: mbgrid.c,v 5.23 2003-11-25 00:54:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2003/08/28 18:36:49  caress
+ * Fixed problems with interpolating background data extracted with grdraster.
+ *
  * Revision 5.21  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -371,7 +374,7 @@ double mbgrid_erf();
 FILE	*outfp = stdout;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.22 2003-08-28 18:36:49 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.23 2003-11-25 00:54:44 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -447,8 +450,11 @@ main (int argc, char **argv)
 	int	check_time = MB_NO;
 	int	first_in_stays = MB_YES;
 	double	timediff = 300.0;
+	int	rformat;
 	char	ifile[MB_PATH_MAXLINE];
+	char	rfile[MB_PATH_MAXLINE];
 	char	ofile[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
 	char	plot_cmd[MB_COMMENT_MAXLINE];
 	int	plot_status;
 	
@@ -540,7 +546,7 @@ main (int argc, char **argv)
 	float	NaN;
 
 	/* other variables */
-	FILE	*dfp;
+	FILE	*dfp, *rfp;
 	int	i, j, k, ii, jj, iii, jjj, kkk, ir, n;
 	int	i1, i2, j1, j2;
 	double	r;
@@ -1247,16 +1253,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		sprintf(plot_cmd, "grdraster %d -R%f/%f/%f/%f | grep -v NaN",
 			grdrasterid,glonmin,glonmax,bounds[2],bounds[3]);
 		nbackground = 0;
-		if ((dfp = popen(plot_cmd,"r")) != NULL)
+		if ((rfp = popen(plot_cmd,"r")) != NULL)
 			{
 			/* loop over reading */
-			while (fscanf(dfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
+			while (fscanf(rfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
 				{
 				nbackground++;
 				}
-			pclose(dfp);
+			pclose(rfp);
 			}
-		if (nbackground > 0 && (dfp = popen(plot_cmd,"r")) != NULL)
+		if (nbackground > 0 && (rfp = popen(plot_cmd,"r")) != NULL)
 			{
 			/* allocate and initialize sgrid */
 			status = mb_malloc(verbose,3*nbackground*sizeof(float),&bdata,&error);
@@ -1274,7 +1280,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 			/* loop over reading */
 			nbackground = 0;
-			while (fscanf(dfp,"%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF)
+			while (fscanf(rfp,"%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF)
 				{
 				if (lonflip == -1 && tlon > 0.0)
 					tlon -= 360.0;
@@ -1292,7 +1298,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				bdata[nbackground*3+2] = (float) tvalue;
 				nbackground++;
 				}
-			pclose(dfp);
+			pclose(rfp);
 			}
 		else
 			{
@@ -1490,6 +1496,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
+		
+	/* open datalist file for list of all files that contribute to the grid */
+	strcpy(dfile,fileroot);
+	strcat(dfile,".mb-1");
+	if ((dfp = fopen(dfile,"w")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(outfp,"\nUnable to open datalist file: %s\n",
+			file);
+		}
 
 	/***** do footprint gridding *****/
 	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
@@ -1559,22 +1575,24 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		if (file_in_bounds == MB_YES)
 		    {
 		    /* check for "fast bathymetry" or "fbt" file */
+		    rformat = format;
+		    strcpy(rfile,file);
 		    if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
 			{
-			mb_get_fbt(verbose, file, &format, &error);
+			mb_get_fbt(verbose, rfile, &rformat, &error);
 			}
 		
 		    /* call mb_read_init() */
 		    if ((status = mb_read_init(
-			verbose,file,format,pings,lonflip,bounds,
+			verbose,rfile,rformat,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
 			&mbio_ptr,&btime_d,&etime_d,
 			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",file);
+			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",rfile);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
 			mb_memory_clear(verbose, &error);
@@ -1893,7 +1911,14 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			fprintf(outfp,"\n");
 		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
-				ndatafile,file);
+				ndatafile,rfile);
+				
+		/* add to datalist if data actually contributed */
+		if (ndatafile > 0 && dfp != NULL)
+			{
+			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
+			fflush(dfp);
+			}
 		} /* end if (format > 0) */
 
 		}
@@ -2003,22 +2028,24 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		if (file_in_bounds == MB_YES)
 		    {
 		    /* check for "fast bathymetry" or "fbt" file */
+		    rformat = format;
+		    strcpy(rfile,file);
 		    if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
 			{
-			mb_get_fbt(verbose, file, &format, &error);
+			mb_get_fbt(verbose, rfile, &rformat, &error);
 			}
 		
 		    /* call mb_read_init() */
 		    if ((status = mb_read_init(
-			verbose,file,format,pings,lonflip,bounds,
+			verbose,rfile,rformat,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
 			&mbio_ptr,&btime_d,&etime_d,
 			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",file);
+			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",rfile);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
 			mb_memory_clear(verbose, &error);
@@ -2477,14 +2504,18 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			fprintf(outfp,"\n");
 		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
-				ndatafile,file);
+				ndatafile,rfile);
+				
+		/* add to datalist if data actually contributed */
+		if (ndatafile > 0 && dfp != NULL)
+			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
 		} /* end if (format > 0) */
 
 		/* if format == 0 then input is lon,lat,values triples file */
 		else if (format == 0 && file[0] != '#')
 		{
 		/* open data file */
-		if ((dfp = fopen(file,"r")) == NULL)
+		if ((rfp = fopen(file,"r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp,"\nUnable to open lon,lat,value triples data file: %s\n",
@@ -2496,7 +2527,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 
 		/* loop over reading */
-		while (fscanf(dfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
+		while (fscanf(rfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
 			{
 			  /* reproject data positions if necessary */
 			  if (use_projection == MB_YES)
@@ -2587,7 +2618,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			    ndatafile++;
 			    }
 			}
-		fclose(dfp);
+		fclose(rfp);
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		if (verbose >= 2) 
@@ -2595,6 +2626,10 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		if (verbose > 0)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,file);
+				
+		/* add to datalist if data actually contributed */
+		if (ndatafile > 0 && dfp != NULL)
+			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
 		} /* end if (format == 0) */
 
 		}
@@ -2703,22 +2738,24 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		if (file_in_bounds == MB_YES)
 		    {
 		    /* check for "fast bathymetry" or "fbt" file */
+		    rformat = format;
+		    strcpy(rfile,file);
 		    if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
 			{
-			mb_get_fbt(verbose, file, &format, &error);
+			mb_get_fbt(verbose, rfile, &rformat, &error);
 			}
 		
 		    /* call mb_read_init() */
 		    if ((status = mb_read_init(
-			verbose,file,format,pings,lonflip,bounds,
+			verbose,rfile,rformat,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
 			&mbio_ptr,&btime_d,&etime_d,
 			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",file);
+			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",rfile);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
 			mb_memory_clear(verbose, &error);
@@ -3079,14 +3116,18 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			fprintf(outfp,"\n");
 		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
-				ndatafile,file);
+				ndatafile,rfile);
+				
+		/* add to datalist if data actually contributed */
+		if (ndatafile > 0 && dfp != NULL)
+			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
 		} /* end if (format > 0) */
 
 		/* if format == 0 then input is lon,lat,values triples file */
 		else if (format == 0 && file[0] != '#')
 		{
 		/* open data file */
-		if ((dfp = fopen(file,"r")) == NULL)
+		if ((rfp = fopen(file,"r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp,"\nUnable to open lon,lat,value triples data file: %s\n",
@@ -3098,7 +3139,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 
 		/* loop over reading */
-		while (fscanf(dfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
+		while (fscanf(rfp,"%lf %lf %lf",&tlon,&tlat,&tvalue) != EOF)
 			{
 			  /* reproject data positions if necessary */
 			  if (use_projection == MB_YES)
@@ -3160,7 +3201,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			      }
 			    }
 			}
-		fclose(dfp);
+		fclose(rfp);
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		if (verbose >= 2) 
@@ -3168,6 +3209,10 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		if (verbose > 0)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,file);
+				
+		/* add to datalist if data actually contributed */
+		if (ndatafile > 0 && dfp != NULL)
+			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
 		} /* end if (format == 0) */
 
 		}
@@ -3234,6 +3279,10 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 	/***** end of median filter gridding *****/
 	}
+				
+	/* close datalist if necessary */
+	if (dfp != NULL)
+		fclose(dfp);
 
 	/* if clip set do smooth interpolation */
 	if (clipmode != MBGRID_INTERP_NONE && clip > 0 && nbinset > 0)
