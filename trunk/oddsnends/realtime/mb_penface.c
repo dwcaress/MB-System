@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_penface.c	5/15/94
- *    $Id: mb_penface.c,v 4.3 1994-10-21 12:56:50 caress Exp $
+ *    $Id: mb_penface.c,v 4.4 1994-11-10 20:56:46 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  12:56:50  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/07/29  19:07:47  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * using unix seconds for time base.
@@ -62,7 +65,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_penface.c,v 4.3 1994-10-21 12:56:50 caress Exp $";
+  	static char rcs_id[]="$Id: mb_penface.c,v 4.4 1994-11-10 20:56:46 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -118,7 +121,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_penface.c,v 4.3 1994-10-21 12:56:50 caress Exp $";
+  	static char rcs_id[]="$Id: mb_penface.c,v 4.4 1994-11-10 20:56:46 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -225,7 +228,7 @@ int ipen;
 int setline(linewidth)
 int linewidth;
 {
-	eps_geo = inchtolon*0.02*linewidth;
+	eps_geo = inchtolon*0.002*linewidth;
         return;
 }
 /*--------------------------------------------------------------------*/
