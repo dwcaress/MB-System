@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *    $Id: mb_define.h,v 5.3 2001-04-30 05:14:10 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -124,6 +127,11 @@ typedef signed char	mb_s_char;
 #endif
 	
 /* MBIO core function prototypes */
+int mb_defaults(int verbose, int *format, int *pings,
+		int *lonflip, double bounds[4], 
+		int *btime_i, int *etime_i,
+		double *speedmin, double *timegap);
+int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject);
 int mb_format_register(int verbose, int *format, char *mbio_ptr, 
 		int *error);
 int mb_format_info(int verbose, int *format, int *system, 
