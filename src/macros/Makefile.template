@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.0 2003-07-27 20:52:57 caress Exp $
+#	$Id: Makefile.template,v 5.1 2004-07-27 19:58:11 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.0  2003/07/27 20:52:57  caress
+# Release 5.0.0
+#
 # Revision 4.14  2003/03/10 07:39:54  caress
 # Added mr1pr library
 #
@@ -91,7 +94,8 @@ all:	$(BINDIR)/mbm_xbt \
 	$(BINDIR)/mbm_grdtiff \
 	$(BINDIR)/mbm_utm \
 	$(BINDIR)/mbm_grd2geovrml \
-	$(BINDIR)/mbm_copy
+	$(BINDIR)/mbm_copy \
+	$(BINDIR)/mbm_route2mission
 
 ### make clean does nothing
 clean:
@@ -154,3 +158,6 @@ $(BINDIR)/mbm_grd2geovrml:	mbm_grd2geovrml.perl
 $(BINDIR)/mbm_copy:	mbm_copy.perl
 	cp mbm_copy.perl $(BINDIR)/mbm_copy
 	chmod 775 $(BINDIR)/mbm_copy
+$(BINDIR)/mbm_route2mission:	mbm_route2mission.perl
+	cp mbm_route2mission.perl $(BINDIR)/mbm_route2mission
+	chmod 775 $(BINDIR)/mbm_route2mission
