@@ -1,4 +1,4 @@
-.TH mbtide l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbtide l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbtide\fP - MBTIDE corrects swath sonar bathymetry data for tides.
 

@@ -1,4 +1,4 @@
-.TH mbnavedit l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbnavedit l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 

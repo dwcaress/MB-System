@@ -1,4 +1,4 @@
-.TH mbm_vrefcheck l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_vrefcheck l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_vrefcheck\fP - Macro to generate plot of crosstrack seafloor slope
 from a swath sonar file.  The noise in this time series largely reflects

@@ -1,4 +1,4 @@
-.TH mbcut l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbcut l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbcut\fP - Removes data in specified regions of a swath
 in swath sonar data.

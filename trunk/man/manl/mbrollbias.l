@@ -1,4 +1,4 @@
-.TH mbrollbias l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbrollbias l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbrollbias\fP - Assess roll bias of swath sonar sonar systems.
 
@@ -106,7 +106,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 4.9 1997-09-17 19:22:06 caress Exp $
+ Version $Id: mbrollbias.l,v 4.10 1998-10-05 19:47:23 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:

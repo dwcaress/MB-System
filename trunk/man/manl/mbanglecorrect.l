@@ -1,4 +1,4 @@
-.TH mbanglecorrect l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbanglecorrect l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbanglecorrect\fP - Apply a grazing angle correction to beam
 amplitude or sidescan data in swath sonar data.

@@ -1,4 +1,4 @@
-.TH mbclean l "16 September 1998" "MB-System 4.5" "MB-System 4.5"
+.TH mbclean l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbclean\fP - Identifies and flags bad beams in swath sonar bathymetry data.
 
@@ -249,7 +249,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.12 1998-10-05 19:19:24 caress Exp $
+ 	Version $Id: mbclean.l,v 4.13 1998-10-05 19:47:23 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

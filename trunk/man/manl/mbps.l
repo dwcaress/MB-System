@@ -1,4 +1,4 @@
-.TH MBPS l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH MBPS l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbps\fP - Generates a PostScript perspective plot of a piece of swath sonar data.
 

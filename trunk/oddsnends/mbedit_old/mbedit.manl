@@ -1,4 +1,4 @@
-.TH mbedit l "September 16, 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbedit l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
