@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	3.00	4/8/93
- *    $Id: mbedit.c,v 3.1 1993-05-14 23:28:56 sohara Exp $
+ *    $Id: mbedit.c,v 3.2 1993-08-17 00:28:52 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/05/14  23:28:56  sohara
+ * fixed rcs_id message
+ *
  * Revision 3.0  1993/04/22  18:49:44  dale
  * Initial version
  *
@@ -55,6 +58,7 @@
 struct mbedit_ping_struct 
 	{
 	int	id;
+	int	record;
 	int	time_i[6];
 	double	time_d;
 	double	navlon;
@@ -70,10 +74,10 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit.c,v 3.1 1993-05-14 23:28:56 sohara Exp $";
+static char rcs_id[] = "$Id: mbedit.c,v 3.2 1993-08-17 00:28:52 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
-static char usage_message[] = "hsbath [-Fformat -V -H -Ifile]";
+static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -95,6 +99,7 @@ int	beams_bath;
 int	beams_back;
 char	ifile[128];
 char	ofile[128];
+int	ofile_defined = MB_NO;
 char	*imbio_ptr;
 char	*ombio_ptr;
 
@@ -122,8 +127,8 @@ int	ocomment = 0;
 char	comment[256];
 
 /* buffer control variables */
-#define	MBEDIT_BUFFER_SIZE	MB_BUFFER_MAX
-/*#define	MBEDIT_BUFFER_SIZE	200*/
+/*#define	MBEDIT_BUFFER_SIZE	MB_BUFFER_MAX*/
+#define	MBEDIT_BUFFER_SIZE	1000
 int	file_open = MB_NO;
 char	*buff_ptr;
 int	buffer_size_default = MBEDIT_BUFFER_SIZE;
@@ -136,6 +141,7 @@ int	current = 0;
 int	current_id = 0;
 int	nload_total = 0;
 int	ndump_total = 0;
+char	last_ping[128];
 
 /* ping drawing control variables */
 #define	MBEDIT_MAX_PINGS	20
@@ -201,7 +207,7 @@ int	*startup_file;
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:O:o:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -222,6 +228,12 @@ int	*startup_file;
 			sscanf (optarg,"%s", ifile);
 			flag++;
 			fileflag++;
+			break;
+		case 'O':
+		case 'o':
+			sscanf (optarg,"%s", ofile);
+			ofile_defined = MB_YES;
+			flag++;
 			break;
 		case '?':
 			errflg++;
@@ -280,9 +292,10 @@ int	*startup_file;
 	/* if file specified then use it */
 	if (fileflag > 0)
 		{
-		status = mbedit_action_open(ifile,format,buffer_size_default,
+		status = mbedit_action_open(ifile,format,hold_size_default,
+				buffer_size_default,
 				xscale,yscale,x_interval,y_interval,plot_size,
-				&nload,&nbuff,&nlist,&current_id,&nplot);
+				&ndump,&nload,&nbuff,&nlist,&current_id,&nplot);
 		if (status = MB_SUCCESS)
 			*startup_file = MB_YES;
 		}
@@ -420,17 +433,19 @@ int	*yntrvl;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_open(file,form,buffer_size,
+int mbedit_action_open(file,form,hold_size,buffer_size,
 	xscl,yscl,xntrvl,yntrvl,plt_size,
-	nloaded,nbuffer,ngood,icurrent,nplt)
+	ndumped,nloaded,nbuffer,ngood,icurrent,nplt)
 char	*file;
 int	form;
+int	hold_size;
 int	buffer_size;
 int	xscl;
 int	yscl;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
+int	*ndumped;
 int	*nloaded;
 int	*nbuffer;
 int	*ngood;
@@ -449,6 +464,7 @@ int	*nplt;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file:        %s\n",file);
 		fprintf(stderr,"dbg2       format:      %d\n",form);
+		fprintf(stderr,"dbg2       hold_size:   %d\n",hold_size);
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
 		fprintf(stderr,"dbg2       xscale:      %d\n",xscl);
 		fprintf(stderr,"dbg2       yscale:      %d\n",yscl);
@@ -472,6 +488,17 @@ int	*nplt;
 		status = mbedit_load_data(buffer_size,nloaded,nbuffer,
 			ngood,icurrent);
 
+	/* keep going until good data or end of file found */
+	while (*nloaded > 0 && *ngood == 0)
+		{
+		/* dump the buffer */
+		status = mbedit_dump_data(hold_size,ndumped,nbuffer);
+
+		/* load the buffer */
+		status = mbedit_load_data(buffer_size,nloaded,nbuffer,
+			ngood,icurrent);
+		}
+
 	/* set up plotting */
 	if (ngood > 0)
 		{
@@ -491,6 +518,7 @@ int	*nplt;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       nloaded:     %d\n",*ndumped);
 		fprintf(stderr,"dbg2       nloaded:     %d\n",*nloaded);
 		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
 		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
@@ -553,12 +581,17 @@ int	*nplt;
 	if (file_open == MB_YES)
 		{
 
-		/* dump the buffer */
-		status = mbedit_dump_data(hold_size,ndumped,nbuffer);
+		/* keep going until good data or end of file found */
+		do
+			{
+			/* dump the buffer */
+			status = mbedit_dump_data(hold_size,ndumped,nbuffer);
 
-		/* load the buffer */
-		status = mbedit_load_data(buffer_size,nloaded,nbuffer,
-			ngood,icurrent);
+			/* load the buffer */
+			status = mbedit_load_data(buffer_size,nloaded,nbuffer,
+				ngood,icurrent);
+			}
+		while (*nloaded > 0 && *ngood == 0);
 
 		/* if end of file reached then 
 			dump last buffer and close file */
@@ -688,7 +721,10 @@ int	*icurrent;
 
 	/* let the world know... */
 	if (verbose >= 1)
+		{
+		fprintf(stderr,"\nLast ping viewed: %s\n",last_ping);
 		fprintf(stderr,"\n>> End Done Event.\n");
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1586,6 +1622,49 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbedit_set_output_file(output_file)
+char	*output_file;
+{
+	/* local variables */
+	char	*function_name = "mbedit_set_output_file";
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       output file: %s\n",output_file);
+		}
+
+	/* copy output file name */
+	if (output_file != NULL)
+		{
+		strcpy(ofile,output_file);
+		ofile_defined = MB_YES;
+		}
+	else
+		{
+		ofile_defined = MB_NO;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbedit_open_file(file,form)
 char	*file;
 int	form;
@@ -1593,6 +1672,8 @@ int	form;
 	/* local variables */
 	char	*function_name = "mbedit_open_file";
 	int	status = MB_SUCCESS;
+	char	*suffix;
+	int	len;
 	int	i;
 
 	/* time, user, host variables */
@@ -1609,10 +1690,26 @@ int	form;
 		fprintf(stderr,"dbg2       format:      %d\n",form);
 		}
 
-	/* copy values to global variables */
+	/* get filenames */
 	strcpy(ifile,file);
-	strcpy(ofile,ifile);
-	strcat(ofile,".ed");
+	if (ofile_defined == MB_NO)
+		{
+		len = 0;
+		if ((suffix = strstr(ifile,".mb")) != NULL)
+			len = strlen(suffix);
+		if (len >= 4 && len <= 5)
+			{
+			strncpy(ofile,"\0",126);
+			strncpy(ofile,ifile,strlen(ifile)-len);
+			strcat(ofile,"e");
+			strcat(ofile,suffix);
+			}
+		else
+			{
+			strcpy(ofile,ifile);
+			strcat(ofile,".ed");
+			}
+		}
 	format = form;
 
 	/* initialize reading the input multibeam file */
@@ -1801,6 +1898,7 @@ int mbedit_close_file()
 	status = mb_buffer_close(verbose,buff_ptr,&error);
 	status = mb_close(verbose,imbio_ptr,&error);
 	status = mb_close(verbose,ombio_ptr,&error);
+	ofile_defined = MB_NO;
 
 	/* deallocate memory for data arrays */
 	mb_free(verbose,bath,&error);
@@ -1826,8 +1924,13 @@ int mbedit_close_file()
 		{
 		fprintf(stderr,"\nMultibeam Input File <%s> closed\n",ifile);
 		fprintf(stderr,"Multibeam Output File <%s> closed\n",ofile);
+		fprintf(stderr,"%d data records loaded\n",nload_total);
+		fprintf(stderr,"%d data records dumped\n",ndump_total);
+		
 		}
 	file_open = MB_NO;
+	nload_total = 0;
+	ndump_total = 0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1870,6 +1973,7 @@ int	*nbuffer;
 			hold_size,&ndump,&nbuff,&error);
 		}
 	*ndumped = ndump;
+	ndump_total += ndump;
 
 	/* reset current data pointer */
 	if (ndump > 0)
@@ -1935,10 +2039,12 @@ int	*icurrent;
 			&nload,&nbuff,&error);
 	*nbuffer = nbuff;
 	*nloaded = nload;
+	nload_total += nload;
 
 	/* set up index of bathymetry pings */
 	nlist = 0;
 	start = 0;
+	list[0] = 0;
 	do
 		{
 		status = mb_buffer_get_next_data(verbose,
@@ -1960,8 +2066,9 @@ int	*icurrent;
 				{
 				fprintf(stderr,"\ndbg5  Next good data found in function <%s>:\n",
 					function_name);
-				fprintf(stderr,"dbg5       list[%d]: %d\n",
-					nlist-1,list[nlist-1]);
+				fprintf(stderr,"dbg5       list[%d]: %d %d\n",
+					nlist-1,list[nlist-1],
+					list[nlist-1] + ndump_total);
 				}
 			}
 		}
@@ -1975,8 +2082,8 @@ int	*icurrent;
 		if (list[i] <= current)
 			current_id = i;
 		}
-	current = list[current_id];
 	*icurrent = current_id;
+	current = list[current_id];
 
 	/* print out information */
 	if (verbose >= 1)
@@ -1985,8 +2092,12 @@ int	*icurrent;
 			*nloaded,ifile);
 		fprintf(stderr,"%d data records now in buffer\n",*nbuffer);
 		fprintf(stderr,"%d editable survey data records now in buffer\n",*ngood);
-		fprintf(stderr,"Current data record index: %d\n",current_id);
-		fprintf(stderr,"Current data record:       %d\n",*icurrent);
+		fprintf(stderr,"Current data record index:  %d\n",
+			current_id);
+		fprintf(stderr,"Current data record:        %d\n",
+			list[current_id]);
+		fprintf(stderr,"Current global data record: %d\n",
+			list[current_id] + ndump_total);
 		}
 
 	/* print output debug statements */
@@ -2098,7 +2209,7 @@ int	*nplt;
 	/* get data into ping arrays and find mean depth value */
 	bathsum = 0.0;
 	nbathsum = 0;
-	ii = current_id;
+	ii = current;
 	for (i=0;i<nplot;i++)
 		{
 		status = mb_buffer_get_next_data(verbose,
@@ -2111,6 +2222,7 @@ int	*nplt;
 			&error);
 		if (status == MB_SUCCESS)
 			{
+			ping[i].record = ping[i].id + ndump_total;
 			for (j=0;j<beams_bath;j++)
 				{
 				if (ping[i].bath[j] > 0)
@@ -2132,8 +2244,8 @@ int	*nplt;
 		fprintf(stderr,"\n%d data records set for plotting (%d desired)\n",
 			nplot,plot_size);
 		for (i=0;i<nplot;i++)
-			fprintf(stderr,"%d %d  %d/%d/%d %2.2d:%2.2d:%2.2d  %d\n",
-				i,ping[i].id,
+			fprintf(stderr,"%4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d  %4d\n",
+				i,ping[i].id,ping[i].record,
 				ping[i].time_i[1],ping[i].time_i[2],
 				ping[i].time_i[0],ping[i].time_i[3],
 				ping[i].time_i[4],ping[i].time_i[5],
@@ -2214,7 +2326,7 @@ int	*nplt;
 		/* set and draw info string */
 		y = ymax - dy/2 - i*dy;
 		sprintf(string,"%d  %d/%d/%d %2.2d:%2.2d:%2.2d  %d",
-			ping[i].id,
+			ping[i].record,
 			ping[i].time_i[1],ping[i].time_i[2],
 			ping[i].time_i[0],ping[i].time_i[3],
 			ping[i].time_i[4],ping[i].time_i[5],
@@ -2222,6 +2334,9 @@ int	*nplt;
 		xg_justify(mbedit_xgid,string,&swidth,&sascent,&sdescent);
 		xg_drawstring(mbedit_xgid,5*margin-swidth-5,y,
 			string,BLACK_ALL);
+
+		/* save string to show last ping seen at end of program */
+		strcpy(last_ping,string);
 
 		/* set beam plotting locations */
 		for (j=0;j<beams_bath;j++)
@@ -2298,12 +2413,12 @@ int	jbeam;
 			xg_fillrectangle(mbedit_xgid, 
 				ping[iping].bath_x[jbeam]-2, 
 				ping[iping].bath_y[jbeam]-2, 4, 4, 
-				OVERLAY2_DRAW);
+				OVERLAY1_DRAW);
 		else if (ping[iping].bath[jbeam] < 0)
 			xg_drawrectangle(mbedit_xgid, 
 				ping[iping].bath_x[jbeam]-2, 
 				ping[iping].bath_y[jbeam]-2, 4, 4, 
-				OVERLAY1_DRAW);
+				OVERLAY2_DRAW);
 		}
 
 	/* print output debug statements */
@@ -2354,7 +2469,7 @@ int	iping;
 			xg_drawline(mbedit_xgid,xold,yold,
 					ping[iping].bath_x[j],
 					ping[iping].bath_y[j],
-					OVERLAY2_DRAW);
+					OVERLAY1_DRAW);
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];
 			}
@@ -2401,12 +2516,12 @@ int	jbeam;
 			xg_fillrectangle(mbedit_xgid, 
 				ping[iping].bath_x[jbeam]-2, 
 				ping[iping].bath_y[jbeam]-2, 4, 4, 
-				OVERLAY2_CLEAR);
+				OVERLAY1_CLEAR);
 		else if (ping[iping].bath[jbeam] < 0)
 			xg_drawrectangle(mbedit_xgid, 
 				ping[iping].bath_x[jbeam]-2, 
 				ping[iping].bath_y[jbeam]-2, 4, 4, 
-				OVERLAY1_CLEAR);
+				OVERLAY2_CLEAR);
 		}
 
 	/* print output debug statements */
@@ -2457,7 +2572,7 @@ int	iping;
 			xg_drawline(mbedit_xgid,xold,yold,
 					ping[iping].bath_x[j],
 					ping[iping].bath_y[j],
-					OVERLAY2_CLEAR);
+					OVERLAY1_CLEAR);
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];
 			}
