@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.0 2004-05-21 23:50:44 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.1 2004-06-18 05:20:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/05/21 23:50:44  caress
+ * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
+ *
  *
  *
  */
@@ -36,7 +39,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.0 2004-05-21 23:50:44 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.1 2004-06-18 05:20:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -44,7 +47,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBextractsegy";
 	static char help_message[] =  "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
-	static char usage_message[] = "mbextractsegy [-Fformat -Ifile -Dtype -H -Osegyfile -V]";
+	static char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -H -Osegyfile -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -81,15 +84,14 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-
-	/* output format list controls */
-	int	type;
+	double	timeshift = 0.0;
 
 	/* MBIO read values */
 	void	*mbio_ptr = NULL;
 	void	*store_ptr = NULL;
 	int	kind;
 	int	time_i[7];
+	int	time_j[5];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -115,8 +117,8 @@ main (int argc, char **argv)
 	
 	/* segy data */
 	struct mb_segyasciiheader_struct segyasciiheader;
-	struct mb_segytapeheader_struct segytapeheader;
-	struct mb_segyheader_struct segyheader;
+	struct mb_segyfileheader_struct segyfileheader;
+	struct mb_segytraceheader_struct segytraceheader;
 	int	segydata_alloc = 0;
 	float	*segydata = NULL;
 	int	buffer_alloc = 0;
@@ -126,7 +128,9 @@ main (int argc, char **argv)
 	int	read_data;
 	double	distmin;
 	int	found;
-	int	nread, first;
+	int	nread;
+	int	nwrite;
+	int	first;
 	int	index;
 	int	i, j, k;
 
@@ -141,39 +145,38 @@ main (int argc, char **argv)
 	for (j=0;j<40;j++)
 		for (i=0;i<80;i++)
 			segyasciiheader.line[j][i] = 0;
-	segytapeheader.jobid = 0;
-	segytapeheader.line = 0;
-	segytapeheader.reel = 0;
-	segytapeheader.channels = 0;
-	segytapeheader.aux_channels = 0;
-	segytapeheader.sample_interval = 0;
-	segytapeheader.sample_interval_org = 0;
-	segytapeheader.number_samples = 0;
-	segytapeheader.number_samples_org = 0;
-	segytapeheader.format = 5;
-	segytapeheader.cdp_fold = 0;
-	segytapeheader.trace_sort = 0;
-	segytapeheader.vertical_sum = 0;
-	segytapeheader.sweep_start = 0;
-	segytapeheader.sweep_end = 0;
-	segytapeheader.sweep_length = 0;
-	segytapeheader.sweep_type = 0;
-	segytapeheader.sweep_trace = 0;
-	segytapeheader.sweep_taper_start = 0;
-	segytapeheader.sweep_taper_end = 0;
-	segytapeheader.sweep_taper = 0;
-	segytapeheader.correlated = 0;
-	segytapeheader.binary_gain = 0;
-	segytapeheader.amplitude = 0;
-	segytapeheader.units = 0;
-	segytapeheader.impulse_polarity = 0;
-	segytapeheader.vibrate_polarity = 0;
+	segyfileheader.jobid = 0;
+	segyfileheader.line = 0;
+	segyfileheader.reel = 0;
+	segyfileheader.channels = 0;
+	segyfileheader.aux_channels = 0;
+	segyfileheader.sample_interval = 0;
+	segyfileheader.sample_interval_org = 0;
+	segyfileheader.number_samples = 0;
+	segyfileheader.number_samples_org = 0;
+	segyfileheader.format = 5;
+	segyfileheader.cdp_fold = 0;
+	segyfileheader.trace_sort = 0;
+	segyfileheader.vertical_sum = 0;
+	segyfileheader.sweep_start = 0;
+	segyfileheader.sweep_end = 0;
+	segyfileheader.sweep_length = 0;
+	segyfileheader.sweep_type = 0;
+	segyfileheader.sweep_trace = 0;
+	segyfileheader.sweep_taper_start = 0;
+	segyfileheader.sweep_taper_end = 0;
+	segyfileheader.sweep_taper = 0;
+	segyfileheader.correlated = 0;
+	segyfileheader.binary_gain = 0;
+	segyfileheader.amplitude = 0;
+	segyfileheader.units = 0;
+	segyfileheader.impulse_polarity = 0;
+	segyfileheader.vibrate_polarity = 0;
 	for (i=0;i<340;i++)
-		segytapeheader.extra[i] = 0;
-	
+		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:F:f:I:i:O:o:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:O:o:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -184,9 +187,20 @@ main (int argc, char **argv)
 		case 'v':
 			verbose++;
 			break;
-		case 'D':
-		case 'd':
-			sscanf (optarg,"%d", &type);
+		case 'B':
+		case 'b':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&btime_i[0],&btime_i[1],&btime_i[2],
+				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
+			flag++;
+			break;
+		case 'E':
+		case 'e':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&etime_i[0],&etime_i[1],&etime_i[2],
+				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'F':
@@ -203,6 +217,11 @@ main (int argc, char **argv)
 		case 'o':
 			sscanf (optarg,"%s", output_file);
 			output_file_set = MB_YES;
+			flag++;
+			break;
+		case 'T':
+		case 't':
+			sscanf (optarg,"%lf", &timeshift);
 			flag++;
 			break;
 		case '?':
@@ -259,6 +278,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
+		fprintf(stderr,"dbg2       timeshift:      %f\n",timeshift);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
 		}
 
@@ -368,7 +388,8 @@ main (int argc, char **argv)
 				fclose(ofp);
 				}
 				
-			/* open the new file and then write the ascii and tape headers */
+			/* open the new file */
+			nwrite = 0;
 			if ((ofp = fopen(output_file, "w")) == NULL) 
 				{
 				status = MB_FAILURE;
@@ -407,25 +428,25 @@ main (int argc, char **argv)
 				|| kind == MB_DATA_SUBBOTTOM_SUBBOTTOM))
 		    {
 		    /* extract the header */
-		    status = mb_extract_segyheader(verbose,mbio_ptr,store_ptr,&kind,
-				    (void *)&segyheader,&error);
+		    status = mb_extract_segytraceheader(verbose,mbio_ptr,store_ptr,&kind,
+				    (void *)&segytraceheader,&error);
 
 		    /* allocate the required memory */
 		    if (status == MB_SUCCESS 
-		    	&& segyheader.nsamps > segydata_alloc)
+		    	&& segytraceheader.nsamps > segydata_alloc)
 			{
-			status = mb_malloc(verbose, segyheader.nsamps * sizeof(float),
+			status = mb_malloc(verbose, segytraceheader.nsamps * sizeof(float),
 						(char **)&segydata, &error);
 			if (status == MB_SUCCESS)
-				segydata_alloc = segyheader.nsamps;
+				segydata_alloc = segytraceheader.nsamps;
 			else
 				segydata_alloc = 0;
 			}
 		    if (status == MB_SUCCESS 
-		    	&& (buffer_alloc < MB_SEGY_HEADER_LENGTH
-				|| buffer_alloc < segyheader.nsamps * sizeof(float)))
+		    	&& (buffer_alloc < MB_SEGY_TRACEHEADER_LENGTH
+				|| buffer_alloc < segytraceheader.nsamps * sizeof(float)))
 			{
-			buffer_alloc = MAX(MB_SEGY_HEADER_LENGTH, segyheader.nsamps * sizeof(float));
+			buffer_alloc = MAX(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * sizeof(float));
 			status = mb_malloc(verbose, buffer_alloc, (char **)&buffer, &error);
 			if (status != MB_SUCCESS)
 				buffer_alloc = 0;
@@ -434,26 +455,46 @@ main (int argc, char **argv)
 		    /* extract the data */
 		    if (status == MB_SUCCESS)
 			status = mb_extract_segy(verbose,mbio_ptr,store_ptr,&kind,
-				    (void *)&segyheader,segydata,&error);
+				    (void *)&segytraceheader,segydata,&error);
 				    
-		    /* write tapeheader if needed */
-		    if (status == MB_SUCCESS && nread == 0)
+		    /* apply time shift if needed */
+		    if (status == MB_SUCCESS && timeshift != 0.0)
 		    	{
-			segytapeheader.format = 5;
-			segytapeheader.channels = 1;
-			segytapeheader.aux_channels = 0;
-			segytapeheader.sample_interval = segyheader.si_micros;
-			segytapeheader.sample_interval_org = segyheader.si_micros;
-			segytapeheader.number_samples = segyheader.nsamps;
-			segytapeheader.number_samples_org = segyheader.nsamps;
-			if (fwrite(&segyasciiheader,1,sizeof(struct mb_segyasciiheader_struct),ofp) 
-						!= sizeof(struct mb_segyasciiheader_struct))
+			time_j[0] = segytraceheader.year;
+			time_j[1] = segytraceheader.day_of_yr;
+			time_j[2] = 60 * segytraceheader.hour + segytraceheader.min;
+			time_j[3] = segytraceheader.sec;
+			time_j[4] = 1000 * segytraceheader.mils;
+			mb_get_itime(verbose,time_j,time_i);
+			mb_get_time(verbose,time_i,&time_d);
+			time_d += timeshift;
+			mb_get_date(verbose,time_d,time_i);
+			mb_get_jtime(verbose,time_i,time_j);
+			segytraceheader.year = time_i[0];
+			segytraceheader.day_of_yr = time_j[1];
+			segytraceheader.hour = time_i[3];
+			segytraceheader.min = time_i[4];
+			segytraceheader.sec = time_i[5];
+			}
+				    
+		    /* write fileheader if needed */
+		    if (status == MB_SUCCESS && nwrite == 0)
+		    	{
+			segyfileheader.format = 5;
+			segyfileheader.channels = 1;
+			segyfileheader.aux_channels = 0;
+			segyfileheader.sample_interval = segytraceheader.si_micros;
+			segyfileheader.sample_interval_org = segytraceheader.si_micros;
+			segyfileheader.number_samples = segytraceheader.nsamps;
+			segyfileheader.number_samples_org = segytraceheader.nsamps;
+			if (fwrite(&segyasciiheader, 1, MB_SEGY_ASCIIHEADER_LENGTH, ofp) 
+						!= MB_SEGY_ASCIIHEADER_LENGTH)
 				{
 				status = MB_FAILURE;
 				error = MB_ERROR_WRITE_FAIL;
 				}
-			else if (fwrite(&segytapeheader,1,sizeof(struct mb_segytapeheader_struct),ofp) 
-						!= sizeof(struct mb_segytapeheader_struct))
+			else if (fwrite(&segyfileheader, 1, MB_SEGY_FILEHEADER_LENGTH, ofp) 
+						!= MB_SEGY_FILEHEADER_LENGTH)
 				{
 				status = MB_FAILURE;
 				error = MB_ERROR_WRITE_FAIL;
@@ -465,86 +506,86 @@ main (int argc, char **argv)
 		    	{
 			nread++;
 			fprintf(stderr,"file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d\n",
-				file,nread,segyheader.shot_num,
-				segyheader.year,segyheader.day_of_yr,
-				segyheader.hour,segyheader.min,segyheader.sec,segyheader.mils,
-				segyheader.nsamps,segyheader.si_micros);
+				file,nread,segytraceheader.shot_num,
+				segytraceheader.year,segytraceheader.day_of_yr,
+				segytraceheader.hour,segytraceheader.min,segytraceheader.sec,segytraceheader.mils,
+				segytraceheader.nsamps,segytraceheader.si_micros);
 			
 			/* insert segy header data into output buffer */
 			index = 0;
-			mb_put_binary_int(MB_NO, segyheader.seq_num, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.seq_reel, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.shot_num, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.shot_tr, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.espn, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.rp_num, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.rp_tr, (void *) &buffer[index]); index += 4;
-			mb_put_binary_short(MB_NO, segyheader.trc_id, (void *) &buffer[index]); index += 2;
-			mb_put_binary_short(MB_NO, segyheader.num_vstk, (void *) &buffer[index]); index += 2;
-			mb_put_binary_short(MB_NO, segyheader.cdp_fold, (void *) &buffer[index]); index += 2;
-			mb_put_binary_short(MB_NO, segyheader.use, (void *) &buffer[index]); index += 2;
-			mb_put_binary_int(MB_NO, segyheader.range, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.grp_elev, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.src_elev, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.src_depth, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.grp_datum, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.src_datum, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.src_wbd, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.grp_wbd, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_short(MB_NO, segyheader.elev_scalar, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.coord_scalar, (void *) &buffer[index]); index += 2;
-			mb_put_binary_int(MB_NO, segyheader.src_long, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.src_lat, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.grp_long, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.grp_lat, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_short(MB_NO, segyheader.coord_units, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.wvel, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.sbvel, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.src_up_vel, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.grp_up_vel, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.src_static, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.grp_static, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.tot_static, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.laga, (void *) &buffer[index]); index += 2;
-			mb_put_binary_int(MB_NO, segyheader.delay_mils, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_short(MB_NO, segyheader.smute_mils, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.emute_mils, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.nsamps, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.si_micros, (void *) &buffer[index]); index += 2;
+			mb_put_binary_int(MB_NO, segytraceheader.seq_num, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.seq_reel, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.shot_num, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.shot_tr, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.espn, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.rp_num, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.rp_tr, (void *) &buffer[index]); index += 4;
+			mb_put_binary_short(MB_NO, segytraceheader.trc_id, (void *) &buffer[index]); index += 2;
+			mb_put_binary_short(MB_NO, segytraceheader.num_vstk, (void *) &buffer[index]); index += 2;
+			mb_put_binary_short(MB_NO, segytraceheader.cdp_fold, (void *) &buffer[index]); index += 2;
+			mb_put_binary_short(MB_NO, segytraceheader.use, (void *) &buffer[index]); index += 2;
+			mb_put_binary_int(MB_NO, segytraceheader.range, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.grp_elev, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.src_elev, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.src_depth, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.grp_datum, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.src_datum, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.src_wbd, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.grp_wbd, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_short(MB_NO, segytraceheader.elev_scalar, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.coord_scalar, (void *) &buffer[index]); index += 2;
+			mb_put_binary_int(MB_NO, segytraceheader.src_long, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.src_lat, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.grp_long, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.grp_lat, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_short(MB_NO, segytraceheader.coord_units, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.wvel, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.sbvel, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.src_up_vel, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.grp_up_vel, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.src_static, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.grp_static, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.tot_static, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.laga, (void *) &buffer[index]); index += 2;
+			mb_put_binary_int(MB_NO, segytraceheader.delay_mils, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_short(MB_NO, segytraceheader.smute_mils, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.emute_mils, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.nsamps, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.si_micros, (void *) &buffer[index]); index += 2;
 			for (i=0;i<19;i++)
 				{
-        			mb_put_binary_short(MB_NO, segyheader.other_1[i], (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.other_1[i], (void *) &buffer[index]); index += 2;
 				}
-        		mb_put_binary_short(MB_NO, segyheader.year, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.day_of_yr, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.hour, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.min, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.sec, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.mils, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segyheader.tr_weight, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.year, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.day_of_yr, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.hour, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.min, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.sec, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.mils, (void *) &buffer[index]); index += 2;
+        		mb_put_binary_short(MB_NO, segytraceheader.tr_weight, (void *) &buffer[index]); index += 2;
 			for (i=0;i<5;i++)
 				{
-        			mb_put_binary_short(MB_NO, segyheader.other_2[i], (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.other_2[i], (void *) &buffer[index]); index += 2;
 				}
-			mb_put_binary_float(MB_NO, segyheader.delay, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.smute_sec, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.emute_sec, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.si_secs, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.wbt_secs, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segyheader.end_of_rp, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy1, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy2, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy3, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy4, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy5, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy6, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy7, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy8, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segyheader.dummy9, (void *) &buffer[index]); index += 4;
+			mb_put_binary_float(MB_NO, segytraceheader.delay, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.smute_sec, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.emute_sec, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.si_secs, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.wbt_secs, (void *) &buffer[index]); index += 4;
+			mb_put_binary_int(MB_NO, segytraceheader.end_of_rp, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy1, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy2, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy3, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy4, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy5, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy6, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy7, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy8, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.dummy9, (void *) &buffer[index]); index += 4;
 
 			/* write out segy header */
-			if (fwrite(buffer,1,MB_SEGY_HEADER_LENGTH,ofp) 
-						!= MB_SEGY_HEADER_LENGTH)
+			if (fwrite(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,ofp) 
+						!= MB_SEGY_TRACEHEADER_LENGTH)
 				{
 				status = MB_FAILURE;
 				error = MB_ERROR_WRITE_FAIL;
@@ -552,15 +593,16 @@ main (int argc, char **argv)
 			
 			/* insert segy data into output buffer */
 			index = 0;
-			for (i=0;i<segyheader.nsamps;i++)
+			for (i=0;i<segytraceheader.nsamps;i++)
 				{
         			mb_put_binary_float(MB_NO, segydata[i], (void *) &buffer[index]); index += 4;
 				}
 
 			/* write out data */
+			nwrite++;
 			if (status == MB_SUCCESS
-				&& fwrite(buffer, 1, segyheader.nsamps * sizeof(float), ofp) 
-						!= segyheader.nsamps * sizeof(float))
+				&& fwrite(buffer, 1, segytraceheader.nsamps * sizeof(float), ofp) 
+						!= segytraceheader.nsamps * sizeof(float))
 				{
 				status = MB_FAILURE;
 				error = MB_ERROR_WRITE_FAIL;
@@ -568,13 +610,6 @@ main (int argc, char **argv)
 			
 			}
 		    }
-
-		/* increment counter */
-		if (error <= MB_ERROR_NO_ERROR 
-			&& kind == MB_DATA_DATA)
-			{
-			nread++;
-			}
 
 		/* print debug statements */
 		if (verbose >= 2)
