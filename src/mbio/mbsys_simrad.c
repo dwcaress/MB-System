@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.10 1996-08-05 15:21:58 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.11 1996-08-26 18:33:50 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -42,6 +42,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.9  1996/07/26  21:06:00  caress
  * Version after first cut of handling em12s and em121 data.
  *
@@ -99,7 +102,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.10 1996-08-05 15:21:58 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.11 1996-08-26 18:33:50 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -233,7 +236,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.10 1996-08-05 15:21:58 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.11 1996-08-26 18:33:50 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -415,7 +418,7 @@ int	*error;
 	struct mbsys_simrad_survey_struct *ping;
 	int	ntime_i[7];
 	double	ntime_d;
-	signed char *beam_ss;
+	char	*beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;
@@ -1134,7 +1137,7 @@ int	*error;
 	struct mbsys_simrad_survey_struct *ping;
 	int	ntime_i[7];
 	double	ntime_d;
-	signed char *beam_ss;
+	char	*beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;

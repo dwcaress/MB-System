@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12sraw.c	7/8/96
- *	$Id: mbr_em12sraw.c,v 4.1 1996-08-05 15:21:58 caress Exp $
+ *	$Id: mbr_em12sraw.c,v 4.2 1996-08-26 18:33:50 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.0  1996/07/26  21:07:59  caress
  * Initial version.
  *
@@ -50,7 +53,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em12sraw.c,v 4.1 1996-08-05 15:21:58 caress Exp $";
+	static char res_id[]="$Id: mbr_em12sraw.c,v 4.2 1996-08-26 18:33:50 caress Exp $";
 	char	*function_name = "mbr_alm_em12sraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -312,8 +315,8 @@ int	*error;
 	struct mbf_em12sraw_struct *data;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
-	signed char *data_ss;
-	signed char *store_ss;
+	char	*data_ss;
+	char	*store_ss;
 	short int *data_ssp;
 	short int *store_ssp;
 	int	ntime_i[7];
@@ -932,8 +935,8 @@ int	*error;
 	int	time_j[5];
 	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
 	int	iss;
-	signed char *data_ss;
-	signed char *store_ss;
+	char	*data_ss;
+	char	*store_ss;
 	short int *data_ssp;
 	short int *store_ssp;
 	int	i, j;
@@ -2261,7 +2264,7 @@ int	*error;
 	int	datagram;
 	int	num_beams;
 	int	beamlist[MBF_EM12SRAW_MAXBEAMS];
-	signed char *beam_ss;
+	char	*beam_ss;
 	short int *beam_ssp;
 	int	ioffset;
 	int	i, j;
@@ -3465,7 +3468,7 @@ int	*error;
 	int	datagram_end[MBF_EM12SRAW_MAXBEAMS+1];
 	int	datagram_size[MBF_EM12SRAW_MAXBEAMS+1];
 	int	new_datagram_size;
-	signed char *beam_ss;
+	char	*beam_ss;
 	short int *beam_ssp;
 	int	ioffset;
 	int	odatagram, obeam;
