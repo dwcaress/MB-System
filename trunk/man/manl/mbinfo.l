@@ -1,9 +1,9 @@
-.TH mbinfo l "22 November 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbinfo l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 

@@ -1,9 +1,9 @@
-.TH mbhistogram l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbhistogram l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbhistogram\fP - Generate a histogram of bathymetry, amplitude, or sidescan values.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbhistogram\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc\fP 

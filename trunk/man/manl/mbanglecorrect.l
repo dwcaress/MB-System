@@ -1,16 +1,16 @@
-.TH mbanglecorrect l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbanglecorrect l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbanglecorrect\fP - Apply a grazing angle correction to beam
 amplitude or sidescan data.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbanglecorrect\fP [\fB-A\fIkind/scale\fP \fB-B\fIyr/mo/da/hr/mn/sc 
 \fB-C\fP \fB-D\fImode/length\fP \fB-E\fIyr/mo/da/hr/mn/sc 
 \fB-F\fIformat\fP \fB-G\fI\fP \fB-I\fIinfile\fP  
-\fB-M\fInsmooth\fP \fB-N\fInangle/anglemax\fP
+\fB-K\fP \fB-M\fInsmooth\fP \fB-N\fInangle/anglemax\fP
 \fB-O\fIoutfile\fP \fB-R\fIwest/east/south/north\fP 
 \fB-S\fIcorrectionfile\fP 
 \fB-Z\fIdepth\fP \fB-V -H\fP]
@@ -131,6 +131,13 @@ This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+.TP
+.B \fB-K\fP
+This option causes the correction to be made by subtracting
+the modeled value from the observed and then adding the \fIscale\fP 
+value defined with the \fB-A\fP option. The "subtraction" mode
+of correction is appropriate for log scaled data (e.g. amplitude
+or backscatter values reported in dB).
 .TP
 .B \fB-M\fInsmooth\fP
 Causes the bathymetry to be smoothed prior to the calculation

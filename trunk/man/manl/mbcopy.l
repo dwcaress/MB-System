@@ -1,9 +1,9 @@
-.TH mbcopy l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbcopy l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbcopy\fP - Copy multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbcopy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcommentfile\fP 

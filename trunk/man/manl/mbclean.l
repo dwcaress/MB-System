@@ -1,9 +1,9 @@
-.TH mbclean l "27 December 1995" "MB-System 4.3" "MB-System 4.3"
+.TH mbclean l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
 .SH NAME
 \fBmbclean\fP - Identifies and flags bad beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.3
+Version 4.4
 
 .SH SYNOPSIS
 \fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
@@ -189,7 +189,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.7 1996-03-01 22:37:24 caress Exp $
+ 	Version $Id: mbclean.l,v 4.8 1996-08-20 20:01:44 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer
