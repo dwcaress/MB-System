@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.6 1995-01-10 17:34:16 caress Exp $
+ *    $Id: mb_format.h,v 4.7 1995-02-17 22:22:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/01/10  17:34:16  caress
+ * Added fore-aft beamwidth table.
+ *
  * Revision 4.5  1994/12/21  20:21:09  caress
  * Changes to support high resolution SeaBeam 2000 sidescan files
  * from R/V Melville data.
@@ -492,39 +495,39 @@ static int mb_traveltime_table[] =
 	1,	/* MBF_BCHRTUNB */
 	};
 
-/* Table of which multibeam data formats support 
+/* Table of which multibeam data formats cannot support 
 	flagging of bad bathymetry data using negative values */
 static int mb_bath_flag_table[] = 
 	{
-	1,	/* NULL */
-	1,	/* MBF_SBSIOMRG */
-	1,	/* MBF_SBSIOCEN */
-	1,	/* MBF_SBSIOLSI */
-	1,	/* MBF_SBURICEN */
-	1,	/* MBF_SBURIVAX */
-	1,	/* MBF_SBSIOSWB */
-	0,	/* MBF_HSATLRAW */
-	1,	/* MBF_HSLDEDMB */
-	1,	/* MBF_HSURICEN */
-	1,	/* MBF_HSLDEOIH */
-	1,	/* MBF_HSURIVAX */
-	1,	/* MBF_HSSIOSWB */
-	1,	/* MBF_SB2000RW */
-	1,	/* MBF_SB2000SB */
+	0,	/* NULL */
+	0,	/* MBF_SBSIOMRG */
+	0,	/* MBF_SBSIOCEN */
+	0,	/* MBF_SBSIOLSI */
+	0,	/* MBF_SBURICEN */
+	0,	/* MBF_SBURIVAX */
+	0,	/* MBF_SBSIOSWB */
+	1,	/* MBF_HSATLRAW */
+	0,	/* MBF_HSLDEDMB */
+	0,	/* MBF_HSURICEN */
+	0,	/* MBF_HSLDEOIH */
+	0,	/* MBF_HSURIVAX */
+	0,	/* MBF_HSSIOSWB */
+	0,	/* MBF_SB2000RW */
+	0,	/* MBF_SB2000SB */
 	0,	/* MBF_SB2000SS */
-	1,	/* MBF_SB2100RW */
-	1,	/* MBF_SB2100IH */
-	1,	/* MBF_EM1000RW */
-	1,	/* MBF_EM12SRAW */
-	1,	/* MBF_EM12DRAW */
-	1,	/* MBF_EM12DARW */
-	1,	/* MBF_MR1PRHIG */
-	1,	/* MBF_MBLDEOIH */
-	1,	/* MBF_CBAT9001 */
-	1,	/* MBF_BCHRTUNB */
+	0,	/* MBF_SB2100RW */
+	0,	/* MBF_SB2100IH */
+	0,	/* MBF_EM1000RW */
+	0,	/* MBF_EM12SRAW */
+	0,	/* MBF_EM12DRAW */
+	0,	/* MBF_EM12DARW */
+	0,	/* MBF_MR1PRHIG */
+	0,	/* MBF_MBLDEOIH */
+	0,	/* MBF_CBAT9001 */
+	0,	/* MBF_BCHRTUNB */
 	};
 
-/* Table of which multibeam data formats support 
+/* Table of which multibeam data formats cannot support 
 	flagging of bad amplitude data using negative values */
 static int mb_amp_flag_table[] = 
 	{
@@ -535,10 +538,10 @@ static int mb_amp_flag_table[] =
 	0,	/* MBF_SBURICEN */
 	0,	/* MBF_SBURIVAX */
 	0,	/* MBF_SBSIOSWB */
-	0,	/* MBF_HSATLRAW */
+	1,	/* MBF_HSATLRAW */
 	0,	/* MBF_HSLDEDMB */
 	0,	/* MBF_HSURICEN */
-	1,	/* MBF_HSLDEOIH */
+	0,	/* MBF_HSLDEOIH */
 	0,	/* MBF_HSURIVAX */
 	0,	/* MBF_HSSIOSWB */
 	0,	/* MBF_SB2000RW */
@@ -546,17 +549,17 @@ static int mb_amp_flag_table[] =
 	0,	/* MBF_SB2000SS */
 	0,	/* MBF_SB2100RW */
 	0,	/* MBF_SB2100IH */
-	1,	/* MBF_EM1000RW */
-	1,	/* MBF_EM12SRAW */
-	1,	/* MBF_EM12DRAW */
-	1,	/* MBF_EM12DARW */
+	0,	/* MBF_EM1000RW */
+	0,	/* MBF_EM12SRAW */
+	0,	/* MBF_EM12DRAW */
+	0,	/* MBF_EM12DARW */
 	0,	/* MBF_MR1PRHIG */
-	1,	/* MBF_MBLDEOIH */
+	0,	/* MBF_MBLDEOIH */
 	0,	/* MBF_CBAT9001 */
 	0,	/* MBF_BCHRTUNB */
 	};
 
-/* Table of which multibeam data formats support 
+/* Table of which multibeam data formats cannot support 
 	flagging of bad sidescan data using negative values */
 static int mb_ss_flag_table[] = 
 	{
@@ -578,11 +581,11 @@ static int mb_ss_flag_table[] =
 	0,	/* MBF_SB2000SS */
 	0,	/* MBF_SB2100RW */
 	0,	/* MBF_SB2100IH */
-	1,	/* MBF_EM1000RW */
-	1,	/* MBF_EM12SRAW */
-	1,	/* MBF_EM12DRAW */
-	1,	/* MBF_EM12DARW */
-	1,	/* MBF_MR1PRHIG */
+	0,	/* MBF_EM1000RW */
+	0,	/* MBF_EM12SRAW */
+	0,	/* MBF_EM12DRAW */
+	0,	/* MBF_EM12DARW */
+	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MBLDEOIH */
 	0,	/* MBF_CBAT9001 */
 	0,	/* MBF_BCHRTUNB */
