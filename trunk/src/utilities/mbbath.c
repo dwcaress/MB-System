@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.15 1995-08-21 17:25:25 caress Exp $
+ *    $Id: mbbath.c,v 4.16 1995-09-22 18:40:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1995/08/21  17:25:25  caress
+ * Changed handling of draught, since that value is
+ * now provided automatically with the travel times.
+ *
  * Revision 4.14  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -114,13 +118,16 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
-#include "../../include/mbsys_hsds.h"
+#include "../../include/mbsys_sb2100.h"
 
 /* DTR define */
 #ifndef M_PI
 #define	M_PI	3.14159265358979323846
 #endif
 #define DTR	(M_PI/180.)
+
+/* max define */
+#define	max(A, B)	((A) > (B) ? (A) : (B))
 
 /*--------------------------------------------------------------------*/
 
@@ -129,7 +136,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.15 1995-08-21 17:25:25 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.16 1995-09-22 18:40:21 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -241,6 +248,9 @@ and stdout.";
 	double	ttime;
 	int	ray_stat;
 
+	/* sb2100 store ptr */
+	struct mbsys_sb2100_struct *store;
+
 	char	buffer[128], tmp[128], *result;
 	int	size;
 	double	dummy;
@@ -248,6 +258,7 @@ and stdout.";
 	int	nbeams;
 	int	center_beam;
 	double	tt, factor, zz, xx, vavg;
+	double	value_max;
 	int	i, j, k, l, m;
 
 	char	*ctime();
@@ -1075,6 +1086,10 @@ and stdout.";
 				angles_forward,flags,
 				&depth_offset,&error);
 
+			/* use user specified draught */
+			if (draught > 0.0)
+				depth_offset = draught;
+
 			/* if needed get roll correction */
 			if (nroll > 0 && kind == MB_DATA_DATA)
 				{
@@ -1156,6 +1171,40 @@ and stdout.";
 				}
 			    }
 			  }
+
+			/* fix possible problem with SB2100 data */
+			if (error == MB_ERROR_NO_ERROR
+				&& kind == MB_DATA_DATA
+				&& format == 41)
+				{
+				/* get max sizes of depth and acrosstrack values */
+				value_max = 0.0;
+				for (i=0;i<beams_bath;i++)
+					{
+					if (fabs(bath[i]) > 0.0)
+						{
+						value_max = max(fabs(bath[i]),value_max);
+						value_max = max(fabs(bathacrosstrack[i]),value_max);
+						}
+					}
+
+				/* get data structure pointer */
+				store = (struct mbsys_sb2100_struct *) store_ptr;
+
+				/* set range scale to accomodate the largest values */
+				if (value_max < 1000.0)
+					{
+					store->range_scale = 'S';
+					}
+				else if (value_max < 10000.0)
+					{
+					store->range_scale = 'I';
+					}
+				else
+					{
+					store->range_scale = 'D';
+					}
+				}
 
 			/* output some debug messages */
 			if (verbose >= 5)
