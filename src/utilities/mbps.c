@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	3.00	11/4/93
- *    $Id: mbps.c,v 1.1 1993-11-04 18:09:06 caress Exp $
+ *    $Id: mbps.c,v 1.2 1993-11-04 19:32:28 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1993/11/04  18:09:06  caress
+ * Initial revision
+ *
  *
  */
 
@@ -30,7 +33,10 @@
 #include <strings.h>
 
 /* MBIO include files */
-#include "/net/heezen/staff/caress/joule_packages/MB-System3/include/mb_status.h"
+#include "../../include/mb_status.h"
+
+/* GMT include files */
+#include "gmt.h"
 
 /*--------------------------------------------------------------------*/
 
@@ -95,9 +101,9 @@ char **argv;
 
 
 /* MBINFO.C definitions */
-	static char rcs_id[] = "$Id: mbps.c,v 1.1 1993-11-04 18:09:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 1.2 1993-11-04 19:32:28 caress Exp $";
 	static char program_name[] = "MBPS";
-	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscrit 3-d mesh plot";
+	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
 	extern char *optarg;
 	extern int optkind;
@@ -653,7 +659,8 @@ char **argv;
           struct EPS * eps;
 */
 
-	ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,eps);
+	ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
+		gmtdefs.paper_width, gmtdefs.page_rgb, eps);
 
 
 
