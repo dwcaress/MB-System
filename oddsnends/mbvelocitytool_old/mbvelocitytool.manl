@@ -1,15 +1,15 @@
-.TH MBVELOCITYTOOL 1 "15 September 1994"
+.TH mbvelocitytool l "31 October 1994"
 .SH NAME
-\fBMBVELOCITYTOOL\fP - Interactive water velocity profile editor.
+\fBmbvelocitytool\fP - Interactive water velocity profile editor.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbvelocitytool\fP [\fBA\fIdangle\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBMBVELOCITYTOOL\fP is an interactive water velocity profile editor
+\fBmbvelocitytool\fP is an interactive water velocity profile editor
 used to examine multiple water velocity profiles and to create
 new water velocity profiles which can be used for the processing
 of multibeam sonar data.  In general, this tool is used to examine
@@ -54,9 +54,9 @@ This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
 .B \fB-V\fP
-Normally, \fBMBVELOCITYTOOL\fP works "silently" without outputting
+Normally, \fBmbvelocitytool\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBMBVELOCITYTOOL\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbvelocitytool\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages, 
 and a large amount of other information.
 
