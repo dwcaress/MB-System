@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.9 1996-02-12 17:09:35 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.10 1996-04-05 15:25:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,12 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/02/12  17:09:35  caress
+ * Added autoscaling of acrosstrack distance when files
+ * are first read and added -G argument to force done
+ * events to be treated as quit events when mbedit is
+ * started up by a GUI.
+ *
  * Revision 4.8  1996/01/26  21:22:00  caress
  * Version 4.3 distribution.
  *
@@ -114,10 +120,6 @@
 #define	MBEDIT_OUTPUT_OUTPUT 0
 #define	MBEDIT_OUTPUT_BROWSE 1
 
-/* gui mode defines */
-#define	MBEDIT_GUI_NO	    0
-#define	MBEDIT_GUI_YES	    1
-
 /* min max define */
 #define	min(A, B)	((A) < (B) ? (A) : (B))
 #define	max(A, B)	((A) > (B) ? (A) : (B))
@@ -145,7 +147,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.9 1996-02-12 17:09:35 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.10 1996-04-05 15:25:11 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -175,7 +177,7 @@ int	ofile_defined = MB_NO;
 char	*imbio_ptr = NULL;
 char	*ombio_ptr = NULL;
 int	output_mode = MBEDIT_OUTPUT_OUTPUT;
-int	gui_mode = MBEDIT_GUI_NO;
+int	gui_mode = MB_NO;
 
 /* mbio read and write values */
 char	*store_ptr = NULL;
@@ -348,7 +350,7 @@ int	*startup_file;
 			break;
 		case 'G':
 		case 'g':
-			gui_mode = MBEDIT_GUI_YES;
+			gui_mode = MB_YES;
 			flag++;
 			break;
 		case 'I':
@@ -824,7 +826,7 @@ int	*nplt;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_done(buffer_size,ndumped,nloaded,nbuffer,ngood,icurrent)
+int mbedit_action_close(buffer_size,ndumped,nloaded,nbuffer,ngood,icurrent)
 int	buffer_size;
 int	*ndumped;
 int	*nloaded;
@@ -833,7 +835,7 @@ int	*ngood;
 int	*icurrent;
 {
 	/* local variables */
-	char	*function_name = "mbedit_action_done";
+	char	*function_name = "mbedit_action_close";
 	int	status = MB_SUCCESS;
 	int	save_nloaded = 0;
 	int	save_ndumped = 0;
@@ -847,22 +849,27 @@ int	*icurrent;
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
 		}
 
-	/* if driven by gui done means quit */
-	if (gui_mode == MBEDIT_GUI_YES)
-	    {
-	    mbedit_action_quit(buffer_size,ndumped,
-				nloaded,nbuffer,ngood,icurrent);
-	    }
+	/* clear the screen */
+	status = mbedit_clear_screen();
 
-	/* else do done */
-	else
-	    {
+	/* if file has been opened and browse mode 
+		just dump the current buffer and close the file */
+	if (file_open == MB_YES 
+		&& output_mode == MBEDIT_OUTPUT_BROWSE)
+		{
 
-	    /* clear the screen */
-	    status = mbedit_clear_screen();
+		/* dump the buffer */
+		status = mbedit_dump_data(0,ndumped,nbuffer);
+		save_ndumped = save_ndumped + *ndumped;
+		*ndumped = save_ndumped;
+		*nloaded = save_nloaded;
 
-	    /* if file has been opened deal with it */
-	    if (file_open == MB_YES)
+		/* now close the file */
+		status = mbedit_close_file();
+		}
+
+	/* if file has been opened deal with all of the data */
+	else if (file_open == MB_YES)
 		{
 
 		/* dump and load until the end of the file is reached */
@@ -884,7 +891,7 @@ int	*icurrent;
 		status = mbedit_close_file();
 		}
 
-	    else
+	else
 		{
 		*ndumped = 0;
 		*nloaded = 0;
@@ -894,15 +901,14 @@ int	*icurrent;
 		status = MB_FAILURE;
 		}
 
-	    /* reset beam_save */
-	    beam_save = MB_NO;
+	/* reset beam_save */
+	beam_save = MB_NO;
 
-	    /* let the world know... */
-	    if (verbose >= 1)
+	/* let the world know... */
+	if (verbose >= 1)
 		{
 		fprintf(stderr,"\nLast ping viewed: %s\n",last_ping);
 		}
-	    }
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -915,6 +921,72 @@ int	*icurrent;
 		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
 		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
 		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_action_done(buffer_size,ndumped,nloaded,nbuffer,
+	ngood,icurrent, quit)
+int	buffer_size;
+int	*ndumped;
+int	*nloaded;
+int	*nbuffer;
+int	*ngood;
+int	*icurrent;
+int	*quit;
+{
+	/* local variables */
+	char	*function_name = "mbedit_action_done";
+	int	status = MB_SUCCESS;
+	int	save_nloaded = 0;
+	int	save_ndumped = 0;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
+		}
+		
+	/* if in normal mode done does not mean quit,
+		if in gui mode done does mean quit */
+	if (gui_mode == MB_YES)
+		*quit = MB_YES;
+	else
+		*quit = MB_NO;
+
+	/* if quitting let the world know... */
+	if (*quit == MB_YES && verbose >= 1)
+		fprintf(stderr,"\nShutting MBEDIT down without further ado...\n");
+
+	/* call routine to deal with saving the current file, if any */
+	if (file_open == MB_YES)
+		status = mbedit_action_close(buffer_size,ndumped,nloaded,
+			nbuffer,ngood,icurrent);
+
+	/* if quitting let the world know... */
+	if (*quit == MB_YES && verbose >= 1)
+		fprintf(stderr,"\nQuitting MBEDIT\nBye Bye...\n");
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ndumped:     %d\n",*ndumped);
+		fprintf(stderr,"dbg2       nloaded:     %d\n",*nloaded);
+		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
+		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
+		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
+		fprintf(stderr,"dbg2       quit:        %d\n",*quit);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
@@ -947,21 +1019,14 @@ int	*icurrent;
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
 		}
 
-
-	/* clear the screen */
-	status = mbedit_clear_screen();
-
 	/* let the world know... */
 	if (verbose >= 1)
 		fprintf(stderr,"\nShutting MBEDIT down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
-		status = mbedit_action_done(buffer_size,ndumped,nloaded,
+		status = mbedit_action_close(buffer_size,ndumped,nloaded,
 			nbuffer,ngood,icurrent);
-
-	/* reset beam_save */
-	beam_save = MB_NO;
 
 	/* let the world know... */
 	if (verbose >= 1)
