@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 4.1 2000-07-19 04:01:41 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -42,6 +42,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/07/19  04:01:41  caress
+ * Supported EM120.
+ *
  * Revision 4.0  1998/12/17  22:59:14  caress
  * MB-System version 4.6beta4
  *
@@ -67,7 +70,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.1 2000-07-19 04:01:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -384,7 +387,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.1 2000-07-19 04:01:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -612,7 +615,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.1 2000-07-19 04:01:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -702,7 +705,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 4.1 2000-07-19 04:01:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 4.2 2000-07-20 20:24:59 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -952,9 +955,7 @@ int	*error;
 				+ 655.36 * ping->png_offset_multiplier;
 		dacrscale  = 0.01 * ping->png_distance_res;
 		daloscale  = 0.01 * ping->png_distance_res;
-		if (store->sonar == EM2_EM120 
-			|| store->sonar == EM2_EM300 
-			|| store->sonar == EM2_EM3000)
+		if (store->sonar <= EM2_EM3000)
 		    ttscale = 0.5 / ping->png_sample_rate;
 		else
 		    ttscale = 0.5 / 14000;
@@ -1259,7 +1260,23 @@ int	*error;
 		/* insert distance and depth values into storage arrays */
 		if (store->sonar == MBSYS_SIMRAD2_UNKNOWN)
 			{
-			if (nbath <= 127)
+			if (nbath <= 87)
+				{
+				store->sonar = MBSYS_SIMRAD2_EM2000;
+				if (ping->png_depth_res == 0)
+				    ping->png_depth_res = 1; /* kluge */
+				if (ping->png_distance_res == 0)
+				    ping->png_distance_res = 1; /* kluge */
+				}
+			else if (nbath <= 111)
+				{
+				store->sonar = MBSYS_SIMRAD2_EM1002;
+				if (ping->png_depth_res == 0)
+				    ping->png_depth_res = 1; /* kluge */
+				if (ping->png_distance_res == 0)
+				    ping->png_distance_res = 1; /* kluge */
+				}
+			else if (nbath <= 127)
 				{
 				store->sonar = MBSYS_SIMRAD2_EM3000;
 				if (ping->png_depth_res == 0)
@@ -1278,10 +1295,10 @@ int	*error;
 			else if (nbath <= 191)
 				{
 				store->sonar = MBSYS_SIMRAD2_EM120;
-				if (store->png_depth_res == 0)
-				    store->png_depth_res = 10; /* kluge */
-				if (store->png_distance_res == 0)
-				    store->png_distance_res = 10; /* kluge */
+				if (ping->png_depth_res == 0)
+				    ping->png_depth_res = 10; /* kluge */
+				if (ping->png_distance_res == 0)
+				    ping->png_distance_res = 10; /* kluge */
 				}
 			else if (nbath <= 254)
 				{
@@ -1302,9 +1319,7 @@ int	*error;
 				+ 655.36 * ping->png_offset_multiplier;
 		dacrscale  = 0.01 * ping->png_distance_res;
 		daloscale  = 0.01 * ping->png_distance_res;
-		if (store->sonar == EM2_EM120 
-			|| store->sonar == EM2_EM300 
-			|| store->sonar == EM2_EM3000)
+		if (store->sonar <= EM2_EM3000)
 		    ttscale = 0.5 / ping->png_sample_rate;
 		else
 		    ttscale = 0.5 / 14000;
@@ -1478,9 +1493,7 @@ int	*error;
 				+ 655.36 * ping->png_offset_multiplier;
 
 		/* get travel times, angles */
-		if (store->sonar == EM2_EM120 
-			|| store->sonar == EM2_EM300 
-			|| store->sonar == EM2_EM3000)
+		if (store->sonar <= EM2_EM3000)
 		    ttscale = 0.5 / ping->png_sample_rate;
 		else
 		    ttscale = 0.5 / 14000;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em300raw.h	10/16/98
- *	$Id: mbf_em300raw.h,v 4.1 2000-07-17 23:36:24 caress Exp $
+ *	$Id: mbf_em300raw.h,v 4.2 2000-07-20 20:24:59 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/07/17  23:36:24  caress
+ * Added support for EM120.
+ *
  * Revision 4.0  1998/12/17  22:59:14  caress
  * MB-System version 4.6beta4
  *
@@ -59,23 +62,36 @@
  *      followed by two bytes representing the checksum for
  *      the data bytes.  MB-System does not check the checksums
  *      on input, but does calculate the checksums for output.
- *   5. The relevent telegram start codes, types, and sizes are:
- *         0x0249: Parameter - Start                      variable size
- *         0x0269: Parameter - Stop                       variable size
- *         0x0230: Parameter - Stop                       variable size
- *         0x0231: Parameter - Data out off               variable size
- *         0x0232: Parameter - Data out on                variable size
- *         0x0252: Runtime Parameter                      52 bytes
- *         0x0243: Clock Output                           28 bytes
- *         0x0254: Tide Output                            30 bytes
- *         0x0268: Height Output                          24 bytes
- *         0x0248: Heading Output                         422 bytes
- *         0x0241: Attitude Output                        1222 bytes
- *         0x0250: Position                               100-134 bytes
- *         0x0256: Sound velocity profile                 variable size
- *         0x0244: Bathymetry                             48-4092 bytes
- *         0x02E1: Bathymetry (MBARI format 57)           48-4092 bytes
- *         0x0253: Sidescan                               48->5K bytes
+ *   5. The Kongsberg Simrad datagram format manual lists a large number
+ *      of datagram types. The complete list of telegram start codes, 
+ *      types, and sizes is given below. Datagram listings preceded
+ *      by an "*" are recognized by MB-System. Unrecognized datagrams
+ *      will be skipped on input and not included in output files.
+ *        *0x0231: Parameter - Data out off               variable size
+ *        *0x0232: Parameter - Data out on                variable size
+ *        *0x0230: Parameter - Stop                       variable size
+ *        *0x0241: Attitude Output                        1222 bytes
+ *        *0x0243: Clock Output                           28 bytes
+ *        *0x0244: Bathymetry                             48-4092 bytes
+ *         0x0245: Single beam echosounder depth          32 bytes
+ *         0x0246: Raw range and beam angle               24-2056 bytes
+ *        *0x0248: Heading Output                         422 bytes
+ *        *0x0249: Parameter - Start                      variable size
+ *         0x024A: Mechanical transducer tilt             variable size
+ *         0x024B: Central beams echogram                 variable size
+ *        *0x0250: Position                               100-134 bytes
+ *        *0x0252: Runtime Parameter                      52 bytes
+ *        *0x0253: Sidescan                               48->5K bytes
+ *        *0x0254: Tide Output                            30 bytes
+ *        *0x0255: Sound velocity profile (new)           variable size
+ *        *0x0256: Sound velocity profile (old)           variable size
+ *         0x0257: SSP input                              variable size
+ *        *0x0268: Height Output                          24 bytes
+ *        *0x0269: Parameter - Stop                       variable size
+ *         0x0270: Parameter - Remote                     variable size
+ *         0x0273: Surface sound speed                    variable size
+ *        *0x02E1: Bathymetry (MBARI format 57)           48-4092 bytes
+ *        *0x02E2: Sidescan (MBARI format 57)             48->5K bytes
  *   6. Simrad systems record navigation fixes using the position 
  *      datagram; no navigation is included in the per ping data.  Thus,
  *      it is necessary to extrapolate the navigation for each ping
