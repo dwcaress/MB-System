@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
- *	$Id: mbr_elmk2unb.c,v 5.7 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbr_elmk2unb.c,v 5.8 2003-05-20 18:05:32 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -117,6 +120,7 @@ int mbr_info_elmk2unb(int verbose,
 			int *nav_source, 
 			int *heading_source, 
 			int *vru_source, 
+			int *svp_source,
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error);
@@ -128,7 +132,7 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
 	char	*function_name = "mbr_register_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -162,6 +166,7 @@ int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->nav_source, 
 			&mb_io_ptr->heading_source, 
 			&mb_io_ptr->vru_source, 
+			&mb_io_ptr->svp_source, 
 			&mb_io_ptr->beamwidth_xtrack, 
 			&mb_io_ptr->beamwidth_ltrack, 
 			error);
@@ -207,7 +212,7 @@ int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
-		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
+		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
 		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
@@ -254,11 +259,12 @@ int mbr_info_elmk2unb(int verbose,
 			int *nav_source, 
 			int *heading_source, 
 			int *vru_source, 
+			int *svp_source, 
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
 	char	*function_name = "mbr_info_elmk2unb";
 	int	status = MB_SUCCESS;
 
@@ -289,6 +295,7 @@ int mbr_info_elmk2unb(int verbose,
 	*nav_source = MB_DATA_NAV;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
+	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 3.0;
 	*beamwidth_ltrack = 3.0;
 
@@ -313,7 +320,7 @@ int mbr_info_elmk2unb(int verbose,
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
 		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
-		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       svp_source:         %d\n",*svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
@@ -327,7 +334,7 @@ int mbr_info_elmk2unb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_elmk2unb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
