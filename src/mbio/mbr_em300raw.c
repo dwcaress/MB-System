@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.5 2001-06-01 00:14:06 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.6 2001-06-01 23:01:22 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/01  00:14:06  caress
+ * Redid support for current Simrad multibeam data.
+ *
  * Revision 5.4  2001/05/30  17:57:26  caress
  * Fixed New Simrad data handling, plus removed use of
  * intermediate data structure. Still need to reduce use
@@ -97,7 +100,7 @@
 #include "../../include/mb_swap.h"
 	
 /* turn on debug statements here */
-#define MBR_EM300RAW_DEBUG 1
+/* #define MBR_EM300RAW_DEBUG 1 */
 
 /* essential function prototypes */
 int mbr_register_em300raw(int verbose, char *mbio_ptr, 
@@ -200,7 +203,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.6 2001-06-01 23:01:22 caress Exp $";
 	char	*function_name = "mbr_register_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -330,7 +333,7 @@ int mbr_info_em300raw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.6 2001-06-01 23:01:22 caress Exp $";
 	char	*function_name = "mbr_info_em300raw";
 	int	status = MB_SUCCESS;
 
@@ -399,7 +402,7 @@ int mbr_info_em300raw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300raw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.6 2001-06-01 23:01:22 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
