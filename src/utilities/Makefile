@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  1/21/93
-#	$Id: Makefile,v 1.10 1993-11-05 18:10:34 caress Exp $
+#	$Id: Makefile,v 1.11 1993-11-08 03:58:16 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.10  1993/11/05  18:10:34  caress
+# Added mbsmooth.1 man page.
+#
 # Revision 1.9  1993/11/05  16:02:14  caress
 # Set up mblevitus so that location of annual database file
 # is found from an include file generated each time make is
@@ -53,7 +56,7 @@
 GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
 GMTINCDIR = /ocean/mgg/gmt2/src
 #     - location of Levitus annual database file
-LEVITUS = /mcscon/turf/caress/Levitus/annual
+LEVITUS = /ocean/mgg/multibeam/levitus/annual
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
 BINDIR = ../../bin
