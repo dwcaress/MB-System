@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.10 1996-04-05 15:25:11 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.11 1996-04-17 23:11:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,11 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1996/04/05  15:25:11  caress
+ * Fixed GUI mode so done means quit for real. Also changed done and
+ * quit handling in browse mode so that the program doesn't read the
+ * entire data file before closing it.
+ *
  * Revision 4.9  1996/02/12  17:09:35  caress
  * Added autoscaling of acrosstrack distance when files
  * are first read and added -G argument to force done
@@ -147,7 +152,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.10 1996-04-05 15:25:11 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.11 1996-04-17 23:11:09 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -1751,12 +1756,6 @@ int	*nplt;
 	else
 		{
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
-		*nbuffer = nbuff;
-		*ngood = nlist;
-		current_id = 0;
-		*icurrent = current_id;
-		current = 0;
 		}
 
 	/* print output debug statements */
@@ -1860,12 +1859,6 @@ int	*nplt;
 	else
 		{
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
-		*nbuffer = nbuff;
-		*ngood = nlist;
-		current_id = 0;
-		*icurrent = current_id;
-		current = 0;
 		}
 
 	/* print output debug statements */
@@ -1969,12 +1962,6 @@ int	*nplt;
 	else
 		{
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
-		*nbuffer = nbuff;
-		*ngood = nlist;
-		current_id = 0;
-		*icurrent = current_id;
-		current = 0;
 		}
 
 	/* print output debug statements */
@@ -2078,12 +2065,6 @@ int	*nplt;
 	else
 		{
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
-		*nbuffer = nbuff;
-		*ngood = nlist;
-		current_id = 0;
-		*icurrent = current_id;
-		current = 0;
 		}
 
 	/* print output debug statements */
@@ -2190,12 +2171,6 @@ int	*nplt;
 	else
 		{
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
-		*nbuffer = nbuff;
-		*ngood = nlist;
-		current_id = 0;
-		*icurrent = current_id;
-		current = 0;
 		}
 
 	/* print output debug statements */
@@ -2862,7 +2837,7 @@ int	autoscale;
 	int	nbathsum,  nbathlist;
 	double	bathsum, bathmean, bathmedian;
 	double	xtrack_max;
-	int	ndec, max;
+	int	ndec, maxx;
 	double	dxscale, dyscale;
 	double	dx_width, dy_height;
 	int	nx_int, ny_int;
@@ -2951,11 +2926,11 @@ int	autoscale;
 		{
 		plot_width = 2.4 * xtrack_max;
 		ndec = max(1, (int) log10((double) plot_width));
-		max = 1;
+		maxx = 1;
 		for (i=0;i<ndec;i++)
-			max = max * 10;
-		max = (plot_width / max + 1) * max;
-		reset_scale_x(plot_width, max);
+			maxx = maxx * 10;
+		maxx = (plot_width / maxx + 1) * maxx;
+		reset_scale_x(plot_width, maxx);
 		}
 
 	/* print out information */

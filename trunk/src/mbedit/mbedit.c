@@ -817,7 +817,7 @@ static void set_number_pings(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
-	int	max;
+	int	maxx;
 	char	label[10];
 
 	/* Read the value of the slider bar for number of pings displayed */
@@ -826,22 +826,22 @@ static void set_number_pings(w, tag, scale)
 	/* if slider set to minimum value, half the value range;
 		if slider set to maximum value,  double the range */
 	XtVaGetValues(widget_array[k_num_pings], 
-			XmNmaximum, &max, 
+			XmNmaximum, &maxx, 
 			NULL);
-	if (mplot_size == 1 || mplot_size == max)
+	if (mplot_size == 1 || mplot_size == maxx)
 		{
 		if (mplot_size == 1)
-			max = max/2;
+			maxx = maxx/2;
 		else
-			max = 2*max;
-		if (max > plot_size_max)
-			max = plot_size_max;
-		if (max < 2)
-			max = 2;
+			maxx = 2*maxx;
+		if (maxx > plot_size_max)
+			maxx = plot_size_max;
+		if (maxx < 2)
+			maxx = 2;
 		XtVaSetValues(widget_array[k_num_pings], 
-			XmNmaximum, max, 
+			XmNmaximum, maxx, 
 			NULL);
-		sprintf(label, "%d", max);
+		sprintf(label, "%d", maxx);
 		XtVaSetValues(widget_array[k_num_pings_lab], 
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, label, (strlen(label) + 1), 
@@ -883,7 +883,7 @@ static void set_scale_x(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
-	int	max;
+	int	maxx;
 	char	label[10];
 
 	mplot_width = scale->value;
@@ -891,20 +891,20 @@ static void set_scale_x(w, tag, scale)
 	/* if slider set to minimum value, half the value range;
 		if slider set to maximum value,  double the range */
 	XtVaGetValues(widget_array[k_x_scale], 
-			XmNmaximum, &max, 
+			XmNmaximum, &maxx, 
 			NULL);
-	if (mplot_width == 1 || mplot_width == max)
+	if (mplot_width == 1 || mplot_width == maxx)
 		{
 		if (mplot_width == 1)
-			max = max/2;
+			maxx = maxx/2;
 		else
-			max = 2*max;
-		if (max < 2)
-			max = 2;
+			maxx = 2*maxx;
+		if (maxx < 2)
+			maxx = 2;
 		XtVaSetValues(widget_array[k_x_scale], 
-			XmNmaximum, max, 
+			XmNmaximum, maxx, 
 			NULL);
-		sprintf(label, "%d", max);
+		sprintf(label, "%d", maxx);
 		XtVaSetValues(widget_array[k_x_scale_lab], 
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, label, (strlen(label) + 1), 
@@ -923,28 +923,28 @@ static void set_scale_x(w, tag, scale)
 /* Program driven reset for `slider_scale_x'.                       */
 /********************************************************************/
  
-int reset_scale_x(pwidth, max)
+int reset_scale_x(pwidth, maxx)
 	int pwidth;
-	int max;
+	int maxx;
 {
 	char	label[10];
 
 	mplot_width = pwidth;
 	
 	/* check max value */
-	if (pwidth > max - 1)
+	if (pwidth > maxx - 1)
 		{
-		max = 2 * pwidth;
-		if (max < 2)
-			max = 2;
+		maxx = 2 * pwidth;
+		if (maxx < 2)
+			maxx = 2;
 		}
 	
 	/* reset the widget */
 	XtVaSetValues(widget_array[k_x_scale], 
 			XmNvalue, mplot_width, 
-			XmNmaximum, max, 
+			XmNmaximum, maxx, 
 			NULL);
-	sprintf(label, "%d", max);
+	sprintf(label, "%d", maxx);
 	XtVaSetValues(widget_array[k_x_scale_lab], 
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, label, (strlen(label) + 1), 
@@ -979,7 +979,7 @@ static void set_scale_y(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
-	int	max;
+	int	maxx;
 	char	label[10];
 
 	mexager = scale->value;
@@ -987,20 +987,20 @@ static void set_scale_y(w, tag, scale)
 	/* if slider set to minimum value, half the value range;
 		if slider set to maximum value,  double the range */
 	XtVaGetValues(widget_array[k_vert_exag], 
-			XmNmaximum, &max, 
+			XmNmaximum, &maxx, 
 			NULL);
-	if (mexager == 1 || mexager == max)
+	if (mexager == 1 || mexager == maxx)
 		{
 		if (mexager == 1)
-			max = max/2;
+			maxx = maxx/2;
 		else
-			max = 2*max;
-		if (max < 2)
-			max = 2;
+			maxx = 2*maxx;
+		if (maxx < 2)
+			maxx = 2;
 		XtVaSetValues(widget_array[k_vert_exag], 
-			XmNmaximum, max, 
+			XmNmaximum, maxx, 
 			NULL);
-		sprintf(label, "%.2f", (double)(max/100.));
+		sprintf(label, "%.2f", (double)(maxx/100.));
 		XtVaSetValues(widget_array[k_vert_exag_lab], 
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, label, (strlen(label) + 1), 
@@ -1025,7 +1025,7 @@ static void set_number_step(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
-	int	max;
+	int	maxx;
 	char	label[10];
 
 	step = scale->value;
@@ -1033,20 +1033,20 @@ static void set_number_step(w, tag, scale)
 	/* if slider set to minimum value, half the value range;
 		if slider set to maximum value,  double the range */
 	XtVaGetValues(widget_array[k_pings_to_step], 
-			XmNmaximum, &max, 
+			XmNmaximum, &maxx, 
 			NULL);
-	if (step == 1 || step == max)
+	if (step == 1 || step == maxx)
 		{
 		if (step == 1)
-			max = max/2;
+			maxx = maxx/2;
 		else
-			max = 2*max;
-		if (max < 2)
-			max = 2;
+			maxx = 2*maxx;
+		if (maxx < 2)
+			maxx = 2;
 		XtVaSetValues(widget_array[k_pings_to_step], 
-			XmNmaximum, max, 
+			XmNmaximum, maxx, 
 			NULL);
-		sprintf(label, "%d", max);
+		sprintf(label, "%d", maxx);
 		XtVaSetValues(widget_array[k_pings_to_step_lab], 
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, label, (strlen(label) + 1), 
@@ -1247,7 +1247,7 @@ static void do_x_interval(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
-	int	max;
+	int	maxx;
 	char	label[10];
 
 	mx_interval = scale->value;
@@ -1255,20 +1255,20 @@ static void do_x_interval(w, tag, scale)
 	/* if slider set to minimum value, half the value range;
 		if slider set to maximum value,  double the range */
 	XtVaGetValues(widget_array[k_x_tick_marks], 
-			XmNmaximum, &max, 
+			XmNmaximum, &maxx, 
 			NULL);
-	if (mx_interval == 1 || mx_interval == max)
+	if (mx_interval == 1 || mx_interval == maxx)
 		{
 		if (mx_interval == 1)
-			max = max/2;
+			maxx = maxx/2;
 		else
-			max = 2*max;
-		if (max < 2)
-			max = 2;
+			maxx = 2*maxx;
+		if (maxx < 2)
+			maxx = 2;
 		XtVaSetValues(widget_array[k_x_tick_marks], 
-			XmNmaximum, max, 
+			XmNmaximum, maxx, 
 			NULL);
-		sprintf(label, "%d", max);
+		sprintf(label, "%d", maxx);
 		XtVaSetValues(widget_array[k_x_tick_marks_lab], 
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, label, (strlen(label) + 1), 
@@ -1291,7 +1291,7 @@ static void do_y_interval(w, tag, scale)
 	int *tag;
 	XmScaleCallbackStruct *scale;
 {
-	int	max;
+	int	maxx;
 	char	label[10];
 
 	my_interval = scale->value;
@@ -1299,20 +1299,20 @@ static void do_y_interval(w, tag, scale)
 	/* if slider set to minimum value, half the value range;
 		if slider set to maximum value,  double the range */
 	XtVaGetValues(widget_array[k_y_tick_marks], 
-			XmNmaximum, &max, 
+			XmNmaximum, &maxx, 
 			NULL);
-	if (my_interval == 1 || my_interval == max)
+	if (my_interval == 1 || my_interval == maxx)
 		{
 		if (my_interval == 1)
-			max = max/2;
+			maxx = maxx/2;
 		else
-			max = 2*max;
-		if (max < 2)
-			max = 2;
+			maxx = 2*maxx;
+		if (maxx < 2)
+			maxx = 2;
 		XtVaSetValues(widget_array[k_y_tick_marks], 
-			XmNmaximum, max, 
+			XmNmaximum, maxx, 
 			NULL);
-		sprintf(label, "%d", max);
+		sprintf(label, "%d", maxx);
 		XtVaSetValues(widget_array[k_y_tick_marks_lab], 
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, label, (strlen(label) + 1), 
