@@ -1,9 +1,9 @@
-.TH MBEDIT 1 "28 February 1994"
+.TH mbedit l "31 October 1994"
 .SH NAME
-\fBMBEDIT\fP - Interactive editor used to flag bad beams in multibeam bathymetry data.
+\fBmbedit\fP - Interactive editor used to flag bad beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 4.30
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbedit\fP [\fB-F\fIformat \fB-I\fIinfile \fB-V -H\fP]

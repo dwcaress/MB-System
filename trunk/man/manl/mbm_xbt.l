@@ -1,9 +1,9 @@
-.TH mbm_xbt 1 "26 Februrary 1994"
+.TH mbm_xbt l "31 October 1994"
 .SH NAME
 \fBmbm_xbt\fP - Calculate sound velocity from XBT data.
 
 .SH VERSION
-Version 4.00
+Version 4.1
 
 .SH SYNOPSIS
 \fBmbm_xbt\fP infilename -Ssalinity -Fformat -V -H
