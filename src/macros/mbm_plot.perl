@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.12 1995-11-22 22:46:40 caress Exp $
+#    $Id: mbm_plot.perl,v 4.13 1996-03-12 17:28:19 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.12 1995-11-22 22:46:40 caress Exp $
+#   $Id: mbm_plot.perl,v 4.13 1996-03-12 17:28:19 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.12  1995/11/22  22:46:40  caress
+# Check in during general flail.
+#
 # Revision 4.11  1995/09/28  18:05:43  caress
 # Various bug fixes working toward release 4.3.
 #
@@ -733,42 +736,122 @@ if (!$ps_viewer)
 	}
 
 # get limits of file using mbinfo
-if ($verbose) 
+if ($format >= 0)
 	{
-	print "Running mbinfo...\n";
+	push(@files_data, $file_data);
+	push(@formats, $format);
+	}
+else
+	{
+	if (open(FILEDATA,"<$file_data"))
+		{
+		while (<FILEDATA>)
+			{
+			($file_tmp, $format_tmp) = $_ =~ /(\S+)\s+(\S+)/;
+			if ($file_tmp && $format_tmp)
+				{
+				push(@files_data, $file_tmp);
+				push(@formats, $format_tmp);
+				}
+			}
+		close FILEDATA;
+		}
 	}
 if ($bounds)
 	{
 	$bounds_info = "-R$bounds";
 	}
-@mbinfo = `mbinfo -F$format -I$file_data $bounds_info -G`;
-while (@mbinfo)
+$cnt = -1;
+foreach $file_mb (@files_data)
 	{
-	$line = shift @mbinfo;
-	if ($line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
+	# use .inf file if it exists 
+	$use_inf = 0;
+	$file_inf = $file_mb . ".inf";
+	if (-r $file_inf)
 		{
-		($xmin,$xmax) = 
-			$line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
+		if ($verbose) 
+			{
+			print "Reading mbinfo output from file $file_inf...\n";
+			}
+		if (open(FILEINF,"<$file_inf"))
+			{
+			while (<FILEINF>)
+				{
+				push(@mbinfo, $_);
+				}
+			close FILEINF;
+			$use_inf = 1;
+			}
 		}
-	if ($line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
+
+	# if .inf file not accessible run mbinfo directly 
+	if (!$use_inf)
 		{
-		($ymin,$ymax) = 
-			$line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
+		if ($verbose) 
+			{
+			print "Running mbinfo on file $file_mb...\n";
+			}
+		$cnt++;
+		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $bounds_info -G`;
 		}
-	if ($line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
+
+	# now parse the mbinfo input 
+	while (@mbinfo)
 		{
-		($zmin,$zmax) = 
-		$line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/;
+		$line = shift @mbinfo;
+		if ($line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
+			{
+			($xmin_f,$xmax_f) = 
+				$line =~ /Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
+			}
+		if ($line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
+			{
+			($ymin_f,$ymax_f) = 
+				$line =~ /Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
+			}
+		if ($line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
+			{
+			($zmin_f,$zmax_f) = 
+			$line =~ /Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/;
+			}
+		if ($line =~ /Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/)
+			{
+			($amin_f,$amax_f) = 
+			$line =~ /Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/;
+			}
+		if ($line =~ /Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/)
+			{
+			($smin_f,$smax_f) = 
+			$line =~ /Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/;
+			}
 		}
-	if ($line =~ /Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/)
+
+	if (!$first_mb)
 		{
-		($amin,$amax) = 
-		$line =~ /Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/;
+		$first_mb = 1;
+		$xmin = $xmin_f;
+		$xmax = $xmax_f;
+		$ymin = $ymin_f;
+		$ymax = $ymax_f;
+		$zmin = $zmin_f;
+		$zmax = $zmax_f;
+		$amin = $amin_f;
+		$amax = $amax_f;
+		$smin = $smin_f;
+		$smax = $smax_f;
 		}
-	if ($line =~ /Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/)
+	else
 		{
-		($smin,$smax) = 
-		$line =~ /Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/;
+		$xmin = &min($xmin, $xmin_f);
+		$xmax = &max($xmax, $xmax_f);
+		$ymin = &min($ymin, $ymin_f);
+		$ymax = &max($ymax, $ymax_f);
+		$zmin = &min($zmin, $zmin_f);
+		$zmax = &max($zmax, $zmax_f);
+		$amin = &min($amin, $amin_f);
+		$amax = &max($amax, $amax_f);
+		$smin = &min($smin, $smin_f);
+		$smax = &max($smax, $smax_f);
 		}
 	}
 

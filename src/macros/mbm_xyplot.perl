@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 4.1 1995-09-28 18:05:43 caress Exp $
+#    $Id: mbm_xyplot.perl,v 4.2 1996-03-12 17:28:19 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -54,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 4.1 1995-09-28 18:05:43 caress Exp $
+#   $Id: mbm_xyplot.perl,v 4.2 1996-03-12 17:28:19 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1995/09/28  18:05:43  caress
+# Various bug fixes working toward release 4.3.
+#
 # Revision 4.0  1995/08/17  14:53:25  caress
 # Revision for release 4.3.
 #
@@ -193,7 +196,7 @@ if (!$file_data)
 # parse misc commands
 if ($misc)
 	{
-	@misc_cmd = split(/:/, $misc);
+	@misc_cmd = split(/:::::::/, $misc);
 	foreach $cmd (@misc_cmd) {
 
 		# deal with general options
@@ -339,8 +342,8 @@ foreach $xyfile_raw (@data_file_list) {
 			= $xyfile_raw
 			=~ /(\S+):(\S+):(\S+)/;
 		push(@xysymbols, $xysymbol_f);
-		push(@xyfills, $xyfill_f);
-		push(@xypens, $xypen);
+		push(@xyfills, $xyfill);
+		push(@xypens, $xypen_f);
 		push(@xysegments, $xysegment);
 		push(@xyfiles, $xyfile_f);
 		}
@@ -1776,7 +1779,7 @@ sub MBGetopts {
 		}
 		if (eval "\$opt_$first") {
 		    eval "\$opt_$first = \$opt_$first 
-				. \":\" . \$rest;";
+				. \":::::::\" . \$rest;";
 		}
 		else {
 		    eval "\$opt_$first = \$rest;";
