@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 4.4 1995-05-08 21:26:28 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 4.5 1995-06-07 20:39:59 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/05/08  21:26:28  caress
+ * Made changes consistent with new i/o spec for SB2100 data.
+ *
  * Revision 4.3  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -148,20 +151,20 @@ struct mbsys_sb2100_struct
 	int	ping_gain_12khz;			/* dB */
 	int	ping_pulse_width_12khz;			/* msec */
 	int	transmitter_attenuation_12khz;		/* dB */
-	int	pitch_12khz;				/* 0.01 deg */
-	int	roll_12khz;				/* 0.01 deg */
-	int	heading_12khz;				/* 0.01 deg */
-	int	ping_gain_36khz;				/* dB */
+	int	pitch_12khz;				/* 0.001 deg */
+	int	roll_12khz;				/* 0.001 deg */
+	int	heading_12khz;				/* 0.001 deg */
+	int	ping_gain_36khz;			/* dB */
 	int	ping_pulse_width_36khz;			/* msec */
 	int	transmitter_attenuation_36khz;		/* dB */
-	int	pitch_36khz;					/* 0.01 deg */
-	int	roll_36khz;					/* 0.01 deg */
-	int	heading_36khz;				/* 0.01 deg */
+	int	pitch_36khz;				/* 0.001 deg */
+	int	roll_36khz;				/* 0.001 deg */
+	int	heading_36khz;				/* 0.001 deg */
 
 	/* formed beam data (DR) */
 	char		source[MBSYS_SB2100_BEAMS];	/* B=BDI, W=WMT */
-	int	travel_time[MBSYS_SB2100_BEAMS];		/*  msec */
-	int	angle_across[MBSYS_SB2100_BEAMS];	/* 0.01 deg */
+	int	travel_time[MBSYS_SB2100_BEAMS];	/*  msec */
+	int	angle_across[MBSYS_SB2100_BEAMS];	/* 0.001 deg */
 	int	angle_forward[MBSYS_SB2100_BEAMS];	/* 0.01 deg */
 	int	depth[MBSYS_SB2100_BEAMS];		/* m or cm */
 	int	acrosstrack_beam[MBSYS_SB2100_BEAMS];	/* m or cm */
