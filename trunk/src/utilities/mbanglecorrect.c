@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.6 1995-10-03 13:28:50 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.7 1996-03-12 17:27:01 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/10/03  13:28:50  caress
+ * Fixed major bugs relating to amplitude data.
+ *
  * Revision 4.5  1995/08/17  15:04:52  caress
  * Revision for release 4.3.
  *
@@ -90,7 +93,7 @@ The default input and output streams are stdin and stdout.\n";
 #define MBANGLECORRECT_LENGTH_DISTANCE	2
 
 /* MBIO buffer structure pointer */
-#define	MBANGLECORRECT_BUFFER	500
+#define	MBANGLECORRECT_BUFFER	250
 #define	MBANGLECORRECT_HOLD	50
 
 /* ping structure definition */
@@ -126,7 +129,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.6 1995-10-03 13:28:50 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.7 1996-03-12 17:27:01 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
