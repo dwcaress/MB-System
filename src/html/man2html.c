@@ -1,5 +1,5 @@
 /*
- * $Id: man2html.c,v 5.1 2004-05-21 23:17:08 caress Exp $
+ * $Id: man2html.c,v 5.2 2004-09-24 21:51:10 caress Exp $
  *
 ** This program was written by Richard Verhoeven (NL:5482ZX35)
 ** at the Eindhoven University of Technology. Email: rcb5@win.tue.nl
@@ -1919,7 +1919,8 @@ static char *fill_words(char *c, char *words[], int *n)
     while (*sl && (*sl!='\n' || slash)) {
 	if (!slash) {
 	    if (*sl=='"') {
-		*sl='\a';
+		/* *sl='\a'; */
+		*sl=' '; /* change to avoid putting \a characters into the html - DWC 9/24/2004 */
 		skipspace=!skipspace;
 	    } else if (*sl==escapesym)
 		slash=1;
