@@ -20,14 +20,15 @@
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/BulletinB.h>
+#include <Xm/ScrolledW.h>
+#include <Xm/RowColumn.h>
 #include <Xm/Scale.h>
-#include <Xm/ToggleB.h>
 #include <Xm/Separator.h>
+#include <Xm/ToggleB.h>
 #include <Xm/PushB.h>
 #include <Xm/Label.h>
 #include <Xm/TextF.h>
 #include <Xm/FileSB.h>
-#include <Xm/RowColumn.h>
 #include <Xm/CascadeB.h>
 #include <Xm/DrawingA.h>
 
@@ -67,6 +68,8 @@ extern void do_quit(Widget, XtPointer, XtPointer);
 extern void do_reset_filters(Widget, XtPointer, XtPointer);
 extern void do_set_filters(Widget, XtPointer, XtPointer);
 extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
+extern void do_check_median_ltrack(Widget, XtPointer, XtPointer);
+extern void do_check_median_xtrack(Widget, XtPointer, XtPointer);
 extern void do_y_interval(Widget, XtPointer, XtPointer);
 extern void do_x_interval(Widget, XtPointer, XtPointer);
 extern void do_buffer_hold(Widget, XtPointer, XtPointer);
@@ -79,6 +82,8 @@ extern void do_output_edit(Widget, XtPointer, XtPointer);
 extern void do_output_browse(Widget, XtPointer, XtPointer);
 extern void do_event(Widget, XtPointer, XtPointer);
 extern void do_expose(Widget, XtPointer, XtPointer);
+extern void do_show_time(Widget, XtPointer, XtPointer);
+extern void do_show_flagged(Widget, XtPointer, XtPointer);
 extern void do_unflag_all(Widget, XtPointer, XtPointer);
 extern void do_unflag_view(Widget, XtPointer, XtPointer);
 extern void BxManageCB(Widget, XtPointer, XtPointer);
@@ -90,8 +95,6 @@ extern void do_scale_x(Widget, XtPointer, XtPointer);
 extern void do_scale_y(Widget, XtPointer, XtPointer);
 extern void do_number_pings(Widget, XtPointer, XtPointer);
 extern void do_number_step(Widget, XtPointer, XtPointer);
-extern void do_show_flagged_on(Widget, XtPointer, XtPointer);
-extern void do_show_flagged_off(Widget, XtPointer, XtPointer);
 extern void do_mode_toggle(Widget, XtPointer, XtPointer);
 extern void do_mode_pick(Widget, XtPointer, XtPointer);
 extern void do_mode_erase(Widget, XtPointer, XtPointer);
@@ -109,12 +112,14 @@ Createwindow_mbedit(Widget parent)
     Boolean  argok = False;
     Widget   dialogShell_filters;
     Widget   bulletinBoard_filters;
+    Widget   scrolledWindow_filters;
+    Widget   bulletinBoard_scrollfilters;
+    Widget   separator6;
     Widget   separator5;
     Widget   separator4;
     Widget   separator3;
     Widget   pushButton_filters_reset;
     Widget   pushButton_filters_apply;
-    Widget   separator2;
     Widget   pushButton_filters_dismiss;
     Widget   dialogShell_annotation;
     Widget   bulletinBoard_annotation;
@@ -174,8 +179,6 @@ Createwindow_mbedit(Widget parent)
     Widget   pushButton_forward;
     Widget   pushButton_reverse;
     Widget   pushButton_quit;
-    Widget   radioBox_show_flagged;
-    Widget   label_show_flagged;
     Widget   setting_mode_label;
     Widget   setting_mode;
     
@@ -186,24 +189,25 @@ Createwindow_mbedit(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmFileSelectionBoxWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 9); ac++;
-    XtSetArg(args[ac], XmNy, 50); ac++;
+    XtSetArg(args[ac], XmNx, 40); ac++;
+    XtSetArg(args[ac], XmNy, 254); ac++;
     XtSetArg(args[ac], XmNwidth, 1014); ac++;
     XtSetArg(args[ac], XmNheight, 665); ac++;
     window_mbedit = XmCreateMainWindow(parent,
@@ -242,12 +246,70 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
+        tmp0 = (XmString) BX_CONVERT(controls_mbedit, "Show Time", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 650); ac++;
+        XtSetArg(args[ac], XmNy, 110); ac++;
+        XtSetArg(args[ac], XmNwidth, 140); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(controls_mbedit, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_show_time = XmCreateToggleButton(controls_mbedit,
+            "toggleButton_show_time",
+            args, 
+            ac);
+        XtManageChild(toggleButton_show_time);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_show_time, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(controls_mbedit, "Show Flagged Profile", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 790); ac++;
+        XtSetArg(args[ac], XmNy, 110); ac++;
+        XtSetArg(args[ac], XmNwidth, 210); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(controls_mbedit, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_show_flagged_on = XmCreateToggleButton(controls_mbedit,
+            "toggleButton_show_flagged_on",
+            args, 
+            ac);
+        XtManageChild(toggleButton_show_flagged_on);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_show_flagged_on, XmNvalueChangedCallback, do_show_flagged, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
         tmp0 = (XmString) BX_CONVERT(controls_mbedit, "Unflag Forward", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 530); ac++;
+        XtSetArg(args[ac], XmNx, 490); ac++;
         XtSetArg(args[ac], XmNy, 110); ac++;
-        XtSetArg(args[ac], XmNwidth, 130); ac++;
+        XtSetArg(args[ac], XmNwidth, 120); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(controls_mbedit, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
@@ -273,9 +335,9 @@ Createwindow_mbedit(Widget parent)
         tmp0 = (XmString) BX_CONVERT(controls_mbedit, "Unflag View", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 390); ac++;
+        XtSetArg(args[ac], XmNx, 370); ac++;
         XtSetArg(args[ac], XmNy, 110); ac++;
-        XtSetArg(args[ac], XmNwidth, 130); ac++;
+        XtSetArg(args[ac], XmNwidth, 120); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(controls_mbedit, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
@@ -639,100 +701,6 @@ Createwindow_mbedit(Widget parent)
     XtAddCallback(pushButton_quit, XmNactivateCallback, do_quit, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNspacing, 10); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 880); ac++;
-    XtSetArg(args[ac], XmNy, 110); ac++;
-    XtSetArg(args[ac], XmNwidth, 114); ac++;
-    XtSetArg(args[ac], XmNheight, 34); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    radioBox_show_flagged = XmCreateRadioBox(controls_mbedit,
-        "radioBox_show_flagged",
-        args, 
-        ac);
-    XtManageChild(radioBox_show_flagged);
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(radioBox_show_flagged, "On", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 49); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(radioBox_show_flagged, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_show_flagged_on = XmCreateToggleButton(radioBox_show_flagged,
-            "toggleButton_show_flagged_on",
-            args, 
-            ac);
-        XtManageChild(toggleButton_show_flagged_on);
-        
-        /*
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    XtAddCallback(toggleButton_show_flagged_on, XmNvalueChangedCallback, do_show_flagged_on, (XtPointer)0);
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(radioBox_show_flagged, "Off", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 49); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(radioBox_show_flagged, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_show_flagged_off = XmCreateToggleButton(radioBox_show_flagged,
-            "toggleButton_show_flagged_off",
-            args, 
-            ac);
-        XtManageChild(toggleButton_show_flagged_off);
-        
-        /*
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    XtAddCallback(toggleButton_show_flagged_off, XmNvalueChangedCallback, do_show_flagged_off, (XtPointer)0);
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(controls_mbedit, "Show flagged profile:", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 730); ac++;
-        XtSetArg(args[ac], XmNy, 110); ac++;
-        XtSetArg(args[ac], XmNwidth, 160); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(controls_mbedit, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_show_flagged = XmCreateLabel(controls_mbedit,
-            "label_show_flagged",
-            args, 
-            ac);
-        XtManageChild(label_show_flagged);
-        
-        /*
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    
-    ac = 0;
     {
         XmString    tmp0;
         
@@ -1049,7 +1017,7 @@ Createwindow_mbedit(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNmarginWidth, 0); ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 110); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -1074,7 +1042,7 @@ Createwindow_mbedit(Widget parent)
     XtSetArg(args[ac], XmNradioBehavior, True); ac++;
     XtSetArg(args[ac], XmNspacing, 0); ac++;
     XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 70); ac++;
+    XtSetArg(args[ac], XmNx, 50); ac++;
     XtSetArg(args[ac], XmNy, 110); ac++;
     XtSetArg(args[ac], XmNwidth, 289); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
@@ -1213,8 +1181,8 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 244); ac++;
-    XtSetArg(args[ac], XmNy, 267); ac++;
+    XtSetArg(args[ac], XmNx, 40); ac++;
+    XtSetArg(args[ac], XmNy, 516); ac++;
     XtSetArg(args[ac], XmNwidth, 541); ac++;
     XtSetArg(args[ac], XmNheight, 489); ac++;
     bulletinBoard_file = XmCreateBulletinBoard(xmDialogShell_file,
@@ -1385,8 +1353,8 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 409); ac++;
-    XtSetArg(args[ac], XmNy, 312); ac++;
+    XtSetArg(args[ac], XmNx, 449); ac++;
+    XtSetArg(args[ac], XmNy, 435); ac++;
     XtSetArg(args[ac], XmNwidth, 196); ac++;
     XtSetArg(args[ac], XmNheight, 302); ac++;
     bulletinBoard_goto = XmCreateBulletinBoard(xmDialogShell_goto,
@@ -1711,8 +1679,8 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 267); ac++;
-    XtSetArg(args[ac], XmNy, 273); ac++;
+    XtSetArg(args[ac], XmNx, 56); ac++;
+    XtSetArg(args[ac], XmNy, 527); ac++;
     XtSetArg(args[ac], XmNwidth, 473); ac++;
     XtSetArg(args[ac], XmNheight, 457); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(xmDialogShell_about,
@@ -2056,8 +2024,8 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 325); ac++;
-    XtSetArg(args[ac], XmNy, 321); ac++;
+    XtSetArg(args[ac], XmNx, 357); ac++;
+    XtSetArg(args[ac], XmNy, 543); ac++;
     XtSetArg(args[ac], XmNwidth, 379); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
     bulletinBoard_message = XmCreateBulletinBoard(xmDialogShell_message,
@@ -2136,8 +2104,8 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 299); ac++;
-    XtSetArg(args[ac], XmNy, 298); ac++;
+    XtSetArg(args[ac], XmNx, 122); ac++;
+    XtSetArg(args[ac], XmNy, 529); ac++;
     XtSetArg(args[ac], XmNwidth, 431); ac++;
     XtSetArg(args[ac], XmNheight, 133); ac++;
     bulletinBoard_editsave = XmCreateBulletinBoard(xmDialogShell_editsave,
@@ -2270,8 +2238,8 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 359); ac++;
-    XtSetArg(args[ac], XmNy, 284); ac++;
+    XtSetArg(args[ac], XmNx, 391); ac++;
+    XtSetArg(args[ac], XmNy, 506); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 161); ac++;
     bulletinBoard_error = XmCreateBulletinBoard(xmDialogShell_error,
@@ -2402,8 +2370,8 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 247); ac++;
-    XtSetArg(args[ac], XmNy, 293); ac++;
+    XtSetArg(args[ac], XmNx, 279); ac++;
+    XtSetArg(args[ac], XmNy, 515); ac++;
     XtSetArg(args[ac], XmNwidth, 536); ac++;
     XtSetArg(args[ac], XmNheight, 142); ac++;
     bulletinBoard_buffer = XmCreateBulletinBoard(dialogShell_buffer,
@@ -2611,8 +2579,8 @@ Createwindow_mbedit(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 247); ac++;
-        XtSetArg(args[ac], XmNy, 297); ac++;
+        XtSetArg(args[ac], XmNx, 279); ac++;
+        XtSetArg(args[ac], XmNy, 519); ac++;
         XtSetArg(args[ac], XmNwidth, 536); ac++;
         XtSetArg(args[ac], XmNheight, 135); ac++;
         bulletinBoard_annotation = XmCreateBulletinBoard(dialogShell_annotation,
@@ -2810,8 +2778,8 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "Filters"); ac++;
-    XtSetArg(args[ac], XmNwidth, 425); ac++;
-    XtSetArg(args[ac], XmNheight, 510); ac++;
+    XtSetArg(args[ac], XmNwidth, 426); ac++;
+    XtSetArg(args[ac], XmNheight, 300); ac++;
     dialogShell_filters = XtCreatePopupShell("dialogShell_filters",
         xmDialogShellWidgetClass,
         window_mbedit,
@@ -2821,20 +2789,132 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 263); ac++;
-    XtSetArg(args[ac], XmNy, 32); ac++;
-    XtSetArg(args[ac], XmNwidth, 425); ac++;
-    XtSetArg(args[ac], XmNheight, 510); ac++;
+    XtSetArg(args[ac], XmNx, 756); ac++;
+    XtSetArg(args[ac], XmNy, 35); ac++;
+    XtSetArg(args[ac], XmNwidth, 426); ac++;
+    XtSetArg(args[ac], XmNheight, 300); ac++;
     bulletinBoard_filters = XmCreateBulletinBoard(dialogShell_filters,
         "bulletinBoard_filters",
         args, 
         ac);
     
     ac = 0;
+    XtSetArg(args[ac], XmNscrollingPolicy, XmAUTOMATIC); ac++;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 10); ac++;
+    XtSetArg(args[ac], XmNwidth, 410); ac++;
+    XtSetArg(args[ac], XmNheight, 230); ac++;
+    scrolledWindow_filters = XmCreateScrolledWindow(bulletinBoard_filters,
+        "scrolledWindow_filters",
+        args, 
+        ac);
+    XtManageChild(scrolledWindow_filters);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+    XtSetArg(args[ac], XmNwidth, 375); ac++;
+    XtSetArg(args[ac], XmNheight, 810); ac++;
+    bulletinBoard_scrollfilters = XmCreateBulletinBoard(scrolledWindow_filters,
+        "bulletinBoard_scrollfilters",
+        args, 
+        ac);
+    XtManageChild(bulletinBoard_scrollfilters);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 90); ac++;
+    XtSetArg(args[ac], XmNy, 70); ac++;
+    XtSetArg(args[ac], XmNwidth, 16); ac++;
+    XtSetArg(args[ac], XmNheight, 16); ac++;
+    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
+    radioBox_mediancalc = XmCreateRadioBox(bulletinBoard_scrollfilters,
+        "radioBox_mediancalc",
+        args, 
+        ac);
+    XtManageChild(radioBox_mediancalc);
+    
+    ac = 0;
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "End Flagging Distance (m)", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "Median Alongtrack Dimension", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, 1); ac++;
+        XtSetArg(args[ac], XmNvalue, 1); ac++;
+        XtSetArg(args[ac], XmNmaximum, 20); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 140); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_median_local_ltrack = XmCreateScale(bulletinBoard_scrollfilters,
+            "scale_median_local_ltrack",
+            args, 
+            ac);
+        XtManageChild(scale_median_local_ltrack);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(scale_median_local_ltrack, XmNvalueChangedCallback, do_check_median_ltrack, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "Median Acrosstrack Dimension", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, 1); ac++;
+        XtSetArg(args[ac], XmNvalue, 5); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 80); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_median_local_xtrack = XmCreateScale(bulletinBoard_scrollfilters,
+            "scale_median_local_xtrack",
+            args, 
+            ac);
+        XtManageChild(scale_median_local_xtrack);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(scale_median_local_xtrack, XmNvalueChangedCallback, do_check_median_xtrack, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 650); ac++;
+    XtSetArg(args[ac], XmNwidth, 350); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    separator6 = XmCreateSeparator(bulletinBoard_scrollfilters,
+        "separator6",
+        args, 
+        ac);
+    XtManageChild(separator6);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "End Flagging Angle (deg)", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
@@ -2843,14 +2923,119 @@ Createwindow_mbedit(Widget parent)
         XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
         XtSetArg(args[ac], XmNshowValue, True); ac++;
         XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 200); ac++;
-        XtSetArg(args[ac], XmNy, 370); ac++;
-        XtSetArg(args[ac], XmNwidth, 210); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 580); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_filters_cutdistanceend = XmCreateScale(bulletinBoard_filters,
+        scale_filters_cutangleend = XmCreateScale(bulletinBoard_scrollfilters,
+            "scale_filters_cutangleend",
+            args, 
+            ac);
+        XtManageChild(scale_filters_cutangleend);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "Start Flagging Angle (deg)", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
+        XtSetArg(args[ac], XmNvalue, 1000); ac++;
+        XtSetArg(args[ac], XmNmaximum, 10000); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 520); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_filters_cutanglestart = XmCreateScale(bulletinBoard_scrollfilters,
+            "scale_filters_cutanglestart",
+            args, 
+            ac);
+        XtManageChild(scale_filters_cutanglestart);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, ":::t\"Flag by\":t\"Beam\"\"Angle\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 530); ac++;
+        XtSetArg(args[ac], XmNwidth, 80); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_filters_cutangle = XmCreateToggleButton(bulletinBoard_scrollfilters,
+            "toggleButton_filters_cutangle",
+            args, 
+            ac);
+        XtManageChild(toggleButton_filters_cutangle);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 500); ac++;
+    XtSetArg(args[ac], XmNwidth, 350); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    separator5 = XmCreateSeparator(bulletinBoard_scrollfilters,
+        "separator5",
+        args, 
+        ac);
+    XtManageChild(separator5);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "End Flagging Distance (m)", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
+        XtSetArg(args[ac], XmNvalue, 1000); ac++;
+        XtSetArg(args[ac], XmNmaximum, 10000); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 440); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_filters_cutdistanceend = XmCreateScale(bulletinBoard_scrollfilters,
             "scale_filters_cutdistanceend",
             args, 
             ac);
@@ -2867,7 +3052,7 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Start Flagging Distance (m)", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "Start Flagging Distance (m)", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
@@ -2876,14 +3061,14 @@ Createwindow_mbedit(Widget parent)
         XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
         XtSetArg(args[ac], XmNshowValue, True); ac++;
         XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 200); ac++;
-        XtSetArg(args[ac], XmNy, 310); ac++;
-        XtSetArg(args[ac], XmNwidth, 210); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 380); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_filters_cutdistancestart = XmCreateScale(bulletinBoard_filters,
+        scale_filters_cutdistancestart = XmCreateScale(bulletinBoard_scrollfilters,
             "scale_filters_cutdistancestart",
             args, 
             ac);
@@ -2900,18 +3085,18 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Flag by Distance", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, ":::t\"Flag by\"\"Distance\"", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 320); ac++;
-        XtSetArg(args[ac], XmNwidth, 190); ac++;
+        XtSetArg(args[ac], XmNy, 390); ac++;
+        XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_filters_cutdistance = XmCreateToggleButton(bulletinBoard_filters,
+        toggleButton_filters_cutdistance = XmCreateToggleButton(bulletinBoard_scrollfilters,
             "toggleButton_filters_cutdistance",
             args, 
             ac);
@@ -2926,21 +3111,10 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 430); ac++;
-    XtSetArg(args[ac], XmNwidth, 400); ac++;
+    XtSetArg(args[ac], XmNy, 210); ac++;
+    XtSetArg(args[ac], XmNwidth, 350); ac++;
     XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator5 = XmCreateSeparator(bulletinBoard_filters,
-        "separator5",
-        args, 
-        ac);
-    XtManageChild(separator5);
-    
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 290); ac++;
-    XtSetArg(args[ac], XmNwidth, 400); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator4 = XmCreateSeparator(bulletinBoard_filters,
+    separator4 = XmCreateSeparator(bulletinBoard_scrollfilters,
         "separator4",
         args, 
         ac);
@@ -2950,21 +3124,21 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "End Flagging Beam Number", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "End Flagging Beam Number", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNvalue, 10); ac++;
         XtSetArg(args[ac], XmNmaximum, 100); ac++;
         XtSetArg(args[ac], XmNshowValue, True); ac++;
         XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 200); ac++;
-        XtSetArg(args[ac], XmNy, 230); ac++;
-        XtSetArg(args[ac], XmNwidth, 210); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 290); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_filters_cutbeamend = XmCreateScale(bulletinBoard_filters,
+        scale_filters_cutbeamend = XmCreateScale(bulletinBoard_scrollfilters,
             "scale_filters_cutbeamend",
             args, 
             ac);
@@ -2981,21 +3155,21 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Start Flagging Beam Number", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "Start Flagging Beam Number", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNvalue, 10); ac++;
         XtSetArg(args[ac], XmNmaximum, 100); ac++;
         XtSetArg(args[ac], XmNshowValue, True); ac++;
         XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 200); ac++;
-        XtSetArg(args[ac], XmNy, 170); ac++;
-        XtSetArg(args[ac], XmNwidth, 210); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 230); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
         XtSetArg(args[ac], XmNheight, 63); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_filters_cutbeamstart = XmCreateScale(bulletinBoard_filters,
+        scale_filters_cutbeamstart = XmCreateScale(bulletinBoard_scrollfilters,
             "scale_filters_cutbeamstart",
             args, 
             ac);
@@ -3012,18 +3186,18 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Flag by Beam Number", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, ":::t\"Flag by\":t\"Beam\"\"Number\"", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 180); ac++;
-        XtSetArg(args[ac], XmNwidth, 190); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
+        XtSetArg(args[ac], XmNy, 240); ac++;
+        XtSetArg(args[ac], XmNwidth, 90); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_filters_cutbeam = XmCreateToggleButton(bulletinBoard_filters,
+        toggleButton_filters_cutbeam = XmCreateToggleButton(bulletinBoard_scrollfilters,
             "toggleButton_filters_cutbeam",
             args, 
             ac);
@@ -3038,10 +3212,10 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 150); ac++;
-    XtSetArg(args[ac], XmNwidth, 400); ac++;
+    XtSetArg(args[ac], XmNy, 360); ac++;
+    XtSetArg(args[ac], XmNwidth, 350); ac++;
     XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator3 = XmCreateSeparator(bulletinBoard_filters,
+    separator3 = XmCreateSeparator(bulletinBoard_scrollfilters,
         "separator3",
         args, 
         ac);
@@ -3051,11 +3225,130 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "Beams from Center Threshold", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNvalue, 10); ac++;
+        XtSetArg(args[ac], XmNmaximum, 100); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 670); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_filters_wrongside = XmCreateScale(bulletinBoard_scrollfilters,
+            "scale_filters_wrongside",
+            args, 
+            ac);
+        XtManageChild(scale_filters_wrongside);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, ":::t\"Wrong\":t\"Side\"\"Filter\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 680); ac++;
+        XtSetArg(args[ac], XmNwidth, 90); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_filters_wrongside = XmCreateToggleButton(bulletinBoard_scrollfilters,
+            "toggleButton_filters_wrongside",
+            args, 
+            ac);
+        XtManageChild(toggleButton_filters_wrongside);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, "% Median Depth Threshold ", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, 1); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 0); ac++;
+        XtSetArg(args[ac], XmNvalue, 10); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_filters_medianspike = XmCreateScale(bulletinBoard_scrollfilters,
+            "scale_filters_medianspike",
+            args, 
+            ac);
+        XtManageChild(scale_filters_medianspike);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_scrollfilters, ":::t\"Median\":t\"Spike\"\"Filter\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 20); ac++;
+        XtSetArg(args[ac], XmNwidth, 90); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_scrollfilters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_filters_medianspike = XmCreateToggleButton(bulletinBoard_scrollfilters,
+            "toggleButton_filters_medianspike",
+            args, 
+            ac);
+        XtManageChild(toggleButton_filters_medianspike);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Reset", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 170); ac++;
-        XtSetArg(args[ac], XmNy, 460); ac++;
+        XtSetArg(args[ac], XmNx, 160); ac++;
+        XtSetArg(args[ac], XmNy, 250); ac++;
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -3083,7 +3376,7 @@ Createwindow_mbedit(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 50); ac++;
-        XtSetArg(args[ac], XmNy, 460); ac++;
+        XtSetArg(args[ac], XmNy, 250); ac++;
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -3107,141 +3400,11 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "% Median Depth Threshold ", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, 1); ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 0); ac++;
-        XtSetArg(args[ac], XmNvalue, 10); ac++;
-        XtSetArg(args[ac], XmNshowValue, True); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 200); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 210); ac++;
-        XtSetArg(args[ac], XmNheight, 63); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_filters_medianspike = XmCreateScale(bulletinBoard_filters,
-            "scale_filters_medianspike",
-            args, 
-            ac);
-        XtManageChild(scale_filters_medianspike);
-        
-        /*
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Beams from Center Threshold", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNvalue, 10); ac++;
-        XtSetArg(args[ac], XmNmaximum, 100); ac++;
-        XtSetArg(args[ac], XmNshowValue, True); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 200); ac++;
-        XtSetArg(args[ac], XmNy, 90); ac++;
-        XtSetArg(args[ac], XmNwidth, 210); ac++;
-        XtSetArg(args[ac], XmNheight, 63); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_filters_wrongside = XmCreateScale(bulletinBoard_filters,
-            "scale_filters_wrongside",
-            args, 
-            ac);
-        XtManageChild(scale_filters_wrongside);
-        
-        /*
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 70); ac++;
-    XtSetArg(args[ac], XmNwidth, 400); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator2 = XmCreateSeparator(bulletinBoard_filters,
-        "separator2",
-        args, 
-        ac);
-    XtManageChild(separator2);
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Median Spike Filter", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 170); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_filters_medianspike = XmCreateToggleButton(bulletinBoard_filters,
-            "toggleButton_filters_medianspike",
-            args, 
-            ac);
-        XtManageChild(toggleButton_filters_medianspike);
-        
-        /*
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Wrong Side Filter", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 100); ac++;
-        XtSetArg(args[ac], XmNwidth, 170); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_filters, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_filters_wrongside = XmCreateToggleButton(bulletinBoard_filters,
-            "toggleButton_filters_wrongside",
-            args, 
-            ac);
-        XtManageChild(toggleButton_filters_wrongside);
-        
-        /*
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_filters, "Dismiss", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 290); ac++;
-        XtSetArg(args[ac], XmNy, 460); ac++;
+        XtSetArg(args[ac], XmNx, 270); ac++;
+        XtSetArg(args[ac], XmNy, 250); ac++;
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList, 
