@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 1.2 2003-11-25 01:43:19 caress Exp $
+ *    $Id: mbview_process.c,v 1.3 2003-12-01 20:55:48 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2003/11/25 01:43:19  caress
+ * MBview version generated during EW0310.
+ *
  *
  */
 /*------------------------------------------------------------------------------*/
@@ -67,7 +70,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 1.2 2003-11-25 01:43:19 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 1.3 2003-12-01 20:55:48 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -2131,8 +2134,8 @@ int mbview_contour(int instance, int rez)
 	glBegin(GL_LINES);
 	
 if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_contour: instance:%d rez:%d contour interval:%f\n",
-instance, rez, data->contour_interval);
+fprintf(stderr,"mbview_contour: instance:%d rez:%d stride:%d contour interval:%f\n",
+instance, rez, stride, data->contour_interval);
 
 	/* construct the contour segments in each triangle */
 	for (i=0;i<data->primary_nx-stride;i+=stride)
