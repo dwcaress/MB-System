@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	3.00	2/1/93
- *    $Id: mbinfo.c,v 3.0 1993-05-04 22:38:24 dale Exp $
+ *    $Id: mbinfo.c,v 3.1 1993-06-12 04:29:33 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/05/04  22:38:24  dale
+ * Inital version.
+ *
  */
 
 /* standard include files */
@@ -48,10 +51,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 3.0 1993-05-04 22:38:24 dale Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 3.1 1993-06-12 04:29:33 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam bathymetry data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
-	static char usage_message[] = "mbinfo [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile]";
+	static char usage_message[] = "mbinfo [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -N -V -H -Ifile]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -100,6 +103,7 @@ char **argv;
 	int	*backdist;
 	char	comment[256];
 	int	icomment = 0;
+	int	comments = MB_YES;
 
 	/* limit variables */
 	double	lonmin, lonmax, latmin, latmax;
@@ -145,7 +149,7 @@ char **argv;
 	strcpy (file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:Nn")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -210,6 +214,11 @@ char **argv;
 			sscanf (optarg,"%s", file);
 			flag++;
 			break;
+		case 'N':
+		case 'n':
+			comments = MB_NO;
+			flag++;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -267,6 +276,7 @@ char **argv;
 		fprintf(output,"dbg2       etime_i[5]: %d\n",etime_i[5]);
 		fprintf(output,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(output,"dbg2       timegap:    %f\n",timegap);
+		fprintf(output,"dbg2       comments:   %d\n",comments);
 		fprintf(output,"dbg2       file:       %s\n",file);
 		}
 
@@ -389,7 +399,7 @@ char **argv;
 				}
 
 			/* print comment records */
-			if (error == MB_ERROR_COMMENT)
+			if (error == MB_ERROR_COMMENT && comments == MB_YES)
 				{
 				if (icomment == 0)
 					{
