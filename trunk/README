@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-Version 5.0.beta10     November 19, 2001
+Version 5.0.beta10     November 20, 2001
 Version 5.0.beta09     November 6, 2001
 Version 5.0.beta08     October 19, 2001
 Version 5.0.beta07     August 10, 2001
@@ -98,14 +98,36 @@ MB-SYSTEM VERSION 5.0.BETA10 RELEASE NOTES:
 ------------------------------------------
 
 The version 5.0.beta10 release of MB-System includes 
-new features for mbedit and mbset. The interactive
-bathymetry editor mbedit now includes an "info" mode
-that allows users to access timetag and navigation
-information about selected soundings. The program
-mbset, used to modify or create mbprocess parameter
-files, will now accept datalists as input. This release
-also includes a significant bug fix to the handling
-of datalists in mbprocess.
+new features for mbedit and mbset, fixes to mbprocess,
+mbvelocitytool, and mbinfo, and changes to the
+handling of default control parameters. 
+
+The interactive bathymetry editor mbedit now includes 
+an "info" mode that allows users to access timetag 
+and navigation information about selected soundings. 
+
+The program mbset, used to modify or create mbprocess 
+parameter files, will now accept datalists as input. 
+
+Prior to this release, the MB-System defaults set by
+mbdefaults included the format id, a control for ping
+averaging, longitude and latitude bounds for windowing by
+area, and begin and end times for windowing in time. These
+values are no longer set in the .mbio_defaults file or
+controlled by mbdefaults. In MB-System 5.0 the format id is
+automatically identified from the filename when possible.
+When filenames do not match one of the recognized
+structures, users must specify the format using the relevant
+programs -Fformat option.  The controls for ping averaging
+and windowing in time and space are rarely used, and must
+now be explicitly set in command line arguments.
+
+This release also includes significant bug fixes:
+  - Handling of datalists in mbprocess
+  - Specifying input swath files from the command
+    line in mbvelocitytool
+  - Using the -C option in mbinfo to print out both
+    metadata tags and comments.
 
 MB-SYSTEM VERSION 5.0.BETA09 RELEASE NOTES:
 ------------------------------------------
@@ -626,10 +648,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.11 2001-11-16 20:14:47 caress Exp $
+RCS ID: $Id: README,v 5.12 2001-11-20 22:11:20 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 5.11  2001/11/16  20:14:47  caress
+# Release 5.0.beta10
+#
 Revision 5.10  2001/11/07 01:57:54  caress
 Fixed for release 5.0.beta09
 
