@@ -20,8 +20,8 @@
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/BulletinB.h>
-#include <Xm/PushB.h>
 #include <Xm/Separator.h>
+#include <Xm/PushB.h>
 #include <Xm/Scale.h>
 #include <Xm/Label.h>
 #include <Xm/RowColumn.h>
@@ -128,10 +128,9 @@ CreatemainWindow(Widget parent)
     Widget   mainWindow;
     Widget   dialogShell_biases;
     Widget   bulletinBoard_biases;
+    Widget   separator9;
     Widget   separator8;
     Widget   separator6;
-    Widget   label_biases_section2;
-    Widget   label_biases_section1;
     Widget   radioBox_biases_together;
     Widget   pushButton_biases_apply;
     Widget   pushButton_biases_dismiss;
@@ -196,8 +195,8 @@ CreatemainWindow(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
@@ -949,8 +948,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 22); ac++;
-    XtSetArg(args[ac], XmNy, 220); ac++;
+    XtSetArg(args[ac], XmNx, 170); ac++;
+    XtSetArg(args[ac], XmNy, 102); ac++;
     XtSetArg(args[ac], XmNwidth, 674); ac++;
     XtSetArg(args[ac], XmNheight, 470); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(xmDialogShell_about,
@@ -1295,8 +1294,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_ANY); ac++;
-    XtSetArg(args[ac], XmNx, 31); ac++;
-    XtSetArg(args[ac], XmNy, 187); ac++;
+    XtSetArg(args[ac], XmNx, 236); ac++;
+    XtSetArg(args[ac], XmNy, 294); ac++;
     XtSetArg(args[ac], XmNwidth, 542); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
     bulletinBoard_message = XmCreateBulletinBoard(xmDialogShell_message,
@@ -1374,8 +1373,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 47); ac++;
-    XtSetArg(args[ac], XmNy, 179); ac++;
+    XtSetArg(args[ac], XmNx, 351); ac++;
+    XtSetArg(args[ac], XmNy, 257); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 160); ac++;
     bulletinBoard_error = XmCreateBulletinBoard(xmDialogShell_error,
@@ -1508,8 +1507,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 19); ac++;
-    XtSetArg(args[ac], XmNy, 200); ac++;
+    XtSetArg(args[ac], XmNx, 172); ac++;
+    XtSetArg(args[ac], XmNy, 315); ac++;
     XtSetArg(args[ac], XmNwidth, 611); ac++;
     XtSetArg(args[ac], XmNheight, 530); ac++;
     bulletinBoard_fileselection = XmCreateBulletinBoard(xmDialogShell_fileselection,
@@ -1623,8 +1622,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNnoResize, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-        XtSetArg(args[ac], XmNx, 21); ac++;
-        XtSetArg(args[ac], XmNy, 192); ac++;
+        XtSetArg(args[ac], XmNx, 97); ac++;
+        XtSetArg(args[ac], XmNy, 234); ac++;
         XtSetArg(args[ac], XmNwidth, 845); ac++;
         XtSetArg(args[ac], XmNheight, 595); ac++;
         bulletinBoard_naverr = XmCreateBulletinBoard(dialogShell_naverr,
@@ -2287,8 +2286,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 33); ac++;
-    XtSetArg(args[ac], XmNy, 190); ac++;
+    XtSetArg(args[ac], XmNx, 220); ac++;
+    XtSetArg(args[ac], XmNy, 168); ac++;
     XtSetArg(args[ac], XmNwidth, 573); ac++;
     XtSetArg(args[ac], XmNheight, 337); ac++;
     bulletinBoard_controls = XmCreateBulletinBoard(xmDialogShell_controls,
@@ -2670,8 +2669,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "Attitude Biases"); ac++;
-    XtSetArg(args[ac], XmNwidth, 158); ac++;
-    XtSetArg(args[ac], XmNheight, 591); ac++;
+    XtSetArg(args[ac], XmNwidth, 284); ac++;
+    XtSetArg(args[ac], XmNheight, 446); ac++;
     dialogShell_biases = XtCreatePopupShell("dialogShell_biases",
         xmDialogShellWidgetClass,
         mainWindow,
@@ -2687,10 +2686,10 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 528); ac++;
-        XtSetArg(args[ac], XmNy, 119); ac++;
-        XtSetArg(args[ac], XmNwidth, 158); ac++;
-        XtSetArg(args[ac], XmNheight, 591); ac++;
+        XtSetArg(args[ac], XmNx, 176); ac++;
+        XtSetArg(args[ac], XmNy, 32); ac++;
+        XtSetArg(args[ac], XmNwidth, 284); ac++;
+        XtSetArg(args[ac], XmNheight, 446); ac++;
         bulletinBoard_biases = XmCreateBulletinBoard(dialogShell_biases,
             "bulletinBoard_biases",
             args, 
@@ -2704,14 +2703,25 @@ CreatemainWindow(Widget parent)
     
     
     ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 340); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    separator9 = XmCreateSeparator(bulletinBoard_biases,
+        "separator9",
+        args, 
+        ac);
+    XtManageChild(separator9);
+    
+    ac = 0;
     {
         XmString    tmp0;
         
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, "Apply to All Files", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 510); ac++;
+        XtSetArg(args[ac], XmNx, 70); ac++;
+        XtSetArg(args[ac], XmNy, 360); ac++;
         XtSetArg(args[ac], XmNwidth, 140); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -2733,8 +2743,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 110); ac++;
-    XtSetArg(args[ac], XmNwidth, 140); ac++;
+    XtSetArg(args[ac], XmNy, 60); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
     XtSetArg(args[ac], XmNheight, 20); ac++;
     separator8 = XmCreateSeparator(bulletinBoard_biases,
         "separator8",
@@ -2744,8 +2754,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 310); ac++;
-    XtSetArg(args[ac], XmNwidth, 140); ac++;
+    XtSetArg(args[ac], XmNy, 200); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
     XtSetArg(args[ac], XmNheight, 20); ac++;
     separator6 = XmCreateSeparator(bulletinBoard_biases,
         "separator6",
@@ -2754,64 +2764,30 @@ CreatemainWindow(Widget parent)
     XtManageChild(separator6);
     
     ac = 0;
-    XtSetArg(args[ac], XmNminimum, -99); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-    XtSetArg(args[ac], XmNvalue, 0); ac++;
-    XtSetArg(args[ac], XmNmaximum, 99); ac++;
-    XtSetArg(args[ac], XmNshowValue, True); ac++;
-    XtSetArg(args[ac], XmNorientation, XmVERTICAL); ac++;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 360); ac++;
-    XtSetArg(args[ac], XmNwidth, 60); ac++;
-    XtSetArg(args[ac], XmNheight, 140); ac++;
-    XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_biases, "-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_biases_heading2 = XmCreateScale(bulletinBoard_biases,
-        "scale_biases_heading2",
-        args, 
-        ac);
-    XtManageChild(scale_biases_heading2);
-    
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, -99); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-    XtSetArg(args[ac], XmNvalue, 0); ac++;
-    XtSetArg(args[ac], XmNmaximum, 99); ac++;
-    XtSetArg(args[ac], XmNshowValue, True); ac++;
-    XtSetArg(args[ac], XmNorientation, XmVERTICAL); ac++;
-    XtSetArg(args[ac], XmNx, 70); ac++;
-    XtSetArg(args[ac], XmNy, 360); ac++;
-    XtSetArg(args[ac], XmNwidth, 60); ac++;
-    XtSetArg(args[ac], XmNheight, 140); ac++;
-    XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_biases, "-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_biases_roll2 = XmCreateScale(bulletinBoard_biases,
-        "scale_biases_roll2",
-        args, 
-        ac);
-    XtManageChild(scale_biases_roll2);
-    
-    ac = 0;
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, ":::t\"Section 2 Biases (deg)\"\"Heading     Roll\"", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, "Section 2 Heading (deg)", 
                 XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, -99); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
+        XtSetArg(args[ac], XmNvalue, 0); ac++;
+        XtSetArg(args[ac], XmNmaximum, 99); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 330); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNy, 220); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(bulletinBoard_biases, "-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        label_biases_section2 = XmCreateLabel(bulletinBoard_biases,
-            "label_biases_section2",
+        scale_biases_heading2 = XmCreateScale(bulletinBoard_biases,
+            "scale_biases_heading2",
             args, 
             ac);
-        XtManageChild(label_biases_section2);
+        XtManageChild(scale_biases_heading2);
         
         /*
          * Free any memory allocated for resources.
@@ -2824,21 +2800,27 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, ":::t\"Section 1 Biases (deg)\"\"Heading     Roll\"", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, "Section 2 Roll (deg)", 
                 XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, -99); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
+        XtSetArg(args[ac], XmNvalue, 0); ac++;
+        XtSetArg(args[ac], XmNmaximum, 99); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 130); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNy, 280); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(bulletinBoard_biases, "-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        label_biases_section1 = XmCreateLabel(bulletinBoard_biases,
-            "label_biases_section1",
+        scale_biases_roll2 = XmCreateScale(bulletinBoard_biases,
+            "scale_biases_roll2",
             args, 
             ac);
-        XtManageChild(label_biases_section1);
+        XtManageChild(scale_biases_roll2);
         
         /*
          * Free any memory allocated for resources.
@@ -2848,45 +2830,71 @@ CreatemainWindow(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNminimum, -99); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-    XtSetArg(args[ac], XmNvalue, 0); ac++;
-    XtSetArg(args[ac], XmNmaximum, 99); ac++;
-    XtSetArg(args[ac], XmNshowValue, True); ac++;
-    XtSetArg(args[ac], XmNorientation, XmVERTICAL); ac++;
-    XtSetArg(args[ac], XmNx, 70); ac++;
-    XtSetArg(args[ac], XmNy, 160); ac++;
-    XtSetArg(args[ac], XmNwidth, 60); ac++;
-    XtSetArg(args[ac], XmNheight, 140); ac++;
-    XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_biases, "-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_biases_roll1 = XmCreateScale(bulletinBoard_biases,
-        "scale_biases_roll1",
-        args, 
-        ac);
-    XtManageChild(scale_biases_roll1);
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, "Section 1 Roll (deg)", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, -99); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
+        XtSetArg(args[ac], XmNvalue, 0); ac++;
+        XtSetArg(args[ac], XmNmaximum, 99); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 140); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 58); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_biases, "-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_biases_roll1 = XmCreateScale(bulletinBoard_biases,
+            "scale_biases_roll1",
+            args, 
+            ac);
+        XtManageChild(scale_biases_roll1);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
     XtAddCallback(scale_biases_roll1, XmNvalueChangedCallback, do_biases_roll, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNminimum, -99); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-    XtSetArg(args[ac], XmNvalue, 0); ac++;
-    XtSetArg(args[ac], XmNmaximum, 99); ac++;
-    XtSetArg(args[ac], XmNshowValue, True); ac++;
-    XtSetArg(args[ac], XmNorientation, XmVERTICAL); ac++;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 160); ac++;
-    XtSetArg(args[ac], XmNwidth, 60); ac++;
-    XtSetArg(args[ac], XmNheight, 140); ac++;
-    XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_biases, "-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_biases_heading1 = XmCreateScale(bulletinBoard_biases,
-        "scale_biases_heading1",
-        args, 
-        ac);
-    XtManageChild(scale_biases_heading1);
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, "Section 1 Heading (deg)", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, -99); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
+        XtSetArg(args[ac], XmNvalue, 0); ac++;
+        XtSetArg(args[ac], XmNmaximum, 99); ac++;
+        XtSetArg(args[ac], XmNshowValue, True); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 80); ac++;
+        XtSetArg(args[ac], XmNwidth, 260); ac++;
+        XtSetArg(args[ac], XmNheight, 58); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_biases, "-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_biases_heading1 = XmCreateScale(bulletinBoard_biases,
+            "scale_biases_heading1",
+            args, 
+            ac);
+        XtManageChild(scale_biases_heading1);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
     XtAddCallback(scale_biases_heading1, XmNvalueChangedCallback, do_biases_heading, (XtPointer)0);
     
     ac = 0;
@@ -2918,8 +2926,8 @@ CreatemainWindow(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 50); ac++;
+    XtSetArg(args[ac], XmNx, 150); ac++;
+    XtSetArg(args[ac], XmNy, 10); ac++;
     XtSetArg(args[ac], XmNwidth, 127); ac++;
     XtSetArg(args[ac], XmNheight, 61); ac++;
     XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
@@ -2987,8 +2995,8 @@ CreatemainWindow(Widget parent)
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, "Apply", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 550); ac++;
+        XtSetArg(args[ac], XmNx, 70); ac++;
+        XtSetArg(args[ac], XmNy, 400); ac++;
         XtSetArg(args[ac], XmNwidth, 70); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -3015,8 +3023,8 @@ CreatemainWindow(Widget parent)
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, "Dismiss", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 80); ac++;
-        XtSetArg(args[ac], XmNy, 550); ac++;
+        XtSetArg(args[ac], XmNx, 140); ac++;
+        XtSetArg(args[ac], XmNy, 400); ac++;
         XtSetArg(args[ac], XmNwidth, 70); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
