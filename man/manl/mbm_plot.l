@@ -177,7 +177,8 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page.
+is given in the \fBMBIO\fP manual page. The default input filename is
+"datalist.mb-1".
 .TP
 .B \-N
 Given by itself, this option causes an annotated 
