@@ -1,7 +1,10 @@
-April 16, 1993
-
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 3.3  1993/11/04  17:46:36  caress
+# Updated for version 3.3.  Added where to get required
+# software packages and what Makefile to change to fit
+# local environments.
+#
 # Revision 3.2  1993/08/25  14:41:41  dale
 # Add porting, and requirements, and bugs and stuff for 3.2
 #
@@ -12,15 +15,15 @@ $Log: not supported by cvs2svn $
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 3.3 1993-11-04 17:46:36 caress Exp $
+RCS ID: $Id: README,v 3.4 1993-11-05 14:59:04 caress Exp $
 
 MBSYSTEM 3.30 RELEASE Notes:
 ----------------------------
 
-This directory structure contains a release of the MBSYSTEM software
-package for processing and display of multibeam data.  There are
-undoubtably numerous bugs in this software - the user should beware
-(and let us know about it!).
+	This directory structure contains a release of the MBSYSTEM
+software package for processing and display of multibeam data.  There
+are undoubtably numerous bugs in this software - the user should
+beware (and let us know about it!).
 
 Copyright:
 ----------
@@ -29,13 +32,14 @@ All Rights Reserved.
 
 Caveat:
 -------
-The MB-System does not come with any warranties, nor is it guarenteed 
-to work on your computer.  The user assumes full responsibility for 
-the use of this system.  In particular, the Lamont-Doherty Earth 
-Observatory of Columbia University, David W. Caress, Dale N. Chayes, 
-or any other individuals involved in the design and maintenance of 
-the MB-System are NOT responsible for any damage that may follow 
-from correct or incorrect use of these programs.
+	The MB-System does not come with any warranties, nor is it
+guarenteed to work on your computer or to do anything useful.  The
+user assumes full responsibility for the use of this system.  In
+particular, the Lamont-Doherty Earth Observatory of Columbia
+University, David W.  Caress, Dale N. Chayes, or any other individuals
+involved in the design and maintenance of the MB-System are NOT
+responsible for any damage that may follow from correct or incorrect
+use of these programs.
 
 Other required software:
 ------------------------
@@ -98,7 +102,9 @@ Ewing (as well as IPX, SS-I and SS-II) under SunOS 4.1X and at Lamont.
 We have yet not attempted to port to Solaris yet, but probably will
 after it is thought to be stable. Since Lamont has a huge collection
 of (mostly SPARC) Suns, its a fair bet that we will be using Suns in
-the forseeable future.
+the forseeable future. Its also a fair bet that if you provide us with
+a really cool (ie. FAST) computer of your choice, we might be inclined
+to try making MB-System run on it.
 
 PORTING:
 --------
@@ -125,37 +131,43 @@ part of the COSE response to NT) it is switching to some Motif-like
 thing that COSE will proably call by some other name. Its not clear
 exactly what Sun is going to do, but we assume that they are going to
 re-market some commercial tool.
-        We (back at Lamont, not out here in our spare time ;-) ) are
-presently evaluating Motif GUI builders with the intent of getting
-something soon and would be intersted in any suggestions based on
-experience at your organizaion. 
+        We (at Lamont), are currently evaluating Motif GUI builders
+with the intent of getting something soon and would be intersted in
+any suggestions based on experience at your organizaion.
         For the short term, we suggest that you run the binaries
-provided in the 3.2 distribution on Suns (if you can) while the GUI
+provided in the 3.3 distribution on Suns (if you can) while the GUI
 builder issue settles out.
 
 "Bugs": 
 ------- 
-The programs mbedit and hsvelocitytool should not be made from scratch
-unless the user has access to the development tool Devguide (sold by
-Sun Microsystems or SunSoft?) - an executable (for Sun Sparc) has been
-left in the src/mbedit directory. See further discussion below.
+	The programs mbedit and hsvelocitytool should not be made from
+scratch unless the user has access to the development tool Devguide
+(sold by Sun Microsystems or SunSoft?) - an executable (for Sun Sparc)
+has been left in the src/mbedit directory. See further discussion
+below.
 
-The program mblevitus depends on a 16 MByte data file that is not
+	The program mblevitus depends on a 16 MByte data file that is not
 included in the MB-System tarfile.  It is in the 'annual.Z' file which
 is available by anonymous ftp from lamont.ldgo.columbia.edu in the
-swath_data subdirectory.
+pub/swath_data subdirectory.
  
-Contributions:
+Contributions: 
 --------------
 	We are actively soliciting contributions for inclusion in the
-MB-System . In particular support for additional data formats in the
+MB-System. In particular support for additional data formats in the
 mbio.a library such as EM-12, HS-MD, MR-1, etc would helpful, as would
 new, clever tools for data manipulation and processing.
 
+Suggestions:
+------------
+	We expect to get support from NSF to continue work on the
+MB-System in 1994. Our primary efforts will be in the direction of
+enhanced usability through easier user interfaces, more documentation,
+cookbook examples, etc. We are interested in your suggestions.
+
+
 Good Luck!!
 
-Dave Caress
-caress@lamont.ldeo.columbia.edu
-Dale Chayes
-dale@ldeo.columbia.edu
+Dave Caress caress@ldeo.columbia.edu 
+Dale Chayes dale@ldeo.columbia.edu
 
