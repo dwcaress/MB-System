@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.12 2001-10-19 00:54:37 caress Exp $
+ *    $Id: mb_process.c,v 5.13 2001-10-19 19:41:09 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2001/10/19  00:54:37  caress
+ * Now tries to use relative paths.
+ *
  * Revision 5.11  2001/09/17  23:22:51  caress
  * Fixed metadata support.
  *
@@ -86,7 +89,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.12 2001-10-19 00:54:37 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.13 2001-10-19 19:41:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -96,6 +99,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	char	*function_name = "mb_pr_readpar";
 	char	parfile[MBP_FILENAMESIZE], fileroot[MBP_FILENAMESIZE];
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
+	char	*lastslash;
 	int	format;
 	FILE	*fp;
 	int	stat_status;
@@ -741,12 +745,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			}
 		    else if (strncmp(buffer, "METAPITCHBIAS", 13) == 0)
 			{
-fprintf(stderr, "GOT METAPITCHBIAS: %s\n", buffer);
 			sscanf(buffer, "METAPITCHBIAS %lf", &process->mbp_meta_pitchbias);
 			}
 		    else if (strncmp(buffer, "METAPI", 6) == 0)
 			{
-fprintf(stderr, "GOT METAPI: %s\n", buffer);
 			strncpy(process->mbp_meta_pi, &buffer[7], MBP_FILENAMESIZE);
 			}
 		    else if (strncmp(buffer, "METAHEADINGBIAS", 15) == 0)
@@ -779,63 +781,29 @@ fprintf(stderr, "GOT METAPI: %s\n", buffer);
 	if (process->mbp_format_specified == MB_NO
 	    || process->mbp_ofile_specified == MB_NO)
 	    {
-	    /* get format if possible */
-	    status = mb_get_format(verbose, process->mbp_ifile, 
-				    fileroot, &format, error);
-				    
-	    /* deal with format */
-	    if (status == MB_SUCCESS && format > 0)
-		{
-		/* set format if found */
-		if (process->mbp_format_specified == MB_NO)
-		    {
-		    process->mbp_format = format;
-		    process->mbp_format_specified = MB_YES;
-		    }
-		    
-		/* set output file if needed */
-		if (process->mbp_ofile_specified == MB_NO
-		    && process->mbp_format_specified == MB_YES)
-		    {
-		    /* use .txt suffix if MBARI ROV navigation */
-		    if (process->mbp_format == MBF_MBARIROV)
-			sprintf(process->mbp_ofile, "%sedited.txt", 
-				fileroot);
-		    /* else use standard .mbXXX suffix */
-		    else
-			sprintf(process->mbp_ofile, "%sp.mb%d", 
-				fileroot, process->mbp_format);
-		    process->mbp_ofile_specified = MB_YES;
-		    }
-		}
-	    else if (process->mbp_ofile_specified == MB_NO
-		    && process->mbp_format_specified == MB_YES)
-		{
-		sprintf(process->mbp_ofile, "%sp.mb%d", 
-			    process->mbp_ifile, process->mbp_format);
-		process->mbp_ofile_specified = MB_YES;
-		}
+	    mb_pr_default_output(verbose, process, error);
 	    }
 	    
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, process, error);
 	    
 	/* look for nav and other bath edit files if not specified */
-	if (lookforfiles == MB_YES)
+	if (lookforfiles == 1)
 	    {
-	    /* look for nav file */
-	    if (process->mbp_nav_mode == MBP_NAV_OFF)
+	    /* look for navadj file */
+	    if (process->mbp_navadj_mode == MBP_NAV_OFF)
 		{
-		for (i = 9; i >= 0 && process->mbp_nav_mode == MBP_NAV_OFF; i--)
+		for (i = 9; i >= 0 && process->mbp_navadj_mode == MBP_NAV_OFF; i--)
 		    {
-		    sprintf(process->mbp_navfile, "%s.na%d", process->mbp_ifile, i);
-		    if (stat(process->mbp_navfile, &statbuf) == 0)
+		    sprintf(process->mbp_navadjfile, "%s.na%d", process->mbp_ifile, i);
+		    if (stat(process->mbp_navadjfile, &statbuf) == 0)
 			    {
-			    process->mbp_nav_mode = MBP_NAV_ON;
-			    process->mbp_nav_format = 9;
+			    process->mbp_navadj_mode = MBP_NAV_ON;
 			    }
 		    }
 		}
+
+	    /* look for nav file */
 	    if (process->mbp_nav_mode == MBP_NAV_OFF)
  		{
 		strcpy(process->mbp_navfile, process->mbp_ifile);
@@ -862,6 +830,38 @@ fprintf(stderr, "GOT METAPI: %s\n", buffer);
 		    {
 		    process->mbp_edit_mode = MBP_EDIT_ON;
 		    }
+		}
+	    }
+	    
+	/* reset all output files to local path if possible */
+	else if (lookforfiles > 1)
+	    {
+	    /* reset output file */
+	    process->mbp_ofile_specified = MB_NO;
+	    mb_pr_default_output(5, process, error);
+
+	    /* reset navadj file */
+	    if ((lastslash = strrchr(process->mbp_navadjfile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_navadjfile, dummy);
+		}
+
+	    /* reset nav file */
+	    if ((lastslash = strrchr(process->mbp_navfile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_navfile, dummy);
+		}
+
+	    /* reset edit file */
+	    if ((lastslash = strrchr(process->mbp_editfile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_editfile, dummy);
 		}
 	    }
 	    
@@ -1343,6 +1343,79 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_default_output(int verbose, struct mb_process_struct *process, 
+			int *error)
+{
+	char	*function_name = "mb_pr_default_output";
+	int	status = MB_SUCCESS;
+	char	fileroot[MBP_FILENAMESIZE];
+	int	format;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
+		fprintf(stderr,"dbg2       process:   %d\n",process);
+		}
+   
+	/* figure out data format and fileroot if possible */
+	status = mb_get_format(verbose, process->mbp_ifile, 
+					fileroot, &format, error);
+				
+	/* deal with format */
+	if (status == MB_SUCCESS && format > 0)
+	    {
+	    /* set format if found */
+	    if (process->mbp_format_specified == MB_NO)
+		{
+		process->mbp_format = format;
+		process->mbp_format_specified = MB_YES;
+		}
+		
+	    /* set output file if needed */
+	    if (process->mbp_ofile_specified == MB_NO
+		&& process->mbp_format_specified == MB_YES)
+		{
+		/* use .txt suffix if MBARI ROV navigation */
+		if (process->mbp_format == MBF_MBARIROV)
+		    sprintf(process->mbp_ofile, "%sedited.txt", 
+			    fileroot);
+		/* else use standard .mbXXX suffix */
+		else
+		    sprintf(process->mbp_ofile, "%sp.mb%d", 
+			    fileroot, process->mbp_format);
+		process->mbp_ofile_specified = MB_YES;
+		}
+	    }
+	else if (process->mbp_ofile_specified == MB_NO
+		&& process->mbp_format_specified == MB_YES)
+	    {
+	    sprintf(process->mbp_ofile, "%sp.mb%d", 
+			process->mbp_ifile, process->mbp_format);
+	    process->mbp_ofile_specified = MB_YES;
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_ofile_specified: %d\n",process->mbp_ofile_specified);
+		fprintf(stderr,"dbg2       mbp_ofile:           %s\n",process->mbp_ofile);
+		fprintf(stderr,"dbg2       mbp_format:          %d\n",process->mbp_format);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
