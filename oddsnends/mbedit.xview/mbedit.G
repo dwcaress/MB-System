@@ -45,7 +45,7 @@
 	:height                 764
 	:background-color       ""
 	:foreground-color       ""
-	:label                  "MBEDIT Version $Id: mbedit.G,v 3.2 1993-08-30 19:03:20 caress Exp $"
+	:label                  "MBEDIT Version $Id: mbedit.G,v 3.3 1993-11-03 19:40:34 caress Exp $"
 	:label-type             :string
 	:initial-state          :open
 	:show-footer            t
@@ -135,7 +135,7 @@
 	:y                      8
 	:width                  380
 	:height                 20
-	:value-x                319
+	:value-x                324
 	:value-y                8
 	:slider-width           100
 	:ticks                  0
@@ -148,7 +148,7 @@
 	:show-range             t
 	:show-value             t
 	:min-value              1
-	:max-value              10000
+	:max-value              50000
 	:min-value-string       ""
 	:max-value-string       ""
 	:min-tick-string        ""
@@ -174,11 +174,11 @@
 	:name                   textfield_x_interval
 	:owner                  controls_mbedit
 	:help                   ""
-	:x                      552
+	:x                      616
 	:y                      8
 	:width                  246
 	:height                 15
-	:value-x                723
+	:value-x                787
 	:value-y                8
 	:value-length           5
 	:stored-length          80
@@ -215,14 +215,14 @@
 	:help                   ""
 	:x                      160
 	:y                      32
-	:width                  380
+	:width                  402
 	:height                 20
-	:value-x                319
+	:value-x                362
 	:value-y                32
 	:slider-width           100
 	:ticks                  0
 	:foreground-color       ""
-	:label                  "Y Scale (m/100 pixels):"
+	:label                  "Vertical Exageration (X 0.01):"
 	:label-type             :string
 	:layout-type            :horizontal
 	:orientation            :horizontal
@@ -230,12 +230,12 @@
 	:show-range             t
 	:show-value             t
 	:min-value              1
-	:max-value              10000
+	:max-value              5000
 	:min-value-string       ""
 	:max-value-string       ""
 	:min-tick-string        ""
 	:max-tick-string        ""
-	:initial-value          1000
+	:initial-value          100
 	:initial-state          :active
 	:notify-handler         set_scale_y
 	:event-handler          nil
@@ -256,11 +256,11 @@
 	:name                   textfield_y_interval
 	:owner                  controls_mbedit
 	:help                   ""
-	:x                      552
+	:x                      616
 	:y                      32
 	:width                  246
 	:height                 15
-	:value-x                723
+	:value-x                787
 	:value-y                32
 	:value-length           5
 	:stored-length          80
@@ -357,9 +357,9 @@
 	:help                   ""
 	:x                      160
 	:y                      56
-	:width                  364
+	:width                  344
 	:height                 20
-	:value-x                331
+	:value-x                336
 	:value-y                56
 	:slider-width           100
 	:ticks                  0
@@ -400,7 +400,7 @@
 	:help                   ""
 	:x                      552
 	:y                      56
-	:width                  330
+	:width                  318
 	:height                 20
 	:value-x                681
 	:value-y                56
@@ -503,7 +503,7 @@
 	:help                   ""
 	:x                      160
 	:y                      80
-	:width                  249
+	:width                  237
 	:height                 15
 	:value-x                338
 	:value-y                80
@@ -542,7 +542,7 @@
 	:help                   ""
 	:x                      552
 	:y                      80
-	:width                  331
+	:width                  319
 	:height                 20
 	:value-x                682
 	:value-y                80
@@ -782,7 +782,7 @@
 	:help                   ""
 	:x                      16
 	:y                      256
-	:width                  189
+	:width                  169
 	:height                 15
 	:value-x                134
 	:value-y                256
@@ -953,7 +953,7 @@
 	:help                   ""
 	:x                      24
 	:y                      24
-	:width                  113
+	:width                  109
 	:height                 15
 	:value-x                66
 	:value-y                24
@@ -983,7 +983,7 @@
 	:help                   ""
 	:x                      24
 	:y                      48
-	:width                  125
+	:width                  105
 	:height                 15
 	:value-x                78
 	:value-y                48
@@ -1013,7 +1013,7 @@
 	:help                   ""
 	:x                      24
 	:y                      72
-	:width                  108
+	:width                  88
 	:height                 15
 	:value-x                61
 	:value-y                72
@@ -1043,7 +1043,7 @@
 	:help                   ""
 	:x                      24
 	:y                      96
-	:width                  115
+	:width                  95
 	:height                 15
 	:value-x                68
 	:value-y                96
@@ -1073,7 +1073,7 @@
 	:help                   ""
 	:x                      24
 	:y                      120
-	:width                  130
+	:width                  110
 	:height                 15
 	:value-x                83
 	:value-y                120
@@ -1103,7 +1103,7 @@
 	:help                   ""
 	:x                      24
 	:y                      144
-	:width                  130
+	:width                  110
 	:height                 15
 	:value-x                83
 	:value-y                144
