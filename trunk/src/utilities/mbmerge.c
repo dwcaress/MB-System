@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.16 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbmerge.c,v 4.17 1997-07-25 14:28:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -12,8 +12,8 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBMERGE merges new navigation with multibeam data for an input file 
- * and then writes the merged data to an output multibeam data file.
+ * MBMERGE merges new navigation with swath sonar data for an input file 
+ * and then writes the merged data to an output swath sonar data file.
  * The input navigation must be in the L-DEO shipboard processing 
  * format. The default input and output streams are stdin and stdout.
  *
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.16  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -103,6 +106,10 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
 
+/* local defines */
+#define	INTERP_SPLINE	1
+#define	INTERP_LINEAR	2
+
 /*--------------------------------------------------------------------*/
 
 main (argc, argv)
@@ -110,10 +117,10 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.16 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.17 1997-07-25 14:28:10 caress Exp $";
 	static char program_name[] = "MBMERGE";
-	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
-	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
+	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
+	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -189,6 +196,8 @@ char **argv;
 	double	*nlonspl = NULL;
 	double	*nlatspl = NULL;
 	int	nav_ok;
+	int	interp_mode = INTERP_SPLINE;
+	double	heading_offset = 0.0;
 	int	make_heading = MB_NO;
 	int	make_heading_now;
 	double	heading_old;
@@ -248,7 +257,7 @@ char **argv;
 	strcpy (nfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:M:m:N:n:Zz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:F:f:L:l:I:i:O:o:M:m:N:n:Zz")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -258,6 +267,16 @@ char **argv;
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'A':
+		case 'a':
+			sscanf (optarg,"%lf", &heading_offset);
+			flag++;
+			break;
+		case 'B':
+		case 'b':
+			interp_mode = INTERP_LINEAR;
+			flag++;
 			break;
 		case 'F':
 		case 'f':
@@ -676,6 +695,15 @@ char **argv;
 			}
 		strncpy(buffer,"\0",sizeof(buffer));
 		}
+		
+	/* check for nav */
+	if (nnav < 2)
+		{
+		fprintf(stderr,"\nNo navigation read from file <%s>\n",nfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
 
 	/* set up spline interpolation of nav points */
 	splineflag = 1.0e30;
@@ -698,7 +726,7 @@ char **argv;
 			ftime_i[4],ftime_i[5],ftime_i[6]);
 		}
 
-	/* initialize reading the input multibeam file */
+	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
@@ -707,20 +735,20 @@ char **argv;
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
+		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for reading\n",ifile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
 		}
 
-	/* initialize writing the output multibeam file */
+	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
+		fprintf(stderr,"\nSwath Sonar File <%s> not initialized for writing\n",ofile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -935,7 +963,7 @@ char **argv;
 				time_i[3],time_i[4],time_i[5],
 				time_i[6]);
 			}
-
+			
 		/* figure out if heading should be recalculated */
 		if (error == MB_ERROR_NO_ERROR 
 			&& make_heading == MB_YES)
@@ -947,10 +975,20 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR
 			|| kind == MB_DATA_COMMENT)
 			{
-			status = splint(ntime-1,nlon-1,nlonspl-1,
-				nnav,time_d,&navlon,&itime);
-			status = splint(ntime-1,nlat-1,nlatspl-1,
-				nnav,time_d,&navlat,&itime);
+			if (interp_mode == INTERP_SPLINE)
+			    {
+			    status = splint(ntime-1,nlon-1,nlonspl-1,
+				    nnav,time_d,&navlon,&itime);
+			    status = splint(ntime-1,nlat-1,nlatspl-1,
+				    nnav,time_d,&navlat,&itime);
+			    }
+			else
+			    {
+			    status = linint(ntime-1,nlon-1,
+				    nnav,time_d,&navlon,&itime);
+			    status = linint(ntime-1,nlat-1,
+				    nnav,time_d,&navlat,&itime);
+			    }
 			}
 
 		/* make up heading and speed if required */
@@ -975,6 +1013,13 @@ char **argv;
 				heading = heading_old;
 			}
 
+		/* else adjust heading if required */
+		else if (error == MB_ERROR_NO_ERROR
+			&& heading_offset != 0.0)
+			{
+			heading += heading_offset;
+			}
+
 		/* give error message */
 		if ((verbose >= 1 && error == MB_ERROR_NO_ERROR 
 			&& (time_d < ntime[0] || time_d > ntime[nnav-1]))
@@ -996,7 +1041,11 @@ char **argv;
 			   - must put new position datagrams into
 			   data stream while ignoring old position
 			   datagrams */
-			if (format > 50 && format < 60 && format != 54)
+			if (format == 51
+			    || format == 52
+			    || format == 53
+			    || format == 55
+			    || format == 92)
 			    {
 			    if (kind == MB_DATA_DATA)
 				{
@@ -1047,11 +1096,11 @@ char **argv;
 				else if (kind == MB_DATA_COMMENT)
 					ocomment++;
 				}
-			else
+			else if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
-				fprintf(stderr,"\nMBIO Error returned from function <mb_put>:\n%s\n",message);
-				fprintf(stderr,"\nMultibeam Data Not Written To File <%s>\n",ofile);
+				fprintf(stderr,"\nMBIO Error returned from function <mb_put_all>:\n%s\n",message);
+				fprintf(stderr,"\nSwath Sonar Data Not Written To File <%s>\n",ofile);
 				fprintf(stderr,"Output Record: %d\n",odata+1);
 				fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
@@ -1162,6 +1211,33 @@ int *i;
 	b=(x-xa[klo])/h;
 	*y=a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2a[klo]
 		+(b*b*b-b)*y2a[khi])*(h*h)/6.0;
+	*i=klo;
+	return(0);
+}
+/*--------------------------------------------------------------------*/
+int linint(xa,ya,n,x,y,i)
+double xa[],ya[],x,*y;
+int n;
+int *i;
+{
+	int klo,khi,k;
+	double h,b;
+
+	klo=1;
+	khi=n;
+	while (khi-klo > 1) {
+		k=(khi+klo) >> 1;
+		if (xa[k] > x) khi=k;
+		else klo=k;
+	}
+	h=xa[khi]-xa[klo];
+	if (h == 0.0) 
+		{
+		fprintf(stderr,"ERROR: interpolation time out of nav bounds\n");
+		return(-1);
+		}
+	b = (ya[khi] - ya[klo]) / h;
+	*y = ya[klo] + b * (x - xa[klo]);
 	*i=klo;
 	return(0);
 }

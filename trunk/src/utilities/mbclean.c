@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.14 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbclean.c,v 4.15 1997-07-25 14:28:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.14  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -104,12 +107,16 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
 
 /* local defines */
 #define	MBCLEAN_FLAG_ONE	1
 #define	MBCLEAN_FLAG_BOTH	2
 #define	MBCLEAN_ZERO_ONE	3
 #define	MBCLEAN_ZERO_BOTH	4
+
+/* MBIO buffer size default */
+#define	MBCLEAN_BUFFER_DEFAULT	500
 
 /* ping structure definition */
 struct mbclean_ping_struct 
@@ -147,10 +154,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.14 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.15 1997-07-25 14:28:10 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
-	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
+	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -188,13 +195,15 @@ char **argv;
 
 	/* MBIO buffer structure pointer */
 	char	*buff_ptr = NULL;
+	int	n_buffer_max = MBCLEAN_BUFFER_DEFAULT;
+	int	nwant = MBCLEAN_BUFFER_DEFAULT;
+	int	nhold = 1;
 	int	nbuff;
-	int	nwant = 500;
 	int	nload;
-	int	nhold = 50;
 	int	ndump;
 	int	done;
 	int	finished;
+	double	save_time_d = 0.0;
 
 	/* mbio read and write values */
 	char	*store_ptr = NULL;
@@ -301,7 +310,7 @@ char **argv;
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:O:o:QqU:u:X:x:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:N:n:O:o:QqU:u:X:x:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -359,6 +368,14 @@ char **argv;
 		case 'M':
 		case 'm':
 			sscanf (optarg,"%d", &mode);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf (optarg,"%d", &n_buffer_max);
+			if (n_buffer_max > MB_BUFFER_MAX
+			    || n_buffer_max < 50)
+			    n_buffer_max = MBCLEAN_BUFFER_DEFAULT;
 			flag++;
 			break;
 		case 'O':
@@ -572,31 +589,11 @@ char **argv;
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"This bathymetry data automatically edited by program %s version %s",
 		program_name,rcs_id);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	right_now = time((long *)0);
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
@@ -608,80 +605,19 @@ char **argv;
 	else
 		strcpy(user, "unknown");
 	gethostname(host,128);
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"Control Parameters:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  MBIO data format:   %d",format);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Input file:         %s",ifile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Output file:        %s",ofile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Longitude flip:     %d",lonflip);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Cleaning mode:      %d",mode);
 	if (mode == MBCLEAN_FLAG_ONE)
 		strcat(comment," (flag one beam of each outlier slope)");
@@ -691,232 +627,65 @@ char **argv;
 		strcat(comment," (zero one beam of each outlier slope)");
 	if (mode == MBCLEAN_ZERO_BOTH)
 		strcat(comment," (zero both beams of each outlier slope)");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Maximum slope:      %f",slopemax);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Minimum distance:   %f",distancemin);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Maximum distance:   %f",distancemax);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Outer beams zapped: %d",zap_beams);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (check_range == MB_YES)
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth range checking on:");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-		strncpy(comment,"\0",256);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		sprintf(comment,"    Minimum acceptable depth: %f",depth_low);
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-		strncpy(comment,"\0",256);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		sprintf(comment,"    Maximum acceptable depth: %f",depth_high);
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth range checking off");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	if (check_fraction == MB_YES)
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth fractional range checking on:");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-		strncpy(comment,"\0",256);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		sprintf(comment,"    Minimum acceptable depth fraction: %f",fraction_low);
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-		strncpy(comment,"\0",256);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		sprintf(comment,"    Maximum acceptable depth fraction: %f",fraction_high);
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth fractional range checking off");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	if (check_deviation == MB_YES)
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth deviation from median checking on:");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
-		strncpy(comment,"\0",256);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		sprintf(comment,"    Maximum acceptable depth deviation: %f",deviation_max);
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth deviation from median checking off");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
-	strncpy(comment,"\0",256);
 	sprintf(comment," ");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,
-			ping[0].ssacrosstrack,ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 
 	/* initialize the buffer */
 	status = mb_buffer_init(verbose,&buff_ptr,&error);
 
 	/* read and write */
 	done = MB_NO;
+	nwant = n_buffer_max;
+	nhold = 1;
 	start = 0;
 	ping[0].id = -1;
 	ping[1].id = -1;
@@ -937,7 +706,7 @@ char **argv;
 			}
 
 		/* check for done */
-		if (nload <= 0)
+		if (nload < nwant)
 			{
 			done = MB_YES;
 			nhold = 0;

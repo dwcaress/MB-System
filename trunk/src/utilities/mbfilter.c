@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.7 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbfilter.c,v 4.8 1997-07-25 14:28:10 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.7  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -68,6 +71,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
 
 /* mode defines */
 #define	MBFILTER_BATH			0
@@ -86,9 +90,8 @@
 #define	MBFILTER_CONTRAST_EDGE		1
 #define	MBFILTER_CONTRAST_GRADIENT	2
 
-/* MBIO buffer structure pointer */
-#define	MBFILTER_BUFFER	500
-#define	MBFILTER_HOLD	50
+/* MBIO buffer size default */
+#define	MBFILTER_BUFFER_DEFAULT	500
 
 /* ping structure definition */
 struct mbfilter_ping_struct 
@@ -119,7 +122,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.7 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.8 1997-07-25 14:28:10 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -141,7 +144,7 @@ The default input and output streams are stdin and stdout.\n";
 
 	static char usage_message[] = "mbfilter [\
 -Akind -Byr/mo/da/hr/mn/sc -Dmode/xdim/ldim/iteration/offset\n\t \
--Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Ooutfile\n\t \
+-Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Nbuffersize -Ooutfile\n\t \
 -Rwest/east/south/north -Smode/xdim/ldim/iteration\n\t \
 -Tthreshold -V -H]";
 	extern char *optarg;
@@ -189,20 +192,22 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* buffer handling parameters */
 	char	*buff_ptr;
-	int	nwant = MBFILTER_BUFFER;
-	int	nhold = MBFILTER_HOLD;
+	int	n_buffer_max = MBFILTER_BUFFER_DEFAULT;
+	int	nwant = MBFILTER_BUFFER_DEFAULT;
+	int	nhold = 0;
+	int	nhold_ping = 0;
 	int	nbuff = 0;
 	int	nload;
 	int	ndump;
 	int	nexpect;
-	struct mbfilter_ping_struct ping[MBFILTER_BUFFER];
+	struct mbfilter_ping_struct ping[MB_BUFFER_MAX];
 	int	nping = 0;
 	int	nping_start;
 	int	nping_end;
 	int	first = MB_YES;
 	int	start, done;
 	int	first_distance;
-	double	save_time_d;
+	double	save_time_d = 0.0;
 
 	/* time, user, host variables */
 	long int	right_now;
@@ -278,7 +283,7 @@ The default input and output streams are stdin and stdout.\n";
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:O:o:R:r:S:s:T:t:Vv")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:N:n:O:o:R:r:S:s:T:t:Vv")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -329,6 +334,14 @@ The default input and output streams are stdin and stdout.\n";
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", ifile);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf (optarg,"%d", &n_buffer_max);
+			if (n_buffer_max > MB_BUFFER_MAX
+			    || n_buffer_max < 50)
+			    n_buffer_max = MBFILTER_BUFFER_DEFAULT;
 			flag++;
 			break;
 		case 'O':
@@ -432,6 +445,7 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:    %s\n",ofile);
 		fprintf(stderr,"dbg2       datakind:       %d\n",datakind);
+		fprintf(stderr,"dbg2       n_buffer_max:   %d\n",n_buffer_max);
 		fprintf(stderr,"dbg2       hipass_mode:    %d\n",hipass_mode);
 		fprintf(stderr,"dbg2       hipass_xdim:    %d\n",hipass_xdim);
 		fprintf(stderr,"dbg2       hipass_ldim:    %d\n",hipass_ldim);
@@ -571,7 +585,7 @@ The default input and output streams are stdin and stdout.\n";
 		}
 
 	/* allocate memory for data arrays */
-	for (i=0;i<MBFILTER_BUFFER;i++)
+	for (i=0;i<n_buffer_max;i++)
 		{
 		ping[i].bath = NULL;
 		ping[i].amp = NULL;
@@ -605,7 +619,16 @@ The default input and output streams are stdin and stdout.\n";
 			status = mb_malloc(verbose,beams_amp*sizeof(double),
 				&ping[i].dataprocess,&error);
 		}
-
+		
+	/* get ideal number of ping records to hold */
+	nhold_ping = 1;
+	if (hipass_mode != MBFILTER_HIPASS_NONE)
+	    nhold_ping = MAX(nhold_ping, hipass_ldim / 2);
+	if (smooth_mode != MBFILTER_SMOOTH_NONE)
+	    nhold_ping = MAX(nhold_ping, smooth_ldim / 2);
+	if (contrast_mode != MBFILTER_CONTRAST_NONE)
+	    nhold_ping = MAX(nhold_ping, contrast_ldim / 2);
+	
 	/* allocate memory for weights */
 	nweightmax = 2*MAX(hipass_xdim*hipass_ldim, 
 	    MAX(smooth_xdim*smooth_ldim, contrast_xdim*contrast_ldim) );
@@ -637,43 +660,13 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	strncpy(comment,"\0",256);
-	sprintf(comment,"Sidescan data altered by program %s",
+	sprintf(comment,"Data filtered by program %s",
 		program_name);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"Version %s",rcs_id);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	right_now = time((long *)0);
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
@@ -685,160 +678,127 @@ The default input and output streams are stdin and stdout.\n";
 	else
 		strcpy(user, "unknown");
 	gethostname(host,128);
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (datakind == MBFILTER_BATH)
 		{
-		strncpy(comment,"\0",256);
-		sprintf(comment,"Bathymetry values filtered");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+		sprintf(comment, "Processing bathymetry data...");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else if (datakind == MBFILTER_AMP)
 		{
-		strncpy(comment,"\0",256);
-		sprintf(comment,"Beam amplitude values filtered");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+		sprintf(comment, "Processing beam amplitude data...");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
-	else
+	else if (datakind == MBFILTER_SS)
 		{
-		strncpy(comment,"\0",256);
-		sprintf(comment,"Sidescan values filtered");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+		sprintf(comment, "Processing sidescan data...");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
-	strncpy(comment,"\0",256);
-	sprintf(comment,"  by a locally defined function of grazing angle.");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	if (hipass_mode == MBFILTER_HIPASS_MEAN)
+		{
+		sprintf(comment, "applying mean subtraction filter for hipass");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	else if (hipass_mode == MBFILTER_HIPASS_GAUSSIAN)
+		{
+		sprintf(comment, "applying gaussian mean subtraction filter for hipass");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	else if (hipass_mode == MBFILTER_HIPASS_MEDIAN)
+		{
+		sprintf(comment, "applying median subtraction filter for hipass");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	if (hipass_mode != MBFILTER_HIPASS_NONE)
+		{
+		sprintf(comment, "  filter acrosstrack dimension: %d", hipass_xdim);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		sprintf(comment, "  filter alongtrack dimension:  %d", hipass_ldim);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		sprintf(comment, "  filter iterations:            %d", hipass_iter);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		sprintf(comment, "  filter offset:                %f", hipass_offset);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	if (smooth_mode == MBFILTER_SMOOTH_MEAN)
+		{
+		sprintf(comment, "applying mean filter for smoothing");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	else if (smooth_mode == MBFILTER_SMOOTH_GAUSSIAN)
+		{
+		sprintf(comment, "applying gaussian mean filter for smoothing");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	else if (smooth_mode == MBFILTER_SMOOTH_MEDIAN)
+		{
+		sprintf(comment, "applying median filter for smoothing");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	else if (smooth_mode == MBFILTER_SMOOTH_GRADIENT)
+		{
+		sprintf(comment, "applying inverse gradient filter for smoothing");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	if (smooth_mode == MBFILTER_SMOOTH_MEDIAN
+		&& apply_threshold == MB_YES)
+		{
+		sprintf(comment, "  filter low ratio threshold:   %f", threshold_lo);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		sprintf(comment, "  filter high ratio threshold:  %f", threshold_hi);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	if (smooth_mode != MBFILTER_SMOOTH_NONE)
+		{
+		sprintf(comment, "  filter acrosstrack dimension: %d", smooth_xdim);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		sprintf(comment, "  filter alongtrack dimension:  %d", smooth_ldim);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		sprintf(comment, "  filter iterations:            %d", smooth_iter);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	if (contrast_mode == MBFILTER_CONTRAST_EDGE)
+		{
+		sprintf(comment, "applying edge detection filter for contrast enhancement");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	else if (contrast_mode == MBFILTER_CONTRAST_GRADIENT)
+		{
+		sprintf(comment, "applying gradient subtraction filter for contrast enhancement");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
+	if (contrast_mode != MBFILTER_CONTRAST_NONE)
+		{
+		sprintf(comment, "  filter acrosstrack dimension: %d", contrast_xdim);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		sprintf(comment, "  filter alongtrack dimension:  %d", contrast_ldim);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		sprintf(comment, "  filter iterations:            %d", contrast_iter);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		}
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Control Parameters:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  MBIO data format:   %d",format);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Input file:         %s",ifile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Output file:        %s",ofile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Longitude flip:     %d",lonflip);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"  Data kind:         %d",datakind);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	strncpy(comment,"\0",256);
 	sprintf(comment," ");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 
 	/* initialize the buffer */
 	status = mb_buffer_init(verbose,&buff_ptr,&error);
@@ -846,6 +806,7 @@ The default input and output streams are stdin and stdout.\n";
 	/* read and write */
 	done = MB_NO;
 	first = MB_YES;
+	nwant = n_buffer_max;
 	if (verbose == 1) fprintf(stderr,"\n");
 	while (!done)
 		{
@@ -875,7 +836,8 @@ The default input and output streams are stdin and stdout.\n";
 		jbeg = 0;
 		jend = 0;
 		status = MB_SUCCESS;
-		while (status == MB_SUCCESS)
+		while (status == MB_SUCCESS
+			&& ndata < n_buffer_max)
 			{
 			/* clear the processed data */
 			if (datakind == MBFILTER_BATH)
@@ -909,15 +871,6 @@ The default input and output streams are stdin and stdout.\n";
 				if (save_time_d == ping[ndata].time_d)
 				    jbeg = ndata + 1;
 				}
-			if (status == MB_SUCCESS && done != MB_YES)
-				{
-				if (jend == 0 && ping[ndata].id >= 
-				    nbuff - MBFILTER_HOLD/2)
-				    {
-				    jend = ndata;
-				    save_time_d = ping[ndata].time_d;
-				    }
-				}
 			if (status == MB_SUCCESS)
 				{
 				start = ping[ndata].id + 1;
@@ -927,12 +880,26 @@ The default input and output streams are stdin and stdout.\n";
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		if (first == MB_YES)
-			{
 			jbeg = 0;
-			}
 		if (done == MB_YES)
 			jend = ndata - 1;
-		nbathdata += (jend - jbeg + 1);
+		else if (ndata > nhold_ping + jbeg)
+			{
+			jend = ndata - 1 - nhold_ping;
+			save_time_d = ping[jend].time_d;
+			}
+		else
+			{
+			jend = ndata - 1;
+			save_time_d = ping[jend].time_d;
+			}
+		if (ndata > 0)
+		    nbathdata += (jend - jbeg + 1);
+		if (verbose >= 1)
+			{
+			fprintf(stderr,"%d survey records being processed\n",
+				(jend - jbeg + 1));
+			}
 		if (first == MB_YES && nbathdata > 0)
 			first = MB_NO;
 
@@ -1028,9 +995,9 @@ The default input and output streams are stdin and stdout.\n";
 		    }
 
 		  /* print out progress */
-		  if (verbose > 0)
+/*		  if (verbose > 0)
 		    fprintf(stderr, "done with ping %d of %d\n", 
-			(j-jbeg+1), (jend-jbeg+1));
+			(j-jbeg+1), (jend-jbeg+1));*/
 		  }
 
 		  /* reset ping values */
@@ -1143,9 +1110,9 @@ The default input and output streams are stdin and stdout.\n";
 		    }
 
 		  /* print out progress */
-		  if (verbose > 0)
+/*		  if (verbose > 0)
 		    fprintf(stderr, "done with ping %d of %d\n", 
-			(j-jbeg+1), (jend-jbeg+1));
+			(j-jbeg+1), (jend-jbeg+1));*/
 		  }
 
 		  /* reset ping values */
@@ -1249,9 +1216,9 @@ The default input and output streams are stdin and stdout.\n";
 		    }
 
 		  /* print out progress */
-		  if (verbose > 0)
+/* 		  if (verbose > 0)
 		    fprintf(stderr, "done with ping %d of %d\n", 
-			(j-jbeg+1), (jend-jbeg+1));
+			(j-jbeg+1), (jend-jbeg+1));*/
 		  }
 
 		  /* reset ping values */
@@ -1292,10 +1259,10 @@ The default input and output streams are stdin and stdout.\n";
 		/* find number of pings to hold */
 		if (done == MB_YES)
 			nhold = 0;
-		else if (ndata > MBFILTER_HOLD)
-			{
-			nhold = nbuff - ping[ndata-MBFILTER_HOLD].id + 1;
-			}
+		else if (jend <= jbeg)
+			nhold = 0;
+		else if (nhold_ping < jend)
+			nhold = nbuff - ping[jend+1-nhold_ping].id;
 		else if (ndata > 0)
 			{
 			nhold = nbuff - ping[0].id + 1;
@@ -1326,7 +1293,7 @@ The default input and output streams are stdin and stdout.\n";
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* free the memory */
-	for (j=0;j<MBFILTER_BUFFER;j++)
+	for (j=0;j<n_buffer_max;j++)
 		{
 		mb_free(verbose,&ping[j].bath,&error); 
 		mb_free(verbose,&ping[j].bathacrosstrack,&error); 

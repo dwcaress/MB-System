@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.10 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbsmooth.c,v 4.11 1997-07-25 14:28:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.10  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -90,13 +93,16 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
 
 /* MBIO buffer structure pointer */
-#define	MBSMOOTH_BUFFER	500
-#define	MBSMOOTH_NUM	3
+#define	MBSMOOTH_BUFFER_DEFAULT	500
+#define	MBSMOOTH_NUM		3
 char	*buff_ptr;
-int	nwant = MBSMOOTH_BUFFER;
-int	nhold = MBSMOOTH_NUM;
+int	n_buffer_max = MBSMOOTH_BUFFER_DEFAULT;
+int	nwant = MBSMOOTH_BUFFER_DEFAULT;
+int	nhold = 0;
+int	nhold_ping = MBSMOOTH_NUM;
 int	nbuff = 0;
 int	nload;
 int	ndump;
@@ -122,11 +128,12 @@ struct mbsmooth_ping_struct
 	double	*bathy;
 	int	*bathsmooth;
 	};
-struct mbsmooth_ping_struct ping[MBSMOOTH_BUFFER];
+struct mbsmooth_ping_struct ping[MB_BUFFER_MAX];
 int	nping = 0;
 int	nping_start;
 int	nping_end;
 int	first = MB_YES;
+double	save_time_d = 0.0;
 
 /* gaussian filter parameters */
 char	wfile[128];
@@ -140,13 +147,13 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.10 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.11 1997-07-25 14:28:10 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \
 smooth out noise in multibeam \nbathymetry data.";
 	static char usage_message[] = "mbsmooth [-Fformat -Gwidth -Iinfile \
--Llonflip -Ooutfile \n\t-Wfilterfile -V -H]";
+-Llonflip -Nbuffersize -Ooutfile \n\t-Wfilterfile -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -247,7 +254,7 @@ smooth out noise in multibeam \nbathymetry data.";
 	strcpy (wfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:G:g:L:l:I:i:O:o:W:w:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:G:g:L:l:I:i:N:n:O:o:W:w:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -276,6 +283,14 @@ smooth out noise in multibeam \nbathymetry data.";
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf (optarg,"%d", &n_buffer_max);
+			if (n_buffer_max > MB_BUFFER_MAX
+			    || n_buffer_max < 50)
+			    n_buffer_max = MBSMOOTH_BUFFER_DEFAULT;
 			flag++;
 			break;
 		case 'O':
@@ -385,7 +400,7 @@ smooth out noise in multibeam \nbathymetry data.";
 		}
 
 	/* allocate memory for data arrays */
-	for (i=0;i<MBSMOOTH_BUFFER;i++)
+	for (i=0;i<n_buffer_max;i++)
 		{
 		ping[i].bath = NULL;
 		ping[i].amp = NULL;
@@ -649,6 +664,7 @@ smooth out noise in multibeam \nbathymetry data.";
 	/* read and write */
 	done = MB_NO;
 	first = MB_YES;
+	nwant = n_buffer_max;
 	if (verbose == 1) fprintf(stderr,"\n");
 	while (!done)
 		{
@@ -663,7 +679,7 @@ smooth out noise in multibeam \nbathymetry data.";
 		if (verbose > 1) fprintf(stderr,"\n");
 		if (verbose >= 1)
 			{
-			fprintf(stderr,"%d records loaded into buffer\n\n",nload);
+			fprintf(stderr,"%d records loaded into buffer\n",nload);
 			}
 
 		/* check for done */
@@ -690,15 +706,17 @@ smooth out noise in multibeam \nbathymetry data.";
 				ping[2].ssacrosstrack,
 				ping[ndata].ssalongtrack,
 				&error);
+			if (status == MB_SUCCESS && first != MB_YES)
+				{
+				if (save_time_d == ping[ndata].time_d)
+				    jbeg = ndata + 1;
+				}
 			if (status == MB_SUCCESS)
 				{
 				start = ping[ndata].id + 1;
 				ndata++;
 				}
 			}
-		nbathdata += ndata - 2*MBSMOOTH_NUM;
-		if (first == MB_YES) nbathdata += MBSMOOTH_NUM;
-		if (done == MB_YES) nbathdata += MBSMOOTH_NUM;
 
 		/* calculate geographical positions for beams */
 		if (ndata > 0)
@@ -720,12 +738,29 @@ smooth out noise in multibeam \nbathymetry data.";
 			}
 
 		/* loop over all of the pings and beams */
-		if (ndata > MBSMOOTH_NUM && first == MB_YES)
+		if (first == MB_YES)
 			jbeg = 0;
+		if (done == MB_YES)
+			jend = ndata - 1;
+		else if (ndata > nhold_ping + jbeg)
+			{
+			jend = ndata - 1 - nhold_ping;
+			save_time_d = ping[jend].time_d;
+			}
 		else
-			jbeg = MBSMOOTH_NUM;
-		jend = ndata - MBSMOOTH_NUM - 1;
-		if (done == MB_YES || jend < 0) jend = ndata;
+			{
+			jend = ndata - 1;
+			save_time_d = ping[jend].time_d;
+			}
+		if (ndata > 0)
+		    nbathdata += (jend - jbeg + 1);
+		if (verbose >= 1)
+			{
+			fprintf(stderr,"%d survey records being processed\n",
+				(jend - jbeg + 1));
+			}
+		if (first == MB_YES && nbathdata > 0)
+			first = MB_NO;
 		for (j=jbeg;j<jend;j++)
 		  {
 		  /* set beginning and end of search */
@@ -779,13 +814,15 @@ smooth out noise in multibeam \nbathymetry data.";
 		/* find number of pings to hold */
 		if (done == MB_YES)
 			nhold = 0;
-		else if (ndata > 2*MBSMOOTH_NUM)
-			{
-			nhold = nbuff - ping[ndata-2*MBSMOOTH_NUM].id + 1;
-			}
+		else if (jend <= jbeg)
+			nhold = 0;
+		else if (nhold_ping < jend)
+			nhold = nbuff - ping[jend+1-nhold_ping].id;
 		else if (ndata > 0)
 			{
 			nhold = nbuff - ping[0].id + 1;
+			if (nhold > nbuff / 2)
+				nhold = nbuff / 2;
 			}
 		else
 			nhold = 0;
@@ -801,7 +838,7 @@ smooth out noise in multibeam \nbathymetry data.";
 		/* give the statistics */
 		if (verbose >= 1)
 			{
-			fprintf(stderr,"\n%d records dumped from buffer\n",ndump);
+			fprintf(stderr,"%d records dumped from buffer\n\n",ndump);
 			}
 		}
 
@@ -834,7 +871,7 @@ smooth out noise in multibeam \nbathymetry data.";
 	if (verbose >= 1)
 		{
 		fprintf(stderr,"\n%d data records processed\n",nrecord);
-		fprintf(stderr,"%d bathymetry data records processed\n",nbathdata);
+		fprintf(stderr,"%d survey data records processed\n",nbathdata);
 		}
 
 	/* end it all */

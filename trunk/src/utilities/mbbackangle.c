@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 4.6 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbbackangle.c,v 4.7 1997-07-25 14:28:10 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -66,7 +69,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 4.6 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangle.c,v 4.7 1997-07-25 14:28:10 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a multibeam data file and generates a table\n\t\
@@ -537,6 +540,13 @@ The results are dumped to stdout.";
 				    nmean[j]++;
 				    }
 				}
+
+			    /* print debug statements */
+			    if (verbose >= 5)
+				{
+				fprintf(stderr,"dbg5       %d %d: slope:%f bath:%f xtrack:%f ang:%f j:%d\n",
+				    nrec, i, slope, bathy, bathacrosstrack[i], angle, j);
+				}
 			    }
 			}
 
@@ -578,6 +588,13 @@ The results are dumped to stdout.";
 				    sigma[j] += ss[i]*ss[i];
 				    nmean[j]++;
 				    }
+				}
+
+			    /* print debug statements */
+			    if (verbose >= 5)
+				{
+				fprintf(stderr,"dbg5       %d %d: slope:%f bath:%f xtrack:%f ang:%f j:%d\n",
+				    nrec, i, slope, bathy, ssacrosstrack[i], angle, j);
 				}
 			    }
 			}
