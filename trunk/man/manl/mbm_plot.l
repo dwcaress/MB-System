@@ -113,7 +113,7 @@ maps run from
 cool colors (or dark grays) for large depth values 
 to hot colors (or light grays) for small depth values.
 In contrast, sidescan and beam amplitude data is normally plotted
-using (light grays (or hot colors) for small amplitudes and
+using light grays (or hot colors) for small amplitudes and
 dark grays (or cool colors) for large amplitudes. 
 If \fB-D\fP is given alone or with \fIflipcolor\fP = 1, 
 it applies to the color table used
