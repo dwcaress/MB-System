@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.27 2004-09-16 01:11:48 caress Exp $
+ *    $Id: mb_process.c,v 5.28 2004-10-06 19:04:24 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2004/09/16 01:11:48  caress
+ * Fixed how esf file path is determined.
+ *
  * Revision 5.26  2003/04/18 00:35:42  caress
  * Added capability to look for svp files with lookforfiles=2.
  *
@@ -131,7 +134,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.27 2004-09-16 01:11:48 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.28 2004-10-06 19:04:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -216,7 +219,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_ssv = 0.0;
 	process->mbp_tt_mode = MBP_TT_OFF;
 	process->mbp_tt_mult = 1.0;
-	process->mbp_angle_mode = MBP_ANGLES_OK;
+	process->mbp_angle_mode = MBP_ANGLES_SNELL;
 	process->mbp_corrected = MB_YES;
 	process->mbp_static_mode = MBP_STATIC_OFF;
 	process->mbp_staticfile[0] = '\0';
@@ -4611,6 +4614,441 @@ int mb_pr_get_kluges(int verbose, char *file,
 		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_set_bathyslopenew(int verbose,
+	int nsmooth, 
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	double *depthsmooth, 
+	int *error)
+{
+	char	*function_name = "set_bathyslope";
+	int	status = MB_SUCCESS;
+	int	first, next, last;
+	double	dxtrack;
+	double	weight;
+	int	j1, j2;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
+		fprintf(stderr,"dbg2       bath:            %d\n",bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
+			bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:\n");
+		for (i=0;i<nbath;i++)
+			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
+				i, beamflag[i], bath[i], bathacrosstrack[i]);
+		fprintf(stderr,"dbg2       depths:           %d\n",depths);
+		fprintf(stderr,"dbg2       depthacrosstrack: %d\n",depthacrosstrack);
+		fprintf(stderr,"dbg2       slopes:           %d\n",slopes);
+		fprintf(stderr,"dbg2       slopeacrosstrack: %d\n",slopeacrosstrack);
+		}
+
+	/* initialize depths */
+	*ndepths = 0;
+	for (i=0;i<nbath;i++)
+		{
+		depths[i] = 0.0;
+		depthacrosstrack[i] = 0.0;
+		}
+		
+	/* decimate by nsmooth, averaging the values used */
+	for (i=0;i<=nbath/nsmooth;i++)
+		{
+		j1 = i * nsmooth;
+		j2 = MIN((i + 1) * nsmooth, nbath);
+		depths[*ndepths] = 0.0;
+		depthacrosstrack[*ndepths] = 0.0;
+		weight = 0.0;
+		for (j=j1;j<j2;j++)
+			{
+			if (mb_beam_ok(beamflag[j]))
+				{
+				depths[*ndepths] += bath[j];
+				depthacrosstrack[*ndepths] += bathacrosstrack[j];
+				weight += 1.0;
+				}
+			}
+		if (weight > 0.0)
+			{
+			depths[*ndepths] /= weight;
+			depthacrosstrack[*ndepths] /= weight;
+			(*ndepths) += 1;
+			}
+		}
+
+	/* now calculate slopes */
+	if (*ndepths > 0)
+		{
+		*nslopes = *ndepths + 1;
+		slopeacrosstrack[0] = depthacrosstrack[0];
+		slopes[0] = 0.0;
+		for (i=1;i<*ndepths;i++)
+			{
+			dxtrack = depthacrosstrack[i] - depthacrosstrack[i-1];
+			slopeacrosstrack[i] = depthacrosstrack[i-1] + 0.5 * dxtrack;
+			if (dxtrack > 0.0)
+				slopes[i] = (depths[i] - depths[i-1])
+					/ dxtrack;
+			else 
+				slopes[i] = 0.0;
+/*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
+i,depths[i-1],depths[i],depthacrosstrack[i-1],depthacrosstrack[i],slopes[i]);*/
+			}
+		slopeacrosstrack[*ndepths] = depthacrosstrack[*ndepths-1];
+		slopes[*ndepths] = 0.0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ndepths:         %d\n",
+			*ndepths);
+		fprintf(stderr,"dbg2       depths:\n");
+		for (i=0;i<*ndepths;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr,"dbg2       nslopes:         %d\n",
+			*nslopes);
+		fprintf(stderr,"dbg2       slopes:\n");
+		for (i=0;i<*nslopes;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_set_bathyslope(int verbose,
+	int nsmooth, 
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	double *depthsmooth, 
+	int *error)
+{
+	char	*function_name = "set_bathyslope";
+	int	status = MB_SUCCESS;
+	int	first, next, last;
+	int	nbathgood;
+	double	depthsum;
+	double	dacrosstrack;
+	double	factor;
+	int	j1, j2;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
+		fprintf(stderr,"dbg2       bath:            %d\n",bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
+			bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:\n");
+		for (i=0;i<nbath;i++)
+			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
+				i, beamflag[i], bath[i], bathacrosstrack[i]);
+		fprintf(stderr,"dbg2       depths:           %d\n",depths);
+		fprintf(stderr,"dbg2       depthacrosstrack: %d\n",depthacrosstrack);
+		fprintf(stderr,"dbg2       slopes:           %d\n",slopes);
+		fprintf(stderr,"dbg2       slopeacrosstrack: %d\n",slopeacrosstrack);
+		}
+
+	/* initialize depths */
+	*ndepths = 0;
+	for (i=0;i<nbath;i++)
+		{
+		depths[i] = 0.0;
+		depthacrosstrack[i] = 0.0;
+		}
+
+	/* first fill in the existing depths */
+	first = -1;
+	last = -1;
+	nbathgood = 0;
+	for (i=0;i<nbath;i++)
+		{
+		if (mb_beam_ok(beamflag[i]))
+			{
+			if (first == -1)
+				{
+				first = i;
+				}
+			last = i;
+			depths[i] = bath[i];
+			depthacrosstrack[i] = bathacrosstrack[i];
+			nbathgood++;
+			}
+		}
+
+	/* now interpolate the depths */
+	if (nbathgood > 0)
+	for (i=first;i<last;i++)
+		{
+		if (mb_beam_ok(beamflag[i]))
+			{
+			next = i;
+			j = i + 1;
+			while (next == i && j < nbath)
+				{
+				if (mb_beam_ok(beamflag[j]))
+					next = j;
+				else
+					j++;
+				}
+			if (next > i)
+				{
+				for (j=i+1;j<next;j++)
+					{
+					factor = ((double)(j - i))
+							/ ((double)(next - i));
+					depths[j] = bath[i] + 
+						factor * (bath[next] - bath[i]);
+					depthacrosstrack[j] = bathacrosstrack[i] + 
+						factor * (bathacrosstrack[next] - bathacrosstrack[i]);
+					}
+				}
+			}
+		}
+
+	/* now smooth the depths */
+	if (nbathgood > 0 && nsmooth > 0)
+		{
+		for (i=first;i<=last;i++)
+			{
+			j1 = i - nsmooth;
+			j2 = i + nsmooth;
+			if (j1 < first)
+				j1 = first;
+			if (j2 > last)
+				j2 = last;
+			depthsum = 0.0;
+			for (j=j1;j<=j2;j++)
+				{
+				depthsum += depths[j];
+				}
+			if (depthsum > 0.0)
+				depthsmooth[i] = depthsum/((double)(j2-j1+1));
+			else
+				depthsmooth[i] = depths[i];
+			}
+		for (i=first;i<=last;i++)
+			depths[i] = depthsmooth[i];
+		}
+
+	/* now extrapolate the depths at the ends of the swath */
+	if (nbathgood > 0)
+		{
+		*ndepths = nbath;
+		if (last - first > 0)
+			dacrosstrack = 
+				(depthacrosstrack[last] 
+				- depthacrosstrack[first]) 
+				/ (last - first);
+		else 
+			dacrosstrack = 1.0;
+		for (i=0;i<first;i++)
+			{
+			depths[i] = depths[first];
+			depthacrosstrack[i] = depthacrosstrack[first] 
+				+ dacrosstrack * (i - first);
+			}
+		for (i=last+1;i<nbath;i++)
+			{
+			depths[i] = depths[last];
+			depthacrosstrack[i] = depthacrosstrack[last] 
+				+ dacrosstrack * (i - last);
+			}
+		}
+
+	/* now calculate slopes */
+	if (nbathgood > 0)
+		{
+		*nslopes = nbath + 1;
+		for (i=0;i<nbath-1;i++)
+			{
+			slopes[i+1] = (depths[i+1] - depths[i])
+				/(depthacrosstrack[i+1] - depthacrosstrack[i]);
+			slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
+				+ depthacrosstrack[i]);
+/*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
+i,depths[i],depths[i+1],depthacrosstrack[i],depthacrosstrack[i+1],slopes[i+1]);*/
+			}
+		slopes[0] = 0.0;
+		slopeacrosstrack[0] = depthacrosstrack[0];
+		slopes[nbath] = 0.0;
+		slopeacrosstrack[nbath] = depthacrosstrack[nbath-1];
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ndepths:         %d\n",
+			*ndepths);
+		fprintf(stderr,"dbg2       depths:\n");
+		for (i=0;i<nbath;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr,"dbg2       nslopes:         %d\n",
+			*nslopes);
+		fprintf(stderr,"dbg2       slopes:\n");
+		for (i=0;i<*nslopes;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_bathyslope(int verbose,
+	int ndepths, double *depths, double *depthacrosstrack,
+	int nslopes, double *slopes, double *slopeacrosstrack, 
+	double acrosstrack, double *depth, double *slope,
+	int *error)
+{
+	char	*function_name = "get_bathyslope";
+	int	status = MB_SUCCESS;
+	int	found_depth, found_slope;
+	int	idepth, islope;
+	int	i;
+	
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       ndepths:         %d\n",
+			ndepths);
+		fprintf(stderr,"dbg2       depths:\n");
+		for (i=0;i<ndepths;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr,"dbg2       nslopes:         %d\n",
+			nslopes);
+		fprintf(stderr,"dbg2       slopes:\n");
+		for (i=0;i<nslopes;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr,"dbg2       acrosstrack:     %f\n",acrosstrack);
+		}
+
+	/* check if acrosstrack is in defined interval */
+	found_depth = MB_NO;
+	found_slope = MB_NO;
+	if (ndepths > 1)
+	    {
+	    
+	    if (acrosstrack < depthacrosstrack[0])
+		{
+		*depth = depths[0];
+		*slope = 0.0;
+		found_depth = MB_YES;
+		found_slope = MB_YES;
+		}
+
+	    else if (acrosstrack > depthacrosstrack[ndepths-1])
+		{
+		*depth = depths[ndepths-1];
+		*slope = 0.0;
+		found_depth = MB_YES;
+		found_slope = MB_YES;
+		}
+    
+	    else if (acrosstrack >= depthacrosstrack[0]
+		    && acrosstrack <= depthacrosstrack[ndepths-1])
+		{
+    
+		/* look for depth */
+		idepth = -1;
+		while (found_depth == MB_NO && idepth < ndepths - 2)
+		    {
+		    idepth++;
+		    if (acrosstrack >= depthacrosstrack[idepth]
+			&& acrosstrack <= depthacrosstrack[idepth+1])
+			{
+			*depth = depths[idepth] 
+				+ (acrosstrack - depthacrosstrack[idepth])
+				/(depthacrosstrack[idepth+1] 
+				- depthacrosstrack[idepth])
+				*(depths[idepth+1] - depths[idepth]);
+			found_depth = MB_YES;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		    }
+    
+		/* look for slope */
+		islope = -1;
+		while (found_slope == MB_NO && islope < nslopes - 2)
+		    {
+		    islope++;
+		    if (acrosstrack >= slopeacrosstrack[islope]
+			&& acrosstrack <= slopeacrosstrack[islope+1])
+			{
+			*slope = slopes[islope] 
+				+ (acrosstrack - slopeacrosstrack[islope])
+				/(slopeacrosstrack[islope+1] 
+				- slopeacrosstrack[islope])
+				*(slopes[islope+1] - slopes[islope]);
+			found_slope = MB_YES;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		    }
+		}
+	    }
+
+	/* check for failure */
+	if (found_depth != MB_YES || found_slope != MB_YES)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OTHER;
+		*depth = 0.0;
+		*slope = 0.0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       depth:           %f\n",*depth);
+		fprintf(stderr,"dbg2       slope:           %f\n",*slope);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
 		}
 
 	/* return status */

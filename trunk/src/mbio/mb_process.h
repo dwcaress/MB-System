@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.19 2004-05-21 23:46:22 caress Exp $
+ *    $Id: mb_process.h,v 5.20 2004-10-06 19:04:24 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -410,6 +410,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2004/05/21 23:46:22  caress
+ * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
+ *
  * Revision 5.18  2003/07/26 17:59:32  caress
  * Changed beamflag handling code.
  *
@@ -1024,22 +1027,34 @@ int mb_pr_get_kluges(int verbose, char *file,
 			int	*mbp_kluge004,
 			int	*mbp_kluge005,
 			int *error);
+int mb_pr_set_bathyslope(int verbose,
+			int nsmooth, 
+			int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+			int *ndepths, double *depths, double *depthacrosstrack, 
+			int *nslopes, double *slopes, double *slopeacrosstrack, 
+			double *depthsmooth, 
+			int *error);
+int mb_pr_get_bathyslope(int verbose,
+			int ndepths, double *depths, double *depthacrosstrack,
+			int nslopes, double *slopes, double *slopeacrosstrack, 
+			double acrosstrack, double *depth, double *slope,
+			int *error);
 int mb_esf_check(int verbose, char *swathfile, char *esffile, 
-		int *found, int *error);
+			int *found, int *error);
 int mb_esf_load(int verbose, char *swathfile,
-		int load, int output,
-		char *esffile, 
-		struct mb_esf_struct *esf,
-		int *error);
+			int load, int output,
+			char *esffile, 
+			struct mb_esf_struct *esf,
+			int *error);
 int mb_esf_open(int verbose, char *esffile, 
-		int load, int output,
-		struct mb_esf_struct *esf,
-		int *error);
+			int load, int output,
+			struct mb_esf_struct *esf,
+			int *error);
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
-		double time_d, int nbath, char *beamflag, 
-		int *error);
+			double time_d, int nbath, char *beamflag, 
+			int *error);
 int mb_esf_save(int verbose, struct mb_esf_struct *esf, 
-		double time_d, int beam, int action, int *error);
+			double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
 
 

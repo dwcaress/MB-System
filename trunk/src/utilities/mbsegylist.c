@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	5/29/2004
- *    $Id: mbsegylist.c,v 5.1 2004-07-27 19:48:35 caress Exp $
+ *    $Id: mbsegylist.c,v 5.2 2004-10-06 19:10:53 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	May 29, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/07/27 19:48:35  caress
+ * Working on handling subbottom data.
+ *
  * Revision 5.0  2004/06/18 04:06:05  caress
  * Adding support for segy i/o and working on support for Reson 7k format 88.
  *
@@ -59,7 +62,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegylist.c,v 5.1 2004-07-27 19:48:35 caress Exp $";
+static char rcs_id[] = "$Id: mbsegylist.c,v 5.2 2004-10-06 19:10:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -67,7 +70,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBsegylist";
 	static char help_message[] =  "MBsegylist lists table data from a segy data file.";
-	static char usage_message[] = "MBsegylist -Ifile [-H -Olist -V]";
+	static char usage_message[] = "MBsegylist -Ifile [-A -Llonflip -Olist -H -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -141,8 +144,9 @@ main (int argc, char **argv)
 	/* set file to null */
 	file[0] = '\0';
 
-	/* set up the default list controls 
-		(Time, lon, lat, heading, speed, along-track distance, center beam depth) */
+	/* set up the default list controls: TiXYSsCcDINL
+		(time, time interval, lon, lat, shot, shot trace #, cmp, cmp trace #, 
+			delay, sample length, number samples, trace length) */
 	n_list = 0;
 	list[n_list]='T'; n_list++;
 	list[n_list]='i'; n_list++;
@@ -165,7 +169,7 @@ main (int argc, char **argv)
 #endif
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "I:i:L:l:O:o:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "AaI:i:L:l:O:o:VvWwHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -175,6 +179,11 @@ main (int argc, char **argv)
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'A':
+		case 'a':
+			ascii = MB_NO;
+			flag++;
 			break;
 		case 'I':
 		case 'i':
@@ -246,6 +255,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
+		fprintf(stderr,"dbg2       ascii:          %d\n",ascii);
 		fprintf(stderr,"dbg2       n_list:         %d\n",n_list);
 		for (i=0;i<n_list;i++)
 			fprintf(stderr,"dbg2         list[%d]:      %c\n",
@@ -497,10 +507,10 @@ main (int argc, char **argv)
 						break;
 					case 'R': /* range */
 						if (ascii == MB_YES)
-						    printf("%6d",traceheader.shot_num);
+						    printf("%6d",traceheader.range);
 						else
 						    {
-						    b = traceheader.shot_num;
+						    b = traceheader.range;
 						    fwrite(&b, sizeof(double), 1, stdout);
 						    }
 						break;

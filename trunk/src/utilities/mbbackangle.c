@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.7 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbbackangle.c,v 5.8 2004-10-06 19:10:52 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2002, 2003 by
+ *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2002/09/19 00:28:12  caress
  * Release 5.0.beta23
  *
@@ -105,32 +108,26 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
+/* GMT include files */
+#include "gmt.h"
+
 /* mode defines */
 #define	MBBACKANGLE_AMP	1
 #define	MBBACKANGLE_SS	2
+#define	MBBACKANGLE_INNERSWATHLIMIT 15.0
 
-int get_bathyslope(int verbose,
-	int ndepths, double *depths, double *depthacrosstrack, 
-	int nslopes, double *slopes, double *slopeacrosstrack, 
-	double acrosstrack, double *depth,  double *slope, 
-	int *error);
-int set_bathyslope(int verbose,
-	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
-	int *error);
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int nangles, double angle_max, double dangle, int symmetry,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.7 2003-04-17 21:17:10 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.8 2004-10-06 19:10:52 caress Exp $";
+static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "MBbackangle reads a swath sonar data file and generates \n\t\
 a set of tables containing the average sidescan values\n\t\
@@ -140,8 +137,8 @@ average function for a user defined number of pings. The \n\t\
 tables are output to an \".aga\" file which can be applied \n\t\
 by MBprocess.";
 	static char usage_message[] = "mbbackangle -Ifile \
-[-Akind \
--Fformat -Nnangles/angle_max -Ppings -Zaltitude -V -H]";
+[-Akind -Fformat -Ggridmode/angle/max/nx/ny \
+-Nnangles/angle_max -Ppings -Zaltitude -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -203,8 +200,10 @@ by MBprocess.";
 	char	comment[256];
 
 	/* slope calculation variables */
+	int	nsmooth = 5;
 	int	ndepths;
 	double	*depths;
+	double	*depthsmooth;
 	double	*depthacrosstrack;
 	int	nslopes;
 	double	*slopes;
@@ -215,11 +214,12 @@ by MBprocess.";
 	int	sidescan_on = MB_NO;
 	int	dump = MB_NO;
 	int	symmetry = MB_NO;
+	int	useslope = MB_NO;
 	int	nangles = 81;
 	double	angle_max = 80.0;
 	double	dangle;
 	double	angle_start;
-	int	pings_avg = 25;
+	int	pings_avg = 50;
 	int	navg = 0;
 	int	*nmeanamp = NULL;
 	double	*meanamp = NULL;
@@ -229,10 +229,39 @@ by MBprocess.";
 	double	*sigmass = NULL;
 	double	altitude_default = 0.0;
 	double	time_d_avg;
-	int	amp_corr_mode;
-	int	ss_corr_mode;
+	int	amp_corr_type;
+	int	amp_corr_symmetry = MBP_SSCORR_SYMMETRIC;
+	int	amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
+	int	ss_corr_type;
+	int	ss_corr_symmetry = MBP_AMPCORR_SYMMETRIC;
+	int	ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
 	double	ref_angle;
 	double	ref_angle_default = 30.0;
+	
+	/* amp vs angle grid variables */
+	int	gridamp = MB_NO;
+	double	gridampangle = 0.0;
+	double	gridampmax = 0.0;
+	int	gridampnx = 0;
+	int	gridampny = 0;
+	double	gridampdx = 0.0;
+	double	gridampdy = 0.0;
+	float	*gridamphist = NULL;
+	int	gridss = MB_NO;
+	double	gridssangle = 0.0;
+	double	gridssmax = 0.0;
+	int	gridssnx = 0;
+	int	gridssny = 0;
+	double	gridssdx = 0.0;
+	double	gridssdy = 0.0;
+	float	*gridsshist = NULL;
+	char	gridfile[MB_PATH_MAXLINE];
+	char	*xlabel = "Grazing Angle (degrees)";
+	char	*ylabel = "Amplitude";
+	char	zlabel[MB_PATH_MAXLINE];
+	char	title[MB_PATH_MAXLINE];
+	char	plot_cmd[MB_PATH_MAXLINE];
+	char	*projection = "GenericLinear";
 
 	int	ampkind;
 	int	read_data;
@@ -240,17 +269,22 @@ by MBprocess.";
 	double	altitude_use;
 	double	slope;
 	double	angle;
+	double	ampmax;
+	double	norm;
 	int	nrec, namp, nss, ntable;
 	int	nrectot = 0;
 	int	namptot = 0;
 	int	nsstot = 0;
 	int	ntabletot = 0;
+	int	mode;
+	int	plot_status;
 
 	/* time, user, host variables */
 	time_t	right_now;
 	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	int	i, j;
+	int	ix, jy, k, n;
 	
 	char	*ctime();
 	char	*getenv();
@@ -267,7 +301,7 @@ by MBprocess.";
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:CcDdF:f:HhI:i:N:n:P:p:R:r:VvZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -294,6 +328,31 @@ by MBprocess.";
 			sscanf (optarg,"%d", &format);
 			flag++;
 			break;
+		case 'G':
+		case 'g':
+			n = sscanf (optarg,"%d/%lf/%lf/%d/%d", &mode,&angle, &ampmax, &i, &j);
+			if (mode == MBBACKANGLE_AMP && n == 5)
+				{
+				gridamp = MB_YES;
+				gridampangle = angle;
+				gridampmax = ampmax;
+				gridampnx = i;
+				gridampny = j;
+				gridampdx = 2.0 * gridampangle / (gridampnx - 1);
+				gridampdy = gridampmax / (gridampny - 1);
+				}
+			else if (mode == MBBACKANGLE_SS && n == 5)
+				{
+				gridss = MB_YES;
+				gridssangle = angle;
+				gridssmax = ampmax;
+				gridssnx = i;
+				gridssny = j;
+				gridssdx = 2.0 * gridssangle / (gridssnx - 1);
+				gridssdy = gridssmax / (gridssny - 1);
+				}
+			flag++;
+			break;
 		case 'H':
 		case 'h':
 			help++;
@@ -311,6 +370,11 @@ by MBprocess.";
 		case 'P':
 		case 'p':
 			sscanf (optarg,"%d", &pings_avg);
+			flag++;
+			break;
+		case 'Q':
+		case 'q':
+			useslope = MB_YES;
 			flag++;
 			break;
 		case 'R':
@@ -394,12 +458,27 @@ by MBprocess.";
 		fprintf(stderr,"dbg2       symmetry:     %d\n",symmetry);
 		fprintf(stderr,"dbg2       amplitude_on: %d\n",amplitude_on);
 		fprintf(stderr,"dbg2       sidescan_on:  %d\n",sidescan_on);
+		fprintf(stderr,"dbg2       useslope:     %d\n",useslope);
 		fprintf(stderr,"dbg2       nangles:      %d\n",nangles);
 		fprintf(stderr,"dbg2       angle_max:    %f\n",angle_max);
 		fprintf(stderr,"dbg2       ref_angle:    %f\n",ref_angle_default);
 		fprintf(stderr,"dbg2       pings_avg:    %d\n",pings_avg);
 		fprintf(stderr,"dbg2       angle_max:    %f\n",angle_max);
 		fprintf(stderr,"dbg2       altitude:     %f\n",altitude_default);
+		fprintf(stderr,"dbg2       gridamp:      %d\n",gridamp);
+		fprintf(stderr,"dbg2       gridampangle: %f\n",gridampangle);
+		fprintf(stderr,"dbg2       gridampmax:   %f\n",gridampmax);
+		fprintf(stderr,"dbg2       gridampnx:    %d\n",gridampnx);
+		fprintf(stderr,"dbg2       gridampny:    %d\n",gridampny);
+		fprintf(stderr,"dbg2       gridampdx:    %d\n",gridampdx);
+		fprintf(stderr,"dbg2       gridampdy:    %d\n",gridampdy);
+		fprintf(stderr,"dbg2       gridss:       %d\n",gridss);
+		fprintf(stderr,"dbg2       gridssangle:  %f\n",gridssangle);
+		fprintf(stderr,"dbg2       gridssmax:    %f\n",gridssmax);
+		fprintf(stderr,"dbg2       gridssnx:     %d\n",gridssnx);
+		fprintf(stderr,"dbg2       gridssny:     %d\n",gridssny);
+		fprintf(stderr,"dbg2       gridssdx:     %d\n",gridssdx);
+		fprintf(stderr,"dbg2       gridssdy:     %d\n",gridssdy);
 		}
 
 	/* if help desired then print it and exit */
@@ -446,6 +525,12 @@ by MBprocess.";
 		exit(error);
 		}
 
+	/* check grid modes */
+	if (gridamp == MB_YES && amplitude_on == MB_NO)
+		gridamp = MB_NO;
+	if (gridss == MB_YES && sidescan_on == MB_NO)
+		gridss = MB_NO;
+
 	/* output some information */
 	if (verbose > 0)
 		{
@@ -457,6 +542,14 @@ by MBprocess.";
 			fprintf(stderr, "Working on beam amplitude data...\n");
 		if (sidescan_on == MB_YES)
 			fprintf(stderr, "Working on sidescan data...\n");
+		if (useslope == MB_YES)
+			fprintf(stderr, "Using seafloor slope in calculating correction tables...\n");
+		else
+			fprintf(stderr, "Using flat bottom assumption in calculating correction tables...\n");
+		if (gridamp == MB_YES)
+			fprintf(stderr, "Outputting gridded histograms of beam amplitude vs grazing angle...\n");
+		if (gridss == MB_YES)
+			fprintf(stderr, "Outputting gridded histograms of sidescan amplitude vs grazing angle...\n");
 		}
 
 	/* get size of bins */
@@ -477,6 +570,42 @@ by MBprocess.";
 		nmeanss[i] = 0;
 		meanss[i] = 0.0;
 		sigmass[i] = 0.0;
+		}
+
+	/* initialize grids */
+	if (gridamp == MB_YES)
+		{
+		/* allocate memory for output grids */
+		status = mb_malloc(verbose, gridampnx * gridampny * sizeof(float), &gridamphist, &error);
+
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+				message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+		}
+	if (gridss == MB_YES)
+		{
+		/* allocate memory for output grids */
+		status = mb_malloc(verbose, gridssnx * gridssny * sizeof(float), &gridsshist, &error);
+
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+				message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
 		}
 
 	/* get format if required */
@@ -541,10 +670,10 @@ by MBprocess.";
 	if (format == MBF_SB2100RW
 	    || format == MBF_SB2100B1
 	    || format == MBF_SB2100B2)
-	    ss_corr_mode = MBP_SSCORR_DIVISION;
+	    ss_corr_type = MBP_SSCORR_DIVISION;
 	else
-	    ss_corr_mode = MBP_SSCORR_SUBTRACTION;
-	amp_corr_mode = MBP_AMPCORR_SUBTRACTION;
+	    ss_corr_type = MBP_SSCORR_SUBTRACTION;
+	amp_corr_type = MBP_AMPCORR_SUBTRACTION;
 	ref_angle = ref_angle_default;
 	
 	/* allocate memory for data arrays */
@@ -577,6 +706,9 @@ by MBprocess.";
 					&depths,&error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
+					&depthsmooth,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&depthacrosstrack,&error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
@@ -601,7 +733,28 @@ by MBprocess.";
 	    fprintf(stderr, "\nprocessing swath file: %s %d\n", swathfile, format);
 	    }
 
-	/* open output file */
+	/* initialize grid arrays */
+	if (error == MB_ERROR_NO_ERROR)
+	    {
+	    if (gridamp == MB_YES)
+		{
+		/* initialize the memory */
+		for (i=0;i<gridampnx*gridampny;i++)
+			{
+			gridamphist[i] = 0.0;
+			}
+		}			
+	    if (gridss == MB_YES)
+		{
+		/* initialize the memory */
+		for (i=0;i<gridssnx*gridssny;i++)
+			{
+			gridsshist[i] = 0.0;
+			}
+		}
+	    }
+
+	/* open output files */
 	if (error == MB_ERROR_NO_ERROR
 		&& dump == MB_YES)
 	    {
@@ -769,10 +922,11 @@ by MBprocess.";
 
 		    /* get the seafloor slopes */
 		    if (beams_bath > 0)
-			set_bathyslope(verbose, 
+			mb_pr_set_bathyslope(verbose,nsmooth,
 				beams_bath,beamflag,bath,bathacrosstrack,
 				&ndepths,depths,depthacrosstrack,
 				&nslopes,slopes,slopeacrosstrack,
+				depthsmooth,
 				&error);
 
 		    /* do the amplitude */
@@ -789,7 +943,7 @@ by MBprocess.";
 				}
 			    else
 				{
-				status = get_bathyslope(verbose,
+				status = mb_pr_get_bathyslope(verbose,
 				    ndepths,depths,depthacrosstrack,
 				    nslopes,slopes,slopeacrosstrack,
 				    bathacrosstrack[i],
@@ -805,15 +959,29 @@ by MBprocess.";
 			    if (bathy > 0.0)
 				{
 				altitude_use = bathy - sonardepth;
-				angle = RTD*(atan(bathacrosstrack[i]/altitude_use)
-				    + atan(slope));
+				angle = RTD * atan(bathacrosstrack[i] / altitude_use);
+				if (useslope == MB_YES)
+					angle += RTD * atan(slope);
+					
+				/* load amplitude into table */
 				j = (angle - angle_start)/dangle;
-				/*j = (int)((fabs(angle) + 0.5 * dangle)/dangle);*/
 				if (j >= 0 && j < nangles)
 				    {
 				    meanamp[j] += amp[i];
 				    sigmaamp[j] += amp[i]*amp[i];
 				    nmeanamp[j]++;
+				    }
+					
+				/* load amplitude into grid */
+				if (gridamp == MB_YES)
+				    {
+				    ix = (angle + gridampangle) / gridampdx;
+				    jy = amp[i] / gridampdy;
+				    if (ix >= 0 && ix < gridampnx && jy >= 0 && jy < gridampny)
+					{
+					k = ix * gridampny + jy;
+					gridamphist[k] += 1.0;
+					}
 				    }
 				}
 
@@ -835,7 +1003,7 @@ by MBprocess.";
 			    nss++;
 			    if (beams_bath > 0)
 				{
-				status = get_bathyslope(verbose,
+				status = mb_pr_get_bathyslope(verbose,
 				    ndepths,depths,depthacrosstrack,
 				    nslopes,slopes,slopeacrosstrack,
 				    ssacrosstrack[i],
@@ -856,15 +1024,35 @@ by MBprocess.";
 			    if (bathy > 0.0)
 				{
 				altitude_use = bathy - sonardepth;
-				angle = RTD*(atan(ssacrosstrack[i]/altitude_use) 
-				    + atan(slope));
+				angle = RTD * atan(ssacrosstrack[i] / altitude_use);
+/*fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f angle:%f\n",
+time_d, i, ssacrosstrack[i], altitude_use, angle);*/
+				if (useslope == MB_YES)
+					{
+/*fprintf(stderr,"SLOPECALC: time_d:%f i:%d angle:%f ",time_d,i,angle);*/
+					angle += RTD * atan(slope);
+/*fprintf(stderr,"slope:%f slopeangle:%f angle:%f\n",slope,RTD * atan(slope),angle);*/
+					}
+					
+				/* load amplitude into table */
 				j = (angle - angle_start)/dangle;
-				/*j = (int)((fabs(angle) + 0.5 * dangle)/dangle);*/
 				if (j >= 0 && j < nangles)
 				    {
 				    meanss[j] += ss[i];
 				    sigmass[j] += ss[i]*ss[i];
 				    nmeanss[j]++;
+				    }
+					
+				/* load amplitude into grid */
+				if (gridamp == MB_YES)
+				    {
+				    ix = (angle + gridssangle) / gridssdx;
+				    jy = ss[i] / gridssdy;
+				    if (ix >= 0 && ix < gridssnx && jy >= 0 && jy < gridssny)
+					{
+					k = ix * gridssny + jy;
+					gridsshist[k] += 1.0;
+					}
 				    }
 				}
 
@@ -890,19 +1078,129 @@ by MBprocess.";
 	nrectot += nrec;
 	namptot += namp;
 	nsstot += nss;
+		
+	/* output grids */
+	if (gridamp == MB_YES)
+		{
+		/* normalize the grid */
+		ampmax = 0.0;
+		for (ix=0;ix<gridampnx;ix++)
+			{
+			norm = 0.0;
+			for (jy=0;jy<gridampny;jy++)
+				{
+				k = ix * gridampny + jy;
+				norm += gridamphist[k];
+				}
+			if (norm > 0.0)
+				{
+				norm *= 0.001;
+				for (jy=0;jy<gridampny;jy++)
+					{
+					k = ix * gridampny + jy;
+					gridamphist[k] /= norm;
+					ampmax = MAX(ampmax, gridamphist[k]);
+					}
+				}
+			}
+		
+		/* set the strings */
+		strcpy(gridfile, swathfile);
+ 	    	strcat(gridfile,"_aga.grd");
+		strcpy(zlabel, "Beam Amplitude PDF (X1000)");
+		strcpy(title, "Beam Amplitude vs. Grazing Angle PDF");
+		
+		/* output the grid */
+		write_cdfgrd(verbose, gridfile, gridamphist,
+				gridampnx, gridampny, 
+				(double)(-gridampangle), gridampangle, 
+				(double)0.0, gridampmax,
+				(double)0.0, ampmax,
+				gridampdx, gridampdy,
+				xlabel, ylabel, zlabel, title, projection,
+				argc, argv, &error);
+	
+		/* run mbm_grdplot */
+		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -Z0/40.0 -MXM# -MXI%s -V -L\"File %s - %s:%s\"", 
+				gridfile, amptablefile, gridfile, title, zlabel);
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on grid file %s\n", gridfile);
+			}
+		}
+	if (gridss == MB_YES)
+		{
+		/* normalize the grid */
+		ampmax = 0.0;
+		for (ix=0;ix<gridssnx;ix++)
+			{
+			norm = 0.0;
+			for (jy=0;jy<gridssny;jy++)
+				{
+				k = ix * gridssny + jy;
+				norm += gridsshist[k];
+				}
+			if (norm > 0.0)
+				{
+				norm *= 0.001;
+				for (jy=0;jy<gridssny;jy++)
+					{
+					k = ix * gridssny + jy;
+					gridsshist[k] /= norm;
+					ampmax = MAX(ampmax, gridsshist[k]);
+					}
+				}
+			}
+		
+		/* set the strings */
+		strcpy(gridfile, swathfile);
+ 	    	strcat(gridfile,"_sga.grd");
+		strcpy(zlabel, "Sidescan Amplitude PDF (X1000)");
+		strcpy(title, "Sidescan Amplitude vs. Grazing Angle PDF");
+		
+		/* output the grid */
+		write_cdfgrd(verbose, gridfile, gridsshist,
+				gridssnx, gridssny, 
+				(double)(-gridssangle), gridssangle, 
+				(double)0.0, gridampmax,
+				(double)0.0, ampmax,
+				gridssdx, gridssdy,
+				xlabel, ylabel, zlabel, title, projection,
+				argc, argv, &error);
+	
+		/* run mbm_grdplot */
+		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -Z0/40.0 -MXM# -MXI%s -V -L\"File %s - %s:%s\"", 
+				gridfile, sstablefile, gridfile, title, zlabel);
+		if (verbose)
+			{
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+				plot_cmd);
+			}
+		plot_status = system(plot_cmd);
+		if (plot_status == -1)
+			{
+			fprintf(stderr, "\nError executing mbm_grdplot on grid file %s\n", gridfile);
+			}
+		}
 
 	/* set amplitude correction in parameter file */
 	if (amplitude_on == MB_YES)
 		status = mb_pr_update_ampcorr(verbose, swathfile, 
 			MB_YES, amptablefile, 
-			amp_corr_mode, MB_YES, ref_angle, MB_NO, 
+			amp_corr_type, amp_corr_symmetry, ref_angle, amp_corr_slope, 
 			&error);
 
 	/* set sidescan correction in parameter file */
 	if (sidescan_on == MB_YES)
 		status = mb_pr_update_sscorr(verbose, swathfile, 
 			MB_YES, sstablefile, 
-			ss_corr_mode, MB_YES, ref_angle, MB_NO, 
+			ss_corr_type, ss_corr_symmetry, ref_angle, ss_corr_slope, 
 			&error);
 
 	/* output information */
@@ -931,6 +1229,7 @@ by MBprocess.";
 	mb_free(verbose,&ssacrosstrack,&error);
 	mb_free(verbose,&ssalongtrack,&error);
 	mb_free(verbose,&depths,&error);
+	mb_free(verbose,&depthsmooth,&error);
 	mb_free(verbose,&depthacrosstrack,&error);
 	mb_free(verbose,&slopes,&error);
 	mb_free(verbose,&slopeacrosstrack,&error);
@@ -977,12 +1276,20 @@ by MBprocess.";
 		mb_free(verbose,&nmeanamp,&error);
 		mb_free(verbose,&meanamp,&error);
 		mb_free(verbose,&sigmaamp,&error);
+		if (gridamp == MB_YES)
+			{
+			mb_free(verbose,&gridamphist,&error);
+			}
 		}
 	if (sidescan_on == MB_YES)
 		{
 		mb_free(verbose,&nmeanss,&error);
 		mb_free(verbose,&meanss,&error);
 		mb_free(verbose,&sigmass,&error);
+		if (gridss == MB_YES)
+			{
+			mb_free(verbose,&gridsshist,&error);
+			}
 		}
 
 	/* set program status */
@@ -1007,206 +1314,16 @@ by MBprocess.";
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int set_bathyslope(int verbose,
-	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
-	int *error)
-{
-	char	*function_name = "set_bathyslope";
-	int	status = MB_SUCCESS;
-	int	i;
-	
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBACKANGLE function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %d\n",bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
-			bathacrosstrack);
-		fprintf(stderr,"dbg2       bath:\n");
-		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, bath[i], bathacrosstrack[i]);
-		}
-
-	/* first find all depths */
-	*ndepths = 0;
-	for (i=0;i<nbath;i++)
-		{
-		if (mb_beam_ok(beamflag[i]))
-			{
-			depths[*ndepths] = bath[i];
-			depthacrosstrack[*ndepths] = bathacrosstrack[i];
-			(*ndepths)++;
-			}
-		}
-
-	/* now calculate slopes */
-	*nslopes = *ndepths + 1;
-	for (i=0;i<*ndepths-1;i++)
-		{
-		slopes[i+1] = (depths[i+1] - depths[i])
-			/(depthacrosstrack[i+1] - depthacrosstrack[i]);
-		slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
-			+ depthacrosstrack[i]);
-		}
-	if (*ndepths > 1)
-		{
-		slopes[0] = 0.0;
-		slopeacrosstrack[0] = depthacrosstrack[0];
-		slopes[*ndepths] = 0.0;
-		slopeacrosstrack[*ndepths] = 
-			depthacrosstrack[*ndepths-1];
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBACKANGLE function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       ndepths:         %d\n",
-			*ndepths);
-		fprintf(stderr,"dbg2       depths:\n");
-		for (i=0;i<*ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, depths[i], depthacrosstrack[i]);
-		fprintf(stderr,"dbg2       nslopes:         %d\n",
-			*nslopes);
-		fprintf(stderr,"dbg2       slopes:\n");
-		for (i=0;i<*nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, slopes[i], slopeacrosstrack[i]);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int get_bathyslope(int verbose,
-	int ndepths, double *depths, double *depthacrosstrack, 
-	int nslopes, double *slopes, double *slopeacrosstrack, 
-	double acrosstrack, double *depth,  double *slope, 
-	int *error)
-{
-	char	*function_name = "get_bathyslope";
-	int	status = MB_SUCCESS;
-	int	found_depth, found_slope;
-	int	idepth, islope;
-	int	i;
-	
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBACKANGLE function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       ndepths:         %d\n",
-			ndepths);
-		fprintf(stderr,"dbg2       depths:\n");
-		for (i=0;i<ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, depths[i], depthacrosstrack[i]);
-		fprintf(stderr,"dbg2       nslopes:         %d\n",
-			nslopes);
-		fprintf(stderr,"dbg2       slopes:\n");
-		for (i=0;i<nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, slopes[i], slopeacrosstrack[i]);
-		fprintf(stderr,"dbg2       acrosstrack:     %f\n",acrosstrack);
-		}
-
-	/* check if acrosstrack is in defined interval */
-	found_depth = MB_NO;
-	found_slope = MB_NO;
-	if (ndepths > 1)
-	if (acrosstrack >= depthacrosstrack[0]
-		&& acrosstrack <= depthacrosstrack[ndepths-1])
-	    {
-
-	    /* look for depth */
-	    idepth = -1;
-	    while (found_depth == MB_NO && idepth < ndepths - 2)
-		{
-		idepth++;
-		if (acrosstrack >= depthacrosstrack[idepth]
-		    && acrosstrack <= depthacrosstrack[idepth+1])
-		    {
-		    *depth = depths[idepth] 
-			    + (acrosstrack - depthacrosstrack[idepth])
-			    /(depthacrosstrack[idepth+1] 
-			    - depthacrosstrack[idepth])
-			    *(depths[idepth+1] - depths[idepth]);
-		    found_depth = MB_YES;
-		    *error = MB_ERROR_NO_ERROR;
-		    }
-		}
-
-	    /* look for slope */
-	    islope = -1;
-	    while (found_slope == MB_NO && islope < nslopes - 2)
-		{
-		islope++;
-		if (acrosstrack >= slopeacrosstrack[islope]
-		    && acrosstrack <= slopeacrosstrack[islope+1])
-		    {
-		    *slope = slopes[islope] 
-			    + (acrosstrack - slopeacrosstrack[islope])
-			    /(slopeacrosstrack[islope+1] 
-			    - slopeacrosstrack[islope])
-			    *(slopes[islope+1] - slopes[islope]);
-		    found_slope = MB_YES;
-		    *error = MB_ERROR_NO_ERROR;
-		    }
-		}
-	    }
-
-	/* check for failure */
-	if (found_depth != MB_YES || found_slope != MB_YES)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_OTHER;
-		*depth = 0.0;
-		*slope = 0.0;
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBACKANGLE function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       depth:           %f\n",*depth);
-		fprintf(stderr,"dbg2       slope:           %f\n",*slope);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int nangles, double angle_max, double dangle, int symmetry, 
 	int *nmean, double *mean, double *sigma, 
 	int *error)
 {
-	char	*function_name = "get_bathyslope";
+	char	*function_name = "output_table";
 	int	status = MB_SUCCESS;
-	double	angle, amean, asigma;
+	double	angle, amean, asigma, sum, sumsq, sumn;
 	int	time_i[7];
+	int	ii, jj, i0, i1;
 	int	i, j;
 	
 
@@ -1242,31 +1359,41 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	fprintf(tfp,"# nangles: %d\n", nangles);
 	for (i=0;i<nangles;i++)
 		{
-		j = nangles - i - 1;
+		amean = 0.0;
+		asigma = 0.0;
+		sum = 0.0;
+		sumsq = 0.0;
+		sumn = 0.0;
 		angle = -angle_max + i * dangle;
-		if (symmetry == MB_YES)
+		if (fabs(angle) > MBBACKANGLE_INNERSWATHLIMIT)
 			{
-			amean = asigma = 0.0;
-			if ((nmean[i] + nmean[j]) > nping / 2)
-				{
-				amean = (mean[i] + mean[j]) 
-					/ (nmean[i] + nmean[j]);
-				asigma = sqrt((sigma[i] + sigma[j]) 
-						/ (nmean[i] + nmean[j]) 
-						- amean * amean);
-				}
-			fprintf(tfp,"%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+			i0 = MAX(i - 1, 0);
+			i1 = MIN(i + 1, nangles - 1);
 			}
 		else
 			{
-			amean = asigma = 0.0;
-			if (nmean[i] > nping / 2)
-				{
-				amean = mean[i] / nmean[i];
-				asigma = sqrt(sigma[i] / nmean[i] - amean * amean);
-				}
-			fprintf(tfp,"%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+			i0 = i;
+			i1 = i;
 			}
+		for (ii=i0;ii<=i1;ii++)
+			{
+			sum += mean[ii];
+			sumsq += sigma[ii];
+			sumn += nmean[ii];
+			if (symmetry == MB_YES)
+				{
+				jj = nangles - ii - 1;
+				sum += mean[jj];
+				sumsq += sigma[jj];
+				sumn += nmean[jj];
+				}
+			}
+		if (sumn > 0.0)
+			{
+			amean = sum /  sumn;
+			asigma = sqrt((sumsq / sumn) - amean * amean);
+			}
+		fprintf(tfp,"%7.4f %12.4f %12.4f\n", angle, amean, asigma);
 		}
 	fprintf(tfp,"#\n");
 	fprintf(tfp,"#\n");
@@ -1280,6 +1407,158 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function write_cdfgrd writes output grid to a 
+ * GMT version 2 netCDF grd file 
+ */
+int write_cdfgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double zmin, double zmax, double dx, double dy, 
+		char *xlab, char *ylab, char *zlab, char *titl, 
+		char *projection, int argc, char **argv, 
+		int *error)
+{
+	char	*function_name = "write_cdfgrd";
+	int	status = MB_SUCCESS;
+	struct GRD_HEADER grd;
+	double	w, e, s, n;
+	int	pad[4];
+	int	complex;
+	float	*a;
+	time_t	right_now;
+	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	int	i, j, kg, ka;
+	char	*message;
+	char	*ctime();
+	char	*getenv();
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
+		fprintf(stderr,"dbg2       grid:       %d\n",grid);
+		fprintf(stderr,"dbg2       nx:         %d\n",nx);
+		fprintf(stderr,"dbg2       ny:         %d\n",ny);
+		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
+		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
+		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
+		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
+		fprintf(stderr,"dbg2       dx:         %f\n",dx);
+		fprintf(stderr,"dbg2       dy:         %f\n",dy);
+		fprintf(stderr,"dbg2       xlab:       %s\n",xlab);
+		fprintf(stderr,"dbg2       ylab:       %s\n",ylab);
+		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
+		fprintf(stderr,"dbg2       titl:       %s\n",titl);
+		fprintf(stderr,"dbg2       argc:       %d\n",argc);
+		fprintf(stderr,"dbg2       *argv:      %d\n",*argv);
+		}
+
+	/* inititialize grd header */
+#ifdef GMT3_0
+	grdio_init();
+	grd_init (&grd, argc, argv, MB_NO);
+#else
+	GMT_grdio_init();
+	GMT_grd_init (&grd, argc, argv, MB_NO);
+#endif
+
+	/* copy values to grd header */
+	grd.nx = nx;
+	grd.ny = ny;
+	grd.node_offset = 0;
+	grd.x_min = xmin;
+	grd.x_max = xmax;
+	grd.y_min = ymin;
+	grd.y_max = ymax;
+	grd.z_min = zmin;
+	grd.z_max = zmax;
+	grd.x_inc = dx;
+	grd.y_inc = dy;
+	grd.z_scale_factor = 1.0;
+	grd.z_add_offset = 0.0;
+	strcpy(grd.x_units,xlab);
+	strcpy(grd.y_units,ylab);
+	strcpy(grd.z_units,zlab);
+	strcpy(grd.title,titl);
+	strcpy(grd.command,"\0");
+	strncpy(date,"\0",MB_PATH_MAXLINE);
+	right_now = time((time_t *)0);
+	strncpy(date,ctime(&right_now),24);
+	if ((user_ptr = getenv("USER")) == NULL)
+		user_ptr = getenv("LOGNAME");
+	if (user_ptr != NULL)
+		strcpy(user,user_ptr);
+	else
+		strcpy(user, "unknown");
+	gethostname(host,MB_PATH_MAXLINE);
+	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
+		projection,program_name,MB_VERSION,user,host,date);
+
+	/* set extract wesn,pad and complex */
+	w = 0.0;
+	e = 0.0;
+	s = 0.0;
+	n = 0.0;
+	for (i=0;i<4;i++)
+		pad[i] = 0;
+	complex = 0;
+
+	/* allocate memory for output array */
+	status = mb_malloc(verbose,grd.nx*grd.ny*sizeof(float),&a,error);
+	if (*error != MB_ERROR_NO_ERROR)
+		{
+		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+		fprintf(stderr,"\nMBIO Error allocating output arrays.\n",
+			message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		mb_memory_clear(verbose, &error);
+		exit(status);
+		}
+
+	/* copy grid to new array and write it to GMT netCDF grd file */
+	if (status == MB_SUCCESS)
+		{
+		/* copy grid to new array */
+		for (i=0;i<grd.nx;i++)
+			for (j=0;j<grd.ny;j++)
+				{
+				kg = i*grd.ny+j;
+				ka = (grd.ny-1-j)*grd.nx+i;
+				a[ka] = grid[kg];
+				}
+
+		/* write the GMT netCDF grd file */
+#ifdef GMT3_0
+		write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
+#else
+		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
+#endif
+
+		/* free memory for output array */
+		mb_free(verbose, &a, error);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */

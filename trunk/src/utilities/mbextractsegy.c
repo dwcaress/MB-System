@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.4 2004-09-16 01:01:12 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.5 2004-10-06 19:10:52 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/09/16 01:01:12  caress
+ * Fixed many things.
+ *
  * Revision 5.3  2004/07/27 19:48:35  caress
  * Working on handling subbottom data.
  *
@@ -48,7 +51,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.4 2004-09-16 01:01:12 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.5 2004-10-06 19:10:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -136,6 +139,7 @@ main (int argc, char **argv)
 	char	*buffer = NULL;
 
 	FILE	*ofp = NULL;
+	char	mbsegyinfo_cmd[MB_PATH_MAXLINE];
 	int	read_data;
 	double	distmin;
 	int	found;
@@ -409,7 +413,18 @@ main (int argc, char **argv)
 			/* close any old output file unless a single file has been specified */
 			if (ofp != NULL)
 				{
+				/* output count of segy records */
+				fprintf(stderr,"%d records output to segy file %s\n",
+					nwrite, output_file);
+			if (verbose > 0)
+				fprintf(stderr,"\n");
+
+				/* close the file */
 				fclose(ofp);
+
+				/* use mbsegyinfo to generate a sinf file */
+				sprintf(mbsegyinfo_cmd, "mbsegyinfo -I %s -O", output_file);
+				system(mbsegyinfo_cmd);
 				}
 				
 			/* open the new file */
@@ -423,6 +438,12 @@ main (int argc, char **argv)
 				fprintf(stderr,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
+				}
+			else if (verbose > 0)
+				{
+				/* output info on file output */
+				fprintf(stderr,"Outputting subbottom data to segy file %s\n",
+					output_file);
 				}
 			}
 		}
@@ -539,7 +560,7 @@ main (int argc, char **argv)
 			
 			/* output info */
 			nread++;
-			if (nread % 10 == 0 || verbose > 0)
+			if (nread % 10 == 0 && verbose > 0)
 			fprintf(stderr,"file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d usec  minmax: %f %f\n",
 				file,nread,segytraceheader.shot_num,
 				segytraceheader.year,segytraceheader.day_of_yr,
@@ -710,7 +731,16 @@ main (int argc, char **argv)
 	/* close any old output file unless a single file has been specified */
 	if (ofp != NULL)
 		{
+		/* output count of segy records */
+		fprintf(stderr,"%d records output to segy file %s\n",
+			nwrite, output_file);
+
+		/* close the file */
 		fclose(ofp);
+		
+		/* use mbsegyinfo to generate a sinf file */
+		sprintf(mbsegyinfo_cmd, "mbsegyinfo -I %s -O", output_file);
+		system(mbsegyinfo_cmd);
 		}
 
 	/* check memory */
