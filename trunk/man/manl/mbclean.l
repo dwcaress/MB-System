@@ -1,4 +1,4 @@
-.TH mbclean l "14 August 1995"
+.TH mbclean l "27 December 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbclean\fP - Identifies and flags bad beams in multibeam bathymetry data.
 
@@ -6,21 +6,25 @@
 Version 4.3
 
 .SH SYNOPSIS
-\fBmbclean\fP [\fB-B\fIlow/high \fB-C\fIslope\fP 
-\fB-D\fIdistance\fP \fB-F\fIformat\fP 
+\fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
+\fB-D\fImin/max\fP \fB-F\fIformat\fP 
 \fB-G\fIfraction_low/fraction_high\fP 
 \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
 \fB-M\fImode\fP \fB-Q\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbclean\fP identifies and flags artifacts in multibeam bathymetry data. 
-Bad beams are primarily identified based on excessive bathymetric slopes. 
+\fBmbclean\fP identifies and flags artifacts in multibeam bathymetry data.
+Several algorithms are available for identifying artifacts; multiple
+algorithms can be applied in a single pass.
+The most commonly used approach is to identify artifacts  
+based on excessive bathymetric slopes. 
 If desired, \fBmbclean\fP will also flag beams associated with "rails" where
 outer beams have smaller crosstrack distances than more inner beams.
 Low and high bounds on acceptable depth values can be set; depth values
 outside the acceptable range will be flagged. The acceptable depth
-ranges can either be absolute (\fB-B\fP) option or relative
-to the local median depth (\fB-G\fP option).
+ranges can either be absolute (\fB-B\fP option), relative to
+the local median depth (\fB-A\fP option) or defined by low
+and high fractions of the local median depth (\fB-G\fP option).
 A set number of outer beams can also be flagged.
 The default input and output streams 
 are stdin and stdout.
@@ -38,6 +42,16 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
+.B \fB-A\fImax\fP
+This option sets the range of acceptable depth values relative to
+the local median depth. The median depth is obtained from the
+current ping and the pings immediately before and after that
+ping.  If a depth value deviates from the median depth by more
+than \fImax\fP, then it
+will be flagged. No deviation from the median depth checking is 
+done if the \fB-A\fP option
+is not used.
+.TP
 .B \fB-B\fIlow/high\fP
 This option sets the range of acceptable depth values.  If a depth
 value is less than \fIlow\fP or more than \fIhigh\fP then it
@@ -47,18 +61,30 @@ is not used.
 .B \fB-C\fIslope\fP
 The value \fIslope\fP is the maximum acceptable slope. Beams associated
 with excessive slopes will be flagged or removed according to the
-operational mode specified using the \fB-M\fP option.
+operational mode specified using the \fB-M\fP option. This method will
+be used if no other algorithms are specified; if other algorithms are
+specified but \fB-C\fP is not used then no slope checking will occur.
 Default: \fIslope\fP = 1.0
 .TP
-.B \fB-D\fIdistance\fP
+.B \fB-D\fImin/max\fP
+Sets the minimum and maximum allowed distances between beams used for
+some of the flagging algorithms.  Both values are expressed in terms
+of fractions of the local median depth. Thus, \fB-D\fP\fI0.01/0.25\fP
+will translate, if the local median depth is 1000 meters, to a minimum
+distance of 10 meters and a maximum distance of 250 meters.
+The \fImin\fP value sets the minimum distance 
+between beams required for an excessive slope to be used 
+to flag bad beams.
 The navigation and heading of the ship are used to calculate the locations
 of beams.  Ship turns often cause beams of adjacent pings to overlap, causing
 the distances between these beams to become quite small.  This can, in turn,
 magnify noise in the bathymetry data to produce slope estimates which
-are excessively large.  The \fB-D\fP option sets the minimum distance 
-(in meters) between beams required for an excessive slope to be used 
-to flag bad beams.
-Default: \fIdistance\fP = 10.
+are excessively large. The \fImax\fP value sets the maximum distance
+between the current beam and other beams for those beams to be used
+in evaluating the current beam. For instance, only beams within the
+maximum distance are used to calculate the local median depth, and only
+beams within the maximum distance are used to check for excessive slopes.
+Default: \fImin/max\fP = 0.01/0.25.
 .TP
 .B \fB-F\fIformat\fP
 Sets the format for the input and output multibeam data using 
@@ -71,7 +97,8 @@ Default: \fIformat\fP = 11.
 .TP
 .B \fB-G\fIfraction_low/fraction_high\fP
 This option sets the range of acceptable depth values relative to
-the local median depth. The median depth is obtained from the
+low and high fractions of the local median depth. 
+The median depth is obtained from the
 current ping and the pings immediately before and after that
 ping.  If a depth
 value is less than \fIfraction_low\fP times the median depth
@@ -141,34 +168,60 @@ outputs the program version being used, all error status messages,
 and the number of beams flagged as bad.
 
 .SH EXAMPLES
-Suppose one wishes to clean up a noisy raw Hydrosweep file in
-L-DGO binary format (format 24) by flagging bad
-depths as negative numbers. Use the following to delete
-the outermost four beams at each end of the swath and to allow
-a maximum slope of 45 degrees:
+Suppose one wishes to do a first pass edit of 
+a raw SeaBeam 2112 file in
+the vendor format (format 41). Use the following to flag any
+beams which deviate by more than 1% from the local median
+depth or which produce a slope greater than 3.5 (74 degrees):
 
- 	mbclean -F24 -C1.0 -M1 -X4 -Ihsnoisy -Ohsclean
+ 	mbclean -F41 -M1 -C3.5 -D0.01/0.20 \
+ 		-G0.99/1.01 \
+ 		-I sb199507130318.rec \
+ 		-O sb199507130318_c.mb41
 
-The program will output some information:
-
- 	input multibeam data file:  noisy.edmb
- 	output multibeam data file: clean.edmb
- 	multibeam format 24: L-DGO 59 ping edmb format
- 	(binary, centered)
-
- 	input records:  527
- 	output records: 527
- 	beams before deletion:  30378
- 	beams deleted:          3672 (12%)
- 	number of zapped pings: 4
+The program will output some information because of the
+\fB-V\fP option:
+.br
+ 	Program MBCLEAN
+ 	Version $Id: mbclean.l,v 4.6 1996-01-26 21:14:21 caress Exp $
+ 	MB-system Version 4.3
+.br
+ 	132 records loaded into buffer
+.br
+ 	f: 1995  9  2 04:50:44.413000    75  1243.50  1263.80
+ 	f: 1995  9  2 04:50:44.413000    76  1244.80  1263.80
+ 	f: 1995  9  2 04:50:44.413000    99  1244.20  1265.20
+ 	f: 1995  9  2 04:50:48.795000    14  1242.90  1257.30
+ 	......... (lines deleted) .........
+ 	s: 1995  9  2 04:59:25.189000    45  1784.00  1231.20   3.71 148.80
+ 	s: 1995  9  2 04:59:31.779000    46  1777.20  1230.90   3.63 149.80
+ 	s: 1995  9  2 04:59:31.779000    47  1530.50  1231.20   4.27  68.50
+ 	......... (lines deleted) .........
+.br
+ 	82 records dumped from buffer
+ 	0 records loaded into buffer
+ 	50 records dumped from buffer
+ 	179 bathymetry data records processed
+.br
+ 	0 outer beams zapped
+ 	0 beams out of acceptable depth range
+ 	96 beams out of acceptable fractional depth range
+ 	0 beams exceed acceptable deviation from median depth
+ 	0 bad rail beams identified
+ 	14 excessive slopes identified
+ 	110 beams flagged
+ 	0 beams zeroed
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbunclean\fP(l), \fBmbedit\fP(l), 
 \fBmbinfo\fP(l)
 
 .SH BUGS
-This algorithm simply doesn't detect all bathymetric artifacts that
-are obvious to the eye on contour charts.  In particular, bad beams 
-at the outer ends of the swaths are sometimes not detected because 
-they are so far from any other samples that the slopes
-turn out to be acceptable.
+The algorithms implemented in \fBmbclean\fP simply 
+don't detect all bathymetric artifacts that
+are obvious to the eye on contour charts.  Although
+\fBmbclean\fP often does a credible first pass at
+flagging obvious artifacts, we strongly recommend that
+any swath bathymetry processing stream include 
+interactive editing of the
+bathymetry data (e.g. \fBmbedit\fP).

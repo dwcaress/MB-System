@@ -1,4 +1,4 @@
-.TH mbsmooth l "14 August 1995"
+.TH mbsmooth l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbsmooth\fP - Smooths multibeam bathymetry data.
 

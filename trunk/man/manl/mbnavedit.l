@@ -1,4 +1,4 @@
-.TH mbnavedit l "17 August 1995"
+.TH mbnavedit l "17 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for multibeam swath data.
 

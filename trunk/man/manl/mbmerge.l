@@ -1,4 +1,4 @@
-.TH mbmerge l "14 August 1995"
+.TH mbmerge l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbmerge\fP - Merges multibeam data with new navigation.
 

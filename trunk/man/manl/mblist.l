@@ -1,4 +1,4 @@
-.TH mblist l "22 November 1995"
+.TH mblist l "22 November 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmblist\fP - List data in multibeam bathymetry data files.
 
