@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.8 1994-12-21 20:22:30 caress Exp $
+ *    $Id: mblist.c,v 4.9 1995-01-18 20:20:46 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1994/12/21  20:22:30  caress
+ * Fixed bug in printing sidescan values.
+ *
  * Revision 4.7  1994/10/21  13:02:31  caress
  * Release V4.0
  *
@@ -128,7 +131,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.8 1994-12-21 20:22:30 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.9 1995-01-18 20:20:46 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -831,16 +834,16 @@ char **argv;
 					printf("%.3f",amp[beams_bath/2]);
 					break;
 				case 'b': /* sidescan */
-					printf("%6d",ss[j]);
+					printf("%.3f",ss[j]);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
-					printf("%5d",
+					printf("%.3f",
 					ssacrosstrack[j]);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
-					printf("%5d",
+					printf("%.3f",
 					ssalongtrack[j]);
 					break;
 				case 'H': /* heading */
@@ -1013,7 +1016,7 @@ int	*error;
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBCOPY function <%s> called\n",
+		fprintf(stderr,"\ndbg2  MBLIST function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
