@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.3 2004-07-27 19:48:35 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.4 2004-09-16 01:01:12 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/07/27 19:48:35  caress
+ * Working on handling subbottom data.
+ *
  * Revision 5.2  2004/07/15 19:33:57  caress
  * Improvements to support for Reson 7k data.
  *
@@ -45,7 +48,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.3 2004-07-27 19:48:35 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.4 2004-09-16 01:01:12 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -53,7 +56,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBextractsegy";
 	static char help_message[] =  "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
-	static char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -H -Osegyfile -V]";
+	static char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -H -Osegyfile -Ssampleformat -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -122,6 +125,8 @@ main (int argc, char **argv)
 	int	icomment = 0;
 	
 	/* segy data */
+	int	sampleformat = MB_SEGY_SAMPLEFORMAT_NONE;
+	int	samplesize = 0;
 	struct mb_segyasciiheader_struct segyasciiheader;
 	struct mb_segyfileheader_struct segyfileheader;
 	struct mb_segytraceheader_struct segytraceheader;
@@ -183,7 +188,7 @@ main (int argc, char **argv)
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:O:o:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:O:o:S:s:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -224,6 +229,11 @@ main (int argc, char **argv)
 		case 'o':
 			sscanf (optarg,"%s", output_file);
 			output_file_set = MB_YES;
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			sscanf (optarg,"%d", &sampleformat);
 			flag++;
 			break;
 		case 'T':
@@ -285,6 +295,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
+		fprintf(stderr,"dbg2       sampleformat:   %d\n",sampleformat);
 		fprintf(stderr,"dbg2       timeshift:      %f\n",timeshift);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
 		}
@@ -300,6 +311,12 @@ main (int argc, char **argv)
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(verbose,read_file,NULL,&format,&error);
+		
+	/* get sample size from sampleformat */
+	if (sampleformat == MB_SEGY_SAMPLEFORMAT_ANALYTIC)
+		samplesize = 2 * sizeof(float);
+	else
+		samplesize = sizeof(float);
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -442,7 +459,7 @@ main (int argc, char **argv)
 		    if (status == MB_SUCCESS 
 		    	&& segytraceheader.nsamps > segydata_alloc)
 			{
-			status = mb_malloc(verbose, segytraceheader.nsamps * sizeof(float),
+			status = mb_malloc(verbose, segytraceheader.nsamps * samplesize,
 						(char **)&segydata, &error);
 			if (status == MB_SUCCESS)
 				segydata_alloc = segytraceheader.nsamps;
@@ -451,9 +468,9 @@ main (int argc, char **argv)
 			}
 		    if (status == MB_SUCCESS 
 		    	&& (buffer_alloc < MB_SEGY_TRACEHEADER_LENGTH
-				|| buffer_alloc < segytraceheader.nsamps * sizeof(float)))
+				|| buffer_alloc < segytraceheader.nsamps * samplesize))
 			{
-			buffer_alloc = MAX(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * sizeof(float));
+			buffer_alloc = MAX(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * samplesize);
 			status = mb_malloc(verbose, buffer_alloc, (char **)&buffer, &error);
 			if (status != MB_SUCCESS)
 				buffer_alloc = 0;
@@ -461,7 +478,7 @@ main (int argc, char **argv)
 
 		    /* extract the data */
 		    if (status == MB_SUCCESS)
-			status = mb_extract_segy(verbose,mbio_ptr,store_ptr,&kind,
+			status = mb_extract_segy(verbose,mbio_ptr,store_ptr,&sampleformat,&kind,
 				    (void *)&segytraceheader,segydata,&error);
 				    
 		    /* apply time shift if needed */
@@ -517,7 +534,7 @@ main (int argc, char **argv)
 			for (i=0;i<segytraceheader.nsamps;i++)
 				{
 				tracemin = MIN(tracemin, segydata[i]);
-				tracemax = MAX(tracemin, segydata[i]);
+				tracemax = MAX(tracemax, segydata[i]);
 				}
 			
 			/* output info */
@@ -619,8 +636,8 @@ main (int argc, char **argv)
 			/* write out data */
 			nwrite++;
 			if (status == MB_SUCCESS
-				&& fwrite(buffer, 1, segytraceheader.nsamps * sizeof(float), ofp) 
-						!= segytraceheader.nsamps * sizeof(float))
+				&& fwrite(buffer, 1, segytraceheader.nsamps * samplesize, ofp) 
+						!= segytraceheader.nsamps * samplesize)
 				{
 				status = MB_FAILURE;
 				error = MB_ERROR_WRITE_FAIL;

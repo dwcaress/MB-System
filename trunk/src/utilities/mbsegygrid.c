@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.1 2004-07-15 19:33:56 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.2 2004-09-16 01:01:12 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/07/15 19:33:56  caress
+ * Improvements to support for Reson 7k data.
+ *
  * Revision 5.0  2004/06/18 04:06:05  caress
  * Adding support for segy i/o and working on support for Reson 7k format 88.
  *
@@ -73,11 +76,11 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 char	*ctime();
 char	*getenv();
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.1 2004-07-15 19:33:56 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.2 2004-09-16 01:01:12 caress Exp $";
 
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
-static char usage_message[] = "MBsegygrid -Ifile -Ogridfile [-Ddecimatex/decimatey -Smode[/start/end[/schan/echan]] -Tsweep[/delay] -H -V]";
+static char usage_message[] = "MBsegygrid -Ifile -Ogridfile [-Ddecimatex/decimatey -R -Smode[/start/end[/schan/echan]] -Tsweep[/delay] -H -V]";
 
 /*--------------------------------------------------------------------*/
 
@@ -149,6 +152,9 @@ main (int argc, char **argv)
 	double	btimesave = 0.0;
 	double	stimesave = 0.0;
 	double	dtimesave = 0.0;
+	int	rmsmode = MB_NO;
+	double	rms;
+	int	nrms;
 	int	i, j, k, n;
 
 	/* set file to null */
@@ -165,7 +171,7 @@ main (int argc, char **argv)
 #endif
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:G:g:I:i:O:o:S:s:T:t:VvW:w:Hh")) != -1)
+	while ((c = getopt(argc, argv, "D:d:G:g:I:i:O:o:RrS:s:T:t:VvW:w:Hh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -194,6 +200,11 @@ main (int argc, char **argv)
 		case 'O':
 		case 'o':
 			sscanf (optarg,"%s", gridfile);
+			flag++;
+			break;
+		case 'R':
+		case 'r':
+			rmsmode = MB_YES;
 			flag++;
 			break;
 		case 'S':
@@ -277,6 +288,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       windowend:      %f\n",windowend);
 		fprintf(stderr,"dbg2       gainmode:       %d\n",gainmode);
 		fprintf(stderr,"dbg2       gain:           %f\n",gain);
+		fprintf(stderr,"dbg2       rmsmode:        %d\n",rmsmode);
 		}
 
 	/* if help desired then print it and exit */
@@ -518,12 +530,29 @@ i,iy,factor,i,trace[i]);*/
 					/* if this is the last trace to go in this column, add it to the grid */
 					if ((tracecount + 1) % decimatex == 0)
 						{
+						/* first get rms */
+						rms = 0.0;
+						nrms = 0;
+						for (iy=0;iy<ngridy;iy++)
+							{
+							if (wtrace[iy] > 0.0)
+								{
+								rms += ptrace[iy] * ptrace[iy] 
+									/ wtrace[iy] / wtrace[iy];
+								nrms++;
+								}
+							}
+						if (nrms > 0)
+							rms = sqrt(rms) / nrms;
+/*fprintf(stderr,"grid ix:%d nrms:%d rms:%f\n",ix,nrms,rms);*/
+
+						/* insert data into the grid */
 						for (iy=0;iy<ngridy;iy++)
 							{
 							k = iy * ngridx + ix;
 							if (wtrace[iy] > 0.0)
 								{
-								grid[k] = ptrace[iy] / wtrace[iy];
+								grid[k] = ptrace[iy] / wtrace[iy] / rms;
 								gridmintot = MIN(grid[k], gridmintot);
 								gridmaxtot = MAX(grid[k], gridmaxtot);
 								}
