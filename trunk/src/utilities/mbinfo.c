@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.9 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbinfo.c,v 4.10 1995-05-08 21:32:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.8  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -112,7 +115,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.9 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.10 1995-05-08 21:32:34 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -265,7 +268,7 @@ char **argv;
 		btime_i,etime_i,&speedmin,&timegap);
 
 	/* set default input to stdin */
-	strcpy (file, "stdin");
+	strcpy (read_file, "stdin");
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:Cc")) != -1)
