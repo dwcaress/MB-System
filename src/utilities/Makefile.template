@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.5 1994-11-21 19:05:43 caress Exp $
+#	$Id: Makefile.template,v 4.6 1994-11-21 20:40:18 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.5  1994/11/21  19:05:43  caress
+# Added mb_rt for gradient raytracing with mbbath.
+#
 # Revision 4.4  1994/10/31  20:24:03  caress
 # Change man pages from section 1 to l.
 #
@@ -157,7 +160,7 @@ mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbunclean.c
 mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbgrid.c
-mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h
+mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h Makefile
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
 surfunc.o:	surfunc.c
