@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.11 2002-09-18 23:36:22 caress Exp $
+#	$Id: Makefile.template,v 5.12 2002-09-19 22:19:00 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.11  2002/09/18 23:36:22  caress
+# Release 5.0.beta23
+#
 # Revision 5.10  2002/07/20 20:45:35  caress
 # Release 5.0.beta20
 #
@@ -240,7 +243,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_gsfgenmb.o mbr_mstiffss.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
 		mbr_omghdcsj.o mbr_mgd77dat.o \
-		mbr_asciixyz.o mbr_mbarirov.o \
+		mbr_asciixyz.o mbr_hydrob93.o \
+		mbr_mbarirov.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
 		mbr_hsds2raw.o mbr_hsds2lam.o \
  		mbr_xtfr8101.o \
@@ -298,7 +302,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_gsfgenmb.o mbr_mstiffss.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
 		mbr_omghdcsj.o mbr_mgd77dat.o \
-		mbr_asciixyz.o mbr_mbarirov.o \
+		mbr_asciixyz.o mbr_hydrob93.o \
+		mbr_mbarirov.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
 		mbr_hsds2raw.o mbr_hsds2lam.o \
  		mbr_xtfr8101.o \
@@ -500,6 +505,8 @@ mbr_mgd77dat.o: mbr_mgd77dat.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_mgd77dat.c
 mbr_asciixyz.o: mbr_asciixyz.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_singlebeam.h
 	$(CC) -c $(CFLAGS) mbr_asciixyz.c
+mbr_hydrob93.o: mbr_hydrob93.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_singlebeam.h
+	$(CC) -c $(CFLAGS) mbr_hydrob93.c
 mbr_mbarirov.o: mbr_mbarirov.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbarirov.h $(INCDIR)/mbsys_singlebeam.h
 	$(CC) -c $(CFLAGS) mbr_mbarirov.c
 mbr_mbpronav.o: mbr_mbpronav.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbpronav.h $(INCDIR)/mbsys_singlebeam.h
