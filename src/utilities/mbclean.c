@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	3.00	2/26/93
- *    $Id: mbclean.c,v 3.1 1993-05-18 00:01:15 caress Exp $
+ *    $Id: mbclean.c,v 3.2 1993-08-26 12:46:36 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/05/18  00:01:15  caress
+ * Changed buffer size (nwant) to 500 and buffer holdover (nhold) to 50.
+ *
  * Revision 3.0  1993/05/04  22:21:32  dale
  * Initial version.
  *
@@ -80,10 +83,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 3.1 1993-05-18 00:01:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 3.2 1993-08-26 12:46:36 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
-	static char usage_message[] = "mbclean [-Fformat -Llonflip -Mmode -Cslope -Ddistance -Xzap_beams \n\t-N -V -H -Iinfile -Ooutfile]";
+	static char usage_message[] = "mbclean [-Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -134,6 +137,8 @@ char **argv;
 	struct bad_struct bad[2];
 	int	find_bad;
 	int	ndata = 0;
+	int	nouter = 0;
+	int	nrail = 0;
 	int	nbad = 0;
 	int	nflag = 0;
 	int	nzero = 0;
@@ -142,6 +147,16 @@ char **argv;
 	double	distancemin = 10.;
 	int	mode = MBCLEAN_FLAG_ONE;
 	int	zap_beams = 0;
+	int	zap_rails = MB_NO;
+
+	/* rail processing variables */
+	int	center;
+	int	lowok;
+	int	highok;
+	int	lowbeam;
+	int	highbeam;
+	int	lowdist;
+	int	highdist;
 
 	/* slope processing variables */
 	double	mtodeglon;
@@ -199,7 +214,7 @@ char **argv;
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:C:c:D:d:M:m:X:x:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:C:c:D:d:M:m:QqX:x:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -243,6 +258,11 @@ char **argv;
 		case 'M':
 		case 'm':
 			sscanf (optarg,"%d", &mode);
+			flag++;
+			break;
+		case 'Q':
+		case 'q':
+			zap_rails = MB_YES;
 			flag++;
 			break;
 		case 'X':
@@ -307,6 +327,7 @@ char **argv;
 		fprintf(stderr,"dbg2       maximum slope:  %f\n",slopemax);
 		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemin);
 		fprintf(stderr,"dbg2       zap_beams:      %d\n",zap_beams);
+		fprintf(stderr,"dbg2       zap_rails:      %d\n",zap_rails);
 		}
 
 	/* if help desired then print it and exit */
@@ -342,6 +363,7 @@ char **argv;
 			program_name);
 		exit(error);
 		}
+	center = beams_bath/2;
 
 	/* initialize writing the output multibeam file */
 	if ((status = mb_write_init(
@@ -604,11 +626,13 @@ char **argv;
 					if (mode <= 2)
 						{
 						ping[1].bath[i] = -ping[1].bath[i];
+						nouter++;
 						nflag++;
 						}
 					else
 						{
 						ping[1].bath[i] = 0;
+						nouter++;
 						nzero++;
 						}
 					}
@@ -619,16 +643,96 @@ char **argv;
 					if (mode <= 2)
 						{
 						ping[1].bath[j] = -ping[1].bath[j];
+						nouter++;
 						nflag++;
 						}
 					else
 						{
 						ping[1].bath[j] = 0;
+						nouter++;
 						nzero++;
 						}
 					}
 					}
 				}
+
+			/* zap rails if requested */
+			if (zap_rails == MB_YES && ping[1].id >= 0)
+			  {
+
+			  /* find limits of good data */
+			  lowok = MB_YES;
+			  highok = MB_YES;
+			  lowbeam = center;
+			  highbeam = center;
+			  lowdist = 0;
+			  highdist = 0;
+			  for (j=center+1;j<beams_bath;j++)
+			    {
+			    k = center - (j - center);
+			    if (highok == MB_YES && ping[1].bath[j] > 0)
+				{
+				if (ping[1].bathdist[j] <= highdist)
+					{
+					highok = MB_NO;
+					highbeam = j;
+					}
+				else
+					highdist = ping[1].bathdist[j];
+				}
+			    if (lowok == MB_YES && ping[1].bath[k] > 0)
+				{
+				if (ping[1].bathdist[k] >= lowdist)
+					{
+					lowok = MB_NO;
+					lowbeam = k;
+					}
+				else
+					lowdist = ping[1].bathdist[k];
+				}
+			    }
+
+
+			  /* get rid of bad data */
+			  if (highok == MB_NO)
+			    {
+			    find_bad = MB_YES;
+			    for (j=highbeam;j<beams_bath;j++)
+			  	{
+				if (mode <= 2)
+					{
+					ping[1].bath[j] = -ping[1].bath[j];
+					nrail++;
+					nflag++;
+					}
+				else
+					{
+					ping[1].bath[j] = 0;
+					nrail++;
+					nzero++;
+					}
+			  	}
+			    }
+			  if (lowok == MB_NO)
+			    {
+			    find_bad = MB_YES;
+			    for (k=0;k<=lowbeam;k++)
+			  	{
+				if (mode <= 2)
+					{
+					ping[1].bath[k] = -ping[1].bath[k];
+					nrail++;
+					nflag++;
+					}
+				else
+					{
+					ping[1].bath[k] = 0;
+					nrail++;
+					nzero++;
+					}
+			  	}
+			    }
+			  }
 
 			/* get locations of data points in local coordinates */
 			if (ping[1].id >= 0)
@@ -947,6 +1051,8 @@ char **argv;
 	if (verbose >= 1)
 		{
 		fprintf(stderr,"\n%d bathymetry data records processed\n",ndata);
+		fprintf(stderr,"%d outer beams zapped\n",nouter);
+		fprintf(stderr,"%d bad rail beams identified\n",nrail);
 		fprintf(stderr,"%d excessive slopes identified\n",nbad);
 		fprintf(stderr,"%d beams flagged\n",nflag);
 		fprintf(stderr,"%d beams zeroed\n",nzero);
