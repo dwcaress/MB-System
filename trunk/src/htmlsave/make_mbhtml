@@ -1,0 +1,114 @@
+eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
+                    & eval 'exec perl -S $0 $argv:q'
+                         if 0;
+#--------------------------------------------------------------------
+#    The MB-system:	make_mbhtml	8/19/97
+#    $Id: make_mbhtml,v 4.0 1997-09-15 19:13:10 caress Exp $
+#
+#    Copyright (c) 1997 by 
+#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#    Lamont-Doherty Earth Observatory
+#    Palisades, NY  10964
+#
+#    See README file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Command:
+#   make_mbhtml
+#
+# Purpose:
+#   Macro to automatically generate html files from
+#   MB-System man pages and place them in the mbsystem/html
+#   directory. This tool is not for direct inclusion in the
+#   MB-System distribution.
+#
+# Author:
+#   David W. Caress
+#   Lamont-Doherty Earth Observatory
+#   Palisades, NY  10964
+#   August 19,  1997
+#
+# Version:
+#   $Id: make_mbhtml,v 4.0 1997-09-15 19:13:10 caress Exp $
+#
+# Revisions:
+#   $Log: not supported by cvs2svn $
+#
+#--------------------------------------------------------------------
+#
+# Set program name
+$program_name = "make_mbhtml";
+
+# Copy necessary files
+`cp mbsystem*.html caress.gif chayes.gif mbsystem*.gif ../../html`;
+
+# Get list of man page files to process
+@manual_pages = `/bin/ls -1 ../../man/manl`;
+
+# Get header and footer data
+@man_header_lines = `cat mbsystem_man_hdr.frag`;
+@man_footer_lines = `cat mbsystem_man_ftr.frag`;
+
+# Loop over files
+foreach $man_page (@manual_pages) {
+    chop($man_page);
+    chop($man_page);
+    chop($man_page);
+    print "\nProcessing manual page for $man_page...\n";
+
+    # Generate an initial html file
+    $raw_html_file = "./$man_page.html";
+    `awf -man ../../man/manl/$man_page.l | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`;
+
+    # Open the input file
+    if (!open(IHTML,"$raw_html_file"))
+	{
+	print "\a";
+	die "Cannot open raw html file $raw_html_file\nMacro $program_name aborted.\n";
+	}
+
+    # Open the output html file
+    $html_file = "../../html/$man_page.html";
+    if (!open(OHTML,">$html_file"))
+	{
+	print "\a";
+	die "Cannot open output file $html_file\nMacro $program_name aborted.\n";
+	}
+
+    # Put header stuff into html file
+    foreach $line (@man_header_lines) {
+	print OHTML $line;
+	}
+	
+    # Read and process lines from raw html file
+    $line_count = 0;
+    $line_total = `cat $raw_html_file | wc -l`;
+    while ($line = <IHTML>) {
+	$line_count++;
+	if ($line_count > 3 
+	    && $line_count < $line_total - 3)
+	    {
+	    print OHTML $line;
+	    }
+	}
+
+    # Close and remove the raw html file
+    close IHTML;
+    `rm -f $raw_html_file`;
+
+    # Put footer stuff into html file
+    foreach $line (@man_footer_lines) {
+	print OHTML $line;
+	}
+
+    # Close the output file
+    close OHTML;
+    
+    # End loop over man pages
+    }
+    
+# Exit the program
+exit 0;
+
+#-----------------------------------------------------------------------

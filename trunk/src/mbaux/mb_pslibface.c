@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.7 1997-04-21 16:53:56 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.8 1997-09-15 19:03:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/21  16:53:56  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.6  1996/04/22  13:18:44  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -83,7 +86,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.7 1997-04-21 16:53:56 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.8 1997-09-15 19:03:27 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -101,10 +104,10 @@ int	*error;
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       argc:             %d\n",argc);
 		fprintf(stderr,"dbg2       argv:             %d\n",argv);
-		fprintf(stderr,"dbg2       bounds[0]:        %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:        %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:        %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:        %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       bounds_use[0]:    %f\n",bounds_use[0]);
+		fprintf(stderr,"dbg2       bounds_use[1]:    %f\n",bounds_use[1]);
+		fprintf(stderr,"dbg2       bounds_use[2]:    %f\n",bounds_use[2]);
+		fprintf(stderr,"dbg2       bounds_use[3]:    %f\n",bounds_use[3]);
 		fprintf(stderr,"dbg2       scale:            %f\n",*scale);
 		}
 
@@ -232,7 +235,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.7 1997-04-21 16:53:56 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.8 1997-09-15 19:03:27 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -284,7 +287,12 @@ int plot_exit(argc,argv)
 int	argc;
 char	**argv;
 {
+	char	*function_name = "plot_exit";
+	int	status = MB_SUCCESS;
+
 	gmt_end(argc, argv);
+	
+	return(status);
 }
 
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 4.5 1997-04-21 16:53:56 caress Exp $
+ *    $Id: mb_delaun.c,v 4.6 1997-09-15 19:03:27 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -10,7 +10,6 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
 /*
  * The function mb_delaun.c assigns triangles to a set of x,y points
  * based on the method of:
@@ -95,6 +94,9 @@
  * Date:	April, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/21  16:53:56  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.4  1996/04/22  13:18:44  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -158,7 +160,7 @@ int	*kv1;
 int	*kv2;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 4.5 1997-04-21 16:53:56 caress Exp $";
+  	static char rcs_id[]="$Id: mb_delaun.c,v 4.6 1997-09-15 19:03:27 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];

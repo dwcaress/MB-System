@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 4.17 1997-07-25 14:27:30 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 4.18 1997-09-15 19:10:50 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu) 
@@ -23,6 +23,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1997/07/25  14:27:30  caress
+ * Version 4.5beta2.
+ *
  * Revision 4.16  1997/04/21  17:09:54  caress
  * MB-System 4.5 Beta Release.
  *
@@ -131,7 +134,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.17 1997-07-25 14:27:30 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.18 1997-09-15 19:10:50 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Ddraft -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -202,8 +205,8 @@ int	format;
 int	pings;
 int	lonflip;
 double	bounds[4];
-int	btime_i[6];
-int	etime_i[6];
+int	btime_i[7];
+int	etime_i[7];
 double	btime_d;
 double	etime_d;
 double	speedmin;
@@ -841,11 +844,11 @@ char	*file;
 /*--------------------------------------------------------------------*/
 /* This function displays a new editable profile.                     */
 /* Called by:                                                         */
-/*                  action_new_profile in mbvelocity_callbacks.c which    */
-/*		      is called by selecting the "NEW EDITABLE        */
+/*                  action_new_profile in mbvelocity_callbacks.c      */
+/*		      which is called by selecting the "NEW EDITABLE  */
 /*                    PROFILE" from the "FILE" pulldown menu.         */
 /*		    - also called from mbvt_process_multibeam()	      */
-/*		      if no editable profile already exists.
+/*		      if no editable profile already exists.	      */
 /* Functions called:                                                  */
 /*                  mb_free                                           */
 /*		    mb_malloc                                         */

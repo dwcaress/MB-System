@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12draw.c	7/8/96
- *	$Id: mbr_em12draw.c,v 4.4 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_em12draw.c,v 4.5 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.3  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -66,7 +70,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em12draw.c,v 4.4 1997-07-25 14:19:53 caress Exp $";
+	static char res_id[]="$Id: mbr_em12draw.c,v 4.5 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mbr_alm_em12draw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -329,8 +333,8 @@ int	*error;
 	struct mbf_em12draw_struct *data;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
-	char	*data_ss;
-	char	*store_ss;
+	mb_s_char *data_ss;
+	mb_s_char *store_ss;
 	short int *data_ssp;
 	short int *store_ssp;
 	int	ntime_i[7];
@@ -684,7 +688,7 @@ int	*error;
 		mb_io_ptr->pixels_ss = 0;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data_ss = (char *) &data->ss[data->beam_start_sample[i]];
+			data_ss = (mb_s_char *) &data->ss[data->beam_start_sample[i]];
 			for (j=0;j<data->beam_samples[i];j++)
 				{
 				mb_io_ptr->new_ss[mb_io_ptr->pixels_ss] 
@@ -916,8 +920,8 @@ int	*error;
 					= data->beam_start_sample[i];
 				if (ping->beam_samples[i] > 0)
 					{
-					store_ss = (char *) &ping->ss[data->beam_start_sample[i]];
-					data_ss = (char *) &data->ss[data->beam_start_sample[i]];
+					store_ss = (mb_s_char *) &ping->ss[data->beam_start_sample[i]];
+					data_ss = (mb_s_char *) &data->ss[data->beam_start_sample[i]];
 					store_ssp = &ping->ssp[data->beam_start_sample[i]];
 					data_ssp = &data->ssp[data->beam_start_sample[i]];
 					for (j=0;j<ping->beam_samples[i];j++)
@@ -962,8 +966,8 @@ int	*error;
 	int	time_j[5];
 	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
 	int	iss;
-	char	*data_ss;
-	char	*store_ss;
+	mb_s_char *data_ss;
+	mb_s_char *store_ss;
 	short int *data_ssp;
 	short int *store_ssp;
 	int	i, j;
@@ -1105,8 +1109,8 @@ int	*error;
 					= ping->beam_start_sample[i];
 				if (data->beam_samples[i] > 0)
 					{
-					data_ss = (char *) &data->ss[data->beam_start_sample[i]];
-					store_ss = (char *) &ping->ss[ping->beam_start_sample[i]];
+					data_ss = (mb_s_char *) &data->ss[data->beam_start_sample[i]];
+					store_ss = (mb_s_char *) &ping->ss[ping->beam_start_sample[i]];
 					data_ssp = &data->ssp[data->beam_start_sample[i]];
 					store_ssp = &ping->ssp[ping->beam_start_sample[i]];
 					for (j=0;j<data->beam_samples[i];j++)
@@ -2314,11 +2318,11 @@ int	*error;
 			short_ptr = ((short int *) beamarray) + 3; 
 			data->tt[i] = *short_ptr;
 			char_ptr = beamarray + 8; 
-			data->amp[i] = *char_ptr;
+			data->amp[i] = (mb_s_char) *char_ptr;
 			char_ptr = beamarray + 9; 
-			data->quality[i] = *char_ptr;
+			data->quality[i] = (mb_u_char) *char_ptr;
 			char_ptr = beamarray + 10; 
-			data->heave[i] = *char_ptr;
+			data->heave[i] = (mb_s_char) *char_ptr;
 			}
 #else
 		short_ptr = (short int *) &line[14]; 
@@ -2357,11 +2361,11 @@ int	*error;
 			short_ptr = ((short int *) beamarray) + 3; 
 			data->tt[i] = (short int) mb_swap_short(*short_ptr);
 			char_ptr = beamarray + 8; 
-			data->amp[i] = *char_ptr;
+			data->amp[i] = (mb_s_char) *char_ptr;
 			char_ptr = beamarray + 9; 
-			data->quality[i] = *char_ptr;
+			data->quality[i] = (mb_u_char) *char_ptr;
 			char_ptr = beamarray + 10; 
-			data->heave[i] = *char_ptr;
+			data->heave[i] = (mb_s_char) *char_ptr;
 			}
 #endif
 		}
@@ -2431,7 +2435,7 @@ int	*error;
 	int	datagram;
 	int	num_beams;
 	int	beamlist[MBF_EM12DRAW_MAXBEAMS];
-	char	*beam_ss;
+	mb_s_char *beam_ss;
 	short int *beam_ssp;
 	int	ioffset;
 	int	npixelsum;
@@ -2531,7 +2535,7 @@ int	*error;
 			data->beam_start_sample[beamlist[i]] = data->pixels_ss;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{
-				data->ss[data->pixels_ss] = line[ioffset];
+				data->ss[data->pixels_ss] = (mb_s_char) line[ioffset];
 				ioffset++;
 				char_ptr1 = (char *) &data->ssp[data->pixels_ss];
 				char_ptr2 = char_ptr1 + 1;
@@ -2593,7 +2597,7 @@ int	*error;
 			data->beam_start_sample[beamlist[i]] = data->pixels_ss;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{
-				data->ss[data->pixels_ss] = line[ioffset];
+				data->ss[data->pixels_ss] = (mb_s_char) line[ioffset];
 				ioffset++;
 				char_ptr1 = (char *) &data->ssp[data->pixels_ss];
 				char_ptr2 = char_ptr1 + 1;
@@ -2849,8 +2853,8 @@ int	*error;
 		for (i=0;i<80;i++)
 			line[341+i] = data->comment[i];
 		line[EM_START_SIZE] = 0x03;
-		line[EM_START_SIZE+1] = '/0';
-		line[EM_START_SIZE+2] = '/0';
+		line[EM_START_SIZE+1] = '\0';
+		line[EM_START_SIZE+2] = '\0';
 
 		/* write out data */
 		status = fwrite(line,1,EM_START_SIZE+3,mbfp);
@@ -2982,8 +2986,8 @@ int	*error;
 		for (i=0;i<80;i++)
 			line[341+i] = data->comment[i];
 		line[EM_STOP_SIZE] = 0x03;
-		line[EM_STOP_SIZE+1] = '/0';
-		line[EM_STOP_SIZE+2] = '/0';
+		line[EM_STOP_SIZE+1] = '\0';
+		line[EM_STOP_SIZE+2] = '\0';
 
 		/* write out data */
 		status = fwrite(line,1,EM_STOP_SIZE+3,mbfp);
@@ -3115,8 +3119,8 @@ int	*error;
 		for (i=0;i<80;i++)
 			line[341+i] = data->comment[i];
 		line[EM_PARAMETER_SIZE] = 0x03;
-		line[EM_PARAMETER_SIZE+1] = '/0';
-		line[EM_PARAMETER_SIZE+2] = '/0';
+		line[EM_PARAMETER_SIZE+1] = '\0';
+		line[EM_PARAMETER_SIZE+2] = '\0';
 
 		/* write out data */
 		status = fwrite(line,1,EM_PARAMETER_SIZE+3,mbfp);
@@ -3278,8 +3282,8 @@ int	*error;
 			data->utm_system,data->pos_quality,
 			data->speed,data->line_heading);
 		line[EM_POS_SIZE] = 0x03;
-		line[EM_POS_SIZE+1] = '/0';
-		line[EM_POS_SIZE+2] = '/0';
+		line[EM_POS_SIZE+1] = '\0';
+		line[EM_POS_SIZE+2] = '\0';
 
 		/* write out data */
 		status = fwrite(line,1,EM_POS_SIZE+3,mbfp);
@@ -3409,8 +3413,8 @@ int	*error;
 			*short_ptr2 = 0;
 			}
 		line[EM_SVP_SIZE] = 0x03;
-		line[EM_SVP_SIZE+1] = '/0';
-		line[EM_SVP_SIZE+2] = '/0';
+		line[EM_SVP_SIZE+1] = '\0';
+		line[EM_SVP_SIZE+2] = '\0';
 
 		/* write out data */
 		status = fwrite(line,1,EM_SVP_SIZE+3,mbfp);
@@ -3560,11 +3564,11 @@ int	*error;
 			short_ptr = ((short int *) beamarray) + 3; 
 			*short_ptr = (short int) data->tt[i];
 			char_ptr = beamarray + 8; 
-			*char_ptr = data->amp[i];
+			*char_ptr = (char) data->amp[i];
 			char_ptr = beamarray + 9; 
-			*char_ptr = data->quality[i];
+			*char_ptr = (char) data->quality[i];
 			char_ptr = beamarray + 10; 
-			*char_ptr = data->heave[i];
+			*char_ptr = (char) data->heave[i];
 			for (j=0;j<11;j++)
 				line[32+11*i+j] = beamarray[j];
 			}
@@ -3604,18 +3608,18 @@ int	*error;
 			*short_ptr = (short int) 
 				mb_swap_short((short int)data->tt[i]);
 			char_ptr = beamarray + 8; 
-			*char_ptr = data->amp[i];
+			*char_ptr = (char) data->amp[i];
 			char_ptr = beamarray + 9; 
-			*char_ptr = data->quality[i];
+			*char_ptr = (char) data->quality[i];
 			char_ptr = beamarray + 10; 
-			*char_ptr = data->heave[i];
+			*char_ptr = (char) data->heave[i];
 			for (j=0;j<11;j++)
 				line[32+11*i+j] = beamarray[j];
 			}
 #endif
 		line[EM_12DP_BATH_SIZE] = 0x03;
-		line[EM_12DP_BATH_SIZE+1] = '/0';
-		line[EM_12DP_BATH_SIZE+2] = '/0';
+		line[EM_12DP_BATH_SIZE+1] = '\0';
+		line[EM_12DP_BATH_SIZE+2] = '\0';
 
 		/* write out data */
 		status = fwrite(line,1,EM_12DP_BATH_SIZE+3,mbfp);
@@ -3667,7 +3671,7 @@ int	*error;
 	int	datagram_end[MBF_EM12DRAW_MAXBEAMS+1];
 	int	datagram_size[MBF_EM12DRAW_MAXBEAMS+1];
 	int	new_datagram_size;
-	char	*beam_ss;
+	mb_s_char *beam_ss;
 	short int *beam_ssp;
 	int	ioffset;
 	int	odatagram, obeam;
@@ -3888,7 +3892,7 @@ int	*error;
 			for (j=0;j<data->beam_samples[i];j++)
 				{
 				char_ptr = &line[ioffset];
-				*char_ptr = beam_ss[j];
+				*char_ptr = (char) beam_ss[j];
 				ioffset++;
 				char_ptr1 = (char *) &beam_ssp[j];
 				char_ptr2 = char_ptr1 + 1;
@@ -3944,7 +3948,7 @@ int	*error;
 			for (j=0;j<data->beam_samples[i];j++)
 				{
 				char_ptr = &line[ioffset];
-				*char_ptr = beam_ss[j];
+				*char_ptr = (char) beam_ss[j];
 				ioffset++;
 				char_ptr1 = (char *) &beam_ssp[j];
 				char_ptr2 = char_ptr1 + 1;
@@ -3960,8 +3964,8 @@ int	*error;
 			line[i] = (char) 0;
 #endif
 		line[EM_12DP_SSP_SIZE] = 0x03;
-		line[EM_12DP_SSP_SIZE+1] = '/0';
-		line[EM_12DP_SSP_SIZE+2] = '/0';
+		line[EM_12DP_SSP_SIZE+1] = '\0';
+		line[EM_12DP_SSP_SIZE+2] = '\0';
 
 		/* write out data */
 		status = fwrite(line,1,EM_12DP_SSP_SIZE+3,mbfp);

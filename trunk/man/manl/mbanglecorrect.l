@@ -10,7 +10,7 @@ Version 4.5
 \fBmbanglecorrect\fP [\fB-A\fIkind/scale\fP \fB-B\fIyr/mo/da/hr/mn/sc 
 \fB-C\fP \fB-D\fImode/length\fP \fB-E\fIyr/mo/da/hr/mn/sc 
 \fB-F\fIformat\fP \fB-G\fI\fP \fB-I\fIinfile\fP  
-\fB-K\fP \fB-M\fInsmooth\fP \fB-N\fInangle/anglemax\fP
+\fB-K\fP \fB-L\fIbuffersize\fP \fB-M\fInsmooth\fP \fB-N\fInangle/anglemax\fP
 \fB-O\fIoutfile\fP \fB-R\fIwest/east/south/north\fP 
 \fB-S\fIcorrectionfile\fP 
 \fB-Z\fIdepth\fP \fB-V -H\fP]
@@ -138,6 +138,21 @@ the modeled value from the observed and then adding the \fIscale\fP
 value defined with the \fB-A\fP option. The "subtraction" mode
 of correction is appropriate for log scaled data (e.g. amplitude
 or backscatter values reported in dB).
+.TP
+.B \fB-L\fIbuffersize\fP
+Sets the maximum number of data records which can be
+read into the buffer. In general, data records may be
+of several different types (e.g. parameter, position, 
+comment) in addition to survey data records. Many data 
+formats include many more position data records than
+survey data records. Thus, a large buffer may be required
+to access a reasonable number of survey data records. 
+However, on memory limited machines large buffer sizes
+can lead to poor performance due to memory swapping. 
+The default value of \fIbuffersize\fP = 500 is appropriate 
+for most cases, but users can set the buffer size as required.
+The absolute maximum buffer size is 5000. 
+Default: \fIbuffersize\fP = 500.
 .TP
 .B \fB-M\fInsmooth\fP
 Causes the bathymetry to be smoothed prior to the calculation

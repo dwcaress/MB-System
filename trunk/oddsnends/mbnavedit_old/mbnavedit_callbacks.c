@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.5 1997-04-22 19:25:57 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.6 1997-09-15 19:10:20 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/22  19:25:57  caress
+ * Fixed startup mode.
+ *
  * Revision 4.4  1997/04/21  17:07:38  caress
  * MB-System 4.5 Beta Release.
  *
@@ -48,11 +51,12 @@
 #include <stdio.h>
 #include <Xm/Xm.h>
 #include <X11/cursorfont.h>
-#include "mbnavedit_creation.h"
 
 #define MBNAVEDIT_DECLARE_GLOBALS
 #include "mbnavedit_extrawidgets.h"
 #include "mbnavedit.h"
+
+#include "mbnavedit_creation.h"
 
 /*--------------------------------------------------------------------*/
 /*
@@ -1981,6 +1985,8 @@ do_unset_interval()
 		else if (mode_pick == PICK_MODE_DESELECTALL)
 			mbnavedit_deselectallcursor();
 		}
+		
+	return(MB_SUCCESS);
 }
 /*--------------------------------------------------------------------*/
 
@@ -2145,6 +2151,8 @@ XtAppContext app;
 	}
 	
     XmUpdateDisplay(topshell);
+		
+    return(MB_SUCCESS);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2189,6 +2197,8 @@ char	*message;
 	}
 	
     XmUpdateDisplay(topshell);
+		
+    return(MB_SUCCESS);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2199,6 +2209,8 @@ do_message_off()
     XtUnmanageChild(bulletinBoard_message);
     XSync(XtDisplay(bulletinBoard_message), 0);
     XmUpdateDisplay(drawingArea);
+		
+    return(MB_SUCCESS);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2214,6 +2226,8 @@ char	*s3;
     set_label_string(label_error_three, s3);
     XtManageChild(bulletinBoard_error);
     XBell(display,100);
+		
+    return(MB_SUCCESS);
 }
 
 /*--------------------------------------------------------------------*/

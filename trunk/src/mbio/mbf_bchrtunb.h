@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_bchrtunb.h	8/21/94
- *	$Id: mbf_bchrtunb.h,v 4.2 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbf_bchrtunb.h,v 4.3 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 21, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.1  1995/07/13  19:15:09  caress
  * Intermediate check-in during major bug-fixing flail.
  *
@@ -50,7 +53,7 @@
  *   5. The relevent telegram start codes, types, and sizes are:
  *         0x0250: Comment (Defined only for MB-System)   200 data bytes
  *         0x0251: Position                                36 data bytes
- *         0x0252: Parameter                               44 data bytes
+ *         0x0252: Parameter                               56 data bytes
  *         0x0253: Sound velocity profile                2016 data bytes
  *         0x0254: BottomChart 56 beam bathymetry         848 data bytes
  *         0x0255: BottomChart 40 beam bathymetry         608 data bytes

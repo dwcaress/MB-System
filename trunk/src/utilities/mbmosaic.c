@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.0 1997-04-21 17:17:47 caress Exp $
+ *    $Id: mbmosaic.c,v 4.1 1997-09-15 19:11:06 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/04/21  17:17:47  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.1  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -71,7 +74,7 @@
 #define	NO_DATA_FLAG	99999.9
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.0 1997-04-21 17:17:47 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.1 1997-09-15 19:11:06 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -583,7 +586,7 @@ char **argv;
 	/* more option not available with single best algorithm */
 	if (more == MB_YES 
 		&& grid_mode == MBMOSAIC_SINGLE_BEST)
-		more == MB_NO;
+		more = MB_NO;
 
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_ping.c	2/3/93
- *	$Id: mb_write_ping.c,v 4.12 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mb_write_ping.c,v 4.13 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Author:	D. W. Caress
  * Date:	Febrary 3, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.11  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -95,7 +99,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mb_write_ping.c,v 4.12 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mb_write_ping.c,v 4.13 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mb_write_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -230,6 +234,10 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_ELMK2UNB)
 		{
 		status = mbr_wt_elmk2unb(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_BCHRXUNB)
+		{
+		status = mbr_wt_bchrxunb(verbose,mbio_ptr,store_ptr,error);
 		}
 	else if (mb_io_ptr->format == MBF_HSMDARAW)
 		{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.11 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.12 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,10 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.10  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -100,7 +104,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.11 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.12 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -401,7 +405,7 @@ int	*error;
 		*namp = store->beams_bath;
 		*nss = 0;
 		depthscale = 0.01;
-		dacrscale  = -0.01;
+		dacrscale  = -0.02;
 		daloscale  = 0.01;
 		reflscale  = 1.0;
 		for (i=0;i<store->profile_num;i++)
@@ -643,7 +647,7 @@ int	*error;
 		if (store->beams_bath == nbath)
 			{
 			depthscale = 0.01;
-			dacrscale  = -0.01;
+			dacrscale  = -0.02;
 			daloscale  = 0.01;
 			reflscale  = 1.0;
 			for (i=0;i<store->profile_num;i++)

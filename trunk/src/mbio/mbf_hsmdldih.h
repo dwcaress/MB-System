@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsmdldih.h	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdldih.h,v 4.1 1997-04-21 17:02:07 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdldih.h,v 4.2 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.0  1995/09/28  18:14:11  caress
  * First cut.
  *
@@ -196,7 +199,7 @@ struct  mbf_hsmdldih_struct {
 	double	ss_range;				/* distance to outermost 
 								sidescan 
 								sample (meters) */
-	unsigned char	ss[MBF_HSMDLDIH_PIXELS_PING];	/* sidescan pixels */
+	mb_u_char	ss[MBF_HSMDLDIH_PIXELS_PING];	/* sidescan pixels */
 	double	heading_tx;		/* Heading at transmit */
 	double	heading_rx[5];		/* Heading during the receive window */
 	double	roll_tx;		/* Roll at transmit */

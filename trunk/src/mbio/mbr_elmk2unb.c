@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
- *	$Id: mbr_elmk2unb.c,v 4.1 1997-07-28 14:58:19 caress Exp $
+ *	$Id: mbr_elmk2unb.c,v 4.2 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/07/28  14:58:19  caress
+ * Fixed typos.
+ *
  * Revision 4.0  1997/07/25  14:25:40  caress
  * Version 4.5beta2.
  *
@@ -54,7 +57,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.1 1997-07-28 14:58:19 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.2 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1740,7 +1743,6 @@ int	*error;
 	char	*function_name = "mbr_elmk2unb_rd_bathgen";
 	int	status = MB_SUCCESS;
 	char	line[ELACMK2_COMMENT_SIZE];
-	unsigned char *char_ptr;
 	short int *short_ptr;
 	int	*int_ptr;
 	int	i, j;
@@ -1897,8 +1899,8 @@ int	*error;
 			data->beams[i].quality = line[16];
 			if (data->beams[i].quality <= 0)
 			    data->beams[i].quality = 8;
-			data->beams[i].amplitude = (signed char) line[17]
-						    + 128;
+			data->beams[i].amplitude 
+				= (int) ((mb_s_char) line[17] + 128);
 #ifndef BYTESWAPPED
 			short_ptr = (short *) &line[18];
 			data->beams[i].time_offset = (unsigned short) 
@@ -2704,7 +2706,6 @@ int	*error;
 	struct mbf_elmk2unb_struct *data;
 	char	line[ELACMK2_COMMENT_SIZE];
 	short int label;
-	unsigned char *char_ptr;
 	short int *short_ptr;
 	int	*int_ptr;
 	int	i, j;
@@ -2899,7 +2900,8 @@ int	*error;
 				    mb_swap_long(&data->beams[i].tt);
 #endif
 		    line[16] = data->beams[i].quality;
-		    line[17] = (signed char) (data->beams[i].amplitude - 128);
+		    line[17] = (char)
+			    ((mb_s_char) (data->beams[i].amplitude - 128));
 #ifndef BYTESWAPPED
 		    short_ptr = (short *) &line[18];
 		    *short_ptr = (unsigned short) 

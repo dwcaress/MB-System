@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 4.1 1997-04-22 19:25:26 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 4.2 1997-09-15 19:10:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/04/22  19:25:26  caress
+ * Fixed startup mode.
+ *
  * Revision 4.0  1997/04/21  17:16:20  caress
  * MB-System 4.5 Beta Release.
  *
@@ -1104,6 +1107,8 @@ XtAppContext app;
 	}
 	
     XmUpdateDisplay(topshell);
+	
+    return(1);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1148,6 +1153,8 @@ char	*message;
 	}
 	
     XmUpdateDisplay(topshell);
+	
+    return(1);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1158,6 +1165,8 @@ do_message_off()
     XtUnmanageChild(bulletinBoard_message);
     XSync(XtDisplay(bulletinBoard_message), 0);
     XmUpdateDisplay(bulletinBoard_message);
+	
+    return(1);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1173,6 +1182,8 @@ char	*s3;
     set_label_string(label_error_three, s3);
     XtManageChild(bulletinBoard_error);
     XBell(display,100);
+	
+    return(1);
 }
 
 /*--------------------------------------------------------------------*/

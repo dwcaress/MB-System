@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>How to Get and Install MB-System</TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01SGoldC-SGI (X11; I; IRIX 6.3 IP32) [Netscape]">
+</HEAD>
+<BODY>
+
+<CENTER><DD><A NAME="MB-get"></A><B><FONT SIZE=+2>How To Get MB-System</FONT></B></DD></CENTER>
+
+<P>The source code for MB-System is available as a compressed tar archive
+by anonymous ftp to the Lamont-Doherty Earth Observatory of Columbia University.
+This archive file is about 1.2 megabytes in size and, depending on the
+speed of your internet connection, may take a few minutes to transfer.</P>
+
+<P>Click<A HREF="ftp://www.ldeo.columbia.edu/pub/swath_data/MB-System.tar.Z">
+here to ftp</A> the current compressed MB-System tar archive.</P>
+
+<P>Click <A HREF="file://www.ldeo.columbia.edu/pub/swath_data">here to
+get point-and-click ftp access</A> to all of the MB-System related files
+available from Lamont (these may include data examples and beta distributions
+of MB-System ).</P>
+
+<P>
+<HR WIDTH="100%"></P>
+
+<CENTER><DD><A NAME="MB-required"></A><B><FONT SIZE=+2>Other Required and
+Suggested Software and Data</FONT></B></DD></CENTER>
+
+<P>MB-System requires a number of other software packages and databases
+to be fully functional. These are:</P>
+
+<UL>
+<LI><B>GMT</B> version 3.0 or later: MB-System makes use of the Generic
+Mapping Tools (GMT) libraries and programs for much of its graphics. GMT
+also includes a detailed global coastline database. GMT has been developed
+by Professor Paul Wessel of SOEST (School of Ocean and Earth Science and
+Technology at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of NOAA.
+The GMT source code is available from the <A HREF="http://www.soest.hawaii.edu/wessel/gmt.html">GMT
+web page</A>.</LI>
+
+<LI><B>NetCDF</B> version 2.3r2 or later: Both GMT and MB-System require
+the <A HREF="ftp://unidata.ucar.edu/pub/netcdf/netcdf.tar.Z">NCAR netCDF
+library</A>.</LI>
+
+<LI><B>Perl</B> version 4.0r19 or later: Perl is a fast, well documented
+scripting language used widely in the Unix world. MB-System contains a
+number of perl scripts used both for installation and to ease common tasks.
+Most of the current Unix operating systems include perl. If you need to
+obtain the perl source code, first check with your local system administrator
+- you will probably find perl already available locally. The perl source
+code can be obtained from the <A HREF="ftp://prep.ai.mit.edu/pub/gnu">GNU
+Project software archive</A> of the <A HREF="http://www.gnu.org">Free Software
+Foundation</A>.</LI>
+
+<LI><B>Motif</B>: The interactive graphical utilities in MB-System (e.g.
+data editors) use the Motif widget set, and Motif libraries are required
+for these utilities to be built and to run. Most current commercial Unix
+operating systems include the required Motif libraries. If you are using
+an older, pre-Motif operating system (e.g. SunOs 4.1) or a &quot;free&quot;
+operating system (e.g. LINUX), you will need to purchase Motif from a third
+party vendor. We do not make recommendations regarding the purchase of
+commercial software packages.</LI>
+
+<LI><B>Levitus Database</B>: The MB-System program mblevitus depends on
+a 16 MByte data file that is not included in the MB-System tarfile. Click
+here to ftp this file. Be sure to uncompress the file and to set the &quot;LEVITUS&quot;
+flag in the install_makefiles appropriately, as described below in the
+installation section.</LI>
+</UL>
+
+<P>MB-System produces Postscript based graphics. Most current Unix operating
+systems provide a program which serves as a screen-based Postscript viewer.
+If you do not have a Postscript viewer, one option is to obtain the Ghostscript
+package from the Free Software Foundation.</P>
+
+<UL>
+<LI><B>Ghostview</B>:&nbsp;&quot;Free&quot; screen Postscript viewer. The
+source code can be obtained from the <A HREF="ftp://prep.ai.mit.edu/pub/gnu">GNU
+Project software archive</A> of the <A HREF="http://www.gnu.org">Free Software
+Foundation</A>.</LI>
+</UL>
+
+<CENTER><P>
+<HR WIDTH="100%"></P></CENTER>
+
+<CENTER><P><A NAME="MB-install"></A><B><FONT SIZE=+2>How to Install MB-System</FONT></B></P></CENTER>
+
+<P>The MB-System source code is extracted by first uncompressing the tar
+file and then running tar:</P>
+
+<UL>
+<PRE>% uncompress MB-System.tar.Z</PRE>
+
+<PRE>% tar xvf MB-System.tar</PRE>
+</UL>
+
+<P>This will create a directory structure called mbsystem. In order to
+configure your installation, you must edit the shellscript mbsystem/install_makefiles.
+This is perl script will read template makefiles in the MB-System source
+directories and create makefiles with the correct attributes. This enables
+users to install MB-System without having to edit the makefiles. Instead
+of editing the makefiles directly, the installer should edit this script
+so that the locations of important libraries and include files are accurate
+and so that the compile and link flags are correct.</P>
+
+<P>The important parameters to be set in install_makefiles are:</P>
+
+<UL>
+<LI>MBSYSTEM_HOME Absolute path to the directory containing this file.
+</LI>
+
+<LI>OS Operating system (e.g. SUN, IRIX, HPUX, LINUX, LYNX). </LI>
+
+<LI>BYTESWAPPED If set to &quot;YES&quot; will enable byte swapping of
+input and output binary data. Otherwise byte swapping is disabled. Byte
+swapping needs to be enabled when installing on &quot;little endian&quot;
+machines such as PCs or VAXs. </LI>
+
+<LI>CC C compiler to be used (optional). </LI>
+
+<LI>CFLAGS Compile flags for C source files. </LI>
+
+<LI>LFLAGS Load flags for all object files. </LI>
+
+<LI>GRAPHICAL If set to &quot;YES&quot; will enable the installation of
+the Motif based graphical utilities mbedit, mbnavedit, and mbvelocitytool.
+If Motif is not available but the nongraphical utilities are desired then
+disable with &quot;NO&quot; (optional, default is &quot;YES&quot;). </LI>
+
+<LI>MOTIFINCDIR Location of Motif include files. </LI>
+
+<LI>MOTIFLIBS X and Motif libraries required for graphical tools. </LI>
+
+<LI>GMTLIBDIR Location of GMT libraries libgmt.a and libpsl.a </LI>
+
+<LI>GMTINCDIR Location of GMT include files gmt.h, grd.h, and pslib.h </LI>
+
+<LI>NETCDFDIR Location of NetCDF library libnetcdf.a </LI>
+
+<LI>LEVITUS Path for Levitus data file annual.</LI>
+</UL>
+
+<P>Examples of appropriate values for several different installations (e.g.
+Sun, SGI, PC) are included in the comments in install_makefiles. To execute
+install_makefiles, do the following:</P>
+
+<UL>
+<PRE>% cd mbsystem </PRE>
+
+<PRE>% install_makefiles</PRE>
+</UL>
+
+<P>Because install_makefiles is a perl script, the executable perl must
+be available in the installer's path. Once install_makefiles has been correctly
+configured and run, give the command &quot;make all&quot; to generate the
+executable programs:</P>
+
+<UL>
+<PRE>% make all</PRE>
+</UL>
+
+<P>The make command will descend recursively down through the directory
+structure, compiling source files, linking object files, and copying executables
+and manual pages to the appropriate directories. The executables will be
+placed in mbsystem/bin, the libraries in mbsystem/lib, and the manual pages
+in mbsystem/man/man1.</P>
+
+<P>Naturally, in order for users to use the MB-System utilities, the directory
+containing the executables must be included in their path (usually this
+is done by editing the .cshrc file in the user's home directory). The executable
+perl must also be available in the user's path for most of the macros to
+work.</P>
+
+<P>Most users will also wish to specify which program they generally use
+to view Postscript plots on their screen. This parameter can be set either
+with the mbdefaults program or using the PS_VIEWER environment variable
+- the former is recommended (see the mbdefaults manual page for details).
+On Sun workstations pageview is a popular Postscript viewer; on Silicon
+Graphics machines xpsview is commonly uses. A popular generic alternative
+to these platform specific programs is ghostview.</P>
+
+<P>
+<HR WIDTH="100%"></P>
+
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

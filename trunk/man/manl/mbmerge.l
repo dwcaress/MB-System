@@ -1,4 +1,4 @@
-.TH mbmerge l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbmerge l "24 July 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbmerge\fP - Merges swath sonar data with new navigation.
 
@@ -6,8 +6,10 @@
 Version 4.5
 
 .SH SYNOPSIS
-\fBmbmerge\fP [\fB-F\fIformat \fB-L\fIlonflip\fP 
-\fB-I\fIinfile \fB-O\fIoutfile \fB-M\fInavformat\fP \fB-N\fInavfile\fP \fB-V -H\fP]
+\fBmbmerge\fP [\fB-A\fIheading_offset\fP \fB-B\fP \fB-F\fIformat 
+\fB-L\fIlonflip\fP 
+\fB-I\fIinfile \fB-O\fIoutfile \fB-M\fInavformat\fP 
+\fB-N\fInavfile\fP \fB-Z -V -H\fP]
 
 .SH DESCRIPTION
 \fBmbmerge\fP is an utility for merging navigation with swath sonar
@@ -25,6 +27,19 @@ Lamont-Doherty Earth Observatory
 Palisades, NY 10964
 
 .SH OPTIONS
+.TP
+.B \fB-A\fIheading_offset\fP
+Adds this value to all heading values. This option
+is useful for correcting simple, constant deviations
+in heading values.
+.TP
+.B \fB-B\fP
+This option causes the navigation to be interpolated using a simple
+linear interpolation. Normally, a spline interpolation is
+used. Linear interpolation may provide better results when
+the navigation is sparse relative to the swath data or when
+the navigation contains significant gaps.
+Default: spline interpolation.
 .TP
 .B \fB-F\fIformat\fP
 Sets the format for the input and output swath sonar data using 
@@ -214,6 +229,12 @@ Normally, \fBmbmerge\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbmerge\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
+.TP
+.B \fB-Z\fP
+This option causes the heading values to be set to 
+"course-made-good" as calculated from the navigation. This
+option is useful when the original heading values are
+irretrievably bad.
 
 .SH EXAMPLES
 Suppose one wishes to merge the good navigation in file navhs with the

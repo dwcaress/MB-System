@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.13 1997-04-21 16:51:19 caress Exp $
+#    $Id: install_makefiles,v 4.14 1997-09-15 19:02:15 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.13 1997-04-21 16:51:19 caress Exp $
+#   $Id: install_makefiles,v 4.14 1997-09-15 19:02:15 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.13  1997/04/21  16:51:19  caress
+# MB-System 4.5 Beta Release.
+#
 # Revision 4.14  1997/04/17  19:31:15  caress
 # Removed Fortran related parameters from user edit area
 # and added LINUX to list of supported operating systems.
@@ -185,6 +188,21 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
 #
+# Example for installing on SeaBeam Instruments SGI IRIX 6.4 workstations:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "IRIX64";
+#	$BYTESWAPPED = "NO";
+#	$CFLAGS = "-O2";
+#	$LFLAGS = "-lm -lsun";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#
 # Example for installing on SeaBeam Instruments Lynx PC:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "LYNX";
@@ -239,7 +257,7 @@ $MBSYSTEM_HOME = "/SB3/caress/dev/mbsystem";
 $OS = "IRIX";
 $BYTESWAPPED = "NO";
 $CFLAGS = "-g";
-$LFLAGS = "-lm -g";
+$LFLAGS = "-lm";
 $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11";
@@ -301,6 +319,11 @@ if (!$GRAPHICAL)
 if ($OS eq "IRIX")
 	{
 	$BIGFLAG = "-Olimit 2000";
+	}
+elsif ($OS eq "IRIX64")
+	{
+	$BIGFLAG = "-OPT:Olimit=5000";
+	$OS = "IRIX";
 	}
 else
 	{
