@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_comment.c	7/15/97
- *    $Id: mb_put_comment.c,v 4.0 1997-07-25 14:25:40 caress Exp $
+ *    $Id: mb_put_comment.c,v 4.1 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,12 @@
  * Date:	July 15, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/07/25  14:25:40  caress
+ * Version 4.5beta2.
+ *
+ * Revision 4.0  1997/07/25  14:25:40  caress
+ * Version 4.5beta2.
+ *
  * Revision 1.1  1997/07/25  14:19:53  caress
  * Initial revision
  *

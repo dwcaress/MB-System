@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.7 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbsys_simrad.h,v 4.8 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,12 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
+ * Revision 4.7  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.6  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.

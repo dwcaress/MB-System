@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 4.3 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_get_value.c,v 4.4 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,12 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
+ * Revision 4.3  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.3  1997/04/17  15:07:36  caress
  * MB-System 4.5 Beta Release
  *
@@ -63,7 +69,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 4.3 1997-04-21 17:02:07 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 4.4 1998-10-05 18:32:27 caress Exp $";
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/

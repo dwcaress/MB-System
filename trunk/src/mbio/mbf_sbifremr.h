@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sbifremr.h	3/29/96
- *	$Id: mbf_sbifremr.h,v 4.0 1996-04-22 10:59:51 caress Exp $
+ *	$Id: mbf_sbifremr.h,v 4.1 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,12 @@
  * Location:	152 39.061W; 34 09.150S on R/V Ewing
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1996/04/22  10:59:51  caress
+ * Initial version.
+ *
+ * Revision 4.0  1996/04/22  10:59:51  caress
+ * Initial version.
+ *
  *
  */
 /*

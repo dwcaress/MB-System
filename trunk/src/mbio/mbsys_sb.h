@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.h	2/17/93
- *	$Id: mbsys_sb.h,v 4.2 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbsys_sb.h,v 4.3 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,15 @@
  * Author:	D. W. Caress
  * Date:	February 17, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1998/10/05  17:46:15  caress
+ * Initial revision
+ *
+ * Revision 4.2  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
+ * Revision 4.2  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.1  1994/10/21  12:20:01  caress
  * Release V4.0
  *

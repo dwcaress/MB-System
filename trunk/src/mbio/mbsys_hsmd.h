@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.h	8/12/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.h,v 4.2 1997-09-15 19:06:40 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.h,v 4.3 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,6 +25,12 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
+ * Revision 4.2  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.1  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *

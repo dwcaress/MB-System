@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.h	8/20/94
- *	$Id: mbsys_elac.h,v 4.4 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbsys_elac.h,v 4.5 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1998/10/05  17:46:15  caress
+ * Initial revision
+ *
+ * Revision 4.4  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.3  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -194,8 +200,8 @@ struct mbsys_elac_struct
 	int	pos_thousandth_sec;
 	int	pos_latitude;		/* 180 deg = 2e9 */
 	int	pos_longitude;		/* 180 deg = 2e9 */
-	unsigned long	utm_northing;
-	unsigned long	utm_easting;
+	unsigned int	utm_northing;
+	unsigned int	utm_easting;
 	int	utm_zone_lon;		/* 180 deg = 2e9 */
 	char	utm_zone;
 	char	hemisphere;

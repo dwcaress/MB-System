@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mr1aldeo.h	3/3/94
- *	$Id: mbf_mr1aldeo.h,v 1.1 1996-01-26 21:27:27 caress Exp $
+ *	$Id: mbf_mr1aldeo.h,v 1.2 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Author:	D. W. Caress
  * Date:	October 23, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1996/01/26  21:27:27  caress
+ * Initial revision
+ *
+ * Revision 1.1  1996/01/26  21:27:27  caress
+ * Initial revision
+ *
  *
  */
 /*

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 4.1 1996-12-08 04:14:22 caress Exp $
+ *    $Id: mb_check_info.c,v 4.2 1998-10-05 18:32:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1996/12/08  04:14:22  caress
+ * Fixed problem where lonflipping was applied to latitude.
+ *
+ * Revision 4.1  1996/12/08  04:14:22  caress
+ * Fixed problem where lonflipping was applied to latitude.
+ *
  * Revision 4.0  1996/09/05  13:59:47  caress
  * Initial revision.
  *
@@ -45,7 +51,7 @@ double	bounds[4];
 int	*file_in_bounds;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 4.1 1996-12-08 04:14:22 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 4.2 1998-10-05 18:32:27 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
