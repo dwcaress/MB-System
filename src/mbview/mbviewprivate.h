@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 1.2 2003-11-25 02:52:55 caress Exp $
+ *    $Id: mbviewprivate.h,v 1.3 2003-11-25 22:14:03 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2003/11/25 02:52:55  caress
+ * MBview version generated during EW0310.
+ *
  *
  *
  */
@@ -58,6 +61,8 @@
 #define MBV_WINDOW_NULL 	0
 #define MBV_WINDOW_HIDDEN 	1
 #define MBV_WINDOW_VISIBLE 	2
+
+#define MBV_WINDOW_HEIGHT_THRESHOLD 	700
 
 #define	MBV_NUM_COLORS   11
 
