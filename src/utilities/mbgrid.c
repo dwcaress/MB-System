@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.19 2003-03-16 18:05:40 caress Exp $
+ *    $Id: mbgrid.c,v 5.20 2003-03-22 03:09:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2003/03/16 18:05:40  caress
+ * Added -K option for underlaying background data on grids.
+ *
  * Revision 5.18  2003/03/06 00:13:29  caress
  * Fixed use of footprint algorithm with projected coordinate grids.
  *
@@ -347,12 +350,18 @@
 #define MBGRID_USE_YES		1
 #define MBGRID_USE_CONDITIONAL	2
 
+/* interpolation mode */
+#define MBGRID_INTERP_NONE	0
+#define MBGRID_INTERP_GAP	1
+#define MBGRID_INTERP_NEAR	2
+#define MBGRID_INTERP_ALL	3
+
 /* approximate complementary error function */
 double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.19 2003-03-16 18:05:40 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.20 2003-03-22 03:09:09 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -412,6 +421,7 @@ main (int argc, char **argv)
 	double	dy = 0.0;
 	char	units[MB_PATH_MAXLINE];
 	int	clip = 0;
+	int	clipmode = MBGRID_INTERP_NONE;
 	int	grid_mode = MBGRID_WEIGHTED_MEAN;
 	int	datatype = MBGRID_DATA_BATHYMETRY;
 	char	gridkindstring[MB_PATH_MAXLINE];
@@ -423,7 +433,7 @@ main (int argc, char **argv)
 	double	scale = 1.0;
 	double	border = 0.0;
 	double	extend = 0.0;
-	double	tension = 1e10;
+	double	tension = 0.0;
 	int	check_time = MB_NO;
 	int	first_in_stays = MB_YES;
 	double	timediff = 300.0;
@@ -433,6 +443,7 @@ main (int argc, char **argv)
 	int	plot_status;
 	
 	int	grdrasterid = 0;
+	double	glonmin, glonmax;
 
 	/* mbio read values */
 	int	rpings;
@@ -524,7 +535,7 @@ main (int argc, char **argv)
 
 	/* other variables */
 	FILE	*dfp;
-	int	i, j, k, ii, jj, iii, jjj, kkk, n;
+	int	i, j, k, ii, jj, iii, jjj, kkk, ir, n;
 	int	i1, i2, j1, j2;
 	double	r;
 	int	dmask[9];
@@ -583,7 +594,17 @@ main (int argc, char **argv)
 			break;
 		case 'C':
 		case 'c':
-			sscanf (optarg,"%d", &clip);
+			n = sscanf (optarg,"%d/%d", &clip, &clipmode);
+			if (n < 1)
+				clipmode = MBGRID_INTERP_NONE;
+			else if (n == 1 && clip > 0)
+				clipmode = MBGRID_INTERP_GAP;
+			else if (n == 1)
+				clipmode = MBGRID_INTERP_NONE;
+			else if (clip > 0 && clipmode < 0)
+				clipmode = MBGRID_INTERP_GAP;
+			else if (clip > 0 && clipmode > 3)
+				clipmode = MBGRID_INTERP_ALL;
 			flag++;
 			break;
 		case 'D':
@@ -786,6 +807,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       grid bounds[1]:       %f\n",gbnd[1]);
 		fprintf(outfp,"dbg2       grid bounds[2]:       %f\n",gbnd[2]);
 		fprintf(outfp,"dbg2       grid bounds[3]:       %f\n",gbnd[3]);
+		fprintf(outfp,"dbg2       clipmode:             %d\n",clipmode);
 		fprintf(outfp,"dbg2       clip:                 %d\n",clip);
 		fprintf(outfp,"dbg2       grdraster background: %d\n",grdrasterid);
 		fprintf(outfp,"dbg2       more:                 %d\n",more);
@@ -1018,12 +1040,13 @@ main (int argc, char **argv)
 				strcpy(units, "unknown");
 			}
 
-fprintf(stderr," Projected coordinates on: proj_status:%d  projection:%s\n",
+/*fprintf(stderr," Projected coordinates on: proj_status:%d  projection:%s\n",
 proj_status, projection_id);
 fprintf(stderr," Lon Lat Bounds: %f %f %f %f\n",
 obnd[0], obnd[1], obnd[2], obnd[3]);
 fprintf(stderr," XY Bounds: %f %f %f %f\n",
 gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
+*/
 		}
 
 	/* deal with no projection */
@@ -1195,14 +1218,27 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		lonflip = 0;
 	else if (lonflip == 1 && bounds[0] < 0.0)
 		lonflip = 0;
+		
+	/* check interpolation parameters */
+	if ((clipmode == MBGRID_INTERP_GAP 
+		|| clipmode == MBGRID_INTERP_NEAR)
+		&& clip > xdim && clip > ydim)
+		clipmode = MBGRID_INTERP_ALL;
 
 	/* if grdrasterid set extract background data using grdraster
 		and interpolate it later onto internal grid */
 	if (grdrasterid > 0)
 		{
 		/* get data vector */
-		sprintf(plot_cmd, "grdraster %d -R%f/%f/%f/%f",
-		grdrasterid,bounds[0],bounds[1],bounds[2],bounds[3]);
+		glonmin = bounds[0];
+		glonmax = bounds[1];
+		if (bounds[0] < 0.0)
+			{
+			glonmin += 360.0;
+			glonmax += 360.0;
+			}
+		sprintf(plot_cmd, "grdraster %d -R%f/%f/%f/%f | grep -v NaN",
+		grdrasterid,glonmin,glonmax,bounds[2],bounds[3]);
 		nbackground = 0;
 		if ((dfp = popen(plot_cmd,"r")) != NULL)
 			{
@@ -1231,11 +1267,22 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 			/* loop over reading */
 			nbackground = 0;
-			while (fscanf(dfp,"%f %f %f",
-				&bdata[nbackground*3],
-				&bdata[nbackground*3+1],
-				&bdata[nbackground*3+2]) != EOF)
+			while (fscanf(dfp,"%lf %lf %lf", &tlon, &tlat, &tvalue) != EOF)
 				{
+				if (lonflip == -1 && tlon > 0.0)
+					tlon -= 360.0;
+				else if (lonflip == 0 && tlon < -180.0)
+					tlon += 360.0;
+				else if (lonflip == 0 && tlon > 180.0)
+					tlon -= 360.0;
+				else if (lonflip == 1 && tlon < 0.0)
+					tlon += 360.0;
+				if (use_projection == MB_YES)
+					mb_proj_forward(verbose, pjptr, tlon, tlat,
+					&tlon, &tlat, &error);
+				bdata[nbackground*3] = tlon;
+				bdata[nbackground*3+1] = tlat;
+				bdata[nbackground*3+2] = tvalue;
 				nbackground++;
 				}
 			pclose(dfp);
@@ -1360,11 +1407,23 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		if (check_time == MB_YES)
 			fprintf(outfp,"Swath overlap time threshold: %f minutes\n", 
 				timediff/60.);
-		if (! clip) 
+		if (clipmode == MBGRID_INTERP_NONE) 
 			fprintf(outfp,"Spline interpolation not applied\n");
-		else
+		else if (clipmode == MBGRID_INTERP_GAP) 
 			{
-			fprintf(outfp,"Spline interpolation applied with clipping dimension: %d\n",clip);
+			fprintf(outfp,"Spline interpolation applied to fill data gaps\n");
+			fprintf(outfp,"Spline interpolation clipping dimension: %d\n",clip);
+			fprintf(outfp,"Spline tension (range 0.0 to infinity): %f\n",tension);
+			}
+		else if (clipmode == MBGRID_INTERP_NEAR) 
+			{
+			fprintf(outfp,"Spline interpolation applied near data\n");
+			fprintf(outfp,"Spline interpolation clipping dimension: %d\n",clip);
+			fprintf(outfp,"Spline tension (range 0.0 to infinity): %f\n",tension);
+			}
+		else if (clipmode == MBGRID_INTERP_ALL) 
+			{
+			fprintf(outfp,"Spline interpolation applied to fill entire grid\n");
 			fprintf(outfp,"Spline tension (range 0.0 to infinity): %f\n",tension);
 			}
 		if (grdrasterid <= 0) 
@@ -3167,7 +3226,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 	}
 
 	/* if clip set do smooth interpolation */
-	if (clip > 0 && nbinset > 0)
+	if (clipmode != MBGRID_INTERP_NONE && clip > 0 && nbinset > 0)
 		{
 		/* set up data vector */
 		ndata = 0;
@@ -3276,60 +3335,146 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
+		if (verbose > 0 && clipmode == MBGRID_INTERP_GAP)
+		    fprintf(outfp,"Applying spline interpolation to fill gaps of %d cells or less...\n",clip);
+		else if (verbose > 0 && clipmode == MBGRID_INTERP_NEAR)
+		    fprintf(outfp,"Applying spline interpolation to fill %d cells from data...\n",clip);
+		else if (verbose > 0 && clipmode == MBGRID_INTERP_ALL)
+		    fprintf(outfp,"Applying spline interpolation to fill all undefined cells in the grid...\n");
 
 		/* translate the interpolation into the grid array 
-		    - interpolate only to fill a data gap */
-		zflag = 5.0e34;
-		for (i=0;i<gxdim;i++)
-		    for (j=0;j<gydim;j++)
+		    filling only data gaps */
+		if (clipmode == MBGRID_INTERP_GAP)
 			{
-			kgrid = i*gydim + j;
-			kint = i + j*gxdim;
-			num[kgrid] = MB_NO;
-			if (grid[kgrid] >= clipvalue 
-			    && sgrid[kint] < zflag)
-			    {
-			    /* initialize direction mask 
-				and bounds of search */
-			    for (ii=0;ii<9;ii++)
-				dmask[ii] = MB_NO;
-			    i1 = MAX(0, i - clip);
-			    i2 = MIN(gxdim - 1, i + clip);
-			    j1 = MAX(0, j - clip);
-			    j2 = MIN(gydim - 1, j + clip);
-				    
-			    /* loop over data within clip region */
-			    for (ii=i1;ii<=i2;ii++)
-				for (jj=j1;jj<=j2;jj++)
-				    {
-				    if (grid[ii*gydim+jj] < clipvalue)
-					{
-					r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
-					iii = rint((ii - i)/r) + 1;
-					jjj = rint((jj - j)/r) + 1;
-					kkk = iii * 3 + jjj;
-					dmask[kkk] = MB_YES;
-					}
-				    }
-				    
-			    if ((dmask[0] && dmask[8])
-				|| (dmask[3] && dmask[5])
-				|| (dmask[6] && dmask[2])
-				|| (dmask[1] && dmask[7]))
-				num[kgrid] = MB_YES;
-			    }
-			}
-		for (i=0;i<gxdim;i++)
-		    for (j=0;j<gydim;j++)
-			{
-			kgrid = i*gydim + j;
-			kint = i + j*gxdim;
-			if (num[kgrid] == MB_YES)
+			zflag = 5.0e34;
+			for (i=0;i<gxdim;i++)
+			    for (j=0;j<gydim;j++)
 				{
-				grid[kgrid] = sgrid[kint];
-				nbinspline++;
+				kgrid = i*gydim + j;
+				kint = i + j*gxdim;
+				num[kgrid] = MB_NO;
+				if (grid[kgrid] >= clipvalue 
+				    && sgrid[kint] < zflag)
+				    {
+				    /* initialize direction mask of search */
+				    for (ii=0;ii<9;ii++)
+					dmask[ii] = MB_NO;
+
+				    /* loop over rings around point, starting close */
+				    for (ir=0; ir <= clip && num[kgrid] == MB_NO; ir++)
+				      {
+				      /* set bounds of search */
+				      i1 = MAX(0, i - ir);
+				      i2 = MIN(gxdim - 1, i + ir);
+				      j1 = MAX(0, j - ir);
+				      j2 = MIN(gydim - 1, j + ir);
+				      
+				      jj = j1;
+				      for (ii=i1;ii<=i2 && num[kgrid] == MB_NO;ii++)
+				        {
+					if (grid[ii*gydim+jj] < clipvalue)
+					    {
+					    r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
+					    iii = rint((ii - i)/r) + 1;
+					    jjj = rint((jj - j)/r) + 1;
+					    kkk = iii * 3 + jjj;
+					    dmask[kkk] = MB_YES;
+					    if ((dmask[0] && dmask[8])
+						|| (dmask[3] && dmask[5])
+						|| (dmask[6] && dmask[2])
+						|| (dmask[1] && dmask[7]))
+						num[kgrid] = MB_YES;
+					    }
+					}
+				      
+				      jj = j2;
+				      for (ii=i1;ii<=i2 && num[kgrid] == MB_NO;ii++)
+				        {
+					if (grid[ii*gydim+jj] < clipvalue)
+					    {
+					    r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
+					    iii = rint((ii - i)/r) + 1;
+					    jjj = rint((jj - j)/r) + 1;
+					    kkk = iii * 3 + jjj;
+					    dmask[kkk] = MB_YES;
+					    if ((dmask[0] && dmask[8])
+						|| (dmask[3] && dmask[5])
+						|| (dmask[6] && dmask[2])
+						|| (dmask[1] && dmask[7]))
+						num[kgrid] = MB_YES;
+					    }
+					}
+				      
+				      ii = i1;
+				      for (jj=j1;jj<=j2 && num[kgrid] == MB_NO;jj++)
+				        {
+					if (grid[ii*gydim+jj] < clipvalue)
+					    {
+					    r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
+					    iii = rint((ii - i)/r) + 1;
+					    jjj = rint((jj - j)/r) + 1;
+					    kkk = iii * 3 + jjj;
+					    dmask[kkk] = MB_YES;
+					    if ((dmask[0] && dmask[8])
+						|| (dmask[3] && dmask[5])
+						|| (dmask[6] && dmask[2])
+						|| (dmask[1] && dmask[7]))
+						num[kgrid] = MB_YES;
+					    }
+					}
+				      
+				      ii = i2;
+				      for (jj=j1;jj<=j2 && num[kgrid] == MB_NO;jj++)
+				        {
+					if (grid[ii*gydim+jj] < clipvalue)
+					    {
+					    r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
+					    iii = rint((ii - i)/r) + 1;
+					    jjj = rint((jj - j)/r) + 1;
+					    kkk = iii * 3 + jjj;
+					    dmask[kkk] = MB_YES;
+					    if ((dmask[0] && dmask[8])
+						|| (dmask[3] && dmask[5])
+						|| (dmask[6] && dmask[2])
+						|| (dmask[1] && dmask[7]))
+						num[kgrid] = MB_YES;
+					    }
+					}
+				      }
+				    }
+				}
+			for (i=0;i<gxdim;i++)
+			    for (j=0;j<gydim;j++)
+				{
+				kgrid = i*gydim + j;
+				kint = i + j*gxdim;
+				if (num[kgrid] == MB_YES)
+					{
+					grid[kgrid] = sgrid[kint];
+					nbinspline++;
+					}
 				}
 			}
+
+		/* translate the interpolation into the grid array 
+		    filling to clip bounds */
+		else
+			{
+			for (i=0;i<gxdim;i++)
+			    for (j=0;j<gydim;j++)
+				{
+				kgrid = i*gydim + j;
+				kint = i + j*gxdim;
+				if (grid[kgrid] >= clipvalue 
+				    && sgrid[kint] < zflag)
+					{
+					grid[kgrid] = sgrid[kint];
+					nbinspline++;
+					}
+				}
+			}
+			
+		/* deallocate the interpolation arrays */
 		mb_free(verbose,&sdata,&error);
 		mb_free(verbose,&sgrid,&error);
 		mb_free(verbose,&work1,&error);
@@ -3344,9 +3489,9 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		/* allocate and initialize sgrid */
 		status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(float),&work1,&error);
+			status = mb_malloc(verbose,nbackground*sizeof(float),&work1,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(int),&work2,&error);
+			status = mb_malloc(verbose,nbackground*sizeof(int),&work2,&error);
 		if (status == MB_SUCCESS)
 			status = mb_malloc(verbose,(gxdim+gydim)*sizeof(int),&work3,&error);
 		if (error != MB_ERROR_NO_ERROR)
@@ -3359,8 +3504,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-		memset((char *)work1,0,ndata*sizeof(float));
-		memset((char *)work2,0,ndata*sizeof(int));
+		memset((char *)work1,0,nbackground*sizeof(float));
+		memset((char *)work2,0,nbackground*sizeof(int));
 		memset((char *)work3,0,(gxdim+gydim)*sizeof(int));
 
 		/* do the interpolation */
