@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.10 1995-08-07 17:25:26 caress Exp $
+#    $Id: install_makefiles,v 4.11 1995-08-17 16:39:53 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.10 1995-08-07 17:25:26 caress Exp $
+#   $Id: install_makefiles,v 4.11 1995-08-17 16:39:53 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.10  1995/08/07  17:25:26  caress
+# Moved to GMT V3.
+#
 # Revision 4.9  1995/07/14  14:09:01  caress
 # Check during serious bug fix flail.
 #
@@ -261,12 +264,19 @@ $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
 $UIL = "/usr/bin/X11/uil";
-$GMTLIBDIR = "/SB3/local/gmt_3.0/src";
-$GMTINCDIR = "/SB3/local/gmt_3.0/src";
+$GMTLIBDIR = "/usr/local/gmt/src";
+$GMTINCDIR = "/usr/local/gmt/src";
 $NETCDFLIBDIR = "/usr/local/netcdf/lib";
 $NETCDFINCDIR = "/usr/local/netcdf/include";
 $LEVITUS = "/usr/local/levitus/annual";
-$REALTIME = 1;
+#
+# **** CHANGE THESE ONLY IF YOU ARE ****
+# **** INSTALLING REALTIME CONTOUR  ****
+# ****    PEN PLOTTING ON A SHIP    ****
+# ****    AND HAVE INSTALLED THE    ****
+# ****      REQUIRED SOFTWARE       ****
+#
+$REALTIME = 0;
 $GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
 $GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
 #
