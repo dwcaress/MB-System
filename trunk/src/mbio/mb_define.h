@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.23 2004-04-27 01:46:12 caress Exp $
+ *    $Id: mb_define.h,v 5.24 2004-09-16 19:02:33 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2004/04/27 01:46:12  caress
+ * Various updates of April 26, 2004.
+ *
  * Revision 5.22  2003/09/23 20:56:00  caress
  * Added declaration of type mb_path.
  *
@@ -387,6 +390,7 @@ int mb_extract_segyheader(int verbose, void *mbio_ptr, void *store_ptr,
 		void *segyheader_ptr, 
 		int *error);
 int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sampleformat,
 		int *kind,
 		void *segyheader_ptr, 
 		float *segydata, 
@@ -516,6 +520,8 @@ int mb_xyz_to_takeoff(int verbose,
 int mb_double_compare(void *a, void *b);
 int mb_int_compare(void *a, void *b);
 int mb_edit_compare(void *a, void *b);
+void hilbert(int n, double delta[], double kappa[]);
+void hilbert2(int n, double data[]);
 
 /* end conditional include */
 #endif
