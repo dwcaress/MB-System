@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.3 2002-10-15 18:34:58 caress Exp $
+ *    $Id: mb_mem.c,v 5.4 2002-11-12 07:25:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/10/15 18:34:58  caress
+ * Release 5.0.beta25
+ *
  * Revision 5.2  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -104,7 +107,7 @@ static int	n_mb_alloc = 0;
 static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static int	mb_alloc_size[MB_MEMORY_HEAP_MAX];
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.3 2002-10-15 18:34:58 caress Exp $";
+static char rcs_id[]="$Id: mb_mem.c,v 5.4 2002-11-12 07:25:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, int size, void **ptr, int *error)
@@ -380,6 +383,60 @@ int mb_free(int verbose, void **ptr, int *error)
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_memory_clear(int verbose, int *error)
+{
+	char	*function_name = "mb_memory_clear";
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+		
+	/* loop over all allocated memory */
+	for (i=0;i<n_mb_alloc;i++)
+		{
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  Allocated memory freed in MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4       i:%d  ptr:%12d %12x  size:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_ptr[i],mb_alloc_size[i]);
+			}
+
+		/* free the memory */
+		if (mb_alloc_ptr[i] != NULL)
+			free(mb_alloc_ptr[i]);
+		mb_alloc_ptr[i] = NULL;
+		mb_alloc_size[i] = 0;
+		}
+	n_mb_alloc = 0;
+	
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
 
 	/* return status */
