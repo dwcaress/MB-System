@@ -51,9 +51,24 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
-identifier BXG_toggleButton_show_time;
-identifier BXG_toggleButton_show_flagged_on;
 identifier BXG_pushButton_file;
+identifier BXG_toggleButton_show_heave;
+identifier BXG_toggleButton_show_pitch;
+identifier BXG_toggleButton_show_roll;
+identifier BXG_toggleButton_show_sonardepth;
+identifier BXG_toggleButton_show_altitude;
+identifier BXG_toggleButton_show_depth;
+identifier BXG_toggleButton_show_speed;
+identifier BXG_toggleButton_show_heading;
+identifier BXG_toggleButton_show_latitude;
+identifier BXG_toggleButton_show_lon;
+identifier BXG_toggleButton_show_interval;
+identifier BXG_toggleButton_show_time;
+identifier BXG_toggleButton_show_wideplot;
+identifier BXG_toggleButton_show_detects;
+identifier BXG_toggleButton_show_flagged_on;
+identifier BXG_toggleButton_reverse_mouse;
+identifier BXG_toggleButton_reverse_keys;
 identifier BXG_slider_scale_x_label;
 identifier BXG_slider_scale_x;
 identifier BXG_slider_scale_x_max_label;
@@ -158,6 +173,9 @@ procedure do_show_time();
 procedure do_check_median_xtrack();
 procedure do_check_median_ltrack();
 procedure do_mode_info();
+procedure do_reverse_keys();
+procedure do_reverse_mouse();
+procedure do_show_detects();
 
 list BaseStyle : arguments {
 };
@@ -744,8 +762,8 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 304;
-        XmNy = 444;
+        XmNx = 0;
+        XmNy = 714;
         XmNwidth = 426;
         XmNheight = 300;
     };
@@ -957,8 +975,8 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 249;
-        XmNy = 527;
+        XmNx = 0;
+        XmNy = 797;
         XmNwidth = 536;
         XmNheight = 135;
     };
@@ -1169,8 +1187,8 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 249;
-        XmNy = 523;
+        XmNx = 0;
+        XmNy = 793;
         XmNwidth = 536;
         XmNheight = 142;
     };
@@ -1287,8 +1305,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 361;
-        XmNy = 514;
+        XmNx = 0;
+        XmNy = 784;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1407,8 +1425,8 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 301;
-        XmNy = 528;
+        XmNx = 0;
+        XmNy = 798;
         XmNwidth = 431;
         XmNheight = 133;
     };
@@ -1493,8 +1511,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 327;
-        XmNy = 551;
+        XmNx = 0;
+        XmNy = 821;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1747,8 +1765,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 280;
-        XmNy = 442;
+        XmNx = 0;
+        XmNy = 636;
         XmNwidth = 473;
         XmNheight = 457;
     };
@@ -2061,8 +2079,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 419;
-        XmNy = 443;
+        XmNx = 0;
+        XmNy = 713;
         XmNwidth = 196;
         XmNheight = 302;
     };
@@ -2382,8 +2400,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 250;
-        XmNy = 442;
+        XmNx = 0;
+        XmNy = 620;
         XmNwidth = 541;
         XmNheight = 489;
     };
@@ -2542,9 +2560,9 @@ object setting_mode : XmRowColumn widget {
         XmNradioBehavior = true;
         XmNspacing = 0;
         XmNorientation = XmHORIZONTAL;
-        XmNx = 50;
-        XmNy = 110;
-        XmNwidth = 343;
+        XmNx = 120;
+        XmNy = 120;
+        XmNwidth = 360;
         XmNheight = 34;
     };
     controls {
@@ -2567,8 +2585,8 @@ object setting_mode_label : XmLabel widget {
         arguments Style_use;
         XmNlabelString = compound_string("Mode:");
         XmNmarginWidth = 0;
-        XmNx = 10;
-        XmNy = 110;
+        XmNx = 70;
+        XmNy = 120;
         XmNheight = 30;
     };
     controls {
@@ -2587,7 +2605,7 @@ object slider_number_max_step_label : XmLabel widget {
         XmNlabelString = compound_string("20");
         XmNrecomputeSize = false;
         XmNx = 960;
-        XmNy = 80;
+        XmNy = 90;
         XmNwidth = 50;
         XmNheight = 20;
     };
@@ -2613,7 +2631,7 @@ object slider_number_step : XmScale widget {
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
         XmNx = 670;
-        XmNy = 70;
+        XmNy = 80;
         XmNwidth = 290;
         XmNheight = 30;
     };
@@ -2646,7 +2664,7 @@ object slider_number_step_label : XmLabel widget {
         XmNalignment = XmALIGNMENT_END;
         XmNlabelString = compound_string("Pings to step:  1");
         XmNx = 550;
-        XmNy = 80;
+        XmNy = 90;
         XmNheight = 20;
     };
     controls {
@@ -2666,7 +2684,7 @@ object slider_num_pings_max_label : XmLabel widget {
         XmNlabelString = compound_string("20");
         XmNrecomputeSize = false;
         XmNx = 960;
-        XmNy = 40;
+        XmNy = 50;
         XmNwidth = 50;
         XmNheight = 20;
     };
@@ -2692,7 +2710,7 @@ object slider_number_pings : XmScale widget {
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
         XmNx = 670;
-        XmNy = 30;
+        XmNy = 40;
         XmNwidth = 290;
         XmNheight = 30;
     };
@@ -2725,7 +2743,7 @@ object slider_number_pings_label : XmLabel widget {
         XmNalignment = XmALIGNMENT_END;
         XmNlabelString = compound_string("Pings shown:   1");
         XmNx = 550;
-        XmNy = 40;
+        XmNy = 50;
         XmNheight = 20;
     };
     controls {
@@ -2745,7 +2763,7 @@ object slider_scale_y_max_label : XmLabel widget {
         XmNlabelString = compound_string("20.00");
         XmNrecomputeSize = false;
         XmNx = 470;
-        XmNy = 80;
+        XmNy = 90;
         XmNwidth = 65;
         XmNheight = 20;
     };
@@ -2772,7 +2790,7 @@ object slider_scale_y : XmScale widget {
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
         XmNx = 210;
-        XmNy = 70;
+        XmNy = 80;
         XmNwidth = 260;
         XmNheight = 31;
     };
@@ -2804,8 +2822,8 @@ object slider_scale_y_label : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_END;
         XmNlabelString = compound_string("Vertical Exaggeration: 0.01");
-        XmNx = 10;
-        XmNy = 80;
+        XmNx = 20;
+        XmNy = 90;
         XmNheight = 20;
     };
     controls {
@@ -2825,7 +2843,7 @@ object slider_scale_x_max_label : XmLabel widget {
         XmNlabelString = compound_string("20000");
         XmNrecomputeSize = false;
         XmNx = 470;
-        XmNy = 40;
+        XmNy = 50;
         XmNwidth = 60;
         XmNheight = 20;
     };
@@ -2851,7 +2869,7 @@ object slider_scale_x : XmScale widget {
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
         XmNx = 210;
-        XmNy = 30;
+        XmNy = 40;
         XmNwidth = 260;
         XmNheight = 31;
     };
@@ -2883,8 +2901,8 @@ object slider_scale_x_label : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_END;
         XmNlabelString = compound_string("Acrosstrack Width (m):  1");
-        XmNx = 10;
-        XmNy = 40;
+        XmNx = 30;
+        XmNy = 50;
         XmNheight = 20;
     };
     controls {
@@ -2902,7 +2920,7 @@ object pushButton_quit : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Quit");
-        XmNx = 790;
+        XmNx = 800;
         XmNy = 0;
         XmNwidth = 80;
         XmNheight = 30;
@@ -2922,7 +2940,7 @@ object pushButton_reverse : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Reverse");
-        XmNx = 660;
+        XmNx = 350;
         XmNy = 0;
         XmNwidth = 80;
         XmNheight = 30;
@@ -2942,9 +2960,9 @@ object pushButton_forward : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Forward");
-        XmNx = 520;
+        XmNx = 450;
         XmNy = 0;
-        XmNwidth = 90;
+        XmNwidth = 80;
         XmNheight = 30;
     };
     controls {
@@ -2962,9 +2980,9 @@ object pushButton_done : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Done");
-        XmNx = 380;
+        XmNx = 700;
         XmNy = 0;
-        XmNwidth = 90;
+        XmNwidth = 80;
         XmNheight = 30;
     };
     controls {
@@ -2982,7 +3000,7 @@ object pushButton_next : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Next Buffer");
-        XmNx = 250;
+        XmNx = 590;
         XmNy = 0;
         XmNwidth = 90;
         XmNheight = 30;
@@ -2992,27 +3010,6 @@ object pushButton_next : XmPushButton widget {
     callbacks {
         callbacks Style_useReasons;
         XmNactivateCallback = procedure do_next_buffer();
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pushButton_file : XmPushButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("File");
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 80;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_file);
-        XmNactivateCallback = procedure BxManageCB("bulletinBoard_file");
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3103,18 +3100,68 @@ object pushButton_filters : XmPushButton widget {
 !(BX)    };
 };
 
+object separator7 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object toggleButton_reverse_keys : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNset = false;
+        XmNlabelString = compound_string("Reverse Right/Left Key Macros");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_reverse_keys);
+        XmNvalueChangedCallback = procedure do_reverse_keys();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_reverse_mouse : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNset = false;
+        XmNlabelString = compound_string("Reverse Mouse Buttons");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_reverse_mouse);
+        XmNvalueChangedCallback = procedure do_reverse_mouse();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 169;
-        XmNheight = 100;
+        XmNx = 330;
+        XmNy = 557;
+        XmNwidth = 240;
+        XmNheight = 150;
     };
     controls {
          managed XmPushButton pushButton_goto;
          managed XmPushButton pushButton_buffer;
          managed XmPushButton pushButton_annotation;
          managed XmPushButton pushButton_filters;
+         managed XmSeparator separator7;
+         managed XmToggleButton toggleButton_reverse_keys;
+         managed XmToggleButton toggleButton_reverse_mouse;
     };
     callbacks {
     };
@@ -3142,9 +3189,9 @@ object cascadeButton_controls : XmCascadeButton widget {
 
 object menuBar_controls : XmMenuBar widget {
     arguments {
-        XmNx = 120;
+        XmNx = 220;
         XmNy = 0;
-        XmNwidth = 87;
+        XmNwidth = 90;
         XmNheight = 34;
     };
     controls {
@@ -3158,8 +3205,8 @@ object pushButton_unflag_view : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Unflag View");
-        XmNx = 440;
-        XmNy = 110;
+        XmNx = 630;
+        XmNy = 120;
         XmNwidth = 120;
         XmNheight = 30;
     };
@@ -3178,8 +3225,8 @@ object pushButton_unflag_all : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Unflag Forward");
-        XmNx = 560;
-        XmNy = 110;
+        XmNx = 780;
+        XmNy = 120;
         XmNwidth = 120;
         XmNheight = 30;
     };
@@ -3198,11 +3245,8 @@ object toggleButton_show_flagged_on : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNset = false;
         XmNlabelString = compound_string("Show Flagged Profile");
-        XmNx = 820;
-        XmNy = 110;
-        XmNwidth = 190;
-        XmNheight = 28;
     };
     controls {
     };
@@ -3216,15 +3260,59 @@ object toggleButton_show_flagged_on : XmToggleButton widget {
 !(BX)    };
 };
 
+object toggleButton_show_detects : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNset = false;
+        XmNlabelString = compound_string("Show Bottom Detect Algorithms");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_detects);
+        XmNvalueChangedCallback = procedure do_show_detects();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator9 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object toggleButton_show_wideplot : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNset = false;
+        XmNlabelString = compound_string("Wide Bathymetry Profiles");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_wideplot);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object toggleButton_show_time : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Show Time");
-        XmNx = 700;
-        XmNy = 110;
-        XmNwidth = 110;
-        XmNheight = 30;
+        XmNset = true;
+        XmNlabelString = compound_string("Print Time Stamps");
     };
     controls {
     };
@@ -3232,6 +3320,280 @@ object toggleButton_show_time : XmToggleButton widget {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_time);
         XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_interval : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Ping Interval");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_interval);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_lon : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Longitude");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_lon);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_latitude : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Latitude");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_latitude);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_heading : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNset = false;
+        XmNlabelString = compound_string("Plot Heading");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_heading);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_speed : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Speed");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_speed);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_depth : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Center Beam Depth");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_depth);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_altitude : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Sonar Altitude");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_altitude);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_sonardepth : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Sonar Depth");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_sonardepth);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_roll : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Roll");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_roll);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_pitch : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Pitch");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_pitch);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_heave : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Plot Heave");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_heave);
+        XmNvalueChangedCallback = procedure do_show_time();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pulldownMenu_view : XmPulldownMenu widget {
+    arguments {
+        XmNx = 270;
+        XmNy = 557;
+        XmNwidth = 247;
+        XmNheight = 366;
+    };
+    controls {
+         managed XmToggleButton toggleButton_show_flagged_on;
+         managed XmToggleButton toggleButton_show_detects;
+         managed XmSeparator separator9;
+         managed XmToggleButton toggleButton_show_wideplot;
+         managed XmToggleButton toggleButton_show_time;
+         managed XmToggleButton toggleButton_show_interval;
+         managed XmToggleButton toggleButton_show_lon;
+         managed XmToggleButton toggleButton_show_latitude;
+         managed XmToggleButton toggleButton_show_heading;
+         managed XmToggleButton toggleButton_show_speed;
+         managed XmToggleButton toggleButton_show_depth;
+         managed XmToggleButton toggleButton_show_altitude;
+         managed XmToggleButton toggleButton_show_sonardepth;
+         managed XmToggleButton toggleButton_show_roll;
+         managed XmToggleButton toggleButton_show_pitch;
+         managed XmToggleButton toggleButton_show_heave;
+    };
+    callbacks {
+    };
+};
+
+object cascadeButton_view : XmCascadeButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("View");
+        XmNx = 5;
+        XmNy = 5;
+        XmNwidth = 48;
+        XmNheight = 24;
+    };
+    controls {
+         unmanaged XmPulldownMenu pulldownMenu_view;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object menuBar_view : XmMenuBar widget {
+    arguments {
+        XmNpacking = XmPACK_TIGHT;
+        XmNx = 110;
+        XmNy = 0;
+        XmNwidth = 80;
+        XmNheight = 34;
+    };
+    controls {
+         managed XmCascadeButton cascadeButton_view;
+    };
+    callbacks {
+    };
+};
+
+object pushButton_file : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("File");
+        XmNx = 0;
+        XmNy = 0;
+        XmNwidth = 80;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_file);
+        XmNactivateCallback = procedure BxManageCB("bulletinBoard_file");
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3250,13 +3612,12 @@ object controls_mbedit : XmBulletinBoard widget {
         XmNheight = 150;
     };
     controls {
-         managed XmToggleButton toggleButton_show_time;
-         managed XmToggleButton toggleButton_show_flagged_on;
+         managed XmPushButton pushButton_file;
+         managed XmMenuBar menuBar_view;
          managed XmPushButton pushButton_unflag_all;
          managed XmPushButton pushButton_unflag_view;
          managed XmMenuBar menuBar_controls;
          managed XmPushButton pushButton_about;
-         managed XmPushButton pushButton_file;
          managed XmPushButton pushButton_next;
          managed XmPushButton pushButton_done;
          managed XmPushButton pushButton_forward;
@@ -3310,8 +3671,8 @@ object mbedit_bboard : XmBulletinBoard widget {
 object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 10;
-        XmNy = 262;
+        XmNx = 155;
+        XmNy = 528;
         XmNwidth = 1014;
         XmNheight = 665;
     };
@@ -3376,8 +3737,8 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        XmNiconName = "MBedit";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
-!(BX)        XmNx = 10;
-!(BX)        XmNy = 262;
+!(BX)        XmNx = 155;
+!(BX)        XmNy = 510;
 !(BX)        XmNwidth = 1014;
 !(BX)        XmNheight = 665;
 !(BX)    };

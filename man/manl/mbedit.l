@@ -1,4 +1,4 @@
-.TH mbedit l "10 November 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit l "29 August 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -118,6 +118,8 @@ the first and last pings in view.
 The middle and right mouse buttons allow the user to step forward
 and backward, respectively, through the data file. The \fBForward\fP
 and \fBReverse\fP buttons provide a duplicate stepping capability. 
+Left-handed users may reverse the right and left mouse button functions by pulling down
+the \fBReverse Mouse Buttons\fP menu item from the \fBControls\fP button.
 
 \fBMBedit\fP can hold up to 25000 swath bathymetry 
 profiles at a time in memory. In the case that
@@ -279,12 +281,137 @@ is clicked, as much data as will fit
 into the data buffer are read and several pings are displayed as 
 stacked bathymetry profiles.
 .TP
+.B View
+This button accesses a pulldown menu with several toggle buttons: 
+\fBShow Flagged Profile\fP, 
+\fBShow Bottom Detect Algorithms\fP, 
+\fBWide Bathymetry Profiles\fP, 
+\fBPlot Time Stamps\fP, 
+\fBPlot Ping Interval\fP, 
+\fBPlot Longitude\fP, 
+\fBPlot Latitude\fP, 
+\fBPlot Heading\fP, 
+\fBPlot Speed\fP, 
+\fBPlot Center Beam Depth\fP, 
+\fBPlot Sonar Altitude\fP, 
+\fBPlot Sonar Depth\fP, 
+\fBPlot Roll\fP, 
+\fBPlot Pitch\fP, and
+\fBPlot Heave\fP.
+The first two toggle buttons set simple display options
+and may be set or unset individually.
+The remaining toggle buttons control the display plot
+modes; only one mode and therefore one toggle button may
+be set at any time.
+.TP
+.B View->Show Flagged Profile
+This toggle allows the user to specify whether the acrosstrack
+bathymetry profile includes only the unflagged or "good" bathymetry
+(toggle set to "Off") or
+whether the profile also includes the flagged or "bad" bathymetry
+(toggle set to "On"). In
+the latter case, red line segments show the portion of the profile
+associated with the flagged depth points.
+.TP
+.B View->Show Bottom Detect Algorithms
+This toggle allows the user to specify whether the beams are
+colored according to their flagging status (toggle set to "Off"
+or according to the bottom detect algorithm used by the sonar 
+(toggle set to "On"). The default is to color each sounding
+according to its flagging status - unflagged beams are black,
+manually flagged beams are red, and filter flagged beams are
+green. If the beams are colored according to bottom detect
+algorithm, then amplitude detects are shown in black, phase
+detects are shown in red, and beams for which the bottom
+detection algorithm is unknown are shown in green. Users should
+be aware that many swath data formats do not include bottom
+detection algorithm information.
+.TP
+.B View->Wide Bathymetry Profiles
+This toggle, when set, causes \fBmbedit\fP to display the widest
+possible plots of the bathymetry profiles. All of the other options
+discussed immediately below narrow the primary plot in order to
+present additional information on the left side of the window.
+.TP
+.B View->Plot Time Stamps
+This toggle, when set, causes \fBmbedit\fP to display time stamp
+information to the left of the bathymetry profiles. 
+.TP
+.B View->Plot Ping Interval
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the time between pings.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Longitude
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+navigation longitude associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Latitude
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+navigation latitude associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Heading
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+heading associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Speed
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+speed associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Center Beam Depth
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+speed associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Sonar Depth
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+sonar depth associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Sonar Altitude
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+sonar altitude associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Roll
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+roll associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Pitch
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+pitch associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
+.B View->Plot Heave
+This toggle, when set, causes \fBmbedit\fP to display an
+automatically scaled vertical time series plot of the 
+heave associated with each ping.
+ This plot appears to the left of the bathymetry profiles.
+.TP
 .B Controls
-This button accesses a pulldown menu with four items: 
+This button accesses a pulldown menu with six items: 
 \fBGo To Specified Time...\fP, \fBBuffer Controls...\fP, 
-\fBAnnotation...\fP, and \fBAnnotation...\fP. 
-Each of these items brings up a dialog of
+\fBAnnotation...\fP, \fBFilters...\fP, 
+\fBReverse Right/Left Key Macros\fP, and
+\fBReverse Mouse Buttons\fP.
+The first (top) four items bring up a dialog of
 the same name. These dialogs are discussed below.
+The last two items are toggle buttons which set mouse button
+and key macro behaviors.
 .TP
 .B Controls->Go To Specified Time...
 This menu item brings up a dialog which allows the user to
@@ -428,6 +555,23 @@ by acrosstrack distance starts.
 This slider sets the beam number at which flagging 
 by acrosstrack distance ends. 
 .TP
+.B Controls->Reverse Right/Left Key Macros
+This toggle button, when set, reverses the
+key macros associated with flagging all beams
+to the left or right of the last picked beam. This
+means that the 'A', 'a', 'J', and 'j' keys will 
+flag to the right rather than to the left. Similarly,
+the  'D', 'd', 'L', and 'l' keys will flag to the
+left rather than to the right. This option allows users
+to conveniently handle swath bathymetry in which the
+beams are mistakenly ordered starboard to port instead
+of the usual port to starboard.
+.TP
+.B Controls->Reverse Mouse Buttons
+This toggle button, when set, reverses the meaning of
+the right and left mouse buttons. This option is for
+the convenience of left-handed users.
+.TP
 .B Next Buffer
 This button causes the program to write out the data from the
 current buffer and then read in and display the next buffer.
@@ -514,15 +658,6 @@ This slider sets the number of pings shown at a time.
 .B Number of pings to step
 This slider sets the number of pings to step when the \fBForward\fP
 or \fBReverse\fP buttons are pushed.
-.TP
-.B Show Flagged Profile
-This toggle allows the user to specify whether the acrosstrack
-bathymetry profile includes only the unflagged or "good" bathymetry
-(toggle set to "On") or
-whether the profile also includes the flagged or "bad" bathymetry
-(toggle set to "Off"). In
-the latter case, red line segments show the portion of the profile
-associated with the flagged depth points.
 
 .SH MOUSE ACTIONS
 .TP

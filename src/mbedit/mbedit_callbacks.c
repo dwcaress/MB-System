@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.7 2002-07-20 20:45:04 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.8 2002-08-30 19:28:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/07/20 20:45:04  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.6  2001/11/16 01:25:20  caress
  * Added info mode.
  *
@@ -208,8 +211,10 @@ int	my_interval;
 int	mode_pick = MODE_TOGGLE;
 int	mshow_detects = MB_NO;
 int	mshow_flagged = MB_NO;
-int	mshow_time = MB_YES;
+int	mshow_time = 1;
 int	mode_output = OUTPUT_MODE_EDIT;
+int	mode_reverse_keys = MB_NO;
+int	mode_reverse_mouse = MB_NO;
 int	ttime_i[7];
 int	f_beams_max;
 double	f_distance_max;
@@ -682,8 +687,48 @@ int do_setup_data()
 	/* set the show flagged toggle */
 	XmToggleButtonSetState(toggleButton_show_flagged_on, mshow_flagged, FALSE);
 	    
-	/* set the show time toggle */
-	XmToggleButtonSetState(toggleButton_show_time, mshow_time, FALSE);
+	/* turn off all plot mode togglebuttons */
+	XmToggleButtonSetState(toggleButton_show_wideplot, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_time, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_interval, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_lon, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_latitude, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_heading, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_speed, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_depth, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_altitude, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_sonardepth, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_roll, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_pitch, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_heave, MB_NO, FALSE);
+    
+	/* now turn on the current plot mode togglebutton */
+	if (mshow_time == 0)
+		XmToggleButtonSetState(toggleButton_show_wideplot, MB_YES, FALSE);
+	else if (mshow_time == 1)
+		XmToggleButtonSetState(toggleButton_show_time, MB_YES, FALSE);
+	else if (mshow_time == 2)
+		XmToggleButtonSetState(toggleButton_show_interval, MB_YES, FALSE);
+	else if (mshow_time == 3)
+		XmToggleButtonSetState(toggleButton_show_lon, MB_YES, FALSE);
+	else if (mshow_time == 4)
+		XmToggleButtonSetState(toggleButton_show_latitude, MB_YES, FALSE);
+	else if (mshow_time == 5)
+		XmToggleButtonSetState(toggleButton_show_heading, MB_YES, FALSE);
+	else if (mshow_time == 6)
+		XmToggleButtonSetState(toggleButton_show_speed, MB_YES, FALSE);
+	else if (mshow_time == 7)
+		XmToggleButtonSetState(toggleButton_show_depth, MB_YES, FALSE);
+	else if (mshow_time == 8)
+		XmToggleButtonSetState(toggleButton_show_altitude, MB_YES, FALSE);
+	else if (mshow_time == 9)
+		XmToggleButtonSetState(toggleButton_show_sonardepth, MB_YES, FALSE);
+	else if (mshow_time == 10)
+		XmToggleButtonSetState(toggleButton_show_roll, MB_YES, FALSE);
+	else if (mshow_time == 11)
+		XmToggleButtonSetState(toggleButton_show_pitch, MB_YES, FALSE);
+	else if (mshow_time == 12)
+		XmToggleButtonSetState(toggleButton_show_heave, MB_YES, FALSE);
 
 	/* get filter values and set widgets */
 	do_get_filters();
@@ -1433,7 +1478,14 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    case 'j':
 	    case 'A':
 	    case 'a':
-		    status = mbedit_action_left_ping(
+		    if (mode_reverse_keys == MB_NO)
+			status = mbedit_action_left_ping(
+			    mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+		    else
+			status = mbedit_action_right_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
 			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
@@ -1447,7 +1499,14 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    case 'l':
 	    case 'D':
 	    case 'd':
-		    status = mbedit_action_right_ping(
+		    if (mode_reverse_keys == MB_NO)
+			status = mbedit_action_right_ping(
+			    mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+		    else
+			status = mbedit_action_left_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
 			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
@@ -1559,24 +1618,6 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    XDefineCursor(theDisplay,can_xid,myCursor);
 			    }
 		    break;
-	    case '1':
-			    {
-			    mshow_detects = MB_NO;
-	    		    status = mbedit_action_plot(mplot_width, mexager,
-		    		mx_interval, my_interval, 
-		    		mplot_size, mshow_detects, mshow_flagged, mshow_time, 
-		    		&nbuffer, &ngood, &icurrent, &mnplot);
-			    }
-		    break;
-	    case '2':
-			    {
-			    mshow_detects = MB_YES;
-	    		    status = mbedit_action_plot(mplot_width, mexager,
-		    		mx_interval, my_interval, 
-		    		mplot_size, mshow_detects, mshow_flagged, mshow_time, 
-		    		&nbuffer, &ngood, &icurrent, &mnplot);
-			    }
-		    break;
 	    default:
 		    break;
 	  } /* end of key switch */
@@ -1627,8 +1668,9 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
       if(event->xany.type == ButtonPress)
       {
 	  /* If left mouse button is pushed then toggle, pick, erase, restore, or info. */
-	  if(event->xbutton.button == 1)
-	  {
+	  if ((event->xbutton.button == 1 && mode_reverse_mouse == MB_NO)
+		|| (event->xbutton.button == 3 && mode_reverse_mouse == MB_YES))
+	    {
 	    x_loc = event->xbutton.x;
 	    y_loc = event->xbutton.y;
 
@@ -1691,7 +1733,14 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    }
 		else if (key_a_down)
 		    {
-		    status = mbedit_action_left_ping(
+		    if (mode_reverse_keys == MB_NO)
+			status = mbedit_action_left_ping(
+			    mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+		    else
+			status = mbedit_action_right_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
 			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
@@ -1699,7 +1748,14 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    }
 		else if (key_d_down)
 		    {
-		    status = mbedit_action_right_ping(
+		    if (mode_reverse_keys == MB_NO)
+			status = mbedit_action_right_ping(
+			    mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+		    else
+			status = mbedit_action_left_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
 			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
@@ -1715,10 +1771,24 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 
 		    /* If the button is still pressed then read the location */
 		    /* of the pointer and run the action mouse function again */
-		    if(mask_return == 256 
-			&& mode_pick != MODE_TOGGLE 
-			&& mode_pick != MODE_PICK)
-		       doit = 1;
+		    if (mode_reverse_mouse == MB_NO)
+			{
+			if ((mask_return & 256) == 256
+			    && mode_pick != MODE_TOGGLE 
+			    && mode_pick != MODE_PICK)
+			    doit = 1;
+			else
+			    doit = 0;
+			}
+		    else if (mode_reverse_mouse == MB_YES)
+			{
+			if ((mask_return & 1024) == 1024
+			    && mode_pick != MODE_TOGGLE 
+			    && mode_pick != MODE_PICK)
+			    doit = 1;
+			else
+			    doit = 0;
+			}
 		    else
 		       doit = 0;
 		}
@@ -1736,7 +1806,8 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    } /* end of middle button events */
 
 	    /* If right mouse button is pushed then scroll forward. */
-	    if(event->xbutton.button == 3)
+	  if ((event->xbutton.button == 3 && mode_reverse_mouse == MB_NO)
+		|| (event->xbutton.button == 1 && mode_reverse_mouse == MB_YES))
 	    {
 		    status = mbedit_action_step(step,mplot_width,mexager,
 				    mx_interval,my_interval,
@@ -1866,7 +1937,53 @@ do_show_time( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     
-    mshow_time = XmToggleButtonGetState(toggleButton_show_time);
+    /* turn off all togglebuttons */
+    XmToggleButtonSetState(toggleButton_show_wideplot, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_time, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_interval, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_lon, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_latitude, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_heading, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_speed, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_depth, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_altitude, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_sonardepth, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_roll, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_pitch, MB_NO, FALSE);
+    XmToggleButtonSetState(toggleButton_show_heave, MB_NO, FALSE);
+    
+    /* turn on the one that was clicked */
+    XmToggleButtonSetState(w, MB_YES, FALSE);
+    
+    /* now set the data type id */
+    if (w == toggleButton_show_wideplot)
+	mshow_time = 0;
+    else if (w == toggleButton_show_time)
+	mshow_time = 1;
+    else if (w == toggleButton_show_interval)
+	mshow_time = 2;
+    else if (w == toggleButton_show_lon)
+	mshow_time = 3;
+    else if (w == toggleButton_show_latitude)
+	mshow_time = 4;
+    else if (w == toggleButton_show_heading)
+	mshow_time = 5;
+    else if (w == toggleButton_show_speed)
+	mshow_time = 6;
+    else if (w == toggleButton_show_depth)
+	mshow_time = 7;
+    else if (w == toggleButton_show_altitude)
+	mshow_time = 8;
+    else if (w == toggleButton_show_sonardepth)
+	mshow_time = 9;
+    else if (w == toggleButton_show_roll)
+	mshow_time = 10;
+    else if (w == toggleButton_show_pitch)
+	mshow_time = 11;
+    else if (w == toggleButton_show_heave)
+	mshow_time = 12;
+    else
+    	mshow_time = 0;
 
     /* reset scaling */
     status = mbedit_set_scaling(mb_borders, mshow_time);
@@ -1876,6 +1993,42 @@ do_show_time( Widget w, XtPointer client_data, XtPointer call_data)
 	    mx_interval, my_interval, 
 	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_reverse_mouse( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    mode_reverse_mouse = XmToggleButtonGetState(toggleButton_reverse_mouse);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_reverse_keys( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    mode_reverse_keys = XmToggleButtonGetState(toggleButton_reverse_keys);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_show_detects( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    mshow_detects = XmToggleButtonGetState(toggleButton_show_detects);
+
+    /* replot the data */
+    status = mbedit_action_plot(mplot_width, mexager,
+	mx_interval, my_interval, 
+	mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	&nbuffer, &ngood, &icurrent, &mnplot);
 }
 
 /*--------------------------------------------------------------------*/
