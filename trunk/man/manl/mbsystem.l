@@ -213,7 +213,7 @@ Hydrosweep data in the raw "real-time" ascii format (format 21).
  		GRD file, use the command:
  		  cat hsnav_ew9204_134_bcen.mb24 24 > data.list
  		  mbgrid -R-140/-139/-10/-9 -D301/-D301 -L1 
-			-C2 -Idata.list -Oew9204_134 -G3
+ 			-C2 -Idata.list -Oew9204_134 -G3
  		This command will produce a shellscript 
  		which will run \fBGMT\fP programs to 
  		display the data.
