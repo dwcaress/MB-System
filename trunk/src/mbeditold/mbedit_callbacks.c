@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.8 2000-03-16 00:35:40 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.9 2000-09-08 00:29:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/03/16  00:35:40  caress
+ * Added mode to output edit save file only.
+ *
  * Revision 4.7  2000/01/25  01:46:20  caress
  * Altered handling of filenames.
  *
@@ -174,6 +177,10 @@ int	mode_pick = MODE_TOGGLE;
 int	mshow_flagged = SHOW_FLAGGED_OFF;
 int	mode_output = OUTPUT_MODE_EDIT;
 int	ttime_i[7];
+int	f_medianspike;
+int	f_medianspike_threshold;
+int	f_wrongside;
+int	f_wrongside_threshold;
 int	status;
 
 /* file opening parameters */
@@ -588,6 +595,30 @@ int do_setup_data()
 	    XmToggleButtonSetState(toggleButton_show_flagged_on, 0, FALSE);
 	    XmToggleButtonSetState(toggleButton_show_flagged_off, 1, FALSE);
 	    }
+
+	/* get some default values from mbedit */
+	status = mbedit_get_filters(&f_medianspike,
+			&f_medianspike_threshold,
+			&f_wrongside,
+			&f_wrongside_threshold);	
+
+	/* set values of median spike filter widgets */
+ 	XmToggleButtonSetState(toggleButton_filters_medianspike,
+ 					f_medianspike, FALSE);
+	XtVaSetValues(scale_filters_medianspike,
+			XmNminimum, 1,
+			XmNmaximum, 100,
+			XmNvalue, f_medianspike_threshold,
+			NULL);
+	
+	/* set values of median spike filter widgets */
+ 	XmToggleButtonSetState(toggleButton_filters_wrongside,
+ 					f_wrongside, FALSE);
+	XtVaSetValues(scale_filters_wrongside,
+			XmNminimum, 0,
+			XmNmaximum, 200,
+			XmNvalue, f_wrongside_threshold,
+			NULL);
 	
 	return(1);
 }
@@ -1114,8 +1145,14 @@ do_load_check(w, client_data, call_data)
     if (selected > 0)
 	    {
 	    /* check for edit save file */
-	    sprintf(save_file, "%s.mbesf", input_file);
+	    sprintf(save_file, "%s.esf", input_file);
 	    fstat = stat(save_file, &file_status);
+	    if (fstat != 0
+		|| (file_status.st_mode & S_IFMT) == S_IFDIR)
+		{
+		sprintf(save_file, "%s.mbesf", input_file);
+		fstat = stat(save_file, &file_status);
+		}
 	    
 	    /* if save file exists bring up dialog asking
 		if it should be used */
@@ -1260,12 +1297,6 @@ do_event(w, client_data, call_data)
 	    case 'm':
 	    case 'Z':
 	    case 'z':
-		    status = mbedit_action_mouse_pick(
-			    x_loc, y_loc,
-			    mplot_width,mexager,
-			    mx_interval,my_interval,
-			    mplot_size,mshow_flagged,
-			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    status = mbedit_action_bad_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
@@ -1861,6 +1892,69 @@ do_goto_apply(w, client_data, call_data)
 	    
     /* turn on expose plots */
     expose_plot_ok = True;
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_set_filters( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	/* get values of median spike filter widgets */
+ 	f_medianspike = XmToggleButtonGetState(toggleButton_filters_medianspike);
+	XtVaGetValues(scale_filters_medianspike,
+		XmNvalue, &f_medianspike_threshold,
+		NULL);
+	
+	/* get values of median spike filter widgets */
+ 	f_wrongside = XmToggleButtonGetState(toggleButton_filters_wrongside);
+	XtVaGetValues(scale_filters_wrongside,
+		XmNvalue, &f_wrongside_threshold,
+		NULL);
+
+	/* set some values in mbedit */
+	status = mbedit_set_filters(f_medianspike,
+			f_medianspike_threshold,
+			f_wrongside,
+			f_wrongside_threshold);			
+	
+    	status = mbedit_action_filter_all(
+	     	mplot_width,mexager,
+	    	mx_interval,my_interval,
+	    	mplot_size,mshow_flagged,
+	    	&nbuffer,&ngood,&icurrent,&mnplot);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_reset_filters( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	/* get some default values from mbedit */
+	status = mbedit_get_filters(&f_medianspike,
+			&f_medianspike_threshold,
+			&f_wrongside,
+			&f_wrongside_threshold);	
+
+	/* set values of median spike filter widgets */
+ 	XmToggleButtonSetState(toggleButton_filters_medianspike,
+ 					f_medianspike, FALSE);
+	XtVaSetValues(scale_filters_medianspike,
+			XmNminimum, 1,
+			XmNmaximum, 100,
+			XmNvalue, f_medianspike_threshold,
+			NULL);
+	
+	/* set values of median spike filter widgets */
+ 	XmToggleButtonSetState(toggleButton_filters_wrongside,
+ 					f_wrongside, FALSE);
+	XtVaSetValues(scale_filters_wrongside,
+			XmNminimum, 0,
+			XmNmaximum, 200,
+			XmNvalue, f_wrongside_threshold,
+			NULL);
 }
 
 /*--------------------------------------------------------------------*/
