@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.16 2004-04-27 01:46:13 caress Exp $
+ *    $Id: mb_format.h,v 5.17 2004-11-06 03:55:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2004/04/27 01:46:13  caress
+ * Various updates of April 26, 2004.
+ *
  * Revision 5.15  2003/09/23 21:02:45  caress
  * Added formats 168 and 169 for reading xyt and yxt triples (topography instead of depth).
  *
@@ -211,7 +214,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2004-04-27 01:46:13 $ $Revision: 5.16 $";
+static char mb_format_updatedate[] = "$Date: 2004-11-06 03:55:15 $ $Revision: 5.17 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -311,7 +314,7 @@ static char mb_format_updatedate[] = "$Date: 2004-04-27 01:46:13 $ $Revision: 5.
 #define	MBF_EM12IFRM	53	/* Simrad EM12S/EM12D multibeam archive format, 
 					81 beam bathymetry and 
 					amplitude, 
-					binary, IFREMER */ 
+					binary, read-only, IFREMER */ 
 #define	MBF_EM12DARW	54	/* Simrad EM12 RRS Darwin processed format, 
 					81 beam, bathymetry and amplitude,
 					binary, centered, Oxford University */ 

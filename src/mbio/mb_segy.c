@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.2 2004-09-16 19:02:34 caress Exp $
+ *    $Id: mb_segy.c,v 5.3 2004-11-06 03:55:17 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 25, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/09/16 19:02:34  caress
+ * Changes to better support segy data.
+ *
  * Revision 5.1  2004/07/27 19:44:38  caress
  * Working on handling subbottom data.
  *
@@ -41,7 +44,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.2 2004-09-16 19:02:34 caress Exp $";
+static char rcs_id[]="$Id: mb_segy.c,v 5.3 2004-11-06 03:55:17 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 
@@ -587,6 +590,10 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
        			{
 			bytes_per_sample = 4;
 			}
+ 		else if (fileheader->format == 1)
+       			{
+			bytes_per_sample = 4;
+			}
  		else if (fileheader->format == 3)
        			{
 			bytes_per_sample = 2;
@@ -644,7 +651,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		index = 0;
 		for (i=0;i<traceheader->nsamps;i++)
 			{
- 			if (fileheader->format == 5 || fileheader->format == 6)
+ 			if (fileheader->format == 5 || fileheader->format == 6 || fileheader->format == 1)
        				{
 				mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(trace[i])); 
 				index += bytes_per_sample;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.h	6/21/94
- *    $Id: mb_swap.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_swap.h,v 5.3 2004-11-06 03:55:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	June 21, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -70,15 +73,6 @@
                        (((a) << 8) & 0x00ff0000) | \
                        (((a) >> 8) & 0x0000ff00) | \
                         ((unsigned int)(a) >>24) )
-
-#define mb_swap_long(a) ( ((a) << 56) | \
-                       (((a) << 40) & 0x00ff000000000000) | \
-                       (((a) << 24) & 0x0000ff0000000000) | \
-                       (((a) <<  8) & 0x000000ff00000000) | \
-                       (((a) >>  8) & 0x00000000ff000000) | \
-                       (((a) >> 24) & 0x0000000000ff0000) | \
-                       (((a) >> 40) & 0x000000000000ff00) | \
-                        ((unsigned long)(a) >> 56)) 
 
 /* end conditional include */
 #endif
