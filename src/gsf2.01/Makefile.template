@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  1/12/98
-#	$Id: Makefile.template,v 4.2 2000-09-30 07:19:33 caress Exp $
+#	$Id: Makefile.template,v 4.3 2001-06-30 17:36:01 caress Exp $
 #
 #     Copyright (c) 1998, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		January 12, 1998
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.2  2000/09/30  07:19:33  caress
+# Snapshot for Dale.
+#
 # Revision 4.1  1998/10/07  19:36:35  caress
 # Added ranlib.
 #
@@ -28,7 +31,7 @@
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 # 
 # Compilers 
-# C compiler left as default
+CC = cc
 #
 # Compile and load flags:
 CFLAGS = -g -DIRIX
