@@ -1,9 +1,9 @@
-.TH MBEDIT 1 "30 August 1993"
+.TH MBEDIT 1 "3 November 1993"
 .SH NAME
 \fBMBEDIT\fP - Interactive editor used to flag bad beams in multibeam bathymetry data.
 
 .SH VERSION
-Version 3.00
+Version 3.30
 
 .SH SYNOPSIS
 \fBmbedit\fP [\fB-F\fIformat \fB-I\fIinfile \fB-V -H\fP]
@@ -104,8 +104,10 @@ key macros (see the keyboard action section):
 .B \fBX Scale\fP
 This slider sets the cross track distance scale in m/100 pixels.
 .TP
-.B \fBY Scale\fP
-This slider sets the depth scale in m/100 pixels.
+.B \fBVertical Exageration\fP
+This slider sets the depth scale in terms of vertical exageration.
+The depth scale will change as the cross track distance scale is
+changed to maintain the same vertical exageration.
 .TP
 .B \fBNumber of pings shown\fP
 This slider sets the number of pings shown at a time.
@@ -223,3 +225,6 @@ files of interest.
 5. When an input file is specified at startup (e.g. mbedit -f1 -isbfile)
 the graphics don't show up until the user hits one of the mouse
 or keyboard buttons.
+
+6. It might be better to define the cross track distance scale
+in terms of the swath width that is desired rather than in m/100 pixels.
