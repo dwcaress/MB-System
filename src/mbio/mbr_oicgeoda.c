@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
- *	$Id: mbr_oicgeoda.c,v 4.0 1999-03-31 18:29:20 caress Exp $
+ *	$Id: mbr_oicgeoda.c,v 4.1 1999-10-21 22:40:10 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/03/31  18:29:20  caress
+ * MB-System 4.6beta7
+ *
  * Revision 1.1  1999/03/31  18:11:35  caress
  * Initial revision
  *
@@ -56,7 +59,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_oicgeoda.c,v 4.0 1999-03-31 18:29:20 caress Exp $";
+ static char res_id[]="$Id: mbr_oicgeoda.c,v 4.1 1999-10-21 22:40:10 caress Exp $";
 	char	*function_name = "mbr_alm_oicgeoda";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1203,37 +1206,32 @@ int	*error;
 	    mb_get_date(verbose,mb_io_ptr->new_time_d,mb_io_ptr->new_time_i);
 
 	    /* get navigation */
+	    mb_io_ptr->new_lon = header->fish_x;
+	    mb_io_ptr->new_lat = header->fish_y;
 	    if (header->nav_type == OIC_NAV_LONLAT)
-		{
-		mb_io_ptr->new_lon = header->fish_x;
-		mb_io_ptr->new_lat = header->fish_y;
-		}
-	    else
-		{
-		mb_io_ptr->new_lon = 0.0;
-		mb_io_ptr->new_lat = 0.0;
-		}
-	    if (mb_io_ptr->lonflip < 0)
+	      {
+	      if (mb_io_ptr->lonflip < 0)
 		{
 		if (mb_io_ptr->new_lon > 0.) 
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
 		else if (mb_io_ptr->new_lon < -360.)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
 		}
-	    else if (mb_io_ptr->lonflip == 0)
+	      else if (mb_io_ptr->lonflip == 0)
 		{
 		if (mb_io_ptr->new_lon > 180.) 
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
 		else if (mb_io_ptr->new_lon < -180.)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
 		}
-	    else
+	      else
 		{
 		if (mb_io_ptr->new_lon > 360.) 
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon - 360.;
 		else if (mb_io_ptr->new_lon < 0.)
 			mb_io_ptr->new_lon = mb_io_ptr->new_lon + 360.;
 		}
+	      }
 
 	    /* get heading */
 	    mb_io_ptr->new_heading = header->fish_heading;
