@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.20 2003-05-20 18:05:32 caress Exp $
+ *    $Id: mb_define.h,v 5.21 2003-07-26 17:59:32 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.19  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -489,6 +492,7 @@ int mb_xyz_to_takeoff(int verbose,
 		int *error);
 int mb_double_compare(void *a, void *b);
 int mb_int_compare(void *a, void *b);
+int mb_edit_compare(void *a, void *b);
 
 /* end conditional include */
 #endif
