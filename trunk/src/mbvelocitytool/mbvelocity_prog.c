@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 4.18 1997-09-15 19:10:50 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 4.19 1997-09-16 21:44:24 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu) 
@@ -23,6 +23,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1997/09/15  19:10:50  caress
+ * Real Version 4.5
+ *
  * Revision 4.17  1997/07/25  14:27:30  caress
  * Version 4.5beta2.
  *
@@ -134,10 +137,10 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.18 1997-09-15 19:10:50 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.19 1997-09-16 21:44:24 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
-static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Ddraft -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
+static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -159,7 +162,6 @@ int	borders[4];
 double	maxdepth = 3000.0;
 double	velrange = 500.0;
 double	resrange = 200.0;
-double	draft = 0.0;
 double	ssv_start = 0.0;
 
 /* plotting variables */
@@ -331,7 +333,7 @@ char	**argv;
 	strcpy(wfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:S:s:W:w:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:E:e:F:f:I:i:S:s:W:w:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -348,11 +350,6 @@ char	**argv;
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			sscanf (optarg,"%lf", &draft);
 			flag++;
 			break;
 		case 'E':
@@ -414,7 +411,6 @@ char	**argv;
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
 		fprintf(stderr,"dbg2       help:               %d\n",help);
-		fprintf(stderr,"dbg2       draft:              %f\n",draft);
 		fprintf(stderr,"dbg2       format:             %f\n",format);
 		fprintf(stderr,"dbg2       input file:         %s\n",ifile);
 		fprintf(stderr,"dbg2       display svp file:   %s\n",sfile);
@@ -2451,7 +2447,7 @@ int mbvt_process_multibeam()
 			    }
 
 			/* add to depth if needed */
-			depth[i] = depth[i] + depth_offset[i] + draft;
+			depth[i] = depth[i] + depth_offset[i];
 
 			/* get min max depths */
 			if (depth[i] < bath_min)
